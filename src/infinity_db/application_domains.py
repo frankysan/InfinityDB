@@ -171,6 +171,8 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
         "Fireteams",
         "top-level",
         "scoped",
+        record_kinds=("rule",),
+        record_categories=("fireteam-general", "fireteam-level-bonuses"),
         navigation=True,
         search=True,
         glossary=True,
@@ -217,6 +219,7 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
             "command-token-use",
             "order-type",
             "peripheral-type",
+            "optional-extra",
         ),
         navigation=True,
         search=True,
@@ -233,6 +236,16 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
         "embedded",
         "embedded",
         record_kinds=("attribute",),
+        search=True,
+        glossary=True,
+        published=True,
+    ),
+    ApplicationDomain(
+        "weapon-properties",
+        "Weapon Property",
+        "Weapon Properties",
+        "embedded",
+        "embedded",
         search=True,
         glossary=True,
         published=True,
@@ -318,9 +331,13 @@ def public_rule_record_domain(record: dict[str, object]) -> ApplicationDomain | 
     unambiguously to one public catalog.
     """
 
+    owner = semantic_record_owner(record)
+    return owner if owner is not None and owner.detail else None
+
+
+def semantic_record_owner(record: dict[str, object]) -> ApplicationDomain | None:
+    """Return the published owner independently of its presentation capabilities."""
     for domain in APPLICATION_DOMAINS:
-        if not domain.published or not domain.detail:
-            continue
-        if record_matches_domain(domain, record):
+        if domain.published and record_matches_domain(domain, record):
             return domain
     return None

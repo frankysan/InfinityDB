@@ -1,0 +1,70 @@
+{
+  "formatVersion": 1,
+  "scope": "reinforcements-current-reference-evidence-not-n5-procedural-authority",
+  "historicalInventory": "config/validation/reinforcements-source-inputs.json",
+  "currentReferences": [
+    {
+      "sourceId": "n5-core-v5.3-pdf",
+      "edition": "N5",
+      "version": "5.3",
+      "localPath": "data/pdf/rules/n5-rules-v5.3-en.pdf",
+      "sha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+      "page": 6,
+      "evidenceKind": "game-mode-name-not-procedure",
+      "requiredText": [
+        "GAME MODES",
+        "GAMES WITH",
+        "REINFORCEMENTS"
+      ]
+    },
+    {
+      "sourceId": "its-season-18-en-pdf",
+      "edition": "N5-ITS",
+      "version": "2026.09.01",
+      "localPath": "data/pdf/its/its-18-rules-v2026.09.01-en.pdf",
+      "sha256": "9e16874924112e62d51acf78d622f5c0cf6196064cc36f003b515de9dc448baf",
+      "page": 27,
+      "evidenceKind": "current-extra-refers-to-unversioned-annex",
+      "requiredText": [
+        "REINFORCEMENTS",
+        "With this Extra, the Reinforcement Rules are used",
+        "see the",
+        "Reinforcements Annex"
+      ]
+    }
+  ],
+  "reviewDecision": {
+    "n5ExtraCurrentlyReferenced": true,
+    "n4OriginOptionalReferenceAllowed": true,
+    "specificN5AnnexTextVerified": false,
+    "explicitUnchangedN4AdoptionVerified": false,
+    "currentN5ProceduresAuthorized": false,
+    "commlinkN5DefinitionAuthorized": false,
+    "requestReinforcementsN5PhaseActionAuthorized": false,
+    "reason": "N5 and ITS establish an optional Reinforcements mode; the separately cited N4-origin annex may be shown as an explicitly labelled optional reference, but neither a revised N5 annex nor unchanged N4 adoption has been verified."
+  },
+  "legacyActionEvidence": [
+    {
+      "name": "Commlink",
+      "sourceId": "reinforcements-n4-en",
+      "pdfPage": 3,
+      "classification": "automatic-skill",
+      "requiredText": [
+        "COMMLINK",
+        "AUTOMATIC SKILL",
+        "Obligatory"
+      ]
+    },
+    {
+      "name": "Request Reinforcements",
+      "sourceId": "reinforcements-n4-en",
+      "pdfPage": 3,
+      "classification": "tactical-phase-step",
+      "requiredText": [
+        "REQUEST REINFORCEMENTS",
+        "ACTIVATION",
+        "Tactical"
+      ]
+    }
+  ]
+}

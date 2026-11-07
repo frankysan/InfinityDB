@@ -1,0 +1,141 @@
+{
+  "formatVersion": 1,
+  "sourceId": "n5-core-v5.3-pdf",
+  "sourcePage": 194,
+  "sourcePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "reviewStatus": "source-reviewed-audit-only",
+  "classification": {
+    "scope": "source-restriction-conditions-not-live-action-legality",
+    "subject": "troop-types-remain-source-selectors-without-canonical-identity",
+    "action": "negative-prohibition-not-positive-permission",
+    "jump": "motorcycle-upward-only-not-all-jumps",
+    "lieutenant": "army-selection-eligibility-not-skill-use",
+    "ladder": "physical-route-restriction-without-invented-skill"
+  },
+  "rows": [
+    {
+      "subject": "TAG",
+      "subjectKind": "troop-type",
+      "ownerRecordId": null,
+      "sourceText": "TAGs cannot go Prone or declare Cautious Movement.",
+      "restrictions": [
+        {
+          "action": "enter-prone",
+          "targetRecordId": "state:prone",
+          "scope": "all"
+        },
+        {
+          "action": "declare-cautious-movement",
+          "targetRecordId": "skill:cautious-movement",
+          "scope": "all"
+        }
+      ],
+      "ownerEvidence": "skill:cautious-movement"
+    },
+    {
+      "subject": "Motorcycle",
+      "subjectKind": "equipment-while-mounted",
+      "ownerRecordId": "equipment:motorcycle",
+      "sourceText": "Troopers mounted on Motorcycles cannot go Prone, declare Cautious Movement, Climb, use ladders, or perform an upwards Jump.",
+      "restrictions": [
+        {
+          "action": "enter-prone",
+          "targetRecordId": "state:prone",
+          "scope": "while-mounted"
+        },
+        {
+          "action": "declare-cautious-movement",
+          "targetRecordId": "skill:cautious-movement",
+          "scope": "while-mounted"
+        },
+        {
+          "action": "declare-climb",
+          "targetRecordId": "skill:climb",
+          "scope": "while-mounted"
+        },
+        {
+          "action": "use-ladders",
+          "targetRecordId": null,
+          "scope": "while-mounted"
+        },
+        {
+          "action": "upward-jump",
+          "targetRecordId": "skill:jump",
+          "scope": "while-mounted-upwards-only"
+        }
+      ],
+      "ownerEvidence": "equipment:motorcycle"
+    },
+    {
+      "subject": "Aerial",
+      "subjectKind": "skill",
+      "ownerRecordId": "skill:aerial",
+      "sourceText": "Troopers with the Aerial Special Skill cannot go Prone or declare Cautious Movement.",
+      "restrictions": [
+        {
+          "action": "enter-prone",
+          "targetRecordId": "state:prone",
+          "scope": "aerial-active"
+        },
+        {
+          "action": "declare-cautious-movement",
+          "targetRecordId": "skill:cautious-movement",
+          "scope": "aerial-active"
+        }
+      ],
+      "ownerEvidence": "skill:aerial"
+    },
+    {
+      "subject": "VH",
+      "subjectKind": "troop-type",
+      "ownerRecordId": null,
+      "sourceText": "Vehicles (VH) cannot go Prone or declare Cautious Movement.",
+      "restrictions": [
+        {
+          "action": "enter-prone",
+          "targetRecordId": "state:prone",
+          "scope": "all"
+        },
+        {
+          "action": "declare-cautious-movement",
+          "targetRecordId": "skill:cautious-movement",
+          "scope": "all"
+        }
+      ],
+      "ownerEvidence": "skill:cautious-movement"
+    },
+    {
+      "subject": "REM",
+      "subjectKind": "troop-type",
+      "ownerRecordId": null,
+      "sourceText": "Remotes (REM) may not declare Cautious Movement or be chosen as Lieutenant.",
+      "restrictions": [
+        {
+          "action": "declare-cautious-movement",
+          "targetRecordId": "skill:cautious-movement",
+          "scope": "all"
+        },
+        {
+          "action": "lieutenant-selection",
+          "targetRecordId": "skill:lieutenant",
+          "scope": "army-selection-only"
+        }
+      ],
+      "ownerEvidence": "skill:lieutenant"
+    },
+    {
+      "subject": "Irregular",
+      "subjectKind": "training",
+      "ownerRecordId": "training:irregular",
+      "sourceText": "Irregular Troops may not be chosen as Lieutenant.",
+      "restrictions": [
+        {
+          "action": "lieutenant-selection",
+          "targetRecordId": "skill:lieutenant",
+          "scope": "army-selection-only"
+        }
+      ],
+      "ownerEvidence": "training:irregular"
+    }
+  ]
+}

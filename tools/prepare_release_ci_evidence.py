@@ -35,6 +35,15 @@ REQUIRED_WORKFLOWS = (
     WorkflowRequirement("Deployment smoke test", "deployment-smoke.yml"),
 )
 OPTIONAL_FULL_ASSET_WORKFLOW = WorkflowRequirement("Full-asset checks", "full-asset-checks.yml")
+CROSS_BROWSER_WORKFLOW = WorkflowRequirement(
+    "Cross-browser compatibility", "cross-browser-compatibility.yml"
+)
+CROSS_BROWSER_JOBS = (
+    "ubuntu-latest / chromium",
+    "ubuntu-latest / firefox",
+    "macos-latest / webkit",
+    "windows-latest / msedge",
+)
 
 
 @dataclass(frozen=True)
@@ -62,6 +71,15 @@ def validate_repository(value: str) -> str:
     if not _REPOSITORY_RE.fullmatch(repository):
         raise ReleaseEvidenceError("Repository must use the GitHub OWNER/REPO form")
     return repository
+
+
+def requires_cross_browser(tag: str) -> bool:
+    """Cross-browser evidence is mandatory from the first 1.0 release onward."""
+    valid = validate_tag(tag)
+    match = re.match(r"^v([0-9]+)", valid)
+    if match is None:
+        raise ReleaseEvidenceError("Invalid release tag version")
+    return int(match.group(1)) >= 1
 
 
 def validate_commit_sha(value: str) -> str:
@@ -112,6 +130,43 @@ def workflow_runs_url(repository: str, workflow_file: str, commit_sha: str) -> s
         }
     )
     return f"{GITHUB_API_BASE}/repos/{owner_repo}/actions/workflows/{workflow}/runs?{query}"
+
+
+def cross_browser_jobs_url(repository: str, run_id: int) -> str:
+    owner_repo = urllib.parse.quote(repository, safe="/")
+    return (
+        f"{GITHUB_API_BASE}/repos/{owner_repo}/actions/runs/{run_id}/jobs"
+        "?per_page=100&filter=latest"
+    )
+
+
+def verify_cross_browser_jobs(payload: dict[str, Any], *, run_id: int) -> list[dict[str, Any]]:
+    """Reject missing, skipped, failed, duplicated or incomplete browser matrix legs."""
+    jobs = payload.get("jobs")
+    total = payload.get("total_count")
+    if not isinstance(jobs, list) or type(total) is not int or len(jobs) != total:
+        raise ReleaseEvidenceError("Cross-browser jobs response is incomplete")
+    names = [job.get("name") for job in jobs if isinstance(job, dict)]
+    if len(names) != len(jobs) or len(names) != len(CROSS_BROWSER_JOBS) or set(names) != set(
+        CROSS_BROWSER_JOBS
+    ):
+        raise ReleaseEvidenceError("Cross-browser jobs are missing, unexpected or duplicated")
+    result = []
+    for job in jobs:
+        name = job["name"]
+        if job.get("run_id") != run_id or job.get("status") != "completed" or (
+            job.get("conclusion") != "success"
+        ):
+            raise ReleaseEvidenceError(f"Cross-browser job {name!r} did not pass completely")
+        result.append({
+            "name": name,
+            "id": _required_int(job, "id", workflow=name),
+            "run_id": run_id,
+            "status": "completed",
+            "conclusion": "success",
+            "url": _required_str(job, "html_url", workflow=name),
+        })
+    return sorted(result, key=lambda job: CROSS_BROWSER_JOBS.index(job["name"]))
 
 
 def _required_int(run: dict[str, Any], key: str, *, workflow: str) -> int:
@@ -196,10 +251,13 @@ def collect_release_evidence(
     *,
     token: str | None = None,
     include_full_assets: bool = False,
+    include_cross_browser: bool = False,
 ) -> dict[str, Any]:
     repository = validate_repository(repository)
     commit_sha = validate_commit_sha(commit_sha)
     requirements = REQUIRED_WORKFLOWS + (
+        (CROSS_BROWSER_WORKFLOW,) if include_cross_browser else ()
+    ) + (
         (OPTIONAL_FULL_ASSET_WORKFLOW,) if include_full_assets else ()
     )
     workflows: list[dict[str, Any]] = []
@@ -213,7 +271,13 @@ def collect_release_evidence(
             requirement=requirement,
             commit_sha=commit_sha,
         )
-        workflows.append(asdict(evidence))
+        entry = asdict(evidence)
+        if requirement == CROSS_BROWSER_WORKFLOW:
+            job_payload = _request_json(
+                cross_browser_jobs_url(repository, evidence.run_id), token=token,
+            )
+            entry["jobs"] = verify_cross_browser_jobs(job_payload, run_id=evidence.run_id)
+        workflows.append(entry)
     return {
         "schema_version": SCHEMA_VERSION,
         "repository": repository,
@@ -236,12 +300,25 @@ def render_tag_message(tag: str, evidence: dict[str, Any]) -> str:
         for workflow in workflows
         if isinstance(workflow, dict) and isinstance(workflow.get("workflow"), str)
     }
-    missing = [
-        requirement.name for requirement in REQUIRED_WORKFLOWS if requirement.name not in names
-    ]
+    require_browser = requires_cross_browser(tag)
+    required = REQUIRED_WORKFLOWS + ((CROSS_BROWSER_WORKFLOW,) if require_browser else ())
+    missing = [requirement.name for requirement in required if requirement.name not in names]
     if missing:
         raise ReleaseEvidenceError(
             "Release evidence is missing required workflows: " + ", ".join(missing)
+        )
+    if require_browser:
+        browser = next(
+            item for item in workflows
+            if isinstance(item, dict) and item.get("workflow") == CROSS_BROWSER_WORKFLOW.name
+        )
+        jobs = browser.get("jobs")
+        if not isinstance(jobs, list):
+            raise ReleaseEvidenceError("Cross-browser release evidence is missing matrix jobs")
+        verify_cross_browser_jobs(
+            {"jobs": [dict(job, html_url=job.get("url")) for job in jobs
+                      if isinstance(job, dict)], "total_count": len(jobs)},
+            run_id=_required_int(browser, "run_id", workflow=CROSS_BROWSER_WORKFLOW.name),
         )
 
     lines = [
@@ -318,6 +395,7 @@ def main(argv: list[str] | None = None) -> int:
             args.commit,
             token=os.environ.get("GITHUB_TOKEN"),
             include_full_assets=args.include_full_assets,
+            include_cross_browser=requires_cross_browser(tag),
         )
         tag_message = render_tag_message(tag, evidence)
     except ReleaseEvidenceError as exc:

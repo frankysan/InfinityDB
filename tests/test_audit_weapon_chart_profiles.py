@@ -4,6 +4,8 @@ import json
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from tools.audit_weapon_chart_profiles import (
     _printed_name_and_mode,
     _value,
@@ -126,6 +128,50 @@ def test_wrapped_name_is_reconstructed_within_row_boundaries() -> None:
     rows = rows_from_words(words, 177)
     assert [row["name"] for row in rows] == ["AP+DA CC WEAPON", "AP+EXP WEAPON"]
     assert rows[0]["ammunition"] == "AP+DA"
+
+
+def test_early_rows_share_profile_and_trait_anchors_without_mode_leaks(monkeypatch) -> None:
+    from tools import audit_weapon_traits_prose
+
+    words = [
+        (297.0, 99.0, "9"),
+        (24.0, 111.8, "SUPPRESSIVE"), (64.0, 111.8, "FIRE"),
+        (24.0, 121.4, "MODE"), (48.0, 121.4, "WEAPON"),
+        (297.0, 116.6, "1"), (470.0, 116.6, "FIRST"),
+        (24.0, 143.0, "URAGAN"), (60.0, 143.0, "MRL"),
+        (24.0, 152.6, "(Blast"), (50.0, 152.6, "Mode)"),
+        (297.0, 147.8, "3"), (470.0, 143.0, "BLAST"),
+        (470.0, 152.6, "TEMPLATE"),
+        (24.0, 174.2, "URAGAN"), (60.0, 174.2, "MRL"),
+        (24.0, 183.8, "(Hit"), (45.0, 183.8, "Mode)"),
+        (297.0, 179.0, "3"), (470.0, 179.0, "HIT"),
+        (297.0, 800.0, "9"),
+    ]
+    rows = rows_from_words(words, 188)
+    names = [row["name"] for row in rows]
+    assert names == [
+        "SUPPRESSIVE FIRE MODE WEAPON",
+        "URAGAN MRL (Blast Mode)",
+        "URAGAN MRL (Hit Mode)",
+    ]
+    assert [row["burst"] for row in rows] == ["1", "3", "3"]
+    assert [_printed_name_and_mode(name) for name in names[1:]] == [
+        ("URAGAN MRL", "Blast Mode"), ("URAGAN MRL", "Hit Mode")
+    ]
+
+    class Page:
+        def get_text(self, kind: str) -> list[tuple[float, float, float, float, str]]:
+            assert kind == "words"
+            return [(x, y, x + 1, y + 1, text) for x, y, text in words]
+
+    class Document:
+        def __getitem__(self, index: int) -> Page:
+            assert index == 187
+            return Page()
+
+    monkeypatch.setattr(audit_weapon_traits_prose, "PDF_PAGES", (188,))
+    traits = audit_weapon_traits_prose._source_traits_by_chart_row(Document())
+    assert [traits[(188, name)] for name in names] == ["FIRST", "BLAST TEMPLATE", "HIT"]
 
 
 def test_explicit_mode_disambiguates_repeated_weapon_name() -> None:
@@ -353,3 +399,131 @@ def test_disco_ball_is_separate_auxiliary_mode_profile() -> None:
     })
     assert len(matched) == 1
     assert matched[0]["status"] == "fields-match"
+
+def test_auxiliary_extractor_preserves_wrapped_object_identities() -> None:
+    from tools.audit_weapon_chart_profiles import _printed_auxiliary_profiles
+
+    words = [
+        (21.6, 545.6, "MONOFILAMENT"), (38.9, 555.2, "MINES"),
+        (124.4, 550.4, "ARM=0"), (158.0, 550.4, "BTS=0"),
+        (193.0, 550.4, "STR=1"), (232.0, 550.4, "S=0"),
+        (28.8, 495.1, "DEPLOYABLE"), (33.1, 504.7, "REPEATER"),
+        (125.9, 499.9, "ARM=0"), (159.0, 499.9, "BTS=0"),
+        (194.0, 499.9, "STR=1"), (230.0, 499.9, "S=1"),
+    ]
+    rows = _printed_auxiliary_profiles(words, 181)
+    assert [row["name"] for row in rows] == [
+        "DEPLOYABLE REPEATER", "MONOFILAMENT MINES",
+    ]
+    assert rows[1]["profile"] == "ARM=0 BTS=0 STR=1 S=0"
+
+
+def test_auxiliary_object_comparison_resolves_mines_modes_and_discrepancies() -> None:
+    from tools.audit_weapon_chart_profiles import compare_auxiliary_profiles
+
+    rows = [
+        {"page": 181, "name": "AP MINES",
+         "profile": "ARM=0 | BTS=0 | STR=1 | S=0"},
+        {"page": 181, "name": "DROP BEARS (Deployable Mode)",
+         "profile": "ARM=0 | BTS=0 | STR=1 | S=0"},
+        {"page": 186, "name": "DAZER",
+         "profile": "ARM=0 | BTS=0 | STR=1 | S=1"},
+        {"page": 186, "name": "DISCO BALL",
+         "profile": "ARM=0 | BTS=0 | STR=1 | S=1"},
+        {"page": 186, "name": "UNKNOWN OBJECT",
+         "profile": "ARM=0 | BTS=0 | STR=1 | S=1"},
+    ]
+    metadata = {
+        "apmine": [{**_army_row("AP Mine"), "profile": "ARM=0, BTS=0, STR=1, S=1"}],
+        "dropbears": [
+            {**_army_row("Drop Bears"), "mode": "BS Mode", "profile": ""},
+            {**_army_row("Drop Bears"), "mode": "Deployable Mode",
+             "profile": "ARM=0, BTS=0, STR=1, S=0"},
+        ],
+        "dazer": [{**_army_row("Dazer"), "profile": "ARM=0, BTS=0, STR=1, S=0"}],
+        "discoballer": [{**_army_row("Disco Baller"), "mode": "Disco Ball",
+                         "profile": "ARM=0, BTS=0, STR=1, S=1"}],
+    }
+    compared = compare_auxiliary_profiles(rows, metadata)
+    assert [row["status"] for row in compared] == [
+        "candidate-discrepancy", "fields-match", "candidate-discrepancy",
+        "fields-match", "unresolved-auxiliary-identity",
+    ]
+    assert compared[0]["armyName"] == "AP Mine"
+    assert compared[0]["differences"] == [{"field": "S", "pdf": 0, "army": 1}]
+    assert compared[1]["armyMode"] == "Deployable Mode"
+    assert compared[2]["differences"] == [{"field": "S", "pdf": 1, "army": 0}]
+    assert compared[3]["armyName"] == "Disco Baller"
+    assert compared[4]["armyName"] is None
+    assert compared[4]["printedAttributes"] == {
+        "ARM": 0, "BTS": 0, "STR": 1, "S": 1,
+    }
+
+
+def test_auxiliary_markdown_report_includes_field_provenance() -> None:
+    from tools.audit_weapon_chart_profiles import compare_auxiliary_profiles
+
+    compared = compare_auxiliary_profiles(
+        [{"page": 186, "name": "DAZER",
+          "profile": "ARM=0 | BTS=0 | STR=1 | S=1"}],
+        {"dazer": [{**_army_row("Dazer"),
+                    "profile": "ARM=0, BTS=0, STR=1, S=0"}]},
+    )
+    report = {
+        "corePdfSha256": "abc", "armyMetadataProfiles": 1,
+        "comparison": compare_rows([], {}),
+        "auxiliaryProfiles": compared,
+        "notCompared": [],
+    }
+    markdown = markdown_report(report)
+    assert "attribute discrepancies: **1**" in markdown
+    assert "S: PDF 1 vs Army 0" in markdown
+
+
+def test_pinned_n53_pdf_chart_source_differences() -> None:
+    """Local-only end-to-end PDF comparison; clean CI omits this source."""
+    from tools.audit_weapon_chart_profiles import audit_chart
+
+    root = Path(__file__).resolve().parents[1]
+    pdf = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+    if not pdf.is_file():
+        pytest.skip("Ignored N5.3 PDF unavailable")
+    pytest.importorskip("fitz")
+    report = audit_chart(pdf, root / "data/generated/infinity.db")
+    assert report["corePdfSha256"] == (
+        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+    )
+    rows = report["comparison"]
+    assert (rows["chartRowsLocated"], rows["unambiguousRowsCompared"]) == (173, 173)
+    assert (rows["candidateDiscrepancies"], rows["rangeCandidates"]) == (2, 1)
+    assert rows["deferredRows"] == 0
+    assert len(report["auxiliaryProfiles"]) == 14
+    differences = [row for row in rows["compared"] if row["differences"]]
+    assert [(row["name"], row["mode"]) for row in differences] == [
+        ("Kobra Pistol", "CC Mode"), ("Suppressive Fire Mode Weapon", "")
+    ]
+    assert differences[0]["differences"] == [
+        {"field": "savingRolls", "pdf": "1", "army": "2"}
+    ]
+    assert differences[1]["differences"] == [
+        {"field": "ammunition", "pdf": "*", "army": ""}
+    ]
+    uragan = {
+        row["mode"]: row for row in rows["compared"] if row["name"] == "Uragan MRL"
+    }
+    assert set(uragan) == {"Blast Mode", "Hit Mode"}
+    assert all(row["page"] == 188 and row["status"] == "fields-match"
+               for row in uragan.values())
+    assert all(row["rangeComparison"]["status"] == "bands-match"
+               for row in uragan.values())
+    katyusha = next(row for row in rows["compared"] if row["name"] == "Katyusha MRL")
+    assert katyusha["rangeComparison"]["pdf"][1:3] == ["3", "3"]
+    assert katyusha["rangeComparison"]["army"][1:3] == ["+3", "+3"]
+    silhouette_conflicts = [
+        row for row in report["auxiliaryProfiles"]
+        if row["status"] == "candidate-discrepancy"
+    ]
+    assert {row["armyName"] for row in silhouette_conflicts} == {
+        "AP Mine", "E/M Mine", "Monofilament Mine", "PARA Mine",
+        "Shock Mine", "Viral Mine", "Dazer",
+    }

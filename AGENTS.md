@@ -12,64 +12,138 @@ repository instructions and documentation take precedence if the local file
 conflicts with them. Promote a local preference into tracked project
 documentation only when the user explicitly wants it to become project policy.
 
-Before making substantial changes, read `docs/README.md` to identify the canonical
-document owner for the work, then read the relevant references. Most code changes need
-`docs/architecture.md`, `docs/data-model.md`, `docs/AI_CONTEXT.md`, and
-`docs/testing.md`; planning/release work also needs `docs/project-domains.md` and
-`docs/releasing.md`.
+Before making substantial changes, consult `docs/README.md` to identify the
+canonical owner, then inspect the affected source, tests and **relevant sections**
+of that owner's documentation. Use targeted searches/line ranges rather than
+rereading entire large documents or historical acceptance logs at every task
+boundary. Consult `docs/architecture.md` and `docs/data-model.md` for the
+invariants affected by a code/data change, `docs/testing.md` for applicable
+validation procedures, and `docs/project-domains.md` plus `docs/releasing.md`
+for planning/release decisions. `docs/AI_CONTEXT.md` is an optional navigation
+index, not an additional required full-document read. Broaden the reading scope
+when dependencies or changed contracts warrant it; never skip a relevant rule.
 
 For browser visual, layout, responsive, interaction, or player-facing copy changes, also read
 `docs/web-design-guidelines.md`; it defines the target UI vocabulary, language, and reusable
 design contract.
 
 The engineering principles in `docs/architecture.md` are authoritative for
-technical design decisions.
+technical design decisions. Preserve the v1.0 reference baseline defined by the
+[release citation gate](docs/releasing.md#version-10-data-completeness-gate):
+at least **one applicable current source** per in-scope rule and a usable
+browser reference; exhaustive source inventories and discrepancy hunts are
+not required.
 
-## Python environment
+## Tooling and validation
 
-Use the project virtual environment for Python tooling. Do not intentionally use
-a system Python when the project virtual environment is available.
+Use the project's virtual environment (normally
+`.venv\\Scripts\\python.exe` on Windows or `.venv/bin/python` on
+Linux/macOS), not system Python. The [testing guide](docs/testing.md)
+owns `tools/run_checks.py` stages, profiles, asset policy, setup,
+test dispatch, reports and preflight requirements. Use its current
+commands rather than maintaining a second command reference here.
+Use the [read-only development status](docs/testing.md#read-only-development-status)
+for a compact task-boundary snapshot when useful; it does not replace the
+V1S selection gate, VD/VR rules or exact-SHA CI acceptance.
 
-Virtual-environment interpreters are normally:
+### Backlog work selection and closeout
 
-- Windows: `.venv\Scripts\python.exe`
-- Linux/macOS: `.venv/bin/python`
+For autonomous work, apply the [V1S selection checkpoint](docs/TODO.md#v1s-work-selection-and-handoff).
+**Invoke the explicit selection gate** from the [testing guide](docs/testing.md#v1s-backlog-checks)
+before starting a numbered slice; inspect all earlier open IDs, documented
+blocked/deferred reasons and any exact TODO-recorded user-priority override.
+Do not use a free-form override argument to bypass earlier work.
+Before retiring a V1S entry, run the Git-aware closeout check for the proposed
+staged index and cite the removed ID in the eventual commit. The historical
+audit requires a deliberate, documented baseline; it does not approve
+semantic completion. At every task boundary apply the
+[backlog retirement contract](docs/README.md#backlog-completion-and-retirement):
+reconcile the worked task and parent against actual evidence and VD/VR
+obligations; retire complete work in the same change, leave actionable
+incomplete work open, and record removed V1S IDs in its commit.
 
-Use `tools/run_checks.py` as the standard entry point for repository checks. It
-invokes pytest, Ruff, Pyright type checking, Army data-build validation, and
-curated rules-database validation through the same Python
-interpreter that launched the runner and keeps stage selection/reporting
-consistent across local development and agent handoffs. Examples:
+### Phased validation and task-boundary checkpoint
 
-```text
-<venv-python> tools/run_checks.py --profile code
-<venv-python> tools/run_checks.py --profile data
-<venv-python> tools/run_checks.py --all
-<venv-python> tools/run_checks.py --stage test tests/test_availability.py
-<venv-python> tools/run_checks.py --profile code --report
-<venv-python> tools/run_checks.py --stage test --assets off
-<venv-python> tools/run_checks.py --stage test --assets required
-```
+The [active VD/VR queue](docs/validation-queue.md#queue-rules) is the sole
+authority for design/execution thresholds, drain order, due dates, linked
+dependencies, and retirement evidence. **Check it before ordinary
+implementation, at every task boundary, and at closeout**. Design due VD
+tests without running them; batch compatible VR executions while reconciling
+each due VR separately.
+Register concrete missing regression designs and each distinct changed
+behavior's deferred execution before reporting an implementation complete.
+Report counts, oldest due/blocked entry, and intended execution host.
+Do not call unrun tests passed or claim a task accepted while its required
+validation is pending.
 
-With `--report` and no path, the runner writes an ignored repository-local
-`reports/CHECKS YYYYMMDD-HHMMSS.txt` file using the same run-start timestamp as
-the report header. An explicit report path overrides that convention. Requested
-stages continue after failures by default; use `--fail-fast` when appropriate.
-See `docs/testing.md` for the complete contract.
+The [testing guide](docs/testing.md#focused-first-vr-execution)
+requires risk-based **focused-first** test execution, including impacted
+cross-layer invariants, and owns immediate safety exceptions and reports.
+A VD/VR threshold alone does not require a full suite.
+Its [Linux dispatch protocol](docs/testing.md#parallel-windows-development-and-linux-validation)
+owns explicit safe Git preparation, pinned asynchronous test execution,
+input/artifact verification and the narrowly scoped Windows-development
+exception while a full Linux suite is **actually running**. Hosted
+[CI](docs/ci.md#agent-ci-monitoring-and-repair) and
+[release acceptance](docs/releasing.md) remain independent. Never use a
+partial Linux run or job dispatch as permission to bypass a due drain.
 
-Direct pytest/Ruff/Pyright commands remain appropriate when debugging those
-tools in isolation, and package installation still runs through the virtual-environment
-Python, for example:
+## Optional multi-agent coordination
 
-```text
-<venv-python> -m pytest tests/test_specific.py -q
-<venv-python> -m ruff check path/to/file.py
-<venv-python> -m pyright
-<venv-python> -m pip install ...
-```
+Use the ordinary authorized Git workflow by default. The
+[multi-agent coordination protocol](docs/multi-agent-workspaces.md#activation-and-default-workflow)
+is **opt-in for an explicitly requested scope**: use it only when the user
+explicitly asks to run that work with the coordination system. Multiple agents,
+existing worktrees or registry claims, and work on the coordination tools do
+not activate it. Do not require registry access, claim acquisition, an ownership
+guard, client upgrades or an integration-leader designation for ordinary work.
 
-Local developer wrappers or command-launching tools may be used, but repository
-instructions must not depend on a particular user's machine configuration.
+Preserve existing assignments and unrelated changes. Concurrent writers must
+agree on separate working trees or non-overlapping work and serialize Git
+operations against a shared checkout. Never modify another agent's checkout or
+move a validation checkout while its pinned jobs are running. When the user
+explicitly enables coordinated mode, its checkout roles, claims, guards and
+designated integration owner apply within that scope.
+
+## Repository access and change delivery
+
+- Check whether the agent has authorized direct access to the current local
+  checkout before relying on uploaded archives or remote repository content.
+  A connected filesystem/terminal is a normal working tree, regardless of which
+  agent uses it. Do not assume local access is unavailable based on an earlier
+  session or workflow.
+- When direct access is available, inspect the actual branch, HEAD, working-tree
+  status, relevant files, and existing local instructions first. Treat that
+  checkout as the source of truth; use remote Git services only for information
+  that cannot be established locally or for explicitly requested remote work.
+- Edit and validate directly in the authorized working tree, preserving any
+  existing checkout assignment and concurrent work. Preserve unrelated
+  tracked and untracked changes. Do not require a repository ZIP or produce an
+  apply-yourself patch as the primary delivery when the files are already edited.
+  Generate a Git-native patch only when requested or needed for transfer/review.
+- When direct access is unavailable, request an appropriate repository snapshot
+  or use an authorized remote-read workflow; validate any proposed patch against
+  its actual base before claiming applicability. Do not infer current local
+  state from a stale archive or a remote branch alone.
+- After local edits, inspect the actual diff and status and run relevant
+  focused checks. For InfinityDB's authorized autonomous workflow, stage
+  only reviewed task-related files and commit a coherent validated batch with
+  a lowercase conventional message, then safely fast-forward push the authorized
+  branch after reviewing its remote tip and ancestry. **Only in explicitly
+  enabled coordinated mode**, development checkout owners hand off committed
+  proposals and the designated integration owner publishes the shared branch.
+  Report each SHA and exact validation
+  outcomes, and proceed to the next clearly identifiable open task only when
+  the validation queue and workspace assignment permit it. Do not commit failed
+  or uncertain changes as accepted, fold unrelated user edits into the
+  commit, force-push, reset, rebase, deploy, or publish a release without
+  separate authorization. A pushed revision is not automatically a
+  validated Linux or CI revision.
+- Keep machine-specific configuration, operational diagnostics, and private
+  evidence out of tracked files. The Git-ignored `local/` workspace is the
+  preferred location for private notes; ignore rules alone are not access
+  controls. Review the public diff and generated artifacts for accidental
+  disclosures before delivery.
 
 ## Repository rules
 
@@ -120,118 +194,48 @@ normal local working tree:
 - Do not force-update a branch unless the user explicitly requests history
   rewriting or a previously agreed recovery requires it.
 
+## Post-push hosted CI follow-through
+
+Follow the [CI monitoring and repair protocol](docs/ci.md#agent-ci-monitoring-and-repair)
+after authorized pushes: record the exact SHA and available runs, inspect
+statuses at task boundaries rather than waiting for each run, and
+autonomously repair actionable repository failures with a focused,
+validated and safely pushed fix. Do not treat local success, incomplete
+CI or an older commit's result as hosted acceptance. External,
+source-authority or unsafe-Git blockers require explicit escalation;
+actual merge/release gates still require terminal results.
+
 ## Documentation and project tracking
 
-### Changelog discipline
+Follow the [documentation map and ownership rules](docs/README.md).
+Update the canonical current-state owner for changed behavior, with
+planned or unimplemented contracts clearly labelled. The
+[backlog](docs/TODO.md) owns unfinished work and its V1S selection rules;
+[retirement](docs/README.md#backlog-completion-and-retirement) requires
+the corresponding acceptance evidence and same-change closeout.
+Use the [release-note writing rules](docs/releasing.md#3-prepare-release-notes-and-metadata)
+for substantive user/operator outcomes; do not add entries for
+internal-only tests, refactors or process updates.
 
-`docs/CHANGELOG.md` is the canonical release history and should be written so it can also serve as the source for the user-facing **What's changed** page.
+Review the actual diff for documentation impact, update public
+`README.md` for user-visible capabilities or setup, and use canonical
+[project-domain labels](docs/project-domains.md) for new/revised
+documentation. An actual release requires the complete
+[release and project-wide documentation audit](docs/releasing.md).
+Apply the [one-use tool and audit retirement policy](docs/README.md#one-use-tool-and-audit-lifecycle)
+at bounded task closeout: check imports, tests, workflow/CLI consumers and
+release obligations before retiring transient scripts or dated audit reports.
+Do not duplicate active task lists, reference semantics or operational
+instructions in agent guidance.
 
-Record **meaningful release outcomes**, not a detailed implementation history. Prefer describing what was added, what behaves differently, what was fixed, or what an operator must do when upgrading.
+## Source-reference safeguards
 
-When adding or consolidating changelog entries:
-
-- Write from the perspective of a user or operator of InfinityDB.
-- Describe the resulting capability, behavior, correctness improvement, or upgrade consequence rather than the implementation steps that produced it.
-- Consolidate related engineering changes into a single outcome-oriented entry where they form one coherent improvement.
-- Begin every release, including `Unreleased`, with a `Player summary` section. Keep it concise and include only changes that are visible or directly useful to players; use `No player-facing changes.` when a release has none. The browser publishes this section openly and keeps the fuller release detail collapsed by default.
-- Keep `Added`, `Changed`, and `Fixed` as the normal detailed categories. Use an `Upgrade notes` section when a release requires an explicit action such as rebuilding generated databases.
-- Keep wording understandable without requiring knowledge of InfinityDB's internal architecture, build pipeline, CI setup, or implementation tools.
-- Retain technical terminology only when it identifies a meaningful user-visible concept or is necessary for an operator to act on the change.
-- Prefer concise entries. A release should communicate its important changes without becoming an inventory of commits.
-
-Normally omit standalone changelog entries for:
-
-- version-number or release-metadata updates;
-- schema or compatibility revision numbers when the only important consequence is that generated data must be rebuilt;
-- linting, formatting, type-checking, or test-coverage work;
-- internal refactors with no externally meaningful behavioral change;
-- query plans, indexes, batching strategies, or other implementation-level performance work when these can instead be summarized as a performance improvement;
-- cache-busting, asset fingerprints, or similar implementation details unless they directly fix a user-visible problem;
-- CI workflow details, validation mechanics, acceptance-test milestones, or individual regression tests;
-- exact tool or script names unless users or operators interact with them directly;
-- project-management milestones whose durable outcome is already described elsewhere in the release notes.
-
-Detailed implementation history should remain available through Git history, architecture and data-model documentation, deployment documentation, manifests, generated reports, and tests rather than being duplicated in the changelog.
-
-Before finalizing a release, review the complete `Unreleased` section as a whole rather than only promoting individual accumulated entries. Merge overlapping entries, remove implementation-only details, and ensure the resulting release notes tell a concise and coherent story of the release.
-
-Before finalizing **any release**, follow the canonical checklist in `docs/releasing.md`. A project-wide documentation audit is a mandatory release gate: review the complete maintained documentation corpus, not only files changed since the previous release, and correct stale current-state claims before tagging. Version-specific release requirements may add gates but do not replace this process.
-
-- Update `docs/architecture.md` when changing architectural boundaries,
-  engineering principles, or lasting design decisions.
-- Update `docs/data-model.md` when changing documented data semantics or
-  persistence structure.
-- Update `docs/AI_CONTEXT.md` when introducing a durable, non-obvious project
-  invariant or development constraint.
-- Add identified future work to `docs/TODO.md`.
-- Record meaningful changes under `Unreleased` in `docs/CHANGELOG.md`.
-- Label new or materially revised change/feature/design/backlog documentation with
-  its canonical project domain. Use the exact labels and multi-domain rules from
-  `docs/project-domains.md`; do not invent near-synonyms.
-- Update `README.md` for user-visible behavior, setup, or major capabilities.
-- When changing the Army database schema or compatibility revision, update all
-  documented current schema/compatibility values and related rebuild guidance in
-  the same change.
-
-Do not duplicate canonical documentation unnecessarily; link to the
-authoritative document instead.
-
-### Documentation status discipline
-
-Keep implementation status explicit throughout the documentation corpus:
-
-- **Current design/behavior** describes what the repository and application do
-  now. Unqualified statements in reference documentation should normally mean
-  current behavior.
-- **Design direction** describes an accepted architectural decision or intended
-  boundary that is not fully implemented yet. Label it explicitly; do not write
-  it as though the corresponding files, schema fields, tooling, or runtime
-  behavior already exist.
-- **Planned/unimplemented work** belongs in `docs/TODO.md`. Architecture and
-  data-model documents may explain the intended shape and rationale, but should
-  point to the backlog instead of maintaining a second task list.
-
-When one topic has both a current implementation and a future design, separate
-them with explicit headings or wording. Do not silently rewrite legacy source or
-curated data to match a future contract; document the current limitation and
-track the migration until the responsible implementation is changed.
-
-## Local rules reference
-
-User-supplied PDFs and wiki snapshots under `data/` may be used as research
-sources for rules-aware features and data review. They are not inputs to the
-Infinity Army merge/normalization/build pipeline.
-
-When deriving structured facts from these materials:
-
-- record source version/date and printed-page citations for PDFs;
-- preserve the wiki source identity actually available to the current curated
-  contract. Archived sources use the exact timestamped ZIP path/hash, acquisition
-  metadata, and snapshot-local member; pinned `oldid=` revisions remain URL-backed
-  when they are not members of that archive;
-- keep core rules, FAQ/errata, ITS season material, and historical sources
-  distinct;
-- treat dated official Corvus Belli news/rules-update posts as supplementary
-  publication-change evidence, with their URL/date and scope recorded; do not
-  substitute a blog changelog for the versioned rules PDF, FAQ, or Army data;
-- for N5 questions, cross-check the pinned Army, rules/FAQ/annex, exact Wiki
-  revision, relevant official update posts, and available historical N5 versions;
-  use `docs/n5-source-history.md` for the source timeline and reconciliation policy;
-  keep official current authority distinct from unofficial historical backups;
-- do not bulk-extract or serve copyrighted text or artwork.
-
-Official Infinity Army data and current official publications remain
-authoritative where they supersede archived local material.
-
-When curating material player-facing rules interactions, follow the explanation standard in
-`data/curated/README.md#explaining-rules-interactions`: make conditions, baseline mechanic,
-modifying rule, explicit exceptions, outcome, and source certainty understandable to players.
-Do not mark an interaction adequately explained solely because its result or relation is correct.
-The browser presentation target is in `docs/web-design-guidelines.md`.
-
-Maintained rules prose must use the semantic maintained-text token syntax whenever it names an
-existing supported Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program,
-or Attribute. The pre-token migration is complete: reviewed batches reject newly authored plain
-semantic candidates. Do not weaken or expand reviewed-plain exceptions merely to make an audit
-pass. Link a clear reference; use an explicit `review-needed` marker when the meaning is genuinely
-ambiguous.
+For rules/Army/FAQ/Wiki source reconciliation, use the
+[source-reconciliation skill](.agents/skills/infinity-source-reconciliation/SKILL.md),
+the [N5 source-history policy](docs/n5-source-history.md), and the
+[curated explanation contract](data/curated/README.md#explaining-rules-interactions).
+Preserve exact source version, provenance, scope and uncertainty. Research
+PDFs/Wiki archives are not implicitly Army pipeline inputs; consult
+[data lifecycle ownership](data/README.md). Do not bulk-reproduce
+copyrighted text or artwork or silently promote an inferred interpretation
+into a verified rule.

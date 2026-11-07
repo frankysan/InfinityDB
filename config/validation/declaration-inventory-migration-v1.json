@@ -1,0 +1,311 @@
+{
+  "format": "InfinityDB V1-A08 declaration-category source-heading migration review",
+  "formatVersion": 1,
+  "historicalCommit": "c5400ab1b950990fdacc509be91c110fe85431fb",
+  "historicalInventorySha256": "3f6b21bc6ba7e508e63cfaa74b1bdb3fdefe3ab3968418d813be18a36275675e",
+  "currentSourceId": "n5-core-v5.3-pdf",
+  "currentPdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "decisionScope": "declaration-category-ownership-and-printed-heading-only",
+  "reviewedOn": "2026-10-31",
+  "retiredTransitions": [
+    {
+      "oldId": "declaration-category:aro:p103",
+      "historicalOwners": [
+        "skill:morpho-scan"
+      ],
+      "currentIds": [
+        "declaration-category:short-skill:p103"
+      ],
+      "disposition": "corrected-classification"
+    },
+    {
+      "oldId": "declaration-category:aro:p40",
+      "historicalOwners": [
+        "skill:bs-attack"
+      ],
+      "currentIds": [
+        "declaration-category:aro:p39"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:aro:p45",
+      "historicalOwners": [
+        "skill:cc-attack"
+      ],
+      "currentIds": [
+        "declaration-category:aro:p51"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:aro:p78",
+      "historicalOwners": [
+        "skill:discover"
+      ],
+      "currentIds": [
+        "declaration-category:aro:p77"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:automatic:p101",
+      "historicalOwners": [
+        "skill:natural-born-warrior"
+      ],
+      "currentIds": [
+        "declaration-category:automatic:p103"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:automatic:p89",
+      "historicalOwners": [
+        "skill:decoy"
+      ],
+      "currentIds": [
+        "declaration-category:deployment:p90"
+      ],
+      "disposition": "corrected-classification"
+    },
+    {
+      "oldId": "declaration-category:automatic:p94",
+      "historicalOwners": [
+        "skill:g-jumper"
+      ],
+      "currentIds": [
+        "declaration-category:automatic:p93"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:automatic:p96",
+      "historicalOwners": [
+        "skill:immunity"
+      ],
+      "currentIds": [
+        "declaration-category:automatic:p95"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:basic-short-skill:p103",
+      "historicalOwners": [
+        "skill:morpho-scan"
+      ],
+      "currentIds": [
+        "declaration-category:short-skill:p103"
+      ],
+      "disposition": "corrected-classification"
+    },
+    {
+      "oldId": "declaration-category:basic-short-skill:p78",
+      "historicalOwners": [
+        "skill:discover"
+      ],
+      "currentIds": [
+        "declaration-category:basic-short-skill:p77"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:deployment:p89",
+      "historicalOwners": [
+        "skill:infiltration"
+      ],
+      "currentIds": [
+        "declaration-category:deployment:p97"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:deployment:p93",
+      "historicalOwners": [
+        "skill:impersonation"
+      ],
+      "currentIds": [
+        "declaration-category:deployment:p96"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:deployment:p94",
+      "historicalOwners": [
+        "skill:hidden-deployment"
+      ],
+      "currentIds": [
+        "declaration-category:deployment:p95"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:long-skill:p25",
+      "historicalOwners": [
+        "skill:jump",
+        "skill:climb"
+      ],
+      "currentIds": [
+        "declaration-category:long-skill:p34",
+        "declaration-category:long-skill:p32"
+      ],
+      "disposition": "split-by-skill-owner"
+    },
+    {
+      "oldId": "declaration-category:short-skill:p112",
+      "historicalOwners": [
+        "skill:sensor"
+      ],
+      "currentIds": [
+        "declaration-category:short-skill:p111"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:short-skill:p40",
+      "historicalOwners": [
+        "skill:bs-attack"
+      ],
+      "currentIds": [
+        "declaration-category:short-skill:p39"
+      ],
+      "disposition": "corrected-source-page"
+    },
+    {
+      "oldId": "declaration-category:short-skill:p45",
+      "historicalOwners": [
+        "skill:cc-attack"
+      ],
+      "currentIds": [
+        "declaration-category:short-skill:p51"
+      ],
+      "disposition": "corrected-source-page"
+    }
+  ],
+  "addedHeadings": [
+    {
+      "id": "declaration-category:aro:p39",
+      "owner": "skill:bs-attack",
+      "printedHeading": "BS ATTACK",
+      "printedClassification": "SHORT SKILL / ARO"
+    },
+    {
+      "id": "declaration-category:aro:p51",
+      "owner": "skill:cc-attack",
+      "printedHeading": "CC ATTACK",
+      "printedClassification": "SHORT SKILL / ARO"
+    },
+    {
+      "id": "declaration-category:aro:p77",
+      "owner": "skill:discover",
+      "printedHeading": "DISCOVER",
+      "printedClassification": "BASIC SHORT SKILL / ARO"
+    },
+    {
+      "id": "declaration-category:automatic:p54",
+      "owner": "skill:hacker",
+      "printedHeading": "HACKER",
+      "printedClassification": "AUTOMATIC SKILL"
+    },
+    {
+      "id": "declaration-category:basic-short-skill:p77",
+      "owner": "skill:discover",
+      "printedHeading": "DISCOVER",
+      "printedClassification": "BASIC SHORT SKILL / ARO"
+    },
+    {
+      "id": "declaration-category:deployment:p101",
+      "owner": "skill:metachemistry",
+      "printedHeading": "METACHEMISTRY",
+      "printedClassification": "DEPLOYMENT SKILL"
+    },
+    {
+      "id": "declaration-category:deployment:p110",
+      "owner": "skill:remdriver",
+      "printedHeading": "REMDRIVER",
+      "printedClassification": "DEPLOYMENT SKILL"
+    },
+    {
+      "id": "declaration-category:deployment:p112",
+      "owner": "skill:strategic-deployment",
+      "printedHeading": "STRATEGIC DEPLOYMENT",
+      "printedClassification": "DEPLOYMENT SKILL"
+    },
+    {
+      "id": "declaration-category:deployment:p86",
+      "owner": "skill:booty",
+      "printedHeading": "BOOTY",
+      "printedClassification": "DEPLOYMENT SKILL"
+    },
+    {
+      "id": "declaration-category:deployment:p90",
+      "owner": "skill:decoy",
+      "printedHeading": "DECOY",
+      "printedClassification": "DEPLOYMENT SKILL"
+    },
+    {
+      "id": "declaration-category:deployment:p95",
+      "owner": "skill:hidden-deployment",
+      "printedHeading": "HIDDEN DEPLOYMENT",
+      "printedClassification": "DEPLOYMENT SKILL"
+    },
+    {
+      "id": "declaration-category:deployment:p96",
+      "owner": "skill:impersonation",
+      "printedHeading": "IMPERSONATION",
+      "printedClassification": "DEPLOYMENT SKILL"
+    },
+    {
+      "id": "declaration-category:deployment:p97",
+      "owner": "skill:infiltration",
+      "printedHeading": "INFILTRATION",
+      "printedClassification": "DEPLOYMENT SKILL"
+    },
+    {
+      "id": "declaration-category:long-skill:p105",
+      "owner": "skill:parachutist",
+      "printedHeading": "PARACHUTIST",
+      "printedClassification": "LONG SKILL"
+    },
+    {
+      "id": "declaration-category:long-skill:p32",
+      "owner": "skill:climb",
+      "printedHeading": "CLIMB",
+      "printedClassification": "LONG SKILL"
+    },
+    {
+      "id": "declaration-category:long-skill:p34",
+      "owner": "skill:jump",
+      "printedHeading": "JUMP",
+      "printedClassification": "LONG SKILL"
+    },
+    {
+      "id": "declaration-category:short-skill:p103",
+      "owner": "skill:morpho-scan",
+      "printedHeading": "MORPHO SCAN",
+      "printedClassification": "SHORT SKILL"
+    },
+    {
+      "id": "declaration-category:short-skill:p111",
+      "owner": "skill:sensor",
+      "printedHeading": "SENSOR",
+      "printedClassification": "SHORT SKILL"
+    },
+    {
+      "id": "declaration-category:short-skill:p39",
+      "owner": "skill:bs-attack",
+      "printedHeading": "BS ATTACK",
+      "printedClassification": "SHORT SKILL / ARO"
+    },
+    {
+      "id": "declaration-category:short-skill:p51",
+      "owner": "skill:cc-attack",
+      "printedHeading": "CC ATTACK",
+      "printedClassification": "SHORT SKILL / ARO"
+    }
+  ],
+  "unresolvedScope": [
+    "full conditional declaration permissions",
+    "per-variant activation restrictions",
+    "normal-mode browser and other-source acceptance"
+  ]
+}

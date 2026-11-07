@@ -33,5 +33,14 @@ jobs:
           FULL_ASSET_BUNDLE_SHA256: ${{ secrets.FULL_ASSET_BUNDLE_SHA256 }}
         run: python tools/stage_full_asset_bundle.py
 
+      - name: Set up Node.js for documentation linting
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install pinned documentation lint dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
       - name: Run full-asset project checks
         run: python tools/run_checks.py --all --assets required --build-source tests/fixtures/deployment-smoke

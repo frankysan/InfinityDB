@@ -194,6 +194,32 @@
           }
         },
         {
+          "id": "mine-trigger-area-base-edge",
+          "anchor": "extended out from the edge of the base of the Mine",
+          "relatedCuratedIds": [
+            "weapon:mines"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "N5.3 p. 72 explicitly defines the Mine Trigger Area origin and exclusion.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "edge of the Mine's base"
+          }
+        },
+        {
+          "id": "mine-trigger-area-total-cover",
+          "anchor": "excludes any areas in Total Cover from the Blast Focus",
+          "relatedCuratedIds": [
+            "weapon:mines"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "N5.3 p. 72 explicitly defines the Mine Trigger Area origin and exclusion.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "Total Cover from the Template's Blast Focus"
+          }
+        },
+        {
           "id": "mine-allied-safety",
           "anchor": "A Mine never triggers if the Small Teardrop Template would affect an ally",
           "relatedCuratedIds": [
@@ -232,7 +258,7 @@
             "status": "represented",
             "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
             "curatedId": "weapon:mines",
-            "summaryAnchor": "then is removed"
+            "summaryAnchor": "and is then removed"
           }
         },
         {
@@ -289,7 +315,7 @@
             "status": "represented",
             "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
             "curatedId": "weapon:chest-mine",
-            "summaryAnchor": "In BS Mode it functions"
+            "summaryAnchor": "It functions as a [[trait:direct-template]] Weapon"
           }
         },
         {
@@ -303,20 +329,1155 @@
             "status": "represented",
             "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
             "curatedId": "weapon:chest-mine",
-            "summaryAnchor": "In [[trait:cc|CC]] Mode it is a [[trait:cc|CC]] Weapon"
+            "summaryAnchor": "It is a [[trait:cc|CC]] Weapon"
           }
         },
         {
           "id": "chest-mine-shared-uses",
           "anchor": "The Disposable (2) Trait is shared between all Modes",
           "relatedCuratedIds": [
+            "trait:disposable-x",
+            "weapon:chest-mine"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Chest Mine now explicitly states both modes share the same two Disposable uses.",
+            "curatedId": "weapon:chest-mine",
+            "summaryAnchor": "Both modes share two uses"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Armed Turret",
+      "page": 70,
+      "armyExamples": [
+        "Armed Turret"
+      ],
+      "clauses": [
+        {
+          "id": "turret-deployable-traits",
+          "anchor": "Disposable (1), Deployable, Non-Reloadable, Perimeter.",
+          "relatedCuratedIds": [
+            "weapon:armed-turret",
+            "trait:deployable",
+            "trait:non-reloadable",
+            "trait:disposable-x",
+            "trait:perimeter"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:armed-turret",
+            "summaryAnchor": "Disposable (1)"
+          }
+        },
+        {
+          "id": "turret-place-deployable",
+          "anchor": "These weapons are placed on the game table using the Place",
+          "relatedCuratedIds": [
+            "weapon:armed-turret",
+            "skill:place-deployable"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:armed-turret",
+            "summaryAnchor": "It uses [[skill:place-deployable|Place Deployable]]"
+          }
+        },
+        {
+          "id": "turret-place-in-zoc",
+          "anchor": "totally inside the Zone of Control of the Trooper",
+          "relatedCuratedIds": [
+            "weapon:armed-turret",
+            "trait:perimeter",
+            "trait:zone-of-control-zc"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:armed-turret",
+            "summaryAnchor": "totally inside the deploying Trooper"
+          }
+        },
+        {
+          "id": "turret-model-not-marker",
+          "anchor": "but not a Marker",
+          "relatedCuratedIds": [
+            "weapon:armed-turret",
+            "skill:bs-attack",
+            "skill:cc-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:armed-turret",
+            "summaryAnchor": "not a Marker"
+          }
+        },
+        {
+          "id": "turret-profile-bracketed-weapon",
+          "anchor": "BS Weapon is listed in brackets after the",
+          "relatedCuratedIds": [
+            "weapon:armed-turret"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:armed-turret",
+            "summaryAnchor": "bracketed weapon name identifies"
+          }
+        },
+        {
+          "id": "turret-str-destruction",
+          "anchor": "number of Wounds equal or higher than its STR Attribute",
+          "relatedCuratedIds": [
+            "weapon:armed-turret"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:armed-turret",
+            "summaryAnchor": "removed when Wounds equal or exceed its STR"
+          }
+        },
+        {
+          "id": "turret-stationary",
+          "anchor": "stationary and cannot move",
+          "relatedCuratedIds": [
+            "weapon:armed-turret"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:armed-turret",
+            "summaryAnchor": "It is immobile"
+          }
+        },
+        {
+          "id": "turret-nonactivation",
+          "anchor": "does not activate other Deployable Weapons or Equipment",
+          "relatedCuratedIds": [
+            "weapon:armed-turret",
+            "trait:deployable"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:armed-turret",
+            "summaryAnchor": "cannot activate other"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:armed-turret",
+          "type": "enables-use-of",
+          "to": "skill:place-deployable"
+        }
+      ]
+    },
+    {
+      "name": "D-Charges",
+      "page": 70,
+      "armyExamples": [
+        "D-Charges"
+      ],
+      "clauses": [
+        {
+          "id": "dcharges-demolition-structures",
+          "anchor": "with a Building or Scenery Structure",
+          "relatedCuratedIds": [
+            "weapon:d-charges",
+            "trait:anti-materiel"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:d-charges",
+            "summaryAnchor": "contact with a Building or Scenery Structure"
+          }
+        },
+        {
+          "id": "dcharges-demolition-enemy-state",
+          "anchor": "in an Immobilized or Null State",
+          "relatedCuratedIds": [
+            "weapon:d-charges"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:d-charges",
+            "summaryAnchor": "in Immobilized or Null State"
+          }
+        },
+        {
+          "id": "dcharges-cc-trooper-contact",
+          "anchor": "contact with an enemy Trooper",
+          "relatedCuratedIds": [
+            "weapon:d-charges",
+            "trait:cc"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:d-charges",
+            "summaryAnchor": "contact with an enemy Trooper"
+          }
+        },
+        {
+          "id": "dcharges-place-deployable",
+          "anchor": "Are placed using the Place Deployable Short Skill",
+          "relatedCuratedIds": [
+            "weapon:d-charges",
+            "skill:place-deployable"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:d-charges",
+            "summaryAnchor": "Place the charge with"
+          }
+        },
+        {
+          "id": "dcharges-no-aro",
+          "anchor": "Cannot be used in ARO",
+          "relatedCuratedIds": [
+            "weapon:d-charges",
+            "trait:aro"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:d-charges",
+            "summaryAnchor": "It cannot be used in"
+          }
+        },
+        {
+          "id": "dcharges-resolution-no-roll",
+          "anchor": "Detonate during the Resolution Step",
+          "relatedCuratedIds": [
+            "weapon:d-charges"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:d-charges",
+            "summaryAnchor": "detonates in the Resolution Step without a Roll"
+          }
+        },
+        {
+          "id": "dcharges-share-disposable",
+          "anchor": "Both Modes of using this weapon share the Disposable (3) Trait",
+          "relatedCuratedIds": [
+            "weapon:d-charges",
             "trait:disposable-x"
           ],
           "semanticReview": {
             "status": "represented",
-            "reason": "The generic Disposable record explicitly states shared modes; the printed Chest Mine count is separately in its profile.",
-            "curatedId": "trait:disposable-x",
-            "summaryAnchor": "all modes share the available uses"
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:d-charges",
+            "summaryAnchor": "both using the same"
+          }
+        },
+        {
+          "id": "dcharges-improvised-mod",
+          "anchor": "Improvised Trait gives a CC-6 MOD",
+          "relatedCuratedIds": [
+            "weapon:d-charges",
+            "trait:improvised"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:d-charges",
+            "summaryAnchor": "applies a -6 MOD"
+          }
+        },
+        {
+          "id": "dcharges-user-unaffected",
+          "anchor": "The detonation of D-Charges",
+          "relatedCuratedIds": [
+            "weapon:d-charges"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The cited family rule explicitly conveys this N5.3 clause.",
+            "curatedId": "weapon:d-charges",
+            "summaryAnchor": "does not affect the user"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:d-charges",
+          "type": "uses-effects-of",
+          "to": "skill:place-deployable"
+        }
+      ]
+    },
+    {
+      "name": "Disco Baller",
+      "page": 71,
+      "armyExamples": [
+        "Disco Baller"
+      ],
+      "clauses": [
+        {
+          "id": "disco-target-location",
+          "anchor": "You do not need a target for the Disco Baller",
+          "relatedCuratedIds": [
+            "weapon:disco-baller",
+            "trait:targetless"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:disco-baller",
+            "summaryAnchor": "Choose a location"
+          }
+        },
+        {
+          "id": "disco-deploy-conclusion",
+          "anchor": "a Disco Ball is successfully deployed in the location",
+          "relatedCuratedIds": [
+            "weapon:disco-baller"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:disco-baller",
+            "summaryAnchor": "On success, place a Disco Ball Model or Token"
+          }
+        },
+        {
+          "id": "disco-eclipse",
+          "anchor": "place an Eclipse Special Ammo Circular Template",
+          "relatedCuratedIds": [
+            "weapon:disco-baller",
+            "ammunition:eclipse"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:disco-baller",
+            "summaryAnchor": "circular [[ammunition:eclipse|Eclipse]] Template"
+          }
+        },
+        {
+          "id": "disco-deactivation",
+          "anchor": "At the start of the States Phase, the Disco Ball deactivates",
+          "relatedCuratedIds": [
+            "weapon:disco-baller"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:disco-baller",
+            "summaryAnchor": "At the start of the States Phase the Disco Ball deactivates"
+          }
+        },
+        {
+          "id": "disco-persist",
+          "anchor": "A deployed Disco Ball remains on the table until the end of the game",
+          "relatedCuratedIds": [
+            "weapon:disco-baller"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:disco-baller",
+            "summaryAnchor": "deployed Ball remains until it is destroyed or the game ends"
+          }
+        },
+        {
+          "id": "disco-allied-only",
+          "anchor": "Only allied Disco Balls can be Activated this way",
+          "relatedCuratedIds": [
+            "weapon:disco-baller",
+            "skill:activate-disco-ball"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "skill:activate-disco-ball",
+            "summaryAnchor": "Enemy Disco Balls cannot be activated"
+          }
+        },
+        {
+          "id": "disco-wip-activation",
+          "anchor": "successful WIP +3 Normal Roll",
+          "relatedCuratedIds": [
+            "equipment:deactivator",
+            "skill:activate-disco-ball"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "skill:activate-disco-ball",
+            "summaryAnchor": "WIP +3"
+          }
+        },
+        {
+          "id": "disco-range-deactivator",
+          "anchor": "Range MODs of the Deactivator are applied",
+          "relatedCuratedIds": [
+            "equipment:deactivator",
+            "skill:activate-disco-ball"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "skill:activate-disco-ball",
+            "summaryAnchor": "Deactivator]]'s Range MODs"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:disco-baller",
+          "type": "uses-effects-of",
+          "to": "skill:activate-disco-ball"
+        }
+      ]
+    },
+    {
+      "name": "Drop Bears",
+      "page": 71,
+      "armyExamples": [
+        "Drop Bears"
+      ],
+      "clauses": [
+        {
+          "id": "drop-two-modes",
+          "anchor": "two modes of use, Deployable Mode and BS Mode",
+          "relatedCuratedIds": [
+            "weapon:drop-bears"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:drop-bears",
+            "summaryAnchor": "two different deployment modes"
+          }
+        },
+        {
+          "id": "drop-deploy-visible",
+          "anchor": "instead of a Camouflage Marker",
+          "relatedCuratedIds": [
+            "skill:place-deployable",
+            "skill:intuitive-attack",
+            "weapon:drop-bears"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:drop-bears",
+            "summaryAnchor": "visible Mine Token"
+          }
+        },
+        {
+          "id": "drop-bs-no-target",
+          "anchor": "You do not need a target to throw a Drop Bear",
+          "relatedCuratedIds": [
+            "trait:targetless",
+            "weapon:drop-bears"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:drop-bears",
+            "summaryAnchor": "no target is needed"
+          }
+        },
+        {
+          "id": "drop-bs-no-same-order-detonation",
+          "anchor": "cannot detonate during the Order it is used in BS Mode",
+          "relatedCuratedIds": [
+            "weapon:drop-bears"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:drop-bears",
+            "summaryAnchor": "cannot detonate during the Order"
+          }
+        },
+        {
+          "id": "drop-bs-camo-placement",
+          "anchor": "cannot be placed where there is an enemy Camouflage Marker",
+          "relatedCuratedIds": [
+            "weapon:drop-bears"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:drop-bears",
+            "summaryAnchor": "inside its Trigger Area unless a valid"
+          }
+        },
+        {
+          "id": "drop-shared-uses",
+          "anchor": "Disposable (3) Trait is shared between all Modes",
+          "relatedCuratedIds": [
+            "trait:disposable-x",
+            "weapon:drop-bears"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:drop-bears",
+            "summaryAnchor": "three shared [[trait:disposable-x|Disposable (3)]] uses"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:drop-bears",
+          "type": "modifies-use-of",
+          "to": "weapon:mines"
+        }
+      ]
+    },
+    {
+      "name": "Mine Dispenser",
+      "page": 72,
+      "armyExamples": [
+        "Mine Dispenser"
+      ],
+      "clauses": [
+        {
+          "id": "dispenser-drop-bs",
+          "anchor": "same rules as Drop Bears in BS Mode",
+          "relatedCuratedIds": [
+            "weapon:drop-bears",
+            "weapon:mine-dispenser"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:mine-dispenser",
+            "summaryAnchor": "uses the **BS Mode** placement rules"
+          }
+        },
+        {
+          "id": "dispenser-mine-kind-bracket",
+          "anchor": "type of Mines in the Mine Dispenser are listed in brackets",
+          "relatedCuratedIds": [
+            "weapon:mines",
+            "weapon:mine-dispenser"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:mine-dispenser",
+            "summaryAnchor": "Mine type is specified in brackets"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:mine-dispenser",
+          "type": "modifies-use-of",
+          "to": "weapon:drop-bears"
+        },
+        {
+          "from": "weapon:mine-dispenser",
+          "type": "uses-effects-of",
+          "to": "weapon:mines"
+        }
+      ]
+    },
+    {
+      "name": "Sepsitor",
+      "page": 73,
+      "armyExamples": [
+        "Sepsitor",
+        "Sepsitor Plus"
+      ],
+      "clauses": [
+        {
+          "id": "sepsitor-cube-target",
+          "anchor": "target must be a Trooper with a Cube",
+          "relatedCuratedIds": [
+            "equipment:cube",
+            "weapon:sepsitor"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:sepsitor",
+            "summaryAnchor": "Troopers with a [[equipment:cube|Cube]]"
+          }
+        },
+        {
+          "id": "sepsitor-template",
+          "anchor": "It works as a Direct Template Weapon",
+          "relatedCuratedIds": [
+            "trait:direct-template",
+            "weapon:sepsitor"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:sepsitor",
+            "summaryAnchor": "[[trait:direct-template|Direct Template]] weapon"
+          }
+        },
+        {
+          "id": "sepsitor-saving",
+          "anchor": "forces the target to make a Saving Roll",
+          "relatedCuratedIds": [
+            "weapon:sepsitor"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:sepsitor",
+            "summaryAnchor": "A hit requires a BTS Saving Roll"
+          }
+        },
+        {
+          "id": "sepsitor-critical",
+          "anchor": "Critical hits with a Sepsitor force the target",
+          "relatedCuratedIds": [
+            "weapon:sepsitor"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:sepsitor",
+            "summaryAnchor": "Critical causes an additional Saving Roll"
+          }
+        },
+        {
+          "id": "sepsitor-state",
+          "anchor": "If the target fails the Saving Roll, it enters Sepsitorized State",
+          "relatedCuratedIds": [
+            "state:sepsitorized",
+            "weapon:sepsitor"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:sepsitor",
+            "summaryAnchor": "failure causes [[state:sepsitorized|Sepsitorized State]]"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:sepsitor",
+          "type": "causes-state",
+          "to": "state:sepsitorized"
+        },
+        {
+          "from": "weapon:sepsitor-plus",
+          "type": "causes-state",
+          "to": "state:sepsitorized"
+        }
+      ]
+    },
+    {
+      "name": "SymbioBomb",
+      "page": 74,
+      "armyExamples": [
+        "SymbioBomb"
+      ],
+      "clauses": [
+        {
+          "id": "symbio-single-use",
+          "anchor": "SymbioBomb is a single-use weapon",
+          "relatedCuratedIds": [
+            "weapon:symbiobomb"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:symbiobomb",
+            "summaryAnchor": "SymbioBomb is a single-use Weapon"
+          }
+        },
+        {
+          "id": "symbio-assign",
+          "anchor": "assign it to another Trooper in the same army",
+          "relatedCuratedIds": [
+            "weapon:symbiobomb"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:symbiobomb",
+            "summaryAnchor": "assigns it to another Trooper in the same Army"
+          }
+        },
+        {
+          "id": "symbio-traits",
+          "anchor": "Assignable (Transmutation), Comms Attack, Optional",
+          "relatedCuratedIds": [
+            "weapon:symbiobomb",
+            "skill:transmutation"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:symbiobomb",
+            "summaryAnchor": "Its printed Traits are"
+          }
+        },
+        {
+          "id": "symbio-pheroware",
+          "anchor": "one Pheroware Tactic: Endgame, Eraser, or Mirrorball",
+          "relatedCuratedIds": [
+            "weapon:symbiobomb",
+            "weapon:pt"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:symbiobomb",
+            "summaryAnchor": "Endgame, Eraser, or Mirrorball"
+          }
+        },
+        {
+          "id": "symbio-target-penalty",
+          "anchor": "a -3 MOD is applied to the target of the Comms Attack",
+          "relatedCuratedIds": [
+            "weapon:symbiobomb"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:symbiobomb",
+            "summaryAnchor": "target receives a -3 MOD"
+          }
+        },
+        {
+          "id": "symbio-remove",
+          "anchor": "removed from the game table at the end of the Order",
+          "relatedCuratedIds": [
+            "weapon:symbiobomb"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:symbiobomb",
+            "summaryAnchor": "Remove the SymbioBomb at the end of the Order"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:symbiobomb",
+          "type": "uses-effects-of",
+          "to": "weapon:pt"
+        }
+      ]
+    },
+    {
+      "name": "WildParrot",
+      "page": 74,
+      "armyExamples": [
+        "WildParrot"
+      ],
+      "clauses": [
+        {
+          "id": "wildparrot-place",
+          "anchor": "placed with the Place Deployable or Intuitive Attack Common Skills",
+          "relatedCuratedIds": [
+            "skill:place-deployable",
+            "skill:intuitive-attack",
+            "weapon:wildparrot"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:wildparrot",
+            "summaryAnchor": "placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]]"
+          }
+        },
+        {
+          "id": "wildparrot-perimeter",
+          "anchor": "totally inside the Zone of Control of the Trooper",
+          "relatedCuratedIds": [
+            "trait:perimeter",
+            "weapon:wildparrot"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:wildparrot",
+            "summaryAnchor": "[[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact"
+          }
+        },
+        {
+          "id": "wildparrot-visible",
+          "anchor": "work like E/M Mines, except that a WildParrot Token",
+          "relatedCuratedIds": [
+            "weapon:mines",
+            "ammunition:em",
+            "weapon:wildparrot"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The pinned source mechanic is explicit in the linked curated summary.",
+            "curatedId": "weapon:wildparrot",
+            "summaryAnchor": "visible WildParrot Token or Model"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:wildparrot",
+          "type": "modifies-use-of",
+          "to": "weapon:mines"
+        }
+      ]
+    },
+    {
+      "name": "Pitcher",
+      "page": 73,
+      "armyExamples": [
+        "Pitcher"
+      ],
+      "clauses": [
+        {
+          "id": "pitcher-targetless",
+          "anchor": "BS Attack, Targetless.",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "skill:bs-attack",
+            "trait:targetless"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "The Pitcher uses [[skill:bs-attack|BS Attack]] and [[trait:targetless|Targetless]]"
+          }
+        },
+        {
+          "id": "pitcher-support-amplifier",
+          "anchor": "a range amplifier for Hackers",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "equipment:deployable-repeater",
+            "equipment:repeater"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "The Token provides [[equipment:repeater|Repeater]] effects"
+          }
+        },
+        {
+          "id": "pitcher-bs-success",
+          "anchor": "A successful BS Roll allows players to place a Deployable Repeater",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "equipment:deployable-repeater"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "A successful BS Roll places a [[equipment:deployable-repeater|Deployable Repeater]] Token"
+          }
+        },
+        {
+          "id": "pitcher-impact-location",
+          "anchor": "at the point of impact",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "equipment:deployable-repeater"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "at the point of impact"
+          }
+        },
+        {
+          "id": "pitcher-disposable",
+          "anchor": "Disposable (2), Indiscriminate, Non-Lethal,",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "trait:disposable-x"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "[[trait:disposable-x|Disposable (2)]]"
+          }
+        },
+        {
+          "id": "pitcher-non-lethal",
+          "anchor": "Indiscriminate, Non-Lethal, Speculative Attack,",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "trait:indiscriminate",
+            "trait:non-lethal"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "[[trait:indiscriminate|Indiscriminate]] and [[trait:non-lethal|Non-Lethal]]"
+          }
+        },
+        {
+          "id": "pitcher-speculative",
+          "anchor": "Speculative Attack, Targetless, [*]",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "trait:speculative-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "[[trait:speculative-attack|Speculative Attack]]"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:pitcher",
+          "type": "uses-effects-of",
+          "to": "equipment:deployable-repeater"
+        },
+        {
+          "from": "weapon:pitcher",
+          "type": "enables-use-of",
+          "to": "skill:speculative-attack"
+        }
+      ]
+    },
+    {
+      "name": "Mixed Weapons",
+      "page": 68,
+      "armyExamples": [
+        "Trench-Hammer",
+        "Kobra Pistol",
+        "Vorpal CC Weapon"
+      ],
+      "clauses": [
+        {
+          "id": "mixed-modes",
+          "anchor": "These weapons can be used as both BS Weapons and CC Weapons",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "two different attack Modes"
+          }
+        },
+        {
+          "id": "mixed-cc-attribute",
+          "anchor": "Uses the Trooper’s CC Attribute",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "skill:cc-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "Trooper's [[attribute:cc|CC]] Attribute"
+          }
+        },
+        {
+          "id": "mixed-cc-trait",
+          "anchor": "Has the CC Trait",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "trait:cc"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "has the [[trait:cc|CC]] Trait"
+          }
+        },
+        {
+          "id": "mixed-cc-weapon",
+          "anchor": "Is a CC Weapon for all purposes",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "skill:cc-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "counts as a [[trait:cc|CC]] Weapon"
+          }
+        },
+        {
+          "id": "mixed-bs-attribute",
+          "anchor": "Uses the Trooper’s BS Attribute",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "skill:bs-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "Trooper's [[attribute:bs|BS]] Attribute"
+          }
+        },
+        {
+          "id": "mixed-range",
+          "anchor": "Has Range MODs",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "skill:bs-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "printed Range MODs"
+          }
+        },
+        {
+          "id": "mixed-bs-weapon",
+          "anchor": "Is a BS Weapon for all purposes",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "skill:bs-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "counts as a BS Weapon"
+          }
+        },
+        {
+          "id": "mixed-bs-exception",
+          "anchor": "other than BS to make BS Attacks, this will be listed in its Traits",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "trait:bs-weapon-ph"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "If its Traits specify a different Attribute"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:mixed-weapons",
+          "type": "uses-effects-of",
+          "to": "skill:bs-attack"
+        },
+        {
+          "from": "weapon:mixed-weapons",
+          "type": "uses-effects-of",
+          "to": "skill:cc-attack"
+        },
+        {
+          "from": "weapon:mixed-weapons",
+          "type": "uses-effects-of",
+          "to": "trait:cc"
+        },
+        {
+          "from": "weapon:kobra-pistol",
+          "type": "uses-effects-of",
+          "to": "weapon:mixed-weapons"
+        },
+        {
+          "from": "weapon:mixed-weapons",
+          "type": "uses-effects-of",
+          "to": "rule:modifiers-explained"
+        }
+      ]
+    },
+    {
+      "name": "Weaponry",
+      "page": 68,
+      "armyExamples": [
+        "Trench-Hammer",
+        "Kobra Pistol",
+        "Vorpal CC Weapon"
+      ],
+      "clauses": [
+        {
+          "id": "weaponry-bracketed-scope",
+          "anchor": "Any MOD or value in round brackets next to a Special Skill, Weapon, or",
+          "relatedCuratedIds": [
+            "rule:modifiers-explained"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Maintained canonical Modifiers Explained rule explicitly explains the N5.3 p.68 clause.",
+            "curatedId": "rule:modifiers-explained",
+            "summaryAnchor": "A value in **round brackets**"
+          }
+        },
+        {
+          "id": "weaponry-applies-when-used",
+          "anchor": "only applies when using the Skill, Weapon, or Equipment.",
+          "relatedCuratedIds": [
+            "rule:modifiers-explained"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Maintained canonical Modifiers Explained rule explicitly explains the N5.3 p.68 clause.",
+            "curatedId": "rule:modifiers-explained",
+            "summaryAnchor": "**only while using that entry**"
+          }
+        },
+        {
+          "id": "weaponry-positive-mods",
+          "anchor": "Positive MODs only apply to the user.",
+          "relatedCuratedIds": [
+            "rule:modifiers-explained"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Maintained canonical Modifiers Explained rule explicitly explains the N5.3 p.68 clause.",
+            "curatedId": "rule:modifiers-explained",
+            "summaryAnchor": "Positive MODs benefit the user"
+          }
+        },
+        {
+          "id": "weaponry-negative-mods",
+          "anchor": "Negative MODs only apply to enemies.",
+          "relatedCuratedIds": [
+            "rule:modifiers-explained"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Maintained canonical Modifiers Explained rule explicitly explains the N5.3 p.68 clause.",
+            "curatedId": "rule:modifiers-explained",
+            "summaryAnchor": "Negative MODs apply to enemies"
+          }
+        },
+        {
+          "id": "weaponry-reroll-one-die",
+          "anchor": "allow the user to reroll one die from the Roll",
+          "relatedCuratedIds": [
+            "rule:modifiers-explained"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Maintained canonical Modifiers Explained rule explicitly explains the N5.3 p.68 clause.",
+            "curatedId": "rule:modifiers-explained",
+            "summaryAnchor": "reroll **one die**"
           }
         }
       ]

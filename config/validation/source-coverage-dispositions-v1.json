@@ -1,0 +1,119 @@
+{
+  "format": "InfinityDB source-coverage dispositions",
+  "formatVersion": 1,
+  "owner": "V1S-082",
+  "reviews": [
+    {
+      "id": "deployable-en-n53",
+      "origin": "record",
+      "clauseKey": "independent-item-and-transition",
+      "source": {
+        "sourceId": "n5-core-v5.3-pdf",
+        "page": 175,
+        "heading": "Deployable",
+        "sha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+      },
+      "recordIds": [
+        "trait:deployable"
+      ],
+      "recordSha256": {
+        "trait:deployable": "ac718e39b87b9d7f8a1fa0d46c2d14e81e4fd4f7affe3af5955eac9889ac0f79"
+      },
+      "scope": "The definition treats the deployed item as independent with its own profile and Attributes, targetable during play, moving immediately from Unconscious to Dead and not activating other Deployable items. Fingerprint rebound on 2026-11-07 after V1S-083 added FAQ source context; the accepted clause scope is unchanged and excludes that note.",
+      "semantic": {
+        "status": "accepted",
+        "reviewer": "gpt-6-source-review",
+        "reviewedOn": "2026-11-06",
+        "evidenceRef": "docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
+      },
+      "browser": {
+        "status": "pending"
+      },
+      "dependsOn": []
+    },
+    {
+      "id": "deployable-es-n53",
+      "origin": "record",
+      "clauseKey": "independent-item-and-transition",
+      "source": {
+        "sourceId": "n5-core-v5.3-es-pdf",
+        "page": 182,
+        "heading": "Posicionable",
+        "sha256": "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"
+      },
+      "recordIds": [
+        "trait:deployable"
+      ],
+      "recordSha256": {
+        "trait:deployable": "ac718e39b87b9d7f8a1fa0d46c2d14e81e4fd4f7affe3af5955eac9889ac0f79"
+      },
+      "scope": "Spanish Posicionable corroborates independent item/profile, targeting, direct Unconscious-to-Dead removal and non-activation of other Deployable items. Fingerprint rebound on 2026-11-07 after V1S-083 added FAQ source context; the accepted clause scope is unchanged and excludes that note.",
+      "semantic": {
+        "status": "accepted",
+        "reviewer": "gpt-6-source-review",
+        "reviewedOn": "2026-11-06",
+        "evidenceRef": "docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
+      },
+      "browser": {
+        "status": "pending"
+      },
+      "dependsOn": []
+    },
+    {
+      "id": "target-attribute-en-n53",
+      "origin": "record",
+      "clauseKey": "attribute-gated-effect",
+      "source": {
+        "sourceId": "n5-core-v5.3-pdf",
+        "page": 175,
+        "heading": "Target (Attribute)",
+        "sha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+      },
+      "recordIds": [
+        "trait:target-attribute"
+      ],
+      "recordSha256": {
+        "trait:target-attribute": "1d8eb474f3330a5b7b038aecbb943c57905491757672514dd60cbcf32a455902"
+      },
+      "scope": "Target (Attribute) requires the indicated VITA or STR; a target lacking it makes no Saving Roll because that Weapon or Equipment has no effect.",
+      "semantic": {
+        "status": "accepted",
+        "reviewer": "gpt-6-source-review",
+        "reviewedOn": "2026-11-06",
+        "evidenceRef": "docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
+      },
+      "browser": {
+        "status": "pending"
+      },
+      "dependsOn": []
+    },
+    {
+      "id": "target-attribute-es-n53",
+      "origin": "record",
+      "clauseKey": "attribute-gated-effect",
+      "source": {
+        "sourceId": "n5-core-v5.3-es-pdf",
+        "page": 182,
+        "heading": "Objetivo (Atributo)",
+        "sha256": "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"
+      },
+      "recordIds": [
+        "trait:target-attribute"
+      ],
+      "recordSha256": {
+        "trait:target-attribute": "1d8eb474f3330a5b7b038aecbb943c57905491757672514dd60cbcf32a455902"
+      },
+      "scope": "Spanish Objetivo (Atributo) corroborates the required VITA/STR attribute and no-effect/no-Saving-Roll consequence for targets lacking it.",
+      "semantic": {
+        "status": "accepted",
+        "reviewer": "gpt-6-source-review",
+        "reviewedOn": "2026-11-06",
+        "evidenceRef": "docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
+      },
+      "browser": {
+        "status": "pending"
+      },
+      "dependsOn": []
+    }
+  ]
+}

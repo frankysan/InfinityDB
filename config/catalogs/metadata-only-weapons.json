@@ -1,0 +1,28 @@
+{
+  "format": "InfinityDB reviewed metadata-only weapon publication",
+  "version": 1,
+  "weapons": [
+    {
+      "id": 225,
+      "name": "Breaker Marksman Rifle",
+      "category": "Marksman Rifles",
+      "profile": {
+        "mode": null,
+        "type": "WEAPON",
+        "ammunition": 3,
+        "burst": "3",
+        "damage": "7",
+        "saving": "BTS/2",
+        "savingNum": "1",
+        "traits": ["Suppressive Fire"],
+        "distance": {
+          "short": {"max": 20, "mod": "-3"},
+          "med": {"max": 60, "mod": "+3"},
+          "long": {"max": 100, "mod": "-3"},
+          "max": {"max": 120, "mod": "-6"}
+        }
+      },
+      "source": "N5.3 English Weapon Chart p. 180; Army source ID 225; N5.3 Spanish Marksman Rifle chart"
+    }
+  ]
+}

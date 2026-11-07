@@ -17,6 +17,28 @@ from infinity_db.rules_database import export_rules_database
 from infinity_db.scenario_components import compose_scenario_document
 
 
+def test_maintained_text_batch_preserves_reference_tokens_and_order() -> None:
+    from infinity_db.database import Database
+    from infinity_db.maintained_text_references import (
+        maintained_text_tokens,
+        maintained_text_tokens_batch,
+    )
+    from infinity_db.rules_database import RulesDatabase
+
+    root = Path(__file__).resolve().parents[1]
+    db = Database(root / "data/generated/infinity.db")
+    rules = RulesDatabase(root / "data/generated/rules.db")
+    values = (
+        "Use [[skill:jump]] or [[skill:dodge]].",
+        "See [[skill:jump]] again.",
+        "Move [[distance:5:cm]] and [[skill:dodge]] before attacking.",
+    )
+    assert maintained_text_tokens_batch(db, rules, values) == [
+        maintained_text_tokens(db, rules, value) for value in values
+    ]
+    assert maintained_text_tokens_batch(db, None, values) == [None] * len(values)
+
+
 def test_maintained_text_parser_preserves_text_references_distances_and_escapes() -> None:
     tokens = parse_maintained_text(
         r"Use [[skill:jump]] or [[skill:dodge:plural|Dodge Skills]] with "
@@ -56,6 +78,18 @@ def test_maintained_text_parser_supports_glossary_game_terms() -> None:
         {"type": "reference", "target": "term:zero-visibility-zone", "display_form": "plural"},
         {"type": "text", "text": " and "},
         {"type": "reference", "target": "term:white-noise-zone", "display_text": "White Noise"},
+        {"type": "text", "text": "."},
+    ]
+
+
+def test_maintained_text_parser_supports_public_general_rules() -> None:
+    assert parse_maintained_text("See [[rule:hacking-area|Hacking Area]].") == [
+        {"type": "text", "text": "See "},
+        {
+            "type": "reference",
+            "target": "rule:hacking-area",
+            "display_text": "Hacking Area",
+        },
         {"type": "text", "text": "."},
     ]
 
@@ -438,7 +472,11 @@ def test_reviewed_batch_audit_catches_case_and_plural_omissions(
 def test_review_needed_markers_are_explicit_and_excluded_from_unlinked_candidates() -> None:
     root = Path(__file__).parents[1]
     current = load_curated_directory(root / "data" / "curated")
-    assert collect_review_needed_markers(current) == {}
+    assert collect_review_needed_markers(current) == {
+        "n5-core-v5.3|trait:silent-x": {
+            ("facts.clarifications[]", "scope-unclear", None): 1,
+        },
+    }
 
     documents = copy.deepcopy(current)
     for _, document in documents:

@@ -7,6 +7,7 @@ from copy import deepcopy
 from typing import Any
 from urllib.parse import quote
 
+from infinity_db.skill_config import load_skill_source_config
 from infinity_db.unit_filter_config import load_unit_filter_config
 
 OPTIONAL_AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
@@ -502,6 +503,70 @@ def enrich_unit_list_presentation(items: list[dict[str, Any]]) -> list[dict[str,
     return items
 
 
+def _separate_loadout_attribute_overrides(
+    specific_items: dict[str, list[dict[str, Any]]],
+    override_slugs: set[str],
+) -> None:
+    """Present configured attribute overrides separately from real Skills."""
+    overrides = [
+        item for item in specific_items["skills"]
+        if item.get("slug") in override_slugs
+    ]
+    if not overrides:
+        return
+    specific_items["skills"] = [
+        item for item in specific_items["skills"]
+        if item.get("slug") not in override_slugs
+    ]
+    specific_items["attribute_overrides"] = overrides
+
+
+def _classify_skill_source_presentations(
+    items: dict[str, list[dict[str, Any]]],
+    classifications: dict[str, str],
+) -> None:
+    """Project Army skill-bucket exceptions without modifying raw occurrences."""
+    overrides = {
+        slug for slug, category in classifications.items()
+        if category == "attribute-override"
+    }
+    _separate_loadout_attribute_overrides(items, overrides)
+    projected_equipment: list[dict[str, Any]] = []
+    training: list[dict[str, Any]] = []
+    source_markers: list[dict[str, Any]] = []
+    skills: list[dict[str, Any]] = []
+    for item in items["skills"]:
+        category = classifications.get(str(item.get("slug") or ""))
+        if category == "equipment":
+            projected_equipment.append({**item, "source_classification": category})
+        elif category == "training":
+            training.append(item)
+        elif category == "source-marker":
+            source_markers.append(item)
+        else:
+            skills.append(item)
+    items["skills"] = skills
+
+    # A source can encode the same Equipment in both Army buckets (Bangbomb).
+    # Prefer the native Equipment occurrence; preserve quantity/extra variants.
+    equipment = items["equipment"]
+    def display_key(item: dict[str, Any]) -> tuple[Any, ...]:
+        return (
+            _normalized_name(item.get("slug") or item.get("name")),
+            _item_identity(item)[1:],
+        )
+    seen = {display_key(item) for item in equipment}
+    for item in projected_equipment:
+        key = display_key(item)
+        if key not in seen:
+            equipment.append(item)
+            seen.add(key)
+    if training:
+        items["training"] = training
+    if source_markers:
+        items["source_markers"] = source_markers
+
+
 def enrich_unit_presentation(
     unit: dict[str, Any],
     *,
@@ -518,6 +583,10 @@ def enrich_unit_presentation(
     optional_filters = {
         flag: True for flag in OPTIONAL_AVAILABILITY_FLAGS
     } | (optional_filters or {})
+    source_classifications = {
+        str(item.skill_ref): item.classification
+        for item in load_skill_source_config()
+    }
     armies = [army for army in unit.get("armies", ()) if isinstance(army, dict)]
     unit["peripheral_types"] = [
         {"id": type_id, "label": _PERIPHERAL_TYPE_LABELS.get(type_id, str(type_id))}
@@ -657,12 +726,13 @@ def enrich_unit_presentation(
             }
             general_order_type = general_rows[0]["order_type"] if general_rows else None
             for loadout in loadouts:
-                loadout["specific_items"] = {
+                specific_items = {
                     property_name: _without_shared(
                         loadout.get(property_name, ()), shared_by_property[property_name]
                     )
                     for property_name in ("skills", "equipment", "weapons")
                 }
+                loadout["specific_items"] = specific_items
                 loadout_order_type = _prominent_order_type([loadout])
                 symbol_types: list[str] = []
                 if loadout_order_type and loadout_order_type != general_order_type:
@@ -675,4 +745,13 @@ def enrich_unit_presentation(
                 loadout["symbol_descriptors"] = [
                     _symbol_descriptor(symbol_type) for symbol_type in symbol_types
                 ]
+    # Derive shared/specific deltas from the untouched Army source buckets first.
+    # Reclassify only their presentation projections afterwards.
+    for general in general_profiles:
+        _classify_skill_source_presentations(general["shared_items"], source_classifications)
+    for army in selected_armies:
+        for profile in army.get("profiles", ()):
+            _classify_skill_source_presentations(profile["specific_items"], source_classifications)
+        for loadout in army.get("loadouts", ()):
+            _classify_skill_source_presentations(loadout["specific_items"], source_classifications)
     return unit

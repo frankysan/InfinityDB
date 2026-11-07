@@ -16,6 +16,8 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
+from tools.paired_audit_connection import open_paired_audit_connection
+
 REPORT_FORMAT = "InfinityDB relationship semantics audit"
 REPORT_FORMAT_VERSION = 6
 
@@ -1434,14 +1436,19 @@ def audit_database(
     *,
     include_details: bool = False,
     historical_relation_endpoints_path: Path = DEFAULT_HISTORICAL_RELATION_ENDPOINTS,
+    current_only: bool = False,
 ) -> dict[str, Any]:
     if not path.is_file():
         raise RelationshipSemanticsAuditError(f"Database does not exist: {path}")
+    # Older, independently reviewed historical endpoints are snapshot-bound.
+    # The explicit current-only mode classifies those IDs as unresolved rather
+    # than borrowing the review for a different current Army snapshot.
     historical_endpoints, historical_snapshot_sha256 = (
-        _load_historical_relation_endpoints(historical_relation_endpoints_path)
+        ({}, "not-reviewed-current-only")
+        if current_only
+        else _load_historical_relation_endpoints(historical_relation_endpoints_path)
     )
-    connection = sqlite3.connect(path)
-    connection.row_factory = sqlite3.Row
+    connection = open_paired_audit_connection(path, REQUIRED_COLUMNS)
     try:
         _validate_schema(connection)
         targets = _payload_targets(connection)
@@ -1490,6 +1497,9 @@ def audit_database(
         return {
             "format": REPORT_FORMAT,
             "formatVersion": REPORT_FORMAT_VERSION,
+            "historicalReviewMode": (
+                "not-applied-current-only" if current_only else "snapshot-bound"
+            ),
             "database": {
                 "path": str(path),
                 "sha256": _sha256(path),
@@ -1528,6 +1538,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--details", action="store_true", help="Include row-level evidence")
     parser.add_argument("--output", type=Path, help="Write the JSON report to this path")
     parser.add_argument(
+        "--current-only", action="store_true",
+        help=(
+            "Do not apply another snapshot's historical endpoint review; "
+            "keep such IDs unresolved"
+        ),
+    )
+    parser.add_argument(
         "--historical-relation-endpoints",
         type=Path,
         default=DEFAULT_HISTORICAL_RELATION_ENDPOINTS,
@@ -1543,6 +1560,7 @@ def main(argv: list[str] | None = None) -> int:
             args.database,
             include_details=args.details,
             historical_relation_endpoints_path=args.historical_relation_endpoints,
+            current_only=args.current_only,
         )
     except RelationshipSemanticsAuditError as exc:
         raise SystemExit(str(exc)) from exc

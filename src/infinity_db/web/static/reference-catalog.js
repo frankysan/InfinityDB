@@ -86,3 +86,18 @@ document.addEventListener("infinity:beforenavigation", () => {
 elements.search.value = readCatalogSearchQuery();
 replaceCatalogSearchQuery(elements.search.value);
 load();
+
+if (catalog === "rules") {
+  const jump = document.createElement("p");
+  jump.className = "intro-copy";
+  const anchor = document.createElement("a");
+  anchor.href = "/rules/restrictions";
+  anchor.textContent = "View N5.3 Restrictions chart";
+  jump.append(anchor);
+  document.querySelector(".intro > div")?.append(jump);
+
+  // Preserve historical links shared before the chart gained its own page.
+  if (/^#restrictions?(?:-|$)/.test(window.location.hash)) {
+    window.location.replace(`/rules/restrictions${window.location.hash}`);
+  }
+}

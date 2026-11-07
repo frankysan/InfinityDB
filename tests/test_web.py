@@ -31,11 +31,13 @@ from infinity_db.database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
 )
+from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web import create_app
 from infinity_db.web.app import STATIC_ASSET_REVISION, STATIC_ASSET_VERSION
+from tools.verify_general_rules_browser import source_rules
 
 
 def _refresh_published_content_checksum(path: Path) -> None:
@@ -384,6 +386,11 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     assert b"<strong>What&#x27;s changed</strong>" in body
     assert b"Player-visible highlights are shown first" in body
     assert b'href="/changes" aria-current="page"' in body
+    assert b'id="changes-unreleased"' not in body
+    assert b'id="changes-1-0-0"' in body
+    assert b"<h2>Version 1.0.0</h2>" in body
+    assert b"Browse current N5.3 rules" in body
+    assert b'<time class="changes-release-date" datetime="2026-11-07">' in body
     assert b'id="changes-0-10-1"' in body
     assert b"<h2>Version 0.10.1</h2>" in body
     assert b'id="changes-0-10-0"' in body
@@ -493,7 +500,12 @@ def test_silhouette_diagrams_use_shared_scale_and_player_surfaces(app: Callable)
         in renderer
     )
     assert b'reference: item.id === 2 && id !== 2' in renderer
-    assert b'if (!selected) return null' in renderer
+    assert b'if (!selected && id !== 0 && id !== "X") return null' in renderer
+    assert b'raw === "X" || raw === "SX"' in renderer
+    assert b"otherTemplates.textContent" in renderer
+    assert b"The rules also define S0 (25 mm base, 3 mm high) and SX" in renderer
+    assert b'if (id === 0 || id === "X")' in renderer
+    assert b'No supplied source SVG for S0/SX' in renderer
 
     expected_viewboxes = {
         1: (149.027, 155.329),
@@ -600,6 +612,10 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b'target.scrollIntoView({ block: "center" });' in script
     assert b'shareStateHref("/units", "units", { army_id: armyValue(army) })' in script
     assert b"army.overview_group" in script
+    assert b"reinforcementRelationships(army, visibleArmies)" in script
+    assert b"army.parent_armies" in script
+    assert b"army.reinforcement_sections" in script
+    assert b'link.href = `#army-${armyValue(target)}`;' in script
     assert b"Out of catalog" in script
     assert b"Not playable in N5" in script
     assert b'identity.className = "army-overview-card-identity"' in script
@@ -732,6 +748,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
         {"type": "CORE", "position": 1, "max_count": 1, "limit_kind": "maximum"}
     ]
     assert chart["teams"][0]["name"] == "Ranger Team"
+    assert chart["teams"][0]["wildcards_excluded"] is True
     assert chart["teams"][0]["types"] == ["CORE"]
     member = chart["teams"][0]["members"][0]
     assert member["unit"]["slug"] == "ranger-prototype"
@@ -760,7 +777,15 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     levels = reference["levels"]["facts"]
     assert levels["cumulative"] is True
     assert [level["level"] for level in levels["levels"]] == [1, 2, 3, 4, 5]
-    assert levels["levels"][1]["bonuses"] == ["[[skill:bs-attack]] (+1 SD)"]
+    assert levels["levels"][1]["bonuses"] == [
+        "[[skill:bs-attack]] ([[rule:special-dice|+1 SD]])"
+    ]
+    sd_tokens = reference["levels"]["fact_tokens"]["levels"][1]["bonuses"][0]
+    assert any(
+        token.get("target") == "rule:special-dice"
+        and token.get("public_reference") == {"catalog": "rules", "id": "special-dice"}
+        for token in sd_tokens
+    )
     assert levels["levels"][4]["bonuses"] == ["[[skill:sixth-sense]]"]
     assert any(
         citation.get("source_url") and "Fireteam_Bonuses" in citation["source_url"]
@@ -778,7 +803,8 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'from "./share-state.js"' in script
     assert b'readShareState("fireteams").params.get("army")' in script
     assert b'writeShareState("fireteams", value ? { army: value } : {}, { replace })' in script
-    assert b"Counts as:" in script
+    assert b"Chart terms:" in script
+    assert b"Counts as:" not in script
     assert b"`${sourceLabel} Fireteam chart.`" in script
     assert b"No members are listed for this Fireteam." in script
     assert b"No member rows are defined for this chart entry." not in script
@@ -797,6 +823,8 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'["Notes", true, "table-column--descriptor"]' in script
     assert b'fto.className = "developer-only table-column--descriptor";' in script
     assert b'note.className = "developer-only table-column--descriptor";' in script
+    assert b'if (!wildcard) appendVerifiedFtoSummary(name, member);' in script
+    assert b'member.resolution !== "army"' in script
     assert b'table.className = "data-table--reference";' in script
     assert b'name.className = "table-column--primary";' in script
     assert (
@@ -807,7 +835,6 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b"const wildcardTeams = teams.filter((team) => team.is_wildcard);" in script
     assert b"if (wildcardTeams.length !== 1) return teams;" in script
     assert b".filter((team) => !team.is_wildcard)" in script
-    assert b"wildcard_members: wildcardMembers" in script
     assert b'if (wildcard) name.append(badge("Wildcard"));' in script
     assert b"appendMemberRow(member, { wildcard: true })" in script
     assert b'window.addEventListener("fireteamswildcardschange"' in script
@@ -2170,6 +2197,11 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert b'<header class="topbar page-header">' in body
     assert b'aria-label="Breadcrumb"' in body
     assert b'<footer class="page-footer">' in body
+    assert b'<details class="page-footer-notice" open>' in body
+    assert b'Toggle InfinityDB accuracy and independence notice' in body
+    assert b'page-footer-notice-icon' in body
+    assert b'/static/page-footer-notice.js' in body
+    assert b'href="/about">About InfinityDB and attribution</a>' in body
     assert f"Version {__display_version__}".encode() in body
 
 
@@ -2222,16 +2254,21 @@ def test_player_unit_tooltips_and_filter_context_use_game_language(app: Callable
     assert b"preview_tokens: item.summary_tokens" in unit_script
     assert b"copy.textContent = item.summary" not in unit_script
 
-    # Technical relationship explanations remain inside Developer-only sections.
-    for function, section, explanation in (
-        ("renderArmyRelationships", "army-relationships", "This source relationship"),
-        ("renderSelectionRelationships", "selection-relationships", "source-defined relationships"),
-    ):
-        block = unit_script.split(f"function {function}(".encode(), 1)[1].split(
-            b"\nfunction ", 1
-        )[0]
-        assert f'detail-group {section} developer-only'.encode() in block
-        assert explanation.encode() in block
+    # Reinforcement parentage and faction membership are developer-only;
+    # ordinary Unit availability and player-facing roster links remain public.
+    army_block = unit_script.split(b"function renderArmyRelationships(", 1)[1].split(
+        b"\nfunction ", 1
+    )[0]
+    assert b'section.className = "detail-group army-relationships developer-only"' in (
+        army_block
+    )
+    assert b'diagnostic.className = "developer-only"' in army_block
+    assert b"This source relationship" in army_block
+    selection_block = unit_script.split(b"function renderSelectionRelationships(", 1)[1].split(
+        b"\nfunction ", 1
+    )[0]
+    assert b'detail-group selection-relationships developer-only' in selection_block
+    assert b"source-defined relationships" in selection_block
 
     status, _, units_script = request(app, "/static/units.js")
     assert status == 200
@@ -3015,7 +3052,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
         ),
         {"display": "none"},
     )
-    assert_css_rule(styles, ".settings-menu", {"margin-top": "clamp(20px, 3vh, 32px)"})
+    assert_css_rule(styles, ".settings-menu", {"margin-top": "clamp(12px, 2vh, 20px)"})
     assert_css_rule(
         styles,
         ".setting-row",
@@ -3618,6 +3655,59 @@ def test_stylesheet_entrypoint_composes_owned_sources_in_order(app: Callable) ->
     assert body == bytes(expected)
 
 
+def test_narrow_reference_breadcrumb_retains_tag_without_overflow(
+    app: Callable,
+) -> None:
+    """The 320px reference header must shrink its breadcrumb, not clip the tag."""
+    status, _, body = request(app, "/static/components.css")
+    assert status == 200
+    css = body.decode("utf-8").replace("\r\n", "\n")
+    small_screen = css.split("@media (max-width: 400px) {")[-1]
+    small_screen = small_screen.split("@media (max-width: 600px) {", 1)[0]
+    assert ".breadcrumb {\n    min-width: 0;\n    flex-wrap: wrap;\n    gap: 8px;" in small_screen
+    assert ".catalog-tag {\n    flex-shrink: 0;" in small_screen
+
+
+def test_mobile_unit_composite_options_preserve_full_names(app: Callable) -> None:
+    """Mobile composite-option cards must wrap names rather than clipping them."""
+    status, _, body = request(app, "/static/components.css")
+    assert status == 200
+    css = body.decode("utf-8")
+    narrow = css.split("@media (max-width: 600px) {", 1)[1]
+    assert ".unit-detail .composite-option-table tbody {" in narrow
+    assert ".unit-detail .composite-option-table .profile-summary {" in narrow
+    assert (
+        ".unit-detail .composite-option-table .order-symbol-name {\n    flex-wrap: wrap;"
+        in narrow
+    )
+    assert "white-space: normal;\n    overflow-wrap: break-word;" in narrow
+
+
+def test_narrow_unit_army_profile_rows_preserve_readable_values(app: Callable) -> None:
+    """Army profile attributes and loadout names must not compete for narrow columns."""
+    status, _, body = request(app, "/static/components.css")
+    assert status == 200
+    css = body.decode("utf-8").replace("\r\n", "\n")
+    narrow = css.rsplit("@media (max-width: 400px) {", 1)[1]
+
+    assert ".unit-detail .army-profile .profile-details-table tbody," in narrow
+    assert ".unit-detail .army-profile .loadout-table tbody {" in narrow
+    assert "grid-template-columns: minmax(0, 1fr);" in narrow
+    assert (
+        ".unit-detail .army-profile .loadout-table .profile-summary {\n"
+        "    grid-template-columns: repeat(2, minmax(0, 1fr));"
+    ) in narrow
+    assert (
+        ".unit-detail .army-profile .loadout-table .profile-summary> :first-child {\n"
+        "    grid-column: 1 / -1;\n    width: auto;\n    white-space: normal;"
+    ) in narrow
+    assert_css_rule(
+        body,
+        ".unit-detail .army-profile .loadout-table .profile-item-label",
+        {"width": "auto"},
+    )
+
+
 def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> None:
     status, headers, body = request(app, "/api/armies")
 
@@ -3666,6 +3756,27 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
     assert rebuilt_status == 200
     assert rebuilt_body == body
     assert rebuilt_headers["etag"] != headers["etag"]
+
+
+def test_weapon_profile_publication_changes_snapshot_etag(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[1] / "data/generated"
+    for filename in ("infinity.db", "rules.db", "weapon-profile-sources.json"):
+        shutil.copyfile(root / filename, tmp_path / filename)
+    army, rules = tmp_path / "infinity.db", tmp_path / "rules.db"
+    first = create_app(army, rules_database_path=rules)
+    status, headers, body = request(first, "/api/weapons/rifle")
+    assert status == 200
+
+    artifact = tmp_path / "weapon-profile-sources.json"
+    document = json.loads(artifact.read_text(encoding="utf-8"))
+    artifact.write_text(json.dumps(document, indent=2), encoding="utf-8")
+    changed = create_app(army, rules_database_path=rules)
+    status, changed_headers, changed_body = request(
+        changed, "/api/weapons/rifle", request_headers={"If-None-Match": headers["etag"]},
+    )
+    assert status == 200
+    assert changed_body == body
+    assert changed_headers["etag"] != headers["etag"]
 
 
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
@@ -4260,6 +4371,85 @@ def test_unit_details_api_owns_general_profile_shared_item_semantics(
     assert b"profile.shared_items" in script
 
 
+def test_unit_loadout_attribute_override_is_not_linked_as_a_skill(
+    app: Callable,
+) -> None:
+    from infinity_db.skill_config import load_skill_source_config
+    from infinity_db.unit_presentation import _separate_loadout_attribute_overrides
+
+    slugs = {
+        str(item.skill_ref)
+        for item in load_skill_source_config()
+        if item.classification == "attribute-override"
+    }
+    assert "bts-3" in slugs
+    source_items = [
+        {"id": 280, "slug": "bts-3", "name": "BTS=3"},
+        {"id": 278, "slug": "bs-12", "name": "BS=12"},
+    ]
+    specific_items = {
+        "skills": list(source_items),
+        "equipment": [],
+        "weapons": [],
+    }
+    _separate_loadout_attribute_overrides(specific_items, slugs)
+    assert source_items[0]["name"] == "BTS=3"
+    assert specific_items["attribute_overrides"] == [source_items[0]]
+    assert specific_items["skills"] == [source_items[1]]
+
+    status, _, script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'document.createElement(catalog ? "a" : "span")' in script
+    assert b'appendClassifiedNonSkillRows(' in script
+    assert b'["attribute_overrides", "Attribute overrides", "Attribute"]' in script
+
+
+def test_non_skill_army_source_items_use_presentation_categories(app: Callable) -> None:
+    from infinity_db.skill_config import load_skill_source_config
+    from infinity_db.unit_presentation import _classify_skill_source_presentations
+
+    classifications = {
+        str(item.skill_ref): item.classification
+        for item in load_skill_source_config()
+    }
+    source_skills = [
+        {"id": 254, "slug": "gizmokit", "name": "Gizmokit"},
+        {"id": 273, "slug": "medikit", "name": "MediKit"},
+        {"id": 266, "slug": "bangbomb", "name": "Bangbomb"},
+        {"id": 258, "slug": "regular", "name": "Regular"},
+        {"id": 282, "slug": "infinity-team-ops", "name": "Infinity Team-Ops"},
+        {"id": 280, "slug": "bts-3", "name": "BTS=3"},
+        {"id": 278, "slug": "bs-12", "name": "BS=12"},
+    ]
+    native_bangbomb = {"id": 246, "slug": "bangbomb", "name": "Bangbomb"}
+    items = {
+        "skills": list(source_skills),
+        "equipment": [native_bangbomb],
+        "weapons": [],
+    }
+
+    _classify_skill_source_presentations(items, classifications)
+
+    assert [item["name"] for item in items["skills"]] == ["BS=12"]
+    assert [item["name"] for item in items["equipment"]] == [
+        "Bangbomb", "Gizmokit", "MediKit"
+    ]
+    assert items["equipment"][0] is native_bangbomb
+    assert all(item["source_classification"] == "equipment" for item in items["equipment"][1:])
+    assert [item["name"] for item in items["attribute_overrides"]] == ["BTS=3"]
+    assert [item["name"] for item in items["training"]] == ["Regular"]
+    assert [item["name"] for item in items["source_markers"]] == ["Infinity Team-Ops"]
+    assert len(source_skills) == 7  # input Army identities are preserved
+
+    status, _, script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'profileItems(classifiedItems, null, fallbackLabel)' in script
+    assert b'["training", "Training", "Training"]' in script
+    assert b'["attribute_overrides", "Attribute overrides", "Attribute"]' in script
+    # The source-only Team-Ops marker remains available in API data, not as a Skill link.
+    assert b'["source_markers"' not in script
+
+
 def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
@@ -4291,14 +4481,16 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     status, _, unit_js = request(app, "/static/unit.js")
     assert status == 200
     assert b"function renderArmyRelationships(unit, armies)" in unit_js
-    assert b'heading("Army relationships")' in unit_js
+    assert b'"Reinforcement relationships" : "Army relationships"' in unit_js
     assert b'section.className = "detail-group army-relationships developer-only";' in unit_js
+    assert b'diagnostic.className = "developer-only";' in unit_js
     assert b'link.href = shareStateHref("/units", "units", { army_id: identifier });' in unit_js
     assert (
         b'link.href = shareStateHref("/units", "units", '
         b'{ declared_faction_id: membership.source_faction_id });' in unit_js
     )
-    assert b"broader source-declared faction membership separately" in unit_js
+    assert b"not a complete Army List validation" in unit_js
+    assert b"broader than current Army-list" in unit_js
     assert b"this faction identity has no current Army list" in unit_js
 
     status, _, units_js = request(app, "/static/units.js")
@@ -4429,14 +4621,16 @@ def test_rules_badges_and_desktop_sidebar_use_consistent_presentation(app: Calla
         styles,
         ".sidebar",
         {
-            "--sidebar-section-gap": "clamp(28px, 6.5vh, 70px)",
-            "--sidebar-body-padding": "clamp(24px, 6vh, 66px)",
+            "--sidebar-section-gap": "clamp(12px, 2vh, 24px)",
+            "--sidebar-edge-padding-top": "clamp(14px, 2vh, 24px)",
+            "--sidebar-edge-padding-bottom": "clamp(14px, 2vh, 24px)",
+            "--sidebar-body-padding": "clamp(12px, 2.5vh, 24px)",
         },
     )
     assert_css_rule(
         styles,
         ".nav-item",
-        {"padding": "clamp(9px, 1.3vh, 13px) 12px"},
+        {"padding": "clamp(7px, 0.9vh, 9px) 10px"},
     )
 
 
@@ -4657,16 +4851,184 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     shock = json.loads(body)
     assert shock["slug"] == "shock"
     assert shock["rules"][0]["id"] == "ammunition:shock"
-    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20260918-130233"
+    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20260926-200832"
 
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 11
+    assert set(general_rules) == set(source_rules(root))
+    assert general_rules["game-sequence"]["name"] == "Game Sequence"
+    assert general_rules["order-pool"]["name"] == "Order Pool"
+    assert general_rules["automatic-reaction-order"]["name"] == "Automatic Reaction Order"
+    assert general_rules["command-tokens"]["name"] == "Command Tokens"
+    assert general_rules["reinforcements-extra"]["name"] == "Reinforcements Extra"
+    assert general_rules["initiative-roll"]["name"] == "Initiative Roll"
+    assert general_rules["combat-group"]["name"] == "Combat Group"
+    assert general_rules["army-retreat"]["name"] == "Army Retreat!"
+    assert general_rules["standard-game"]["name"] == "Standard Game"
+    assert general_rules["game-modes"]["name"] == "Game Modes"
+    assert general_rules["specialist-troops-standard"]["name"] == "Specialist Troops"
+    assert general_rules["modifiers-explained"]["name"] == "Modifiers Explained (MODs)"
+    assert general_rules["deployment-phase"]["name"] == "Deployment Phase"
     assert general_rules["regular-order"]["name"] == "Regular Order"
     assert general_rules["irregular-order"]["name"] == "Irregular Order"
     assert general_rules["loss-of-lieutenant"]["name"] == "Loss of Lieutenant"
     assert general_rules["peripheral-type-servant"]["name"] == "Peripheral (Servant)"
+    for subtype in ("servant", "synchronized", "control", "ancillary", "cyberplug"):
+        status, _, body = request(rules_app, f"/api/rules/peripheral-type-{subtype}")
+        assert status == 200
+        rule = json.loads(body)["rules"][0]
+        if subtype == "ancillary":
+            assert any(
+                token.get("target") == "rule:fireteam-general"
+                and token.get("public_reference") == {"href": "/fireteams"}
+                for clause in rule["fact_tokens"]["clarifications"] for token in clause
+            )
+        assert rule["id"] == f"rule:peripheral-type:{subtype}"
+        assert rule["facts"]["effects"]
+        assert rule["fact_tokens"]["effects"]
+        assert any(
+            token.get("public_reference")
+            for clause in rule["fact_tokens"]["effects"]
+            for token in clause
+        )
+        status, _, _ = request(rules_app, f"/rules/peripheral-type-{subtype}")
+        assert status == 200
+    assert general_rules["hacking-area"]["name"] == "Hacking Area"
+    assert general_rules["supportware"]["name"] == "Supportware"
+    assert general_rules["special-dice"]["name"] == "Special Dice (+1 SD)"
+    assert general_rules["face-to-face-rolls"]["name"] == "Face to Face Rolls"
+    assert general_rules["saving-rolls"]["name"] == "Saving Rolls"
+    assert general_rules["guts-roll"]["name"] == "Guts Roll"
+    assert general_rules["order-expenditure-sequence"]["name"] == "Order Expenditure Sequence"
+    assert general_rules["coordinated-orders"]["name"] == "Coordinated Orders"
+
+    status, _, body = request(rules_app, "/api/rules/coordinated-orders")
+    assert status == 200
+    coordinated = json.loads(body)
+    assert coordinated["rules"][0]["id"] == "rule:coordinated-orders"
+    assert any(
+        token.get("target") == "rule:special-dice"
+        and token.get("public_reference") is not None
+        for clause in coordinated["rules"][0]["fact_tokens"]["clarifications"]
+        for token in clause
+    )
+    status, headers, _ = request(rules_app, "/rules/coordinated-orders")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+
+    status, _, body = request(rules_app, "/api/rules/order-expenditure-sequence")
+    assert status == 200
+    order = json.loads(body)
+    assert order["rules"][0]["id"] == "rule:order-expenditure-sequence"
+    assert any(
+        token.get("target") == "trait:disposable-x"
+        and token.get("public_reference") is not None
+        for clause in order["rules"][0]["fact_tokens"]["restrictions"]
+        for token in clause
+    )
+    status, headers, _ = request(rules_app, "/rules/order-expenditure-sequence")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+
+    status, _, body = request(rules_app, "/api/rules/guts-roll")
+    assert status == 200
+    guts = json.loads(body)
+    assert guts["rules"][0]["id"] == "rule:guts-roll"
+    assert any(
+        token.get("target") == "skill:courage"
+        and token.get("public_reference") is not None
+        for clause in guts["rules"][0]["fact_tokens"]["clarifications"]
+        for token in clause
+    )
+    status, headers, _ = request(rules_app, "/rules/guts-roll")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+
+    for slug, skill_ref in (
+        ("face-to-face-rolls", "skill:dodge"),
+        ("saving-rolls", "ammunition:para"),
+    ):
+        status, _, body = request(rules_app, f"/api/rules/{slug}")
+        assert status == 200
+        record = json.loads(body)
+        assert record["rules"][0]["id"] == f"rule:{slug}"
+        assert any(
+            token.get("target") == skill_ref and token.get("public_reference")
+            for clause in record["rules"][0]["fact_tokens"][
+                "clarifications" if slug == "face-to-face-rolls" else "restrictions"
+            ]
+            for token in clause
+        )
+        status, headers, _ = request(rules_app, f"/rules/{slug}")
+        assert status == 200
+        assert headers["content-type"].startswith("text/html")
+
+    for rule_slug, expected_reference in (
+        ("hacking-area", "equipment:repeater"),
+        ("supportware", "skill:hacker"),
+    ):
+        status, _, body = request(rules_app, f"/api/rules/{rule_slug}")
+        assert status == 200
+        rule = json.loads(body)
+        assert rule["rules"][0]["id"] == f"rule:{rule_slug}"
+        assert any(
+            token.get("target") == expected_reference
+            and token.get("public_reference") is not None
+            for token in rule["rules"][0]["summary_tokens"]
+        )
+
+    status, _, body = request(rules_app, "/api/rules/special-dice")
+    assert status == 200
+    special_dice = json.loads(body)
+    assert special_dice["slug"] == "special-dice"
+    assert special_dice["rules"][0]["id"] == "rule:special-dice"
+    assert any(
+        token.get("target") == "skill:berserk" and token.get("public_reference")
+        for tokens in special_dice["rules"][0]["fact_tokens"]["restrictions"]
+        for token in tokens
+    )
+    status, headers, body = request(rules_app, "/rules/special-dice")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+
+    status, _, body = request(rules_app, "/api/equipment")
+    assert status == 200
+    equipment_items = {item["slug"]: item for item in json.loads(body)["items"]}
+    assert equipment_items["firewall"]["name"] == "Firewall"
+    assert equipment_items["firewall"]["use_count"] == 0
+
+    status, _, body = request(rules_app, "/api/equipment/firewall")
+    assert status == 200
+    firewall = json.loads(body)
+    assert firewall["slug"] == "firewall"
+    assert firewall["rules"][0]["id"] == "equipment:firewall"
+    assert not firewall["variants"]
+    assert any("+3" in text for text in firewall["rules"][0]["facts"]["effects"])
+
+    rules_database = rules_app.rules_database
+    assert rules_database is not None
+    tinbot_variant = rules_database.composed_record("equipment:tinbot-firewall")
+    assert tinbot_variant is not None
+    assert rule_record_public_reference(rules_app.database, tinbot_variant) is None
+    assert rules_app.api.equipment_catalog.get_equipment("tinbot-firewall") is None
+
+    # Source 188 is reviewed, but absent from this Army snapshot: it is not
+    # a standalone Equipment page or a member of the Army-variant list.
+    neuro_variant = rules_database.composed_record("equipment:tinbot-neurocinetics")
+    assert neuro_variant is not None
+    assert neuro_variant["variant_semantics"]["inheritance"] == "source"
+    assert any(
+        relation["type"] == "uses-effects-of"
+        and relation["record_id"] == "skill:neurocinetics"
+        for relation in neuro_variant["relations"]
+    )
+    assert rule_record_public_reference(rules_app.database, neuro_variant) is None
+    assert rules_app.api.equipment_catalog.get_equipment("tinbot-neurocinetics") is None
+    # Army-backed Equipment must not appear without its source catalog identity.
+    assert "repeater" not in equipment_items
+    assert rules_app.api.equipment_catalog.get_equipment("repeater") is None
+
     assert "fireteam-general" not in general_rules
     assert "profile-help-unit-profile" not in general_rules
 
@@ -4680,6 +5042,32 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     loss_of_lieutenant = json.loads(body)
     assert loss_of_lieutenant["slug"] == "loss-of-lieutenant"
     assert loss_of_lieutenant["rules"][0]["id"] == "rule:loss-of-lieutenant"
+    loss_rule = loss_of_lieutenant["rules"][0]
+    loss_requirements = " ".join(loss_rule["facts"]["requirements"])
+    loss_effects = " ".join(loss_rule["facts"]["effects"])
+    assert "at the beginning of the [[skill:lieutenant|Lieutenant]]'s next Active Turn" in (
+        loss_requirements
+    )
+    assert "unless [[state:isolated|Isolated]] has been canceled before then" in (
+        loss_requirements
+    )
+    assert (
+        "after it has triggered this army-level situation does not itself "
+        "cancel that situation"
+    ) in loss_effects
+    assert {
+        (citation["source_id"], citation["page"])
+        for citation in loss_rule["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 168),
+        ("n5-core-v5.3-es-pdf", 161),
+    }
+    assert any(
+        token.get("target") == "state:isolated"
+        and token.get("public_reference") is not None
+        for clause in loss_rule["fact_tokens"]["requirements"]
+        for token in clause
+    )
     lieutenant_reference = next(
         token
         for token in loss_of_lieutenant["rules"][0]["summary_tokens"]
@@ -4711,15 +5099,31 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert len(labels) == 24
     assert labels["hackable"]["name"] == "Hackable"
 
+    status, _, body = request(rules_app, "/api/labels/negative-feedback")
+    assert status == 200
+    nfb = json.loads(body)
+    assert "same Trooper" in nfb["description"]
+    assert "cancels and overrides" in nfb["description"]
+    assert "Only one NFB effect" in nfb["description"]
+    assert {item["href"] for item in nfb["used_by"]} >= {
+        "/equipment/albedo",
+        "/equipment/holoprojector",
+        "/hacking-programs/cybermask",
+        "/hacking-programs/white-noise",
+        "/skills/impersonation",
+        "/skills/mimetism",
+    }
+
     status, _, body = request(rules_app, "/api/labels/non-reloadable")
     assert status == 200
     label = json.loads(body)
     assert label["name"] == "Non-Reloadable"
-    reference = next(
-        token for token in label["description_tokens"] if token["type"] == "reference"
-    )
-    assert reference["target"] == "state:unloaded"
-    assert reference["public_reference"] == {"catalog": "states", "id": "unloaded"}
+    references = {
+        token["target"]: token["public_reference"]
+        for token in label["description_tokens"] if token["type"] == "reference"
+    }
+    assert references["state:unloaded"] == {"catalog": "states", "id": "unloaded"}
+    assert references["trait:disposable-x"] == {"catalog": "traits", "id": "disposable-x"}
 
     status, _, body = request(rules_app, "/api/labels/cc-attack")
     assert status == 200
@@ -5062,6 +5466,289 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     assert json.loads(body)["error"] == "Provide q exactly once"
 
 
+def test_game_modes_recommended_setup_is_public_and_searchable(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    for query in ("Game Modes", "Game"):
+        status, _, body = request(
+            rules_app, "/api/search", query=urlencode({"q": query}),
+        )
+        assert status == 200
+        assert {"domain": "General rule", "name": "Game Modes",
+                "href": "/rules/game-modes"} in json.loads(body)["items"]
+    status, _, body = request(rules_app, "/api/rules/game-modes")
+    assert status == 200
+    record = json.loads(body)["rules"][0]
+    assert record["id"] == "rule:game-modes"
+    assert record["facts"]["category"] == "basic-rule"
+    table = record["facts"]["gameSetupTable"]
+    assert table["scope"] == "recommended-general-setup-with-independent-retreat-thresholds"
+    assert len(table["rows"]) == 6
+    assert [
+        (r["armyPoints"], r["baseSwc"], r["retreatThresholdVictoryPoints"])
+        for r in table["rows"]
+    ] == [(150, 3, 38), (200, 4, 50), (250, 5, 63),
+          (300, 6, 75), (350, 7, 88), (400, 8, 100)]
+    assert [c["page"] for c in record["citations"]] == [6, 146, 147]
+    assert "scenario" in " ".join(record["facts"]["restrictions"])
+    assert "minutes" in record["summary"]
+    assert any(t.get("target") == "rule:army-retreat" and t.get("public_reference")
+               for t in record["summary_tokens"])
+    status, _, body = request(rules_app, "/rules/game-modes")
+    assert status == 200
+    assert b'id="item-content"' in body
+
+
+def test_army_retreat_and_standard_game_are_source_scoped_and_routable(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    for query, name, href in (
+        ("Army Retreat", "Army Retreat!", "/rules/army-retreat"),
+        ("Retreat", "Army Retreat!", "/rules/army-retreat"),
+        ("Standard Game", "Standard Game", "/rules/standard-game"),
+    ):
+        status, _, body = request(
+            rules_app, "/api/search", query=urlencode({"q": query}),
+        )
+        assert status == 200
+        assert {"domain": "General rule", "name": name, "href": href} in (
+            json.loads(body)["items"]
+        )
+    for slug, expected_citations in (
+        ("army-retreat", {"n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf",
+                          "wiki-retreat-situation-oldid-3942"}),
+        ("standard-game", {"n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf"}),
+    ):
+        status, _, body = request(rules_app, f"/api/rules/{slug}")
+        assert status == 200
+        record = json.loads(body)["rules"][0]
+        assert record["id"] == f"rule:{slug}"
+        assert record["facts"]["category"] == "basic-rule"
+        assert {c["source_id"] for c in record["citations"]} == expected_citations
+        assert any(
+            token.get("target") == ("state:retreat" if slug == "army-retreat"
+                                     else "rule:army-retreat")
+            and token.get("public_reference")
+            for token in record["summary_tokens"]
+        )
+        status, _, body = request(rules_app, f"/rules/{slug}")
+        assert status == 200
+        assert b'id="item-content"' in body
+
+    status, _, body = request(rules_app, "/api/rules/army-retreat")
+    retreat = json.loads(body)["rules"][0]
+    assert "25%" in retreat["summary"]
+    assert "not yet placed" in retreat["summary"]
+    assert "equal to or below" in " ".join(retreat["facts"]["requirements"])
+    assert "scenario" in " ".join(retreat["facts"]["restrictions"])
+    status, _, body = request(rules_app, "/api/rules/standard-game")
+    standard = json.loads(body)["rules"][0]
+    assert "three-Game-Round" in standard["summary"]
+    assert "Victory Points" in standard["summary"]
+    assert "scenario" in " ".join(standard["facts"]["restrictions"])
+
+    for path in ("/api/states/retreat", "/api/rules/loss-of-lieutenant"):
+        status, _, body = request(rules_app, path)
+        assert status == 200, path
+        item = json.loads(body)["rules"][0]
+        assert "rule:army-retreat" in json.dumps(item), path
+
+
+def test_combat_group_source_limit_and_links_are_searchable(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    expected = {
+        "domain": "General rule", "name": "Combat Group",
+        "href": "/rules/combat-group",
+    }
+    for query in ("Combat Group", "Combat"):
+        status, _, body = request(
+            rules_app, "/api/search", query=urlencode({"q": query}),
+        )
+        assert status == 200
+        assert expected in json.loads(body)["items"]
+    status, _, body = request(rules_app, "/api/rules/combat-group")
+    assert status == 200
+    detail = json.loads(body)
+    record = detail["rules"][0]
+    assert record["id"] == "rule:combat-group"
+    assert record["facts"]["category"] == "basic-rule"
+    assert "10 Troopers" in record["summary"]
+    assert "15-Trooper" in record["summary"]
+    assert {c["source_id"] for c in record["citations"]} == {
+        "n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf",
+        "wiki-army-list-oldid-3847",
+    }
+    assert any(c["page"] == 10 for c in record["citations"])
+    for target in ("skill:peripheral", "rule:regular-order", "rule:irregular-order"):
+        assert any(
+            token.get("target") == target and token.get("public_reference")
+            for clause in record["fact_tokens"]["effects"] for token in clause
+        ), target
+    for path, target in (
+        ("/api/rules/regular-order", "rule:combat-group"),
+        ("/api/rules/irregular-order", "rule:combat-group"),
+        ("/api/skills/peripheral", "rule:combat-group"),
+        ("/api/skills/strategos", "rule:combat-group"),
+    ):
+        status, _, body = request(rules_app, path)
+        assert status == 200, path
+        payload = json.loads(body)
+        assert any(
+            token.get("target") == target and token.get("public_reference")
+            for item in payload["rules"]
+            for clause in item.get("fact_tokens", {}).get("effects", [])
+            for token in clause
+        ) or any(
+            token.get("target") == target and token.get("public_reference")
+            for item in payload["rules"]
+            for token in item.get("summary_tokens", [])
+        ), path
+    status, _, body = request(rules_app, "/rules/combat-group")
+    assert status == 200
+    assert b'id="item-content"' in body
+
+
+def test_initiative_roll_is_linked_and_searchable_in_normal_mode(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+
+    expected = {
+        "domain": "General rule", "name": "Initiative Roll",
+        "href": "/rules/initiative-roll",
+    }
+    for query in ("Initiative Roll", "Initiative"):
+        status, _, body = request(
+            rules_app, "/api/search", query=urlencode({"q": query}),
+        )
+        assert status == 200
+        assert expected in json.loads(body)["items"]
+    status, _, body = request(rules_app, "/api/rules/initiative-roll")
+    assert status == 200
+    rule = json.loads(body)["rules"][0]
+    assert rule["id"] == "rule:initiative-roll"
+    assert rule["facts"]["category"] == "basic-rule"
+    assert len(rule["facts"]["effects"]) == 4
+    assert {citation["section"] for citation in rule["citations"]} == {
+        "Initiative Roll", "Keeping Initiative", "Keeping Deployment",
+    }
+    assert all(citation["page"] == 15 for citation in rule["citations"])
+    for target in ("skill:lieutenant", "attribute:wip", "rule:deployment-phase"):
+        assert any(
+            token.get("target") == target and token.get("public_reference")
+            for token in rule["summary_tokens"]
+        ), target
+    for slug, target in (
+        ("deployment-phase", "rule:initiative-roll"),
+        ("initiative-roll", "rule:deployment-phase"),
+    ):
+        status, _, body = request(rules_app, f"/api/rules/{slug}")
+        assert status == 200
+        record = json.loads(body)["rules"][0]
+        assert any(
+            token.get("target") == target and token.get("public_reference")
+            for token in record["summary_tokens"]
+        )
+    status, _, body = request(rules_app, "/api/skills/lieutenant")
+    assert status == 200
+    lieutenant = json.loads(body)
+    assert any(
+        token.get("target") == "rule:initiative-roll" and token.get("public_reference")
+        for token in lieutenant["rules"][0]["summary_tokens"]
+    )
+    status, _, body = request(rules_app, "/rules/initiative-roll")
+    assert status == 200
+    assert b'id="item-content"' in body
+
+
+def test_specialist_troops_general_rule_is_searchable_with_scenario_context(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    expected = {
+        "domain": "General rule", "name": "Specialist Troops",
+        "href": "/rules/specialist-troops-standard",
+    }
+    for query in ("Specialist Troops", "specialist troop", "specialist"):
+        status, _, body = request(
+            rules_app, "/api/search", query=urlencode({"q": query}),
+        )
+        assert status == 200
+        assert json.loads(body)["items"].count(expected) == 1
+
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    entries = [
+        item for item in json.loads(body)["items"]
+        if item["id"] == "rule:specialist-troops:standard"
+    ]
+    assert len(entries) == 1
+    assert entries[0]["href"] == expected["href"]
+    assert entries[0]["domain"] == "General rule"
+
+    status, _, body = request(rules_app, "/api/rules/specialist-troops-standard")
+    assert status == 200
+    details = json.loads(body)
+    assert details["id"] == "specialist-troops-standard"
+    assert details["rules"][0]["id"] == "rule:specialist-troops:standard"
+    assert details["rules"][0]["facts"]["category"] == "basic-rule"
+    assert len(details["rules"][0]["facts"]["specialists"]["anyOfSkills"]) == 7
+    assert "each scenario determines" in details["description"]
+    assert {cite["page"] for cite in details["rules"][0]["citations"]} == {
+        152, 154, 155,
+    }
+    assert [(row["name"], row["href"]) for row in details["used_by"]] == [
+        ("Domination", "/scenarios/domination"),
+        ("Firefight", "/scenarios/firefight"),
+        ("Supplies", "/scenarios/supplies"),
+    ]
+
+
+def test_glossary_frozen_pair_reuses_resolved_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A repeat Glossary request must not recompute every source-linked description."""
+    root = Path(__file__).parents[1]
+    rules_app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+    status, _, original = request(rules_app, "/api/glossary")
+    assert status == 200
+    entries = json.loads(original)["items"]
+    assert len(entries) > 100
+    assert any(
+        token.get("target") == "skill:peripheral"
+        for entry in entries if entry["id"] == "term:peripheral"
+        for token in entry["description_tokens"]
+    )
+
+    def no_second_build() -> None:
+        raise AssertionError("Glossary entries were rebuilt on a repeat request")
+
+    monkeypatch.setattr(rules_app.api.glossary_catalog, "entries", no_second_build)
+    status, _, repeated = request(rules_app, "/api/glossary")
+    assert status == 200
+    assert repeated == original
+
+
 def test_glossary_projects_canonical_rules_and_embedded_attributes(
     app: Callable, tmp_path: Path,
 ) -> None:
@@ -5086,6 +5773,85 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     status, _, body = request(rules_app, "/api/glossary")
     assert status == 200
     items = json.loads(body)["items"]
+    rules = RulesDatabase(rules_path)
+    definition_citations = {
+        record["id"]: record["citations"]
+        for kind in ("attribute", "term", "rule")
+        for record in rules.composed_records_by_kind(kind)
+    }
+    assert all(definition_citations[identifier] for identifier in (
+        "attribute:mov", "rule:profile-help:troop-type", "term:fto", "term:marker",
+    ))
+    trooper = next(item for item in items if item["id"] == "term:trooper")
+    assert trooper["domain"] == "Game term"
+    assert trooper["href"] == "/glossary#term-trooper"
+    assert trooper["embedded"] is True
+    assert trooper["description"] == (
+        "Troopers are game elements represented by Unit Profiles and belonging to "
+        "a player's Army List. They have Attributes, contribute Orders to the Order "
+        "Pool, can spend Orders to activate themselves, and can declare and receive "
+        "Attacks."
+    )
+    peripheral = next(item for item in items if item["id"] == "term:peripheral")
+    assert peripheral["domain"] == "Game term"
+    assert peripheral["href"] == "/glossary#term-peripheral"
+    assert peripheral["embedded"] is True
+    assert peripheral["description"] == (
+        "A [[skill:peripheral|Peripheral]] is a special Trooper category. It cannot "
+        "contribute or spend "
+        "Orders on its own and does not take a place in the Army List. Normally, it "
+        "activates when its Controller spends an Order and copies the Controller's "
+        "actions; its type-specific rules may differ.\n\n"
+        "Its own Troop Profile lists its Cost, which is also added to the Controller's "
+        "Cost. The Special Skill explains the Controller relationship and each type."
+    )
+    assert any(
+        token.get("type") == "reference"
+        and token.get("label") == "Peripheral"
+        and token.get("target") == "skill:peripheral"
+        and token.get("public_reference") == {
+            "catalog": "skills",
+            "id": "peripheral",
+        }
+        for token in peripheral["description_tokens"]
+    )
+    reviewed = {
+        record["id"]: record
+        for _, document in load_curated_directory(root / "data/curated/rules")
+        for record in document["records"]
+        if record["id"] in {
+            "term:deployable-equipment", "term:deployable-weapon",
+            "term:target", "term:hostile", "term:neutral",
+        }
+    }
+    assert len(reviewed) == 5
+    for identity, source in reviewed.items():
+        item = next(row for row in items if row["id"] == identity)
+        assert item["domain"] == "Game term"
+        assert item["embedded"] is True
+        assert item["href"] == "/glossary#" + identity.replace(":", "-")
+        assert item["description"] == source["summary"]
+        if identity in {"term:deployable-equipment", "term:deployable-weapon"}:
+            assert any(
+                token.get("type") == "reference"
+                and token.get("label") == "Deployable"
+                and token.get("target") == "trait:deployable"
+                for token in item["description_tokens"]
+            )
+        if identity == "term:deployable-weapon":
+            assert "may belong" in item["description"]
+            assert "must belong" not in item["description"]
+
+    unit_profile = next(item for item in items if item["id"] == "term:unit-profile")
+    assert unit_profile["domain"] == "Game term"
+    assert unit_profile["href"] == "/glossary#term-unit-profile"
+    assert unit_profile["embedded"] is True
+    assert unit_profile["description"] == (
+        "A Unit Profile represents the Troopers that form a Unit. It gives each "
+        "Trooper's numerical Attribute values and lists their Characteristics, "
+        "Special Skills, Equipment, and Armor. It also shows the Unit's Trooper "
+        "options, which can differ in Skills, Equipment, and Weapons."
+    )
     movement = next(item for item in items if item["id"] == "attribute:mov")
     assert movement == {
         "id": "attribute:mov",
@@ -5101,6 +5867,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "aliases": [],
         "href": "/glossary#attribute-mov",
         "embedded": True,
+        "citations": definition_citations["attribute:mov"],
         "description_tokens": [
             {
                 "type": "text",
@@ -5129,6 +5896,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "aliases": ["Type"],
         "href": "/glossary#rule-profile-help-troop-type",
         "embedded": True,
+        "citations": definition_citations["rule:profile-help:troop-type"],
         "description_tokens": [
             {
                 "type": "text",
@@ -5157,6 +5925,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "aliases": ["FTO", "Fireteam Option"],
         "href": "/glossary#term-fto",
         "embedded": True,
+        "citations": definition_citations["term:fto"],
         "description_tokens": [
             {
                 "type": "text",
@@ -5184,6 +5953,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "aliases": [],
         "href": "/glossary#term-marker",
         "embedded": True,
+        "citations": definition_citations["term:marker"],
         "description_tokens": [
             {
                 "type": "text",
@@ -5200,7 +5970,12 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     assert loss_of_lieutenant["domain"] == "General rule"
     assert loss_of_lieutenant["href"] == "/rules/loss-of-lieutenant"
     assert loss_of_lieutenant["embedded"] is False
-    assert not any(item["id"] == "rule:fireteam-general" for item in items)
+    fireteam_rules = [item for item in items if item["domain_slug"] == "fireteams"]
+    assert {item["id"] for item in fireteam_rules} == {
+        "rule:fireteam-general", "rule:fireteam-level-bonuses",
+    }
+    assert all(item["href"] == "/fireteams" and not item["embedded"]
+               for item in fireteam_rules)
     assert any(item["id"] == "rule:profile-help:unit-profile" for item in items)
     profile_domain_entries = {
         item["id"]: item
@@ -5279,6 +6054,26 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
 
 
 
+def test_curated_weapon_families_are_discoverable_in_glossary(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    entries = {
+        entry["id"]: entry for entry in json.loads(body)["items"]
+        if entry["kind"] == "weapon"
+    }
+    assert entries["weapon:mines"]["href"] == "/weapons/ap-mine#rule-weapon-mines"
+    assert entries["weapon:para-mine"]["href"] == "/weapons/para-mine"
+    assert entries["weapon:wildparrot"]["href"] == "/weapons/wildparrot"
+    assert "weapon:pt-endgame" not in entries
+    assert all(entry["domain_slug"] == "weapons" for entry in entries.values())
+
+
 def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
     app: Callable, tmp_path: Path,
 ) -> None:
@@ -5339,6 +6134,60 @@ def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
         record = records[anchor.replace("term-", "term:", 1)]
         assert record["facts"]["scope"] == "visibility-condition"
         assert record["citations"][0]["page"] == 144
+
+    base = records["term:visibility-zone"]["summary"]
+    for fragment in (
+        "from, into, or through the area",
+        "[[skill:dodge|Dodge]] is excluded",
+        "[[term:low-visibility-zone|Low Visibility]] applies -3",
+        "[[term:poor-visibility-zone|Poor Visibility]] applies -6",
+        "[[term:zero-visibility-zone|Zero Visibility]] blocks Line of Fire",
+        "[[skill:bs-attack|BS Attack]] exception",
+        "[[term:white-noise-zone|White Noise]] restricts sight",
+        "**stack with applicable other MODs**",
+        "Range, Partial Cover, Special Skills, and Equipment",
+        "**never stack with other [[term:visibility-zone|Visibility Zone]] MODs**",
+        "most restrictive [[term:visibility-zone|Visibility Zone]] MOD",
+    ):
+        assert fragment in base, fragment
+
+def test_visibility_zone_five_term_explanations_match_pinned_n5_3_source() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned English N5.3 PDF unavailable")
+    review = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == review["corePdfSha256"]
+    with pdf.open(source) as document:
+        page = " ".join(document[143].get_text().split()).casefold()
+    for excerpt in (
+        "Low Visibility Zones apply a MOD of -3",
+        "Poor Visibility Zones apply a MOD of -6",
+        "LoF cannot be drawn into, through, or out of a Zero Visibility Zone",
+        "A White Noise Zone acts as a Zero Visibility Zone",
+        "This MOD for Visibility stacks with other MODs",
+        "Partial Cover, Range... but never with other Zone of Visibility MODs",
+        "Visibility Zone MODs never stack with other Visibility Zone MODs",
+        "always the most restrictive one",
+    ):
+        assert excerpt.casefold() in page, excerpt
+
+
+def test_mobile_glossary_hash_targets_clear_sticky_navigation(app: Callable) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert b"@media (max-width: 920px)" in styles
+    assert b"The compact sticky navigation must not obscure glossary hash targets." in styles
+    assert b".glossary-entry {" in styles
+    assert b"scroll-margin-top: 6rem;" in styles
+
 
 def test_visibility_zone_inline_links_have_glossary_previews(
     app: Callable, tmp_path: Path,
@@ -5424,6 +6273,280 @@ def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> N
     assert item["source_ids"] == [21, 244]
 
 
+@pytest.mark.parametrize(
+    ("catalog", "identifier"),
+    [("skills", "11"), ("equipment", "21")],
+)
+def test_catalog_detail_advertises_only_matched_variant_usage_publication(
+    app: Callable, catalog: str, identifier: str,
+) -> None:
+    path = f"/api/{catalog}/{identifier}"
+    status, _, body = request(app, path)
+    assert status == 200
+    assert json.loads(body)["variant_usage_published"] is False
+
+    app.api.variant_usage = {"sourceSnapshot": {}, "variants": []}
+    status, _, body = request(app, path)
+    assert status == 200
+    assert json.loads(body)["variant_usage_published"] is True
+
+
+def test_variant_usage_page_modules_are_packaged_and_capability_gated(
+    app: Callable,
+) -> None:
+    status, _, module = request(app, "/static/variant-usage.js")
+    assert status == 200
+    assert b'from "./share-state.js"' in module
+    assert b'from "./view-components.js"' in module
+
+    for filename in ("skill.js", "catalog-detail.js"):
+        status, _, body = request(app, f"/static/{filename}")
+        assert status == 200
+        assert b'from "./variant-usage.js"' in body
+        assert b"variant_usage_published" in body
+        assert b"exactVariantRuleIds" in body
+        assert b"getVariantUsages(variantRuleIds, pageController.signal)" in body
+
+    status, _, unit = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function revealProfileGroupHash()" in unit
+    assert b"requestAnimationFrame(revealProfileGroupHash)" in unit
+
+
+@pytest.mark.parametrize("catalog", ("skills", "equipment"))
+def test_variant_usage_browser_does_not_fetch_unpublished_index(
+    app: Callable, catalog: str,
+    chromium_test_slot: None,
+) -> None:
+    from tools.browser_wsgi_transport import route_browser_page
+
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    app.api.variant_usage = None
+    with playwright_api.sync_playwright() as driver:
+        try:
+            browser = driver.chromium.launch(channel="chrome")
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                pytest.skip(f"Chrome unavailable: {exc}")
+            raise
+        try:
+            page = browser.new_page()
+            route_browser_page(page, app, "http://variant-usage.test")
+            requests: list[str] = []
+            page.on("request", lambda request: requests.append(request.url)
+                    if "/api/variant-usage" in request.url else None)
+            slug = "stealth" if catalog == "skills" else "medikit"
+            page.goto(f"http://variant-usage.test/{catalog}/{slug}", wait_until="domcontentloaded")
+            selector = "#skill-content" if catalog == "skills" else "#item-content"
+            page.locator(selector).wait_for(state="visible", timeout=30000)
+            assert not requests
+            assert page.locator(".exact-variant-usage").count() == 0
+            page.close()
+        finally:
+            browser.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
+    app: Callable, width: int, chromium_test_slot: None,
+) -> None:
+    from tools.browser_wsgi_transport import route_browser_page
+
+    code, _, content = request(app, "/api/units/1")
+    assert code == 200
+    unit = json.loads(content)
+    # Use a real profile group so that navigation targets an actual rendered section.
+    army = next(
+        item for item in unit["armies"]
+        if item["id"] in {101, 201} and item["profiles"]
+        and not item.get("availability_flags")
+    )
+    group_id = army["profiles"][0]["group_id"]
+    army_id = army["id"]
+    anchor = f"profile-group-{army_id}-{group_id}"
+
+    groups = []
+    for record_id in ("skill:stealth", "equipment:medikit"):
+        base = {
+            "catalog": "skills" if record_id.startswith("skill:") else "equipment",
+            "unitId": 1,
+            "groupId": group_id,
+            "parentId": 1,
+        }
+        direct = {
+            **base, "ownerKind": "profile", "occurrenceId": 1,
+            "context": {
+                "logicalUnitId": 1, "applicationArmyId": army_id,
+                "payloadSha256": "a" * 64,
+            },
+        }
+        repeated = {**direct, "occurrenceId": 2}
+        loadout = {
+            **base, "ownerKind": "option", "occurrenceId": 3,
+            "context": {
+                "logicalUnitId": 1, "applicationArmyId": army_id,
+                "payloadSha256": "b" * 64,
+            },
+        }
+        shared = {
+            **base, "ownerKind": "unit_option", "occurrenceId": 4,
+            "context": {"logicalUnitId": None, "applicationArmyId": None},
+        }
+        groups.append({
+            "variantKey": record_id,
+            "variant": {
+                "recordId": record_id, "collectionId": "n5-core-v5.3",
+                "effect": {"sourceVariant": {"kind": "level", "value": 1}},
+            },
+            "uniqueUnits": 1,
+            "sourceRelationshipRows": 4,
+            "sourceRows": [direct, repeated, loadout, shared],
+        })
+    app.api.variant_usage = {"sourceSnapshot": {}, "variants": groups}
+
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    with playwright_api.sync_playwright() as driver:
+        try:
+            browser = driver.chromium.launch(channel="chrome")
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                pytest.skip(f"Chrome unavailable: {exc}")
+            raise
+        try:
+            for catalog, slug in (("skills", "stealth"), ("equipment", "medikit")):
+                page = browser.new_page(viewport={"width": width, "height": 900})
+                route_browser_page(page, app, "http://variant-usage.test")
+                errors: list[str] = []
+                page.on("pageerror", lambda error, failures=errors: failures.append(str(error)))
+                try:
+                    response = page.goto(
+                        f"http://variant-usage.test/{catalog}/{slug}",
+                        wait_until="domcontentloaded",
+                    )
+                    assert response is not None and response.status == 200
+                    usage = page.locator(".exact-variant-usage")
+                    usage.wait_for(state="attached", timeout=30000)
+                    assert usage.is_hidden(), (catalog, width)
+                    page.locator('button[aria-controls="settings-menu"]').click()
+                    toggle = page.locator("#developer-mode-toggle")
+                    toggle.set_checked(True)
+                    page.locator('button[aria-controls="settings-menu"]').click()
+                    usage.wait_for(state="visible", timeout=30000)
+                    assert "Only complete, source-reviewed variants" in usage.inner_text()
+                    group = usage.locator(".exact-variant-group")
+                    assert group.count() == 1
+                    group.locator("summary").focus()
+                    group.locator("summary").press("Enter")
+                    group.locator("tr[data-owner-kind]").first.wait_for(
+                        state="visible", timeout=30000,
+                    )
+                    assert group.locator("tr[data-owner-kind]").count() == 2
+                    assert "shared Unit-option source row" in group.inner_text()
+                    links = group.locator('a[href^="/units/"]')
+                    assert links.count() == 2
+                    previous_group = group.element_handle()
+                    page.evaluate("() => window.dispatchEvent(new Event('optionalunitschange'))")
+                    page.wait_for_function(
+                        "(previous) => !previous.isConnected",
+                        arg=previous_group, timeout=30000,
+                    )
+                    assert usage.count() == 1
+                    page.locator('button[aria-controls="settings-menu"]').click()
+                    toggle.set_checked(False)
+                    assert usage.is_hidden(), (catalog, width)
+                    toggle.set_checked(True)
+                    page.locator('button[aria-controls="settings-menu"]').click()
+                    usage.wait_for(state="visible", timeout=30000)
+                    group.locator("summary").focus()
+                    group.locator("summary").press("Enter")
+                    group.locator("tr[data-owner-kind]").first.wait_for(
+                        state="visible", timeout=30000,
+                    )
+                    assert links.count() == 2
+                    assert all(
+                        f"#{anchor}" in (links.nth(index).get_attribute("href") or "")
+                        for index in range(links.count())
+                    )
+                    assert page.evaluate(
+                        "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                    ), width
+                    links.first.focus()
+                    links.first.press("Enter")
+                    page.wait_for_url(re.compile(r".*/units/ranger-prototype\?.*#profile-group-.*"))
+                    page.locator(f'#{anchor}').wait_for(state="visible", timeout=30000)
+                    assert page.locator(f'#{anchor}').evaluate(
+                        "(element) => element.closest('details')?.open"
+                    )
+                    assert not errors, (catalog, width, errors)
+                finally:
+                    page.close()
+        finally:
+            browser.close()
+
+
+def test_variant_usage_api_filters_exact_groups_by_canonical_rule(app: Callable) -> None:
+    requested = {
+        "variantKey": '{"recordId":"skill:stealth","sourceVariant":"level-1"}',
+        "variant": {"recordId": "skill:stealth", "sourceVariant": "level-1"},
+    }
+    other = {
+        "variantKey": '{"recordId":"skill:stealth","sourceVariant":"level-2"}',
+        "variant": {"recordId": "skill:stealth", "sourceVariant": "level-2"},
+    }
+    unrelated = {
+        "variantKey": '{"recordId":"equipment:medikit","sourceVariant":"default"}',
+        "variant": {"recordId": "equipment:medikit", "sourceVariant": "default"},
+    }
+    app.api.variant_usage = {
+        "sourceSnapshot": {"armyArchiveSha256": "a" * 64},
+        "variants": [other, unrelated, requested],
+    }
+
+    status, _, body = request(
+        app, "/api/variant-usage", query="record_id=skill%3Astealth",
+    )
+
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["recordId"] == "skill:stealth"
+    assert payload["scope"] == "exact-reviewed-source-variants"
+    assert payload["items"] == [requested, other]
+    status, _, metrics = request(app, "/internal/metrics")
+    assert status == 200
+    assert b'route="/api/variant-usage",status_class="2xx"} 1' in metrics
+
+
+@pytest.mark.parametrize(
+    ("query", "message"),
+    [
+        ("", "Provide record_id exactly once"),
+        ("record_id=", "Provide record_id exactly once"),
+        ("record_id=skill%3Astealth&record_id=skill%3Astealth",
+         "Provide record_id only once"),
+        ("record_id=state%3Aretreat", "record_id must identify a Skill or Equipment rule"),
+        ("record_id=skill%3Astealth&unknown=1", "Unknown query parameter: unknown"),
+    ],
+)
+def test_variant_usage_api_rejects_invalid_filters(
+    app: Callable, query: str, message: str,
+) -> None:
+    status, _, body = request(app, "/api/variant-usage", query=query)
+
+    assert status == 400
+    assert message in json.loads(body)["error"]
+
+
+def test_variant_usage_api_is_unavailable_without_a_matched_publication(
+    app: Callable,
+) -> None:
+    status, _, body = request(
+        app, "/api/variant-usage", query="record_id=skill%3Astealth",
+    )
+
+    assert status == 503
+    assert "not published" in json.loads(body)["error"]
+
+
 def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/skills/11")
     assert status == 200
@@ -5439,6 +6562,7 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
         "name": "Stealth",
         "wiki": None,
         "slug": "stealth",
+        "variant_usage_published": False,
         "categories": [
             {"id": "unclassified", "name": "Unclassified", "source": None, "page": None}
         ],
@@ -5725,8 +6849,8 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
         {
             "id": "automatic",
             "name": "Automatic",
-            "source": "Infinity Wiki snapshot (English) v20260918-130233",
-            "page": None,
+            "source": "N5 Core Rules v5.3",
+            "page": 77,
         }
     ]
     assert alert["variants"] == []
@@ -5819,6 +6943,9 @@ def test_equipment_and_weapon_details_are_served(
     assert payload["name"] == name
     if catalog == "equipment":
         assert payload["wiki"] == "https://infinitythewiki.com/Medikit"
+        assert payload["variant_usage_published"] is False
+    else:
+        assert "variant_usage_published" not in payload
     assert payload["slug"] == slug
     assert payload["variants"][0]["units"][0]["id"] == 1
 
@@ -5860,7 +6987,8 @@ def test_catalog_detail_frontend_renders_typed_source_variant_labels(
     assert b"function sourceVariantLabel(variant)" in body
     assert b'if (semantics.kind === "named") return semantics.label;' in body
     assert b'const summaryParts = [semanticLabel, unitCount].filter(Boolean);' in body
-    assert b"gameplayVariantRules(item.variants)" in body
+    assert b"gameplayVariantRules(item.variants, {" in body
+    assert b'includeSourceSummaries: catalog === "equipment"' in body
     assert b"levelEffectsSection(item.rules)" in body
     assert b'rulesReferenceSection(variantRules, "Variant rules")' in body
     assert b"section.append(rulesReferenceSection(variant.rules" not in body
@@ -5953,18 +7081,20 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     reference = next(
         token for token in rule["summary_tokens"] if token["type"] == "reference"
     )
-    assert reference == {
+    assert {key: reference[key] for key in (
+        "type", "target", "label", "public_reference"
+    )} == {
         "type": "reference",
         "target": "skill:jump",
         "label": "Jump",
         "public_reference": {"catalog": "skills", "id": "jump"},
-        "preview_tokens": [
-            {
-                "type": "text",
-                "text": "A Long Common Skill used to clear obstacles and move through the air.",
-            }
-        ],
     }
+    status, _, jump_body = request(rules_app, "/api/skills/jump")
+    assert status == 200
+    jump = json.loads(jump_body)["rules"][0]
+    assert reference["preview_tokens"][0] == jump["summary_tokens"][0]
+    assert reference["preview_tokens"][0]["text"].startswith("A Long Common Skill")
+    assert all("preview_tokens" not in token for token in reference["preview_tokens"])
     distances = [
         token
         for token in rule["fact_tokens"]["effects"][1]
@@ -6020,6 +7150,7 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b'const viewportGutter = 12' in renderer
     assert b'tooltip.setAttribute("popover", "manual")' in renderer
     assert b'tooltip.showPopover()' in renderer
+    assert b'if (!link.isConnected || !tooltip?.isConnected)' in renderer
     assert b'tooltip.hidePopover()' in renderer
     assert b'link.addEventListener("pointerenter", (event) =>' in renderer
     assert b'link.addEventListener("pointerleave", (event) =>' in renderer
@@ -6042,6 +7173,16 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b'calc(100vw - 24px)' in styles
     assert b".maintained-review-needed" in styles
     assert b"var(--color-status-warning-surface)" in styles
+
+
+def test_detached_reference_preview_does_not_open_popover() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "maintained_reference_lifecycle_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "detached reference prevented popover reopening" in result.stdout
 
 
 def test_rules_summary_rendering_preserves_links_emphasis_and_source_notes() -> None:
@@ -6082,7 +7223,7 @@ def test_immunity_skill_card_renders_only_reviewed_conditions(app: Callable) -> 
     harness = Path(__file__).resolve().parent / "immunity_cases_render_harness.mjs"
     result = subprocess.run([node, str(harness)], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
-    assert "5 reviewed Immunity cases, conditions, evidence labels" in result.stdout
+    assert "23 reviewed Immunity cases, conditions, evidence labels" in result.stdout
 
     status, _, renderer = request(app, "/static/rules-reference.js")
     assert status == 200
@@ -6133,7 +7274,7 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     ) < body.rindex(b'appendImmunityCases(container, rule)')
     assert body.index(
         b"appendMaintainedText(paragraph, paragraphTokens)"
-    ) < body.index(b"const applicability = includeApplicability ? applicabilityText(rule)")
+    ) < body.index(b"const applicability = includeApplicability && !rule.citations?.length")
     assert b"includeApplicability = true" in body
     assert b"detail-fact-heading" in body
     assert b'heading.textContent = "Related rules"' in body
@@ -6538,3 +7679,65 @@ def test_catalog_detail_reveals_async_rule_fragment_after_render(app: Callable) 
     assert b'requestAnimationFrame(revealHashTarget)' in script
     assert b'window.addEventListener("hashchange", revealHashTarget' in script
     assert b'content.contains(target)' in script
+
+
+def test_glossary_boost_exposes_distinct_placement_and_triggering_references(
+    app: Callable, tmp_path: Path,
+) -> None:
+    """Boost's linked comparison must reach canonical rules without inventing mechanics."""
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    boost = next(
+        item for item in json.loads(body)["items"]
+        if item["id"] == "trait:boost"
+    )
+    assert boost["href"] == "/traits/boost"
+    description = boost["description"]
+    assert "**Placing is not triggering:**" in description
+    assert "the Marker remains exempt from Boost" in description
+    assert "Boost alone does not grant that Skill" in description
+    assert "becomes active at its Conclusion" in description
+    assert "Models **or Markers**" in description
+    links = {
+        token["target"]
+        for token in boost["description_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "skill:place-deployable", "skill:intuitive-attack",
+        "trait:perimeter", "weapon:mines", "state:camouflaged",
+    } <= links
+    status, _, body = request(rules_app, "/traits/boost")
+    assert status == 200
+    assert b"<main" in body
+
+
+
+def test_mine_detail_profile_order_and_absent_ammunition_source_preservation(
+    app: Callable,
+) -> None:
+    """The browser fixes presentation without rewriting published Army fields."""
+    status, _, body = request(app, "/static/catalog-detail.js")
+    assert status == 200
+    text = body.decode("utf-8")
+    assert 'if (profile.ammunition === 0) {' in text
+    assert 'cell.textContent = "--";' in text
+    assert 'item.rules?.some((rule) => rule.id === "weapon:mines")' in text
+    assert '...(mineFamily && profiles ? [profiles] : [])' in text
+    assert '...(!mineFamily && profiles ? [profiles] : [])' in text
+    assert 'Number(a.id === "weapon:mines") - Number(b.id === "weapon:mines")' in text
+
+    root = Path(__file__).resolve().parents[1]
+    catalog_app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+    status, _, body = request(catalog_app, "/api/weapons/cybermine")
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["profiles"][0]["ammunition"] == 0
+    assert payload["profiles"][0]["saving"] == "BTS"
+    assert payload["profiles"][0]["saving_num"] == "2"

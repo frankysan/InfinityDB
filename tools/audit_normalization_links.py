@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.database.schema import DATABASE_TABLES
+from tools.paired_audit_connection import open_paired_audit_connection
 
 REPORT_FORMAT = "InfinityDB normalization link semantics audit"
 REPORT_FORMAT_VERSION = 1
@@ -91,7 +92,10 @@ def _sha256_file(path: Path) -> str:
 def _table_names(connection: sqlite3.Connection) -> set[str]:
     return {
         str(row[0])
-        for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+        for row in connection.execute(
+            "SELECT name FROM main.sqlite_master WHERE type = 'table' "
+            "UNION SELECT name FROM temp.sqlite_master WHERE type = 'view'"
+        )
     }
 
 
@@ -311,10 +315,14 @@ def audit_database(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise NormalizationLinkAuditError(f"Database does not exist: {path}")
 
-    connection = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)
-    connection.row_factory = sqlite3.Row
+    required_tables = {
+        "__infinity_metadata", "option_weapon_templates", "option_weapons",
+        *(table for table, _catalog in FILTER_CATALOG_LINKS.values()),
+        *(catalog for _table, catalog in FILTER_CATALOG_LINKS.values()),
+        *(item["table"] for item in CANONICALIZATION_LINKS),
+    }
+    connection = open_paired_audit_connection(path, required_tables)
     try:
-        connection.execute("PRAGMA query_only = ON")
         _validate_policy(connection)
         metadata = _metadata(connection)
         return {

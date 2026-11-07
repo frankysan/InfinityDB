@@ -3,10 +3,11 @@
 **Project domain:** Deployment
 
 InfinityDB is deployed as an immutable Docker image containing the web application,
-tracked processed graphical assets, and the release-matched `infinity.db` and `rules.db`
-snapshots. Caddy listens on HTTP and proxies traffic to the application, which is not
-exposed directly on the host. Put Caddy behind an external TLS reverse proxy for public
-HTTPS.
+tracked processed graphical assets, the release-matched `infinity.db` and `rules.db`
+snapshots, generated `deployed-objects.json`, and the tracked exact-variant
+`variant-usage.json` and Weapon-profile `weapon-profile-sources.json` publications.
+Caddy listens on HTTP and proxies traffic to the application, which is not exposed
+directly on the host. Put Caddy behind an external TLS reverse proxy for public HTTPS.
 
 Corvus Belli has explicitly permitted InfinityDB to use and redistribute the graphical
 assets used by this non-commercial community project. By project policy, the generated runtime
@@ -17,8 +18,10 @@ tracked release artifacts. See
 [third-party notices](../THIRD_PARTY_NOTICES.md).
 
 Deployment is intentionally **release-only**. Database and symbol generation happen in a
-development/release checkout. A tagged server checkout consumes the exact artifacts already
-reviewed and committed for that release; it does not acquire raw data or rebuild databases.
+development/release checkout. A tagged server checkout consumes the exact tracked databases and
+symbols and exact-variant publication reviewed for that release, and deterministically
+produces the matching deployed-object publication from tracked curated reviews;
+it does not acquire raw data, rebuild databases or regenerate variant usage.
 For moving an installation to a new host, see the
 [server migration guide](server-migration.md).
 
@@ -73,6 +76,8 @@ Every deploy requires these release-controlled files to be present in the checko
 ```text
 data/generated/infinity.db
 data/generated/rules.db
+data/generated/variant-usage.json
+data/generated/weapon-profile-sources.json
 data/manifests/symbol-publication.json
 src/infinity_db/web/static/{armies,characteristics,orders,peripherals,units}/...
 ```
@@ -84,8 +89,30 @@ SHA-256, and compares `infinity.db`'s embedded `snapshotArchiveSha256` with
 data and graphical publication to the same exact source ZIP without requiring that raw archive
 or the terminal `army-symbol-build.json` on the server.
 
+Before building the Docker image, `deploy.sh` deterministically generates and
+checks the ignored `data/generated/deployed-objects.json` publication from the
+tracked database pair and reviewed curated source files. It fails rather than
+ship a missing or mismatched publication. No raw snapshots or database rebuilds
+are needed on the deployment host. A direct `docker build` requires that
+publication to have been generated in the checkout first. In contrast, the
+exact-variant publication is a **tracked release file** built during development
+with `tools.build_variant_usage --publish` and `--check-publication`, using the
+pinned ignored raw source. Deployment and clean CI have no raw archive;
+they validate the committed publication against the tracked databases and
+generated deployed-object bytes without regenerating it. Changes to either
+database or the deployed-object publication require rebuilding and committing
+matching variant JSON during release preparation.
+
+The tracked `weapon-profile-sources.json` is generated from the same
+database pair and reviewed Weapon decisions with
+`python -m tools.build_weapon_profile_publication`; `--check` compares the
+exact bytes and source pins. Deployment verification runs this check without
+the PDF or raw Army archive. Rebuild and commit the matched file whenever
+either database or its reviewed inputs change. The image verifies and
+serves it independently of the curated files.
+
 The Docker image explicitly configures both runtime database paths. Missing, invalid, or
-incompatible tracked databases fail before activation. After building the image,
+incompatible tracked databases or reference publications fail before activation. After building the image,
 `scripts/verify-container-image.sh --published-assets` revalidates the installed publication,
 the embedded database/publication provenance, package contents, representative symbol routes,
 and production startup. Compose is started with `--no-build` only after that exact image has
@@ -253,6 +280,9 @@ history database. The collector also fails closed on an unreviewed route label r
 persisting a new high-cardinality dimension. Latency and response-size histogram boundaries are also
 allowlisted so a future metrics-layout change cannot silently mix incompatible bucket schemas in one
 historical store.
+
+The reviewed vocabulary includes the fixed `/api/variant-usage` route label;
+its catalog, variant and Army query values are never retained as labels.
 
 The engine can also be exercised manually from a checkout against the trusted LAN metrics listener:
 

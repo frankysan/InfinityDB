@@ -9,11 +9,13 @@ from urllib.parse import quote
 from infinity_db.application_domains import (
     public_rule_record_domain,
     semantic_record_domain,
+    semantic_record_owner,
 )
 from infinity_db.domain_slugs import (
     route_slug_from_qualified_typed_domain_id,
     route_slug_from_typed_domain_id,
 )
+from infinity_db.equipment_config import CURATED_ONLY_EQUIPMENT_SLUGS
 
 if TYPE_CHECKING:
     from infinity_db.database.repository import Database
@@ -35,12 +37,18 @@ def public_slug_for_reference(
 def rule_record_public_reference(
     database: Database | None,
     record: dict[str, Any],
+    *,
+    validate_army_links: bool = False,
+    additional_route_slugs: frozenset[str] = frozenset(),
 ) -> dict[str, str] | None:
     """Return the player-facing reference for one rules-relation endpoint.
 
     Route-backed domains use their normal catalog/detail URL contract. Embedded
     vocabularies intentionally have no detail route, so their canonical public
-    destination is the corresponding Glossary entry.
+    destination is the corresponding Glossary entry. When requested and a
+    database is available, validate Army links and select canonical slugs from
+    that snapshot rather than publishing stale source references. An owning
+    catalog may also supply its published non-Army route slugs.
     """
 
     kind = record.get("kind")
@@ -48,6 +56,9 @@ def rule_record_public_reference(
         return None
     domain = public_rule_record_domain(record)
     if domain is None:
+        owner = semantic_record_owner(record)
+        if owner is not None and owner.landing and owner.route is not None:
+            return {"href": owner.route}
         semantic_domain = semantic_record_domain(kind)
         if (
             semantic_domain is None
@@ -75,6 +86,28 @@ def rule_record_public_reference(
             for link in record.get("army_links", [])
             if link.get("entity") == entity
         ]
+        if validate_army_links and database is not None:
+            resolved_links = []
+            for link in army_links:
+                raw_ref = link.get("id")
+                if type(raw_ref) is int or (
+                    isinstance(raw_ref, str) and raw_ref.isdigit()
+                ):
+                    item_ref = int(raw_ref)
+                elif isinstance(raw_ref, str) and raw_ref:
+                    item_ref = raw_ref
+                else:
+                    continue
+                slug = public_slug_for_reference(database, catalog, item_ref)
+                if (
+                    slug is None
+                    and isinstance(item_ref, str)
+                    and item_ref in additional_route_slugs
+                ):
+                    slug = item_ref
+                if slug is not None:
+                    resolved_links.append({**link, "id": slug})
+            army_links = resolved_links
         # A family shared by several Army Weapons needs a link to the rule
         # card, not just to the first Weapon's profile table. Until there is
         # a dedicated family route, the first linked Weapon hosts that card.
@@ -87,22 +120,38 @@ def rule_record_public_reference(
         has_army_link = bool(army_links)
         for link in army_links:
             raw_ref = link.get("id")
-            if not isinstance(raw_ref, str) or not raw_ref:
-                continue
-            if raw_ref.isdigit():
+            if type(raw_ref) is int or (
+                isinstance(raw_ref, str) and raw_ref.isdigit()
+            ):
                 if database is None:
                     continue
                 slug = public_slug_for_reference(database, catalog, int(raw_ref))
                 if slug is None:
                     continue
-            else:
+            elif isinstance(raw_ref, str) and raw_ref:
                 slug = raw_ref
+            else:
+                continue
             if shared_weapon_family:
                 fragment = record["id"].replace(":", "-")
                 return {"href": f"/{catalog}/{quote(slug, safe='')}#rule-{fragment}"}
             return {"catalog": catalog, "id": slug}
 
-        if has_army_link or kind != "skill":
+        if has_army_link or kind not in {"skill", "equipment"}:
+            # The Skill catalog also serves canonical Common/Special definitions
+            # by semantic slug when a given Army snapshot has no matching skill.
+            # Never infer such a route for source-specific or non-Skill records.
+            facts = record.get("facts") or {}
+            if not (
+                kind == "skill"
+                and facts.get("category") in {"common-skill", "special-skill"}
+                and (record.get("variant_semantics") or {}).get("inheritance") != "source"
+            ):
+                return None
+        # Only explicitly source-independent Equipment has a standalone route.
+        if kind == "equipment" and record.get("id") not in {
+            f"equipment:{slug}" for slug in CURATED_ONLY_EQUIPMENT_SLUGS
+        }:
             return None
 
     record_id = record.get("id")

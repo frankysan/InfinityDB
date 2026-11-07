@@ -108,6 +108,14 @@ def test_deployment_assets_require_complete_tracked_publication(
             pass
 
     monkeypatch.setattr(deployment_assets, "RulesDatabase", FakeRulesDatabase)
+    # This test isolates symbol coverage; variant publication has separate
+    # required-path and missing/stale-source regressions below.
+    monkeypatch.setattr(deployment_assets, "verify_variant_release_publication", lambda *_: None)
+    weapon_checks = []
+    monkeypatch.setattr(
+        deployment_assets, "verify_weapon_profile_release_publication",
+        lambda *paths: weapon_checks.append(paths),
+    )
     validation = verify_deployment_assets(
         static,
         database_path=tmp_path / "infinity.db",
@@ -117,6 +125,7 @@ def test_deployment_assets_require_complete_tracked_publication(
 
     assert validation.complete
     assert validation.present_count == validation.expected_count
+    assert weapon_checks == [(tmp_path / "infinity.db", tmp_path / "rules.db")]
 
 
 def test_deployment_assets_reject_missing_published_svg(
@@ -150,6 +159,69 @@ def test_deployment_assets_validate_rules_database(
         )
 
 
+@pytest.mark.parametrize(
+    ("state", "expected_error"),
+    [
+        ("missing", "missing or empty"),
+        ("empty", "missing or empty"),
+        ("stale", "does not match release artifacts"),
+    ],
+)
+def test_deployment_requires_release_paired_variant_publication(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, state: str, expected_error: str,
+) -> None:
+    def load(publication: Path, army: Path, rules: Path, objects: Path) -> dict | None:
+        assert publication == tmp_path / "variant-usage.json"
+        assert army == tmp_path / "infinity.db"
+        assert rules == tmp_path / "rules.db"
+        assert objects == tmp_path / "deployed-objects.json"
+        if state == "missing":
+            return None
+        if state == "empty":
+            return {"variants": []}
+        raise ValueError("Variant usage publication does not match release artifacts")
+
+    monkeypatch.setattr(deployment_assets, "load_variant_usage_publication", load)
+    with pytest.raises((DeploymentAssetError, ValueError), match=expected_error):
+        deployment_assets.verify_variant_release_publication(
+            tmp_path / "infinity.db", tmp_path / "rules.db",
+        )
+
+
+def test_deployment_accepts_release_paired_variant_publication(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        deployment_assets, "load_variant_usage_publication",
+        lambda *_: {"variants": [{"variantKey": "reviewed"}]},
+    )
+    deployment_assets.verify_variant_release_publication(
+        tmp_path / "infinity.db", tmp_path / "rules.db",
+    )
+
+
+def test_deployment_checks_weapon_profile_publication_against_reviewed_inputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = []
+
+    def check(army: Path, rules: Path, reviews: Path, publication: Path) -> None:
+        calls.append((army, rules, reviews, publication))
+        raise ValueError("reviewed publication is missing")
+
+    monkeypatch.setattr(deployment_assets, "check_publication", check)
+    with pytest.raises(ValueError, match="reviewed publication is missing"):
+        deployment_assets.verify_weapon_profile_release_publication(
+            tmp_path / "infinity.db", tmp_path / "rules.db",
+        )
+    assert calls == [(
+        tmp_path / "infinity.db",
+        tmp_path / "rules.db",
+        deployment_assets.DEFAULT_REVIEWS,
+        tmp_path / "weapon-profile-sources.json",
+    )]
+
+
 def test_deployment_rejects_database_for_different_publication_snapshot(tmp_path: Path) -> None:
     smoke_database, _ = _build_fixture_database(tmp_path, "smoke")
     _, production_sha256 = _build_fixture_database(tmp_path, "production")
@@ -175,3 +247,38 @@ def test_deployment_rejects_publication_without_snapshot_provenance(tmp_path: Pa
 
     with pytest.raises(DeploymentProvenanceError, match="sourceSnapshot.armyArtifact.sha256"):
         publication_snapshot_sha256(publication_manifest)
+
+
+@pytest.mark.parametrize("mismatched", [False, True])
+def test_svg_skip_still_checks_real_database_publication_binding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mismatched: bool,
+) -> None:
+    database, digest = _build_fixture_database(tmp_path, "runtime")
+    manifest, _ = _write_publication(tmp_path, army_sha256="0" * 64 if mismatched else digest)
+    validated = []
+
+    class Rules:
+        def __init__(self, path: Path) -> None:
+            self.path = path
+
+        def validate(self) -> None:
+            validated.append(self.path)
+
+    monkeypatch.setattr(deployment_assets, "RulesDatabase", Rules)
+    # This fixture checks the symbol/database source binding, not the separately
+    # tested variant-publication gate; it has no variant-usage source pair.
+    monkeypatch.setattr(
+        deployment_assets, "verify_variant_release_publication", lambda *_: None,
+    )
+    monkeypatch.setattr(
+        deployment_assets, "verify_weapon_profile_release_publication", lambda *_: None,
+    )
+    monkeypatch.setattr(deployment_assets, "validate_asset_set", lambda *_args, **_kwargs: (
+        pytest.fail("SVG availability must not be checked in skip mode")
+    ))
+    rules = tmp_path / "rules.db"
+    assert deployment_assets.main([
+        "--skip-svg", "--database", str(database), "--rules-database", str(rules),
+        "--publication-manifest", str(manifest),
+    ]) == (1 if mismatched else 0)
+    assert validated == ([] if mismatched else [rules])

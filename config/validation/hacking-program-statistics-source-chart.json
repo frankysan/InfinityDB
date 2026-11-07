@@ -1,0 +1,319 @@
+{
+  "formatVersion": 1,
+  "sourceId": "n5-core-v5.3-pdf",
+  "sourcePage": 58,
+  "sourcePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "armyArchive": "data/raw/JSON 20260929-114335.zip",
+  "armyArchiveSha256": "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75",
+  "armyMember": "metadata.json",
+  "reviewStatus": "source-reviewed-audit-only",
+  "classification": {
+    "scope": "individual-hacking-program-profile-statistics-not-device-access",
+    "comparison": "source-order-independent-name-match",
+    "special": "reviewed-equivalent-clause-fragments-not-verbatim-identity",
+    "sourceMinus": "literal-dash-not-zero-or-absent-carrier",
+    "target": "source-column-set-not-army-list-ownership"
+  },
+  "rows": [
+    {
+      "name": "Assisted Fire",
+      "attackMod": "-",
+      "opponentMod": "-",
+      "ps": "-",
+      "burst": "-",
+      "targets": [
+        "REM"
+      ],
+      "skillTypes": [
+        "long skill"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "MARKSMANSHIP",
+          "army": "MARKSMANSHIP"
+        }
+      ]
+    },
+    {
+      "name": "Carbonite",
+      "attackMod": "0",
+      "opponentMod": "0",
+      "ps": "7",
+      "burst": "2",
+      "targets": [
+        "TAG",
+        "HI",
+        "REM",
+        "VH",
+        "Hacker"
+      ],
+      "skillTypes": [
+        "short skill",
+        "aro"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "DA AMMO",
+          "army": "DA AMMO"
+        },
+        {
+          "pdf": "NON-LETHAL",
+          "army": "NON-LETHAL"
+        },
+        {
+          "pdf": "IMMOBILIZED-B",
+          "army": "IMM-B"
+        }
+      ]
+    },
+    {
+      "name": "Controlled Jump",
+      "attackMod": "-",
+      "opponentMod": "-",
+      "ps": "-",
+      "burst": "-",
+      "targets": [],
+      "skillTypes": [
+        "short skill",
+        "aro"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "+3/-3",
+          "army": "+3/-3"
+        },
+        {
+          "pdf": "PH",
+          "army": "PH"
+        },
+        {
+          "pdf": "COMBAT JUMP",
+          "army": "COMBAT JUMP"
+        }
+      ]
+    },
+    {
+      "name": "Cybermask",
+      "attackMod": "-",
+      "opponentMod": "-",
+      "ps": "-",
+      "burst": "-",
+      "targets": [],
+      "skillTypes": [
+        "long skill"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "IMP-2",
+          "army": "IMPERSONATION 2"
+        },
+        {
+          "pdf": "MARKER",
+          "army": "MARKER"
+        }
+      ]
+    },
+    {
+      "name": "Enhanced Reaction",
+      "attackMod": "-",
+      "opponentMod": "-",
+      "ps": "-",
+      "burst": "-",
+      "targets": [
+        "REM"
+      ],
+      "skillTypes": [
+        "long skill"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "B2 IN ARO",
+          "army": "B2 IN ARO"
+        }
+      ]
+    },
+    {
+      "name": "Fairy Dust",
+      "attackMod": "-",
+      "opponentMod": "-",
+      "ps": "-",
+      "burst": "-",
+      "targets": [
+        "TAG",
+        "REM",
+        "HI",
+        "VH"
+      ],
+      "skillTypes": [
+        "long skill"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "FIREWALL",
+          "army": "FIREWALL"
+        }
+      ]
+    },
+    {
+      "name": "Oblivion",
+      "attackMod": "0",
+      "opponentMod": "0",
+      "ps": "4",
+      "burst": "2",
+      "targets": [
+        "TAG",
+        "HI",
+        "REM",
+        "VH",
+        "Hacker"
+      ],
+      "skillTypes": [
+        "short skill",
+        "aro"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "AP AMMO",
+          "army": "AP AMMO"
+        },
+        {
+          "pdf": "NON-LETHAL",
+          "army": "NON-LETHAL"
+        },
+        {
+          "pdf": "ISOLATED",
+          "army": "ISOLATED"
+        }
+      ]
+    },
+    {
+      "name": "Total Control",
+      "attackMod": "0",
+      "opponentMod": "0",
+      "ps": "4",
+      "burst": "1",
+      "targets": [
+        "TAG"
+      ],
+      "skillTypes": [
+        "short skill",
+        "aro"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "DA AMMO",
+          "army": "DA AMMO"
+        },
+        {
+          "pdf": "NON-LETHAL",
+          "army": "NON-LETHAL"
+        },
+        {
+          "pdf": "POS/NORMAL",
+          "army": "POS/NORMAL"
+        }
+      ]
+    },
+    {
+      "name": "Trinity",
+      "attackMod": "+3",
+      "opponentMod": "0",
+      "ps": "6",
+      "burst": "3",
+      "targets": [
+        "Hacker"
+      ],
+      "skillTypes": [
+        "short skill",
+        "aro"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "1 WOUND",
+          "army": "1 WOUND"
+        },
+        {
+          "pdf": "FAILED SAVING ROLL",
+          "army": "FAILED SR"
+        }
+      ]
+    },
+    {
+      "name": "Spotlight",
+      "attackMod": "0",
+      "opponentMod": "0",
+      "ps": "5",
+      "burst": "2",
+      "targets": [],
+      "skillTypes": [
+        "short skill",
+        "aro"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "AP AMMO",
+          "army": "AP AMMO"
+        },
+        {
+          "pdf": "NON-LETHAL",
+          "army": "NON-LETHAL"
+        },
+        {
+          "pdf": "TARGETED",
+          "army": "TARGETED"
+        }
+      ]
+    },
+    {
+      "name": "White Noise",
+      "attackMod": "-",
+      "opponentMod": "-",
+      "ps": "-",
+      "burst": "1",
+      "targets": [],
+      "skillTypes": [
+        "short skill"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "NFB",
+          "army": "NFB"
+        },
+        {
+          "pdf": "REFLECTIVE",
+          "army": "REFLECTIVE"
+        },
+        {
+          "pdf": "CIRCULAR TEMPLATE",
+          "army": "CIRCULAR TEMPLATE"
+        }
+      ]
+    },
+    {
+      "name": "Zero Pain",
+      "attackMod": "0",
+      "opponentMod": "-3",
+      "ps": "-",
+      "burst": "2",
+      "targets": [],
+      "skillTypes": [
+        "short skill",
+        "aro"
+      ],
+      "specialEvidence": [
+        {
+          "pdf": "COMMS ATTACK",
+          "army": "COMMS ATTACK"
+        },
+        {
+          "pdf": "B2 IN ARO",
+          "army": "B2 IN ARO"
+        },
+        {
+          "pdf": "NON-LETHAL",
+          "army": "NON-LETHAL"
+        }
+      ]
+    }
+  ]
+}

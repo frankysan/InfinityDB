@@ -286,4 +286,13 @@ def test_tracked_runtime_fireteam_projection_is_auditable() -> None:
     assert report["chartShape"]["teamCount"] > 0
     assert report["typeLimits"]["projectionMismatchCount"] == 0
     assert report["levelEquivalence"]["projectionMismatchCount"] == 0
-    assert report["ftoEligibility"]["markerProjectionMismatchCount"] == 0
+    fto = report["ftoEligibility"]
+    assert fto["markerProjectionMismatchCount"] == 0
+    assert sum(fto["statusCounts"].values()) == fto["memberRowCount"]
+    assert fto["statusCounts"].get("resolved", 0) > 0
+    assert fto["eligibleOptionOccurrenceCount"] >= fto["statusCounts"]["resolved"]
+    assert len(fto["unresolved"]) == fto["unresolvedCount"]
+    assert all(
+        case["status"] in ("source-unit-context-mismatch", "no-matching-fto-option")
+        for case in fto["unresolved"]
+    )

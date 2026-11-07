@@ -695,6 +695,16 @@ def test_relationship_audit_rejects_historical_review_for_other_snapshot(
     with pytest.raises(RelationshipSemanticsAuditError, match="bound to snapshot"):
         audit_database(database, historical_relation_endpoints_path=review)
 
+    current = audit_database(
+        database,
+        historical_relation_endpoints_path=review,
+        current_only=True,
+    )
+    assert current["historicalReviewMode"] == "not-applied-current-only"
+    assert current["relations"]["reviewedStaleRelationCount"] == 0
+    assert current["relations"]["unresolvedRelationCount"] == 1
+    assert current["relations"]["memberEndpointResolution"]["unresolvedSourceUnitIds"] == [99]
+
 
 def test_relationship_audit_rejects_missing_schema(tmp_path: Path) -> None:
     path = tmp_path / "broken.db"

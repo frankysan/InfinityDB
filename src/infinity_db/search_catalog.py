@@ -67,7 +67,7 @@ class SearchCatalog:
         }
 
     def search(self, query: str) -> list[dict[str, Any]]:
-        """Return name matches across every player-facing database domain.
+        """Return name/curated-alias matches across player-facing database domains.
 
         Search deliberately reuses the application read models instead of flattening
         source identifiers into a separate index. This keeps public slugs, rules-only
@@ -141,7 +141,8 @@ class SearchCatalog:
         )
         for domain, route, items in catalog_sources:
             for item in items:
-                if needle not in accent_insensitive_key(item["name"]):
+                labels = [item["name"], *item.get("aliases", [])]
+                if not any(needle in accent_insensitive_key(label) for label in labels):
                     continue
                 identifier = item.get("slug")
                 if identifier is None and route in {"skills", "equipment", "weapons"}:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any
 
 from infinity_db.application_domains import (
@@ -11,7 +12,9 @@ from infinity_db.application_domains import (
 )
 from infinity_db.database.repository import Database, accent_insensitive_key
 from infinity_db.domain_references import rule_record_public_reference
+from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.weapon_properties import WeaponProperties
 
 
 class GlossaryCatalog:
@@ -21,6 +24,10 @@ class GlossaryCatalog:
         self.database = database
         self.rules_database = rules_database
         self._entries_cache: list[dict[str, Any]] | None = None
+        self._weapon_properties = (
+            WeaponProperties(rules_database, database=database)
+            if rules_database is not None else None
+        )
 
     @staticmethod
     def _href(reference: dict[str, str] | None) -> str | None:
@@ -38,34 +45,49 @@ class GlossaryCatalog:
         if self.rules_database is None:
             return []
         entries: list[dict[str, Any]] = []
+        equipment_slugs = frozenset(
+            item["slug"]
+            for item in EquipmentCatalog(self.database, self.rules_database).list_equipment()
+            if isinstance(item.get("slug"), str)
+        )
         for domain in APPLICATION_DOMAINS:
             if not domain.published or not domain.glossary:
                 continue
             for kind in domain.record_kinds:
-                for record in self.rules_database.composed_records_by_kind(kind):
+                for record in self.rules_database.composed_records_by_kind(
+                    kind, include_army_links=(kind in {"equipment", "weapon"})
+                ):
                     if not record_matches_domain(domain, record):
                         continue
                     if (record.get("variant_semantics") or {}).get("inheritance") == "source":
                         continue
-                    reference = rule_record_public_reference(self.database, record)
+                    reference = rule_record_public_reference(
+                        self.database,
+                        record,
+                        validate_army_links=(kind == "equipment"),
+                        additional_route_slugs=(
+                            equipment_slugs if kind == "equipment" else frozenset()
+                        ),
+                    )
                     href = self._href(reference)
                     if href is None:
                         # A route-backed concept without a valid public identity should not
                         # gain a parallel Glossary-only identity by accident.
                         continue
-                    entries.append(
-                        {
-                            "id": record["id"],
-                            "kind": kind,
-                            "domain": domain.singular_name,
-                            "domain_slug": domain.slug,
-                            "name": record["name"],
-                            "description": record["summary"],
-                            "aliases": list(record.get("aliases", [])),
-                            "href": href,
-                            "embedded": domain.level == "embedded",
-                        }
-                    )
+                    entry = {
+                        "id": record["id"],
+                        "kind": kind,
+                        "domain": domain.singular_name,
+                        "domain_slug": domain.slug,
+                        "name": record["name"],
+                        "description": record["summary"],
+                        "aliases": list(record.get("aliases", [])),
+                        "href": href,
+                        "embedded": domain.level == "embedded",
+                    }
+                    if entry["embedded"]:
+                        entry["citations"] = record["citations"]
+                    entries.append(entry)
         return entries
 
     def _profile_help_entries(self) -> list[dict[str, Any]]:
@@ -100,6 +122,7 @@ class GlossaryCatalog:
                     "aliases": aliases_by_key.get(str(item["key"]), []),
                     "href": f"/glossary#{identifier.replace(':', '-')}",
                     "embedded": True,
+                    "citations": item["citations"],
                 }
             )
         return entries
@@ -141,6 +164,23 @@ class GlossaryCatalog:
             )
         return entries
 
+    def _weapon_property_entries(self) -> list[dict[str, Any]]:
+        if self._weapon_properties is None:
+            return []
+        return [
+            {
+                "id": item["id"], "kind": "weapon-property",
+                "domain": "Weapon Property",
+                "domain_slug": "weapon-properties",
+                "name": item["name"],
+                "description": item["summary"],
+                "origins": item["origins"],
+                "aliases": [], "embedded": True,
+                "href": item["public_reference"]["href"],
+            }
+            for item in self._weapon_properties.entries()
+        ]
+
     def entries(self) -> list[dict[str, Any]]:
         """Return current canonical Glossary entries in stable display order."""
 
@@ -150,6 +190,7 @@ class GlossaryCatalog:
                     *self._record_entries(),
                     *self._profile_help_entries(),
                     *self._label_entries(),
+                    *self._weapon_property_entries(),
                 ],
                 key=lambda item: (
                     accent_insensitive_key(item["name"]),
@@ -157,7 +198,13 @@ class GlossaryCatalog:
                     item["id"],
                 ),
             )
-        return [dict(item, aliases=list(item["aliases"])) for item in self._entries_cache]
+        entries = []
+        for item in self._entries_cache:
+            entry = dict(item, aliases=list(item["aliases"]))
+            if "citations" in item:
+                entry["citations"] = deepcopy(item["citations"])
+            entries.append(entry)
+        return entries
 
     def embedded_entries(self) -> list[dict[str, Any]]:
         """Return embedded concepts for global search without duplicating catalogs."""

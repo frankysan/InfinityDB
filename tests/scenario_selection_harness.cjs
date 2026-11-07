@@ -11,10 +11,11 @@ class FakeElement extends EventTarget {
     this.hidden = false;
     this.value = "";
     this.dataset = {};
+    this.children = [];
     this.classList = { add() {} };
   }
-  append() {}
-  replaceChildren() {}
+  append(...nodes) { this.children.push(...nodes); }
+  replaceChildren(...nodes) { this.children = nodes; }
 }
 const elements = new Map();
 const document = new EventTarget();
@@ -44,9 +45,12 @@ const context = vm.createContext({
   getScenario: (_slug, points, signal) => new Promise((resolve, reject) => {
     requests.push({ points, signal, resolve, reject });
   }),
+  // The FAQ overlay is independent and immediately available in this race
+  // harness. Only stale scenario responses may replace the active game size.
+  fetchReviewedFaqRulings: async () => ({ items: [] }),
   readShareState: () => ({ params: new URLSearchParams(), source: "none" }),
   writeShareState: (_kind, params) => shares.push(params.army_points),
-  appendMaintainedText() {},
+  appendMaintainedText(node, _tokens, raw) { node.append(raw); },
   distanceUnit: () => "in",
   createPanelSwitcher: () => (panel) => { panels.push(panel); },
 });
@@ -55,6 +59,27 @@ vm.runInContext(code, context, { filename: scriptPath });
 context.render = (item) => renders.push(item.selected_army_points);
 
 setImmediate(async () => {
+  // Shared renderer: inline mission rules must not disappear when there is no
+  // canonical linked Rule object (e.g. ITS Battleground's six local rules).
+  const inline = context.inlineScenarioRuleArticle({
+    name: "Dominate Zone", paragraphs: ["Only eligible Troopers count.", "Null States do not."],
+  });
+  assert.equal(inline.className.includes("scenario-inline-rule"), true);
+  assert.deepEqual(inline.children.map((child) => child.children.length), [1, 1, 1]);
+  assert.equal(inline.children[0].children[0].children[0], "Dominate Zone");
+  assert.equal(inline.children[1].children[0], "Only eligible Troopers count.");
+  assert.equal(inline.children[2].children[0], "Null States do not.");
+  const sector = context.conditionNode({
+    kind: "dominated-region-comparison", comparison: "greater",
+    elementIds: ["sector-center"], minimum: 1,
+  });
+  assert.equal(sector.textContent, "Dominate this Sector");
+  const quadrants = context.conditionNode({
+    kind: "dominated-region-comparison", comparison: "greater",
+    elementIds: ["quadrant-1", "quadrant-2"],
+  });
+  assert.equal(quadrants.textContent, "Dominate more Quadrants than the opponent");
+
   assert.equal(requests.length, 1, "default game size must load");
   assert.equal(requests[0].points, 300);
   assert.deepEqual(shares, ["300"]);

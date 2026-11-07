@@ -18,13 +18,19 @@
         <div>
           <p class="eyebrow">Scenario reference</p>
           <h1 id="page-title">Scenarios<span>.</span></h1>
-          <p class="intro-copy">Browse current core scenarios, then choose an Army Points value to see the exact setup, objectives, special rules, and deployment map for that game size.</p>
+          <p class="intro-copy">Browse a published scenario collection, then choose an Army Points value to see its exact setup, objectives, special rules, and deployment map.</p>
         </div>
       </section>
       <section class="surface surface--clipped content-frame scenario-catalog" aria-labelledby="scenario-list-heading">
         <div class="section-heading">
           <h2 id="scenario-list-heading">Current scenarios</h2>
           <span id="scenario-count" class="section-index">Loading…</span>
+        </div>
+        <div class="scenario-collection-controls">
+          <div class="field scenario-collection-field">
+            <label for="scenario-collection">Scenario collection</label>
+            <select id="scenario-collection" disabled><option>Loading collections</option></select>
+          </div>
         </div>
         <div id="scenario-results" class="results" aria-busy="true">
           <div id="scenario-loading" class="state-panel"><span class="spinner" aria-hidden="true"></span><h3>Loading scenarios</h3><p>Loading current scenario information.</p></div>

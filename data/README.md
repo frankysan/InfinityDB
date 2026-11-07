@@ -57,16 +57,30 @@ provenance/state, and build outputs.
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — generated `master.json`, normalized data, validation reports,
   the application `infinity.db`, development-only `infinity.raw.db`, and the
-  separate curated-rules `rules.db`. `infinity.db` and `rules.db` are tracked release
-  artifacts; the intermediate JSON/raw archive and other generated build products remain
-  ignored.
+  separate curated-rules `rules.db` and deterministic `deployed-objects.json`,
+  `variant-usage.json`, and `weapon-profile-sources.json` reference publications.
+  The two SQLite databases and the **byte-exact variant-usage and Weapon-profile
+  JSON files** are tracked release artifacts;
+  `deployed-objects.json` remains ignored and is regenerated from the pinned
+  databases and reviewed source before Docker packaging. Variant usage requires
+  the paired raw archive to regenerate, so a tagged/deployment checkout uses
+  the tracked JSON and validates its Army/rules/deployed-object fingerprints
+  rather than trying to regenerate it without the raw archive.
+  Intermediate JSON/raw archives and other generated build products remain ignored.
 
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
-source control so machine-local snapshot state does not obscure code changes. The two
-runtime SQLite databases are the deliberate exception: their deterministic bytes are
-reviewed/tracked with each release so a tagged checkout contains the exact runtime data that
-production will serve. Generated snapshot manifests remain local provenance records rather
-than maintained project knowledge.
+source control so machine-local snapshot state does not obscure code changes.
+For the private Linux worker, [Syncthing-staged development assets](../docs/syncthing-assets.md)
+defines the separate source staging and explicit, verified checkout activation procedure.
+The tracked SQLite databases and byte-exact reference publications are release artifacts:
+a tagged checkout includes what production serves. The variant JSON also pins the verified
+raw archive digest, which may differ between independent host rebuilds even when the
+logical export pair agrees. Never regenerate it on a deployment host or rewrite its bytes
+through line-ending conversion. The Weapon-profile JSON is built from the tracked database
+pair and reviewed source decisions without raw archives; rebuild and commit it when either
+database or those decisions change. Its deployment check independently regenerates expected
+bytes and refuses a missing or stale publication. Generated manifests remain local
+provenance records.
 
 Generated Army database data is replaceable. Builds create temporary application
 and raw-archive siblings, validate both before publication, and bind them with the
@@ -96,12 +110,36 @@ fingerprint. `infinity-db database-health data/generated/infinity.db --require-r
 operator-facing validation command for this pair contract; omitting `--require-raw` validates only
 the published application database.
 
+For local source inspection, the read-only `tools.inspect_raw_archive` CLI
+checks the application/raw sibling pairing *before* reading any lossless
+source rows. It uses the imported table inventory from the paired metadata;
+zero-row source tables remain visible, and table names are never accepted
+outside the normalized source schema. From the repository root:
+
+```powershell
+.venv\Scripts\python.exe -m tools.inspect_raw_archive verify
+.venv\Scripts\python.exe -m tools.inspect_raw_archive tables
+.venv\Scripts\python.exe -m tools.inspect_raw_archive row skills 0
+.venv\Scripts\python.exe -m tools.inspect_raw_archive rows skills --start 0 --limit 20
+```
+
+The `--application` and `--raw` flags select explicit sibling paths when
+inspecting a different local build; a stale or mismatched pair fails closed.
+Rows are exact source JSON, not application identities. Bounded listings
+accept at most 100 entries per invocation. This tool does not change
+imported, curated or published data, and it is not part of the runtime API.
+
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;
 `curated/README.md` owns the current format version and validation rules. PDF citations use
 printed pages. Archived wiki sources bind to an
 exact timestamped ZIP/hash and citations use archive members; exact pinned wiki
 revisions remain URL-backed sources.
+
+The [local PDF revision inventory](../docs/n5-source-history.md#local-pdf-revision-inventory-2026-11-06)
+records available rules, FAQ and ITS revisions, their exact hashes and renamed
+locators. Additional local revisions are research evidence until explicitly
+reviewed and selected; they do not automatically replace cited publications.
 
 Official Corvus Belli news posts can provide **dated, supplementary publication-change
 and clarification evidence**, separate from the underlying rules, Army, FAQ, and ITS

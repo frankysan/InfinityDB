@@ -61,7 +61,8 @@ def source_directory(tmp_path: Path) -> Path:
 
 @pytest.mark.parametrize("archive", [False, True])
 def test_build_creates_verified_json_and_queryable_database(
-    source_directory: Path, tmp_path: Path, archive: bool
+    source_directory: Path, tmp_path: Path, archive: bool,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     source = source_directory
     if archive:
@@ -71,6 +72,13 @@ def test_build_creates_verified_json_and_queryable_database(
                 output.write(path, f"army/{path.name}")
     output_dir = tmp_path / "generated"
     assert main(["build", str(source), "--output-dir", str(output_dir), "--compact"]) == 0
+    output = capsys.readouterr().out
+    for filename, label in (
+        ("infinity.db", "Application database size"),
+        ("infinity.raw.db", "Raw archive size"),
+    ):
+        size = (output_dir / filename).stat().st_size
+        assert f"{label}: {size:,} bytes" in output
 
     master = json.loads((output_dir / "master.json").read_text(encoding="utf-8"))
     normalized_text = (output_dir / "normalized.json").read_text(encoding="utf-8")
@@ -407,7 +415,12 @@ def test_render_scenario_map_command_uses_maintained_scenario_definition(
     assert 'data-marker-type="console" data-diameter-mm="40"' in svg
     assert 'id="deployment-a-depth" class="measurement"' in svg
     assert '>12″</text></g>' in svg
-    assert '>16″ × 12″</text>' in svg
+    # Reviewed Domination maps measure Console centers instead of labeling quadrant sizes.
+    assert 'id="quadrant-1-size" class="area-size"' not in svg
+    assert 'id="console-q1-center-left" class="center-measurement"' in svg
+    assert 'id="console-q1-center-top" class="center-measurement"' in svg
+    assert 'data-distance-inches="8"' in svg
+    assert 'data-distance-inches="18"' in svg
     assert f"Scenario map ready: {output}" in capsys.readouterr().out
 
 

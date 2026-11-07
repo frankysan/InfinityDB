@@ -1,0 +1,1413 @@
+"""Chromium acceptance for Weapon and Equipment profiles and source conflicts."""
+
+from __future__ import annotations
+
+import json
+import sqlite3
+from collections import defaultdict
+from collections.abc import Iterator
+from pathlib import Path
+from socketserver import ThreadingMixIn
+from threading import Thread
+from typing import Any
+from unittest.mock import patch
+from urllib.request import urlopen
+from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
+
+import pytest
+
+from infinity_db.weapon_properties import WeaponProperties
+from infinity_db.web import create_app
+from tools.browser_test_metrics import launch_timed_chromium
+from tools.browser_wsgi_transport import route_browser_page
+
+
+class _ThreadedServer(ThreadingMixIn, WSGIServer):
+    daemon_threads = True
+
+
+class _QuietHandler(WSGIRequestHandler):
+    def log_message(self, format: str, *args: object) -> None:
+        pass
+
+
+@pytest.fixture(scope="module")
+def weapon_app() -> Any:
+    root = Path(__file__).resolve().parents[1]
+    return create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+
+
+@pytest.fixture(scope="module")
+def origin(weapon_app: Any) -> Iterator[str]:
+    server = make_server(
+        "127.0.0.1", 0, weapon_app,
+        server_class=_ThreadedServer, handler_class=_QuietHandler,
+    )
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        yield f"http://127.0.0.1:{server.server_port}"
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+@pytest.fixture(scope="module")
+def chrome(weapon_app: Any, origin: str, pooled_chromium_browser: Any) -> Iterator[Any]:
+    class RoutedBrowser:
+        def __init__(self, browser: Any):
+            self.browser = browser
+
+        def new_page(self, **kwargs: Any) -> Any:
+            page = self.browser.new_page(**kwargs)
+            route_browser_page(page, weapon_app, origin)
+            return page
+
+    if pooled_chromium_browser is not None:
+        yield RoutedBrowser(pooled_chromium_browser)
+        return
+
+    sync_api = pytest.importorskip("playwright.sync_api")
+    with sync_api.sync_playwright() as driver:
+        try:
+            browser = launch_timed_chromium(driver, "weapon-cards")
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                pytest.skip(f"Chromium unavailable: {exc}")
+            raise
+        try:
+            yield RoutedBrowser(browser)
+        finally:
+            browser.close()
+
+
+CASES = (
+    ("d-charges", "weapon:d-charges", {"CC Mode", "Demolition Mode"}, {70, 186}),
+    ("disco-baller", "weapon:disco-baller", {None, "Disco Ball"}, {71, 186}),
+)
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_weapon_property_origins_reach_sources_in_normal_browser(
+    origin: str, chrome: Any, width: int,
+) -> None:
+    examples = {
+        "plasma": "plasma-sniper-rifle",
+        "viral": "viral-cc-weapon",
+        "breaker": "breaker-marksman-rifle",
+        "k1": "k1-combi-rifle",
+        "multi": "multi-rifle",
+        "ap-da": "feuerbach",
+        "ap-exp": "ap-exp-cc-weapon",
+        "ap-shock": "silenced-pistol",
+        "monofilament": "monofilament-mine",
+        "silenced": "silenced-pistol",
+        "n-em": "e-m-cc-weapon",
+    }
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{origin}/weapons/breaker-marksman-rifle", wait_until="domcontentloaded")
+        property_link = page.locator(
+            '.weapon-profile a[href="/glossary#weapon-property-breaker"]'
+        ).first
+        property_link.wait_for(state="visible", timeout=30000)
+        property_link.focus()
+        property_link.press("Enter")
+        page.wait_for_url(f"{origin}/glossary#weapon-property-breaker", timeout=30000)
+        page.locator("#weapon-property-breaker").wait_for(state="visible", timeout=30000)
+
+        for property_slug, weapon_slug in examples.items():
+            entry = page.locator(f"#weapon-property-{property_slug}")
+            assert entry.count() == 1, (property_slug, width)
+            assert entry.locator(f'a[href="/weapons/{weapon_slug}"]').count() == 1
+        ap_t2 = page.locator("#weapon-property-ap-t2")
+        assert ap_t2.count() == 1
+        assert "p. 67" in ap_t2.inner_text()
+        assert "p. 177: AP+T2 CC Weapon Chart" in ap_t2.inner_text()
+        assert ap_t2.locator('a[href="/ammunition/ap"]').count() == 1
+        assert ap_t2.locator('a[href="/ammunition/t2"]').count() == 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+
+        example = page.locator(
+            '#weapon-property-breaker a[href="/weapons/breaker-marksman-rifle"]'
+        )
+        example.focus()
+        example.press("Enter")
+        page.wait_for_url(f"{origin}/weapons/breaker-marksman-rifle", timeout=30000)
+        citation = page.locator(
+            "#rule-weapon-breaker-marksman-rifle .rules-source-citations"
+        )
+        citation.wait_for(state="visible", timeout=30000)
+        source = citation.locator("a").filter(has_text="N5 Core Rules v5.3, p. 180")
+        assert source.count() == 1
+        assert source.get_attribute("href") == (
+            "https://experience.corvusbelli.com/en/infinity/resources"
+        )
+
+        page.goto(f"{origin}/weapons/ap-t2-cc-weapon", wait_until="domcontentloaded")
+        property_link = page.locator(
+            '.weapon-profile a[href="/glossary#weapon-property-ap-t2"]'
+        ).first
+        property_link.wait_for(state="visible", timeout=30000)
+        property_link.focus()
+        property_link.press("Enter")
+        page.wait_for_url(f"{origin}/glossary#weapon-property-ap-t2", timeout=30000)
+        page.locator("#weapon-property-ap-t2").wait_for(state="visible", timeout=30000)
+        assert "p. 177: AP+T2 CC Weapon Chart" in page.locator(
+            "#weapon-property-ap-t2"
+        ).inner_text()
+        assert not errors, (width, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("color_scheme", ("light", "dark"))
+def test_reviewed_weapon_chart_sources_reach_exact_modes_in_browser(
+    origin: str, chrome: Any, width: int, color_scheme: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900}, color_scheme=color_scheme)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.context.route(
+        "https://experience.corvusbelli.com/**",
+        lambda route: route.fulfill(status=200, content_type="text/plain", body="Source site"),
+    )
+    try:
+        page.goto(f"{origin}/weapons/uragan-mrl", wait_until="domcontentloaded")
+        cards = page.locator(".weapon-variant .weapon-profile")
+        cards.first.wait_for(state="visible", timeout=30000)
+        assert cards.count() == 2
+        assert {card.locator("h4").inner_text() for card in cards.all()} == {
+            "Blast Mode", "Hit Mode",
+        }
+        for card in cards.all():
+            citation = card.locator(".rules-source-citations").filter(has_text="Weapon Chart:")
+            assert citation.count() == 1
+            assert "N5 Core Rules v5.3, p. 188" in citation.inner_text()
+            link = citation.locator("a")
+            assert link.get_attribute("href") == (
+                "https://experience.corvusbelli.com/en/infinity/resources"
+            )
+            assert link.get_attribute("target") == "_blank"
+            assert link.get_attribute("rel") == "noopener noreferrer"
+
+        page.goto(f"{origin}/weapons/rifle", wait_until="domcontentloaded")
+        card = page.locator(".weapon-variant .weapon-profile").first
+        card.wait_for(state="visible", timeout=30000)
+        chart = card.locator(".rules-source-citations").filter(has_text="Weapon Chart:")
+        assert "N5 Core Rules v5.3, p. 183" in chart.inner_text()
+        ammunition = card.locator(".weapon-ammunition-effects")
+        ammunition.locator("summary").click()
+        assert ammunition.locator(".weapon-ammunition-effect .detail-source a").count() > 0
+        assert "Weapon Chart:" not in ammunition.inner_text()
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+        link = chart.locator("a")
+        link.focus()
+        assert link.evaluate("(node) => document.activeElement === node")
+        with page.expect_popup() as popup_info:
+            link.press("Enter")
+        popup = popup_info.value
+        try:
+            popup.wait_for_load_state("domcontentloaded", timeout=30000)
+            assert popup.url == "https://experience.corvusbelli.com/en/infinity/resources"
+        finally:
+            popup.close()
+        assert not errors, (width, color_scheme, errors)
+    finally:
+        page.close()
+
+
+def test_missing_weapon_chart_publication_is_visible_in_browser(
+    origin: str, chrome: Any, weapon_app: Any,
+) -> None:
+    with patch.object(weapon_app.api, "weapon_profile_citations", None):
+        page = chrome.new_page(viewport={"width": 390, "height": 900})
+        try:
+            page.goto(f"{origin}/weapons/rifle", wait_until="domcontentloaded")
+            card = page.locator(".weapon-variant .weapon-profile").first
+            card.wait_for(state="visible", timeout=30000)
+            citation = card.locator(".rules-source-citations").filter(has_text="Weapon Chart:")
+            assert citation.inner_text() == "Weapon Chart: Unavailable."
+            assert citation.locator("a").count() == 0
+        finally:
+            page.close()
+
+
+def test_unroutable_weapon_property_example_shows_source_section_in_browser(
+    origin: str, chrome: Any,
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+    rules = app.rules_database
+    assert rules is not None
+    composed_record = rules.composed_record
+
+    def unroutable_example(record_id: str, **kwargs: Any) -> Any:
+        record = composed_record(record_id, **kwargs)
+        if record_id == "weapon:breaker-marksman-rifle" and record is not None:
+            return {**record, "army_links": [{"entity": "weapon", "id": "missing-weapon-slug"}]}
+        return record
+
+    with patch.object(rules, "composed_record", side_effect=unroutable_example):
+        app.api.glossary_catalog._weapon_properties = WeaponProperties(
+            rules, database=app.database
+        )
+
+    page = chrome.browser.new_page(viewport={"width": 390, "height": 900})
+    route_browser_page(page, app, origin)
+    try:
+        page.goto(f"{origin}/glossary#weapon-property-breaker", wait_until="domcontentloaded")
+        entry = page.locator("#weapon-property-breaker")
+        entry.wait_for(state="visible", timeout=30000)
+        assert (
+            "Weaponry (reviewed profile example): N5.3 p. 180: Breaker Marksman Rifle"
+            in entry.locator(".glossary-property-origins").inner_text()
+        )
+        assert entry.locator('a[href="/weapons/breaker-marksman-rifle"]').count() == 0
+        assert entry.locator('a[href="/weapons/missing-weapon-slug"]').count() == 0
+        assert entry.locator('a[href="/ammunition/ap"]').count() == 1
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("slug", "name", "source_page"),
+    (("cube", "Cube", 121), ("tinbot", "TinBot", 127)),
+)
+def test_equipment_glossary_reaches_cited_detail_with_keyboard(
+    origin: str, chrome: Any, width: int, slug: str, name: str, source_page: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{origin}/glossary", wait_until="domcontentloaded")
+        page.locator("#glossary-list .glossary-entry").first.wait_for(
+            state="visible", timeout=30000
+        )
+        page.locator("#glossary-search").fill(name)
+        entry = page.locator(f"#equipment-{slug}")
+        entry.wait_for(state="visible", timeout=30000)
+        assert entry.locator(".glossary-domain").inner_text().casefold() == "equipment"
+        link = entry.locator(f'header a[href="/equipment/{slug}"]')
+        assert link.count() == 1
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{origin}/equipment/{slug}", timeout=30000)
+        card = page.locator(f"#rule-equipment-{slug}")
+        card.wait_for(state="visible", timeout=30000)
+        citation = card.locator(".rules-source-citations a").filter(
+            has_text=f"N5 Core Rules v5.3, p. {source_page}"
+        )
+        assert citation.count() == 1
+        assert citation.get_attribute("href") == (
+            "https://experience.corvusbelli.com/en/infinity/resources"
+        )
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+        assert not errors, (width, slug, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize(("slug", "rule_id", "modes", "pages"), CASES)
+def test_pinned_weapon_modes_rules_links_and_citations(
+    origin: str, chrome: Any, width: int, slug: str, rule_id: str,
+    modes: set[str | None], pages: set[int],
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.request.get(f"{origin}/api/weapons/{slug}")
+        assert response.status == 200
+        item = response.json()
+        profiles = item["profiles"]
+        assert len(profiles) == 2
+        assert {profile["mode"] for profile in profiles} == modes
+        rule = next(rule for rule in item["rules"] if rule["id"] == rule_id)
+        assert pages <= {
+            citation["page"] for citation in rule["citations"]
+            if citation["source_id"] == "n5-core-v5.3-pdf"
+        }
+        variants = item["weapon_variants"]
+        expected_profile_titles = [
+            profile.get("mode") or profile.get("name") or variant["name"]
+            for variant in variants for profile in variant["profiles"]
+        ]
+        assert len(expected_profile_titles) == 2
+
+        route = f"{origin}/weapons/{slug}#rule-{rule_id.replace(':', '-')}"
+        page.goto(route, wait_until="domcontentloaded")
+        page.locator("#item-content").wait_for(state="visible", timeout=60000)
+        cards = page.locator(".weapon-variant .weapon-profile")
+        assert cards.count() == 2, (slug, width)
+        assert [card.locator("h4").first.text_content() for card in cards.all()] == (
+            expected_profile_titles
+        )
+        for card, profile in zip(cards.all(), (
+            profile for variant in variants for profile in variant["profiles"]
+        ), strict=True):
+            stat = card.locator(".weapon-statline tbody tr").first
+            assert stat.locator('td[data-label="B"]').text_content() == str(profile["burst"])
+            assert stat.locator('td[data-label="PS"]').text_content() == str(profile["damage"])
+            assert card.locator("h4").first.is_visible()
+            if profile.get("profile"):
+                assert profile["profile"] in card.inner_text()
+
+        article = page.locator(f'[id="rule-{rule_id.replace(":", "-")}"]')
+        article.wait_for(state="visible", timeout=10000)
+        assert article.count() == 1
+        visible_text = article.inner_text()
+        assert all(f"p. {number}" in visible_text for number in pages)
+        assert "[[" not in visible_text  # Maintained semantic links must render as UI.
+        for relation in rule.get("display_relations", []):
+            if not relation.get("presentation"):
+                continue
+            reference = relation["record"].get("public_reference") or {}
+            href = reference.get("href")
+            if not href and reference.get("catalog") and reference.get("id"):
+                href = f"/{reference['catalog']}/{reference['id']}"
+            if href:
+                assert article.locator(".rules-relations a").evaluate_all(
+                    "(links, href) => links.some(link => link.getAttribute('href') === href)",
+                    href,
+                ), (slug, width, relation["record"]["id"], href)
+        assert not errors, (slug, width, errors)
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        ), (slug, width)
+    finally:
+        page.close()
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("slug", "source_page", "modes"),
+    (
+        (
+            "multi-rifle", 183,
+            (
+                ("Anti-Materiel Mode", "DA", "1", "7", "ARM × 2",
+                 "Anti-materiel", "Suppressive Fire"),
+                ("AP Mode", "AP", "3", "7", "ARM/2 × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+                ("Shock Mode", "Shock", "3", "7", "ARM × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+            ),
+        ),
+        (
+            "multi-heavy-machine-gun", 179,
+            (
+                ("Anti-materiel Mode", "Exp", "1", "5", "ARM × 3",
+                 "Anti-materiel", "Suppressive Fire"),
+                ("AP Mode", "AP", "4", "5", "ARM/2 × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+                ("Shock Mode", "Shock", "4", "5", "ARM × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+            ),
+        ),
+        (
+            "multi-marksman-rifle", 180,
+            (
+                ("Anti-Material Mode", "DA", "1", "7", "ARM × 2",
+                 "Anti-materiel", "Suppressive Fire"),
+                ("AP Mode", "AP", "3", "7", "ARM/2 × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+                ("Shock Mode", "Shock", "3", "7", "ARM × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+            ),
+        ),
+        (
+            "multi-pistol", 182,
+            (
+                ("Anti-Material Mode", "DA", "1", "7", "ARM × 2",
+                 "Anti-materiel", "Suppressive Fire"),
+                ("AP Mode", "AP", "2", "7", "ARM/2 × 1",
+                 None, "Anti-materiel"),
+                ("Shock Mode", "Shock", "2", "7", "ARM × 1",
+                 None, "Anti-materiel"),
+            ),
+        ),
+    ),
+)
+def test_multi_weapon_modes_stay_separate_in_normal_browser(
+    origin: str, chrome: Any, width: int, slug: str, source_page: int,
+    modes: tuple[tuple[str, str, str, str, str, str | None, str], ...],
+) -> None:
+    """V1-A08: source-scoped MULTI modes must not transfer Burst or Traits."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{origin}/weapons", wait_until="domcontentloaded")
+        entry = page.locator(f'#catalog-list a[href="/weapons/{slug}"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{origin}/weapons/{slug}", timeout=30000)
+        cards = page.locator(".weapon-variant .weapon-profile")
+        cards.first.wait_for(state="visible", timeout=30000)
+        assert cards.count() == len(modes), (slug, width)
+        for card, (name, ammo, burst, ps, saving, required, forbidden) in zip(
+            cards.all(), modes, strict=True,
+        ):
+            assert card.locator("h4").first.inner_text() == name
+            cells = card.locator(".weapon-statline tbody tr td")
+            assert [
+                cell.inner_text() for cell in cells.all()
+            ] == [ammo, burst, ps, saving], (slug, width, name)
+            text = card.inner_text()
+            if required is not None:
+                assert required in text, (slug, width, name, required)
+            else:
+                assert not card.locator(".weapon-data-heading").filter(
+                    has_text="Traits"
+                ).count(), (slug, width, name)
+            assert forbidden not in text, (slug, width, name, forbidden)
+        rule = page.locator(f'#rule-weapon-{slug}')
+        rule.wait_for(state="visible", timeout=30000)
+        assert f"p. {source_page}" in rule.locator(
+            ".rules-source-citations"
+        ).inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        ap_link = cards.nth(1).locator('a[href="/ammunition/ap"]').first
+        ap_link.wait_for(state="visible", timeout=10000)
+        ap_link.focus()
+        ap_link.press("Enter")
+        page.wait_for_url(f"{origin}/ammunition/ap", timeout=30000)
+        assert not errors, (slug, width, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("slug", "page_number", "profiles"),
+    (
+        (
+            "boarding-pistol", 182,
+            (
+                ("Blast Mode", "N", "1", "ARM × 1",
+                 ("Intuitive Attack", "Direct Template (Small Teardrop)")),
+                ("Hit Mode", "N", "2", "ARM × 1", ()),
+            ),
+        ),
+        (
+            "missile-launcher", 187,
+            (
+                ("Blast Mode", "Exp", None, "ARM × 3",
+                 ("Impact Template (Circular)", "Anti-materiel")),
+                ("Hit Mode", "AP+Exp", None, "ARM/2 × 3",
+                 ("Anti-materiel",)),
+            ),
+        ),
+    ),
+)
+def test_blast_and_hit_weapon_modes_keep_effects_separate_in_browser(
+    origin: str, chrome: Any, width: int, slug: str, page_number: int,
+    profiles: tuple[tuple[str, str, str | None, str, tuple[str, ...]], ...],
+) -> None:
+    """V1-A08: template, ammunition and attack-mode effects must not leak."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{origin}/weapons", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator(f'#catalog-list a[href="/weapons/{slug}"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{origin}/weapons/{slug}", timeout=30000)
+        cards = page.locator(".weapon-variant .weapon-profile")
+        cards.first.wait_for(state="visible", timeout=30000)
+        assert cards.count() == 2, (slug, width)
+        for card, (mode, ammo, burst, saving, traits) in zip(
+            cards.all(), profiles, strict=True,
+        ):
+            assert card.locator("h4").inner_text() == mode
+            statline = card.locator(".weapon-statline tbody tr").first
+            assert statline.locator('td[data-label="Ammunition"]').inner_text() == ammo
+            assert statline.locator('td[data-label="Saving"]').inner_text() == saving
+            if burst is not None:
+                assert statline.locator('td[data-label="B"]').inner_text() == burst
+            text = card.inner_text()
+            for trait in traits:
+                assert trait in text, (slug, mode, trait)
+            if mode == "Hit Mode":
+                for template in ("Direct Template", "Impact Template", "Intuitive Attack"):
+                    assert template not in text, (slug, mode, template)
+            if slug == "boarding-pistol":
+                assert card.locator(".weapon-ranges").count() == (
+                    0 if mode == "Blast Mode" else 1
+                ), (slug, mode)
+        rule = page.locator(f"#rule-weapon-{slug}")
+        rule.wait_for(state="visible", timeout=30000)
+        assert f"p. {page_number}" in rule.locator(
+            ".rules-source-citations"
+        ).inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        ammo_href = "/ammunition/normal" if slug == "boarding-pistol" else "/ammunition/exp"
+        first_link = cards.first.locator(f'a[href="{ammo_href}"]').first
+        first_link.wait_for(state="visible", timeout=10000)
+        first_link.focus()
+        first_link.press("Enter")
+        page.wait_for_url(f"{origin}{ammo_href}", timeout=30000)
+        assert not errors, (slug, width, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("slug", "source_page", "burst", "suppressive"),
+    (
+        ("k1-combi-rifle", 183, "3", True),
+        ("k1-sniper-rifle", 185, "2", False),
+    ),
+)
+def test_k1_weapon_profiles_keep_normal_ammunition_and_arm_zero_in_browser(
+    origin: str, chrome: Any, width: int, slug: str,
+    source_page: int, burst: str, suppressive: bool,
+) -> None:
+    """V1-A08: K1 affects printed Saving, not ammunition or other K1 traits."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{origin}/weapons", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator(f'#catalog-list a[href="/weapons/{slug}"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{origin}/weapons/{slug}", timeout=30000)
+        profile = page.locator(".weapon-variant .weapon-profile")
+        profile.wait_for(state="visible", timeout=30000)
+        assert profile.count() == 1, (slug, width)
+        statline = profile.locator(".weapon-statline tbody tr").first
+        expected = {
+            "Ammunition": "N",
+            "B": burst,
+            "PS": "7",
+            "Saving": "ARM=0 × 1",
+        }
+        for label, value in expected.items():
+            assert statline.locator(
+                f'td[data-label="{label}"]'
+            ).inner_text() == value, (slug, width, label)
+        traits = profile.locator(".weapon-data-row").filter(
+            has=page.locator(".weapon-data-heading", has_text="Traits")
+        )
+        assert "Anti-materiel" in profile.inner_text()
+        assert ("Suppressive Fire" in traits.inner_text()
+                if traits.count() else False) is suppressive, (slug, width)
+        rule = page.locator(f"#rule-weapon-{slug}")
+        rule.wait_for(state="visible", timeout=30000)
+        summary = rule.inner_text()
+        assert "not a separate K1 Ammunition" in summary, (slug, width)
+        assert "ARM/2" in summary, (slug, width)
+        assert f"p. {source_page}" in rule.locator(
+            ".rules-source-citations"
+        ).inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        link = statline.locator('a[href="/ammunition/normal"]').first
+        link.wait_for(state="visible", timeout=10000)
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{origin}/ammunition/normal", timeout=30000)
+        assert not errors, (slug, width, errors)
+    finally:
+        page.close()
+
+
+@pytest.fixture(scope="module")
+def published_weapons(origin: str) -> list[dict[str, Any]]:
+    """Read every published Weapon detail once for storage/API/browser checks."""
+    def get(path: str) -> dict[str, Any]:
+        with urlopen(f"{origin}{path}", timeout=15) as response:
+            assert response.status == 200, path
+            return json.load(response)
+
+    items = get("/api/weapons")["items"]
+    assert len(items) >= 50, "Pinned Weapon catalog unexpectedly sparse"
+    details = [get(f"/api/weapons/{item['slug']}") for item in items]
+    assert [detail["slug"] for detail in details] == [item["slug"] for item in items]
+    return details
+
+
+@pytest.fixture(scope="module")
+def multi_profile_weapons(published_weapons: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    details = []
+    for detail in published_weapons:
+        profiles = [
+            profile for variant in detail.get("weapon_variants", [])
+            for profile in variant.get("profiles", [])
+        ]
+        assert len(profiles) == len(detail["profiles"]), detail["slug"]
+        if len(profiles) > 1:
+            details.append(detail)
+    assert len(details) >= 2, "Pinned catalog unexpectedly lacks multi-profile Weapons"
+    return details
+
+
+def _saving_display(profile: dict[str, Any]) -> str:
+    saving = profile.get("saving")
+    if saving is None or str(saving).strip() in ("", "-", "--"):
+        return "--"
+    return " × ".join(
+        str(value) for value in (saving, profile.get("saving_num"))
+        if value is not None and value != ""
+    )
+
+
+def _stat_display(value: Any) -> str:
+    return "—" if value is None or value == "" else str(value)
+
+
+def _ammunition_display(profile: dict[str, Any]) -> str:
+    if profile.get("ammunition") == 0:
+        return "--"
+    if isinstance(profile.get("ammunition_parts"), list):
+        return "".join(part["text"] for part in profile["ammunition_parts"])
+    return _stat_display(profile.get("ammunition"))
+
+
+def _expected_weapon_trait_groups(profile: dict[str, Any]) -> dict[str, str]:
+    references = profile.get("trait_references") or []
+    canonical_slugs = {
+        reference["slug"] for reference in references
+        if reference.get("slug") and not reference.get("source_alias")
+    }
+    groups: dict[str, list[str]] = {
+        "Traits": [],
+        "Labels": [],
+        "States": [],
+        "Properties": [],
+    }
+    for reference in references:
+        slug = reference.get("slug")
+        source_alias = bool(reference.get("source_alias"))
+        if source_alias and slug in canonical_slugs:
+            continue
+
+        source_label = reference.get("label") or ""
+        state_references = reference.get("state_references") or []
+        public_reference = reference.get("public_reference") or {}
+        if public_reference.get("catalog") == "labels":
+            group = "Labels"
+        elif (
+            public_reference.get("catalog") == "states"
+            or state_references
+            or source_label.casefold().startswith("state:")
+        ):
+            group = "States"
+        elif slug:
+            group = "Traits"
+        else:
+            group = "Properties"
+
+        if state_references:
+            label = " / ".join(state["label"] for state in state_references)
+        else:
+            label = (
+                reference.get("name") if source_alias else reference.get("label")
+            ) or reference.get("name") or ""
+            if group == "States" and label.casefold().startswith("state:"):
+                label = label.split(":", 1)[1].strip()
+        if label:
+            groups[group].append(label)
+
+    return {
+        group: " · ".join(labels)
+        for group, labels in groups.items()
+        if labels
+    }
+
+
+def _rendered_weapon_trait_groups(card: Any) -> dict[str, str]:
+    return card.evaluate(
+        """card => Object.fromEntries(
+          [...card.querySelectorAll('.weapon-data-row')]
+            .flatMap(row => {
+              const heading = row.querySelector('.weapon-data-heading')?.textContent ?? '';
+              if (!['Traits', 'Labels', 'States', 'Properties'].includes(heading)) {
+                return [];
+              }
+              return [[
+                heading,
+                row.querySelector('.weapon-data-value')?.innerText.trim() ?? ''
+              ]];
+            })
+        )"""
+    )
+
+
+def test_all_published_multi_profile_weapon_statlines_render_on_mobile(
+    origin: str, chrome: Any, multi_profile_weapons: list[dict[str, Any]],
+) -> None:
+    """All published multi-profile source rows must reach their own rendered card."""
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for weapon in multi_profile_weapons:
+            slug = weapon["slug"]
+            expected = [
+                [
+                    profile.get("mode") or profile.get("name") or variant["name"],
+                    _ammunition_display(profile),
+                    _stat_display(profile.get("burst")),
+                    _stat_display(profile.get("damage")),
+                    _saving_display(profile),
+                    profile.get("profile") or "",
+                ]
+                for variant in weapon["weapon_variants"]
+                for profile in variant["profiles"]
+            ]
+            page.goto(f"{origin}/weapons/{slug}", wait_until="domcontentloaded")
+            page.locator("#item-content").wait_for(state="visible", timeout=15000)
+            actual = page.locator(".weapon-variant .weapon-profile").evaluate_all(
+                """(cards) => cards.map((card) => {
+                  const cell = (label) => card.querySelector(
+                    '.weapon-statline tbody td[data-label="' + label + '"]'
+                  )?.textContent ?? '';
+                  const profileRow = [...card.querySelectorAll('.weapon-data-row')].find(
+                    row => row.querySelector('.weapon-data-heading')?.textContent === 'Profile'
+                  );
+                  return [
+                    card.querySelector('h4')?.textContent ?? '',
+                    cell('Ammunition'), cell('B'), cell('PS'), cell('Saving'),
+                    profileRow?.querySelector('.weapon-data-value')?.textContent ?? ''
+                  ];
+                })"""
+            )
+            assert actual == expected, (slug, actual, expected)
+            source_profiles = [
+                profile for variant in weapon["weapon_variants"]
+                for profile in variant["profiles"]
+            ]
+            for card, profile in zip(
+                page.locator(".weapon-variant .weapon-profile").all(),
+                source_profiles,
+                strict=True,
+            ):
+                expected_modifiers = _expected_range_modifiers(profile)
+                assert card.locator(".weapon-ranges tbody td").all_text_contents() == (
+                    expected_modifiers if any(expected_modifiers) else []
+                ), (slug, profile["mode"], expected_modifiers)
+                assert _rendered_weapon_trait_groups(card) == (
+                    _expected_weapon_trait_groups(profile)
+                ), (slug, profile["mode"])
+                parts = profile.get("ammunition_parts")
+                if not isinstance(parts, list):
+                    continue
+                expected_links = []
+                for part in parts:
+                    reference = part.get("public_reference") or {}
+                    href = reference.get("href")
+                    if not href and reference.get("catalog") and reference.get("id"):
+                        href = f"/{reference['catalog']}/{reference['id']}"
+                    if href:
+                        expected_links.append((part["text"], href))
+                links = card.locator('.weapon-statline td[data-label="Ammunition"] a')
+                actual_links = [
+                    (link.text_content(), link.get_attribute("href"))
+                    for link in links.all()
+                ]
+                assert actual_links == expected_links, (slug, profile["mode"])
+            assert page.evaluate(
+                "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+            ), slug
+        assert not errors, errors
+    finally:
+        page.close()
+
+def test_published_weapon_profiles_preserve_source_metadata(
+    published_weapons: list[dict[str, Any]],
+) -> None:
+    """Full published source-row parity; curated rules remain a separate layer."""
+    root = Path(__file__).resolve().parents[1]
+    source_rows: dict[tuple[int, str | None], list[dict[str, Any]]] = defaultdict(list)
+    with sqlite3.connect(
+        f"{(root / 'data/generated/infinity.db').resolve().as_uri()}?mode=ro",
+        uri=True,
+    ) as connection:
+        connection.row_factory = sqlite3.Row
+        rows = connection.execute(
+            "SELECT id, name, mode, type, ammunition, burst, damage, "
+            "saving, savingNum, profile, properties, distance "
+            "FROM metadata_weapons"
+        ).fetchall()
+    for row in rows:
+        source_rows[(row["id"], row["mode"])].append(dict(row))
+
+    checked = 0
+    profileless = []
+    for weapon in published_weapons:
+        flat = [
+            profile for variant in weapon["weapon_variants"]
+            for profile in variant["profiles"]
+        ]
+        assert flat == weapon["profiles"], weapon["slug"]
+        if not flat:
+            profileless.append(weapon["slug"])
+            continue
+        for profile in flat:
+            key = (profile["id"], profile["mode"])
+            candidates = source_rows.get(key, [])
+            assert candidates, (weapon["slug"], key)
+            comparable = {
+                "id": profile["id"],
+                "name": profile["name"],
+                "mode": profile["mode"],
+                "type": profile["type"],
+                "ammunition": profile["ammunition_source_id"],
+                "burst": profile["burst"],
+                "damage": profile["damage"],
+                "saving": profile["saving"],
+                "savingNum": profile["saving_num"],
+                "profile": profile["profile"],
+            }
+            matching = [
+                row for row in candidates
+                if all(row[column] == value for column, value in comparable.items())
+            ]
+            assert matching, (weapon["slug"], key, comparable, candidates)
+            source = matching[0]
+            assert [
+                reference["label"] for reference in profile.get("trait_references", [])
+            ] == profile["traits"], (weapon["slug"], key, profile["traits"])
+            for source_column, api_key, default in (
+                ("properties", "traits", []),
+                ("distance", "ranges", {}),
+            ):
+                raw = source[source_column]
+                decoded = json.loads(raw) if isinstance(raw, str) else (
+                    default if raw is None else raw
+                )
+                assert decoded == profile[api_key], (
+                    weapon["slug"], key, api_key, decoded, profile[api_key]
+                )
+            checked += 1
+    assert checked >= 100, checked
+    # SymbioBomb has a reviewed rules card but no standalone chart statline.
+    assert "symbiobomb" in profileless
+
+
+
+def _expected_range_modifiers(profile: dict[str, Any]) -> list[str]:
+    ranges = sorted(
+        (
+            band for band in (profile.get("ranges") or {}).values()
+            if isinstance(band, dict) and band.get("max") is not None
+        ),
+        key=lambda band: float(band["max"]),
+    )
+    modifiers = []
+    for maximum in (20, 40, 60, 80, 100, 120, 240):
+        matching = next(
+            (band for band in ranges if float(band["max"]) >= maximum),
+            None,
+        )
+        modifiers.append(
+            "" if matching is None and not ranges
+            else "--" if matching is None
+            else str(matching["mod"]) if matching.get("mod") is not None
+            else ""
+        )
+    return modifiers
+
+
+@pytest.mark.parametrize("shard", [0, 1, 2])
+def test_all_published_single_profile_weapon_cards_at_mobile_width(
+    origin: str, chrome: Any, published_weapons: list[dict[str, Any]], shard: int,
+) -> None:
+    """Shard the full published single-profile browser audit for bounded check runs."""
+    singles = [weapon for weapon in published_weapons if len(weapon["profiles"]) == 1]
+    assert len(singles) >= 20, len(singles)
+    selected = singles[shard::3]
+    assert selected
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for weapon in selected:
+            slug = weapon["slug"]
+            (variant,) = weapon["weapon_variants"]
+            (profile,) = variant["profiles"]
+            page.goto(f"{origin}/weapons/{slug}", wait_until="domcontentloaded")
+            page.locator("#item-content").wait_for(state="visible", timeout=15000)
+            cards = page.locator(".weapon-variant .weapon-profile")
+            assert cards.count() == 1, slug
+            card = cards.first
+            observed = card.evaluate(
+                """(card) => {
+                  const cell = label => card.querySelector(
+                    '.weapon-statline tbody td[data-label="' + label + '"]'
+                  )?.textContent ?? '';
+                  const profileRow = [...card.querySelectorAll('.weapon-data-row')].find(
+                    row => row.querySelector('.weapon-data-heading')?.textContent === 'Profile'
+                  );
+                  return [
+                    card.querySelector('h4')?.textContent ?? '',
+                    cell('Ammunition'), cell('B'), cell('PS'), cell('Saving'),
+                    profileRow?.querySelector('.weapon-data-value')?.textContent ?? ''
+                  ];
+                }"""
+            )
+            expected = [
+                profile.get("mode") or profile.get("name") or variant["name"],
+                _ammunition_display(profile),
+                _stat_display(profile.get("burst")),
+                _stat_display(profile.get("damage")),
+                _saving_display(profile),
+                profile.get("profile") or "",
+            ]
+            assert observed == expected, (slug, observed, expected)
+
+            source_modifiers = _expected_range_modifiers(profile)
+            rendered_range = card.locator(".weapon-ranges tbody td").all_text_contents()
+            assert rendered_range == (
+                source_modifiers if any(source_modifiers) else []
+            ), (slug, rendered_range, source_modifiers)
+            assert _rendered_weapon_trait_groups(card) == (
+                _expected_weapon_trait_groups(profile)
+            ), (slug, profile["mode"])
+
+            parts = profile.get("ammunition_parts")
+            if isinstance(parts, list):
+                expected_links = []
+                for part in parts:
+                    reference = part.get("public_reference") or {}
+                    href = reference.get("href")
+                    if not href and reference.get("catalog") and reference.get("id"):
+                        href = f"/{reference['catalog']}/{reference['id']}"
+                    if href:
+                        expected_links.append((part["text"], href))
+                actual_links = [
+                    (link.text_content(), link.get_attribute("href"))
+                    for link in card.locator(
+                        '.weapon-statline td[data-label="Ammunition"] a'
+                    ).all()
+                ]
+                assert actual_links == expected_links, (slug, actual_links, expected_links)
+            assert page.evaluate(
+                "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+            ), slug
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+def test_profileless_symbiobomb_still_exposes_reviewed_rules(
+    origin: str, chrome: Any, published_weapons: list[dict[str, Any]],
+) -> None:
+    weapon = next(weapon for weapon in published_weapons if weapon["slug"] == "symbiobomb")
+    assert weapon["profiles"] == []
+    assert any(rule["id"] == "weapon:symbiobomb" for rule in weapon["rules"])
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    try:
+        page.goto(f"{origin}/weapons/symbiobomb", wait_until="domcontentloaded")
+        page.locator("#item-content").wait_for(state="visible", timeout=15000)
+        assert page.locator(".weapon-variant .weapon-profile").count() == 0
+        article = page.locator('[id="rule-weapon-symbiobomb"]')
+        article.wait_for(state="visible")
+        assert "SymbioBomb" in article.inner_text()
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+def test_pheroware_chart_citations_and_variant_scope_in_normal_browser(
+    origin: str, chrome: Any, width: int, theme: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}')")
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.request.get(f"{origin}/api/weapons/pt")
+        assert response.status == 200
+        item = response.json()
+        variants = {variant["id"]: variant for variant in item["weapon_variants"]}
+        assert set(variants) == {203, 204, 205}
+        owners = {variant["item_id"]: variant for variant in item["variants"]}
+        assert set(owners) == set(variants)
+        assert [rule["id"] for rule in owners[203]["rules"]] == ["weapon:pt-endgame"]
+        assert all(not owners[source_id].get("rules") for source_id in (204, 205))
+
+        page.goto(f"{origin}/weapons", wait_until="domcontentloaded")
+        entry = page.locator('#catalog-list a[href="/weapons/pt"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.focus()
+        assert entry.evaluate("node => document.activeElement === node")
+        entry.press("Enter")
+        page.wait_for_url(f"{origin}/weapons/pt", timeout=30000)
+        family = page.locator("#rule-weapon-pt")
+        family.wait_for(state="visible", timeout=30000)
+        assert page.locator("html").get_attribute("data-theme") == theme
+        variant_section = page.locator("section.rules-reference").filter(
+            has=page.get_by_role("heading", name="Variant rules", exact=True),
+        )
+        assert variant_section.locator("#rule-weapon-pt-endgame").count() == 1
+
+        for identity in ("weapon-pt", "weapon-pt-endgame"):
+            citations = page.locator(f"#rule-{identity} .rules-source-citations")
+            citations.wait_for(state="visible", timeout=30000)
+            assert "p. 182" in citations.inner_text()
+            assert "p. 181" not in citations.inner_text()
+            source = citations.locator("a")
+            assert source.count() == 1
+            assert source.get_attribute("href") == (
+                "https://experience.corvusbelli.com/en/infinity/resources"
+            )
+            source.focus()
+            assert source.evaluate("node => document.activeElement === node")
+
+        for source_id, variant in variants.items():
+            assert len(variant["profiles"]) == 1
+            profile = variant["profiles"][0]
+            title = profile.get("mode") or profile.get("name") or variant["name"]
+            card = page.locator(".weapon-profile").filter(
+                has=page.get_by_role("heading", name=title, exact=True),
+            )
+            assert card.count() == 1, (source_id, title)
+            assert card.locator("#rule-weapon-pt-endgame").count() == 0
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (width, theme)
+        assert not errors, (width, theme, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+def test_kobra_conflicting_sources_stay_visible_on_cc_mode_only(
+    origin: str, chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    try:
+        page.goto(f"{origin}/weapons/kobra-pistol", wait_until="domcontentloaded")
+        page.locator("#item-content").wait_for(state="visible", timeout=15000)
+        bs = page.locator(".weapon-profile").filter(
+            has=page.get_by_role("heading", name="BS Mode", exact=True)
+        )
+        cc = page.locator(".weapon-profile").filter(
+            has=page.get_by_role("heading", name="CC Mode", exact=True)
+        )
+        assert bs.count() == cc.count() == 1
+        assert bs.locator('[id="rule-weapon-kobra-pistol-cc"]').count() == 0
+        assert bs.locator('td[data-label="Ammunition"]').inner_text() == "Shock"
+        assert cc.locator('td[data-label="Saving"]').inner_text() == "ARM × 2"
+        card = cc.locator('[id="rule-weapon-kobra-pistol-cc"]')
+        card.wait_for(state="visible")
+        notes = card.locator(".rules-source-note").all_inner_texts()
+        assert len(notes) == 2
+        assert "Saving Rolls" in notes[0]
+        assert "publication conflict unresolved" in notes[1]
+        assert "Anti-materiel" in notes[1]
+        assert "p. 182" in card.inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        ), width
+    finally:
+        page.close()
+
+def test_katyusha_pdf_unsigned_mod_keeps_reviewed_plus_three_in_browser(
+    origin: str, chrome: Any,
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    review = json.loads(
+        (root / "config/validation/weapon-range-source-review.json")
+        .read_text(encoding="utf-8")
+    )
+    (candidate,) = review["candidates"]
+    assert candidate["name"] == "Katyusha MRL"
+    assert candidate["pdfUnsignedLabel"] == "3"
+    assert candidate["resolvedRangeMod"] == "+3"
+    assert candidate["classification"] == "confirmed-pdf-sign-omission"
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    try:
+        page.goto(f"{origin}/weapons/katyusha-mrl", wait_until="domcontentloaded")
+        page.locator("#item-content").wait_for(state="visible", timeout=15000)
+        actual = page.locator(
+            ".weapon-profile .weapon-ranges tbody td"
+        ).all_inner_texts()
+        assert actual == ["-3", "+3", "+3", "0", "0", "-6", "--"]
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("slug", (
+    "ap-mine", "e-m-mine", "monofilament-mine",
+    "para-mine", "shock-mine", "viral-mine",
+))
+def test_mine_object_silhouette_sources_remain_disclosed(
+    origin: str, chrome: Any, slug: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    errors: list[str] = []
+    failed_requests: list[str] = []
+    api_responses: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "requestfailed",
+        lambda request: failed_requests.append(f"{request.url}: {request.failure}"),
+    )
+    page.on(
+        "response",
+        lambda response: api_responses.append(f"{response.status} {response.url}")
+        if "/api/weapons/" in response.url or "/api/visible-unit-ids" in response.url
+        else None,
+    )
+    try:
+        url = f"{origin}/weapons/{slug}"
+        page.goto(url, wait_until="domcontentloaded")
+        rule = page.locator('[id="rule-weapon-mines"]')
+        try:
+            rule.wait_for(state="visible", timeout=45000)
+        except Exception as exc:
+            status = page.locator("#item-status").inner_text(timeout=2500)
+            content_hidden = page.locator("#item-content").is_hidden(timeout=2500)
+            raise AssertionError(
+                f"{slug} at 390px: {url}; status={status!r}; "
+                f"content hidden={content_hidden}; API responses={api_responses!r}; "
+                f"page errors={errors!r}; failed requests={failed_requests!r}"
+            ) from exc
+        note = rule.locator(".rules-source-note").first
+        assert note.is_visible()
+        content = note.inner_text()
+        assert "S0" in content and "S1" in content
+        assert "No official correction or source precedence has been confirmed" in content
+        assert not errors, errors
+    finally:
+        page.close()
+
+# The auxiliary Weapon Chart object names are not necessarily the item carried by
+# a Trooper (notably Disco Ball/Disco Baller). Keep their source identity and
+# deployed object's mode separate. The tuple pins Army's S, not source precedence.
+AUXILIARY_OBJECTS = (
+    ("AP Mine", None, 1, 181),
+    ("Cybermine", None, 0, 181),
+    ("Drop Bears", "Deployable Mode", 0, 181),
+    ("E/M Mine", None, 1, 181),
+    ("Monofilament Mine", None, 1, 181),
+    ("PARA Mine", None, 1, 181),
+    ("Shock Mine", None, 1, 181),
+    ("Viral Mine", None, 1, 181),
+    ("WildParrot", None, 1, 181),
+    ("Crazykoala", None, 1, 186),
+    ("Dazer", None, 0, 186),
+    ("Deployable Repeater", None, 1, 186),
+    ("Disco Baller", "Disco Ball", 1, 186),
+    ("FastPanda", None, 1, 186),
+)
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+def test_all_chart_auxiliary_objects_have_catalog_profile_in_normal_browser(
+    origin: str, chrome: Any, published_weapons: list[dict[str, Any]], width: int,
+) -> None:
+    """The 14 pinned chart objects are reachable without picking a carrier Unit.
+
+    This validates Army profile preservation, not precedence when official
+    publications conflict (six Mines and Dazer).
+    """
+    import re
+
+    assert len(AUXILIARY_OBJECTS) == 14
+    by_name = {weapon["name"].casefold(): weapon for weapon in published_weapons}
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    failed_requests: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "requestfailed",
+        lambda request: failed_requests.append(f"{request.url}: {request.failure}"),
+    )
+    try:
+        for name, mode, army_s, pdf_page in AUXILIARY_OBJECTS:
+            if name in {"Dazer", "Deployable Repeater", "FastPanda"}:
+                # These object identities are Equipment, not Weapon carriers.
+                assert name.casefold() not in by_name
+                slug = name.casefold().replace(" ", "-")
+                response = page.request.get(f"{origin}/api/equipment/{slug}")
+                assert response.status == 200
+                equipment = response.json()
+                assert any(rule["id"] == f"equipment:{slug}" for rule in equipment["rules"])
+                page.goto(f"{origin}/equipment/{slug}", wait_until="domcontentloaded")
+                rule_card = page.locator(f'[id="rule-equipment-{slug}"]')
+                rule_card.wait_for(state="visible", timeout=15000)
+                content = rule_card.inner_text()
+                if name == "Dazer":
+                    note = rule_card.locator(".rules-source-note").first
+                    assert "S0" in note.inner_text() and "S1" in note.inner_text()
+                    assert "ARM 0, BTS 0 and STR 1" in content
+                elif name == "Deployable Repeater":
+                    assert "ARM 0, BTS 0, STR 1 and S 1" in content
+                else:
+                    assert "ARM 0, BTS 0, STR 1, S 1" in content
+                matching = [
+                    profile for profile in equipment.get("profiles", [])
+                    if profile.get("mode") == mode
+                ]
+                assert len(matching) == 1, (name, mode)
+                (profile,) = matching
+                source_text = profile["profile"]
+                assert source_text
+                attributes = {
+                    key: int(value)
+                    for key, value in re.findall(
+                        r"\b(ARM|BTS|STR|S)\s*=\s*(\d+)\b", source_text
+                    )
+                }
+                assert attributes == {"ARM": 0, "BTS": 0, "STR": 1, "S": army_s}
+                cards = page.locator(".weapon-variant .weapon-profile").filter(
+                    has=page.get_by_role(
+                        "heading", name=mode or profile["name"], exact=True
+                    )
+                )
+                assert cards.count() == 1, (name, mode)
+                assert source_text in cards.first.inner_text()
+                assert page.evaluate(
+                    "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+                ), (name, width)
+                continue
+            weapon = by_name[name.casefold()]
+            source_profiles = [
+                p for variant in weapon["weapon_variants"]
+                for p in variant["profiles"]
+                if p["mode"] == mode
+            ]
+            assert len(source_profiles) == 1, (name, mode, pdf_page)
+            (profile,) = source_profiles
+            source_text = profile["profile"]
+            assert isinstance(source_text, str) and source_text, (name, mode)
+            attributes = {
+                key: int(value)
+                for key, value in re.findall(r"\b(ARM|BTS|STR|S)\s*=\s*(\d+)\b", source_text)
+            }
+            assert attributes == {"ARM": 0, "BTS": 0, "STR": 1, "S": army_s}, name
+
+            url = f"{origin}/weapons/{weapon['slug']}"
+            failed_requests.clear()
+            page.goto(url, wait_until="domcontentloaded")
+            try:
+                page.locator("#item-content").wait_for(
+                    state="visible", timeout=45000
+                )
+            except Exception as exc:
+                # The async catalog loader can remain hidden if fetch/render
+                # fails. Preserve the exact object, status and network cause
+                # when a parallel Chromium run exceeds its render deadline.
+                status_text = page.locator("#item-status").inner_text()
+                raise AssertionError(
+                    f"{name} ({mode}) at {width}px: {url}; "
+                    f"catalog status={status_text!r}; "
+                    f"page errors={errors!r}; "
+                    f"failed requests={failed_requests!r}"
+                ) from exc
+            cards = page.locator(".weapon-variant .weapon-profile")
+            candidates = cards.filter(
+                has=page.get_by_role(
+                    "heading", name=mode or profile["name"], exact=True,
+                )
+            )
+            assert candidates.count() == 1, (name, mode)
+            card = candidates.first
+            profile_rows = card.locator(".weapon-data-row").filter(
+                has=page.get_by_role("heading", name="Profile", exact=True)
+            )
+            assert profile_rows.count() == 1, (name, mode)
+            assert source_text in profile_rows.first.inner_text(), (name, source_text)
+            assert page.evaluate(
+                "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+            ), (name, width)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+def test_armed_turret_curated_object_profile_keeps_source_conflict_visible(
+    origin: str, chrome: Any, width: int,
+) -> None:
+    """Armed Turret has a curated Trooper profile, not a Weapon Chart object row."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    failed_requests: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "requestfailed",
+        lambda request: failed_requests.append(f"{request.url}: {request.failure}"),
+    )
+    try:
+        response = page.request.get(f"{origin}/api/weapons/armed-turret")
+        assert response.status == 200
+        weapon = response.json()
+        profile = weapon["special_profile"]
+        assert dict(profile["stats"])["S"] == "2"
+        assert dict(profile["stats"])["ARM"] == "2"
+        assert dict(profile["stats"])["BTS"] == "3"
+        assert dict(profile["stats"])["STR"] == "1"
+
+        url = f"{origin}/weapons/armed-turret"
+        page.goto(url, wait_until="domcontentloaded")
+        card = page.locator(".special-weapon-profile")
+        try:
+            card.wait_for(state="visible", timeout=45000)
+        except Exception as exc:
+            status_text = page.locator("#item-status").inner_text()
+            raise AssertionError(
+                f"Armed Turret at {width}px: {url}; "
+                f"catalog status={status_text!r}; "
+                f"page errors={errors!r}; failed requests={failed_requests!r}"
+            ) from exc
+        observed = card.evaluate(
+            """(element) => [...element.querySelectorAll('thead th')].map(
+              (th, index) => [
+                th.textContent,
+                element.querySelectorAll('tbody td')[index]?.textContent
+              ]
+            )"""
+        )
+        assert observed == profile["stats"]
+        assert "360º Visor" in card.inner_text()
+        assert "Total Reaction" in card.inner_text()
+        assert profile["cc_weapon"] in card.inner_text()
+
+        rule = page.locator('[id="rule-weapon-armed-turret"]')
+        rule.wait_for(state="visible", timeout=15000)
+        notes = rule.locator(".rules-source-note").all_inner_texts()
+        assert len(notes) >= 2
+        assert "S1" in notes[0] and "S2" in notes[0]
+        assert "Unresolved Silhouette conflict" in notes[0]
+        assert "one Saving Roll" in notes[1]
+        assert not errors, errors
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        ), width
+    finally:
+        page.close()

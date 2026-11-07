@@ -33,7 +33,10 @@ import os
 from pathlib import Path
 
 from infinity_db.database import Database
+from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.variant_usage_reference import load_variant_usage_publication
+from infinity_db.weapon_profile_publication import load_weapon_profile_publication
 
 expected_environment = {
     "INFINITY_DB_DATABASE": "/app/data/infinity.db",
@@ -48,7 +51,16 @@ if hasattr(os, "geteuid") and os.geteuid() == 0:
     raise SystemExit("Application image must not run as root")
 
 data_dir = Path("/app/data")
-expected_files = {"infinity.db", "rules.db"}
+Database(data_dir / "infinity.db").validate()
+rules = RulesDatabase(data_dir / "rules.db")
+rules.validate()
+restrictions = rules.restrictions_payload()
+# v8 is a disposable compatibility image: it cannot carry a mismatched
+# v9-only generated publication. Current v9 release images must carry it.
+expected_files = {"infinity.db", "rules.db", "deployed-objects.json"}
+if restrictions["available"]:
+    expected_files.add("variant-usage.json")
+    expected_files.add("weapon-profile-sources.json")
 actual_files = {path.name for path in data_dir.iterdir()}
 if actual_files != expected_files:
     raise SystemExit(
@@ -56,8 +68,48 @@ if actual_files != expected_files:
         f"expected {sorted(expected_files)!r}"
     )
 
-Database(data_dir / "infinity.db").validate()
-RulesDatabase(data_dir / "rules.db").validate()
+if restrictions["available"]:
+    if (
+        restrictions["source"]["id"] != "n5-core-v5.3-pdf"
+        or restrictions["source"]["page"] != 194
+        or len(restrictions["items"]) != 14
+        or restrictions["evaluationSupported"] is not False
+    ):
+        raise SystemExit("Release image has incomplete v9 Restrictions data")
+elif restrictions["items"] or restrictions["evaluationSupported"] is not False:
+    raise SystemExit("Legacy release image invented positive Restrictions data")
+publication = load_deployed_object_publication(
+    data_dir / "deployed-objects.json", data_dir / "infinity.db", data_dir / "rules.db"
+)
+if publication is None or len(publication["objects"]) != 17:
+    raise SystemExit("Release image has no complete reviewed deployed-object publication")
+if len(publication["unresolvedDeliveries"]) != 1:
+    raise SystemExit("Release image lost the unresolved deployed-object delivery")
+usage = load_variant_usage_publication(
+    data_dir / "variant-usage.json",
+    data_dir / "infinity.db",
+    data_dir / "rules.db",
+    data_dir / "deployed-objects.json",
+)
+if restrictions["available"] and (usage is None or not usage["variants"]):
+    raise SystemExit("Release image is missing the reviewed exact-variant publication")
+if not restrictions["available"] and usage is not None:
+    raise SystemExit("Legacy compatibility image unexpectedly published variant usage")
+weapon_sources = load_weapon_profile_publication(
+    data_dir / "weapon-profile-sources.json",
+    data_dir / "infinity.db",
+    data_dir / "rules.db",
+)
+if restrictions["available"]:
+    rifle = Database(data_dir / "infinity.db").get_catalog_item("weapons", "rifle")
+    if not weapon_sources or rifle is None:
+        raise SystemExit("Release image is missing reviewed Weapon Chart citations")
+    profile = rifle["profiles"][0]
+    citation = weapon_sources.get((rifle["id"], profile["id"], profile["mode"]))
+    if not citation or citation["source_id"] != "n5-core-v5.3-pdf" or citation["page"] != 183:
+        raise SystemExit("Release image has no matching Rifle Weapon Chart citation")
+elif weapon_sources is not None:
+    raise SystemExit("Legacy compatibility image unexpectedly published Weapon Chart citations")
 '
 
 if [ "$published_assets" -eq 1 ]; then
@@ -224,6 +276,62 @@ with urlopen("http://127.0.0.1:8000/api/skills/74", timeout=3) as response:
 if not skill.get("rules"):
     raise SystemExit("/api/skills/74 did not include curated rules data")
 
+with urlopen("http://127.0.0.1:8000/api/deployed-objects", timeout=3) as response:
+    deployed = json.load(response)
+if len(deployed.get("items", [])) != 17 or len(deployed.get("unresolved_deliveries", [])) != 1:
+    raise SystemExit("/api/deployed-objects did not publish the reviewed release objects")
+with urlopen("http://127.0.0.1:8000/deployed-objects", timeout=3) as response:
+    if b"deployed" not in response.read().lower():
+        raise SystemExit("/deployed-objects browser entry point unavailable")
+
+with urlopen("http://127.0.0.1:8000/api/restrictions", timeout=3) as response:
+    restrictions = json.load(response)
+if restrictions.get("evaluationSupported") is not False:
+    raise SystemExit("/api/restrictions incorrectly claims legality evaluation")
+if restrictions.get("available"):
+    if len(restrictions.get("items", [])) != 14:
+        raise SystemExit("/api/restrictions has incomplete v9 source conditions")
+    jump = next(
+        (row for row in restrictions["items"] if
+         row["subject"] == "Motorcycle" and row["action"] == "upward-jump"),
+        None,
+    )
+    if (
+        jump is None
+        or jump["scope"] != "while-mounted-upwards-only"
+        or jump["operation"] != {
+            "kind": "directional-skill-movement", "qualifier": {"direction": "upward"}
+        }
+    ):
+        raise SystemExit("/api/restrictions lost the mounted upward-Jump condition")
+    chosen = [
+        row for row in restrictions["items"]
+        if row["action"] == "lieutenant-selection"
+    ]
+    if len(chosen) != 2 or any(
+        row["operation"] != {
+            "kind": "army-role-selection", "qualifier": {"role": "lieutenant"}
+        }
+        for row in chosen
+    ):
+        raise SystemExit("/api/restrictions lost Lieutenant selection-only scope")
+elif restrictions.get("items") != []:
+    raise SystemExit("/api/restrictions legacy snapshot must not imply permissions")
+
+with urlopen("http://127.0.0.1:8000/api/weapons/rifle", timeout=3) as response:
+    rifle = json.load(response)
+if rifle.get("profile_citations_available") is not restrictions.get("available"):
+    raise SystemExit("/api/weapons/rifle has the wrong Weapon Chart publication status")
+profile_sources = rifle["profiles"][0].get("profile_citations", [])
+if restrictions.get("available"):
+    if not any(
+        citation.get("source_id") == "n5-core-v5.3-pdf" and citation.get("page") == 183
+        for citation in profile_sources
+    ):
+        raise SystemExit("/api/weapons/rifle lost its reviewed Weapon Chart citation")
+elif profile_sources:
+    raise SystemExit("Legacy Weapon profile incorrectly retained a v9 citation")
+
 with urlopen("http://127.0.0.1:8000/api/version", timeout=3) as response:
     version = json.load(response)
 if not version.get("version") or not version.get("snapshot_revision"):
@@ -243,6 +351,27 @@ with urlopen("http://127.0.0.1:8000/changes", timeout=3) as response:
 expected_release_notes = render_current_release_notes_html()
 if not expected_release_notes or expected_release_notes not in changes:
     raise SystemExit("/changes did not render the installed canonical changelog")
+'
+
+# v9 releases must expose a real reviewed source group through the installed API.
+# The v8 compatibility image deliberately contains no variant publication.
+docker exec "$container" python -c '
+import json
+from pathlib import Path
+from urllib.parse import quote
+from urllib.request import urlopen
+
+path = Path("/app/data/variant-usage.json")
+if path.is_file():
+    publication = json.loads(path.read_text(encoding="utf-8"))
+    record_id = publication["variants"][0]["variant"]["recordId"]
+    url = "http://127.0.0.1:8000/api/variant-usage?record_id=" + quote(record_id)
+    with urlopen(url, timeout=3) as response:
+        result = json.load(response)
+    if result.get("recordId") != record_id or not result.get("items"):
+        raise SystemExit("Exact-variant usage API is missing the installed publication")
+    if result.get("sourceSnapshot") != publication["sourceSnapshot"]:
+        raise SystemExit("Exact-variant usage API returned unexpected source provenance")
 '
 
 if [ "$packaged_assets" -eq 1 ]; then

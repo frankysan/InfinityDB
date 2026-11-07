@@ -1,0 +1,90 @@
+{
+  "formatVersion": 1,
+  "scope": "N5.3 optional table/scenery reference records; not deployed Weapon/Equipment or Army carriers",
+  "sourceId": "n5-core-v5.3-pdf",
+  "records": [
+    {
+      "id": "rule:special-terrain",
+      "kind": "rule",
+      "name": "Special Terrain",
+      "summary": "Optional battlefield areas agreed before play, configured with a Terrain Type and at least one additional characteristic. Their boundaries and effects belong to the current game table, not an Army or Unit Profile.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "effects": [
+          "During game-table setup, both players agree on the location and characteristics of Special Terrain zones and mark boundaries clearly using scenery, templates, or other representations.",
+          "Every Special Terrain area has a Terrain Type: Aquatic, Desert, Mountain, Jungle, or Zero-G. The Type is chosen before Deployment and determines whether a Trooper's [[skill:terrain]] Special Skill is applicable.",
+          "Each Special Terrain area must also have at least one additional characteristic: Difficult Terrain, Saturation, or Visibility Conditions. These characteristics may be combined.",
+          "Special Terrain areas have infinite height unless otherwise specified.",
+          "A Trooper is affected while in Silhouette contact with the area or when its base or Silhouette Template is at least partly covered by the area."
+        ],
+        "restrictions": [
+          "Special Terrain is optional and requires agreement between players before play.",
+          "The named examples in the Special Terrain suggestions table are illustrative combinations, not additional canonical Terrain Types or mandatory game-table elements."
+        ],
+        "definesSkills": []
+      },
+      "relations": [],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 143,
+          "section": "Terrain and Scenery Structures — Special Terrain"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-30"
+      }
+    },
+    {
+      "id": "rule:access-width",
+      "kind": "rule",
+      "name": "Access Width",
+      "summary": "Narrow and Wide scenery access points constrain passage by Silhouette, with an explicit [[state:prone|Prone]]/Silhouette X exception. Their gate Tokens label scenery openings, not deployed Weapons or Equipment.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "effects": [
+          "Players agree on the Access Width of scenery openings during table setup and mark each as a Narrow Gate or Wide Gate Token.",
+          "Narrow access points permit passage only to Troopers with a Silhouette Attribute of 2 or lower; Wide access points permit all Troopers regardless of Silhouette.",
+          "Access Width restrictions take priority over the General Movement Rules and the Requirements of Skills with the Movement Label. A Trooper lacking the required Silhouette cannot pass.",
+          "Gates and access points are treated as open and do not block Line of Fire unless a specific rule or scenario condition says otherwise."
+        ],
+        "restrictions": [
+          "Troopers in [[state:prone|Prone State]] with Silhouette X use the Silhouette Attribute on their Unit Profile when checking access restrictions.",
+          "Access Width is a property of the agreed scenery layout, not an intrinsic permanent can-pass property of a Trooper. Gate Tokens are labels, not independently placed game devices."
+        ],
+        "definesSkills": []
+      },
+      "relations": [],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 145,
+          "section": "Scenery Structures — Access Width (AW)"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-30"
+      }
+    }
+  ]
+}

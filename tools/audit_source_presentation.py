@@ -420,6 +420,70 @@ def _gap_evidence(connection: sqlite3.Connection) -> dict[str, int | None]:
     }
 
 
+def _occupied_field_count(connection: sqlite3.Connection, table: str, field: str) -> int:
+    """Count populated source values without interpreting zero/false as absent."""
+    name = quote(field)
+    return int(connection.execute(
+        f"SELECT COUNT(*) FROM {quote(table)} WHERE {name} IS NOT NULL "
+        f"AND (typeof({name}) != 'text' OR length(trim({name})) > 0)"
+    ).fetchone()[0])
+
+
+def _unrepresented_field_occupancy(
+    connection: sqlite3.Connection,
+) -> list[dict[str, Any]]:
+    """Retain potential gaps even when the pinned source provides no values."""
+    result: list[dict[str, Any]] = []
+    for table, fields in sorted(_schema_fields().items()):
+        for field in fields:
+            policy = FIELD_OVERRIDES.get((table, field), TABLE_POLICY[table])
+            if policy["status"] != UNREPRESENTED:
+                continue
+            total = _count(connection, table)
+            if total is None:
+                raise SourcePresentationAuditError(
+                    f"Paired raw database is missing source table {table!r}"
+                )
+            result.append({
+                "table": table,
+                "field": field,
+                "sourceRowCount": total,
+                "occupiedCount": _occupied_field_count(connection, table, field),
+            })
+    return result
+
+
+def _potential_gap_batches(fields: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Group unrepresented source fields by table, prioritizing populated evidence."""
+    by_table: dict[str, dict[str, Any]] = {}
+    for field in fields:
+        batch = by_table.setdefault(
+            field["table"],
+            {"table": field["table"], "sourceRowCount": field["sourceRowCount"], "fields": []},
+        )
+        batch["fields"].append({
+            "field": field["field"],
+            "occupiedCount": field["occupiedCount"],
+        })
+
+    batches = list(by_table.values())
+    for batch in batches:
+        batch["occupiedFieldCount"] = sum(
+            field["occupiedCount"] > 0 for field in batch["fields"]
+        )
+        batch["occupiedValueCount"] = sum(
+            field["occupiedCount"] for field in batch["fields"]
+        )
+    return sorted(
+        batches,
+        key=lambda batch: (
+            -batch["occupiedFieldCount"],
+            -batch["occupiedValueCount"],
+            batch["table"],
+        ),
+    )
+
+
 def _raw_evidence(path: Path) -> dict[str, Any]:
     raw_path = raw_database_path(path)
     if not raw_path.is_file():
@@ -431,8 +495,18 @@ def _raw_evidence(path: Path) -> dict[str, Any]:
     connection = sqlite3.connect(raw_path.resolve().as_uri() + "?mode=ro", uri=True)
     try:
         tables = _table_names(connection)
+        unrepresented = _unrepresented_field_occupancy(connection)
+        batches = _potential_gap_batches(unrepresented)
         return {
             "status": "available",
+            "unrepresentedFieldOccupancy": unrepresented,
+            "potentialGapBatches": batches,
+            "occupiedUnrepresentedFieldCount": sum(
+                item["occupiedCount"] > 0 for item in unrepresented
+            ),
+            "occupiedUnrepresentedTableCount": sum(
+                batch["occupiedFieldCount"] > 0 for batch in batches
+            ),
             "path": str(raw_path),
             "fireteamCount": _count(connection, "fireteams"),
             "fireteamMemberCount": _count(connection, "fireteam_members"),
@@ -478,6 +552,7 @@ def audit_database(path: Path) -> dict[str, Any]:
     finally:
         connection.close()
 
+    raw_evidence = _raw_evidence(path)
     return {
         "format": FORMAT,
         "formatVersion": FORMAT_VERSION,
@@ -488,12 +563,18 @@ def audit_database(path: Path) -> dict[str, Any]:
             "confirmedGapCount": len(CONFIRMED_GAPS),
             "deferredOutOfScopeCount": len(DEFERRED_OUT_OF_SCOPE),
             "fieldStatusCounts": counts,
+            "occupiedUnrepresentedFieldCount": raw_evidence.get(
+                "occupiedUnrepresentedFieldCount"
+            ),
+            "occupiedUnrepresentedTableCount": raw_evidence.get(
+                "occupiedUnrepresentedTableCount"
+            ),
         },
         "inventory": inventory,
         "confirmedGaps": list(CONFIRMED_GAPS),
         "deferredOutOfScope": list(DEFERRED_OUT_OF_SCOPE),
         "applicationEvidence": evidence,
-        "rawEvidence": _raw_evidence(path),
+        "rawEvidence": raw_evidence,
     }
 
 
@@ -501,6 +582,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=FORMAT)
     parser.add_argument("database", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--require-no-occupied-gaps",
+        action="store_true",
+        help=(
+            "Fail if unrepresented source fields are populated "
+            "or raw evidence is missing."
+        ),
+    )
     args = parser.parse_args(argv)
     report = audit_database(args.database)
     if args.output:
@@ -516,6 +605,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         f"Completeness: {report['summary']['confirmedGapCount']} confirmed gap families | "
         f"{report['summary']['deferredOutOfScopeCount']} explicit scope decisions"
     )
+    occupied = report["summary"]["occupiedUnrepresentedFieldCount"]
+    print(
+        f"Source occupancy: {occupied} of "
+        f"{report['summary']['fieldStatusCounts'][UNREPRESENTED]} potential "
+        "unrepresented fields populated"
+        if occupied is not None else "Source occupancy: paired raw database unavailable"
+    )
+    if args.require_no_occupied_gaps:
+        if occupied is None:
+            print("Source-field gate: FAIL (paired raw source database unavailable)")
+            return 1
+        if occupied:
+            print(
+                f"Source-field gate: FAIL ({occupied} occupied unrepresented fields; "
+                "review rawEvidence.potentialGapBatches)"
+            )
+            return 1
+        print("Source-field gate: PASS (no occupied unrepresented fields)")
     return 0
 
 

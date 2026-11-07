@@ -12,6 +12,13 @@ from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.hacking_program_catalog import hacking_program_declaration_categories
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.skill_config import load_skill_source_config
+from infinity_db.structured_chart_outcomes import (
+    link_booty_family_outcomes,
+    link_booty_weapon_outcomes,
+    link_metachemistry_skill_components,
+    project_booty_rows,
+    project_metachemistry_rows,
+)
 
 UNCLASSIFIED_CATEGORY = {"id": "unclassified", "name": "Unclassified", "source": None, "page": None}
 DECLARATION_KIND = "declaration-category"
@@ -348,10 +355,36 @@ class SkillCatalog:
             rows = self.database.list_martial_arts_levels()
             return {"kind": "martial-arts", "title": "Martial Arts chart", "rows": rows}
         if slug == "booty":
-            rows = self.database.list_booty_results()
+            rows = project_booty_rows(self.database.list_booty_results())
+            if self.rules_database is not None:
+                weapons = deepcopy(self.database.list_catalog_items("weapons"))
+                for weapon in weapons:
+                    attach_public_catalog_slug(self.database, "weapons", weapon)
+                rows = link_booty_weapon_outcomes(rows, public_weapons=weapons)
+                equipment = deepcopy(self.database.list_catalog_items("equipment"))
+                for item in equipment:
+                    attach_public_catalog_slug(self.database, "equipment", item)
+                rows = link_booty_family_outcomes(
+                    rows,
+                    public_catalogs={
+                        "weapons": weapons,
+                        "equipment": equipment,
+                        "skills": self.list_skills(),
+                    },
+                    reviewed_records=[
+                        *self._skill_records(),
+                        *self.rules_database.composed_records_by_kind("equipment"),
+                    ],
+                )
             return {"kind": "random-chart", "title": "Booty chart", "rows": rows}
         if slug == "metachemistry":
-            rows = self.database.list_metachemistry_results()
+            rows = project_metachemistry_rows(self.database.list_metachemistry_results())
+            if self.rules_database is not None:
+                rows = link_metachemistry_skill_components(
+                    rows,
+                    reviewed_records=self._skill_records(),
+                    public_skills=self.list_skills(),
+                )
             return {"kind": "random-chart", "title": "MetaChemistry chart", "rows": rows}
         return None
 

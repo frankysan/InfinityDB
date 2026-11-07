@@ -210,6 +210,59 @@ def test_render_maintained_core_scenario_maps_are_deterministic_and_well_formed(
         )
 
 
+@pytest.mark.parametrize(
+    ("configuration_id", "horizontal", "vertical"),
+    [("150-points", 6, 12), ("200-250-points", 8, 18),
+     ("300-400-points", 12, 18)],
+)
+@pytest.mark.parametrize("unit", ["in", "cm"])
+def test_domination_console_center_measurements_use_source_geometry(
+    configuration_id: str, horizontal: int, vertical: int, unit: str,
+) -> None:
+    document = load_curated_document(_CORE_RULES)
+    definition = scenario_definition_from_curated_document(document, "scenario:domination")
+    configuration = next(
+        row for row in definition.configurations if row.id == configuration_id
+    )
+    geometry = configuration.geometry
+    svg = render_scenario_map_svg(geometry, distance_unit=unit)  # type: ignore[arg-type]
+    root = ElementTree.fromstring(svg)
+    namespace = "{http://www.w3.org/2000/svg}"
+    groups = [
+        node for node in root.iter(f"{namespace}g")
+        if node.attrib.get("class") == "center-measurement"
+    ]
+    assert len(groups) == 8
+    markers = {
+        node.attrib["id"]: node for node in root.iter(f"{namespace}circle")
+        if node.attrib.get("data-marker-type") == "console"
+    }
+    assert set(markers) == {f"console-q{number}" for number in range(1, 5)}
+    for number in range(1, 5):
+        marker_id = f"console-q{number}"
+        marker = markers[marker_id]
+        x, y = float(marker.attrib["cx"]), float(marker.attrib["cy"])
+        horizontal_edge = "left" if number in (1, 3) else "right"
+        vertical_edge = "top" if number in (1, 2) else "bottom"
+        for edge, distance in ((horizontal_edge, horizontal), (vertical_edge, vertical)):
+            ruler = next(row for row in groups if row.attrib["id"] == f"{marker_id}-center-{edge}")
+            assert ruler.attrib["data-target"] == marker_id
+            assert ruler.attrib["data-reference"] == "center"
+            assert ruler.attrib["data-edge"] == edge
+            line = ruler.find(f"{namespace}line")
+            text = ruler.find(f"{namespace}text")
+            assert line is not None and text is not None
+            assert text.attrib["data-distance-inches"] == str(distance)
+            assert text.text == (f"{distance}″" if unit == "in" else f"{distance * 2.5:g} cm")
+            assert (float(line.attrib["x2"]), float(line.attrib["y2"])) == (x, y)
+    assert not any(
+        node.attrib.get("id", "").endswith("-size") for node in root.iter()
+        if node.attrib.get("data-target", "").startswith("quadrant-")
+    )
+    assert len([node for node in root.iter(f"{namespace}rect")
+                if node.attrib.get("class") == "scoring"]) == 4
+
+
 def test_render_scenario_map_svg_projects_derived_dimensions_and_area_size() -> None:
     geometry = parse_scenario_geometry(
         {

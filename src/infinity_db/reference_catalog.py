@@ -100,6 +100,30 @@ class RulesRecordCatalog:
                     )
         return sorted(peers, key=lambda peer: (peer["name"].casefold(), peer["id"]))
 
+    def _scenario_users(self, record_id: str) -> list[dict[str, str]]:
+        """Link general rules to scenarios that explicitly include them."""
+        if self.domain.slug != "rules" or self.rules_database is None:
+            return []
+        users = []
+        for scenario in self.rules_database.composed_records_by_kind("scenario"):
+            mission = scenario.get("facts", {}).get("mission", {})
+            if not any(
+                item.get("definitionId") == record_id
+                for item in mission.get("rules", [])
+            ):
+                continue
+            slug = route_slug_from_typed_domain_id(
+                scenario["id"], expected_domain="scenario",
+                context="current Scenario reference",
+            )
+            users.append({
+                "catalog": "scenarios",
+                "catalog_name": "Scenarios",
+                "name": str(scenario["name"]),
+                "href": f"/scenarios/{slug}",
+            })
+        return sorted(users, key=lambda item: (item["name"].casefold(), item["href"]))
+
     def list_items(self) -> list[dict[str, Any]]:
         """Return the current player-facing identities in stable display order."""
 
@@ -109,6 +133,7 @@ class RulesRecordCatalog:
                 "slug": self._slug(record),
                 "name": record["name"],
                 "description": record["summary"],
+                "aliases": list(record.get("aliases", [])),
             }
             for record in self._records()
         ]
@@ -164,6 +189,9 @@ class RulesRecordCatalog:
                 )
                 if related_peers:
                     item["related_category_peers"] = related_peers
+            scenario_users = self._scenario_users(str(record["id"]))
+            if scenario_users:
+                item["used_by"] = scenario_users
             return item
         return None
 
@@ -194,6 +222,7 @@ class LabelCatalog:
                     raise ValueError(
                         f"Current Label {label_id!r} has conflicting definitions"
                     )
+                existing["vocabulary_sources"].extend(label["vocabulary_sources"])
                 continue
             labels[label_id] = label
         self._labels_cache = sorted(
@@ -226,5 +255,6 @@ class LabelCatalog:
                 "name": label["name"],
                 "description": label["description"],
                 "collection": deepcopy(label["collection"]),
+                "vocabulary_sources": deepcopy(label["vocabulary_sources"]),
             }
         return None

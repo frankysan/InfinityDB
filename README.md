@@ -5,8 +5,9 @@ Equipment, Skills, Weapons, core Scenarios, and relationships across Armies. It 
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Current release: **0.10.1** (2026-10-10).
-See the [release process](docs/releasing.md) and [current milestone](docs/TODO.md#current-milestone).
+Current release: **1.0.0** (2026-11-07). See the
+[release notes](docs/CHANGELOG.md#100---2026-11-07) for changes and upgrade
+considerations, and the [deployment guide](docs/deployment.md) for updates.
 
 ## Guiding principles
 
@@ -74,27 +75,63 @@ its application metrics.
   legacy Army references, and direct links into pre-filtered Unit Explorer rosters.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
   Ammunition, Traits, Labels, States, Hacking Programs, and General Rules reference
-  catalogs, with reverse Unit usage links where that relationship applies. Search and filter state
+  catalogs, including reviewed current weapons not yet used by an Army Unit,
+  with reverse Unit usage links where that relationship applies. Search and filter state
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Includes global search and a federated Glossary across player-facing reference domains, with
-  embedded Attributes and scoped Game terms routed back to their canonical owning surfaces.
-- Includes a browsable core **Scenarios** reference with explicit Army Points selection, structured
-  setup/objectives/scoring, scenario Rules and Skills, source-verification notes, and deterministic
-  deployment maps generated from the same maintained geometry as the scenario data.
+  canonical Equipment, embedded Attributes, scoped Game terms and searchable Weapon Properties
+  (such as Viral, Plasma and combined Ammunition). Weapon Properties link to their underlying
+  canonical rules and reviewed, source-cited Weapon examples instead of redefining the effects.
+  Embedded Attribute, Game-term and Unit Profile help entries show their source citations in the
+  Glossary; Unit Profile notation help also shows them in context.
+- Label definitions include deployment, targeting, modifier and fixed-result
+  qualifications, with Assignable's English/Spanish timing difference disclosed.
+  Detail pages show the vocabulary's source locators and their scope.
+- Trait help explains Disposable exhaustion, Non-Reloadable cancellation,
+  attribute-specific target effects and Silent's conditional Dodge modifiers.
+- Links to **Orders and AROs** from the home page and navigation, with searchable
+  declarations by Order type and links to their rules and scenario context.
+- Shows eighteen suggested terrain combinations on Special Terrain, preserving
+  optional and conditional values; Narrow Gate and Wide Gate searches lead to Access Width.
+- Includes linked N5.3 movement and geometry references for routes, supporting
+  surfaces, visibility, Cover, zones, Coherency and replacement positioning, with
+  Move's declaration requirements and Silhouette diagrams.
+- Presents dated N5 FAQ clarifications alongside the affected rules and scenarios,
+  with concise citations and disclosed source disagreements. The **Deployed objects**
+  reference presents 17 reviewed objects in individual cards, retaining disputed
+  or unknown attributes and verified delivery/Unit-use context.
+- Includes a browsable **Scenarios** reference with four N5.3 Core missions
+  and a separately selectable ITS Season 18 Battleground pilot. Explicit
+  Army Points selection, structured setup/objectives/scoring, scenario Rules
+  and Skills, source-verification notes and deterministic maps all derive
+  from maintained scenario definitions. The wider ITS library remains
+  outside the 1.0 completeness requirement.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.
 - Supports System, Light, and Dark themes from Settings; System follows the operating-system
   preference, while an explicit choice can be remembered with the other browser settings.
 - Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when
-  an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, equivalence
-  labels, and N5 rules/bonus context.
+  an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, parenthetical
+  chart terms, original chart notes, and N5 rules/bonus context. Parentheses alone do not imply
+  a counts-as rule or profile eligibility. Unverified Unit/FTO references are flagged;
+  Reinforcement charts show parent Army limits separately. The combined view respects reviewed
+  explicit Wildcard exclusions. General Fireteam rules remain available without Army chart entries.
 - Presents connected Unit relationships for Peripherals/Controllers, Includes,
   selection/dependency constraints, Reinforcement parentage, and broader
   source-declared faction membership.
 - Displays curated rules-reference information where available, including
   summaries, classifications, special weapon data, and source citations.
+  Normal rules cards disclose known source disagreements and unresolved Army
+  qualifiers without assigning unverified effects.
+  Equipment families distinguish reference-only variants from options in
+  the current Army data and identify family-source citation scope. Reviewed
+  Weapon profiles without a separate rules
+  card show their corresponding N5 Weapon Chart page when the matching
+  source publication is available.
 - Supports centimetre/inch display preferences and a Developer mode for
-  inspecting database IDs and other review information.
+  inspecting database IDs, exact reviewed Skill/Equipment source occurrences,
+  and source-scoped Restrictions links. The complete Restrictions chart has
+  its own public reference page at `/rules/restrictions`.
 - Supports published Army, Unit, Peripheral, Order, and Characteristic SVG symbols. Corvus
   Belli has explicitly permitted InfinityDB to use and redistribute the graphical
   assets used by this non-commercial community project, including processed SVGs
@@ -125,11 +162,11 @@ across planning, architecture, release notes, and implementation:
 See [project domains](docs/project-domains.md) for the canonical boundaries and the
 documentation-label convention.
 
-## Roadmap to 1.0
+## Release progression
 
 **Project domain:** Project infrastructure
 
-The current direction is deliberately incremental:
+InfinityDB reached its current 1.0 reference baseline through these releases:
 
 - **0.7.x — Rules & context:** enriched existing catalog/application data with concise
   rules summaries, official references, classifications, and reviewed semantic
@@ -141,20 +178,19 @@ The current direction is deliberately incremental:
   gaps and made the result searchable, navigable, and understandable.
 - **0.10.x — Stabilize & harden:** completed the application consistency and scenario
   architecture reviews, frontend/theme work, and release/operations hardening.
-- **0.10.1 — Interim reference consistency (release preparation):** release the completed
-  core Scenarios, Ammunition and rules-reference improvements alongside the stabilization
-  fixes. Remaining acceptance and publication gates are tracked in
-  [`docs/TODO.md`](docs/TODO.md#0101--interim-reference-consistency).
-- **1.0.0 — Player data-complete (temporarily paused):** resume after this interim release;
-  ensure every useful in-scope game datum collected by InfinityDB has a maintained
-  representation and a meaningful, usable place in the
-  web reference, including the current core-rules scenarios. ITS season/tournament
-  content remains a later extension of the same scenario model.
+- **0.10.1 — Interim reference consistency (released 2026-10-10):**
+  published the core Scenarios, Ammunition and rules-reference improvements,
+  with stabilization fixes. See the [release notes](docs/CHANGELOG.md#0101---2026-10-10).
+- **1.0.0 — Current N5.3 reference (2026-11-07):** delivered the in-scope
+  current-source citation and browser reference baseline, dated FAQ,
+  deployed-object and exact-variant references, four core scenarios and the
+  optional ITS Season 18 Battleground pilot. The wider ITS library and
+  tournament tooling remain outside this baseline.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
-0.9 closed application gaps → 0.10 hardened and polished → 1.0 completes the reference.**
-Exact minor-release scope may move as audits discover dependencies; the durable 1.0 gate is
-defined in [release process](docs/releasing.md).
+0.9 closed application gaps → 0.10 hardened and polished → 1.0 completed the reference.**
+The [release process](docs/releasing.md) preserves the 1.0 completeness contract;
+future work is in the [post-1.0 backlog](docs/TODO.md#post-10--maintenance-and-product-expansion).
 
 ## Requirements and setup
 
@@ -211,7 +247,7 @@ the detailed snapshot contract.
 Curated rules data is built independently from Army data:
 
 ```powershell
-infinity-db build-rules
+infinity-db build-rules --output local/rules-standalone.db
 ```
 
 Reference PDFs and wiki snapshots are research inputs rather than direct runtime
@@ -285,10 +321,18 @@ infinity-db database-health data/generated/infinity.db --require-raw
 infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 
 # Build the independent rules-reference database
-infinity-db build-rules --output data/generated/rules.db
+infinity-db build-rules --output local/rules-standalone.db
 ```
 
-`build-rules` defaults to `data/curated/rules/`.
+`build-rules` defaults to `data/curated/rules/`. Its standard output
+remains the v8-compatible format for standalone use. The tracked
+1.0 rules release database uses the reviewed v9
+conditional Restrictions table and must be built as a coordinated
+release pair with `data/generated/deployed-objects.json`; see
+[the migration and recovery contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
+The CLI refuses to overwrite an existing v9 database with this default
+v8 export. Use the guarded v9 staging and paired-publication workflow
+to update the tracked release pair.
 
 `infinity-army` and `python -m infinity_army_data` remain available for the
 JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)
@@ -347,7 +391,8 @@ installation to another host.
 ## Project layout
 
 ```text
-docs/                       # Tracked project docs; docs/audits/ is local audit evidence
+docs/                       # Tracked project documentation
+local/                      # Private untracked workspace, excluded from Docker builds
 src/
   infinity_army_data/       # Army merge, normalization, metadata, and validation
   infinity_db/              # SQLite storage, application services, API, and browser
@@ -379,8 +424,22 @@ python tools/run_checks.py --profile code
 # Data/build validation
 python tools/run_checks.py --profile data
 
-# All stages
+# Markdownlint dependencies (one-time/when package-lock.json changes)
+npm ci --ignore-scripts --no-audit --no-fund
+
+# Markdown documentation checks
+python tools/run_checks.py --stage docs
+
+# All stages (including Markdownlint and isolated CI preflight)
+# Preflight may download Python packages; it skips if an earlier stage fails
 python tools/run_checks.py --all
+
+# CI preflight: staged src/ files and configured wheel data, without rerunning pytest
+python tools/ci_preflight.py --skip-pytest
+
+# Before committing: indexed lint/artifacts/tests/types and installed-wheel smoke
+# Creates a fresh virtual environment and may download Python packages
+python tools/run_checks.py --stage preflight
 
 # Targeted checks
 python tools/run_checks.py --stage test tests/test_availability.py
@@ -402,8 +461,10 @@ python tools/run_checks.py --stage test --test-workers 4
 python tools/run_checks.py --stage test --test-workers 0
 ```
 
-See [development checks](docs/testing.md) for worker-selection guidance and the
-current test-runner contract.
+See [development checks](docs/testing.md) for worker-selection guidance,
+Git-index preflight behavior and the current test-runner contract.
+Preflight checks the **staged index**, not unstaged tracked modifications,
+and complements the separate [installed-wheel CI check](docs/ci.md#installed-wheel-smoke).
 
 Requested stages continue after a failure by default; add `--fail-fast` to stop
 at the first failure. See [development checks](docs/testing.md) for stage and

@@ -1,14 +1,20 @@
-import { getCatalogItem } from "./api.js";
+import { getArmies, getCatalogItem } from "./api.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { appendMaintainedText } from "./maintained-text.js";
-import { rulesReferenceSection } from "./rules-reference.js";
+import { rulesCitationList, rulesReferenceSection } from "./rules-reference.js";
+import { shareStateHref } from "./share-state.js";
 
 const { catalog, singular, summaryHeading } = document.body.dataset;
 const itemId = window.location.pathname.split("/").pop();
+const isReinforcementsReference = catalog === "rules" && itemId === "reinforcements-extra";
 const name = document.getElementById("item-name");
 const meta = document.getElementById("item-meta");
 const status = document.getElementById("item-status");
 const content = document.getElementById("item-content");
 const pageController = new AbortController();
+let displayedItem;
+let faqItems = [];
+let reinforcementArmies = null;
 
 function definitionSection(item) {
   const section = document.createElement("section");
@@ -24,6 +30,18 @@ function definitionSection(item) {
     item.description || "No definition is available.",
   );
   section.append(heading, copy);
+  if (Array.isArray(item.vocabulary_sources)) {
+    section.append(rulesCitationList(item.vocabulary_sources, {
+      label: "Label vocabulary sources: ", discloseArchive: true,
+    }));
+    if (item.vocabulary_sources.length) {
+      const scope = document.createElement("p");
+      scope.className = "detail-source";
+      scope.textContent = "These sources describe the Label vocabulary as a whole; "
+        + "a source may not cover this specific Label.";
+      section.append(scope);
+    }
+  }
   return section;
 }
 
@@ -126,19 +144,81 @@ function relatedCategorySection(items) {
   return section;
 }
 
+function reinforcementSectionsSection(armies) {
+  if (!Array.isArray(armies)) return null;
+  const eligible = armies.filter((army) => army.playable !== false && !army.legacy);
+  const byId = new Map(eligible.map((army) => [army.id, army]));
+  const sections = eligible.filter((army) => army.role === "reinforcement")
+    .sort((left, right) => left.name.localeCompare(right.name));
+  if (!sections.length) return null;
+
+  const section = document.createElement("section");
+  section.className = "surface surface--subtle detail-section reference-detail-section";
+  section.id = "reinforcement-section-navigation";
+  const heading = document.createElement("h2");
+  heading.className = "surface-titlebar surface-titlebar--ruled";
+  heading.textContent = "Reinforcement Sections";
+  const description = document.createElement("p");
+  description.className = "detail-copy";
+  description.textContent = "Explore the current Army source pools and their parent Armies. "
+    + "These links do not validate a combined Army List or establish an N5 rewrite of the annex.";
+  const list = document.createElement("ul");
+  list.className = "reference-usage-list";
+
+  function overviewLink(army) {
+    const link = document.createElement("a");
+    link.href = `/armies#army-${encodeURIComponent(
+      army.public_slug || army.slug || String(army.id)
+    )}`;
+    link.textContent = army.name;
+    return link;
+  }
+
+  for (const reinforcement of sections) {
+    const item = document.createElement("li");
+    item.append(overviewLink(reinforcement));
+    const parents = (reinforcement.parent_armies || [])
+      .map((parent) => byId.get(parent.id))
+      .filter(Boolean);
+    if (parents.length) {
+      item.append(" — used by ");
+      parents.forEach((parent, index) => {
+        if (index) item.append(index === parents.length - 1 ? " and " : ", ");
+        item.append(overviewLink(parent));
+      });
+    }
+    const units = document.createElement("a");
+    units.href = shareStateHref("/units", "units", {
+      army_id: reinforcement.public_slug || reinforcement.slug || String(reinforcement.id),
+      reinforcement: "1",
+    });
+    units.textContent = "Browse section units";
+    item.append(" · ", units);
+    list.append(item);
+  }
+  section.append(heading, description, list);
+  return section;
+}
+
 function render(item) {
+  displayedItem = item;
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
   if (meta) meta.textContent = `${singular} · ${item.id}`;
   const sections = item.rules?.length
     ? [rulesReferenceSection(item.rules)]
     : [definitionSection(item)];
+  if (isReinforcementsReference) {
+    const sectionsNavigation = reinforcementSectionsSection(reinforcementArmies);
+    if (sectionsNavigation) sections.push(sectionsNavigation);
+  }
   const categoryPeers = categoryPeersSection(item.category_peers);
   if (categoryPeers) sections.push(categoryPeers);
   const relatedCategory = relatedCategorySection(item.related_category_peers);
   if (relatedCategory) sections.push(relatedCategory);
   const usedBy = usedBySection(item.used_by);
   if (usedBy) sections.push(usedBy);
+  if (faqItems.length) sections.push(faqRulingsSection(faqItems));
   content.replaceChildren(...sections);
   content.hidden = false;
   status.hidden = true;
@@ -149,7 +229,33 @@ document.addEventListener(
   () => pageController.abort(),
   { once: true },
 );
-getCatalogItem(catalog, itemId, pageController.signal).then(render).catch((error) => {
+getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
+  render(item);
+  if (isReinforcementsReference) {
+    getArmies(pageController.signal).then((payload) => {
+      if (pageController.signal.aborted) return;
+      reinforcementArmies = payload.items || [];
+      if (displayedItem) render(displayedItem);
+    }).catch((error) => {
+      if (error.name !== "AbortError") {
+        console.error("Could not load Reinforcement Section links", error);
+      }
+    });
+  }
+  if (catalog !== "rules" && catalog !== "ammunition") return;
+  const prefix = catalog === "rules" ? "rule" : "ammunition";
+  const topicId = item.rules?.find((rule) => rule.id?.startsWith(`${prefix}:`))?.id
+    || `${prefix}:${itemId}`;
+  fetchReviewedFaqRulings(topicId, { signal: pageController.signal })
+    .then((payload) => {
+      if (pageController.signal.aborted) return;
+      faqItems = payload.items || [];
+      if (faqItems.length && displayedItem) render(displayedItem);
+    })
+    .catch((error) => {
+      if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+    });
+}).catch((error) => {
   if (error.name === "AbortError") return;
   name.firstChild.textContent = `${singular} unavailable`;
   status.textContent = error.message || "Could not load this reference item.";

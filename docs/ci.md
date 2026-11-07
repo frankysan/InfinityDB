@@ -10,6 +10,15 @@ Required CI is intentionally hermetic with respect to Corvus Belli services and 
 inputs. A clean checkout must be able to validate source behavior, deterministic generated output,
 installed-package behavior, tracked release assets, and the production container.
 
+The local [phased validation workflow](testing.md#phased-development-and-validation)
+may batch discretionary broad checks between implementation passes. Its
+[active VD/VR queue](validation-queue.md) records pending design and
+execution, including deferred asynchronous Linux runs against explicitly
+selected revisions. These do **not** change required hosted CI triggers,
+jobs, matrices, or acceptance criteria. Outstanding validation for the
+relevant change must be resolved before merge or release acceptance;
+a local deferral or a green worker run is not a CI exemption.
+
 ## Principles
 
 1. **No routine network acquisition.** Required push/pull-request jobs consume repository-owned
@@ -25,6 +34,123 @@ installed-package behavior, tracked release assets, and the production container
 6. **Keep extended external checks explicit.** Optional network/acquisition/performance workflows
    must not make an otherwise valid source commit fail because an external service is unavailable.
 
+## Cross-browser release compatibility gate
+
+The [Cross-browser compatibility workflow](../.github/workflows/cross-browser-compatibility.yml)
+is an independent, **mandatory v1.0 release gate**. It runs on pull
+requests, pushes to `main`, and manual dispatch once registered on the
+default branch. The four required jobs are Ubuntu/Chromium, Ubuntu/Firefox,
+macOS/WebKit and Windows/Microsoft Edge; all must complete successfully
+for the **same exact candidate SHA**. No job uses `continue-on-error`.
+Ordinary development pushes without a pull request do not launch this
+matrix by default. Configure repository branch protection/rulesets
+separately if these checks are to block PR merging; the release-evidence
+collector independently fails closed before tagging v1.0 or later.
+
+Each job installs Python 3.11.9, **Playwright 1.64.1** and its selected browser,
+generates and checks the ignored deployed-object publication matched to
+the tracked rules/Army/variant artifacts, and serves the frozen database
+pair using an ephemeral WSGI server. One shared portable cohort runs
+**14 critical journeys** (seven at 1440 and 390 px) covering soft navigation,
+source citations, Weapon fragments, Unit detail, Core scenario selection,
+FAQ entry points and notice keyboard/touch behavior. Tests fail on missing
+browser executables, unhandled JavaScript/network errors or unavailable
+artifacts; the selected engine cannot silently skip. Each job uploads JUnit
+evidence and failure screenshot/trace artifacts, and the browser engine/version
+is logged. Playwright is pinned; branded Edge and rolling hosted images must
+still be identified by their recorded actual versions, not treated as frozen
+browser binaries. No external Army/PDF acquisition is needed.
+
+For **v1.0 and later**, `tools.prepare_release_ci_evidence` requires the
+Cross-browser compatibility workflow in addition to Source checks,
+Installed wheel smoke and Deployment smoke. It validates each of the
+**four exact job identities and successful terminal conclusions** from
+the latest GitHub Actions attempt. Missing, skipped, failed, incomplete or
+duplicated jobs and green aggregate workflow runs with failed matrix legs
+are **not accepted**. The annotated tag evidence includes the verified
+workflow run; structured JSON records all four jobs. This does not replace
+the comprehensive Chromium and 81-page Unit matrices, exact hosted
+candidate checks or human Safari/iOS/touch acceptance. macOS WebKit is
+not a real-device Safari/iOS test.
+
+**V1S-097 acceptance baseline:** the reporting-only four-platform pilot
+at `6892e7e6094288b6c7eb1cc51abe0b3fb6b6ac84` passed **56/56**
+across [run 42366303864](https://github.com/frankysan/InfinityDB/actions/runs/42366303864)
+after clean-checkout deployed-object setup, WebKit request-cancellation
+readiness and the Windows socket listen-backlog correction. The **mandatory**
+workflow then passed **56/56 without skips** at
+`b5ca8823d3bad593ac000298a244d36aea494480` in
+[run 42367296713](https://github.com/frankysan/InfinityDB/actions/runs/42367296713):
+Chromium 156.0.8078.4 (10.24 s), Firefox 157.0 (13.85 s),
+macOS WebKit 27.2 (53.55 s) and Edge 157.0.4341.42 (24.28 s).
+The 16 focused release-evidence regression tests passed on Windows, as did
+Ruff, Pyright and documentation checks. This accepts V1S-097 as a development
+release-gate implementation, **not** as final 1.0 candidate/tag/hosted evidence;
+the exact eventual release SHA must still pass all four jobs.
+
+## Agent CI monitoring and repair
+
+For authorized autonomous InfinityDB development, **CI monitoring is
+non-blocking**. After a successful development-branch push, record the
+full commit SHA and available workflow run IDs, then continue the next
+independent Windows task; **do not wait for a terminal CI result before
+each subsequent commit**. Reconcile outstanding hosted runs at natural
+task boundaries, especially after a due full local/Linux validation.
+Source checks (including every OS/Python matrix leg, clean-index
+preflight and dependent cross-platform deterministic outputs),
+Installed wheel smoke, and Deployment smoke test are the minimum
+required workflows for hosted acceptance. For release preparation,
+include any additional release-specific gates from `releasing.md`.
+
+GitHub CI is **not triggered by a local test run**. Source checks is
+triggered on pull requests, pushes to `main`, and manual dispatch.
+A branch push can therefore have no new Source checks run if no
+applicable pull request is open. When a required workflow is absent,
+untriggered or inaccessible, mark it *not verified*; do not dispatch
+the entire CI matrix on every intermediate development commit.
+Arrange an authorized manual dispatch at a due validation or
+release/merge gate, or report the blocker. Never interpret no run
+as success. Associate findings with the actual SHA and run ID, not
+merely the latest workflow shown in the repository.
+
+During an active development session, maintain a compact record
+of pending SHA/run IDs and inspect them at meaningful implementation
+or full-test completion boundaries. Do not idle-poll CI or let it
+block unrelated development, commits or pushes. If several newer
+commits supersede an older pending run, prioritize the newest relevant
+revision; still triage older failures when their cause may persist.
+A run is accepted only after it and **all required jobs** reach
+successful terminal conclusions. Distinguish `queued`,
+`in_progress`, `success`, `failure`, `cancelled`,
+`timed_out` and `skipped`. Missing and skipped required jobs
+are incomplete coverage, not a pass. Only a final release/merge
+candidate or an explicitly mandatory gate must wait for all
+applicable hosted checks to finish.
+
+On failure, retrieve the failed job and step logs (and artifacts when
+useful), find the first actionable error, and report the affected
+SHA/run and diagnosed cause. The agent has standing authorization to
+fix repository causes without separate permission: make the smallest
+compatible change, validate focused regressions plus applicable
+critical checks, inspect unrelated changes, commit and fast-forward
+push, then record the **replacement SHA** for continued non-blocking
+monitoring. Do not pause independent development waiting for that
+replacement run. Prefer a retry of a single job only for substantiated transient
+runner/network failures, not reproducible test/type/build defects.
+Do not bypass, disable or silently relax required checks. If a
+failure remains unresolved, Git cannot advance safely, or the cause
+requires secrets, external authority or deployment permissions,
+report the blocker and leave hosted acceptance open. Document exact
+terminal outcomes; preserve the active VD/VR queue for local deferred
+validation rather than duplicating every CI run as a VR item.
+
+This is an **agent workflow while a session is running**. It does not
+install a persistent watcher, send push notifications outside the
+session or schedule background GitHub API calls. GitHub-hosted
+failure notifications or an explicitly configured scheduled watcher
+are separate mechanisms; neither should imply unattended repository
+fixes unless those capabilities are actually connected and verified.
+
 ## Source checks
 
 `.github/workflows/source-checks.yml` runs on pull requests, pushes to `main`, and manual dispatch.
@@ -35,9 +161,208 @@ The current matrix is:
 - macOS / Python 3.11 — test + Army build + rules build;
 - Ubuntu / Python 3.14 — test + Army build + rules build.
 
+The full Ubuntu 3.11 leg and filesystem-heavy Windows leg each have a
+30-minute job limit. The other legs have 15-minute limits. The full leg needs
+time for both the ordinary checks and the isolated preflight's additional
+pytest run; its time limit does not omit or relax either pass.
+
+**2026-11-07 timeout repair:** In
+[Source run 42315535265](https://github.com/frankysan/InfinityDB/actions/runs/42315535265)
+at `2af9c39c0713190c79e2de0c1ef0686ab472f7fb`, the ordinary Ubuntu 3.11
+checks passed, but the job reached its former 15-minute limit while the
+isolated pytest pass was still progressing. The dependent deterministic-output
+comparison was skipped. At `cde06cb34f3e5a78a87f2043bad4f7f4a887cc14`,
+four focused Windows tests passed without skips for the matrix budgets,
+publication setup and retained full preflight. The dedicated MCP Linux
+worker was unavailable. Replacement commit
+`06e817972a2adade0f17259c672395d18a95419d` passed
+[Source run 42317983707](https://github.com/frankysan/InfinityDB/actions/runs/42317983707),
+including all four platform/Python jobs and cross-platform deterministic
+outputs. Its
+[installed-wheel run 42317983643](https://github.com/frankysan/InfinityDB/actions/runs/42317983643)
+and [deployment-smoke run 42317983693](https://github.com/frankysan/InfinityDB/actions/runs/42317983693)
+also passed. These outcomes apply only to that revision; final-candidate
+release acceptance remains separate.
+
 Every leg installs `.[dev,symbols]`, uses the controlled `tests/fixtures/deployment-smoke` Army
 source for build validation, and requires the tracked graphical publication. The primary Ubuntu
-3.11 leg owns lint/type checks; other matrix legs focus on runtime/build portability.
+3.11 leg owns Ruff, Markdownlint, offline Markdown path/heading validation
+and Pyright; other matrix legs focus on runtime/build portability.
+For the `--all` leg, CI sets up Node.js 24 and explicitly runs
+`npm ci --ignore-scripts --no-audit --no-fund` against the tracked `package-lock.json` before the
+check runner starts. The `docs` stage uses this local installation without acquiring dependencies
+at execution time; other matrix legs do not require npm.
+
+### V1S Git-aware retirement gate
+
+The primary Ubuntu 3.11 Source leg uses a full-history checkout and runs
+`python -m tools.check_v1_backlog_ci` before installing dependencies.
+The regular `docs` stage separately checks current TODO structure without Git.
+The CI retirement check enforces newly removed V1S identifiers only within an
+explicitly selected, first-parent-compatible range, with the same
+`V1B005`/evidence-pointer distinction as the offline checker:
+
+- Pull requests audit the PR **head commit**, not the synthetic merge commit;
+  choose the nearest shared first-parent revision from the PR base history,
+  narrowed to the adopted checker baseline when it is later.
+- Pushes to `main` audit the event's `before..after` range and fail if
+  the prior SHA is not in first-parent history. Force/divergent history is
+  not silently accepted.
+- Manual dispatches may provide an explicit `backlog_base` SHA. Otherwise,
+  the adopted `0bac3369` baseline is used when on the target's first-parent
+  path. Older branches fall back to the preceding commit with a prominent
+  **limited-history warning**; that partial check cannot certify full
+  retirement history for release acceptance.
+
+The helper fails closed on missing event data, invalid revisions, inaccessible
+history, incompatible ancestry and malformed target backlogs. Commit-message
+ID attribution is an objective check; evidence-pointer warnings still need
+review and do not approve semantic completion.
+
+**V1S-096 acceptance (2026-11-05):** Phases 1–4 and the Windows/Linux
+focused checker tests passed locally at `0bac3369` and `bf0821af`.
+The hosted Ubuntu 3.11 Source job for PR #23 at
+[`702536fe`](https://github.com/frankysan/InfinityDB/actions/runs/42096775320)
+successfully executed **Check V1S retirement history**, the complete
+documentation check stage including static V1S validation, and its source
+checks. The installed-wheel and deployment-smoke workflows also passed
+for that SHA. After a repeated Windows-only Node lifecycle test timeout,
+the Source workflow's second attempt passed all four platform jobs and
+cross-platform deterministic-output comparison. This accepts the backlog
+checker's CI integration at this development SHA; it does **not** replace
+the exact-main-SHA acceptance required by
+[V1S-093](TODO.md#final-10-acceptance). A targeted Node harness exit
+stability fix was later committed as `34282616`, with separate focused
+Windows/Linux regression acceptance. Evidence-presence checks cannot
+substitute for semantic closeout review.
+
+**2026-11-07 recurring Windows lifecycle timeout:** At
+`31125e18a04b6040b8d14ff45acc2455b43b816b`,
+[Source run 42320834173](https://github.com/frankysan/InfinityDB/actions/runs/42320834173)
+passed both Ubuntu jobs and macOS, but the Windows job timed out waiting
+15 seconds for the scenario navigation Node process. The dependent
+cross-platform determinism job was skipped. The prior deterministic-exit
+change therefore did not eliminate this intermittent failure. On a later
+Windows checkout, both scenario lifecycle/selection tests passed and
+40 two-worker Node invocations completed, but these local results do not
+identify the hosted cause. The separate installed-wheel and deployment
+smoke runs passed at `31125e18`. Diagnose any recurrence; replacement-SHA
+hosted results and final acceptance remain independent.
+
+**2026-11-07 runtime identity failure:** Source runs
+[42323715516](https://github.com/frankysan/InfinityDB/actions/runs/42323715516)
+at `e06982fa762d66cc9b530592863044cf148f4a60` and
+[42323999988](https://github.com/frankysan/InfinityDB/actions/runs/42323999988)
+at `e73a80985c04fdcfdd49ffa1924f9afc46e762e3` failed all four
+platform/Python jobs on the same two selectors; dependent deterministic-output
+jobs were skipped. The baseline and release-browser checks calculated only
+the database pair, while the runtime also fingerprints its Weapon-profile
+publication. The failures reproduced locally on Windows at `9e7d9f92` before
+repair. The shared identity repair passed its
+[28-test Windows batch](testing.md#v1s-082-runtime-snapshot-identity-repair-vr-0136)
+at `1d1ec4a1aea3e0987e9f54e0ff65780b780da421`. Replacement revision
+`0c5b4dc1a05626d1003f78bcfacf6cd32f922314` passed
+[Source run 42325818212](https://github.com/frankysan/InfinityDB/actions/runs/42325818212),
+including all four platform/Python jobs and cross-platform deterministic
+outputs. Its [installed-wheel run 42325818214](https://github.com/frankysan/InfinityDB/actions/runs/42325818214)
+and [deployment-smoke run 42325818217](https://github.com/frankysan/InfinityDB/actions/runs/42325818217)
+also passed. This closes hosted follow-through for the repair on that exact
+revision; final-candidate acceptance remains separate.
+
+**2026-11-07 disclosure-publication follow-through:** At
+`8cd201dcdef3eb7c896ce92af93cae691ddcdc87`,
+[Source run 42357974261](https://github.com/frankysan/InfinityDB/actions/runs/42357974261)
+failed all four platform/Python jobs in exact-variant provenance validation;
+the deterministic comparison was skipped. Its
+[deployment run 42357974200](https://github.com/frankysan/InfinityDB/actions/runs/42357974200)
+failed the same guard. The pin used Windows CRLF curated bytes instead of
+Git's LF blob. Repair `2736eaba3402e2e99662414f6ad15c17c87efe47` passed
+the paired checks and focused Linux/Windows acceptance. Its
+[wheel run 42358423930](https://github.com/frankysan/InfinityDB/actions/runs/42358423930)
+and [deployment run 42358423951](https://github.com/frankysan/InfinityDB/actions/runs/42358423951)
+passed, but the Ubuntu/Python 3.14 leg of
+[Source run 42358423894](https://github.com/frankysan/InfinityDB/actions/runs/42358423894)
+reported 15 failures in stale record-evidence fingerprints and test expectations.
+The [117-test focused consumer repair](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
+passed on Windows, retaining the evidence guards and previously tested rules
+artifacts. Replacement-SHA hosted Source/deterministic acceptance remains open;
+the earlier focused passes do not certify the full suite or final candidate.
+
+The development dependencies include PyMuPDF so PDF-aware test modules collect and
+research tools type-check in a clean environment. Official PDFs under `data/pdf/`
+remain ignored local evidence. Only tests requiring absent PDF bytes skip; data/API
+checks and synthetic evidence-gate regressions still run. Present PDFs retain their
+hash/text validation and must fail on changed or malformed evidence.
+
+Chromium browser pooling is an opt-in test feature. Its Playwright import
+must remain deferred until the pool is activated: `.[dev,symbols]`
+deliberately does not install Playwright, and the primary clean Ubuntu
+Pyright leg must still pass. Host-resource sampling also contains
+Windows-only `ctypes` entry points; Linux type checking must not depend
+on those symbols existing in Linux's `ctypes` stubs. The Windows matrix
+exercises the native sampler and Syncthing activation, including
+idempotent links whose resolved target is identical despite a different
+stored path spelling. A genuinely different symlink destination remains
+a conflict, not an overwrite.
+
+### Git-index preflight and wheel-content audit
+
+The primary Ubuntu 3.11 `--all` leg includes the isolated `preflight` stage
+after the ordinary test/build/rules stages. It invokes
+`tools/ci_preflight.py --isolated`, installs only indexed `.[dev,symbols]`
+dependencies in a fresh environment, verifies indexed release-artifact provenance,
+and runs indexed Ruff, pytest and Pyright. It then exercises the built wheel in a
+second fresh environment using the same smoke helper as the installed-wheel workflow.
+This additional pass checks dependency declarations and clean-source assumptions
+independently of the working-tree checks. If any earlier stage fails or cannot start,
+preflight is reported as skipped; the remaining ordinary stages still run unless
+`--fail-fast` was requested. The other
+`Source checks` legs do not run this isolated stage; the separate
+`Installed wheel smoke` job builds and tests an installed wheel on Ubuntu.
+
+The preflight detects non-ignored untracked files and exports exactly the
+Git-index snapshot, preserving executable modes and symlink entries.
+The exported tree intentionally has no `.git` directory. Report-path
+safety checks must therefore reject paths when Git tracking cannot be
+verified, rather than treating missing metadata as permission to overwrite.
+The corresponding regression accepts that fail-closed result as well as
+confirmed Git-tracked rejection in a normal checkout.
+In normal hosted CI this index corresponds to the checked-out commit.
+Its wheel audit checks presence of **every tracked `src/` file** (except the
+intentional logo design-source directory), including standalone modules and
+implicit namespace packages, **and** all configured `[tool.setuptools.data-files]`
+sources at their expected wheel `.data/data/` destinations. Missing files,
+unsupported Git modes, unresolved index entries, build failures, or unexpected wheel counts fail
+the stage. The structural wheel audit does not infer undeclared shared-resource
+requirements. Isolated preflight therefore also installs and executes the built
+wheel outside the checkout; application startup and CLI builds must resolve their
+resources from the installation. The independent installed-wheel workflow retains
+the same acceptance on hosted Ubuntu.
+
+Local Git-index preflight, including an optional clean-export pytest run,
+is documented in [development checks](testing.md#ci-preflight-clean-checkout-and-wheel-contents).
+The standard runner uses isolated mode for `--all`, `--profile all` and
+`--stage preflight`; it prepares the same publication as source CI before pytest.
+Use it before committing to expose dependencies hidden by a richer developer
+environment and tests that assume ignored inputs are present. The direct
+`ci_preflight.py --skip-pytest` command remains available for a packaging-only check.
+It cannot validate unstaged tracked edits; stage a proposed change or
+review the index before relying on a green preflight. Pip's isolated wheel
+build may obtain its setuptools backend if not already cached; no upstream
+Infinity game-data acquisition is performed. Focused tests for export,
+file modes, missing wheel members, and error paths reside in
+`tests/test_run_checks.py`.
+
+The full Army occurrence archive `data/generated/infinity.raw.db` is
+Git-ignored and absent in clean CI. Three source-variant provenance test
+modules require it and explicitly skip there; they still run against the
+full paired archive locally. A clean hosted pass does not independently
+certify pinned source-only occurrence counts. A present but malformed
+archive remains a test failure. Synthetic source-to-presentation
+regression fixtures deliberately populate some unrepresented fields to
+verify detection; their counts do not establish current Army-source
+occupancy. The separate 1.0 source-occupancy release gate must run locally
+against the pinned application/raw database pair.
 
 Windows hosted CI uses `--test-workers 2` to bound process/resource use while running the complete
 suite. Automatic worker selection previously proved unstable on that runner class; serial execution
@@ -48,6 +373,20 @@ and cross-platform determinism remain unchanged.
 
 Source-check logs include the twenty slowest pytest durations and skipped-test reasons so
 hosted performance problems can be traced to individual tests or fixture setup.
+Before the test matrix runs, each source-check leg deterministically generates and verifies
+the **Git-ignored** `data/generated/deployed-objects.json` publication against the tracked
+Army and rules databases. Tests must not depend on an existing local publication:
+a fresh Git checkout does not contain the JSON file. The publication stage is
+separate from database generation and does not modify either tracked database.
+
+The manually dispatched `Full-asset checks` workflow also runs `--all`, so it performs the same
+pinned npm installation and both documentation checks. The installed-wheel and deployment-smoke jobs
+do not require Markdown tooling or ship Node.js dependencies. The deployment-smoke
+job builds and checks the deterministic deployed-object reference publication
+from the tracked Army/rules databases and reviewed curated sources before Docker
+build. The container verifier checks its source-pair fingerprints and reviewed
+object count, then exercises `/api/deployed-objects` and `/deployed-objects` on
+the actual production process; a green source-check matrix alone is not that gate.
 
 ## Cross-platform deterministic outputs
 
@@ -56,7 +395,13 @@ A dependent job downloads those manifests and compares SHA-256 identities across
 
 The compared set covers representative database, JSON/report, snapshot/work archive, and
 checksum-bound publication metadata. The matrix pins the same CPython patch line for the
-cross-platform comparison so Python/SQLite drift is not mistaken for an OS difference.
+cross-platform comparison. **This does not itself pin the SQLite library**: CPython's Windows
+build and Linux system packages may provide different SQLite versions, which can encode
+identical rows in different B-tree layouts. The manifest's exact-byte comparison remains
+mandatory. If it fails, inspect the host SQLite versions and run the strict logical
+comparison (`tools.audit_rules_rebuild_equivalence`) before deciding whether to align
+the SQLite toolchain or revise the documented byte-reproducibility contract. Neither
+logical parity nor the installed tracked database alone replaces that hosted check.
 
 Generators remain responsible for canonical bytes; `.gitattributes` only prevents tracked
 checksum-bound files from being rewritten by checkout line-ending conversion.
@@ -65,7 +410,11 @@ checksum-bound files from being rewritten by checkout line-ending conversion.
 
 `.github/workflows/installed-wheel.yml` builds a wheel, installs it in a fresh virtual environment,
 stages controlled Army/rules fixtures outside the repository checkout, and exercises the installed
-contract.
+contract. Both the workflow and isolated preflight call
+`tools/installed_wheel_smoke.py`, keeping CLI, configuration, runtime-route and
+asset-free acceptance in one implementation. The installed wheel has no developer
+dependencies or editable import path; runtime probes use Python's isolated mode
+and reject application imports outside that environment.
 
 The job verifies:
 
@@ -87,14 +436,46 @@ images still require the complete tracked publication through deployment-smoke v
 ## Deployment smoke
 
 `.github/workflows/deployment-smoke.yml` builds the production container directly from the tracked
-release `infinity.db`, `rules.db`, and processed SVG publication, then runs
+release `infinity.db`, `rules.db`, byte-exact tracked `variant-usage.json`,
+byte-exact tracked `weapon-profile-sources.json`, generated
+`deployed-objects.json`, and processed SVG publication, then runs
 `scripts/verify-container-image.sh` with published-asset validation.
 
-Deployment smoke tests the exact artifact model used by tagged production deployment. It does not
-rebuild runtime databases and is not a substitute for the source or installed-wheel checks.
-The `/changes` probe compares the served release-note content with the installed canonical
-changelog. It accepts both development notes under `Unreleased` and finalized version sections,
-and rejects stale or missing release-note content.
+Deployment smoke validates the variant publication's co-located Army/rules/deployed-object
+fingerprints, image presence and representative exact-variant API response. The separate
+source matrix also checks the tracked publication against the regenerated deployed-object
+bytes, without requiring an ignored raw archive in CI.
+Both checks also compare the Weapon-profile publication with its reviewed
+inputs and validate exact source-pair binding; the container smoke checks a
+representative Weapon citation through the API. Cross-platform determinism
+rebuilds and compares the Weapon-profile JSON bytes on each supported OS.
+
+Deployment smoke first tests the exact v9 artifact model used by tagged production deployment.
+It does not rebuild the tracked release databases and is not a substitute for the source or
+installed-wheel checks. The `/changes` probe compares the served release-note content with
+the installed canonical changelog. It accepts both development notes under `Unreleased`
+and finalized version sections, and rejects stale or missing release-note content.
+
+**Rollback-image rehearsal (passed at commit `663a345`, 2026-10-30):** the workflow also rebuilds
+a **disposable v8/compatibility-10** `rules.db` from current reviewed curated sources under
+ignored `local/` and generates its matching deployed-object publication. It validates both
+databases and publication fingerprints, requires the complete reviewed object content
+and canonical legacy relationship graph to remain unchanged, and confirms that the v8 API
+reports Restrictions as unavailable rather than inventing permissions. A Docker image
+derived from the already validated v9 release image replaces **only** `rules.db` and
+`deployed-objects.json`, leaving the installed application, Army database, symbols,
+and runtime configuration unchanged. The v8 image explicitly removes the v9-only
+exact-variant publication; it must not expose stale usage against the substituted
+rules database. It also removes the v9-paired Weapon-profile publication and
+requires the corresponding API status to be unavailable. The full
+production-startup/image verifier runs against that v8 overlay image,
+followed by another check of the original v9 image.
+
+This tests application compatibility with a reconstructed source-equivalent v8 pair;
+it does **not** claim byte identity with retained historical v8 recovery files,
+test a host-level deployment, or swap live containers. The single-operator 1.0
+release requires retaining the documented recovery path and prior artifacts,
+not a live-host rollback/forward rehearsal.
 
 ## Release evidence retention
 

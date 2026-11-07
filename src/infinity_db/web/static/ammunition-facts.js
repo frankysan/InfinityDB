@@ -58,6 +58,19 @@ export function ammunitionFactRows(facts = {}, stateNames = {}) {
     rows.push(["Multispectral Visors", zone.multispectralVisor === "blocked"
       ? "Cannot draw LoF through this zone"
       : "Can draw LoF through this zone"]);
+    const opposition = zone.opposition;
+    if (opposition) {
+      rows.push(["Opposing Attacks",
+        "Face to Face only against enemy Attacks requiring a Roll and LoF crossing the zone",
+        opposition.ruleId]);
+      rows.push(["Visor Attacks", opposition.visorAttack === "normal-roll"
+        ? "Normal Rolls against placement; Smoke does not oppose these Attacks"
+        : "Qualifying rolled Attacks through Eclipse can be Face to Face"]);
+      rows.push(["Enemy Dodge", "A Dodge inside the Template is a Normal Roll, unopposed by placement"]);
+      rows.push(["Template remains",
+        "Win every applicable Face to Face Roll, or pass the unopposed Normal Roll"]);
+      rows.push(["Critical", "No additional effect; apply the Face to Face rules", opposition.ruleId]);
+    }
   }
   return rows;
 }

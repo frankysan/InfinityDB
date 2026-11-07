@@ -99,6 +99,102 @@ def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     assert "data/generated/rules.db binary" in attributes
 
 
+def test_deployed_object_publication_is_generated_and_verified_for_each_release_image() -> None:
+    dockerfile = _read("Dockerfile")
+    dockerignore = _read(".dockerignore")
+    gitignore = _read(".gitignore")
+    deploy = _read("scripts/deploy.sh")
+    workflow = _read(".github/workflows/deployment-smoke.yml")
+    smoke = _read("scripts/verify-container-image.sh")
+
+    assert "data/generated/*" in gitignore
+    assert "!data/generated/deployed-objects.json" not in gitignore
+    assert "!data/generated/deployed-objects.json" in dockerignore
+    assert (
+        "COPY --chown=appuser:appuser data/generated/deployed-objects.json "
+        "/app/data/deployed-objects.json"
+    ) in dockerfile
+    build = '"$python" -m tools.build_deployed_object_publication'
+    assert deploy.index(build + "\n") < deploy.index(build + " --check")
+    assert deploy.index(build + " --check") < deploy.index("docker compose build")
+    ci_build = "PYTHONPATH=src python -m tools.build_deployed_object_publication"
+    assert workflow.index(ci_build + "\n") < workflow.index(ci_build + " --check")
+    assert workflow.index(ci_build + " --check") < workflow.index("docker build")
+    assert '{"infinity.db", "rules.db", "deployed-objects.json"}' in smoke
+    assert "load_deployed_object_publication(" in smoke
+    assert '/api/deployed-objects' in smoke
+    assert 'http://127.0.0.1:8000/deployed-objects' in smoke
+
+
+def test_variant_usage_publication_is_byte_exact_and_packaged_for_v9_release() -> None:
+    gitignore = _read(".gitignore")
+    attributes = _read(".gitattributes")
+    dockerignore = _read(".dockerignore")
+    dockerfile = _read("Dockerfile")
+    deploy = _read("scripts/deploy.sh")
+    smoke = _read("scripts/verify-container-image.sh")
+    workflow = _read(".github/workflows/deployment-smoke.yml")
+    source_workflow = _read(".github/workflows/source-checks.yml")
+
+    assert "!data/generated/variant-usage.json" in gitignore
+    assert "data/generated/variant-usage.json binary" in attributes
+    assert "!data/generated/variant-usage.json" in dockerignore
+    assert (
+        "COPY --chown=appuser:appuser data/generated/variant-usage.json "
+        "/app/data/variant-usage.json"
+    ) in dockerfile
+    assert (ROOT / "data/generated/variant-usage.json").is_file()
+    assert "tools.build_variant_usage --publish" not in deploy
+    assert "tools.build_deployed_object_publication --check" in deploy
+    assert 'expected_files.add("variant-usage.json")' in smoke
+    assert "load_variant_usage_publication(" in smoke
+    assert "/api/variant-usage?record_id=" in smoke
+    assert "tools.verify_deployment_assets --skip-svg" in source_workflow
+    assert "tools.verify_deployment_assets --skip-svg" in workflow
+    assert workflow.index("Validate pinned exact-variant release publication") < workflow.index(
+        "Build application image from tracked databases"
+    )
+
+
+def test_weapon_profile_citations_are_release_paired_and_packaged() -> None:
+    gitignore = _read(".gitignore")
+    attributes = _read(".gitattributes")
+    dockerignore = _read(".dockerignore")
+    dockerfile = _read("Dockerfile")
+    smoke = _read("scripts/verify-container-image.sh")
+    workflow = _read(".github/workflows/deployment-smoke.yml")
+    determinism = _read("tools/build_determinism_manifest.py")
+
+    assert "!data/generated/weapon-profile-sources.json" in gitignore
+    assert "data/generated/weapon-profile-sources.json binary" in attributes
+    assert "!data/generated/weapon-profile-sources.json" in dockerignore
+    assert (
+        "COPY --chown=appuser:appuser data/generated/weapon-profile-sources.json "
+        "/app/data/weapon-profile-sources.json"
+    ) in dockerfile
+    assert (ROOT / "data/generated/weapon-profile-sources.json").is_file()
+    assert 'expected_files.add("weapon-profile-sources.json")' in smoke
+    assert "load_weapon_profile_publication(" in smoke
+    assert "/api/weapons/rifle" in smoke
+    assert "RUN rm /app/data/weapon-profile-sources.json" in workflow
+    assert "tools.build_weapon_profile_publication" in determinism
+    assert "publication/weapon-profile-sources.json" in determinism
+
+
+def test_variant_usage_legacy_image_removes_v9_publication_before_smoke() -> None:
+    workflow = _read(".github/workflows/deployment-smoke.yml")
+    smoke = _read("scripts/verify-container-image.sh")
+
+    assert "RUN rm /app/data/variant-usage.json" in workflow
+    assert workflow.index("RUN rm /app/data/variant-usage.json") < workflow.index(
+        "Validate v8 rollback image and production startup"
+    )
+    assert 'if restrictions["available"]:' in smoke
+    assert 'expected_files.add("variant-usage.json")' in smoke
+    assert 'if not restrictions["available"] and usage is not None:' in smoke
+    assert "Legacy compatibility image unexpectedly published variant usage" in smoke
+
+
 def test_release_installer_deploys_tracked_runtime_databases_without_rebuilding() -> None:
     script = _read("scripts/install-or-update.sh")
     assert "infinity-db build" not in script
@@ -221,11 +317,13 @@ def test_container_build_packages_canonical_changelog() -> None:
 
 @pytest.mark.parametrize("heading", ["## Unreleased", "## [0.10.0] - 2026-10-07"])
 @pytest.mark.parametrize("matching_content", [True, False])
+@pytest.mark.parametrize("restrictions_version", [8, 9])
 def test_container_smoke_validates_canonical_notes_in_both_release_states(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     heading: str,
     matching_content: bool,
+    restrictions_version: int,
 ) -> None:
     changelog = tmp_path / "CHANGELOG.md"
     changelog.write_text(
@@ -239,7 +337,54 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
     if not matching_content:
         page = page.replace("New player highlight.", "Outdated player highlight.")
     page = f'<section aria-label="InfinityDB release notes">{page}</section>'
+    if restrictions_version == 9:
+        restrictions = {
+            "available": True, "evaluationSupported": False,
+            "items": [
+                *[
+                    {
+                        "subject": "TAG", "action": "enter-prone",
+                        "scope": "all", "operation": {
+                            "kind": "state-entry", "qualifier": {},
+                        },
+                    }
+                    for _ in range(11)
+                ],
+                {
+                    "subject": "Motorcycle", "action": "upward-jump",
+                    "scope": "while-mounted-upwards-only",
+                    "operation": {
+                        "kind": "directional-skill-movement",
+                        "qualifier": {"direction": "upward"},
+                    },
+                },
+                *[
+                    {
+                        "subject": subject, "action": "lieutenant-selection",
+                        "scope": "army-selection-only",
+                        "operation": {
+                            "kind": "army-role-selection",
+                            "qualifier": {"role": "lieutenant"},
+                        },
+                    }
+                    for subject in ("REM", "Irregular")
+                ],
+            ],
+        }
+    else:
+        restrictions = {
+            "available": False, "evaluationSupported": False, "items": [],
+        }
+    profile_citations = (
+        [{"source_id": "n5-core-v5.3-pdf", "page": 183}]
+        if restrictions_version == 9 else []
+    )
+    rifle = {
+        "profile_citations_available": restrictions_version == 9,
+        "profiles": [{"profile_citations": profile_citations}],
+    }
     payloads = {
+        "/api/restrictions": restrictions,
         "/api/armies": {
             "items": [
                 {"id": 101, "role": "main", "group_id": None},
@@ -247,32 +392,57 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
             ]
         },
         "/api/skills/74": {"rules": ["Super-Jump"]},
+        "/api/deployed-objects": {
+            "items": [{} for _ in range(17)],
+            "unresolved_deliveries": [{}],
+        },
+        "/api/weapons/rifle": rifle,
         "/api/version": {"version": "0.10.0", "snapshot_revision": "fixture"},
     }
 
     def urlopen(url: str, timeout: int) -> io.BytesIO:
         route = url.removeprefix("http://127.0.0.1:8000")
-        body = page if route == "/changes" else json.dumps(payloads[route])
+        body = (
+            page if route == "/changes"
+            else "Deployed objects" if route == "/deployed-objects"
+            else json.dumps(payloads[route])
+        )
         return io.BytesIO(body.encode("utf-8"))
 
     monkeypatch.setattr("urllib.request.urlopen", urlopen)
     script = _read("scripts/verify-container-image.sh")
     runtime_probe = script.split('docker exec "$container" python -c \'\n', 1)[1]
     runtime_probe = runtime_probe.split("\n'", 1)[0]
+    code = compile(runtime_probe, "verify-container-image.sh", "exec")
     if matching_content:
-        exec(compile(runtime_probe, "verify-container-image.sh", "exec"), {})
+        exec(code, {})
+        rifle["profile_citations_available"] = restrictions_version != 9
+        with pytest.raises(SystemExit, match="wrong Weapon Chart publication status"):
+            exec(code, {})
+        rifle["profile_citations_available"] = restrictions_version == 9
+        if restrictions_version == 9:
+            for citation in (
+                {"source_id": "n5-core-v5.3-pdf", "page": 184},
+                {"source_id": "incorrect-source", "page": 183},
+            ):
+                profile_citations[:] = [citation]
+                with pytest.raises(SystemExit, match="lost its reviewed Weapon Chart citation"):
+                    exec(code, {})
+        else:
+            profile_citations.append({"source_id": "n5-core-v5.3-pdf", "page": 183})
+            with pytest.raises(SystemExit, match="incorrectly retained a v9 citation"):
+                exec(code, {})
     else:
         with pytest.raises(SystemExit, match="canonical changelog"):
-            exec(compile(runtime_probe, "verify-container-image.sh", "exec"), {})
+            exec(code, {})
 
 
 def test_installed_wheel_smoke_runs_database_health_check() -> None:
     workflow = _read(".github/workflows/installed-wheel.yml")
 
-    assert (
-        '"$RUNNER_TEMP/wheel-venv/bin/infinity-db" database-health '
-        "generated/infinity.db --require-raw"
-    ) in workflow
+    assert "python tools/installed_wheel_smoke.py" in workflow
+    smoke = _read("tools/installed_wheel_smoke.py")
+    assert '[main_cli, "database-health", "generated/infinity.db", "--require-raw"]' in smoke
 
 
 def test_full_asset_checks_can_run_against_candidate_branch() -> None:
@@ -291,6 +461,107 @@ def test_wheel_packages_runtime_unit_filter_semantics() -> None:
         "share/infinity-db/config/catalogs"
     ]
     assert "config/catalogs/unit-filter-semantics.json" in catalog_data
+
+
+def test_deployment_smoke_builds_and_exercises_v8_rollback_image() -> None:
+    """Rehearse v8 with the same installed application, never overwrite v9."""
+    workflow = _read(".github/workflows/deployment-smoke.yml")
+    expected_order = (
+        "sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets",
+        "python -m infinity_db build-rules --output local/restrictions-v8-ci/rules.db",
+        (
+            "python -m tools.build_deployed_object_publication "
+            "--rules-db local/restrictions-v8-ci/rules.db "
+            "--output local/restrictions-v8-ci/deployed-objects.json"
+        ),
+        "--output local/restrictions-v8-ci/deployed-objects.json --check",
+        'if old.execute("PRAGMA user_version").fetchone()[0] != 8:',
+        "FROM ${BASE_IMAGE}",
+        "COPY --chown=appuser:appuser rules.db /app/data/rules.db",
+        "COPY --chown=appuser:appuser deployed-objects.json /app/data/deployed-objects.json",
+        (
+            "docker build --build-arg BASE_IMAGE=infinity-db:deployment-smoke "
+            "--tag infinity-db:rollback-v8 local/restrictions-v8-ci"
+        ),
+        "sh scripts/verify-container-image.sh infinity-db:rollback-v8 --published-assets",
+        "Verify v9 image remains valid after rollback rehearsal",
+    )
+    positions = [workflow.index(fragment) for fragment in expected_order]
+    assert positions == sorted(positions)
+    assert 'if expected != current_publication:' in workflow
+    assert "Rollback modified the canonical legacy relationship graph" in workflow
+    assert 'assert r.restrictions_payload()["available"] is False' in workflow
+    assert "data/generated/rules.db /app/data/rules.db" not in workflow
+    assert "data/generated/deployed-objects.json /app/data/deployed-objects.json" not in workflow
+
+
+def test_source_ci_builds_ignored_release_publication_before_tests() -> None:
+    workflow = _read(".github/workflows/source-checks.yml")
+    source_checkout = workflow.split("- name: Check out source", 1)[1].split(
+        "- name: Set up Python", 1
+    )[0]
+    # Frozen reference-evidence tests use git show against pinned older commits.
+    assert "fetch-depth: 0" in source_checkout
+    generate = workflow.index("python -m tools.build_deployed_object_publication")
+    verify = workflow.index("python -m tools.build_deployed_object_publication --check")
+    source_checks = workflow.index("- name: Run source checks")
+    assert generate < verify < source_checks
+    assert "python tools/run_checks.py" in workflow
+
+
+def test_source_ci_matrix_time_budgets_include_isolated_preflight() -> None:
+    workflow = _read(".github/workflows/source-checks.yml")
+    job = workflow.split("  source-checks:", 1)[1].split("    steps:", 1)[0]
+    matrix = job.split("      matrix:", 1)[1].split("    runs-on:", 1)[0]
+    legs: dict[tuple[str, str], tuple[str, int]] = {}
+    for block in matrix.split("          - os: ")[1:]:
+        os_name, *lines = block.splitlines()
+        fields: dict[str, str] = {}
+        for line in lines:
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            key, value = stripped.split(":", 1)
+            assert key not in fields
+            fields[key] = value.strip().strip('"')
+        identity = (os_name.strip(), fields["label"])
+        assert identity not in legs
+        legs[identity] = (fields["check_args"], int(fields["timeout_minutes"]))
+
+    standard_checks = "--stage test --stage build --stage rules"
+    assert legs == {
+        ("ubuntu-latest", "3.11"): ("--all", 30),
+        ("windows-latest", "3.11"): (standard_checks, 30),
+        ("macos-latest", "3.11"): (standard_checks, 15),
+        ("ubuntu-latest", "3.14"): (standard_checks, 15),
+    }
+    assert "timeout-minutes: ${{ matrix.timeout_minutes }}" in job
+    source_checks = workflow.split("- name: Run source checks", 1)[1].split(
+        "- name: Report deterministic-output toolchain", 1
+    )[0]
+    assert "python tools/run_checks.py ${{ matrix.check_args }}" in source_checks
+
+
+def test_wheel_packages_all_registered_static_assets() -> None:
+    """Any asset in the live HTTP registry must survive wheel installation.
+
+    The installed web module hashes these assets at import time; excluding a
+    single asset prevents both wheel and production container startup.
+    """
+    from infinity_db.web.presentation import ASSETS
+
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+    patterns = project["tool"]["setuptools"]["package-data"]["infinity_db.web"]
+    uncovered = [
+        name
+        for name, _ in sorted(ASSETS.values())
+        if not any(
+            fnmatch.fnmatchcase("static/" + name, pattern)
+            for pattern in patterns
+        )
+    ]
+    assert uncovered == [], f"Web registry assets omitted from wheel: {uncovered}"
 
 
 def test_wheel_package_data_includes_browser_icon_rasters() -> None:

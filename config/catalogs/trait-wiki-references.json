@@ -1,0 +1,138 @@
+{
+  "format": "InfinityDB trait Wiki references",
+  "version": 1,
+  "entries": {
+    "trait:anti-materiel": {
+      "name": "Anti-materiel",
+      "url": "https://infinitythewiki.com/Traits#Anti-materiel"
+    },
+    "trait:arm-0": {
+      "name": "ARM = 0",
+      "url": "https://infinitythewiki.com/Traits#ARM_.3D_0"
+    },
+    "trait:aro": {
+      "name": "ARO",
+      "url": "https://infinitythewiki.com/Traits#ARO"
+    },
+    "trait:bioweapon": {
+      "name": "BioWeapon",
+      "url": "https://infinitythewiki.com/Traits#BioWeapon"
+    },
+    "trait:boost": {
+      "name": "Boost",
+      "url": "https://infinitythewiki.com/Traits#Boost"
+    },
+    "trait:bs-weapon-ph": {
+      "name": "BS Weapon (PH)",
+      "url": "https://infinitythewiki.com/Traits#BS_Weapon_.28PH.29"
+    },
+    "trait:bs-weapon-wip": {
+      "name": "BS Weapon (WIP)",
+      "url": "https://infinitythewiki.com/Traits#BS_Weapon_.28WIP.29"
+    },
+    "trait:bts-0": {
+      "name": "BTS = 0",
+      "url": "https://infinitythewiki.com/Traits#BTS_.3D_0"
+    },
+    "trait:burst-b": {
+      "name": "Burst (B)",
+      "url": "https://infinitythewiki.com/Traits#Burst_.28B.29"
+    },
+    "trait:burst-single-target": {
+      "name": "Burst: Single Target",
+      "url": "https://infinitythewiki.com/Traits#Burst:_Single_Target"
+    },
+    "trait:cc": {
+      "name": "CC",
+      "url": "https://infinitythewiki.com/Traits#CC"
+    },
+    "trait:concealed": {
+      "name": "Concealed",
+      "url": "https://infinitythewiki.com/Traits#Concealed"
+    },
+    "trait:continuous-damage": {
+      "name": "Continuous Damage",
+      "url": "https://infinitythewiki.com/Traits#Continuous_Damage"
+    },
+    "trait:deployable": {
+      "name": "Deployable",
+      "url": "https://infinitythewiki.com/Traits#Deployable"
+    },
+    "trait:direct-template": {
+      "name": "Direct Template",
+      "url": "https://infinitythewiki.com/Traits#Direct_Template"
+    },
+    "trait:disposable-x": {
+      "name": "Disposable (X)",
+      "url": "https://infinitythewiki.com/Traits#Disposable_.28X.29"
+    },
+    "trait:double-shot": {
+      "name": "Double Shot",
+      "url": "https://infinitythewiki.com/Traits#Double_Shot"
+    },
+    "trait:impact-template": {
+      "name": "Impact Template",
+      "url": "https://infinitythewiki.com/Traits#Impact_Template"
+    },
+    "trait:improvised": {
+      "name": "Improvised",
+      "url": "https://infinitythewiki.com/Traits#Improvised"
+    },
+    "trait:indiscriminate": {
+      "name": "Indiscriminate",
+      "url": "https://infinitythewiki.com/Traits#Indiscriminate"
+    },
+    "trait:intuitive-attack": {
+      "name": "Intuitive Attack",
+      "url": "https://infinitythewiki.com/Traits#Intuitive_Attack"
+    },
+    "trait:non-lethal": {
+      "name": "Non-Lethal",
+      "url": "https://infinitythewiki.com/Traits#Non-Lethal"
+    },
+    "trait:non-reloadable": {
+      "name": "Non-Reloadable",
+      "url": "https://infinitythewiki.com/Traits#Non-Reloadable"
+    },
+    "trait:perimeter": {
+      "name": "Perimeter",
+      "url": "https://infinitythewiki.com/Traits#Perimeter"
+    },
+    "trait:prior-deployment": {
+      "name": "Prior Deployment",
+      "url": "https://infinitythewiki.com/Traits#Prior_Deployment"
+    },
+    "trait:reflective": {
+      "name": "Reflective",
+      "url": "https://infinitythewiki.com/Traits#Reflective"
+    },
+    "trait:silent-x": {
+      "name": "Silent (X)",
+      "url": "https://infinitythewiki.com/Traits#Silent_.28X.29"
+    },
+    "trait:speculative-attack": {
+      "name": "Speculative Attack",
+      "url": "https://infinitythewiki.com/Traits#Speculative_Attack"
+    },
+    "trait:state": {
+      "name": "State",
+      "url": "https://infinitythewiki.com/Traits#State"
+    },
+    "trait:suppressive-fire": {
+      "name": "Suppressive Fire (SF)",
+      "url": "https://infinitythewiki.com/Traits#Suppressive_Fire_.28SF.29"
+    },
+    "trait:target-attribute": {
+      "name": "Target (Attribute)",
+      "url": "https://infinitythewiki.com/Traits#Target_.28Attribute.29"
+    },
+    "trait:targetless": {
+      "name": "Targetless",
+      "url": "https://infinitythewiki.com/Traits#Targetless"
+    },
+    "trait:zone-of-control-zc": {
+      "name": "Zone of Control (ZoC)",
+      "url": "https://infinitythewiki.com/Traits#Zone_of_Control_.28ZoC.29"
+    }
+  }
+}

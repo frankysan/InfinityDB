@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
@@ -64,7 +65,7 @@ def test_work_archive_script_runs_from_repository_root(tmp_path: Path) -> None:
     output = tmp_path / "script.zip"
 
     result = subprocess.run(
-        ["python", "tools/create_work_archive.py", "--output", str(output)],
+        [sys.executable, "tools/create_work_archive.py", "--output", str(output)],
         cwd=root,
         check=True,
         capture_output=True,

@@ -128,7 +128,13 @@ start_metrics_history() {
   fi
 }
 
-echo "Validating tracked runtime databases and published symbol set..."
+echo "Generating release-paired deployed-object reference publication..."
+"$python" -m tools.build_deployed_object_publication
+"$python" -m tools.build_deployed_object_publication --check
+
+# The variant-usage publication is an immutable tracked release artifact.
+# Its generating raw archive is intentionally absent from deployment hosts.
+echo "Validating tracked runtime databases and release publications..."
 "$python" tools/verify_deployment_assets.py
 
 display_version="$("$python" -c 'import infinity_db; print(infinity_db.__display_version__)')"

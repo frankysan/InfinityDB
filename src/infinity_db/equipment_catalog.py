@@ -1,4 +1,4 @@
-"""Compose textual Army Equipment with presentation-encoded Equipment identities."""
+"""Compose Army, presentation-encoded, and curated-only Equipment identities."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
 from infinity_db.domain_slugs import route_slug_from_typed_domain_id
 from infinity_db.equipment_config import (
+    CURATED_ONLY_EQUIPMENT_SLUGS,
     EquipmentPresentationEncoding,
     load_equipment_presentation_config,
 )
@@ -66,7 +67,7 @@ class EquipmentCatalog:
         return [item for item in payload["items"] if item["id"] in logical_ids]
 
     def list_equipment(self) -> list[dict[str, Any]]:
-        """Return textual Army Equipment plus reviewed presentation-encoded identities."""
+        """Return Army, presentation-encoded, and curated-only Equipment."""
 
         items = deepcopy(self.database.list_catalog_items("equipment"))
         represented_slugs: set[str] = set()
@@ -98,6 +99,23 @@ class EquipmentCatalog:
                     ),
                 }
             )
+            represented_slugs.add(encoding.equipment_id)
+        # Rules-only Equipment (such as Firewall) has no Army source identity.
+        # Publish its curated definition instead of creating a fictitious Army link.
+        for slug in sorted(CURATED_ONLY_EQUIPMENT_SLUGS):
+            record = records.get(slug)
+            if slug in represented_slugs or record is None or record.get("army_links"):
+                continue
+            items.append(
+                {
+                    "id": slug,
+                    "slug": slug,
+                    "name": record["name"],
+                    "wiki": None,
+                    "source_ids": [],
+                    "use_count": 0,
+                }
+            )
         return sorted(items, key=lambda item: (str(item["name"]).casefold(), str(item["id"])))
 
     def get_equipment(self, item_ref: int | str) -> dict[str, Any] | None:
@@ -111,10 +129,18 @@ class EquipmentCatalog:
             return None
         encoding = self._encoding_by_slug().get(item_ref)
         record = self._records_by_slug().get(item_ref)
-        if encoding is None or record is None:
+        if record is None:
             return None
-        units = self._units_for_encoding(encoding, include_all_optional=True)
-        return {
+        if encoding is None and (
+            item_ref not in CURATED_ONLY_EQUIPMENT_SLUGS or record.get("army_links")
+        ):
+            return None
+        units = (
+            self._units_for_encoding(encoding, include_all_optional=True)
+            if encoding is not None
+            else []
+        )
+        result = {
             "id": item_ref,
             "slug": item_ref,
             "name": record["name"],
@@ -130,6 +156,9 @@ class EquipmentCatalog:
             ] if units else [],
             "profiles": [],
         }
+        if encoding is None:
+            result["rules"] = [record]
+        return result
 
     def logical_unit_ids_for_filter(self, item_ref: int | str | None) -> frozenset[int] | None:
         """Resolve a presentation-encoded Equipment filter to logical Unit identities."""

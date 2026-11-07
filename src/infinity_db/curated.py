@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
+from infinity_db.faq_rulings import validate_faq_ruling_facts
 from infinity_db.maintained_text import validate_maintained_text_syntax
 from infinity_db.rule_relations import RULE_RELATION_TYPES
 from infinity_db.scenario_definition import (
@@ -43,9 +45,1579 @@ ARMY_LINK_SLUG_DOMAINS = {
 CATALOG_RULE_KINDS = frozenset({"skill", "equipment", "weapon"})
 VARIANT_INHERITANCE_MODES = frozenset({"family", "source"})
 VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
-VARIANT_PARAMETER_KINDS = frozenset({"distance"})
+VARIANT_PARAMETER_KINDS = frozenset({"distance", "numeric-mod", "reviewed-extra"})
+VARIANT_MOD_TARGETS = frozenset({"skill-holder", "opponent"})
+VARIANT_MOD_APPLICATIONS = frozenset(
+    {"bs-attack-requiring-lof", "discover", "berserk-cc-attack", "dodge-ph-roll",
+     "surprise-attack-target-face-to-face-aro"}
+)
 SOURCE_VARIANT_KINDS = frozenset({"attribute-replacement", "level", "named"})
 TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
+
+
+# TAGCom's source strings contain two distinct PH-roll bonuses, but Army
+# encodes the same pair both as two extras and as one compound TEXT extra.
+# Each complete, ordered source signature is independently certified.
+TAGCOM_SOURCE_SPECS = (
+    (((312, "Dodge (PH+3)"), (313, "GizmoKit (PH+1)")), 3),
+    (((369, "Dodge (PH+3), GizmoKit (PH+1)"),), 3),
+    (((370, "Dodge (PH+1), GizmoKit (PH+1)"),), 1),
+)
+TAGCOM_COMBINATIONS: list[dict[str, Any]] = [
+    {
+        "extras": [
+            {"extraId": extra_id, "extraType": "TEXT", "rawValue": raw}
+            for extra_id, raw in signature
+        ],
+        "effects": [
+            {
+                "kind": "tagcom-recipient-ph-mod",
+                "recipient": "tag-in-user-combat-group",
+                "sourceCondition": "tagcom-user-deployed-non-null",
+                "appliesTo": "tag-dodge-ph-roll",
+                "modifier": dodge_mod,
+                "stacking": "distinct-tagcom-mods-only",
+            },
+            {
+                "kind": "tagcom-recipient-ph-mod",
+                "recipient": "tag-in-user-combat-group",
+                "sourceCondition": "tagcom-user-deployed-non-null",
+                "appliesTo": "tag-target-gizmokit-recovery-ph-roll",
+                "modifier": 1,
+                "stacking": "distinct-tagcom-mods-only",
+            },
+        ],
+    }
+    for signature, dodge_mod in TAGCOM_SOURCE_SPECS
+]
+
+
+# RemDriver's compound profile values belong to the assigned Remote, not the
+# Skill holder. Each complete, source-native ordered signature is certified.
+REMDRIVER_COMBINATION_SPECS = (
+    ((271, "+1 BS", "BS", 1, "mod"), (300, "+5 CC", "CC", 5, "mod")),
+    ((280, "CC=15", "CC", 15, "replace"),
+     (281, "BS=13", "BS", 13, "replace"),
+     (282, "WIP=14", "WIP", 14, "replace")),
+    ((281, "BS=13", "BS", 13, "replace"),
+     (52, "PH=13", "PH", 13, "replace"),
+     (384, "BTS=6", "BTS", 6, "replace")),
+)
+REMDRIVER_COMBINATIONS: list[dict[str, Any]] = [
+    {
+        "extras": [
+            {"extraId": extra_id, "extraType": "TEXT", "rawValue": raw}
+            for extra_id, raw, _attribute, _value, _operation in signature
+        ],
+        "effects": [
+            {
+                "kind": ("remdriver-recipient-attribute-mod"
+                         if operation == "mod"
+                         else "remdriver-recipient-attribute-replacement"),
+                "recipient": "token-assigned-remote",
+                "attribute": attribute,
+                ("modifier" if operation == "mod" else "value"): value,
+            }
+            for _extra_id, _raw, attribute, value, operation in signature
+        ],
+    }
+    for signature in REMDRIVER_COMBINATION_SPECS
+]
+
+
+# Full, ordered Army occurrence combinations; component review never implies approval.
+# A missing PS value means a program grant, while PS=N is an exact replacement.
+HACKING_COMBINATION_SPECS = {
+    "hacking-device": (
+        (
+            (25, "UPGRADE: Cybermask", "cybermask", None),
+            (12, "UPGRADE:\u00a0Trinity", "trinity", None),
+        ),
+        (
+            (373, "UPGRADE: Total Control (PS=3)", "total-control", 3),
+            (343, "UPGRADE: Trinity (PS=5)", "trinity", 5),
+        ),
+    ),
+    "hacking-device-plus": (
+        (
+            (343, "UPGRADE: Trinity (PS=5)", "trinity", 5),
+            (287, "UPGRADE: Zero Pain", "zero-pain", None),
+        ),
+    ),
+}
+
+
+def reviewed_hacking_combinations(device: str) -> list[dict[str, Any]]:
+    """Only approved full ordered source signatures, with separate effects."""
+    return [
+        {
+            "extras": [
+                {"extraId": extra_id, "extraType": "TEXT", "rawValue": raw}
+                for extra_id, raw, _program, _ps in signature
+            ],
+            "effects": [
+                (
+                    {"kind": "hacking-program-grant",
+                     "program": f"hacking-program:{program}"}
+                    if ps is None else
+                    {"kind": "program-ps-replacement",
+                     "program": f"hacking-program:{program}", "value": ps,
+                     **({"grantsProgram": True} if program == "trinity" else {})}
+                )
+                for _extra_id, _raw, program, ps in signature
+            ],
+        }
+        for signature in HACKING_COMBINATION_SPECS[device]
+    ]
+
+
+# The exact KHD source-145 signatures, including one multi-upgrade *raw* value.
+# The compound source extra is one occurrence parameter, never two Army extras.
+KILLER_HACKING_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "hacking-program-grant",
+                    "program": f"hacking-program:{program}",
+                },
+            }
+            for extra_id, raw, program in (
+                (13, "UPGRADE: Carbonite", "carbonite"),
+                (14, "UPGRADE: Spotlight", "spotlight"),
+                (20, "UPGRADE:\u00a0White Noise", "white-noise"),
+                (21, "UPGRADE: Oblivion", "oblivion"),
+            )
+        ] + [
+            {
+                "extraId": 270, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Trinity (AP)",
+                "effect": {
+                    "kind": "program-ammunition-upgrade",
+                    "program": "hacking-program:trinity",
+                    "ammunition": "ammunition:ap",
+                },
+            },
+            {
+                "extraId": 286, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Trinity (-3)",
+                "effect": {
+                    "kind": "program-opponent-roll-mod",
+                    "program": "hacking-program:trinity",
+                    "appliesTo": "enemy-face-to-face-roll-against-program",
+                    "modifier": -3,
+                },
+            },
+            {
+                "extraId": 334, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Firewall (-3)",
+                "effect": {
+                    "kind": "firewall-comms-defense",
+                    "rule": "equipment:firewall",
+                    "appliesTo": "comms-attack-targeting-device-owner",
+                    "attackerWipMod": -3,
+                    "defenderSavingRollMod": 3,
+                },
+            },
+            {
+                "extraId": 335, "extraType": "TEXT",
+                "rawValue": "UPGRADES: Carbonite, Firewall (-3)",
+                "effect": {
+                    "kind": "hacking-program-grant-and-firewall",
+                    "program": "hacking-program:carbonite",
+                    "grantsProgram": True,
+                    "rule": "equipment:firewall",
+                    "appliesTo": "comms-attack-targeting-device-owner",
+                    "attackerWipMod": -3,
+                    "defenderSavingRollMod": 3,
+                },
+            },
+            {
+                "extraId": 339, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Trinity (SR-1)",
+                "effect": {
+                    "kind": "program-saving-roll-mod",
+                    "program": "hacking-program:trinity",
+                    "appliesTo": "target-saving-roll-against-program",
+                    "modifier": -1,
+                },
+            },
+            {
+                "extraId": 343, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Trinity (PS=5)",
+                "effect": {
+                    "kind": "program-ps-replacement",
+                    "program": "hacking-program:trinity",
+                    "value": 5,
+                },
+            },
+        ],
+    }],
+}
+
+
+# Regeneration PH=N replaces only the Normal PH Roll used in States Phase.
+# It does not alter the Trooper's PH Attribute or other PH Rolls.
+REGENERATION_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": f"PH={value}",
+                "effect": {
+                    "kind": "regeneration-ph-replacement",
+                    "appliesTo": "regeneration-states-phase-ph-roll",
+                    "attribute": "PH", "value": value,
+                },
+            }
+            for extra_id, value in ((52, 13), (244, 14), (250, 12), (353, 15))
+        ],
+    }],
+}
+
+
+# Lieutenant's two N5.3 p. 99 additions affect different resources.
+# Source extra 245 changes match Command Tokens; 246 grants a second
+# Special Lieutenant Order per Turn, not a Regular Order Pool increase.
+LIEUTENANT_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": 245,
+                "extraType": "TEXT",
+                "rawValue": "+1 Command Token",
+                "effect": {
+                    "kind": "lieutenant-extra-command-token",
+                    "appliesTo": "army-match-command-token-total",
+                    "count": 1,
+                },
+            },
+            {
+                "extraId": 246,
+                "extraType": "TEXT",
+                "rawValue": "+1 Order",
+                "effect": {
+                    "kind": "lieutenant-extra-special-order",
+                    "appliesTo": "special-lieutenant-orders-per-turn",
+                    "count": 1,
+                },
+            },
+        ],
+    }],
+}
+
+# N5.3 p. 116: one matching type, choose one on placement for a
+# multi-type profile, or all five current types with Terrain (Total).
+# These are applicability selectors, never extra MOV modifiers.
+TERRAIN_SOURCE_SPECS = (
+    (33, "Total", ("aquatic", "desert", "mountain", "jungle", "zero-g"), "all"),
+    (34, "Zero-G", ("zero-g",), "fixed"),
+    (35, "Aquatic", ("aquatic",), "fixed"),
+    (36, "Desert", ("desert",), "fixed"),
+    (37, "Jungle", ("jungle",), "fixed"),
+    (38, "Mountain", ("mountain",), "fixed"),
+    (50, "Aquatic/Jungle", ("aquatic", "jungle"), "choose-one-on-placement"),
+)
+TERRAIN_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "terrain-type-applicability",
+                    "appliesTo": "terrain-movement-skill-effects",
+                    "terrainTypes": list(types),
+                    "selection": selection,
+                },
+            }
+            for extra_id, raw, types, selection in TERRAIN_SOURCE_SPECS
+        ],
+    }],
+}
+
+
+# N5 FAQ v0.1 (carried from v0.0) p. 2: a one-use Camouflage
+# state entry remains available after Model deployment, but attempted
+# Marker deployment with failed Infiltration consumes it.
+CAMOUFLAGE_ONE_USE_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extraValues": [{
+            "extraId": 43,
+            "extraType": "TEXT",
+            "rawValue": "1 Use",
+            "effect": {
+                "kind": "camouflaged-state-one-use",
+                "appliesTo": "camouflaged-state-entry",
+                "maxUses": 1,
+                "deploymentAsModelConsumesUse": False,
+                "failedInfiltrationMarkerDeploymentConsumesUse": True,
+            },
+        }],
+    }],
+}
+
+# N5.3 p. 97: a bracketed Infiltration PH=X substitutes only the PH
+# used for the PH-3 Infiltration Roll; never change the Unit's PH stat.
+# Army source-47 ReRoll (extra 277) does not name the printed reroll PH=X
+# and remains deliberately unresolved until that source boundary is reviewed.
+INFILTRATION_PH_SOURCE_SPECS = (
+    (250, 12, 4), (353, 15, 4), (340, 16, 2),
+    (317, 18, 2), (318, 19, 5),
+)
+INFILTRATION_PH_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": f"PH={ph}",
+                "effect": {
+                    "kind": "infiltration-roll-ph-value",
+                    "appliesTo": "infiltration-ph-minus-three-roll",
+                    "attribute": "PH", "value": ph,
+                },
+            }
+            for extra_id, ph, _count in INFILTRATION_PH_SOURCE_SPECS
+        ],
+    }],
+}
+
+
+# N5.3 p. 89: printed Combat Jump landing uses a PH Roll.
+# Source PH=X selects the PH value for that Roll; +3 modifies only
+# that Roll. Explosion triggers a self-exempt, single-use template
+# attack *after* the final landing position, not a landing PH bonus.
+COMBAT_JUMP_SOURCE_SPECS = (
+    (1, "+3", 3),
+    (27, "PH=11", 102),
+    (52, "PH=13", 2),
+    (244, "PH=14", 4),
+    (250, "PH=12", 5),
+    (255, "Explosion", 5),
+)
+COMBAT_JUMP_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": (
+                    {
+                        "kind": "combat-jump-landing-ph-mod",
+                        "appliesTo": "combat-jump-landing-ph-roll",
+                        "modifier": 3,
+                    } if raw == "+3" else {
+                        "kind": "combat-jump-landing-ph-value",
+                        "appliesTo": "combat-jump-landing-ph-roll",
+                        "attribute": "PH", "value": int(raw.removeprefix("PH=")),
+                    } if raw.startswith("PH=") else {
+                        "kind": "combat-jump-landing-explosion",
+                        "appliesTo": "after-combat-jump-final-landing-location",
+                        "attack": "direct-circular-template",
+                        "power": 8, "ammunition": "ammunition:normal",
+                        "savingAttribute": "ARM", "singleUse": True,
+                        "affectsUser": False,
+                    }
+                ),
+            }
+            for extra_id, raw, _count in COMBAT_JUMP_SOURCE_SPECS
+        ],
+    }],
+}
+
+# The generic N5.3 ReRoll annotation applies to the Skill's own Roll.
+# Both are optional deployment chart Rolls, not rolls using chart rewards.
+CHART_REROLL_VARIANTS: dict[str, dict[str, Any]] = {
+    slug: {
+        "inheritance": "family",
+        "occurrenceParameters": [{
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extraValues": [{
+                "extraId": 277, "extraType": "TEXT", "rawValue": "ReRoll",
+                "effect": {
+                    "kind": "reroll-one-die",
+                    "appliesTo": f"{slug}-deployment-chart-roll",
+                },
+            }],
+        }],
+    }
+    for slug in ("booty", "metachemistry")
+}
+
+
+# Source Skill 1000 attaches directly assigned programs/Upgrades to the Hacker.
+# These are not automatically Hacking Device extras. One profile variant has
+# two ordered program grants: neither standalone component is certified.
+HACKER_SOURCE_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": 265, "extraType": "TEXT", "rawValue": "Zero Pain",
+                "effect": {
+                    "kind": "hacking-program-grant",
+                    "program": "hacking-program:zero-pain",
+                    "owner": "hacker-skill-holder",
+                },
+            },
+            {
+                "extraId": 314, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Total Control (SR-2)",
+                "effect": {
+                    "kind": "program-saving-roll-mod",
+                    "program": "hacking-program:total-control",
+                    "owner": "hacker-skill-holder",
+                    "grantsProgram": True,
+                    "appliesTo": "target-saving-roll-against-program",
+                    "modifier": -2,
+                },
+            },
+            {
+                "extraId": 334, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Firewall (-3)",
+                "effect": {
+                    "kind": "firewall-comms-defense",
+                    "rule": "equipment:firewall",
+                    "owner": "hacker-skill-holder",
+                    "appliesTo": "comms-attack-targeting-hacker",
+                    "attackerWipMod": -3,
+                    "defenderSavingRollMod": 3,
+                },
+            },
+        ],
+    }],
+    "occurrenceCombinations": [{
+        "extras": [
+            {"extraId": 386, "extraType": "TEXT", "rawValue": "Carbonite"},
+            {"extraId": 387, "extraType": "TEXT", "rawValue": "Spotlight"},
+        ],
+        "effects": [
+            {
+                "kind": "hacking-program-grant",
+                "program": f"hacking-program:{program}",
+                "owner": "hacker-skill-holder",
+            }
+            for program in ("carbonite", "spotlight")
+        ],
+    }],
+}
+
+
+# The pinned Viral Vulnerability example matches *weapon names*, not
+# Ammunition identities/components. This metadata is not a runtime matcher.
+VULNERABILITY_VIRAL_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [{
+            "extraId": 39, "extraType": "TEXT", "rawValue": "Viral",
+            "effect": {
+                "kind": "immunity-use-restriction",
+                "immunity": "skill:immunity",
+                "appliesTo": "attack-with-weapon-name-containing-viral",
+                "weaponNameContains": "Viral",
+            },
+        }],
+    }],
+}
+
+
+# Decoy (1)/(2) counts additional replica Markers on deployment, not
+# the total number of representations or an Attribute modifier.
+DECOY_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": str(count),
+                "effect": {
+                    "kind": "decoy-replica-marker-count",
+                    "appliesTo": "decoy-state-deployment",
+                    "count": count,
+                },
+            }
+            for extra_id, count in ((44, 1), (267, 2))
+        ],
+    }],
+}
+
+
+# Bracketed FT Master Unit names are the source-listed cancellation triggers,
+# not inferred unit slugs. One Army TEXT extra can name multiple Units.
+FT_MASTER_UNIT_SIGNATURES: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (325, "Kuang Shi", ("Kuang Shi",)),
+    (329, "Shaolin", ("Shaolin",)),
+    (336, "Diablos", ("Diablos",)),
+    (338, "Morlocks, Zellenkriegers, Connolly",
+     ("Morlocks", "Zellenkriegers", "Connolly")),
+    (347, "Hungries", ("Hungries",)),
+    (364, "Helots", ("Helots",)),
+    (365, "Jackals", ("Jackals",)),
+    (377, "Stingers", ("Stingers",)),
+)
+FT_MASTER_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "fireteam-cancellation-dependency",
+                    "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+                    "unitNames": list(names),
+                },
+            }
+            for extra_id, raw, names in FT_MASTER_UNIT_SIGNATURES
+        ],
+    }],
+}
+
+
+# Army additionally lists Bangbomb (+4) as Skill 266 on RacerBots,
+# although the reviewed rules owner is canonical Equipment source 246.
+# Preserve exactly the same Dodge eligibility restriction, not a generic +4.
+BANGBOMB_SKILL_PARAMETERS: list[dict[str, Any]] = [{
+    "catalog": "skills", "sourceId": 266,
+    "source": "army-extra", "kind": "reviewed-extra",
+    "extraValues": [{
+        "extraId": 310, "extraType": "TEXT", "rawValue": "+4",
+        "effect": {
+            "kind": "dodge-roll-mod",
+            "appliesTo": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+            "modifier": 4,
+        },
+    }],
+}]
+
+
+# Army lists target-side PH overrides as Skills 254/273, although both
+# canonical GizmoKit and MediKit definitions are Equipment. Keep those
+# provenance identities distinct from the single game-rule owner.
+MEDIKIT_TARGET_PH_PARAMETERS: list[dict[str, Any]] = [{
+    "catalog": "skills", "sourceId": 273,
+    "source": "army-extra", "kind": "reviewed-extra",
+    "extraValues": [
+        {
+            "extraId": extra_id, "extraType": "TEXT", "rawValue": f"PH={value}",
+            "effect": {
+                "kind": "medikit-target-ph-replacement",
+                "appliesTo": "target-medikit-recovery-ph-roll",
+                "attribute": "PH", "value": value,
+            },
+        }
+        for extra_id, value in (
+            (52, 13), (244, 14), (250, 12),
+            (340, 16), (353, 15), (382, 17),
+        )
+    ],
+}]
+
+GIZMOKIT_TARGET_PH_PARAMETERS: list[dict[str, Any]] = [{
+    "catalog": "skills", "sourceId": 254,
+    "source": "army-extra", "kind": "reviewed-extra",
+    "extraValues": [
+        {
+            "extraId": extra_id, "extraType": "TEXT", "rawValue": f"PH={value}",
+            "effect": {
+                "kind": "gizmokit-target-ph-replacement",
+                "appliesTo": "target-gizmokit-recovery-ph-roll",
+                "attribute": "PH", "value": value,
+            },
+        }
+        for extra_id, value in (
+            (27, 11), (32, 10), (46, 9),
+            (52, 13), (244, 14), (250, 12),
+        )
+    ],
+}]
+
+
+def _validate_reviewed_extra_parameter(
+    parameter: dict[str, Any],
+    context: str,
+    inheritance: str,
+    army_links: list[object],
+) -> None:
+    """Bound typed extra effects to exact, reviewed Army source families."""
+    hacking_grants = {
+        "hacking-device": [
+            (12, "UPGRADE:\u00a0Trinity", "trinity"),
+            (20, "UPGRADE:\u00a0White Noise", "white-noise"),
+            (25, "UPGRADE: Cybermask", "cybermask"),
+            (287, "UPGRADE: Zero Pain", "zero-pain"),
+        ],
+        "hacking-device-plus": [
+            (17, "UPGRADE:\u00a0Fairy Dust", "fairy-dust"),
+        ],
+    }
+    hacking_mods = {
+        "hacking-device": [
+            (269, "UPGRADE: Oblivion (+1B)", "oblivion", "program-burst-mod", "modifier", 1),
+            (278, "UPGRADE: Total Control (+1B)", "total-control",
+             "program-burst-mod", "modifier", 1),
+            (285, "UPGRADE: Carbonite (+1 B)", "carbonite", "program-burst-mod", "modifier", 1),
+            (290, "UPGRADE: Trinity (+1B)", "trinity", "program-burst-mod", "modifier", 1),
+            (363, "UPGRADE: Carbonite (PS=6)", "carbonite", "program-ps-replacement", "value", 6),
+            (378, "UPGRADE: Trinity (+1SD)", "trinity", "program-special-die", "count", 1),
+            (383, "UPGRADE: Carbonite (+1SD)", "carbonite", "program-special-die", "count", 1),
+        ],
+        "hacking-device-plus": [
+            (269, "UPGRADE: Oblivion (+1B)", "oblivion", "program-burst-mod", "modifier", 1),
+            (378, "UPGRADE: Trinity (+1SD)", "trinity", "program-special-die", "count", 1),
+        ],
+    }
+    hacking_srs = {
+        "hacking-device": [
+            (331, "UPGRADE: Carbonite (SR-2)", "carbonite", -2),
+            (339, "UPGRADE: Trinity (SR-1)", "trinity", -1),
+            (352, "UPGRADE: Trinity (SR-2)", "trinity", -2),
+        ],
+        "hacking-device-plus": [
+            (314, "UPGRADE: Total Control (SR-2)", "total-control", -2),
+            (339, "UPGRADE: Trinity (SR-1)", "trinity", -1),
+        ],
+    }
+    hacking_firewalls = {
+        "hacking-device": [
+            (326, "Firewall -6", -6),
+            (334, "UPGRADE: Firewall (-3)", -3),
+            (376, "UPGRADE: Firewall (-6)", -6),
+        ],
+        "hacking-device-plus": [],
+    }
+    for device, grants in hacking_grants.items():
+        if inheritance != "family" or army_links != [
+            {"entity": "equipment", "id": device}
+        ]:
+            continue
+        values = parameter.get("extraValues")
+        expected = [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "hacking-program-grant",
+                    "program": f"hacking-program:{program}",
+                },
+            }
+            for extra_id, raw, program in grants
+        ]
+        expected += [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": kind, "program": f"hacking-program:{program}",
+                    field: value,
+                    **({"grantsProgram": True} if program == "trinity" else {}),
+                },
+            }
+            for extra_id, raw, program, kind, field, value in hacking_mods[device]
+        ]
+        expected += [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "program-saving-roll-mod",
+                    "program": f"hacking-program:{program}",
+                    "appliesTo": "target-saving-roll-against-program",
+                    "modifier": modifier,
+                    **({"grantsProgram": True} if program == "trinity" else {}),
+                },
+            }
+            for extra_id, raw, program, modifier in hacking_srs[device]
+        ]
+        expected += [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "firewall-comms-defense",
+                    "rule": "equipment:firewall",
+                    "appliesTo": "comms-attack-targeting-device-owner",
+                    "attackerWipMod": modifier,
+                    "defenderSavingRollMod": 3,
+                },
+            }
+            for extra_id, raw, modifier in hacking_firewalls[device]
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != len(expected)
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                for entry in values
+            )
+            or values != expected
+            or any(
+                isinstance(entry.get("effect"), dict)
+                and "grantsProgram" in entry["effect"]
+                and type(entry["effect"]["grantsProgram"]) is not bool
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid {device} reviewed hacking extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "killer-hacking-device"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = KILLER_HACKING_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != len(expected)
+            or any(
+                not isinstance(entry, dict) or type(entry.get("extraId")) is not int
+                for entry in values
+            )
+            or values != expected
+            or any(
+                type(entry["effect"]["grantsProgram"]) is not bool
+                for entry in values if "grantsProgram" in entry["effect"]
+            )
+        ):
+            raise ValueError(f"{context}: invalid Killer Hacking Device reviewed extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "evo-hacking-device"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 352, "extraType": "TEXT",
+            "rawValue": "UPGRADE: Trinity (SR-2)",
+            "effect": {
+                "kind": "hacking-program-upgrade",
+                "program": "hacking-program:trinity",
+                "grantsProgram": True,
+                "appliesTo": "target-saving-roll-against-program",
+                "modifier": -2,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+            or (
+                isinstance(values[0].get("effect"), dict)
+                and type(values[0]["effect"].get("grantsProgram")) is not bool
+            )
+        ):
+            raise ValueError(f"{context}: invalid EVO Hacking Device Trinity upgrade")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "medikit"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 8, "extraType": "TEXT", "rawValue": "+1B",
+            "effect": {
+                "kind": "equipment-burst-mod",
+                "appliesTo": "ranged-medikit-bs-attack",
+                "modifier": 1,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid MediKit reviewed source extra")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "gizmokit"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 8, "extraType": "TEXT", "rawValue": "+1B",
+            "effect": {
+                "kind": "equipment-burst-mod",
+                "appliesTo": "ranged-gizmokit-bs-attack",
+                "modifier": 1,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid GizmoKit reviewed source extra")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "deactivator"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [
+            {
+                "extraId": 8, "extraType": "TEXT", "rawValue": "+1B",
+                "effect": {
+                    "kind": "equipment-burst-mod",
+                    "appliesTo": "deactivator-wip-attack",
+                    "modifier": 1,
+                },
+            },
+            {
+                "extraId": 277, "extraType": "TEXT", "rawValue": "ReRoll",
+                "effect": {
+                    "kind": "reroll-one-die",
+                    "appliesTo": "deactivator-wip-roll",
+                },
+            },
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != len(expected)
+            or any(
+                not isinstance(value, dict) or type(value.get("extraId")) is not int
+                for value in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid Deactivator reviewed source extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "albedo"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [
+            {
+                "extraId": extra_id,
+                "extraType": "TEXT",
+                "rawValue": str(modifier),
+                "effect": {
+                    "kind": "enemy-albedo-attribute-mod",
+                    "appliesTo": (
+                        "msv-or-marksmanship-lof-bs-attack-or-discover-against-bearer"
+                    ),
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((6, -3), (7, -6))
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(entry, dict) or type(entry.get("extraId")) is not int
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid Albedo reviewed source extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "bangbomb"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 310, "extraType": "TEXT", "rawValue": "+4",
+            "effect": {
+                "kind": "dodge-roll-mod",
+                "appliesTo": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+                "modifier": 4,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid Bangbomb reviewed source extra")
+        return
+    ecm_sources = {
+        239: (
+            "Guided", "guided-attack-targeting-ecm-owner",
+            ((6, -3), (7, -6), (51, -8), (251, -8)),
+        ),
+        241: (
+            "Hacker", "hacking-program-targeting-ecm-owner",
+            ((6, -3), (7, -6)),
+        ),
+    }
+    if inheritance == "source" and len(army_links) == 1:
+        link = army_links[0]
+        source_id = link.get("id") if isinstance(link, dict) else None
+        if isinstance(link, dict) and link.get("entity") == "equipment" and (
+            source_id in ecm_sources
+        ):
+            label, scope, modifiers = ecm_sources[source_id]
+            expected = [
+                {
+                    "extraId": extra_id, "extraType": "TEXT",
+                    "rawValue": str(modifier),
+                    "effect": {
+                        "kind": "enemy-ecm-attack-mod", "appliesTo": scope,
+                        "modifier": modifier,
+                    },
+                }
+                for extra_id, modifier in modifiers
+            ]
+            values = parameter.get("extraValues")
+            if (
+                set(parameter) != {"source", "kind", "extraValues"}
+                or not isinstance(values, list)
+                or len(values) != len(expected)
+                or any(not isinstance(entry, dict)
+                       or type(entry.get("extraId")) is not int for entry in values)
+                or values != expected
+            ):
+                raise ValueError(f"{context}: invalid ECM {label} source extras")
+            return
+    if inheritance == "source" and army_links == [
+        {"entity": "equipment", "id": 244}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 277,
+            "extraType": "TEXT",
+            "rawValue": "ReRoll",
+            "effect": {
+                "kind": "reroll-one-die",
+                "appliesTo": "tinbot-discover-roll",
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid TinBot Discover source extras")
+        return
+    if inheritance == "source" and army_links == [
+        {"entity": "equipment", "id": 247}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [
+            {
+                "extraId": extra_id,
+                "extraType": "TEXT",
+                "rawValue": str(modifier),
+                "effect": {
+                    "kind": "enemy-guided-attack-mod",
+                    "appliesTo": "guided-attack-targeting-tinbot-owner",
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((7, -6), (259, -9))
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 2
+            or any(
+                not isinstance(entry, dict) or type(entry.get("extraId")) is not int
+                for entry in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid TinBot ECM Guided source extras")
+        return
+    if inheritance == "source" and army_links == [
+        {"entity": "equipment", "id": 169}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [
+            {
+                "extraId": extra_id,
+                "extraType": "TEXT",
+                "rawValue": str(modifier),
+                "effect": {
+                    "kind": "enemy-comms-attack-mod",
+                    "appliesTo": "comms-attack-targeting-tinbot-owner",
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((6, -3), (7, -6))
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 2
+            or any(not isinstance(entry, dict)
+                   or type(entry.get("extraId")) is not int for entry in values)
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid TinBot Firewall source extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "commlink"}
+    ]:
+        # Optional N4-origin Reinforcements Extra: +X modifies only
+        # the maximum Trooper count, not a stat or roster legality.
+        # Keep the source signatures closed rather than accepting any +N.
+        expected = [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": f"+{count}",
+                "effect": {
+                    "kind": "max-trooper-count-increase",
+                    "appliesTo": "optional-reinforcements-extra-army-list",
+                    "count": count,
+                },
+            }
+            for extra_id, count in ((298, 1), (299, 2))
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or parameter.get("extraValues") != expected
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                or type(entry["effect"].get("count")) is not int
+                for entry in parameter.get("extraValues", [])
+            )
+        ):
+            raise ValueError(f"{context}: invalid optional Commlink count extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "lieutenant"}
+    ]:
+        # The two printed extras are discrete: tokens for the match,
+        # Special Lieutenant Orders per Turn. Neither is a generic MOD.
+        values = parameter.get("extraValues")
+        expected = LIEUTENANT_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(item, dict)
+                or type(item.get("extraId")) is not int
+                or type(item.get("effect", {}).get("count")) is not int
+                for item in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid N5.3 Lieutenant resource extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "infiltration"}
+    ]:
+        # Only the five pinned source-47 PH=X extras. ReRoll is not a
+        # typed value without the printed PH=X reroll parameter.
+        values = parameter.get("extraValues")
+        expected = INFILTRATION_PH_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or type(entry.get("effect", {}).get("value")) is not int
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid N5.3 Infiltration PH source extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "combat-jump"}
+    ]:
+        # Exact source-35 Army extras only; the fixed PH values are
+        # landing-Roll values, not permanent model Attribute replacements.
+        # Explosion is a single-use attack after the final placement.
+        values = parameter.get("extraValues")
+        expected = COMBAT_JUMP_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                or (entry["effect"].get("kind") == "combat-jump-landing-ph-value"
+                    and type(entry["effect"].get("value")) is not int)
+                or (entry["effect"].get("kind") == "combat-jump-landing-ph-mod"
+                    and type(entry["effect"].get("modifier")) is not int)
+                or (entry["effect"].get("kind") == "combat-jump-landing-explosion"
+                    and (type(entry["effect"].get("singleUse")) is not bool
+                         or type(entry["effect"].get("affectsUser")) is not bool))
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid N5.3 Combat Jump source extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "camouflage"}
+    ]:
+        # The carried-forward FAQ requires an exact single use, not a
+        # generic limited-use counter or permission to retry failed infiltration.
+        values = parameter.get("extraValues")
+        expected = CAMOUFLAGE_ONE_USE_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                or type(entry["effect"].get("maxUses")) is not int
+                or type(entry["effect"].get("deploymentAsModelConsumesUse")) is not bool
+                or type(entry["effect"].get(
+                    "failedInfiltrationMarkerDeploymentConsumesUse"
+                )) is not bool
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid FAQ Camouflage one-use extra")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "terrain"}
+    ]:
+        # N5.3 p. 116: multi-type means choose one when placed,
+        # except Total, which applies to all five types. No MOV stacking.
+        values = parameter.get("extraValues")
+        expected = TERRAIN_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                or not isinstance(entry["effect"].get("terrainTypes"), list)
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid N5.3 Terrain type extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "forward-observer"}
+    ]:
+        # N5.3 pp. 75, 92: +1SD adds a selectable/discarded die to
+        # this WIP-based BS Attack; it is not +1 Burst or ammunition.
+        expected = [{
+            "extraId": 308,
+            "extraType": "TEXT",
+            "rawValue": "+1SD",
+            "effect": {
+                "kind": "special-die",
+                "appliesTo": "forward-observer-wip-attack-roll",
+                "count": 1,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or parameter.get("extraValues") != expected
+            or type(parameter["extraValues"][0]["effect"]["count"]) is not int
+        ):
+            raise ValueError(f"{context}: invalid Forward Observer Special Die extra")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "neurocinetics"}
+    ]:
+        expected = [{
+            "extraId": 8,
+            "extraType": "TEXT",
+            "rawValue": "+1B",
+            "effect": {
+                "kind": "skill-burst-mod",
+                "appliesTo": "neurocinetics-reactive-turn-bs-weapon-single-target",
+                "modifier": 1,
+            },
+        }]
+        values = parameter.get("extraValues")
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(not isinstance(entry, dict)
+                   or type(entry.get("extraId")) is not int
+                   or not isinstance(entry.get("effect"), dict)
+                   or type(entry["effect"].get("modifier")) is not int
+                   for entry in values)
+        ):
+            raise ValueError(f"{context}: invalid Neurocinetics reactive Burst extra")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "chain-of-command"}
+    ]:
+        # N5.3 p. 87: this annotation suppresses Specialist status granted
+        # by Chain of Command only; other qualifying Skills still apply.
+        expected = [{
+            "extraId": 375,
+            "extraType": "TEXT",
+            "rawValue": "Non Specialist",
+            "effect": {
+                "kind": "specialist-qualification-exclusion",
+                "appliesTo": "specialist-troop-qualification-from-chain-of-command",
+                "excluded": True,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or parameter.get("extraValues") != expected
+            or type(parameter["extraValues"][0]["effect"]["excluded"]) is not bool
+        ):
+            raise ValueError(f"{context}: invalid Chain of Command Non Specialist extra")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "discover"}
+    ]:
+        # N5.3 pp. 68, 77: brackets apply only to this Skill's WIP Roll.
+        # ReRoll permits one die to be rerolled; it is not an Attribute MOD.
+        expected = [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": f"+{modifier}",
+                "effect": {
+                    "kind": "discover-wip-roll-mod",
+                    "appliesTo": "discover-wip-roll",
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((1, 3), (2, 6))
+        ] + [{
+            "extraId": 277, "extraType": "TEXT", "rawValue": "ReRoll",
+            "effect": {
+                "kind": "reroll-one-die",
+                "appliesTo": "discover-wip-roll",
+            },
+        }]
+        values = parameter.get("extraValues")
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 3
+            or any(
+                not isinstance(item, dict)
+                or type(item.get("extraId")) is not int
+                or not isinstance(item.get("effect"), dict)
+                or (
+                    item["extraId"] in (1, 2)
+                    and type(item["effect"].get("modifier")) is not int
+                )
+                for item in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid Discover reviewed source extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "parachutist"}
+    ]:
+        # N5.3 p. 105: only the exact Army Dep. Zone variant permits entry
+        # inside the enemy Deployment Zone; the base family retains its ban.
+        expected = [{
+            "extraId": 48,
+            "extraType": "TEXT",
+            "rawValue": "Dep. Zone",
+            "effect": {
+                "kind": "parachutist-entry-zone-permission",
+                "appliesTo": "parachutist-table-edge-entry",
+                "zone": "enemy-deployment-zone",
+                "permitted": True,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or parameter.get("extraValues") != expected
+            or type(parameter["extraValues"][0]["effect"]["permitted"]) is not bool
+        ):
+            raise ValueError(f"{context}: invalid Parachutist Deployment Zone extra")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "minelayer"}
+    ]:
+        # N5.3 p. 102: the bracketed quantity is the number of deployable
+        # items placed, never extra uses or an unrelated equipment count.
+        expected = [{
+            "extraId": 267,
+            "extraType": "TEXT",
+            "rawValue": "2",
+            "effect": {
+                "kind": "minelayer-deployment-item-count",
+                "appliesTo": "minelayer-items-placed-during-deployment",
+                "count": 2,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or parameter.get("extraValues") != expected
+        ):
+            raise ValueError(f"{context}: invalid Minelayer deployment item count")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "regeneration"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = REGENERATION_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(item, dict)
+                or type(item.get("extraId")) is not int
+                or not isinstance(item.get("effect"), dict)
+                or type(item["effect"].get("value")) is not int
+                for item in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid exact Regeneration PH replacements")
+        return
+    if inheritance == "family" and len(army_links) == 1 and isinstance(
+        army_links[0], dict
+    ) and army_links[0].get("entity") == "skill" and (
+        army_links[0].get("id") in CHART_REROLL_VARIANTS
+    ):
+        skill = army_links[0]["id"]
+        expected = CHART_REROLL_VARIANTS[skill][
+            "occurrenceParameters"
+        ][0]["extraValues"]
+        values = parameter.get("extraValues")
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(not isinstance(x, dict) or type(x.get("extraId")) is not int
+                   for x in values)
+        ):
+            raise ValueError(f"{context}: invalid {skill} chart ReRoll extra")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "hacker"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = HACKER_SOURCE_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(item, dict) or type(item.get("extraId")) is not int
+                for item in values
+            )
+            or type(values[1]["effect"].get("modifier")) is not int
+            or type(values[1]["effect"].get("grantsProgram")) is not bool
+            or type(values[2]["effect"].get("attackerWipMod")) is not int
+            or type(values[2]["effect"].get("defenderSavingRollMod")) is not int
+        ):
+            raise ValueError(f"{context}: invalid exact Hacker Skill extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "vulnerability"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = VULNERABILITY_VIRAL_VARIANT[
+            "occurrenceParameters"
+        ][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                for entry in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid exact Viral Vulnerability extra")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "decoy"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = DECOY_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                or type(entry["effect"].get("count")) is not int
+                for entry in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid Decoy replica count extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "ft-master"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = FT_MASTER_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or not all(
+                isinstance(entry, dict)
+                and type(entry.get("extraId")) is int
+                and isinstance(entry.get("effect"), dict)
+                and isinstance(entry["effect"].get("unitNames"), list)
+                for entry in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid FT Master listed-unit extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "impersonation"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 268, "extraType": "TEXT", "rawValue": "IMP-2",
+            "effect": {
+                "kind": "impersonation-state-restriction",
+                "state": "state:impersonation-2",
+                "appliesTo": "deployment-and-activation",
+                "only": True,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+            or type(values[0]["effect"].get("only")) is not bool
+        ):
+            raise ValueError(f"{context}: invalid Impersonation IMP-2 source extra")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "super-jump"}
+    ]:
+        values = parameter.get("extraValues")
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != [{
+                "extraId": 304,
+                "extraType": "TEXT",
+                "rawValue": "Jet Propulsion",
+                "effect": {
+                    "kind": "trajectory-control",
+                    "appliesTo": "super-jump-jet-propulsion",
+                },
+            }]
+        ):
+            raise ValueError(f"{context}: invalid Super-Jump Jet Propulsion extra")
+        return
+    if (
+        inheritance != "family"
+        or len(army_links) != 1
+        or not isinstance(army_links[0], dict)
+        or army_links[0].get("entity") != "skill"
+        or army_links[0].get("id") != "dodge"
+    ):
+        raise ValueError(f"{context}: reviewed-extra currently requires the Dodge family")
+    if set(parameter) != {"source", "kind", "extraValues"}:
+        raise ValueError(f"{context}: reviewed-extra requires source, kind and extraValues")
+    values = parameter["extraValues"]
+    if not isinstance(values, list) or not values:
+        raise ValueError(f"{context}: extraValues must be nonempty")
+    seen_ids: set[int] = set()
+    for index, entry in enumerate(values):
+        prefix = f"{context}.extraValues[{index}]"
+        if not isinstance(entry, dict) or set(entry) != {
+            "extraId", "extraType", "rawValue", "effect"
+        }:
+            raise ValueError(f"{prefix}: invalid extraValues entry")
+        extra_id = entry["extraId"]
+        if type(extra_id) is not int or extra_id <= 0 or extra_id in seen_ids:
+            raise ValueError(f"{prefix}: invalid or duplicate extraId")
+        seen_ids.add(extra_id)
+        raw = entry["rawValue"]
+        effect = entry["effect"]
+        if not isinstance(raw, str) or not isinstance(effect, dict):
+            raise ValueError(f"{prefix}: rawValue and effect must be typed")
+        kind = effect.get("kind")
+        if kind == "opponent-roll-mod":
+            if set(effect) != {"kind", "appliesTo", "modifier"} or (
+                effect["appliesTo"] != "dodge-face-to-face"
+                or type(effect["modifier"]) is not int
+                or effect["modifier"] not in range(-12, 0)
+            ):
+                raise ValueError(f"{prefix}: invalid opponent-roll-mod")
+            expected_raw = f"{effect['modifier']:+d}"
+            expected_type = "TEXT"
+        elif kind == "roll-attribute-replacement":
+            if set(effect) != {"kind", "appliesTo", "attribute", "value"} or (
+                effect["appliesTo"] != "dodge-ph-roll"
+                or effect["attribute"] != "PH"
+                or type(effect["value"]) is not int
+                or not 1 <= effect["value"] <= 20
+            ):
+                raise ValueError(f"{prefix}: invalid roll-attribute-replacement")
+            expected_raw = f"PH={effect['value']}"
+            expected_type = "TEXT"
+        elif kind == "movement-bonus":
+            if set(effect) != {"kind", "appliesTo", "centimeters"} or (
+                effect["appliesTo"] != "successful-dodge-movement"
+                or type(effect["centimeters"]) not in (int, float)
+            ):
+                raise ValueError(f"{prefix}: invalid movement-bonus")
+            try:
+                cm = Decimal(str(effect["centimeters"]))
+            except InvalidOperation as exc:
+                raise ValueError(f"{prefix}: invalid centimeters") from exc
+            if not cm.is_finite() or not 0 < cm <= 30 or cm % Decimal("2.5") != 0:
+                raise ValueError(f"{prefix}: invalid game distance")
+            expected_raw = f"+{cm.normalize():f}"
+            expected_type = "DISTANCE"
+        elif kind == "special-die":
+            if set(effect) != {"kind", "appliesTo", "count"} or (
+                effect["appliesTo"] != "dodge-roll"
+                or type(effect["count"]) is not int
+                or effect["count"] != 1
+            ):
+                raise ValueError(f"{prefix}: invalid special-die")
+            expected_raw = "+1SD"
+            expected_type = "TEXT"
+        elif kind == "saving-attribute-mod":
+            if set(effect) != {"kind", "appliesTo", "attribute", "modifier"} or (
+                effect["appliesTo"] != "arm-saving-roll-after-dodge"
+                or effect["attribute"] != "ARM"
+                or type(effect["modifier"]) is not int
+                or effect["modifier"] != 3
+            ):
+                raise ValueError(f"{prefix}: invalid saving-attribute-mod")
+            expected_raw = "ARM +3"
+            expected_type = "TEXT"
+        else:
+            raise ValueError(f"{prefix}: unsupported reviewed effect {kind!r}")
+        if entry["extraType"] != expected_type or raw != expected_raw:
+            raise ValueError(
+                f"{prefix}: extraType/rawValue conflicts with reviewed effect"
+            )
 
 
 def _validate_variant_semantics(
@@ -53,7 +1625,10 @@ def _validate_variant_semantics(
 ) -> str:
     if not isinstance(value, dict):
         raise ValueError(f"{context}: must be an object")
-    allowed = {"inheritance", "occurrenceParameters", "sourceVariant", "sourceMode"}
+    allowed = {
+        "inheritance", "occurrenceParameters", "occurrenceCombinations",
+        "sourceVariant", "sourceMode", "sourceCatalogParameters",
+    }
     unknown = set(value) - allowed
     if unknown:
         raise ValueError(f"{context}: unsupported fields {sorted(unknown)}")
@@ -64,10 +1639,52 @@ def _validate_variant_semantics(
             f"{sorted(VARIANT_INHERITANCE_MODES)}"
         )
 
+    # Army Skill catalog extras can refer to existing Equipment rule families.
+    # Permit only exact source IDs, effect scope, and canonical Equipment owners.
+    if "sourceCatalogParameters" in value:
+        extra = value["sourceCatalogParameters"]
+        expected_cross_catalog = {
+            "bangbomb": BANGBOMB_SKILL_PARAMETERS,
+            "gizmokit": GIZMOKIT_TARGET_PH_PARAMETERS,
+            "medikit": MEDIKIT_TARGET_PH_PARAMETERS,
+        }
+        equipment_id = (
+            army_links[0].get("id")
+            if len(army_links) == 1 and isinstance(army_links[0], dict)
+            and army_links[0].get("entity") == "equipment"
+            else None
+        )
+        if (
+            inheritance != "family"
+            or equipment_id not in expected_cross_catalog
+            or not isinstance(extra, list)
+            or len(extra) != 1
+            or not isinstance(extra[0], dict)
+            or not isinstance(extra[0].get("extraValues"), list)
+            or any(
+                not isinstance(item, dict) or type(item.get("extraId")) is not int
+                or not isinstance(item.get("effect"), dict)
+                or type(item["effect"].get(
+                    "modifier" if equipment_id == "bangbomb" else "value"
+                )) is not int
+                for item in extra[0]["extraValues"]
+            )
+            or extra != expected_cross_catalog[equipment_id]
+        ):
+            label = str(equipment_id)
+            if equipment_id == "bangbomb":
+                label = "Bangbomb"
+            elif equipment_id == "gizmokit":
+                label = "GizmoKit"
+            elif equipment_id == "medikit":
+                label = "MediKit"
+            detail = "Skill extra" if equipment_id == "bangbomb" else "target PH"
+            raise ValueError(f"{context}: invalid cross-catalog {label} {detail}")
     parameters = value.get("occurrenceParameters", [])
     if not isinstance(parameters, list):
         raise ValueError(f"{context}: 'occurrenceParameters' must be an array")
     seen_parameters: set[tuple[str, str]] = set()
+    seen_extra_ids: set[int] = set()
     for index, parameter in enumerate(parameters):
         parameter_context = f"{context}.occurrenceParameters[{index}]"
         if not isinstance(parameter, dict):
@@ -84,22 +1701,191 @@ def _validate_variant_semantics(
                 f"{parameter_context}: unsupported parameter kind {kind!r}; "
                 f"expected one of {sorted(VARIANT_PARAMETER_KINDS)}"
             )
-        expected_fields = {"source", "kind", "positiveSign"}
-        if set(parameter) != expected_fields:
-            raise ValueError(
-                f"{parameter_context}: distance parameters must contain only "
-                "'source', 'kind', and 'positiveSign'"
+        if kind == "reviewed-extra":
+            _validate_reviewed_extra_parameter(
+                parameter, parameter_context, inheritance, army_links
             )
-        if parameter["positiveSign"] not in {"preserve", "omit", "force"}:
-            raise ValueError(
-                f"{parameter_context}: 'positiveSign' must be one of "
-                "'preserve', 'omit', or 'force'"
-            )
+        elif kind == "distance":
+            expected_fields = {"source", "kind", "positiveSign"}
+            if set(parameter) != expected_fields:
+                raise ValueError(
+                    f"{parameter_context}: distance parameters must contain only "
+                    "'source', 'kind', and 'positiveSign'"
+                )
+            if parameter["positiveSign"] not in {"preserve", "omit", "force"}:
+                raise ValueError(
+                    f"{parameter_context}: 'positiveSign' must be one of "
+                    "'preserve', 'omit', or 'force'"
+                )
+        else:
+            if (
+                inheritance != "family"
+                or len(army_links) != 1
+                or not isinstance(army_links[0], dict)
+                or army_links[0].get("entity") != "skill"
+            ):
+                raise ValueError(
+                    f"{parameter_context}: numeric-mod currently requires a family Skill link"
+                )
+            expected_fields = {
+                "source", "kind", "owner", "target", "appliesTo", "extraValues"
+            }
+            if set(parameter) != expected_fields:
+                raise ValueError(
+                    f"{parameter_context}: numeric-mod parameters require exactly "
+                    f"{sorted(expected_fields)}"
+                )
+            if parameter["owner"] != "skill-holder":
+                raise ValueError(f"{parameter_context}: owner must be 'skill-holder'")
+            if parameter["target"] not in VARIANT_MOD_TARGETS:
+                raise ValueError(
+                    f"{parameter_context}: invalid numeric-mod target"
+                )
+            applies_to = parameter["appliesTo"]
+            if (
+                not isinstance(applies_to, list)
+                or not applies_to
+                or any(
+                    not isinstance(scope, str) or scope not in VARIANT_MOD_APPLICATIONS
+                    for scope in applies_to
+                )
+                or len(set(applies_to)) != len(applies_to)
+            ):
+                raise ValueError(f"{parameter_context}: invalid appliesTo scopes")
+            if (
+                parameter["target"] == "opponent"
+                and set(applies_to) not in (
+                    {"bs-attack-requiring-lof", "discover"},
+                    {"surprise-attack-target-face-to-face-aro"},
+                )
+            ) or (
+                parameter["target"] == "skill-holder"
+                and not set(applies_to) <= {"berserk-cc-attack", "dodge-ph-roll"}
+            ):
+                raise ValueError(
+                    f"{parameter_context}: target conflicts with appliesTo scope"
+                )
+            if "surprise-attack-target-face-to-face-aro" in applies_to and (
+                army_links != [{"entity": "skill", "id": "surprise-attack"}]
+            ):
+                raise ValueError(
+                    f"{parameter_context}: Surprise Attack scope requires its exact family link"
+                )
+            values = parameter["extraValues"]
+            if not isinstance(values, list) or not values:
+                raise ValueError(f"{parameter_context}: extraValues must be nonempty")
+            seen_numeric_ids: set[int] = set()
+            for entry in values:
+                if not isinstance(entry, dict) or set(entry) != {
+                    "extraId", "extraType", "rawValue", "modifier"
+                }:
+                    raise ValueError(f"{parameter_context}: invalid extraValues entry")
+                extra_id, modifier = entry["extraId"], entry["modifier"]
+                if type(extra_id) is not int or extra_id < 1 or extra_id in seen_numeric_ids:
+                    raise ValueError(f"{parameter_context}: duplicate/invalid extraId")
+                seen_numeric_ids.add(extra_id)
+                if type(modifier) is not int or not (-12 <= modifier <= 12) or modifier == 0:
+                    raise ValueError(f"{parameter_context}: invalid numeric modifier")
+                if (
+                    entry["extraType"] != "TEXT"
+                    or entry["rawValue"] != f"{modifier:+d}"
+                ):
+                    raise ValueError(
+                        f"{parameter_context}: extraType/rawValue must match modifier"
+                    )
+                if (
+                    (parameter["target"] == "opponent" and modifier >= 0)
+                    or (parameter["target"] == "skill-holder" and modifier <= 0)
+                ):
+                    raise ValueError(f"{parameter_context}: modifier sign conflicts with target")
+        if kind in {"numeric-mod", "reviewed-extra"}:
+            for entry in parameter["extraValues"]:
+                extra_id = entry["extraId"]
+                if extra_id in seen_extra_ids:
+                    raise ValueError(
+                        f"{parameter_context}: duplicate occurrence extraId {extra_id}"
+                    )
+                seen_extra_ids.add(extra_id)
         key = (source, kind)
         if key in seen_parameters:
             raise ValueError(f"{parameter_context}: duplicate parameter {key!r}")
         seen_parameters.add(key)
 
+    if "occurrenceCombinations" in value:
+        combinations = value["occurrenceCombinations"]
+        expected_device = (
+            army_links[0].get("id")
+            if len(army_links) == 1 and isinstance(army_links[0], dict)
+            and army_links[0].get("entity") == "equipment"
+            else None
+        )
+        if army_links == [{"entity": "skill", "id": "hacker"}]:
+            if (
+                inheritance != "family"
+                or not isinstance(combinations, list)
+                or combinations != HACKER_SOURCE_VARIANT["occurrenceCombinations"]
+                or any(
+                    not isinstance(entry, dict)
+                    or type(entry.get("extraId")) is not int
+                    for combo in combinations
+                    for entry in combo["extras"]
+                )
+            ):
+                raise ValueError(f"{context}: invalid exact Hacker Skill combination")
+        elif army_links == [{"entity": "skill", "id": "tagcom"}]:
+            if (
+                inheritance != "family"
+                or not isinstance(combinations, list)
+                or combinations != TAGCOM_COMBINATIONS
+                or any(
+                    not isinstance(entry, dict)
+                    or type(entry.get("extraId")) is not int
+                    for combination in combinations
+                    for entry in combination["extras"]
+                )
+                or any(
+                    not isinstance(effect, dict)
+                    or type(effect.get("modifier")) is not int
+                    for combination in combinations
+                    for effect in combination["effects"]
+                )
+            ):
+                raise ValueError(f"{context}: invalid exact TAGCom combinations")
+        elif army_links == [{"entity": "skill", "id": "remdriver"}]:
+            if (
+                inheritance != "family"
+                or not isinstance(combinations, list)
+                or combinations != REMDRIVER_COMBINATIONS
+                or any(
+                    not isinstance(entry, dict)
+                    or type(entry.get("extraId")) is not int
+                    for combination in combinations
+                    for entry in combination["extras"]
+                )
+                or any(
+                    not isinstance(effect, dict)
+                    or type(effect.get(
+                        "modifier" if effect.get("kind")
+                        == "remdriver-recipient-attribute-mod" else "value"
+                    )) is not int
+                    for combination in combinations
+                    for effect in combination["effects"]
+                )
+            ):
+                raise ValueError(f"{context}: invalid exact RemDriver combinations")
+        elif (
+            inheritance != "family"
+            or expected_device not in HACKING_COMBINATION_SPECS
+            or not isinstance(combinations, list)
+            or combinations != reviewed_hacking_combinations(expected_device)
+            or any(
+                type(effect.get("grantsProgram")) is not bool
+                for combination in combinations
+                for effect in combination["effects"]
+                if "grantsProgram" in effect
+            )
+        ):
+            raise ValueError(f"{context}: invalid exact Hacking Device combinations")
     source_variant = value.get("sourceVariant")
     source_mode = value.get("sourceMode")
     if source_mode is not None:
@@ -153,6 +1939,13 @@ def _validate_variant_semantics(
             _require_string(
                 source_variant.get("label"), "label", f"{context}.sourceVariant"
             )
+            ecm_labels = {239: "Guided", 241: "Hacker"}
+            if (
+                link.get("entity") == "equipment"
+                and link.get("id") in ecm_labels
+                and source_variant["label"] != ecm_labels[link["id"]]
+            ):
+                raise ValueError(f"{context}: invalid exact ECM source label")
         else:
             if set(source_variant) != {"kind", "attribute", "value"}:
                 raise ValueError(
@@ -171,6 +1964,18 @@ def _validate_variant_semantics(
         raise ValueError(
             f"{context}: family semantics must not declare 'sourceVariant'"
         )
+    tinbot_labels = {169: "Firewall", 244: "Discover", 247: "ECM Guided"}
+    if parameters and len(army_links) == 1 and isinstance(army_links[0], dict):
+        link = army_links[0]
+        source_id = link.get("id") if link.get("entity") == "equipment" else None
+        if type(source_id) is int and source_id in tinbot_labels:
+            if (
+                inheritance != "source"
+                or source_variant != {"kind": "named", "label": tinbot_labels[source_id]}
+                or len(parameters) != 1
+                or parameters[0].get("kind") != "reviewed-extra"
+            ):
+                raise ValueError(f"{context}: invalid TinBot source variant")
     return inheritance
 
 
@@ -208,12 +2013,28 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
     """Validate conditional reviewed examples, never a general roll evaluator."""
     if not isinstance(value, list) or not value:
         raise ValueError(f"{context}: expected reviewed combined examples")
-    seen: set[tuple[int, str]] = set()
+    seen: set[tuple[int, str, str]] = set()
     arm_when = {
         "immunity": "ARM", "savingAttribute": "ARM", "attackClass": "non-comms"
     }
     ap_when = {
         "immunity": "AP", "savingAttribute": "ARM", "attackClass": "non-comms"
+    }
+    bts_cc_when = {
+        "immunity": "BTS", "savingAttribute": "BTS",
+        "attackClass": "non-comms", "weaponId": "weapon:e-m-cc-weapon",
+    }
+    em_cc_when = {**bts_cc_when, "immunity": "E/M"}
+    silenced_ap_when = {
+        "immunity": "AP", "savingAttribute": "BTS",
+        "attackClass": "non-comms", "weaponId": "weapon:silenced-pistol",
+    }
+    silenced_bts_when = {**silenced_ap_when, "immunity": "BTS"}
+    silenced_shock_when = {**silenced_ap_when, "immunity": "Shock"}
+    silenced_whens = (silenced_ap_when, silenced_bts_when, silenced_shock_when)
+    ap_t2_when = {
+        "immunity": "AP", "savingAttribute": "ARM",
+        "attackClass": "non-comms", "weaponId": "weapon:ap-t2-cc-weapon",
     }
     for index, case in enumerate(value):
         item = f"{context}[{index}]"
@@ -224,9 +2045,12 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
             raise ValueError(f"{item}: invalid combined Immunity case fields")
         source_id = case["sourceAmmunitionId"]
         when = case["when"]
-        if when not in (arm_when, ap_when):
+        if when not in (
+            arm_when, ap_when, bts_cc_when, silenced_ap_when, silenced_bts_when,
+            ap_t2_when, silenced_shock_when, em_cc_when,
+        ):
             raise ValueError(f"{item}: unsupported Immunity applicability")
-        identity = (source_id, when["immunity"])
+        identity = (source_id, when["immunity"], when.get("weaponId", ""))
         if type(source_id) is not int or source_id < 1 or identity in seen:
             raise ValueError(f"{item}: invalid or duplicate source Ammunition ID")
         seen.add(identity)
@@ -243,9 +2067,15 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
         original = case["withoutImmunity"]
         if (
             not isinstance(original, dict)
-            or set(original) != {"hitRolls", "criticalRolls"}
+            or set(original) != (
+                {"hitRolls", "criticalRolls", "savingAttribute"}
+                if when in (*silenced_whens, ap_t2_when, em_cc_when)
+                else {"hitRolls", "criticalRolls"}
+            )
             or type(original["hitRolls"]) is not int
-            or original["hitRolls"] < 2
+            or original["hitRolls"] < (
+                1 if when in (*silenced_whens, ap_t2_when) else 2
+            )
             or type(original["criticalRolls"]) is not int
             or original["criticalRolls"] != original["hitRolls"] + 1
         ):
@@ -253,6 +2083,84 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
         if when == arm_when:
             expected = {
                 "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
+            }
+        elif when in (bts_cc_when, em_cc_when):
+            # N5.3 pp. 67, 95, 177: E/M CC Weapon is a non-Comms CC
+            # attack with N+E/M and BTS/2 x2, never an arbitrary E/M attack.
+            if (
+                source_id != 5
+                or case["sourceAmmunitionName"] != "N+E/M"
+                or components != ["ammunition:normal", "ammunition:em"]
+                or original != {
+                    "hitRolls": 2, "criticalRolls": 3,
+                    **({"savingAttribute": "BTS/2"} if when == em_cc_when else {}),
+                }
+            ):
+                raise ValueError(f"{item}: unsupported BTS Weapon applicability")
+            expected = {
+                "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
+            }
+            if when == em_cc_when:
+                expected = {
+                    **expected, "savingAttribute": "BTS",
+                    "ignoredComponents": ["ammunition:em"],
+                    "remainingComponents": ["ammunition:normal"],
+                }
+        elif when in silenced_whens:
+            # Silenced Pistol is the reviewed AP+Shock/BTS/2 profile.
+            # AP-only Immunity leaves Shock's VITA=1 failed-save rule intact.
+            if (
+                source_id != 30
+                or case["sourceAmmunitionName"] != "AP+Shock"
+                or components != ["ammunition:ap", "ammunition:shock"]
+                or original != {
+                    "hitRolls": 1, "criticalRolls": 2, "savingAttribute": "BTS/2",
+                }
+            ):
+                raise ValueError(f"{item}: unsupported Silenced Pistol applicability")
+            expected = {
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "savingAttribute": "BTS",
+                "treatedAs": "ammunition:shock",
+                "ignoredComponents": ["ammunition:ap"],
+                "remainingComponents": ["ammunition:shock"],
+            }
+            if when == silenced_bts_when:
+                # Attribute Immunity covers BOTH AP and Shock here, unlike
+                # the AP-only case. Silent's interaction is not adjudicated.
+                expected = {
+                    "hitRolls": 1, "criticalRolls": 2,
+                    "savingAttribute": "BTS", "treatedAs": "ammunition:normal",
+                }
+            elif when == silenced_shock_when:
+                expected = {
+                    "hitRolls": 1, "criticalRolls": 2,
+                    "savingAttribute": "BTS/2", "treatedAs": "ammunition:ap",
+                    "ignoredComponents": ["ammunition:shock"],
+                    "remainingComponents": ["ammunition:ap"],
+                }
+        elif when == ap_t2_when:
+            # N5.3 pp. 63, 67, 95-96, 177: AP+T2 CC Weapon only.
+            # Hit and extra-Critical failed rolls inflict DIFFERENT Wounds.
+            if (
+                source_id != 40
+                or case["sourceAmmunitionName"] != "AP+T2"
+                or components != ["ammunition:ap", "ammunition:t2"]
+                or original != {
+                    "hitRolls": 1, "criticalRolls": 2,
+                    "savingAttribute": "ARM/2",
+                }
+            ):
+                raise ValueError(f"{item}: unsupported AP+T2 CC applicability")
+            expected = {
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "savingAttribute": "ARM",
+                "treatedAs": "ammunition:t2",
+                "ignoredComponents": ["ammunition:ap"],
+                "remainingComponents": ["ammunition:t2"],
+                "failedRollWounds": {"hit": 2, "criticalAdditionalRoll": 1},
             }
         else:
             # Only this specific AP+DA example has been reviewed; retaining DA
@@ -271,7 +2179,12 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
                 "ignoredComponents": ["ammunition:ap"],
                 "remainingComponents": ["ammunition:da"],
             }
-        if case["withImmunity"] != expected:
+        applied = case["withImmunity"]
+        if (
+            not isinstance(applied, dict)
+            or any(type(applied.get(key)) is not int for key in ("hitRolls", "criticalRolls"))
+            or applied != expected
+        ):
             raise ValueError(f"{item}: unsupported covered-attack result")
         if case["evidence"] != "derived-from-pinned-general-rules":
             raise ValueError(f"{item}: evidence must identify the rule-derived conclusion")
@@ -282,8 +2195,200 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
     if not isinstance(value, dict) or set(value) != {
         "coveredAmmunition", "criticalAgainstCoveredAmmunition", "exceptions",
         "reviewedCombinedCases", "reviewedVulnerabilityCases", "reviewedWeaponCases",
+        "reviewedSavingRollCases", "reviewedCriticalCases", "reviewedCommsCases",
     }:
         raise ValueError(f"{context}: invalid Immunity interaction fields")
+    # The pinned p. 95 Comms exclusion is distinct from ordinary BTS
+    # Immunity. Oblivion p. 58 is the exact reviewed Comms Attack, and
+    # Immunity (State: Isolated) can prevent only the named State.
+    # Burst is an attack die count, NOT a Saving Roll count.
+    if value["reviewedCommsCases"] != [{
+        "when": {
+            "programId": "hacking-program:oblivion",
+            "attackClass": "comms",
+            "stateId": "state:isolated",
+        },
+        "sourceProfile": {
+            "ammunitionId": "ammunition:ap",
+            "savingAttribute": "BTS",
+            "nonLethalTrait": "trait:non-lethal",
+            "failedSaveState": "state:isolated",
+            "burst": 2,
+        },
+        "immunityBts": {
+            "applies": False,
+            "apModifierIgnored": False,
+            "isolatedStatePrevented": False,
+        },
+        "immunityStateIsolated": {
+            "applies": True,
+            "isolatedStatePrevented": True,
+            "savingRollCancelled": False,
+        },
+        "evidence": "derived-from-pinned-general-rules",
+    }]:
+        raise ValueError(f"{context}: unsupported Oblivion Comms Immunity case")
+    # Printed Example 3 of N5.3 p. 96 is a Combined Saving Roll, NOT a
+    # combination of ammunition effects. Preserve both attribute rolls.
+    if value["reviewedSavingRollCases"] != [
+        {
+            "when": {
+                "weaponId": "weapon:plasma-rifle",
+                "immunity": "Enhanced",
+                "ammunitionId": "ammunition:normal",
+            },
+            "savingRolls": [
+                {"attribute": "ARM", "count": 1},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "result": "combined-saving-roll-preserved",
+            "evidence": "explicit-n5.3-pdf-p96-example-3",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:plasma-rifle",
+                "immunity": "Critical",
+                "attackClass": "non-comms",
+                "ammunitionId": "ammunition:normal",
+            },
+            "criticalWithoutImmunity": [
+                {"attribute": "ARM", "count": 2},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "criticalWithImmunity": [
+                {"attribute": "ARM", "count": 1},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "removedCriticalRoll": {"attribute": "ARM", "count": 1},
+            "result": "critical-extra-arm-roll-removed",
+            "evidence": "derived-from-pinned-general-rules",
+        },
+    ]:
+        raise ValueError(f"{context}: unsupported Plasma Combined Saving Roll example")
+    # T2 hit-roll Wounds survive Immunity (Critical); the separate
+    # one-Wound extra Critical roll is absent. Scope to the exact Army
+    # AP+T2 CC Weapon, not a runtime immunity or damage calculator.
+    if value["reviewedCriticalCases"] != [
+        {
+            "when": {
+                "weaponId": "weapon:ap-t2-cc-weapon",
+                "sourceAmmunitionId": 40,
+                "ammunitionId": "ammunition:t2",
+                "immunity": "Critical",
+                "attackClass": "non-comms",
+            },
+            "components": ["ammunition:ap", "ammunition:t2"],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "failedHitRollWounds": 2,
+                "failedAdditionalCriticalRollWounds": 1,
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 1,
+                "criticalRolls": 1,
+                "failedHitRollWounds": 2,
+                "additionalCriticalRollRemoved": True,
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:ap-da-cc-weapon",
+                "sourceAmmunitionId": 10,
+                "immunity": "Critical",
+                "attackClass": "non-comms",
+            },
+            "components": ["ammunition:ap", "ammunition:da"],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 2,
+                "criticalRolls": 3,
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 2,
+                "criticalRolls": 2,
+                "additionalCriticalRollRemoved": True,
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:ap-exp-cc-weapon",
+                "sourceAmmunitionId": 13,
+                "immunity": "Critical",
+                "attackClass": "non-comms"
+            },
+            "components": [
+                "ammunition:ap",
+                "ammunition:exp"
+            ],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 3,
+                "criticalRolls": 4
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 3,
+                "criticalRolls": 3,
+                "additionalCriticalRollRemoved": True
+            },
+            "evidence": "derived-from-pinned-general-rules"
+        },
+        {
+            "when": {
+                "weaponId": "weapon:silenced-pistol",
+                "sourceAmmunitionId": 30,
+                "immunity": "Critical",
+                "attackClass": "non-comms"
+            },
+            "components": [
+                "ammunition:ap",
+                "ammunition:shock"
+            ],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "BTS/2",
+                "hitRolls": 1,
+                "criticalRolls": 2
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "BTS/2",
+                "hitRolls": 1,
+                "criticalRolls": 1,
+                "additionalCriticalRollRemoved": True
+            },
+            "evidence": "derived-from-pinned-general-rules"
+        },
+        {
+            "when": {
+                "weaponId": "weapon:e-m-cc-weapon",
+                "sourceAmmunitionId": 5,
+                "immunity": "Critical",
+                "attackClass": "non-comms"
+            },
+            "components": [
+                "ammunition:normal",
+                "ammunition:em"
+            ],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "BTS/2",
+                "hitRolls": 2,
+                "criticalRolls": 3
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "BTS/2",
+                "hitRolls": 2,
+                "criticalRolls": 2,
+                "additionalCriticalRollRemoved": True
+            },
+            "evidence": "derived-from-pinned-general-rules"
+        },
+    ]:
+        raise ValueError(f"{context}: unsupported source-scoped Critical immunity cases")
     covered = value["coveredAmmunition"]
     if (
         not isinstance(covered, dict)
@@ -315,8 +2420,9 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
         ]
     ):
         raise ValueError(f"{context}: invalid Immunity exceptions")
-    # This is the one printed Flash Pulse example, not a weapon/trait evaluator.
-    # In particular, the stunned condition must not be inferred for other weapons.
+    # Fixed source-reviewed cases only: Flash Pulse, standalone E/Mitter,
+    # printed Missile Launcher (Blast Mode), and printed Monofilament.
+    # Do not generalize to Hit Mode or other Weapon Traits.
     if value["reviewedWeaponCases"] != [
         {
             "when": {
@@ -331,10 +2437,99 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
                 "stateId": "state:stunned",
                 "condition": "failed-saving-roll",
             },
-            "evidence": "explicit-pinned-wiki-example",
-        }
+            "evidence": "explicit-n5.3-pdf-p96-example-4",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:e-mitter",
+                "sourceWeaponId": 25,
+                "sourceAmmunitionId": 14,
+                "immunity": "BTS",
+                "savingAttribute": "BTS",
+                "attackClass": "non-comms",
+            },
+            "ammunitionTreatedAs": "ammunition:normal",
+            "survivingTraits": ["trait:non-lethal"],
+            "withoutImmunity": {
+                "hitRolls": 2,
+                "criticalRolls": 3,
+                "savingAttribute": "BTS/2",
+            },
+            "withImmunity": {
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "savingAttribute": "BTS",
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:missile-launcher",
+                "mode": "Blast Mode",
+                "immunity": "ARM",
+                "savingAttribute": "ARM",
+                "attackClass": "non-comms",
+            },
+            "sourceProfile": {
+                "ammunitionId": "ammunition:exp",
+                "savingRoll": "ARM",
+                "hitRolls": 3,
+                "traits": ["trait:anti-materiel", "trait:impact-template"],
+            },
+            "withImmunity": {
+                "savingAttribute": "ARM",
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "treatedAs": "ammunition:normal",
+            },
+            "evidence": "explicit-n5.3-pdf-p96-example-1",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:monofilament-cc-weapon",
+                "immunity": "ARM",
+                "savingAttribute": "ARM",
+                "attackClass": "non-comms",
+            },
+            "sourceProfile": {
+                "ammunitionId": "ammunition:normal",
+                "savingRoll": "ARM=0",
+                "hitRolls": 1,
+                "traits": ["trait:arm-0", "trait:state"],
+                "stateId": "state:dead",
+            },
+            "withImmunity": {
+                "savingAttribute": "ARM",
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "ignoredTraits": ["trait:arm-0", "trait:state"],
+                "stateAppliedOnFailedRoll": False,
+            },
+            "evidence": "explicit-n5.3-pdf-p96-example-2",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:e-m-grenade-launcher",
+                "sourceAmmunitionId": 14,
+                "immunity": "BTS",
+                "savingAttribute": "BTS",
+                "attackClass": "non-comms",
+            },
+            "ammunitionTreatedAs": "ammunition:normal",
+            "survivingTraits": ["trait:non-lethal"],
+            "sourceProfileTraits": [
+                "trait:impact-template", "trait:speculative-attack",
+            ],
+            "withoutImmunity": {
+                "hitRolls": 2, "criticalRolls": 3, "savingAttribute": "BTS/2",
+            },
+            "withImmunity": {
+                "hitRolls": 1, "criticalRolls": 2, "savingAttribute": "BTS",
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
     ]:
-        raise ValueError(f"{context}: unsupported Flash Pulse Immunity example")
+        raise ValueError(f"{context}: unsupported reviewed Weapon Immunity examples")
     # The pinned Vulnerability example names a *weapon*, not just an
     # Ammunition component. Do not turn this into substring-based runtime logic.
     if value["reviewedVulnerabilityCases"] != [
@@ -463,9 +2658,10 @@ def _validate_ammunition_visibility_zone(value: object, context: str) -> None:
     """Keep non-damaging visibility facts separate from Saving Roll resolution."""
     if (
         not isinstance(value, dict)
-        or set(value) != {
-            "visibility", "template", "height", "expires", "multispectralVisor"
-        }
+        or set(value) not in (
+            {"visibility", "template", "height", "expires", "multispectralVisor"},
+            {"visibility", "template", "height", "expires", "multispectralVisor", "opposition"},
+        )
         or value["visibility"] != "zero"
         or value["template"] != "circular"
         or value["height"] != "infinite"
@@ -474,6 +2670,18 @@ def _validate_ammunition_visibility_zone(value: object, context: str) -> None:
         or value["multispectralVisor"] not in {"can-draw-lof", "blocked"}
     ):
         raise ValueError(f"{context}: unsupported Ammunition visibility zone")
+    if "opposition" in value and value["opposition"] != {
+        "ruleId": "rule:face-to-face-rolls",
+        "attackRequirements": ["requires-roll", "requires-lof", "lof-crosses-zone"],
+        "visorAttack": (
+            "face-to-face-if-qualifying" if value["multispectralVisor"] == "blocked"
+            else "normal-roll"
+        ),
+        "enemyDodge": "normal-roll",
+        "templateRetention": "win-every-opposed-or-pass-unopposed",
+        "critical": "no-additional-effect",
+    }:
+        raise ValueError(f"{context}.opposition: unsupported visibility opposition facts")
 
 
 def _validate_scope(value: object, context: str) -> None:
@@ -608,6 +2816,11 @@ def _validate_source(source: dict[str, Any], context: str) -> None:
         _require_string(source.get("publishedDate"), "publishedDate", context)
         _require_string(source.get("localPath"), "localPath", context)
         _require_positive_int(source.get("pageCount"), "pageCount", context)
+        if "sha256" in source:
+            _require_string(source["sha256"], "sha256", context)
+            digest = source["sha256"]
+            if len(digest) != 64 or any(char not in "0123456789abcdefABCDEF" for char in digest):
+                raise ValueError(f"{context}: 'sha256' must be a 64-character hexadecimal digest")
         return
 
     if source.get("localPath") is not None:
@@ -734,6 +2947,9 @@ def _validate_peripheral_type_facts(facts: object, context: str) -> set[str]:
         "maxPerController",
         "operatingDistance",
         "profileModes",
+        "effects",
+        "restrictions",
+        "clarifications",
     }
     unknown = set(facts) - allowed
     if unknown:
@@ -764,6 +2980,18 @@ def _validate_peripheral_type_facts(facts: object, context: str) -> set[str]:
             raise ValueError(
                 f"{context}.profileModes: must be a unique non-empty subset of "
                 "['connected', 'autonomous']"
+            )
+    for field in ("effects", "restrictions", "clarifications"):
+        clauses = facts.get(field)
+        if clauses is None:
+            continue
+        if (
+            not isinstance(clauses, list)
+            or not clauses
+            or any(not isinstance(clause, str) or not clause.strip() for clause in clauses)
+        ):
+            raise ValueError(
+                f"{context}.{field}: expected non-empty maintained-text strings"
             )
     return skill_ids
 
@@ -851,10 +3079,12 @@ def _validate_fireteam_general_facts(facts: object, context: str) -> None:
 def _validate_fireteam_level_facts(facts: object, context: str) -> None:
     if not isinstance(facts, dict):
         raise ValueError(f"{context}: Fireteam Level facts must be an object")
-    expected = {"category", "basis", "cumulative", "levels"}
-    if set(facts) != expected:
+    required = {"category", "basis", "cumulative", "levels"}
+    allowed = required | {"sourceNotes"}
+    if not required.issubset(facts) or set(facts) - allowed:
         raise ValueError(
-            f"{context}: Fireteam Level facts must contain exactly {sorted(expected)}"
+            f"{context}: Fireteam Level facts require {sorted(required)}; "
+            "only optional 'sourceNotes' is supported"
         )
     if facts["category"] != "fireteam-level-bonuses":
         raise ValueError(f"{context}.category: must be 'fireteam-level-bonuses'")
@@ -884,6 +3114,61 @@ def _validate_fireteam_level_facts(facts: object, context: str) -> None:
             raise ValueError(
                 f"{item_context}.bonuses: must be a unique non-empty array of strings"
             )
+
+
+def _validate_game_setup_table(value: object, context: str) -> None:
+    """Closed, non-executable N5.3 general setup reference table."""
+    if not isinstance(value, dict) or set(value) != {"scope", "rows"}:
+        raise ValueError(f"{context}: expected scope and rows")
+    if value["scope"] != "recommended-general-setup-with-independent-retreat-thresholds":
+        raise ValueError(f"{context}: unsupported game setup scope")
+    rows = value["rows"]
+    if not isinstance(rows, list) or len(rows) != 6:
+        raise ValueError(f"{context}: expected six reviewed Game Modes")
+    expected_points = (150, 200, 250, 300, 350, 400)
+    for index, (row, points) in enumerate(zip(rows, expected_points, strict=True)):
+        row_context = f"{context}.rows[{index}]"
+        if not isinstance(row, dict) or set(row) != {
+            "name", "armyPoints", "baseSwc", "tableInches",
+            "deploymentZoneInches", "durationMinutes", "retreatThresholdVictoryPoints",
+        }:
+            raise ValueError(f"{row_context}: invalid game setup row schema")
+        if not isinstance(row["name"], str) or not row["name"].strip():
+            raise ValueError(f"{row_context}: missing game mode name")
+        for field in ("armyPoints", "baseSwc", "durationMinutes",
+                      "retreatThresholdVictoryPoints"):
+            if type(row[field]) is not int or row[field] <= 0:
+                raise ValueError(f"{row_context}.{field}: must be a positive integer")
+        if (row["armyPoints"] != points or row["baseSwc"] * 50 != points
+                or row["retreatThresholdVictoryPoints"] != (points + 3) // 4):
+            raise ValueError(f"{row_context}: point/SWC/Retreat threshold mismatch")
+        for field in ("tableInches", "deploymentZoneInches"):
+            dimensions = row[field]
+            if (not isinstance(dimensions, list) or len(dimensions) != 2
+                    or any(type(d) is not int or d <= 0 for d in dimensions)):
+                raise ValueError(f"{row_context}.{field}: expected two positive inches")
+
+
+def _validate_terrain_examples(value: object, context: str) -> None:
+    """Preserve the optional source table as reference values, not zone mechanics."""
+    if not isinstance(value, dict) or set(value) != {"scope", "rows"}:
+        raise ValueError(f"{context}: expected scope and rows")
+    if value["scope"] != "optional-source-suggestions-not-terrain-types":
+        raise ValueError(f"{context}: unsupported terrain example scope")
+    rows = value["rows"]
+    if not isinstance(rows, list) or len(rows) != 18:
+        raise ValueError(f"{context}: expected eighteen source examples")
+    names: set[str] = set()
+    fields = {"name", "terrainType", "difficultTerrain", "visibility", "saturation"}
+    for index, row in enumerate(rows):
+        if not isinstance(row, dict) or set(row) != fields:
+            raise ValueError(f"{context}.rows[{index}]: invalid source columns")
+        if any(not isinstance(cell, str) or not cell.strip() for cell in row.values()):
+            raise ValueError(f"{context}.rows[{index}]: expected nonempty source values")
+        name = row["name"].strip().casefold()
+        if name in names:
+            raise ValueError(f"{context}: duplicate terrain example")
+        names.add(name)
 
 
 def load_curated_document(path: Path) -> dict[str, Any]:
@@ -1114,31 +3399,78 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                         f"{context}.facts.visibilityZone: must not mix with Saving Roll facts"
                     )
                 _validate_ammunition_visibility_zone(zone, f"{context}.facts.visibilityZone")
-        if record["kind"] == "skill":
-            facts = record.get("facts")
-            if composition_role == "definition":
-                type_ids = facts.get("typeIds") if isinstance(facts, dict) else None
-                if (
-                    not isinstance(type_ids, list)
-                    or not type_ids
-                    or any(
-                        not isinstance(type_id, str) or type_id not in skill_type_ids
-                        for type_id in type_ids
-                    )
+                if "opposition" in zone and not any(
+                    isinstance(r, dict) and r.get("type") == "uses-effects-of"
+                    and r.get("recordId") == zone["opposition"]["ruleId"]
+                    for r in (record.get("relations") or [])
                 ):
                     raise ValueError(
-                        f"{context}: skill 'facts.typeIds' must be a non-empty array "
-                        "referencing skillTypes"
+                        f"{context}.facts.visibilityZone.opposition: missing owning rule relation"
                     )
-                if len(type_ids) != len(set(type_ids)):
-                    raise ValueError(
-                        f"{context}: skill 'facts.typeIds' must not contain duplicates"
-                    )
+        if record["kind"] == "faq-ruling":
+            validate_faq_ruling_facts(
+                record.get("facts"),
+                record_id=record["id"],
+                record_role=composition_role,
+                citations=record["citations"],
+                sources=sources,
+                context=f"{context}.facts",
+            )
+        if record["kind"] in {"skill", "equipment"}:
+            facts = record.get("facts")
+            kind = record["kind"]
+            if composition_role == "definition":
+                type_ids = facts.get("typeIds") if isinstance(facts, dict) else None
+                # All Skills require categories. Equipment may declare an action
+                # category only when its official source identifies one; passive
+                # Equipment is not silently classified as a declarable Skill.
+                if kind == "skill" or (
+                    isinstance(facts, dict) and "typeIds" in facts
+                ):
+                    if (
+                        not isinstance(type_ids, list)
+                        or not type_ids
+                        or any(
+                            not isinstance(type_id, str) or type_id not in skill_type_ids
+                            for type_id in type_ids
+                        )
+                    ):
+                        raise ValueError(
+                            f"{context}: {kind} 'facts.typeIds' must be a non-empty array "
+                            "referencing skillTypes"
+                        )
+                    if len(type_ids) != len(set(type_ids)):
+                        raise ValueError(
+                            f"{context}: {kind} 'facts.typeIds' must not contain duplicates"
+                        )
                 if isinstance(facts, dict) and "typeId" in facts:
                     raise ValueError(
-                        f"{context}: skill definitions must use 'facts.typeIds', "
+                        f"{context}: {kind} definitions must use 'facts.typeIds', "
                         "not singular 'facts.typeId'"
                     )
+            elif isinstance(facts, dict) and (
+                "typeIds" in facts or "typeId" in facts
+            ) and kind == "equipment":
+                raise ValueError(
+                    f"{context}: Equipment supplements must not redefine declaration types"
+                )
+        if "terrainExamples" in (record.get("facts") or {}):
+            if record["id"] != "rule:special-terrain":
+                raise ValueError(f"{context}: only Special Terrain may own terrainExamples")
+            _validate_terrain_examples(
+                record["facts"]["terrainExamples"], f"{context}.facts.terrainExamples"
+            )
+        if (record.get("facts") or {}).get("gameSetupTable") is not None:
+            if record["id"] != "rule:game-modes" or record["kind"] != "rule":
+                raise ValueError(f"{context}: only Game Modes may own gameSetupTable")
+            _validate_game_setup_table(
+                record["facts"]["gameSetupTable"], f"{context}.facts.gameSetupTable"
+            )
+        if record["id"] == "rule:game-modes" and (
+            not isinstance(record.get("facts"), dict)
+            or "gameSetupTable" not in record["facts"]
+        ):
+            raise ValueError(f"{context}: Game Modes requires gameSetupTable")
         if record["kind"] == "rule":
             facts = record.get("facts")
             if isinstance(facts, dict):
@@ -1531,20 +3863,24 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             for scenario_id in scoped:
                 for skill_id in facts.get("definesSkills", []):
                     registry.record(skill_id, "skill", scenario_id)
-            if "specialists" in facts:
-                baseline = facts["specialists"]
-                if not isinstance(baseline, dict) or set(baseline) != {"anyOfSkills"}:
-                    raise ValueError("Specialist baseline requires anyOfSkills")
-                qualifiers = baseline["anyOfSkills"]
-                if (
-                    not isinstance(qualifiers, list)
-                    or not qualifiers
-                    or len(set(qualifiers)) != len(qualifiers)
-                ):
-                    raise ValueError("Specialist qualifiers must be a unique non-empty array")
-                for skill_id in qualifiers:
-                    if record_kind_by_id.get(skill_id) != "skill":
-                        raise ValueError(f"Unknown Specialist Skill {skill_id!r}")
+        if "specialists" in facts:
+            if record["kind"] != "rule" or facts.get("category") not in {
+                "basic-rule", "scenario-rule",
+            }:
+                raise ValueError("Specialist qualifiers require a general or scenario Rule")
+            baseline = facts["specialists"]
+            if not isinstance(baseline, dict) or set(baseline) != {"anyOfSkills"}:
+                raise ValueError("Specialist baseline requires anyOfSkills")
+            qualifiers = baseline["anyOfSkills"]
+            if (
+                not isinstance(qualifiers, list)
+                or not qualifiers
+                or len(set(qualifiers)) != len(qualifiers)
+            ):
+                raise ValueError("Specialist qualifiers must be a unique non-empty array")
+            for skill_id in qualifiers:
+                if record_kind_by_id.get(skill_id) != "skill":
+                    raise ValueError(f"Unknown Specialist Skill {skill_id!r}")
     if "scenarioComponents" in document:
         for component in document["scenarioComponents"]["definitions"]:
             for citation in component["citations"]:

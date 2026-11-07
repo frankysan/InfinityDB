@@ -109,7 +109,13 @@ class ScenarioComponents:
         if record is None or record.get("kind") != kind:
             raise ValueError(f"Unknown {kind} definition {identifier!r}")
         scope = record.get("scope", {}).get("scenarios")
-        if scope is None or scenario_id not in scope:
+        if scope is None:
+            # A source-reviewed general Rule can be included in a scenario;
+            # only the inclusion determines which scenario uses it. Skills
+            # and scenario-specific Rule definitions still require scope.
+            if kind != "rule" or record.get("facts", {}).get("category") != "basic-rule":
+                raise ValueError(f"Definition {identifier!r} is not applicable to {scenario_id!r}")
+        elif scenario_id not in scope:
             raise ValueError(f"Definition {identifier!r} is not applicable to {scenario_id!r}")
         return record
 

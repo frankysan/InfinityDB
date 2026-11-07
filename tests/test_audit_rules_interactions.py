@@ -17,12 +17,31 @@ from tools.audit_rules_interactions import (
 )
 
 
+def _maintained_review_ids(release: str | None = None) -> set[str]:
+    policy = json.loads(DEFAULT_POLICY_PATH.read_text(encoding="utf-8"))
+    rows = [r for r in policy["records"]
+            if release is None or r["targetRelease"] == release]
+    ids = {r["recordId"] for r in rows}
+    assert len(ids) == len(rows)
+    return ids
+
+
+def _maintained_supporting_ids(scope: Path = DEFAULT_CATALOG_SCOPE_PATH) -> set[str]:
+    document = json.loads(scope.read_text(encoding="utf-8"))
+    kinds = {"skills": "skill", "equipment": "equipment", "traits": "trait", "states": "state"}
+    primary = {f"{kinds[catalog]}:{item['id']}"
+               for catalog, items in document["catalogs"].items() for item in items}
+    return _maintained_review_ids() - primary
+
+
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 312
-    assert report["summary"]["authoredOutgoingRelationCount"] == 314
-    assert report["summary"]["futureInteractionCount"] == 113
+    assert {r["id"] for r in report["items"]} == _maintained_review_ids()
+    assert report["summary"]["recordCount"] == len(_maintained_review_ids())
+    assert not any(item["id"].startswith("faq-ruling:") for item in report["items"])
+    assert report["summary"]["authoredOutgoingRelationCount"] == 518
+    assert report["summary"]["futureInteractionCount"] == 111
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 209,
         "complete": 209,
@@ -63,13 +82,16 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "inherited": 0,
         "percentComplete": 100.0,
     }
+    current_ids = _maintained_review_ids("1.0.0")
+    assert len(current_ids) >= 127
+    assert {"rule:moving-and-measuring", "rule:general-movement"} <= current_ids
     assert report["summary"]["releases"]["1.0.0"] == {
-        "total": 44,
-        "complete": 29,
-        "pending": 15,
-        "reviewed": 29,
+        "total": len(current_ids),
+        "complete": len(current_ids),
+        "pending": 0,
+        "reviewed": len(current_ids),
         "inherited": 0,
-        "percentComplete": 65.9,
+        "percentComplete": 100.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
@@ -116,9 +138,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 131
-    assert report["summary"]["supporting"]["complete"] == 116
-    assert report["summary"]["supporting"]["pending"] == 15
+    supporting_ids = _maintained_supporting_ids()
+    assert {r["id"] for r in report["supportingItems"]} == supporting_ids
+    assert report["summary"]["supporting"]["total"] == len(supporting_ids)
+    assert report["summary"]["supporting"]["complete"] == len(supporting_ids)
+    assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
     equipment_items = [
@@ -274,20 +298,31 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         ("modifies-use-of", "skill:place-deployable")
     ]
     for record_id in {
-        "ammunition:ap",
-        "ammunition:da",
-        "ammunition:eclipse",
-        "ammunition:em",
-        "ammunition:exp",
-        "ammunition:normal",
+        "scenario:annihilation",
+        "scenario:domination",
+        "scenario:firefight",
+        "scenario:supplies",
         "ammunition:para",
         "ammunition:shock",
-        "ammunition:smoke",
         "ammunition:stun",
+        "ammunition:exp",
         "ammunition:t2",
+        "ammunition:ap",
+        "ammunition:em",
+        "ammunition:normal",
+        "ammunition:da",
+        "ammunition:smoke",
+        "ammunition:eclipse",
     }:
-        assert items[record_id]["status"] == "pending"
+        assert items[record_id]["status"] == "reviewed"
         assert items[record_id]["targetRelease"] == "1.0.0"
+    assert items["ammunition:eclipse"]["relations"] == [
+        ("uses-effects-of", "ammunition:smoke"),
+        ("uses-effects-of", "rule:face-to-face-rolls"),
+    ]
+    assert items["ammunition:smoke"]["relations"] == [
+        ("uses-effects-of", "rule:face-to-face-rolls"),
+    ]
 
     for record_id in {
         "rule:peripheral-type:control",
@@ -311,6 +346,12 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert set(items["skill:request-speedball"]["relations"]) == {
         ("uses-effects-of", "skill:combat-jump")
     }
+    assert ("uses-effects-of", "skill:combat-jump") in set(
+        items["skill:request-specball"]["relations"]
+    )
+    assert ("enables-use-of", "skill:request-specball") in set(
+        items["skill:infinity-spec-ops"]["relations"]
+    )
     assert ("cancels-state", "state:impersonation-1") in set(
         items["equipment:biometric-visor"]["relations"]
     )
@@ -323,6 +364,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:number-2", "state:isolated", None) in future_keys
     assert ("skill:specialist-operative", "rule:specialist-troop", "uses-effects-of") in future_keys
     assert ("skill:journalist", "rule:guts-roll", "modifies-rolls-for") in future_keys
+    # Shared Specialist Troops belongs in General Rules, with scenario-scoped overrides.
+    specialists = items["rule:specialist-troops:standard"]
+    assert "unscoped" in specialists["note"]
+    assert "scenario" in specialists["note"]
     assert ("skill:tagcom", "rule:troop-type:tag", "applies-effects-to") in future_keys
     assert ("skill:booty", "rule:booty-chart", "uses-effects-of") in future_keys
     assert (
@@ -337,6 +382,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:hacker", "equipment:hacking-device", None) not in future_keys
     assert ("skill:hacker", "rule:upgrade-program", None) in future_keys
     assert ("equipment:symbiomate", "skill:immunity", "uses-effects-of") not in future_keys
+    # The canonical Firewall exists; retain the exact TinBot-owner/modifier scope.
+    assert ("equipment:tinbot-firewall", "equipment:firewall", "uses-effects-of") in future_keys
+    assert ("uses-effects-of", "equipment:firewall") not in set(
+        items["equipment:tinbot-firewall"]["relations"]
+    )
 
     assert ("skill:request-speedball", "skill:combat-jump", "uses-effects-of") not in future_keys
     assert ("skill:suppressive-fire", "state:suppressive-fire", "enters-state") not in future_keys
@@ -353,9 +403,15 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:minelayer", "trait:disposable-x", None) in future_keys
     assert (
         "skill:surprise-attack",
-        "rule:face-to-face-roll",
+        "rule:face-to-face-rolls",
         "imposes-modifiers-on",
     ) in future_keys
+    assert (
+        "state:suppressive-fire",
+        "rule:face-to-face-rolls",
+        "imposes-modifiers-on",
+    ) in future_keys
+    assert not any(target == "rule:face-to-face-roll" for _, target, _ in future_keys)
     assert ("rule:marker-form", "skill:surprise-attack", "enables-use-of") in future_keys
     assert ("trait:bioweapon", "ammunition:da", "uses-effects-of") in future_keys
     assert ("trait:bioweapon", "ammunition:shock", "uses-effects-of") in future_keys
@@ -368,7 +424,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:g-jumper", "state:isolated", None) in future_keys
     assert ("skill:g-jumper", "rule:null-state", None) in future_keys
     assert ("skill:infinity-spec-ops", "rule:spec-ops-chart", "uses-effects-of") in future_keys
-    assert ("skill:request-specball", "skill:combat-jump", "uses-effects-of") in future_keys
+    assert (
+        "skill:infinity-spec-ops", "skill:request-specball", "enables-use-of"
+    ) not in future_keys
+    assert ("skill:request-specball", "skill:combat-jump", "uses-effects-of") not in future_keys
     assert ("skill:morpho-scan", "attribute:vita", None) in future_keys
     assert ("skill:morpho-scan", "attribute:str", None) in future_keys
     assert ("skill:remdriver", "rule:troop-type:rem", "applies-effects-to") in future_keys
@@ -417,6 +476,14 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     ) in future_keys
     assert ("state:stunned", "rule:roll", "modifies-rolls-for") in future_keys
     assert ("state:isolated", "state:disconnected", "causes-state") in future_keys
+    # An army's Retreat! situation is a rule, not the state on each Trooper.
+    assert ("state:retreat", "rule:army-retreat", None) in future_keys
+    assert ("skill:shasvastii", "rule:army-retreat", None) in future_keys
+    assert ("skill:inspiring-leadership", "rule:army-retreat", None) in future_keys
+    assert not any(target == "rule:retreat-situation" for _, target, _ in future_keys)
+    assert ("rule:army-retreat" not in {
+        target for _, target in items["state:retreat"]["relations"]
+    })
     assert ("rule:null-state", "state:disconnected", "causes-state") in future_keys
     assert (
         "equipment:hacking-device-plus",
@@ -429,13 +496,18 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         ("cancels-state", "state:possessed"),
     }
     assert ("skill:courage", "rule:guts-roll", "applies-effects-to") in future_keys
+    assert ("skill:immunity", "rule:saving-rolls", "applies-effects-to") in future_keys
+    assert ("skill:immunity", "rule:saving-roll", "applies-effects-to") not in future_keys
+    # Existing rule identities do not automatically authorize unconditional edges.
+    assert ("skill:terrain", "rule:special-terrain", None) in future_keys
+    assert ("skill:g-jumper", "rule:combat-group", None) in future_keys
     assert ("skill:impetuous", "state:prone", "cancels-state") not in future_keys
     assert ("skill:impetuous", "state:prone", None) not in future_keys
     assert ("equipment:gizmokit", "skill:remote-presence", None) not in future_keys
     assert ("skill:dogged", "rule:healing", None) in future_keys
     assert ("skill:no-wound-incapacitation", "state:dead", None) in future_keys
     assert ("skill:remote-presence", "state:dead", None) in future_keys
-    assert ("skill:shasvastii", "rule:retreat-situation", None) in future_keys
+    assert ("skill:shasvastii", "rule:army-retreat", None) in future_keys
     assert ("skill:regeneration", "rule:wound", None) in future_keys
     assert ("skill:protheion", "rule:wound", None) in future_keys
     assert set(items["skill:dogged"]["relations"]) == {
@@ -554,7 +626,253 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 116/131 complete, 15 pending" in output
+    count = len(_maintained_supporting_ids())
+    assert f"Supporting identities: {count}/{count} complete, 0 pending" in output
+
+
+def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> None:
+    assert main([
+        "--check-output", str(DEFAULT_CHECKLIST_PATH),
+        "--require-release", "1.0.0",
+    ]) == 0
+    output = capsys.readouterr().out
+    count = len(_maintained_supporting_ids())
+    assert f"Supporting identities: {count}/{count} complete, 0 pending" in output
+    assert "Pending identities:" not in output
+
+
+def test_primary_release_gate_requires_its_own_scope_not_supporting_only(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert main(["--require-primary-release", "0.7.0"]) == 0
+    assert main(["--require-primary-release", "1.0.0"]) == 1
+    output = capsys.readouterr().out
+    assert "Primary catalog does not target 1.0.0" in output
+    assert "maintained scope targets 0.7.0" in output
+    assert "supporting reviews do not certify the primary catalog" in output
+
+
+def test_primary_release_gate_rejects_pending_catalog_items(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
+    report["summary"]["primaryCatalog"]["pending"] = 1
+    monkeypatch.setattr(
+        "tools.audit_rules_interactions.audit_rules_interactions",
+        lambda *_args: report,
+    )
+    assert main(["--require-primary-release", "0.7.0"]) == 1
+    assert "Primary catalog for 0.7.0 has 1 pending items" in capsys.readouterr().out
+
+
+def test_rules_interaction_1_0_gate_reports_regressed_pending_item(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys,
+) -> None:
+    report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
+    pending = next(
+        item for item in report["items"] if item["id"] == "scenario:supplies"
+    )
+    pending["status"] = "pending"
+    report["summary"]["supporting"]["releases"]["1.0.0"]["pending"] = 1
+    monkeypatch.setattr(
+        "tools.audit_rules_interactions.audit_rules_interactions",
+        lambda *_args: report,
+    )
+    assert main(["--require-release", "1.0.0"]) == 1
+    output = capsys.readouterr().out
+    assert "1 supporting identities pending" in output
+    assert "Pending identities: scenario:supplies" in output
+
+
+def test_catalog_scope_drift_is_read_only_and_preserves_review_exceptions(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    from tools.audit_rules_interactions import _catalog_scope_drift
+
+    baseline = {
+        "targetRelease": "0.7.0",
+        "catalogs": {
+            "skills": [{"id": "old", "name": "Old"}],
+            "equipment": [{"id": "common", "name": "Old label"}],
+            "traits": [],
+            "states": [],
+        },
+        "releaseExceptions": [{
+            "catalog": "skills",
+            "itemId": "commlink",
+            "targetRelease": "post-0.7.0",
+            "reason": "Needs source review.",
+        }],
+    }
+    current = {
+        **baseline,
+        "catalogs": {
+            "skills": [{"id": "new", "name": "New"}],
+            "equipment": [{"id": "common", "name": "Current label"}],
+            "traits": [],
+            "states": [],
+        },
+    }
+    result = _catalog_scope_drift(baseline, current)
+    assert result["catalogs"]["skills"] == {
+        "added": [{"id": "new", "name": "New"}],
+        "removed": [{"id": "old", "name": "Old"}],
+        "renamed": [],
+    }
+    assert result["catalogs"]["equipment"] == {
+        "added": [],
+        "removed": [],
+        "renamed": [{
+            "id": "common", "name": "Current label", "previousName": "Old label",
+        }],
+    }
+    assert result["catalogs"]["traits"] == {
+        "added": [], "removed": [], "renamed": [],
+    }
+    assert result["releaseExceptions"] == baseline["releaseExceptions"]
+    assert main(["--report-catalog-scope-drift"]) == 2
+    assert "--database and --rules-database" in capsys.readouterr().out
+    for conflicting in (
+        ["--refresh-catalog-scope"],
+        ["--require-release", "1.0.0"],
+        ["--require-primary-release", "1.0.0"],
+        ["--check-output", str(DEFAULT_CHECKLIST_PATH)],
+    ):
+        assert main(["--report-catalog-scope-drift", *conflicting]) == 2
+        assert "cannot be combined" in capsys.readouterr().out
+
+
+def test_pinned_catalog_scope_drift_identifies_three_reviewed_primary_omissions(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    database = root / "data/generated/infinity.db"
+    rules_database = root / "data/generated/rules.db"
+    if not database.is_file() or not rules_database.is_file():
+        pytest.skip("Paired generated catalog databases unavailable")
+    original = DEFAULT_CATALOG_SCOPE_PATH.read_bytes()
+    assert main([
+        "--report-catalog-scope-drift",
+        "--database", str(database),
+        "--rules-database", str(rules_database),
+    ]) == 0
+    drift = json.loads(capsys.readouterr().out)
+    assert drift["targetRelease"] == "0.7.0"
+    assert {
+        category: [item["id"] for item in row["added"]]
+        for category, row in drift["catalogs"].items()
+    } == {
+        "skills": ["activate-disco-ball", "request-reinforcements", "request-specball"],
+        "equipment": ["firewall"],
+        "traits": [],
+        "states": [],
+    }
+    assert all(
+        not row["removed"] and not row["renamed"]
+        for row in drift["catalogs"].values()
+    )
+    assert drift["releaseExceptions"] == [
+        {
+            "catalog": "skills",
+            "itemId": "commlink",
+            "targetRelease": "post-0.7.0",
+            "reason": (
+                "Commlink belongs to the official Reinforcements Extra rather than the "
+                "N5 core rules. It is explicitly vetted for 0.7.0 but its canonical "
+                "definition is deferred until the Reinforcements annex is modeled as a "
+                "separately scoped collection."
+            ),
+        },
+    ]
+    policy = json.loads(DEFAULT_POLICY_PATH.read_text(encoding="utf-8"))
+    reviews = {item["recordId"]: item for item in policy["records"]}
+    for record_id in (
+        "skill:activate-disco-ball", "skill:request-specball", "equipment:firewall",
+    ):
+        assert reviews[record_id]["status"] == "reviewed"
+        assert reviews[record_id]["targetRelease"] == "1.0.0"
+    assert DEFAULT_CATALOG_SCOPE_PATH.read_bytes() == original
+
+
+def test_1_0_primary_candidate_preserves_historical_reviews_and_discloses_optional_annex(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    candidate = DEFAULT_CATALOG_SCOPE_PATH.with_name("catalog-scope-1.0.0.json")
+    document = json.loads(candidate.read_text(encoding="utf-8"))
+    assert document["targetRelease"] == "1.0.0"
+    assert document["releaseExceptions"] == []
+    assert {kind: len(items) for kind, items in document["catalogs"].items()} == {
+        "skills": 98, "equipment": 31, "traits": 33, "states": 24,
+    }
+
+    report = audit_rules_interactions(
+        DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH, candidate,
+    )
+    primary = report["summary"]["primaryCatalog"]
+    assert (primary["total"], primary["complete"], primary["pending"]) == (
+        186, 186, 0,
+    )
+    supporting_ids = _maintained_supporting_ids(candidate)
+    assert {r["id"] for r in report["supportingItems"]} == supporting_ids
+    assert report["summary"]["supporting"]["total"] == len(supporting_ids)
+    primary_items = {item["id"]: item for item in report["primaryCatalogItems"]}
+    for record_id, release in {
+        "skill:activate-disco-ball": "1.0.0",
+        "skill:request-specball": "1.0.0",
+        "equipment:firewall": "1.0.0",
+        "skill:hacker": "0.7.0",
+    }.items():
+        assert primary_items[record_id]["status"] == "reviewed"
+        assert primary_items[record_id]["targetRelease"] == release
+        assert primary_items[record_id]["reviewedOn"]
+    for identity in ("skill:commlink", "skill:request-reinforcements"):
+        item = primary_items[identity]
+        assert item["status"] == "reviewed"
+        assert item["recordDefined"]
+        assert not item["scopeException"]
+        assert "N4" in item["note"]
+    assert main([
+        "--catalog-scope", str(candidate),
+        "--require-primary-release", "1.0.0",
+    ]) == 0
+    assert "186/186 complete" in capsys.readouterr().out
+    assert main([
+        "--catalog-scope", str(candidate),
+        "--require-release", "1.0.0",
+    ]) == 0
+
+
+def test_1_0_primary_candidate_matches_pinned_public_database_pair(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    candidate = DEFAULT_CATALOG_SCOPE_PATH.with_name("catalog-scope-1.0.0.json")
+    root = Path(__file__).resolve().parents[1]
+    database = root / "data/generated/infinity.db"
+    rules_database = root / "data/generated/rules.db"
+    if not database.is_file() or not rules_database.is_file():
+        pytest.skip("Paired generated catalog databases unavailable")
+    assert main([
+        "--catalog-scope", str(candidate),
+        "--database", str(database),
+        "--rules-database", str(rules_database),
+    ]) == 0
+    assert "1.0.0 primary catalog: 186/186 complete" in capsys.readouterr().out
+
+
+def test_1_0_primary_candidate_rejects_reviews_from_future_releases(
+    tmp_path: Path,
+) -> None:
+    candidate = DEFAULT_CATALOG_SCOPE_PATH.with_name("catalog-scope-1.0.0.json")
+    document = json.loads(candidate.read_text(encoding="utf-8"))
+    document["targetRelease"] = "0.6.0"
+    younger_scope = tmp_path / "catalog-scope.json"
+    younger_scope.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(RulesInteractionAuditError, match="expected no later than"):
+        audit_rules_interactions(
+            DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH, younger_scope,
+        )
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

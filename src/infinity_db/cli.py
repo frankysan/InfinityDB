@@ -105,7 +105,10 @@ def cmd_build(args: argparse.Namespace) -> int:
     )
     normalized = args.output_dir / "normalized.json"
     _validate_source_anomaly_baseline(normalized)
-    _export(normalized, args.output_dir / "infinity.db")
+    database = args.output_dir / "infinity.db"
+    _export(normalized, database)
+    print(f"Application database size: {database.stat().st_size:,} bytes")
+    print(f"Raw archive size: {raw_database_path(database).stat().st_size:,} bytes")
     return 0
 
 
@@ -183,8 +186,38 @@ def cmd_validate_curated(args: argparse.Namespace) -> int:
 
 
 def cmd_build_rules(args: argparse.Namespace) -> int:
+    if (
+        args.restrictions_manifest is None
+        and args.output.resolve() == DEFAULT_RULES_DATABASE.resolve()
+        and args.output.is_file()
+    ):
+        connection = sqlite3.connect(args.output)
+        try:
+            current_schema_version = connection.execute(
+                "PRAGMA user_version"
+            ).fetchone()[0]
+        finally:
+            connection.close()
+        if current_schema_version == 9:
+            raise ValueError(
+                "default build-rules export is v8 and cannot replace the tracked "
+                "v9 rules database; use the guarded v9 staging and paired "
+                "publication workflow"
+            )
+
     documents = load_curated_directory(args.input)
-    export_rules_database(documents, args.output)
+    if args.restrictions_manifest is not None:
+        if args.output.resolve() == DEFAULT_RULES_DATABASE.resolve():
+            raise ValueError(
+                "v9 Restrictions export requires an explicit staging --output path; "
+                "do not replace the tracked release rules.db before publication review"
+            )
+        manifest = json.loads(args.restrictions_manifest.read_text(encoding="utf-8"))
+        export_rules_database(
+            documents, args.output, restrictions_manifest=manifest,
+        )
+    else:
+        export_rules_database(documents, args.output)
     print(f"Rules database ready: {args.output}")
     print(f"Collections: {len(documents)}")
     return 0
@@ -343,6 +376,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_rules.add_argument("input", nargs="?", type=Path, default=DEFAULT_CURATED_RULES)
     p_rules.add_argument("--output", type=Path, default=DEFAULT_RULES_DATABASE)
+    p_rules.add_argument(
+        "--restrictions-manifest", type=Path,
+        help="Explicit opt-in to v9 conditional Restrictions export; stage outside release paths",
+    )
     p_rules.set_defaults(func=cmd_build_rules)
 
     p_scenario_map = sub.add_parser(

@@ -59,13 +59,15 @@ function descendants(element, predicate) {
 const rendered = new Map();
 for (const record of ammunition) {
   const states = (record.relations || [])
-    .filter((relation) => relation.type === "causes-state")
+    .filter((relation) => relation.type === "causes-state"
+      || relation.recordId === "rule:face-to-face-rolls")
     .map((relation) => ({
       record: {
-        id: relation.recordId, kind: "state",
+        id: relation.recordId, kind: relation.recordId.startsWith("state:") ? "state" : "rule",
         name: `${relation.recordId.split(":")[1]} State`,
         public_reference: {
-          catalog: "states", id: relation.recordId.split(":")[1],
+          catalog: relation.recordId.startsWith("state:") ? "states" : "rules",
+          id: relation.recordId.split(":")[1],
         },
       },
     }));
@@ -82,7 +84,19 @@ const eclipse = rendered.get("ammunition:eclipse").textContent;
 const smoke = rendered.get("ammunition:smoke").textContent;
 assert.match(eclipse, /Multispectral VisorsCannot draw LoF/);
 assert.match(smoke, /Multispectral VisorsCan draw LoF/);
-for (const text of [eclipse, smoke]) assert.doesNotMatch(text, /Critical|Saving Roll/);
+assert.match(smoke, /Visor AttacksNormal Rolls against placement/);
+assert.match(eclipse, /Visor AttacksQualifying rolled Attacks through Eclipse/);
+for (const text of [eclipse, smoke]) {
+  assert.doesNotMatch(text, /Saving Roll/);
+  assert.match(text, /enemy Attacks requiring a Roll and LoF crossing the zone/);
+  assert.match(text, /Dodge inside the Template is a Normal Roll/);
+  assert.match(text, /Win every applicable Face to Face Roll/);
+  assert.match(text, /CriticalNo additional effect/);
+}
+for (const id of ["ammunition:smoke", "ammunition:eclipse"]) {
+  assert.ok(descendants(rendered.get(id), (node) => node.tag === "a")
+    .some((link) => link.href === "/rules/face-to-face-rolls"));
+}
 
 const t2 = rendered.get("ammunition:t2").textContent;
 assert.match(t2, /2 Wounds per failed Saving Roll/);

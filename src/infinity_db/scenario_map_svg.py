@@ -55,6 +55,8 @@ stroke:var(--color-scenario-map-outline,#203b35);stroke-width:.1}
 .guide{fill:none;stroke:var(--color-scenario-map-guide,#65716b);
 stroke-width:.06;stroke-dasharray:.35 .25}
 .measurement{fill:none;stroke:var(--color-scenario-map-measurement,#203b35);stroke-width:.05}
+.center-measurement{fill:none;stroke:var(--color-scenario-map-measurement,#203b35);
+stroke-width:.075;stroke-dasharray:.3 .16}
 .dimension-label,.area-size{fill:var(--color-scenario-map-text,#203b35);
 font-family:sans-serif;font-size:var(--scenario-map-measure-size,1.1px);font-weight:600;
 paint-order:stroke;stroke:var(--color-scenario-map-text-halo,#fffefa);stroke-width:.055;stroke-linejoin:round}
@@ -267,6 +269,73 @@ def _render_annotation(
     )
 
 
+def _domination_console_centers(geometry: ScenarioGeometry) -> dict[str, MarkerElement]:
+    """Return reviewed quadrant-center Consoles, never approximate other maps.
+
+    The four source-defined scoring rectangles and Console IDs are present in
+    every N5.3 Domination size. Only draw placement rulers when each physical
+    Console is at the exact center of its matching Quadrant.
+    """
+    rectangles = {
+        element.id: element
+        for element in geometry.elements
+        if isinstance(element, RectangleElement) and element.style == "scoring"
+    }
+    markers = {
+        element.id: element
+        for element in geometry.elements
+        if isinstance(element, MarkerElement) and element.marker_type == "console"
+    }
+    if set(rectangles) != {f"quadrant-{index}" for index in range(1, 5)}:
+        return {}
+    if set(markers) != {f"console-q{index}" for index in range(1, 5)}:
+        return {}
+    for index in range(1, 5):
+        bounds = _rectangle_bounds(geometry, rectangles[f"quadrant-{index}"])
+        marker = markers[f"console-q{index}"]
+        x = _resolved(geometry, marker.x, "x")
+        y = _resolved(geometry, marker.y, "y")
+        if abs(x - (bounds[0] + bounds[2]) / 2) > 0.000001:
+            return {}
+        if abs(y - (bounds[1] + bounds[3]) / 2) > 0.000001:
+            return {}
+    return markers
+
+
+def _render_console_center_guides(
+    geometry: ScenarioGeometry,
+    marker: MarkerElement,
+    text_scale: float,
+    distance_unit: Literal["in", "cm"],
+) -> str:
+    """Measure to marker *centers*, not to physical marker boundaries."""
+    x = _resolved(geometry, marker.x, "x")
+    y = _resolved(geometry, marker.y, "y")
+    horizontal_edge = "left" if x < geometry.table.width / 2 else "right"
+    vertical_edge = "top" if y < geometry.table.height / 2 else "bottom"
+    edge_x = 0.0 if horizontal_edge == "left" else geometry.table.width
+    edge_y = 0.0 if vertical_edge == "top" else geometry.table.height
+    name = escape(marker.id, quote=True)
+    return (
+        f'<g id="{name}-center-{horizontal_edge}" class="center-measurement" '
+        f'data-target="{name}" data-edge="{horizontal_edge}" data-reference="center">'
+        f'<line x1="{_number(edge_x)}" y1="{_number(y)}" '
+        f'x2="{_number(x)}" y2="{_number(y)}"/>'
+        f'<text class="dimension-label" x="{_number((x + edge_x) / 2)}" '
+        f'y="{_number(y + 1.05 * text_scale)}" text-anchor="middle" '
+        f'data-distance-inches="{_number(abs(x - edge_x))}">'
+        f'{_measurement_text(abs(x - edge_x), distance_unit)}</text></g>\n'
+        f'<g id="{name}-center-{vertical_edge}" class="center-measurement" '
+        f'data-target="{name}" data-edge="{vertical_edge}" data-reference="center">'
+        f'<line x1="{_number(x)}" y1="{_number(edge_y)}" '
+        f'x2="{_number(x)}" y2="{_number(y)}"/>'
+        f'<text class="dimension-label" x="{_number(x + 1.1 * text_scale)}" '
+        f'y="{_number((y + edge_y) / 2)}" text-anchor="start" '
+        f'data-distance-inches="{_number(abs(y - edge_y))}">'
+        f'{_measurement_text(abs(y - edge_y), distance_unit)}</text></g>'
+    )
+
+
 def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
     for element in geometry.elements:
         if element.style not in _RENDERABLE_ELEMENT_STYLES:
@@ -295,9 +364,6 @@ def render_scenario_map_svg(
     width = _number(geometry.table.width)
     height = _number(geometry.table.height)
     title = escape(geometry.title)
-    elements = "\n".join(_render_element(geometry, element) for element in geometry.elements)
-    if elements:
-        elements += "\n"
     rectangles = {
         element.id: element
         for element in geometry.elements
@@ -311,9 +377,26 @@ def render_scenario_map_svg(
     # Increase viewBox-space text on wider tables; at the same on-screen map width,
     # 48-inch maps should no longer render labels at half the size of 24-inch maps.
     text_scale = 1.0 + max(0.0, min(24.0, geometry.table.width - 24.0)) / 48.0
+    center_consoles = _domination_console_centers(geometry)
+    elements = "\n".join(
+        (
+            _render_console_center_guides(
+                geometry, center_consoles[element.id], text_scale, distance_unit
+            ) + "\n"
+            if element.id in center_consoles else ""
+        ) + _render_element(geometry, element)
+        for element in geometry.elements
+    )
+    if elements:
+        elements += "\n"
     annotations = "\n".join(
         _render_annotation(geometry, annotation, rectangles, markers, text_scale, distance_unit)
         for annotation in geometry.annotations
+        if not (
+            center_consoles
+            and isinstance(annotation, AreaSizeAnnotation)
+            and annotation.target in {f"quadrant-{index}" for index in range(1, 5)}
+        )
     )
     if annotations:
         annotations += "\n"

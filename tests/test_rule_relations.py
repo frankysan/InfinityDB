@@ -125,8 +125,87 @@ def test_rules_database_projects_curated_summaries_labels_and_relation_semantics
             definition.get("labelIds", [])
         )
         for relation in record.get("display_relations", []):
-            expected = relation_presentation(relation["type"], relation["direction"])
+            outbound = relation["direction"] == "outbound"
+            expected = relation_presentation(
+                relation["type"],
+                relation["direction"],
+                source_record_id=record_id if outbound else relation["record_id"],
+                target_record_id=relation["record_id"] if outbound else record_id,
+            )
             if expected is None:
                 assert "presentation" not in relation
             else:
                 assert relation["presentation"] == expected
+
+
+def test_two_source_scoped_legacy_edges_are_qualified_in_both_directions(
+    tmp_path: Path,
+) -> None:
+    """Legacy relation IDs survive; only ambiguous display labels are tightened."""
+    root = Path(__file__).resolve().parents[1]
+    old_path = tmp_path / "v8-rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), old_path)
+
+    cases = (
+        (
+            "equipment:motorcycle", "skill:jump",
+            "Prohibits upward movement while mounted with",
+            "Upward movement while mounted prohibited by",
+        ),
+        (
+            "training:irregular", "skill:lieutenant",
+            "Cannot be selected as",
+            "Lieutenant selection excludes",
+        ),
+    )
+    for db_path in (old_path, root / "data/generated/rules.db"):
+        database = RulesDatabase(db_path)
+        database.validate()
+        records = {
+            record["id"]: record
+            for kind in ("training", "skill", "equipment")
+            for record in database.composed_records_by_kind(kind)
+        }
+        for source_id, target_id, outward, inward in cases:
+            source = records[source_id]
+            target = records[target_id]
+            # Existing structural and public API relation data remains untouched.
+            assert {"type": "restricts-use-of", "record_id": target_id,
+                    "collection_id": "n5-core-v5.3"} in source["relations"]
+            outbound = next(
+                relation for relation in source["display_relations"]
+                if relation["type"] == "restricts-use-of"
+                and relation["record_id"] == target_id
+            )
+            inbound = next(
+                relation for relation in target["display_relations"]
+                if relation["type"] == "restricts-use-of"
+                and relation["record_id"] == source_id
+                and relation["direction"] == "inbound"
+            )
+            assert outbound["presentation"]["label"] == outward
+            assert inbound["presentation"]["label"] == inward
+            assert outbound["record"]["id"] == target_id
+            assert inbound["record"]["id"] == source_id
+
+        # Other edges and generic relation-type metadata keep the old contract.
+        climb = next(
+            relation for relation in records["equipment:motorcycle"]["display_relations"]
+            if relation["record_id"] == "skill:climb"
+        )
+        assert climb["presentation"]["label"] == "Restricts use of"
+        generic = relation_presentation("restricts-use-of", "inbound")
+        assert generic is not None and generic["label"] == "Use restricted by"
+
+
+def test_scoped_legacy_labels_never_spill_to_other_relation_types() -> None:
+    other = relation_presentation(
+        "enables-use-of", "outbound",
+        source_record_id="equipment:motorcycle", target_record_id="skill:jump",
+    )
+    assert other is not None and other["label"] == "Enables use of"
+    unknown = relation_presentation(
+        "restricts-use-of", "outbound",
+        source_record_id="equipment:motorcycle", target_record_id="skill:climb",
+    )
+    assert unknown is not None and unknown["label"] == "Restricts use of"

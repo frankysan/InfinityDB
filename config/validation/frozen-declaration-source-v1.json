@@ -1,0 +1,608 @@
+{
+  "formatVersion": 1,
+  "scope": "frozen-declaration-source-evidence-not-current-rules",
+  "historicalCommit": "c5400ab1b950990fdacc509be91c110fe85431fb",
+  "historicalPath": "data/curated/rules/n5-core-v5.3.json",
+  "historicalFileSha256": "bb17f2013a1b8bc32961689789e4afff6fcc30f1476248d5d53d4b96587ab9a5",
+  "records": [
+    {
+      "id": "declaration-category:automatic:p89",
+      "kind": "declaration-category",
+      "name": "Automatic",
+      "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "automatic",
+        "order": 10
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "decoy"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 89
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:automatic:p94",
+      "kind": "declaration-category",
+      "name": "Automatic",
+      "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "automatic",
+        "order": 10
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "g-jumper"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 94
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:automatic:p96",
+      "kind": "declaration-category",
+      "name": "Automatic",
+      "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "automatic",
+        "order": 10
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "immunity"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 96
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:automatic:p101",
+      "kind": "declaration-category",
+      "name": "Automatic",
+      "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "automatic",
+        "order": 10
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "natural-born-warrior"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 101
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:deployment:p89",
+      "kind": "declaration-category",
+      "name": "Deployment",
+      "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "deployment-skill",
+        "order": 20
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "infiltration"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 89
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:deployment:p93",
+      "kind": "declaration-category",
+      "name": "Deployment",
+      "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "deployment-skill",
+        "order": 20
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "impersonation"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 93
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:deployment:p94",
+      "kind": "declaration-category",
+      "name": "Deployment",
+      "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "deployment-skill",
+        "order": 20
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "hidden-deployment"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 94
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:short-skill:p40",
+      "kind": "declaration-category",
+      "name": "Short Skill",
+      "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "short-skill",
+        "order": 40
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "bs-attack"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 40
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:short-skill:p45",
+      "kind": "declaration-category",
+      "name": "Short Skill",
+      "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "short-skill",
+        "order": 40
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "cc-attack"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 45
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:basic-short-skill:p78",
+      "kind": "declaration-category",
+      "name": "Basic Short Skill",
+      "summary": "The linked Army entries are classified as Basic Short Skill in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "basic-short-skill",
+        "order": 30
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "discover"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 78
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:basic-short-skill:p103",
+      "kind": "declaration-category",
+      "name": "Basic Short Skill",
+      "summary": "The linked Army entries are classified as Basic Short Skill in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "basic-short-skill",
+        "order": 30
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "morpho-scan"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 103
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:short-skill:p112",
+      "kind": "declaration-category",
+      "name": "Short Skill",
+      "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "short-skill",
+        "order": 40
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "sensor"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 112
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
+      }
+    },
+    {
+      "id": "declaration-category:long-skill:p25",
+      "kind": "declaration-category",
+      "name": "Long Skill",
+      "summary": "The linked Army entries are classified as Long Skill in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "long-skill",
+        "order": 50
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "jump"
+        },
+        {
+          "entity": "skill",
+          "id": "climb"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 25
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:aro:p40",
+      "kind": "declaration-category",
+      "name": "ARO",
+      "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "aro",
+        "order": 60
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "bs-attack"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 40
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:aro:p45",
+      "kind": "declaration-category",
+      "name": "ARO",
+      "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "aro",
+        "order": 60
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "cc-attack"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 45
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:aro:p78",
+      "kind": "declaration-category",
+      "name": "ARO",
+      "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "aro",
+        "order": 60
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "discover"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 78
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    },
+    {
+      "id": "declaration-category:aro:p103",
+      "kind": "declaration-category",
+      "name": "ARO",
+      "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "typeId": "aro",
+        "order": 60
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "morpho-scan"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "n5-core-v5.3-pdf",
+          "page": 103
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-17"
+      }
+    }
+  ]
+}

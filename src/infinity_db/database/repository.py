@@ -29,7 +29,11 @@ from infinity_db.domain_slugs import (
     require_domain_slug,
     resolve_domain_slug_candidates,
 )
-from infinity_db.fireteam_semantics import fireteam_limit_kind
+from infinity_db.fireteam_semantics import (
+    excludes_wildcards,
+    fireteam_limit_kind,
+    member_reference_issues,
+)
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
@@ -1740,6 +1744,39 @@ class Database:
                 )
             ]
 
+            parent_charts = []
+            selectable_parents = {
+                item["id"] for item in self.list_fireteam_armies()
+            } if army["parent_armies"] else set()
+            for parent in army["parent_armies"]:
+                parent_source = connection.execute(
+                    "SELECT source_army_id, source_kind, source_file, source_sha256 "
+                    "FROM application_fireteam_charts WHERE application_army_id = ?",
+                    (parent["id"],),
+                ).fetchone()
+                parent_limits = connection.execute(
+                    "SELECT fireteam_type, position, raw_limit "
+                    "FROM application_fireteam_chart_limits WHERE application_army_id = ? "
+                    "ORDER BY position, fireteam_type",
+                    (parent["id"],),
+                ).fetchall()
+                parent_charts.append({
+                    "army": {key: parent[key] for key in ("id", "name", "slug")},
+                    "selectable": parent["id"] in selectable_parents,
+                    "source": {
+                        "army_id": int(parent_source["source_army_id"]),
+                        "kind": parent_source["source_kind"],
+                        "file": parent_source["source_file"],
+                        "sha256": parent_source["source_sha256"],
+                    } if parent_source is not None else None,
+                    "limits": [{
+                        "type": row["fireteam_type"],
+                        "position": int(row["position"]),
+                        "max_count": int(row["raw_limit"]),
+                        "limit_kind": fireteam_limit_kind(int(row["raw_limit"])),
+                    } for row in parent_limits],
+                })
+
         types_by_team: dict[int, list[str]] = {}
         for row in type_rows:
             types_by_team.setdefault(int(row["fireteam_id"]), []).append(
@@ -1790,6 +1827,10 @@ class Database:
                     "source_unit_id": row["source_unit_id"],
                     "unit": unit,
                     "loadouts": loadouts_by_member.get((fireteam_id, member_id), []),
+                    "reference_issues": member_reference_issues(
+                        row["resolution"], row["source_unit_id"], row["fto_marker"],
+                        bool(loadouts_by_member.get((fireteam_id, member_id))),
+                    ),
                     "equivalence_labels": equivalence_by_member.get(
                         (fireteam_id, member_id), []
                     ),
@@ -1805,6 +1846,7 @@ class Database:
                     "position": int(row["position"]),
                     "name": row["name"],
                     "observation": row["observation"],
+                    "wildcards_excluded": excludes_wildcards(row["observation"]),
                     "source_army_id": int(row["source_army_id"]),
                     "source_fireteam_id": int(row["source_fireteam_id"]),
                     "is_wildcard": bool(row["is_wildcard"]),
@@ -1832,6 +1874,7 @@ class Database:
                 for row in limits
             ],
             "teams": teams,
+            "parent_charts": parent_charts,
         }
 
     @instance_lru_cache(maxsize=1)
@@ -3413,6 +3456,98 @@ class Database:
                         ],
                     }
                 )
+            chart_rows = connection.execute(
+                "WITH " + SOURCE_UNIT_NAMES_CTE + " "
+                "SELECT s.source_unit_id, n.unit_name AS source_name, s.spectables "
+                "FROM logical_unit_spectables AS s "
+                "JOIN source_unit_names AS n ON n.unit_id = s.source_unit_id "
+                "WHERE s.logical_unit_id = ? ORDER BY s.source_unit_id",
+                (group["id"],),
+            ).fetchall()
+            source_charts: list[dict[str, Any]] = []
+            if chart_rows:
+                chart_names = {
+                    kind: {
+                        row["id"]: row["name"]
+                        for row in connection.execute(
+                            f"SELECT id, name FROM {table}"
+                        )
+                    }
+                    for kind, table in (
+                        ("skill", "skills"),
+                        ("weapon", "weapons"),
+                        ("equip", "equipment"),
+                    )
+                }
+                extra_names = {
+                    row["id"]: row["name"]
+                    for row in connection.execute("SELECT id, name FROM extras")
+                }
+                chart_links = {
+                    (row["catalog"], row["source_item_id"]): (
+                        f"/{row['catalog']}/{row['slug']}"
+                    )
+                    for row in connection.execute(
+                        "SELECT s.catalog, s.source_item_id, d.slug "
+                        "FROM application_catalog_sources AS s "
+                        "JOIN application_domain_slugs AS d "
+                        "ON d.domain = s.catalog AND d.application_id = s.application_item_id "
+                        "WHERE d.slug IS NOT NULL AND d.status = 'resolved'"
+                    )
+                }
+                for chart_row in chart_rows:
+                    original_charts = json.loads(chart_row["spectables"])
+                    if (
+                        not isinstance(original_charts, dict)
+                        or set(original_charts) != {"table", "specball"}
+                        or any(
+                            not isinstance(chart, dict)
+                            or not isinstance(chart.get("items"), list)
+                            for chart in original_charts.values()
+                        )
+                    ):
+                        # Preserve non-Spec-Ops payloads without guessing their semantics.
+                        continue
+                    source_unit_id = chart_row["source_unit_id"]
+                    versions = [
+                        {"version": row["version"], "source_file": row["source_file"]}
+                        for row in connection.execute(
+                            "SELECT DISTINCT a.version, a.source_file "
+                            "FROM army_lists AS a "
+                            "JOIN army_units AS u ON u.army_id = a.id "
+                            "WHERE u.unit_id = ? ORDER BY a.version, a.source_file",
+                            (source_unit_id,),
+                        )
+                    ]
+                    charts: dict[str, Any] = {}
+                    for chart_kind, chart_data in original_charts.items():
+                        items = []
+                        for option in chart_data["items"]:
+                            attributes = []
+                            for attribute in option["attrs"]:
+                                kind = attribute["type"]
+                                catalog = {
+                                    "skill": "skills", "weapon": "weapons",
+                                    "equip": "equipment",
+                                }.get(kind)
+                                source_id = attribute.get("id")
+                                attributes.append({
+                                    **attribute,
+                                    "name": chart_names.get(kind, {}).get(source_id),
+                                    "href": chart_links.get((catalog, source_id)),
+                                    "extras": [
+                                        {"id": extra_id, "name": extra_names.get(extra_id)}
+                                        for extra_id in attribute.get("extra", [])
+                                    ],
+                                })
+                            items.append({"attributes": attributes})
+                        charts[chart_kind] = {"items": items}
+                    source_charts.append({
+                        "source_unit_id": source_unit_id,
+                        "source_name": chart_row["source_name"],
+                        "source_versions": versions,
+                        "charts": charts,
+                    })
             profile_rows = connection.execute(
                 "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, "
                 "ppo.logo, pp.name, "
@@ -3595,11 +3730,14 @@ class Database:
                     profile_item["characteristics"].append({"name": characteristic["name"]})
             profile_peripheral_rows = connection.execute(
                 "SELECT p.unit_id, p.army_id, p.group_id, p.profile_id, "
-                "a.entity_id, e.name, e.type_id, p.quantity "
+                "a.entity_id, COALESCE(e.name, s.source_name) AS name, "
+                "e.type_id, p.quantity, p.item_id "
                 "FROM profile_peripherals AS p "
-                "JOIN application_peripheral_sources AS a "
+                "JOIN application_peripheral_source_labels AS s "
+                "ON s.army_id = p.army_id AND s.peripheral_id = p.item_id "
+                "LEFT JOIN application_peripheral_sources AS a "
                 "ON a.army_id = p.army_id AND a.peripheral_id = p.item_id "
-                "JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
+                "LEFT JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
                 f"WHERE p.unit_id IN ({placeholders}) "
                 "ORDER BY p.army_id, p.group_id, p.profile_id, p.position, p.unit_id",
                 source_ids,
@@ -3620,10 +3758,17 @@ class Database:
                     append_unique_item(
                         profile_item.setdefault("peripherals", []),
                         {
-                            "id": peripheral["entity_id"],
+                            "id": peripheral["entity_id"] or (
+                                f"source-peripheral:{peripheral['army_id']}:"
+                                f"{peripheral['item_id']}"
+                            ),
                             "name": peripheral["name"],
                             "type_id": peripheral["type_id"],
                             "quantity": peripheral["quantity"],
+                            **(
+                                {"source_only": True}
+                                if peripheral["entity_id"] is None else {}
+                            ),
                         },
                     )
 
@@ -3861,11 +4006,14 @@ class Database:
                         )
             loadout_peripheral_rows = connection.execute(
                 "SELECT p.unit_id, p.army_id, p.group_id, p.option_id, "
-                "a.entity_id, e.name, e.type_id, p.quantity "
+                "a.entity_id, COALESCE(e.name, s.source_name) AS name, "
+                "e.type_id, p.quantity, p.item_id "
                 "FROM option_peripherals AS p "
-                "JOIN application_peripheral_sources AS a "
+                "JOIN application_peripheral_source_labels AS s "
+                "ON s.army_id = p.army_id AND s.peripheral_id = p.item_id "
+                "LEFT JOIN application_peripheral_sources AS a "
                 "ON a.army_id = p.army_id AND a.peripheral_id = p.item_id "
-                "JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
+                "LEFT JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
                 f"WHERE p.unit_id IN ({placeholders}) "
                 "ORDER BY p.army_id, p.group_id, p.option_id, p.position, p.unit_id",
                 source_ids,
@@ -3886,10 +4034,17 @@ class Database:
                     append_unique_item(
                         loadout_item.setdefault("peripherals", []),
                         {
-                            "id": peripheral["entity_id"],
+                            "id": peripheral["entity_id"] or (
+                                f"source-peripheral:{peripheral['army_id']}:"
+                                f"{peripheral['item_id']}"
+                            ),
                             "name": peripheral["name"],
                             "type_id": peripheral["type_id"],
                             "quantity": peripheral["quantity"],
+                            **(
+                                {"source_only": True}
+                                if peripheral["entity_id"] is None else {}
+                            ),
                         },
                     )
 
@@ -4253,6 +4408,7 @@ class Database:
             "isc_abbr": group["isc_abbr"],
             "notes": group["notes"],
             "source_notes": source_notes,
+            "source_charts": source_charts,
             "main_army_id": group["main_army_id"],
             "main_army_name": army_names.get(group["main_army_id"]),
             "main_faction": main_faction,

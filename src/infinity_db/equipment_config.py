@@ -10,6 +10,10 @@ from typing import Any
 from infinity_army_data.project_resources import maintained_config_path
 from infinity_db.domain_slugs import require_domain_slug
 
+# Source-independent definitions with a deliberate Equipment catalog route.
+# Do not promote ordinary Army-backed curated records when an Army snapshot is absent.
+CURATED_ONLY_EQUIPMENT_SLUGS = frozenset({"firewall"})
+
 EQUIPMENT_PRESENTATION_CONFIG_FORMAT = "InfinityDB equipment presentation encodings"
 EQUIPMENT_PRESENTATION_CONFIG_VERSION = 1
 DEFAULT_EQUIPMENT_PRESENTATION_CONFIG = maintained_config_path(

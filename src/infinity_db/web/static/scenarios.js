@@ -5,6 +5,7 @@ import { createPanelSwitcher } from "./view-components.js";
 const byId = (id) => document.getElementById(id);
 const elements = {
   count: byId("scenario-count"),
+  collection: byId("scenario-collection"),
   results: byId("scenario-results"),
   loading: byId("scenario-loading"),
   error: byId("scenario-error"),
@@ -13,6 +14,12 @@ const elements = {
   grid: byId("scenario-grid"),
 };
 const controller = new AbortController();
+let availableCollections = [];
+const selectedParams = new URLSearchParams(window.location.search);
+const selection = {
+  collection: selectedParams.get("collection") || "",
+  revision: selectedParams.get("revision") || "",
+};
 const show = createPanelSwitcher({
   container: elements.results,
   loading: elements.loading,
@@ -61,7 +68,12 @@ function renderScenario(item) {
   source.textContent = item.publication?.source_title || "Current rules";
   const link = document.createElement("a");
   link.className = "button button-primary";
-  link.href = `/scenarios/${encodeURIComponent(item.slug)}`;
+  const params = new URLSearchParams();
+  if (item.publication?.collection_id !== "n5-core") {
+    params.set("collection", item.publication.collection_id);
+    params.set("revision", item.publication.revision);
+  }
+  link.href = `/scenarios/${encodeURIComponent(item.slug)}${params.size ? `?${params}` : ""}`;
   link.textContent = "Open scenario";
   footer.append(source, link);
 
@@ -69,10 +81,48 @@ function renderScenario(item) {
   return article;
 }
 
+function populateCollections(collections) {
+  availableCollections = collections;
+  const selected = selection.collection
+    ? collections.findIndex((item) => item.id === selection.collection && item.revision === selection.revision)
+    : collections.findIndex((item) => item.id === "n5-core");
+  const options = collections.map((item, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = `${item.title} · ${item.revision} (${item.scenario_count})`;
+    return option;
+  });
+  if (selected < 0) {
+    const unavailable = document.createElement("option");
+    unavailable.value = "";
+    unavailable.textContent = selection.collection
+      ? `Collection unavailable: ${selection.collection} · ${selection.revision}`
+      : "No current core scenarios";
+    unavailable.disabled = true;
+    options.unshift(unavailable);
+  }
+  elements.collection.replaceChildren(...options);
+  elements.collection.value = selected < 0 ? "" : String(selected);
+  elements.collection.disabled = collections.length === 0;
+}
+
+function changeCollection() {
+  if (!elements.collection.value) return;
+  const item = availableCollections[Number(elements.collection.value)];
+  if (!item) return;
+  const params = new URLSearchParams();
+  if (item.id !== "n5-core") {
+    params.set("collection", item.id);
+    params.set("revision", item.revision);
+  }
+  window.location.assign(`/scenarios${params.size ? `?${params}` : ""}`);
+}
+
 async function initialize() {
   show(elements.loading);
   try {
-    const payload = await getScenarios(controller.signal);
+    const payload = await getScenarios(controller.signal, selection);
+    populateCollections(payload.collections || []);
     const items = payload.items || [];
     elements.count.textContent = `${items.length} ${items.length === 1 ? "scenario" : "scenarios"}`;
     if (!items.length) return show(elements.empty);
@@ -85,5 +135,6 @@ async function initialize() {
   }
 }
 
+elements.collection.addEventListener("change", changeCollection);
 document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
 initialize();

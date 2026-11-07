@@ -244,15 +244,34 @@ def test_history_forward_migration_is_transactional(
         }
 
 
-def test_parse_history_snapshot_rejects_unreviewed_route_labels() -> None:
+@pytest.mark.parametrize("route", (
+    "/units/private-user-value",
+    "/api/variant-usage?catalog=skills&name=private-user-value",
+    "/api/variant-usage/private-user-value",
+))
+def test_parse_history_snapshot_rejects_unreviewed_route_labels(route: str) -> None:
     text = _metrics_text(
         started_at=_timestamp(2026, 10, 6),
         requests=1,
-        route="/units/private-user-value",
+        route=route,
     )
 
     with pytest.raises(ValueError, match="unreviewed metrics route"):
         parse_history_snapshot(text)
+
+
+def test_variant_usage_metrics_accept_only_the_bounded_route() -> None:
+    snapshot = parse_history_snapshot(_metrics_text(
+        started_at=_timestamp(2026, 11, 5), requests=3, route="/api/variant-usage",
+    ))
+    assert snapshot.counters
+    assert {dict(series.labels)["route"] for series in snapshot.counters} == {
+        "/api/variant-usage",
+    }
+    requests = next(value for series, value in snapshot.counters.items()
+                    if series.name == "infinitydb_http_requests_total"
+                    and dict(series.labels)["status_class"] == "2xx")
+    assert requests == 3
 
 
 def test_parse_history_snapshot_rejects_unreviewed_histogram_bounds() -> None:

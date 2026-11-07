@@ -1,7 +1,7 @@
 // Present only curated, source-reviewed Immunity cases. Never evaluate a new attack.
 const catalogs = {
   ammunition: "ammunition", weapon: "weapons", state: "states", trait: "traits",
-  skill: "skills",
+  skill: "skills", "hacking-program": "hacking-programs",
 };
 const text = (value) => ({ type: "text", text: value });
 const reference = (id, label) => {
@@ -14,14 +14,27 @@ const reference = (id, label) => {
 const evidence = (value) => value === "derived-from-pinned-general-rules"
   ? "Derived from reviewed general rules"
   : value === "explicit-pinned-wiki-example" ? "Explicit source example"
-    : "Evidence classification unavailable";
+    : value === "explicit-n5.3-pdf-p96-example-3"
+      ? "Explicit N5.3 p. 96, Example 3"
+      : value === "explicit-n5.3-pdf-p96-example-2"
+        ? "Explicit N5.3 p. 96, Example 2"
+        : value === "explicit-n5.3-pdf-p96-example-1"
+          ? "Explicit N5.3 p. 96, Example 1"
+          : value === "explicit-n5.3-pdf-p96-example-4"
+            ? "Explicit N5.3 p. 96, Example 4"
+            : "Evidence classification unavailable";
 const rollCount = (count) => `${count} Saving Roll${count === 1 ? "" : "s"}`;
 const counts = (rolls) => `${rollCount(rolls.hitRolls)} on a hit (${rolls.criticalRolls} on a Critical)`;
 
 function componentTokens(ids) {
-  return ids.flatMap((id, index) => [
-    ...(index ? [text(" + ")] : []), reference(id, id.split(":")[1].toUpperCase()),
-  ]);
+  const labels = { normal: "N", em: "E/M" };
+  return ids.flatMap((id, index) => {
+    const slug = id.split(":")[1];
+    return [
+      ...(index ? [text(" + ")] : []),
+      reference(id, labels[slug] || slug.toUpperCase()),
+    ];
+  });
 }
 
 export function immunityCaseRows(facts = {}) {
@@ -29,21 +42,122 @@ export function immunityCaseRows(facts = {}) {
   if (!cases) return [];
   const rows = [];
   for (const item of cases.reviewedWeaponCases || []) {
-    // The source currently reviews Flash Pulse, not arbitrary BTS weapons.
-    if (item.when.weaponId !== "weapon:flash-pulse") continue;
+    if (item.when.weaponId === "weapon:flash-pulse") {
+      rows.push({
+        title: [text(`Immunity (${item.when.immunity}) vs `),
+          reference(item.when.weaponId, "Flash Pulse")],
+        detail: [
+          text(`A failed ${item.when.savingAttribute} Saving Roll still causes `),
+          reference(item.stateEffect.stateId, "Stunned"),
+          text(" without Wounds. "),
+          reference("ammunition:stun", "STUN"),
+          text(" counts as "), reference(item.ammunitionTreatedAs, "Normal"),
+          text(`, but the Saving Roll remains ${item.when.savingAttribute}; the explicit `),
+          reference("trait:non-lethal", "Non-Lethal"), text(" and "),
+          reference("trait:state", "State: Stunned"),
+          text(" Trait exceptions still apply (non-Comms attacks)."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:e-mitter") {
+      rows.push({
+        title: [text(`Immunity (${item.when.immunity}) vs standalone `),
+          reference(item.when.weaponId, "E/Mitter")],
+        detail: [
+          text(`The source's ${counts(item.withoutImmunity)} at ${item.withoutImmunity.savingAttribute} `),
+          text(`become ${counts(item.withImmunity)} at ${item.withImmunity.savingAttribute}. `),
+          reference("ammunition:em", "E/M"), text(" is treated as "),
+          reference(item.ammunitionTreatedAs, "Normal"),
+          text("; its Isolated/Immobilized-B effects are ignored. The "),
+          reference("trait:non-lethal", "Non-Lethal"),
+          text(" Trait still applies, so this weapon inflicts no Wounds. "),
+          text("Only the source Weapon 25 non-Comms profile is reviewed; "),
+          text("the Armed Turret E/Mitter discrepancy is not adjudicated."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:missile-launcher") {
+      const original = item.sourceProfile;
+      const applied = item.withImmunity;
+      rows.push({
+        title: [text("Immunity (ARM) vs "),
+          reference(item.when.weaponId, "Missile Launcher (Blast Mode)")],
+        detail: [
+          text(`The reviewed Blast Mode uses `),
+          reference(original.ammunitionId, "EXP"),
+          text(` and ${rollCount(original.hitRolls)} using ${original.savingRoll} on a hit. `),
+          text("With Immunity (ARM), EXP is treated as "),
+          reference(applied.treatedAs, "Normal"),
+          text(`: ${rollCount(applied.hitRolls)} using full ${applied.savingAttribute} on a hit or `),
+          text(`${rollCount(applied.criticalRolls)} on a Critical unless Immunity (Critical) applies. `),
+          text("The Blast Mode profile also lists "),
+          reference("trait:impact-template", "Circular Impact Template"),
+          text(" and "), reference("trait:anti-materiel", "Anti-materiel"),
+          text("; this example does not determine their separate applicability. "),
+          text("Hit Mode uses AP+EXP with ARM/2 instead and is not this printed example."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:monofilament-cc-weapon") {
+      const profile = item.sourceProfile;
+      const applied = item.withImmunity;
+      rows.push({
+        title: [text("Immunity (ARM) vs "),
+          reference(item.when.weaponId, "Monofilament CC Weapon")],
+        detail: [
+          text("The source's one "), reference(profile.ammunitionId, "Normal"),
+          text(` Ammunition Saving Roll uses ${profile.savingRoll}. With Immunity (ARM), `),
+          reference("trait:arm-0", "ARM = 0"),
+          text(" is ignored: the defender uses full "),
+          text(applied.savingAttribute),
+          text(` for ${rollCount(applied.hitRolls)} on a hit or `),
+          text(`${rollCount(applied.criticalRolls)} on a Critical unless Immunity (Critical) applies. `),
+          reference("trait:state", "State: Dead"),
+          text(" is also ignored, so a failed Saving Roll does not cause "),
+          reference(profile.stateId, "Dead"),
+          text(" from that Trait. Ordinary failed Normal Ammunition Saving Rolls are not cancelled. This is the exact printed non-Comms example, not a general Weapon Trait calculator."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:e-m-grenade-launcher") {
+      rows.push({
+        title: [text("Immunity (BTS) vs "),
+          reference(item.when.weaponId, "E/M Grenade Launcher")],
+        detail: [
+          text(`The source's ${counts(item.withoutImmunity)} using ${item.withoutImmunity.savingAttribute} `),
+          text(`become ${counts(item.withImmunity)} using full ${item.withImmunity.savingAttribute}. `),
+          reference("ammunition:em", "E/M"), text(" is treated as "),
+          reference(item.ammunitionTreatedAs, "Normal"),
+          text(", so the E/M Isolated and conditional Immobilized-B State effects are ignored. "),
+          reference("trait:non-lethal", "Non-Lethal"),
+          text(" still applies, preventing Wounds. The listed "),
+          reference("trait:impact-template", "Circular Impact Template"),
+          text(" and "), reference("trait:speculative-attack", "Speculative Attack"),
+          text(" are separate Weapon Traits; this example does not adjudicate template or attack mechanics. Only the exact non-Comms E/M Grenade Launcher is reviewed, not Comms Attacks or arbitrary E/M weapons."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    }
+  }
+  for (const item of cases.reviewedCommsCases || []) {
+    const source = item.sourceProfile;
     rows.push({
-      title: [text(`Immunity (${item.when.immunity}) vs `),
-        reference(item.when.weaponId, "Flash Pulse")],
+      title: [text("Comms exception: "),
+        reference(item.when.programId, "Oblivion"),
+        text(" vs Immunity (BTS / State: Isolated)")],
       detail: [
-        text(`A failed ${item.when.savingAttribute} Saving Roll still causes `),
-        reference(item.stateEffect.stateId, "Stunned"),
-        text(" without Wounds. "),
-        reference("ammunition:stun", "STUN"),
-        text(" counts as "), reference(item.ammunitionTreatedAs, "Normal"),
-        text(`, but the Saving Roll remains ${item.when.savingAttribute}; the explicit `),
-        reference("trait:non-lethal", "Non-Lethal"), text(" and "),
-        reference("trait:state", "State: Stunned"),
-        text(" Trait exceptions still apply (non-Comms attacks)."),
+        reference(item.when.programId, "Oblivion"),
+        text(" is a Comms Attack using "),
+        reference(source.ammunitionId, "AP"),
+        text(" Ammunition against BTS. Immunity (BTS) does not apply to Comms Attacks, so it neither removes the AP BTS reduction nor prevents "),
+        reference(source.failedSaveState, "Isolated"),
+        text(" after a failed Saving Roll. By contrast, Immunity (State: Isolated) does apply and prevents entry into "),
+        reference(item.when.stateId, "Isolated"),
+        text(" without cancelling the underlying Saving Roll. "),
+        reference(source.nonLethalTrait, "Non-Lethal"),
+        text(" remains the program's independent Trait. Its Burst "),
+        text(String(source.burst)),
+        text(" counts attack dice, not Saving Rolls. This applies only to the reviewed Oblivion program, not all hacking or Comms effects."),
       ],
       evidence: evidence(item.evidence),
     });
@@ -57,18 +171,188 @@ export function immunityCaseRows(facts = {}) {
       evidence: evidence(item.evidence),
     });
   }
+  for (const item of cases.reviewedSavingRollCases || []) {
+    // Printed Plasma/Enhanced case is a Combined Saving Roll, not combined
+    // Ammunition. These fixed source-reviewed rolls are not a calculator.
+    if (item.when.weaponId !== "weapon:plasma-rifle") continue;
+    const describeRolls = (rolls) => rolls.map(
+      (roll) => `${roll.count} ${roll.attribute} Saving Roll${roll.count === 1 ? "" : "s"}`
+    ).join(" and ");
+    if (item.when.immunity === "Enhanced") {
+      rows.push({
+        title: [text(`Immunity (${item.when.immunity}) vs `),
+          reference(item.when.weaponId, "Plasma Rifle")],
+        detail: [
+          text(`Still requires ${describeRolls(item.savingRolls)}. `),
+          reference(item.when.ammunitionId, "Normal Ammunition"),
+          text(" is not a combined Ammunition type; treating it as Normal does not eliminate either Saving Roll Attribute. This is the exact printed example, not a general immunity calculation."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.immunity === "Critical") {
+      rows.push({
+        title: [text("Immunity (Critical) vs "),
+          reference(item.when.weaponId, "Plasma Rifle")],
+        detail: [
+          text(`A Critical normally requires ${describeRolls(item.criticalWithoutImmunity)}. `),
+          text("Immunity (Critical) removes only the additional "),
+          text(`${item.removedCriticalRoll.attribute} Saving Roll, leaving `),
+          text(`${describeRolls(item.criticalWithImmunity)}. `),
+          reference(item.when.ammunitionId, "Normal Ammunition"),
+          text(" still uses a Combined Saving Roll, not Combined Ammunition. Applies only to the reviewed non-Comms Plasma Rifle profile; this is derived from N5.3 pp. 67 and 95, not a printed Immunity example or an attack calculator."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    }
+  }
+  for (const item of cases.reviewedCriticalCases || []) {
+    // These reviewed cases cancel only the Critical-added roll, not the
+    // source Ammunition's own Saving Rolls or their effects.
+    const original = item.criticalWithoutImmunity;
+    const applied = item.criticalWithImmunity;
+    if (item.when.weaponId === "weapon:ap-t2-cc-weapon") {
+      rows.push({
+        title: [text("Immunity (Critical) vs "),
+          reference(item.when.weaponId, "AP+T2 CC Weapon")],
+        detail: [
+          text("The reviewed Critical normally adds one Saving Roll: "),
+          text(`${rollCount(original.criticalRolls)} using ${original.savingAttribute}. `),
+          text("With Immunity (Critical), only the extra Critical roll is removed: "),
+          text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute} remains. `),
+          text("The original failed hit Saving Roll still inflicts "),
+          text(`${applied.failedHitRollWounds} Wounds from `),
+          reference(item.when.ammunitionId, "T2"),
+          text("; the suppressed extra Critical roll would have inflicted "),
+          text(`${original.failedAdditionalCriticalRollWounds} Wound on failure. `),
+          reference("ammunition:ap", "AP"),
+          text(" still halves ARM, and "),
+          reference("trait:anti-materiel", "Anti-materiel"),
+          text(" remains a separate Weapon Trait. Applies to the exact non-Comms AP+T2 CC Weapon only; this is a derived reference, not an attack calculator."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (["weapon:ap-da-cc-weapon", "weapon:ap-exp-cc-weapon"].includes(item.when.weaponId)) {
+      const exp = item.when.weaponId === "weapon:ap-exp-cc-weapon";
+      rows.push({
+        title: [text("Immunity (Critical) vs "),
+          reference(item.when.weaponId, exp ? "AP+EXP CC Weapon" : "AP+DA CC Weapon")],
+        detail: [
+          text(`A hit requires ${rollCount(original.hitRolls)} using ${original.savingAttribute}; `),
+          text(`a Critical normally requires ${rollCount(original.criticalRolls)}. `),
+          text("Immunity (Critical) cancels only the extra Critical Saving Roll: "),
+          text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute} remain because `),
+          reference(exp ? "ammunition:exp" : "ammunition:da", exp ? "EXP" : "DA"),
+          text(exp ? " still requires three rolls per hit. " : " still requires two rolls per hit. "),
+          reference("ammunition:ap", "AP"),
+          text(" still halves ARM. "),
+          reference("trait:anti-materiel", "Anti-materiel"),
+          text(` remains a separate Weapon Trait. This is the exact non-Comms AP+${exp ? "EXP" : "DA"} CC Weapon profile, not a general attack calculator.`),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:silenced-pistol") {
+      rows.push({
+        title: [text("Immunity (Critical) vs "),
+          reference(item.when.weaponId, "Silenced Pistol")],
+        detail: [
+          text(`A Critical normally requires ${rollCount(original.criticalRolls)} using ${original.savingAttribute}. `),
+          text("Immunity (Critical) removes only the extra Critical Saving Roll, leaving "),
+          text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute}. `),
+          reference("ammunition:ap", "AP"), text(" still halves BTS, and "),
+          reference("ammunition:shock", "Shock"),
+          text(" still inflicts 1 Wound per failed Saving Roll and sends a VITA 1 target directly to "),
+          reference("state:dead", "Dead"), text(" on failure, bypassing "),
+          reference("state:unconscious", "Unconscious"), text(". "),
+          reference("trait:silent-x", "Silent (-6)"),
+          text(" is a separate reaction mechanic, not adjudicated by this Saving Roll example. Applies to the exact non-Comms Silenced Pistol only; this is a derived reference, not an attack calculator."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:e-m-cc-weapon") {
+      rows.push({
+        title: [text("Immunity (Critical) vs "),
+          reference(item.when.weaponId, "E/M CC Weapon")],
+        detail: [
+          text(`A Critical normally requires ${rollCount(original.criticalRolls)} using ${original.savingAttribute}. `),
+          text("Immunity (Critical) removes only the extra Critical Saving Roll, leaving "),
+          text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute}. `),
+          reference("ammunition:normal", "Normal"),
+          text(" still inflicts 1 Wound per failed Saving Roll; "),
+          reference("ammunition:em", "E/M"),
+          text(" still halves BTS and causes "), reference("state:isolated", "Isolated"),
+          text(" on a failed Saving Roll, plus "),
+          reference("state:immobilized-b", "Immobilized-B"),
+          text(" for HI, TAG, REM or VH targets. There is no additional ARM Saving Roll. Applies to the exact non-Comms N+E/M CC Weapon only; this is a derived reference, not an attack calculator."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    }
+  }
   for (const item of cases.reviewedCombinedCases || []) {
     const partial = Array.isArray(item.withImmunity.ignoredComponents);
     const applied = item.withImmunity;
     rows.push({
-      title: [text(`Immunity (${item.when.immunity}) vs `), ...componentTokens(item.components)],
+      title: [
+        text(`Immunity (${item.when.immunity}) vs `), ...componentTokens(item.components),
+        ...(item.when.weaponId
+          ? [text(" — "), reference(
+              item.when.weaponId,
+              ({
+                "weapon:silenced-pistol": "Silenced Pistol",
+                "weapon:ap-t2-cc-weapon": "AP+T2 CC Weapon",
+                "weapon:e-m-cc-weapon": "E/M CC Weapon",
+              })[item.when.weaponId] || "Reviewed Weapon"
+            )] : []),
+      ],
       detail: [
-        text(`${counts(applied)} using ${item.when.savingAttribute}, rather than `),
-        text(`${counts(item.withoutImmunity)}. `),
+        text(`${counts(applied)} using ${applied.savingAttribute || item.when.savingAttribute}, rather than `),
+        text(`${counts(item.withoutImmunity)}${item.withoutImmunity.savingAttribute
+          ? ` using ${item.withoutImmunity.savingAttribute}` : ""}. `),
         ...(partial ? [text("The "), ...componentTokens(applied.ignoredComponents),
           text(" component is ignored; "), ...componentTokens(applied.remainingComponents),
           text(" still applies.")] : [text("The covered combined Ammunition counts as "),
           reference(applied.treatedAs, "Normal"), text(".")]),
+        ...(item.when.weaponId === "weapon:silenced-pistol" && item.when.immunity === "AP"
+          ? [text(" On a failed Saving Roll, the "),
+            reference("ammunition:shock", "Shock"),
+            text(" effect still sends a VITA 1 target directly to "),
+            reference("state:dead", "Dead"),
+            text(" instead of Unconscious.")] : []),
+        ...(item.when.weaponId === "weapon:silenced-pistol" && item.when.immunity === "BTS"
+          ? [text(" Both "), reference("ammunition:ap", "AP"),
+              text(" and "), reference("ammunition:shock", "Shock"),
+              text(" special effects are ignored: BTS is not halved and Shock's VITA 1 direct-to-"),
+              reference("state:dead", "Dead"),
+              text(" effect does not apply. A failed Normal Saving Roll can still inflict a Wound; Immunity (BTS) does not cancel the roll.")] : []),
+        ...(item.when.weaponId === "weapon:silenced-pistol" && item.when.immunity === "Shock"
+          ? [text(" Only "), reference("ammunition:shock", "Shock"),
+            text(" is treated as "), reference("ammunition:normal", "Normal"),
+            text("; its VITA 1 direct-to-"), reference("state:dead", "Dead"),
+            text(" effect is ignored. "), reference("ammunition:ap", "AP"),
+            text(" still halves BTS, and each failed Saving Roll can still inflict 1 Wound. This does not grant Immunity (AP), (BTS) or (Critical).")]
+          : []),
+        ...(item.when.weaponId === "weapon:silenced-pistol"
+          ? [text(" The weapon's "),
+            reference("trait:silent-x", "Silent (-6)"),
+            text(item.when.immunity === "AP"
+              ? " remains a separately conditional Trait."
+              : " concerns conditional Face to Face Dodge Rolls; this Saving Roll example does not adjudicate its interaction with Immunity.")] : []),
+        ...(item.when.weaponId === "weapon:e-m-cc-weapon" && item.when.immunity === "E/M"
+          ? [text(" Ignoring "), reference("ammunition:em", "E/M"),
+            text(" removes its BTS reduction, additional Saving Roll per hit and "),
+            reference("state:isolated", "Isolated"), text(" / "),
+            reference("state:immobilized-b", "Immobilized-B"),
+            text(" effects. "), reference("ammunition:normal", "Normal"),
+            text(" remains: each failed Saving Roll can still inflict 1 Wound. The Saving Roll stays BTS, with no additional ARM roll. The extra Critical roll remains unless Immunity (Critical) also applies.")]
+          : []),
+        ...(item.when.weaponId === "weapon:ap-t2-cc-weapon"
+          ? [text(" A failed hit Saving Roll still inflicts "),
+            text(`${applied.failedRollWounds.hit} Wounds`),
+            text("; a failed additional Critical Saving Roll inflicts only "),
+            text(`${applied.failedRollWounds.criticalAdditionalRoll} Wound`),
+            text(". Identify which die is the hit roll and which is the extra Critical roll before rolling. The "),
+            reference("trait:anti-materiel", "Anti-materiel"),
+            text(" Trait remains a separate Weapon property.")] : []),
         text(" Applies to the reviewed non-Comms attack only."),
       ],
       evidence: evidence(item.evidence),

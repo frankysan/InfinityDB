@@ -4,7 +4,7 @@ import { immunityCaseRows } from "./immunity-cases.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { tableViewport } from "./view-components.js";
 
-function citationLabel(citation) {
+function citationLabel(citation, { includeLocationDetails = false } = {}) {
   const source = citation.source_title || citation.source_id || "Source";
   const version = citation.source_version && !source.toLowerCase().includes(
     citation.source_version.toLowerCase()
@@ -12,11 +12,15 @@ function citationLabel(citation) {
   const location = citation.page
     ? `p. ${citation.page}`
     : citation.heading || citation.member || citation.section || "";
-  return `${source}${version}${location ? `, ${location}` : ""}`;
+  const details = includeLocationDetails
+    ? [...new Set([citation.heading, citation.section].filter((value) => value && value !== location))]
+    : [];
+  return `${source}${version}${location ? `, ${location}` : ""}`
+    + (details.length ? ` (${details.join("; ")})` : "");
 }
 
-export function rulesCitationNode(citation) {
-  const label = citationLabel(citation);
+export function rulesCitationNode(citation, options = {}) {
+  const label = citationLabel(citation, options);
   if (!citation.source_url) return document.createTextNode(label);
   const link = document.createElement("a");
   link.href = citation.source_url;
@@ -24,6 +28,31 @@ export function rulesCitationNode(citation) {
   link.rel = "noopener noreferrer";
   link.textContent = label;
   return link;
+}
+
+export function rulesCitationList(citations, {
+  label = "Sources: ", discloseArchive = false, includeLocationDetails = false,
+} = {}) {
+  const paragraph = document.createElement("p");
+  paragraph.className = "detail-source rules-source-citations";
+  const heading = document.createElement("strong");
+  heading.className = "rules-provenance-label";
+  heading.textContent = label;
+  paragraph.append(heading);
+  if (!citations.length) {
+    paragraph.append("Unavailable.");
+  } else {
+    for (const [index, citation] of citations.entries()) {
+      if (index) paragraph.append(" · ");
+      paragraph.append(rulesCitationNode(citation, { includeLocationDetails }));
+      if (discloseArchive && citation.member) {
+        paragraph.append(` (archived member ${citation.member}`);
+        if (citation.source_url) paragraph.append("; link opens source site");
+        paragraph.append(")");
+      }
+    }
+  }
+  return paragraph;
 }
 
 function applicabilityText(rule) {
@@ -170,9 +199,18 @@ function appendRuleFactGroup(container, rule, key, label) {
   if (!Array.isArray(facts[key]) || !facts[key].length) return;
   const group = document.createElement("div");
   group.className = "detail-fact-group";
+  if (key === "clarifications") {
+    group.setAttribute("data-provenance", "reviewed-explanation");
+  }
   const heading = document.createElement("h4");
   heading.className = "detail-fact-heading";
   heading.textContent = label;
+  if (key === "clarifications") {
+    const context = document.createElement("p");
+    context.className = "rules-provenance-caption";
+    context.textContent = "InfinityDB-reviewed explanation or example; see source citations.";
+    group.append(heading, context);
+  }
   const list = document.createElement("ul");
   list.className = "detail-list";
   for (const [index, fact] of facts[key].entries()) {
@@ -180,7 +218,98 @@ function appendRuleFactGroup(container, rule, key, label) {
     appendMaintainedText(item, rule.fact_tokens?.[key]?.[index], fact);
     list.append(item);
   }
-  group.append(heading, list);
+  if (key === "clarifications") group.append(list);
+  else group.append(heading, list);
+  container.append(group);
+}
+
+function appendGameSetupTable(container, rule) {
+  if (rule.id !== "rule:game-modes") return;
+  const setup = rule.facts?.gameSetupTable;
+  if (!Array.isArray(setup?.rows)) return;
+  const group = document.createElement("section");
+  group.className = "detail-fact-group game-setup-reference";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = "N5.3 recommended Game Modes and Retreat! thresholds";
+  const guidance = document.createElement("p");
+  guidance.className = "detail-copy";
+  guidance.textContent = "Table and Deployment Zone dimensions are in inches per player; duration is an estimate in minutes. Retreat! thresholds are army-level game conditions, not recommendations.";
+  const table = document.createElement("table");
+  table.className = "data-table--reference";
+  table.setAttribute("aria-label", "Recommended Game Modes and source Retreat thresholds");
+  const head = document.createElement("thead");
+  const headers = ["Game mode", "Army points", "Base SWC", "Table (in)", "Deployment Zone (in)", "Duration (min)", "Retreat! at or below (VP)"];
+  const headingRow = document.createElement("tr");
+  for (const label of headers) {
+    const th = document.createElement("th");
+    th.scope = "col";
+    th.textContent = label;
+    headingRow.append(th);
+  }
+  head.append(headingRow);
+  const body = document.createElement("tbody");
+  for (const mode of setup.rows) {
+    const row = document.createElement("tr");
+    const cells = [
+      mode.name, mode.armyPoints, mode.baseSwc,
+      mode.tableInches.join(" × "), mode.deploymentZoneInches.join(" × "),
+      mode.durationMinutes, mode.retreatThresholdVictoryPoints,
+    ];
+    for (const [index, value] of cells.entries()) {
+      const cell = document.createElement(index === 0 ? "th" : "td");
+      if (index === 0) cell.scope = "row";
+      cell.textContent = String(value);
+      row.append(cell);
+    }
+    body.append(row);
+  }
+  table.append(head, body);
+  group.append(heading, guidance, tableViewport(table));
+  container.append(group);
+}
+
+function appendTerrainExamples(container, rule) {
+  if (rule.id !== "rule:special-terrain") return;
+  const examples = rule.facts?.terrainExamples;
+  if (!Array.isArray(examples?.rows)) return;
+  const group = document.createElement("section");
+  group.className = "detail-fact-group terrain-examples-reference";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = "Suggested terrain combinations";
+  const guidance = document.createElement("p");
+  guidance.className = "detail-copy";
+  guidance.textContent = "Examples to agree before play, not additional Terrain Types or mandatory scenery. A dash preserves a dash in the source; optional and conditional values remain as printed.";
+  const table = document.createElement("table");
+  table.className = "data-table--reference";
+  table.setAttribute("aria-label", "Suggested terrain combinations");
+  const head = document.createElement("thead");
+  const headingRow = document.createElement("tr");
+  for (const label of ["Example", "Terrain Type", "Difficult Terrain", "Visibility Conditions", "Saturation Zone"]) {
+    const cell = document.createElement("th");
+    cell.scope = "col";
+    cell.textContent = label;
+    headingRow.append(cell);
+  }
+  head.append(headingRow);
+  const body = document.createElement("tbody");
+  for (const example of examples.rows) {
+    const row = document.createElement("tr");
+    for (const [index, field] of ["name", "terrainType", "difficultTerrain", "visibility", "saturation"].entries()) {
+      const cell = document.createElement(index === 0 ? "th" : "td");
+      if (index === 0) cell.scope = "row";
+      cell.textContent = example[field];
+      row.append(cell);
+    }
+    body.append(row);
+  }
+  table.append(head, body);
+  const viewport = tableViewport(table);
+  viewport.tabIndex = 0;
+  viewport.setAttribute("role", "region");
+  viewport.setAttribute("aria-label", "Suggested terrain combinations, scroll for all columns");
+  group.append(heading, guidance, viewport);
   container.append(group);
 }
 
@@ -193,6 +322,9 @@ function appendAmmunitionFacts(container, rule) {
     [...states].map(([id, state]) => [id, state.name])
   );
   const rows = ammunitionFactRows(rule.facts, stateNames);
+  const references = new Map((rule.display_relations || [])
+    .filter((relation) => relation.record)
+    .map((relation) => [relation.record.id, relation.record]));
   if (!rows.length) return;
   const group = document.createElement("div");
   group.className = "detail-fact-group ammunition-mechanics";
@@ -201,10 +333,10 @@ function appendAmmunitionFacts(container, rule) {
   heading.textContent = "Reviewed mechanics";
   const list = document.createElement("dl");
   list.className = "ammunition-mechanics-list";
-  for (const [label, value, stateId] of rows) {
+  for (const [label, value, referenceId] of rows) {
     const term = document.createElement("dt");
-    const state = stateId ? states.get(stateId) : null;
-    const href = state ? relationHref(state) : null;
+    const reference = referenceId ? references.get(referenceId) : null;
+    const href = reference ? relationHref(reference) : null;
     if (href) {
       const link = document.createElement("a");
       link.href = href;
@@ -250,7 +382,7 @@ function appendImmunityCases(container, rule) {
   }
   const caveat = document.createElement("p");
   caveat.className = "detail-source";
-  caveat.textContent = "Only these conditions are reviewed. Critical counts assume no Immunity (Critical); see the cited rules below.";
+  caveat.textContent = "Only these conditions are reviewed. Critical counts assume no Immunity (Critical) unless a case explicitly covers it; see the cited rules below.";
   group.append(heading, list, caveat);
   container.append(group);
 }
@@ -276,12 +408,28 @@ function summaryParagraphs(tokens, fallback = "") {
   ));
 }
 
+function hasRedundantRuleSummary(rule) {
+  if (typeof rule.name !== "string" || typeof rule.summary !== "string") return false;
+  const summary = rule.summary.trim();
+  const label = `Rules for ${rule.name}`;
+  return (summary === label || summary === `${label}.`)
+    && (!Array.isArray(rule.summary_tokens)
+      || rule.summary_tokens.every((token) => token?.type === "text"));
+}
+
 function appendRuleDetails(
   container,
   rule,
-  { includeBadges = true, includeApplicability = true, beforeRelations = [] } = {},
+  {
+    includeBadges = true,
+    includeApplicability = true,
+    beforeRelations = [],
+    includeLocationDetails = false,
+  } = {},
 ) {
-  for (const paragraphTokens of summaryParagraphs(rule.summary_tokens, rule.summary)) {
+  for (const paragraphTokens of (
+    hasRedundantRuleSummary(rule) ? [] : summaryParagraphs(rule.summary_tokens, rule.summary)
+  )) {
     const paragraph = document.createElement("p");
     paragraph.className = "detail-copy";
     appendMaintainedText(paragraph, paragraphTokens);
@@ -294,6 +442,8 @@ function appendRuleDetails(
   const facts = rule.facts || {};
   appendRuleFactGroup(container, rule, "requirements", "Requirements");
   appendRuleFactGroup(container, rule, "effects", "Effects");
+  appendGameSetupTable(container, rule);
+  appendTerrainExamples(container, rule);
   appendAmmunitionFacts(container, rule);
 
   const specialists = facts.specialists?.anyOfSkills;
@@ -324,11 +474,16 @@ function appendRuleDetails(
   for (const [index, note] of (rule.facts?.sourceNotes || []).entries()) {
     const paragraph = document.createElement("p");
     paragraph.className = "rules-source-note";
+    const label = document.createElement("strong");
+    label.className = "rules-provenance-label";
+    label.textContent = "Source context: ";
+    paragraph.append(label);
     appendMaintainedText(paragraph, rule.fact_tokens?.sourceNotes?.[index], note);
     container.append(paragraph);
   }
 
-  const applicability = includeApplicability ? applicabilityText(rule) : "";
+  const applicability = includeApplicability && !rule.citations?.length
+    ? applicabilityText(rule) : "";
   if (applicability) {
     const context = document.createElement("p");
     context.className = "detail-source";
@@ -337,13 +492,7 @@ function appendRuleDetails(
   }
 
   if (rule.citations?.length) {
-    const citations = document.createElement("p");
-    citations.className = "detail-source";
-    for (const [index, citation] of rule.citations.entries()) {
-      if (index) citations.append(" · ");
-      citations.append(rulesCitationNode(citation));
-    }
-    container.append(citations);
+    container.append(rulesCitationList(rule.citations, { includeLocationDetails }));
   }
 }
 
@@ -357,12 +506,15 @@ export function hasGameplayRuleFacts(rule) {
   });
 }
 
-export function gameplayVariantRules(variants) {
+export function gameplayVariantRules(variants, { includeSourceSummaries = false } = {}) {
   const result = [];
   const seen = new Set();
   for (const variant of variants || []) {
     for (const rule of variant.rules || []) {
-      if (!hasGameplayRuleFacts(rule)) continue;
+      const reviewedSourceSummary = includeSourceSummaries
+        && rule.variant_semantics?.inheritance === "source"
+        && typeof rule.summary === "string" && rule.summary.trim();
+      if (!hasGameplayRuleFacts(rule) && !reviewedSourceSummary) continue;
       const key = rule.id || rule;
       if (seen.has(key)) continue;
       seen.add(key);
@@ -429,6 +581,7 @@ export function rulesReferenceArticle(
     headerContent = [],
     beforeRelations = [],
     includeApplicability = true,
+    includeLocationDetails = false,
   } = {},
 ) {
   const article = document.createElement("article");
@@ -442,11 +595,15 @@ export function rulesReferenceArticle(
   const badgeRow = ruleBadgeRow(rule);
   if (badgeRow) header.append(badgeRow);
   header.append(...headerContent);
-  article.append(header, ...leadingContent);
+  const provenance = document.createElement("p");
+  provenance.className = "rules-card-provenance";
+  provenance.textContent = "InfinityDB-maintained reference · consult citations for source wording";
+  article.append(header, ...leadingContent, provenance);
   appendRuleDetails(article, rule, {
     includeBadges: false,
     includeApplicability,
     beforeRelations,
+    includeLocationDetails,
   });
 
   for (const supplement of rule.supplements || []) {
@@ -455,18 +612,22 @@ export function rulesReferenceArticle(
     const supplementTitle = document.createElement("h4");
     supplementTitle.textContent = "Additional rules";
     supplemental.append(supplementTitle);
-    appendRuleDetails(supplemental, supplement, { includeApplicability });
+    appendRuleDetails(supplemental, supplement, { includeApplicability, includeLocationDetails });
     article.append(supplemental);
   }
   return article;
 }
 
-export function rulesReferenceSection(rules, headingText = "Rules reference") {
+export function rulesReferenceSection(
+  rules, headingText = "Rules reference", { includeLocationDetails = false } = {},
+) {
   const section = document.createElement("section");
   section.className = "detail-group rules-reference";
   const heading = document.createElement("h2");
   heading.className = "detail-heading";
   heading.textContent = headingText;
-  section.append(heading, ...rules.map((rule) => rulesReferenceArticle(rule)));
+  section.append(heading, ...rules.map((rule) => rulesReferenceArticle(
+    rule, { includeLocationDetails },
+  )));
   return section;
 }

@@ -43,6 +43,15 @@
       ],
       "components": ["ammunition:ap", "ammunition:t2"]
     },
+    "5": {
+      "name": "N+E/M",
+      "segments": [
+        {"text": "N", "ruleId": "ammunition:normal"},
+        {"text": "+"},
+        {"text": "E/M", "ruleId": "ammunition:em"}
+      ],
+      "components": ["ammunition:normal", "ammunition:em"]
+    },
     "14": {"name": "E/M", "segments": [{"text": "E/M", "ruleId": "ammunition:em"}]},
     "18": {"name": "T2", "segments": [{"text": "T2", "ruleId": "ammunition:t2"}]},
     "21": {"name": "Smoke", "segments": [{"text": "Smoke", "ruleId": "ammunition:smoke"}]},

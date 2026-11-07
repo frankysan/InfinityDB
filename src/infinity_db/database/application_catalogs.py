@@ -2,16 +2,22 @@
 
 from __future__ import annotations
 
+import json
 import re
 import sqlite3
 from collections import defaultdict
 from collections.abc import Collection
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
+from infinity_army_data.project_resources import maintained_config_path
 from infinity_db.identities import IdentityConfig
 
 CATALOGS = ("skills", "equipment", "weapons")
+DEFAULT_METADATA_ONLY_WEAPONS = maintained_config_path(
+    "catalogs", "metadata-only-weapons.json"
+)
 
 
 @dataclass(frozen=True)
@@ -55,15 +61,104 @@ def _merged_catalog_name(name: object) -> str:
     return _merged_skill_name(text)
 
 
+_PUBLICATION_PROFILE_KEYS = {
+    "mode", "type", "ammunition", "burst", "damage", "saving",
+    "savingNum", "traits", "distance",
+}
+
+
+def _reviewed_metadata_only_weapons(
+    connection: sqlite3.Connection,
+    path: Path = DEFAULT_METADATA_ONLY_WEAPONS,
+) -> list[dict[str, Any]]:
+    """Publish only explicitly reviewed, exact-match unused Army Weapon profiles."""
+    document = json.loads(path.read_text(encoding="utf-8"))
+    if (
+        not isinstance(document, dict)
+        or set(document) != {"format", "version", "weapons"}
+        or document["format"] != "InfinityDB reviewed metadata-only weapon publication"
+        or type(document["version"]) is not int
+        or document["version"] != 1
+        or not isinstance(document["weapons"], list)
+    ):
+        raise ValueError("Invalid metadata-only Weapon publication configuration")
+
+    result: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    for entry in document["weapons"]:
+        if (
+            not isinstance(entry, dict)
+            or set(entry) != {"id", "name", "category", "profile", "source"}
+            or type(entry["id"]) is not int
+            or entry["id"] <= 0
+            or entry["id"] in seen
+            or any(not isinstance(entry[k], str) or not entry[k].strip()
+                   for k in ("name", "category", "source"))
+            or not isinstance(entry["profile"], dict)
+            or set(entry["profile"]) != _PUBLICATION_PROFILE_KEYS
+        ):
+            raise ValueError("Invalid or duplicate metadata-only Weapon publication")
+        seen.add(entry["id"])
+        expected = entry["profile"]
+        if (
+            expected["mode"] is not None
+            or expected["type"] != "WEAPON"
+            or type(expected["ammunition"]) is not int
+            or expected["ammunition"] <= 0
+            or any(not isinstance(expected[k], str) or not expected[k]
+                   for k in ("burst", "damage", "saving", "savingNum"))
+            or not isinstance(expected["traits"], list)
+            or any(not isinstance(trait, str) or not trait for trait in expected["traits"])
+            or not isinstance(expected["distance"], dict)
+        ):
+            raise ValueError(f"Invalid metadata-only Weapon profile for {entry['id']}")
+        rows = _dict_rows(
+            connection,
+            "SELECT id, name, mode, type, ammunition, burst, damage, "
+            "saving, savingNum, properties, distance "
+            "FROM metadata_weapons WHERE id = ?",
+            (entry["id"],),
+        )
+        # An older source snapshot or a minimal fixture may not contain the
+        # reviewed weapon. Do not synthesize an upstream profile in that case.
+        if not rows:
+            continue
+        if len(rows) != 1:
+            raise ValueError(f"Reviewed Weapon {entry['id']} has multiple source profiles")
+        row = rows[0]
+        actual = {k: row[k] for k in _PUBLICATION_PROFILE_KEYS
+                  if k not in {"traits", "distance"}}
+        actual["traits"] = json.loads(row["properties"] or "[]")
+        actual["distance"] = json.loads(row["distance"] or "null")
+        if row["name"] != entry["name"] or actual != expected:
+            raise ValueError(f"Reviewed metadata-only Weapon {entry['id']} source profile drift")
+        existing = connection.execute(
+            "SELECT 1 FROM weapons WHERE id = ?", (entry["id"],)
+        ).fetchone()
+        if existing is None:
+            result.append({
+                "id": entry["id"],
+                "name": entry["name"],
+                "wiki": None,
+                "category": entry["category"],
+                "has_metadata": 1,
+            })
+    return result
+
+
 def _source_catalog_rows(connection: sqlite3.Connection, catalog: str) -> list[dict[str, Any]]:
     if catalog == "weapons":
-        return _dict_rows(
+        rows = _dict_rows(
             connection,
             "SELECT c.id, COALESCE(NULLIF(c.name, ''), MIN(NULLIF(m.name, '')), "
             "'Weapon #' || c.id) AS name, NULL AS wiki, c.category, "
             "CAST(CASE WHEN COUNT(m.position) > 0 THEN 1 ELSE 0 END AS INTEGER) AS has_metadata "
             "FROM weapons AS c LEFT JOIN metadata_weapons AS m ON m.id = c.id "
             "GROUP BY c.id, c.name, c.category ORDER BY c.id",
+        )
+        return sorted(
+            [*rows, *_reviewed_metadata_only_weapons(connection)],
+            key=lambda row: row["id"],
         )
     metadata_table = {"skills": "metadata_skills", "equipment": "metadata_equipment"}[catalog]
     fallback = "Skill" if catalog == "skills" else "Equipment"
@@ -208,6 +303,9 @@ def validate_application_catalogs(
             "SELECT COUNT(*) FROM application_catalog_sources WHERE catalog = ?",
             (catalog,),
         ).fetchone()[0]
+    # Reviewed metadata-only publications add one mapped source identity
+    # without inventing a row in the upstream usage-derived weapons table.
+    source_count += len(_reviewed_metadata_only_weapons(connection))
     empty_item = connection.execute(
         "SELECT 1 FROM application_catalog_items AS aci "
         "LEFT JOIN application_catalog_sources AS acs "

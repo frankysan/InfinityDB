@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
 from infinity_db.weapon_combined_saving_rolls import WeaponCombinedSavingRolls
+from infinity_db.weapon_properties import WeaponProperties
+
+if TYPE_CHECKING:
+    from infinity_db.database.repository import Database
 
 DECLARATION_KIND = "declaration-category"
 
@@ -43,7 +47,9 @@ def _source_label(category: dict[str, Any]) -> str | None:
 class CatalogRules:
     """Enrich Army catalog items with curated rule records when available."""
 
-    def __init__(self, rules_database: RulesDatabase | None) -> None:
+    def __init__(
+        self, rules_database: RulesDatabase | None, *, database: Database | None = None,
+    ) -> None:
         self.rules_database = rules_database
         self._category_indexes: dict[
             str, dict[ArmyLinkRef, list[dict[str, Any]]]
@@ -54,6 +60,10 @@ class CatalogRules:
         self._rule_reference_cache: dict[str, dict[str, Any]] = {}
         self._combined_saving_rolls = (
             WeaponCombinedSavingRolls() if rules_database is not None else None
+        )
+        self._weapon_properties = (
+            WeaponProperties(rules_database, database=database)
+            if rules_database is not None else None
         )
         self._ammunition_references = (
             WeaponAmmunitionReferences(rules_database)
@@ -219,6 +229,36 @@ class CatalogRules:
             if variant_rules:
                 variant["rules"] = list(variant_rules.values())
 
+        if entity == "equipment":
+            attached_rule_ids = {
+                rule["id"]
+                for variant in result.get("variants", [])
+                for rule in variant.get("rules", [])
+            }
+            reference_only: dict[str, dict[str, Any]] = {}
+            for family in records:
+                for relation in family.get("display_relations", []):
+                    endpoint = relation["record"]
+                    record_id = endpoint["id"]
+                    if (
+                        relation["type"] != "variant-of"
+                        or relation["direction"] != "inbound"
+                        or endpoint["kind"] != "equipment"
+                        or record_id in attached_rule_ids
+                        or record_id in reference_only
+                    ):
+                        continue
+                    reference = rules_database.composed_record(record_id)
+                    if reference is None:
+                        raise ValueError(f"Unknown Equipment variant reference {record_id!r}")
+                    if (reference.get("variant_semantics") or {}).get("inheritance") == "source":
+                        reference_only[record_id] = reference
+            if reference_only:
+                result["reference_only_variants"] = sorted(
+                    reference_only.values(),
+                    key=lambda record: (record["name"].casefold(), record["id"]),
+                )
+
         ammunition_references = self._ammunition_references
         if entity == "weapon" and ammunition_references is not None:
             combined_saving_rolls = self._combined_saving_rolls
@@ -226,9 +266,16 @@ class CatalogRules:
             # Ammunition composition, while Saving Roll x2 is a separate field.
             def attach_ammunition_references(profiles: list[dict[str, Any]]) -> None:
                 for profile in profiles:
+                    if self._weapon_properties is not None:
+                        properties = self._weapon_properties.for_profile(profile)
+                        if properties:
+                            profile["weapon_properties"] = properties
                     segments = ammunition_references.for_profile(profile)
                     if segments is not None:
                         profile["ammunition_parts"] = segments
+                        profile["ammunition_effects"] = (
+                            ammunition_references.effects_for_profile(profile)
+                        )
                     composition = ammunition_references.composition_for_profile(profile)
                     if composition is not None:
                         profile["ammunition_composition"] = composition

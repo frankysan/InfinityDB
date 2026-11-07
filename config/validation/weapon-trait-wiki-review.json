@@ -51,9 +51,9 @@
       "reviewNote": "The N5.3 chart legend on p.176 defines [*] as Weaponry and [**] as Ammunition. PDF/Wiki PARA Mine uses [*], but Army uses [**]; preserve both source values until Army's intended reference is checked.",
       "semanticReview": {
         "classification": "source-footnote",
-        "state": "partial",
-        "finding": "The N5.3 chart legend (p.176) defines [*] as a Weaponry reference and [**] as an Ammunition reference. PARA Mines (p.181) prints [*] and the Mines rule is on p.72; Army records [**].",
-        "remaining": "Review whether Army's marker follows the printed chart legend and why its category differs; retain both original source values.",
+        "state": "explained",
+        "finding": "The N5.3 chart legend (p.176) defines [*] as a Weaponry reference and [**] as an Ammunition reference. The curated weapon:para-mine record links both weapon:mines and ammunition:para and identifies the marker mismatch without changing Army.",
+        "remaining": "Why Army uses [**] while the PDF and Wiki use [*] remains unresolved under SRC-013; retain the imported Army marker and both published rule references.",
         "pdfPages": [
           72,
           176,
@@ -69,8 +69,8 @@
       "semanticReview": {
         "classification": "ammunition-and-explicit-trait",
         "state": "explained",
-        "finding": "N5.3 pp.74 and 181 explicitly list Non-Lethal for WildParrot and identify its E/M ammunition. The rule describes its behavior as an E/M Mine; the Army Trait list omits Non-Lethal.",
-        "remaining": "Do not add an Army property by inference. Review whether the app should expose the printed Trait as separately sourced or as derived effect context.",
+        "finding": "N5.3 pp. 74 and 181 explicitly list Non-Lethal for WildParrot and identify its E/M ammunition. The curated weapon:wildparrot record exposes the source-backed Trait through variantRuleReferences while preserving the Army Trait omission.",
+        "remaining": "Whether Army should list Non-Lethal remains unresolved under SRC-015. Preserve the raw imported profile; no further presentation change is identified.",
         "pdfPages": [
           64,
           74,
@@ -90,11 +90,12 @@
       },
       "semanticReview": {
         "classification": "legacy-terminology-and-trait",
-        "state": "partial",
-        "finding": "The April 2025 official Pheroware change replaced Technical Weapon with BS Weapon (WIP) and added Double Shot to Endgame. The N5.3 chart reflects both; Army retains the old label and omits Double Shot.",
-        "remaining": "Reconcile Endgame Double Shot in the current rules model/presentation without rewriting the raw Army source.",
+        "state": "explained",
+        "finding": "The April 2025 official Pheroware change replaced Technical Weapon with BS Weapon (WIP) and added Double Shot to Endgame. N5.3 p. 182 and curated weapon:pt-endgame explain that, during the Active Turn, Double Shot may add +1 Burst by using both Disposable (2) charges; Army retains the older label and omits the Trait.",
+        "remaining": "Whether Army's omission is intentional remains unresolved under SRC-016. Preserve the imported Army profile; the cited N5.3 chart and curated explanation retain the source-backed effect without changing Army data.",
         "pdfPages": [
-          62
+          62,
+          182
         ]
       }
     },
@@ -167,9 +168,9 @@
       "reviewNote": "PDF p.187 prints [*], referring to the Sepsitor family context (p.73), but Army omits it; a name-matching cause is not confirmed.",
       "semanticReview": {
         "classification": "source-footnote",
-        "state": "partial",
-        "finding": "The N5.3 legend (p.176) defines [*] as a Weaponry reference. N5.3 chart p.187 lists [*] for Sepsitor Plus; the Sepsitor Weaponry section (p.73) covers the weapon family. Army omits the marker.",
-        "remaining": "Preserve the source mismatch. Both weapons now publish their own Sepsitor rules references; why Army omits the marker remains unverified. The proposed Army name-lookup explanation is a hypothesis.",
+        "state": "explained",
+        "finding": "The N5.3 legend (p.176) defines [*] as a Weaponry reference. The chart (p.187) prints [*] for Sepsitor Plus, and p.73 provides the Sepsitor family rules. The curated weapon:sepsitor-plus record cites the legend and chart and discloses the Army omission.",
+        "remaining": "Why Army omits this source marker remains unresolved under SRC-014. Preserve the imported Army profile and its missing marker; the curated record retains its cited Weaponry rules, and the proposed name-matching explanation remains a hypothesis.",
         "pdfPages": [
           73,
           176,

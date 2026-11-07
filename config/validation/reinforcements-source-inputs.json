@@ -1,0 +1,26 @@
+{
+  "formatVersion": 1,
+  "scope": "historical-source-identity-not-n5-authority",
+  "sources": [
+    {
+      "id": "reinforcements-n4-en",
+      "language": "en",
+      "edition": "N4",
+      "applicability": "historical-only",
+      "localPath": "data/pdf/rules/reinforcement-rules-en.pdf",
+      "sha256": "7c8c93c640e22ce33a8c71069a98f4daff0b1f430548db3c62c70a63252c2ba0",
+      "sourceUrl": "https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf",
+      "publishedDate": null
+    },
+    {
+      "id": "reinforcements-n4-es",
+      "language": "es",
+      "edition": "N4",
+      "applicability": "historical-only",
+      "localPath": "data/pdf/rules/reinforcement-rules-es.pdf",
+      "sha256": "ef2d6c67486e37336900a9e54fcc357bfdef4a185dc559c6ba1279274e6f41bf",
+      "sourceUrl": "https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-es.pdf",
+      "publishedDate": null
+    }
+  ]
+}

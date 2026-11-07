@@ -9,6 +9,67 @@ from typing import Any
 
 _FTO_RE = re.compile(r"\bFTO(?:[-\s]?(\d+))?\b", re.IGNORECASE)
 _BRACKET_RE = re.compile(r"\(([^()]*)\)")
+_NO_WILDCARDS_RE = re.compile(
+    r"\s*No\s+Wildcards(?:\s+Special\s+Fireteam)?\s*[.!]?\s*", re.IGNORECASE,
+)
+
+
+def excludes_wildcards(observation: str | None) -> bool:
+    """Decode the reviewed explicit exclusion notes, not arbitrary chart prose.
+
+    Both forms occur in the pinned Army chart observations. A false result
+    means no recognized exclusion; it does not certify Wildcard eligibility.
+    """
+    return bool(_NO_WILDCARDS_RE.fullmatch(observation or ""))
+
+
+def fto_reference_status(
+    resolution: str, source_unit_id: int | None, marker: str | None, has_loadouts: bool,
+) -> str:
+    """Classify chart FTO evidence without granting cross-Army eligibility."""
+    if marker is None:
+        return "not-applicable"
+    if resolution != "army" or source_unit_id is None:
+        return "source-unit-context-mismatch"
+    return "resolved" if has_loadouts else "no-matching-fto-option"
+
+
+def member_reference_issues(
+    resolution: str, source_unit_id: int | None, marker: str | None, has_loadouts: bool,
+) -> list[dict[str, str]]:
+    """Explain incomplete Unit/FTO references using the materialized evidence."""
+    issues = []
+    if resolution == "global":
+        issues.append({
+            "code": "unit-not-in-army",
+            "message": (
+                "This Unit is listed in another Army; its profile in this Army is unconfirmed."
+            ),
+        })
+    elif resolution == "ambiguous":
+        issues.append({
+            "code": "unit-reference-ambiguous",
+            "message": "More than one Unit matches this chart entry.",
+        })
+    elif resolution != "army" or source_unit_id is None:
+        issues.append({
+            "code": "unit-reference-unresolved",
+            "message": "No matching Unit was found for this chart entry.",
+        })
+    status = fto_reference_status(resolution, source_unit_id, marker, has_loadouts)
+    if status == "source-unit-context-mismatch":
+        issues.append({
+            "code": "fto-unit-context-mismatch",
+            "message": "The FTO profile in this Army has not been verified.",
+        })
+    elif status == "no-matching-fto-option":
+        issues.append({
+            "code": "fto-option-unresolved",
+            "message": (
+                "The chart requires FTO, but no matching FTO loadout was found in this Army."
+            ),
+        })
+    return issues
 
 
 def ascii_upper(value: str | None) -> str:
@@ -69,7 +130,11 @@ def fto_option_matches(member_name: str | None, marker: str, option_name: str | 
 
 
 def equivalence_labels(comment: str | None) -> tuple[str, ...]:
-    """Return ordered Fireteam-Level equivalence labels from parenthetical source text."""
+    """Preserve ordered parenthetical source terms without inferring equivalence.
+
+    The legacy storage/API name is retained. A term can instead qualify a
+    profile or loadout; parentheses alone do not establish a counts-as rule.
+    """
     labels: list[str] = []
     for match in _BRACKET_RE.findall(comment or ""):
         labels.extend(part.strip() for part in match.split(",") if part.strip())

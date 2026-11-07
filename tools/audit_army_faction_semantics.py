@@ -494,7 +494,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
     report = audit_database(args.database)
-    payload = json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    # Windows consoles may use CP1252: keep stdout valid JSON without requiring
+    # terminal Unicode support, while preserving Unicode in UTF-8 report files.
+    payload = json.dumps(report, indent=2, sort_keys=True, ensure_ascii=args.output is None) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(payload, encoding="utf-8", newline="\n")

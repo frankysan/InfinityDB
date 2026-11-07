@@ -12,6 +12,8 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
+from tools.paired_audit_connection import open_paired_audit_connection
+
 REPORT_FORMAT = "InfinityDB peripheral semantics audit"
 REPORT_FORMAT_VERSION = 1
 
@@ -415,8 +417,7 @@ def _audit_normalization_gaps(metadata: dict[str, Any], *, include_details: bool
 def audit_database(path: Path, *, include_details: bool = False) -> dict[str, Any]:
     if not path.is_file():
         raise PeripheralSemanticsAuditError(f"Database does not exist: {path}")
-    connection = sqlite3.connect(path)
-    connection.row_factory = sqlite3.Row
+    connection = open_paired_audit_connection(path, REQUIRED_COLUMNS)
     try:
         _validate_schema(connection)
         metadata = _metadata_rows(connection)

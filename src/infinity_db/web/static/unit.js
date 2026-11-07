@@ -1,5 +1,6 @@
 import { getUnit, getUnitProfileHelp } from "./api.js";
 import { maintainedTextFragment } from "./maintained-text.js";
+import { rulesCitationList } from "./rules-reference.js";
 import { silhouetteValuePreview } from "./silhouette-diagrams.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
@@ -236,6 +237,11 @@ function renderProfileNotationHelp(items) {
     const copy = document.createElement("p");
     copy.append(maintainedTextFragment(item.summary_tokens, item.summary));
     entry.append(heading, copy);
+    if (Array.isArray(item.citations)) {
+      entry.append(rulesCitationList(item.citations, {
+        discloseArchive: true, includeLocationDetails: true,
+      }));
+    }
     grid.append(entry);
   }
   body.append(grid);
@@ -370,9 +376,11 @@ function profileItems(items, catalog, fallbackLabel) {
     const label = item.quantity != null && Number(item.quantity) !== 1
       ? `${decoratedName} ×${item.quantity}`
       : decoratedName;
-    const link = document.createElement("a");
-    const routeId = item.slug || item.id;
-    link.href = `/${catalog}/${encodeURIComponent(routeId)}`;
+    const link = document.createElement(catalog ? "a" : "span");
+    if (catalog) {
+      const routeId = item.slug || item.id;
+      link.href = `/${catalog}/${encodeURIComponent(routeId)}`;
+    }
     link.textContent = label;
     if (hiddenIds.length) {
       const details = document.createElement("span");
@@ -447,7 +455,8 @@ function peripheralItems(items) {
     const quantity = item.quantity != null && Number(item.quantity) !== 1
       ? ` ×${item.quantity}`
       : "";
-    const label = `${item.name || "Peripheral"}${quantity} (${peripheralTypeLabel(item)})`;
+    const type = item.type_label || item.type_id;
+    const label = `${item.name || "Peripheral"}${quantity}${type ? ` (${type})` : ""}`;
     if (index) result.append(", ");
     result.append(document.createTextNode(label));
   });
@@ -677,8 +686,94 @@ function renderSourceNotes(unit, armies) {
   return section;
 }
 
+function renderSourceChoices(unit) {
+  const sourceCharts = unit.source_charts || [];
+  if (!sourceCharts.length) return null;
+  const section = document.createElement("section");
+  section.className = "detail-group source-choice-charts";
+  const title = heading("Spec-Ops and SpecBall choices");
+  title.className = "detail-heading detail-heading--rule";
+  section.append(title);
+
+  const intro = document.createElement("p");
+  intro.textContent = "Source-defined choices, not selected upgrades or an Army List. "
+    + "Entries with multiple items are a single combined option. "
+    + "TEAM-OPS availability is governed separately by applicable ITS rules.";
+  section.append(intro);
+  const related = document.createElement("p");
+  related.append("Core rules: ");
+  for (const [index, slug, title] of [
+    [0, "infinity-spec-ops", "Infinity Spec-Ops"],
+    [1, "request-specball", "Request SpecBall"],
+  ]) {
+    if (index) related.append(" · ");
+    const link = document.createElement("a");
+    link.href = `/skills/${slug}`;
+    link.textContent = title;
+    related.append(link);
+  }
+  section.append(related);
+
+  for (const [index, source] of sourceCharts.entries()) {
+    const disclosure = document.createElement("details");
+    disclosure.className = "surface content-frame source-choice-chart";
+    disclosure.open = index === 0;
+    const summary = document.createElement("summary");
+    summary.textContent = source.source_name + ` · Source Unit #${source.source_unit_id}`;
+    disclosure.append(summary);
+    const provenance = document.createElement("p");
+    provenance.className = "army-relationship-intro";
+    const versions = [...new Set((source.source_versions || [])
+      .map((item) => item.version).filter(Boolean))];
+    provenance.textContent = `Army source version: ${versions.join(", ") || "unspecified"}`;
+    disclosure.append(provenance);
+
+    for (const [key, label] of [
+      ["table", "Spec-Ops / TEAM-OPS selection chart"],
+      ["specball", "SpecBall chart"],
+    ]) {
+      const chart = source.charts[key];
+      if (!chart) continue;
+      disclosure.append(subheading(label));
+      const choices = document.createElement("ol");
+      choices.className = "detail-list source-choice-list";
+      for (const choice of chart.items) {
+        const row = document.createElement("li");
+        choice.attributes.forEach((attribute, attributeIndex) => {
+          if (attributeIndex) row.append(" + ");
+          const isStat = attribute.type === "stat";
+          const stat = attribute.stat === "move0" ? "MOV first component"
+            : attribute.stat === "move1" ? "MOV second component"
+              : (attribute.stat || "Unknown").toUpperCase();
+          const labelText = isStat ? `${stat} (source q=${text(attribute.q)})`
+            : attribute.name || `${attribute.type} #${attribute.id}`;
+          if (attribute.href && !isStat) {
+            const link = document.createElement("a");
+            link.href = attribute.href;
+            link.textContent = labelText;
+            row.append(link);
+          } else {
+            row.append(labelText);
+          }
+          if (attribute.q != null && !isStat) row.append(` (source q=${attribute.q})`);
+          for (const extra of attribute.extras || []) {
+            row.append(` (extra #${extra.id}: ${extra.name || "unresolved"})`);
+          }
+        });
+        choices.append(row);
+      }
+      disclosure.append(choices);
+    }
+    section.append(disclosure);
+  }
+  return section;
+}
+
 function renderArmyRelationships(unit, armies) {
-  const uniqueArmies = [...new Map(armies.map((army) => [Number(army.id), army])).values()];
+  const uniqueArmies = [...new Map(
+    armies.filter((army) => army.presentation_visible !== false)
+      .map((army) => [Number(army.id), army]),
+  ).values()];
   const reinforcementRelations = uniqueArmies.filter((army) => (
     (army.parent_armies || []).length || (army.reinforcement_sections || []).length
   ));
@@ -687,7 +782,9 @@ function renderArmyRelationships(unit, armies) {
 
   const section = document.createElement("section");
   section.className = "detail-group army-relationships developer-only";
-  const title = heading("Army relationships");
+  const title = heading(
+    reinforcementRelations.length ? "Reinforcement relationships" : "Army relationships",
+  );
   title.className = "detail-heading detail-heading--rule";
   section.append(title);
 
@@ -695,8 +792,8 @@ function renderArmyRelationships(unit, armies) {
   surface.className = "surface surface--clipped content-frame connected-unit-surface army-relationship-surface";
   const intro = document.createElement("p");
   intro.className = "army-relationship-intro";
-  intro.textContent = "Army availability is shown in the profile sections below. These links show "
-    + "Reinforcement parentage and broader source-declared faction membership separately.";
+  intro.textContent = "These links identify which Armies use each Reinforcement Section. "
+    + "They describe source availability, not a complete Army List validation.";
   surface.append(intro);
 
   if (reinforcementRelations.length) {
@@ -733,12 +830,14 @@ function renderArmyRelationships(unit, armies) {
   }
 
   if (declaredFactions.length) {
-    surface.append(subheading("Declared faction membership"));
+    const diagnostic = document.createElement("div");
+    diagnostic.className = "developer-only";
+    diagnostic.append(subheading("Declared faction membership"));
     const explanation = document.createElement("p");
     explanation.className = "army-relationship-note";
     explanation.textContent = "This source relationship is broader than current Army-list "
       + "availability. Follow a faction link to find other Units with the same declaration.";
-    surface.append(explanation);
+    diagnostic.append(explanation);
     const list = document.createElement("ul");
     list.className = "detail-list connected-unit-list";
     for (const membership of declaredFactions) {
@@ -757,7 +856,8 @@ function renderArmyRelationships(unit, armies) {
       item.append(provenance);
       list.append(item);
     }
-    surface.append(list);
+    diagnostic.append(list);
+    surface.append(diagnostic);
   }
 
   section.append(surface);
@@ -913,6 +1013,25 @@ function renderPeripheralRelationships(unit) {
   return section;
 }
 
+
+function appendClassifiedNonSkillRows(rows, items, labelClass, itemClass, colSpan = null) {
+  for (const [property, label, fallbackLabel] of [
+    ["attribute_overrides", "Attribute overrides", "Attribute"],
+    ["training", "Training", "Training"],
+  ]) {
+    const classifiedItems = items?.[property] || [];
+    if (!classifiedItems.length) continue;
+    rows.push([
+      { content: label, header: true, className: labelClass },
+      {
+        content: profileItems(classifiedItems, null, fallbackLabel),
+        className: itemClass,
+        ...(colSpan ? { colSpan } : {}),
+      },
+    ]);
+  }
+}
+
 function generalProfileTableRows(profiles) {
   const rows = [];
   for (const profile of profiles) {
@@ -955,6 +1074,9 @@ function generalProfileTableRows(profiles) {
         },
       ]);
     }
+    appendClassifiedNonSkillRows(
+      rows, profile.shared_items, "data-label general-item-label", "general-item-list",
+    );
   }
   return rows;
 }
@@ -991,6 +1113,9 @@ function profileTableRows(profiles, generalByIdentity, anchorScope) {
         },
       ]);
     }
+    appendClassifiedNonSkillRows(
+      rows, profile.specific_items, "data-label profile-item-label", "profile-item-list",
+    );
     appendIncludeRows(rows, profile, anchorScope);
     appendPeripheralRows(rows, profile);
     return rows;
@@ -1054,6 +1179,9 @@ function loadoutTable(loadouts, anchorScope, anchoredPayloads) {
           },
         ]);
       }
+      appendClassifiedNonSkillRows(
+        rows, loadout.specific_items, "data-label profile-item-label", "profile-item-list", 2,
+      );
       appendIncludeRows(rows, loadout, anchorScope, 2);
       appendPeripheralRows(rows, loadout, 2);
       return rows;
@@ -1294,6 +1422,8 @@ function render(unit, helpItems = [], attributeItems = []) {
   content.append(profilesFilteredOut ? filteredProfilesNotice() : generalProfilesSection);
   const sourceNotes = renderSourceNotes(unit, armies);
   if (sourceNotes) content.append(sourceNotes);
+  const sourceChoices = renderSourceChoices(unit);
+  if (sourceChoices) content.append(sourceChoices);
   const armyRelationships = renderArmyRelationships(unit, unit.armies);
   if (armyRelationships) content.append(armyRelationships);
   const peripheralRelationships = renderPeripheralRelationships(unit);
@@ -1321,7 +1451,25 @@ function render(unit, helpItems = [], attributeItems = []) {
     content.append(section);
   }
   content.hidden = false;
+  requestAnimationFrame(revealProfileGroupHash);
 }
+
+function revealProfileGroupHash() {
+  if (!window.location.hash.startsWith("#profile-group-")) return;
+  let targetId;
+  try {
+    targetId = decodeURIComponent(window.location.hash.slice(1));
+  } catch {
+    return;
+  }
+  const target = document.getElementById(targetId);
+  if (!target || !content.contains(target)) return;
+  const details = target.closest("details");
+  if (details) details.open = true;
+  target.scrollIntoView({ block: "start" });
+}
+
+window.addEventListener("hashchange", revealProfileGroupHash, { signal: pageController.signal });
 
 document.addEventListener(
   "infinity:beforenavigation",
