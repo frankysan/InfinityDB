@@ -228,8 +228,12 @@ bounded rule-citation/route check; final release acceptance remains open.
   having no current Army occurrence; their family page now separates cited
   reference-only definitions from Army options;
   [VR-0130 passed](testing.md#v1s-082-reference-only-equipment-variants-vr-0130)
-  its focused source/API/browser regressions. Continue reconciling remaining
-  maintained references and routes before closing this gate.
+  its focused source/API/browser regressions. The subsequent
+  [routing census](v1.0-source-coverage-audit.md#v1s-082-maintained-reference-routing-census-2026-11-07)
+  checked 317 direct cited cards, 48 embedded entries and contextual
+  source variants and scenarios. Reconcile citation applicability and known
+  missing dependencies before closing this gate; metadata and reachability
+  alone do not prove that a locator supports its reference.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are
