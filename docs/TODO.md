@@ -49,24 +49,16 @@ references, scoped Reinforcements and exact-variant usage API/browser paths.
 The usage publication is still conditional on a verified matched artifact;
 an ignored development candidate is not a release artifact.
 
-The [focused UI and citation acceptance](testing.md#focused-ui-regression-drain-vr-0138-0141-2026-11-07)
-passed **51/51** tests with zero skips on the frozen development pair:
-FAQ spacing and developer-only occurrence lists (VR-0138), the standalone
-Restrictions chart and contextual links (VR-0139), Deployed objects,
-Orders & AROs and source-backed FAQ cards (VR-0140), and the redundant
-source-scope/FAQ-disclosure spacing fix (VR-0141). The four VR entries
-are retired; final release-matched visual and cumulative gates remain
-separate.
-  A follow-up removes the duplicate applicability line from cited rule
-  cards and adds clearance after FAQ cards before Unit-use disclosures;
-  verification is tracked under [VD-0115 / VR-0141](validation-queue.md).
+The [cumulative candidate acceptance](testing.md#cumulative-candidate-acceptance-v1s-090--vr-0142)
+closes local/source/browser and isolated-package validation on the frozen inputs.
+Final release metadata, exact-main-SHA CI, tagging and deployment remain below.
 
 ### Development sequence
 
 Review and close the earliest actionable numbered V1S slice below after
 checking the [VD/VR queue](validation-queue.md). Source/inventory
 reconciliation precedes its dependent curation or projection; final
-release-input checks remain V1S-081–095. The
+release steps remain V1S-092–095. The
 [1.0 release definition](releasing.md#version-10-data-completeness-gate)
 determines scope. Do not make optional ITS tooling or publisher answers
 release blockers.
@@ -110,126 +102,23 @@ remain separate. Only an actively running **full Linux suite** allows
 independent Windows work while validation drains; see the
 [queue rules](validation-queue.md#queue-rules).
 
-#### Rules and contextual reference completion
-
-**Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
-**Project domains:** Data processing, Web backend, Web frontend
-
-Previous source reviews and exact browser acceptance are retained in
-[the coverage audit](v1.0-source-coverage-audit.md). The remaining external
-Silent/Immunity question is [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier),
-not a 1.0 gate.
-
-The [V1S-041 frozen-pair Reinforcements and Commlink browser gate](v1.0-source-coverage-audit.md#v1s-041-frozen-pair-optional-reinforcements-browser-acceptance-2026-11-07)
-passed. N4-origin disclosures and the non-blocking SRC-030 publisher
-question remain separate from any claim of N5-native adoption.
-
-#### Four core scenarios
-
-**Parent:** [Core-scenario reference completion](#rules-and-reference-completeness).
-**Project domains:** Data processing, Web backend, Web frontend
-
-The [V1S-045 frozen-pair four-scenario interaction acceptance](v1.0-source-coverage-audit.md#v1s-045-frozen-pair-four-scenario-interaction-acceptance-2026-11-07)
-passed with 36/36 Chrome cases at desktop and narrow widths, including
-light/dark themes, keyboard/touch navigation, rapid size changes, empty/error
-states, recovery and browser history. The previously accepted V1S-088
-scenario source/size matrix remains separate.
-
-#### FAQ and errata
-
-**Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
-**Project domains:** Data processing, Web backend, Web frontend
-
-Release-paired FAQ parity and the final
-[V1S-088 scenario/FAQ acceptance](v1.0-source-coverage-audit.md#v1s-088-frozen-pair-scenario-and-faq-browser-acceptance-2026-11-07)
-are accepted. Hosted and deployed acceptance remain separate.
-
-#### Rule-variant usage index and Restrictions
-
-**Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
-**Project domains:** Data processing, Web backend, Web frontend, Deployment
-
-The [variant usage source-pair and browser gate](v1.0-source-coverage-audit.md#full-exact-variant-usage-source-pair-acceptance-2026-11-05)
-is accepted on development inputs; final artifact/hosted checks are
-still required. Restrictions migration has staged-pair and CI image
-rehearsal; the former V1S-067 live-host rehearsal is out of scope.
-
-#### Game States context
-
-**Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
-**Project domains:** Data processing, Web backend, Web frontend
-
-The [State/Fireteam review](v1.0-source-coverage-audit.md#contextual-state-fireteam-browser-acceptance-2026-11-05)
-records reviewed source-backed reciprocal links. Final source-input
-acceptance remains under V1S-081–088.
-
-#### Weapons, Ammunition and deployed objects
-
-**Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
-**Project domains:** Data processing, Web backend, Web frontend
-
-The [deployed-object acceptance](v1.0-source-coverage-audit.md#deployed-object-api-and-ordinary-browser-acceptance-v1s-078-2026-11-05)
-is bounded to the development pair; final-input checks remain.
-
 #### Final frozen-candidate acceptance and release
 
 **Parent:** [Final 1.0 acceptance](#final-10-acceptance).
 **Project domains:** Data processing, Web backend, Web frontend, Project infrastructure, Deployment
 
-The current input baseline is pinned and artifact-validated. The
-[coverage audit](v1.0-source-coverage-audit.md) retains historical source
-inventory research, but **1.0 requires at least one applicable current citation
-per in-scope rules reference and a usable normal-browser entry**, not exhaustive
-source-first coverage or resolution of source discrepancies. V1S-082 is complete
-on development inputs; its
-[bounded citation and route acceptance](v1.0-source-coverage-audit.md#v1s-082-bounded-citation-and-route-acceptance-2026-11-07)
-records the evidence. Final release acceptance remains open.
-
-The [known-conflict and unavailable-value disclosure review](v1.0-source-coverage-audit.md#v1s-083-known-conflict-and-unavailable-value-disclosure-2026-11-07)
-is accepted on development inputs. Publisher questions remain open;
-final-input checks and release acceptance below remain required.
-
-The [release-pair rebuild and publication checks](v1.0-source-coverage-audit.md#v1s-084-release-pair-rebuild-and-publication-verification-2026-11-07)
-are accepted on the pinned inputs; remaining gates follow below.
-
-The [frozen-pair source gates](v1.0-source-coverage-audit.md#v1s-085-frozen-pair-source-gate-acceptance-2026-11-07)
-are accepted, with the Linux physical-byte difference explicitly distinguished
-from logical equality. Final browser, cumulative and hosted gates remain open.
-
-The [V1S-086 maintained-reference and fragment browser acceptance](v1.0-source-coverage-audit.md#v1s-086-final-maintained-reference-and-fragment-browser-acceptance-2026-11-07)
-passed on the frozen pair. Subsequent final browser, cumulative and hosted
-checks retain their separately numbered gates.
-
-The [isolated Linux served-candidate acceptance](testing.md#isolated-linux-served-candidate-acceptance-v1s-087)
-passed the exact-version representative Unit checks. This accepts the
-staging candidate, not production deployment or final exact-SHA hosted CI.
-
-The [V1S-088 frozen-pair scenario and FAQ rerun](v1.0-source-coverage-audit.md#v1s-088-frozen-pair-scenario-and-faq-browser-acceptance-2026-11-07)
-passed. The [final candidate manual notice and Silhouette sign-off](testing.md#final-candidate-manual-notice-and-silhouette-acceptance-2026-11-07)
-is accepted; cumulative and final hosted CI/deployment gates remain open.
-
-- [ ] **V1S-090 (L, gate):** Drain due VD/VR work and run the full
-  local/Linux, source, docs, preflight and applicable full-asset checks.
-  Manual and served-candidate prerequisites are accepted. The
-  [cumulative evidence](testing.md#cumulative-candidate-regression-repair-v1s-090)
-  accepts the replacement full source run with activated pinned PDFs and
-  complete Windows docs checks. Finish isolated preflight after the runner
-  argument-forwarding repair under [VR-0142](validation-queue.md), retaining
-  exact host, source/asset coverage, skips and replacement hosted CI evidence.
-
-The **V1S-091** tracked documentation audit passed Markdownlint (44 files),
-local path/heading checks (43 files), maintained command-module inspection and
-**83 focused tests** covering link, release-note/evidence, backlog and
-representative player-facing copy contracts. The release checklist now
-clarifies its virtual-environment commands and the shipped theme requirement.
+The pinned source/current-citation and frozen-pair browser gates are accepted;
+the [source-coverage audit](v1.0-source-coverage-audit.md) and
+[testing evidence](testing.md#cumulative-candidate-acceptance-v1s-090--vr-0142)
+retain their scope. Human notice/Silhouette and isolated Linux served-candidate
+checks also passed. Publisher questions remain non-blocking when accurately disclosed.
 
 - [ ] **V1S-092 (M, gate):** Finalize Unreleased notes,
-  release metadata and version after completeness acceptance.
-  Sequencing dependency resolved: a separate untagged `1.0.0` package/API
-  version checkpoint has been prepared for V1S-087. It does not finalize
-  the Unreleased changelog, approve release metadata, merge or tag.
-  Blocked: final version and release notes require accepted candidate completeness;
-  authority: release owner; retry: when V1S-090 passes.
+  release metadata and version after completeness acceptance. The package/API
+  version is already `1.0.0`; consolidate the player/operator outcomes, prepare
+  the dated release section and README status, and verify affected metadata,
+  package and documentation checks before handoff. Merge/tag approval remains
+  separate under V1S-093.
 - [ ] **V1S-093 (L, gate):** Merge the approved candidate, obtain
   exact-main-SHA hosted Source, wheel and deployment smoke evidence,
   optional full-assets and annotated tag. The recurring Windows scenario
@@ -248,148 +137,41 @@ clarifies its virtual-environment commands and the shipped theme requirement.
   Blocked: post-deployment checks require an actually deployed release;
   authority: release owner; retry: after approved V1S-094 deployment completes.
 
-The [mandatory cross-browser compatibility release gate](ci.md#cross-browser-release-compatibility-gate)
-passed all four hosted jobs on the development acceptance revision
-`b5ca8823d3bad593ac000298a244d36aea494480` (56/56 tests).
-Final candidate exact-SHA acceptance remains independently required.
+V1S-093 requires the [mandatory cross-browser compatibility gate](ci.md#cross-browser-release-compatibility-gate)
+on the exact final main SHA alongside Source, wheel and deployment smoke evidence.
 
 ### Source inventory and gap batches
 
 **Project domains:** Data processing, Project infrastructure
 
-The [source-coverage audit](v1.0-source-coverage-audit.md) owns reviewed
-dispositions, source identities and confirmed omissions. These tasks cover
-maintained references and known material defects; exhaustive source-first
-inventory is optional research, not a 1.0 prerequisite. The source/rebuild
-gates are accepted on the pinned pair; final browser and release gates remain.
-
-- [ ] Run the remaining final Unit/scenario browser checks under
-  V1S-087–088. Correct confirmed material errors or
-  missing citations without treating source conflicts, unreviewed clauses
-  or deliberate exclusions as defects. Re-run the
-  [source-evidence tools](testing.md#10-source-evidence-baseline) only if an
-  affected input changes; the pinned-pair gates passed under V1S-085.
-  The rebuilt pair preserves its selected inputs. The reviewed
-  [ITS hotfix](n5-source-history.md#its-18-hotfix-three-confirmed-scenario-changes)
-  and .09.11 adoption remain under the post-1.0 ITS backlog; the optional
-  Battleground pilot deliberately retains 2026.09.01.
-
-The strict interaction gate uses `catalog-scope-1.0.0.json`; the older
-`catalog-scope.json` and review dates retain historical provenance rather
-than whole-record approval. Final citation and browser acceptance follow the
-[completeness gate](releasing.md#version-10-data-completeness-gate).
-
-The [bounded source/relationship findings](n5-source-history.md) and
-[ranked gap batches](v1.0-source-coverage-audit.md#ranked-confirmed-gaps-and-evidence-batches-v1s-022-2026-11-03)
-remain evidence, not extra TODO entries. The [final candidate manual sign-off](testing.md#final-candidate-manual-notice-and-silhouette-acceptance-2026-11-07)
-is accepted; remaining release gates follow the [release checklist](releasing.md).
+The pinned source/rebuild and final Unit/scenario gates are accepted; see
+[the coverage audit](v1.0-source-coverage-audit.md). Reopen affected checks if
+inputs change. Exhaustive source discovery and the ITS hotfix adoption remain
+post-1.0; final publication steps are tracked below.
 
 ### Rules and reference completeness
 
 **Project domains:** Data processing, Web backend, Web frontend
 
-The [rules explanation audit](rules-explanation-audit-1.0.md) and
-[source-coverage audit](v1.0-source-coverage-audit.md) own detailed
-findings and historical test results. Existing Skill, Equipment,
-General Rule, State, Trait, Attribute, FAQ, scenario and Weapon
-definitions are the foundation; the tasks below cover outstanding
-known material source concerns, semantics and release publication, not a rebuild
-of already-reviewed catalogs.
-
-- [ ] On the final rebuilt release pair, recheck each **maintained current
-  rules-reference identity** for an applicable current citation and usable
-  normal-browser access, including known material conditional information
-  presented to players. The bounded development review is
-  [accepted](v1.0-source-coverage-audit.md#v1s-082-bounded-citation-and-route-acceptance-2026-11-07);
-  release-pair rebuilding and maintained-reference browser checks are accepted;
-  the V1S-088 scenario/FAQ rerun is accepted. The frozen
-  [367-record clause inventory](rules-explanation-audit-1.0-inventory.md#audit-completion-gate)
-  is historical research, not an exhaustive 1.0 sign-off requirement.
-  - [ ] Correct **known inaccurate or uncited player-facing** declaration,
-    ARO and interaction summaries. For the interactions InfinityDB already
-    publishes, verify material conditions, effects and uncertainty against
-    [the explanation standard](../data/curated/README.md#explaining-rules-interactions).
-    A complete source-first inventory of every conditional clause is
-    **post-1.0**, not required to pass this gate.
-  - [ ] Curate confirmed missing facts, links or explanations across Skills,
-    Equipment, Weaponry, Ammunition, Traits, States, Fireteams and glossary
-    terms. Preserve versioned source provenance and scoped application
-    identities, and extend the validated fact vocabulary where required.
-    Do not duplicate Hacking Program facts or create a separate
-    scenario-only identity for a shared rule.
-  - [ ] Verify current-source citations and necessary context for the
-    **already supported** Weapon Properties, special weapons, auxiliary
-    Equipment and mode-specific references. Address confirmed defects;
-    a source-wide review of unmodeled Weaponry clauses and source
-    discrepancies is post-1.0.
-- [ ] Reconcile reviewed base and combined Ammunition, Attribute Immunity,
-  critical and State interactions against the final pinned Weapon/Rules
-  publication. Preserve composition versus Combined Saving Rolls, conditional
-  exceptions and cited uncertainty; unanswered
-  [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier)
-  does not require a publisher response before 1.0.
-- [x] **Core scenarios:** The four published scenarios' frozen source,
-  geometry, SVG, scoped FAQ and browser size matrix passed under V1S-088;
-  keyboard/touch/theme, responsive and recovery acceptance passed under
-  [V1S-045](v1.0-source-coverage-audit.md#v1s-045-frozen-pair-four-scenario-interaction-acceptance-2026-11-07).
-  Hosted/deployed exact-SHA checks remain separate. A live scoring or
-  match-state engine is not required. See
-  [the scenario contract](data-model.md#scenario-model-implemented-core-and-future-extensions).
-
-**FAQ/errata:** Final-pair 29-ruling/48-topic source, supersession,
-exclusion, applicability and browser acceptance passed under V1S-084/088.
-The [FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset)
-retains core-versus-ITS scope, source provenance and conservative
-conflict disclosure; hosted/deployed acceptance remains independent.
-Historical replay and publisher rulings are not 1.0 prerequisites.
-
-- [ ] **Rule-variant usage projection:** Accept the byte-exact tracked
-  `variant-usage.json` artifact, its deployment/image guards and Skill/Equipment
-  API/browser links against the **frozen** release source/runtime pair. The
-  [development source-pair/API/browser acceptance](v1.0-source-coverage-audit.md#full-exact-variant-usage-source-pair-acceptance-2026-11-05)
-  is complete; final candidate, exact-SHA hosted and deployed checks remain.
-  - [ ] Reconcile any newly reviewed exact occurrence parameters,
-    reused payloads, shared Unit options, Include/Peripheral paths and
-    incompatible/unknown signatures against final input revisions. Fail
-    closed when Army/profile membership or a typed variant cannot be
-    established; do not attribute source-only rows as direct uses.
-    Use the [variant contract](data-model.md#current-read-only-variant-candidate).
-  The reviewed Restrictions chart/projection and staging safety are
-  implemented. Real-host v8/v9 rollback rehearsal is not required for 1.0.
-
-- [ ] **Game States:** Add any genuinely missing contextual links revealed
-  by final Fireteam, Hacking, Ammunition, FAQ and scenario review.
-  Distinguish entry, cancellation, immunity and objective effects;
-  check reciprocal navigation and do not infer a Unit's live game State.
-
-- [ ] **Weapons and deployed objects:** Resolve any final-input
-  Weapon-profile, Ammunition/Trait relationship and deployed-object
-  source/publication omission. Repeat normal browser reachability and
-  source-context checks for shared carriers, delivery modes, Include
-  edges, variants and known/unreported/disputed attributes under
-  **V1S-081–088**. The
-  [Weapon profile](data-model.md#weapon-profile-row-and-api-contract) and
-  [deployed-object](data-model.md#deployed-object-read-model-and-artifact-gated-browser-reference)
-  contracts own implemented behavior; comparison controls are post-1.0.
-  Keep unresolved Mine/Dazer/Armed Turret differences disclosed.
+Current-reference citation, known-disclosure, source-pair, publication and
+ordinary browser acceptance are recorded in [the coverage audit](v1.0-source-coverage-audit.md)
+and [testing](testing.md#cumulative-candidate-acceptance-v1s-090--vr-0142).
+The [data model](data-model.md) owns the implemented contracts; final release
+publication remains under the open parent below. Accurately disclosed publisher
+questions and a live rules/legality engine are not extra 1.0 prerequisites.
 
 ### Final 1.0 acceptance
 
 **Project domains:** Data processing, Web backend, Web frontend,
 Project infrastructure, Deployment
 
-- [ ] Complete **V1S-090–095**
-  against the exact frozen source,
-  database, generated-publication, static-asset and release-candidate
-  revisions. This includes one current source citation per in-scope rule,
-  usable maintained-reference browser coverage,
-  preservation of accepted Unit/scenario/FAQ and manual browser evidence,
-  all due VD/VR checks, full local/Linux checks,
-  documentation audit, exact-SHA hosted CI, annotated tag, authorized
-  deployment and post-deploy smoke. Use the
-  [canonical release checklist](releasing.md); keep detailed commands,
-  logs and intermediate acceptance counts in their maintained owners
-  rather than a second checklist here.
+- [ ] Complete **V1S-092–095**: finalize release metadata and its affected
+  checks, obtain exact-main-SHA hosted CI and the annotated tag, then perform
+  authorized deployment and post-deploy verification. Preserve accepted
+  source/runtime/publication identities and reference/browser evidence;
+  repeat affected gates when those inputs or consumers change. Use the
+  [canonical release checklist](releasing.md), with detailed commands and
+  acceptance evidence in their maintained owners.
   Preserve unresolved but accurately disclosed publisher issues as
   non-blocking; verify recovery assets without requiring a live-host
   rollback rehearsal.

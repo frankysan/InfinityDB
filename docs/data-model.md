@@ -3613,9 +3613,10 @@ Season 18 library, historical-season UI, Classified Deck, or general
 tournament tooling, and does not expand the mandatory 1.0 scope beyond
 the four Core missions. Browser selection state uses the common versioned
 share-state token; legacy explicit `army_points` input remains readable.
-Broader geometry/element vocabularies, source discrepancies and remaining
-in-scope Core acceptance stay under the
-[1.0 backlog](TODO.md#rules-and-reference-completeness).
+Broader geometry/element vocabularies remain post-1.0 work. The
+[Core scenario browser acceptance](testing.md#frozen-pair-four-scenario-interactions-v1s-045)
+is recorded separately from the [remaining release gates](TODO.md#final-10-acceptance);
+known source discrepancies retain their disclosed scope.
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
 `InfinityDB scenario geometry` format version 1, canonical inch table dimensions, ordered unique

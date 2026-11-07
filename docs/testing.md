@@ -5720,81 +5720,58 @@ This closes V1S-087 together with the previously accepted local 81-page
 Unit matrix. Final cumulative V1S-090, exact-SHA hosted CI, release metadata,
 merge/tag and production/post-deployment acceptance remain separate.
 
-### Source CI contract repair before cumulative acceptance (2026-11-07)
+### Cumulative candidate acceptance (V1S-090 / VR-0142)
 
-**Project domain:** Project infrastructure
+**Project domains:** Project infrastructure, Data processing, Web backend, Web frontend
 
-Source checks on `d758e128` exposed five repeatable test failures across
-Linux and macOS: the scenario renderer still expected a duplicate
-applicability caption on cited cards, and four browser-lane assertions
-incorrectly counted the separately dispatched cross-engine cohort.
-The scenario regression now verifies cited cards retain their Sources
-links without the duplicate caption, while uncited cards retain scenario
-applicability. Lane checks exclude the independent cross-engine cohort
-without changing Chromium scheduling or reducing the hosted matrix.
+The frozen candidate passed the following complementary checks. None is
+production deployment or final exact-main-SHA/tag acceptance.
 
-As an immediate mandatory CI-repair check,
-`tests/test_browser_test_capacity.py tests/test_scenario_components.py`
-passed **41/41**, zero skips, on Windows in **7.07 s**. No application,
-rules or generated artifact changed. This focused result does not close
-the cumulative gate or accept the failed hosted revision; replacement
-exact-SHA Source and deterministic-output evidence remains required.
+- **Full source and browser suite:** `linux-dev` job
+  `ca6eb9cd07d244cd8d316a5d1c551867` on
+  `e5700703d8d9656360c9cf9e1ef8be2a0e177001` passed **5,847 tests,
+  38 skipped, zero failures**, with two existing Python 3.14 fork deprecation
+  warnings in **700.79 s**. The eight-worker/four-slot/four-lane run required
+  **808/808** SVGs and used the activated pinned rule/FAQ/ITS PDFs. There were
+  no missing-source or missing-browser skips. Lint, type, Army/rules builds
+  and the source-occupancy gate also passed: zero of 39 potential unrepresented
+  fields populated. The 38 skips were 17 release-FAQ opt-ins, 14 independent
+  cross-browser cases, six prior/optional migration checks and one Windows-only case.
+- **Release-pair FAQ:** the unchanged runtime pair passed the separate Windows
+  **17/17** opt-in source/primary/secondary/conflict batch. Human Windows Firefox
+  and iOS Safari acceptance and the served-candidate Unit matrix retain their
+  separately recorded evidence above.
+- **Isolated index/package gate:** after the preflight-only argument-forwarding
+  repair, `linux-dev` on `3b73a100d5c3da868900ddb1d50244e6f2f91c67`
+  passed **152/152** focused runner/capacity/section tests and complete indexed
+  preflight, including artifact/lint/type, wheel contents and installed-wheel
+  normal/asset-free runtime. Job `1576d58f53434dfa93821f3bb0f87bfa` passed;
+  job `53aaab9af66d4345875c5c5898d9bdad` repeated it with an explicit skip
+  summary for retirement review. Both clean-export suites reported **4,604
+  passing and 1,283 skipped cases** across all 5,887 indexed tests. The 71 skip
+  reasons reflect excluded private sources/archives, optional Playwright,
+  opt-in cohorts, historical Git/migration evidence and Windows-only coverage;
+  these are not additional source/browser passes. The full-source suite and
+  separate opt-in/hosted cohorts supply that coverage.
+- **Documentation and final state:** the complete Windows docs stage passed
+  (44 linted files, 43 path/heading-checked files), with Ruff/Pyright clean.
+  Post-execution Linux inspection confirmed the intended branch/SHA, no tracked
+  changes, and **808/808** source-matched graphical/runtime/reference artifacts.
+  [Source CI](https://github.com/frankysan/InfinityDB/actions/runs/42392307798)
+  passed every OS/Python job and cross-platform deterministic outputs on `3b73a100`;
+  wheel, deployment smoke and all four cross-browser jobs also passed.
 
-### Cumulative candidate regression repair (V1S-090)
+The repaired failures were stale scenario/FAQ and Developer Mode browser
+expectations, plus omitted explicit browser capacity in isolated pytest.
+The main source-suite command, application, curated data and release artifacts
+did not change after the full-source pass. Focused runner regressions and full
+isolated execution verify the later orchestration change. Failed full reports
+and the final complete reports remain under ignored `local/candidates/`; Git
+history retains the intermediate repairs. No transient tool was added to the
+tracked tree or retained as a build/release dependency.
 
-**Project domain:** Project infrastructure
-
-Hosted Source checks, including every OS/Python job and cross-platform
-deterministic outputs, passed on `3284c7c2a9d3d5a50d987f68f8260dc864808ffa`.
-Wheel, deployment smoke and all four cross-browser jobs also passed on
-that revision. This remains development-candidate CI evidence, not an
-eventual main/tag acceptance.
-
-The independent Linux full-profile attempt on that revision
-(`linux-dev:8cdafaccabe24b0382c274c71f31a864`) reported **9 failed,
-5,613 passed, 263 skipped** in 791.14 s pytest time. Lint, type, Army build,
-rules build and the source-occupancy gate passed; docs failed because the
-worker lacked the installed Markdownlint dependency, and preflight was
-correctly skipped after the earlier failures. Most extra skips came from
-unactivated ignored PDF inputs, not passing source checks. The complete
-report is retained under ignored `local/candidates/`.
-
-The failures were stale browser test contracts after the accepted UI
-changes: three scenario FAQ cases expected duplicate source metadata and
-an old per-card badge; six variant-publication cases attempted to open
-Developer Mode-only occurrence lists while Developer Mode was off.
-The repaired checks retain one linked FAQ source, the FAQ section identity,
-scenario isolation, hidden/visible/hidden occurrence behavior, keyboard
-disclosure, exact Unit links, overflow and JavaScript/request assertions.
-As an immediate required cumulative-gate repair, Windows passed **12/12**
-affected cases: the nine-case variant-publication module and three scenario
-FAQ cases. No application, rules or release-publication bytes changed.
-
-Before replacement Linux execution, activate the already staged pinned
-rule/FAQ PDFs and verify their source guards. The complete Windows docs
-stage supplies documentation acceptance while the Linux Markdownlint
-installation is unavailable. Require replacement full source and isolated
-preflight results; the failed full-profile attempt does not close V1S-090.
-
-The replacement full source run on
-`e5700703d8d9656360c9cf9e1ef8be2a0e177001` passed **5,847 tests,
-38 skipped, zero failures**, with two existing Python 3.14 fork deprecation
-warnings, in **700.79 s**. All seven activated rule/FAQ/ITS source PDFs
-were available; no missing-PDF skips remained. Skips were 17 release-FAQ
-opt-ins (separately covered by the 17-case Windows release-pair batch),
-14 independently dispatched cross-browser cases, six completed/optional
-migration checks and one Windows-only check. Lint, type, Army/rules builds
-and zero occupied unrepresented source fields also passed.
-
-Isolated preflight then exposed invalid argument forwarding: it received
-`--split-scenario-faq` but not the explicit four-lane count required by
-that option. Isolated pytest exited 3 with an xdist worker-completion
-assertion; the full gate remained failed despite passing wheel/runtime smoke.
-The runner now forwards explicit slot/lane counts to both pytest stages,
-with paired regression cases for test and preflight commands. The immediate
-Windows runner/capacity/section batch passed **151 tests, one symlink-privilege
-skip**. Require a replacement complete isolated-preflight pass before closeout;
-do not infer acceptance from the source suite or installed-wheel smoke alone.
+This completes V1S-090 and VR-0142, with **VD 0 / VR 0**. Release-metadata
+edits must receive their affected validation before merge/tag preparation.
 
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
