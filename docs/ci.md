@@ -206,8 +206,14 @@ the database pair, while the runtime also fingerprints its Weapon-profile
 publication. The failures reproduced locally on Windows at `9e7d9f92` before
 repair. The shared identity repair passed its
 [28-test Windows batch](testing.md#v1s-082-runtime-snapshot-identity-repair-vr-0136)
-at `1d1ec4a1aea3e0987e9f54e0ff65780b780da421`. Hosted replacement-SHA and
-final acceptance remain separate.
+at `1d1ec4a1aea3e0987e9f54e0ff65780b780da421`. Replacement revision
+`0c5b4dc1a05626d1003f78bcfacf6cd32f922314` passed
+[Source run 42325818212](https://github.com/frankysan/InfinityDB/actions/runs/42325818212),
+including all four platform/Python jobs and cross-platform deterministic
+outputs. Its [installed-wheel run 42325818214](https://github.com/frankysan/InfinityDB/actions/runs/42325818214)
+and [deployment-smoke run 42325818217](https://github.com/frankysan/InfinityDB/actions/runs/42325818217)
+also passed. This closes hosted follow-through for the repair on that exact
+revision; final-candidate acceptance remains separate.
 
 The development dependencies include PyMuPDF so PDF-aware test modules collect and
 research tools type-check in a clean environment. Official PDFs under `data/pdf/`

@@ -186,90 +186,11 @@ The current input baseline is pinned and artifact-validated. The
 [coverage audit](v1.0-source-coverage-audit.md) retains historical source
 inventory research, but **1.0 requires at least one applicable current citation
 per in-scope rules reference and a usable normal-browser entry**, not exhaustive
-source-first coverage or resolution of source discrepancies. V1S-082 owns this
-bounded rule-citation/route check; final release acceptance remains open.
+source-first coverage or resolution of source discrepancies. V1S-082 is complete
+on development inputs; its
+[bounded citation and route acceptance](v1.0-source-coverage-audit.md#v1s-082-bounded-citation-and-route-acceptance-2026-11-07)
+records the evidence. Final release acceptance remains open.
 
-- [ ] **V1S-082 (M, gate):** Ensure **every maintained in-scope rule/reference
-  has at least one applicable current source citation** and a usable,
-  player-facing normal-browser entry. Check existing records/known dependencies
-  for absent or stale citations and broken/misleading routes, and fix confirmed
-  material errors. **Do not** scan all source pages for new concepts, require
-  every clause to be accepted, or investigate/resolve source discrepancies.
-  The [release definition](releasing.md#version-10-data-completeness-gate)
-  owns this boundary.
-  Earlier record/source/semantic pilots, the mixed-screen efficiency benchmark
-  and optional clause-disposition work remain historical research in the
-  [coverage audit](v1.0-source-coverage-audit.md) and
-  [optimization plan](v1.0-coverage-workflow-plan.md), not v1.0 exit criteria.
-  The known Isolated/Loss-of-Lieutenant defect and MOV/TinBot navigation
-  gaps have corrected, matched publications and normal-browser tests.
-  **VR-0118/0121/0122/0123/0124 are complete** on the shared pinned,
-  focused Linux and Windows evidence
-  ([test results](testing.md#focused-first-vr-execution)); their earlier
-  failure and repair are [recorded](v1.0-source-coverage-audit.md#v1s-082-vr-drain-movtinbot-browser-checks-and-isolated-repair-2026-11-06).
-  The [read-only current citation check](testing.md#current-n5-citation-minimum-v1s-082)
-  now reports **495/495** Core/Hacking/FAQ records with at least one
-  declared applicable current source (zero metadata gaps); its focused
-  regressions passed on the pinned Windows revision. The separate
-  [Weapon Property origin review](v1.0-source-coverage-audit.md#v1s-082-weapon-property-citation-and-route-review-2026-11-06)
-  identified and corrected missing example links and chart locators;
-  VR-0126 passed its focused source, stale-slug and browser regressions.
-  The maintained-reference reachability review found and corrected 30 canonical
-  Equipment definitions absent from the federated Glossary despite working
-  source-card routes; VR-0127 passed the focused API and browser regressions.
-  Label detail pages now expose the existing, explicitly vocabulary-scoped
-  source locators; VR-0128 passed the focused API and browser regressions.
-  Embedded Glossary Attributes, Game terms and Unit Profile help now project
-  their underlying definition citations, including contextual Unit Profile
-  help; [VR-0129 passed](testing.md#v1s-082-embedded-glossary-source-visibility-vr-0129).
-  The Fireteam-scoped Rules, Training/Order context and eight Core
-  scenario-scoped Rules have bounded source and browser evidence.
-  Two retained TinBot variant definitions lacked a normal reference despite
-  having no current Army occurrence; their family page now separates cited
-  reference-only definitions from Army options;
-  [VR-0130 passed](testing.md#v1s-082-reference-only-equipment-variants-vr-0130)
-  its focused source/API/browser regressions. The subsequent
-  [routing census](v1.0-source-coverage-audit.md#v1s-082-maintained-reference-routing-census-2026-11-07)
-  checked 317 direct cited cards, 48 embedded entries and contextual
-  source variants and scenarios. The Pheroware Tactics family and Endgame
-  locators were corrected to the actual N5.3 chart page;
-  [VR-0131 passed](testing.md#v1s-082-pheroware-citation-regression-vr-0131)
-  its focused source-to-browser regressions on Windows. The
-  [Wiki-only citation screen](v1.0-source-coverage-audit.md#v1s-082-wiki-only-direct-citation-screen-2026-11-07)
-  matched all 62 remaining direct-reference locators to captured articles
-  or sections. The [Army catalog dependency screen](v1.0-source-coverage-audit.md#v1s-082-army-catalog-dependency-screen-2026-11-07)
-  found cited Skill, Equipment, Trait and Ammunition targets. All 62
-  profile-only Weapons have fingerprinted, reviewed chart-page evidence,
-  and a matched profile/mode citation publication now projects those locators
-  separately from Ammunition rules;
-  [VR-0134 passed](testing.md#v1s-082-weapon-profile-citation-regression-vr-0134)
-  source, API and browser checks on Windows. The chart-audit extractor also missed
-  two early page-188 rows; its shared-anchor correction passed
-  [VR-0133](testing.md#v1s-082-weapon-chart-early-row-regression-vr-0133)
-  on Windows. Reconcile other
-  PDF-backed and contextual citation applicability and known missing dependencies before closing this gate.
-  The [PDF-only locator screen](v1.0-source-coverage-audit.md#v1s-082-pdf-only-reference-locator-screen-2026-11-07)
-  matched 145 existing identities or aliases to cited pages and checked
-  parent context for 13 others; it is not a clause-by-clause review.
-  The [Hacking and FAQ recheck](v1.0-source-coverage-audit.md#v1s-082-hacking-and-faq-current-citation-recheck-2026-11-07)
-  matched all 12 Program name locators and all 29 selected FAQ citations to
-  their current published identities.
-  The [contextual variant recheck](v1.0-source-coverage-audit.md#v1s-082-contextual-variant-locator-recheck-2026-11-07)
-  matched all 20 existing variant families on cited pages and checked their
-  seven explicit effect targets for current citation presence.
-  The TinBot reference-only cards now disclose that their family citations
-  need not establish each named combination;
-  [VR-0135 passed](testing.md#v1s-082-reference-only-equipment-source-scope-vr-0135)
-  source/API and browser checks on Windows. Metadata and reachability alone do
-  not prove that a locator supports its reference.
-  Hosted Source checks exposed a release-identity mismatch between the runtime
-  and baseline/browser verification tools; the shared repair passed
-  [VR-0136](testing.md#v1s-082-runtime-snapshot-identity-repair-vr-0136)
-  on Windows. Replacement-SHA hosted acceptance remains open.
-  The full cumulative
-  V1S-090 gate and hosted release checks remain independent. SRC-002/006/
-  020/021/034 and further source-first/whole-record investigations are
-  optional post-1.0 research, not release blockers.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of **already known** material source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched
@@ -356,10 +277,12 @@ definitions are the foundation; the tasks below cover outstanding
 known material source concerns, semantics and release publication, not a rebuild
 of already-reviewed catalogs.
 
-- [ ] Verify each **maintained current rules-reference identity** has at
-  least one applicable current source citation and usable normal-browser
-  access, including known material conditional information actually
-  presented to players. The frozen
+- [ ] On the final rebuilt release pair, recheck each **maintained current
+  rules-reference identity** for an applicable current citation and usable
+  normal-browser access, including known material conditional information
+  presented to players. The bounded development review is
+  [accepted](v1.0-source-coverage-audit.md#v1s-082-bounded-citation-and-route-acceptance-2026-11-07);
+  final-input checks remain V1S-084/086/088. The frozen
   [367-record clause inventory](rules-explanation-audit-1.0-inventory.md#audit-completion-gate)
   is historical research, not an exhaustive 1.0 sign-off requirement.
   - [ ] Correct **known inaccurate or uncited player-facing** declaration,
