@@ -2055,6 +2055,214 @@ def test_initiative_roll_normal_reference_navigation(
         page.close()
 
 
+@pytest.mark.parametrize("slug", ("annihilation", "domination", "supplies", "firefight"))
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+def test_final_frozen_scenario_browser_navigation_theme_and_size(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+    slug: str, width: int, theme: str,
+) -> None:
+    """Final Army/rules pair: keyboard/touch, two themes, resize and history."""
+    page = chrome.new_page(
+        viewport={"width": width, "height": 844},
+        has_touch=width <= 390,
+    )
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.add_init_script(
+        f"sessionStorage.setItem('infinity-db-theme', '{theme}');"
+        "sessionStorage.setItem('infinity-db-developer-mode', 'false');"
+    )
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/scenarios", wait_until="domcontentloaded")
+        link = page.locator(f'#scenario-grid a[href="/scenarios/{slug}"]')
+        link.wait_for(state="visible", timeout=30000)
+        if width <= 390:
+            link.tap()
+        else:
+            link.focus()
+            assert link.evaluate("(node) => document.activeElement === node")
+            link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/scenarios/{slug}*", timeout=30000)
+        page.wait_for_function(
+            """() => document.querySelector('#scenario-content')?.hidden === false
+               && document.querySelector('.scenario-setup-card .scenario-facts dd')
+                 ?.textContent?.trim() === '300'
+               && document.querySelector('svg.scenario-map') !== null""",
+            timeout=30000,
+        )
+        assert page.evaluate("document.documentElement.dataset.theme") == theme
+        select = page.locator("#scenario-army-points")
+        select.focus()
+        assert select.evaluate("(node) => document.activeElement === node")
+        select.select_option("350")
+        page.wait_for_function(
+            """() => document.querySelector('#scenario-content')?.hidden === false
+               && document.querySelector('.scenario-setup-card .scenario-facts dd')
+                 ?.textContent?.trim() === '350'
+               && document.querySelector('svg.scenario-map') !== null""",
+            timeout=30000,
+        )
+        assert page.locator("svg.scenario-map").get_attribute("viewBox") == "0 0 48 48"
+        assert page.locator(".scenario-citations a").count() >= 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width, theme)
+        page.go_back(wait_until="domcontentloaded")
+        page.locator("#scenario-grid").wait_for(state="visible", timeout=30000)
+        assert page.locator(".scenario-card").count() == 4
+        page.go_forward(wait_until="domcontentloaded")
+        page.wait_for_function(
+            """() => document.querySelector('#scenario-content')?.hidden === false
+               && document.querySelector('.scenario-setup-card .scenario-facts dd')
+                 ?.textContent?.trim() === '350'""",
+            timeout=30000,
+        )
+        assert select.input_value() == "350"
+        assert page.evaluate("document.documentElement.dataset.theme") == theme
+        assert not errors, (slug, width, theme, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize(("mode", "width"), (
+    ("empty", 1440), ("empty", 320), ("error", 1440), ("error", 320),
+))
+def test_final_frozen_scenario_catalog_empty_and_error(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+    mode: str, width: int,
+) -> None:
+    """The tracked database pair keeps controlled catalog fallback readable."""
+    page = chrome.new_page(viewport={"width": width, "height": 844})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.route(
+        "**/api/scenarios*",
+        lambda route: route.fulfill(
+            status=200 if mode == "empty" else 503,
+            content_type="application/json",
+            body='{"items":[],"collections":[]}' if mode == "empty"
+                 else '{"error":"Controlled unavailable publication"}',
+        ),
+    )
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/scenarios", wait_until="domcontentloaded")
+        panel = page.locator("#scenario-empty" if mode == "empty" else "#scenario-error")
+        panel.wait_for(state="visible", timeout=30000)
+        assert page.locator("#scenario-grid").is_hidden()
+        assert page.locator("#scenario-loading").is_hidden()
+        assert page.locator("#scenario-results").get_attribute("aria-busy") == "false"
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize(("slug", "width"), (
+    ("annihilation", 1440), ("domination", 390),
+    ("supplies", 1440), ("firefight", 390),
+))
+def test_final_frozen_scenario_rapid_selection_and_reload(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+    slug: str, width: int,
+) -> None:
+    """Overlapping size selections on all four scenarios keep only the last."""
+    page = chrome.new_page(viewport={"width": width, "height": 844})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(
+            f"{ORIGIN}/scenarios/{slug}?army_points=150", wait_until="domcontentloaded"
+        )
+        page.wait_for_function(
+            """() => document.querySelector('#scenario-content')?.hidden === false
+               && document.querySelector('.scenario-setup-card .scenario-facts dd')
+                 ?.textContent?.trim() === '150'""",
+            timeout=30000,
+        )
+        page.evaluate(
+            """() => {
+                const select = document.querySelector('#scenario-army-points');
+                for (const value of ['200', '400', '250', '300', '350']) {
+                    select.value = value;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }"""
+        )
+        page.wait_for_function(
+            """() => document.querySelector('#scenario-content')?.hidden === false
+               && document.querySelector('.scenario-setup-card .scenario-facts dd')
+                 ?.textContent?.trim() === '350'
+               && document.querySelector('svg.scenario-map') !== null""",
+            timeout=30000,
+        )
+        assert page.locator(".scenario-setup-card .scenario-fact").nth(
+            1
+        ).locator("dd").inner_text().splitlines()[0] in {"6", "7"}
+        assert page.locator("svg.scenario-map").get_attribute("viewBox") == "0 0 48 48"
+        page.reload(wait_until="domcontentloaded")
+        page.wait_for_function(
+            """() => document.querySelector('.scenario-setup-card .scenario-facts dd')
+                 ?.textContent?.trim() === '350'""",
+            timeout=30000,
+        )
+        assert page.locator("#scenario-army-points").input_value() == "350"
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize(("slug", "width"), (
+    ("annihilation", 390), ("domination", 1440),
+    ("supplies", 390), ("firefight", 1440),
+))
+def test_final_frozen_scenario_detail_error_recovers(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+    slug: str, width: int,
+) -> None:
+    """A failed exact-size API request does not poison the next configuration."""
+    page = chrome.new_page(viewport={"width": width, "height": 844})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    pattern = f"**/api/scenarios/{slug}*"
+    def unavailable(route: Any) -> None:
+        route.fulfill(
+            status=503, content_type="application/json",
+            body='{"error":"Controlled unavailable scenario"}',
+        )
+    page.route(pattern, unavailable)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(
+            f"{ORIGIN}/scenarios/{slug}?army_points=350", wait_until="domcontentloaded"
+        )
+        panel = page.locator("#scenario-error")
+        panel.wait_for(state="visible", timeout=30000)
+        assert page.locator("#scenario-content").is_hidden()
+        page.unroute(pattern, unavailable)
+        page.locator("#scenario-army-points").select_option("300")
+        page.wait_for_function(
+            """() => document.querySelector('#scenario-content')?.hidden === false
+               && document.querySelector('.scenario-setup-card .scenario-facts dd')
+                 ?.textContent?.trim() === '300'
+               && document.querySelector('svg.scenario-map') !== null""",
+            timeout=30000,
+        )
+        assert panel.is_hidden()
+        assert page.locator(".scenario-citations a").count() >= 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390])
 @pytest.mark.parametrize("response", ["empty", "error"])
 def test_core_scenario_catalog_controlled_empty_and_error_states(

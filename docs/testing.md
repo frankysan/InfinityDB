@@ -5375,6 +5375,41 @@ was required. V1S-088 is closed for this frozen candidate. V1S-041/045/080,
 local cumulative V1S-090, human sign-off and hosted/deployed exact-version
 gates remain independent. VD/VR is empty.
 
+### Frozen-pair four-scenario interactions (V1S-045)
+
+**Project domains:** Web frontend, Web backend
+
+The release-paired Army and rules databases accepted under V1S-084/085
+remained unchanged. On Windows at
+`ebcc4651df5f27611dfd7b5b90662ada13bd3005`,
+four targeted Chromium selectors from
+`tests/test_verify_scenario_faq_browser.py` passed **36/36, zero skips**
+in independent asynchronous jobs, without a full-suite rerun:
+
+- `test_final_frozen_scenario_browser_navigation_theme_and_size`:
+  **24/24** in 25.87 s (job `c2c6eb7bfd1a4f51ac7bf916932e96d4`).
+  Four Core scenarios × light/dark × 1440/390/320 px; keyboard or touch
+  entry, size changes, theme, map/source citations, Back/Forward and overflow.
+- `test_final_frozen_scenario_catalog_empty_and_error`:
+  **4/4** in 5.95 s (job `7556a3a88d7e42f2b022a36ecd615a50`);
+  desktop and 320 px controlled catalog empty/error states.
+- `test_final_frozen_scenario_rapid_selection_and_reload`:
+  **4/4** in 7.86 s (job `6b938caaabb14b728f893ca77a8aab17`);
+  all four scenarios, overlapping Army Points changes, final SVG/selection
+  and reload persistence.
+- `test_final_frozen_scenario_detail_error_recovers`:
+  **4/4** in 6.21 s (job `08b88151064e4a1dbff40bccf0eb878e`);
+  all four scenarios recover from a controlled HTTP 503 after a valid
+  alternative size is chosen.
+
+The earlier [V1S-088](#frozen-pair-scenario-and-faq-rerun-v1s-088)
+already accepted the 24 Core sizes and 48 rendered selections.
+These added browser checks use the **tracked release pair**, not the
+fresh curated rules export used by several development-input regressions.
+No gameplay/source/runtime changes or new deferred VD/VR obligations
+were needed for this mandatory acceptance gate. Hosted candidate,
+manual visual/touch and eventual release SHA checks stay independent.
+
 ### Frozen-pair 81-page Unit matrix (V1S-087, local portion)
 
 **Project domains:** Web frontend, Project infrastructure

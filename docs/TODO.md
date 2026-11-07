@@ -117,13 +117,11 @@ question remain separate from any claim of N5-native adoption.
 **Parent:** [Core-scenario reference completion](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-045 (M, gate):** Run final-input four-scenario
-  keyboard/touch/theme/responsive, rapid-selection, empty/error
-  and navigation/race-recovery acceptance on the frozen candidate.
-  Existing [bounded source/browser checks](v1.0-source-coverage-audit.md#core-scenario-scoped-skills-specialists-overlays-and-faq-v1s-044-2026-11-05)
-  do not certify the frozen candidate.
-  Frozen-input prerequisites and V1S-088 are accepted; outstanding
-  keyboard/touch/theme/responsive and recovery checks remain here.
+The [V1S-045 frozen-pair four-scenario interaction acceptance](v1.0-source-coverage-audit.md#v1s-045-frozen-pair-four-scenario-interaction-acceptance-2026-11-07)
+passed with 36/36 Chrome cases at desktop and narrow widths, including
+light/dark themes, keyboard/touch navigation, rapid size changes, empty/error
+states, recovery and browser history. The previously accepted V1S-088
+scenario source/size matrix remains separate.
 
 #### FAQ and errata
 
@@ -312,14 +310,13 @@ of already-reviewed catalogs.
   exceptions and cited uncertainty; unanswered
   [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier)
   does not require a publisher response before 1.0.
-- [ ] **Core scenarios:** Finish the four published scenarios' final
-  source-to-storage-to-browser reconciliation and keyboard/touch/theme/
-  narrow-width acceptance. Keep scenario-only concepts, spatial geometry,
-  derived SVG, scoped FAQ and ordinary rules links consistent; use
-  **V1S-045** for outstanding touch/keyboard/theme/recovery checks;
-  V1S-088 source/browser matrix is accepted. See
+- [x] **Core scenarios:** The four published scenarios' frozen source,
+  geometry, SVG, scoped FAQ and browser size matrix passed under V1S-088;
+  keyboard/touch/theme, responsive and recovery acceptance passed under
+  [V1S-045](v1.0-source-coverage-audit.md#v1s-045-frozen-pair-four-scenario-interaction-acceptance-2026-11-07).
+  Hosted/deployed exact-SHA checks remain separate. A live scoring or
+  match-state engine is not required. See
   [the scenario contract](data-model.md#scenario-model-implemented-core-and-future-extensions).
-  A live scoring or match-state engine is not required.
 
 **FAQ/errata:** Final-pair 29-ruling/48-topic source, supersession,
 exclusion, applicability and browser acceptance passed under V1S-084/088.
