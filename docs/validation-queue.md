@@ -145,24 +145,7 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0133 (2026-11-07; ready-to-run): Verify the shared Weapon Chart
-  row-anchor correction and its downstream profile/Trait evidence.
-  Work: V1S-082; revision: implementation commit to be pinned; risk:
-  inaccurate source coverage or cross-mode attribution.
-  Immediate: Ruff and documentation checks passed; source bytes and generated
-  databases are unchanged.
-  Design: VD-0105 was statically reviewed without executing tests. It adds
-  synthetic boundary/mode/trait-alignment and pinned-PDF assertions in
-  `tests/test_audit_weapon_chart_profiles.py` and
-  `tests/test_audit_weapon_traits_prose.py`.
-  Deferred: run those two modules plus
-  `tests/test_audit_weapon_definition_gaps.py` and
-  `tests/test_audit_wiki_weapon_chart_names.py`;
-  run the exact-hash local N5.3 PDF integration and inspect the resulting
-  profile/mode, field, range and Trait classifications. Reconcile any skips
-  and preserve candidate differences without changing gameplay data.
-  Intended host: pinned `linux-dev` when available; otherwise Windows with
-  the locally pinned PDF, reported separately from Linux and hosted CI.
+No pending deferred execution entries.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -173,6 +156,7 @@ and [VR-0128 Label source visibility](testing.md#v1s-082-label-vocabulary-source
 and [VR-0129 embedded source visibility](testing.md#v1s-082-embedded-glossary-source-visibility-vr-0129)
 and [VR-0130 reference-only Equipment variants](testing.md#v1s-082-reference-only-equipment-variants-vr-0130)
 and [VR-0131 Pheroware citations](testing.md#v1s-082-pheroware-citation-regression-vr-0131)
+and [VR-0133 Weapon Chart rows](testing.md#v1s-082-weapon-chart-early-row-regression-vr-0133)
 passed on pinned Windows revisions. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs

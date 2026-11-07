@@ -243,8 +243,9 @@ bounded rule-citation/route check; final release acceptance remains open.
   but their normal browser pages do not expose that Weapon-specific source;
   publish applicable profile citations without treating Ammunition citations
   as evidence for Weapon statistics. The chart-audit extractor also missed
-  two early page-188 rows; its shared-anchor correction is pending
-  [VR-0133](validation-queue.md#pending-deferred-execution). Reconcile other
+  two early page-188 rows; its shared-anchor correction passed
+  [VR-0133](testing.md#v1s-082-weapon-chart-early-row-regression-vr-0133)
+  on Windows. Reconcile other
   PDF-backed and contextual citation applicability and known missing dependencies before closing this gate;
   metadata and reachability alone do not prove that a locator supports its reference.
   The full cumulative

@@ -709,6 +709,33 @@ and the exact-variant usage publication SHA-256 was
 `d14dbb8dbf337d0a14c00646cf82a42f0af453f01b370c45ddf6bd64d6342c41`.
 This closes VR-0131, not V1S-082, hosted CI or frozen-candidate acceptance.
 
+### V1S-082 Weapon Chart early-row regression (VR-0133)
+
+At `04cde57d9a21861fdb075843f63b0daed0ec4fd2`, the focused Windows
+run passed **61 tests, zero skips**:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q `
+  tests\test_audit_weapon_chart_profiles.py `
+  tests\test_audit_weapon_traits_prose.py `
+  tests\test_audit_weapon_definition_gaps.py `
+  tests\test_audit_wiki_weapon_chart_names.py
+```
+
+The pinned English N5.3 PDF SHA-256 was
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`,
+the Army database SHA-256 was
+`8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`,
+and the rules database SHA-256 was
+`0fcf537fcca2b148541d9ad136003d939f0c0ecbe1e79136fca1bb6fd622714b`.
+The source-pinned audit confirmed 173 detected profile and Trait rows,
+including both early page-188 rows and separately matched Uragan modes;
+its differences remain disclosed in the
+[coverage audit](v1.0-source-coverage-audit.md#v1s-082-weapon-chart-early-row-correction-2026-11-07).
+Ruff, targeted Pyright and documentation checks passed. The dedicated MCP
+Linux worker was unavailable; Windows evidence does not establish Linux,
+hosted CI or final-candidate acceptance.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not
@@ -5193,15 +5220,16 @@ The output includes the source PDF SHA-256, raw compared fields, range-band
 evidence, candidate discrepancies, and any unresolved chart rows. Saving Roll
 multipliers are interpreted together with the Saving Attribute: an Army
 `savingNum=1` with `saving=-` is non-operative and matches a printed `--`.
-At the 2026-11-05 review, the extractor uniquely aligned 171 detected rows, with
-170 five-field matches and 170 range-band matches. A later
-[early-row correction](v1.0-source-coverage-audit.md#v1s-082-weapon-chart-early-row-correction-2026-11-07)
-identified two omitted page-188 rows; refreshed execution is tracked under
-VR-0133. Kobra Pistol CC Mode has a Saving Rolls
-source discrepancy candidate (PDF 1, Army 2); Katyusha MRL prints unsigned `3`
-where Army has `+3`. The separate Disco Ball object's attributes match.
+The corrected extractor aligns 173 detected rows, with 171 five-field
+matches and 172 range-band matches. Kobra Pistol CC Mode has a Saving Rolls
+source discrepancy candidate (PDF 1, Army 2); the generic Suppressive Fire
+Mode Weapon has a printed `*` versus Army `0` Ammunition sentinel; and
+Katyusha MRL prints unsigned `3` where Army has `+3`. The separate Disco Ball
+object's attributes match. The
+[early-row regression](#v1s-082-weapon-chart-early-row-regression-vr-0133)
+records the tested revision and source pins.
 The [V1S-070 source review](v1.0-source-coverage-audit.md#weapon-profile-and-multimode-chart-review-v1s-070-2026-11-05)
-records the existing source dispositions for both candidates; the Kobra
+records the existing source dispositions for Kobra and Katyusha; the Kobra
 correction request remains open under SRC-021. This is still partial evidence:
 the V1S-072 acceptance now covers the full published profile storage/API/browser
 projection (see the [acceptance evidence](v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05)),
@@ -6506,12 +6534,12 @@ record as proof that no gameplay rule representation exists.
 python tools/audit_weapon_traits_prose.py --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
 ```
 
-The supplied N5 v5.3 PDF yields 145 literal Trait-list matches, 15 reviewed
-notation equivalents, two manually checked source-cell matches, and nine remaining
-membership/classification candidates across 171 then-detected chart rows
-(zero deferrals). The later
-[early-row correction](v1.0-source-coverage-audit.md#v1s-082-weapon-chart-early-row-correction-2026-11-07)
-identified two omitted page-188 rows.
+The corrected N5 v5.3 audit yields 147 literal Trait-list matches, 16 reviewed
+notation equivalents, two manually checked source-cell matches, and eight
+remaining membership/classification candidates across 173 detected rows
+(zero deferrals). The
+[early-row regression](#v1s-082-weapon-chart-early-row-regression-vr-0133)
+records the tested revision.
 `config/validation/weapon-trait-source-review.json` maintains the narrow spelling,
 State-notation, and compound footnote equivalences separately from gameplay data.
 The two verified source cells are keyed by printed name/page and can only be reused
