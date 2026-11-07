@@ -119,7 +119,7 @@ export function exactVariantUsageSection(payload, item) {
       .map((unit) => [unit.id, unit]),
   );
   const section = document.createElement("section");
-  section.className = "detail-group usage-section-group exact-variant-usage";
+  section.className = "detail-group usage-section-group exact-variant-usage developer-only";
   const heading = document.createElement("h2");
   heading.className = "detail-heading";
   heading.textContent = "Exact reviewed source occurrences";

@@ -27,7 +27,7 @@ export function restrictionsContextSection(data, recordIds) {
   }
   if (!matches.length) return null;
   const section = document.createElement("section");
-  section.className = "detail-group restrictions-context";
+  section.className = "detail-group restrictions-context developer-only";
   const heading = document.createElement("h2");
   heading.className = "detail-heading";
   heading.textContent = "Restrictions chart";

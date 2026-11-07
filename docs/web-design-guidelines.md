@@ -214,10 +214,13 @@ An exception should exist because the information has different requirements, no
 Full source tables, such as the N5.3 Restrictions chart, belong on their
 own navigable reference page (`/rules/restrictions`), linked from the
 relevant catalog. Do not append a full chart below an unrelated listing.
-On Skill, Equipment and State details, preserve concise, source-scoped
-condition links when they retain important qualifiers (for example,
-upward-only Jump or Lieutenant selection rather than Skill use).
-Those links lead to exact rows on the standalone page. The chart is
+On Skill, Equipment and State details, retain the contextual,
+source-scoped condition links in **Developer Mode only**; important
+qualifiers (such as upward-only Jump or Lieutenant selection rather than
+Skill use) still lead to exact rows on the public standalone page.
+Exact reviewed source occurrences on Skill/Equipment detail pages are
+also Developer Mode only; ordinary rules, variants and their citations
+stay visible. The chart is
 a finite source reference, not a general action-legality evaluator.
 
 ### Specialist Troops filtering is contextual

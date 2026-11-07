@@ -6500,6 +6500,20 @@ original bookmarks, card inset and no horizontal overflow.
 Light/dark, soft-navigation and controlled failure-mode visual
 regressions remain deferred to VD-0113 / VR-0139.
 
+**2026-11-07 developer detail visibility:** Contextual Restrictions sections
+on Skill, Equipment and State details now require Developer Mode. The
+full `/rules/restrictions` reference remains public from the General Rules
+directory, and original source conditions and chart anchors are retained.
+`tests/test_game_mode_source_table.py::test_restrictions_chart_normal_chromium_at_three_widths`
+now checks both default-hidden and Developer Mode-visible contexts before
+following source links. Likewise, the shared `exactVariantUsageSection`
+renderer on Skill and Equipment pages is Developer Mode-only;
+`tests/test_web.py::test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups`
+checks visibility toggling and source-link continuity. These selectors
+were updated but **not executed during the implementation pass**;
+their linked obligations remain in VD-0112/0113 and VR-0138/0139.
+Ordinary rules, descriptions, variants and their citations remain visible.
+
 **Typed condition contract:** the source compiler in
 `src/infinity_db/restriction_conditions.py` covers all 14 negative
 constraints using exactly five operation kinds. It preserves source

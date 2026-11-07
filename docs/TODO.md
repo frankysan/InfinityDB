@@ -52,15 +52,17 @@ an ignored development candidate is not a release artifact.
 - [ ] **Skill detail spacing (Web frontend, non-gating):** Confirm that FAQ
   clarification cards have consistent padding and Exact reviewed source
   occurrences have separation before/after the section, in both themes at
-  desktop and narrow widths. CSS is updated; focused visual acceptance
-  is deferred under [VD-0112 / VR-0138](validation-queue.md).
+  desktop and narrow widths with Developer Mode enabled. Exact reviewed
+  source occurrences are now Developer Mode-only; normal-mode absence and
+  developer-mode visibility are included in [VD-0112 / VR-0138](validation-queue.md).
 
 - [ ] **Restrictions chart standalone page (Web frontend, non-gating):**
   Accept the standalone `/rules/restrictions` reference, its link from
   General Rules, complete source-scoped condition rows, legacy hash
   compatibility, and responsive/theme navigation without clipping.
   Existing Skill/Equipment/State contextual excerpts retain distinct
-  typed qualifiers; remaining checks belong to [VD-0113 / VR-0139](validation-queue.md).
+  typed qualifiers in Developer Mode only. The standalone chart remains
+  public; visibility checks belong to [VD-0113 / VR-0139](validation-queue.md).
 
 ### Development sequence
 

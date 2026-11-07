@@ -139,12 +139,18 @@ selector and other dependencies in its VR item.
   `/skills/climb`. At 1440/390/320 px in light/dark themes, assert FAQ
   question, answer, and source are inset from all card edges; the
   occurrences section has at least 24 px outer separation; no clipping,
-  overflow or overlap when occurrence disclosures are opened. Account for
-  pages without a FAQ or without reviewed occurrences.
+  overflow or overlap when occurrence disclosures are opened **in Developer
+  Mode**. Verify that exact reviewed occurrences on both Skill and Equipment
+  pages are hidden by default, show when Developer Mode is switched on, and
+  hide again on switching off without dropping source rows. Keep FAQ cards,
+  main rules and citations public; account for pages without occurrences.
   Work: [Skill detail spacing](TODO.md#implemented-foundations-and-remaining-scope);
   change: `src/infinity_db/web/static/page-overrides.css` from `4cb55c0`;
   risk: low. Existing coverage: FAQ/source-browser DOM assertions, but no
-  focused layout assertions. Linked execution: **VR-0138**.
+  focused layout assertions. Updated existing
+  `tests/test_web.py::test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups`
+  to assert the two-mode visibility and source-link retention; no execution
+  in this implementation phase. Linked execution: **VR-0138**.
 
 - [ ] VD-0113 (2026-11-07; needs-design): Complete a standalone
   Restrictions chart navigation/visual regression. The existing source
@@ -152,10 +158,16 @@ selector and other dependencies in its VR item.
   rendering, exact links, and legacy hashes. Design additional light/dark
   presentation and soft-navigation checks for the /rules listing-to-chart
   link, source-row focus/scroll, readable card padding, error recovery,
-  and absent chart on unrelated rule pages.
+  and absent chart on unrelated rule pages. The full standalone chart stays
+  public; contextual Restrictions sections on Skill, Equipment and State
+  pages must be hidden by default and visible in Developer Mode, with all
+  reviewed condition counts and exact anchors unchanged.
   Work: [Restrictions chart standalone page](TODO.md#implemented-foundations-and-remaining-scope);
   change: `src/infinity_db/web/{presentation.py,routes.py,static/}`
   after `9add9ae`; risk: moderate; linked execution: **VR-0139**.
+  The existing `test_restrictions_chart_normal_chromium_at_three_widths`
+  now asserts default-hidden and developer-visible contextual excerpts
+  before validating their source links; test execution is deferred.
 
 ## Pending deferred execution
 
@@ -170,10 +182,12 @@ is recorded. Failed or incomplete verification remains open.
   FAQ/occurrences spacing refinement without changing rules or published data.
   Work: [Skill detail spacing](TODO.md#implemented-foundations-and-remaining-scope);
   revision: post-`4cb55c0` CSS edit (record final SHA upon commit); risk: low.
-  Immediate: source-level CSS review only; no tests executed in implementation.
-  Design: **VD-0112**. Deferred: newly designed focused desktop/mobile
-  Playwright layout regression; rerun existing FAQ and exact-usage UI checks
-  on the pinned implementation commit. Outcome: pending.
+  Immediate: source-level CSS and component-class review; no tests executed
+  in this visibility change's implementation phase. Design: **VD-0112**.
+  Deferred: focused desktop/mobile FAQ and source-occurrence layout;
+  `tests/test_web.py::test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups`
+  on the pinned implementation commit (hidden/visible/hidden on Skill and
+  Equipment, unchanged links), plus affected FAQ UI checks. Outcome: pending.
 
 - [ ] VR-0139 (2026-11-07; awaiting-design): Validate the standalone
   /rules/restrictions page, backward-compatible hashes, source-scoped
@@ -182,8 +196,10 @@ is recorded. Failed or incomplete verification remains open.
   revision: post-`9add9ae` change (record final SHA); risk: moderate.
   Immediate: mandatory focused public-route navigation regression and
   Python checks only; no full-suite release gate. Design: **VD-0113**.
-  Deferred: expanded soft-navigation/theme/error browser selector and
-  the existing N5.3 source-chart publication integrity checks.
+  Deferred: `tests/test_game_mode_source_table.py::test_restrictions_chart_normal_chromium_at_three_widths`
+  for default-hidden and Developer Mode-visible reverse contexts at three
+  widths, expanded soft-navigation/theme/error browser selector, and the
+  existing N5.3 source-chart publication integrity checks.
   Outcome: pending.
 
 The [V1S-083 disclosure and consumer batches](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)

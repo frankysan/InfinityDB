@@ -89,8 +89,10 @@ are not retroactively relabeled.
 - General Rules links to a dedicated N5.3 Restrictions chart page, showing six
   affected categories and their exact prohibitions, including conditions
   for mounted Motorcycles and Lieutenant selection. Related Skill,
-  Equipment and State pages now link back to the applicable chart
-  entries with their original conditions. A typed source-constraint
+  Equipment and State pages retain exact contextual chart links in
+  Developer Mode; normal rule cards remain source-cited. Exact reviewed
+  Skill/Equipment source occurrences are also Developer Mode-only.
+  A typed source-constraint
   model distinguishes State entry, Skill declaration, ladder traversal,
   upward movement and Lieutenant selection without changing the legacy
   relation graph.

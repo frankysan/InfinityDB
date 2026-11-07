@@ -6426,6 +6426,11 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                     )
                     assert response is not None and response.status == 200
                     usage = page.locator(".exact-variant-usage")
+                    usage.wait_for(state="attached", timeout=30000)
+                    assert usage.is_hidden(), (catalog, width)
+                    page.locator('button[aria-controls="settings-menu"]').click()
+                    toggle = page.locator("#developer-mode-toggle")
+                    toggle.set_checked(True)
                     usage.wait_for(state="visible", timeout=30000)
                     assert "Only complete, source-reviewed variants" in usage.inner_text()
                     group = usage.locator(".exact-variant-group")
@@ -6445,6 +6450,10 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                         arg=previous_group, timeout=30000,
                     )
                     assert usage.count() == 1
+                    toggle.set_checked(False)
+                    assert usage.is_hidden(), (catalog, width)
+                    toggle.set_checked(True)
+                    usage.wait_for(state="visible", timeout=30000)
                     group.locator("summary").click()
                     group.locator("tr[data-owner-kind]").first.wait_for(
                         state="visible", timeout=30000,

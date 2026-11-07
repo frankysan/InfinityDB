@@ -2674,10 +2674,12 @@ does not inspect maintained configuration or infer rules semantics.
 Each condition retains a source action and scope, player-readable
 description, optional exact destination link and original
 `targetRecordId`; chart subjects retain reviewed `ownerRecordId`
-when available. Skill, Equipment and State pages render matching
-negative conditions with links to the exact chart row, using this
-published read model rather than interpreting generic canonical
-relations. TAG/VH/REM are unlinked source Troop Type selectors,
+when available. Skill, Equipment and State pages retain matching
+negative conditions with links to exact chart rows **in Developer Mode**,
+using this published read model rather than interpreting generic
+canonical relations. The standalone chart remains a public reference,
+while Exact reviewed source occurrences on Skill/Equipment pages are
+also Developer Mode-only. TAG/VH/REM are unlinked source Troop Type selectors,
 not new domain identities.
 Mounted Motorcycles cannot Jump **upwards** or use ladders; Irregular
 and REM restrictions concern **selection** as Lieutenant, not use of

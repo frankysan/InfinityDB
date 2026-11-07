@@ -702,6 +702,11 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                             wait_until="domcontentloaded",
                         )
                         context = page.locator(".restrictions-context")
+                        context.wait_for(state="attached", timeout=15000)
+                        assert context.is_hidden(), (width, route)
+                        page.evaluate(
+                            "() => { document.documentElement.dataset.developerMode = 'true'; }"
+                        )
                         context.wait_for(state="visible", timeout=15000)
                         assert context.locator("li").count() == count, (width, route)
                         anchor = context.locator(
@@ -724,6 +729,11 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                                 wait_until="domcontentloaded",
                             )
                             context = page.locator(".restrictions-context")
+                            context.wait_for(state="attached", timeout=15000)
+                            assert context.is_hidden()
+                            page.evaluate(
+                                "() => { document.documentElement.dataset.developerMode = 'true'; }"
+                            )
                             context.wait_for(state="visible", timeout=15000)
                         if route.endswith("/jump"):
                             assert context.locator("li").first.get_attribute(
