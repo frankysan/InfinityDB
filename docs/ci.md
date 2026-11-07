@@ -107,6 +107,11 @@ The current matrix is:
 - macOS / Python 3.11 — test + Army build + rules build;
 - Ubuntu / Python 3.14 — test + Army build + rules build.
 
+The full Ubuntu 3.11 leg and filesystem-heavy Windows leg each have a
+30-minute job limit. The other legs have 15-minute limits. The full leg needs
+time for both the ordinary checks and the isolated preflight's additional
+pytest run; its time limit does not omit or relax either pass.
+
 Every leg installs `.[dev,symbols]`, uses the controlled `tests/fixtures/deployment-smoke` Army
 source for build validation, and requires the tracked graphical publication. The primary Ubuntu
 3.11 leg owns Ruff, Markdownlint, offline Markdown path/heading validation

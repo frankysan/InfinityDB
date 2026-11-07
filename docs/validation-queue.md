@@ -134,7 +134,15 @@ static design-review outcome. Do not record a test result in VD. Retire
 the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
-No pending design entries.
+- [ ] VD-0104 (2026-11-07; needs-design): Protect the Source CI matrix time
+  budgets and their job-level use. Work: hosted CI timeout repair in
+  `.github/workflows/source-checks.yml`; risk: medium. Existing coverage:
+  `tests/test_deployment_scripts.py::test_source_ci_builds_ignored_release_publication_before_tests`
+  checks publication setup but not time limits. Design assertions that every
+  included leg supplies a bounded budget, the `--all` and Windows legs each
+  allow 30 minutes, other current legs retain 15, and the job consumes the
+  matrix budget without dropping the full preflight. Linked execution: VR-0132.
+  Outcome: pending static test design; due for the hosted CI repair.
 
 ## Pending deferred execution
 
@@ -145,7 +153,16 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending deferred execution entries.
+- [ ] VR-0132 (2026-11-07; awaiting-design): Verify the Source CI matrix
+  timeout repair after Ubuntu 3.11 was cancelled at 15 minutes while its
+  isolated pytest pass was still progressing. Work: hosted CI repair in
+  `.github/workflows/source-checks.yml`; risk: medium. Immediate: structural
+  YAML inspection confirmed all four budgets and the unchanged source
+  command; the documentation stage passed on Windows before commit.
+  Design: VD-0104. Deferred: the designed matrix-budget regression and
+  `tests/test_deployment_scripts.py::test_source_ci_builds_ignored_release_publication_before_tests`
+  on a committed revision. Outcome: pending design and focused execution;
+  a successful replacement hosted run remains a separate CI gate.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -160,8 +177,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0104`; active obligations are listed above.
-- Execution: `VR-0132`; active obligations are listed above.
+- Design: `VD-0105`; active obligations are listed above.
+- Execution: `VR-0133`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

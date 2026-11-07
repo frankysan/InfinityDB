@@ -28,27 +28,31 @@ jobs:
             check_args: "--all"
             test_workers: "auto"
             determinism: true
+            timeout_minutes: 30
           - os: windows-latest
             python: "3.11.9"
             label: "3.11"
             check_args: "--stage test --stage build --stage rules"
             test_workers: "2"
             determinism: true
+            timeout_minutes: 30
           - os: macos-latest
             python: "3.11.9"
             label: "3.11"
             check_args: "--stage test --stage build --stage rules"
             test_workers: "auto"
             determinism: true
+            timeout_minutes: 15
           - os: ubuntu-latest
             python: "3.14"
             label: "3.14"
             check_args: "--stage test --stage build --stage rules"
             test_workers: "auto"
             determinism: false
+            timeout_minutes: 15
     runs-on: ${{ matrix.os }}
-    # Keep Windows parallelism bounded; allow its filesystem-heavy suite more time.
-    timeout-minutes: ${{ matrix.os == 'windows-latest' && 30 || 15 }}
+    # The full check leg includes isolated preflight; Windows has a slower filesystem.
+    timeout-minutes: ${{ matrix.timeout_minutes }}
     steps:
       - name: Check out source
         uses: actions/checkout@v7
