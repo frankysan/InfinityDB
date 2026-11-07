@@ -445,6 +445,24 @@ commit the coherent batch without mixing unrelated agents' edits. Batching
 never postpones an immediate safety gate, a due queue drain or a required
 V1S closeout; do not grow a batch merely to reach a validation threshold.
 
+### Portable cross-browser critical-journey cohort (V1S-097 pilot)
+
+**Project domains:** Web frontend, Project infrastructure
+
+Use `python -m tools.run_cross_browser_compatibility --engine chromium` for
+an explicitly selected local engine; `firefox`, `webkit` and `msedge` are
+also supported. Install `playwright==1.64.1` and that engine using
+`python -m playwright install <engine>` first (on Linux CI the matching OS
+libraries are installed with `--with-deps`). The helper runs the dedicated
+`tests/test_cross_browser_compatibility.py` cohort with one engine, exits
+nonzero on failed/missing browser setup and writes JUnit and failure traces
+under ignored `local/cross-browser-compatibility/`. The ordinary source
+suite does not require Playwright and skips this opt-in module without an
+engine. The authoritative hosted matrix, pilot status and promotion rules
+are in [CI](ci.md#cross-browser-release-compatibility-pilot-v1s-097).
+Do not count a pilot run as the full release gate, nor multiply the 81-page
+Unit matrix over all browser engines.
+
 ### Focused-first VR execution
 
 **Default: no full-suite run for an ordinary task or VD/VR drain.** A VD

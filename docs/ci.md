@@ -34,6 +34,36 @@ a local deferral or a green worker run is not a CI exemption.
 6. **Keep extended external checks explicit.** Optional network/acquisition/performance workflows
    must not make an otherwise valid source commit fail because an external service is unavailable.
 
+## Cross-browser release compatibility pilot (V1S-097)
+
+The [dedicated reporting-only workflow](../.github/workflows/cross-browser-compatibility.yml)
+uses one shared Python Playwright critical-journey cohort rather than repeating
+all Chromium browser tests across every engine. Its four separate jobs are:
+Ubuntu/Chromium, Ubuntu/Firefox, macOS/WebKit and Windows/Microsoft Edge.
+It runs on pull requests, manual dispatch (once registered on the default
+branch), and development-branch pushes that change the pilot's workflow,
+tests or runner—not on every unrelated development commit. Each job installs **Playwright 1.64.1** and its matching selected browser,
+serves the tracked Army/rules database pair using an ephemeral local WSGI
+server, and executes 14 tests (seven journeys at 1440 and 390 px).
+The cohort covers soft navigation, citations, Weapon fragments, Unit details,
+Core scenario selection, FAQ cards, and notice keyboard/touch behavior.
+JUnit output and failure screenshots/Playwright traces are uploaded as
+short-lived CI artifacts; unavailable Playwright/browser binaries must fail
+rather than skip a selected pilot job. No official game-source download or
+remote InfinityDB server is required.
+
+**Current status: pilot, not an accepted release gate.** Each job currently
+has `continue-on-error: true`; a green aggregate workflow cannot be used to
+assert all four cross-browser cases passed. Inspect every job conclusion and
+its JUnit/traces for the **same exact commit SHA**. After stable reviewed
+cross-engine results, remove `continue-on-error`, require all four jobs and
+add the new workflow to v1.0 exact-SHA release evidence/branch protection.
+The [open V1S-097 task](TODO.md#final-frozen-candidate-acceptance-and-release)
+tracks that enforcement step. The existing comprehensive Chromium and
+81-page Unit matrices, full source checks, deployed candidate acceptance,
+and manual Safari/iOS/touch sign-off stay independent. WebKit on macOS is
+not a real-device Safari/iOS test.
+
 ## Agent CI monitoring and repair
 
 For authorized autonomous InfinityDB development, **CI monitoring is

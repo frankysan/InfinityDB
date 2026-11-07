@@ -1,0 +1,70 @@
+name: Cross-browser compatibility (pilot)
+
+on:
+  pull_request:
+  # Collect the first pilot baseline without running it on every dev commit.
+  push:
+    branches:
+      - dev/v1.0.0
+    paths:
+      - .github/workflows/cross-browser-compatibility.yml
+      - tests/test_cross_browser_compatibility.py
+      - tools/run_cross_browser_compatibility.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    # Reporting-only until the cohort has stable, reviewed platform baselines.
+    # Promotion to a required release check is tracked by V1S-097.
+    name: ${{ matrix.os }} / ${{ matrix.engine }} (non-blocking)
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            engine: chromium
+          - os: ubuntu-latest
+            engine: firefox
+          - os: macos-latest
+            engine: webkit
+          - os: windows-latest
+            engine: msedge
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11.9"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install test dependencies
+        run: python -m pip install -e ".[dev,symbols]" "playwright==1.64.1"
+
+      - name: Install selected browser and OS dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: python -m playwright install --with-deps ${{ matrix.engine }}
+
+      - name: Install selected browser
+        if: matrix.os != 'ubuntu-latest'
+        run: python -m playwright install ${{ matrix.engine }}
+
+      - name: Run selected critical journeys
+        run: python -m tools.run_cross_browser_compatibility --engine ${{ matrix.engine }}
+
+      - name: Upload JUnit and failure traces
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cross-browser-${{ matrix.engine }}-${{ runner.os }}
+          path: local/cross-browser-compatibility/
+          if-no-files-found: warn
+          retention-days: 7

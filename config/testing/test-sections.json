@@ -159,6 +159,7 @@
     "browser": {
       "description": "Real Chromium acceptance and browser verifier contract tests.",
       "modules": [
+        "test_cross_browser_compatibility",
         "test_verify_accessible_navigation_browser",
         "test_verify_ammunition_publication_browser",
         "test_verify_aro_deployment_browser",

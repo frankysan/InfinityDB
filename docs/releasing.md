@@ -284,6 +284,12 @@ deployment behavior.
   it on protected `main` through the normal pull-request workflow. The resulting `main` revision is
   the candidate release commit; if the repository uses a merge or squash commit, use that resulting
   commit rather than assuming the branch-head SHA is the release SHA.
+- [ ] For 1.0, after [V1S-097](TODO.md#final-frozen-candidate-acceptance-and-release)
+  promotes the cross-browser pilot, require all four Ubuntu Chromium/Firefox,
+  macOS WebKit and Windows Edge compatibility jobs green on the exact candidate
+  SHA. The current reporting-only workflow is **not** an accepted gate even
+  when its aggregate status is green. Retain JUnit/traces for failures and
+  preserve separate real-device/human sign-off.
 - [ ] Confirm the required hosted workflows are green for that exact candidate release commit,
   including the `Source checks` cross-platform deterministic-output comparison. `Source checks`,
   `Deployment smoke test`, and `Installed wheel smoke` provide the normal
