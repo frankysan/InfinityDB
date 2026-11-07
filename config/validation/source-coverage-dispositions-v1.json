@@ -17,9 +17,9 @@
         "trait:deployable"
       ],
       "recordSha256": {
-        "trait:deployable": "3a68e086d2fad39e42f9da820e571c214afe3f0b7313b988dda35249b1394a32"
+        "trait:deployable": "ac718e39b87b9d7f8a1fa0d46c2d14e81e4fd4f7affe3af5955eac9889ac0f79"
       },
-      "scope": "The definition treats the deployed item as independent with its own profile and Attributes, targetable during play, moving immediately from Unconscious to Dead and not activating other Deployable items.",
+      "scope": "The definition treats the deployed item as independent with its own profile and Attributes, targetable during play, moving immediately from Unconscious to Dead and not activating other Deployable items. Fingerprint rebound on 2026-11-07 after V1S-083 added FAQ source context; the accepted clause scope is unchanged and excludes that note.",
       "semantic": {
         "status": "accepted",
         "reviewer": "gpt-6-source-review",
@@ -45,9 +45,9 @@
         "trait:deployable"
       ],
       "recordSha256": {
-        "trait:deployable": "3a68e086d2fad39e42f9da820e571c214afe3f0b7313b988dda35249b1394a32"
+        "trait:deployable": "ac718e39b87b9d7f8a1fa0d46c2d14e81e4fd4f7affe3af5955eac9889ac0f79"
       },
-      "scope": "Spanish Posicionable corroborates independent item/profile, targeting, direct Unconscious-to-Dead removal and non-activation of other Deployable items.",
+      "scope": "Spanish Posicionable corroborates independent item/profile, targeting, direct Unconscious-to-Dead removal and non-activation of other Deployable items. Fingerprint rebound on 2026-11-07 after V1S-083 added FAQ source context; the accepted clause scope is unchanged and excludes that note.",
       "semantic": {
         "status": "accepted",
         "reviewer": "gpt-6-source-review",

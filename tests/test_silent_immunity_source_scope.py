@@ -188,7 +188,8 @@ def test_v1s082_trait_definitions_export_and_api(
     assert stored is not None
     assert stored["summary"] == authored["summary"]
     assert stored.get("facts") == authored.get("facts")
-    assert authored["review"] == {"status": "reviewed", "reviewedOn": "2026-11-06"}
+    reviewed_on = "2026-11-07" if record_id == "trait:deployable" else "2026-11-06"
+    assert authored["review"] == {"status": "reviewed", "reviewedOn": reviewed_on}
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)
     environ.update(PATH_INFO=f"/api/traits/{record_id.split(':', 1)[1]}", REQUEST_METHOD="GET")

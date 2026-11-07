@@ -191,11 +191,10 @@ on development inputs; its
 [bounded citation and route acceptance](v1.0-source-coverage-audit.md#v1s-082-bounded-citation-and-route-acceptance-2026-11-07)
 records the evidence. Final release acceptance remains open.
 
-- [ ] **V1S-083 (M, gate):** Verify disclosure of **already known** material source conflicts
-  and empty/unavailable/not-applicable semantics.
-  The known Army qualifier, FAQ question-scope and Engineer contact notes are
-  published; VR-0137 must verify their source/API/browser path and the existing
-  conflict/empty-value regressions before this gate can close.
+The [known-conflict and unavailable-value disclosure review](v1.0-source-coverage-audit.md#v1s-083-known-conflict-and-unavailable-value-disclosure-2026-11-07)
+is accepted on development inputs. Publisher questions remain open;
+final-input checks and release acceptance below remain required.
+
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched
   Army/rules pair, FAQ parity, deployed objects and processed symbols.
 - [ ] **V1S-085 (M, gate):** Run source occupancy, archive,
@@ -250,9 +249,10 @@ and complete release checks remain V1S-081–085.
   including ITS 18 version 2026.09.11 in both languages, before selecting the
   final ITS input; compare content and migrate affected citations explicitly.
   Current citations remain pinned to 2026.09.01.
-- [ ] Reconcile known material N5 change-post, Army-update and FAQ issues
-  affecting maintained references against pinned primary sources, without
-  inventing historical deltas. The broader
+- [ ] Recheck known material N5 change-post, Army-update and FAQ issues
+  if the final V1S-084 publication changes a selected input or affected
+  reference. The current-input citation and disclosure reviews are accepted;
+  do not invent historical deltas. The broader
   [reconciliation inventory](rules-explanation-audit-1.0-n5.3-reconciliation.md#current-reconciliation-inventory-2026-10-29)
   and unresolved publisher questions in the [SRC register](official-source-clarifications.md)
   remain optional investigations rather than independent 1.0 blockers.

@@ -4985,10 +4985,11 @@ def test_rea038_direct_recovery_contact_does_not_inherit_allied_gate(
     assert "Allied" in " ".join(kit["facts"]["requirements"])
     assert "allied Model" in " ".join(servant["facts"]["effects"])
     assert "allied target" in " ".join(cyberplug["facts"]["clarifications"])
-    assert len(notes) == 1
-    assert "does not itself verify a blanket permission" in notes[0]
-    assert "[[state:unconscious|Unconscious]]" in notes[0]
-    assert "No scoped current N5 ruling" in notes[0]
+    allegiance_notes = [note for note in notes if "Target allegiance review (REA-038)" in note]
+    assert len(allegiance_notes) == 1
+    assert "does not itself verify a blanket permission" in allegiance_notes[0]
+    assert "[[state:unconscious|Unconscious]]" in allegiance_notes[0]
+    assert "No scoped current N5 ruling" in allegiance_notes[0]
     assert {
         (ref["source_id"], ref.get("page"))
         for ref in direct["citations"]

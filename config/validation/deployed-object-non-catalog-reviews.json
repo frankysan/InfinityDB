@@ -154,8 +154,10 @@
         175
       ],
       "summaryEvidence": "A [[trait:deployable|Deployable]] Weapon or Equipment is placed as an independent battlefield element",
-      "factsEvidence": [],
-      "caveat": "Deployable describes an eligible Weapon/Equipment class and its general consequences; it does not establish a concrete deployed object, carrier, mode or four-stat profile. Existing reviewed objects remain individually identified."
+      "factsEvidence": [
+        "**FAQ question scope (SRC-026):** English FAQ v0.1 p. 1 asks about firing a Deployable onto a vertical surface; Spanish v0.1 p. 2 asks about placing Deployables. Both answers reject that placement. This reference retains the selected English firing context without treating the broader Spanish question as a new general placement rule or a contradictory answer."
+      ],
+      "caveat": "Deployable describes an eligible Weapon/Equipment class and its general consequences; it does not establish a concrete deployed object, carrier, mode or four-stat profile. Existing reviewed objects remain individually identified. The facts evidence pins the added FAQ question-scope note only; the object classification still rests on the unchanged p. 175 summary."
     },
     {
       "recordId": "trait:perimeter",

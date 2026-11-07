@@ -264,11 +264,11 @@ def test_v1s082_fixed_pilot_selection_is_valid_fail_closed_and_unapproved(
     assert pilot["formatVersion"] == 2
     assert summary["uniqueSelectedSourceLocators"] <= summary["selectedSourceCitationOccurrences"]
     assert summary["sourcePageIdentityComplete"] is True
-    assert summary["knownUniqueSourcePageIdentities"] == 104
+    assert summary["knownUniqueSourcePageIdentities"] == 105
     assert summary["unresolvedSourcePageIdentityLocators"] == 0
     assert summary["unresolvedSourcePageIdentitySources"] == []
-    assert summary["uniqueSelectedSourcePages"] == 104
-    assert summary["sourcePageOpensPotentiallyReusable"] == 25
+    assert summary["uniqueSelectedSourcePages"] == 105
+    assert summary["sourcePageOpensPotentiallyReusable"] == 27
     camouflaged = next(record for record in pilot["records"] if record["id"] == "state:camouflaged")
     assert any(
         citation.get("member") == "Camouflaged_State"
@@ -382,8 +382,9 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
         "selectedBrowserTestAnchors": 36,
         "currentIdentitiesWithLaterEvidence": 56,
         "wholeRecordApprovals": 0,
-        # The invalid Pheroware Endgame p. 181 locator was removed.
-        "pendingSourceSections": 829,
+        # V1S-083 adds the Engineer omission and two FAQ-scope citations;
+        # none becomes a whole-record or clause approval.
+        "pendingSourceSections": 832,
     }
     historical = {row["id"]: row for row in evidence["historicalRecords"]}
     current = {row["id"]: row for row in evidence["currentRecords"]}

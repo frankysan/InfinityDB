@@ -510,6 +510,94 @@ revision. The full-suite V1S-090, exact-SHA hosted Source matrix and
 frozen release-candidate gates remain separate; the earlier failed
 full suite at `94103ef4` is not claimed green.
 
+### Known-source disclosure acceptance (V1S-083 / VR-0137)
+
+**Project domains:** Data processing, Web backend, Web frontend, Project infrastructure
+
+At `2736eaba3402e2e99662414f6ad15c17c87efe47`, the focused two-worker
+Linux batch passed **255 tests**, with **14 reviewed skips**, using required
+assets (**808/808** published and browser-referenced SVGs). Pinned job
+`linux-dev:713b014647cd4d2eb876e28cea1d16c8` ran the new disclosure selectors
+plus the affected existing source/API, conflict and empty-value regressions.
+
+The new selectors in `tests/test_verify_scenario_faq_browser.py` are
+`test_known_source_disclosures_in_release_api` (**10 cases**) and
+`test_known_source_disclosures_normal_browser` (**60 cases**). They cover
+ten notes across nine canonical references, keyboard catalog-to-detail
+navigation, 1440/390/320 px, both themes and Developer Mode off. Assertions
+retain citations and interpretation limits, and reject script errors, failed
+requests, bad HTTP responses, unresolved markup and horizontal overflow.
+The API check also retains Engineer's contact requirement and the distinct
+Spanish omission citation, plus both FAQ language sources.
+
+The compatible existing selection included:
+
+- `tests/test_application_rule_references.py` and `tests/test_faq_ruling_references.py`;
+- all four `tests/test_verify_deployed_object_publication_browser.py` cases;
+- the seven exact-owner/negative-typing selectors for Charontid SR-1,
+  Journalist, Religious Troop, Doctor, Engineer, CC Attack and Infiltration
+  in `tests/test_audit_source_variant_inputs.py`;
+- `test_published_weapon_source_conflicts_preserve_official_profiles` in
+  `tests/test_weaponry_catalog_api.py`;
+- the pinned-uncertainty and missing-parent-chart cases in
+  `tests/test_verify_fireteam_context_browser.py`;
+- the existing provenance-label, Domination SWC, Haris FAQ, all-24-setup,
+  controlled empty/error and unavailable/archived-source cases in
+  `tests/test_verify_scenario_faq_browser.py`, and the missing-publication
+  case in `tests/test_verify_weapon_source_cards_browser.py`.
+
+The Linux skips were **11 local PDF cases** and **three opt-in FAQ parity
+cases**. A separate two-worker Windows batch on the **same revision** passed
+**20 tests with zero skips**, including every skipped case, with
+`INFINITYDB_RELEASE_FAQ_PARITY=1`. It also covered the empty Hacking Program
+API and `tests/test_hacking_source_followup.py`, including normal browser
+source/timing checks at all three widths. These Windows results supplement
+Linux coverage; skipped Linux tests are not reported as passed there.
+
+The initial Linux batch at `8cd201dc` had 20 failures, 100 setup errors,
+135 passes and 14 skips. Every failure/error rejected an unmatched
+variant-usage/deployed-object pair: the first Windows publication fingerprinted
+CRLF curated bytes instead of Git's LF blob. The repair changed provenance
+only, matched the Linux-built deployed-object bytes exactly, and passed both
+dependent publication checks on Linux before the rerun. Reports are retained
+under ignored `local/v1s083-linux-focused-initial.txt`,
+`local/v1s083-linux-focused-repaired.txt` and
+`local/v1s083-windows-source-and-optin.txt` in the development checkout.
+
+The current-citation minimum remained **495/495**, zero metadata gaps.
+Curated validation, deterministic v9 staging, preserved Restrictions and Army
+values, 490 unchanged unrelated records, dependent-publication checks, focused
+Ruff and the documentation stage passed. VD-0111 was designed without test
+execution.
+
+Hosted Source then exposed additional record consumers on `2736eaba`:
+stale Deployable non-catalog and clause-review evidence, recovery tests
+requiring exactly one source note, the Deployable review date and baseline
+locator counts. The immediate CI/publication-integrity repair passed **117
+tests** in the reviewed Windows worktree based on that SHA. The seven exact
+targets were `tests/test_deployed_object_citation_migrations.py`,
+`tests/test_deployed_object_non_catalog_queue.py`,
+`tests/test_rules_database.py::test_rea038_direct_recovery_contact_does_not_inherit_allied_gate`,
+`tests/test_silent_immunity_source_scope.py`,
+`tests/test_source_coverage_dispositions.py`,
+`tests/test_legacy_staging_schema_guards.py` and
+`tests/test_report_reference_baseline.py`. One test deliberately skipped
+because its historical migration was already promoted; the other migration
+preflight, drift, negative-input and schema guards passed. The full report is
+`local/v1s083-consumer-repair-windows.txt`.
+
+The source-review fingerprints were rebound only after confirming that the
+original Deployable summary/clauses were unchanged. Their scope explicitly
+excludes the new FAQ note and browser approvals remain pending. Non-catalog
+evidence separately pins the added note without changing classification.
+The baseline now has 832 source sections and 105 pilot source-page identities;
+these are inventories, not extra approvals. The rules databases and browser
+artifacts were unchanged by this consumer repair, so the pinned Linux/browser
+results above remain applicable. Focused Ruff, Pyright with the project
+interpreter and docs passed for the repair.
+VR-0137 is now closed. This accepts the bounded disclosure gate,
+not the cumulative V1S-090 suite, final release pair or replacement-SHA hosted CI.
+
 ### Current N5 citation minimum (V1S-082)
 
 The read-only reporter checks whether each maintained **current Core,

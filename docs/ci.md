@@ -215,6 +215,25 @@ and [deployment-smoke run 42325818217](https://github.com/frankysan/InfinityDB/a
 also passed. This closes hosted follow-through for the repair on that exact
 revision; final-candidate acceptance remains separate.
 
+**2026-11-07 disclosure-publication follow-through:** At
+`8cd201dcdef3eb7c896ce92af93cae691ddcdc87`,
+[Source run 42357974261](https://github.com/frankysan/InfinityDB/actions/runs/42357974261)
+failed all four platform/Python jobs in exact-variant provenance validation;
+the deterministic comparison was skipped. Its
+[deployment run 42357974200](https://github.com/frankysan/InfinityDB/actions/runs/42357974200)
+failed the same guard. The pin used Windows CRLF curated bytes instead of
+Git's LF blob. Repair `2736eaba3402e2e99662414f6ad15c17c87efe47` passed
+the paired checks and focused Linux/Windows acceptance. Its
+[wheel run 42358423930](https://github.com/frankysan/InfinityDB/actions/runs/42358423930)
+and [deployment run 42358423951](https://github.com/frankysan/InfinityDB/actions/runs/42358423951)
+passed, but the Ubuntu/Python 3.14 leg of
+[Source run 42358423894](https://github.com/frankysan/InfinityDB/actions/runs/42358423894)
+reported 15 failures in stale record-evidence fingerprints and test expectations.
+The [117-test focused consumer repair](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
+passed on Windows, retaining the evidence guards and previously tested rules
+artifacts. Replacement-SHA hosted Source/deterministic acceptance remains open;
+the earlier focused passes do not certify the full suite or final candidate.
+
 The development dependencies include PyMuPDF so PDF-aware test modules collect and
 research tools type-check in a clean environment. Official PDFs under `data/pdf/`
 remain ignored local evidence. Only tests requiring absent PDF bytes skip; data/API
