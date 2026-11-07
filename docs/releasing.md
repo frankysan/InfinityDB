@@ -4,9 +4,11 @@
 
 This document is the canonical release checklist for InfinityDB. **Every release**
 must pass this checklist unless a step is explicitly inapplicable to that release.
-Active version-specific implementation/release blockers belong in `docs/TODO.md`;
-they extend this process rather than replacing it. Long-lived acceptance definitions,
-such as the version-1.0 completeness gate below, remain in this document.
+Unfinished **implementation** work belongs in `docs/TODO.md`; release-only
+approvals, exact-SHA hosted evidence, tagging, deployment and verification belong
+in this checklist. The version-1.0 completeness definition remains here as a
+durable acceptance contract. The runbook records release obligations without
+making a second TODO-cleanup merge necessary.
 
 A release is not ready merely because its implementation checks pass. The release
 gate includes repository state, documentation, release metadata, hosted validation,
@@ -216,23 +218,14 @@ application parses it to render **What's changed**.
 - [ ] Update the package/application version consistently in `pyproject.toml` and
   `src/infinity_army_data/__init__.py`.
 - [ ] Update the current-release statement in `README.md`.
-- [ ] Keep release-metadata preparation distinct from publication: the README may identify the
-  prepared version, but must not claim an unpublished candidate has already been released. Active
-  candidate status belongs in `docs/TODO.md`; tag creation follows exact-commit hosted validation.
+- [ ] Freeze the README/changelog for the target released version before the final
+  planned merge. The text describes the version being shipped; publication
+  evidence remains the tag, exact-SHA CI and production verification in this
+  checklist. Do not create a second merge merely to rewrite the TODO.
 - [ ] Re-run the documentation audit checks affected by those release-metadata edits.
 
 Do not change the released version early merely to mark work in progress; development
 checkouts use the existing `+dev` display-version mechanism until release preparation.
-
-**Historical 1.0 candidate checkpoint:** Before the 1.0 release metadata was
-finalized, the exact-version Unit gate (V1S-087) required `/api/version` to
-report `1.0.0` while the public README still identified 0.10.1 as the
-released version. The version pair in `pyproject.toml` and
-`src/infinity_army_data/__init__.py` was promoted first on `dev/v1.0.0`;
-release-note and README promotion followed in V1S-092. This exception
-explains the pre-publication test evidence and is **not** a general instruction
-to leave the current README on an older version. Merge, tag, deployment and
-exact-SHA hosted acceptance remain separate release steps.
 
 ## 4. Run local release validation
 
@@ -292,6 +285,37 @@ rerun the full gate when the edit can affect executable, generated, packaged, or
 deployment behavior.
 
 ## 5. Land the release commit, verify hosted CI, and tag
+
+### Development freeze and release-only handoff
+
+For 1.0.0, **the development branch and its active implementation TODO must be
+final before the approved merge**. The merge is the final *planned* tracked
+source/documentation change. Afterward, exact-main-SHA CI, the annotated tag,
+deployment and production verification are operator release steps. Record their
+results in GitHub Actions, the immutable tag annotation, release/deployment
+records and ignored operational reports, **not by editing TODO and making a
+routine second merge**.
+
+The following former V1S entries are **transferred obligations, not completed
+tasks**. They are accepted only as their corresponding checklist steps pass:
+
+- **V1S-093 — integration and tag:** Approve and merge the frozen candidate;
+  require exact-main-SHA Source, wheel, deployment smoke and all four
+  cross-browser jobs, optional full-asset evidence where configured, and the
+  annotated tag. Investigate any recurring Windows scenario lifecycle timeout
+  if it affects hosted acceptance. Tag approval remains a separate release-owner
+  decision.
+- **V1S-094 — authorized deployment:** Deploy the verified tagged artifact only
+  with explicit operator approval; confirm previous-image/database and recovery
+  assets exist. No live rollback rehearsal is required.
+- **V1S-095 — deployed acceptance:** Verify the exact source/runtime database
+  pair, application version, static assets and representative browser paths on
+  the actual hosted deployment.
+
+If a post-merge gate reveals a defect requiring tracked changes, **stop release
+acceptance**, prepare and validate a corrected development candidate, then
+perform another approved merge and exact-SHA checks. That is an exceptional
+repair, not a routine second merge merely to retire operational TODO entries.
 
 - [ ] Before merge, when the optional checksum-pinned publication bundle is part of the release
   gate, manually dispatch `Full-asset checks` against the release-candidate branch and record the

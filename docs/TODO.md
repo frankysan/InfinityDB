@@ -1,9 +1,10 @@
 # InfinityDB backlog
 
-This is the working backlog. Open items are either **1.0.0 release-handoff
-operations** or **post-1.0** development. The remaining 1.0 entries track
-publication/verification, not unfinished player-reference features. Future
-milestones may move non-gating work as evidence changes.
+This is the working development backlog. The 1.0.0 implementation baseline is
+complete; remaining entries concern **post-1.0** work. Merge, exact-main-SHA
+CI, tagging, deployment and post-deployment verification belong to the
+[release checklist](releasing.md), not to open development tasks. Their
+handoff does not mean those operations have already succeeded.
 
 This file does not define current application behavior. Current behavior belongs in
 the relevant reference documentation; lasting design direction belongs in
@@ -20,161 +21,52 @@ New or materially revised work items use the canonical project-domain labels
 defined in `docs/project-domains.md`; section-level domain declarations may be used
 when all contained work shares the same owner.
 
-## Current milestone
+## 1.0.0 — reference baseline
 
 **Project domain:** Project infrastructure
 
-Current product baseline: **1.0.0**. The [changelog](CHANGELOG.md) owns
-release history; [testing](testing.md) owns verification procedures; and
-[releasing](releasing.md) owns release acceptance. This development branch
-still tracks the final merge, exact-SHA CI, tag, deployment and post-deployment
-checks under V1S-093–095. Their pending state must not be mistaken for an
-unimplemented 1.0 player feature or for evidence that production has already
-been verified. Optional ITS expansion, user-data tools, performance experiments
-and native clients are post-1.0.
-
-## 1.0.0 — release handoff and verification
-
-The player-reference completeness work is incorporated into the 1.0 baseline.
-Only the remaining release operations below are open against the
-[1.0 definition](releasing.md#version-10-data-completeness-gate).
-
-### Delivered baseline and outstanding release evidence
-
-**Project domains:** Data processing, Web backend, Web frontend, Project infrastructure
-
-The canonical [data model](data-model.md), [source-coverage audit](v1.0-source-coverage-audit.md)
-and [test procedures](testing.md) own implemented facts, bounded acceptance
-and source identities. Published foundations include the core scenarios,
-dated FAQ, structured skill charts, Weapon/Ammunition and deployed-object
-references, scoped Reinforcements and exact-variant usage API/browser paths.
-The usage publication is still conditional on a verified matched artifact;
-an ignored development candidate is not a release artifact.
-
-The [cumulative candidate acceptance](testing.md#cumulative-candidate-acceptance-v1s-090--vr-0142)
-closes local/source/browser and isolated-package validation on the frozen inputs.
-The [prepared release metadata](testing.md#prepared-100-release-metadata-v1s-092)
-also passed its focused, browser and isolated-package checks. Merge approval,
-exact-main-SHA CI, tagging and deployment remain below.
-
-### Development sequence
-
-Review and close the earliest actionable numbered V1S slice below after
-checking the [VD/VR queue](validation-queue.md). Source/inventory
-reconciliation precedes its dependent curation or projection; final
-release steps remain V1S-093–095. The
-[1.0 release definition](releasing.md#version-10-data-completeness-gate)
-determines scope. Do not make optional ITS tooling or publisher answers
-release blockers.
+Version **1.0.0** is the current player-reference baseline described in the
+[README](../README.md), [data model](data-model.md) and
+[changelog](CHANGELOG.md). Its bounded source/browser acceptance is recorded in
+the [1.0 source-coverage audit](v1.0-source-coverage-audit.md) and
+[testing evidence](testing.md#cumulative-candidate-acceptance-v1s-090--vr-0142).
+Final hosted CI, tagging, deployment and production verification are
+**release operations** under [releasing.md](releasing.md), not open
+implementation items or evidence that a deployment check has already passed.
 
 ### Pre-planned 1.0 execution slices
 
-The remaining numbered V1S entries are the actionable release handoff,
-not a second reference-feature backlog or release definition.
-The original 2026-11-03 sizing and retired ID history remain in Git.
-S/M/L are relative bounded/small multi-step/larger acceptance slices,
-not time estimates. A source-reviewed no-change is a valid closeout;
-conditional implementation requires a confirmed gap.
+The development register has **no open V1S tasks**. This historical heading
+remains for the Git-aware backlog checker; individual closeouts are in Git
+history, not maintained as a second task ledger.
 
 #### V1S work selection and handoff
 
-After the [VD/VR checkpoint](validation-queue.md#queue-rules), before
-each autonomous "proceed" pass:
-
-1. Inventory **all unchecked V1S IDs**, prerequisites, owners and
-   available evidence; do not resume from the latest edited section
-   or assume missing IDs have passed.
-2. Select the **earliest actionable** ID. For earlier IDs, record
-   a concrete `Blocked:` dependency/owner/retry trigger or
-   `Deferred:` priority/revisit trigger in their existing entries.
-   Source uncertainty alone is not a blocker when further review is
-   possible. Bypass actionable earlier work only for explicit user
-   priority or a documented critical dependency.
-3. At each boundary reconcile the selected ID, its parent, source
-   evidence, changed contracts and VD/VR obligations. Retire it only
-   with completed acceptance and documentation; otherwise rewrite
-   the remaining action. Preserve every retired V1S ID in the
-   closeout commit per [the retirement contract](README.md#backlog-completion-and-retirement).
-4. Report the selected/previous ID disposition, reasons for passing
-   over earlier IDs, and current VD/VR counts. Do not equate a
-   focused test pass or Git commit with final release acceptance.
-
-An implementation slice needs source/variant provenance, affected
-model/export, API and ordinary browser route (or justified no-change),
-regressions and documentation handoff. Final candidate and CI gates
-remain separate. Only an actively running **full Linux suite** allows
-independent Windows work while validation drains; see the
-[queue rules](validation-queue.md#queue-rules).
-
-#### Final frozen-candidate acceptance and release
-
-**Parent:** [Final 1.0 acceptance](#final-10-acceptance).
-**Project domains:** Data processing, Web backend, Web frontend, Project infrastructure, Deployment
-
-The pinned source/current-citation and frozen-pair browser gates are accepted;
-the [source-coverage audit](v1.0-source-coverage-audit.md) and
-[testing evidence](testing.md#cumulative-candidate-acceptance-v1s-090--vr-0142)
-retain their scope. Human notice/Silhouette and isolated Linux served-candidate
-checks also passed. Publisher questions remain non-blocking when accurately disclosed.
-
-- [ ] **V1S-093 (L, gate):** Merge the approved candidate, obtain
-  exact-main-SHA hosted Source, wheel and deployment smoke evidence,
-  optional full-assets and annotated tag. The recurring Windows scenario
-  lifecycle timeout in [hosted Source](ci.md#v1s-git-aware-retirement-gate)
-  remains unexplained; investigate recurrence rather than assuming a local
-  pass proves hosted stability.
-  Blocked: local candidate and metadata acceptance passed, but merging and
-  tagging require separate release-owner approval;
-  authority: release owner; retry: after explicit approval to merge the reviewed
-  candidate, followed by exact-main-SHA hosted acceptance and tag approval.
-- [ ] **V1S-094 (L, external):** With explicit operator approval,
-  deploy the tagged artifact and verify recovery assets exist.
-  A live-host rollback rehearsal is not required.
-  Blocked: deployment requires an approved exact-SHA hosted-green release tag;
-  authority: release owner; retry: after V1S-093 and explicit deployment approval.
-- [ ] **V1S-095 (M, gate):** Verify the deployed exact source/runtime
-  pair, release version, static assets and representative browser paths.
-  Blocked: post-deployment checks require an actually deployed release;
-  authority: release owner; retry: after approved V1S-094 deployment completes.
-
-V1S-093 requires the [mandatory cross-browser compatibility gate](ci.md#cross-browser-release-compatibility-gate)
-on the exact final main SHA alongside Source, wheel and deployment smoke evidence.
+When numbered V1S work is reopened, follow the
+[selection and closeout commands](testing.md#v1s-backlog-checks) and
+[backlog retirement contract](README.md#backlog-completion-and-retirement).
+New optional features belong below, under post-1.0.
 
 ### Source inventory and gap batches
 
-**Project domains:** Data processing, Project infrastructure
-
-The pinned source/rebuild and final Unit/scenario gates are accepted; see
-[the coverage audit](v1.0-source-coverage-audit.md). Reopen affected checks if
-inputs change. Exhaustive source discovery and the ITS hotfix adoption remain
-post-1.0; final publication steps are tracked below.
+The bounded 1.0 Army/rules/source and publication reviews are retained in the
+[source audit](v1.0-source-coverage-audit.md). Exhaustive source discovery,
+publisher reconciliation and ITS hotfix adoption are post-1.0 research, not
+missing 1.0 features.
 
 ### Rules and reference completeness
 
-**Project domains:** Data processing, Web backend, Web frontend
-
-Current-reference citation, known-disclosure, source-pair, publication and
-ordinary browser acceptance are recorded in [the coverage audit](v1.0-source-coverage-audit.md)
-and [testing](testing.md#cumulative-candidate-acceptance-v1s-090--vr-0142).
-The [data model](data-model.md) owns the implemented contracts; final release
-publication remains under the open parent below. Accurately disclosed publisher
-questions and a live rules/legality engine are not extra 1.0 prerequisites.
+The current-source citation minimum, known limitations and normal-browser
+coverage are governed by [the 1.0 release definition](releasing.md#version-10-data-completeness-gate)
+and [the data model](data-model.md), with dated verification in
+[testing](testing.md).
 
 ### Final 1.0 acceptance
 
-**Project domains:** Data processing, Web backend, Web frontend,
-Project infrastructure, Deployment
-
-- [ ] Complete **V1S-093–095**: obtain merge approval, exact-main-SHA hosted
-  CI and the annotated tag, then perform
-  authorized deployment and post-deploy verification. Preserve accepted
-  source/runtime/publication identities and reference/browser evidence;
-  repeat affected gates when those inputs or consumers change. Use the
-  [canonical release checklist](releasing.md), with detailed commands and
-  acceptance evidence in their maintained owners.
-  Preserve unresolved but accurately disclosed publisher issues as
-  non-blocking; verify recovery assets without requiring a live-host
-  rollback rehearsal.
+Former **V1S-093–095** are transferred, **not marked completed**, to the
+[release-only handoff](releasing.md#development-freeze-and-release-only-handoff).
+Operator approval, exact-main-SHA hosted CI, tag, deployment and production
+checks retain their separate evidence and acceptance conditions.
 
 ## Post-1.0 — maintenance and product expansion
 

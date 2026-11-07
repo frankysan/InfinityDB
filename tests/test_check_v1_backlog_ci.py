@@ -82,6 +82,101 @@ def test_ci_push_rejects_non_first_parent_before_and_wrong_checkout(
         )
 
 
+@pytest.mark.parametrize("attributed", [True, False])
+def test_ci_push_adoption_merge_audits_full_feature_history(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], attributed: bool,
+) -> None:
+    root, old_main = _repository(tmp_path)
+    _new_commit(root, "TODO.md", "# Legacy backlog without a V1S register\n",
+                "docs: legacy backlog")
+    old_main = _git(root, "rev-parse", "HEAD")
+    _git(root, "checkout", "-qb", "feature")
+    adoption = _new_commit(root, "TODO.md", _todo(1, 2),
+                           "feat: adopt V1S retirement check")
+    message = ("docs: retire V1S-001 verified: tests/test_audit.py"
+               if attributed else "docs: shorten backlog")
+    feature = _new_commit(root, "TODO.md", _todo(2), message)
+    _git(root, "checkout", "-q", "main")
+    _git(root, "merge", "-q", "--no-ff", "-m", "Merge feature", "feature")
+    merged = _git(root, "rev-parse", "HEAD")
+
+    event = {"before": old_main, "after": merged}
+    selected = choose_ci_range("push", event, merged, repository=root,
+                               adoption_base=adoption)
+    assert (selected.base, selected.target, selected.integrated_target) == (
+        adoption, feature, merged,
+    )
+    assert selected.origin == "push-feature-merge"
+    assert selected.complete
+
+    event_path = tmp_path / "merge-event.json"
+    event_path.write_text(json.dumps(event), encoding="utf-8")
+    env = {"GITHUB_EVENT_NAME": "push", "GITHUB_SHA": merged,
+           "GITHUB_EVENT_PATH": str(event_path)}
+    assert main(env, repository=root, adoption_base=adoption) == (0 if attributed else 1)
+    report = capsys.readouterr().out
+    assert f"integrated as {merged[:12]}" in report
+    assert ("V1S CI retirement: PASS" if attributed else "V1B005") in report
+
+
+def test_ci_push_adoption_merge_refuses_unreviewed_merge_resolution(
+    tmp_path: Path,
+) -> None:
+    root, _ = _repository(tmp_path)
+    _new_commit(root, "TODO.md", "# Legacy backlog\n", "docs: legacy backlog")
+    old_main = _git(root, "rev-parse", "HEAD")
+    _git(root, "checkout", "-qb", "feature")
+    adoption = _new_commit(root, "TODO.md", _todo(1, 2), "feat: adopt V1S checks")
+    _git(root, "checkout", "-q", "main")
+    _git(root, "merge", "-q", "--no-ff", "--no-commit", "feature")
+    (root / "docs" / "TODO.md").write_text(_todo(2), encoding="utf-8")
+    _git(root, "add", "docs/TODO.md")
+    _git(root, "commit", "-qm", "Merge feature with unreviewed TODO changes")
+    merged = _git(root, "rev-parse", "HEAD")
+    with pytest.raises(ValueError, match="merge changed the audited V1S backlog"):
+        choose_ci_range("push", {"before": old_main, "after": merged},
+                        merged, repository=root, adoption_base=adoption)
+
+
+def test_ci_push_legacy_without_adopted_merge_fails_closed(tmp_path: Path) -> None:
+    root, _ = _repository(tmp_path)
+    _new_commit(root, "TODO.md", "# Legacy backlog\n", "docs: legacy backlog")
+    old_main = _git(root, "rev-parse", "HEAD")
+    latest = _new_commit(root, "TODO.md", _todo(1), "docs: add new register")
+    with pytest.raises(ValueError, match="direct two-parent merge"):
+        choose_ci_range("push", {"before": old_main, "after": latest},
+                        latest, repository=root)
+
+
+def test_ci_push_merges_approved_development_closeout_without_requiring_id_in_merge_message(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    root, common = _repository(tmp_path)
+    _git(root, "checkout", "-qb", "feature")
+    feature = _new_commit(root, "TODO.md", _todo(2, 3),
+                          "docs: transfer V1S-001; evidence: docs/releasing.md")
+    _git(root, "checkout", "-q", "main")
+    old_main = _new_commit(root, "notes.md", "Main change.\n", "docs: main notes")
+    _git(root, "merge", "-q", "--no-ff", "-m", "Merge feature", "feature")
+    merged = _git(root, "rev-parse", "HEAD")
+
+    selected = choose_ci_range(
+        "push", {"before": old_main, "after": merged}, merged, repository=root,
+    )
+    assert (selected.base, selected.target, selected.integrated_target) == (
+        common, feature, merged,
+    )
+    assert selected.origin == "push-feature-merge"
+    event_path = tmp_path / "merge-event.json"
+    event_path.write_text(json.dumps({
+        "before": old_main, "after": merged,
+    }), encoding="utf-8")
+    env = {"GITHUB_EVENT_NAME": "push", "GITHUB_SHA": merged,
+           "GITHUB_EVENT_PATH": str(event_path)}
+    assert main(env, repository=root) == 0
+    assert "V1S CI retirement: PASS" in capsys.readouterr().out
+
+
 def test_ci_pr_uses_head_first_parent_not_synthetic_merge_ref(
     tmp_path: Path,
 ) -> None:

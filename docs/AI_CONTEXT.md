@@ -148,15 +148,23 @@ release/audit narrative belongs in the changelog and Git history.
 
 - `data/generated/infinity.db`: tracked Army-derived application runtime database.
 - `data/generated/rules.db`: tracked curated-rules runtime database.
-- `data/generated/infinity.raw.db`: development/audit archive of normalized source structures; not a
-  production dependency.
-- `data/manifests/symbol-publication.json`: tracked processed-SVG publication contract and Army
-  source binding.
+- `data/generated/variant-usage.json`: tracked, release-matched exact-variant
+  Skill/Equipment usage publication; built from pinned raw Army inputs during
+  development and validated without those inputs on the release host.
+- `data/generated/weapon-profile-sources.json`: tracked, reviewed Weapon-profile
+  source locator publication.
+- `data/generated/deployed-objects.json`: ignored deterministic publication
+  generated from the tracked database pair and curated reviews at deployment.
+- `data/generated/infinity.raw.db`: development/audit archive of normalized
+  source structures, not a production dependency.
+- `data/manifests/symbol-publication.json`: tracked processed-SVG publication
+  contract and Army source binding.
 - Raw Army/wiki/PDF/source-symbol archives plus detailed symbol-build state remain local inputs and
   provenance, not deployment requirements.
 
-A release must deploy its tracked runtime databases and processed graphical publication as one
-validated set. Production must not substitute a server-side rebuild.
+A release must deploy its tracked databases, JSON read models and processed SVG
+publication as one matched, validated set. Production must not regenerate
+tracked publications or substitute a server-side database rebuild.
 
 ## Army/application identity invariants
 

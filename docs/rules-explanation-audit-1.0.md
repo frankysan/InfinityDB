@@ -15,7 +15,9 @@ subsequent implementation and acceptance work.
 **Snapshot scope:** Findings and totals describe the examined commits above, not the
 current 1.0 reference. Later implementation notes record selected corrections;
 the original findings are historical evidence, not open 1.0 release tasks.
-Any remaining release operations belong in [the backlog](TODO.md#current-milestone).
+Release operations and their verification belong in the
+[release checklist](releasing.md#development-freeze-and-release-only-handoff);
+the [backlog](TODO.md#post-10--maintenance-and-product-expansion) tracks post-1.0 work.
 
 **Reading this frozen audit:** The executive summary, proposed batches and
 statement of potential blockers below describe the **2026-10-09 baseline**, not
@@ -1126,7 +1128,9 @@ REA-035 and REA-036 received additional source-owned restrictions and traits,
 and full player-facing browser verification on 2026-10-14; both findings
 are now closed. Other referenced work retains its own 1.0 review scope.
 The historical findings below remain as evidence; see
-[`TODO.md`](TODO.md#current-milestone) for remaining 1.0 work.
+[the release checklist](releasing.md#development-freeze-and-release-only-handoff)
+for final release acceptance and [TODO](TODO.md#post-10--maintenance-and-product-expansion)
+for post-1.0 development.
 
 ### REA-016 - Stealth omits Deployables and multi-Trooper reaction reasoning
 

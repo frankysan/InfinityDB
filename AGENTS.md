@@ -48,11 +48,11 @@ V1S selection gate, VD/VR rules or exact-SHA CI acceptance.
 
 ### Backlog work selection and closeout
 
-For autonomous work, apply the [V1S selection checkpoint](docs/TODO.md#v1s-work-selection-and-handoff).
-**Invoke the explicit selection gate** from the [testing guide](docs/testing.md#v1s-backlog-checks)
-before starting a numbered slice; inspect all earlier open IDs, documented
-blocked/deferred reasons and any exact TODO-recorded user-priority override.
-Do not use a free-form override argument to bypass earlier work.
+For autonomous work, use the active [post-1.0 backlog](docs/TODO.md) and its
+[retirement contract](docs/README.md#backlog-completion-and-retirement).
+The 1.0 V1S register has no open tasks. If a numbered V1S slice is reopened,
+run the [selection gate](docs/testing.md#v1s-backlog-checks) and inspect all
+earlier open IDs and documented exceptions; never invent a priority override.
 Before retiring a V1S entry, run the Git-aware closeout check for the proposed
 staged index and cite the removed ID in the eventual commit. The historical
 audit requires a deliberate, documented baseline; it does not approve

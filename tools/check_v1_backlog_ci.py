@@ -29,6 +29,7 @@ class AuditRange:
     target: str
     origin: str
     complete: bool
+    integrated_target: str | None = None
 
 
 def _valid_sha(value: Any, field: str) -> str:
@@ -51,9 +52,12 @@ def choose_ci_range(
     """Choose a bounded, first-parent-compatible audit range.
 
     PR: earliest shared first-parent revision, narrowed to the adopted checker
-    baseline where it is later. Push: the explicit previous SHA (no force
-    assumption). Manual: explicit baseline, otherwise adoption or one commit
-    with an *incomplete* label. The caller must expose the coverage level.
+    baseline where it is later. Push: the explicit previous SHA, or the
+    complete merged-feature lineage when a direct PR merge changes TODO.
+    Legacy main without a register uses the adopted baseline; the published
+    merge's TODO must match its audited second parent.
+    Manual: explicit baseline, otherwise adoption or one commit with an
+    *incomplete* label. The caller must expose the coverage level.
     """
     current = _valid_sha(checkout_head, "checkout")
     if event_name == "pull_request":
@@ -84,6 +88,43 @@ def choose_ci_range(
             raise ValueError("push target is not the checked-out commit")
         if before not in _first_parent(repository, target):
             raise ValueError("push before SHA is not in first-parent history")
+        base_backlog = analyze_backlog(_git(repository, "show", f"{before}:docs/TODO.md"))
+        legacy_base = (
+            len(base_backlog.diagnostics) == 1
+            and base_backlog.diagnostics[0].code == "V1B004"
+        )
+        if base_backlog.diagnostics and not legacy_base:
+            raise ValueError("push before backlog contains invalid V1S declarations")
+
+        # For a direct PR merge that changes TODO, audit the commits on the
+        # merged branch rather than attributing every retirement to GitHub's
+        # generated merge message. Require the published TODO to be identical
+        # to the reviewed branch tip. This also handles the first merge from
+        # a legacy main that predates the V1S register.
+        parents = _git(repository, "rev-list", "--parents", "-n", "1", target).split()
+        before_todo = _git(repository, "show", f"{before}:docs/TODO.md")
+        target_todo = _git(repository, "show", f"{target}:docs/TODO.md")
+        if len(parents) == 3 and parents[1] == before and target_todo != before_todo:
+            merged_head = parents[2]
+            if target_todo != _git(repository, "show", f"{merged_head}:docs/TODO.md"):
+                raise ValueError("merge changed the audited V1S backlog")
+            feature_lineage = _first_parent(repository, merged_head)
+            prior_history = set(_git(repository, "rev-list", before).splitlines())
+            shared = next((rev for rev in feature_lineage if rev in prior_history), None)
+            if shared is None:
+                raise ValueError("merged branch has no shared first-parent history")
+            shared_backlog = analyze_backlog(
+                _git(repository, "show", f"{shared}:docs/TODO.md")
+            )
+            if shared_backlog.diagnostics:
+                if not legacy_base or adoption_base not in feature_lineage:
+                    raise ValueError("merged branch lacks a valid V1S audit baseline")
+                shared = adoption_base
+            return AuditRange(shared, merged_head, "push-feature-merge",
+                              True, target)
+
+        if legacy_base:
+            raise ValueError("pre-adoption push requires a direct two-parent merge")
         return AuditRange(before, target, "push", True)
 
     if event_name == "workflow_dispatch":
@@ -120,18 +161,24 @@ def _event_document(environ: Mapping[str, str]) -> dict[str, Any]:
     return parsed
 
 
-def main(environ: Mapping[str, str] | None = None, *, repository: Path = ROOT) -> int:
+def main(
+    environ: Mapping[str, str] | None = None, *,
+    repository: Path = ROOT, adoption_base: str = ADOPTION_BASE,
+) -> int:
     environment = os.environ if environ is None else environ
     try:
         audit_range = choose_ci_range(
             environment.get("GITHUB_EVENT_NAME", ""),
             _event_document(environment),
             environment.get("GITHUB_SHA", ""),
-            repository=repository,
+            repository=repository, adoption_base=adoption_base,
         )
-        markdown = _git(repository, "show", f"{audit_range.target}:docs/TODO.md")
+        # For the first integration, this is the merge commit, not the branch
+        # tip whose first-parent history is audited.
+        published_target = audit_range.integrated_target or audit_range.target
+        markdown = _git(repository, "show", f"{published_target}:docs/TODO.md")
         analysis = analyze_backlog(
-            markdown, source=f"{audit_range.target[:12]}:docs/TODO.md",
+            markdown, source=f"{published_target[:12]}:docs/TODO.md",
         )
         if any(d.severity == "error" for d in analysis.diagnostics):
             raise ValueError("target V1S backlog has structural errors")
@@ -147,6 +194,8 @@ def main(environ: Mapping[str, str] | None = None, *, repository: Path = ROOT) -
         f"V1S CI retirement check: {audit_range.origin} "
         f"{audit_range.base[:12]}..{audit_range.target[:12]} "
         f"({'complete selected range' if audit_range.complete else 'last commit only'})"
+        + (f"; integrated as {audit_range.integrated_target[:12]}"
+           if audit_range.integrated_target else "")
     )
     if not audit_range.complete:
         print("WARNING: manual run predates the adopted baseline; "
