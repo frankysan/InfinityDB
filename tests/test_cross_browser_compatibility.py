@@ -167,12 +167,21 @@ def test_critical_browser_journey(browser: Any, origin: str, width: int, journey
     errors: list[str] = []
     failed_requests: list[str] = []
     page.on("pageerror", lambda error: errors.append(str(error)))
-    page.on(
-        "requestfailed",
-        lambda request: failed_requests.append(f"{request.url}: {request.failure}")
-        if "/api/" in request.url and "ERR_ABORTED" not in str(request.failure)
-        else None,
-    )
+    def record_failed_request(request: Any) -> None:
+        if "/api/" not in request.url:
+            return
+        failure = str(request.failure)
+        # Leaving the Units catalog cancels its optional API preloads. Firefox
+        # and WebKit use different cancellation reasons than Chromium.
+        if "ERR_ABORTED" in failure or (
+            journey == "navigation" and failure.casefold() in {
+                "ns_binding_aborted", "cancelled",
+            }
+        ):
+            return
+        failed_requests.append(f"{request.url}: {failure}")
+
+    page.on("requestfailed", record_failed_request)
     try:
         response = context.request.get(f"{origin}/api/version", timeout=15000)
         assert response.status == 200
