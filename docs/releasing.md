@@ -12,6 +12,11 @@ A release is not ready merely because its implementation checks pass. The releas
 gate includes repository state, documentation, release metadata, hosted validation,
 and post-release verification.
 
+Commands shown as `python` in this checklist use **the project's virtual
+environment**, not system Python: `.\.venv\Scripts\python.exe` in PowerShell
+or `.venv/bin/python` on Linux/macOS. Use the repository root as the
+working directory and substitute the actual release SHA/tag for placeholders.
+
 ## Version 1.0 data-completeness gate
 
 Version 1.0 represents the point where InfinityDB provides a **complete,
@@ -45,8 +50,9 @@ experience; preserve their scenario/season scope. Core-scenario geometry must al
 versioned deterministic SVG renderer so the four supported missions do not depend on manually
 maintained diagrams. Geometry schema v1 only needs to cover those core missions; ITS-only map
 features and an interactive editor remain outside the 1.0 gate. Final visual polish, every planned
-search/filter/comparison feature, exhaustive performance work, optional themes, deployment
-conveniences, and unrelated architectural refactors likewise do not block 1.0.
+search/filter/comparison feature, exhaustive performance work, additional theme variants beyond
+shipped System/Light/Dark, deployment conveniences, and unrelated architectural refactors
+likewise do not block 1.0. Accessibility of the shipped themes remains a release check.
 
 The 1.0 release gate requires:
 
@@ -306,7 +312,7 @@ deployment behavior.
   candidate:
 
   ```text
-  python tools/prepare_release_ci_evidence.py --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output reports/release-ci-v<version>.json --tag-message-output reports/release-tag-v<version>.txt
+  python -m tools.prepare_release_ci_evidence --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output reports/release-ci-v<version>.json --tag-message-output reports/release-tag-v<version>.txt
   ```
 
   The command must verify successful `Source checks`, `Installed wheel smoke`, and

@@ -226,21 +226,35 @@ passed; independent touch/human, cumulative and hosted gates remain open.
   Blocked: final cumulative gate should run only after upstream candidate
   acceptance and human/manual checks are reconciled; authority: release owner;
   retry: when V1S-080, V1S-087 and V1S-089 prerequisites are accepted.
-- [ ] **V1S-091 (L, gate):** Audit the complete tracked Markdown
-  corpus, links, commands, contracts and browser copy.
+
+The **V1S-091** tracked documentation audit passed Markdownlint (44 files),
+local path/heading checks (43 files), maintained command-module inspection and
+**83 focused tests** covering link, release-note/evidence, backlog and
+representative player-facing copy contracts. The release checklist now
+clarifies its virtual-environment commands and the shipped theme requirement.
+
 - [ ] **V1S-092 (M, gate):** Finalize Unreleased notes,
   release metadata and version after completeness acceptance.
+  Blocked: final version and release notes require accepted candidate completeness;
+  authority: release owner; retry: when V1S-080, V1S-087, V1S-089 and V1S-090 pass.
 - [ ] **V1S-093 (L, gate):** Merge the approved candidate, obtain
   exact-main-SHA hosted Source, wheel and deployment smoke evidence,
   optional full-assets and annotated tag. The recurring Windows scenario
   lifecycle timeout in [hosted Source](ci.md#v1s-git-aware-retirement-gate)
   remains unexplained; investigate recurrence rather than assuming a local
   pass proves hosted stability.
+  Blocked: an approved and locally accepted candidate is required before merge;
+  authority: release owner; retry: after V1S-092 and required local acceptance pass.
 - [ ] **V1S-094 (L, external):** With explicit operator approval,
   deploy the tagged artifact and verify recovery assets exist.
   A live-host rollback rehearsal is not required.
+  Blocked: deployment requires an approved exact-SHA hosted-green release tag;
+  authority: release owner; retry: after V1S-093 and explicit deployment approval.
 - [ ] **V1S-095 (M, gate):** Verify the deployed exact source/runtime
   pair, release version, static assets and representative browser paths.
+  Blocked: post-deployment checks require an actually deployed release;
+  authority: release owner; retry: after approved V1S-094 deployment completes.
+
 The [mandatory cross-browser compatibility release gate](ci.md#cross-browser-release-compatibility-gate)
 passed all four hosted jobs on the development acceptance revision
 `b5ca8823d3bad593ac000298a244d36aea494480` (56/56 tests).
