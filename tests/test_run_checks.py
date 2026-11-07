@@ -277,13 +277,15 @@ def test_test_stage_can_schedule_two_browser_lanes() -> None:
     assert stage.command[8:] == ("-m", "not full_assets", "-q")
 
 
-def test_test_stage_can_select_three_or_four_chromium_slots_and_lanes() -> None:
+@pytest.mark.parametrize("stage_name", ("test", "preflight"))
+def test_test_and_preflight_preserve_explicit_chromium_capacity(stage_name: str) -> None:
     [stage] = run_checks.stage_definitions(
-        ("test",), [], build_source=None,
+        (stage_name,), [], build_source=None,
         test_workers="8", test_distribution="browserlanes",
         browser_slot_count=4, browser_lane_count=3,
     )
-    assert stage.command[3:12] == (
+    start = stage.command.index("-n")
+    assert stage.command[start:start + 9] == (
         "-n", "8", "--dist", "loadgroup", "--browser-lanes",
         "--browser-slot-count", "4", "--browser-lane-count", "3",
     )
@@ -321,14 +323,16 @@ def test_browser_reuse_rejects_unsafe_modes(
     assert "--reuse-browser requires" in capsys.readouterr().err
 
 
-def test_four_lane_scenario_split_is_explicit_opt_in() -> None:
+@pytest.mark.parametrize("stage_name", ("test", "preflight"))
+def test_four_lane_scenario_split_is_explicit_opt_in(stage_name: str) -> None:
     [stage] = run_checks.stage_definitions(
-        ("test",), [], build_source=None,
+        (stage_name,), [], build_source=None,
         test_workers="8", test_distribution="browserlanes",
         browser_slot_count=4, browser_lane_count=4,
         split_scenario_faq=True,
     )
-    assert stage.command[3:13] == (
+    start = stage.command.index("-n")
+    assert stage.command[start:start + 10] == (
         "-n", "8", "--dist", "loadgroup", "--browser-lanes",
         "--split-scenario-faq", "--browser-slot-count", "4",
         "--browser-lane-count", "4",

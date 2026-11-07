@@ -372,11 +372,10 @@ def stage_definitions(
                         command.append("--split-scenario-faq")
                     if reuse_browser:
                         command.append("--reuse-browser")
-            if name == "test":
-                if browser_slot_count != 2:
-                    command.extend(("--browser-slot-count", str(browser_slot_count)))
-                if browser_lane_count != 2:
-                    command.extend(("--browser-lane-count", str(browser_lane_count)))
+            if browser_slot_count != 2:
+                command.extend(("--browser-slot-count", str(browser_slot_count)))
+            if browser_lane_count != 2:
+                command.extend(("--browser-lane-count", str(browser_lane_count)))
             if targets and name == "test":
                 command.extend(targets)
             asset_marker = (

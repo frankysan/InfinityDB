@@ -145,7 +145,20 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending execution entries.
+- [ ] **VR-0142** (2026-11-07; ready-to-run; mandatory V1S-090 gate):
+  Verify explicit browser capacity reaches isolated preflight together with
+  the scenario split flag. Work: [V1S-090](TODO.md#final-frozen-candidate-acceptance-and-release).
+  Change: `tools/run_checks.py` and paired `tests/test_run_checks.py`
+  regressions after `e5700703`; pin the committed repair with `expected_commit`.
+  Immediate: mandatory preflight-repair batch passed 151 tests on Windows,
+  one symlink-privilege skip; lint, type and complete docs checks passed.
+  Design: no missing design; existing capacity and split regressions now
+  cover both test and preflight commands under the immediate correctness gate.
+  Deferred: on `linux-dev`, run runner/capacity/section modules followed by
+  complete isolated preflight with required assets, eight workers, four
+  browser lanes/slots and the scenario FAQ split. Require terminal pytest,
+  indexed artifact/lint/type and installed-wheel/runtime results, including
+  all skip reasons. This entry remains due until that execution is reconciled.
 
 The [V1S-083 disclosure and consumer batches](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
 passed on the recorded Linux/Windows states and close VR-0137. Hosted CI
@@ -169,7 +182,7 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 ## Next unused IDs
 
 - Design: `VD-0116`; active obligations are listed above.
-- Execution: `VR-0142`; active obligations are listed above.
+- Execution: `VR-0143`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

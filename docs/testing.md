@@ -290,6 +290,9 @@ the complete indexed SVG publication. Preflight always checks the full indexed s
 and `--test-section` narrow only the ordinary working-tree test stage. The ordinary
 test stage retains access to local evidence and optional browser tooling, while the
 isolated pass checks the environment and files available to a clean CI checkout.
+Explicit browser slot/lane counts also reach isolated pytest, including the
+four-lane prerequisite when `--split-scenario-faq` is selected. This does not
+enable the host's automatic browser profile for preflight.
 
 This exports the same index, creates a fresh virtual environment without system-site
 packages, installs only `.[dev,symbols]` from that export, prepares the publication,
@@ -5772,6 +5775,26 @@ rule/FAQ PDFs and verify their source guards. The complete Windows docs
 stage supplies documentation acceptance while the Linux Markdownlint
 installation is unavailable. Require replacement full source and isolated
 preflight results; the failed full-profile attempt does not close V1S-090.
+
+The replacement full source run on
+`e5700703d8d9656360c9cf9e1ef8be2a0e177001` passed **5,847 tests,
+38 skipped, zero failures**, with two existing Python 3.14 fork deprecation
+warnings, in **700.79 s**. All seven activated rule/FAQ/ITS source PDFs
+were available; no missing-PDF skips remained. Skips were 17 release-FAQ
+opt-ins (separately covered by the 17-case Windows release-pair batch),
+14 independently dispatched cross-browser cases, six completed/optional
+migration checks and one Windows-only check. Lint, type, Army/rules builds
+and zero occupied unrepresented source fields also passed.
+
+Isolated preflight then exposed invalid argument forwarding: it received
+`--split-scenario-faq` but not the explicit four-lane count required by
+that option. Isolated pytest exited 3 with an xdist worker-completion
+assertion; the full gate remained failed despite passing wheel/runtime smoke.
+The runner now forwards explicit slot/lane counts to both pytest stages,
+with paired regression cases for test and preflight commands. The immediate
+Windows runner/capacity/section batch passed **151 tests, one symlink-privilege
+skip**. Require a replacement complete isolated-preflight pass before closeout;
+do not infer acceptance from the source suite or installed-wheel smoke alone.
 
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
