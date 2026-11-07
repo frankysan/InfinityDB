@@ -1819,6 +1819,7 @@ def test_served_revision_matches_exact_inventoried_database_pair() -> None:
     assert observed["status"] == "exact-database-pair-match-not-source-completeness"
     assert observed["snapshotRevision"] == app.snapshot_revision
     assert opened.call_args.args[0].full_url == "http://127.0.0.1:8000/api/version"
+    assert opened.call_args.args[0].get_header("User-agent") == "Mozilla/5.0"
     assert opened.call_args.kwargs == {"timeout": 10}
 
 

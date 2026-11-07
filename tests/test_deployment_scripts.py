@@ -43,10 +43,26 @@ def test_metrics_history_service_is_immutable_private_and_volume_backed() -> Non
     assert "condition: service_healthy" in metrics_service
 
     assert "FROM python:3.11-slim" in dockerfile
-    assert "COPY tools/metrics_history.py /app/metrics_history.py" in dockerfile
+    assert "tools/metrics_history.py /app/metrics_history.py" in dockerfile
     assert "USER metrics" in dockerfile
     assert "ENTRYPOINT" in dockerfile
     assert 'CMD ["run"]' in dockerfile
+
+
+def test_installer_config_umask_does_not_leak_into_release_checkout() -> None:
+    script = _read("scripts/install-or-update.sh")
+    settings = script.split("Save these settings to", 1)[1].split(
+        "prepare_tracked_release_file()", 1,
+    )[0]
+    assert "    (\n      umask 077\n" in settings
+    assert 'chmod 600 "$config_file"' in settings
+    assert '    )\n    echo "Saved deployment settings' in settings
+
+
+def test_fingerprinted_svg_assets_are_byte_exact() -> None:
+    attributes = _read(".gitattributes")
+    assert "src/infinity_db/web/static/*.svg -text" in attributes
+    assert "src/infinity_db/web/static/silhouettes/*.svg -text" in attributes
 
 
 def test_deploy_brackets_app_replacement_with_noncritical_metrics_history_scrapes() -> None:

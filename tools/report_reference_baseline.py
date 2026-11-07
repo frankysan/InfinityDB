@@ -1109,7 +1109,10 @@ def verify_served_revision(report: dict[str, Any], base_url: str) -> dict[str, s
         )
     version_url = base_url.rstrip("/") + "/api/version"
     try:
-        request = Request(version_url, headers={"Accept": "application/json"})
+        request = Request(
+            version_url,
+            headers={"Accept": "application/json", "User-Agent": "Mozilla/5.0"},
+        )
         with urlopen(request, timeout=10) as response:
             if response.status != 200:
                 raise ReferenceBaselineError(
