@@ -162,6 +162,19 @@ validation remains in the [validation queue](validation-queue.md). A bounded tas
 can close while a separate, explicitly owned final release gate remains open;
 do not relabel unfinished descendants as separate gates merely to close a parent.
 
+**Freeze before merging a release candidate:** The active development TODO
+must be reconciled before the final planned merge. Keep merge approval,
+exact-main-SHA hosted CI, tagging, authorized deployment and post-deployment
+verification in the canonical [release checklist](releasing.md), not as open
+development tasks whose later retirement requires a second merge. When an
+existing V1S entry concerns only those external release operations, transfer
+it explicitly to the runbook with its former ID, exact remaining obligation,
+approval dependency and evidence requirement; cite the IDs and this handoff
+in the transfer commit. **Transfer is not completion** and never waives a
+release gate. CI or deployment failures requiring tracked fixes reopen
+development and require a corrected release candidate instead of pretending
+the earlier merge is final.
+
 When correcting or extending an existing task, reopen it and every checked
 ancestor **before** editing its scope or adding subtasks. If genuinely new scope
 arises after completion, create a separate open task referring to the delivered

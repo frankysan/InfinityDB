@@ -293,6 +293,37 @@ deployment behavior.
 
 ## 5. Land the release commit, verify hosted CI, and tag
 
+### Development freeze and release-only handoff
+
+For 1.0.0, **the development branch and its active implementation TODO must be
+final before the approved merge**. The merge is the final *planned* tracked
+source/documentation change. Afterward, exact-main-SHA CI, the annotated tag,
+deployment and production verification are operator release steps. Record their
+results in GitHub Actions, the immutable tag annotation, release/deployment
+records and ignored operational reports, **not by editing TODO and making a
+routine second merge**.
+
+The following former V1S entries are **transferred obligations, not completed
+tasks**. They are accepted only as their corresponding checklist steps pass:
+
+- **V1S-093 — integration and tag:** Approve and merge the frozen candidate;
+  require exact-main-SHA Source, wheel, deployment smoke and all four
+  cross-browser jobs, optional full-asset evidence where configured, and the
+  annotated tag. Investigate any recurring Windows scenario lifecycle timeout
+  if it affects hosted acceptance. Tag approval remains a separate release-owner
+  decision.
+- **V1S-094 — authorized deployment:** Deploy the verified tagged artifact only
+  with explicit operator approval; confirm previous-image/database and recovery
+  assets exist. No live rollback rehearsal is required.
+- **V1S-095 — deployed acceptance:** Verify the exact source/runtime database
+  pair, application version, static assets and representative browser paths on
+  the actual hosted deployment.
+
+If a post-merge gate reveals a defect requiring tracked changes, **stop release
+acceptance**, prepare and validate a corrected development candidate, then
+perform another approved merge and exact-SHA checks. That is an exceptional
+repair, not a routine second merge merely to retire operational TODO entries.
+
 - [ ] Before merge, when the optional checksum-pinned publication bundle is part of the release
   gate, manually dispatch `Full-asset checks` against the release-candidate branch and record the
   successful run SHA. This pre-merge validation does not require the candidate to be on `main`.

@@ -1579,7 +1579,8 @@ warnings remained. Skips include opt-in publication work, absent ignored
 historical PDFs and a local migration report; they are not source acceptance.
 This verifies the Linux obligations for VR-0052 through VR-0058 at that
 revision. The separate hosted Source acceptance for the cleaned-up
-historical-evidence export remains open under V1S-093; this result does
+historical-evidence export remains open under the
+[transferred V1S-093 release gate](releasing.md#development-freeze-and-release-only-handoff); this result does
 not cover subsequent movement-reference or clean-export evidence changes.
 
 The later pinned movement/geometry batch at
@@ -1614,8 +1615,9 @@ edited, uncommitted V1S-033E browser test was part of this run.
 The reviewed, locally complete queue entries are retired under the
 strict drain policy; **hosted Source checks, macOS, cross-platform
 byte determinism, Installed wheel, Deployment smoke, and final
-source/browser release acceptance remain open** under V1S-093 and
-the mandatory `docs/ci.md`/`docs/releasing.md` gates.
+source/browser release acceptance remain open** under the
+[transferred V1S-093 release gate](releasing.md#development-freeze-and-release-only-handoff)
+and the mandatory `docs/ci.md`/`docs/releasing.md` checks.
 
 **2026-11-04 V1S-033E browser closeout:** The previously uncommitted
 combined browser test was reviewed in VD-0007 (no tests during design),

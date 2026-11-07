@@ -205,9 +205,15 @@ explicitly selected, first-parent-compatible range, with the same
 - Pull requests audit the PR **head commit**, not the synthetic merge commit;
   choose the nearest shared first-parent revision from the PR base history,
   narrowed to the adopted checker baseline when it is later.
-- Pushes to `main` audit the event's `before..after` range and fail if
-  the prior SHA is not in first-parent history. Force/divergent history is
-  not silently accepted.
+- Pushes to `main` normally audit the event's `before..after` first-parent
+  range. When a direct two-parent PR merge changes `docs/TODO.md`, the checker
+  instead audits the merged feature's entire first-parent history from its
+  shared, valid backlog baseline. This attributes V1S removals to the actual
+  development commits rather than GitHub's generated merge message. The merge
+  must preserve the audited branch's `docs/TODO.md` exactly. For the initial
+  integration into a pre-register `main`, the adopted `0bac3369` baseline is
+  used. Unreviewed merge resolutions, invalid histories and divergent pushes
+  still fail closed.
 - Manual dispatches may provide an explicit `backlog_base` SHA. Otherwise,
   the adopted `0bac3369` baseline is used when on the target's first-parent
   path. Older branches fall back to the preceding commit with a prominent
@@ -231,7 +237,7 @@ the Source workflow's second attempt passed all four platform jobs and
 cross-platform deterministic-output comparison. This accepts the backlog
 checker's CI integration at this development SHA; it does **not** replace
 the exact-main-SHA acceptance required by
-[V1S-093](TODO.md#final-10-acceptance). A targeted Node harness exit
+[the transferred V1S-093 release gate](releasing.md#development-freeze-and-release-only-handoff). A targeted Node harness exit
 stability fix was later committed as `34282616`, with separate focused
 Windows/Linux regression acceptance. Evidence-presence checks cannot
 substitute for semantic closeout review.
