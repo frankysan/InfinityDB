@@ -171,23 +171,6 @@ acceptance remains under V1S-081–088.
 The [deployed-object acceptance](v1.0-source-coverage-audit.md#deployed-object-api-and-ordinary-browser-acceptance-v1s-078-2026-11-05)
 is bounded to the development pair; final-input checks remain.
 
-#### Accessibility and navigation
-
-**Parent:** [Player-facing navigation and reference clarity](#player-facing-navigation-and-reference-clarity).
-**Project domains:** Web frontend, Project infrastructure
-
-- [ ] **V1S-080 (M, gate):** Complete final-candidate manual touch/visual
-  acceptance for the accuracy notice and navigation on 320/390 px screens
-  in light/dark themes. The [frozen-pair automated notice gate](testing.md#v1s-080-frozen-pair-automated-notice-acceptance)
-  passed **10/10** on `174bf8b2`, with zero skips; no browser defect was
-  reproduced. The owner subsequently reported **5/5 real manual
-  checks passed** on development preview `2df92f9`, including actual touch;
-  the final release-matched candidate still needs recorded sign-off.
-  The earlier V1S-079 NVDA/Chrome 7/7 walkthrough remains separate.
-  Preserve the frozen source pair; do not test the older public 0.10.1 deployment.
-  Blocked: manual touch/visual sign-off requires a release-matched candidate;
-  authority: release owner; retry: when the candidate is available for device inspection.
-
 #### Final frozen-candidate acceptance and release
 
 **Parent:** [Final 1.0 acceptance](#final-10-acceptance).
@@ -232,22 +215,14 @@ checks retain their separately numbered gates.
   and hosted for verification.
 
 The [V1S-088 frozen-pair scenario and FAQ rerun](v1.0-source-coverage-audit.md#v1s-088-frozen-pair-scenario-and-faq-browser-acceptance-2026-11-07)
-passed; independent touch/human, cumulative and hosted gates remain open.
+passed. The [final candidate manual notice and Silhouette sign-off](testing.md#final-candidate-manual-notice-and-silhouette-acceptance-2026-11-07)
+is accepted; cumulative and hosted gates remain open.
 
-- [ ] **V1S-089 (M, gate):** Obtain manual Silhouette
-  hover/keyboard/touch/theme/narrow-width and human visual sign-off.
-  The [source/geometry preflight](testing.md#v1s-089-silhouette-manual-visual-acceptance-preflight)
-  passed **4/4** on `2f4f4686`, including the pinned N5.3 PDF.
-  The owner reported **6/6 visual and real-touch checks passed** on
-  development preview `2df92f9`. Final candidate sign-off is still open.
-  Blocked: human preview interaction and proportional SVG visual inspection
-  remain unapproved; authority: release owner; retry: once the candidate
-  is available for real-device and desktop visual inspection.
 - [ ] **V1S-090 (L, gate):** Drain due VD/VR work and run the full
   local/Linux, source, docs, preflight and applicable full-asset checks.
-  Blocked: final cumulative gate should run only after upstream candidate
-  acceptance and human/manual checks are reconciled; authority: release owner;
-  retry: when V1S-080, V1S-087 and V1S-089 prerequisites are accepted.
+  Manual candidate checks are accepted. Blocked: exact-version hosted Unit
+  acceptance remains open; authority: release owner;
+  retry: when V1S-087 is accepted.
 
 The **V1S-091** tracked documentation audit passed Markdownlint (44 files),
 local path/heading checks (43 files), maintained command-module inspection and
@@ -261,7 +236,7 @@ clarifies its virtual-environment commands and the shipped theme requirement.
   version checkpoint has been prepared for V1S-087. It does not finalize
   the Unreleased changelog, approve release metadata, merge or tag.
   Blocked: final version and release notes require accepted candidate completeness;
-  authority: release owner; retry: when V1S-080, V1S-087, V1S-089 and V1S-090 pass.
+  authority: release owner; retry: when V1S-087 and V1S-090 pass.
 - [ ] **V1S-093 (L, gate):** Merge the approved candidate, obtain
   exact-main-SHA hosted Source, wheel and deployment smoke evidence,
   optional full-assets and annotated tag. The recurring Windows scenario
@@ -313,8 +288,8 @@ than whole-record approval. Final citation and browser acceptance follow the
 
 The [bounded source/relationship findings](n5-source-history.md) and
 [ranked gap batches](v1.0-source-coverage-audit.md#ranked-confirmed-gaps-and-evidence-batches-v1s-022-2026-11-03)
-remain evidence, not extra TODO entries. Final human visual sign-off is owned
-by V1S-045/089 and the [release checklist](releasing.md).
+remain evidence, not extra TODO entries. The [final candidate manual sign-off](testing.md#final-candidate-manual-notice-and-silhouette-acceptance-2026-11-07)
+is accepted; remaining release gates follow the [release checklist](releasing.md).
 
 ### Rules and reference completeness
 
@@ -405,30 +380,18 @@ Historical replay and publisher rulings are not 1.0 prerequisites.
   contracts own implemented behavior; comparison controls are post-1.0.
   Keep unresolved Mine/Dazer/Armed Turret differences disclosed.
 
-### Player-facing navigation and reference clarity
-
-**Project domains:** Web frontend, Project infrastructure
-
-- [ ] Complete final-candidate touch, 320/390px responsive and theme
-  acceptance of the floating accuracy notice and navigation under
-  **V1S-080**. The 7/7 human screen-reader walkthrough passed under
-  retired V1S-079; its reported result and the earlier automated focus,
-  announcement and notice regressions are recorded in
-  [testing](testing.md#parallel-windows-development-and-linux-validation).
-  The [web design guidelines](web-design-guidelines.md) own the UI contract.
-
 ### Final 1.0 acceptance
 
 **Project domains:** Data processing, Web backend, Web frontend,
 Project infrastructure, Deployment
 
-- [ ] Complete **V1S-087 and V1S-089–095** and outstanding earlier browser gates
+- [ ] Complete **V1S-087 and V1S-090–095**
   against the exact frozen source,
   database, generated-publication, static-asset and release-candidate
-  revisions. This includes one current source citation per in-scope rule
-  and usable maintained-reference browser coverage,
-  81-page Unit matrix, core scenario and FAQ gates, manual Silhouette
-  and visual acceptance, all due VD/VR checks, full local/Linux checks,
+  revisions. This includes one current source citation per in-scope rule,
+  usable maintained-reference browser coverage,
+  preservation of accepted Unit/scenario/FAQ and manual browser evidence,
+  all due VD/VR checks, full local/Linux checks,
   documentation audit, exact-SHA hosted CI, annotated tag, authorized
   deployment and post-deploy smoke. Use the
   [canonical release checklist](releasing.md); keep detailed commands,

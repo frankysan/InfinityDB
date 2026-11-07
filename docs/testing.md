@@ -1282,7 +1282,7 @@ navigation and soft-navigation state continuity. No source, database or
 runtime edits were necessary; the existing browser contract provides
 the selected frozen-pair checks.
 
-**Manual acceptance still required:** a release owner must inspect the
+**Manual acceptance checklist (accepted below):** a release owner must inspect the
 actual release-matched candidate at approximately 320/390 px in both themes
 and activate the notice with **real touch** (expanded and collapsed states),
 verify its legibility/bounds, check that the icon-only collapsed control
@@ -1300,7 +1300,9 @@ control, Back/Forward state continuity, and **actual-device touch**.
 The preview started and the checkout SHA was confirmed (2/2 preparation
 checks); specific device/browser version was not provided in the result.
 These are accepted as observations of that development revision, **not**
-final exact-version v1.0 candidate sign-off. V1S-080 remains open.
+final exact-version v1.0 candidate sign-off. The later
+[candidate manual acceptance](#final-candidate-manual-notice-and-silhouette-acceptance-2026-11-07)
+closes V1S-080.
 
 **2026-11-05 V1S-079 human assistive-technology acceptance:**
 The release owner reported **7/7 manual screen-reader checks passed** using the
@@ -5624,9 +5626,32 @@ development server after this checkpoint and request
 the current snapshot/static values. The release owner still needs to
 serve a candidate on an accessible, controlled origin and run the
 independent exact-version `tools.verify_release_candidate_browser` gate,
-then record final touch/visual sign-off on the *candidate SHA*. Final
+with local browser and human sign-off recorded below. Final
 changelog promotion, V1S-090 cumulative testing, merge/tagging and
 deployment remain gated independently.
+
+### Final candidate manual notice and Silhouette acceptance (2026-11-07)
+
+**Project domains:** Web frontend, Project infrastructure
+
+The release owner reported **all manual checks passed** on the untagged
+`1.0.0` candidate `73e807b3887bfec4e4ec9cba7791b1e5cda0012f`,
+using **Windows Firefox and iOS Safari**. This accepts the notice/navigation
+checklist under V1S-080 and the Silhouette visual/hover/keyboard/touch
+checklist under V1S-089, including 320/390 px and light/dark presentation.
+Browser and OS version numbers were not supplied; the result is
+release-owner-reported human evidence, not an agent-observed device session.
+V1S-080 and V1S-089 are complete on this candidate. Repeat affected checks
+if their implementation, source pair or browser assets change.
+
+The local inspection preview's `/api/version` was verified before and after
+the report: version `1.0.0`, static revision `c135d9dba2cf9b77`, runtime
+snapshot `5e79f6ac1d6cfa74d1f5dee71f2f2730e4b6f6fea45572469ae65652ab10c0ef`.
+The existing `tools.verify_release_candidate_browser` command also passed
+**21/21** real Chrome Unit cases at 1440/390/320 px against that preview,
+with matching version/runtime/static preflight and postflight. This is
+local candidate evidence; it does not close the independently hosted
+V1S-087 gate or approve final cumulative testing, merge, tagging or deployment.
 
 ### Hosted Unit release-candidate acceptance
 
@@ -6785,7 +6810,7 @@ The source/geometry fixture verifies the pinned English N5.3 printed
 Silhouette table, the S1–S8 proportional SVG inputs and the S0/SX
 text-only exceptions. It **does not** constitute rendered visual approval.
 
-**Release-owner manual walkthrough (pending):**
+**Release-owner manual walkthrough (accepted below):**
 
 1. On the release-matched candidate, open the Glossary's Silhouette
    Attribute (`S`) reference. Verify that S1–S8 templates and captions
@@ -6812,13 +6837,13 @@ hover and keyboard focus open/close, **actual-device touch** open/close,
 and both themes at 320/390 px without clipping or horizontal overflow.
 The specific device/browser version was not supplied in the result.
 This is human evidence for the development preview, **not** final
-version-matched v1.0 candidate acceptance; V1S-089 remains open.
+version-matched v1.0 candidate acceptance. The later
+[candidate manual acceptance](#final-candidate-manual-notice-and-silhouette-acceptance-2026-11-07)
+closes V1S-089.
 
-Do not use the older public release as proof of the pending v1.0
-candidate's visual acceptance. Human sign-off is still required.
-The release-gate backlog item V1S-089 remains open and paused;
-the cumulative full suite under V1S-090 is not made due by
-this source preflight.
+The older public release and the source preflight do not establish candidate
+visual acceptance; use the later human sign-off linked above. The cumulative
+full suite under V1S-090 retains its separate hosted-candidate prerequisite.
 
 ### N5.3 Game Modes versus general setup/reference tables
 
