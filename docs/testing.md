@@ -1116,6 +1116,10 @@ does not itself lower the VR count.
    verification against the tracked Army/rules databases.** A matching
    Git HEAD does not include `data/generated/deployed-objects.json`;
    omitting it makes publication, migration and scenario tests fail.
+   When exact-variant or Weapon-profile publications are present, also verify
+   their paired build checks before dispatch. Fingerprint curated inputs from
+   the bytes that Git actually publishes; Windows CRLF working copies must
+   not produce a different source pin from the repository's LF blob.
    Verify browser dependencies and the expected source-evidence coverage
    separately. Do not dispatch an unmatched or incomplete checkout and
    call it equivalent.

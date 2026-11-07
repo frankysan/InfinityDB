@@ -2782,9 +2782,9 @@ all 14 reviewed Restrictions and all 17 deployed objects. The rules
 database SHA-256 is
 `90d600a5b7b0425ee590ef90891481433e179d4e96f4a7b1dbf26edfde672ca9`;
 its matching deployed-object publication SHA-256 is
-`7d0a9facf49ed0734b6eff794ebe7f4f5b25837cd1265a86a9b4d2d5dcac7c9e`,
+`cdcb794f18df52890b1ba5b908f525aa59235c55307854a28f81996927f9a723`,
 and the exact-variant usage publication SHA-256 is
-`f78a602c1c197105812c566c283eb81a03541c929cacdb86ead5601deb3856cd`.
+`da26a4e299031ab419c56f59c2333994bfc8d62147671752aaf2c3f2e3fc32ee`.
 The matched Weapon-profile citation publication SHA-256 is
 `ad3123832c5d777d91739ed6897182f6191ba1985f094f72114d49969ad86db1`.
 The V1S-083 source-context publication changed nine reference owners,

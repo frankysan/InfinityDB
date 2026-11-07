@@ -159,6 +159,13 @@ is recorded. Failed or incomplete verification remains open.
   and negative-typing regressions for SRC-001/027/028/029/032/033; citation
   minimum and affected publication checks. Due before V1S-083 acceptance.
   Intended host: linux-dev; Windows fallback if worker is unavailable.
+  Initial Linux execution at `8cd201dc` failed: 20 failed, 135 passed,
+  14 skipped, 100 setup errors. All failures/errors rejected the unmatched
+  variant-usage/deployed-object pair: the initial Windows provenance used CRLF
+  source bytes while Git stores LF. Canonical-byte repinning preserves all
+  499 rules and now exactly matches the Linux deployed-object bytes. Rerun
+  the failed coverage on the repair; verify missing local PDFs and opt-in
+  FAQ parity separately on Windows. No initial skip counts as acceptance.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
