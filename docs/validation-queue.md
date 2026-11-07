@@ -134,25 +134,7 @@ static design-review outcome. Do not record a test result in VD. Retire
 the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
-- [ ] VD-0102 (2026-11-07; needs-design): Assert the Pheroware family and
-  Endgame source locators are exactly N5.3 p. 182, not p. 181, in curated input,
-  a fresh rules export and the tracked v9 database; preserve distinct variant
-  ownership and detect a stale publication.
-  Work: [V1S-082](TODO.md#final-10-acceptance); change: Pheroware citation
-  correction and matched artifact promotion; risk: medium.
-  Existing coverage: `tests/test_weaponry_catalog_api.py::test_pt_endgame_rules_apply_only_to_the_endgame_source_variant`
-  currently expects the incorrect p. 181; linked execution: VR-0131.
-  Outcome: revise/add focused selectors and inspect them without running tests.
-
-- [ ] VD-0103 (2026-11-07; needs-design): Assert the normal Pheroware Weapon
-  page renders the correct p. 182 family and Endgame source cards, not p. 181,
-  on desktop and narrow viewports in light and dark themes without granting
-  Endgame's variant rule to Eraser or Mirrorball.
-  Work: [V1S-082](TODO.md#final-10-acceptance); change: Pheroware citation
-  correction; risk: medium.
-  Existing coverage: `tests/test_verify_weapon_source_cards_browser.py`;
-  linked execution: VR-0131.
-  Outcome: add a focused browser selector and inspect it without running tests.
+No pending design entries.
 
 ## Pending deferred execution
 
@@ -163,18 +145,30 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0131 (2026-11-07; awaiting-design): Verify corrected Pheroware
+- [ ] VR-0131 (2026-11-07; ready-to-run): Verify corrected Pheroware
   family and Endgame citations from curated input through the matched rules,
   deployed-object and exact-variant publications, API and normal browser.
-  Work: [V1S-082](TODO.md#final-10-acceptance); revision: pending implementation
-  and design commits; risk: medium.
+  Work: [V1S-082](TODO.md#final-10-acceptance); implementation:
+  `e7a69113817b2ba376a0c1add60dc3542ef830c5`; design revision: pending
+  design commit; risk: medium.
   Immediate: source PDF identity and printed pages checked; guarded matched
   artifact promotion and `tools.build_deployed_object_publication --check`,
   `tools.build_variant_usage --check-publication`, and
   `tools.verify_deployment_assets --skip-svg` passed on Windows.
-  Design: VD-0102, VD-0103.
-  Deferred: new source/export/API/browser selectors; existing Weapon variant,
-  current citation-baseline and matched-publication integrity checks.
+  Design: VD-0102 and VD-0103 statically reviewed and retired without running
+  tests; the exact selectors below carry their source, export, API and
+  responsive/theme browser assertions.
+  Deferred: `tests/test_weaponry_catalog_api.py::test_pheroware_chart_heading_matches_pinned_n53_pdf`,
+  `tests/test_weaponry_catalog_api.py::test_pheroware_citations_match_curated_fresh_and_published_rules`,
+  `tests/test_weaponry_catalog_api.py::test_pt_endgame_rules_apply_only_to_the_endgame_source_variant`,
+  `tests/test_curated.py::test_checked_in_n5_collection_is_valid`,
+  `tests/test_rules_database.py::test_weapon_source_notes_remain_distinct_from_gameplay_summary`,
+  `tests/test_report_reference_baseline.py::test_current_citation_minimum_covers_live_n5_reference_collections`,
+  `tests/test_variant_usage.py::test_variant_usage_publication_rejects_stale_release_artifacts`,
+  `tests/test_verify_weapon_source_cards_browser.py::test_pheroware_chart_citations_and_variant_scope_in_normal_browser`,
+  `tests/test_verify_weapon_source_cards_browser.py::test_pinned_weapon_modes_rules_links_and_citations`,
+  plus the matched publication checks above on the tested revision. Require
+  the pinned English N5.3 PDF, Chromium, full assets and zero skips.
   Outcome: pending a pinned focused execution.
 
 The five-item November 4 drain was verified at

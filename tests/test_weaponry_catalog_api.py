@@ -7,6 +7,7 @@ not prove that a player can reach the rule from the relevant weapon page.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -18,6 +19,7 @@ import pytest
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.web import create_app
+from tools.release_rules_export import export_release_rules
 
 
 @pytest.fixture(scope="module")
@@ -263,6 +265,13 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
     payload = _weapon_detail(weaponry_app, "pt")
     assert payload["name"] == "PT"
     assert set(_weapon_rules(payload)) == {"weapon:pt"}
+    family = _weapon_rules(payload)["weapon:pt"]
+    assert [
+        (citation["page"], citation["section"])
+        for citation in family["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["source_version"] == "5.3"
+    ] == [(182, "Pheroware Tactics (PT)")]
 
     variants = {variant["item_id"]: variant for variant in payload["variants"]}
     assert set(variants) == {203, 204, 205}
@@ -275,12 +284,12 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
     assert "Double Shot" in rule["summary"]
     assert "source discrepancy" in rule["facts"]["sourceNotes"][0]
     assert rule["facts"]["effects"]
-    assert {
-        citation["page"]
+    assert [
+        (citation["page"], citation["section"])
         for citation in rule["citations"]
         if citation["source_id"] == "n5-core-v5.3-pdf"
         and citation["source_version"] == "5.3"
-    } >= {181, 182}
+    ] == [(182, "Weapon Chart: PT: Endgame")]
     assert any(
         token.get("target") == "trait:double-shot"
         and token["public_reference"] == {"catalog": "traits", "id": "double-shot"}
@@ -309,6 +318,62 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
             "source_alias": True,
         }
     assert profiles[203]["burst"] == "1"
+
+
+def test_pheroware_chart_heading_matches_pinned_n53_pdf() -> None:
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == (
+        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+    )
+    with pdf.open(source) as book:
+        previous = book[180].get_text().upper()
+        chart = book[181].get_text().upper()
+        assert "PHEROWARE" not in previous
+        assert "182" in chart.splitlines()
+        for heading in (
+            "PHEROWARE TACTICS (PT)", "PT: ENDGAME", "PT: ERASER", "PT: MIRRORBALL",
+        ):
+            assert heading in chart
+
+
+def test_pheroware_citations_match_curated_fresh_and_published_rules(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    documents = load_curated_directory(root / "data/curated")
+    expected = {
+        "weapon:pt": ("n5-core-v5.3-pdf", 182, "Pheroware Tactics (PT)"),
+        "weapon:pt-endgame": ("n5-core-v5.3-pdf", 182, "Weapon Chart: PT: Endgame"),
+    }
+    authored = {
+        record["id"]: record
+        for _, document in documents
+        for record in document["records"]
+        if record["id"] in expected
+    }
+    assert set(authored) == set(expected)
+    for identity, locator in expected.items():
+        assert [
+            (citation["sourceId"], citation["page"], citation["section"])
+            for citation in authored[identity]["citations"]
+        ] == [locator]
+
+    fresh_path = tmp_path / "fresh-rules.db"
+    export_release_rules(documents, fresh_path)
+    for path in (fresh_path, root / "data/generated/rules.db"):
+        database = RulesDatabase(path)
+        database.validate()
+        for identity, locator in expected.items():
+            record = database.composed_record(identity)
+            assert record is not None, (path, identity)
+            assert [
+                (citation["source_id"], citation["page"], citation["section"])
+                for citation in record["citations"]
+            ] == [locator], (path, identity)
 
 
 @pytest.mark.parametrize(

@@ -962,6 +962,71 @@ def test_profileless_symbiobomb_still_exposes_reviewed_rules(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+def test_pheroware_chart_citations_and_variant_scope_in_normal_browser(
+    origin: str, chrome: Any, width: int, theme: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}')")
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.request.get(f"{origin}/api/weapons/pt")
+        assert response.status == 200
+        item = response.json()
+        variants = {variant["id"]: variant for variant in item["weapon_variants"]}
+        assert set(variants) == {203, 204, 205}
+        owners = {variant["item_id"]: variant for variant in item["variants"]}
+        assert set(owners) == set(variants)
+        assert [rule["id"] for rule in owners[203]["rules"]] == ["weapon:pt-endgame"]
+        assert all(not owners[source_id].get("rules") for source_id in (204, 205))
+
+        page.goto(f"{origin}/weapons", wait_until="domcontentloaded")
+        entry = page.locator('#catalog-list a[href="/weapons/pt"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.focus()
+        assert entry.evaluate("node => document.activeElement === node")
+        entry.press("Enter")
+        page.wait_for_url(f"{origin}/weapons/pt", timeout=30000)
+        family = page.locator("#rule-weapon-pt")
+        family.wait_for(state="visible", timeout=30000)
+        assert page.locator("html").get_attribute("data-theme") == theme
+        variant_section = page.locator("section.rules-reference").filter(
+            has=page.get_by_role("heading", name="Variant rules", exact=True),
+        )
+        assert variant_section.locator("#rule-weapon-pt-endgame").count() == 1
+
+        for identity in ("weapon-pt", "weapon-pt-endgame"):
+            citations = page.locator(f"#rule-{identity} .rules-source-citations")
+            citations.wait_for(state="visible", timeout=30000)
+            assert "p. 182" in citations.inner_text()
+            assert "p. 181" not in citations.inner_text()
+            source = citations.locator("a")
+            assert source.count() == 1
+            assert source.get_attribute("href") == (
+                "https://experience.corvusbelli.com/en/infinity/resources"
+            )
+            source.focus()
+            assert source.evaluate("node => document.activeElement === node")
+
+        for source_id, variant in variants.items():
+            assert len(variant["profiles"]) == 1
+            profile = variant["profiles"][0]
+            title = profile.get("mode") or profile.get("name") or variant["name"]
+            card = page.locator(".weapon-profile").filter(
+                has=page.get_by_role("heading", name=title, exact=True),
+            )
+            assert card.count() == 1, (source_id, title)
+            assert card.locator("#rule-weapon-pt-endgame").count() == 0
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (width, theme)
+        assert not errors, (width, theme, errors)
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390])
 def test_kobra_conflicting_sources_stay_visible_on_cc_mode_only(
     origin: str, chrome: Any, width: int,
