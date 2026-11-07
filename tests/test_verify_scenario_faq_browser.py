@@ -617,6 +617,117 @@ def test_tinbot_reference_only_variants_normal_browser(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+def test_skill_faq_card_padding_and_developer_occurrence_geometry(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
+) -> None:
+    """VD-0112: source card geometry and exact-usage visibility at three widths."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.add_init_script(
+        f"sessionStorage.setItem('infinity-db-theme', '{theme}');"
+        "sessionStorage.setItem('infinity-db-developer-mode', 'false');"
+    )
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/skills/climb", wait_until="domcontentloaded")
+        group = page.locator("#skill-content .faq-rulings")
+        group.wait_for(state="visible", timeout=30000)
+        assert group.evaluate(
+            "(node) => parseFloat(getComputedStyle(node).marginTop) >= 24"
+        )
+        card = group.locator(".faq-dated-clarification").first
+        card.wait_for(state="visible", timeout=30000)
+        card_box = card.bounding_box()
+        assert card_box
+        for selector in ("h3", ".detail-copy", ".faq-publication-source"):
+            box = card.locator(selector).first.bounding_box()
+            assert box, (width, theme, selector)
+            assert box["x"] >= card_box["x"] + 12, selector
+            assert box["x"] + box["width"] <= card_box["x"] + card_box["width"] - 12
+        source = card.locator(".faq-publication-source")
+        assert source.locator(".rules-provenance-label").inner_text() == "Sources:"
+        assert source.locator("a").count() == 1
+        assert group.locator(":scope > .detail-source").count() == 0
+
+        usage = page.locator(".exact-variant-usage")
+        usage.wait_for(state="attached", timeout=30000)
+        assert usage.is_hidden(), (width, theme)
+        page.locator('button[aria-controls="settings-menu"]').click()
+        toggle = page.locator("#developer-mode-toggle")
+        toggle.set_checked(True)
+        usage.wait_for(state="visible", timeout=30000)
+        assert usage.evaluate(
+            "(node) => parseFloat(getComputedStyle(node).marginTop) >= 24"
+            " && parseFloat(getComputedStyle(node).marginBottom) >= 24"
+        )
+        disclosure = usage.locator(".exact-variant-group").first
+        disclosure.locator("summary").click()
+        assert disclosure.evaluate("(node) => node.open")
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        ), (width, theme)
+        toggle.set_checked(False)
+        assert usage.is_hidden()
+        assert not errors, (width, theme, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize(("route", "minimum_cards"), (
+    ("/skills/jump", 2),
+    ("/equipment/deployable-cover", 1),
+))
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+def test_faq_single_source_line_and_card_separation(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+    route: str, minimum_cards: int, width: int, theme: str,
+) -> None:
+    """VD-0114: one linked source per FAQ and stable spacing in player views."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.add_init_script(
+        f"sessionStorage.setItem('infinity-db-theme', '{theme}');"
+        "sessionStorage.setItem('infinity-db-developer-mode', 'false');"
+    )
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}{route}", wait_until="domcontentloaded")
+        group = page.locator(".faq-rulings")
+        group.wait_for(state="visible", timeout=30000)
+        assert group.locator(":scope > .detail-source").count() == 0
+        assert group.evaluate(
+            "(node) => parseFloat(getComputedStyle(node).marginTop) >= 24"
+        )
+        cards = group.locator(".faq-dated-clarification")
+        assert cards.count() >= minimum_cards
+        for i in range(cards.count()):
+            card = cards.nth(i)
+            source = card.locator(".faq-publication-source")
+            assert source.count() == 1
+            assert source.locator(".rules-provenance-label").inner_text() == "Sources:"
+            assert source.locator("a").count() == 1
+            assert "date anchor" not in source.inner_text()
+            assert card.evaluate(
+                "(node) => parseFloat(getComputedStyle(node).paddingLeft) >= 16"
+            )
+            if i:
+                previous = cards.nth(i - 1).bounding_box()
+                current = card.bounding_box()
+                assert previous and current
+                assert current["y"] - (previous["y"] + previous["height"]) >= 12
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (route, width, theme)
+        assert not errors, (route, width, theme, errors)
+    finally:
+        page.close()
+
+
 def test_tinbot_reference_only_variants_keep_unfiltered_classification(
     release_scenario_app: Callable[..., Any], chrome: Any,
 ) -> None:
@@ -3173,12 +3284,10 @@ def test_reference_provenance_labels_remain_distinct_across_themes(
         assert "Sources:" in card.locator(".rules-source-citations").inner_text()
         faq = page.locator("#scenario-content .faq-dated-clarification")
         faq.wait_for(state="visible", timeout=60000)
-        assert "source date anchor 2026-09-01" in faq.locator(
-            ".faq-publication-source"
-        ).inner_text()
-        assert "not a verified PDF publication date" in page.locator(
-            "#scenario-content .faq-rulings > .detail-source"
-        ).inner_text()
+        source = faq.locator(".faq-publication-source")
+        assert source.locator(".rules-provenance-label").inner_text() == "Sources:"
+        assert "English v0.1" in source.inner_text()
+        assert page.locator("#scenario-content .faq-rulings > .detail-source").count() == 0
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= innerWidth + 1"
         ), (width, theme)
@@ -3464,13 +3573,11 @@ def test_fireteam_faq_discloses_real_source_conflict_not_language_omission(
         haris = ruling_card("faq-ruling:fireteam-type-after-member-loss")
         assert "three-member HARIS" in haris.locator(".detail-copy").inner_text()
         selected = haris.locator(".faq-publication-source")
-        assert "version 0.1" in selected.inner_text()
-        assert "source date anchor 2026-09-01" in selected.inner_text()
-        assert "English" in selected.inner_text()
+        assert selected.locator(".rules-provenance-label").inner_text() == "Sources:"
+        assert "English v0.1" in selected.inner_text()
         assert "p. 3" in selected.inner_text()
         assert selected.locator("a").count() == 1
-        assert "Base rules remain separate" in root.inner_text()
-        assert "not a verified PDF publication date" in root.inner_text()
+        assert root.locator(":scope > .detail-source").count() == 0
 
         warning = haris.locator("details.faq-source-discrepancy")
         assert warning.count() == 1
@@ -3696,9 +3803,8 @@ def test_every_additional_faq_topic_link_is_visible_from_its_normal_page(
                 card = heading.locator("xpath=..")
                 assert record["facts"]["answer"] in card.inner_text()
                 source = card.locator(".faq-publication-source")
-                assert "version 0.1" in source.inner_text()
-                assert "source date anchor 2026-09-01" in source.inner_text()
-                assert "English" in source.inner_text()
+                assert source.locator(".rules-provenance-label").inner_text() == "Sources:"
+                assert "English v0.1" in source.inner_text()
                 assert f"p. {record['facts']['selectedCitation']['page']}" in (
                     source.inner_text()
                 )
@@ -3751,10 +3857,8 @@ def test_every_published_faq_has_a_normal_browser_entry_point(
                 card = heading.locator("xpath=..")
                 assert record["facts"]["answer"] in card.inner_text()
                 source = card.locator(".faq-publication-source")
-                assert "FAQ clarification" in source.inner_text()
-                assert "version 0.1" in source.inner_text()
-                assert "source date anchor 2026-09-01" in source.inner_text()
-                assert "English" in source.inner_text()
+                assert source.locator(".rules-provenance-label").inner_text() == "Sources:"
+                assert "English v0.1" in source.inner_text()
                 assert f"p. {record['facts']['selectedCitation']['page']}" in source.inner_text()
                 assert source.locator("a").count() >= 1
             assert not errors, (path, errors)

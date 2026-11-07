@@ -54,7 +54,7 @@ an ignored development candidate is not a release artifact.
   occurrences have separation before/after the section, in both themes at
   desktop and narrow widths with Developer Mode enabled. Exact reviewed
   source occurrences are now Developer Mode-only; normal-mode absence and
-  developer-mode visibility are included in [VD-0112 / VR-0138](validation-queue.md).
+  developer-mode visibility are included in [VR-0138](validation-queue.md).
 
 - [ ] **Restrictions chart standalone page (Web frontend, non-gating):**
   Accept the standalone `/rules/restrictions` reference, its link from
@@ -62,7 +62,15 @@ an ignored development candidate is not a release artifact.
   compatibility, and responsive/theme navigation without clipping.
   Existing Skill/Equipment/State contextual excerpts retain distinct
   typed qualifiers in Developer Mode only. The standalone chart remains
-  public; visibility checks belong to [VD-0113 / VR-0139](validation-queue.md).
+  public; visibility checks belong to [VR-0139](validation-queue.md).
+
+- [ ] **Reference card layout and FAQ citations (Web frontend, non-gating):**
+  Review individual Deployed object cards, full-width Orders & AROs tables,
+  and consistent spacing between Equipment detail, FAQ and usage sections.
+  FAQ cards now share the ordinary linked `Sources:` presentation rather
+  than a separate dated section preface and repeated provenance prose.
+  Preserve provenance in the API and source-conflict disclosures; focused
+  visual/browser evidence is queued under [VR-0140](validation-queue.md).
 
 ### Development sequence
 

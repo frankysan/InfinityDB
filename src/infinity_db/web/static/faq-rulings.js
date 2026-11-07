@@ -1,5 +1,5 @@
 import { getFaqRulings } from "./api.js";
-import { rulesCitationNode } from "./rules-reference.js";
+import { rulesCitationList, rulesCitationNode } from "./rules-reference.js";
 
 // Intentional, reviewed N5.3 / FAQ v0.1 source snapshot. Never use the
 // viewer's clock to change historical FAQ applicability silently.
@@ -28,10 +28,7 @@ export function faqRulingsSection(items) {
   const heading = document.createElement("h2");
   heading.className = "detail-heading";
   heading.textContent = "FAQ clarifications";
-  const context = document.createElement("p");
-  context.className = "detail-source";
-  context.textContent = "N5.3 · FAQ v0.1 · reference date 2026-09-01 (announcement-era anchor, not a verified PDF publication date). Base rules remain separate.";
-  group.append(heading, context);
+  group.append(heading);
 
   for (const ruling of items) {
     const card = document.createElement("article");
@@ -45,22 +42,12 @@ export function faqRulingsSection(items) {
     answer.textContent = ruling.answer;
     card.append(question, answer);
 
-    const source = document.createElement("p");
-    source.className = "detail-source faq-publication-source";
-    const selected = ruling.selected_source || {};
-    const publication = ruling.original_publication || {};
-    source.append(
-      `FAQ clarification · version ${selected.version || "?"} · source date anchor ${selected.published_date || "unknown"} · `,
-    );
     const citation = (ruling.citations || []).find((item) =>
       item.source_id === ruling.selected_citation?.sourceId
       && item.page === ruling.selected_citation?.page
     );
-    if (citation) source.append(rulesCitationNode(citation));
-    else source.append("Source page unavailable");
-    if (publication.version !== selected.version) {
-      source.append(` · first documented v${publication.version} (date anchor ${publication.publishedDate})`);
-    }
+    const source = rulesCitationList(citation ? [citation] : []);
+    source.className += " faq-publication-source";
     card.append(source);
     if (ruling.conflicting_citations?.length) {
       const discrepancy = document.createElement("details");

@@ -161,7 +161,7 @@ const selectedFaq = {
   question: "Can this be done?", answer: "No.",
   selected_source: { version: "0.1", published_date: "2026-09-01" },
   original_publication: { version: "0.1" },
-  citations: [{ source_id: "faq", page: 3, source_title: "N5 FAQ" }],
+  citations: [{ source_id: "faq", page: 3, source_title: "N5 FAQ", source_version: "0.1" }],
   selected_citation: { sourceId: "faq", page: 3 },
 };
 const FAQ = faqRulingsSection([
@@ -176,22 +176,20 @@ const FAQ = faqRulingsSection([
 const dated = FAQ.children.find((node) => node.tag === "article");
 assert.ok(dated.className.includes("faq-dated-clarification"));
 assert.ok(dated.children.some((node) => (
-  node.className === "detail-source faq-publication-source"
-  && node.textContent.includes("source date anchor 2026-09-01")
+  node.className === "detail-source rules-source-citations faq-publication-source"
+  && node.textContent.includes("Sources: N5 FAQ v0.1, p. 3")
 )));
-assert.ok(FAQ.children.some((node) => (
-  node.className === "detail-source"
-  && node.textContent.includes("not a verified PDF publication date")
-)));
+assert.equal(FAQ.children.filter((node) => node.tag === "p").length, 0);
 const carriedFaq = faqRulingsSection([{
   ...selectedFaq,
   original_publication: { version: "0.0", publishedDate: "2025-10-15" },
 }]);
 const carried = carriedFaq.children.find((node) => node.tag === "article");
 assert.ok(carried.children.some((node) => (
-  node.className === "detail-source faq-publication-source"
-  && node.textContent.includes("first documented v0.0 (date anchor 2025-10-15)")
+  node.className === "detail-source rules-source-citations faq-publication-source"
+  && node.textContent.includes("Sources: N5 FAQ v0.1, p. 3")
 )));
+assert.ok(!carried.textContent.includes("first documented"));
 const conflicted = FAQ.children.filter((node) => node.tag === "article")[1];
 const warning = conflicted.children.find((node) => (
   node.className === "faq-source-discrepancy"

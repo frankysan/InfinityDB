@@ -346,7 +346,8 @@ def test_cover_and_vertical_skills_with_separate_dated_faq(chrome: Any, width: i
         faq.wait_for(state="visible", timeout=30000)
         assert faq.count() == 1
         text = faq.inner_text()
-        assert "version 0.1" in text and "first documented v0.0" in text
+        assert "Sources:" in text and "English v0.1" in text
+        assert "first documented" not in text
 
     try:
         response = page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")

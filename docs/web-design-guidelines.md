@@ -242,6 +242,19 @@ InfinityDB is a dense reference application. The interface should make names, va
 
 Use whitespace to separate meaningful groups, not to distribute empty space evenly. Dense information may be compact, but compactness must not force premature wrapping, unstable columns, or ambiguous grouping.
 
+Reviewed collections of independent objects (such as Deployed objects)
+should use separate, padded peer cards rather than nesting all entries in
+one large surface. Preserve stable anchors and source-linked detail disclosures.
+Reference matrices such as Orders & AROs should fill their available reading
+column rather than shrink to the width of a short category name.
+
+Dated FAQ cards should have one compact `Sources:` citation row, using the
+same link and version/page formatting as normal rules cards. Do not print a
+second, repeated publication/date line above the group. Keep archival source
+dates and first-publication attribution in the maintained data, and preserve
+an explicit expandable discrepancy note when cited sources materially differ.
+Maintain separation between detail/usage panels and following FAQ cards.
+
 ### Preserve predictable geometry
 
 Equivalent structures should occupy equivalent visual roles across pages. Normal interaction such as enabling developer mode, changing filters, expanding optional information, or moving between similar catalog pages should not cause unrelated columns or controls to jump unpredictably when that can be avoided.

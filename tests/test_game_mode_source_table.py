@@ -629,6 +629,21 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                     )
                     section = page.locator("#restrictions")
                     section.wait_for(state="visible", timeout=15000)
+                    for theme in ("light", "dark"):
+                        page.evaluate(
+                            "(value) => document.documentElement.dataset.theme = value",
+                            theme,
+                        )
+                        assert section.is_visible()
+                        assert page.locator("#restrictions-content").is_visible()
+                        assert page.evaluate(
+                            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                        ), (width, theme)
+                    page.go_back(wait_until="domcontentloaded")
+                    assert page.url.endswith("/rules")
+                    assert page.locator("#restrictions").count() == 0
+                    page.go_forward(wait_until="domcontentloaded")
+                    section.wait_for(state="visible", timeout=15000)
                     assert page.locator("#restrictions .restrictions-subject").count() == 6
                     assert section.locator("li[data-action]").count() == 14
                     assert page.locator(
@@ -756,6 +771,22 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                     )
                     page.locator("#skill-content").wait_for(state="visible")
                     assert page.locator(".restrictions-context").count() == 0
+                    if width == 320:
+                        page.route(
+                            "**/static/restrictions-reference.json",
+                            lambda route: route.fulfill(
+                                status=503, content_type="application/json",
+                                body='{"error":"Controlled source failure"}',
+                            ),
+                        )
+                        page.goto(
+                            f"http://127.0.0.1:{server.server_port}/rules/restrictions",
+                            wait_until="domcontentloaded",
+                        )
+                        status = page.locator("#restrictions-status")
+                        status.wait_for(state="visible", timeout=15000)
+                        assert "unavailable" in status.inner_text().lower()
+                        assert page.locator("#restrictions-content").is_hidden()
                     assert errors == [], errors
                     page.close()
             finally:

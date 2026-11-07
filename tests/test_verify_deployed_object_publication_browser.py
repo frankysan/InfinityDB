@@ -227,8 +227,35 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     entry.press("Enter")
                     page.wait_for_url(f"{origin}/deployed-objects", timeout=30000)
                     page.locator("#deployed-list").wait_for(state="visible", timeout=60000)
-                    assert page.locator(".deployed-object-entry").count() == 17
+                    cards = page.locator(".deployed-object-entry")
+                    assert cards.count() == 17
                     assert "17 reviewed" in page.locator("#deployed-count").inner_text()
+                    assert not page.locator(".deployed-objects-reference").evaluate(
+                        "(node) => node.classList.contains('surface')"
+                    )
+                    assert cards.evaluate_all(
+                        """(nodes) => nodes.every((node) => {
+                          const style = getComputedStyle(node);
+                          return node.classList.contains('surface')
+                            && parseFloat(style.paddingLeft) >= 16
+                            && parseFloat(style.paddingRight) >= 16;
+                        })"""
+                    )
+                    first_box, second_box = cards.nth(0).bounding_box(), cards.nth(1).bounding_box()
+                    assert first_box and second_box
+                    assert (
+                        first_box["x"] + first_box["width"] + 8 <= second_box["x"]
+                        or first_box["y"] + first_box["height"] + 8 <= second_box["y"]
+                    ), (width, first_box, second_box)
+                    for theme in ("light", "dark"):
+                        page.evaluate(
+                            "(value) => document.documentElement.dataset.theme = value",
+                            theme,
+                        )
+                        assert cards.first.is_visible()
+                        assert page.evaluate(
+                            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                        ), (width, theme)
                     for obj in objects:
                         card = page.locator(f'.deployed-object-entry[id="{obj["id"]}"]')
                         heading = card.get_by_role("heading", name=obj["name"], exact=True)

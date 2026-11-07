@@ -134,40 +134,7 @@ static design-review outcome. Do not record a test result in VD. Retire
 the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
-- [ ] VD-0112 (2026-11-07; needs-design): Design a browser geometry
-  regression for FAQ card padding and exact-variant section separation on
-  `/skills/climb`. At 1440/390/320 px in light/dark themes, assert FAQ
-  question, answer, and source are inset from all card edges; the
-  occurrences section has at least 24 px outer separation; no clipping,
-  overflow or overlap when occurrence disclosures are opened **in Developer
-  Mode**. Verify that exact reviewed occurrences on both Skill and Equipment
-  pages are hidden by default, show when Developer Mode is switched on, and
-  hide again on switching off without dropping source rows. Keep FAQ cards,
-  main rules and citations public; account for pages without occurrences.
-  Work: [Skill detail spacing](TODO.md#implemented-foundations-and-remaining-scope);
-  change: `src/infinity_db/web/static/page-overrides.css` from `4cb55c0`;
-  risk: low. Existing coverage: FAQ/source-browser DOM assertions, but no
-  focused layout assertions. Updated existing
-  `tests/test_web.py::test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups`
-  to assert the two-mode visibility and source-link retention; no execution
-  in this implementation phase. Linked execution: **VR-0138**.
-
-- [ ] VD-0113 (2026-11-07; needs-design): Complete a standalone
-  Restrictions chart navigation/visual regression. The existing source
-  Chromium cohort covers three widths, the six-row/fourteen-condition
-  rendering, exact links, and legacy hashes. Design additional light/dark
-  presentation and soft-navigation checks for the /rules listing-to-chart
-  link, source-row focus/scroll, readable card padding, error recovery,
-  and absent chart on unrelated rule pages. The full standalone chart stays
-  public; contextual Restrictions sections on Skill, Equipment and State
-  pages must be hidden by default and visible in Developer Mode, with all
-  reviewed condition counts and exact anchors unchanged.
-  Work: [Restrictions chart standalone page](TODO.md#implemented-foundations-and-remaining-scope);
-  change: `src/infinity_db/web/{presentation.py,routes.py,static/}`
-  after `9add9ae`; risk: moderate; linked execution: **VR-0139**.
-  The existing `test_restrictions_chart_normal_chromium_at_three_widths`
-  now asserts default-hidden and developer-visible contextual excerpts
-  before validating their source links; test execution is deferred.
+No pending design entries.
 
 ## Pending deferred execution
 
@@ -178,29 +145,50 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0138 (2026-11-07; awaiting-design): Verify the Skill-detail
-  FAQ/occurrences spacing refinement without changing rules or published data.
+- [ ] VR-0138 (2026-11-07; ready-to-run): Verify the Skill-detail
+  FAQ/occurrences spacing and Developer Mode-only exact source usage.
   Work: [Skill detail spacing](TODO.md#implemented-foundations-and-remaining-scope);
-  revision: post-`4cb55c0` CSS edit (record final SHA upon commit); risk: low.
-  Immediate: source-level CSS and component-class review; no tests executed
-  in this visibility change's implementation phase. Design: **VD-0112**.
-  Deferred: focused desktop/mobile FAQ and source-occurrence layout;
+  revision: CSS base `9add9ae`, visibility base `3551d09`, plus this
+  focused UI batch (pin final SHA before execution); risk: low.
+  Design: **VD-0112 completed**, selectors statically reviewed with
+  Ruff and Pyright green; no browser tests executed.
+  Deferred: `tests/test_verify_scenario_faq_browser.py::test_skill_faq_card_padding_and_developer_occurrence_geometry`
+  (1440/390/320 px, both themes, card inset and 24 px source-occurrence
+  clearance) and
   `tests/test_web.py::test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups`
-  on the pinned implementation commit (hidden/visible/hidden on Skill and
-  Equipment, unchanged links), plus affected FAQ UI checks. Outcome: pending.
-
-- [ ] VR-0139 (2026-11-07; awaiting-design): Validate the standalone
-  /rules/restrictions page, backward-compatible hashes, source-scoped
-  reverse links, and responsive visual layout at its committed SHA.
-  Work: [Restrictions chart standalone page](TODO.md#implemented-foundations-and-remaining-scope);
-  revision: post-`9add9ae` change (record final SHA); risk: moderate.
-  Immediate: mandatory focused public-route navigation regression and
-  Python checks only; no full-suite release gate. Design: **VD-0113**.
-  Deferred: `tests/test_game_mode_source_table.py::test_restrictions_chart_normal_chromium_at_three_widths`
-  for default-hidden and Developer Mode-visible reverse contexts at three
-  widths, expanded soft-navigation/theme/error browser selector, and the
-  existing N5.3 source-chart publication integrity checks.
+  (Skill/Equipment hidden-visible-hidden and original Unit links).
   Outcome: pending.
+
+- [ ] VR-0139 (2026-11-07; ready-to-run): Validate standalone
+  /rules/restrictions, backward-compatible anchors, typed contextual links,
+  responsive theme/layout and controlled source failure.
+  Work: [Restrictions chart standalone page](TODO.md#implemented-foundations-and-remaining-scope);
+  revision: `877d308` chart, `3551d09` contextual visibility and this
+  test-design batch (pin final SHA before execution); risk: moderate.
+  Design: **VD-0113 completed**, Ruff and Pyright static checks green.
+  Existing dedicated-page and 3-width core navigation passed on
+  `877d308`, but **not the subsequently changed assertions**.
+  Deferred: `tests/test_game_mode_source_table.py::test_restrictions_chart_normal_chromium_at_three_widths`
+  (desktop/390/320, light/dark, Back/Forward, hash links, seven owner
+  contexts hidden by default and shown in Developer Mode, controlled 503),
+  plus `test_restrictions_reference_has_standalone_rules_page` and
+  source-publication integrity. Outcome: pending.
+
+- [ ] VR-0140 (2026-11-07; ready-to-run): Validate individual Deployed
+  object cards, full-width Orders & AROs sections, and single linked FAQ
+  `Sources:` lines with readable spacing and intact source discrepancies.
+  Work: [Reference card layout and FAQ citations](TODO.md#implemented-foundations-and-remaining-scope);
+  revision: this UI batch from `3551d09` (pin SHA before execution);
+  risk: moderate. Design: **VD-0114 completed**; Ruff and Pyright static
+  checks green, no implementation-time browser tests run.
+  Deferred: focused
+  `tests/test_verify_deployed_object_publication_browser.py::test_chromium_reviewed_attributes_delivery_navigation_and_missing_values`,
+  `tests/test_verify_orders_aros_browser.py::test_orders_aros_page_renders_and_filters_without_overflow`,
+  `tests/test_verify_scenario_faq_browser.py::test_faq_single_source_line_and_card_separation`,
+  `tests/test_verify_scenario_faq_browser.py::test_fireteam_faq_discloses_real_source_conflict_not_language_omission`,
+  and affected FAQ source/browser and movement cases, at 1440/390/320
+  in both themes where applicable. Check the JavaScript DOM harness and
+  unchanged FAQ temporal/source-selection API gates. Outcome: pending.
 
 The [V1S-083 disclosure and consumer batches](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
 passed on the recorded Linux/Windows states and close VR-0137. Hosted CI
@@ -223,8 +211,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0114`; active obligations are listed above.
-- Execution: `VR-0140`; active obligations are listed above.
+- Design: `VD-0115`; active obligations are listed above.
+- Execution: `VR-0141`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

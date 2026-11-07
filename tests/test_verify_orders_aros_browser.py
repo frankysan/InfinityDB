@@ -83,6 +83,30 @@ def test_orders_aros_page_renders_and_filters_without_overflow(
         assert page.locator("#matrix-sections[aria-busy=false]").count() == 1
         assert page.locator("#matrix-sections tbody tr").count() == 57
         assert page.locator("#matrix-state").inner_text() == ""
+        reference = page.locator("#matrix-sections")
+        groups = reference.locator(":scope > .orders-aros-group")
+        assert groups.count() == 4
+        group_box = groups.first.bounding_box()
+        parent_box = reference.bounding_box()
+        assert group_box and parent_box
+        assert abs(group_box["width"] - parent_box["width"]) <= 2, width
+        assert groups.first.locator(".table-viewport").evaluate(
+            "(node) => Math.abs(node.getBoundingClientRect().width"
+            " - node.parentElement.getBoundingClientRect().width) <= 2"
+        )
+        intro_box = page.locator(".orders-aros-intro").bounding_box()
+        controls_box = page.locator(".orders-aros-controls").bounding_box()
+        assert intro_box and controls_box
+        assert intro_box["x"] >= controls_box["x"] + 16
+        for theme in ("light", "dark"):
+            page.evaluate(
+                "(value) => document.documentElement.dataset.theme = value",
+                theme,
+            )
+            assert groups.first.is_visible()
+            assert page.evaluate(
+                "() => document.documentElement.scrollWidth <= innerWidth + 1"
+            ), (width, theme)
         assert "not whether it is legal" in page.locator("#main").inner_text()
         assert "N5.3 Core Rules, p. 191" in page.locator("#main").inner_text()
 

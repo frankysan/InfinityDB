@@ -50,7 +50,7 @@ function attributeRow(label, attribute) {
 
 function entry(object) {
   const section = document.createElement("article");
-  section.className = "detail-group deployed-object-entry";
+  section.className = "surface surface--subtle deployed-object-entry";
   section.id = object.id;
   section.tabIndex = -1;
 

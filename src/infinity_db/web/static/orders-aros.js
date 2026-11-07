@@ -37,7 +37,7 @@ function renderSections(rows, destination, prefix, query) {
     if (!visible.length) continue;
 
     const group = document.createElement("section");
-    group.className = "surface surface--clipped content-frame";
+    group.className = "surface surface--clipped orders-aros-group";
     group.setAttribute("aria-labelledby", `${prefix}orders-aros-${section.id}`);
     const heading = document.createElement("div");
     heading.className = "section-heading";

@@ -8975,8 +8975,17 @@ and source date anchor, and the expandable warning shows the actual
 selection rationale with a Spanish alternative PDF citation link.
 The FT Master qualifier omission remains visible in the selected
 English answer and does not produce a false contradiction warning.
-Both the 29 primary and 19 secondary browser topic associations now
-also assert selected English source, version and source-date labels.
+Both the 29 primary and 19 secondary browser topic associations
+originally asserted selected English source, version and source-date labels.
+**2026-11-07 presentation revision:** The FAQ section no longer repeats
+its date-anchor disclaimer above the cards. Each card instead uses the
+shared `rulesCitationList` `Sources:` line with the selected English FAQ
+version, link and printed page. Source/selection/original-publication dates
+remain available through the API, and conflict rationales/alternative PDF
+citations remain in their disclosures. Existing browser and Node test
+assertions were updated; new responsive/source-card geometry and layout
+coverage is queued for execution under VR-0140 (design VD-0114 completed). No tests from this new UI batch
+were executed during the implementation/design phase.
 This is bounded current-publication presentation proof, not final
 hosted release acceptance or independently dated historical replay.
 

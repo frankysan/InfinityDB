@@ -587,6 +587,104 @@ html:not([data-developer-mode="true"])
   }
 }
 
+/* Reviewed deployed objects are peer cards, not a single large table frame. */
+.deployed-objects-reference {
+  width: min(960px, 100%);
+}
+
+.deployed-objects-reference > .section-heading {
+  padding: 0 0 var(--space-2);
+}
+
+.deployed-object-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  gap: var(--space-3);
+}
+
+.deployed-object-entry {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-3);
+  scroll-margin-top: var(--space-3);
+}
+
+.deployed-object-entry > .detail-section-heading,
+.deployed-object-entry > .detail-copy,
+.deployed-object-entry > ul {
+  margin: 0;
+}
+
+.deployed-object-attributes {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.deployed-object-attributes > .weapon-data-row:first-child {
+  border-top: 0;
+}
+
+.deployed-object-entry > .weapon-data-heading {
+  padding: var(--space-1) var(--space-2);
+}
+
+.deployed-object-entry > ul,
+.deployed-object-unit-uses > ul {
+  padding-inline-start: var(--space-3);
+}
+
+.deployed-object-unit-uses {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-2);
+}
+
+.deployed-object-unit-uses > summary {
+  cursor: pointer;
+}
+
+.deployed-object-unit-uses > .detail-copy {
+  margin-block: var(--space-2);
+}
+
+/* Orders and ARO tables should fill their reference region, not shrink to labels. */
+.orders-aros-controls,
+.orders-aros-scenario,
+#matrix-sections,
+#scenario-matrix-sections {
+  width: min(860px, 100%);
+}
+
+#matrix-sections,
+#scenario-matrix-sections {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.orders-aros-group {
+  width: 100%;
+  min-width: 0;
+}
+
+.orders-aros-group .table-viewport,
+.orders-aros-group .data-table--listing {
+  width: 100%;
+}
+
+.orders-aros-intro {
+  margin: 0;
+  padding: var(--space-2) 26px 0;
+}
+
+.faq-rulings {
+  width: min(760px, 100%);
+  margin-block-start: var(--space-3);
+  gap: var(--space-2);
+}
+
 /* Dated FAQ clarifications are source publications, not generic "new" rules. */
 .faq-dated-clarification {
   display: grid;

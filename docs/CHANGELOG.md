@@ -74,7 +74,10 @@ are not retroactively relabeled.
   Smoke and Eclipse cards show when placement
   opposes Attacks and how Visors affect that opposition.
 - Dated FAQ clarifications now appear beside the rules and scenarios they affect,
-  keeping their source versions and scenario restrictions visible.
+  with a single linked Sources line per card; scenario restrictions and
+  disclosed source conflicts remain visible without duplicate date metadata.
+- Deployed objects use individual cards for each reviewed profile, and
+  Orders & AROs tables and adjacent detail/FAQ sections have clearer spacing.
 - The Scenario browser can select published ITS missions as well as N5 Core.
   The first ITS Season 18 mission is Battleground, with size-specific maps and scoring.
 - Martial Arts, Booty and MetaChemistry charts are easier to read, with separate
