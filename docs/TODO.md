@@ -164,12 +164,16 @@ is bounded to the development pair; final-input checks remain.
 **Parent:** [Player-facing navigation and reference clarity](#player-facing-navigation-and-reference-clarity).
 **Project domains:** Web frontend, Project infrastructure
 
-- [ ] **V1S-080 (M, gate):** Complete final-candidate touch, theme,
-  320/390px viewport and notice expand/collapse verification; fix
-  reproducible 1.0 defects. Development touch regressions passed;
-  release-candidate manual/browser acceptance remains open.
-  Frozen-input and V1S-088 prerequisites are satisfied; final human/touch
-  candidate acceptance remains outstanding.
+- [ ] **V1S-080 (M, gate):** Complete final-candidate manual touch/visual
+  acceptance for the accuracy notice and navigation on 320/390 px screens
+  in light/dark themes. The [frozen-pair automated notice gate](testing.md#v1s-080-frozen-pair-automated-notice-acceptance)
+  passed **10/10** on `174bf8b2`, with zero skips; no browser defect was
+  reproduced. This is **not human touch acceptance**, and the earlier
+  V1S-079 NVDA/Chrome 7/7 walkthrough does not replace it.
+  Blocked: requires the release owner's manual touch/visual observations
+  on a genuinely release-matched candidate; authority: release owner;
+  retry: once the candidate is presented for manual inspection. Preserve
+  the frozen source pair; do not test the older public 0.10.1 deployment.
 
 #### Final frozen-candidate acceptance and release
 

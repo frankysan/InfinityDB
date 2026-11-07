@@ -1198,6 +1198,32 @@ Markdownlint, link checks and `git diff --check` passed before commit.
 This closes the **local** Phase 2/3 deferred-execution entries; Phase 4
 integration, hosted CI and final release acceptance remain independent.
 
+### V1S-080 frozen-pair automated notice acceptance
+
+**Project domains:** Web frontend, Project infrastructure
+
+On unchanged tracked Army/rules release inputs at
+`174bf8b20bb5e27c12f79586a25ffa8509a57ea4`, the focused
+`tests/test_verify_page_footer_browser.py` module passed **10/10 with
+zero skips** in 11.33 seconds (Windows async job
+`72dea735e96e422d97f6e96fedd164ae`). It verified the native floating
+notice at 1440/390/320 px, light/dark, fixed position and bounds,
+touch and Enter/Space disclosure, session-storage persistence, normal About
+navigation and soft-navigation state continuity. No source, database or
+runtime edits were necessary; the existing browser contract provides
+the selected frozen-pair checks.
+
+**Manual acceptance still required:** a release owner must inspect the
+actual release-matched candidate at approximately 320/390 px in both themes
+and activate the notice with **real touch** (expanded and collapsed states),
+verify its legibility/bounds, check that the icon-only collapsed control
+remains reachable, then use keyboard and navigation to reopen it, including
+Back/Forward. Check no horizontal overflow or visual occlusion. Record
+device/browser, candidate SHA and the outcome. Browser-emulated touch is
+valuable regression evidence but is not a human/real-device sign-off.
+The earlier V1S-079 NVDA walkthrough is a separate acceptance.
+Until this review, V1S-080 remains open and documented as blocked.
+
 **2026-11-05 V1S-079 human assistive-technology acceptance:**
 The release owner reported **7/7 manual screen-reader checks passed** using the
 NVDA/Chrome walkthrough: initial page semantics; expanded notice and its
