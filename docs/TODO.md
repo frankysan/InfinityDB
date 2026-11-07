@@ -49,6 +49,12 @@ references, scoped Reinforcements and exact-variant usage API/browser paths.
 The usage publication is still conditional on a verified matched artifact;
 an ignored development candidate is not a release artifact.
 
+- [ ] **Skill detail spacing (Web frontend, non-gating):** Confirm that FAQ
+  clarification cards have consistent padding and Exact reviewed source
+  occurrences have separation before/after the section, in both themes at
+  desktop and narrow widths. CSS is updated; focused visual acceptance
+  is deferred under [VD-0112 / VR-0138](validation-queue.md).
+
 ### Development sequence
 
 Review and close the earliest actionable numbered V1S slice below after

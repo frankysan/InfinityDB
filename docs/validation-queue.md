@@ -134,7 +134,17 @@ static design-review outcome. Do not record a test result in VD. Retire
 the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
-No pending design entries.
+- [ ] VD-0112 (2026-11-07; needs-design): Design a browser geometry
+  regression for FAQ card padding and exact-variant section separation on
+  `/skills/climb`. At 1440/390/320 px in light/dark themes, assert FAQ
+  question, answer, and source are inset from all card edges; the
+  occurrences section has at least 24 px outer separation; no clipping,
+  overflow or overlap when occurrence disclosures are opened. Account for
+  pages without a FAQ or without reviewed occurrences.
+  Work: [Skill detail spacing](TODO.md#implemented-foundations-and-remaining-scope);
+  change: `src/infinity_db/web/static/page-overrides.css` from `4cb55c0`;
+  risk: low. Existing coverage: FAQ/source-browser DOM assertions, but no
+  focused layout assertions. Linked execution: **VR-0138**.
 
 ## Pending deferred execution
 
@@ -145,7 +155,14 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending execution entries.
+- [ ] VR-0138 (2026-11-07; awaiting-design): Verify the Skill-detail
+  FAQ/occurrences spacing refinement without changing rules or published data.
+  Work: [Skill detail spacing](TODO.md#implemented-foundations-and-remaining-scope);
+  revision: post-`4cb55c0` CSS edit (record final SHA upon commit); risk: low.
+  Immediate: source-level CSS review only; no tests executed in implementation.
+  Design: **VD-0112**. Deferred: newly designed focused desktop/mobile
+  Playwright layout regression; rerun existing FAQ and exact-usage UI checks
+  on the pinned implementation commit. Outcome: pending.
 
 The [V1S-083 disclosure and consumer batches](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
 passed on the recorded Linux/Windows states and close VR-0137. Hosted CI
@@ -168,8 +185,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0112`; active obligations are listed above.
-- Execution: `VR-0138`; active obligations are listed above.
+- Design: `VD-0113`; active obligations are listed above.
+- Execution: `VR-0139`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

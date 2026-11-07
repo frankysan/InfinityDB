@@ -589,7 +589,22 @@ html:not([data-developer-mode="true"])
 
 /* Dated FAQ clarifications are source publications, not generic "new" rules. */
 .faq-dated-clarification {
+  display: grid;
+  gap: 12px;
+  padding: var(--space-2) 18px;
   border-inline-start: 3px solid var(--color-border-strong);
+}
+
+.faq-dated-clarification > .surface-titlebar {
+  padding: 0;
+}
+
+.faq-dated-clarification > p {
+  margin: 0;
+}
+
+.exact-variant-usage {
+  margin-block: var(--space-3);
 }
 
 .faq-publication-source {
