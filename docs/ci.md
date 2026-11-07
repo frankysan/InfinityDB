@@ -112,6 +112,17 @@ The full Ubuntu 3.11 leg and filesystem-heavy Windows leg each have a
 time for both the ordinary checks and the isolated preflight's additional
 pytest run; its time limit does not omit or relax either pass.
 
+**2026-11-07 timeout repair:** In
+[Source run 42315535265](https://github.com/frankysan/InfinityDB/actions/runs/42315535265)
+at `2af9c39c0713190c79e2de0c1ef0686ab472f7fb`, the ordinary Ubuntu 3.11
+checks passed, but the job reached its former 15-minute limit while the
+isolated pytest pass was still progressing. The dependent deterministic-output
+comparison was skipped. At `cde06cb34f3e5a78a87f2043bad4f7f4a887cc14`,
+four focused Windows tests passed without skips for the matrix budgets,
+publication setup and retained full preflight. The dedicated MCP Linux
+worker was unavailable. A replacement hosted run and its required jobs
+remain separate acceptance evidence.
+
 Every leg installs `.[dev,symbols]`, uses the controlled `tests/fixtures/deployment-smoke` Army
 source for build validation, and requires the tracked graphical publication. The primary Ubuntu
 3.11 leg owns Ruff, Markdownlint, offline Markdown path/heading validation

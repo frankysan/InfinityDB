@@ -145,21 +145,7 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0132 (2026-11-07; ready-to-run): Verify the Source CI matrix
-  timeout repair after Ubuntu 3.11 was cancelled at 15 minutes while its
-  isolated pytest pass was still progressing. Work: hosted CI repair in
-  `.github/workflows/source-checks.yml`; implementation:
-  `73515136c494cc5796b8e6ccf482c5d337e699b6`; risk: medium. Immediate:
-  structural YAML inspection confirmed all four budgets and the unchanged
-  source command; the documentation stage passed on Windows before commit.
-  Design: VD-0104 statically reviewed the new selector's four matrix legs,
-  uniqueness and job-level timeout assertions without executing tests.
-  Deferred:
-  `tests/test_deployment_scripts.py::test_source_ci_matrix_time_budgets_include_isolated_preflight`,
-  `tests/test_deployment_scripts.py::test_source_ci_builds_ignored_release_publication_before_tests`,
-  and `tests/test_run_checks.py::test_full_run_includes_isolated_preflight_after_successful_checks`
-  on a committed revision. Outcome: pending focused execution; a successful
-  replacement hosted run remains a separate CI gate.
+No pending deferred execution entries.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
