@@ -198,7 +198,8 @@ autonomous numbered task, first run the explicit selection check. It examines
 every earlier open ID across workstreams and fails unexplained skips:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --select V1S-041
+$taskId = (.\.venv\Scripts\python.exe -m tools.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable
+.\.venv\Scripts\python.exe -m tools.check_v1_backlog --select $taskId
 ```
 
 A user-directed priority exception is permitted **only** when the selected

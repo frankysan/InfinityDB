@@ -108,13 +108,9 @@ Previous source reviews and exact browser acceptance are retained in
 Silent/Immunity question is [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier),
 not a 1.0 gate.
 
-- [ ] **V1S-041 (M, gate):** Accept the optional Reinforcements
-  Section, profiles and exact Commlink (+1)/(+2) variants in the
-  ordinary browser on the frozen, release-matched source pair.
-  Preserve N4-origin disclosure; do not assert roster legality or
-  N5-native authority.
-  Frozen-input prerequisite V1S-081/084/088 is satisfied; the final
-  ordinary-browser acceptance can now proceed.
+The [V1S-041 frozen-pair Reinforcements and Commlink browser gate](v1.0-source-coverage-audit.md#v1s-041-frozen-pair-optional-reinforcements-browser-acceptance-2026-11-07)
+passed. N4-origin disclosures and the non-blocking SRC-030 publisher
+question remain separate from any claim of N5-native adoption.
 
 #### Four core scenarios
 
@@ -316,12 +312,6 @@ of already-reviewed catalogs.
   exceptions and cited uncertainty; unanswered
   [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier)
   does not require a publisher response before 1.0.
-- [ ] Accept the published, separately scoped optional Reinforcements
-  Section/profile/Commlink reference on release-matched inputs and ordinary
-  desktop/mobile browser routes under **V1S-041**. Disclose its N4-origin
-  procedures without asserting N5-native adoption or roster legality;
-  [SRC-030](official-source-clarifications.md) is non-blocking.
-
 - [ ] **Core scenarios:** Finish the four published scenarios' final
   source-to-storage-to-browser reconciliation and keyboard/touch/theme/
   narrow-width acceptance. Keep scenario-only concepts, spatial geometry,
