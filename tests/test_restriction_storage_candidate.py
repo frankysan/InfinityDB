@@ -3893,8 +3893,8 @@ def candidate(
         connection.close()
 
 
-def test_shared_staging_preserves_active_v9_restrictions(tmp_path: Path) -> None:
-    from tools.stage_hacking_device_chart_citations import export_release_rules
+def test_shared_staging_preserves_active_restrictions_and_embedded_objects(tmp_path: Path) -> None:
+    from tools.release_rules_export import export_release_rules
 
     current = RulesDatabase(DB)
     current.validate()
@@ -3904,18 +3904,27 @@ def test_shared_staging_preserves_active_v9_restrictions(tmp_path: Path) -> None
     copied = RulesDatabase(staged)
     copied.validate()
     assert copied.restrictions_payload() == current.restrictions_payload()
+    army = ROOT / "data/generated/infinity.db"
+    assert copied.deployed_objects_payload(army) == current.deployed_objects_payload(army)
     with sqlite3.connect(staged) as connection:
-        assert connection.execute("PRAGMA user_version").fetchone()[0] == 9
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == 10
 
 
 def test_shared_promotion_refuses_v9_to_v8_downgrade(
     tmp_path: Path, legacy_v8_db: Path,
 ) -> None:
+    from tools.release_rules_export import release_deployed_object_bytes
     from tools.stage_hacking_device_chart_citations import STAGED_PATHS, _replace_staged_batch
 
     root = tmp_path / "workspace"
     (root / "local").mkdir(parents=True)
-    originals = {path: (ROOT / path).read_bytes() for path in STAGED_PATHS}
+    originals = {
+        path: (
+            release_deployed_object_bytes(ROOT / path)
+            if path.endswith("deployed-objects.json") else (ROOT / path).read_bytes()
+        )
+        for path in STAGED_PATHS
+    }
     for path, data in originals.items():
         destination = root / path
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -3927,7 +3936,7 @@ def test_shared_promotion_refuses_v9_to_v8_downgrade(
     assert all((root / path).read_bytes() == original for path, original in originals.items())
 
 
-def test_disposable_v8_rollback_pair_preserves_v9_reviewed_objects(
+def test_disposable_v8_rollback_pair_preserves_current_reviewed_objects(
     legacy_v8_db: Path, tmp_path: Path,
 ) -> None:
     """Rollback image must differ only in the rules DB and its pinned SHA-256."""
@@ -3973,7 +3982,7 @@ def test_disposable_v8_rollback_pair_preserves_v9_reviewed_objects(
     ) == v8_publication
     with sqlite3.connect(legacy_v8_db) as old, sqlite3.connect(DB) as new:
         assert old.execute("PRAGMA user_version").fetchone()[0] == 8
-        assert new.execute("PRAGMA user_version").fetchone()[0] == 9
+        assert new.execute("PRAGMA user_version").fetchone()[0] == 10
         assert legacy_relation_snapshot(old) == legacy_relation_snapshot(new)
 
 
@@ -4160,6 +4169,10 @@ def test_candidate_version_rollout_requires_application_transition(
         "WHERE key = 'databaseCompatibilityVersion'"
     )
     connection.execute("PRAGMA user_version = 10")
+    connection.commit()
+    with pytest.raises(ValueError, match="compatibility revision"):
+        RulesDatabase(target).validate()
+    connection.execute("PRAGMA user_version = 11")
     connection.commit()
     with pytest.raises(ValueError, match="Unsupported rules database schema"):
         RulesDatabase(target).validate()

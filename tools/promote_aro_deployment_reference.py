@@ -18,11 +18,11 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory
-from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from tools.build_deployed_object_publication import build_publication, publication_bytes
 from tools.release_rules_export import (
     export_release_rules,
+    load_release_deployed_objects,
     same_logical_rules_contents,
 )
 from tools.restrictions_v9_release import _replace_with_rollback
@@ -122,7 +122,7 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
         )
         if unchanged.returncode != 0:
             raise ValueError("Tracked rules database differs from HEAD")
-    previous = load_deployed_object_publication(root / OBJECTS, root / ARMY, active_path)
+    previous = load_release_deployed_objects(root / OBJECTS, root / ARMY, active_path)
     if previous is None:
         raise ValueError("Active rules/deployed-object publication does not match")
     docs = load_curated_directory(root / "data/curated/rules")
@@ -130,7 +130,10 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
         record for _, document in docs for record in document["records"]
     ])
     source_hash = _digest(root / CURATED)
-    original = {name: (root / name).read_bytes() for name in (RULES, OBJECTS)}
+    original = {
+        name: (root / name).read_bytes() if (root / name).is_file() else None
+        for name in (RULES, OBJECTS)
+    }
 
     with tempfile.TemporaryDirectory(prefix="aro-deployment-v9-", dir=root / "local") as tmp:
         first, second = Path(tmp) / "first.db", Path(tmp) / "second.db"
@@ -171,7 +174,8 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
         if projection != expected:
             raise ValueError("Unrelated deployed objects changed")
         if source_hash != _digest(root / CURATED) or any(
-            (root / name).read_bytes() != data for name, data in original.items()
+            ((root / name).read_bytes() if (root / name).is_file() else None) != data
+            for name, data in original.items()
         ):
             raise ValueError("Source or publication changed during staging")
         report = {
@@ -196,7 +200,7 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
             for identity in selected:
                 if promoted.composed_record(identity) != staged.composed_record(identity):
                     raise ValueError(f"Post-promotion {identity} mismatch")
-            if load_deployed_object_publication(
+            if load_release_deployed_objects(
                 root / OBJECTS, root / ARMY, root / RULES,
             ) != projection:
                 raise ValueError("Post-promotion matched release pair is invalid")

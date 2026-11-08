@@ -84,6 +84,43 @@ def test_soft_navigation_focuses_main_and_announces_route(
         page.wait_for_function(
             "() => document.querySelector('#skill-filter')?.disabled === false"
         )
+        unfiltered_url = page.url
+        original_army = page.locator("#army-filter").input_value()
+        selected_army = page.locator("#army-filter").evaluate(
+            "node => [...node.options].find(option => option.value)?.value"
+        )
+        assert selected_army
+        page.locator("#army-filter").select_option(selected_army)
+        page.wait_for_function("old => location.href !== old", arg=unfiltered_url)
+        page.locator("#loading-state").wait_for(state="hidden")
+        filtered_url = page.url
+        page.evaluate("""() => {
+            window.filteredMain = document.querySelector('main#main');
+            window.fragmentNavigations = 0;
+            document.addEventListener('infinity:beforenavigation', () => {
+                window.fragmentNavigations += 1;
+            });
+            window.filterHashChange = new Promise(resolve => {
+                window.addEventListener('hashchange', () => resolve(true), { once: true });
+            });
+        }""")
+        page.locator(".skip-link").focus()
+        page.locator(".skip-link").press("Enter")
+        page.evaluate("() => window.filterHashChange")
+        assert page.url == filtered_url + "#main"
+        assert page.evaluate("window.fragmentNavigations") == 0
+        assert page.evaluate("document.querySelector('main#main') === window.filteredMain")
+        page.go_back(wait_until="domcontentloaded")
+        assert page.url == filtered_url
+        assert page.locator("#army-filter").input_value() == selected_army
+        assert page.evaluate("window.fragmentNavigations") == 0
+        page.go_back(wait_until="domcontentloaded")
+        assert page.url == unfiltered_url
+        assert_soft_navigation_handoff(page, "/units")
+        page.wait_for_function(
+            "value => document.querySelector('#army-filter')?.value === value",
+            arg=original_army,
+        )
         page.evaluate("() => window.scrollTo(0, 160)")
         previous_scroll = page.evaluate("() => window.scrollY")
         assert previous_scroll >= 60

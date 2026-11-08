@@ -22,7 +22,7 @@ from infinity_db.reference_catalog import RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.release_rules_export import export_release_rules
+from tools.release_rules_export import export_release_rules, release_deployed_object_bytes
 from tools.restrictions_v9_release import _check_variant_semantics_delta
 from tools.stage_commlink_v9_candidate import (
     promote_commlink_candidate,
@@ -77,7 +77,10 @@ def test_commlink_candidate_rejects_unrelated_curated_drift(tmp_path: Path) -> N
         name: (root / "data/generated" / name).read_bytes()
         for name in ("rules.db", "deployed-objects.json")
     }
-    with pytest.raises(ValueError, match="Variant refresh changed unrelated rows: records"):
+    with pytest.raises(
+        ValueError,
+        match="Variant refresh changed unrelated rows: (records|deployed_object_metadata)",
+    ):
         stage_commlink_candidate(root / "local/rejected", root=root)
     assert not (root / "local/rejected").exists()
     assert all((root / "data/generated" / name).read_bytes() == content
@@ -99,7 +102,10 @@ def _disposable_commlink_release(tmp_path: Path) -> Path:
     for relative in files:
         target = root / relative
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(ROOT / relative, target)
+        if relative == "data/generated/deployed-objects.json":
+            target.write_bytes(release_deployed_object_bytes(ROOT / relative))
+        else:
+            shutil.copy2(ROOT / relative, target)
     # Exercise one-time promotion even after the real tracked release is promoted:
     # reconstruct the exact prior family-only row in a disposable v9 database.
     rules = root / "data/generated/rules.db"

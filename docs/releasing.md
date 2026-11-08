@@ -309,8 +309,13 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
   records, citations, source metadata and 48 topic associations to
   match a fresh curated export. A stale tracked binary blocks release,
   even when source and browser tests using fresh exports pass.
-- [ ] After rebuilding either database, regenerate and `--check` the
-  pinned `data/generated/deployed-objects.json` with
+- [ ] After rebuilding either database, follow the schema-specific
+  [matched-artifact workflow](deployment.md#normal-updates-from-081-onward).
+  For v10, verify embedded deployed objects and use
+  `tools.build_v10_runtime_candidate --check` for the source-matched
+  candidate; tracked promotion is a separate explicit operation.
+  Only legacy v8/v9 releases generate and `--check` the pinned
+  `data/generated/deployed-objects.json` with
   `tools.build_deployed_object_publication`. Regenerate the tracked
   `data/generated/variant-usage.json` with `tools.build_variant_usage --publish`
   from the matched raw Army archive, then run `--check-publication` before

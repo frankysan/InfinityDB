@@ -25,7 +25,7 @@ def stage(tmp_path: Path) -> Path:
 
 def test_current_staged_pair_passes_freshness_gate(stage: Path) -> None:
     accepted = verify_staged_release_pair(stage)
-    assert accepted["schemaVersion"] == 9
+    assert accepted["schemaVersion"] == 10
     assert accepted["reviewedObjects"] == 17
     assert set(accepted["releaseBaselineSha256"]) == {
         "rulesDatabase", "deployedObjects",

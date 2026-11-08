@@ -17,6 +17,7 @@ from tools.audit_deployed_object_citation_migrations import (
     build_citation_migration_plan,
     main,
 )
+from tools.release_rules_export import release_deployed_object_bytes
 from tools.stage_deployed_object_citation_migration import (
     prepare_migrated_inputs,
     stage_citation_migration,
@@ -156,6 +157,8 @@ def test_preflight_does_not_write_sources(
 
 
 def test_migration_staging_is_complete_and_does_not_touch_inputs(tmp_path: Path) -> None:
+    if audit_citations()["pendingCount"] == 0:
+        pytest.skip("Migration already promoted; staging covered before promotion")
     original_curated = CURATED.read_bytes()
     original_manifests = {name: path.read_bytes() for name, path in MANIFEST_PATHS.items()}
     original_rules = (CURATED.parents[2] / "generated/rules.db").read_bytes()
@@ -163,8 +166,6 @@ def test_migration_staging_is_complete_and_does_not_touch_inputs(tmp_path: Path)
         CURATED.parents[2] / "generated/deployed-objects.json"
     ).read_bytes()
 
-    if audit_citations()["pendingCount"] == 0:
-        pytest.skip("Migration already promoted; staging covered before promotion")
     output = tmp_path / "stage"
     report = stage_citation_migration(output)
     assert report["migratedCount"] == 14
@@ -255,7 +256,7 @@ def test_promoted_artifacts_match_staging_report_when_available() -> None:
         staged["stagedSha256"]["rulesDatabase"]
     )
     publication = json.loads(
-        (repo / "data/generated/deployed-objects.json").read_text(encoding="utf-8")
+        release_deployed_object_bytes(repo / "data/generated/deployed-objects.json")
     )
     assert len(publication["objects"]) == 17
     assert publication["sourceSnapshot"]["rulesDatabaseSha256"] == hashlib.sha256(

@@ -6,8 +6,8 @@ For public internet serving, InfinityDB deploys an immutable Docker image
 containing the web application, processed graphical assets, release-matched
 `infinity.db` and `rules.db`, and tracked exact-variant
 `variant-usage.json` and Weapon-profile `weapon-profile-sources.json` publications.
-The current v9 image additionally includes its generated
-`deployed-objects.json`; v10 images embed these records directly in `rules.db`.
+Legacy v8/v9 images additionally include generated `deployed-objects.json`;
+the prepared 1.0.1 v10 image embeds these records directly in `rules.db`.
 Caddy listens on HTTP and proxies traffic to the application, which is not exposed
 directly on the host. Put Caddy behind an external TLS reverse proxy for public HTTPS.
 

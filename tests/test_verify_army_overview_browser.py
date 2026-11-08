@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from socketserver import ThreadingMixIn
@@ -172,10 +172,32 @@ def test_pinned_army_overview_api_links_and_keyboard_navigation(
         link = page.locator(first_link[0]).first
         link.focus()
         assert link.evaluate("(element) => element === document.activeElement")
-        page.keyboard.press("Enter")
         target_id = first_link[1][1:]
+        page.evaluate("""() => {
+            window.overviewMain = document.querySelector('main#main');
+            window.overviewNavigations = 0;
+            document.addEventListener('infinity:beforenavigation', () => {
+                window.overviewNavigations += 1;
+            });
+        }""")
+
+        def fragment_navigation(action: Callable[[], Any], fragment: str) -> None:
+            page.evaluate("""() => {
+                window.overviewHashChange = new Promise(resolve => {
+                    window.addEventListener('hashchange', () => resolve(true), { once: true });
+                });
+            }""")
+            action()
+            page.evaluate("() => window.overviewHashChange")
+            assert page.evaluate("window.location.hash") == fragment
+            assert page.evaluate("window.overviewNavigations") == 0
+            assert page.evaluate("document.querySelector('main#main') === window.overviewMain")
+
+        fragment_navigation(lambda: page.keyboard.press("Enter"), first_link[1])
         page.wait_for_function("(id) => document.activeElement?.id === id", arg=target_id)
-        assert page.evaluate("window.location.hash") == first_link[1]
+        fragment_navigation(page.go_back, "")
+        fragment_navigation(page.go_forward, first_link[1])
+        page.wait_for_function("(id) => document.activeElement?.id === id", arg=target_id)
         page.locator(f'[id="{target_id}"]').wait_for(state="visible", timeout=5000)
 
 

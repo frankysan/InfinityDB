@@ -21,6 +21,19 @@ SECTION_COUNTS = {
 }
 
 
+def _assert_card_gap(page: Any, before: str, after: str) -> None:
+    before_box = page.locator(before).bounding_box()
+    after_box = page.locator(after).bounding_box()
+    assert before_box and after_box
+    minimum = page.evaluate(
+        "() => parseFloat(getComputedStyle(document.documentElement)"
+        ".getPropertyValue('--space-3'))"
+    )
+    assert minimum > 0
+    gap = after_box["y"] - (before_box["y"] + before_box["height"])
+    assert gap >= minimum - 1, (before, after, gap, minimum)
+
+
 @pytest.fixture(scope="module")
 def app() -> Any:
     return create_app(
@@ -90,6 +103,7 @@ def test_orders_aros_page_renders_and_filters_without_overflow(
         parent_box = reference.bounding_box()
         assert group_box and parent_box
         assert abs(group_box["width"] - parent_box["width"]) <= 2, width
+        _assert_card_gap(page, ".orders-aros-controls", "#matrix-sections > section:first-child")
         assert groups.first.locator(".table-viewport").evaluate(
             "(node) => Math.abs(node.getBoundingClientRect().width"
             " - node.parentElement.getBoundingClientRect().width) <= 2"
@@ -103,6 +117,9 @@ def test_orders_aros_page_renders_and_filters_without_overflow(
                 theme,
             )
             assert groups.first.is_visible()
+            _assert_card_gap(
+                page, ".orders-aros-controls", "#matrix-sections > section:first-child",
+            )
             assert page.evaluate(
                 "() => document.documentElement.scrollWidth <= innerWidth + 1"
             ), (width, theme)
@@ -206,6 +223,8 @@ def test_orders_aros_scenario_context_stays_separate_and_deep_links(
             timeout=15000,
         )
         assert scoped.is_visible()
+        _assert_card_gap(page, ".orders-aros-controls", "#scenario-matrix")
+        _assert_card_gap(page, "#scenario-matrix", "#matrix-sections > section:first-child")
         assert scenario.title() in page.locator("#scenario-matrix-title").inner_text()
         assert page.locator("#matrix-sections tbody tr").count() == 57
         assert page.locator("#scenario-matrix-sections tbody tr").count() == 1

@@ -24,7 +24,8 @@ closeout and release readiness, not the feature itself.
    release, also follow the complete mandatory [release checklist](../../../docs/releasing.md).
 2. Inspect the actual diff and current state. Identify the canonical current-behavior/design owner
    for each durable outcome; update that owner rather than duplicating contracts across documents.
-3. Add an Unreleased changelog entry only for a meaningful user/operator-visible outcome. Write
+3. Add a changelog entry under the [pending target release](../../../docs/releasing.md#between-releases)
+   only for a meaningful user/operator-visible outcome. Write
    from the user's or operator's perspective, consolidate related outcomes, and keep implementation
    details in code/tests/history. If the change is internal-only and warrants no entry, state that
    decision in the handoff rather than adding noise.

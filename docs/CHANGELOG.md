@@ -58,6 +58,13 @@ are not retroactively relabeled.
   rules semantics and the improved Battleground map. Embedded reviewed deployed
   objects in the rules database and preserved independent JSON compatibility
   for legacy release images.
+- **Data processing:** Updated shared Rules staging to retain the current database
+  format and rebuild its reviewed deployed-object model, preserving Restrictions
+  and source pairing after the v10 migration. Updated source audits and staging
+  comparisons to read embedded objects without requiring a legacy JSON file.
+- **Web frontend:** Fixed keyboard navigation between Army overview cards and
+  Back/Forward through their fragment links. Kept the existing page in place so
+  focus stayed on the linked card instead of racing a page reload.
 - **Deployment + Project infrastructure:** Fixed deployment file permissions after saving
   private installer settings. Kept the settings file restricted to its owner without
   applying that restriction to subsequent checkout files, and ensured the metrics-history

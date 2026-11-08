@@ -27,10 +27,14 @@ from tools.audit_terrain_scenery_source_gaps import (
     verify_example_values,
     verify_pinned_pdf,
 )
+from tools.release_rules_export import release_deployed_object_bytes
 
 
 def _inputs() -> tuple[dict, dict]:
-    return load_curated_document(CURATED), json.loads(PUBLICATION.read_text(encoding="utf-8"))
+    return (
+        load_curated_document(CURATED),
+        json.loads(release_deployed_object_bytes(PUBLICATION)),
+    )
 
 
 def test_terrain_scenery_inventory_remains_outside_deployed_objects() -> None:

@@ -190,7 +190,7 @@ def test_cover_pair_rebuild_and_refusal_preserve_both_artifacts(
     if not PDF.is_file() or not (ROOT / "local").is_dir():
         pytest.skip("Pinned source and local staging unavailable")
     objects = ROOT / "data/generated/deployed-objects.json"
-    original = (RULES.read_bytes(), objects.read_bytes())
+    original = (RULES.read_bytes(), objects.read_bytes() if objects.is_file() else None)
     result = verify_candidate()
     assert result["alreadyPublished"] and result["deterministic"] and result["matchedPublication"]
     assert result["logicallyEquivalentWithPublished"]
@@ -198,8 +198,8 @@ def test_cover_pair_rebuild_and_refusal_preserve_both_artifacts(
     assert result["publishedRulesSha256"] == hashlib.sha256(RULES.read_bytes()).hexdigest()
     with pytest.raises(ValueError, match="repeated cover promotion"):
         verify_candidate(promote=True)
-    monkeypatch.setattr(promote_cover_reference, "load_deployed_object_publication",
+    monkeypatch.setattr(promote_cover_reference, "load_release_deployed_objects",
                         lambda *_args: None)
     with pytest.raises(ValueError, match="publication does not match"):
         verify_candidate()
-    assert (RULES.read_bytes(), objects.read_bytes()) == original
+    assert (RULES.read_bytes(), objects.read_bytes() if objects.is_file() else None) == original

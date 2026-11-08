@@ -17,6 +17,86 @@ The type-check stage explicitly passes the runner's interpreter to Pyright for d
 resolution, so invoking the virtual-environment Python works without first activating that
 environment in the shell.
 
+## 1.0.1 release preparation
+
+**Project domains:** Web frontend, Data processing, Project infrastructure
+
+On 2026-11-08, the complete Linux release gate passed against staged tree
+`bd6345314ec196a8e52d609a8f7ae3264446a1e3`, based on `f9be5fe9`.
+It used Python 3.14.4, eight workers, four Chromium lanes/slots and the
+Scenario FAQ split profile, with required assets, source occupancy and
+`INFINITYDB_RELEASE_FAQ_PARITY=1`. The full source suite passed
+**5,916 tests, 22 skipped, zero failures** in 665.48 seconds. Ruff,
+Markdownlint, tracked-document links, backlog structure, Pyright, the
+pinned Army build and rules/source-occupancy stages all passed.
+
+The isolated Git-index preflight also passed (384.97 seconds), including
+indexed artifact verification, lint/types, clean-export pytest, wheel
+content checks and normal/asset-free installed-runtime smoke. Both installed
+CLI entry points reported **1.0.1**. The clean-export run reported
+**1,289 skips**, principally absent Playwright (880 cases) and ignored
+Army/PDF/research inputs. These do not claim clean-export browser/source
+acceptance: the separate full source run covered those available cohorts.
+Its 22 skips were 14 separately selected cross-browser cases, seven
+historical/legacy/migration-evidence cases and one Windows-only API case.
+Two Python 3.14 multithreaded-fork deprecation warnings remained.
+
+The source-matched v10 candidate and its `--check`, variant publication,
+Weapon publication and deployment asset checks passed against the unchanged
+tracked runtime set: 17 objects, one unresolved delivery, 151 variant groups,
+62 reviewed Weapons and all 808 published/browser-referenced SVGs. Source
+occupancy found no populated field among the 39 unrepresented fields. The
+updated disposable Docker preview built the **1.0.1** wheel and passed
+packaged-data, startup-health and reference API checks; its container/image
+were removed. Docker ran through Windows' Linux engine because the devbox
+account lacked Docker socket access. Neither check deployed an application.
+
+The Orders & AROs spacing regression passed **12/12, zero skips** on Windows
+Chrome (11.86 seconds), then passed in the Linux suite. The CSS was committed
+in `8ecf035e`; bounding-box assertions were designed/reviewed without execution
+in VD-0116. They check controls/core-card separation at 1440/1024/390/320 px
+in both themes and controls/scenario/core-card separation at 1440/390 px,
+retaining navigation, filters, page-error, request and overflow checks.
+This closes VD-0116 and VR-0144.
+
+Shared staging and source-review consumers now preserve the active v10
+schema, Restrictions and reviewed embedded deployed objects. Comparisons
+read the schema-owned model rather than requiring stale legacy JSON;
+nonmutation guards preserve exact file bytes or absence. Legacy format,
+rollback, unrelated-drift and unsupported-version rejection remain covered.
+The impacted Windows cohort passed **846/846, zero skips** (59.50 seconds);
+an additional audit/staging/reference/browser cohort passed **116 tests,
+five historical/source skips** (57.97 seconds). Version/release-note/page
+checks passed **36/36**. The final Linux full gate covered the repaired
+consumers without relying on an existing ignored legacy JSON file.
+
+The Army overview keyboard failure exposed a shared `popstate` bug: native
+fragment traversal reloaded the page, racing its hash-target focus.
+VD-0117 added lifecycle/main-identity and Back/Forward assertions at
+1440/390 px, reviewed without execution. The new assertion failed before
+the fix with one unexpected soft-navigation lifecycle event. The initial
+Army/accessibility/web cohort passed **327/327**; the final expanded
+Army/accessibility/Orders cohort passed **18/18** (21.66 seconds).
+It also checks a filter-query update followed by the Skip link, fragment
+Back and query Back, keeping native fragments distinct from route/query
+changes and retaining cross-page focus/scroll restoration.
+
+Failed/interrupted attempts remain in ignored `local/audits/v1.0.1/` and
+are not acceptance: the first complete Windows run had nine legacy-reader
+failures (**5,902 passed, 27 skipped**). The next had one Spec-Ops timeout
+(**5,910 passed, 27 skipped**) with static-module `ERR_CONNECTION_REFUSED`;
+that observation establishes neither a product regression nor a concurrency
+root cause. An earlier Linux run had the Army keyboard failure (**5,915
+passed, 22 skipped**). Linux source-audit inputs were copied inside the
+validation root where required; root-containment checks were not weakened.
+The existing interactive and MCP worker checkouts were preserved.
+
+This verified local gate closes **VR-0145, VR-0146 and VR-0147**.
+The final documentation-only closeout receives documentation and staged-index
+checks before commit. Exact-SHA hosted Source/Wheel/Deployment/Cross-browser
+acceptance, release dating, tagging and deployment remain separate release
+checklist obligations.
+
 ## Agent coordination safety acceptance
 
 These checks validate the optional coordination CLI. They do not enable it or
@@ -1490,12 +1570,12 @@ does not itself lower the VR count.
    VR entry; do not force or reset the checkout. Neither
    `start_test_job` nor file transfer is Git synchronization. Staged
    Syncthing assets must be activated separately when needed. **Before
-   the full suite, generate the Git-ignored paired deployed-object
-   publication on the selected worker using
-   `tools.build_deployed_object_publication`, then run its `--check`
-   verification against the tracked Army/rules databases.** A matching
-   Git HEAD does not include `data/generated/deployed-objects.json`;
-   omitting it makes publication, migration and scenario tests fail.
+   the full suite, verify the schema-specific matched runtime artifacts.**
+   Current v10 Rules embed deployed objects; validate them against the
+   tracked Army database. Only legacy v8/v9 checkouts generate
+   `data/generated/deployed-objects.json` with
+   `tools.build_deployed_object_publication` and run its `--check` verification.
+   A matching Git HEAD does not supply that ignored legacy publication.
    When exact-variant or Weapon-profile publications are present, also verify
    their paired build checks before dispatch. Fingerprint curated inputs from
    the bytes that Git actually publishes; Windows CRLF working copies must
@@ -9257,8 +9337,8 @@ the final frozen release candidate. It never rebuilds the artifact. The
 normal `build-rules` export now produces a v10 candidate at ignored
 `local/rules-standalone.db`. Explicit `--legacy-v8`/`--legacy-v9` flags
 are available for compatibility testing. All CLI modes reject direct writes to
-the tracked rules database. The tracked release remains v9 until a separately
-verified image/artifact migration; its guarded publication contract is in
+the tracked rules database. The prepared 1.0.1 tracked release uses v10;
+its schema-specific publication contract is in
 [the data-model contract](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
 Normal development checks skip this release-only gate:
 
@@ -9271,14 +9351,16 @@ try {
 }
 ```
 
-**Rebuild dependent publication before testing the release pair.**
-The tracked rules DB hash also anchors the ignored
-`data/generated/deployed-objects.json`. Regenerate and verify that
-publication whenever the release workflow calls for a rebuild. When
-changing the tracked v9 rules database, use its guarded paired-promotion
-workflow rather than replacing either artifact individually; application
-startup rejects a mismatched pair. For a standalone publication rebuild,
-run:
+**Verify dependent publications before testing the release pair.**
+Current v10 Rules embed deployed objects. Verify the matched four-file
+runtime set with `tools.build_v10_runtime_candidate --check` and
+`tools.verify_deployment_assets`, following the
+[release checklist](releasing.md#4-run-local-release-validation).
+For legacy v8/v9 only, the tracked rules DB hash also anchors ignored
+`data/generated/deployed-objects.json`; regenerate and verify it whenever
+the legacy release workflow calls for a rebuild. Its guarded paired-promotion
+workflow preserves both artifacts; application startup rejects a mismatched
+pair. For a standalone legacy publication rebuild, run:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.build_deployed_object_publication

@@ -5,8 +5,9 @@ Equipment, Skills, Weapons, core Scenarios, and relationships across Armies. It 
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Current release: **1.0.0** (2026-11-07). See the
-[release notes](docs/CHANGELOG.md#100---2026-11-07) for changes and upgrade
+Prepared release version: **1.0.1** (Unreleased); the last tagged release is
+**1.0.0** (2026-11-07). See the
+[release notes](docs/CHANGELOG.md#101---unreleased) for changes and upgrade
 considerations, and the [deployment guide](docs/deployment.md) for updates.
 
 ## Guiding principles
@@ -149,6 +150,10 @@ scenarios, reviewed FAQ and deployed objects, and exact-variant usage
 references. See the [changelog](docs/CHANGELOG.md) for the complete version
 history and the [post-1.0 backlog](docs/TODO.md#post-10--maintenance-and-product-expansion)
 for work outside this baseline.
+
+Version **1.0.1** is being prepared with improved scenario maps, reference-page
+spacing, version-specific release notes and safer local-build/deployment workflows.
+Its Rules database embeds reviewed deployed objects while retaining the reference baseline.
 
 ## Requirements and setup
 
@@ -318,8 +323,8 @@ The Restrictions chart and deployed-object reviews are applied automatically.
 Use `--legacy-v8` or `--legacy-v9` for older standalone formats.
 Direct writes to the tracked release `rules.db` are disallowed.
 
-The tracked 1.0 release still uses v9 with `deployed-objects.json`.
-The v10 migration is not yet published; see the
+The prepared 1.0.1 release uses v10 with deployed objects embedded in `rules.db`;
+the tagged 1.0.0 release used v9 with `deployed-objects.json`. See the
 [versioned storage contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted)
 and its release work in [TODO](docs/TODO.md#performance-storage-and-build-tooling).
 A tagged immutable Docker image must receive a validated matching set of

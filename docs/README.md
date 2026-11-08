@@ -194,8 +194,9 @@ progress indicators for partially delivered tasks.
 Complete the handoff at the same time as the work:
 
 1. Record the practical outcome in the canonical behavior/design documentation.
-   Add or consolidate meaningful player/operator outcomes under `Unreleased` in
-   [the changelog](CHANGELOG.md); internal-only test, refactor or process work
+   Add or consolidate meaningful player/operator outcomes in
+   [the changelog](CHANGELOG.md) under the branch's
+   [pending target release](releasing.md#between-releases); internal-only test, refactor or process work
    needs no release-note entry, with that decision stated in the handoff.
 2. Remove a completed standalone task or completed parent and its whole subtree.
    A completed subtask whose immediate parent is still open may instead become

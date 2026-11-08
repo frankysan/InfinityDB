@@ -1,4 +1,5 @@
 import { getOrdersAros } from "./api.js";
+import { writeHistoryUrl } from "./share-state.js";
 
 const state = document.getElementById("matrix-state");
 const target = document.getElementById("matrix-sections");
@@ -155,7 +156,7 @@ scenarioSelect.addEventListener("change", () => {
   const url = new URL(window.location.href);
   if (scenarioSelect.value) url.searchParams.set("scenario", scenarioSelect.value);
   else url.searchParams.delete("scenario");
-  window.history.replaceState(window.history.state, "", url);
+  writeHistoryUrl(url, { replace: true });
   load();
 });
 document.addEventListener("infinity:beforenavigation", () => controller?.abort(), { once: true });

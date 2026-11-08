@@ -134,16 +134,7 @@ static design-review outcome. Do not record a test result in VD. Retire
 the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
-- [ ] VD-0116 (2026-11-08; needs-design): Assert that the Orders & AROs
-  declaration controls are visually separated from the first core-category card,
-  and that choosing a scenario preserves spacing between consecutive cards at
-  desktop and mobile widths.
-  Work: user-reported Orders & AROs spacing defect (2026-11-08);
-  change: `src/infinity_db/web/static/page-overrides.css` on `dev/v1.0.1`;
-  risk: low. Existing coverage: `tests/test_verify_orders_aros_browser.py`
-  verifies card width/overflow, not the vertical gap; linked execution: VR-0144.
-  Outcome: add bounding-box spacing assertions for both core and scenario
-  states to that browser test; static design review pending, no tests run.
+No pending design entries.
 
 ## Pending deferred execution
 
@@ -154,18 +145,12 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0144 (2026-11-08; awaiting-design): Verify consistent vertical
-  spacing between the Orders & AROs declaration controls, optional scenario
-  card, and first category card.
-  Work: user-reported Orders & AROs spacing defect (2026-11-08);
-  revision: `src/infinity_db/web/static/page-overrides.css` on
-  `dev/v1.0.1` (exact SHA to record at execution); risk: low.
-  Immediate: CSS diff inspected; test execution deferred by the
-  phased-validation policy. Design: VD-0116.
-  Deferred: `tests/test_verify_orders_aros_browser.py` (desktop and mobile,
-  core and scenario layouts) after VD-0116, preferably on `linux-dev` at the
-  exact committed revision; visual browser confirmation if needed.
-  Outcome: pending.
+No pending execution entries.
+
+VR-0144, VR-0145, VR-0146 and VR-0147 passed the
+[1.0.1 preparation and release checks](testing.md#101-release-preparation).
+VD-0116 and VD-0117 completed their separate design reviews. Hosted and
+release-only acceptance remain owned by the release checklist.
 
 The
 [prepared release-metadata gate](testing.md#prepared-100-release-metadata-v1s-092)
@@ -192,8 +177,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0117`; active obligations are listed above.
-- Execution: `VR-0145`; active obligations are listed above.
+- Design: `VD-0118`; active obligations are listed above.
+- Execution: `VR-0148`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

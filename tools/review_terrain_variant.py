@@ -18,7 +18,6 @@ from infinity_db.curated import (
     TERRAIN_VARIANT,
     load_curated_directory,
 )
-from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from tools.audit_source_variant_inputs import (
     inventory_source_variants,
@@ -26,7 +25,7 @@ from tools.audit_source_variant_inputs import (
     source_extra_owner_context,
 )
 from tools.build_deployed_object_publication import build_publication
-from tools.release_rules_export import export_release_rules
+from tools.release_rules_export import export_release_rules, load_release_deployed_objects
 from tools.restrictions_v9_release import (
     _check_variant_semantics_delta,
     refresh_variant_semantics_v9_release,
@@ -69,7 +68,7 @@ def check_candidate(root: Path = ROOT) -> dict[str, Any]:
                    for c in matching[0].get("citations", []))
     ):
         raise ValueError("N5.3 Terrain curated source contract changed")
-    prior = load_deployed_object_publication(objects, army, rules)
+    prior = load_release_deployed_objects(objects, army, rules)
     if prior is None:
         raise ValueError("Existing deployed-object/rules release pair is not matched")
     published = RulesDatabase(rules).skill_reviewed_extra_semantics().get("terrain")
