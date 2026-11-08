@@ -120,9 +120,13 @@ The v10 candidate builder embeds reviewed deployed objects directly in
 It is staged under ignored `local/v10-candidate/` by default, without
 `deployed-objects.json`. For a disposable v10 image build preview, run
 `python -m tools.prepare_runtime_bundle --source-dir local/v10-candidate`
-to fill `data/runtime/` from that validated candidate. Normal `deploy.sh`
-always reconstructs the image bundle from tracked `data/generated/`, and
-never silently selects the local candidate. The tracked release remains v9
+to fill `data/runtime/` from that validated candidate. The optional
+`python -m tools.preview_runtime_image --source-dir local/v10-candidate`
+builds an isolated Docker preview, checks its packaged data and local HTTP
+routes, removes the preview container/image, and restores the tracked
+release's runtime bundle. This requires an active Docker Linux engine.
+Normal `deploy.sh` always reconstructs the image bundle from tracked
+`data/generated/`, and never silently selects the local candidate. The tracked release remains v9
 pending acceptance; see [TODO](TODO.md#performance-storage-and-build-tooling).
 The immutable container never regenerates or replaces its databases at runtime.
 

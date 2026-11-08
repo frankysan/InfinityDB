@@ -17,6 +17,28 @@ def _read(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
+def test_v10_preview_requires_linux_engine_before_staging(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from types import SimpleNamespace
+
+    from tools import preview_runtime_image
+
+    stage = tmp_path / "candidate"
+    stage.mkdir()
+    monkeypatch.setattr(preview_runtime_image.shutil, "which", lambda _name: "docker")
+    monkeypatch.setattr(
+        preview_runtime_image.subprocess, "run",
+        lambda *_args, **_kwargs: SimpleNamespace(returncode=1),
+    )
+    monkeypatch.setattr(
+        preview_runtime_image, "prepare_bundle",
+        lambda *_args: pytest.fail("Must not change image bundle without Docker"),
+    )
+    with pytest.raises(ValueError, match="Docker Desktop Linux engine is unavailable"):
+        preview_runtime_image.preview_image(stage, "infinity-db:v10-preview-test")
+
+
 def test_compose_supports_explicit_bind_address_and_host_port() -> None:
     compose = _read("compose.yaml")
     assert "${BIND_ADDRESS:-0.0.0.0}:${HTTP_PORT:-80}:80" in compose

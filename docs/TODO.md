@@ -266,7 +266,11 @@ only when required to fix correctness, reproducibility, or release reliability.
     container's read model chooses by schema. Keep this contract through
     final v10 image verification.
   - [ ] Validate an immutable image built from the matched release artifacts,
-    including startup, API parity, deployment smoke and CI. Do not introduce
+    including startup, API parity, deployment smoke and CI. The optional local
+    v10 preview was blocked on 2026-11-08 because Docker Desktop's Linux
+    engine socket was unavailable; no image was built or deployed. Retry
+    `tools.preview_runtime_image` when a Docker engine is active, then verify
+    the tracked release image on hosted CI. Do not introduce
     live-replacement locks, in-container regeneration or multi-file runtime
     transaction/rollback machinery; new images replace old images as a unit.
     Retire superseded v9 promotion helpers after their unique contracts are
