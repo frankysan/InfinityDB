@@ -47,6 +47,14 @@ domain-specific actions, not second copies of operational thresholds or rules.
 `AGENTS.local.md` is private, machine/user-specific guidance and must not
 override tracked project policy.
 
+## Active strategic plans
+
+- [restructuring-plan.md](restructuring-plan.md) — proposed phased simplification of
+  developer workflow, SQLite runtime data, source-family databases, player-facing
+  presentation, tooling and repository structure. It maps dependencies and
+  acceptance criteria but does not override current behavior or duplicate the
+  live implementation backlog in `TODO.md`.
+
 ## Maintained evidence and research
 
 These files intentionally retain reviewed evidence that is useful beyond one release:

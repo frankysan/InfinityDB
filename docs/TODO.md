@@ -73,6 +73,16 @@ checks retain their separate evidence and acceptance conditions.
 These items are intentionally outside the 1.0 completeness gate. They may move earlier
 only when required to fix correctness, reproducibility, or release reliability.
 
+### Major simplification and restructuring
+
+**Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
+
+- [ ] Execute the [phased restructuring plan](restructuring-plan.md), starting with
+  simpler agent/validation rules (P0) and a dependency inventory (P1) before
+  changing the runtime data path. The plan owns step ordering, decisions and
+  exit criteria; record individual implementation work here only when actionable,
+  without copying the complete roadmap into a second task ledger.
+
 ### External source clarifications
 
 **Project domain:** Data processing
