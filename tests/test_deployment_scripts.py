@@ -39,6 +39,54 @@ def test_v10_preview_requires_linux_engine_before_staging(
         preview_runtime_image.preview_image(stage, "infinity-db:v10-preview-test")
 
 
+def test_v10_preview_waits_for_health_then_checks_http_without_published_ports(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from types import SimpleNamespace
+
+    from tools import preview_runtime_image
+
+    stage = tmp_path / "candidate"
+    stage.mkdir()
+    calls: list[tuple[str, ...]] = []
+    bundles: list[tuple[Path, Path]] = []
+    probes = 0
+
+    def fake_run(
+        args: list[str] | tuple[str, ...], **_kwargs: object,
+    ) -> SimpleNamespace:
+        nonlocal probes
+        command = tuple(args)
+        calls.append(command)
+        if command[:3] == ("docker", "exec", "infinitydb-v10-preview-check"):
+            if command[-1] == preview_runtime_image._HEALTH_PROBE:
+                probes += 1
+                return SimpleNamespace(returncode=1 if probes == 1 else 0)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(preview_runtime_image.shutil, "which", lambda _name: "docker")
+    monkeypatch.setattr(preview_runtime_image.subprocess, "run", fake_run)
+    monkeypatch.setattr(preview_runtime_image.time, "sleep", lambda _seconds: None)
+    monkeypatch.setattr(
+        preview_runtime_image, "prepare_bundle",
+        lambda source, output: bundles.append((source, output)),
+    )
+    preview_runtime_image.preview_image(stage, "infinity-db:v10-preview-test")
+
+    run = next(call for call in calls if call[:3] == ("docker", "run", "-d"))
+    assert "--network" not in run
+    assert "-p" not in run and "--publish" not in run
+    assert "--read-only" in run
+    assert probes == 2
+    assert sum(call[-1] == preview_runtime_image._HTTP_VERIFY for call in calls) == 1
+    assert calls[-2][:2] == ("docker", "stop")
+    assert calls[-1][:3] == ("docker", "image", "rm")
+    assert bundles == [
+        (stage, preview_runtime_image.DEFAULT_OUTPUT),
+        (preview_runtime_image.DEFAULT_SOURCE, preview_runtime_image.DEFAULT_OUTPUT),
+    ]
+
+
 def test_compose_supports_explicit_bind_address_and_host_port() -> None:
     compose = _read("compose.yaml")
     assert "${BIND_ADDRESS:-0.0.0.0}:${HTTP_PORT:-80}:80" in compose

@@ -265,16 +265,17 @@ only when required to fix correctness, reproducibility, or release reliability.
     fifth file. Deployment generates legacy JSON only for v8/v9, and the
     container's read model chooses by schema. Keep this contract through
     final v10 image verification.
-  - [ ] Validate an immutable image built from the matched release artifacts,
-    including startup, API parity, deployment smoke and CI. The optional local
-    v10 preview was blocked on 2026-11-08 because Docker Desktop's Linux
-    engine socket was unavailable; no image was built or deployed. Retry
-    `tools.preview_runtime_image` when a Docker engine is active, then verify
-    the tracked release image on hosted CI. Do not introduce
-    live-replacement locks, in-container regeneration or multi-file runtime
-    transaction/rollback machinery; new images replace old images as a unit.
-    Retire superseded v9 promotion helpers after their unique contracts are
-    migrated and tested.
+  - [ ] Validate the promoted v10 release image and exact tracked artifacts
+    on hosted CI, including deployment smoke and frozen-candidate parity.
+    The isolated local v10 Docker preview passed on 2026-11-08 after fixing
+    loopback networking and the text/plain health probe. It verified v10
+    package contents, startup, deployed-object API, exact-variant API and
+    Weapon Chart citations, then removed its temporary image/container and
+    restored v9 Docker build inputs. No deployment was performed. Do not
+    introduce live-replacement locks, in-container regeneration or multi-file
+    runtime transaction/rollback machinery; new images replace old images
+    as a unit. Retire superseded v9 promotion helpers after their unique
+    contracts are migrated and tested.
 
 - [ ] **Post-1.0 infrastructure research — deferred:** Continue the
   [Chromium lifecycle and concurrency investigation](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)

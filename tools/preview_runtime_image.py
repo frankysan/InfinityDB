@@ -49,19 +49,43 @@ assert app.variant_usage is not None
 print('v10 immutable image artifacts: PASS')
 """
 
+_HEALTH_PROBE = r"""
+from urllib.request import urlopen
+with urlopen('http://127.0.0.1:8000/internal/health', timeout=5) as response:
+    assert response.status == 200 and response.read() == b'ok\n'
+"""
+
 _HTTP_VERIFY = r"""
 import json
+from pathlib import Path
+from urllib.parse import quote
 from urllib.request import urlopen
+
 root = 'http://127.0.0.1:8000'
-for path in (
-    '/internal/health', '/api/deployed-objects',
-    '/api/variant-usage?record_id=skill:camouflage', '/api/weapons/rifle',
-):
+
+
+def get_json(path):
     with urlopen(root + path, timeout=8) as response:
         assert response.status == 200, path
-        payload = json.loads(response.read())
-    if path == '/api/deployed-objects':
-        assert len(payload['items']) == 17
+        return json.load(response)
+
+
+deployed = get_json('/api/deployed-objects')
+assert len(deployed['items']) == 17
+assert len(deployed['unresolved_deliveries']) == 1
+
+publication = json.loads(Path('/app/data/variant-usage.json').read_text(encoding='utf-8'))
+record_id = publication['variants'][0]['variant']['recordId']
+usage = get_json('/api/variant-usage?record_id=' + quote(record_id))
+assert usage['recordId'] == record_id and usage['items']
+assert usage['sourceSnapshot'] == publication['sourceSnapshot']
+
+rifle = get_json('/api/weapons/rifle')
+assert rifle['profile_citations_available']
+assert any(
+    citation['source_id'] == 'n5-core-v5.3-pdf' and citation['page'] == 183
+    for citation in rifle['profiles'][0]['profile_citations']
+)
 print('v10 container HTTP smoke: PASS')
 """
 
@@ -89,19 +113,25 @@ def preview_image(stage: Path, tag: str) -> None:
         _run("docker", "build", "--tag", tag, ".")
         built = True
         _run("docker", "run", "--rm", "--entrypoint", "python", tag, "-c", _IMAGE_VERIFY)
-        _run("docker", "run", "-d", "--rm", "--network", "none",
+        # No host ports are published. Use Docker's private bridge network:
+        # --network none leaves loopback unavailable for in-container HTTP probes.
+        _run("docker", "run", "-d", "--rm", "--read-only",
+             "--tmpfs", "/tmp", "--security-opt", "no-new-privileges",
              "--name", container, tag)
         running = True
-        last_error: subprocess.CalledProcessError | None = None
         for _ in range(20):
-            try:
-                _run("docker", "exec", container, "python", "-c", _HTTP_VERIFY)
+            probe = subprocess.run(
+                ["docker", "exec", container, "python", "-c", _HEALTH_PROBE],
+                cwd=ROOT, capture_output=True, check=False,
+            )
+            if probe.returncode == 0:
                 break
-            except subprocess.CalledProcessError as error:
-                last_error = error
-                time.sleep(1)
+            time.sleep(1)
         else:
-            raise ValueError(f"v10 HTTP smoke failed: {last_error}")
+            subprocess.run(["docker", "logs", container], cwd=ROOT, check=False)
+            raise ValueError("v10 container did not become HTTP-healthy")
+        # Run the substantive API assertions once after readiness.
+        _run("docker", "exec", container, "python", "-c", _HTTP_VERIFY)
     finally:
         if running:
             subprocess.run(["docker", "stop", container], cwd=ROOT, check=False)
