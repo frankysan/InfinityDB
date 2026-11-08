@@ -389,7 +389,10 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     assert b'id="changes-unreleased"' not in body
     assert b'id="changes-1-0-1"' in body
     assert b"<h2>Version 1.0.1</h2>" in body
-    assert b'<span class="changes-release-date">Unreleased</span>' in body
+    assert (
+        b'<time class="changes-release-date" datetime="2026-11-09">'
+        b'November 9, 2026</time>' in body
+    )
     assert b"Added the ability to save scenario maps" in body
     assert b'id="changes-1-0-0"' in body
     assert b"<h2>Version 1.0.0</h2>" in body
