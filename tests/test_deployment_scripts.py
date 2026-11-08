@@ -403,7 +403,9 @@ def test_container_build_packages_canonical_changelog() -> None:
     assert documentation == ["docs/CHANGELOG.md"]
 
 
-@pytest.mark.parametrize("heading", ["## Unreleased", "## [0.10.0] - 2026-10-07"])
+@pytest.mark.parametrize(
+    "heading", ["## Unreleased", "## [1.0.1] - Unreleased", "## [0.10.0] - 2026-10-07"],
+)
 @pytest.mark.parametrize("matching_content", [True, False])
 @pytest.mark.parametrize("restrictions_version", [8, 9])
 def test_container_smoke_validates_canonical_notes_in_both_release_states(

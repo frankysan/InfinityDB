@@ -195,13 +195,52 @@ will actively guide later work.
 
 ## 3. Prepare release notes and metadata
 
+### Between releases
+
+**Project domains:** Project infrastructure, Web backend, Web frontend
+
+Once a development branch has an agreed release target, record implemented
+changes directly under a version-specific pending heading in `docs/CHANGELOG.md`:
+
+```markdown
+## [1.0.1] - Unreleased
+```
+
+- The pending heading is the maintained record of the branch's target version.
+  For example, `dev/v1.0.1` targets `1.0.1`. Confirm the agreed target when
+  starting work; do not choose a new target from the change's apparent size.
+- Keep one pending release section at the top, followed by dated release
+  history. Add meaningful implemented outcomes to that target as work lands,
+  using the writing rules below. Planned or deferred work stays in `docs/TODO.md`.
+- Use a generic `## [Unreleased]` section only while no release target has
+  been agreed. Once the target is known, rename that section to the named
+  pending heading, retaining its entries. Do not keep a parallel generic
+  bucket for changes already assigned to the target.
+- If the agreed target changes, rename the pending heading and reconcile its
+  entries with the new scope. Move unimplemented or deferred work to the
+  backlog; retain implemented changes that remain in the branch. Do not
+  silently relabel dated release history.
+- Keep `Unreleased` in place of the date until release preparation. The
+  browser presents the target as, for example, **Version 1.0.1 — Unreleased**,
+  without a release date. Naming the target does not change the package
+  version, establish a release date, or imply CI, tagging or deployment acceptance.
+- At release preparation, replace `Unreleased` with the agreed release date
+  and apply the version/metadata checklist below. After release, start a
+  pending section for the next agreed target when its first meaningful
+  implemented change lands; use the generic fallback if that target is unknown.
+
+Empty pending sections need no filler and are omitted from the browser page.
+Historical generic `Unreleased` headings remain supported for compatibility.
+
+### Writing release notes
+
 **Changelog entry discipline (also applies during development):** Introduce
 the features and changes implemented in each release, with the **end-user
 perspective first and the developer/maintainer perspective second**. The
 v1.0.0 entry in `docs/CHANGELOG.md` is the style example for future entries.
 
 - Write in **past tense**, including the Player summary and implemented
-  changes under `Unreleased`: “Added the ability to …”, “Expanded …”,
+  changes in pending release sections: “Added the ability to …”, “Expanded …”,
   “Clarified the use of …” or “Corrected …”. Describe what changed; avoid
   imperative browsing instructions or a general present-tense feature guide.
   Planned work belongs in the backlog, not the changelog.
@@ -226,15 +265,18 @@ v1.0.0 entry in `docs/CHANGELOG.md` is the style example for future entries.
   detail when it explains a user/operator consequence, such as an upgrade
   requirement or compatibility limit; place that detail after player outcomes.
 
-Empty `Unreleased` needs no filler; review its entries together before
-promotion. `docs/CHANGELOG.md` contains release content, not maintainer
+Review the pending release's entries together before finalization.
+`docs/CHANGELOG.md` contains release content, not maintainer
 instructions, because the web application parses it to render **What's changed**.
 
-- [ ] Cross-check `Unreleased` against substantive player/operator changes in Git
+### Finalize release notes and metadata
+
+- [ ] Confirm the pending heading names the agreed target version.
+- [ ] Cross-check the pending release against substantive player/operator changes in Git
   history since the previous release and the last changelog update. Restore
   missing outcomes, but do not turn commits, tests or internal refactors into
   individual release-note entries.
-- [ ] Review the complete `Unreleased` section of `docs/CHANGELOG.md` as one release:
+- [ ] Review the complete pending section of `docs/CHANGELOG.md` as one release:
   use past tense and an end-user-first perspective, keep its `Player summary`
   concise and player-visible only, and retain concrete feature and correction
   detail below it. Merge overlapping entries, remove implementation-only
@@ -243,7 +285,7 @@ instructions, because the web application parses it to render **What's changed**
   against the pre-rewrite version in Git history. Verify that distinct
   capabilities, meaningful fixes, examples and important qualifications
   survived the rewrite; restore useful detail lost through over-compression.
-- [ ] Move the finalized entries to a section for the target version and release date.
+- [ ] Replace the target section's `Unreleased` status with the agreed release date.
 - [ ] Update the package/application version consistently in `pyproject.toml` and
   `src/infinity_army_data/__init__.py`.
 - [ ] Update the current-release statement in `README.md`.

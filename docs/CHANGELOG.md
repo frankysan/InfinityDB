@@ -2,37 +2,40 @@
 
 All notable user- or operator-relevant changes to InfinityDB are documented here.
 Each release with entries begins with a concise **Player summary** containing only changes visible
-or useful to players; an empty `Unreleased` heading is omitted from the browser page. The remaining
+or useful to players; an empty pending section is omitted from the browser page. The remaining
 sections preserve fuller user/operator release detail. Entries describe
 meaningful release outcomes rather than detailed implementation history. New or materially revised
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
-## [Unreleased]
+## [1.0.1] - Unreleased
 
 ### Player summary
 
-- Save scenario maps directly as SVG images through the browser's image context menu,
-  retaining the selected Light/Dark theme, Army Points and distance units.
+- Added the ability to save scenario maps directly as SVG images through the browser's
+  image context menu, retaining the selected Light/Dark theme, Army Points and distance units.
+- Identified upcoming release notes by their target version and marked them as unreleased.
 
 ### Changed
 
-- **Web backend + Web frontend:** Keep scenario maps as normal image elements;
-  embed the chosen theme palette in the standalone SVG and update its URL when
-  display preferences change, without client-side SVG inlining.
+- **Web backend + Web frontend:** Added version-specific headings for upcoming release notes,
+  showing the target version and Unreleased status without a release date.
+- **Web backend + Web frontend:** Kept scenario maps as ordinary images that could be
+  saved directly. Embedded the selected theme palette in each standalone SVG and updated
+  the map when display preferences changed.
 
 ### Fixed
 
-- **Data processing + Web backend + Deployment:** Restore the
+- **Data processing + Web backend + Deployment:** Restored the
   `build --compact` → `build-rules` → `serve` checkout workflow, using
   up-to-date local Rules, exact-variant data and Weapon citations without
-  requiring Docker release publication. Docker continues to use only
+  requiring Docker release publication. Docker continued to use only
   verified, matched release artifacts.
-- **Data processing + Deployment:** Promote the verified v10 Rules database
+- **Data processing + Deployment:** Promoted the verified v10 Rules database
   and matching variant/Weapon publications together, retaining existing
-  rules semantics and the improved Battleground map. Reviewed deployed
-  objects are embedded in the rules database; legacy release images keep
-  their independent JSON compatibility.
+  rules semantics and the improved Battleground map. Embedded reviewed deployed
+  objects in the rules database and preserved independent JSON compatibility
+  for legacy release images.
 
 ## [1.0.0] - 2026-11-07
 

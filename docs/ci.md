@@ -461,8 +461,9 @@ rebuilds and compares the Weapon-profile JSON bytes on each supported OS.
 Deployment smoke first tests the exact v9 artifact model used by tagged production deployment.
 It does not rebuild the tracked release databases and is not a substitute for the source or
 installed-wheel checks. The `/changes` probe compares the served release-note content with
-the installed canonical changelog. It accepts both development notes under `Unreleased`
-and finalized version sections, and rejects stale or missing release-note content.
+the installed canonical changelog. It accepts version-specific pending notes
+(for example, `[1.0.1] - Unreleased`), legacy generic `Unreleased` headings and
+dated release sections, and rejects stale or missing release-note content.
 
 **Rollback-image rehearsal (passed at commit `663a345`, 2026-10-30):** the workflow also rebuilds
 a **disposable v8/compatibility-10** `rules.db` from current reviewed curated sources under
