@@ -406,6 +406,12 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
     `its-18@2026.09.01` for historically scoped results. Extend typed
     geometry, scoring and card/classified choices only where each mission
     needs them. Unpublished missions must fail closed.
+  - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
+    season launched under N5) and ITS Season 16 Part II (the N5-compatible
+    revision), at minimum their scenario definitions and maps. Keep original
+    Season 16 N4-era content distinct from Part II; preserve exact season,
+    revision and source provenance. Consider season-specific rules and FAQ
+    coverage after the scenario baseline, without delaying Season 18.
   - [ ] Capture structured, cited scenario facts: objectives and scoring, game
     rounds/end conditions, force/point/SWC/table/deployment configuration,
     deployment map or geometry, exclusion zones, token types/diameters,
