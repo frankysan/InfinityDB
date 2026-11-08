@@ -21,7 +21,10 @@ def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     assert releases[0].version == "1.0.1"
     assert releases[0].released_on == date(2026, 11, 9)
     assert releases[0].sections[0].heading == "Player summary"
-    assert any("Added the ability to save scenario maps" in item for item in releases[0].player_summary)
+    assert any(
+        "Added the ability to save scenario maps" in item
+        for item in releases[0].player_summary
+    )
     assert [section.heading for section in releases[0].detail_sections] == [
         "Added", "Changed", "Fixed", "Upgrade notes",
     ]
