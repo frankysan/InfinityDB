@@ -387,9 +387,13 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     assert b"Player-visible highlights are shown first" in body
     assert b'href="/changes" aria-current="page"' in body
     assert b'id="changes-unreleased"' not in body
+    assert b'id="changes-1-0-1"' in body
+    assert b"<h2>Version 1.0.1</h2>" in body
+    assert b'<span class="changes-release-date">Unreleased</span>' in body
+    assert b"Added the ability to save scenario maps" in body
     assert b'id="changes-1-0-0"' in body
     assert b"<h2>Version 1.0.0</h2>" in body
-    assert b"Browse current N5.3 rules" in body
+    assert b"Expanded the N5.3 reference" in body
     assert b'<time class="changes-release-date" datetime="2026-11-07">' in body
     assert b'id="changes-0-10-1"' in body
     assert b"<h2>Version 0.10.1</h2>" in body

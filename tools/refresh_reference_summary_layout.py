@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory
-from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.variant_usage import build_variant_usage_projection
 from infinity_db.variant_usage_reference import publication_from_candidate
@@ -35,7 +34,7 @@ from tools.promote_hackable_profile_help import (
     identities,
     usage_bytes,
 )
-from tools.release_rules_export import export_release_rules
+from tools.release_rules_export import export_release_rules, load_release_deployed_objects
 from tools.restrictions_v9_release import _replace_with_rollback
 
 
@@ -74,7 +73,7 @@ def verify_candidate(
     old_db = RulesDatabase(root / RULES)
     old_db.validate()
     old_ids = identities(root / RULES)
-    previous_objects = load_deployed_object_publication(
+    previous_objects = load_release_deployed_objects(
         root / OBJECTS, root / ARMY, root / RULES,
     )
     if previous_objects is None:
@@ -158,7 +157,7 @@ def verify_candidate(
             actual.validate()
             if actual.composed_record(record_id) != after:
                 raise ValueError("Promoted summary differs from staged candidate")
-            if load_deployed_object_publication(
+            if load_release_deployed_objects(
                 root / OBJECTS, root / ARMY, root / RULES,
             ) != objects:
                 raise ValueError("Promoted deployed-object publication is not matched")

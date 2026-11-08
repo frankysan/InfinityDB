@@ -85,10 +85,11 @@ release/audit narrative belongs in the changelog and Git history.
   `s=` codec. Source disagreements remain explicit: Domination's
   350-point SWC note is unresolved; Supplies' outer boxes are **8 inches**
   from edges, not the diagram's 12-inch guide line.
-- Scenario SVG uses canonical geometry and semantic colors. On inlining,
-  remove the SVG's embedded `<style>` for CSP and use page CSS; never
-  recalculate geometry or scoring in JavaScript. For precise
-  marker, Specialist and source-review contracts, see `docs/data-model.md`.
+- Scenario SVG uses canonical geometry and embeds its selected Light/Dark palette
+  from the maintained theme CSS; scenario pages keep the standalone SVG as an
+  `<img>` for native saving. Theme and distance-unit changes refresh the image
+  URL, never recalculate geometry or scoring in JavaScript. For precise marker,
+  Specialist and source-review contracts, see `docs/data-model.md`.
 
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.
@@ -153,8 +154,9 @@ release/audit narrative belongs in the changelog and Git history.
   development and validated without those inputs on the release host.
 - `data/generated/weapon-profile-sources.json`: tracked, reviewed Weapon-profile
   source locator publication.
-- `data/generated/deployed-objects.json`: ignored deterministic publication
-  generated from the tracked database pair and curated reviews at deployment.
+- Current v10 Rules embed reviewed deployed objects. The ignored
+  `data/generated/deployed-objects.json` publication is generated only for
+  legacy v8/v9 deployment; see [the artifact lifecycle](../data/README.md).
 - `data/generated/infinity.raw.db`: development/audit archive of normalized
   source structures, not a production dependency.
 - `data/manifests/symbol-publication.json`: tracked processed-SVG publication
@@ -351,7 +353,8 @@ When a change alters a durable contract:
 - update the canonical owner, not every document that happens to mention the topic;
 - keep `AI_CONTEXT.md` to non-obvious invariants and links;
 - add unfinished work only to `docs/TODO.md`;
-- record meaningful user/operator outcomes in `docs/CHANGELOG.md` under `Unreleased`
+- record meaningful user/operator outcomes in `docs/CHANGELOG.md` under the branch's
+  [pending target release](releasing.md#between-releases)
   when the corresponding work is completed, not only at release time; verify
   documentation impact against the actual diff before handing off (see
   `AGENTS.md` for the canonical workflow);

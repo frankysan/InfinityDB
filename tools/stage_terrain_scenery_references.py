@@ -20,7 +20,11 @@ from tools.audit_terrain_scenery_source_gaps import (
     verify_pinned_pdf,
 )
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.release_rules_export import RELEASE_RULES, export_release_rules
+from tools.release_rules_export import (
+    RELEASE_RULES,
+    export_release_rules,
+    release_deployed_object_bytes,
+)
 
 ROOT = CURATED.parents[3]
 ADDITIONS = ROOT / "config/validation/terrain-scenery-reference-additions.json"
@@ -113,7 +117,7 @@ def stage_terrain_references(
     original = curated_path.read_text(encoding="utf-8")
     audit_terrain_scenery_boundary(
         load_curated_document(curated_path),
-        json.loads(publication_path.read_text(encoding="utf-8")),
+        json.loads(release_deployed_object_bytes(publication_path).decode("utf-8")),
     )
     if not army_path.is_file():
         raise ValueError("Matching Army database unavailable")
@@ -149,7 +153,9 @@ def stage_terrain_references(
         "scope": "staged-only-no-checkout-modification",
         "releaseBaselineSha256": {
             "rulesDatabase": hashlib.sha256(RELEASE_RULES.read_bytes()).hexdigest(),
-            "deployedObjects": hashlib.sha256(publication_path.read_bytes()).hexdigest(),
+            "deployedObjects": hashlib.sha256(
+                release_deployed_object_bytes(publication_path),
+            ).hexdigest(),
         },
         "proposedIds": list(EXPECTED_IDS),
         "verifiedPdfSha256": pdf_digest,

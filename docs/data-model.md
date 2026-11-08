@@ -58,11 +58,11 @@ entries: Army Skill 260 extras `298/TEXT:+1` and `299/TEXT:+2`,
 respectively `max-trooper-count-increase` by one or two, scoped
 solely to `optional-reinforcements-extra-army-list`. The
 validator rejects any other source signature or effect scope, and
-fresh exports expose the typed effects. The reviewed (+1)/(+2)
-semantics are now present in the tracked v9 `rules.db` after a
-separately authorized guarded paired promotion. The matched
-`deployed-objects.json` re-pins only the rules SHA-256; all 17
-reviewed objects and other source fingerprints remain unchanged.
+fresh exports expose the typed effects. The reviewed (+1)/(+2) semantics were first promoted into the
+tracked v9 `rules.db` through guarded paired publication. They remain
+in the tracked v10 database. Its normalized deployed-object tables
+supersede the formerly matched standalone JSON; all 17 reviewed
+objects and their source evidence are retained.
 Reinforcement list legality is not calculated.
 Separate N5-native procedural authority verification remains open.
 The optional Rule detail page also exposes a browser-only list of currently
@@ -210,7 +210,15 @@ known structural context roles against silent additions; it cannot establish
 whether an unreviewed rule, mode or source-text mention represents another
 deployed object.
 
-The release-builder `tools.build_deployed_object_publication` compiles the
+Current v10 Rules store the reviewed objects, attributes, source evidence,
+delivery paths and Unit uses in normalized tables within `rules.db`.
+The runtime verifies the source Army database hash before reading that
+embedded model, including when the rules database is independently staged.
+It does not read raw Army archives or curated/review files on requests.
+The `/api/deployed-objects` catalog, exact-ID endpoint and browser page
+publish the same reviewed identities, attributes and delivery links.
+
+For legacy v8/v9 images, `tools.build_deployed_object_publication` compiles the
 validated review and current Army/rules database pair to deterministic
 `deployed-objects.json` once during release preparation. Every published object
 must carry an explicit `unitUses` list (which may be empty when no exact uses
@@ -221,16 +229,16 @@ snapshot, curated JSON, or review files on requests. When the artifact is
 present, `/api/deployed-objects` and the `/deployed-objects` browser page
 publish its reviewed identities, attributes and delivery source links.
 `/api/deployed-objects/{id}` returns one exact reviewed identity.
-When it is absent (legacy or not-yet-built release), the API returns 503
+When the legacy publication is absent, the API returns 503
 rather than reconstructing source assertions from raw tables; a mismatched
 artifact fails closed on startup. Auto-discovery applies only to a
-**co-located Army/rules database pair**: an explicitly supplied rules database
+**co-located legacy Army/rules database pair**: an explicitly supplied legacy rules database
 from another directory is an independent source, so the application does not
 attach a release publication from beside the Army database. The deployed-object
 API returns 503 in that mixed-source configuration. A mismatched publication
 beside a co-located release pair still fails closed on startup.
 
-Release packaging generates this deterministic, Git-ignored publication from
+Legacy release packaging generates this deterministic, Git-ignored publication from
 the tracked database pair and reviewed source files immediately before the
 Docker build. The image copies it beside both databases; its startup smoke
 test verifies source-pair hashes, 17 reviewed objects, the unresolved Mine
@@ -2282,11 +2290,11 @@ variants and non-stacking exceptions are not inferred from these two
 unqualified extras. The existing multiple-attacker FAQ is unchanged.
 See [source review](n5-source-history.md#reviewed-surprise-attack-occurrence-modifiers).
 
-Both the tracked v9 artifact and fresh curated exports classify this exact
-source ID as `reviewed-numeric-parameter`. The guarded paired refresh permits
+Both the tracked v10 artifact and fresh curated exports classify this exact
+source ID as `reviewed-numeric-parameter`. The original guarded v9 refresh permitted
 only occurrence-parameter additions in explicitly named existing family records;
 every other row, schema object, Restriction and deployed-object payload must
-remain identical. It does not populate the future Unit-use index or make the
+remain identical. That refresh did not populate the Unit-use index or make the
 parameter metadata part of the distance-only display API.
 
 Do **not** parse a variant from a display string, strip punctuation, infer a
@@ -2659,20 +2667,41 @@ On v9/compatibility-11, it reads only the materialized table, with
 The **current browser still consumes the static Restrictions
 publication**; it does not require the new endpoint.
 
-`RulesDatabase.validate()` now accepts only the exact schema /
-compatibility pairs **(8, 10)** and **(9, 11)**. For v9, it
-also verifies all fourteen source-ordered conditions, negative
-polarity, qualifiers, source selectors and consistent provenance;
-unsupported versions and mixed pairs fail closed. The **default**
-`build-rules` path remains v8/compatibility-10, preserving normal
-build outputs. Supplying the optional
-`--restrictions-manifest config/validation/restrictions-source-chart.json`
-produces deterministic v9/compatibility-11 data using the reviewed
-curated records. For safety, this opt-in CLI path refuses the default
-tracked `data/generated/rules.db` output: select a staging file. The
-default v8 export also refuses to overwrite that path when it already
-contains a v9 database; use the guarded staging and paired-publication
-workflow.
+`RulesDatabase.validate()` accepts the exact schema / compatibility pairs
+**(8, 10)**, **(9, 11)**, and **(10, 12)**. The prepared 1.0.1 release uses
+the tracked v10/compatibility-12 artifact. For v9 and v10,
+it validates the fourteen Restrictions constraints, negative polarity,
+qualifiers, and provenance. v10 additionally verifies normalized
+deployed-object structures, source-review fingerprints and foreign-key
+integrity. Invalid combinations fail closed.
+
+Shared release staging preserves the active supported schema. For v10 it
+rebuilds the reviewed embedded object model from the pinned Army and curated
+inputs, retaining Restrictions. Audit and staging comparisons can serialize
+that embedded model in memory with a transient rules-file fingerprint;
+they do not require or regenerate an adjacent legacy JSON file for v10.
+Legacy v8/v9 comparisons continue to use the exact publication bytes.
+
+Normal `build-rules` now creates a **v10/compatibility-12** candidate under
+ignored `local/rules-standalone.db`, using the tracked Restrictions chart,
+reviewed deployed-object source evidence and pinned Army database. The v10
+build places identities, attributes, attribute evidence, delivery paths,
+unresolved paths, and exact Unit uses in relational tables within rules.db.
+It records the source Army database fingerprint without embedding the
+rules database's own hash, which would be self-referential.
+
+Explicit `--legacy-v8` and `--legacy-v9` preserve older standalone
+builders. All CLI modes reject writes directly to tracked
+`data/generated/rules.db`. The v10 development artifacts were promoted together
+on 2026-11-08; the tagged 1.0.0 v9/JSON release remains available for rollback.
+`python -m tools.build_v10_runtime_candidate` stages the full pinned
+four-file runtime set in ignored `local/v10-candidate/`, including v2
+`variant-usage.json` without a deployed-object publication fingerprint and
+matching reviewed Weapon-profile citations. `--check` rederives the publication
+inputs and checks their bytes and database provenance. `tools.prepare_runtime_bundle`
+copies the source-verified four-file v10 (or five-file legacy v9) set into
+ignored `data/runtime/` for Docker packaging. This is image-build preparation,
+not runtime migration or multi-file publication locking.
 
 The v9 build is byte-deterministic in tests, and read-only HTTP
 checks confirm both v8-unavailable and v9-available responses,
@@ -2680,7 +2709,7 @@ filtering, backward-compatible Skills/Equipment responses, and
 unchanged legacy relations. The application also accepts the original
 v8 snapshot as a rollback source.
 
-**Current development release artifacts (2026-11-07):**
+**Historical v1.0.0 development artifacts (2026-11-07):**
 
 The guarded staging workflow preserved the **v9/compatibility-11** schema,
 all 14 reviewed Restrictions and all 17 deployed objects. The rules
@@ -2695,7 +2724,8 @@ The matched Weapon-profile citation publication SHA-256 is
 The V1S-083 source-context publication changed nine reference owners,
 preserving the other 490 records and all dependent payloads apart from pins.
 The original v8 pair remains available in ignored local recovery storage.
-These hashes identify development artifacts; local promotion does not
+These historical hashes identify development artifacts before the v10 promotion;
+they are not the current 1.0.1 artifact identities. Local promotion does not
 establish hosted or deployed acceptance.
 
 **Legacy relationship consumer review:** the reviewed Motorcycle →
@@ -2716,7 +2746,7 @@ graph edges, remain the source of conditional semantics; the seven
 source-only/unrepresentable generic edges are not manufactured.
 
 **Reviewed PDF source pins (2026-10-30):** All 12 PDF source declarations
-in the tracked v9 database now carry reviewed byte fingerprints for six
+in the historical v9 database received reviewed byte fingerprints for six
 documents: English/Spanish N5.3 core, English/Spanish FAQ v0.1, historical
 English FAQ v0.0 and English ITS Season 18. After the English core refresh,
 a guarded paired refresh permitted only the nine remaining NULL-to-hash
@@ -2726,7 +2756,7 @@ Two independent exports were byte-identical. The rules SHA-256 is
 `983aa2d86220120fc9fce9b50ba4a1ba00c600ee052d904517e20de49383a18a`;
 the matching ignored publication SHA-256 is
 `d6d67811a6a14f5a03976d13e656f46829f14be18594ead8efcc620fce0fe670`.
-These current fingerprints include the subsequent Surprise Attack
+These historical fingerprints include the subsequent Surprise Attack
 occurrence-metadata refresh and 2026-10-31 source-reference additions.
 The paired v9 rebuild restores the fourteen typed Restrictions after an
 ordinary v8 rebuild replaced the release database; legacy relations and
@@ -3533,8 +3563,10 @@ measurement from the referenced rectangle, so a map cannot silently disagree wit
 dimensions. Rendered measurement text carries the canonical inch value in
 `data-distance-inches` or `data-distance-size-inches`, separate from the user-facing display unit.
 The map API accepts optional `distance_unit=in|cm`, using the Infinity distance convention
-of 1 inch = 2.5 cm. The browser updates inlined annotations when the existing unit preference
-changes, without altering the inch viewBox or stored geometry. Marker `data-diameter-mm`
+of 1 inch = 2.5 cm, and optional `theme=light|dark` (default Light). Its standalone SVG
+embeds the selected theme's canonical map palette. Browser pages retain it as a normal
+image element for Save Image As; theme and distance-unit preference events change the
+image URL without altering the inch viewBox or stored geometry. Marker `data-diameter-mm`
 remains unconverted physical metadata.
 It also supports `element-edge-distance` annotations for markers and rectangles: the
 displayed distance is derived from the target element's nearest physical boundary and selected table edge,

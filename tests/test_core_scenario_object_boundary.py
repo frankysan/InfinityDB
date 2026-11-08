@@ -16,12 +16,13 @@ from tools.audit_core_scenario_objects import (
     audit_source_files,
     main,
 )
+from tools.release_rules_export import release_deployed_object_bytes
 
 
 def _inputs() -> tuple[dict, dict]:
     return (
         load_curated_document(CURATED),
-        json.loads(PUBLICATION.read_text(encoding="utf-8")),
+        json.loads(release_deployed_object_bytes(PUBLICATION).decode("utf-8")),
     )
 
 

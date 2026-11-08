@@ -75,6 +75,36 @@ InfinityDB has six engineering domains:
 
 The canonical ownership definitions are in `docs/project-domains.md`.
 
+## Runtime targets
+
+InfinityDB permanently supports two serving targets that share the same
+read-only application/API and validated database models:
+
+- **Directly from a checkout (local or self-hosted).** The sequence
+  `infinity-db build --compact`, `infinity-db build-rules`,
+  `infinity-db serve` builds the
+  Army data and an ignored, source-matched `local/checkout-runtime/` bundle.
+  Plain `serve` selects the complete checkout bundle when present and current;
+  otherwise it uses the tracked release pair. Missing/mismatched local
+  publications fail closed, not silently against the older release. Explicit
+  database selection remains available. Host-side WSGI deployments point
+  explicitly at the corresponding checkout runtime pair.
+- **Docker for public internet serving.** A release builds an immutable image
+  exclusively from verified, tracked `data/generated/` publications, assembled
+  into `data/runtime/` during image preparation. Docker never automatically
+  reads `local/checkout-runtime/`, raw snapshots, or a loose standalone Rules
+  database. Checkout Rules builds never promote tracked Rules or their
+  dependent JSON publications, and no development command deploys an image.
+  The existing `build --compact` default still refreshes the tracked Army
+  `data/generated/infinity.db`; this Git-visible change must not be
+  mistaken for a validated, release-paired Docker publication.
+
+The first target prioritizes an uncomplicated edit/build/serve cycle; the
+second requires deliberate paired publication and image verification. Both
+must remain supported when changing CLI defaults, storage schemas, or release
+tooling. The [data directory contract](../data/README.md) owns artifact
+paths; [deployment](deployment.md) owns image preparation and hosting.
+
 ## Semantic provenance
 
 Every nontrivial application fact should fit one of these classes:
@@ -100,8 +130,9 @@ InfinityDB deliberately separates four kinds of repository data:
 - `data/manifests/` contains publication/provenance state; the tracked symbol publication manifest
   is a release contract, while acquisition/build manifests are normally local generated evidence.
 - `data/generated/` contains generated artifacts. `infinity.db`, `rules.db`, `variant-usage.json`,
-  and `weapon-profile-sources.json` are tracked runtime release artifacts. The deployed-object JSON
-  is regenerated for deployment; other intermediate JSON and `infinity.raw.db` remain rebuildable
+  and `weapon-profile-sources.json` are tracked runtime release artifacts. Current Rules embed
+  deployed objects; legacy v8/v9 images regenerate a matching deployed-object JSON for deployment.
+  Other intermediate JSON and `infinity.raw.db` remain rebuildable
   development outputs.
 
 Runtime code must not reach back into raw archives or working-tree curation to reinterpret an
@@ -176,16 +207,17 @@ Point markers retain semantic marker identity;
 known marker types resolve through canonical marker metadata, including physical diameter where that
 affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
 scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
-Renderer-only styling remains separate. Standalone SVGs use a deterministic fallback palette;
-scenario detail inlines the same-origin SVG so its semantic map-color roles inherit from the active
-InfinityDB theme. The browser applies those roles through external CSS rather than SVG `<style>`
-because the application's Content Security Policy blocks injected inline styles. Renderer typography
-scales with table width in viewBox coordinates, without changing scenario geometry. The
-map endpoint accepts `distance_unit=in|cm` for deterministic standalone labels; browser-inlined
-SVG retains canonical inch measurements in `data-distance-inches` /
-`data-distance-size-inches` and updates labels immediately on the existing in/cm preference event.
-Table dimensions use the same preference, and existing maintained-text distance tokens already
-refresh through the shared maintained-text renderer. Game geometry remains inch-based, while
+Renderer-only styling remains separate. The SVG response embeds the canonical map palette
+from the selected Light or Dark theme, so it has the same appearance as a saved standalone file;
+the map API defaults to Light for existing callers and accepts an explicit `theme=light|dark`
+parameter. Scenario pages retain the SVG as a normal `<img>` element for native browser
+Save Image As support. Theme changes update the image URL rather than inlining SVG or injecting
+styles into the page. Renderer typography scales with table width in viewBox coordinates
+without changing scenario geometry. The endpoint accepts `distance_unit=in|cm` for deterministic
+standalone labels; changing the browser's distance-unit preference also refreshes the image URL.
+The SVG retains canonical inch measurements in `data-distance-inches` /
+`data-distance-size-inches`, while table dimensions and maintained-text distance tokens
+use the same preference. Game geometry remains inch-based, while
 physical marker diameters stay in millimeters. Structured map annotations may reference semantic
 geometry to derive displayed distances and area sizes; they must not duplicate the underlying measurements.
 Geometry v1 includes rectangle dimensions/area sizes plus element-to-table-edge distances, which covers

@@ -30,6 +30,21 @@ def source_paths() -> tuple[Path, Path, Path, Path, Path]:
     return files
 
 
+@pytest.fixture(scope="module")
+def legacy_v9_rules(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Keep legacy JSON binding tests independent of the tracked rules schema."""
+    from infinity_db.cli import build_parser, cmd_build_rules
+
+    output = tmp_path_factory.mktemp("deployed-v9-compatibility") / "rules.db"
+    args = build_parser().parse_args([
+        "build-rules", "--legacy-v9", "--output", str(output),
+    ])
+    assert cmd_build_rules(args) == 0
+    with sqlite3.connect(output) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == 9
+    return output
+
+
 def test_pinned_publication_is_deterministic_and_source_complete(
     source_paths: tuple[Path, Path, Path, Path, Path], tmp_path: Path,
 ) -> None:
@@ -517,7 +532,8 @@ def test_publication_rejects_identity_value_and_delivery_tampering(
 
 
 def test_external_rules_database_does_not_inherit_adjacent_release_publication(
-    source_paths: tuple[Path, Path, Path, Path, Path], tmp_path: Path,
+    source_paths: tuple[Path, Path, Path, Path, Path],
+    legacy_v9_rules: Path, tmp_path: Path,
 ) -> None:
     from infinity_db.web import create_app
 
@@ -526,31 +542,33 @@ def test_external_rules_database_does_not_inherit_adjacent_release_publication(
     army = release / "infinity.db"
     rules = release / "rules.db"
     shutil.copyfile(source_paths[0], army)
-    shutil.copyfile(source_paths[1], rules)
+    shutil.copyfile(legacy_v9_rules, rules)
+    legacy_source = (source_paths[0], legacy_v9_rules, *source_paths[2:])
     (release / "deployed-objects.json").write_bytes(
-        publication_bytes(build_publication(*source_paths))
+        publication_bytes(build_publication(*legacy_source))
     )
     external_rules = tmp_path / "independent" / "rules.db"
     external_rules.parent.mkdir()
-    shutil.copyfile(source_paths[1], external_rules)
+    shutil.copyfile(legacy_v9_rules, external_rules)
 
     assert create_app(army, rules_database_path=rules).deployed_objects is not None
-    # An independently supplied rules source must never pick up that publication,
-    # even when its contents happen to match the release pair byte-for-byte.
+    # Legacy v9 must not inherit a JSON publication across separate directories.
     assert create_app(army, rules_database_path=external_rules).deployed_objects is None
 
 
 def test_release_pair_still_fails_closed_on_same_directory_rules_drift(
-    source_paths: tuple[Path, Path, Path, Path, Path], tmp_path: Path,
+    source_paths: tuple[Path, Path, Path, Path, Path],
+    legacy_v9_rules: Path, tmp_path: Path,
 ) -> None:
     from infinity_db.web import create_app
 
     army = tmp_path / "infinity.db"
     rules = tmp_path / "rules.db"
     shutil.copyfile(source_paths[0], army)
-    shutil.copyfile(source_paths[1], rules)
+    shutil.copyfile(legacy_v9_rules, rules)
+    legacy_source = (source_paths[0], legacy_v9_rules, *source_paths[2:])
     (tmp_path / "deployed-objects.json").write_bytes(
-        publication_bytes(build_publication(*source_paths))
+        publication_bytes(build_publication(*legacy_source))
     )
     with sqlite3.connect(rules) as db:
         db.execute(

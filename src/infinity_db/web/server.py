@@ -28,10 +28,17 @@ def _ensure_port_is_available(host: str, port: int) -> None:
             raise
 
 
-def serve(database_path: Path, *, host: str = "0.0.0.0", port: int = 8000) -> None:
+def serve(
+    database_path: Path | None = None, *, host: str = "0.0.0.0", port: int = 8000,
+) -> None:
     _ensure_port_is_available(host, port)
+    if database_path is None:
+        from infinity_db.checkout_runtime import select_checkout_database
+
+        database_path = select_checkout_database()
     app = create_app(database_path)
     with make_server(host, port, app, server_class=ThreadingWSGIServer) as server:
+        print(f"InfinityDB database: {database_path}", flush=True)
         print(f"InfinityDB: http://{host}:{server.server_port}", flush=True)
         print("Press Ctrl+C to stop.", flush=True)
         server.serve_forever()

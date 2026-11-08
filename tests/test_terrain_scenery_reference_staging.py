@@ -17,6 +17,7 @@ from tools.audit_terrain_scenery_source_gaps import (
     SOURCE,
     audit_terrain_scenery_boundary,
 )
+from tools.release_rules_export import release_deployed_object_bytes
 from tools.stage_terrain_scenery_references import (
     ADDITIONS,
     insert_reference_records,
@@ -56,7 +57,7 @@ def test_reference_staging_preserves_originals_and_rebuilds_publication(
     ):
         pytest.skip("Rule references already promoted; staging is pre-promotion only")
     source_before = CURATED.read_bytes()
-    publication_before = PUBLICATION.read_bytes()
+    publication_before = (PUBLICATION.read_bytes() if PUBLICATION.is_file() else None)
     rules = CURATED.parents[2] / "generated/rules.db"
     rules_before = rules.read_bytes()
     directory = tmp_path / "terrain-staged"
@@ -87,7 +88,7 @@ def test_reference_staging_preserves_originals_and_rebuilds_publication(
         ("rule:access-width", "rule"),
         ("rule:special-terrain", "rule"),
     ]
-    old_pub = json.loads(publication_before)
+    old_pub = json.loads(release_deployed_object_bytes(PUBLICATION))
     report = audit_terrain_scenery_boundary(staged, old_pub)
     assert report["reviewStatus"]["specialTerrainRule"] == "maintained"
     assert report["reviewStatus"]["accessWidthRule"] == "maintained"
@@ -100,7 +101,7 @@ def test_reference_staging_preserves_originals_and_rebuilds_publication(
     assert len(new_pub["objects"]) == 17
     assert source_before == CURATED.read_bytes()
     assert rules_before == rules.read_bytes()
-    assert publication_before == PUBLICATION.read_bytes()
+    assert publication_before == (PUBLICATION.read_bytes() if PUBLICATION.is_file() else None)
     assert (directory / "staging-report.json").is_file()
     with pytest.raises(FileExistsError):
         stage_terrain_references(directory)
@@ -122,7 +123,7 @@ def test_promoted_terrain_rules_match_tracked_database_when_available() -> None:
         ("rule:access-width", "rule"),
         ("rule:special-terrain", "rule"),
     ]
-    published = json.loads(PUBLICATION.read_text(encoding="utf-8"))
+    published = json.loads(release_deployed_object_bytes(PUBLICATION).decode("utf-8"))
     assert published["sourceSnapshot"]["rulesDatabaseSha256"] == hashlib.sha256(
         db_path.read_bytes()
     ).hexdigest()
@@ -147,5 +148,5 @@ def test_reference_insertion_rejects_duplicates_and_unrelated_changes() -> None:
     with pytest.raises(ValueError, match="Partial"):
         audit_terrain_scenery_boundary(
             {**doc, "records": doc["records"][:-1]},
-            json.loads(PUBLICATION.read_text(encoding="utf-8")),
+            json.loads(release_deployed_object_bytes(PUBLICATION).decode("utf-8")),
         )

@@ -30,6 +30,7 @@ docker image inspect "$image" >/dev/null
 # Validate the immutable runtime-data contract without starting the service.
 docker run --rm --entrypoint python "$image" -c '
 import os
+import sqlite3
 from pathlib import Path
 
 from infinity_db.database import Database
@@ -55,9 +56,13 @@ Database(data_dir / "infinity.db").validate()
 rules = RulesDatabase(data_dir / "rules.db")
 rules.validate()
 restrictions = rules.restrictions_payload()
-# v8 is a disposable compatibility image: it cannot carry a mismatched
-# v9-only generated publication. Current v9 release images must carry it.
-expected_files = {"infinity.db", "rules.db", "deployed-objects.json"}
+# Each immutable image contains only the artifacts for its exact schema.
+# v10 embeds deployed objects; v8/v9 retain the adjacent legacy JSON.
+with sqlite3.connect(data_dir / "rules.db") as connection:
+    schema = connection.execute("PRAGMA user_version").fetchone()[0]
+expected_files = {"infinity.db", "rules.db"}
+if schema in {8, 9}:
+    expected_files.add("deployed-objects.json")
 if restrictions["available"]:
     expected_files.add("variant-usage.json")
     expected_files.add("weapon-profile-sources.json")
@@ -78,8 +83,12 @@ if restrictions["available"]:
         raise SystemExit("Release image has incomplete v9 Restrictions data")
 elif restrictions["items"] or restrictions["evaluationSupported"] is not False:
     raise SystemExit("Legacy release image invented positive Restrictions data")
-publication = load_deployed_object_publication(
-    data_dir / "deployed-objects.json", data_dir / "infinity.db", data_dir / "rules.db"
+publication = (
+    rules.deployed_objects_payload(data_dir / "infinity.db")
+    if schema == 10 else
+    load_deployed_object_publication(
+        data_dir / "deployed-objects.json", data_dir / "infinity.db", data_dir / "rules.db"
+    )
 )
 if publication is None or len(publication["objects"]) != 17:
     raise SystemExit("Release image has no complete reviewed deployed-object publication")

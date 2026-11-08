@@ -22,11 +22,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Generate and verify release-paired deployed-object publication
+      - name: Verify deployed-object publication for the tracked schema
         run: |
-          PYTHONPATH=src python -m tools.build_deployed_object_publication
-          PYTHONPATH=src python -m tools.build_deployed_object_publication --check
+          if PYTHONPATH=src python -c 'import sqlite3,sys; sys.exit(sqlite3.connect("data/generated/rules.db").execute("PRAGMA user_version").fetchone()[0] != 10)'; then
+            echo "Normalized v10 deployed objects require no JSON publication."
+          else
+            PYTHONPATH=src python -m tools.build_deployed_object_publication
+            PYTHONPATH=src python -m tools.build_deployed_object_publication --check
+          fi
           PYTHONPATH=src python - <<'PY'
+          import sqlite3
           from pathlib import Path
 
           from infinity_db.deployed_object_publication import load_deployed_object_publication
@@ -34,18 +39,24 @@ jobs:
 
           army = Path("data/generated/infinity.db")
           rules_path = Path("data/generated/rules.db")
-          publication = Path("data/generated/deployed-objects.json")
           rules = RulesDatabase(rules_path)
           rules.validate()
           restrictions = rules.restrictions_payload()
           assert restrictions["available"] and len(restrictions["items"]) == 14
           assert restrictions["evaluationSupported"] is False
-          paired = load_deployed_object_publication(publication, army, rules_path)
+          schema = sqlite3.connect(rules_path).execute("PRAGMA user_version").fetchone()[0]
+          paired = (rules.deployed_objects_payload(army) if schema == 10
+              else load_deployed_object_publication(
+                  Path("data/generated/deployed-objects.json"), army, rules_path))
           assert paired is not None and len(paired["objects"]) == 17
+          assert len(paired["unresolvedDeliveries"]) == 1
           PY
 
       - name: Validate pinned exact-variant release publication
         run: PYTHONPATH=src python -m tools.verify_deployment_assets --skip-svg
+
+      - name: Prepare immutable runtime bundle
+        run: PYTHONPATH=src python -m tools.prepare_runtime_bundle
 
       - name: Build application image from tracked databases and generated publication
         run: docker build --tag infinity-db:deployment-smoke .
@@ -58,7 +69,7 @@ jobs:
         # rules.db or its release-matched publication in this checkout.
         run: |
           mkdir -p local/restrictions-v8-ci
-          PYTHONPATH=src python -m infinity_db build-rules --output local/restrictions-v8-ci/rules.db
+          PYTHONPATH=src python -m infinity_db build-rules --legacy-v8 --output local/restrictions-v8-ci/rules.db
           PYTHONPATH=src python -m tools.build_deployed_object_publication --rules-db local/restrictions-v8-ci/rules.db --output local/restrictions-v8-ci/deployed-objects.json
           PYTHONPATH=src python -m tools.build_deployed_object_publication --rules-db local/restrictions-v8-ci/rules.db --output local/restrictions-v8-ci/deployed-objects.json --check
 
@@ -75,8 +86,15 @@ jobs:
           army = Path("data/generated/infinity.db")
           current = Path("data/generated/rules.db")
           previous = Path("local/restrictions-v8-ci/rules.db")
-          current_publication = load_deployed_object_publication(
-              Path("data/generated/deployed-objects.json"), army, current,
+          v_current = RulesDatabase(current)
+          v_current.validate()
+          current_schema = sqlite3.connect(current).execute("PRAGMA user_version").fetchone()[0]
+          current_publication = (
+              v_current.deployed_objects_payload(army)
+              if current_schema == 10 else
+              load_deployed_object_publication(
+                  Path("data/generated/deployed-objects.json"), army, current,
+              )
           )
           previous_publication = load_deployed_object_publication(
               Path("local/restrictions-v8-ci/deployed-objects.json"), army, previous,
@@ -84,13 +102,11 @@ jobs:
           if current_publication is None or previous_publication is None:
               raise SystemExit("A release-paired deployed-object publication is missing")
 
-          v9 = RulesDatabase(current)
           v8 = RulesDatabase(previous)
-          v9.validate()
           v8.validate()
-          if (not v9.restrictions_payload()["available"]
-              or len(v9.restrictions_payload()["items"]) != 14):
-              raise SystemExit("Current release is not the reviewed v9 Restrictions database")
+          if (not v_current.restrictions_payload()["available"]
+              or len(v_current.restrictions_payload()["items"]) != 14):
+              raise SystemExit("Current release lacks reviewed Restrictions")
           if v8.restrictions_payload() != {
               "formatVersion": 1, "available": False, "source": None,
               "polarity": "prohibition", "items": [], "evaluationSupported": False,
@@ -98,9 +114,12 @@ jobs:
               raise SystemExit("v8 rollback must report unavailable, never inferred permissions")
 
           expected = deepcopy(previous_publication)
-          expected["sourceSnapshot"]["rulesDatabaseSha256"] = (
-              current_publication["sourceSnapshot"]["rulesDatabaseSha256"]
-          )
+          if current_schema == 10:
+              expected["sourceSnapshot"].pop("rulesDatabaseSha256")
+          else:
+              expected["sourceSnapshot"]["rulesDatabaseSha256"] = (
+                  current_publication["sourceSnapshot"]["rulesDatabaseSha256"]
+              )
           if expected != current_publication:
               raise SystemExit("v8 rollback changed reviewed objects or non-rules provenance")
           query = (
@@ -110,8 +129,8 @@ jobs:
           with sqlite3.connect(previous) as old, sqlite3.connect(current) as new:
               if old.execute("PRAGMA user_version").fetchone()[0] != 8:
                   raise SystemExit("Rollback artifact does not use schema v8")
-              if new.execute("PRAGMA user_version").fetchone()[0] != 9:
-                  raise SystemExit("Forward artifact does not use schema v9")
+              if new.execute("PRAGMA user_version").fetchone()[0] not in {9, 10}:
+                  raise SystemExit("Forward artifact does not use a reviewed schema")
               if old.execute(query).fetchall() != new.execute(query).fetchall():
                   raise SystemExit("Rollback modified the canonical legacy relationship graph")
           PY

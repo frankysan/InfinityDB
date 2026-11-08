@@ -24,7 +24,11 @@ from tools.audit_deployed_object_citation_migrations import (
     build_citation_migration_plan,
 )
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.release_rules_export import RELEASE_RULES, export_release_rules
+from tools.release_rules_export import (
+    RELEASE_RULES,
+    export_release_rules,
+    release_deployed_object_bytes,
+)
 
 RULES_DIR = CURATED.parent
 ARMY_DB = ROOT / "data/generated/infinity.db"
@@ -228,7 +232,7 @@ def stage_citation_migration(
         "releaseBaselineSha256": {
             "rulesDatabase": hashlib.sha256(RELEASE_RULES.read_bytes()).hexdigest(),
             "deployedObjects": hashlib.sha256(
-                (ROOT / "data/generated/deployed-objects.json").read_bytes()
+                release_deployed_object_bytes(ROOT / "data/generated/deployed-objects.json")
             ).hexdigest(),
         },
         "migratedCount": 14,

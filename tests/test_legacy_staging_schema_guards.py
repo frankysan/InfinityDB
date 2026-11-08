@@ -16,6 +16,7 @@ from tools.audit_deployed_object_citation_migrations import (
     build_citation_migration_plan,
 )
 from tools.audit_hacking_device_program_source_chart import PINNED
+from tools.release_rules_export import release_deployed_object_bytes
 from tools.stage_deployed_object_citation_migration import stage_citation_migration
 from tools.stage_hacking_device_chart_citations import (
     SOURCE_CITATION,
@@ -107,7 +108,10 @@ def test_legacy_staging_preserves_v9_restrictions_and_checkout(
 ) -> None:
     """Staging must preserve schema, Restrictions and paired publication on v9."""
     immutable = (CURATED, RULES_DB, PUBLICATION, *MANIFEST_PATHS.values())
-    originals = {path: hashlib.sha256(path.read_bytes()).digest() for path in immutable}
+    originals = {
+        path: hashlib.sha256(path.read_bytes()).digest() if path.is_file() else None
+        for path in immutable
+    }
     staged_source = _temporary_curated_rules(tmp_path)
     output = tmp_path / "staged"
     if stage_kind == "citations":
@@ -127,14 +131,14 @@ def test_legacy_staging_preserves_v9_restrictions_and_checkout(
     staged_rules = output / "data/generated/rules.db"
     staged_publication = output / "data/generated/deployed-objects.json"
     with sqlite3.connect(RULES_DB) as current, sqlite3.connect(staged_rules) as staged:
-        assert current.execute("PRAGMA user_version").fetchone()[0] == 9
-        assert staged.execute("PRAGMA user_version").fetchone()[0] == 9
+        assert current.execute("PRAGMA user_version").fetchone()[0] == 10
+        assert staged.execute("PRAGMA user_version").fetchone()[0] == 10
     current_restrictions = RulesDatabase(RULES_DB).restrictions_payload()
     assert len(current_restrictions["items"]) == 14
     assert RulesDatabase(staged_rules).restrictions_payload() == current_restrictions
 
     published = json.loads(staged_publication.read_text(encoding="utf-8"))
-    active_publication = json.loads(PUBLICATION.read_text(encoding="utf-8"))
+    active_publication = json.loads(release_deployed_object_bytes(PUBLICATION).decode("utf-8"))
     assert published["objects"] == active_publication["objects"]
     assert len(published["objects"]) == report["reviewedObjects"] == 17
     staged_hash = hashlib.sha256(staged_rules.read_bytes()).hexdigest()
@@ -146,6 +150,6 @@ def test_legacy_staging_preserves_v9_restrictions_and_checkout(
     if stage_kind != "hacking-device":
         assert verify_staged_release_pair(
             output, curated_path=staged_source,
-        )["schemaVersion"] == 9
-    assert all(hashlib.sha256(path.read_bytes()).digest() == digest
+        )["schemaVersion"] == 10
+    assert all((hashlib.sha256(path.read_bytes()).digest() if path.is_file() else None) == digest
                for path, digest in originals.items())

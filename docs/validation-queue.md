@@ -145,7 +145,14 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending execution entries. The
+No pending execution entries.
+
+VR-0144, VR-0145, VR-0146 and VR-0147 passed the
+[1.0.1 preparation and release checks](testing.md#101-release-preparation).
+VD-0116 and VD-0117 completed their separate design reviews. Hosted and
+release-only acceptance remain owned by the release checklist.
+
+The
 [prepared release-metadata gate](testing.md#prepared-100-release-metadata-v1s-092)
 passed on its pinned Linux revision and closes VR-0143.
 
@@ -170,8 +177,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0116`; active obligations are listed above.
-- Execution: `VR-0144`; active obligations are listed above.
+- Design: `VD-0118`; active obligations are listed above.
+- Execution: `VR-0148`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

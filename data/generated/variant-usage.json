@@ -1,13 +1,12 @@
 {
   "format": "infinitydb-rule-variant-usage",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "scope": "exact-reviewed-source-variants",
   "sourceSnapshot": {
     "armyArchiveSha256": "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75",
     "armyDatabaseSha256": "8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8",
-    "deployedObjectPublicationSha256": "cdcb794f18df52890b1ba5b908f525aa59235c55307854a28f81996927f9a723",
     "exportPairSha256": "babe75c00a818eee4828f2b16a70b13f6aa8fa352a5d0ec3d7c4e9309982e122",
-    "rulesDatabaseSha256": "90d600a5b7b0425ee590ef90891481433e179d4e96f4a7b1dbf26edfde672ca9"
+    "rulesDatabaseSha256": "10d7d4922a53c67bf16b0f3867a7c910ce71f021b2fd074092ee10f740ba0f23"
   },
   "variants": [
     {

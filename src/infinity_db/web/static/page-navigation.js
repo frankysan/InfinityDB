@@ -1,6 +1,7 @@
 /** Replace page content while keeping the shared navigation and its settings mounted. */
 const mainSelector = "main#main";
 let navigationNumber = 0;
+let currentPageUrl = new URL(window.location.href);
 
 function isSameOriginPage(link) {
   return link
@@ -83,6 +84,7 @@ async function navigate(url, { replace = false, restoreScroll } = {}) {
   syncDescription(nextDocument);
   syncBody(nextDocument.body);
   currentMain.replaceWith(nextMain);
+  currentPageUrl = new URL(url, window.location.href);
   syncActiveNavigation(new URL(url, window.location.href).pathname);
   await runPageModules(nextDocument);
   window.scrollTo(0, restoreScroll ?? 0);
@@ -104,6 +106,13 @@ document.addEventListener("click", (event) => {
   navigate(link.href).catch(() => window.location.assign(link.href));
 });
 
+window.addEventListener("infinity:historychange", () => {
+  currentPageUrl = new URL(window.location.href);
+});
+
 window.addEventListener("popstate", () => {
+  // Native fragment history fires popstate too. Keep its document and hash focus.
+  if (window.location.pathname === currentPageUrl.pathname
+      && window.location.search === currentPageUrl.search) return;
   navigate(window.location.href, { replace: true, restoreScroll: history.state?.scrollY }).catch(() => window.location.reload());
 });

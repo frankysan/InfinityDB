@@ -130,7 +130,7 @@ def test_terrain_conditions_matched_pair_guard_and_repeated_promotion_refusal(
     if not PDF.is_file() or not (ROOT / "local").is_dir():
         pytest.skip("Pinned PDF or ignored recovery path unavailable")
     objects = ROOT / "data/generated/deployed-objects.json"
-    original = RULES.read_bytes(), objects.read_bytes()
+    original = RULES.read_bytes(), objects.read_bytes() if objects.is_file() else None
     report = verify_candidate()
     assert report["alreadyPublished"] and report["deterministic"]
     assert report["matchedPublication"] and report["logicallyEquivalentWithPublished"]
@@ -138,7 +138,7 @@ def test_terrain_conditions_matched_pair_guard_and_repeated_promotion_refusal(
     with pytest.raises(ValueError, match="repeated terrain-condition promotion"):
         verify_candidate(promote=True)
     monkeypatch.setattr(promote_terrain_condition_reference,
-                        "load_deployed_object_publication", lambda *_args: None)
+                        "load_release_deployed_objects", lambda *_args: None)
     with pytest.raises(ValueError, match="publication does not match"):
         verify_candidate()
-    assert (RULES.read_bytes(), objects.read_bytes()) == original
+    assert (RULES.read_bytes(), objects.read_bytes() if objects.is_file() else None) == original

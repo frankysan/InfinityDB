@@ -340,6 +340,10 @@ Reusable structures must remain usable with keyboard navigation, visible focus, 
 
 When soft navigation replaces the route's `<main>`, move focus to the new main landmark without changing the restored scroll position, update the browser title, and announce the new page through a persistent polite status region. The first full-page load uses the browser's native focus and announcement behavior. The floating accuracy notice retains native `details`/`summary` semantics, including an accessible name while icon-only and its expanded/collapsed state; do not turn the notice into an interrupting alert.
 
+Fragment-only navigation, including Back/Forward within the same path and query,
+keeps the current main landmark. Preserve native fragment history and the page's
+hash-target focus behavior without starting another soft-navigation lifecycle.
+
 ### Keep browser-chrome branding self-contained
 
 The project favicon is a small-size derivative of the InfinityDB logo rather than a second brand

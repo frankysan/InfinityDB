@@ -50,8 +50,8 @@ separately if these checks are to block PR merging; the release-evidence
 collector independently fails closed before tagging v1.0 or later.
 
 Each job installs Python 3.11.9, **Playwright 1.64.1** and its selected browser,
-generates and checks the ignored deployed-object publication matched to
-the tracked rules/Army/variant artifacts, and serves the frozen database
+checks the embedded v10 deployed objects or generates and checks the legacy
+v8/v9 publication matched to the tracked rules/Army/variant artifacts, and serves the frozen database
 pair using an ephemeral WSGI server. One shared portable cohort runs
 **14 critical journeys** (seven at 1440 and 390 px) covering soft navigation,
 source citations, Weapon fragments, Unit detail, Core scenario selection,
@@ -381,18 +381,19 @@ and cross-platform determinism remain unchanged.
 
 Source-check logs include the twenty slowest pytest durations and skipped-test reasons so
 hosted performance problems can be traced to individual tests or fixture setup.
-Before the test matrix runs, each source-check leg deterministically generates and verifies
-the **Git-ignored** `data/generated/deployed-objects.json` publication against the tracked
-Army and rules databases. Tests must not depend on an existing local publication:
-a fresh Git checkout does not contain the JSON file. The publication stage is
-separate from database generation and does not modify either tracked database.
+Before the test matrix runs, each source-check leg verifies the deployed-object
+model against the tracked Army and rules databases. Current v10 Rules embed
+that model; legacy v8/v9 instead deterministically generate and verify the
+**Git-ignored** `data/generated/deployed-objects.json`. Tests must not depend
+on an existing local JSON publication: a fresh checkout does not contain it,
+and v10 does not require it. This stage does not modify either tracked database.
 
 The manually dispatched `Full-asset checks` workflow also runs `--all`, so it performs the same
 pinned npm installation and both documentation checks. The installed-wheel and deployment-smoke jobs
 do not require Markdown tooling or ship Node.js dependencies. The deployment-smoke
-job builds and checks the deterministic deployed-object reference publication
-from the tracked Army/rules databases and reviewed curated sources before Docker
-build. The container verifier checks its source-pair fingerprints and reviewed
+job verifies the schema-owned deployed-object model and prepares the immutable
+runtime bundle before Docker build. Legacy v8/v9 builds generate the matching
+JSON publication. The container verifier checks source-pair fingerprints and reviewed
 object count, then exercises `/api/deployed-objects` and `/deployed-objects` on
 the actual production process; a green source-check matrix alone is not that gate.
 
@@ -445,39 +446,42 @@ images still require the complete tracked publication through deployment-smoke v
 
 `.github/workflows/deployment-smoke.yml` builds the production container directly from the tracked
 release `infinity.db`, `rules.db`, byte-exact tracked `variant-usage.json`,
-byte-exact tracked `weapon-profile-sources.json`, generated
-`deployed-objects.json`, and processed SVG publication, then runs
+byte-exact tracked `weapon-profile-sources.json` and processed SVG publication,
+with embedded v10 deployed objects or the generated legacy v8/v9 JSON, then runs
 `scripts/verify-container-image.sh` with published-asset validation.
 
-Deployment smoke validates the variant publication's co-located Army/rules/deployed-object
-fingerprints, image presence and representative exact-variant API response. The separate
-source matrix also checks the tracked publication against the regenerated deployed-object
-bytes, without requiring an ignored raw archive in CI.
+Deployment smoke validates the variant publication's schema-specific Army/rules
+fingerprints, image presence and representative exact-variant API response.
+Legacy format v1 additionally pins deployed-object JSON bytes; current format
+v2 uses the embedded model. The separate source matrix checks the same tracked
+publication without requiring an ignored raw archive in CI.
 Both checks also compare the Weapon-profile publication with its reviewed
 inputs and validate exact source-pair binding; the container smoke checks a
 representative Weapon citation through the API. Cross-platform determinism
 rebuilds and compares the Weapon-profile JSON bytes on each supported OS.
 
-Deployment smoke first tests the exact v9 artifact model used by tagged production deployment.
+Deployment smoke first tests the exact tracked release set (v10 for the prepared
+1.0.1 release; tagged 1.0.0 used v9).
 It does not rebuild the tracked release databases and is not a substitute for the source or
 installed-wheel checks. The `/changes` probe compares the served release-note content with
-the installed canonical changelog. It accepts both development notes under `Unreleased`
-and finalized version sections, and rejects stale or missing release-note content.
+the installed canonical changelog. It accepts version-specific pending notes
+(for example, `[1.0.1] - Unreleased`), legacy generic `Unreleased` headings and
+dated release sections, and rejects stale or missing release-note content.
 
-**Rollback-image rehearsal (passed at commit `663a345`, 2026-10-30):** the workflow also rebuilds
+**Rollback-image rehearsal (original v9 baseline passed at commit `663a345`, 2026-10-30):** the workflow also rebuilds
 a **disposable v8/compatibility-10** `rules.db` from current reviewed curated sources under
 ignored `local/` and generates its matching deployed-object publication. It validates both
 databases and publication fingerprints, requires the complete reviewed object content
 and canonical legacy relationship graph to remain unchanged, and confirms that the v8 API
 reports Restrictions as unavailable rather than inventing permissions. A Docker image
-derived from the already validated v9 release image replaces **only** `rules.db` and
+derived from the already validated current release image replaces **only** `rules.db` and
 `deployed-objects.json`, leaving the installed application, Army database, symbols,
-and runtime configuration unchanged. The v8 image explicitly removes the v9-only
+and runtime configuration unchanged. The v8 image explicitly removes the forward-paired
 exact-variant publication; it must not expose stale usage against the substituted
-rules database. It also removes the v9-paired Weapon-profile publication and
+rules database. It also removes the forward-paired Weapon-profile publication and
 requires the corresponding API status to be unavailable. The full
 production-startup/image verifier runs against that v8 overlay image,
-followed by another check of the original v9 image.
+followed by another check of the original current-release image.
 
 This tests application compatibility with a reconstructed source-equivalent v8 pair;
 it does **not** claim byte identity with retained historical v8 recovery files,

@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory
-from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from tools.build_deployed_object_publication import build_publication, publication_bytes
 from tools.promote_aro_deployment_reference import (
@@ -30,7 +29,11 @@ from tools.promote_aro_deployment_reference import (
     _digest,
     _ids,
 )
-from tools.release_rules_export import export_release_rules, same_logical_rules_contents
+from tools.release_rules_export import (
+    export_release_rules,
+    load_release_deployed_objects,
+    same_logical_rules_contents,
+)
 from tools.restrictions_v9_release import _replace_with_rollback
 
 NEW_IDS = {"rule:cover"}
@@ -62,7 +65,7 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
         cwd=root, capture_output=True, check=False,
     ).returncode != 0:
         raise ValueError("Tracked rules database differs from HEAD")
-    previous = load_deployed_object_publication(root / OBJECTS, root / ARMY, active)
+    previous = load_release_deployed_objects(root / OBJECTS, root / ARMY, active)
     if previous is None:
         raise ValueError("Active rules/deployed-object publication does not match")
     documents = load_curated_directory(root / "data/curated/rules")
@@ -81,7 +84,10 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
                 if c["sourceId"] == "n5-core-v5.3-pdf"} != CITATIONS[identity]
         ):
             raise ValueError(f"Cover identity, scope or citation drift: {identity}")
-    original = {name: (root / name).read_bytes() for name in (RULES, OBJECTS)}
+    original = {
+        name: (root / name).read_bytes() if (root / name).is_file() else None
+        for name in (RULES, OBJECTS)
+    }
     source_hash = _digest(root / CURATED)
     with tempfile.TemporaryDirectory(prefix="cover-v9-", dir=root / "local") as tmp:
         first, second = Path(tmp) / "first.db", Path(tmp) / "second.db"
@@ -116,7 +122,8 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
         if projection != expected:
             raise ValueError("Unrelated deployed-object publication changed")
         if source_hash != _digest(root / CURATED) or any(
-            (root / name).read_bytes() != content for name, content in original.items()
+            ((root / name).read_bytes() if (root / name).is_file() else None) != content
+            for name, content in original.items()
         ):
             raise ValueError("Cover source or publication changed during staging")
         report = {
@@ -136,7 +143,7 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
             current.validate()
             if any(current.composed_record(i) != staged.composed_record(i) for i in selected):
                 raise ValueError("Promoted cover records do not match staged source")
-            if load_deployed_object_publication(
+            if load_release_deployed_objects(
                 root / OBJECTS, root / ARMY, active,
             ) != projection:
                 raise ValueError("Promoted cover publication pair does not match")

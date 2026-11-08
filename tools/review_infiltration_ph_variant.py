@@ -20,7 +20,6 @@ from infinity_db.curated import (
     INFILTRATION_PH_VARIANT,
     load_curated_directory,
 )
-from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from tools.audit_source_variant_inputs import (
     inventory_source_variants,
@@ -28,7 +27,7 @@ from tools.audit_source_variant_inputs import (
     source_extra_owner_context,
 )
 from tools.build_deployed_object_publication import build_publication
-from tools.release_rules_export import export_release_rules
+from tools.release_rules_export import export_release_rules, load_release_deployed_objects
 from tools.restrictions_v9_release import (
     _check_variant_semantics_delta,
     refresh_variant_semantics_v9_release,
@@ -72,7 +71,7 @@ def check_candidate(root: Path = ROOT) -> dict[str, Any]:
     ):
         raise ValueError("N5.3 Infiltration curated p.97 source contract changed")
 
-    before = load_deployed_object_publication(objects, army, rules)
+    before = load_release_deployed_objects(objects, army, rules)
     if before is None:
         raise ValueError("Existing Infiltration release/publication pair not matched")
     published = RulesDatabase(rules).skill_reviewed_extra_semantics().get("infiltration")

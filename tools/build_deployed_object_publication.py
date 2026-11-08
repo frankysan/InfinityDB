@@ -12,9 +12,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from infinity_db.deployed_object_reference import project_deployed_references
-from infinity_db.deployed_object_usage import attach_reviewed_unit_uses
-from tools.audit_deployed_object_inventory import audit_inventory
+from infinity_db.deployed_object_builder import build_deployed_objects
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -32,12 +30,10 @@ def build_publication(
     candidate_reviews: Path,
 ) -> dict[str, Any]:
     """Project only validated review evidence; pin both shipped databases."""
-    report = audit_inventory(army_db, curated_source, delivery_reviews, candidate_reviews)
-    publication = project_deployed_references(report)
-    attach_reviewed_unit_uses(army_db, publication)
+    publication = build_deployed_objects(
+        army_db, curated_source, delivery_reviews, candidate_reviews,
+    )
     publication["sourceSnapshot"]["rulesDatabaseSha256"] = _digest(rules_db)
-    publication["sourceSnapshot"]["deliveryReviewSha256"] = report["deliveryReviewSha256"]
-    publication["sourceSnapshot"]["candidateReviewSha256"] = report["candidateReviewSha256"]
     return publication
 
 
@@ -67,6 +63,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--output", type=Path, default=ROOT / "data/generated/deployed-objects.json"
     )
     parser.add_argument("--check", action="store_true", help="Verify an existing artifact only")
+    parser.add_argument(
+        "--when-legacy", action="store_true",
+        help="Build/check JSON for v8/v9, or validate embedded deployed objects for v10",
+    )
     migration = parser.add_mutually_exclusive_group()
     migration.add_argument(
         "--stage-restrictions-v9", type=Path,
@@ -209,6 +209,20 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
+    if args.when_legacy:
+        import sqlite3
+
+        from infinity_db.rules_database import RulesDatabase
+
+        with sqlite3.connect(args.rules_db) as connection:
+            version = connection.execute("PRAGMA user_version").fetchone()[0]
+        if version == 10:
+            rules = RulesDatabase(args.rules_db)
+            rules.validate()
+            if rules.deployed_objects_payload(args.army_db) is None:
+                raise ValueError("v10 rules database lacks the matched embedded objects")
+            print("v10 reviewed deployed objects verified in rules.db (no legacy JSON)")
+            return 0
     if (
         args.stage_restrictions_v9 is not None
         or args.promote_restrictions_v9 is not None

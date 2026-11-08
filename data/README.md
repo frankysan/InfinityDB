@@ -57,16 +57,34 @@ provenance/state, and build outputs.
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — generated `master.json`, normalized data, validation reports,
   the application `infinity.db`, development-only `infinity.raw.db`, and the
-  separate curated-rules `rules.db` and deterministic `deployed-objects.json`,
-  `variant-usage.json`, and `weapon-profile-sources.json` reference publications.
-  The two SQLite databases and the **byte-exact variant-usage and Weapon-profile
-  JSON files** are tracked release artifacts;
-  `deployed-objects.json` remains ignored and is regenerated from the pinned
-  databases and reviewed source before Docker packaging. Variant usage requires
-  the paired raw archive to regenerate, so a tagged/deployment checkout uses
-  the tracked JSON and validates its Army/rules/deployed-object fingerprints
-  rather than trying to regenerate it without the raw archive.
+  separate curated-rules `rules.db`, `variant-usage.json` and
+  `weapon-profile-sources.json` reference publications. The two SQLite
+  databases and the **byte-exact variant-usage and Weapon-profile JSON files**
+  are tracked release artifacts. The tracked development release pair now
+  uses schema v10: reviewed deployed objects are embedded in `rules.db`, and
+  its v2 variant publication has no separate deployed-object JSON dependency.
+  `deployed-objects.json` remains ignored and is generated only for legacy
+  v8/v9 image compatibility; the previously tagged production release is v9.
+  Variant usage requires the paired raw archive to regenerate, so a
+  tagged/deployment checkout validates the tracked JSON and its source
+  fingerprints rather than regenerating it without raw inputs.
   Intermediate JSON/raw archives and other generated build products remain ignored.
+
+**Checkout runtime:** `infinity-db build-rules` (without an explicit
+`--output`) writes ignored `local/rules-standalone.db`, then assembles
+`local/checkout-runtime/` with the currently built Army database, v10 Rules
+database, v2 variant usage and matching reviewed Weapon citations. This
+requires the raw Army sibling produced by `infinity-db build --compact`.
+`infinity-db serve` automatically uses this complete bundle, checking that
+its Army and Rules hashes still match the latest checkout builds. An explicit
+`--database` selects exactly the requested pair. An explicit
+`build-rules --output` produces a standalone database only. Neither Rules build
+path changes the tracked Rules or dependent release publications. The Army
+`build --compact` command still writes the tracked
+`data/generated/infinity.db` by historical design; its changes are
+Git-visible and cannot be deployed with an unrelated tracked Rules/publication
+set. Docker ignores the local checkout paths and packages only a verified,
+matched tracked release set.
 
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
 source control so machine-local snapshot state does not obscure code changes.

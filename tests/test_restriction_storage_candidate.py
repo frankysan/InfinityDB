@@ -3893,8 +3893,8 @@ def candidate(
         connection.close()
 
 
-def test_shared_staging_preserves_active_v9_restrictions(tmp_path: Path) -> None:
-    from tools.stage_hacking_device_chart_citations import export_release_rules
+def test_shared_staging_preserves_active_restrictions_and_embedded_objects(tmp_path: Path) -> None:
+    from tools.release_rules_export import export_release_rules
 
     current = RulesDatabase(DB)
     current.validate()
@@ -3904,18 +3904,27 @@ def test_shared_staging_preserves_active_v9_restrictions(tmp_path: Path) -> None
     copied = RulesDatabase(staged)
     copied.validate()
     assert copied.restrictions_payload() == current.restrictions_payload()
+    army = ROOT / "data/generated/infinity.db"
+    assert copied.deployed_objects_payload(army) == current.deployed_objects_payload(army)
     with sqlite3.connect(staged) as connection:
-        assert connection.execute("PRAGMA user_version").fetchone()[0] == 9
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == 10
 
 
 def test_shared_promotion_refuses_v9_to_v8_downgrade(
     tmp_path: Path, legacy_v8_db: Path,
 ) -> None:
+    from tools.release_rules_export import release_deployed_object_bytes
     from tools.stage_hacking_device_chart_citations import STAGED_PATHS, _replace_staged_batch
 
     root = tmp_path / "workspace"
     (root / "local").mkdir(parents=True)
-    originals = {path: (ROOT / path).read_bytes() for path in STAGED_PATHS}
+    originals = {
+        path: (
+            release_deployed_object_bytes(ROOT / path)
+            if path.endswith("deployed-objects.json") else (ROOT / path).read_bytes()
+        )
+        for path in STAGED_PATHS
+    }
     for path, data in originals.items():
         destination = root / path
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -3927,7 +3936,7 @@ def test_shared_promotion_refuses_v9_to_v8_downgrade(
     assert all((root / path).read_bytes() == original for path, original in originals.items())
 
 
-def test_disposable_v8_rollback_pair_preserves_v9_reviewed_objects(
+def test_disposable_v8_rollback_pair_preserves_current_reviewed_objects(
     legacy_v8_db: Path, tmp_path: Path,
 ) -> None:
     """Rollback image must differ only in the rules DB and its pinned SHA-256."""
@@ -3973,7 +3982,7 @@ def test_disposable_v8_rollback_pair_preserves_v9_reviewed_objects(
     ) == v8_publication
     with sqlite3.connect(legacy_v8_db) as old, sqlite3.connect(DB) as new:
         assert old.execute("PRAGMA user_version").fetchone()[0] == 8
-        assert new.execute("PRAGMA user_version").fetchone()[0] == 9
+        assert new.execute("PRAGMA user_version").fetchone()[0] == 10
         assert legacy_relation_snapshot(old) == legacy_relation_snapshot(new)
 
 
@@ -4161,6 +4170,10 @@ def test_candidate_version_rollout_requires_application_transition(
     )
     connection.execute("PRAGMA user_version = 10")
     connection.commit()
+    with pytest.raises(ValueError, match="compatibility revision"):
+        RulesDatabase(target).validate()
+    connection.execute("PRAGMA user_version = 11")
+    connection.commit()
     with pytest.raises(ValueError, match="Unsupported rules database schema"):
         RulesDatabase(target).validate()
 
@@ -4307,18 +4320,61 @@ def test_v9_validator_rejects_missing_table_and_broadened_constraint(
         RulesDatabase(target).validate()
 
 
-def test_v9_cli_requires_separate_staging_output() -> None:
+def test_default_build_rules_writes_standalone_v10_database(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db import cli
+
+    output = tmp_path / "rules-standalone.db"
+    monkeypatch.setattr(cli, "DEFAULT_STANDALONE_RULES_DATABASE", output)
+    from tools import build_v10_runtime_candidate
+
+    published: list[Path] = []
+    monkeypatch.setattr(
+        build_v10_runtime_candidate, "publish_checkout_runtime", published.append,
+    )
+    args = cli.build_parser().parse_args([
+        "build-rules", str(ROOT / "data/curated/rules"),
+    ])
+    assert args.output is None
+    assert cli.cmd_build_rules(args) == 0
+    assert published == [output]
+    with sqlite3.connect(output) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == 10
+    RulesDatabase(output).validate()
+    assert len(RulesDatabase(output).restrictions_payload()["items"]) == 14
+    deployed = RulesDatabase(output).deployed_objects_payload(
+        ROOT / "data/generated/infinity.db"
+    )
+    assert deployed is not None
+    assert len(deployed["objects"]) == 17
+
+
+def test_v9_cli_rejects_tracked_release_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db import cli
+
+    path = tmp_path / "rules.db"
+    monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", path)
+    args = cli.build_parser().parse_args(["build-rules", "--output", str(path)])
+    with pytest.raises(ValueError, match="cannot write the tracked release"):
+        cli.cmd_build_rules(args)
+    assert not path.exists()
+
+
+def test_v8_manifest_conflict_fails_closed() -> None:
     from infinity_db.cli import build_parser, cmd_build_rules
 
     args = build_parser().parse_args([
-        "build-rules", "--restrictions-manifest",
+        "build-rules", "--legacy-v8", "--restrictions-manifest",
         "config/validation/restrictions-source-chart.json",
     ])
-    with pytest.raises(ValueError, match="explicit staging --output"):
+    with pytest.raises(ValueError, match="cannot be combined"):
         cmd_build_rules(args)
 
 
-def test_default_build_rules_cannot_replace_tracked_v9_database(
+def test_explicit_v8_build_rules_cannot_replace_tracked_v9_database(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from infinity_db import cli
@@ -4334,15 +4390,16 @@ def test_default_build_rules_cannot_replace_tracked_v9_database(
     monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", output)
     args = cli.build_parser().parse_args([
         "build-rules", str(ROOT / "data/curated/rules"),
+        "--legacy-v8", "--output", str(output),
     ])
     assert args.output.resolve() == output.resolve()
-    with pytest.raises(ValueError, match="default build-rules export is v8"):
+    with pytest.raises(ValueError, match="cannot write the tracked release"):
         cli.cmd_build_rules(args)
 
     assert output.read_bytes() == original
 
 
-def test_default_build_rules_can_rebuild_existing_v8_database(
+def test_legacy_v8_opt_in_can_rebuild_existing_v8_database(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from infinity_db import cli
@@ -4351,9 +4408,9 @@ def test_default_build_rules_can_rebuild_existing_v8_database(
     documents = load_curated_directory(ROOT / "data/curated/rules")
     export_rules_database(documents, output)
 
-    monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", output)
     args = cli.build_parser().parse_args([
         "build-rules", str(ROOT / "data/curated/rules"),
+        "--legacy-v8", "--output", str(output),
     ])
     assert args.output.resolve() == output.resolve()
     assert cli.cmd_build_rules(args) == 0
@@ -4381,7 +4438,7 @@ def test_explicit_build_rules_cli_exports_v9_to_separate_path(tmp_path: Path) ->
 
     output = tmp_path / "restrictions-v9.db"
     args = build_parser().parse_args([
-        "build-rules", "--restrictions-manifest",
+        "build-rules", "--legacy-v9", "--restrictions-manifest",
         "config/validation/restrictions-source-chart.json",
         "--output", str(output),
     ])

@@ -26,7 +26,7 @@ from tools.audit_hacking_device_program_source_chart import (
     verify_pinned_pdf,
 )
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.release_rules_export import export_release_rules
+from tools.release_rules_export import export_release_rules, release_deployed_object_bytes
 from tools.stage_deployed_object_citation_migration import (
     insert_citations_without_reformatting,
 )
@@ -103,7 +103,7 @@ def stage_hacking_device_chart_citations(
         raise ValueError("Staging directory overlaps tracked inputs")
     if output.exists():
         raise FileExistsError(f"Refusing to overwrite staging directory: {output}")
-    if not army_path.is_file() or not publication_path.is_file():
+    if not army_path.is_file():
         raise ValueError("Matching Army database and deployed publication required")
     curated_text = curated_path.read_text(encoding="utf-8")
     original = load_curated_document(curated_path)
@@ -130,7 +130,7 @@ def stage_hacking_device_chart_citations(
     published = build_publication(
         army_path, staged_rules_db, staged_source, DELIVERY, CANDIDATES,
     )
-    current_published = json.loads(publication_path.read_text(encoding="utf-8"))
+    current_published = json.loads(release_deployed_object_bytes(publication_path).decode("utf-8"))
     if (
         len(published["objects"]) != 17
         or published["objects"] != current_published["objects"]

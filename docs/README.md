@@ -47,6 +47,14 @@ domain-specific actions, not second copies of operational thresholds or rules.
 `AGENTS.local.md` is private, machine/user-specific guidance and must not
 override tracked project policy.
 
+## Active strategic plans
+
+- [restructuring-plan.md](restructuring-plan.md) — proposed phased simplification of
+  developer workflow, SQLite runtime data, source-family databases, player-facing
+  presentation, tooling and repository structure. It maps dependencies and
+  acceptance criteria but does not override current behavior or duplicate the
+  live implementation backlog in `TODO.md`.
+
 ## Maintained evidence and research
 
 These files intentionally retain reviewed evidence that is useful beyond one release:
@@ -186,8 +194,9 @@ progress indicators for partially delivered tasks.
 Complete the handoff at the same time as the work:
 
 1. Record the practical outcome in the canonical behavior/design documentation.
-   Add or consolidate meaningful player/operator outcomes under `Unreleased` in
-   [the changelog](CHANGELOG.md); internal-only test, refactor or process work
+   Add or consolidate meaningful player/operator outcomes in
+   [the changelog](CHANGELOG.md) under the branch's
+   [pending target release](releasing.md#between-releases); internal-only test, refactor or process work
    needs no release-note entry, with that decision stated in the handoff.
 2. Remove a completed standalone task or completed parent and its whole subtree.
    A completed subtask whose immediate parent is still open may instead become

@@ -15,3 +15,7 @@ data/generated/rules.db binary
 data/generated/variant-usage.json binary
 # Byte-exact reviewed Weapon Chart publication paired to the release databases.
 data/generated/weapon-profile-sources.json binary
+
+# Byte-exact static graphical assets used in release fingerprints.
+src/infinity_db/web/static/*.svg -text
+src/infinity_db/web/static/silhouettes/*.svg -text

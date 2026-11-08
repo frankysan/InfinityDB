@@ -93,9 +93,12 @@ printf 'Save these settings to %s for later runs? [Y/n]: ' "$config_file"
 IFS= read -r save_answer || exit 1
 case "${save_answer:-Y}" in
   Y|y|yes|YES)
-    umask 077
-    printf 'DOMAIN=%s\nRETAIN_APP_IMAGES=%s\nMETRICS_BIND_ADDRESS=%s\nMETRICS_PORT=%s\n' \
-      "$domain" "$retain" "$metrics_bind" "$metrics_port" > "$config_file"
+    (
+      umask 077
+      printf 'DOMAIN=%s\nRETAIN_APP_IMAGES=%s\nMETRICS_BIND_ADDRESS=%s\nMETRICS_PORT=%s\n' \
+        "$domain" "$retain" "$metrics_bind" "$metrics_port" > "$config_file"
+      chmod 600 "$config_file"
+    )
     echo "Saved deployment settings to $config_file."
     ;;
 esac

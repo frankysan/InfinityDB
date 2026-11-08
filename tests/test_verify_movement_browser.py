@@ -8,10 +8,10 @@ from urllib.parse import quote
 
 import pytest
 
-from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.web import create_app
 from tools.browser_wsgi_transport import route_browser_page
 from tools.promote_movement_reference import ARMY, ROOT, RULES
+from tools.release_rules_export import load_release_deployed_objects
 
 ORIGIN = "http://infinitydb-movement.test"
 
@@ -411,7 +411,7 @@ def test_shared_movement_geometry_cover_and_terrain_family_browser_acceptance(
     chrome: Any, width: int,
 ) -> None:
     """V1S-033E integrates the four published rule families and ordinary search."""
-    published = load_deployed_object_publication(
+    published = load_release_deployed_objects(
         ROOT / "data/generated/deployed-objects.json", ROOT / ARMY, ROOT / RULES,
     )
     assert published is not None  # Only the exact release-matched artifacts qualify.

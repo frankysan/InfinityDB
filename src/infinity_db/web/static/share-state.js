@@ -152,10 +152,15 @@ export function shareStateHref(path, name, values) {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
+export function writeHistoryUrl(url, { replace = false } = {}) {
+  window.history[replace ? "replaceState" : "pushState"](window.history.state, "", url);
+  window.dispatchEvent(new Event("infinity:historychange"));
+}
+
 export function writeShareState(name, values, { replace = false } = {}) {
   const url = applyShareState(new URL(window.location.href), name, values);
   if (url.href !== window.location.href) {
-    window.history[replace ? "replaceState" : "pushState"](window.history.state, "", url);
+    writeHistoryUrl(url, { replace });
   }
   return url;
 }

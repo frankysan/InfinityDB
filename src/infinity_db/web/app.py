@@ -88,18 +88,23 @@ class Application:
         # independent test/development source, not the release rules.db.
         # Never auto-attach its neighbour's publication to that mixed pair.
         rules_path = self.rules_database.path if self.rules_database is not None else None
+        self.deployed_objects = (
+            self.rules_database.deployed_objects_payload(self.database.path)
+            if self.rules_database is not None else None
+        )
+        # v10 can be previewed from an independent staging directory because
+        # the embedded model verifies its Army hash; legacy publications
+        # remain restricted to a co-located release database pair.
         if (
-            rules_path is not None
-            and rules_path.resolve().parent != self.database.path.resolve().parent
+            rules_path is None
+            or rules_path.resolve().parent == self.database.path.resolve().parent
         ):
-            self.deployed_objects = None
-        else:
             deployed_objects_path = self.database.path.with_name("deployed-objects.json")
-            self.deployed_objects = load_deployed_object_publication(
-                deployed_objects_path,
-                self.database.path,
-                rules_path,
-            )
+            if self.deployed_objects is None:
+                # Read-only fallback for v8/v9 release images.
+                self.deployed_objects = load_deployed_object_publication(
+                    deployed_objects_path, self.database.path, rules_path,
+                )
             variant_usage_path = self.database.path.with_name("variant-usage.json")
             self.variant_usage = load_variant_usage_publication(
                 variant_usage_path,

@@ -19,7 +19,11 @@ from tools.audit_terrain_scenery_source_gaps import (
     audit_terrain_scenery_boundary,
 )
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.release_rules_export import RELEASE_RULES, export_release_rules
+from tools.release_rules_export import (
+    RELEASE_RULES,
+    export_release_rules,
+    release_deployed_object_bytes,
+)
 from tools.stage_terrain_scenery_references import (
     ARMY,
     CANDIDATES,
@@ -77,7 +81,7 @@ def stage_promoted_terrain_artifacts(
         raise ValueError("Promoted terrain records differ from reviewed proposal")
     audit = audit_terrain_scenery_boundary(
         curated,
-        json.loads(PUBLICATION.read_text(encoding="utf-8")),
+        json.loads(release_deployed_object_bytes(PUBLICATION).decode("utf-8")),
     )
     if (
         audit["reviewStatus"]["specialTerrainRule"] != "maintained"
@@ -108,7 +112,9 @@ def stage_promoted_terrain_artifacts(
         "scope": "post-promotion-binary-rebuild-not-applied",
         "releaseBaselineSha256": {
             "rulesDatabase": hashlib.sha256(RELEASE_RULES.read_bytes()).hexdigest(),
-            "deployedObjects": hashlib.sha256(PUBLICATION.read_bytes()).hexdigest(),
+            "deployedObjects": hashlib.sha256(
+                release_deployed_object_bytes(PUBLICATION),
+            ).hexdigest(),
         },
         "sourceSha256": hashlib.sha256(curated_path.read_bytes()).hexdigest(),
         "reviewedRuleIds": list(EXPECTED_IDS),

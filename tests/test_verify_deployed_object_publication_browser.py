@@ -369,11 +369,14 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
 def test_unpublished_legacy_database_does_not_infer_object_catalog(
     tmp_path: Path,
 ) -> None:
+    from infinity_db.curated import load_curated_directory
+    from infinity_db.rules_database import export_rules_database
+
     root = Path(__file__).resolve().parents[1]
     army = tmp_path / "infinity.db"
     rules = tmp_path / "rules.db"
     shutil.copyfile(root / "data/generated/infinity.db", army)
-    shutil.copyfile(root / "data/generated/rules.db", rules)
+    export_rules_database(load_curated_directory(root / "data/curated/rules"), rules)
     app = create_app(army, rules_database_path=rules)
     for path in ("/api/deployed-objects", "/api/deployed-objects/army-weapon-199"):
         status, content = _request(app, path)

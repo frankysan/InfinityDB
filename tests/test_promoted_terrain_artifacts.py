@@ -11,6 +11,7 @@ import pytest
 
 from infinity_db.rules_database import RulesDatabase
 from tools.audit_terrain_scenery_source_gaps import CURATED, PUBLICATION
+from tools.release_rules_export import release_deployed_object_bytes
 from tools.stage_promoted_terrain_artifacts import stage_promoted_terrain_artifacts
 
 
@@ -18,7 +19,7 @@ def test_promoted_terrain_rebuild_is_source_pinned_and_nonmutating(
     tmp_path: Path,
 ) -> None:
     source_before = CURATED.read_bytes()
-    publication_before = PUBLICATION.read_bytes()
+    publication_before = (PUBLICATION.read_bytes() if PUBLICATION.is_file() else None)
     rules = CURATED.parents[2] / "generated/rules.db"
     rules_before = rules.read_bytes()
     output = tmp_path / "regenerated"
@@ -35,8 +36,8 @@ def test_promoted_terrain_rebuild_is_source_pinned_and_nonmutating(
     ]
     staged_rules = output / "data/generated/rules.db"
     with sqlite3.connect(rules) as source, sqlite3.connect(staged_rules) as staged:
-        assert source.execute("PRAGMA user_version").fetchone()[0] == 9
-        assert staged.execute("PRAGMA user_version").fetchone()[0] == 9
+        assert source.execute("PRAGMA user_version").fetchone()[0] == 10
+        assert staged.execute("PRAGMA user_version").fetchone()[0] == 10
     assert RulesDatabase(staged_rules).restrictions_payload() == (
         RulesDatabase(rules).restrictions_payload()
     )
@@ -55,7 +56,7 @@ def test_promoted_terrain_rebuild_is_source_pinned_and_nonmutating(
         report["stagedSha256"]["rulesDatabase"]
     )
     assert source_before == CURATED.read_bytes()
-    assert publication_before == PUBLICATION.read_bytes()
+    assert publication_before == (PUBLICATION.read_bytes() if PUBLICATION.is_file() else None)
     assert rules_before == rules.read_bytes()
     assert (output / "staging-report.json").is_file()
     with pytest.raises(FileExistsError):
@@ -66,7 +67,7 @@ def test_promoted_terrain_publication_matches_rules_database_and_stage() -> None
     """Require matching published binaries and check exact local staging provenance."""
     root = CURATED.parents[3]
     rules = root / "data/generated/rules.db"
-    payload = json.loads(PUBLICATION.read_text(encoding="utf-8"))
+    payload = json.loads(release_deployed_object_bytes(PUBLICATION).decode("utf-8"))
     rule_hash = hashlib.sha256(rules.read_bytes()).hexdigest()
     assert payload["sourceSnapshot"]["rulesDatabaseSha256"] == rule_hash
     assert len(payload["objects"]) == 17

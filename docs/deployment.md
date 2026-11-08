@@ -2,10 +2,12 @@
 
 **Project domain:** Deployment
 
-InfinityDB is deployed as an immutable Docker image containing the web application,
-tracked processed graphical assets, the release-matched `infinity.db` and `rules.db`
-snapshots, generated `deployed-objects.json`, and the tracked exact-variant
+For public internet serving, InfinityDB deploys an immutable Docker image
+containing the web application, processed graphical assets, release-matched
+`infinity.db` and `rules.db`, and tracked exact-variant
 `variant-usage.json` and Weapon-profile `weapon-profile-sources.json` publications.
+Legacy v8/v9 images additionally include generated `deployed-objects.json`;
+the prepared 1.0.1 v10 image embeds these records directly in `rules.db`.
 Caddy listens on HTTP and proxies traffic to the application, which is not exposed
 directly on the host. Put Caddy behind an external TLS reverse proxy for public HTTPS.
 
@@ -17,13 +19,43 @@ stay outside the public repository; the processed SVG publication and two runtim
 tracked release artifacts. See
 [third-party notices](../THIRD_PARTY_NOTICES.md).
 
-Deployment is intentionally **release-only**. Database and symbol generation happen in a
-development/release checkout. A tagged server checkout consumes the exact tracked databases and
+**Docker deployment** is intentionally **release-only**; the independently
+supported direct-checkout runtime is described below. Database and symbol
+generation happen in a development/release checkout. A tagged Docker server
+checkout consumes the exact tracked databases and
 symbols and exact-variant publication reviewed for that release, and deterministically
 produces the matching deployed-object publication from tracked curated reviews;
 it does not acquire raw data, rebuild databases or regenerate variant usage.
 For moving an installation to a new host, see the
 [server migration guide](server-migration.md).
+
+## Direct checkout hosting (without Docker)
+
+This is the separate local/LAN or self-hosted checkout target, not the public
+Docker release workflow. From the repository root, after acquiring a local
+Army snapshot and installing the project:
+
+```sh
+infinity-db build --compact
+infinity-db build-rules
+infinity-db serve
+```
+
+The second command assembles `local/checkout-runtime/` (ignored by Git) from
+the just-built Army database, current curated v10 Rules and their matching
+variant/Weapon publications. `serve` chooses that bundle automatically,
+rejecting stale or incomplete results. On a checkout without a local build,
+`serve` instead uses the tracked release pair.
+
+For a longer-lived Linux checkout service, install the optional `server`
+dependencies and configure the service working directory to the checkout.
+Set `INFINITY_DB_DATABASE` to the absolute path of
+`local/checkout-runtime/infinity.db` and `INFINITY_DB_RULES_DATABASE` to
+the adjacent `rules.db` before starting
+`gunicorn --bind 127.0.0.1:8000 infinity_db.web.wsgi:app`. Explicit WSGI
+paths are required because they avoid environment-dependent auto-selection.
+A local rebuild does not publish a Docker release or overwrite tracked
+release Rules/JSON.
 
 ## Prerequisites
 
@@ -89,19 +121,23 @@ SHA-256, and compares `infinity.db`'s embedded `snapshotArchiveSha256` with
 data and graphical publication to the same exact source ZIP without requiring that raw archive
 or the terminal `army-symbol-build.json` on the server.
 
-Before building the Docker image, `deploy.sh` deterministically generates and
-checks the ignored `data/generated/deployed-objects.json` publication from the
-tracked database pair and reviewed curated source files. It fails rather than
-ship a missing or mismatched publication. No raw snapshots or database rebuilds
-are needed on the deployment host. A direct `docker build` requires that
-publication to have been generated in the checkout first. In contrast, the
-exact-variant publication is a **tracked release file** built during development
-with `tools.build_variant_usage --publish` and `--check-publication`, using the
-pinned ignored raw source. Deployment and clean CI have no raw archive;
-they validate the committed publication against the tracked databases and
-generated deployed-object bytes without regenerating it. Changes to either
-database or the deployed-object publication require rebuilding and committing
-matching variant JSON during release preparation.
+For v8/v9 releases, `deploy.sh` deterministically generates and checks the
+ignored `data/generated/deployed-objects.json` publication before packaging.
+For the tracked v10 development pair, deployed objects are embedded in
+`rules.db` and validated against the exact Army database hash; no legacy
+JSON is generated or shipped. No raw snapshots or database rebuilds are
+needed on the Docker host. Before a direct Docker build, run
+`python -m tools.prepare_runtime_bundle` after verifying the tracked
+publications. It creates ignored `data/runtime/` with exactly the validated
+schema-specific four- or five-file image contents.
+
+The exact-variant publication is a **tracked release file**, source-verified
+from the pinned raw Army archive during development. v9 uses the legacy JSON
+fingerprint; v10 uses the embedded deployed-object model and format v2.
+Docker deployment and clean CI validate the paired, committed publication
+against the tracked databases without regenerating it. Changes to either
+database require promoting and committing the matching variant and Weapon JSON
+together.
 
 The tracked `weapon-profile-sources.json` is generated from the same
 database pair and reviewed Weapon decisions with
@@ -110,6 +146,31 @@ exact bytes and source pins. Deployment verification runs this check without
 the PDF or raw Army archive. Rebuild and commit the matched file whenever
 either database or its reviewed inputs change. The image verifies and
 serves it independently of the curated files.
+
+The v10 candidate builder embeds reviewed deployed objects directly in
+`rules.db` and prepares v2 variant usage plus matching Weapon citations.
+It stages exactly four files under ignored `local/v10-candidate/` by default,
+without `deployed-objects.json`. After `--check`, the explicit
+`--promote-release` command verifies preserved v9 semantics plus the
+Battleground map additions and promotes the three changed tracked release
+artifacts together. `infinity.db` remains byte-identical. For example:
+
+```sh
+python -m tools.build_v10_runtime_candidate --output-dir local/v10-candidate --check
+python -m tools.build_v10_runtime_candidate --output-dir local/v10-candidate --promote-release
+python -m tools.verify_deployment_assets --skip-svg
+```
+
+Use `python -m tools.preview_runtime_image --tracked-release` for a
+disposable image build/startup and API smoke test against the **actual tracked
+release pair**. It cleans up the preview container/image and restores
+`data/runtime/` to the tracked bundle. Requires an active Docker Linux engine.
+Normal `deploy.sh` always reconstructs the bundle from tracked
+`data/generated/` and never selects ignored local candidates. The
+development branch has promoted v10; the prior tagged production release
+remains v9 until release acceptance. See the
+[open v10 release gate](TODO.md#performance-storage-and-build-tooling).
+The immutable container never regenerates or replaces databases at runtime.
 
 The Docker image explicitly configures both runtime database paths. Missing, invalid, or
 incompatible tracked databases or reference publications fail before activation. After building the image,

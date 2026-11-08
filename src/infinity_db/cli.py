@@ -37,6 +37,7 @@ from .source_anomalies import (
 
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
 DEFAULT_RULES_DATABASE = Path("data/generated/rules.db")
+DEFAULT_STANDALONE_RULES_DATABASE = Path("local/rules-standalone.db")
 DEFAULT_CURATED_RULES = Path("data/curated/rules")
 DEFAULT_PERIPHERAL_IDENTITIES = Path("data/curated/peripherals/army-identities.json")
 
@@ -186,40 +187,57 @@ def cmd_validate_curated(args: argparse.Namespace) -> int:
 
 
 def cmd_build_rules(args: argparse.Namespace) -> int:
-    if (
-        args.restrictions_manifest is None
-        and args.output.resolve() == DEFAULT_RULES_DATABASE.resolve()
-        and args.output.is_file()
-    ):
-        connection = sqlite3.connect(args.output)
-        try:
-            current_schema_version = connection.execute(
-                "PRAGMA user_version"
-            ).fetchone()[0]
-        finally:
-            connection.close()
-        if current_schema_version == 9:
-            raise ValueError(
-                "default build-rules export is v8 and cannot replace the tracked "
-                "v9 rules database; use the guarded v9 staging and paired "
-                "publication workflow"
-            )
+    output = args.output if args.output is not None else DEFAULT_STANDALONE_RULES_DATABASE
+    if output.resolve() == DEFAULT_RULES_DATABASE.resolve():
+        raise ValueError(
+            "build-rules cannot write the tracked release rules.db directly; "
+            "stage outside data/generated/ and use guarded release publication"
+        )
+    if args.legacy_v8 and args.restrictions_manifest is not None:
+        raise ValueError("--legacy-v8 cannot be combined with --restrictions-manifest")
 
     documents = load_curated_directory(args.input)
-    if args.restrictions_manifest is not None:
-        if args.output.resolve() == DEFAULT_RULES_DATABASE.resolve():
-            raise ValueError(
-                "v9 Restrictions export requires an explicit staging --output path; "
-                "do not replace the tracked release rules.db before publication review"
-            )
-        manifest = json.loads(args.restrictions_manifest.read_text(encoding="utf-8"))
-        export_rules_database(
-            documents, args.output, restrictions_manifest=manifest,
+    manifest = None
+    deployed_objects = None
+    if not args.legacy_v8:
+        source = (
+            args.restrictions_manifest
+            if args.restrictions_manifest is not None
+            else Path("config/validation/restrictions-source-chart.json")
         )
-    else:
-        export_rules_database(documents, args.output)
-    print(f"Rules database ready: {args.output}")
+        manifest = json.loads(source.read_text(encoding="utf-8"))
+        if not args.legacy_v9:
+            from infinity_db.deployed_object_builder import build_deployed_objects
+
+            curated_source = next(
+                (
+                    path for path, document in documents
+                    if document["collection"]["id"] == "n5-core-v5.3"
+                    and document["collection"]["status"] == "current"
+                ),
+                None,
+            )
+            if curated_source is None:
+                raise ValueError("Current N5.3 core source required for deployed objects")
+            deployed_objects = build_deployed_objects(
+                args.army_db, curated_source, args.delivery_reviews,
+                args.candidate_reviews,
+            )
+    export_rules_database(
+        documents, output, restrictions_manifest=manifest,
+        deployed_objects=deployed_objects,
+    )
+    version = 8 if args.legacy_v8 else 9 if args.legacy_v9 else 10
+    print(f"Rules database ready: {output} (schema v{version})")
     print(f"Collections: {len(documents)}")
+    if args.output is None and not (args.legacy_v8 or args.legacy_v9):
+        # A checkout has two supported targets: this ignored, complete runtime
+        # for local/LAN hosting, and the separately promoted tracked Docker data.
+        # Do not publish a mismatched variant/Weapon view during development.
+        from tools.build_v10_runtime_candidate import publish_checkout_runtime
+
+        publish_checkout_runtime(output)
+        print("Checkout runtime ready: local/checkout-runtime")
     return 0
 
 
@@ -356,7 +374,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_health.set_defaults(func=cmd_database_health)
 
     p_serve = sub.add_parser("serve", help="Start the local unit browser and read-only API")
-    p_serve.add_argument("--database", type=Path, default=DEFAULT_DATABASE)
+    p_serve.add_argument(
+        "--database", type=Path,
+        help="Explicit Army database (disables automatic checkout runtime selection)",
+    )
     p_serve.add_argument(
         "--host",
         default="0.0.0.0",
@@ -375,10 +396,37 @@ def build_parser() -> argparse.ArgumentParser:
         "build-rules", help="Build the separate rules database from curated JSON collections"
     )
     p_rules.add_argument("input", nargs="?", type=Path, default=DEFAULT_CURATED_RULES)
-    p_rules.add_argument("--output", type=Path, default=DEFAULT_RULES_DATABASE)
+    p_rules.add_argument(
+        "--output", type=Path,
+        help=(
+            "Standalone output (default: local/rules-standalone.db); without --output "
+            "also prepares the ignored complete checkout runtime; never writes tracked rules.db"
+        ),
+    )
+    legacy = p_rules.add_mutually_exclusive_group()
+    legacy.add_argument(
+        "--legacy-v8", action="store_true",
+        help="Export obsolete v8 format explicitly for compatibility tests",
+    )
+    legacy.add_argument(
+        "--legacy-v9", action="store_true",
+        help="Export pre-deployed-object v9 format explicitly for compatibility tests",
+    )
     p_rules.add_argument(
         "--restrictions-manifest", type=Path,
-        help="Explicit opt-in to v9 conditional Restrictions export; stage outside release paths",
+        help="Override the reviewed Restrictions chart manifest",
+    )
+    p_rules.add_argument(
+        "--army-db", type=Path, default=DEFAULT_DATABASE,
+        help="Source Army database for reviewed deployed-object usage",
+    )
+    p_rules.add_argument(
+        "--delivery-reviews", type=Path,
+        default=Path("config/validation/deployed-object-delivery-reviews.json"),
+    )
+    p_rules.add_argument(
+        "--candidate-reviews", type=Path,
+        default=Path("config/validation/deployed-object-candidate-reviews.json"),
     )
     p_rules.set_defaults(func=cmd_build_rules)
 

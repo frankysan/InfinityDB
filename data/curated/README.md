@@ -858,8 +858,10 @@ authorize correcting genuinely ambiguous source values.
 Shared prose participates in the full semantic maintained-text syntax, target, and reviewed-link
 audits, including objective/ending payloads in the component library. No plain-reference exception
 is broadened for the new model. The rules builder consumes curated format v23.
-Its base schema/compatibility is 8/10; the reviewed 1.0 tracked release database uses the supported v9/11
-restriction-publication extension. Verify the matched tracked artifact rather
+Its base schema/compatibility is 8/10. The normal CLI builds v10/12 with
+Restrictions and embedded deployed objects; explicit compatibility builds retain
+v8/10 and v9/11. The prepared 1.0.1 tracked release uses v10/12, while the
+tagged 1.0.0 release used v9/11. Verify the matched tracked artifact rather
 than assuming a fresh base export has identical release bytes.
 
 Embedded `term` records own source-backed Game terminology that does not warrant a standalone
@@ -1056,9 +1058,9 @@ with `appliesTo: "optional-reinforcements-extra-army-list"`
 and a positive integer `count` of one or two. This describes
 the annex's maximum Trooper-count allowance, not an
 Attribute modifier, Skill Level, list-legality decision or
-independently reissued N5 procedure. Only freshly built rules
-databases expose these newly curated source semantics until
-the tracked v9 release pair is guardedly refreshed.
+independently reissued N5 procedure. These reviewed effects are present in
+the tracked v10 database as well as fresh exports; their earlier v9
+promotion is described in the [data model](../../docs/data-model.md).
 
 The bounded Dodge effects are `opponent-roll-mod` (negative opponent
 Face to Face MOD), `roll-attribute-replacement` (PH value for Dodge),

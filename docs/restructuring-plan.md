@@ -1,0 +1,211 @@
+# Major simplification and restructuring plan
+
+**Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
+
+**Status:** Accepted planning direction; implementation not started.  
+**Established:** 2026-11-08  
+**Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
+
+## Purpose and scope
+
+Simplify InfinityDB as a single-maintainer, non-commercial, read-only Infinity reference. Reduce development and operational overhead *substantially* while preserving the useful behavior of the web application: accurate game data, source citations, linked references, scenario maps, navigation, accessibility, privacy and supported local/Docker hosting.
+
+This is a **target architecture and execution sequence**, not a statement of current behavior and not a second active task register. `TODO.md` owns live implementation work; `validation-queue.md` owns outstanding verification; `releasing.md` owns releases. Use the phase/step identifiers below as durable references in short, actionable TODO entries or commits when necessary. Do not mirror a checkbox per step here or preserve a parallel completion diary.
+
+### Agreed direction
+
+1. **Single-maintainer proportionality.** Prefer Git history, clear documentation, coherent commits, focused checks and a few meaningful release checks over routine staging/promotion, compatibility scaffolding, rollback exercises or repetitive administrative gates.
+2. **Databases are the runtime structured-data boundary.** Upstream and editable curated JSON remain valid *build inputs*. All structured data required to serve the application belongs in SQLite output, not loose required JSON or a second build-time interpretation layer. Normal HTTP JSON responses are unaffected.
+3. **Source-oriented database ownership.** Rename `infinity.db` to **`army.db`** and `rules.db` to **`rules_n5.db`**. Plan a separate **`its_18.db`** for ITS Season 18, with later seasons following the same pattern where useful.
+4. **One artifact contract, two hosting targets.** Checkout-based serving and immutable Docker deployment consume the *same logical database set and application code*. Deployment packages already built data; it does not invent an alternate data model.
+5. **Player-first presentation.** Normal pages explain Infinity; internal schema constraints, ingestion caveats and implementation warnings belong in developer diagnostics or documentation. Material gameplay uncertainties and source citations remain available to players.
+6. **Remove, do not merely relocate, accidental complexity.** Retire obsolete scripts, deprecated schemas, duplicated checks and documents after proving no live consumer remains. Extract independent acquisition tooling when that actually makes the main repository simpler.
+7. **Bounded agent work.** Planning, implementation, test design/execution, housekeeping and release operations are distinct responsibilities; every change should not run all five.
+
+### Guardrails, not procedural gates
+
+- Preserve the player-facing functional baseline and game meaning; no silent changes to Army profiles, rules, cited provenance, scenario geometry, or historical source scope.
+- Keep acquisition explicit and offline builds reproducible from identified inputs; do not silently merge different N5/ITS revisions.
+- Retain basic database validation, source attribution/licensing, privacy, security, accessibility, and actionable focused regression checks. Simplicity is not permission to publish incorrect data.
+- No indefinite compatibility layer for *internal* filenames, schemas, deprecated build commands or legacy runtime publication formats. A deliberate cutover with documented replacement commands is acceptable. Public URLs and documented user-visible API contracts are evaluated separately because breaking them affects users.
+- Preserve immutable upstream snapshots and genuinely unique research evidence where needed. Git history is the default record for superseded *code and process*, not a substitute for source files unavailable from Git.
+- Do not automatically refactor unrelated gameplay features while cleaning architecture. Keep changes in coherent slices so regressions can be attributed.
+
+## Target boundary (proposed, not yet implemented)
+
+```text
+Explicit source acquisition     Human-maintained curation
+(Army, wiki, symbols, PDFs)     (JSON, identity maps, reviewed rules)
+             \                 /
+              --> Validate / normalize / resolve / build
+                              |
+                    data/generated/
+                      army.db
+                      rules_n5.db
+                      its_18.db   (when season extracted)
+                              |
+                   One read-only API/backend
+                         /          \
+                 local serve      Docker image
+```
+
+- **`army.db`:** normalized Army snapshots, application Army/Unit/profile identities and usage/relationships derived from Army data. Cross-source information placed here only when Army ownership makes sense.
+- **`rules_n5.db`:** N5 core rules, current applicable N5 FAQ, reviewed reference content, rules citations and core scenarios. Retain exact publication/version identity inside records; `n5` in the filename is a family, not an excuse to conflate revisions.
+- **`its_18.db`:** Season 18 scenarios, seasonal rules/extras and season-scoped interpretations/citations. The boundary with N5 shared concepts must be decided from real consumers before extraction.
+- **Future seasons:** separate database per independently managed season only when worthwhile. Do not require a new physical database for every minor PDF revision or force shared concepts into seasonal duplicates.
+- **Raw archives/`infinity.raw.db`:** research and lossless provenance *build-side only*; explicitly reassess whether the raw SQLite sibling is still useful. It is not a serving dependency.
+- **Assets:** SVGs, styles, scripts, fonts and other non-structured static assets remain files. JSON used as a transient interchange or generated diagnostic report is acceptable; **required runtime JSON sidecars are not**.
+- **Cross-database relationships:** use stable typed IDs and one centralized resolver/query boundary. Prefer build-time materialization or a small shared runtime resolver over scattered joins, replicated rules, or an extra meta-database. Decide the precise approach with tests before migration.
+
+## Work phases
+
+The ordering below expresses **dependencies**, not a requirement to serialize independent work. P4 (UI content) may proceed in parallel with database migration after its baseline is captured. Each step should be delivered as a bounded change, not as one large agent call.
+
+### P0 — Replace heavyweight development governance
+
+**Outcome:** A minimal, explicit single-maintainer workflow that helps rather than obstructs the restructuring.  
+**Owns:** Project infrastructure.  
+**Prerequisite:** This plan exists.
+
+1. **P0.1 — Inventory mandatory checks.** Enumerate current task-boundary actions across `AGENTS.md`, `AGENTS.local.md`, `docs/testing.md`, `docs/validation-queue.md`, `docs/ci.md` and `docs/releasing.md`. Classify each as correctness-critical, release-only, useful optional, or removable duplication.
+2. **P0.2 — Define the normal task lifecycle.** A small coherent implementation task gets relevant context, a focused change, an immediate focused check where warranted, review of its diff, and a coherent commit. Deferred checks are batched by risk/impact rather than multiplying admin steps per edit.
+3. **P0.3 — Streamline validation ownership.** Keep a lightweight queue for *real* deferred test obligations. Decide which VD/VR distinctions, numeric thresholds, age limits and strict drain rules actually help; remove duplicated accounting. Preserve independent Linux execution and concise exact-revision reporting without making Linux sync a prerequisite for every edit.
+4. **P0.4 — Separate release from development.** Keep explicit release/deploy authorization, basic artifact validation and a relevant smoke test; remove redundant candidate/promotion/rollback ceremony for immutable Docker deployments where Git and rebuilds suffice.
+5. **P0.5 — Reconcile agent instructions.** Update the canonical tracked guidance and its linked procedures together. Coordinate any local-only preferences with their owner rather than silently overriding `AGENTS.local.md`; prevent contradictory mandatory instructions.
+
+**Exit:** An agent can explain and execute a normal small change using a short workflow; focused validation and final release responsibilities are unambiguous; no new compatibility or staging policy is added merely for process continuity.
+
+### P1 — Map the dependency graph and define the cutover
+
+**Outcome:** Evidence-based keep/migrate/extract/retire inventory and an executable database target contract.  
+**Owns:** Project infrastructure, Data processing, Web backend, Deployment.  
+**Prerequisite:** P0 workflow is usable; read-only inventory may start immediately.
+
+1. **P1.1 — Inventory entrypoints and paths.** Record tracked and generated assets by owner: `src/`, `data/`, `config/`, `tools/`, `scripts/`, `.github/workflows/`, `docs/` and Docker packaging. Distinguish source inputs, editable knowledge, intermediates, release artifacts and serving dependencies.
+2. **P1.2 — Trace runtime reads.** For every required `.json`, `.db` and manifest, identify producers, CLI consumers, API/backend consumers, tests, Docker requirements and direct static browser fetches. Start with `variant-usage.json`, `weapon-profile-sources.json`, `restrictions-reference.json`, legacy `deployed-objects.json`, `infinity.raw.db` and symbol publication metadata.
+3. **P1.3 — Capture baseline behavior.** Select representative Army/Unit/rules/FAQ/Fireteam/scenario/search responses and browser routes, including Battleground geometry, source citations and Developer mode. Record snapshot-specific fixtures or checks that can show semantic parity after migrations without demanding full-suite runs at each intermediate step.
+4. **P1.4 — Define database ownership.** For each runtime dataset specify physical database, stable identities, schema, provenance/version requirements and cross-database lookup. Resolve where Weapon citations, variant usage, restrictions, deployed objects and symbol mappings belong.
+5. **P1.5 — Define build/serve paths.** Choose one default generated database directory, an explicit way to select an alternate database set, and Docker's mechanism for packaging exactly those built artifacts. Keep local and Docker data expectations aligned; determine whether release DBs remain tracked or are generated as release outputs.
+6. **P1.6 — Classify tooling.** Mark each tool as maintained runtime/build utility, reusable check, completed one-use helper, extractable acquisition concern, or obsolete. Cite live imports, CI, commands and documentation consumers before removal.
+
+**Exit:** Each runtime data dependency has a named database destination and migration order; the two serve targets have one artifact contract; tool retirements are evidence-based; baseline comparisons are runnable.
+
+### P2 — Make runtime data SQLite-only and unify build/serve
+
+**Outcome:** No required loose JSON data publications and no competing checkout-vs-Docker data assembly model.  
+**Owns:** Data processing, Web backend, Deployment.  
+**Prerequisite:** P1 database and build decisions.
+
+1. **P2.1 — Establish the final DB build interface.** Design `infinity-db build` as the complete normal offline build. Retain narrower developer commands only when genuinely useful; `infinity-db serve` should consume the selected built database directory directly.
+2. **P2.2 — Embed variant usage.** Normalize `variant-usage.json` into its agreed owning DB; migrate reference loading/API output; remove file/hash pairing and runtime fallback code.
+3. **P2.3 — Embed reviewed Weapon-profile citations.** Migrate `weapon-profile-sources.json` into its agreed DB, preserving source locators and relationship semantics; delete the sidecar consumer.
+4. **P2.4 — Embed remaining static structured reference data.** Move `restrictions-reference.json` behind the API/DB; scan for other static JSON that supplies domain facts at runtime, including any needed symbol mapping. Avoid moving ordinary static web assets into SQLite.
+5. **P2.5 — Finalize the deployed-object transition.** Retain v10's DB-backed model while removing only proven unused v8/v9 loose-file fallbacks, legacy builder modes and publication verifiers.
+6. **P2.6 — Rename `infinity.db` to `army.db` and `rules.db` to `rules_n5.db`.** Update CLI defaults, env vars, package/build scripts, path discovery, database validators, docs, tests, Dockerfile and workflows in one coordinated cutover. Do not preserve permanent filename aliases.
+7. **P2.7 — Remove redundant publication stages.** Collapse `local/checkout-runtime/`, standalone rules staging, candidate promotion, duplicated matched-release checks and `data/runtime/` copying where possible into the simple contract from P1. Temporary files used for atomic DB creation are still acceptable; do not equate implementation safety with a public promotion workflow.
+8. **P2.8 — Prove both hosting targets.** Verify the local `build && serve` path and an actual Docker image built from the same DB set. Compare representative API payload semantics, citations, scenario SVG results, startup health and absence of missing sidecars.
+
+**Exit:** Built DBs alone provide every runtime structured fact; normal local serving and Docker image serving agree; no silent fallback to older artifacts or required loose JSON; reviewed results meet P1 baseline.
+
+### P3 — Separate seasonal ITS data from N5 core rules
+
+**Outcome:** Source-family boundaries support current and historical seasons without duplicating core rules.  
+**Owns:** Data processing, Web backend, Web frontend.  
+**Prerequisite:** P2 storage and identity contracts; can begin design during P1/P2.
+
+1. **P3.1 — Model publication ownership.** Identify N5 core/FAQ objects versus ITS 18 missions, extras, tournament constraints and season-scoped FAQ; preserve effective versions and selected source identity.
+2. **P3.2 — Define `its_18.db` schema and builder.** Reuse existing scenario component and geometry models instead of making a separate ITS renderer or rules engine.
+3. **P3.3 — Migrate existing Battleground pilot.** Ensure it still resolves core rules, source citations and map geometry with exactly the same player-visible meaning.
+4. **P3.4 — Centralize multi-DB resolution.** Provide a clear backend registry and typed cross-domain references. Avoid leaking file paths, `ATTACH` assumptions or season selection rules into UI components.
+5. **P3.5 — Verify season isolation and extension.** Ensure Season 18 data cannot silently shadow N5 core rules or hypothetical future seasons; prove a second season can be added without restructuring N5/Army storage.
+
+**Exit:** N5 and ITS ownership is explicit, the current Battleground pilot works against `its_18.db`, and the model is ready for more seasons. Curating all ITS missions remains separate feature work in `TODO.md`, not a restructuring prerequisite.
+
+### P4 — Make the interface player-first
+
+**Outcome:** Less user-visible implementation language without loss of relevant gameplay accuracy.  
+**Owns:** Web frontend, Web backend where API copy/metadata is involved.  
+**Prerequisite:** P1 representative UI baseline; may run alongside P2/P3.
+
+1. **P4.1 — Audit visible strings and chrome.** Review reference cards, source lines, normal/developer variants, accuracy notice, About, FAQ, scenario pages, empty states and errors. Identify repeated disclaimers, architecture caveats and source-processing vocabulary.
+2. **P4.2 — Classify content by audience.** Gameplay facts/citations and meaningful ambiguities stay in normal mode. Internal IDs, ingestion limitations, evidence inventories, schema/version diagnostics and maintenance constraints move to developer-only views or documentation.
+3. **P4.3 — Simplify shared renderers first.** Remove repeated labels such as `InfinityDB-maintained reference · consult citations for source wording` when a concise `Sources` line is sufficient. Avoid page-specific copy forks and spacing patches.
+4. **P4.4 — Tighten editorial language.** Explain limits in terms players need: supported season, source version, unavailable data or genuinely disputed ruling; do not explain Git, build tooling or internal schema constraints in ordinary rules cards.
+5. **P4.5 — Validate representative flows.** Compare key pages and keyboard/screen-reader behavior in both themes/viewport classes where relevant. Preserve route usability, citations, responsive layout and map saving.
+
+**Exit:** Normal reference pages prioritize gameplay; technical material is not repeated across cards; genuine uncertainty stays visible and accessible.
+
+### P5 — Retire, consolidate and selectively extract tools
+
+**Outcome:** A smaller InfinityDB repository with clearly maintained entrypoints.  
+**Owns:** Acquisition, Data processing, Project infrastructure.  
+**Prerequisite:** P1 tool inventory; final retirement after replacement consumers are stable.
+
+1. **P5.1 — Retire completed one-use tooling.** Inspect `stage_*`, `promote_*`, `audit_*`, one-off migrations and historic candidate/release helpers. Check dynamic command/CI/tests/docs consumers, not only Python imports.
+2. **P5.2 — Consolidate ongoing utilities.** Favor a few clear CLI subcommands and shared validators over wrappers that repeat the same generation or verification.
+3. **P5.3 — Evaluate acquisition repository boundaries.** Army JSON downloader, Wiki/Human Sphere mirroring, and symbol acquisition/processing are candidates for separate Git repositories. Split only if each has a stable input/output contract and remains independently useful. Keep necessary Army normalization and domain-specific publishing in InfinityDB.
+4. **P5.4 — Extract incrementally.** Move one downloader at a time, specify versioned archive/output format and provenance, update importer/operator documentation, and verify an offline build from its produced artifact. Avoid cross-repository runtime dependencies or a mandatory multi-repository development setup.
+5. **P5.5 — Remove obsolete documents and scaffolding.** Retain active source evidence and essential operating instructions; delete superseded procedural narratives where Git history suffices. Reduce documentation duplication rather than moving every old file to `local/`.
+
+**Exit:** The main repository clearly separates app/build responsibilities from optional acquisition; unused tools and obsolete guidance are gone; a normal build does not require fetching or cloning new tool repositories.
+
+### P6 — Consolidate, measure and establish the new baseline
+
+**Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
+**Owns:** Project infrastructure, Data processing, Web backend, Web frontend, Deployment.  
+**Prerequisite:** P2–P5 changes intended for the restructuring milestone.
+
+1. **P6.1 — Delete residual compatibility scaffolding.** Search for old database names, legacy runtime JSON consumers, deprecated schema switches, temporary parallel bundling and unused environment options.
+2. **P6.2 — Align docs and help.** Update `README.md`, `docs/architecture.md`, `docs/data-model.md`, `data/README.md`, setup/deployment instructions, CLI help, agent instructions, test commands and relevant CI configuration. Retire historical instructions that are no longer active.
+3. **P6.3 — Run a measured acceptance batch.** Execute focused cross-layer tests first, then the appropriate full/project check and real local/Docker smoke tests once the integrated state is ready. Compare the P1 sample dataset, core routes, references, maps and accessibility regressions.
+4. **P6.4 — Quantify simplification.** Compare the initial and final counts of maintained CLI/tool entrypoints, required runtime files, compatibility branches, duplicate docs and development actions per ordinary change. Record actual build/test/deploy time where measurable; do not invent performance savings.
+5. **P6.5 — Retire the roadmap.** Transfer final architectural contracts to their canonical owners; keep only genuinely open scope in `TODO.md`. Git history preserves this plan once complete; do not keep it as a permanent competing guide.
+
+**Exit:** A newcomer or future agent can identify the main data path, rebuild databases, run the web app locally, and package a Docker image from a few concise, authoritative entrypoints.
+
+## Dependency and delivery map
+
+```text
+P0 workflow simplification -----> P1 dependency inventory
+                                      |
+                                      v
+                         P2 database/runtime unification
+                                      |
+                                      v
+                         P3 N5 / ITS family separation
+                                      |
+                                      v
+                         P6 integrated acceptance
+                                      ^
+P1 UI baseline ------------> P4 player-first UI ----|
+                                      ^
+P1 tool inventory --> P5 retirement/extraction ----|
+                       (timing follows consumers)
+```
+
+**Suggested first execution batch:** P0.1–P0.3 as a focused documentation/process change, followed by P0.4–P0.5. Next do the P1 dependency inventory *before* modifying the data path. Work that is genuinely independent (P4 copy) need not block on the database migration.
+
+## Questions to settle during discovery (not reasons to stop planning)
+
+- Which database owns cross-source variant usage, Weapon-profile citations, and symbol-to-identity mappings?
+- Does the build need a `data/generated/` tracked artifact directory, an ignored output plus explicit release packaging, or some smaller combination? There should be **one contract**, not competing implicit defaults.
+- Which parts of `infinity.raw.db` provide unique research value versus raw ZIP snapshots?
+- How are core/ITS revisions selected when archived seasons or rules editions become supported? Source-family separation must not collapse revisions.
+- Which consumers legitimately require a public API/backward-compatibility guarantee, versus internal helpers that can be replaced outright?
+- Which symbol pipeline functions truly belong in an external repository rather than the application packaging layer?
+
+Decide each with observed consumers, one brief rationale and a concrete migration task; do not create a standing architecture review ceremony.
+
+## Evidence and success criteria
+
+At the final integrated milestone, verify:
+
+- **Zero runtime-required loose structured JSON files** (while authored source JSON and static binary/text assets remain valid).
+- **`army.db`, `rules_n5.db`, and season-scoped DBs** expose clear ownership and stable cross-reference semantics.
+- **One normal offline build, one local serve, and one Docker packaging contract**; no routine candidate promotion or implicit stale-release fallback.
+- The released normal web app retains accurate source-backed rules, Army content, citations, scenario maps, navigation, accessibility and privacy characteristics.
+- Unused compatibility paths, legacy staging helpers and redundant checklists are removed, not merely wrapped.
+- Routine agent tasks require fewer mandatory process operations; focused tests run when relevant and full checks run at meaningful integration/release points.
+- Reduction in tool entrypoints and duplicated documentation is demonstrated from P1 baselines, with regressions and deliberate product changes called out separately.
+
+**Current status:** Only this plan and its documentation/backlog pointers are authorized by the planning request. All changes described in P0–P6 remain proposals until implemented and validated.

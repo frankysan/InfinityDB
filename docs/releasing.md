@@ -195,26 +195,97 @@ will actively guide later work.
 
 ## 3. Prepare release notes and metadata
 
-**Changelog entry discipline (also applies during development):** Document
-meaningful **player- or operator-visible outcomes**, not individual commits,
-test coverage, internal refactors, implementation mechanics, or bare schema
-versions. Consolidate related outcomes. For a release containing entries,
-begin with a concise `Player summary` (use `No player-facing changes.` for
-operator-only releases), followed by `Added`, `Changed` and `Fixed` as
-applicable, and `Upgrade notes` for required operator actions. Keep language
-accessible without internal development context. Empty `Unreleased` needs
-no filler; review its entries together before promotion. `docs/CHANGELOG.md`
-contains release content, not maintainer instructions, because the web
-application parses it to render **What's changed**.
+### Between releases
 
-- [ ] Cross-check `Unreleased` against substantive player/operator changes in Git
+**Project domains:** Project infrastructure, Web backend, Web frontend
+
+Once a development branch has an agreed release target, record implemented
+changes directly under a version-specific pending heading in `docs/CHANGELOG.md`:
+
+```markdown
+## [1.0.1] - Unreleased
+```
+
+- The pending heading is the maintained record of the branch's target version.
+  For example, `dev/v1.0.1` targets `1.0.1`. Confirm the agreed target when
+  starting work; do not choose a new target from the change's apparent size.
+- Keep one pending release section at the top, followed by dated release
+  history. Add meaningful implemented outcomes to that target as work lands,
+  using the writing rules below. Planned or deferred work stays in `docs/TODO.md`.
+- Use a generic `## [Unreleased]` section only while no release target has
+  been agreed. Once the target is known, rename that section to the named
+  pending heading, retaining its entries. Do not keep a parallel generic
+  bucket for changes already assigned to the target.
+- If the agreed target changes, rename the pending heading and reconcile its
+  entries with the new scope. Move unimplemented or deferred work to the
+  backlog; retain implemented changes that remain in the branch. Do not
+  silently relabel dated release history.
+- Keep `Unreleased` in place of the date until release preparation. The
+  browser presents the target as, for example, **Version 1.0.1 — Unreleased**,
+  without a release date. Naming the target does not change the package
+  version, establish a release date, or imply CI, tagging or deployment acceptance.
+- At release preparation, replace `Unreleased` with the agreed release date
+  and apply the version/metadata checklist below. After release, start a
+  pending section for the next agreed target when its first meaningful
+  implemented change lands; use the generic fallback if that target is unknown.
+
+Empty pending sections need no filler and are omitted from the browser page.
+Historical generic `Unreleased` headings remain supported for compatibility.
+
+### Writing release notes
+
+**Changelog entry discipline (also applies during development):** Introduce
+the features and changes implemented in each release, with the **end-user
+perspective first and the developer/maintainer perspective second**. The
+v1.0.0 entry in `docs/CHANGELOG.md` is the style example for future entries.
+
+- Write in **past tense**, including the Player summary and implemented
+  changes in pending release sections: “Added the ability to …”, “Expanded …”,
+  “Clarified the use of …” or “Corrected …”. Describe what changed; avoid
+  imperative browsing instructions or a general present-tense feature guide.
+  Planned work belongs in the backlog, not the changelog.
+- Lead with the capability, correction or practical effect for players or
+  operators. Name the affected feature and explain what was added, changed
+  or fixed in language accessible without internal development context.
+  Retain canonical project-domain labels, but keep implementation mechanics
+  out of the player-facing explanation.
+- Begin with a concise `Player summary` containing only player-visible or
+  player-useful outcomes (use `No player-facing changes.` for operator-only
+  releases). Follow with `Added`, `Changed` and `Fixed` as applicable, then
+  `Upgrade notes` for operator requirements. Keep the summary brief without
+  imposing that brevity on the detailed entries.
+- Preserve enough detail to introduce each meaningful feature or correction:
+  concrete capabilities, choices, representative examples, important
+  conditions, scope limits and unresolved source disagreements. Keep distinct
+  features identifiable rather than collapsing them into vague claims such
+  as “Expanded rules references” or “Improved usability”.
+- Consolidate overlapping entries and remove repetition while retaining
+  useful information. Omit commit-by-commit history, test counts, internal
+  refactors, audit bookkeeping and bare schema versions. Include technical
+  detail when it explains a user/operator consequence, such as an upgrade
+  requirement or compatibility limit; place that detail after player outcomes.
+
+Review the pending release's entries together before finalization.
+`docs/CHANGELOG.md` contains release content, not maintainer
+instructions, because the web application parses it to render **What's changed**.
+
+### Finalize release notes and metadata
+
+- [ ] Confirm the pending heading names the agreed target version.
+- [ ] Cross-check the pending release against substantive player/operator changes in Git
   history since the previous release and the last changelog update. Restore
   missing outcomes, but do not turn commits, tests or internal refactors into
   individual release-note entries.
-- [ ] Review the complete `Unreleased` section of `docs/CHANGELOG.md` as one release:
-  make its `Player summary` concise and player-visible only, merge overlapping detailed entries,
-  remove implementation-only detail, and make upgrade consequences explicit.
-- [ ] Move the finalized entries to a section for the target version and release date.
+- [ ] Review the complete pending section of `docs/CHANGELOG.md` as one release:
+  use past tense and an end-user-first perspective, keep its `Player summary`
+  concise and player-visible only, and retain concrete feature and correction
+  detail below it. Merge overlapping entries, remove implementation-only
+  detail, and make upgrade consequences explicit.
+- [ ] When substantially rewriting or consolidating existing notes, compare
+  against the pre-rewrite version in Git history. Verify that distinct
+  capabilities, meaningful fixes, examples and important qualifications
+  survived the rewrite; restore useful detail lost through over-compression.
+- [ ] Replace the target section's `Unreleased` status with the agreed release date.
 - [ ] Update the package/application version consistently in `pyproject.toml` and
   `src/infinity_army_data/__init__.py`.
 - [ ] Update the current-release statement in `README.md`.
@@ -238,8 +309,13 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
   records, citations, source metadata and 48 topic associations to
   match a fresh curated export. A stale tracked binary blocks release,
   even when source and browser tests using fresh exports pass.
-- [ ] After rebuilding either database, regenerate and `--check` the
-  pinned `data/generated/deployed-objects.json` with
+- [ ] After rebuilding either database, follow the schema-specific
+  [matched-artifact workflow](deployment.md#normal-updates-from-081-onward).
+  For v10, verify embedded deployed objects and use
+  `tools.build_v10_runtime_candidate --check` for the source-matched
+  candidate; tracked promotion is a separate explicit operation.
+  Only legacy v8/v9 releases generate and `--check` the pinned
+  `data/generated/deployed-objects.json` with
   `tools.build_deployed_object_publication`. Regenerate the tracked
   `data/generated/variant-usage.json` with `tools.build_variant_usage --publish`
   from the matched raw Army archive, then run `--check-publication` before

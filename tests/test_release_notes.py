@@ -13,12 +13,15 @@ from infinity_db.web.release_notes import (
 
 
 def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
-    releases = load_release_notes()
+    all_releases = load_release_notes()
+    assert all_releases[0].version == "1.0.1"
+    assert all_releases[0].released_on is None
+    releases = tuple(release for release in all_releases if release.released_on is not None)
 
     assert releases[0].version == "1.0.0"
     assert releases[0].released_on == date(2026, 11, 7)
     assert releases[0].sections[0].heading == "Player summary"
-    assert any("Browse current N5.3 rules" in item for item in releases[0].player_summary)
+    assert any("Expanded the N5.3 reference" in item for item in releases[0].player_summary)
     assert [section.heading for section in releases[0].detail_sections] == [
         "Added", "Changed", "Fixed", "Upgrade notes",
     ]
@@ -55,7 +58,70 @@ def test_release_notes_accepts_both_unreleased_headings(heading: str) -> None:
     assert releases[0].player_summary == ("Upcoming change.",)
 
 
-@pytest.mark.parametrize("heading", ["## Unreleased", "## [Unreleased]"])
+def test_named_pending_release_retains_version_and_finalizes_without_changing_content() -> None:
+    markdown = (
+        "# Changelog\n\n## [1.0.1] - Unreleased\n\n"
+        "### Player summary\n\n- Added saveable scenario maps.\n\n"
+        "### Fixed\n\n- Restored local builds.\n\n"
+        "## [1.0.0] - 2026-11-07\n\n### Player summary\n\n- Earlier release.\n"
+    )
+    pending, previous = parse_release_notes(markdown)
+    assert pending.version == pending.label == "1.0.1"
+    assert pending.released_on is None
+    assert previous.released_on == date(2026, 11, 7)
+    rendered = render_release_notes_html((pending,))
+    assert 'id="changes-1-0-1"' in rendered
+    assert "<h2>Version 1.0.1</h2>" in rendered
+    assert '<span class="changes-release-date">Unreleased</span>' in rendered
+    assert 'class="surface changes-release changes-release--unreleased"' in rendered
+    assert "<time" not in rendered
+
+    finalized, unchanged_previous = parse_release_notes(
+        markdown.replace("[1.0.1] - Unreleased", "[1.0.1] - 2026-11-10")
+    )
+    assert finalized.sections == pending.sections
+    assert finalized.version == pending.version
+    assert finalized.released_on == date(2026, 11, 10)
+    assert unchanged_previous == previous
+    finalized_html = render_release_notes_html((finalized,))
+    assert 'id="changes-1-0-1"' in finalized_html
+    assert 'datetime="2026-11-10"' in finalized_html
+    assert "changes-release--unreleased" not in finalized_html
+
+
+@pytest.mark.parametrize(
+    "first, second",
+    [
+        ("## [1.0.0] - 2026-11-07", "## [1.0.1] - Unreleased"),
+        ("## [Unreleased]", "## [1.0.1] - Unreleased"),
+        ("## [1.0.1] - Unreleased", "## [1.0.2] - Unreleased"),
+        ("## [1.0.1] - Unreleased", "## [Unreleased]"),
+    ],
+)
+def test_pending_release_is_the_only_pending_heading_and_comes_first(
+    first: str, second: str,
+) -> None:
+    with pytest.raises(ReleaseNotesError, match="must be the first release heading"):
+        parse_release_notes(
+            f"# Changelog\n\n{first}\n\n### Player summary\n\n- First change.\n\n"
+            f"{second}\n\n### Player summary\n\n- Second change.\n"
+        )
+
+
+@pytest.mark.parametrize("heading", ["## [Unreleased]", "## [1.0.1] - Unreleased"])
+def test_pending_operator_changes_remain_visible(heading: str) -> None:
+    releases = parse_release_notes(
+        f"# Changelog\n\n{heading}\n\n"
+        "### Player summary\n\n- No player-facing changes.\n\n"
+        "### Changed\n\n- **Deployment:** Updated operator instructions.\n"
+    )
+    assert len(releases) == 1
+    assert "Updated operator instructions." in render_release_notes_html(releases)
+
+
+@pytest.mark.parametrize(
+    "heading", ["## Unreleased", "## [Unreleased]", "## [1.0.1] - Unreleased"],
+)
 @pytest.mark.parametrize(
     "empty_content",
     ["", "\n### Player summary\n", "\n### Player summary\n\n- No player-facing changes.\n"],
@@ -77,7 +143,9 @@ def test_empty_unreleased_is_omitted_from_release_history(
     assert "Historical update." in rendered
 
 
-@pytest.mark.parametrize("heading", ["## Unreleased", "## [Unreleased]"])
+@pytest.mark.parametrize(
+    "heading", ["## Unreleased", "## [Unreleased]", "## [1.0.1] - Unreleased"],
+)
 def test_changelog_with_only_empty_unreleased_has_no_rendered_releases(
     heading: str,
 ) -> None:

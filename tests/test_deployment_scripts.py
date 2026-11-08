@@ -17,6 +17,76 @@ def _read(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
+def test_v10_preview_requires_linux_engine_before_staging(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from types import SimpleNamespace
+
+    from tools import preview_runtime_image
+
+    stage = tmp_path / "candidate"
+    stage.mkdir()
+    monkeypatch.setattr(preview_runtime_image.shutil, "which", lambda _name: "docker")
+    monkeypatch.setattr(
+        preview_runtime_image.subprocess, "run",
+        lambda *_args, **_kwargs: SimpleNamespace(returncode=1),
+    )
+    monkeypatch.setattr(
+        preview_runtime_image, "prepare_bundle",
+        lambda *_args: pytest.fail("Must not change image bundle without Docker"),
+    )
+    with pytest.raises(ValueError, match="Docker Desktop Linux engine is unavailable"):
+        preview_runtime_image.preview_image(stage, "infinity-db:v10-preview-test")
+
+
+def test_v10_preview_waits_for_health_then_checks_http_without_published_ports(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from types import SimpleNamespace
+
+    from tools import preview_runtime_image
+
+    stage = tmp_path / "candidate"
+    stage.mkdir()
+    calls: list[tuple[str, ...]] = []
+    bundles: list[tuple[Path, Path]] = []
+    probes = 0
+
+    def fake_run(
+        args: list[str] | tuple[str, ...], **_kwargs: object,
+    ) -> SimpleNamespace:
+        nonlocal probes
+        command = tuple(args)
+        calls.append(command)
+        if command[:3] == ("docker", "exec", "infinitydb-v10-preview-check"):
+            if command[-1] == preview_runtime_image._HEALTH_PROBE:
+                probes += 1
+                return SimpleNamespace(returncode=1 if probes == 1 else 0)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(preview_runtime_image.shutil, "which", lambda _name: "docker")
+    monkeypatch.setattr(preview_runtime_image.subprocess, "run", fake_run)
+    monkeypatch.setattr(preview_runtime_image.time, "sleep", lambda _seconds: None)
+    monkeypatch.setattr(
+        preview_runtime_image, "prepare_bundle",
+        lambda source, output: bundles.append((source, output)),
+    )
+    preview_runtime_image.preview_image(stage, "infinity-db:v10-preview-test")
+
+    run = next(call for call in calls if call[:3] == ("docker", "run", "-d"))
+    assert "--network" not in run
+    assert "-p" not in run and "--publish" not in run
+    assert "--read-only" in run
+    assert probes == 2
+    assert sum(call[-1] == preview_runtime_image._HTTP_VERIFY for call in calls) == 1
+    assert calls[-2][:2] == ("docker", "stop")
+    assert calls[-1][:3] == ("docker", "image", "rm")
+    assert bundles == [
+        (stage, preview_runtime_image.DEFAULT_OUTPUT),
+        (preview_runtime_image.DEFAULT_SOURCE, preview_runtime_image.DEFAULT_OUTPUT),
+    ]
+
+
 def test_compose_supports_explicit_bind_address_and_host_port() -> None:
     compose = _read("compose.yaml")
     assert "${BIND_ADDRESS:-0.0.0.0}:${HTTP_PORT:-80}:80" in compose
@@ -43,10 +113,26 @@ def test_metrics_history_service_is_immutable_private_and_volume_backed() -> Non
     assert "condition: service_healthy" in metrics_service
 
     assert "FROM python:3.11-slim" in dockerfile
-    assert "COPY tools/metrics_history.py /app/metrics_history.py" in dockerfile
+    assert "tools/metrics_history.py /app/metrics_history.py" in dockerfile
     assert "USER metrics" in dockerfile
     assert "ENTRYPOINT" in dockerfile
     assert 'CMD ["run"]' in dockerfile
+
+
+def test_installer_config_umask_does_not_leak_into_release_checkout() -> None:
+    script = _read("scripts/install-or-update.sh")
+    settings = script.split("Save these settings to", 1)[1].split(
+        "prepare_tracked_release_file()", 1,
+    )[0]
+    assert "    (\n      umask 077\n" in settings
+    assert 'chmod 600 "$config_file"' in settings
+    assert '    )\n    echo "Saved deployment settings' in settings
+
+
+def test_fingerprinted_svg_assets_are_byte_exact() -> None:
+    attributes = _read(".gitattributes")
+    assert "src/infinity_db/web/static/*.svg -text" in attributes
+    assert "src/infinity_db/web/static/silhouettes/*.svg -text" in attributes
 
 
 def test_deploy_brackets_app_replacement_with_noncritical_metrics_history_scrapes() -> None:
@@ -99,6 +185,19 @@ def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     assert "data/generated/rules.db binary" in attributes
 
 
+def test_checkout_builds_never_enter_immutable_docker_release_context() -> None:
+    dockerignore = _read(".dockerignore")
+    dockerfile = _read("Dockerfile")
+    prepare = _read("tools/prepare_runtime_bundle.py")
+    deploy = _read("scripts/deploy.sh")
+
+    assert "local/" in dockerignore
+    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
+    assert 'DEFAULT_SOURCE = ROOT / "data/generated"' in prepare
+    assert '"$python" -m tools.prepare_runtime_bundle' in deploy
+    assert "checkout-runtime" not in deploy
+
+
 def test_deployed_object_publication_is_generated_and_verified_for_each_release_image() -> None:
     dockerfile = _read("Dockerfile")
     dockerignore = _read(".dockerignore")
@@ -109,18 +208,13 @@ def test_deployed_object_publication_is_generated_and_verified_for_each_release_
 
     assert "data/generated/*" in gitignore
     assert "!data/generated/deployed-objects.json" not in gitignore
-    assert "!data/generated/deployed-objects.json" in dockerignore
-    assert (
-        "COPY --chown=appuser:appuser data/generated/deployed-objects.json "
-        "/app/data/deployed-objects.json"
-    ) in dockerfile
-    build = '"$python" -m tools.build_deployed_object_publication'
-    assert deploy.index(build + "\n") < deploy.index(build + " --check")
-    assert deploy.index(build + " --check") < deploy.index("docker compose build")
-    ci_build = "PYTHONPATH=src python -m tools.build_deployed_object_publication"
-    assert workflow.index(ci_build + "\n") < workflow.index(ci_build + " --check")
-    assert workflow.index(ci_build + " --check") < workflow.index("docker build")
-    assert '{"infinity.db", "rules.db", "deployed-objects.json"}' in smoke
+    assert "!data/generated/deployed-objects.json" not in dockerignore
+    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
+    assert "tools.prepare_runtime_bundle" in deploy
+    assert deploy.index("tools.prepare_runtime_bundle") < deploy.index("docker compose build")
+    assert "tools.build_deployed_object_publication --check" in workflow
+    assert workflow.index("tools.prepare_runtime_bundle") < workflow.index("docker build")
+    assert 'expected_files.add("deployed-objects.json")' in smoke
     assert "load_deployed_object_publication(" in smoke
     assert '/api/deployed-objects' in smoke
     assert 'http://127.0.0.1:8000/deployed-objects' in smoke
@@ -138,11 +232,8 @@ def test_variant_usage_publication_is_byte_exact_and_packaged_for_v9_release() -
 
     assert "!data/generated/variant-usage.json" in gitignore
     assert "data/generated/variant-usage.json binary" in attributes
-    assert "!data/generated/variant-usage.json" in dockerignore
-    assert (
-        "COPY --chown=appuser:appuser data/generated/variant-usage.json "
-        "/app/data/variant-usage.json"
-    ) in dockerfile
+    assert "data/generated/*" in dockerignore
+    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
     assert (ROOT / "data/generated/variant-usage.json").is_file()
     assert "tools.build_variant_usage --publish" not in deploy
     assert "tools.build_deployed_object_publication --check" in deploy
@@ -167,11 +258,8 @@ def test_weapon_profile_citations_are_release_paired_and_packaged() -> None:
 
     assert "!data/generated/weapon-profile-sources.json" in gitignore
     assert "data/generated/weapon-profile-sources.json binary" in attributes
-    assert "!data/generated/weapon-profile-sources.json" in dockerignore
-    assert (
-        "COPY --chown=appuser:appuser data/generated/weapon-profile-sources.json "
-        "/app/data/weapon-profile-sources.json"
-    ) in dockerfile
+    assert "data/generated/*" in dockerignore
+    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
     assert (ROOT / "data/generated/weapon-profile-sources.json").is_file()
     assert 'expected_files.add("weapon-profile-sources.json")' in smoke
     assert "load_weapon_profile_publication(" in smoke
@@ -315,7 +403,9 @@ def test_container_build_packages_canonical_changelog() -> None:
     assert documentation == ["docs/CHANGELOG.md"]
 
 
-@pytest.mark.parametrize("heading", ["## Unreleased", "## [0.10.0] - 2026-10-07"])
+@pytest.mark.parametrize(
+    "heading", ["## Unreleased", "## [1.0.1] - Unreleased", "## [0.10.0] - 2026-10-07"],
+)
 @pytest.mark.parametrize("matching_content", [True, False])
 @pytest.mark.parametrize("restrictions_version", [8, 9])
 def test_container_smoke_validates_canonical_notes_in_both_release_states(
@@ -468,7 +558,7 @@ def test_deployment_smoke_builds_and_exercises_v8_rollback_image() -> None:
     workflow = _read(".github/workflows/deployment-smoke.yml")
     expected_order = (
         "sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets",
-        "python -m infinity_db build-rules --output local/restrictions-v8-ci/rules.db",
+        "python -m infinity_db build-rules --legacy-v8 --output local/restrictions-v8-ci/rules.db",
         (
             "python -m tools.build_deployed_object_publication "
             "--rules-db local/restrictions-v8-ci/rules.db "
@@ -495,18 +585,26 @@ def test_deployment_smoke_builds_and_exercises_v8_rollback_image() -> None:
     assert "data/generated/deployed-objects.json /app/data/deployed-objects.json" not in workflow
 
 
-def test_source_ci_builds_ignored_release_publication_before_tests() -> None:
-    workflow = _read(".github/workflows/source-checks.yml")
-    source_checkout = workflow.split("- name: Check out source", 1)[1].split(
+def test_source_and_cross_browser_ci_prepare_only_legacy_deployed_json() -> None:
+    source = _read(".github/workflows/source-checks.yml")
+    browser = _read(".github/workflows/cross-browser-compatibility.yml")
+    source_checkout = source.split("- name: Check out source", 1)[1].split(
         "- name: Set up Python", 1
     )[0]
     # Frozen reference-evidence tests use git show against pinned older commits.
     assert "fetch-depth: 0" in source_checkout
-    generate = workflow.index("python -m tools.build_deployed_object_publication")
-    verify = workflow.index("python -m tools.build_deployed_object_publication --check")
-    source_checks = workflow.index("- name: Run source checks")
-    assert generate < verify < source_checks
-    assert "python tools/run_checks.py" in workflow
+    for workflow in (source, browser):
+        assert "python -m tools.build_deployed_object_publication --when-legacy" in workflow
+        assert (
+            "python -m tools.build_deployed_object_publication --check --when-legacy"
+            in workflow
+        )
+    generate = source.index("python -m tools.build_deployed_object_publication --when-legacy")
+    verify = source.index(
+        "python -m tools.build_deployed_object_publication --check --when-legacy"
+    )
+    assert generate < verify < source.index("- name: Run source checks")
+    assert "python tools/run_checks.py" in source
 
 
 def test_source_ci_matrix_time_budgets_include_isolated_preflight() -> None:

@@ -30,6 +30,9 @@ docs/audits/
 # User-specific agent preferences
 /AGENTS.local.md
 
+# Transient, schema-selected runtime image bundle
+data/runtime/
+
 # Raw and generated Infinity data
 data/raw/*
 !data/raw/.gitkeep

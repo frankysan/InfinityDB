@@ -16,7 +16,6 @@ from contextlib import closing
 from pathlib import Path
 
 from infinity_db.curated import load_curated_directory
-from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.variant_usage import build_variant_usage_projection
 from infinity_db.variant_usage_reference import publication_from_candidate
@@ -30,7 +29,7 @@ from tools.promote_aro_deployment_reference import (
     ROOT,
     RULES,
 )
-from tools.release_rules_export import export_release_rules
+from tools.release_rules_export import export_release_rules, load_release_deployed_objects
 from tools.restrictions_v9_release import _replace_with_rollback
 
 RAW = Path("data/generated/infinity.raw.db")
@@ -104,7 +103,7 @@ def verify_candidate(*, root: Path = ROOT, promote: bool = False) -> dict:
     original = RulesDatabase(root / RULES)
     original.validate()
     old_ids = identities(root / RULES)
-    old_objects = load_deployed_object_publication(root / OBJECTS, root / ARMY, root / RULES)
+    old_objects = load_release_deployed_objects(root / OBJECTS, root / ARMY, root / RULES)
     if old_objects is None:
         raise ValueError("Existing deployed-object publication is not matched")
     old_usage = json.loads(baseline[USAGE])
@@ -184,7 +183,7 @@ def verify_candidate(*, root: Path = ROOT, promote: bool = False) -> dict:
             current.validate()
             if current.composed_record(RECORD_ID) != after:
                 raise ValueError("Promoted Hackable record mismatch")
-            if load_deployed_object_publication(
+            if load_release_deployed_objects(
                 root / OBJECTS, root / ARMY, root / RULES,
             ) != projected:
                 raise ValueError("Promoted deployed-object publication mismatch")

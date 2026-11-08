@@ -19,6 +19,7 @@ from tools.audit_hacking_device_program_source_chart import (
     PROGRAMS,
     audit_device_program_chart,
 )
+from tools.release_rules_export import release_deployed_object_bytes
 from tools.stage_hacking_device_chart_citations import (
     ARMY,
     PUBLICATION,
@@ -79,7 +80,8 @@ def test_staging_builds_paired_binaries_without_touching_checkout(
         pytest.skip("Four citations already promoted")
     tracked_rules_db = CURATED.parents[2] / "generated/rules.db"
     inputs = (CURATED, tracked_rules_db, PUBLICATION)
-    before = [path.read_bytes() for path in inputs]
+    before = [path.read_bytes() if path.is_file() else None for path in inputs]
+    assert before[0] is not None
     stage = tmp_path / "hacking-stage"
     report = stage_hacking_device_chart_citations(
         stage, pdf_path=PDF if PDF.exists() else None,
@@ -113,12 +115,12 @@ def test_staging_builds_paired_binaries_without_touching_checkout(
         ).fetchone()
     assert count == (4,)
     published = json.loads((stage / STAGED_PATHS[2]).read_text(encoding="utf-8"))
-    original_published = json.loads(before[2])
+    original_published = json.loads(release_deployed_object_bytes(PUBLICATION))
     assert published["objects"] == original_published["objects"]
     assert published["sourceSnapshot"]["rulesDatabaseSha256"] == (
         report["stagedSha256"]["rulesDatabase"]
     )
-    assert [path.read_bytes() for path in inputs] == before
+    assert [path.read_bytes() if path.is_file() else None for path in inputs] == before
     assert (stage / "staging-report.json").is_file()
     with pytest.raises(FileExistsError, match="Refusing to overwrite"):
         stage_hacking_device_chart_citations(stage)
@@ -129,7 +131,7 @@ def test_promoted_citations_are_consistent_with_rules_database() -> None:
     if not _is_promoted(curated):
         pytest.skip("Four citations not yet promoted")
     rules_db = CURATED.parents[2] / "generated/rules.db"
-    published = json.loads(PUBLICATION.read_text(encoding="utf-8"))
+    published = json.loads(release_deployed_object_bytes(PUBLICATION).decode("utf-8"))
     assert published["sourceSnapshot"]["rulesDatabaseSha256"] == hashlib.sha256(
         rules_db.read_bytes()
     ).hexdigest()

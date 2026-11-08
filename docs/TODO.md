@@ -73,6 +73,16 @@ checks retain their separate evidence and acceptance conditions.
 These items are intentionally outside the 1.0 completeness gate. They may move earlier
 only when required to fix correctness, reproducibility, or release reliability.
 
+### Major simplification and restructuring
+
+**Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
+
+- [ ] Execute the [phased restructuring plan](restructuring-plan.md), starting with
+  simpler agent/validation rules (P0) and a dependency inventory (P1) before
+  changing the runtime data path. The plan owns step ordering, decisions and
+  exit criteria; record individual implementation work here only when actionable,
+  without copying the complete roadmap into a second task ledger.
+
 ### External source clarifications
 
 **Project domain:** Data processing
@@ -240,6 +250,26 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 ### Performance, storage, and build tooling
 
+- [ ] **Finish v10 rules-data release acceptance (post-1.0):** The matched
+  v10 artifact set was promoted to tracked `data/generated/` in development
+  on 2026-11-08. It contains 17 normalized deployed objects (one unresolved
+  delivery), 151 exact-variant groups (v2), reviewed citations for 62 Weapons,
+  and the unchanged pinned Army database. The read-only v9→v10 common-table
+  parity audit passed: only schema metadata and Battleground map annotations/
+  labels changed among existing records; seven normalized deployed-object
+  tables were added. Checkout hosting and release image packaging are
+  independently supported. The *previous tagged production release* remains
+  v9; there has been no deployment or new release tag.
+  - [ ] Obtain terminal hosted Source, Deployment, Wheel and Cross-browser
+    acceptance for the exact promoted-artifact SHA; confirm the release image
+    against the tracked four-file set. Local tracked-image build, startup,
+    provenance, deployed-object, variant and Weapon API smoke passed
+    2026-11-08, and the disposable image/container were removed.
+  - [ ] After hosted acceptance, audit and retire superseded v9 promotion
+    helpers (preserving any remaining v8/v9 compatibility consumers). Keep
+    the immutable-image release model simple: no live replacement locks,
+    in-container regeneration or multi-file runtime transaction machinery.
+
 - [ ] **Post-1.0 infrastructure research — deferred:** Continue the
   [Chromium lifecycle and concurrency investigation](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)
   as maintenance research beyond the 1.0 baseline. The v1.0 instrumentation
@@ -376,6 +406,12 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
     `its-18@2026.09.01` for historically scoped results. Extend typed
     geometry, scoring and card/classified choices only where each mission
     needs them. Unpublished missions must fail closed.
+  - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
+    season launched under N5) and ITS Season 16 Part II (the N5-compatible
+    revision), at minimum their scenario definitions and maps. Keep original
+    Season 16 N4-era content distinct from Part II; preserve exact season,
+    revision and source provenance. Consider season-specific rules and FAQ
+    coverage after the scenario baseline, without delaying Season 18.
   - [ ] Capture structured, cited scenario facts: objectives and scoring, game
     rounds/end conditions, force/point/SWC/table/deployment configuration,
     deployment map or geometry, exclusion zones, token types/diameters,

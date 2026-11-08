@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_document
+from tools.release_rules_export import release_deployed_object_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
@@ -170,7 +171,7 @@ def audit_source_files(
     pdf_path: Path | None = None,
 ) -> dict[str, Any]:
     source = curated_path.read_bytes()
-    published = publication_path.read_bytes()
+    published = release_deployed_object_bytes(publication_path)
     report = audit_terrain_scenery_boundary(
         load_curated_document(curated_path),
         json.loads(published),

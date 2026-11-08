@@ -592,6 +592,7 @@ def export_rules_database(
     *,
     finalize: bool = True,
     restrictions_manifest: dict[str, Any] | None = None,
+    deployed_objects: dict[str, Any] | None = None,
 ) -> None:
     """Atomically replace a rules database from validated curated documents.
 
@@ -600,6 +601,8 @@ def export_rules_database(
     """
     if not documents:
         raise ValueError("No curated documents supplied")
+    if deployed_objects is not None and restrictions_manifest is None:
+        raise ValueError("Normalized deployed objects require the v9 Restrictions baseline")
     _validate_documents(documents)
     documents = [(source, compose_scenario_document(document)) for source, document in documents]
     path = Path(path)
@@ -628,7 +631,7 @@ def export_rules_database(
                     [(key, _json_text(value)) for key, value in metadata.items()],
                 )
                 if restrictions_manifest is not None:
-                    # Explicit opt-in: legacy builds keep byte-identical schema v8.
+                    # Legacy standalone exports without a manifest retain schema v8.
                     from infinity_db.restriction_storage import (
                         CANDIDATE_COMPATIBILITY_VERSION,
                         CANDIDATE_SCHEMA_VERSION,
@@ -656,6 +659,26 @@ def export_rules_database(
                     connection.execute(
                         f"UPDATE {RULES_METADATA_TABLE} SET value = ? WHERE key = ?",
                         (_json_text(CANDIDATE_COMPATIBILITY_VERSION),
+                         "databaseCompatibilityVersion"),
+                    )
+                if deployed_objects is not None:
+                    from infinity_db.deployed_object_storage import (
+                        DEPLOYED_OBJECT_COMPATIBILITY_VERSION,
+                        DEPLOYED_OBJECT_SCHEMA_VERSION,
+                        stage_deployed_objects,
+                    )
+
+                    stage_deployed_objects(connection, deployed_objects)
+                    connection.execute(
+                        f"PRAGMA user_version = {DEPLOYED_OBJECT_SCHEMA_VERSION}"
+                    )
+                    connection.execute(
+                        f"UPDATE {RULES_METADATA_TABLE} SET value = ? WHERE key = ?",
+                        (_json_text(DEPLOYED_OBJECT_SCHEMA_VERSION), "formatVersion"),
+                    )
+                    connection.execute(
+                        f"UPDATE {RULES_METADATA_TABLE} SET value = ? WHERE key = ?",
+                        (_json_text(DEPLOYED_OBJECT_COMPATIBILITY_VERSION),
                          "databaseCompatibilityVersion"),
                     )
                 connection.execute("ANALYZE")
@@ -806,37 +829,57 @@ class RulesDatabase:
             if connection.execute("PRAGMA application_id").fetchone()[0] != RULES_APPLICATION_ID:
                 raise ValueError("Unsupported rules database application ID")
             schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if schema_version not in {RULES_SCHEMA_VERSION, 9}:
+            if schema_version not in {RULES_SCHEMA_VERSION, 9, 10}:
                 raise ValueError("Unsupported rules database schema; rebuild rules.db")
             metadata_rows = connection.execute(
                 f"SELECT key, value FROM {RULES_METADATA_TABLE} "
                 "WHERE key IN ('formatVersion', 'databaseCompatibilityVersion')"
             ).fetchall()
             metadata = {row["key"]: _decode_json(row["value"], None) for row in metadata_rows}
-            expected_compatibility = (
-                RULES_COMPATIBILITY_VERSION if schema_version == RULES_SCHEMA_VERSION else 11
-            )
+            expected_compatibility = {
+                8: RULES_COMPATIBILITY_VERSION, 9: 11, 10: 12,
+            }[schema_version]
             if (
                 metadata.get("databaseCompatibilityVersion") != expected_compatibility
                 or (
-                    schema_version == 9
+                    schema_version in {9, 10}
                     and metadata.get("formatVersion") != schema_version
                 )
             ):
                 raise ValueError(
                     "Rules database compatibility revision does not match this application"
                 )
-            if schema_version == 9:
+            if schema_version in {9, 10}:
                 from infinity_db.restriction_storage import validate_restriction_snapshot
 
                 try:
                     validate_restriction_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError(
-                        "Invalid v9 Restrictions snapshot: missing or damaged table"
+                        "Invalid Restrictions snapshot: missing or damaged table"
                     ) from exc
+            if schema_version == 10:
+                from infinity_db.deployed_object_storage import (
+                    validate_deployed_object_snapshot,
+                )
+
+                try:
+                    validate_deployed_object_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid v10 deployed-object snapshot") from exc
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Rules database integrity check failed")
+            if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
+                raise ValueError("Rules database contains broken foreign keys")
+
+    def deployed_objects_payload(self, army_database: Path) -> dict[str, Any] | None:
+        """Return v10 objects, or None for older external-publication schemas."""
+        from infinity_db.deployed_object_storage import read_deployed_objects
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] != 10:
+                return None
+            return read_deployed_objects(connection, army_database)
 
     def restrictions_payload(
         self, *, subject: str | None = None, record_id: str | None = None,
@@ -859,7 +902,7 @@ class RulesDatabase:
                     "items": [],
                     "evaluationSupported": False,
                 }
-            if schema != 9:
+            if schema not in {9, 10}:
                 raise ValueError("Unsupported rules database schema")
             payload = candidate_restrictions_payload(
                 connection, subject=subject, record_id=record_id,

@@ -10,7 +10,7 @@ from html import escape
 from infinity_army_data.project_resources import maintained_documentation_path
 
 _RELEASE_HEADING = re.compile(
-    r"^## \[(?P<version>[A-Za-z0-9.-]+)\] - (?P<date>\d{4}-\d{2}-\d{2})$"
+    r"^## \[(?P<version>[A-Za-z0-9.-]+)\] - (?P<date>\d{4}-\d{2}-\d{2}|Unreleased)$"
 )
 _INLINE_MARKUP = re.compile(r"`(?P<code>[^`]+)`|\*\*(?P<strong>[^*]+)\*\*")
 
@@ -82,10 +82,10 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
         nonlocal current_heading, current_sections
         if not started:
             return
-        # A new release may leave Unreleased as a bare heading or an empty
+        # A pending release may be a bare heading or have an empty
         # Player summary. Keep it in the changelog, but not on What's changed.
         if (
-            current_version is None
+            current_date is None
             and not current_sections
             and not current_items
             and current_heading in (None, "Player summary")
@@ -100,7 +100,7 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
         if any(section.heading == "Player summary" for section in current_sections[1:]):
             raise ReleaseNotesError("Release contains more than one Player summary section")
         if (
-            current_version is None
+            current_date is None
             and len(current_sections) == 1
             and current_sections[0].items == ("No player-facing changes.",)
         ):
@@ -121,15 +121,20 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
 
         release_match = _RELEASE_HEADING.fullmatch(line)
         if release_match:
+            pending = release_match.group("date") == "Unreleased"
+            if pending and started:
+                raise ReleaseNotesError("Pending release must be the first release heading")
             flush_release()
             started = True
             current_version = release_match.group("version")
-            try:
-                current_date = date.fromisoformat(release_match.group("date"))
-            except ValueError as exc:
-                raise ReleaseNotesError(
-                    f"Invalid release date on changelog line {line_number}"
-                ) from exc
+            current_date = None
+            if not pending:
+                try:
+                    current_date = date.fromisoformat(release_match.group("date"))
+                except ValueError as exc:
+                    raise ReleaseNotesError(
+                        f"Invalid release date on changelog line {line_number}"
+                    ) from exc
             continue
 
         if not started:
@@ -195,12 +200,12 @@ def render_release_notes_html(releases: tuple[ReleaseNote, ...]) -> str:
     rendered: list[str] = []
     for release in releases:
         classes = "surface changes-release"
-        if release.version is None:
+        heading = "Unreleased" if release.version is None else f"Version {release.version}"
+        if release.released_on is None:
             classes += " changes-release--unreleased"
-            date_markup = '<span class="changes-release-date">Next release</span>'
-            heading = "Unreleased"
+            status = "Next release" if release.version is None else "Unreleased"
+            date_markup = f'<span class="changes-release-date">{status}</span>'
         else:
-            assert release.released_on is not None
             date_text = (
                 f"{release.released_on:%B} {release.released_on.day}, "
                 f"{release.released_on.year}"
@@ -209,7 +214,6 @@ def render_release_notes_html(releases: tuple[ReleaseNote, ...]) -> str:
                 f'<time class="changes-release-date" '
                 f'datetime="{release.released_on.isoformat()}">{escape(date_text)}</time>'
             )
-            heading = f"Version {release.version}"
 
         summary_items = "".join(
             f"<li>{_render_inline(item)}</li>" for item in release.player_summary

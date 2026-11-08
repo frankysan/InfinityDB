@@ -5,8 +5,9 @@ Equipment, Skills, Weapons, core Scenarios, and relationships across Armies. It 
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Current release: **1.0.0** (2026-11-07). See the
-[release notes](docs/CHANGELOG.md#100---2026-11-07) for changes and upgrade
+Prepared release version: **1.0.1** (Unreleased); the last tagged release is
+**1.0.0** (2026-11-07). See the
+[release notes](docs/CHANGELOG.md#101---unreleased) for changes and upgrade
 considerations, and the [deployment guide](docs/deployment.md) for updates.
 
 ## Guiding principles
@@ -91,7 +92,9 @@ its application metrics.
   and a separately selectable ITS Season 18 Battleground pilot. Explicit
   Army Points selection, structured setup/objectives/scoring, scenario Rules
   and Skills, source-verification notes and deterministic maps all derive
-  from maintained scenario definitions. The wider ITS library remains
+  from maintained scenario definitions. Maps can be saved as standalone SVGs
+  using the browser's image context menu, with the selected theme and units.
+  The wider ITS library remains
   outside the 1.0 completeness requirement.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.
@@ -148,6 +151,10 @@ references. See the [changelog](docs/CHANGELOG.md) for the complete version
 history and the [post-1.0 backlog](docs/TODO.md#post-10--maintenance-and-product-expansion)
 for work outside this baseline.
 
+Version **1.0.1** is being prepared with improved scenario maps, reference-page
+spacing, version-specific release notes and safer local-build/deployment workflows.
+Its Rules database embeds reviewed deployed objects while retaining the reference baseline.
+
 ## Requirements and setup
 
 Requires Python 3.11 or newer. The application uses only the Python standard
@@ -163,25 +170,39 @@ Select `.venv` as the Python interpreter in VS Code.
 
 ## Quick start
 
-A normal checkout includes the runtime Army database, rules database, and processed
-graphical publication. After installing the project, start the local server directly:
+InfinityDB supports two independent runtime targets: **serving directly from a
+checkout** (local development or a trusted hosted checkout), and **immutable
+Docker deployment** for internet serving. See
+[architecture](docs/architecture.md#runtime-targets) and
+[deployment](docs/deployment.md) for the separate contracts.
+
+A clean checkout includes tracked runtime databases and processed graphics. Without
+a local rebuild, the development server uses the tracked database pair:
 
 ```powershell
 infinity-db serve
 ```
 
-Open <http://127.0.0.1:8000> on the development machine. The development server
-listens on local network interfaces by default; use the machine's LAN address
-from another device, or bind only to localhost with:
+To use the latest Army and curated Rules changes, the original development
+workflow remains supported:
 
 ```powershell
-infinity-db serve --host 127.0.0.1
+infinity-db build --compact
+infinity-db build-rules
+infinity-db serve
 ```
 
-Stop the server with `Ctrl+C`.
+The Rules build publishes a complete, ignored `local/checkout-runtime/` with
+co-located Army and v10 Rules databases, exact-variant usage and reviewed Weapon
+citations. `serve` automatically selects that **verified local build** over
+the tracked release pair; a stale/mismatched local build fails with instructions
+to rebuild instead of silently falling back. Explicit `serve --database PATH`
+bypasses automatic selection. Docker never reads this directory.
 
-To rebuild Army data from an existing immutable local snapshot, use `infinity-db build --compact`.
-Rebuilding is a development operation; it is not required to browse the tracked runtime artifacts.
+Open <http://127.0.0.1:8000> on the development machine. The development server
+listens on local network interfaces by default; use the machine's LAN address
+from another device, or bind only to localhost with
+`infinity-db serve --host 127.0.0.1`. Stop with `Ctrl+C`.
 
 ### Download a fresh Army snapshot
 
@@ -190,6 +211,7 @@ Acquisition is explicit and separate from normal builds:
 ```powershell
 python tools/download_army_json.py data/raw
 infinity-db build --compact
+infinity-db build-rules
 infinity-db serve
 ```
 
@@ -200,11 +222,26 @@ the detailed snapshot contract.
 
 ### Build the rules reference
 
-Curated rules data is built independently from Army data:
+The current rules build combines curated rule definitions with reviewed Army-derived
+deployed-object evidence, while keeping its complete reference model in rules.db:
 
 ```powershell
-infinity-db build-rules --output local/rules-standalone.db
+infinity-db build-rules
 ```
+
+The default command writes v10 Rules to `local/rules-standalone.db`
+and assembles the matching `local/checkout-runtime/` for checkout-based
+serving. It requires the paired raw Army database produced by
+`infinity-db build --compact` to publish reviewed exact-variant usage.
+Use `--output` for a **standalone Rules-only** build with no checkout
+publication, or `--legacy-v8`/`--legacy-v9` for compatibility work.
+For an independently staged, source-matched v10 candidate, run
+`python -m tools.build_v10_runtime_candidate` and repeat with `--check`.
+Use `--promote-release` to explicitly verify v9→v10 semantic parity and
+promote the three matched v10 tracked files (Rules, variant usage and Weapon
+citations). The development branch now contains this promoted v10 set;
+the previous tagged production release remains v9 until separate acceptance
+and deployment.
 
 Reference PDFs and wiki snapshots are research inputs rather than direct runtime
 inputs. Human-reviewed rules collections live under `data/curated/rules/`.
@@ -276,19 +313,22 @@ infinity-db database-health data/generated/infinity.db --require-raw
 # Validate a curated rules file
 infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 
-# Build the independent rules-reference database
-infinity-db build-rules --output local/rules-standalone.db
+# Build the complete v10 rules-reference candidate
+infinity-db build-rules
 ```
 
-`build-rules` defaults to `data/curated/rules/`. Its standard output
-remains the v8-compatible format for standalone use. The tracked
-1.0 rules release database uses the reviewed v9
-conditional Restrictions table and must be built as a coordinated
-release pair with `data/generated/deployed-objects.json`; see
-[the migration and recovery contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
-The CLI refuses to overwrite an existing v9 database with this default
-v8 export. Use the guarded v9 staging and paired-publication workflow
-to update the tracked release pair.
+`build-rules` reads `data/curated/rules/` and the reviewed Army-source
+inputs, writing a v10 candidate to `local/rules-standalone.db` by default.
+The Restrictions chart and deployed-object reviews are applied automatically.
+Use `--legacy-v8` or `--legacy-v9` for older standalone formats.
+Direct writes to the tracked release `rules.db` are disallowed.
+
+The prepared 1.0.1 release uses v10 with deployed objects embedded in `rules.db`;
+the tagged 1.0.0 release used v9 with `deployed-objects.json`. See the
+[versioned storage contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted)
+and its release work in [TODO](docs/TODO.md#performance-storage-and-build-tooling).
+A tagged immutable Docker image must receive a validated matching set of
+artifacts rather than rebuilding data at container startup.
 
 `infinity-army` and `python -m infinity_army_data` remain available for the
 JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)

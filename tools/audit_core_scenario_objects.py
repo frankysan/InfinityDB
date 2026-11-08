@@ -17,6 +17,7 @@ from infinity_db.scenario_components import ScenarioComponents
 from infinity_db.scenario_definition import parse_scenario_definition_record
 from infinity_db.scenario_geometry import MarkerElement
 from infinity_db.scenario_mission import ElementStatusComparison, ElementStatusCount
+from tools.release_rules_export import release_deployed_object_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
@@ -177,7 +178,7 @@ def audit_scenario_object_boundary(
 
 def audit_source_files(curated_path: Path, publication_path: Path) -> dict[str, Any]:
     source_bytes = curated_path.read_bytes()
-    publication_bytes = publication_path.read_bytes()
+    publication_bytes = release_deployed_object_bytes(publication_path)
     return {
         **audit_scenario_object_boundary(
             load_curated_document(curated_path),

@@ -16,7 +16,7 @@ from typing import Any
 
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
-from tools.release_rules_export import RELEASE_RULES
+from tools.release_rules_export import RELEASE_RULES, release_deployed_object_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
 ACTIVE_PUBLICATION = ROOT / "data/generated/deployed-objects.json"
@@ -46,7 +46,7 @@ def verify_staged_release_pair(
     army_db: Path = ARMY_DB,
     curated_path: Path = CURATED,
 ) -> dict[str, Any]:
-    """Fail closed on a stale baseline, mutated candidate or mismatched v8/v9 pair."""
+    """Fail closed on a stale baseline, mutated candidate or mismatched schema pair."""
     if directory.is_symlink():
         raise ValueError("Staging directory may not be a symlink")
     stage = directory.resolve(strict=True)
@@ -70,7 +70,11 @@ def verify_staged_release_pair(
         ("rulesDatabase", active_rules),
         ("deployedObjects", active_publication),
     ):
-        if sha256(source) != baseline[key]:
+        digest = (
+            hashlib.sha256(release_deployed_object_bytes(source)).hexdigest()
+            if key == "deployedObjects" else sha256(source)
+        )
+        if digest != baseline[key]:
             raise ValueError(f"Release baseline changed since staging: {key}")
     source_digest = report.get("curatedSourceSha256", report.get("sourceSha256"))
     if not isinstance(source_digest, str) or sha256(curated_path) != source_digest:
@@ -92,7 +96,7 @@ def verify_staged_release_pair(
     with closing(sqlite3.connect(staged["rulesDatabase"])) as conn:
         staged_version = conn.execute("PRAGMA user_version").fetchone()[0]
     if (
-        current_version not in (8, 9)
+        current_version not in (8, 9, 10)
         or staged_version != current_version
         or proposed.restrictions_payload() != current.restrictions_payload()
     ):

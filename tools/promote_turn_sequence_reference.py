@@ -18,11 +18,11 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory
-from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from tools.build_deployed_object_publication import build_publication, publication_bytes
 from tools.release_rules_export import (
     export_release_rules,
+    load_release_deployed_objects,
     same_logical_rules_contents,
 )
 from tools.restrictions_v9_release import _replace_with_rollback
@@ -138,7 +138,7 @@ def verify_candidate(
         )
         if completed.returncode != 0:
             raise ValueError("Tracked rules database differs from HEAD")
-    old_publication = load_deployed_object_publication(
+    old_publication = load_release_deployed_objects(
         root / OBJECTS, root / ARMY, active_rules
     )
     if old_publication is None:
@@ -148,7 +148,10 @@ def verify_candidate(
         record for _, document in docs for record in document["records"]
     ])
     curated_hash = _sha(root / CURATED)
-    old_bytes = {rel: (root / rel).read_bytes() for rel in (RULES, OBJECTS)}
+    old_bytes = {
+        rel: (root / rel).read_bytes() if (root / rel).is_file() else None
+        for rel in (RULES, OBJECTS)
+    }
     with tempfile.TemporaryDirectory(prefix="turn-sequence-v9-", dir=root / "local") as tmp:
         first, second = Path(tmp) / "one.db", Path(tmp) / "two.db"
         export_release_rules(docs, first, baseline=active_rules)
@@ -186,7 +189,10 @@ def verify_candidate(
         expected["sourceSnapshot"]["curatedSourceSha256"] = curated_hash
         if candidate_publication != expected:
             raise ValueError("Candidate changed unrelated deployed-object publication data")
-        if any((root / rel).read_bytes() != data for rel, data in old_bytes.items()):
+        if any(
+            ((root / rel).read_bytes() if (root / rel).is_file() else None) != data
+            for rel, data in old_bytes.items()
+        ):
             raise ValueError("Active release pair changed during staging")
         if curated_hash != _sha(root / CURATED):
             raise ValueError("Curated source changed during staging")
@@ -216,7 +222,7 @@ def verify_candidate(
                 saved = current.composed_record(identity)
                 if saved is None or saved["facts"] != authored["facts"]:
                     raise ValueError(f"Promoted {identity} differs from candidate")
-            if load_deployed_object_publication(
+            if load_release_deployed_objects(
                 root / OBJECTS, root / ARMY, root / RULES
             ) != candidate_publication:
                 raise ValueError("Promoted rules and deployed-object pair is unmatched")

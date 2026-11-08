@@ -5,8 +5,11 @@
 A released InfinityDB checkout is self-contained for runtime deployment. The tracked Git
 revision supplies the application, `infinity.db`, `rules.db`, exact-variant
 `variant-usage.json`, Weapon-profile `weapon-profile-sources.json`, processed SVGs
-and `symbol-publication.json`. Deployment deterministically generates the matching
-ignored `deployed-objects.json` from tracked release inputs. Raw Army/wiki/PDF/source-symbol
+and `symbol-publication.json`. Current v10 Rules embed deployed objects in
+`rules.db`; legacy v8/v9 deployment generates matching ignored
+`deployed-objects.json` from tracked release inputs. Deployment prepares the
+schema-specific image bundle as described in [deployment](deployment.md).
+Raw Army/wiki/PDF/source-symbol
 archives and terminal symbol build state are development/rebuild inputs, not server
 deployment requirements.
 

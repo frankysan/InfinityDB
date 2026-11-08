@@ -156,7 +156,10 @@ def test_variant_usage_stale_release_pair_fails_closed(
     objects = tmp_path / "deployed-objects.json"
     shutil.copyfile(DATA / "infinity.db", army)
     shutil.copyfile(DATA / "rules.db", rules)
-    shutil.copyfile(DATA / "deployed-objects.json", objects)
+    if published_pair["publication"]["formatVersion"] == 1:
+        shutil.copyfile(DATA / "deployed-objects.json", objects)
+    else:
+        assert not objects.exists()
     assert load_variant_usage_publication(publication, army, rules, objects)
     with rules.open("ab") as output:
         output.write(b"\nintentionally stale pairing\n")

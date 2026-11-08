@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY tools/metrics_history.py /app/metrics_history.py
+COPY --chmod=0644 tools/metrics_history.py /app/metrics_history.py
 
 RUN useradd --create-home --uid 10002 metrics \
     && mkdir -p /var/lib/infinitydb-metrics \

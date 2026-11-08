@@ -173,10 +173,35 @@ def test_scenario_map_typography_scales_with_table_width(
         }
     )
     root = ElementTree.fromstring(render_scenario_map_svg(geometry))
-    assert root.attrib["style"] == (
+    assert root.attrib["style"].startswith(
         f"--scenario-map-label-size:{label_size}px;"
-        f"--scenario-map-measure-size:{measure_size}px"
+        f"--scenario-map-measure-size:{measure_size}px;"
     )
+
+
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_scenario_map_saves_standalone_with_canonical_theme_palette(theme: str) -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Portable theme",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [],
+        }
+    )
+    root = ElementTree.fromstring(
+        render_scenario_map_svg(geometry, theme=theme)  # type: ignore[arg-type]
+    )
+    assert root.attrib["data-theme"] == theme
+    style = root.attrib["style"]
+    palette = (
+        Path(__file__).parents[1] / "src/infinity_db/web/static/themes" / f"{theme}.css"
+    ).read_text(encoding="utf-8")
+    entries = re.findall(r"(--color-scenario-map-[a-z-]+):\s*(#[0-9a-fA-F]{6});", palette)
+    assert len(entries) >= 10
+    for key, color in entries:
+        assert f"{key}:{color}" in style
 
 
 _CORE_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
@@ -510,3 +535,56 @@ def test_render_scenario_map_svg_fails_closed_for_unknown_marker_type() -> None:
 
     with pytest.raises(ScenarioMapRenderError, match="no canonical marker metadata"):
         render_scenario_map_svg(geometry)
+
+
+_ITS_18_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-its-season-18-2026.09.01.json"
+
+
+@pytest.mark.parametrize(
+    ("configuration_id", "deployment_depth", "sector_depth"),
+    [
+        ("150-points", 8, 4),
+        ("200-250-points", 12, 8),
+        ("300-400-points", 12, 8),
+    ],
+)
+@pytest.mark.parametrize("unit", ["in", "cm"])
+def test_battleground_map_labels_both_sides_and_measures_all_bands(
+    configuration_id: str, deployment_depth: int, sector_depth: int, unit: str
+) -> None:
+    document = load_curated_document(_ITS_18_RULES)
+    definition = scenario_definition_from_curated_document(document, "scenario:battleground")
+    geometry = next(
+        configuration.geometry
+        for configuration in definition.configurations
+        if configuration.id == configuration_id
+    )
+    root = ElementTree.fromstring(
+        render_scenario_map_svg(geometry, distance_unit=unit)  # type: ignore[arg-type]
+    )
+    namespace = "{http://www.w3.org/2000/svg}"
+    nodes = {element.attrib["id"]: element for element in root.iter() if "id" in element.attrib}
+
+    scoring = [node for node in root.iter(f"{namespace}rect") if node.get("class") == "scoring"]
+    assert len(scoring) == 3
+    assert nodes["table-center-line"].get("y1") == f"{geometry.table.height / 2:g}"
+    for label_id, expected in (
+        ("deployment-a-label", "Deployment Zone A"),
+        ("sector-near-a-label", "A: 2 OP · B: 5 OP"),
+        ("sector-center-label", "Central Sector · 3 OP"),
+        ("sector-near-b-label", "A: 5 OP · B: 2 OP"),
+        ("deployment-b-label", "Deployment Zone B"),
+    ):
+        assert nodes[label_id].text == expected
+
+    for target, depth in (
+        ("deployment-a", deployment_depth),
+        ("sector-near-a", sector_depth),
+        ("sector-center", sector_depth),
+        ("sector-near-b", sector_depth),
+        ("deployment-b", deployment_depth),
+    ):
+        group = nodes[f"{target}-depth"]
+        label = next(group.iter(f"{namespace}text"))
+        assert label.get("data-distance-inches") == str(depth)
+        assert label.text == (f"{depth}″" if unit == "in" else f"{depth * 2.5:g} cm")
