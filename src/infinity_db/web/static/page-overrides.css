@@ -1011,8 +1011,8 @@ html:not([data-developer-mode="true"])
   background: var(--color-surface-default);
 }
 
-/* SVG images are isolated; once a map is inlined, these external rules
-   replace its standalone <style> (blocked in documents by our CSP). */
+/* Compatibility styling for maps embedded inline outside the normal Scenario
+   detail view. The standard view uses a self-contained SVG via <img>. */
 svg.scenario-map .table {
   fill: var(--color-scenario-map-table);
   stroke: var(--color-scenario-map-outline);

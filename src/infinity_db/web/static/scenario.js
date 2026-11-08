@@ -111,22 +111,12 @@ function refreshScenarioDistances() {
     const height = Number(table.dataset.heightInches);
     table.textContent = `${scenarioDistance(width)} × ${scenarioDistance(height)}`;
   }
-  const map = elements.content.querySelector(".scenario-map");
-  if (!map) return;
-  if (map.localName === "img") {
-    const url = new URL(map.src);
-    url.searchParams.set("distance_unit", distanceUnit());
-    if (map.src !== url.href) map.src = url.href;
-    return;
-  }
-  map.dataset.distanceUnit = distanceUnit();
-  for (const label of map.querySelectorAll("[data-distance-inches]")) {
-    label.textContent = scenarioDistance(Number(label.dataset.distanceInches));
-  }
-  for (const label of map.querySelectorAll("[data-distance-size-inches]")) {
-    label.textContent = label.dataset.distanceSizeInches.split(",")
-      .map((dimension) => scenarioDistance(Number(dimension))).join(" × ");
-  }
+  const image = elements.content.querySelector("img.scenario-map");
+  if (!image) return;
+  const url = new URL(image.src);
+  url.searchParams.set("distance_unit", distanceUnit());
+  url.searchParams.set("theme", document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  if (image.src !== url.href) image.src = url.href;
 }
 
 function setupCard(item) {
@@ -186,6 +176,7 @@ function mapCard(item) {
   image.alt = `${item.name} deployment and scenario map for ${item.selected_army_points} Army Points`;
   const params = new URLSearchParams({
     army_points: String(item.selected_army_points), distance_unit: distanceUnit(),
+    theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
   });
   if (selectedPublication.collection) params.set("collection", selectedPublication.collection);
   if (selectedPublication.revision) params.set("revision", selectedPublication.revision);
@@ -223,26 +214,6 @@ function mapCard(item) {
     dimensions.append(title, list, note);
     figure.append(dimensions);
   }
-  // <img> SVGs cannot inherit theme variables. Inline the same-origin generated
-  // SVG, as we do for the themed logo, keeping the image as a network fallback.
-  fetch(image.src, { signal: pageController.signal })
-    .then((response) => {
-      if (!response.ok) throw new Error(`Scenario map request failed (${response.status}).`);
-      return response.text();
-    })
-    .then((markup) => {
-      if (pageController.signal.aborted || !image.isConnected) return;
-      const svg = new DOMParser().parseFromString(markup, "image/svg+xml").documentElement;
-      if (svg.namespaceURI !== "http://www.w3.org/2000/svg" || svg.localName !== "svg") return;
-      // External application CSS owns the inline map; its embedded <style>
-      // is for standalone SVG responses and is blocked by our document CSP.
-      svg.querySelector("style")?.remove();
-      svg.setAttribute("class", "scenario-map");
-      svg.setAttribute("aria-label", image.alt);
-      image.replaceWith(document.importNode(svg, true));
-      refreshScenarioDistances();
-    })
-    .catch(() => { /* Keep the standalone SVG image fallback. */ });
   return figure;
 }
 
@@ -552,6 +523,9 @@ async function initialize() {
 
 elements.points.addEventListener("change", () => choose(elements.points.value));
 window.addEventListener("distanceunitchange", refreshScenarioDistances, {
+  signal: pageController.signal,
+});
+window.addEventListener("themechange", refreshScenarioDistances, {
   signal: pageController.signal,
 });
 document.addEventListener("infinity:beforenavigation", () => {

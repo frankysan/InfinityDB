@@ -10,6 +10,17 @@ are not retroactively relabeled.
 
 ## [Unreleased]
 
+### Player summary
+
+- Save scenario maps directly as SVG images through the browser's image context menu,
+  retaining the selected Light/Dark theme, Army Points and distance units.
+
+### Changed
+
+- **Web backend + Web frontend:** Keep scenario maps as normal image elements;
+  embed the chosen theme palette in the standalone SVG and update its URL when
+  display preferences change, without client-side SVG inlining.
+
 ## [1.0.0] - 2026-11-07
 
 ### Player summary

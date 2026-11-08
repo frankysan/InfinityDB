@@ -228,9 +228,10 @@ def _scenario_army_points(
 
 def _scenario_map_options(
     query_string: str,
-) -> tuple[int, Literal["in", "cm"], str | None, str | None]:
+) -> tuple[int, Literal["in", "cm"], Literal["light", "dark"], str | None, str | None]:
     params = _validated_query_params(
-        query_string, {"army_points", "distance_unit", "collection", "revision", "cache_bust"}
+        query_string,
+        {"army_points", "distance_unit", "theme", "collection", "revision", "cache_bust"},
     )
     army_points = _integer(params, "army_points", None, 1, 10000)
     if army_points is None:
@@ -242,7 +243,14 @@ def _scenario_map_options(
         unit = "cm"
     else:
         raise ValueError("distance_unit must be in or cm")
-    return army_points, unit, *_scenario_selection(params)
+    requested_theme = params.get("theme", ["light"])[0]
+    if requested_theme == "light":
+        theme: Literal["light", "dark"] = "light"
+    elif requested_theme == "dark":
+        theme = "dark"
+    else:
+        raise ValueError("theme must be light or dark")
+    return army_points, unit, theme, *_scenario_selection(params)
 
 
 def _scenario_summary(
@@ -1141,7 +1149,7 @@ class ApiHandler:
         elif match := SCENARIO_MAP_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
-                army_points, distance_unit, collection, revision = _scenario_map_options(
+                army_points, distance_unit, theme, collection, revision = _scenario_map_options(
                     query_string
                 )
             except ValueError as exc:
@@ -1189,7 +1197,7 @@ class ApiHandler:
                         cache_control=cache_control,
                     )
                 geometry = parse_scenario_geometry(scenario["placement"]["geometry"])
-                svg = render_scenario_map_svg(geometry, distance_unit=distance_unit)
+                svg = render_scenario_map_svg(geometry, distance_unit=distance_unit, theme=theme)
                 return WebResponse(
                     body=svg.encode("utf-8"),
                     content_type="image/svg+xml; charset=utf-8",

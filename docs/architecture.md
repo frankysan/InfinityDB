@@ -176,16 +176,17 @@ Point markers retain semantic marker identity;
 known marker types resolve through canonical marker metadata, including physical diameter where that
 affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
 scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
-Renderer-only styling remains separate. Standalone SVGs use a deterministic fallback palette;
-scenario detail inlines the same-origin SVG so its semantic map-color roles inherit from the active
-InfinityDB theme. The browser applies those roles through external CSS rather than SVG `<style>`
-because the application's Content Security Policy blocks injected inline styles. Renderer typography
-scales with table width in viewBox coordinates, without changing scenario geometry. The
-map endpoint accepts `distance_unit=in|cm` for deterministic standalone labels; browser-inlined
-SVG retains canonical inch measurements in `data-distance-inches` /
-`data-distance-size-inches` and updates labels immediately on the existing in/cm preference event.
-Table dimensions use the same preference, and existing maintained-text distance tokens already
-refresh through the shared maintained-text renderer. Game geometry remains inch-based, while
+Renderer-only styling remains separate. The SVG response embeds the canonical map palette
+from the selected Light or Dark theme, so it has the same appearance as a saved standalone file;
+the map API defaults to Light for existing callers and accepts an explicit `theme=light|dark`
+parameter. Scenario pages retain the SVG as a normal `<img>` element for native browser
+Save Image As support. Theme changes update the image URL rather than inlining SVG or injecting
+styles into the page. Renderer typography scales with table width in viewBox coordinates
+without changing scenario geometry. The endpoint accepts `distance_unit=in|cm` for deterministic
+standalone labels; changing the browser's distance-unit preference also refreshes the image URL.
+The SVG retains canonical inch measurements in `data-distance-inches` /
+`data-distance-size-inches`, while table dimensions and maintained-text distance tokens
+use the same preference. Game geometry remains inch-based, while
 physical marker diameters stay in millimeters. Structured map annotations may reference semantic
 geometry to derive displayed distances and area sizes; they must not duplicate the underlying measurements.
 Geometry v1 includes rectangle dimensions/area sizes plus element-to-table-edge distances, which covers

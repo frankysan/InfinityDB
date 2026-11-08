@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import re
+from functools import lru_cache
 from html import escape
+from pathlib import Path
 from typing import Literal
 
 from .scenario_geometry import (
@@ -39,8 +42,8 @@ class ScenarioMapRenderError(ValueError):
     """Raised when valid scenario geometry cannot be represented by SVG renderer v1."""
 
 
-# The SVG works as a standalone light-map image with fallbacks, but inherits
-# semantic tokens from InfinityDB when embedded inline in the browser.
+# Standalone SVGs use the same semantic map tokens as the browser themes.
+# SVGs loaded through <img> cannot inherit the page's CSS variables.
 _STYLE_CSS = """\
 .table{fill:var(--color-scenario-map-table,#fffefa);
 stroke:var(--color-scenario-map-outline,#203b35);stroke-width:.12}
@@ -63,6 +66,20 @@ paint-order:stroke;stroke:var(--color-scenario-map-text-halo,#fffefa);stroke-wid
 .label{fill:var(--color-scenario-map-text,#203b35);
 font-family:sans-serif;font-size:var(--scenario-map-label-size,1.4px);font-weight:600}
 """
+
+
+_THEME_TOKEN_RE = re.compile(r"(--color-scenario-map-[a-z-]+):\s*(#[0-9a-fA-F]{6});")
+
+
+@lru_cache(maxsize=2)
+def _theme_style(theme: Literal["light", "dark"]) -> str:
+    """Embed canonical theme tokens so downloaded maps retain their appearance."""
+    path = Path(__file__).resolve().parent / "web" / "static" / "themes" / f"{theme}.css"
+    colors = dict(_THEME_TOKEN_RE.findall(path.read_text(encoding="utf-8")))
+    required = set(re.findall(r"--color-scenario-map-[a-z-]+", _STYLE_CSS))
+    if not required <= colors.keys():
+        raise ScenarioMapRenderError(f"incomplete {theme} scenario-map theme palette")
+    return ";".join(f"{name}:{colors[name]}" for name in sorted(required))
 
 
 def _number(value: float) -> str:
@@ -354,12 +371,15 @@ def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
 
 
 def render_scenario_map_svg(
-    geometry: ScenarioGeometry, *, distance_unit: Literal["in", "cm"] = "in"
+    geometry: ScenarioGeometry, *, distance_unit: Literal["in", "cm"] = "in",
+    theme: Literal["light", "dark"] = "light",
 ) -> str:
     """Render deterministic standalone SVG bytes from validated geometry."""
 
     if distance_unit not in {"in", "cm"}:
         raise ValueError("distance_unit must be in or cm")
+    if theme not in {"light", "dark"}:
+        raise ValueError("theme must be light or dark")
     _validate_renderer_support(geometry)
     width = _number(geometry.table.width)
     height = _number(geometry.table.height)
@@ -404,9 +424,10 @@ def render_scenario_map_svg(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
         f'role="img" aria-labelledby="map-title" data-unit="in" '
-        f'data-distance-unit="{distance_unit}" '
+        f'data-distance-unit="{distance_unit}" data-theme="{theme}" '
         f'style="--scenario-map-label-size:{_number(1.4 * text_scale)}px;'
-        f'--scenario-map-measure-size:{_number(1.1 * text_scale)}px">\n'
+        f'--scenario-map-measure-size:{_number(1.1 * text_scale)}px;'
+        f'{_theme_style(theme)}">\n'
         f'<title id="map-title">{title}</title>\n'
         f'<style>{_STYLE_CSS}</style>\n'
         f'<rect class="table" x="0" y="0" width="{width}" height="{height}"/>\n'

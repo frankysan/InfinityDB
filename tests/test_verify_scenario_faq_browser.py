@@ -8,6 +8,7 @@ import re
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
+from xml.etree import ElementTree
 
 import pytest
 
@@ -23,6 +24,29 @@ from tools.verify_unit_skill_presentation_browser import (
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-browser.test"
+
+
+def _rendered_scenario_image(page: Any) -> ElementTree.Element:
+    """The browser displays an image; inspect its downloaded, self-contained SVG."""
+    image = page.locator("img.scenario-map")
+    image.wait_for(state="visible", timeout=30000)
+    page.wait_for_function(
+        """() => {
+          const image = document.querySelector('img.scenario-map');
+          return image?.complete && image.naturalWidth > 0;
+        }""",
+        timeout=30000,
+    )
+    markup = page.evaluate(
+        """async () => {
+          const image = document.querySelector('img.scenario-map');
+          const response = await fetch(image.src);
+          if (!response.ok) throw new Error("Scenario SVG request failed");
+          return response.text();
+        }"""
+    )
+    return ElementTree.fromstring(markup)
+
 
 KNOWN_DISCLOSURES = (
     ("equipment", "hacking-device-plus", "SRC-001", ("SR-1", "no all-Programs")),
@@ -2215,7 +2239,7 @@ def test_final_frozen_scenario_browser_navigation_theme_and_size(
             """() => document.querySelector('#scenario-content')?.hidden === false
                && document.querySelector('.scenario-setup-card .scenario-facts dd')
                  ?.textContent?.trim() === '300'
-               && document.querySelector('svg.scenario-map') !== null""",
+               && document.querySelector('img.scenario-map') !== null""",
             timeout=30000,
         )
         assert page.evaluate("document.documentElement.dataset.theme") == theme
@@ -2227,10 +2251,10 @@ def test_final_frozen_scenario_browser_navigation_theme_and_size(
             """() => document.querySelector('#scenario-content')?.hidden === false
                && document.querySelector('.scenario-setup-card .scenario-facts dd')
                  ?.textContent?.trim() === '350'
-               && document.querySelector('svg.scenario-map') !== null""",
+               && document.querySelector('img.scenario-map') !== null""",
             timeout=30000,
         )
-        assert page.locator("svg.scenario-map").get_attribute("viewBox") == "0 0 48 48"
+        assert _rendered_scenario_image(page).attrib["viewBox"] == "0 0 48 48"
         assert page.locator(".scenario-citations a").count() >= 1
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= innerWidth + 1"
@@ -2324,13 +2348,13 @@ def test_final_frozen_scenario_rapid_selection_and_reload(
             """() => document.querySelector('#scenario-content')?.hidden === false
                && document.querySelector('.scenario-setup-card .scenario-facts dd')
                  ?.textContent?.trim() === '350'
-               && document.querySelector('svg.scenario-map') !== null""",
+               && document.querySelector('img.scenario-map') !== null""",
             timeout=30000,
         )
         assert page.locator(".scenario-setup-card .scenario-fact").nth(
             1
         ).locator("dd").inner_text().splitlines()[0] in {"6", "7"}
-        assert page.locator("svg.scenario-map").get_attribute("viewBox") == "0 0 48 48"
+        assert _rendered_scenario_image(page).attrib["viewBox"] == "0 0 48 48"
         page.reload(wait_until="domcontentloaded")
         page.wait_for_function(
             """() => document.querySelector('.scenario-setup-card .scenario-facts dd')
@@ -2376,7 +2400,7 @@ def test_final_frozen_scenario_detail_error_recovers(
             """() => document.querySelector('#scenario-content')?.hidden === false
                && document.querySelector('.scenario-setup-card .scenario-facts dd')
                  ?.textContent?.trim() === '300'
-               && document.querySelector('svg.scenario-map') !== null""",
+               && document.querySelector('img.scenario-map') !== null""",
             timeout=30000,
         )
         assert panel.is_hidden()
@@ -2502,14 +2526,14 @@ def test_domination_rapid_size_changes_leave_only_final_configuration(
             """() => document.querySelector('#scenario-content')?.hidden === false
               && document.querySelector('.scenario-setup-card .scenario-facts dd')
                 ?.textContent?.trim() === '350'
-              && document.querySelector('svg.scenario-map') !== null""",
+              && document.querySelector('img.scenario-map') !== null""",
             timeout=30000,
         )
         assert page.locator("#scenario-army-points").input_value() == "350"
         assert page.locator(".scenario-setup-card .scenario-fact").nth(
             1
         ).locator("dd").inner_text().splitlines()[0] == "6"
-        assert page.locator("svg.scenario-map").get_attribute("viewBox") == (
+        assert _rendered_scenario_image(page).attrib["viewBox"] == (
             "0 0 48 48"
         )
         assert page.locator("#scenario-source-issue-350-point-swc").is_visible()
@@ -2557,7 +2581,7 @@ def test_core_scenario_detail_error_recovers_after_valid_size_choice(
             timeout=30000,
         )
         assert panel.is_hidden()
-        page.locator("svg.scenario-map").wait_for(state="visible", timeout=30000)
+        page.locator("img.scenario-map").wait_for(state="visible", timeout=30000)
         assert not errors, errors
     finally:
         page.close()
@@ -2650,7 +2674,7 @@ def test_all_24_core_scenario_setups_render_source_backed_browser_contract(
                   document.querySelector('#scenario-content')?.hidden === false
                   && document.querySelector('.scenario-setup-card .scenario-facts dd')
                     ?.textContent?.trim() === String(points)
-                  && document.querySelector('svg.scenario-map') !== null""",
+                  && document.querySelector('img.scenario-map') !== null""",
                 arg=points,
                 timeout=30000,
             )
@@ -2664,9 +2688,9 @@ def test_all_24_core_scenario_setups_render_source_backed_browser_contract(
             if has_minimum:
                 assert setup.nth(3).locator("dd").inner_text() == str(minimum)
 
-            svg = page.locator("svg.scenario-map")
-            assert svg.get_attribute("viewBox") == f"0 0 {table_width} {table_height}"
-            assert svg.locator("rect.table").count() == 1
+            svg = _rendered_scenario_image(page)
+            assert svg.attrib["viewBox"] == f"0 0 {table_width} {table_height}"
+            assert len(svg.findall("{http://www.w3.org/2000/svg}rect[@class='table']")) == 1
             assert page.locator(".scenario-objective").count() == objective_count
             assert page.locator(".scenario-rules .detail-section").count() == rule_count
             assert page.locator(".scenario-citations a").count() >= 1
@@ -3360,6 +3384,61 @@ def test_core_scenario_marker_sizes_are_visible_and_physically_fixed(
 
 
 @pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_scenario_map_is_saveable_image_and_tracks_theme_and_units(
+    scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}');")
+    try:
+        page.goto(f"{ORIGIN}/scenarios/battleground?collection=its-18&revision=2026.09.01&army_points=300",
+                  wait_until="domcontentloaded")
+        # A normal image element enables the browser's native Save Image As action.
+        image = page.locator("img.scenario-map")
+        svg = _rendered_scenario_image(page)
+        assert page.locator("svg.scenario-map").count() == 0
+        assert image.get_attribute("alt")
+        assert "theme=" + theme in image.get_attribute("src")
+        assert svg.attrib["data-theme"] == theme
+        assert svg.attrib["viewBox"] == "0 0 48 48"
+        assert "collection=its-18" in image.get_attribute("src")
+
+        next_theme = "light" if theme == "dark" else "dark"
+        page.evaluate(
+            """(theme) => {
+              const select = document.querySelector("#theme-selector");
+              select.value = theme;
+              select.dispatchEvent(new Event("change", { bubbles: true }));
+            }""",
+            next_theme,
+        )
+        page.wait_for_function(
+            "(theme) => document.querySelector('img.scenario-map')?.src.includes('theme=' + theme)",
+            arg=next_theme, timeout=30000,
+        )
+        svg = _rendered_scenario_image(page)
+        assert svg.attrib["data-theme"] == next_theme
+
+        page.evaluate(
+            """() => {
+              const toggle = document.querySelector("#distance-unit-toggle");
+              toggle.checked = false;
+              toggle.dispatchEvent(new Event("change", { bubbles: true }));
+            }"""
+        )
+        page.wait_for_function(
+            "() => document.querySelector('img.scenario-map')?.src.includes('distance_unit=cm')",
+            timeout=30000,
+        )
+        svg = _rendered_scenario_image(page)
+        assert svg.attrib["data-distance-unit"] == "cm"
+        assert svg.attrib["data-theme"] == next_theme
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
 def test_domination_embedded_map_emphasizes_console_center_placement(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:
@@ -3373,12 +3452,15 @@ def test_domination_embedded_map_emphasizes_console_center_placement(
                 f"{ORIGIN}/scenarios/domination?army_points={points}",
                 wait_until="domcontentloaded",
             )
-            svg = page.locator("svg.scenario-map")
-            svg.wait_for(state="visible", timeout=60000)
-            guides = svg.locator("g.center-measurement")
-            assert guides.count() == 8
-            assert svg.locator('rect.scoring').count() == 4
-            assert svg.locator('text.area-size[data-target^="quadrant-"]').count() == 0
+            svg = _rendered_scenario_image(page)
+            namespace = "{http://www.w3.org/2000/svg}"
+            guides = svg.findall(f".//{namespace}g[@class='center-measurement']")
+            assert len(guides) == 8
+            assert len(svg.findall(f".//{namespace}rect[@class='scoring']")) == 4
+            assert not any(
+                node.attrib.get("data-target", "").startswith("quadrant-")
+                for node in svg.findall(f".//{namespace}text[@class='area-size']")
+            )
             note = page.locator(".scenario-map-placement-note")
             assert note.is_visible()
             assert "each Console center" in note.inner_text()
@@ -3393,14 +3475,17 @@ def test_domination_embedded_map_emphasizes_console_center_placement(
                     }""",
                     unit,
                 )
+                svg = _rendered_scenario_image(page)
                 for edge, inches in (("left", horizontal), ("top", vertical)):
-                    group = svg.locator(
-                        f'#console-q1-center-{edge}'
+                    group = next(
+                        node for node in svg.iter(f"{namespace}g")
+                        if node.attrib.get("id") == f"console-q1-center-{edge}"
                     )
-                    assert group.get_attribute("data-reference") == "center"
-                    label = group.locator("text.dimension-label")
-                    assert label.get_attribute("data-distance-inches") == str(inches)
-                    assert label.text_content() == f"{inches * scale:g}{suffix}"
+                    assert group.attrib["data-reference"] == "center"
+                    label = group.find(f"{namespace}text[@class='dimension-label']")
+                    assert label is not None
+                    assert label.attrib["data-distance-inches"] == str(inches)
+                    assert label.text == f"{inches * scale:g}{suffix}"
                 assert page.evaluate(
                     "() => document.documentElement.scrollWidth <= innerWidth + 1"
                 ), (width, points, unit)

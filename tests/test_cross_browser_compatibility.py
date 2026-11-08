@@ -129,14 +129,14 @@ def _exercise(page: Any, origin: str, journey: str) -> None:
             """() => document.querySelector('#scenario-content')?.hidden === false
             && document.querySelector('.scenario-setup-card .scenario-facts dd')
                ?.textContent?.trim() === '150'
-            && document.querySelector('svg.scenario-map') !== null"""
+            && document.querySelector('img.scenario-map') !== null"""
         )
         select.select_option("350")
         page.wait_for_function(
             """() => document.querySelector('#scenario-content')?.hidden === false
             && document.querySelector('.scenario-setup-card .scenario-facts dd')
                ?.textContent?.trim() === '350'
-            && document.querySelector('svg.scenario-map') !== null"""
+            && document.querySelector('img.scenario-map') !== null"""
         )
         assert page.locator(".scenario-citations a").count() >= 1
         assert page.locator(".scenario-source-issue").count() == 1

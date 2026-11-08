@@ -173,10 +173,35 @@ def test_scenario_map_typography_scales_with_table_width(
         }
     )
     root = ElementTree.fromstring(render_scenario_map_svg(geometry))
-    assert root.attrib["style"] == (
+    assert root.attrib["style"].startswith(
         f"--scenario-map-label-size:{label_size}px;"
-        f"--scenario-map-measure-size:{measure_size}px"
+        f"--scenario-map-measure-size:{measure_size}px;"
     )
+
+
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_scenario_map_saves_standalone_with_canonical_theme_palette(theme: str) -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Portable theme",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [],
+        }
+    )
+    root = ElementTree.fromstring(
+        render_scenario_map_svg(geometry, theme=theme)  # type: ignore[arg-type]
+    )
+    assert root.attrib["data-theme"] == theme
+    style = root.attrib["style"]
+    palette = (
+        Path(__file__).parents[1] / "src/infinity_db/web/static/themes" / f"{theme}.css"
+    ).read_text(encoding="utf-8")
+    entries = re.findall(r"(--color-scenario-map-[a-z-]+):\s*(#[0-9a-fA-F]{6});", palette)
+    assert len(entries) >= 10
+    for key, color in entries:
+        assert f"{key}:{color}" in style
 
 
 _CORE_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"

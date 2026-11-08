@@ -91,7 +91,9 @@ its application metrics.
   and a separately selectable ITS Season 18 Battleground pilot. Explicit
   Army Points selection, structured setup/objectives/scoring, scenario Rules
   and Skills, source-verification notes and deterministic maps all derive
-  from maintained scenario definitions. The wider ITS library remains
+  from maintained scenario definitions. Maps can be saved as standalone SVGs
+  using the browser's image context menu, with the selected theme and units.
+  The wider ITS library remains
   outside the 1.0 completeness requirement.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.

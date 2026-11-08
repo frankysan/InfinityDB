@@ -810,14 +810,15 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b'group.className = "scenario-rules rules-card-stack";' in script
     assert b'new URLSearchParams(window.location.search).get("army_points")' not in script
     assert b'/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?' in script
-    assert b'new DOMParser().parseFromString(markup, "image/svg+xml")' in script
-    assert b'svg.querySelector("style")?.remove();' in script
-    assert b'document.importNode(svg, true)' in script
+    assert b'const image = document.createElement("img")' in script
+    assert b'figure.append(heading, image)' in script
+    assert b'new DOMParser()' not in script
+    assert b'document.importNode(svg, true)' not in script
     assert b'window.addEventListener("distanceunitchange", refreshScenarioDistances, {' in script
+    assert b'window.addEventListener("themechange", refreshScenarioDistances, {' in script
     assert b"signal: pageController.signal" in script
-    assert b'[data-distance-inches]' in script
-    assert b'[data-distance-size-inches]' in script
     assert b'url.searchParams.set("distance_unit", distanceUnit())' in script
+    assert b'url.searchParams.set("theme",' in script
     assert b'rulesCitationNode(citation)' in script
     assert b'issue.status === "reviewed-resolution"' in script
     assert b'badge.textContent = reviewed ? "reviewed" : "uncertain"' in script
@@ -830,7 +831,7 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b"padding: 16px;" in stylesheet
 
 
-def test_scenario_browser_aborts_map_and_unit_listener_on_soft_navigation() -> None:
+def test_scenario_browser_cleans_up_image_preference_listeners_on_soft_navigation() -> None:
     node = shutil.which("node")
     if node is not None:
         command = [node]
@@ -1009,6 +1010,31 @@ def test_scenario_map_api_supports_cm_and_rejects_invalid_unit_requests(
         status, _, body = request(scenario_app, endpoint, query=query)
         assert status == 400
         assert b"distance_unit" in body or b"duplicate" in body.lower()
+
+
+@pytest.mark.parametrize(
+    ("theme", "table_color"),
+    [("light", "#fffefa"), ("dark", "#17201b")],
+)
+def test_scenario_map_api_returns_saveable_theme_complete_svg(
+    scenario_app: Application, theme: str, table_color: str,
+) -> None:
+    endpoint = "/api/scenarios/domination/map.svg"
+    status, headers, svg = request(
+        scenario_app, endpoint,
+        query=f"army_points=300&distance_unit=cm&theme={theme}",
+    )
+    assert status == 200
+    assert headers["content-type"].startswith("image/svg+xml")
+    assert f'data-theme="{theme}"'.encode() in svg
+    assert b'data-distance-unit="cm"' in svg
+    assert f"--color-scenario-map-table:{table_color}".encode() in svg
+    assert b"<style>" in svg
+
+    for query in ("army_points=300&theme=system", "army_points=300&theme=light&theme=dark"):
+        status, _, body = request(scenario_app, endpoint, query=query)
+        assert status == 400
+        assert b"theme" in body or b"duplicate" in body.lower()
 
 
 def test_scenario_map_api_renders_selected_maintained_geometry(

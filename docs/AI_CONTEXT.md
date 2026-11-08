@@ -85,10 +85,11 @@ release/audit narrative belongs in the changelog and Git history.
   `s=` codec. Source disagreements remain explicit: Domination's
   350-point SWC note is unresolved; Supplies' outer boxes are **8 inches**
   from edges, not the diagram's 12-inch guide line.
-- Scenario SVG uses canonical geometry and semantic colors. On inlining,
-  remove the SVG's embedded `<style>` for CSP and use page CSS; never
-  recalculate geometry or scoring in JavaScript. For precise
-  marker, Specialist and source-review contracts, see `docs/data-model.md`.
+- Scenario SVG uses canonical geometry and embeds its selected Light/Dark palette
+  from the maintained theme CSS; scenario pages keep the standalone SVG as an
+  `<img>` for native saving. Theme and distance-unit changes refresh the image
+  URL, never recalculate geometry or scoring in JavaScript. For precise marker,
+  Specialist and source-review contracts, see `docs/data-model.md`.
 
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.
