@@ -461,6 +461,113 @@
                   "y1": 24,
                   "x2": 24,
                   "y2": 32
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": {
+                    "anchor": "center"
+                  },
+                  "x2": {
+                    "anchor": "right"
+                  },
+                  "y2": {
+                    "anchor": "center"
+                  }
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 4.55,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "sector-near-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 12.55,
+                  "text": "A: 2 OP · B: 5 OP"
+                },
+                {
+                  "id": "sector-center-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 15.15,
+                  "text": "Central Sector · 3 OP"
+                },
+                {
+                  "id": "sector-near-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 20.55,
+                  "text": "A: 5 OP · B: 2 OP"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 28.55,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-a-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-a",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-center-depth",
+                  "kind": "dimension",
+                  "target": "sector-center",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-b-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-b",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
                 }
               ]
             }
@@ -525,6 +632,113 @@
                   "y1": 36,
                   "x2": 32,
                   "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": {
+                    "anchor": "center"
+                  },
+                  "x2": {
+                    "anchor": "right"
+                  },
+                  "y2": {
+                    "anchor": "center"
+                  }
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.55,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "sector-near-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 16.55,
+                  "text": "A: 2 OP · B: 5 OP"
+                },
+                {
+                  "id": "sector-center-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 23.15,
+                  "text": "Central Sector · 3 OP"
+                },
+                {
+                  "id": "sector-near-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 32.55,
+                  "text": "A: 5 OP · B: 2 OP"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 42.55,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-a-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-a",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-center-depth",
+                  "kind": "dimension",
+                  "target": "sector-center",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-b-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-b",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
                 }
               ]
             }
@@ -590,6 +804,113 @@
                   "y1": 36,
                   "x2": 48,
                   "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": {
+                    "anchor": "center"
+                  },
+                  "x2": {
+                    "anchor": "right"
+                  },
+                  "y2": {
+                    "anchor": "center"
+                  }
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.55,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "sector-near-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 16.55,
+                  "text": "A: 2 OP · B: 5 OP"
+                },
+                {
+                  "id": "sector-center-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 23.15,
+                  "text": "Central Sector · 3 OP"
+                },
+                {
+                  "id": "sector-near-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 32.55,
+                  "text": "A: 5 OP · B: 2 OP"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 42.55,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-a-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-a",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-center-depth",
+                  "kind": "dimension",
+                  "target": "sector-center",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-b-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-b",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
                 }
               ]
             }
