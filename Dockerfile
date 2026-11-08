@@ -14,7 +14,7 @@ WORKDIR /app
 # The application has no runtime dependency beyond Gunicorn. Copy its package
 # sources plus the maintained config, documentation, and curated data needed while building
 # the installed wheel; source snapshots and development artifacts stay out. Runtime
-# databases are copied separately as versioned release data.
+# databases are copied separately as a validated, versioned runtime bundle.
 COPY pyproject.toml README.md /app/
 COPY src /app/src
 COPY docs/CHANGELOG.md /app/docs/CHANGELOG.md
@@ -29,11 +29,9 @@ RUN pip install --no-cache-dir ".[server]" \
     && useradd --create-home --uid 10001 appuser \
     && chown -R appuser:appuser /app
 
-COPY --chown=appuser:appuser data/generated/infinity.db /app/data/infinity.db
-COPY --chown=appuser:appuser data/generated/rules.db /app/data/rules.db
-COPY --chown=appuser:appuser data/generated/deployed-objects.json /app/data/deployed-objects.json
-COPY --chown=appuser:appuser data/generated/variant-usage.json /app/data/variant-usage.json
-COPY --chown=appuser:appuser data/generated/weapon-profile-sources.json /app/data/weapon-profile-sources.json
+# Prepared before Docker build: v9 includes deployed-objects.json;
+# v10 embeds those records in rules.db and packages no such JSON file.
+COPY --chown=appuser:appuser data/runtime/ /app/data/
 
 USER appuser
 EXPOSE 8000

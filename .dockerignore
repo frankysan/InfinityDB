@@ -18,12 +18,9 @@ build/
 dist/
 .vscode/
 data/raw/
+# No development archives or loose generated artifacts enter the image.
+# tools.prepare_runtime_bundle creates the selected, validated data/runtime/ files.
 data/generated/*
-!data/generated/infinity.db
-!data/generated/rules.db
-!data/generated/deployed-objects.json
-!data/generated/variant-usage.json
-!data/generated/weapon-profile-sources.json
 data/manifests/*
 !data/manifests/symbol-publication.json
 data/work/

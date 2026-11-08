@@ -246,18 +246,25 @@ only when required to fix correctness, reproducibility, or release reliability.
   delivery paths and source-verified Unit uses. v9 runtime and JSON releases
   remain readable; the existing production image and tracked v9 rules.db have
   not been replaced.
-  - [ ] Reconcile the read-only rebuild-equivalence audit's Battleground
-    differences in `records` and `scenario_publications` against reviewed
-    current inputs. Do not silently substitute a newly built rules.db with
-    different logical content.
-  - [ ] Rebuild the v10 tracked database from pinned curated/Army sources,
-    regenerate and verify v2 `variant-usage.json` and matched
-    `weapon-profile-sources.json`, and verify all API/Rules parity gates.
-  - [ ] Remove the legacy `deployed-objects.json` requirement from Docker
-    image assembly, deployment checks and build tooling once the tracked
-    v10 release and dependent publications are ready. Preserve v8/v9
-    read compatibility, but do not retain the separate JSON as a v10 runtime
-    dependency.
+  - [x] Reconcile the tracked-v9 Battleground rebuild drift: field-level
+    comparison found only the newly curated dimension annotations, centre guide
+    and zone labels in scenario geometry; `scenario_publications` changes only
+    its derived content SHA. Preserve these intentional map refinements in v10,
+    rather than reverting curated data to the older binary.
+  - [ ] Promote a fully accepted v10 artifact set to tracked
+    `data/generated/`. Reproducible ignored staging already works via
+    `tools.build_v10_runtime_candidate` and verifies the four matching files:
+    v10 rules.db (17 reviewed objects, 1 unresolved delivery),
+    v2 `variant-usage.json` (151 groups), Weapon citations (62 Weapons), and
+    pinned Army database. Complete frozen-candidate parity and hosted/image
+    acceptance before updating tracked artifacts; avoid mixing v10 with old
+    v9 publication hashes.
+  - [x] Make Docker image assembly schema-selective: the verifier and
+    `tools.prepare_runtime_bundle` now package the four-file v10 artifact set
+    without deployed-object JSON, while existing v9 images retain their matched
+    fifth file. Deployment generates legacy JSON only for v8/v9, and the
+    container's read model chooses by schema. Keep this contract through
+    final v10 image verification.
   - [ ] Validate an immutable image built from the matched release artifacts,
     including startup, API parity, deployment smoke and CI. Do not introduce
     live-replacement locks, in-container regeneration or multi-file runtime

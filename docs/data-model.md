@@ -2677,9 +2677,15 @@ rules database's own hash, which would be self-referential.
 Explicit `--legacy-v8` and `--legacy-v9` preserve older standalone
 builders. All CLI modes reject writes directly to tracked
 `data/generated/rules.db`. The shipped v9/JSON release remains intact until
-the v10 candidate and dependent publications pass release checks. Immutable
-Docker deployment only needs a validated matched artifact set at image-build
-time; no multi-file runtime promotion protocol is required.
+the v10 candidate and dependent publications pass release checks.
+`python -m tools.build_v10_runtime_candidate` stages the full pinned
+four-file runtime set in ignored `local/v10-candidate/`, including v2
+`variant-usage.json` without a deployed-object publication fingerprint and
+matching reviewed Weapon-profile citations. `--check` rederives the publication
+inputs and checks their bytes and database provenance. `tools.prepare_runtime_bundle`
+copies the source-verified four-file v10 (or five-file legacy v9) set into
+ignored `data/runtime/` for Docker packaging. This is image-build preparation,
+not runtime migration or multi-file publication locking.
 
 The v9 build is byte-deterministic in tests, and read-only HTTP
 checks confirm both v8-unavailable and v9-available responses,

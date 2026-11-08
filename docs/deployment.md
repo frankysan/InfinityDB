@@ -94,8 +94,11 @@ For the current tracked v9 release, before building the Docker image,
 `data/generated/deployed-objects.json` publication from the
 tracked database pair and reviewed curated source files. It fails rather than
 ship a missing or mismatched publication. No raw snapshots or database rebuilds
-are needed on the deployment host. A direct `docker build` requires that
-publication to have been generated in the checkout first. In contrast, the
+are needed on the deployment host. Before any Docker build, run
+`python -m tools.prepare_runtime_bundle` after verifying the tracked
+publications. It creates ignored `data/runtime/` with exactly the validated
+schema-specific image files; direct `docker build` also requires this step.
+In contrast, the
 exact-variant publication is a **tracked release file** built during development
 with `tools.build_variant_usage --publish` and `--check-publication`, using the
 pinned ignored raw source. Deployment and clean CI have no raw archive;
@@ -112,12 +115,16 @@ the PDF or raw Army archive. Rebuild and commit the matched file whenever
 either database or its reviewed inputs change. The image verifies and
 serves it independently of the curated files.
 
-The staged v10 rules builder now embeds deployed-object references directly in
-rules.db, but the v10 tracked-artifact/image migration remains pending (see
-[TODO](TODO.md#performance-storage-and-build-tooling)). When that migration
-ships, Docker packaging can omit the separate deployed-object JSON entirely.
-The container is immutable, so its artifact set is validated during image
-build and smoke testing, without runtime replacement or rollback orchestration.
+The v10 candidate builder embeds reviewed deployed objects directly in
+`rules.db` and prepares v2 variant usage plus matching Weapon citations.
+It is staged under ignored `local/v10-candidate/` by default, without
+`deployed-objects.json`. For a disposable v10 image build preview, run
+`python -m tools.prepare_runtime_bundle --source-dir local/v10-candidate`
+to fill `data/runtime/` from that validated candidate. Normal `deploy.sh`
+always reconstructs the image bundle from tracked `data/generated/`, and
+never silently selects the local candidate. The tracked release remains v9
+pending acceptance; see [TODO](TODO.md#performance-storage-and-build-tooling).
+The immutable container never regenerates or replaces its databases at runtime.
 
 The Docker image explicitly configures both runtime database paths. Missing, invalid, or
 incompatible tracked databases or reference publications fail before activation. After building the image,

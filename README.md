@@ -212,8 +212,10 @@ infinity-db build-rules
 This writes a **v10** candidate to `local/rules-standalone.db`, including
 normalized deployed objects and v9 Restrictions. Use `--output` for another
 staging path, or `--legacy-v8`/`--legacy-v9` for compatibility work.
-It never modifies the tracked release database. The shipped v9 release
-and its legacy JSON publication remain unchanged until v10 release acceptance.
+For an entire, source-matched four-file v10 image input set, run
+`python -m tools.build_v10_runtime_candidate` and then repeat with `--check`.
+Both commands leave the tracked release unchanged. The shipped v9 release and
+legacy JSON publication remain in place until v10 release acceptance.
 
 Reference PDFs and wiki snapshots are research inputs rather than direct runtime
 inputs. Human-reviewed rules collections live under `data/curated/rules/`.

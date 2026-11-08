@@ -59,6 +59,67 @@ def _logical_rows(conn: sqlite3.Connection, name: str) -> list[bytes]:
     return sorted(_row_bytes(row) for row in conn.execute(f"SELECT * FROM {quoted}"))
 
 
+def _changed_fields(
+    before: Any, after: Any, path: str = "$", *, limit: int = 24,
+) -> list[dict[str, Any]]:
+    """Bounded key/index-level report for a changed structured JSON value."""
+    if before == after or limit <= 0:
+        return []
+    if isinstance(before, dict) and isinstance(after, dict):
+        result: list[dict[str, Any]] = []
+        for key in sorted(before.keys() | after.keys()):
+            if len(result) >= limit:
+                break
+            result.extend(_changed_fields(
+                before.get(key), after.get(key), f"{path}.{key}",
+                limit=limit - len(result),
+            ))
+        return result
+    if isinstance(before, list) and isinstance(after, list):
+        result = []
+        for index in range(max(len(before), len(after))):
+            if len(result) >= limit:
+                break
+            result.extend(_changed_fields(
+                before[index] if index < len(before) else None,
+                after[index] if index < len(after) else None,
+                f"{path}[{index}]", limit=limit - len(result),
+            ))
+        return result
+    return [{"path": path, "tracked": str(before)[:160], "rebuilt": str(after)[:160]}]
+
+
+def _record_field_changes(
+    old: sqlite3.Connection, new: sqlite3.Connection,
+) -> list[dict[str, Any]]:
+    columns = [row[1] for row in old.execute("PRAGMA table_info(records)")]
+    query = "SELECT * FROM records ORDER BY collection_id, id"
+    before = {(row[0], row[1]): row for row in old.execute(query)}
+    after = {(row[0], row[1]): row for row in new.execute(query)}
+    result = []
+    for key in sorted(before.keys() | after.keys()):
+        if before.get(key) == after.get(key):
+            continue
+        fields: list[dict[str, Any]] = []
+        for column, left, right in zip(
+            columns, before.get(key) or (), after.get(key) or (), strict=False,
+        ):
+            if left == right:
+                continue
+            if column.endswith("_json") and isinstance(left, str) and isinstance(right, str):
+                fields.extend(_changed_fields(
+                    json.loads(left), json.loads(right), column,
+                ))
+            else:
+                fields.append({
+                    "path": column, "tracked": str(left)[:160], "rebuilt": str(right)[:160],
+                })
+        result.append({"identity": key, "fieldChanges": fields[:32]})
+        if len(result) >= 10:
+            break
+    return result
+
+
 def audit(root: Path = ROOT) -> dict[str, Any]:
     root = root.resolve()
     release = root / "data/generated/rules.db"
@@ -109,6 +170,8 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
                                             for line in new if line not in old), None),
                     })
             report["logicalDifferences"] = table_diffs
+            if any(item["table"] == "records" for item in table_diffs):
+                report["recordFieldDifferences"] = _record_field_changes(before, after)
             report["sameLogicalRows"] = not table_diffs and report["sameTableSchema"]
         mismatches = [
             index for index, (left, right) in enumerate(

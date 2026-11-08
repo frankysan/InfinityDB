@@ -148,6 +148,56 @@ def test_v10_standalone_build_is_deterministic(tmp_path: Path) -> None:
     assert outputs[0].read_bytes() == outputs[1].read_bytes()
 
 
+
+def test_complete_v10_candidate_bundle_has_no_deployed_object_json(
+    pinned_inputs: tuple[Path, ...], tmp_path: Path,
+) -> None:
+    from tools.build_v10_runtime_candidate import (
+        REQUIRED,
+        build_candidate,
+        verify_candidate,
+    )
+    from tools.prepare_runtime_bundle import prepare_bundle
+
+    root = Path(__file__).resolve().parents[1]
+    if not (root / "data/generated/infinity.raw.db").is_file():
+        pytest.skip("Matched raw Army archive is unavailable")
+    candidate = tmp_path / "candidate"
+    result = build_candidate(candidate)
+    assert result["schemaVersion"] == 10
+    assert result["variantPublicationVersion"] == 2
+    assert result["deployedObjects"] == 17
+    assert {path.name for path in candidate.iterdir()} == REQUIRED
+    bundle = tmp_path / "bundle"
+    assert prepare_bundle(candidate, bundle) == REQUIRED
+    assert {path.name for path in bundle.iterdir()} == REQUIRED
+    assert verify_candidate(candidate)["sha256"] == result["sha256"]
+    (candidate / "weapon-profile-sources.json").write_bytes(b"stale")
+    with pytest.raises(ValueError, match="differs from reviewed inputs"):
+        verify_candidate(candidate)
+
+
+def test_legacy_v9_image_bundle_keeps_matched_json(
+    pinned_inputs: tuple[Path, ...], tmp_path: Path,
+) -> None:
+    from tools.prepare_runtime_bundle import prepare_bundle
+
+    source = Path(__file__).resolve().parents[1] / "data/generated"
+    if not all((source / name).is_file() for name in (
+        "deployed-objects.json", "variant-usage.json", "weapon-profile-sources.json",
+    )):
+        pytest.skip("Generated legacy publication is unavailable")
+    with sqlite3.connect(source / "rules.db") as connection:
+        if connection.execute("PRAGMA user_version").fetchone()[0] != 9:
+            pytest.skip("Tracked rules database no longer uses legacy v9")
+    output = tmp_path / "legacy"
+    names = prepare_bundle(source, output)
+    assert names == {
+        "infinity.db", "rules.db", "deployed-objects.json",
+        "variant-usage.json", "weapon-profile-sources.json",
+    }
+
+
 def test_normalized_snapshot_rejects_mismatched_army_sha(
     pinned_inputs: tuple[Path, ...],
 ) -> None:

@@ -125,18 +125,13 @@ def test_deployed_object_publication_is_generated_and_verified_for_each_release_
 
     assert "data/generated/*" in gitignore
     assert "!data/generated/deployed-objects.json" not in gitignore
-    assert "!data/generated/deployed-objects.json" in dockerignore
-    assert (
-        "COPY --chown=appuser:appuser data/generated/deployed-objects.json "
-        "/app/data/deployed-objects.json"
-    ) in dockerfile
-    build = '"$python" -m tools.build_deployed_object_publication'
-    assert deploy.index(build + "\n") < deploy.index(build + " --check")
-    assert deploy.index(build + " --check") < deploy.index("docker compose build")
-    ci_build = "PYTHONPATH=src python -m tools.build_deployed_object_publication"
-    assert workflow.index(ci_build + "\n") < workflow.index(ci_build + " --check")
-    assert workflow.index(ci_build + " --check") < workflow.index("docker build")
-    assert '{"infinity.db", "rules.db", "deployed-objects.json"}' in smoke
+    assert "!data/generated/deployed-objects.json" not in dockerignore
+    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
+    assert "tools.prepare_runtime_bundle" in deploy
+    assert deploy.index("tools.prepare_runtime_bundle") < deploy.index("docker compose build")
+    assert "tools.build_deployed_object_publication --check" in workflow
+    assert workflow.index("tools.prepare_runtime_bundle") < workflow.index("docker build")
+    assert 'expected_files.add("deployed-objects.json")' in smoke
     assert "load_deployed_object_publication(" in smoke
     assert '/api/deployed-objects' in smoke
     assert 'http://127.0.0.1:8000/deployed-objects' in smoke
@@ -154,11 +149,8 @@ def test_variant_usage_publication_is_byte_exact_and_packaged_for_v9_release() -
 
     assert "!data/generated/variant-usage.json" in gitignore
     assert "data/generated/variant-usage.json binary" in attributes
-    assert "!data/generated/variant-usage.json" in dockerignore
-    assert (
-        "COPY --chown=appuser:appuser data/generated/variant-usage.json "
-        "/app/data/variant-usage.json"
-    ) in dockerfile
+    assert "data/generated/*" in dockerignore
+    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
     assert (ROOT / "data/generated/variant-usage.json").is_file()
     assert "tools.build_variant_usage --publish" not in deploy
     assert "tools.build_deployed_object_publication --check" in deploy
@@ -183,11 +175,8 @@ def test_weapon_profile_citations_are_release_paired_and_packaged() -> None:
 
     assert "!data/generated/weapon-profile-sources.json" in gitignore
     assert "data/generated/weapon-profile-sources.json binary" in attributes
-    assert "!data/generated/weapon-profile-sources.json" in dockerignore
-    assert (
-        "COPY --chown=appuser:appuser data/generated/weapon-profile-sources.json "
-        "/app/data/weapon-profile-sources.json"
-    ) in dockerfile
+    assert "data/generated/*" in dockerignore
+    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
     assert (ROOT / "data/generated/weapon-profile-sources.json").is_file()
     assert 'expected_files.add("weapon-profile-sources.json")' in smoke
     assert "load_weapon_profile_publication(" in smoke
@@ -484,7 +473,7 @@ def test_deployment_smoke_builds_and_exercises_v8_rollback_image() -> None:
     workflow = _read(".github/workflows/deployment-smoke.yml")
     expected_order = (
         "sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets",
-        "python -m infinity_db build-rules --output local/restrictions-v8-ci/rules.db",
+        "python -m infinity_db build-rules --legacy-v8 --output local/restrictions-v8-ci/rules.db",
         (
             "python -m tools.build_deployed_object_publication "
             "--rules-db local/restrictions-v8-ci/rules.db "
