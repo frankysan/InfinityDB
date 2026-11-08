@@ -14,7 +14,16 @@ are not retroactively relabeled.
 
 - Added the ability to save scenario maps directly as SVG images through the browser's
   image context menu, retaining the selected Light/Dark theme, Army Points and distance units.
+- Completed Battleground map labels and measurements for both Deployment Zones and all
+  three Sectors, including the Objective Points available to each player.
+- Added clearer spacing between Orders & AROs controls, scenario rules and reference cards.
 - Identified upcoming release notes by their target version and marked them as unreleased.
+
+### Added
+
+- **Deployment:** Added a disposable Docker image preview for staged or tracked runtime
+  artifacts. It checked packaged data, startup health and reference APIs, then cleaned up
+  the preview container and image without replacing the deployed service.
 
 ### Changed
 
@@ -23,19 +32,49 @@ are not retroactively relabeled.
 - **Web backend + Web frontend:** Kept scenario maps as ordinary images that could be
   saved directly. Embedded the selected theme palette in each standalone SVG and updated
   the map when display preferences changed.
+- **Data processing + Web backend:** Made `build-rules` write current Rules to
+  `local/rules-standalone.db` and prepare a complete local runtime for `serve` by default.
+  Explicit `--output` selected a standalone Rules-only build; `--legacy-v8` and `--legacy-v9`
+  retained older formats. Direct writes to the tracked release Rules database were rejected.
 
 ### Fixed
 
+- **Data processing + Web frontend:** Completed ITS Season 18 Battleground maps at every
+  supported game size with Deployment Zone A/B labels, the table center line, Sector scoring
+  for both players and depth measurements for both Deployment Zones and all three Sectors.
+  Measurements followed the selected inches/centimeters preference.
+- **Web frontend:** Added vertical spacing between Orders & AROs declaration controls,
+  the optional scenario card and the following reference cards.
 - **Data processing + Web backend + Deployment:** Restored the
   `build --compact` → `build-rules` → `serve` checkout workflow, using
   up-to-date local Rules, exact-variant data and Weapon citations without
   requiring Docker release publication. Docker continued to use only
-  verified, matched release artifacts.
+  verified, matched release artifacts. `serve` selected the verified local runtime when
+  present and reported incomplete or stale builds with instructions to rebuild. A checkout
+  without a local runtime used the tracked release data; an explicit `--database` bypassed
+  automatic selection.
 - **Data processing + Deployment:** Promoted the verified v10 Rules database
   and matching variant/Weapon publications together, retaining existing
   rules semantics and the improved Battleground map. Embedded reviewed deployed
   objects in the rules database and preserved independent JSON compatibility
   for legacy release images.
+- **Deployment + Project infrastructure:** Fixed deployment file permissions after saving
+  private installer settings. Kept the settings file restricted to its owner without
+  applying that restriction to subsequent checkout files, and ensured the metrics-history
+  helper remained readable by its service user. Preserved fingerprinted SVG bytes across
+  checkouts to avoid line-ending changes invalidating release verification.
+
+### Upgrade notes
+
+- **Deployment:** Changed direct Docker builds to require a prepared runtime bundle under
+  `data/runtime/`, created with `python -m tools.prepare_runtime_bundle`; `deploy.sh` handled
+  this preparation automatically. Current Rules stored deployed objects in the database,
+  while legacy images retained their separate JSON file. Deployment required the matched
+  Army/Rules databases and variant/Weapon publications for the selected release.
+- **Data processing + Web backend:** Preparing the automatic checkout runtime required
+  `build --compact` before `build-rules` so the paired raw Army data was available for
+  exact-variant references.
+  An existing stale local runtime required rebuilding before `serve` could use it.
 
 ## [1.0.0] - 2026-11-07
 
