@@ -4314,11 +4314,18 @@ def test_default_build_rules_writes_standalone_v10_database(
 
     output = tmp_path / "rules-standalone.db"
     monkeypatch.setattr(cli, "DEFAULT_STANDALONE_RULES_DATABASE", output)
+    from tools import build_v10_runtime_candidate
+
+    published: list[Path] = []
+    monkeypatch.setattr(
+        build_v10_runtime_candidate, "publish_checkout_runtime", published.append,
+    )
     args = cli.build_parser().parse_args([
         "build-rules", str(ROOT / "data/curated/rules"),
     ])
     assert args.output is None
     assert cli.cmd_build_rules(args) == 0
+    assert published == [output]
     with sqlite3.connect(output) as connection:
         assert connection.execute("PRAGMA user_version").fetchone()[0] == 10
     RulesDatabase(output).validate()

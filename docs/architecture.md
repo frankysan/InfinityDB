@@ -75,6 +75,36 @@ InfinityDB has six engineering domains:
 
 The canonical ownership definitions are in `docs/project-domains.md`.
 
+## Runtime targets
+
+InfinityDB permanently supports two serving targets that share the same
+read-only application/API and validated database models:
+
+- **Directly from a checkout (local or self-hosted).** The sequence
+  `infinity-db build --compact`, `infinity-db build-rules`,
+  `infinity-db serve` builds the
+  Army data and an ignored, source-matched `local/checkout-runtime/` bundle.
+  Plain `serve` selects the complete checkout bundle when present and current;
+  otherwise it uses the tracked release pair. Missing/mismatched local
+  publications fail closed, not silently against the older release. Explicit
+  database selection remains available. Host-side WSGI deployments point
+  explicitly at the corresponding checkout runtime pair.
+- **Docker for public internet serving.** A release builds an immutable image
+  exclusively from verified, tracked `data/generated/` publications, assembled
+  into `data/runtime/` during image preparation. Docker never automatically
+  reads `local/checkout-runtime/`, raw snapshots, or a loose standalone Rules
+  database. Checkout Rules builds never promote tracked Rules or their
+  dependent JSON publications, and no development command deploys an image.
+  The existing `build --compact` default still refreshes the tracked Army
+  `data/generated/infinity.db`; this Git-visible change must not be
+  mistaken for a validated, release-paired Docker publication.
+
+The first target prioritizes an uncomplicated edit/build/serve cycle; the
+second requires deliberate paired publication and image verification. Both
+must remain supported when changing CLI defaults, storage schemas, or release
+tooling. The [data directory contract](../data/README.md) owns artifact
+paths; [deployment](deployment.md) owns image preparation and hosting.
+
 ## Semantic provenance
 
 Every nontrivial application fact should fit one of these classes:

@@ -165,25 +165,39 @@ Select `.venv` as the Python interpreter in VS Code.
 
 ## Quick start
 
-A normal checkout includes the runtime Army database, rules database, and processed
-graphical publication. After installing the project, start the local server directly:
+InfinityDB supports two independent runtime targets: **serving directly from a
+checkout** (local development or a trusted hosted checkout), and **immutable
+Docker deployment** for internet serving. See
+[architecture](docs/architecture.md#runtime-targets) and
+[deployment](docs/deployment.md) for the separate contracts.
+
+A clean checkout includes tracked runtime databases and processed graphics. Without
+a local rebuild, the development server uses the tracked database pair:
 
 ```powershell
 infinity-db serve
 ```
 
-Open <http://127.0.0.1:8000> on the development machine. The development server
-listens on local network interfaces by default; use the machine's LAN address
-from another device, or bind only to localhost with:
+To use the latest Army and curated Rules changes, the original development
+workflow remains supported:
 
 ```powershell
-infinity-db serve --host 127.0.0.1
+infinity-db build --compact
+infinity-db build-rules
+infinity-db serve
 ```
 
-Stop the server with `Ctrl+C`.
+The Rules build publishes a complete, ignored `local/checkout-runtime/` with
+co-located Army and v10 Rules databases, exact-variant usage and reviewed Weapon
+citations. `serve` automatically selects that **verified local build** over
+the tracked release pair; a stale/mismatched local build fails with instructions
+to rebuild instead of silently falling back. Explicit `serve --database PATH`
+bypasses automatic selection. Docker never reads this directory.
 
-To rebuild Army data from an existing immutable local snapshot, use `infinity-db build --compact`.
-Rebuilding is a development operation; it is not required to browse the tracked runtime artifacts.
+Open <http://127.0.0.1:8000> on the development machine. The development server
+listens on local network interfaces by default; use the machine's LAN address
+from another device, or bind only to localhost with
+`infinity-db serve --host 127.0.0.1`. Stop with `Ctrl+C`.
 
 ### Download a fresh Army snapshot
 
@@ -209,13 +223,16 @@ deployed-object evidence, while keeping its complete reference model in rules.db
 infinity-db build-rules
 ```
 
-This writes a **v10** candidate to `local/rules-standalone.db`, including
-normalized deployed objects and v9 Restrictions. Use `--output` for another
-staging path, or `--legacy-v8`/`--legacy-v9` for compatibility work.
-For an entire, source-matched four-file v10 image input set, run
-`python -m tools.build_v10_runtime_candidate` and then repeat with `--check`.
-Both commands leave the tracked release unchanged. The shipped v9 release and
-legacy JSON publication remain in place until v10 release acceptance.
+The default command writes v10 Rules to `local/rules-standalone.db`
+and assembles the matching `local/checkout-runtime/` for checkout-based
+serving. It requires the paired raw Army database produced by
+`infinity-db build --compact` to publish reviewed exact-variant usage.
+Use `--output` for a **standalone Rules-only** build with no checkout
+publication, or `--legacy-v8`/`--legacy-v9` for compatibility work.
+For an independently staged, source-matched v10 release candidate, run
+`python -m tools.build_v10_runtime_candidate` and repeat with `--check`.
+These commands do not replace tracked Rules or dependent release JSON.
+The shipped v9 release remains in place until explicit v10 acceptance.
 
 Reference PDFs and wiki snapshots are research inputs rather than direct runtime
 inputs. Human-reviewed rules collections live under `data/curated/rules/`.

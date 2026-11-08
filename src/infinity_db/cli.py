@@ -230,6 +230,14 @@ def cmd_build_rules(args: argparse.Namespace) -> int:
     version = 8 if args.legacy_v8 else 9 if args.legacy_v9 else 10
     print(f"Rules database ready: {output} (schema v{version})")
     print(f"Collections: {len(documents)}")
+    if args.output is None and not (args.legacy_v8 or args.legacy_v9):
+        # A checkout has two supported targets: this ignored, complete runtime
+        # for local/LAN hosting, and the separately promoted tracked Docker data.
+        # Do not publish a mismatched variant/Weapon view during development.
+        from tools.build_v10_runtime_candidate import publish_checkout_runtime
+
+        publish_checkout_runtime(output)
+        print("Checkout runtime ready: local/checkout-runtime")
     return 0
 
 
@@ -366,7 +374,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_health.set_defaults(func=cmd_database_health)
 
     p_serve = sub.add_parser("serve", help="Start the local unit browser and read-only API")
-    p_serve.add_argument("--database", type=Path, default=DEFAULT_DATABASE)
+    p_serve.add_argument(
+        "--database", type=Path,
+        help="Explicit Army database (disables automatic checkout runtime selection)",
+    )
     p_serve.add_argument(
         "--host",
         default="0.0.0.0",
@@ -387,7 +398,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_rules.add_argument("input", nargs="?", type=Path, default=DEFAULT_CURATED_RULES)
     p_rules.add_argument(
         "--output", type=Path,
-        help="Staging output (default: local/rules-standalone.db; never the tracked rules.db)",
+        help=(
+            "Standalone output (default: local/rules-standalone.db); without --output "
+            "also prepares the ignored complete checkout runtime; never writes tracked rules.db"
+        ),
     )
     legacy = p_rules.add_mutually_exclusive_group()
     legacy.add_argument(

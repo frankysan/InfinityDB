@@ -212,7 +212,7 @@ def test_source_anomaly_regression_blocks_database_export(
 def test_serve_defaults_and_explicit_binding() -> None:
     parser = build_parser()
     defaults = parser.parse_args(["serve"])
-    assert defaults.database == Path("data/generated/infinity.db")
+    assert defaults.database is None  # Auto-select complete checkout build, else tracked release
     assert defaults.host == "0.0.0.0"
     assert defaults.port == 8000
     configured = parser.parse_args(
@@ -221,6 +221,100 @@ def test_serve_defaults_and_explicit_binding() -> None:
     assert configured.database == Path("custom.db")
     assert configured.host == "0.0.0.0"
     assert configured.port == 9000
+
+
+
+def test_checkout_serve_uses_verified_local_build_and_fails_closed_on_staleness(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db import checkout_runtime as runtime
+
+    tracked = tmp_path / "generated" / "infinity.db"
+    tracked.parent.mkdir()
+    tracked.write_bytes(b"army")
+    standalone = tmp_path / "local" / "rules-standalone.db"
+    standalone.parent.mkdir()
+    standalone.write_bytes(b"rules")
+    checkout = tmp_path / "local" / "checkout-runtime"
+
+    assert runtime.select_checkout_database(
+        tracked_army=tracked, standalone_rules=standalone, checkout=checkout,
+    ) == tracked
+
+    checkout.mkdir()
+    for name, data in (
+        ("infinity.db", b"army"), ("rules.db", b"rules"),
+        ("variant-usage.json", b"variant"), ("weapon-profile-sources.json", b"weapon"),
+    ):
+        (checkout / name).write_bytes(data)
+
+    class FakeRules:
+        def __init__(self, path: Path):
+            assert path == checkout / "rules.db"
+
+        def validate(self) -> None:
+            pass
+
+        def deployed_objects_payload(self, _army: Path) -> dict:
+            return {"objects": [{}]}
+
+    monkeypatch.setattr(runtime, "RulesDatabase", FakeRules)
+    monkeypatch.setattr(
+        runtime, "load_variant_usage_publication", lambda *_args: {"formatVersion": 2},
+    )
+    monkeypatch.setattr(
+        runtime, "load_weapon_profile_publication", lambda *_args: {(1, 2, None): {}},
+    )
+
+    def select() -> Path:
+        return runtime.select_checkout_database(
+            tracked_army=tracked, standalone_rules=standalone, checkout=checkout,
+        )
+    assert select() == checkout / "infinity.db"
+
+    tracked.write_bytes(b"new-army")
+    with pytest.raises(ValueError, match="rerun 'infinity-db build-rules'"):
+        select()
+    tracked.write_bytes(b"army")
+    standalone.write_bytes(b"new-rules")
+    with pytest.raises(ValueError, match="rerun 'infinity-db build-rules'"):
+        select()
+    standalone.write_bytes(b"rules")
+    (checkout / "variant-usage.json").unlink()
+    with pytest.raises(ValueError, match="incomplete or stale"):
+        select()
+
+
+def test_checkout_server_default_vs_explicit_database(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db import checkout_runtime
+    from infinity_db.web import server
+
+    selected = tmp_path / "checkout" / "infinity.db"
+    explicit = tmp_path / "release" / "infinity.db"
+    opened: list[Path] = []
+    monkeypatch.setattr(server, "_ensure_port_is_available", lambda *_args: None)
+    monkeypatch.setattr(checkout_runtime, "select_checkout_database", lambda: selected)
+    monkeypatch.setattr(server, "create_app", lambda path: opened.append(path) or object())
+
+    class FakeServer:
+        server_port = 8000
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args: object) -> None:
+            pass
+
+        def serve_forever(self) -> None:
+            pass
+
+    monkeypatch.setattr(server, "make_server", lambda *_args, **_kwargs: FakeServer())
+
+    server.serve(None, host="127.0.0.1")
+    server.serve(explicit, host="127.0.0.1")
+    assert opened == [selected, explicit]
 
 
 def test_database_health_command_defaults_and_options() -> None:

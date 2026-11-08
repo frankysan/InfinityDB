@@ -185,6 +185,19 @@ def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     assert "data/generated/rules.db binary" in attributes
 
 
+def test_checkout_builds_never_enter_immutable_docker_release_context() -> None:
+    dockerignore = _read(".dockerignore")
+    dockerfile = _read("Dockerfile")
+    prepare = _read("tools/prepare_runtime_bundle.py")
+    deploy = _read("scripts/deploy.sh")
+
+    assert "local/" in dockerignore
+    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
+    assert 'DEFAULT_SOURCE = ROOT / "data/generated"' in prepare
+    assert '"$python" -m tools.prepare_runtime_bundle' in deploy
+    assert "checkout-runtime" not in deploy
+
+
 def test_deployed_object_publication_is_generated_and_verified_for_each_release_image() -> None:
     dockerfile = _read("Dockerfile")
     dockerignore = _read(".dockerignore")

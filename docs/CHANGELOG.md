@@ -21,6 +21,14 @@ are not retroactively relabeled.
   embed the chosen theme palette in the standalone SVG and update its URL when
   display preferences change, without client-side SVG inlining.
 
+### Fixed
+
+- **Data processing + Web backend + Deployment:** Restore the
+  `build --compact` → `build-rules` → `serve` checkout workflow, using
+  up-to-date local Rules, exact-variant data and Weapon citations without
+  requiring Docker release publication. Docker continues to use only
+  verified, matched release artifacts.
+
 ## [1.0.0] - 2026-11-07
 
 ### Player summary

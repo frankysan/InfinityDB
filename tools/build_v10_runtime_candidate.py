@@ -112,8 +112,21 @@ def verify_candidate(stage: Path, *, root: Path = ROOT) -> dict[str, Any]:
     }
 
 
+def _write_companion_publications(stage: Path, *, root: Path = ROOT) -> None:
+    """Produce the matched runtime companions for either development or release staging."""
+    stage.joinpath("variant-usage.json").write_bytes(_json_bytes(
+        publication_from_candidate(build_variant_usage_projection(
+            stage / "infinity.db", root / "data/generated/infinity.raw.db",
+            stage / "rules.db", stage / "deployed-objects.json",
+        ))
+    ))
+    stage.joinpath("weapon-profile-sources.json").write_bytes(weapon_bytes(
+        build_weapon_publication(stage / "infinity.db", stage / "rules.db", DEFAULT_REVIEWS)
+    ))
+
+
 def build_candidate(stage: Path, *, root: Path = ROOT) -> dict[str, Any]:
-    """Build into a staging directory without changing the tracked release."""
+    """Build into an empty staging directory without changing the tracked release."""
     stage.mkdir(parents=True, exist_ok=True)
     if any(stage.iterdir()):
         raise ValueError("Candidate output directory must be empty")
@@ -134,29 +147,78 @@ def build_candidate(stage: Path, *, root: Path = ROOT) -> dict[str, Any]:
         restrictions_manifest=json.loads(manifest_path.read_text(encoding="utf-8")),
         deployed_objects=objects,
     )
-    stage.joinpath("variant-usage.json").write_bytes(_json_bytes(
-        publication_from_candidate(build_variant_usage_projection(
-            stage / "infinity.db", root / "data/generated/infinity.raw.db",
-            stage / "rules.db", stage / "deployed-objects.json",
-        ))
-    ))
-    stage.joinpath("weapon-profile-sources.json").write_bytes(weapon_bytes(
-        build_weapon_publication(stage / "infinity.db", stage / "rules.db", DEFAULT_REVIEWS)
-    ))
+    _write_companion_publications(stage, root=root)
     return verify_candidate(stage, root=root)
+
+
+def publish_checkout_runtime(
+    built_rules: Path,
+    destination: Path = ROOT / "local" / "checkout-runtime",
+    *,
+    root: Path = ROOT,
+) -> dict[str, Any]:
+    """Assemble a complete ignored checkout runtime from the freshly built rules DB.
+
+    Never modify release artifacts. The data is published only after the
+    matching v2 variant and reviewed Weapon publications pass verification.
+    """
+    import tempfile
+
+    source = (root / "data/generated/infinity.db").resolve()
+    target = destination.resolve()
+    if not target.is_relative_to((root / "local").resolve()):
+        raise ValueError("Checkout runtime must reside within ignored local/")
+    if not built_rules.is_file():
+        raise ValueError("Build the standalone rules database before publishing checkout runtime")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = Path(tempfile.mkdtemp(prefix=".checkout-runtime-", dir=target.parent))
+    try:
+        shutil.copyfile(source, temporary / "infinity.db")
+        shutil.copyfile(built_rules, temporary / "rules.db")
+        _write_companion_publications(temporary, root=root)
+        result = verify_candidate(temporary, root=root)
+        if target.exists():
+            if {child.name for child in target.iterdir()} != REQUIRED:
+                raise ValueError("Unexpected contents in existing checkout runtime")
+            shutil.rmtree(target)
+        temporary.replace(target)
+        return result
+    finally:
+        if temporary.exists():
+            shutil.rmtree(temporary)
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_STAGE)
+    parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--check", action="store_true", help="Validate an existing candidate")
+    parser.add_argument(
+        "--checkout", action="store_true",
+        help="Refresh ignored local/checkout-runtime from the standalone v10 rules DB",
+    )
+    parser.add_argument(
+        "--rules-db", type=Path, default=ROOT / "local/rules-standalone.db",
+        help="Source v10 Rules database for --checkout",
+    )
     args = parser.parse_args(argv)
-    destination = args.output_dir.resolve()
+    default = ROOT / "local/checkout-runtime" if args.checkout else DEFAULT_STAGE
+    destination = (args.output_dir or default).resolve()
     if not destination.is_relative_to((ROOT / "local").resolve()):
         parser.error("Staging must be inside the ignored local/ directory")
-    result = (
-        verify_candidate(destination) if args.check else build_candidate(destination)
-    )
+    if args.checkout:
+        result = (
+            verify_candidate(destination) if args.check
+            else publish_checkout_runtime(args.rules_db, destination)
+        )
+        if destination == (ROOT / "local/checkout-runtime").resolve():
+            from infinity_db.checkout_runtime import select_checkout_database
+
+            if select_checkout_database() != destination / "infinity.db":
+                raise ValueError("Default serve did not select the checkout runtime")
+    else:
+        result = (
+            verify_candidate(destination) if args.check else build_candidate(destination)
+        )
     print(json.dumps(result, indent=2))
     return 0
 

@@ -251,6 +251,11 @@ only when required to fix correctness, reproducibility, or release reliability.
     and zone labels in scenario geometry; `scenario_publications` changes only
     its derived content SHA. Preserve these intentional map refinements in v10,
     rather than reverting curated data to the older binary.
+  - [x] Restore the independent checkout-hosted target: the default
+    `build-rules` publishes an ignored, matched v10 runtime with both JSON
+    companions, while `serve` automatically prefers that build (or uses the
+    tracked release when absent). Explicit `--database` bypasses auto-selection;
+    Docker still packages only the tracked, validated release pair.
   - [ ] Promote a fully accepted v10 artifact set to tracked
     `data/generated/`. Reproducible ignored staging already works via
     `tools.build_v10_runtime_candidate` and verifies the four matching files:

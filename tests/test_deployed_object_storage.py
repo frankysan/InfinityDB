@@ -172,6 +172,25 @@ def test_complete_v10_candidate_bundle_has_no_deployed_object_json(
     assert prepare_bundle(candidate, bundle) == REQUIRED
     assert {path.name for path in bundle.iterdir()} == REQUIRED
     assert verify_candidate(candidate)["sha256"] == result["sha256"]
+
+    import tempfile
+
+    from infinity_db.checkout_runtime import select_checkout_database
+    from tools.build_v10_runtime_candidate import publish_checkout_runtime
+
+    (root / "local").mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(
+        prefix="checkout-test-", dir=root / "local",
+    ) as directory:
+        checkout = Path(directory) / "checkout-runtime"
+        published = publish_checkout_runtime(candidate / "rules.db", checkout)
+        assert published["sha256"] == result["sha256"]
+        assert {path.name for path in checkout.iterdir()} == REQUIRED
+        assert select_checkout_database(
+            tracked_army=pinned_inputs[0], standalone_rules=candidate / "rules.db",
+            checkout=checkout,
+        ) == checkout / "infinity.db"
+
     (candidate / "weapon-profile-sources.json").write_bytes(b"stale")
     with pytest.raises(ValueError, match="differs from reviewed inputs"):
         verify_candidate(candidate)

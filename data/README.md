@@ -71,6 +71,22 @@ provenance/state, and build outputs.
   rather than trying to regenerate it without the raw archive.
   Intermediate JSON/raw archives and other generated build products remain ignored.
 
+**Checkout runtime:** `infinity-db build-rules` (without an explicit
+`--output`) writes ignored `local/rules-standalone.db`, then assembles
+`local/checkout-runtime/` with the currently built Army database, v10 Rules
+database, v2 variant usage and matching reviewed Weapon citations. This
+requires the raw Army sibling produced by `infinity-db build --compact`.
+`infinity-db serve` automatically uses this complete bundle, checking that
+its Army and Rules hashes still match the latest checkout builds. An explicit
+`--database` selects exactly the requested pair. An explicit
+`build-rules --output` produces a standalone database only. Neither Rules build
+path changes the tracked Rules or dependent release publications. The Army
+`build --compact` command still writes the tracked
+`data/generated/infinity.db` by historical design; its changes are
+Git-visible and cannot be deployed with an unrelated tracked Rules/publication
+set. Docker ignores the local checkout paths and packages only a verified,
+matched tracked release set.
+
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
 source control so machine-local snapshot state does not obscure code changes.
 For the private Linux worker, [Syncthing-staged development assets](../docs/syncthing-assets.md)
