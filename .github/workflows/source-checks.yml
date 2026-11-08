@@ -88,13 +88,12 @@ jobs:
         if: matrix.check_args == '--all'
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Generate source-test deployed-object publication
-        # This release-paired JSON is intentionally Git-ignored. All source
-        # tests must run against the same deterministic publication as the
-        # deployment-smoke image rather than relying on a developer's local copy.
+      - name: Validate deployed objects for the tracked rules schema
+        # Legacy v8/v9 requires an ignored JSON companion. v10 embeds the same
+        # reviewed model in rules.db; do not generate a mismatched legacy JSON.
         run: |
-          python -m tools.build_deployed_object_publication
-          python -m tools.build_deployed_object_publication --check
+          python -m tools.build_deployed_object_publication --when-legacy
+          python -m tools.build_deployed_object_publication --check --when-legacy
 
       - name: Validate tracked exact-variant publication provenance
         run: python -m tools.verify_deployment_assets --skip-svg

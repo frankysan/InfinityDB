@@ -1242,8 +1242,10 @@ def test_isolated_preflight_checks_only_declared_environment_and_preserves_failu
     ]
     assert calls[1][1:] == ["-m", "pip", "install", "-e", ".[dev,symbols]"]
     assert calls[1][0] != sys.executable
-    assert calls[2][1:] == ["-m", "tools.build_deployed_object_publication"]
-    assert calls[3][-1] == "--check"
+    assert calls[2][1:] == [
+        "-m", "tools.build_deployed_object_publication", "--when-legacy",
+    ]
+    assert calls[3][-2:] == ["--check", "--when-legacy"]
     assert calls[4][1:] == ["-m", "tools.verify_deployment_assets"]
     assert calls[5][1:] == ["-m", "tools.run_checks", "--stage", "lint"]
     assert calls[6][1:] == [

@@ -144,13 +144,23 @@ def preview_image(stage: Path, tag: str) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-dir", type=Path, default=DEFAULT_CANDIDATE)
+    parser.add_argument(
+        "--tracked-release", action="store_true",
+        help="Preview the exact promoted data/generated/ release instead of ignored staging",
+    )
     parser.add_argument("--tag", default="infinity-db:v10-preview-local")
     args = parser.parse_args(argv)
-    if not args.source_dir.resolve().is_relative_to((ROOT / "local").resolve()):
-        parser.error("Preview inputs must live under ignored local/")
+    if args.tracked_release:
+        if args.source_dir != DEFAULT_CANDIDATE:
+            parser.error("--tracked-release cannot be combined with --source-dir")
+        source = DEFAULT_SOURCE
+    else:
+        source = args.source_dir.resolve()
+        if not source.is_relative_to((ROOT / "local").resolve()):
+            parser.error("Preview inputs must live under ignored local/")
     if not args.tag.startswith("infinity-db:v10-preview-"):
         parser.error("Preview image tag must start with infinity-db:v10-preview-")
-    preview_image(args.source_dir.resolve(), args.tag)
+    preview_image(source, args.tag)
     print(json.dumps({"status": "passed", "image": args.tag, "deployed": False}))
     return 0
 

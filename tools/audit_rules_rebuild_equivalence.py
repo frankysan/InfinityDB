@@ -185,10 +185,159 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
         return report
 
 
+def audit_v10_candidate(
+    candidate: Path, release: Path = RULES,
+) -> dict[str, Any]:
+    """Compare v9's common rules data with staged v10 without rebuilding either."""
+    from infinity_db.rules_database import RulesDatabase
+
+    RulesDatabase(release).validate()
+    RulesDatabase(candidate).validate()
+    with closing(sqlite3.connect(release)) as old, closing(
+        sqlite3.connect(candidate)
+    ) as new:
+        old_version = old.execute("PRAGMA user_version").fetchone()[0]
+        new_version = new.execute("PRAGMA user_version").fetchone()[0]
+        if (old_version, new_version) != (9, 10):
+            raise ValueError("v10 parity requires a tracked v9 release and v10 candidate")
+        previous = _tables(old)
+        incoming = _tables(new)
+        shared = sorted(set(previous) & set(incoming))
+        new_tables = sorted(set(incoming) - set(previous))
+        removed_tables = sorted(set(previous) - set(incoming))
+        schema_changed = [
+            table for table in shared if previous[table] != incoming[table]
+        ]
+        changed = []
+        for table in shared:
+            if table.startswith("sqlite_stat"):
+                continue
+            left, right = _logical_rows(old, table), _logical_rows(new, table)
+            if left != right:
+                changed.append({
+                    "table": table, "beforeRows": len(left), "afterRows": len(right),
+                })
+        query = "SELECT * FROM records WHERE id = 'scenario:battleground'"
+        record_before = old.execute(query).fetchall()
+        record_after = new.execute(query).fetchall()
+        if len(record_before) != 1 or len(record_after) != 1:
+            raise ValueError("Expected one Battleground record in each schema")
+        columns = [row[1] for row in old.execute("PRAGMA table_info(records)")]
+        changes = {}
+        for index, column in enumerate(columns):
+            a, b = record_before[0][index], record_after[0][index]
+            if a == b:
+                continue
+            changes[column] = (
+                _changed_fields(json.loads(a), json.loads(b), limit=40)
+                if column.endswith("_json") else [str(a)[:90], str(b)[:90]]
+            )
+        report = {
+            "oldVersion": old_version, "newVersion": new_version,
+            "removedTables": removed_tables, "addedTables": new_tables,
+            "commonSchemaChanges": schema_changed,
+            "commonRowChanges": changed,
+            "battlegroundFieldChanges": changes,
+        }
+        expected_new = {
+            "deployed_objects", "deployed_object_attributes",
+            "deployed_object_attribute_sources", "deployed_object_deliveries",
+            "deployed_object_unit_uses", "deployed_object_unresolved",
+            "deployed_object_metadata",
+        }
+        if removed_tables or schema_changed or set(new_tables) != expected_new:
+            raise ValueError("v10 changed an unexpected rules table or shared schema")
+        if {item["table"] for item in changed} != {
+            "__rules_metadata", "records", "scenario_publications",
+        }:
+            raise ValueError("v10 changed unexpected existing rules data")
+        old_metadata = dict(old.execute("SELECT key,value FROM __rules_metadata"))
+        new_metadata = dict(new.execute("SELECT key,value FROM __rules_metadata"))
+        if (
+            set(old_metadata) != set(new_metadata)
+            or json.loads(old_metadata["formatVersion"]) != 9
+            or json.loads(new_metadata["formatVersion"]) != 10
+            or any(
+                old_metadata[key] != new_metadata[key]
+                for key in old_metadata
+                if key not in {"formatVersion", "databaseCompatibilityVersion"}
+            )
+        ):
+            raise ValueError("v10 changed unexpected rules metadata")
+        old_records = {
+            (row[0], row[1]): row
+            for row in old.execute("SELECT * FROM records")
+        }
+        new_records = {
+            (row[0], row[1]): row
+            for row in new.execute("SELECT * FROM records")
+        }
+        if set(old_records) != set(new_records):
+            raise ValueError("v10 added or removed legacy rules records")
+        changed_ids = [
+            key for key in old_records
+            if old_records[key] != new_records[key]
+        ]
+        battleground = ("its-season-18-2026.09.01", "scenario:battleground")
+        if changed_ids != [battleground] or set(changes) != {"facts_json"}:
+            raise ValueError(
+                f"v10 changed rules beyond Battleground geometry: "
+                f"changed IDs={changed_ids[:12]!r}, columns={sorted(changes)!r}"
+            )
+        previous_facts = json.loads(old_records[battleground][columns.index("facts_json")])
+        current_facts = json.loads(new_records[battleground][columns.index("facts_json")])
+        before_configs = previous_facts.get("configurations", [])
+        after_configs = current_facts.get("configurations", [])
+        if len(before_configs) != 3 or len(after_configs) != 3:
+            raise ValueError("Unexpected Battleground configuration count")
+        for earlier, updated in zip(before_configs, after_configs, strict=True):
+            old_geo = earlier["geometry"]
+            new_geo = updated["geometry"]
+            annotations = new_geo.pop("annotations", None)
+            if not isinstance(annotations, list) or not annotations:
+                raise ValueError("Battleground dimension annotations missing")
+            old_elements = old_geo["elements"]
+            new_elements = new_geo["elements"]
+            added = new_elements[len(old_elements):]
+            if (
+                new_elements[:len(old_elements)] != old_elements
+                or {item.get("id") for item in added} != {
+                    "table-center-line", "deployment-a-label",
+                    "deployment-b-label", "sector-near-a-label",
+                    "sector-near-b-label", "sector-center-label",
+                }
+            ):
+                raise ValueError("Unexpected Battleground geometry change")
+            new_geo["elements"] = old_elements
+        if previous_facts != current_facts:
+            raise ValueError("Battleground changed beyond map annotations and labels")
+        old_publications = {
+            (row[0], row[1]): row
+            for row in old.execute("SELECT * FROM scenario_publications")
+        }
+        new_publications = {
+            (row[0], row[1]): row
+            for row in new.execute("SELECT * FROM scenario_publications")
+        }
+        if (
+            set(old_publications) != set(new_publications)
+            or [key for key in old_publications
+                if old_publications[key] != new_publications[key]] != [battleground]
+        ):
+            raise ValueError("Unexpected scenario publication content drift")
+        report["parity"] = "passed"
+        return report
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.parse_args(argv)
-    print(json.dumps(audit(), indent=2))
+    parser.add_argument(
+        "--v10-candidate", type=Path,
+        help="Read-only comparison of tracked v9 against an existing v10 rules.db",
+    )
+    args = parser.parse_args(argv)
+    report = audit_v10_candidate(args.v10_candidate) if args.v10_candidate else audit()
+    print(json.dumps(report, indent=2))
     return 0
 
 

@@ -240,47 +240,25 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 ### Performance, storage, and build tooling
 
-- [ ] **Complete the v10 rules-data publication migration (post-1.0):** The
-  `build-rules` CLI now constructs a v10 candidate combining v9 Restrictions
-  and normalized deployed-object identity, attribute provenance, reviewed
-  delivery paths and source-verified Unit uses. v9 runtime and JSON releases
-  remain readable; the existing production image and tracked v9 rules.db have
-  not been replaced.
-  - [x] Reconcile the tracked-v9 Battleground rebuild drift: field-level
-    comparison found only the newly curated dimension annotations, centre guide
-    and zone labels in scenario geometry; `scenario_publications` changes only
-    its derived content SHA. Preserve these intentional map refinements in v10,
-    rather than reverting curated data to the older binary.
-  - [x] Restore the independent checkout-hosted target: the default
-    `build-rules` publishes an ignored, matched v10 runtime with both JSON
-    companions, while `serve` automatically prefers that build (or uses the
-    tracked release when absent). Explicit `--database` bypasses auto-selection;
-    Docker still packages only the tracked, validated release pair.
-  - [ ] Promote a fully accepted v10 artifact set to tracked
-    `data/generated/`. Reproducible ignored staging already works via
-    `tools.build_v10_runtime_candidate` and verifies the four matching files:
-    v10 rules.db (17 reviewed objects, 1 unresolved delivery),
-    v2 `variant-usage.json` (151 groups), Weapon citations (62 Weapons), and
-    pinned Army database. Complete frozen-candidate parity and hosted/image
-    acceptance before updating tracked artifacts; avoid mixing v10 with old
-    v9 publication hashes.
-  - [x] Make Docker image assembly schema-selective: the verifier and
-    `tools.prepare_runtime_bundle` now package the four-file v10 artifact set
-    without deployed-object JSON, while existing v9 images retain their matched
-    fifth file. Deployment generates legacy JSON only for v8/v9, and the
-    container's read model chooses by schema. Keep this contract through
-    final v10 image verification.
-  - [ ] Validate the promoted v10 release image and exact tracked artifacts
-    on hosted CI, including deployment smoke and frozen-candidate parity.
-    The isolated local v10 Docker preview passed on 2026-11-08 after fixing
-    loopback networking and the text/plain health probe. It verified v10
-    package contents, startup, deployed-object API, exact-variant API and
-    Weapon Chart citations, then removed its temporary image/container and
-    restored v9 Docker build inputs. No deployment was performed. Do not
-    introduce live-replacement locks, in-container regeneration or multi-file
-    runtime transaction/rollback machinery; new images replace old images
-    as a unit. Retire superseded v9 promotion helpers after their unique
-    contracts are migrated and tested.
+- [ ] **Finish v10 rules-data release acceptance (post-1.0):** The matched
+  v10 artifact set was promoted to tracked `data/generated/` in development
+  on 2026-11-08. It contains 17 normalized deployed objects (one unresolved
+  delivery), 151 exact-variant groups (v2), reviewed citations for 62 Weapons,
+  and the unchanged pinned Army database. The read-only v9→v10 common-table
+  parity audit passed: only schema metadata and Battleground map annotations/
+  labels changed among existing records; seven normalized deployed-object
+  tables were added. Checkout hosting and release image packaging are
+  independently supported. The *previous tagged production release* remains
+  v9; there has been no deployment or new release tag.
+  - [ ] Obtain terminal hosted Source, Deployment, Wheel and Cross-browser
+    acceptance for the exact promoted-artifact SHA; confirm the release image
+    against the tracked four-file set. Local tracked-image build, startup,
+    provenance, deployed-object, variant and Weapon API smoke passed
+    2026-11-08, and the disposable image/container were removed.
+  - [ ] After hosted acceptance, audit and retire superseded v9 promotion
+    helpers (preserving any remaining v8/v9 compatibility consumers). Keep
+    the immutable-image release model simple: no live replacement locks,
+    in-container regeneration or multi-file runtime transaction machinery.
 
 - [ ] **Post-1.0 infrastructure research — deferred:** Continue the
   [Chromium lifecycle and concurrency investigation](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)

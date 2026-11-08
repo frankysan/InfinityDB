@@ -58,11 +58,11 @@ entries: Army Skill 260 extras `298/TEXT:+1` and `299/TEXT:+2`,
 respectively `max-trooper-count-increase` by one or two, scoped
 solely to `optional-reinforcements-extra-army-list`. The
 validator rejects any other source signature or effect scope, and
-fresh exports expose the typed effects. The reviewed (+1)/(+2)
-semantics are now present in the tracked v9 `rules.db` after a
-separately authorized guarded paired promotion. The matched
-`deployed-objects.json` re-pins only the rules SHA-256; all 17
-reviewed objects and other source fingerprints remain unchanged.
+fresh exports expose the typed effects. The reviewed (+1)/(+2) semantics were first promoted into the
+tracked v9 `rules.db` through guarded paired publication. They remain
+in the tracked v10 database. Its normalized deployed-object tables
+supersede the formerly matched standalone JSON; all 17 reviewed
+objects and their source evidence are retained.
 Reinforcement list legality is not calculated.
 Separate N5-native procedural authority verification remains open.
 The optional Rule detail page also exposes a browser-only list of currently

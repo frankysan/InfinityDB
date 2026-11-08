@@ -50,12 +50,12 @@ jobs:
         if: matrix.os != 'ubuntu-latest'
         run: python -m playwright install ${{ matrix.engine }}
 
-      - name: Materialize the matched deployed-object companion
-        # The tracked variant-usage snapshot requires this ignored publication.
-        # Match Source checks and deployment smoke; never bypass provenance guards.
+      - name: Validate schema-matched deployed objects
+        # Legacy v8/v9 needs ignored JSON; v10 uses embedded reviewed objects.
+        # Match Source checks and deployment smoke; preserve provenance guards.
         run: |
-          python -m tools.build_deployed_object_publication
-          python -m tools.build_deployed_object_publication --check
+          python -m tools.build_deployed_object_publication --when-legacy
+          python -m tools.build_deployed_object_publication --check --when-legacy
 
       - name: Run selected critical journeys
         run: python -m tools.run_cross_browser_compatibility --engine ${{ matrix.engine }}

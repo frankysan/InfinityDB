@@ -156,8 +156,8 @@ def check_export(
             return ["isolated CI dependency installation failed"]
 
     for arguments in (
-        ["-m", "tools.build_deployed_object_publication"],
-        ["-m", "tools.build_deployed_object_publication", "--check"],
+        ["-m", "tools.build_deployed_object_publication", "--when-legacy"],
+        ["-m", "tools.build_deployed_object_publication", "--check", "--when-legacy"],
     ):
         # The ordinary mode may have an editable install of the working tree.
         # Publication preparation must import the indexed application instead.

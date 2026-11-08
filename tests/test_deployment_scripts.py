@@ -583,18 +583,26 @@ def test_deployment_smoke_builds_and_exercises_v8_rollback_image() -> None:
     assert "data/generated/deployed-objects.json /app/data/deployed-objects.json" not in workflow
 
 
-def test_source_ci_builds_ignored_release_publication_before_tests() -> None:
-    workflow = _read(".github/workflows/source-checks.yml")
-    source_checkout = workflow.split("- name: Check out source", 1)[1].split(
+def test_source_and_cross_browser_ci_prepare_only_legacy_deployed_json() -> None:
+    source = _read(".github/workflows/source-checks.yml")
+    browser = _read(".github/workflows/cross-browser-compatibility.yml")
+    source_checkout = source.split("- name: Check out source", 1)[1].split(
         "- name: Set up Python", 1
     )[0]
     # Frozen reference-evidence tests use git show against pinned older commits.
     assert "fetch-depth: 0" in source_checkout
-    generate = workflow.index("python -m tools.build_deployed_object_publication")
-    verify = workflow.index("python -m tools.build_deployed_object_publication --check")
-    source_checks = workflow.index("- name: Run source checks")
-    assert generate < verify < source_checks
-    assert "python tools/run_checks.py" in workflow
+    for workflow in (source, browser):
+        assert "python -m tools.build_deployed_object_publication --when-legacy" in workflow
+        assert (
+            "python -m tools.build_deployed_object_publication --check --when-legacy"
+            in workflow
+        )
+    generate = source.index("python -m tools.build_deployed_object_publication --when-legacy")
+    verify = source.index(
+        "python -m tools.build_deployed_object_publication --check --when-legacy"
+    )
+    assert generate < verify < source.index("- name: Run source checks")
+    assert "python tools/run_checks.py" in source
 
 
 def test_source_ci_matrix_time_budgets_include_isolated_preflight() -> None:

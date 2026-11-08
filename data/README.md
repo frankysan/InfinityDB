@@ -57,18 +57,17 @@ provenance/state, and build outputs.
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — generated `master.json`, normalized data, validation reports,
   the application `infinity.db`, development-only `infinity.raw.db`, and the
-  separate curated-rules `rules.db` and deterministic `deployed-objects.json`,
-  `variant-usage.json`, and `weapon-profile-sources.json` reference publications.
-  The two SQLite databases and the **byte-exact variant-usage and Weapon-profile
-  JSON files** are tracked release artifacts;
-  `deployed-objects.json` remains ignored and is regenerated from the pinned
-  databases and reviewed source before Docker packaging **for the current v9
-  release**. A separately staged v10 build embeds this reviewed projection in
-  normalized rules.db tables; Docker packaging and release-artifact promotion
-  still require migration before that format can ship. Variant usage requires
-  the paired raw archive to regenerate, so a tagged/deployment checkout uses
-  the tracked JSON and validates its Army/rules/deployed-object fingerprints
-  rather than trying to regenerate it without the raw archive.
+  separate curated-rules `rules.db`, `variant-usage.json` and
+  `weapon-profile-sources.json` reference publications. The two SQLite
+  databases and the **byte-exact variant-usage and Weapon-profile JSON files**
+  are tracked release artifacts. The tracked development release pair now
+  uses schema v10: reviewed deployed objects are embedded in `rules.db`, and
+  its v2 variant publication has no separate deployed-object JSON dependency.
+  `deployed-objects.json` remains ignored and is generated only for legacy
+  v8/v9 image compatibility; the previously tagged production release is v9.
+  Variant usage requires the paired raw archive to regenerate, so a
+  tagged/deployment checkout validates the tracked JSON and its source
+  fingerprints rather than regenerating it without raw inputs.
   Intermediate JSON/raw archives and other generated build products remain ignored.
 
 **Checkout runtime:** `infinity-db build-rules` (without an explicit

@@ -28,6 +28,11 @@ are not retroactively relabeled.
   up-to-date local Rules, exact-variant data and Weapon citations without
   requiring Docker release publication. Docker continues to use only
   verified, matched release artifacts.
+- **Data processing + Deployment:** Promote the verified v10 Rules database
+  and matching variant/Weapon publications together, retaining existing
+  rules semantics and the improved Battleground map. Reviewed deployed
+  objects are embedded in the rules database; legacy release images keep
+  their independent JSON compatibility.
 
 ## [1.0.0] - 2026-11-07
 

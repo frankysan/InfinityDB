@@ -206,6 +206,7 @@ Acquisition is explicit and separate from normal builds:
 ```powershell
 python tools/download_army_json.py data/raw
 infinity-db build --compact
+infinity-db build-rules
 infinity-db serve
 ```
 
@@ -229,10 +230,13 @@ serving. It requires the paired raw Army database produced by
 `infinity-db build --compact` to publish reviewed exact-variant usage.
 Use `--output` for a **standalone Rules-only** build with no checkout
 publication, or `--legacy-v8`/`--legacy-v9` for compatibility work.
-For an independently staged, source-matched v10 release candidate, run
+For an independently staged, source-matched v10 candidate, run
 `python -m tools.build_v10_runtime_candidate` and repeat with `--check`.
-These commands do not replace tracked Rules or dependent release JSON.
-The shipped v9 release remains in place until explicit v10 acceptance.
+Use `--promote-release` to explicitly verify v9→v10 semantic parity and
+promote the three matched v10 tracked files (Rules, variant usage and Weapon
+citations). The development branch now contains this promoted v10 set;
+the previous tagged production release remains v9 until separate acceptance
+and deployment.
 
 Reference PDFs and wiki snapshots are research inputs rather than direct runtime
 inputs. Human-reviewed rules collections live under `data/curated/rules/`.

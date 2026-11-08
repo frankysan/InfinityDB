@@ -121,23 +121,23 @@ SHA-256, and compares `infinity.db`'s embedded `snapshotArchiveSha256` with
 data and graphical publication to the same exact source ZIP without requiring that raw archive
 or the terminal `army-symbol-build.json` on the server.
 
-For the current tracked v9 release, before building the Docker image,
-`deploy.sh` deterministically generates and checks the ignored
-`data/generated/deployed-objects.json` publication from the
-tracked database pair and reviewed curated source files. It fails rather than
-ship a missing or mismatched publication. No raw snapshots or database rebuilds
-are needed on the deployment host. Before any Docker build, run
+For v8/v9 releases, `deploy.sh` deterministically generates and checks the
+ignored `data/generated/deployed-objects.json` publication before packaging.
+For the tracked v10 development pair, deployed objects are embedded in
+`rules.db` and validated against the exact Army database hash; no legacy
+JSON is generated or shipped. No raw snapshots or database rebuilds are
+needed on the Docker host. Before a direct Docker build, run
 `python -m tools.prepare_runtime_bundle` after verifying the tracked
 publications. It creates ignored `data/runtime/` with exactly the validated
-schema-specific image files; direct `docker build` also requires this step.
-In contrast, the
-exact-variant publication is a **tracked release file** built during development
-with `tools.build_variant_usage --publish` and `--check-publication`, using the
-pinned ignored raw source. Deployment and clean CI have no raw archive;
-they validate the committed publication against the tracked databases and
-generated deployed-object bytes without regenerating it. Changes to either
-database or the deployed-object publication require rebuilding and committing
-matching variant JSON during release preparation.
+schema-specific four- or five-file image contents.
+
+The exact-variant publication is a **tracked release file**, source-verified
+from the pinned raw Army archive during development. v9 uses the legacy JSON
+fingerprint; v10 uses the embedded deployed-object model and format v2.
+Docker deployment and clean CI validate the paired, committed publication
+against the tracked databases without regenerating it. Changes to either
+database require promoting and committing the matching variant and Weapon JSON
+together.
 
 The tracked `weapon-profile-sources.json` is generated from the same
 database pair and reviewed Weapon decisions with
@@ -149,18 +149,28 @@ serves it independently of the curated files.
 
 The v10 candidate builder embeds reviewed deployed objects directly in
 `rules.db` and prepares v2 variant usage plus matching Weapon citations.
-It is staged under ignored `local/v10-candidate/` by default, without
-`deployed-objects.json`. For a disposable v10 image build preview, run
-`python -m tools.prepare_runtime_bundle --source-dir local/v10-candidate`
-to fill `data/runtime/` from that validated candidate. The optional
-`python -m tools.preview_runtime_image --source-dir local/v10-candidate`
-builds an isolated Docker preview, checks its packaged data and local HTTP
-routes, removes the preview container/image, and restores the tracked
-release's runtime bundle. This requires an active Docker Linux engine.
-Normal `deploy.sh` always reconstructs the image bundle from tracked
-`data/generated/`, and never silently selects the local candidate. The tracked release remains v9
-pending acceptance; see [TODO](TODO.md#performance-storage-and-build-tooling).
-The immutable container never regenerates or replaces its databases at runtime.
+It stages exactly four files under ignored `local/v10-candidate/` by default,
+without `deployed-objects.json`. After `--check`, the explicit
+`--promote-release` command verifies preserved v9 semantics plus the
+Battleground map additions and promotes the three changed tracked release
+artifacts together. `infinity.db` remains byte-identical. For example:
+
+```sh
+python -m tools.build_v10_runtime_candidate --output-dir local/v10-candidate --check
+python -m tools.build_v10_runtime_candidate --output-dir local/v10-candidate --promote-release
+python -m tools.verify_deployment_assets --skip-svg
+```
+
+Use `python -m tools.preview_runtime_image --tracked-release` for a
+disposable image build/startup and API smoke test against the **actual tracked
+release pair**. It cleans up the preview container/image and restores
+`data/runtime/` to the tracked bundle. Requires an active Docker Linux engine.
+Normal `deploy.sh` always reconstructs the bundle from tracked
+`data/generated/` and never selects ignored local candidates. The
+development branch has promoted v10; the prior tagged production release
+remains v9 until release acceptance. See the
+[open v10 release gate](TODO.md#performance-storage-and-build-tooling).
+The immutable container never regenerates or replaces databases at runtime.
 
 The Docker image explicitly configures both runtime database paths. Missing, invalid, or
 incompatible tracked databases or reference publications fail before activation. After building the image,
