@@ -38,108 +38,219 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Browse current N5.3 rules alongside Units, Weapons, Skills and Equipment, with
-  inspectable citations and known source disagreements explained in context.
-- Follow linked references for the Player Turn, Orders and AROs, Command Tokens,
-  movement, terrain, Silhouettes, Hacking, States and Fireteams.
-- Read dated FAQ answers beside the rules and scenarios they affect, and inspect
-  reviewed Weapon profiles and deployed objects with their source-specific values.
-- Find scenario Specialist Troop candidates and use clearer core-scenario maps,
-  structured charts and narrow-screen Unit pages. An optional ITS Season 18
-  Battleground pilot is available alongside the core scenarios.
-- Navigate with improved keyboard focus, assistive-technology announcements,
-  reference previews and a collapsible accuracy notice in light and dark themes.
+- Expanded the N5.3 reference with linked explanations of the Player Turn, Orders and AROs,
+  Command Tokens, movement, combat, Hacking and Fireteams, with citations beside the rules.
+- Added searchable Weapon Properties, expandable Ammunition help and separate profiles for
+  17 deployed objects. Expanded Equipment and Glossary references and made more source links
+  available directly from Unit and Weapon profiles.
+- Added 29 dated FAQ clarifications beside the affected rules and scenarios, and explained
+  known disagreements between Army, rulebooks, Wiki pages and language editions in context.
+- Added scenario-specific Specialist Troops filtering, optional Reinforcements references
+  and the ITS Season 18 Battleground pilot with game-size-specific maps and scoring.
+- Improved rules charts, core-scenario maps and narrow-screen Unit pages. Added clearer
+  keyboard navigation and page announcements, and made the accuracy notice collapsible.
 
 ### Added
 
-- **Data processing + Web backend + Web frontend:** Extend the current N5.3 reference
-  across General Rules, Skills, Equipment, Weapons, Ammunition, Traits, Labels,
-  States and Glossary terms. Definition cards and contextual Unit help expose
-  current citations, including exact Weapon Chart locators for reviewed profiles
-  and individual modes. Weapon profiles offer expandable Ammunition help and
-  searchable Weapon Properties alongside their separate Traits, Labels and States.
-- **Data processing + Web backend + Web frontend:** Add linked Game Sequence,
-  Order Pool, Orders/AROs, Command Token, Initiative, Combat Group, Standard Game,
-  Retreat! and Restrictions references. Keep setup recommendations and scenario
-  exceptions distinct from a live rules or Army List legality engine.
-- **Data processing + Web backend + Web frontend:** Expand movement and battlefield
-  geometry help for Move, Climb, Jump, visibility, Cover, zones, Coherency,
-  replacement positioning and Silhouettes, including the S0/SX exceptions.
-  Publish Game Modes and suggested terrain combinations; Gate search labels lead
-  to Access Width.
-- **Data processing + Web backend + Web frontend:** Publish 29 dated FAQ
-  clarifications with current English/Spanish sources and retained original
-  provenance where applicable. Preserve scenario scope, supersession and
-  disclosed publication conflicts.
-- **Data processing + Web backend + Web frontend:** Add standalone references for
-  17 reviewed deployed objects, with delivery/context links and deliberate
-  disputed or unavailable attribute values. Developer Mode can trace reviewed
-  Skill and Equipment variants to exact source occurrences and Unit contexts;
-  unreviewed or unassigned options are excluded.
-- **Data processing + Web backend + Web frontend:** Add a scenario-aware Specialist
-  Troops filter and optional Reinforcements references. Reinforcements procedures
-  retain their N4-origin warning; Commlink extras do not change the normal N5
-  roster limit. Request SpecBall is a separate core procedure from Speedball
-  and ITS TEAM-OPS.
-- **Data processing + Web backend + Web frontend:** Add version-specific scenario
-  selection and the ITS Season 18 Battleground pilot, with size-specific maps,
-  Sectors, scoring and rules. Links retain the selected collection and game size.
+- **Data processing + Web backend + Web frontend:** Added Game Sequence and Order Pool
+  references covering the five phases of the Player Turn, Tactical Phase checks, Combat Group
+  Order ownership, hidden and off-table Orders, unused Orders and repeat spending. Explained
+  the source disagreement over Lieutenant Order eligibility alongside the supported reading.
+- **Data processing + Web backend + Web frontend:** Added an Orders/AROs quick reference
+  linking core declarations to their rules, with scenario actions and Request Reinforcements
+  separately identified. Added an ARO overview covering eligibility, declaration timing,
+  valid targets, one reaction per Order, default Burst and the restriction on splitting Burst.
+- **Data processing + Web backend + Web frontend:** Added a Command Tokens reference
+  explaining the shared four-token match pool and Strategic, Executive and Operational uses,
+  including first-turn restrictions, expenditure timing, eligible actions and repeat-use limits.
+- **Data processing + Web backend + Web frontend:** Added Initiative Roll and Combat Group
+  references covering Lieutenant WIP, rerolls, turn-order and Deployment choices, the
+  ten-member Combat Group limit, Peripheral capacity, group information and transfer exceptions.
+  Added separate Army Retreat! and Standard Game references explaining the survivor check,
+  Loss of Lieutenant, recovery and evacuation, and the Standard Game's rounds, scoring and
+  ending conditions without applying those endings to scenarios.
+- **Data processing + Web backend + Web frontend:** Added a Game Modes table with six
+  N5.3 game sizes, Army Points, base SWC, recommended table and Deployment Zone dimensions,
+  estimated play times and Retreat! thresholds. Kept setup recommendations distinct from
+  scenario-specific requirements.
+- **Data processing + Web backend + Web frontend:** Added a dedicated General Rules page
+  for the N5.3 Restrictions chart, covering six subjects and fourteen prohibitions, including
+  mounted Motorcycles, upward movement, ladder use and Lieutenant selection. Linked related
+  Skill, Equipment and State restrictions to their source context in Developer Mode.
+- **Data processing + Web backend + Web frontend:** Expanded movement and battlefield geometry
+  references for Move, Climb, Jump, Line of Fire, Cover, zones, Coherency and replacement
+  positioning. Added supporting-surface requirements, vertical-movement and posture exceptions,
+  and linked Silhouette explanations, including S0 and SX alongside the existing S1–S8 diagrams.
+  Expanded Deployment Phase help with base placement, contact, fit, Prone and pregame measurement
+  restrictions.
+- **Data processing + Web backend + Web frontend:** Added eighteen suggested terrain
+  combinations, including optional difficulty, combined visibility and conditional Zero-G.
+  Made Narrow Gate and Wide Gate discoverable through search and the Glossary, linking to
+  Access Width.
+- **Data processing + Web backend + Web frontend:** Expanded linked combat references for
+  the Order Expenditure Sequence, Coordinated Orders, Guts Rolls, Face to Face and Saving Rolls,
+  Special Dice and Mixed Weapons. Added BS/CC Attack explanations for shooting into close
+  combat, Coup de Grâce and multiple-Trooper attacks, plus distinct Direct and Impact Template
+  guidance for targeting, cancellation, Dodge, Criticals and scenery.
+- **Data processing + Web backend + Web frontend:** Expanded Hacking Area, Firewall,
+  Supportware and Modifiers Explained references with linked targeting, timing, exceptions
+  and recovery guidance. Added N5.3 chart citations to Hacking Device references alongside
+  their Wiki sources.
+- **Data processing + Web backend + Web frontend:** Expanded Weapon references across
+  CC Weapons, Pistols, Rifles, Sniper Rifles, heavy and support weapons, Mines and deployed
+  objects. Explained mode-specific placement, charges, templates and effects for Weapons
+  including D-Charges, Disco Baller, SymbioBomb, Pitcher and Mine Dispenser. Made Breaker
+  Marksman Rifle searchable even without current Unit usage.
+- **Data processing + Web backend + Web frontend:** Added searchable Weapon Properties with
+  linked previews and cited examples, including Plasma, Viral, Breaker, K1, MULTI,
+  Monofilament, Silenced, AP combinations and N+E/M. Added expandable Ammunition help on
+  Weapon profiles while preserving each mode's Saving Rolls, Traits, Labels and States.
+  Added exact N5.3 Weapon Chart citations for reviewed profiles and individual modes.
+- **Data processing + Web backend + Web frontend:** Added standalone profiles for 17 reviewed
+  deployed objects, with source links, delivery methods and explicitly disputed or unavailable
+  attributes. Covered WildParrot's two placement methods, FastPanda's Perimeter deployment
+  and Armed Turret profiles, and retained the unresolved Mine Dispenser subtype. Linked
+  reviewed delivery sources to their carrying Unit profiles and loadouts where established.
+- **Data processing + Web backend + Web frontend:** Added 29 dated FAQ clarifications beside
+  the Equipment, Scenarios, Skills, Traits, States, General Rules, Hacking Programs and
+  Fireteams they affected. Linked current English/Spanish answers and retained the original
+  FAQ version where applicable. Added a General Deployment repositioning reference and
+  identified the Ancillary scoring answer's Annihilation-only scope as InfinityDB's reviewed
+  interpretation, with the source ambiguity disclosed.
+- **Data processing + Web backend + Web frontend:** Added a Specialist Troops reference and
+  a Unit Explorer filter with InfinityDB Standard, Domination, Supplies and Firefight choices.
+  Results identified candidate Units for the selected context without implying that every
+  profile qualified.
+- **Data processing + Web backend + Web frontend:** Added optional Reinforcements Extra,
+  Commlink and Request Reinforcements references, with links to Reinforcement Section pools,
+  their owning Armies and filtered Unit Explorer views. Marked the procedures as **N4-origin**
+  because current N5/ITS references had not established that the historic procedures were
+  reissued unchanged. Scoped Commlink (+1)/(+2) Trooper-limit increases to that Extra,
+  preserving the normal N5 roster limit.
+- **Data processing + Web backend + Web frontend:** Added a separate Request SpecBall
+  reference covering eligibility, token drop and collection, Enhanced Profiles and SpecBot
+  handling, with links distinguishing it from Request Speedball and ITS TEAM-OPS procedures.
+- **Data processing + Web backend + Web frontend:** Added scenario collection and revision
+  selection, plus the ITS Season 18 Battleground pilot with size-specific maps, Sectors,
+  end-of-game scoring and special rules. Updated shared scenario links to retain the selected
+  collection and game size.
+- **Web backend + Web frontend:** Added Equipment such as Cubes and TinBots to the Glossary
+  with links to their reference pages. Added source citations to embedded Attribute,
+  Game-term and Unit Profile definitions and contextual profile-notation help, and exposed
+  Label vocabulary sources with their scope clearly identified.
+- **Web backend + Web frontend:** Added Developer Mode links from reviewed Skill and
+  Equipment variants to their exact source occurrences and Army-specific Unit profiles or
+  loadouts. Excluded unreviewed variants and shared options without established assignments.
 
 ### Changed
 
-- **Web frontend:** Make navigation more compact, keep mobile menus scrollable,
-  move keyboard focus to newly loaded content and announce soft navigation to
-  assistive technologies. The floating accuracy/independence notice can collapse
-  to a reachable icon control for the browsing session.
-- **Web frontend:** Present FAQ answers and deployed-object profiles in separate
-  cards, improve Orders/AROs tables and section spacing, and remove duplicate
-  source captions while retaining linked citations. Exact source occurrences
-  and technical Reinforcement relationships appear only in Developer Mode.
-- **Data processing + Web backend + Web frontend:** Improve Martial Arts, Booty
-  and MetaChemistry charts with separate conditional results and links to related
-  references. Clarify Peripheral, treatment/recovery, Immunity, State,
-  declaration and Fireteam interactions without calculating game outcomes.
-- **Data processing + Web frontend:** Keep known Army, Wiki, PDF and bilingual
-  disagreements visible beside the selected interpretation. Imported profiles
-  retain their source values; reference-only Equipment combinations are shown
-  separately from current Army options.
+- **Data processing + Web backend + Web frontend:** Improved Martial Arts, Booty and
+  MetaChemistry charts by hiding inapplicable modifiers, separating Booty's TAG/other-Troop-Type
+  results and MetaChemistry's compound outcomes, and linking related Weapons, Skills and
+  Equipment without changing the source results.
+- **Data processing + Web frontend:** Expanded Trooper, Unit Profile and Peripheral Glossary
+  definitions to explain profile choices, Attributes, Orders, Attacks, Controller activation,
+  Army List limits and Cost accounting. Clarified Deployable Equipment and Weapons, valid
+  Targets and the distinction between Hostile and Neutral game elements.
+- **Data processing + Web frontend:** Expanded Label and Trait definitions with deployment
+  limits, attack/Hacking eligibility, close-combat modifiers, fixed results, Null States and
+  Private Information conditions. Clarified Deployable targetability, spent Disposable uses,
+  Unloaded, Non-Reloadable, Target (Attribute) and Silent's conditional stacking, while retaining
+  Assignable's bilingual timing difference and the unresolved Silent/Immunity interaction.
+- **Data processing + Web backend + Web frontend:** Expanded Peripheral, Doctor and Engineer
+  guidance with treatment and recovery examples, and clarified Immunity with simultaneous
+  State effects. Expanded explanations of Stealth, Controlled Jump/Speedball, Intuitive Attack,
+  BS Weapon (WIP), Continuous Damage and Negative Feedback lifetimes. Kept ordinary rules,
+  conditional exceptions and reviewed examples visibly distinct.
+- **Data processing + Web frontend:** Clarified Fireteam formation and ongoing membership,
+  Team Leader and shared actions, leaving/rejoining, TinBot sharing, Special Dice and Disposable
+  spending. Explained the Level 3 Morat example without granting Level 4 bonuses. Added links
+  between Fireteams and relevant State rules, including Suppressive Fire, Retreat!, Isolated
+  and the Ancillary-specific Disconnected exception.
+- **Data processing + Web frontend:** Added separate ECM: Guided and ECM: Hacker explanation
+  cards with their attack scope and citations. Distinguished cited, reference-only Equipment
+  combinations from options present in current Army data, without implying that a Unit had
+  those combinations or that a family citation verified every named variant.
+- **Data processing + Web backend + Web frontend:** Made known source disagreements visible
+  beside the affected rules and retained imported Army values. Explained disputes over
+  Weapon profiles and Saving Rolls, Mine/Dazer and Armed Turret Silhouettes, Dodge (ARM+3),
+  Fireteam dice/member-count examples and Doctor/Engineer target eligibility. Added contextual
+  explanations for unresolved Army qualifiers, FAQ question scope and Engineer's bilingual
+  contact wording.
+- **Web frontend:** Made desktop navigation more compact and mobile menus scrollable on short
+  screens. Moved keyboard focus to newly loaded content and announced navigation to assistive
+  technologies while preserving scroll restoration. Made the accuracy/independence notice
+  collapsible to an accessible icon for the current browsing session.
+- **Web frontend:** Presented FAQ answers and deployed-object profiles in separate cards,
+  improved Orders/AROs tables and section spacing, and removed repeated subtitles, date metadata
+  and source captions while retaining linked citations. Moved exact source occurrences and
+  technical Reinforcement relationships into Developer Mode and reduced repeated processing
+  when loading Glossary definitions.
 
 ### Fixed
 
-- **Data processing + Web backend + Web frontend:** Correct reviewed Skill
-  declaration categories and conditional ARO descriptions, Attribute help,
-  Hackable eligibility and Hacking Program target explanations. Correct
-  Pheroware, Repeater, Supportware and other reviewed N5.3 source locators.
-- **Data processing + Web backend + Web frontend:** Correct Doctor (2W) to remove
-  up to two Wounds. Clarify Lieutenant/Isolated timing and retain conditional
-  Ammunition, Critical, Saving Roll and Immunity exceptions.
-- **Data processing + Web frontend:** Clarify Mine Trigger Areas, deployed-object
-  removal and persistence, source-specific Weapon profiles and shared-carrier
-  context. Restore the source-scoped Restrictions in the shipped rules data.
-- **Data processing + Web frontend:** Correct Domination Console measurement
-  origins and show physical Console/Supply Box diameters separately from scoring
-  areas. Preserve Annihilation's corrected scoring bands and disclose
-  Domination's conflicting 350-point SWC values.
-- **Web backend + Web frontend:** Respect Fireteam chart exclusions for Wildcards,
-  preserve original member annotations and unverified FTO references, and avoid
-  treating every parenthesized term as a counts-as rule. Reinforcement parent
-  limits remain distinct from Section membership.
-- **Web frontend:** Keep dense Unit data, breadcrumbs and reference previews
-  usable on narrow screens. Make official Trait Wiki heading links available
-  through ordinary reference pages, and include nonempty upcoming-release notes
-  on What's changed.
-- **Deployment:** Keep aggregate metrics history working for reviewed variant-use
-  requests and Orders/AROs routes without retaining query values.
+- **Data processing + Web backend + Web frontend:** Corrected reviewed Skill declaration
+  categories and conditional ARO explanations. Identified Alert! as an automatic facing
+  adjustment, clarified Climbing Plus/Super-Jump declarations, and corrected guidance for
+  Guard/Aerial, Combat Instinct/Sixth Sense, Look Out!, Reload/Place Deployable, Discover and
+  Hacking Area reaction windows. Distinguished additive Range/Cover/Skill MODs from the
+  most-restrictive, non-stacking Visibility Zone MOD.
+- **Data processing + Web backend + Web frontend:** Corrected Hackable profile help to
+  identify default HI/REM/TAG/VH eligibility, the Hacker exception regardless of Troop Type
+  and Program-specific allied/enemy targeting. Explained an unspecified Hacking Program Target
+  dash without treating it as no valid target. Corrected Repeater and Supportware source links,
+  added primary citations for Hacking Programs and clarified White Noise timing and Zero Pain's
+  two-roll defense in either turn. Corrected Pheroware Tactics and PT: Endgame citations to the
+  N5.3 Weapon Chart on page 182.
+- **Data processing + Web backend + Web frontend:** Corrected Doctor (2W) to remove
+  **up to two Wounds**. Clarified an Isolated Lieutenant's next-Active-Turn Loss of Lieutenant
+  trigger and the difference between clearing Isolated before that turn and after the
+  army-level situation had begun.
+- **Data processing + Web frontend:** Clarified Ammunition, Critical and Immunity exceptions,
+  including PARA with missing PH, Shock's VITA condition, T2's additional Critical roll and
+  Stun/Guts. Separated Smoke/Eclipse opposition, Visor interactions, Dodge, template retention,
+  scenery and Critical effects in compact help. Kept Combined Ammunition distinct from
+  Combined Saving Rolls.
+- **Data processing + Web frontend:** Clarified Mine Trigger Area measurement, Total Cover,
+  concealed Markers, revealed objects and exceptional movement. Put Mine-specific profiles
+  before shared rules and displayed Cybermine's absent Ammunition as "--". Distinguished
+  Deactivator removal and persistent deployed-object effects from Boost contact attacks,
+  Armed Turret reactions and allied Disco Ball activation.
+- **Data processing + Web frontend:** Corrected Domination Console placement distances to
+  use marker centers and table edges, and displayed physical Console/Supply Box diameters
+  separately from scoring areas. Disclosed Domination's conflicting English 6 SWC and Spanish
+  7 SWC values at 350 points. Corroborated Annihilation's corrected survival bands while
+  retaining the four core scenarios' distinct scoring and ending conditions.
+- **Web backend + Web frontend:** Respected chart exclusions for Fireteam Wildcards,
+  including Invincible Army Forward Fireteams and Next Wave Team Achilles. Preserved original
+  member annotations, flagged unverified Unit/FTO references and stopped treating every
+  parenthesized term as a counts-as rule. Kept Reinforcement parent-Army limits separate from
+  Section members and repaired links to the Fireteam quick reference.
+- **Data processing + Web backend + Web frontend:** Put Equipment imported in Army's Skill
+  category, Regular Training and loadout Attribute overrides in their proper Unit categories.
+  Removed nonexistent Skill links created by source-only markers. Explained how dashed
+  Attributes limited declarations and use, and retained SWC's support-weapon meaning.
+- **Data processing + Web backend:** Restored fourteen source-scoped Restrictions in the
+  shipped rules data and the Restrictions API without changing reviewed deployed-object
+  profiles or existing relationships.
+- **Web frontend:** Fixed narrow-screen clipping of dense Unit attributes, loadouts,
+  composite-option names, Points/SWC, Order symbols and reference breadcrumbs. Kept Glossary
+  headings below the navigation bar and prevented detached previews from reopening after
+  navigation. Made official Wiki heading links available on all 33 canonical Trait pages.
+- **Web backend + Web frontend:** Included nonempty upcoming-release notes on **What's changed**
+  and omitted empty development sections. Added Orders and AROs to the home page reference links.
+- **Deployment:** Fixed aggregate metrics-history collection for reviewed variant-use requests
+  and Orders/AROs routes without retaining query values.
 
 ### Upgrade notes
 
-- **Deployment:** Deploy the complete release image with its matched Army/rules
-  databases, deployed-object, variant-usage and Weapon-profile publications,
-  and graphical assets. Do not mix artifacts from different releases or rebuild
-  source data on the production server.
-- **Data processing:** Local installations maintaining their own generated data
-  must use the release's curated inputs and guarded v9 rules/publication workflow.
-  Preserve original upstream snapshots and recovery copies before migration.
+- **Deployment:** Required the complete release image with matched Army/rules databases,
+  deployed-object, variant-usage and Weapon-profile publications, and graphical assets.
+  Mixing artifacts from different releases or rebuilding source data on the production
+  server remained unsupported.
+- **Data processing:** Required local installations maintaining generated data to use the
+  release's curated inputs and guarded v9 rules/publication workflow. Migration required
+  retaining original upstream snapshots and recovery copies.
 
 ## [0.10.1] - 2026-10-10
 
