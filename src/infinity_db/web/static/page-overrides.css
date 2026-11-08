@@ -658,6 +658,11 @@ html:not([data-developer-mode="true"])
   width: min(860px, 100%);
 }
 
+.orders-aros-controls,
+.orders-aros-scenario {
+  margin-block-end: var(--space-3);
+}
+
 #matrix-sections,
 #scenario-matrix-sections {
   display: grid;
