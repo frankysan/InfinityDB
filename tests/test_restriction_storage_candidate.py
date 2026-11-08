@@ -4307,7 +4307,7 @@ def test_v9_validator_rejects_missing_table_and_broadened_constraint(
         RulesDatabase(target).validate()
 
 
-def test_default_build_rules_writes_standalone_v8_database(
+def test_default_build_rules_writes_standalone_v10_database(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from infinity_db import cli
@@ -4320,19 +4320,37 @@ def test_default_build_rules_writes_standalone_v8_database(
     assert args.output is None
     assert cli.cmd_build_rules(args) == 0
     with sqlite3.connect(output) as connection:
-        assert connection.execute("PRAGMA user_version").fetchone()[0] == 8
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == 10
     RulesDatabase(output).validate()
-    assert RulesDatabase(output).restrictions_payload()["available"] is False
+    assert len(RulesDatabase(output).restrictions_payload()["items"]) == 14
+    deployed = RulesDatabase(output).deployed_objects_payload(
+        ROOT / "data/generated/infinity.db"
+    )
+    assert deployed is not None
+    assert len(deployed["objects"]) == 17
 
 
-def test_v9_cli_requires_separate_staging_output() -> None:
+def test_v9_cli_rejects_tracked_release_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db import cli
+
+    path = tmp_path / "rules.db"
+    monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", path)
+    args = cli.build_parser().parse_args(["build-rules", "--output", str(path)])
+    with pytest.raises(ValueError, match="cannot write the tracked release"):
+        cli.cmd_build_rules(args)
+    assert not path.exists()
+
+
+def test_v8_manifest_conflict_fails_closed() -> None:
     from infinity_db.cli import build_parser, cmd_build_rules
 
     args = build_parser().parse_args([
-        "build-rules", "--restrictions-manifest",
+        "build-rules", "--legacy-v8", "--restrictions-manifest",
         "config/validation/restrictions-source-chart.json",
     ])
-    with pytest.raises(ValueError, match="explicit staging --output"):
+    with pytest.raises(ValueError, match="cannot be combined"):
         cmd_build_rules(args)
 
 
@@ -4352,16 +4370,16 @@ def test_explicit_v8_build_rules_cannot_replace_tracked_v9_database(
     monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", output)
     args = cli.build_parser().parse_args([
         "build-rules", str(ROOT / "data/curated/rules"),
-        "--output", str(output),
+        "--legacy-v8", "--output", str(output),
     ])
     assert args.output.resolve() == output.resolve()
-    with pytest.raises(ValueError, match="default build-rules export is v8"):
+    with pytest.raises(ValueError, match="cannot write the tracked release"):
         cli.cmd_build_rules(args)
 
     assert output.read_bytes() == original
 
 
-def test_default_build_rules_can_rebuild_existing_v8_database(
+def test_legacy_v8_opt_in_can_rebuild_existing_v8_database(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from infinity_db import cli
@@ -4370,10 +4388,9 @@ def test_default_build_rules_can_rebuild_existing_v8_database(
     documents = load_curated_directory(ROOT / "data/curated/rules")
     export_rules_database(documents, output)
 
-    monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", output)
     args = cli.build_parser().parse_args([
         "build-rules", str(ROOT / "data/curated/rules"),
-        "--output", str(output),
+        "--legacy-v8", "--output", str(output),
     ])
     assert args.output.resolve() == output.resolve()
     assert cli.cmd_build_rules(args) == 0
@@ -4401,7 +4418,7 @@ def test_explicit_build_rules_cli_exports_v9_to_separate_path(tmp_path: Path) ->
 
     output = tmp_path / "restrictions-v9.db"
     args = build_parser().parse_args([
-        "build-rules", "--restrictions-manifest",
+        "build-rules", "--legacy-v9", "--restrictions-manifest",
         "config/validation/restrictions-source-chart.json",
         "--output", str(output),
     ])

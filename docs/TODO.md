@@ -240,6 +240,31 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 ### Performance, storage, and build tooling
 
+- [ ] **Complete the v10 rules-data publication migration (post-1.0):** The
+  `build-rules` CLI now constructs a v10 candidate combining v9 Restrictions
+  and normalized deployed-object identity, attribute provenance, reviewed
+  delivery paths and source-verified Unit uses. v9 runtime and JSON releases
+  remain readable; the existing production image and tracked v9 rules.db have
+  not been replaced.
+  - [ ] Reconcile the read-only rebuild-equivalence audit's Battleground
+    differences in `records` and `scenario_publications` against reviewed
+    current inputs. Do not silently substitute a newly built rules.db with
+    different logical content.
+  - [ ] Rebuild the v10 tracked database from pinned curated/Army sources,
+    regenerate and verify v2 `variant-usage.json` and matched
+    `weapon-profile-sources.json`, and verify all API/Rules parity gates.
+  - [ ] Remove the legacy `deployed-objects.json` requirement from Docker
+    image assembly, deployment checks and build tooling once the tracked
+    v10 release and dependent publications are ready. Preserve v8/v9
+    read compatibility, but do not retain the separate JSON as a v10 runtime
+    dependency.
+  - [ ] Validate an immutable image built from the matched release artifacts,
+    including startup, API parity, deployment smoke and CI. Do not introduce
+    live-replacement locks, in-container regeneration or multi-file runtime
+    transaction/rollback machinery; new images replace old images as a unit.
+    Retire superseded v9 promotion helpers after their unique contracts are
+    migrated and tested.
+
 - [ ] **Post-1.0 infrastructure research — deferred:** Continue the
   [Chromium lifecycle and concurrency investigation](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)
   as maintenance research beyond the 1.0 baseline. The v1.0 instrumentation

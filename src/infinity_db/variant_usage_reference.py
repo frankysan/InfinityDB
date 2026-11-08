@@ -36,7 +36,9 @@ def publication_from_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Unsupported variant usage candidate")
     publication = {
         "format": PUBLICATION_FORMAT,
-        "formatVersion": PUBLICATION_VERSION,
+        "formatVersion": 2 if "deployedObjectPublicationSha256" not in candidate[
+            "sourceSnapshot"
+        ] else PUBLICATION_VERSION,
         "scope": PUBLICATION_SCOPE,
         # Raw SQLite bytes may differ across hosts even for the same validated
         # export pair. Keep the raw byte digest in build diagnostics, not in
@@ -70,7 +72,7 @@ def _validate_publication(document: Any) -> dict[str, Any]:
     if (
         not isinstance(document, dict)
         or document.get("format") != PUBLICATION_FORMAT
-        or document.get("formatVersion") != PUBLICATION_VERSION
+        or document.get("formatVersion") not in {PUBLICATION_VERSION, 2}
         or document.get("scope") != PUBLICATION_SCOPE
         or not isinstance(document.get("sourceSnapshot"), dict)
         or not isinstance(document.get("variants"), list)
@@ -83,8 +85,13 @@ def _validate_publication(document: Any) -> dict[str, Any]:
         "armyDatabaseSha256",
         "rulesDatabaseSha256",
         "exportPairSha256",
-        "deployedObjectPublicationSha256",
+        *(
+            ("deployedObjectPublicationSha256",)
+            if document["formatVersion"] == 1 else ()
+        ),
     )
+    if document["formatVersion"] == 2 and "deployedObjectPublicationSha256" in snapshot:
+        raise ValueError("v2 variant usage must not depend on deployed-object JSON")
     if any(
         not isinstance(snapshot.get(field), str)
         or len(snapshot[field]) != 64
@@ -226,9 +233,18 @@ def load_variant_usage_publication(
     if (
         snapshot["armyDatabaseSha256"] != _sha256(army_database)
         or snapshot["rulesDatabaseSha256"] != _sha256(rules_database)
-        or not deployed_object_publication.is_file()
-        or snapshot["deployedObjectPublicationSha256"]
-        != _sha256(deployed_object_publication)
     ):
         raise ValueError("Variant usage publication does not match release artifacts")
+    if publication["formatVersion"] == 1:
+        if (
+            not deployed_object_publication.is_file()
+            or snapshot["deployedObjectPublicationSha256"]
+            != _sha256(deployed_object_publication)
+        ):
+            raise ValueError("Variant usage publication does not match release artifacts")
+    else:
+        from infinity_db.rules_database import RulesDatabase
+
+        if RulesDatabase(rules_database).deployed_objects_payload(army_database) is None:
+            raise ValueError("Variant usage v2 requires normalized deployed objects")
     return publication

@@ -17,7 +17,7 @@ from typing import Any
 
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.deployed_object_publication import load_deployed_object_publication
-from infinity_db.rules_database import _variant_semantics
+from infinity_db.rules_database import RulesDatabase, _variant_semantics
 from infinity_db.variant_usage_includes import build_include_provenance
 from infinity_db.variant_usage_peripherals import build_peripheral_provenance
 
@@ -379,13 +379,19 @@ def build_variant_usage_projection(
 
     No writes, and no URL/API exposure. Unresolved inputs are diagnostic-only.
     """
-    verified = load_deployed_object_publication(publication_path, application_path,
-                                                rules_path)
-    if verified is None:
-        raise ValueError("Variant usage requires a matched deployed-object publication")
     export_pair = validate_database_pair(application_path, raw_path=raw_path)
     if export_pair is None:
         raise ValueError("Variant usage requires a pinned Army export pair")
+    embedded = (
+        RulesDatabase(rules_path).deployed_objects_payload(application_path)
+        if rules_path.is_file() else None
+    )
+    if embedded is None:
+        verified = load_deployed_object_publication(
+            publication_path, application_path, rules_path,
+        )
+        if verified is None:
+            raise ValueError("Variant usage requires a matched deployed-object publication")
     with (
         closing(_connect(application_path)) as application,
         closing(_connect(raw_path)) as raw,
@@ -495,7 +501,11 @@ def build_variant_usage_projection(
                 "rawDatabaseSha256": _digest(raw_path),
                 "rulesDatabaseSha256": _digest(rules_path),
                 "exportPairSha256": export_pair,
-                "deployedObjectPublicationSha256": _digest(publication_path),
+                **(
+                    {} if embedded is not None else {
+                        "deployedObjectPublicationSha256": _digest(publication_path)
+                    }
+                ),
             },
             "variants": ordered,
             "familyOnlyUniqueUnitCounts": {

@@ -89,8 +89,9 @@ SHA-256, and compares `infinity.db`'s embedded `snapshotArchiveSha256` with
 data and graphical publication to the same exact source ZIP without requiring that raw archive
 or the terminal `army-symbol-build.json` on the server.
 
-Before building the Docker image, `deploy.sh` deterministically generates and
-checks the ignored `data/generated/deployed-objects.json` publication from the
+For the current tracked v9 release, before building the Docker image,
+`deploy.sh` deterministically generates and checks the ignored
+`data/generated/deployed-objects.json` publication from the
 tracked database pair and reviewed curated source files. It fails rather than
 ship a missing or mismatched publication. No raw snapshots or database rebuilds
 are needed on the deployment host. A direct `docker build` requires that
@@ -110,6 +111,13 @@ exact bytes and source pins. Deployment verification runs this check without
 the PDF or raw Army archive. Rebuild and commit the matched file whenever
 either database or its reviewed inputs change. The image verifies and
 serves it independently of the curated files.
+
+The staged v10 rules builder now embeds deployed-object references directly in
+rules.db, but the v10 tracked-artifact/image migration remains pending (see
+[TODO](TODO.md#performance-storage-and-build-tooling)). When that migration
+ships, Docker packaging can omit the separate deployed-object JSON entirely.
+The container is immutable, so its artifact set is validated during image
+build and smoke testing, without runtime replacement or rollback orchestration.
 
 The Docker image explicitly configures both runtime database paths. Missing, invalid, or
 incompatible tracked databases or reference publications fail before activation. After building the image,

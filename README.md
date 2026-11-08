@@ -202,15 +202,18 @@ the detailed snapshot contract.
 
 ### Build the rules reference
 
-Curated rules data is built independently from Army data:
+The current rules build combines curated rule definitions with reviewed Army-derived
+deployed-object evidence, while keeping its complete reference model in rules.db:
 
 ```powershell
 infinity-db build-rules
 ```
 
-This writes the standalone v8-compatible database to
-`local/rules-standalone.db`. Use `--output` to choose another standalone path.
-Neither command updates the tracked v9 release database or its paired publication.
+This writes a **v10** candidate to `local/rules-standalone.db`, including
+normalized deployed objects and v9 Restrictions. Use `--output` for another
+staging path, or `--legacy-v8`/`--legacy-v9` for compatibility work.
+It never modifies the tracked release database. The shipped v9 release
+and its legacy JSON publication remain unchanged until v10 release acceptance.
 
 Reference PDFs and wiki snapshots are research inputs rather than direct runtime
 inputs. Human-reviewed rules collections live under `data/curated/rules/`.
@@ -282,19 +285,22 @@ infinity-db database-health data/generated/infinity.db --require-raw
 # Validate a curated rules file
 infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 
-# Build the independent v8-compatible rules-reference database
+# Build the complete v10 rules-reference candidate
 infinity-db build-rules
 ```
 
-`build-rules` reads `data/curated/rules/` by default and writes the standalone
-v8-compatible format to `local/rules-standalone.db` unless an explicit
-`--output` is provided. The tracked 1.0 rules release database uses the
-reviewed v9 conditional Restrictions table and must be built as a coordinated
-release pair with `data/generated/deployed-objects.json`; see
-[the migration and recovery contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
-Even with an explicit output path, the CLI refuses to overwrite the
-tracked v9 database with a v8 export. Use the guarded v9 staging and
-paired-publication workflow to update the tracked release pair.
+`build-rules` reads `data/curated/rules/` and the reviewed Army-source
+inputs, writing a v10 candidate to `local/rules-standalone.db` by default.
+The Restrictions chart and deployed-object reviews are applied automatically.
+Use `--legacy-v8` or `--legacy-v9` for older standalone formats.
+Direct writes to the tracked release `rules.db` are disallowed.
+
+The tracked 1.0 release still uses v9 with `deployed-objects.json`.
+The v10 migration is not yet published; see the
+[versioned storage contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted)
+and its release work in [TODO](docs/TODO.md#performance-storage-and-build-tooling).
+A tagged immutable Docker image must receive a validated matching set of
+artifacts rather than rebuilding data at container startup.
 
 `infinity-army` and `python -m infinity_army_data` remain available for the
 JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)

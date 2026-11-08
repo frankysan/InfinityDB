@@ -62,7 +62,10 @@ provenance/state, and build outputs.
   The two SQLite databases and the **byte-exact variant-usage and Weapon-profile
   JSON files** are tracked release artifacts;
   `deployed-objects.json` remains ignored and is regenerated from the pinned
-  databases and reviewed source before Docker packaging. Variant usage requires
+  databases and reviewed source before Docker packaging **for the current v9
+  release**. A separately staged v10 build embeds this reviewed projection in
+  normalized rules.db tables; Docker packaging and release-artifact promotion
+  still require migration before that format can ship. Variant usage requires
   the paired raw archive to regenerate, so a tagged/deployment checkout uses
   the tracked JSON and validates its Army/rules/deployed-object fingerprints
   rather than trying to regenerate it without the raw archive.

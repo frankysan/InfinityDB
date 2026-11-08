@@ -1,7 +1,7 @@
-"""Opt-in SQLite v9 candidate for source-scoped restriction constraints.
+"""Reviewed source-scoped Restrictions storage for v9/v10 rules snapshots.
 
-This is deliberately not called by the released v8 exporter or runtime API.
-It proves an additive, negative-only storage/read contract before promotion.
+The builder adds this negative-only table to a fresh v8 export baseline.
+It is never an in-place runtime database migration.
 """
 from __future__ import annotations
 
@@ -63,10 +63,10 @@ def stage_candidate_restrictions(
     manifest: dict[str, Any],
     records: dict[str, dict[str, Any]],
 ) -> int:
-    """Stage a v9 candidate atomically; leave all legacy tables and rows alone.
+    """Add reviewed Restrictions to a disposable v8 export transaction.
 
-    Call only on a disposable copied v8 database. This is not a runtime
-    migration/upgrade path and does not change PRAGMA user_version or metadata.
+    This is not a runtime migration/upgrade path and does not change
+    PRAGMA user_version or metadata.
     """
     conditions = compile_restriction_conditions(manifest, records)
     digest = manifest.get("sourcePdfSha256")

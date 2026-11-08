@@ -138,7 +138,7 @@ def smoke_wheel(wheel: Path, source: Path, work: Path, *, require_assets: bool) 
         [main_cli, "build", "army", "--output-dir", "generated", "--compact"],
         [main_cli, "database-health", "generated/infinity.db", "--require-raw"],
         [army_cli, "build", "army", "--output-dir", "army-only", "--compact"],
-        [main_cli, "build-rules", "rules", "--output", "generated/rules.db"],
+        [main_cli, "build-rules", "rules", "--legacy-v8", "--output", "generated/rules.db"],
         [main_cli, "validate-curated", "rules"],
     ):
         run(command, inputs)
