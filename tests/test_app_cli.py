@@ -316,9 +316,12 @@ def test_validate_curated_command_parses() -> None:
 
 def test_build_rules_command_defaults_to_curated_rules() -> None:
     parser = build_parser()
-    args = parser.parse_args(["build-rules", "--output", "rules.db"])
+    args = parser.parse_args(["build-rules"])
     assert args.input == Path("data/curated/rules")
-    assert args.output == Path("rules.db")
+    assert args.output is None
+
+    explicit = parser.parse_args(["build-rules", "--output", "rules.db"])
+    assert explicit.output == Path("rules.db")
 
 
 def test_validate_peripheral_identities_command_defaults_to_curated_contract() -> None:

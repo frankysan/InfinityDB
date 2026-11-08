@@ -4307,6 +4307,24 @@ def test_v9_validator_rejects_missing_table_and_broadened_constraint(
         RulesDatabase(target).validate()
 
 
+def test_default_build_rules_writes_standalone_v8_database(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db import cli
+
+    output = tmp_path / "rules-standalone.db"
+    monkeypatch.setattr(cli, "DEFAULT_STANDALONE_RULES_DATABASE", output)
+    args = cli.build_parser().parse_args([
+        "build-rules", str(ROOT / "data/curated/rules"),
+    ])
+    assert args.output is None
+    assert cli.cmd_build_rules(args) == 0
+    with sqlite3.connect(output) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == 8
+    RulesDatabase(output).validate()
+    assert RulesDatabase(output).restrictions_payload()["available"] is False
+
+
 def test_v9_cli_requires_separate_staging_output() -> None:
     from infinity_db.cli import build_parser, cmd_build_rules
 
@@ -4318,7 +4336,7 @@ def test_v9_cli_requires_separate_staging_output() -> None:
         cmd_build_rules(args)
 
 
-def test_default_build_rules_cannot_replace_tracked_v9_database(
+def test_explicit_v8_build_rules_cannot_replace_tracked_v9_database(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from infinity_db import cli
@@ -4334,6 +4352,7 @@ def test_default_build_rules_cannot_replace_tracked_v9_database(
     monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", output)
     args = cli.build_parser().parse_args([
         "build-rules", str(ROOT / "data/curated/rules"),
+        "--output", str(output),
     ])
     assert args.output.resolve() == output.resolve()
     with pytest.raises(ValueError, match="default build-rules export is v8"):
@@ -4354,6 +4373,7 @@ def test_default_build_rules_can_rebuild_existing_v8_database(
     monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", output)
     args = cli.build_parser().parse_args([
         "build-rules", str(ROOT / "data/curated/rules"),
+        "--output", str(output),
     ])
     assert args.output.resolve() == output.resolve()
     assert cli.cmd_build_rules(args) == 0

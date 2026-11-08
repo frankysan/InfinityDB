@@ -9254,9 +9254,10 @@ rewrites the artifact.
 
 Run this gate against the tracked release artifact, and repeat it against
 the final frozen release candidate. It never rebuilds the artifact. The
-default `build-rules` export is v8 and refuses to overwrite an existing
-tracked v9 database; update the v9 rules database only through the guarded
-staging and paired-publication workflow in
+default `build-rules` export is v8 and writes to ignored
+`local/rules-standalone.db`; an explicit v8 export refuses to overwrite an
+existing tracked v9 database. Update the v9 rules database only through
+the guarded staging and paired-publication workflow in
 [the data-model contract](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
 Normal development checks skip this release-only gate:
 

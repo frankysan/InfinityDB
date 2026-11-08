@@ -37,6 +37,7 @@ from .source_anomalies import (
 
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
 DEFAULT_RULES_DATABASE = Path("data/generated/rules.db")
+DEFAULT_STANDALONE_RULES_DATABASE = Path("local/rules-standalone.db")
 DEFAULT_CURATED_RULES = Path("data/curated/rules")
 DEFAULT_PERIPHERAL_IDENTITIES = Path("data/curated/peripherals/army-identities.json")
 
@@ -186,12 +187,18 @@ def cmd_validate_curated(args: argparse.Namespace) -> int:
 
 
 def cmd_build_rules(args: argparse.Namespace) -> int:
+    if args.restrictions_manifest is not None and args.output is None:
+        raise ValueError(
+            "v9 Restrictions export requires an explicit staging --output path; "
+            "do not replace the tracked release rules.db before publication review"
+        )
+    output = args.output if args.output is not None else DEFAULT_STANDALONE_RULES_DATABASE
     if (
         args.restrictions_manifest is None
-        and args.output.resolve() == DEFAULT_RULES_DATABASE.resolve()
-        and args.output.is_file()
+        and output.resolve() == DEFAULT_RULES_DATABASE.resolve()
+        and output.is_file()
     ):
-        connection = sqlite3.connect(args.output)
+        connection = sqlite3.connect(output)
         try:
             current_schema_version = connection.execute(
                 "PRAGMA user_version"
@@ -207,18 +214,18 @@ def cmd_build_rules(args: argparse.Namespace) -> int:
 
     documents = load_curated_directory(args.input)
     if args.restrictions_manifest is not None:
-        if args.output.resolve() == DEFAULT_RULES_DATABASE.resolve():
+        if output.resolve() == DEFAULT_RULES_DATABASE.resolve():
             raise ValueError(
                 "v9 Restrictions export requires an explicit staging --output path; "
                 "do not replace the tracked release rules.db before publication review"
             )
         manifest = json.loads(args.restrictions_manifest.read_text(encoding="utf-8"))
         export_rules_database(
-            documents, args.output, restrictions_manifest=manifest,
+            documents, output, restrictions_manifest=manifest,
         )
     else:
-        export_rules_database(documents, args.output)
-    print(f"Rules database ready: {args.output}")
+        export_rules_database(documents, output)
+    print(f"Rules database ready: {output}")
     print(f"Collections: {len(documents)}")
     return 0
 
@@ -375,7 +382,10 @@ def build_parser() -> argparse.ArgumentParser:
         "build-rules", help="Build the separate rules database from curated JSON collections"
     )
     p_rules.add_argument("input", nargs="?", type=Path, default=DEFAULT_CURATED_RULES)
-    p_rules.add_argument("--output", type=Path, default=DEFAULT_RULES_DATABASE)
+    p_rules.add_argument(
+        "--output", type=Path,
+        help="Output database (default: local/rules-standalone.db for v8; required for v9)",
+    )
     p_rules.add_argument(
         "--restrictions-manifest", type=Path,
         help="Explicit opt-in to v9 conditional Restrictions export; stage outside release paths",

@@ -205,8 +205,12 @@ the detailed snapshot contract.
 Curated rules data is built independently from Army data:
 
 ```powershell
-infinity-db build-rules --output local/rules-standalone.db
+infinity-db build-rules
 ```
+
+This writes the standalone v8-compatible database to
+`local/rules-standalone.db`. Use `--output` to choose another standalone path.
+Neither command updates the tracked v9 release database or its paired publication.
 
 Reference PDFs and wiki snapshots are research inputs rather than direct runtime
 inputs. Human-reviewed rules collections live under `data/curated/rules/`.
@@ -278,19 +282,19 @@ infinity-db database-health data/generated/infinity.db --require-raw
 # Validate a curated rules file
 infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 
-# Build the independent rules-reference database
-infinity-db build-rules --output local/rules-standalone.db
+# Build the independent v8-compatible rules-reference database
+infinity-db build-rules
 ```
 
-`build-rules` defaults to `data/curated/rules/`. Its standard output
-remains the v8-compatible format for standalone use. The tracked
-1.0 rules release database uses the reviewed v9
-conditional Restrictions table and must be built as a coordinated
+`build-rules` reads `data/curated/rules/` by default and writes the standalone
+v8-compatible format to `local/rules-standalone.db` unless an explicit
+`--output` is provided. The tracked 1.0 rules release database uses the
+reviewed v9 conditional Restrictions table and must be built as a coordinated
 release pair with `data/generated/deployed-objects.json`; see
 [the migration and recovery contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
-The CLI refuses to overwrite an existing v9 database with this default
-v8 export. Use the guarded v9 staging and paired-publication workflow
-to update the tracked release pair.
+Even with an explicit output path, the CLI refuses to overwrite the
+tracked v9 database with a v8 export. Use the guarded v9 staging and
+paired-publication workflow to update the tracked release pair.
 
 `infinity-army` and `python -m infinity_army_data` remain available for the
 JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)

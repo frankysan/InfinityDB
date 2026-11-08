@@ -2664,15 +2664,16 @@ compatibility pairs **(8, 10)** and **(9, 11)**. For v9, it
 also verifies all fourteen source-ordered conditions, negative
 polarity, qualifiers, source selectors and consistent provenance;
 unsupported versions and mixed pairs fail closed. The **default**
-`build-rules` path remains v8/compatibility-10, preserving normal
-build outputs. Supplying the optional
+`build-rules` path remains v8/compatibility-10 and now writes to
+`local/rules-standalone.db`, avoiding the tracked release artifact.
+Supplying the optional
 `--restrictions-manifest config/validation/restrictions-source-chart.json`
 produces deterministic v9/compatibility-11 data using the reviewed
-curated records. For safety, this opt-in CLI path refuses the default
-tracked `data/generated/rules.db` output: select a staging file. The
-default v8 export also refuses to overwrite that path when it already
-contains a v9 database; use the guarded staging and paired-publication
-workflow.
+curated records, but requires an explicit staging `--output` path.
+For safety, this opt-in CLI path refuses the tracked
+`data/generated/rules.db` output. An explicit v8 export also refuses
+to overwrite that tracked path when it contains a v9 database; use the
+guarded staging and paired-publication workflow.
 
 The v9 build is byte-deterministic in tests, and read-only HTTP
 checks confirm both v8-unavailable and v9-available responses,
