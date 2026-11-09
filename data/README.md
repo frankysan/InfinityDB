@@ -89,7 +89,8 @@ matched tracked release set.
 **Explicit complete runtime build:** `infinity-db build SOURCE.zip --db-dir PATH --compact`
 builds Army, Rules, variant usage, reviewed Weapon citations, the
 Restrictions chart, Trait Wiki links, Combined Saving Roll profiles,
-Ammunition links and reviewed Weapon Properties into one selected directory. It requires the source checkout, a local immutable Army ZIP and its selected Army API metadata. Omitting the source selects the
+Ammunition links and reviewed Weapon Properties into one selected directory.
+Its opt-in Army v27 also embeds reviewed Cube/Cube 2.0 presentation encodings. It requires the source checkout, a local immutable Army ZIP and its selected Army API metadata. Omitting the source selects the
 newest local Army ZIP once; `--metadata` selects external API metadata explicitly.
 It never downloads an input or inherits the serving-only `INFINITY_DB_DB_DIR`.
 `--db-dir` and the existing narrow Army `--output-dir` are mutually exclusive;
@@ -100,13 +101,15 @@ cross-domain enrichment and Weapon-gap audits are not complete-build inputs.
 The legacy Weapon JSON publication command delegates to the same builder while
 the tracked v10 release retains its JSON contract.
 
-The builder uses disposable work files under ignored `data/work/build/`, validates
-the full runtime set and matching input provenance, then replaces only the two
+The builder uses disposable work files under ignored `data/work/build/`,
+extends the *matched* Army/raw export pair with reviewed Equipment encodings,
+validates the full runtime set and matching input provenance, then replaces only the two
 selected runtime filenames: `infinity.db` and `rules.db`.
-Rules v17 extends the v16 embedded reference data with 12 reviewed
-Weapon Properties, their ordered canonical/source origins, and exact
-Army Weapon profile/mode signatures. Maintained JSON sources
-remain validated build inputs, not v17 runtime dependencies. The completed
+Rules v17 extends v16 with 12 reviewed Weapon Properties and exact
+profile/mode signatures. The opt-in complete builder also extends
+Army v26/compatibility 35 to v27/compatibility 36 with the two
+reviewed Equipment characteristic encodings. Maintained JSON
+remains a build input, not a v27 runtime dependency. The completed
 build removes obsolete `variant-usage.json` and
 `weapon-profile-sources.json` from its selected output directory. It preserves
 unrelated files and leaves
@@ -160,10 +163,11 @@ Other intermediate files in the directory are ignored. The v10 candidate
 and Docker-bundle checks share this built-artifact validator while retaining
 their additional source-rebuild and pinned-content checks.
 
-The v17 two-file layout also embeds reviewed Weapon Properties,
-alongside variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
-and Ammunition publications. Five further P2.4-maintained Army JSON
-datasets and symbol path mappings remain open. Older v10–v16 layouts
+The current two-file opt-in layout embeds Army v27 Equipment presentation
+encodings and Rules v17 Weapon Properties, alongside variant/Weapon/
+Restrictions, Trait Wiki, Combined Saving Roll and Ammunition publications.
+Four further P2.4-maintained Army JSON datasets and symbol path mappings
+remain open. Older v10–v16 Rules layouts
 remain transitional compatibility. The browser
 fetches `/api/restrictions/chart`; for a pre-v13 release the endpoint
 returns its original packaged static publication. The v13+ chart
@@ -175,7 +179,11 @@ maintained source JSON adapter. v16 Ammunition display links and
 combined-component references are read from Rules SQLite; pre-v16
 releases retain the reviewed JSON adapter. v17 Weapon Property origins
 and exact source-profile references likewise read from Rules SQLite;
-earlier schemas retain their validated JSON adapter.
+earlier schemas retain their validated JSON adapter. The v27
+EquipmentCatalog reads Cube mappings from Army SQLite; v26
+retains its validated JSON adapter. The separate Army/raw pair
+remains source-identical through shared export metadata and
+the v27 checksum includes the new relational rows.
 It does not verify working-tree curation/config freshness or graphical
 assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual

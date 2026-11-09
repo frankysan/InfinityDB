@@ -56,12 +56,17 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         "pyproject.toml", "src/sample.py", "data/curated/rules/sample.json",
         "data/manifests/symbol-publication.json",
         "src/infinity_db/web/static/restrictions-reference.json",
+        "config/catalogs/equipment-presentation-encodings.json",
         "tools/build_weapon_profile_publication.py", "tools/audit_enrichment_coverage.py",
         "tools/audit_weapon_definition_gaps.py",
     ):
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("{}", encoding="utf-8")
+    shutil.copyfile(
+        RELEASE.parent.parent / "config/catalogs/equipment-presentation-encodings.json",
+        root / "config/catalogs/equipment-presentation-encodings.json",
+    )
     source = root / "army.zip"
     with zipfile.ZipFile(source, "w") as archive:
         archive.writestr("metadata.json", json.dumps({"factions": [{"id": 1, "name": "Test"}]}))
@@ -98,6 +103,7 @@ def _fake_army(args: argparse.Namespace, record: dict[str, Any]) -> int:
     _update_metadata(army, {
         BUILD_PROVENANCE_KEY: record, "_meta": meta["_meta"], "armyMetadata": meta["armyMetadata"],
     })
+    shutil.copyfile(army, args.output_dir / "infinity.raw.db")
     (args.output_dir / "normalized.json").write_text("build-only", encoding="utf-8")
     return 0
 
@@ -224,6 +230,7 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert first["combinedSavingRollProfiles"] == 6
     assert first["ammunitionReferences"] == 16
     assert first["weaponProperties"] == 12
+    assert first["equipmentPresentationEncodings"] == 2
     assert first["reviewedWeapons"] == 62
     assert validate_database_set(args.db_dir)["sha256"] == first["sha256"]
     assert set(_digests(args.db_dir)) == {*EMBEDDED_WEAPON_RUNTIME_FILES, "keep.txt"}

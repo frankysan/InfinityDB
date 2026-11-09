@@ -890,10 +890,23 @@ class Database:
         with self._connect() as connection:
             application_id = connection.execute("PRAGMA application_id").fetchone()[0]
             version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if application_id != APPLICATION_ID or version != SCHEMA_VERSION:
+            from infinity_db.equipment_presentation_storage import (
+                ARMY_COMPATIBILITY_VERSION,
+                ARMY_SCHEMA_VERSION,
+                ARMY_V27_PUBLISHED_TABLES,
+                read_equipment_encodings,
+            )
+
+            if application_id != APPLICATION_ID or version not in {
+                SCHEMA_VERSION, ARMY_SCHEMA_VERSION,
+            }:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
+            if source_consistency and version != SCHEMA_VERSION:
+                raise ValueError("Source consistency requires the base Army export schema")
             required_tables = (
-                DATABASE_TABLES if source_consistency else PUBLISHED_DATABASE_TABLES
+                DATABASE_TABLES if source_consistency else
+                ARMY_V27_PUBLISHED_TABLES if version == ARMY_SCHEMA_VERSION else
+                PUBLISHED_DATABASE_TABLES
             )
             for name, definition in required_tables.items():
                 columns = {
@@ -924,11 +937,17 @@ class Database:
                 )
             except (json.JSONDecodeError, TypeError) as exc:
                 raise ValueError("Database has invalid compatibility metadata") from exc
-            if compatibility_version != DATABASE_COMPATIBILITY_VERSION:
+            expected_compatibility = (
+                ARMY_COMPATIBILITY_VERSION if version == ARMY_SCHEMA_VERSION
+                else DATABASE_COMPATIBILITY_VERSION
+            )
+            if compatibility_version != expected_compatibility:
                 raise ValueError(
                     "Database compatibility revision does not match this application; "
                     "rebuild the database"
                 )
+            if version == ARMY_SCHEMA_VERSION:
+                read_equipment_encodings(connection)
             identity_config = identity_config_from_connection(connection)
             validate_application_army_integrity(connection)
             validate_application_fireteam_integrity(connection)
@@ -1087,7 +1106,10 @@ class Database:
             if (
                 not isinstance(expected_checksum, str)
                 or len(expected_checksum) != 64
-                or published_content_sha256(connection) != expected_checksum
+                or published_content_sha256(
+                    connection, definitions=required_tables
+                    if not source_consistency else PUBLISHED_DATABASE_TABLES,
+                ) != expected_checksum
             ):
                 raise ValueError(
                     "Database published application content does not match its validated checksum; "
@@ -1098,6 +1120,18 @@ class Database:
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Database contains broken foreign keys")
+
+    def equipment_presentation_encodings(self):
+        """Read v27 authored characteristic mappings; v26 uses the maintained adapter."""
+        from infinity_db.equipment_presentation_storage import (
+            ARMY_SCHEMA_VERSION,
+            read_equipment_encodings,
+        )
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < ARMY_SCHEMA_VERSION:
+                return None
+            return read_equipment_encodings(connection)
 
     def source_data_changed_on(self) -> date | None:
         """Return the latest date encoded by the Army source revisions."""

@@ -2824,6 +2824,37 @@ Earlier schemas and explicit source-review calls keep the
 validated JSON adapter until P2.6. No released serving defaults
 or generated v10 assets change in this slice.
 
+### Equipment presentation encodings in Army v27 (P2.4 opt-in)
+
+The editable `config/catalogs/equipment-presentation-encodings.json`
+retains two reviewed Cube/Cube 2.0 characteristic mappings.
+The opt-in complete builder extends the disposable Army export
+from v26/compatibility 35 to **v27/compatibility 36**, without
+altering the narrow Army importer or tracked release.
+`equipment_presentation_encodings` stores the exact canonical
+Equipment slug, ordered position, source characteristic ID/name
+and authored reason. Each characteristic ID is a local foreign
+key to the selected Army's `characteristics` catalog and the
+name must resolve uniquely, case-insensitively.
+`equipment_presentation_metadata` records the maintained source
+digest, source format/version, exact export-generation identity,
+row count and full content fingerprint.
+
+The opt-in builder extends the **application and raw pair together**:
+both receive matching compatibility/checksum metadata, while the
+published Army database adds relational rows and a v27 checksum
+covering those tables. The raw sibling remains build-only. This
+preserves explicit pairing through variant and Weapon publication
+and prevents mixed snapshots from appearing valid. A standalone
+v26/compatibility-35 Army database continues to load normally.
+
+`EquipmentCatalog` reads v27 encodings from the selected Army
+SQLite file without a runtime JSON lookup. On legacy v26 it
+retains the validated source adapter. Equipment pages, filters,
+Cube characteristic links and canonical rules references are
+unchanged. No Equipment identity is synthesized from characteristic
+spelling, and source-review mismatches fail closed.
+
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
 **Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**

@@ -8,6 +8,11 @@ import time
 from pathlib import Path
 from typing import Any
 
+from infinity_db.equipment_presentation_storage import (
+    ARMY_COMPATIBILITY_VERSION,
+    ARMY_SCHEMA_VERSION,
+)
+
 from .paths import raw_database_path
 from .publication import validate_database_pair
 from .repository import Database
@@ -66,6 +71,9 @@ def database_health_report(path: Path, *, require_raw: bool = False) -> dict[str
         schema_revision, compatibility_revision = _read_revisions(database_path)
         application["schemaRevision"] = schema_revision
         application["compatibilityRevision"] = compatibility_revision
+        if schema_revision == ARMY_SCHEMA_VERSION:
+            application["expectedSchemaRevision"] = ARMY_SCHEMA_VERSION
+            application["expectedCompatibilityRevision"] = ARMY_COMPATIBILITY_VERSION
     except (OSError, sqlite3.Error, json.JSONDecodeError, TypeError, ValueError):
         pass
 

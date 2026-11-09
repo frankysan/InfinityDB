@@ -26,6 +26,7 @@ from .curated import load_curated_directory
 from .database.publication import validate_database_pair
 from .database_set import EMBEDDED_WEAPON_RUNTIME_FILES, validate_database_set
 from .deployed_object_builder import build_deployed_objects
+from .equipment_presentation_storage import publish_equipment_encodings
 from .rules_database import export_rules_database
 from .trait_wiki_references import load_trait_wiki_references
 from .variant_usage import build_variant_usage_projection
@@ -171,6 +172,11 @@ def build_database_set(
         army_args.source, army_args.output_dir = source, stage
         if build_army(army_args, build_record(manifest, "army")) != 0:
             raise ValueError("Army build failed before runtime publication")
+        publish_equipment_encodings(
+            stage / "infinity.db",
+            stage / "infinity.raw.db",
+            root / "config/catalogs/equipment-presentation-encodings.json",
+        )
         _build_rules_and_publications(stage, root, manifest)
         result = validate_database_set(stage)
         if result["buildProvenance"].get("buildSetId") != build_set_id(manifest):

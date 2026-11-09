@@ -33,9 +33,10 @@ when all contained work shares the same owner.
   Complete builds embed exact variant usage, reviewed Weapon-profile
   citations, the Restrictions chart, Trait Wiki links, Combined Saving
   Roll annotations, Ammunition links and 12 reviewed Weapon Properties
-  in Rules v17. The opt-in two-file set has local source-build and
-  API parity checks; migrate P2.4's remaining five maintained Army
-  JSON datasets and symbol path mappings.
+  in Rules v17, plus two Cube characteristic encodings in Army v27.
+  The opt-in two-file set has local source-build and API parity checks;
+  migrate P2.4's remaining four maintained Army JSON datasets and
+  symbol path mappings.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;

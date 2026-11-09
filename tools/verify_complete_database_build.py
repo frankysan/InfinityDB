@@ -73,6 +73,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 or report["combinedSavingRollProfiles"] != 6
                 or report["ammunitionReferences"] != 16
                 or report["weaponProperties"] != 12
+                or report["equipmentPresentationEncodings"] != 2
             ):
                 raise ValueError("Complete build changed the reviewed source inventory")
 
@@ -164,6 +165,20 @@ def verify(source: Path, expected_sha256: str) -> dict:
                     for profile in profiles
                 ):
                     raise ValueError(f"Missing reviewed Weapon Property for {slug}")
+            from infinity_db.database.repository import Database
+            from infinity_db.equipment_config import load_equipment_presentation_config
+
+            encodings = Database(
+                destination / "infinity.db"
+            ).equipment_presentation_encodings()
+            if encodings != load_equipment_presentation_config(
+                ROOT / "config/catalogs/equipment-presentation-encodings.json"
+            ):
+                raise ValueError("Embedded Equipment encodings differ from reviewed source")
+            for slug in ("cube", "cube-2"):
+                detail = _api(app, f"/api/equipment/{slug}")
+                if detail.get("slug") != slug:
+                    raise ValueError(f"Missing presentation Equipment {slug}")
             baseline = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
             observed = capture(
                 app, paths=tuple(item["path"] for item in baseline["probes"]),
@@ -175,7 +190,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 f"Complete build {attempt}: v17 healthy, 62 Weapons, "
                 f"69 citations, 6 chart rows, 33 Trait links, "
                 f"6 saving-roll modes, 16 Ammunition references, "
-                f"12 Weapon Properties, 41 baseline routes; "
+                f"12 Weapon Properties, 2 Equipment encodings, 41 baseline routes; "
                 f"hashes {json.dumps(report['sha256'], sort_keys=True)}",
                 flush=True,
             )
@@ -197,6 +212,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
         "combinedSavingRollProfiles": reports[0]["combinedSavingRollProfiles"],
         "ammunitionReferences": reports[0]["ammunitionReferences"],
         "weaponProperties": reports[0]["weaponProperties"],
+        "equipmentPresentationEncodings": reports[0]["equipmentPresentationEncodings"],
         "rebuilds": 2,
     }
 

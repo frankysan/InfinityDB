@@ -67,7 +67,9 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     missing = sorted(name for name in names if not (directory / name).is_file())
     if missing:
         raise ValueError(f"Incomplete database set; missing: {', '.join(missing)}")
-    Database(army_path).validate()
+    army = Database(army_path)
+    army.validate()
+    encodings = army.equipment_presentation_encodings()
     rules = RulesDatabase(rules_path)
     rules.validate()
     provenance = validate_set_provenance(army_path, rules_path)
@@ -129,6 +131,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         "deployedObjects": len(objects["objects"]),
         "unresolvedDeliveries": len(objects["unresolvedDeliveries"]),
         "variantGroups": len(variants["variants"]),
+        **({"equipmentPresentationEncodings": len(encodings)} if encodings is not None else {}),
         "variantPublicationVersion": variants["formatVersion"],
         "reviewedWeapons": len({key[0] for key in weapons}),
         **({"restrictionChartRows": len(chart["rows"])} if chart is not None else {}),

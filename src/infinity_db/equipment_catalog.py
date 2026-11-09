@@ -22,7 +22,10 @@ class EquipmentCatalog:
     def __init__(self, database: Database, rules_database: RulesDatabase | None) -> None:
         self.database = database
         self.rules_database = rules_database
-        self._encodings = load_equipment_presentation_config()
+        embedded = database.equipment_presentation_encodings()
+        self._encodings = (
+            embedded if embedded is not None else load_equipment_presentation_config()
+        )
 
     def _records_by_slug(self) -> dict[str, dict[str, Any]]:
         if self.rules_database is None:

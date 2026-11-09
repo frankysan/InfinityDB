@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in v13, Trait Wiki links in v14, Combined Saving Roll annotations in v15, Ammunition source links in v16 and reviewed Weapon Properties in v17. Five maintained Army JSON datasets, symbol mappings and final build/serving cutover remain unfinished.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in Rules v13, Trait Wiki links in v14, Combined Saving Rolls in v15, Ammunition links in v16 and Weapon Properties in v17; Army v27 now embeds Cube presentation encodings. Four maintained Army JSON datasets, symbol mappings and final build/serving cutover remain unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1614,12 +1614,34 @@ default build/serve/Docker behavior and packaged SVG assets are
 unchanged. Focused and independent real-source-build evidence
 is recorded in [testing](testing.md#selected-runtime-database-set-validation).
 
-**Remaining P2.4:** Migrate five maintained Army JSON datasets and
-the symbol path mappings identified in P1.4. The v10–v16 JSON
+#### P2.4 — Sixth slice: Army presentation-encoded Equipment (2026-11-09)
+
+**Status:** Opt-in complete builds extend their disposable v26 Army/raw
+export pair to Army v27/compatibility 36 and embed the two reviewed
+Cube/Cube 2.0 presentation encodings from
+`config/catalogs/equipment-presentation-encodings.json`.
+`equipment_presentation_encodings` stores Equipment slug,
+source-characteristic ID/name, selection order and authored reason,
+with a source-catalog foreign key. The metadata binds the raw Army
+generation identity and the exact maintained config fingerprint.
+A v27-specific published-content checksum includes these relational
+rows; the raw sibling receives matching checksum/compatibility
+metadata, keeping paired-export validation strict.
+
+`EquipmentCatalog` reads the v27 source mappings directly from
+Army SQLite, while the tracked v26 release and narrow Army build
+retain the validated JSON adapter. Existing equipment routes,
+Unit characteristic links and filter results are preserved.
+The tracked v10 release artifacts, default serving contract and
+Docker packaging are unchanged. Focused and repeated pinned-source
+acceptance is owned by [testing](testing.md#selected-runtime-database-set-validation).
+
+**Remaining P2.4:** Migrate four maintained Army JSON datasets and
+the symbol path mappings identified in P1.4. The legacy JSON
 adapters remain only while independently needed for actual
-release/research/presentation consumption; historical tests
-alone do not justify preserving obsolete build machinery.
-Final naming, serving and Docker cutover belongs to P2.6.
+release/research/presentation consumption; historical tests do
+not justify retaining superseded build machinery. Final naming,
+serving and Docker cutover belongs to P2.6.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

@@ -769,6 +769,40 @@ Build-set ID:
 No tracked release databases were modified. This accepts the Windows
 opt-in path, not Linux/Docker or P2.6 default serving cutover.
 
+**2026-11-09 P2.4 sixth slice, Equipment presentation encodings (Windows local):**
+`tests/test_equipment_presentation_storage.py` (12/12)
+covers Cube/Cube 2.0 source characteristic mappings, Army v27
+SQLite read-model parity with v26, no maintained JSON read in
+v27 EquipmentCatalog, matching v27 Army/raw export generation,
+published content checksum and rejection of missing, duplicate,
+unrecognized or corrupted sources. The existing
+`tests/test_equipment_config.py` passed 2/2,
+`tests/test_database_set_builder.py` 16/16,
+`tests/test_database_set.py` 20/20, and the focused Cube
+HTTP/Unit-characteristic regression 1/1. Ruff, canonical Pyright
+(zero errors/warnings), documentation and Git diff checks passed.
+
+Two independent complete opt-in builds of the pinned immutable
+`JSON 20260929-114335.zip` source (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+each passed 73 Army normalization checks (116 known baseline
+warnings), the paired Army v27/compatibility-36 and Rules v17
+integrity/provenance checks, 151 variant groups, 62 reviewed
+Weapons/69 citations, six Restrictions chart rows, 33 Trait
+Wiki links, six Combined Saving Roll profiles, 16 Ammunition
+references, 12 Weapon Properties and two Equipment presentation
+encodings. All 41 pinned P1.3 runtime routes passed in both
+builds. The outputs were byte-identical:
+`infinity.db` =
+`c12a77d5ef9b67aefd16ae4e70ebd1cc4931f99322d5054d60edb74d997c7cd4`,
+`rules.db` =
+`8406bd463988072150c0f5224aea036ac33717bbffddbfbebd2b85cfb09230ed`.
+Build-set ID:
+`132848a42efa935fc6f10f919375dd72a169033f177e0117ee3e42621305f8a9`.
+No tracked release database files were modified. This accepts
+the local Windows opt-in path, not Linux/Docker or the P2.6
+serving/name cutover.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
