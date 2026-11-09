@@ -64,29 +64,27 @@ incomplete work open, and record removed V1S IDs in its commit.
 
 ### Phased validation and task-boundary checkpoint
 
-The [active VD/VR queue](docs/validation-queue.md#queue-rules) is the sole
-authority for design/execution thresholds, drain order, due dates, linked
-dependencies, and retirement evidence. **Check it before ordinary
-implementation, at every task boundary, and at closeout**. Design due VD
-tests without running them; batch compatible VR executions while reconciling
-each due VR separately.
-Register concrete missing regression designs and each distinct changed
-behavior's deferred execution before reporting an implementation complete.
-Report counts, oldest due/blocked entry, and intended execution host.
-Do not call unrun tests passed or claim a task accepted while its required
-validation is pending.
+Use the short [development lifecycle](docs/testing.md#phased-development-and-validation):
+orient, implement a coherent change, run relevant focused checks, deliver,
+and report actual outcomes. Writing and executing focused tests in the same
+implementation pass is normal. Required immediate security, schema,
+source/provenance and artifact-integrity checks cannot be silently deferred.
 
-The [testing guide](docs/testing.md#focused-first-vr-execution)
-requires risk-based **focused-first** test execution, including impacted
-cross-layer invariants, and owns immediate safety exceptions and reports.
-A VD/VR threshold alone does not require a full suite.
-Its [Linux dispatch protocol](docs/testing.md#parallel-windows-development-and-linux-validation)
-owns explicit safe Git preparation, pinned asynchronous test execution,
-input/artifact verification and the narrowly scoped Windows-development
-exception while a full Linux suite is **actually running**. Hosted
-[CI](docs/ci.md#agent-ci-monitoring-and-repair) and
-[release acceptance](docs/releasing.md) remain independent. Never use a
-partial Linux run or job dispatch as permission to bypass a due drain.
+Use the [deferred-validation queue](docs/validation-queue.md#queue-rules)
+**only** for a concrete check that cannot currently be designed or run.
+Record its owner, revision/inputs, blocker, selector or evidence, and
+resumption trigger; do not create VD/VR entries for every edit. The queue
+has no numeric threshold or mandatory drain-to-zero gate. Revisit its
+items when prerequisites clear, a relevant integration/release gate is
+approaching, or a compatible validation batch is scheduled. Never call
+an unrun, failed or blocked check passed.
+
+The [Linux protocol](docs/testing.md#parallel-windows-development-and-linux-validation)
+uses explicit safe Git handoff and pinned checkout/asset verification.
+Unrelated work can proceed during either focused or full Linux testing
+**only in an independent checkout without shared mutable inputs**.
+Hosted [CI](docs/ci.md#agent-ci-monitoring-and-repair) and
+[release acceptance](docs/releasing.md) remain separate.
 
 ## Optional multi-agent coordination
 

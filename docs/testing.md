@@ -206,10 +206,11 @@ On Linux/macOS use `.venv/bin/python`. `--offline` skips both network/monitor
 lookups, returning local Git, V1S and VD/VR data only. This command **never
 writes Git state, selects or retires work, starts tests, synchronizes checkouts,
 or dispatches CI**. It reads current `docs/TODO.md` through the maintained
-V1S parser and reads the active queue/thresholds from
+V1S parser and reads active deferred checks from
 `docs/validation-queue.md`. The reported next actionable V1S is only
-advisory; no active agent assignment is stored, and the explicit V1S selection
-gate still applies. A read-only report does not drain a due validation queue.
+advisory; no active agent assignment is stored. Queue counts and oldest-item
+ages are informational: they do not create validation deadlines or initiate
+test execution.
 
 When online, the command checks the existing Windows MCP monitor's loopback
 `/api/status` endpoint (default port 8766; override with `--monitor-port`).
@@ -502,50 +503,47 @@ Do not report Ruff/Pyright as run when those tools are unavailable in the active
 
 ## Phased development and validation
 
-Ordinary v1.0 work separates **implementation**, **test design (VD)**, and
-**test execution (VR)** to avoid running a regression suite after every small
-change. The [active validation queue](validation-queue.md#queue-rules) is the
-**sole authority** for counts, trigger thresholds, age limits, drain order,
-dependencies, status changes, and retirement. In particular, check it at
-each task boundary; do not reproduce its numeric thresholds in agent skills
-or secondary documentation.
+**Normal workflow:** orient to the task and checkout, implement one coherent
+change, run the relevant focused checks, review/deliver the diff, and report
+actual results. Tests may be designed, written and executed during the same
+implementation pass. Choose checks by actual behavior and risk, not by a
+per-edit validation quota. This is the canonical short development lifecycle;
+see the [restructuring decision](restructuring-plan.md#p02--proposed-normal-task-lifecycle-2026-11-09).
 
-- **Implementation:** record concrete missing assertions as VD and each
-  distinct changed behavior needing deferred verification as VR. Existing
-  tests needing only reruns require VR, not VD. Immediate non-test lint,
-  documentation, type, and structural checks remain appropriate. Execute
-  a test immediately only for an explicitly documented safety-critical
-  correctness, security, schema, migration, provenance or publication gate
-  that cannot safely wait; record what ran and its outcome.
-- **Design (VD):** author or revise tests and review selectors/fixtures
-  statically. Do **not** execute any tests, including sanity or focused tests.
-  Link the resulting selectors to the dependent VR.
-- **Execution (VR):** start with the smallest sufficient set of deferred
-  affected-behavior, cross-layer, browser and integrity tests on the pinned
-  revision. Run cumulative checks **only when independently required** by an
-  explicitly named risk/gate or the final release checklist, not because the
-  queue reached its execution threshold. Verify actual results, source/asset
-  coverage and skips; reuse compatible runs and reconcile each VR separately.
-  A dispatched, failed, blocked or required-skipped job is not a pass.
+- **Ordinary changes:** run appropriate new or existing focused regressions
+  plus lint/type/docs/data checks when relevant. For documentation-only edits,
+  documentation checks suffice unless the change affects executable examples
+  or behavior. Fix failed checks before claiming acceptance.
+- **Immediate gates:** security, schema/data integrity, source authority and
+  publication changes require their relevant correctness checks now. Report a
+  blocker when a required check cannot run; do not label it passed.
+- **Genuinely deferred checks:** record a concrete VD only if required test
+  design is blocked; record VR only for required execution that cannot yet run
+  (unavailable host/assets, dependent integration state, etc.). Specify the
+  tested contract, owner, revision/inputs and resumption trigger. Do **not**
+  create queue items for work fully tested in the current task.
+- **Batching:** related changes can share a focused impact test run on a
+  compatible revision. Full suites run for independently identified cumulative,
+  integration or release risks, not because the queue reached a count.
+- **Pending acceptance:** a task with an outstanding *required* check is not
+  fully verified. A separately owned hosted CI/release gate remains pending
+  without requiring routine development to reproduce the release gate.
+  Never claim dispatch, a failed/skipped check or an older SHA as success.
 
-A bounded change with successful immediate checks is **implemented, pending
-validation** while VD/VR obligations remain. The queue never waives hosted
-[CI](ci.md), [release acceptance](releasing.md), or required immediate
-integrity gates. The Linux full-suite parallel-development exception and
-explicit Git handoff are specified below, under
-[parallel Windows development and Linux validation](#parallel-windows-development-and-linux-validation).
+The [deferred-validation queue](validation-queue.md#queue-rules) is the single
+register for open VD/VR items and their triggers. It has **no numeric
+thresholds, automatic seven-day deadline or mandatory drain-to-zero cycle**.
+Review it when a prerequisite becomes available, before relevant
+merge/release acceptance, or when scheduling a deliberate compatible batch.
+Independent development can proceed while tests run in a different pinned
+checkout with no shared mutable inputs; see
+[parallel Windows and Linux validation](#parallel-windows-development-and-linux-validation).
 
-**Coherent implementation batches:** Prefer a bounded, reviewable group of
-related edits sharing an affected source family, behavior contract or
-publication artifact over a separate investigation/commit/checkpoint for each
-minor edit. Check the V1S selection gate and due VD/VR work before the batch;
-recheck at task boundaries and whenever a mandatory or age/threshold gate
-becomes due. Register each independently changed behavior's VR and each
-missing test-design requirement's VD; several files or assertions for one
-behavior do not require several VRs. Reconcile the owning TODO items and
-commit the coherent batch without mixing unrelated agents' edits. Batching
-never postpones an immediate safety gate, a due queue drain or a required
-V1S closeout; do not grow a batch merely to reach a validation threshold.
+**Coherent change batches:** prefer a reviewable group of related changes over
+a separate administrative cycle for each edit. Preserve unrelated changes,
+address cross-layer consumers, and make a single meaningful validation and
+commit where appropriate. Do not use batching to postpone a known critical
+correctness check or to hide outstanding acceptance.
 
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 
@@ -567,15 +565,13 @@ Unit matrix is not multiplied across browser engines.
 
 ### Focused-first VR execution
 
-**Default: no full-suite run for an ordinary task or VD/VR drain.** A VD
-pass designs tests and executes none. When VR becomes due, run a **small,
-risk-based impact set first**; fix and rerun failures at that scope. Execute
-the complete suite only at an explicitly required cumulative/release gate
-(such as V1S-090), or when an identified cross-cutting change cannot be
-adequately bounded by focused tests. Record the exact reason before dispatch.
-The numeric VR threshold determines **when** to validate, not **how many**
-tests to run. A full-suite pass is not needed to close an ordinary VR when
-its applicable selectors and integrity checks have passed.
+**Default: focused tests during normal implementation.** For a newly
+written test, run it immediately when practical. For deferred VR execution,
+run a **small, risk-based impact set first** and fix failures at that scope.
+Execute the complete suite only for a separately identified cumulative,
+integration or release gate, or when cross-cutting risk cannot be bounded by
+focused tests. Record the reason for any full-suite dispatch. The presence
+or number of queued VRs does not itself justify a broad run.
 
 Build the impact set from **all modified inputs and their consumers**, not
 only the new test files. Check broad contracts affected by each changed
@@ -1182,40 +1178,24 @@ not hosted CI or final-candidate acceptance.
 
 ### Validation batch planning
 
-After due VD prerequisites have been **designed and statically reviewed, not
-executed**, plan shared VR execution before starting any jobs:
+When several checks genuinely remain deferred, group compatible work instead
+of launching a separate job for every queue entry:
 
-1. Inventory all **due**, ready-to-run VRs and their individual required
-   selectors, cumulative checks, intended revision, source/asset versions,
-   target host and runner options. Keep blocked or incomplete prerequisites
-   open; no dispatch can satisfy them.
-2. Partition by compatible **verified testing state**: one pinned commit
-   containing the intended implementation and test designs, host, source/asset
-   and ignored-publication identity, dependencies, and runner/browser options.
-   A newer revision does not automatically validate an older VR when its
-   affected behavior or artifacts changed. Separate Windows-only evidence,
-   different fixture/asset requirements and mutually incompatible options.
-3. For each compatible group, deduplicate the exact **impact-based focused
-   selectors** across all relevant layers and run them first in one pinned
-   asynchronous job. Triage any failure there before considering wider runs.
-   Only append a separately required cumulative gate if its independent
-   necessity and exact scope are documented; a shared VR batch alone does
-   not justify a full-suite launch. Keep per-VR selector/prerequisite
-   mappings in the existing queue and job evidence, not another register.
-4. Once the job terminates, verify exact HEAD, actual collected/selected tests,
-   exit status, skips and their reasons, fixture/asset coverage, and browser
-   evidence **for each VR separately**. Record the shared job ID and relevant
-   result against each VR; retire only satisfied entries. A partial pass,
-   skipped required case or mismatched SHA leaves that obligation open. Recount
-   and drain according to the canonical queue before unrelated implementation.
+1. Identify the outstanding selectors, missing prerequisites, owning changes
+   and intended revisions/asset state. Do not silently accept blockers.
+2. Group by compatible *pinned* commit, test inputs, runner/browser options and
+   host. Reuse the smallest sufficient cross-layer focused test set.
+3. Execute one compatible batch, inspect failures/skips and expand only when a
+   separately justified cumulative or release gate requires it.
+4. Associate the terminal results with each affected obligation. Close only
+   those checks proven green for their intended revision. Record unresolved
+   work and its concrete next trigger; no threshold-driven recount or full
+   drain is required.
 
-For the first pilot, compare the planned number of per-VR jobs against actual
-shared launches, unique/repeated selectors, source/worker preparation time,
-wall time and any failures requiring reruns. Keep detailed timing under
-ignored `local/`; report a concise result at the VR closeout. Preserve all
-[CI](ci.md) and [release](releasing.md) gates independently. The queue owns
-whether work is due; this procedure changes only **dispatch grouping**, not
-its thresholds, drain ordering or individual acceptance requirements.
+Long logs and timings belong under ignored `local/` when useful. CI and
+release acceptance have separate owners. Independent work may continue in
+another checkout while an isolated job runs; never mutate the test checkout
+or inputs being tested.
 
 **Parallel work while a test job runs:** An asynchronous test job does not
 require the agent to idle. Continue with read-only audits, source inspection,
@@ -1470,17 +1450,15 @@ and Ruff after this transport change. Hosted confirmation remains required;
 local success does not prove the hosted timeout's underlying cause. This is an
 internal test-infrastructure change and needs no release-note entry.
 
-**Full-suite parallelism exception: run on Linux, develop on Windows.**
-Only while a **full test suite** is actively running against a pinned
-revision in the separate `linux-dev` MCP checkout may the agent continue
-other independent Windows implementation during a due VR drain. Focused,
-module, browser-subset and other partial Linux runs do **not** grant this
-exception. Never treat dispatch or a pending job as VR completion. Poll at
-meaningful work boundaries, triage actionable failures, and return to
-draining VR when the full-suite run finishes.
-Linux-only checks may naturally execute on Linux. Avoid scheduling duplicate
-full suites on Windows just because development has advanced during a Linux
-run; respect the active validation queue and mandatory release gates.
+**Isolated Linux validation may run alongside independent Windows work.**
+Focused, browser-subset, partial and full-suite tests can all run against a
+pinned, separate `linux-dev` checkout while unrelated Windows development
+continues. This is safe only when test inputs and generated artifacts are not
+shared or mutated; it does **not** allow moving the worker's HEAD during a
+running job. A test result validates only the exact revision and inputs
+actually tested, not newer Windows work. Dispatch is never acceptance.
+Reserve full suites for explicit cumulative/release gates rather than using
+them merely to permit parallel development.
 
 The Windows MCP `local` checkout, the interactive `devbox` checkout, and the
 `mcpworker` checkout at `/srv/mcp-worker/workspaces/InfinityDB` are **three
@@ -1493,30 +1471,25 @@ source snapshot/database identity where relevant, and final pass/fail/skip
 counts. A Linux result validates only the state it tested, never newer
 Windows changes or a different Linux checkout.
 
-A practical handoff is **complete VD design without tests -> enter VR drain
--> prepare a pinned revision and relevant assets -> run the union of focused
-impact selectors -> resolve failures -> retire satisfied VRs**. Run a
-separate full Linux suite only for an explicitly due cumulative/release gate;
-then the narrow independent-Windows-development exception applies while that
-full suite actually runs. Focused VR jobs stay within the dedicated drain.
-The no-mutation rule above still applies to
-*the Linux test checkout and any shared inputs its jobs actually consume*;
-never edit that checkout or swap tracked databases during its test run.
+For truly deferred execution, select the intended revision and relevant
+assets, run compatible focused selectors together, inspect failures and close
+only satisfied obligations. Run a full suite only for an independently
+required cumulative/release gate. Never modify the testing checkout or
+shared inputs while any job is running.
 
 **Autonomous commits and due-validation Git handoff are agent-initiated,
 not automatic background mirroring.** After required immediate safety
 and static checks pass, inspect the working diff, stage only task-related
 files, create a coherent conventional Git commit, and fast-forward push
 the intended development branch through separate bounded operations.
-Record the SHA and any unrun VD/VR tests. Continue with the next clearly
-identifiable open task **only when the strict VD/VR drain loop allows it**
-or a full Linux suite is actually running; avoid manufacturing tasks
-to keep the process running. These actions are authorized
+Record the SHA and any genuinely deferred VD/VR checks. Independent work may
+continue if the test checkout and inputs are isolated; do not manufacture
+tasks merely to keep the process running. These actions are authorized
 by the user's standing InfinityDB development workflow, but they do
 not authorize force/reset/rebase, destructive checkout changes,
 releases, deployment, or publication of new acquired content.
 
-Once the queue triggers execution, inspect the committed Windows
+When a test is assigned to the Linux worker, inspect the committed Windows
 revision and dedicated MCP worker checkout; use separate, bounded
 Git operations to fetch and fast-forward the worker's matching branch
 to the intended revision. Never silently fetch/checkout a different
@@ -1549,71 +1522,30 @@ post-push monitoring is independent of queued local VD/VR checks.
 Only a mandatory release/merge acceptance gate requires waiting
 for terminal CI results.
 
-**Queued Linux dispatch protocol (VD/VR):** Follow the
-[strict drain loop](validation-queue.md#queue-rules) first; a dispatch
-does not itself lower the VR count.
+**Deferred Linux execution (only when needed):**
 
-1. At **task start**, inspect [the active queue](validation-queue.md)
-   and perform the strict VD/VR drain if any threshold is due, before
-   ordinary implementation. At **implementation closeout**, register
-   every concrete missing test design as VD and each distinct change
-   awaiting execution as VR, with linked selectors, revision, input/asset
-   requirements and outstanding gates. Most focused regressions should
-   enter VD rather than being written and executed during implementation;
-   only named immediate safety exceptions bypass that separation.
-   Record separately which immediate checks actually ran. Update
-   next-unused-ID counters; do not maintain another pending-test list.
-2. Apply the queue's current [thresholds, prerequisite-design rule,
-   overdue-item handling and drain order](validation-queue.md#queue-rules).
-   Design all required VD tests **without executing any tests** before
-   their dependent VR runs. Group compatible VR selectors only where
-   revision and coverage match, and reconcile each result individually.
-   Failed/blocked items remain open; an unsafe Git handoff is a blocker,
-   never permission to skip due validation.
-3. Select the intended committed/frozen revision and verify that the
-   **MCP Linux worker checkout** (not the interactive `devbox` checkout)
-   has exactly that HEAD and required dependencies/source inputs. If it
-   does not, run separate safe Git fetch and fast-forward operations
-   against the worker's matching branch **as part of the authorized
-   due-validation handoff**, verifying the target SHA. If this refuses,
-   record `Linux checkout not prepared` and the exact blocker in the
-   VR entry; do not force or reset the checkout. Neither
-   `start_test_job` nor file transfer is Git synchronization. Staged
-   Syncthing assets must be activated separately when needed. **Before
-   the full suite, verify the schema-specific matched runtime artifacts.**
-   Current v10 Rules embed deployed objects; validate them against the
-   tracked Army database. Only legacy v8/v9 checkouts generate
-   `data/generated/deployed-objects.json` with
-   `tools.build_deployed_object_publication` and run its `--check` verification.
-   A matching Git HEAD does not supply that ignored legacy publication.
-   When exact-variant or Weapon-profile publications are present, also verify
-   their paired build checks before dispatch. Fingerprint curated inputs from
-   the bytes that Git actually publishes; Windows CRLF working copies must
-   not produce a different source pin from the repository's LF blob.
-   Verify browser dependencies and the expected source-evidence coverage
-   separately. Do not dispatch an unmatched or incomplete checkout and
-   call it equivalent.
-4. Start asynchronous MCP pytest jobs via `start_test_job` using
-   `worker="linux-dev"` and `expected_commit=<full 40-character SHA>`.
-   For runner profiles containing tests, use `start_script_job` with
-   the tracked `tools.run_checks` module, the same worker/commit pin,
-   and appropriate timeout. Record job ID and intended selectors in each
-   affected VR item or ignored evidence. Only for an **actively running
-   full-suite Linux job**, continue independent Windows implementation;
-   retain and return to the open VR drain when it finishes. For focused
-   or partial jobs, keep processing the VR queue rather than starting
-   unrelated implementation. Do not mutate the Linux checkout or shared
-   test inputs. Inspect `list_script_jobs` after reconnecting and poll
-   at meaningful boundaries or actionable failures.
-5. Before retiring a VR, verify the **actual** worker revision, exit code,
-   report, pass/fail/skip counts, and required source/asset coverage.
-   Unexpected browser or source-data skips are gaps, not a green
-   acceptance. A failure stays open and links the implementation fix in
-   TODO. Record concise durable outcome in `docs/testing.md` or the
-   release evidence owner, retire each passing VR immediately and each VD when its test design
-    is complete without execution,
-   and advance queue counters without reusing IDs. Windows-only checks,
-   hosted CI and final release acceptance remain distinct.
+1. Identify a real pending check, its revision, selectors and required assets.
+   The queue has no count-based execution trigger; a prerequisite becoming
+   available or a relevant integration/release gate is sufficient reason.
+2. Prepare the dedicated `linux-dev` MCP worker checkout using separate,
+   non-destructive fetch/fast-forward operations, then verify exact HEAD and
+   relevant dependencies/source inputs. Never silently move the interactive
+   `devbox` checkout, reset/rebase, or change a checkout with active jobs.
+   A missing required source artifact or unsafe Git handoff is a blocker.
+3. Verify schema-specific matched runtime artifacts where the test depends
+   on them (including embedded deployed objects in v10 Rules, matched
+   variant/Weapon-profile publications, source identities and browser assets).
+   Do not mistake a matching Git SHA for evidence that ignored data is present.
+4. Dispatch with `start_test_job` or `start_script_job` using
+   `worker="linux-dev"`, `expected_commit=<full SHA>` and the smallest
+   relevant selectors. Record the job ID and intended coverage. Independent
+   Windows work may continue during a **focused or full** run when it cannot
+   mutate this worker's checkout or shared inputs. A dispatch is not a pass.
+5. Verify terminal status, actual SHA, failures, skips and source/asset coverage.
+   Retire satisfied queued work; keep failed, blocked or unrun verification
+   open with a concrete next trigger. Hosted CI and release acceptance remain
+   independent. Poll existing jobs after reconnecting rather than launching
+   duplicates.
 
 **Workspace MCP execution:** The connected MCP server requires test workloads
 to use its asynchronous job interface. Use `start_test_job` for ordinary

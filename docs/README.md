@@ -28,8 +28,9 @@ Use these documents when deciding how the project works now:
 - [multi-agent-workspaces.md](multi-agent-workspaces.md) — optional coordination, enabled only
   by explicit user request; its checkout roles, claims and serialized integration apply within
   that requested scope, rather than to ordinary development by default.
-- `validation-queue.md` — canonical VD/VR scheduling and active deferred-validation
-  register (design/execution thresholds, dependencies, drain and retirement); not an implementation backlog.
+- `validation-queue.md` — active register for genuinely deferred test design
+  or execution (owner, prerequisites, resumption trigger and outcome); no
+  mandatory per-edit entries or numeric thresholds.
 - `ci.md` — hosted CI workflows and repository-level validation policy.
 - `deployment.md` — production install/update/rollback/operations contract.
 - `server-migration.md` — moving released or development environments between hosts.

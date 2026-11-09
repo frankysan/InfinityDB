@@ -126,7 +126,7 @@ The ordering below expresses **dependencies**, not a requirement to serialize in
 
 #### P0.2 — Proposed normal task lifecycle (2026-11-09)
 
-**Status:** Design defined on `dev/v1.1.0`; **not active policy until P0.3–P0.5 reconcile the queue, testing, agent and CI/release instructions**. This section is the target contract for ordinary implementation, not a second current operating manual. When activated, `AGENTS.md` will point to the short workflow in `docs/testing.md`; this design section can then be retired or reduced to a decision record.
+**Status:** Design defined on `dev/v1.1.0`; P0.3 implements the focused-test and deferred-queue rules in tracked guidance. P0.4–P0.5 still own release-policy and local-agent preference reconciliation. This section records the target rationale, not a second current operating manual. Active task instructions live in `docs/testing.md` and are linked from `AGENTS.md`.
 
 **Default task unit:** One coherent, reviewable behavior change or closely coupled set of changes with an observable acceptance condition. Avoid splitting every file edit into its own investigation/test/commit cycle, but do not mix independent defects merely to fill a batch. Small, known tasks need no separate planning agent, formal handoff or pre-implementation approval.
 
@@ -161,6 +161,31 @@ The ordering below expresses **dependencies**, not a requirement to serialize in
 - **P0.5:** Give the active default one authoritative short owner in `docs/testing.md`; keep `AGENTS.md` an entry point and align `docs/validation-queue.md`, `docs/ci.md`, `docs/releasing.md` and local `AGENTS.local.md` without conflicting MUST rules. Do not edit ignored personal preferences without an explicit reconciliation decision.
 
 **Exit decision for P0.2:** The normal path is **orient → implement → verify → deliver → report**. Specialized investigation, queued testing, multi-agent delegation and release operations are opt-in by actual risk or need, not mandatory steps per edit. No behavior, queue threshold or existing mandatory gate changes merely because this target lifecycle has been documented.
+
+#### P0.3 — Deferred-validation simplification (2026-11-09)
+
+**Implemented on `dev/v1.1.0`:** Ordinary implementation now permits
+immediate focused regression design and execution. VD/VR entries are created
+only for concrete **unresolved** checks, each with a reason and resumption
+trigger. Removed mandatory 3/5 item thresholds, seven-day age deadlines and
+drain-to-zero sequencing. A pinned, independent Linux checkout can execute
+focused or full tests while unrelated Windows work continues without changing
+shared inputs. Linux revision/asset verification, Git safety, actual terminal
+test results and all independently required CI/release gates remain.
+
+The read-only `tools.dev_status` report now gives counts, oldest age and
+blocked IDs without inferring an automatic "due" state. The historical VD/VR
+IDs and active markdown sections remain readable. Removed redundant
+completed-entry narrative from the active queue; Git history and existing
+testing evidence retain that history.
+
+**Scope boundary:** Tracked `AGENTS.md`, `docs/testing.md`,
+`docs/validation-queue.md`, `docs/AI_CONTEXT.md`, documentation map,
+Copilot guidance and the optional coordination entrypoint are aligned.
+`AGENTS.local.md` remains Git-ignored and contains superseded strict-queue
+preferences; tracked policy takes precedence, but explicit local-preference
+reconciliation belongs to **P0.5**. P0.4 still owns substantive release and
+hosted-gate simplification. Neither was silently rewritten here.
 
 ### P1 — Map the dependency graph and define the cutover
 

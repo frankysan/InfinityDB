@@ -12,10 +12,9 @@ architecture mirror, release diary, or backlog. Before substantial work, use the
 - curated schemas/review policy: `data/curated/README.md`;
 - data/provenance lifecycle: `data/README.md`;
 - checks/CI: `docs/testing.md`, `docs/ci.md`;
-- deferred test design/execution and asynchronous Linux dispatch:
-  `docs/validation-queue.md` (strict VD-to-zero then VR-to-zero drain
-  under its current thresholds; VD never runs tests; parallel Windows work permitted
-  only while an independent Linux full suite is running);
+- deferred test obligations: `docs/validation-queue.md` (only concrete
+  unrun checks, no numeric drain; focused tests may run during implementation;
+  independent Windows work is allowed during isolated focused/full Linux runs);
 - unfinished implementation work: `docs/TODO.md`;
 - upstream rules/Army/Wiki/FAQ inconsistencies and publisher ruling questions:
   `docs/official-source-clarifications.md` (stable SRC IDs);
