@@ -186,6 +186,10 @@ def test_missing_or_malformed_publication_is_explicit(
         ("profile", "profile changed"),
         ("page", "Incomplete reviewed Weapon entry"),
         ("missing-review", "lack reviewed chart citations"),
+        ("duplicate-review", "Duplicate reviewed Weapon"),
+        ("missing-reason", "Incomplete reviewed Weapon entry"),
+        ("changed-name", "Reviewed Weapon identity changed"),
+        ("invalid-format", "Unsupported reviewed Weapon source policy"),
     ),
 )
 def test_builder_rejects_stale_or_incomplete_review(
@@ -200,6 +204,14 @@ def test_builder_rejects_stale_or_incomplete_review(
         policy["reviews"][0]["chartPage"] = 189
     elif mutation == "missing-review":
         policy["reviews"].pop(0)
+    elif mutation == "duplicate-review":
+        policy["reviews"].append(deepcopy(policy["reviews"][0]))
+    elif mutation == "missing-reason":
+        policy["reviews"][0]["reason"] = ""
+    elif mutation == "changed-name":
+        policy["reviews"][0]["name"] = "Incorrect identity"
+    elif mutation == "invalid-format":
+        policy["format"] = "unreviewed"
     with pytest.raises(ValueError, match=message):
         build_publication(DEFAULT_ARMY, DEFAULT_RULES, _write(tmp_path / "reviews.json", policy))
 

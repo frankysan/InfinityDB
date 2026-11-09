@@ -29,6 +29,7 @@ from .deployed_object_builder import build_deployed_objects
 from .rules_database import export_rules_database
 from .variant_usage import build_variant_usage_projection
 from .variant_usage_reference import publication_from_candidate
+from .weapon_profile_builder import build_publication
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -41,12 +42,7 @@ def collect_build_manifest(root: Path, source: Path, metadata: Path | None) -> d
         raise ValueError("Complete runtime builds require the project source checkout")
     envelope = discover_metadata(source, metadata, required=True)
     assert envelope is not None
-    code = sorted((root / "src").rglob("*.py")) + [
-        root / "tools" / name for name in (
-            "build_weapon_profile_publication.py", "audit_enrichment_coverage.py",
-            "audit_weapon_definition_gaps.py",
-        )
-    ]
+    code = sorted((root / "src").rglob("*.py"))
     maintained = [
         path for directory in (
             "config/catalogs", "config/identity", "config/validation", "config/symbols",
@@ -81,10 +77,6 @@ def collect_build_manifest(root: Path, source: Path, metadata: Path | None) -> d
 
 
 def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
-    # P2.3 extracts the reviewed Weapon builder from its current source-audit
-    # wrapper. Until then complete builds explicitly require this checkout.
-    from tools.build_weapon_profile_publication import build_publication
-
     army, rules = stage / "infinity.db", stage / "rules.db"
     generation = validate_database_pair(army)
     if generation is None:

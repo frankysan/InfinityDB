@@ -94,6 +94,11 @@ newest local Army ZIP once; `--metadata` selects external API metadata explicitl
 It never downloads an input or inherits the serving-only `INFINITY_DB_DB_DIR`.
 `--db-dir` and the existing narrow Army `--output-dir` are mutually exclusive;
 complete builds require lossless verification and reject `--no-verify`.
+Reviewed Weapon citation eligibility and current PDF/profile provenance are
+validated by the maintained `infinity_db.weapon_profile_builder`; historical
+cross-domain enrichment and Weapon-gap audits are not complete-build inputs.
+The legacy Weapon JSON publication command delegates to the same builder while
+the tracked v10 release retains its JSON contract.
 
 The builder uses disposable work files under ignored `data/work/build/`, validates
 the full runtime set and matching input provenance, then replaces only the two

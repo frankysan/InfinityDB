@@ -581,6 +581,29 @@ independent-platform reproducibility, Docker, Linux and exact-SHA hosted CI
 were not established by this batch. The builder regression uses shipped
 release-database fixtures, not a fresh Army normalization and source build.
 
+**2026-11-09 P2.3 real source-ZIP acceptance (Windows):** The opt-in
+`tools.verify_complete_database_build` diagnostic rebuilt the same immutable
+`data/raw/JSON 20260929-114335.zip` twice (archive SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`).
+Both runs performed lossless normalization, all 73 source validation checks
+(116 known baseline warnings), full v12 database-set health, matched build
+provenance, 62 exact reviewed Weapon identities/69 cited profiles, 151 variant
+groups, matched historical v10 citation semantics and live Weapon/variant HTTP
+reads. Byte-level hashes were **identical** between independent runs:
+`infinity.db` =
+`a2607403e924d02a36f72da88a7d65300e8a2de354365044ff46ca2a7c171fa6`;
+`rules.db` =
+`e06e24c22f1c8b82fe8f4be4c628df8c12b5fe95261349775d84c1b9ac055998`.
+Build-set ID:
+`f7615d25cd8590b4498c7493cdebf382593d1377861bbd8f48f905fbc63e5af2`.
+The two output directories and intermediate raw data were temporary under
+ignored `local/`; no tracked release artifacts were replaced. Re-run the
+opt-in diagnostic with
+`python -m tools.verify_complete_database_build "data/raw/JSON 20260929-114335.zip" --sha256 f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`.
+The historical citation builder and new maintained builder produced identical
+tracked publication bytes. These are Windows local checks, not cross-platform
+byte reproducibility, Docker, browser or hosted CI acceptance.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

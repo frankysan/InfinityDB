@@ -82,10 +82,10 @@ only when required to fix correctness, reproducibility, or release reliability.
   current-format shared validation and opt-in offline complete builds with
   input provenance are available in the [data lifecycle](../data/README.md).
   Complete builds now embed variant usage and reviewed Weapon-profile citations
-  in Rules v12, publishing a two-file SQLite set. Finish P2.3's extraction of
-  still-needed Weapon verification from historical audit tools and its real
-  source-build/API parity acceptance, then proceed with P2.4's remaining facts;
-  final default/serving integration remains with P2.6. Keep current serving
+  in Rules v12, publishing a two-file SQLite set. P2.3's independent build
+  validation and real-source reproducibility are complete on Windows; continue
+  with P2.4's remaining runtime facts. Final default/serving integration and
+  platform acceptance remain under P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;
   do not copy its complete roadmap into a second task ledger.
 

@@ -151,6 +151,10 @@ def test_builder_code_and_selected_metadata_are_inputs(project) -> None:
     assert code_change["builderRevision"] != original["builderRevision"]
     (root / "src/sample.py").write_bytes(b"# changed\r\n")
     assert builder.collect_build_manifest(root, args.source, None) == code_change
+    # Historical audits are now independent diagnostics, not build inputs.
+    (root / "tools/audit_enrichment_coverage.py").write_text("changed", encoding="utf-8")
+    (root / "tools/audit_weapon_definition_gaps.py").write_text("changed", encoding="utf-8")
+    assert builder.collect_build_manifest(root, args.source, None) == code_change
     metadata = root / "other-metadata.json"
     metadata.write_text('{"factions":[{"id":2,"name":"Other"}]}', encoding="utf-8")
     selected = builder.collect_build_manifest(root, args.source, metadata)
