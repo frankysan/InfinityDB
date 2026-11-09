@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0 and P1.1–P1.3 completed; P1.4–P6 remain planned.  
+**Status:** Active on `dev/v1.1.0`: P0 and P1.1–P1.4 completed (P1.4 defines the design, not implemented schemas); P1.5–P6 remain planned.  
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
 
@@ -660,6 +660,255 @@ project suite for each intermediate step. P1.4 now specifies the
 database owners/schema and P1.5 the unified build directory/serving
 contract before any production data migration.
 
+#### P1.4 — Target database ownership and relational contract (2026-11-09)
+
+**Status:** Design accepted for implementation planning on `dev/v1.1.0`,
+based on current Army schema v26, the v10 Rules release model, the P1.2 read graph
+and the P1.3 parity fixture. **Nothing in this section describes a
+deployed or migrated schema.** P1.5 owns paths/packaging; P2 builds the
+first two files; P3 separates ITS physically. Exact SQL DDL and
+compatibility-version increments belong to the implementing change.
+
+**Final database families and authority:**
+
+- **`army.db` — Army source and Army-facing application facts.** Own
+  normalized source-native Armies, Units, profiles, options, Weapons and
+  exact source identifiers; canonical Army slugs, source-to-logical-Unit
+  identities, Army overviews/legacy identities, filter semantics,
+  classifications, and published Army/Unit/profile **symbol path
+  mappings**. Generated from the pinned Army archive and maintained
+  Army-specific authoring/validation inputs. Do not put rule
+  interpretations, source PDF authority or season-specific missions here.
+- **`rules_n5.db` — N5 rule authority and N5-scoped enrichments.**
+  Own reviewed rule collections/records/relations/citations, N5 FAQ and
+  applicability, Restrictions conditions/chart, Weapon Properties and
+  profile-to-rule references, mode-specific Weapon Chart citations,
+  **exact reviewed Skill/Equipment variant usage**, and existing
+  embedded deployed-object read models. Some of these are **joint
+  projections** over the selected Army source; they must explicitly
+  pin `army.db` rather than be mistaken for Army-independent
+  official-rule facts. Preserve the N4-origin Reinforcements annex as
+  distinctly labeled optional historical authority when referenced by
+  N5; do not silently reclassify it as native N5.
+- **`its_18.db` — ITS Season 18 publications.** Eventually owns
+  Battleground and subsequent ITS 18 missions, season revision/source
+  authority, setup/scoring, geometry, seasonal constraints and
+  season-scoped FAQ/rules contributions. It references N5 canonical
+  definitions by typed identity without copying their definitions.
+  **Interim P2 exception:** existing ITS 18 rows remain in
+  `rules_n5.db` until P3 migrates them; never publish duplicates
+  from both databases or drop Battleground during the cutover.
+  A later `its_17.db` follows the same independent source-family
+  contract without modifying N5 or Season 18 schema.
+
+**Concrete destination for every P1.2 serving JSON:**
+
+- `data/curated/identities/army-overview.json` →
+  `army.db`: `army_overview_text` keyed by stable Army application
+  slug and text role, with authored ordering/source attribution;
+  `/api/armies` remains unchanged.
+- `data/curated/identities/legacy-armies.json` →
+  `army.db`: `legacy_army_identities` keyed by explicit
+  historical source identity plus named source/archive context;
+  aliases and current-identity links use ordered child rows.
+  Do not infer a missing parent from an Army ID or name.
+- `config/catalogs/equipment-presentation-encodings.json` →
+  `army.db`: `equipment_presentation_encodings` keyed by the
+  reviewed characteristic and canonical Equipment ID; retain
+  reason/selection and reject ambiguous characteristic matches.
+- `config/catalogs/skill-source-classifications.json` →
+  `army.db`: `skill_source_classifications` keyed by the
+  source Skill identity, with classification and review reason.
+  This classifies Army's source bucket; it does not create N5
+  canonical Skill definitions.
+- `config/catalogs/unit-filter-semantics.json` →
+  `army.db`: `hidden_unit_characteristics` keyed by normalized
+  characteristic slug, `source_classification_memberships` keyed by
+  source classification and matched filter slug, with explicit
+  reason/position. Query filters, hidden choices and public IDs
+  must retain existing behavior.
+- `config/catalogs/trait-wiki-references.json` →
+  `rules_n5.db`: `trait_source_links` keyed by canonical
+  `trait:<slug>` and source/version; preserve the verified URL
+  as a locator, not a derived rule definition.
+- `config/catalogs/weapon-ammunition-references.json` →
+  `rules_n5.db`: `weapon_ammunition_links` keyed by exact
+  Army Ammunition source ID and N5 source/version;
+  `weapon_ammunition_segments` ordered by position with optional
+  canonical `ammunition:<slug>` link; reviewed composition
+  components remain distinct ordered relationships. Never parse
+  label punctuation into game semantics.
+- `config/catalogs/weapon-combined-saving-rolls.json` →
+  `rules_n5.db`: `weapon_combined_saving_roll_profiles`
+  keyed by exact Army Weapon source ID **plus mode**, original
+  ammunition/source-profile signature, N5 citation, extra-roll
+  count and ARM/BTS attribute. Preserve source strings and nulls;
+  this is a reviewed annotation, not a generic roll calculator.
+- `config/catalogs/weapon-properties.json` →
+  `rules_n5.db`: `weapon_properties` keyed by canonical
+  `weapon-property:<slug>`; ordered `weapon_property_origins`
+  and `weapon_property_profiles` hold each reviewed rule/source
+  section and exact Army Weapon/source-mode signature. Do not
+  merge this vocabulary with official Ammo or Trait records.
+- `data/generated/variant-usage.json` →
+  `rules_n5.db`: `variant_usage_groups` keyed by N5 record
+  identity and **canonical reviewed variant signature**;
+  `variant_usage_source_rows` with unique
+  `(catalog, owner_kind, occurrence_id)`, explicit
+  Army/Unit/group/profile/option ID and source position;
+  ordered `variant_usage_extras`, include/peripheral provenance
+  and any count fields or derivable count views. Store
+  `army_export_pair_sha256` and selected N5 source identity
+  in projection metadata; raw `infinity.raw.db` remains
+  build-only. Preserve unresolved/ambiguous source rows as
+  diagnostics, **not** invented exact usages. Maintain the public
+  `variantKey`, source-row order, sourceSnapshot and
+  `/api/variant-usage` semantics.
+- `data/generated/weapon-profile-sources.json` →
+  `rules_n5.db`: `weapon_chart_profile_citations`
+  unique by exact `(weapon_id, source_profile_id, mode_key)`;
+  `mode_key` is non-null and explicitly distinguishes an
+  unqualified mode from named modes (SQLite composite UNIQUE
+  does not treat NULLs as equal). FK within Rules to the
+  current primary `sources(collection_id,id)`, with page,
+  curated review SHA and profile fingerprint bound to selected
+  Army source. Return the original nullable mode on the API.
+  Preserve completeness checks for every source profile/mode.
+- `web/static/restrictions-reference.json` →
+  `rules_n5.db`: source-chart `restriction_chart_rows`
+  and ordered `restriction_chart_conditions` keyed by
+  N5 PDF identity/page, row position, condition position and
+  subject; optional mapping edges to existing
+  `restriction_constraints` preserve the distinct 6-row
+  educational chart and 14 normalized prohibition conditions.
+  API projection returns the exact former chart structure,
+  labels/links/notes and no-legality-evaluator caveat; frontend
+  changes from a direct static JSON fetch to that API.
+  **Do not** conflate chart rows with restrictions constraints
+  or add an independent rules-evaluation layer.
+- `data/manifests/symbol-publication.json` →
+  `army.db` for runtime `factionIdToPublishedPath`,
+  `unitSlugToPublishedPath`, `unitProfileLogoToPublishedPath`
+  and `profileIdentityToPublishedPath` lookups. Implement
+  `published_symbol_paths` with validated mapping kind,
+  exact identity and relative SVG path, unique by kind/identity.
+  Other publication-manifest metadata remains build/asset
+  validation evidence. Keep processed SVGs as packaged files,
+  and derive static cache identity from validated **asset bytes**
+  plus the embedded mapping revision, not a runtime JSON file.
+- `data/generated/deployed-objects.json` → **already
+  `rules_n5.db` in v10**: retain
+  `deployed_objects`, attributes, delivery sources, direct
+  Unit uses and unresolved entries. Only retire v8/v9 file
+  fallbacks once no accepted runtime/test/build consumer needs
+  them. No second migration of the same rows.
+
+**Typed identity and cross-database resolution:**
+
+1. Canonical rule/record references are typed strings such as
+   `skill:camouflage`, `weapon-property:<slug>` and
+   `scenario:battleground`; original numeric Army source IDs,
+   canonical Army slugs and source occurrence coordinates are
+   **different identities** and must not be conflated. Preserve
+   existing public slug/numeric lookup compatibility through the
+   central domain resolver. A record identity is additionally
+   qualified by its source collection/revision wherever authority
+   and historical variants require that distinction.
+2. `rules_n5.db` owns links into `army.db` as **typed external
+   references**, not SQL FKs into another file. Store the precise
+   owner kind, source identity, optional mode/profile key, and
+   paired Army generation identity. Validate the target,
+   cardinality, variant signature and nonambiguity **at build
+   time**, then validate the selected database set at startup.
+   Do not use `ATTACH`, global SQLite connections, implicit
+   sibling-file guesses or browser-side cross-database joins as
+   the domain resolution mechanism. An application-layer
+   registry/resolver produces the existing API read model.
+3. `its_18.db` uses `(season_id, season_revision,
+   scenario_id)` for mission membership/publication selection.
+   A canonical scenario ID alone is **not** globally unique
+   across seasons or revisions. Typed references to core Rule,
+   Skill, State and game-object definitions resolve centrally
+   against `rules_n5.db`; season-specific rule supplements
+   retain their owner/revision/effective dates and never
+   silently shadow a core definition. Missing/ambiguous
+   season/version selectors fail closed, consistent with
+   current `resolve_scenario_publication` behavior.
+4. Within each SQLite file, use ordinary `PRIMARY KEY`,
+   `FOREIGN KEY`, `UNIQUE`, explicit position and `CHECK`
+   constraints. Encode repeatable query-bearing facts, source
+   links, variant extras, rules citations and geometry in typed
+   columns or child tables. Do **not** replace loose JSON with
+   opaque JSON blobs that must be reparsed for normal queries.
+   Existing validated nested scenario payloads and older
+   `*_json` columns are migration debt; P3 may preserve the
+   current typed scenario component serialization temporarily,
+   but it must retain explicit relational identity, source
+   membership and all semantics. Audit any retained JSON
+   columns when their owners are migrated.
+
+**Provenance and atomic set selection:**
+
+- Each database has its distinct SQLite application ID,
+  schema/compatibility version, build revision, source family,
+  exact archive/source collection+revision, applicable official
+  source SHA(s), curation/config digests, and deterministic
+  content fingerprint. Stable `build_set_id` is computed
+  **before writing output bytes** from the canonical manifest
+  of pinned build inputs and selected families; all databases
+  in one built set carry it. A rules or season database
+  additionally carries the exact required Army/source and
+  core-rules generation references as applicable. Never
+  embed a database's *own final file hash* or a circular
+  two-way file-hash reference inside that database.
+- The candidate validator checks independent schema IDs,
+  `PRAGMA integrity_check`, logical content and the
+  required cross-database identity edges. Runtime requires
+  one coherent selected set and rejects mixed sources,
+  incompatible rule/season versions, incomplete projections
+  or stale embedded mappings. Do not silently attach a
+  mismatched rules database or fall back to older sidecars.
+  An expressly optional season may be absent without
+  disabling N5 core; its own routes must report an
+  unambiguous unavailable/404 status rather than inventing
+  content. Release builds requiring ITS 18 must require
+  its presence once P3 is complete.
+- The public `/api/version` still exposes application,
+  static and snapshot revisions. Its future snapshot
+  revision deterministically covers the **selected completed
+  database set** and source-bound enrichments; the static
+  revision covers static assets and published symbol paths
+  separately. Define the new exact-revision algorithm at
+  P1.5/P2 implementation and test cache invalidation. The
+  P1.3 semantic parity gate deliberately ignores old DB
+  *byte* digests but protects source archive, citation and
+  public payload identities. An update to official data is
+  a separately reviewed baseline revision, not a reason to
+  bypass parity during a storage-only migration.
+
+**Migration sequencing constraints:** Implement `army.db` source
+overlays/symbols and `rules_n5.db` rule-owned mappings while
+both are built against the same pinned Army inputs; then embed
+variant usage and mode-specific Weapon citations with their
+cross-database validators; move Restrictions chart behind
+a DB-backed API; remove the now-unneeded legacy JSON
+runtime readers; perform the explicit file-name/build-path
+cutover once consumers agree. Keep ITS 18 temporarily
+accessible through `rules_n5.db` until P3 exports and
+switches it to `its_18.db` in a single parity-checked
+change. P2.8 and P3.5 must compare all P1.3 selected routes
+and the Battleground SVG, plus appropriate actual browser
+and Docker smoke checks. The goal is a **single build
+contract**, not separate, recurring publish/promote
+ceremony for every artifact.
+
+**P1.5 handoff:** Select the default output directory,
+CLI `--db-dir`/environment override contract, package
+inputs for checkout and Docker, and file-required/optional
+policies. P1.4 assigns *owners and relations*, not
+unchecked changes to current CLI filenames or release
+publication expectations.
+
 ### P2 — Make runtime data SQLite-only and unify build/serve
 
 **Outcome:** No required loose JSON data publications and no competing checkout-vs-Docker data assembly model.  
@@ -669,7 +918,7 @@ contract before any production data migration.
 1. **P2.1 — Establish the final DB build interface.** Design `infinity-db build` as the complete normal offline build. Retain narrower developer commands only when genuinely useful; `infinity-db serve` should consume the selected built database directory directly.
 2. **P2.2 — Embed variant usage.** Normalize `variant-usage.json` into its agreed owning DB; migrate reference loading/API output; remove file/hash pairing and runtime fallback code.
 3. **P2.3 — Embed reviewed Weapon-profile citations.** Migrate `weapon-profile-sources.json` into its agreed DB, preserving source locators and relationship semantics; delete the sidecar consumer.
-4. **P2.4 — Embed remaining static structured reference data.** Move `restrictions-reference.json` behind the API/DB; scan for other static JSON that supplies domain facts at runtime, including any needed symbol mapping. Avoid moving ordinary static web assets into SQLite.
+4. **P2.4 — Embed remaining runtime-maintained and static structured facts.** Materialize the nine identified maintained JSON datasets and runtime symbol mappings in their P1.4 owner DBs; remove wheel-packaged JSON *serving* dependencies while retaining editable build inputs. Move `restrictions-reference.json` behind the Rules API/DB. Scan for missed direct static JSON facts; keep ordinary SVG/CSS/JS assets as files.
 5. **P2.5 — Finalize the deployed-object transition.** Retain v10's DB-backed model while removing only proven unused v8/v9 loose-file fallbacks, legacy builder modes and publication verifiers.
 6. **P2.6 — Rename `infinity.db` to `army.db` and `rules.db` to `rules_n5.db`.** Update CLI defaults, env vars, package/build scripts, path discovery, database validators, docs, tests, Dockerfile and workflows in one coordinated cutover. Do not preserve permanent filename aliases.
 7. **P2.7 — Remove redundant publication stages.** Collapse `local/checkout-runtime/`, standalone rules staging, candidate promotion, duplicated matched-release checks and `data/runtime/` copying where possible into the simple contract from P1. Temporary files used for atomic DB creation are still acceptable; do not equate implementation safety with a public promotion workflow.
@@ -757,11 +1006,11 @@ flowchart TD
     p5 --> p6
 ```
 
-**Suggested first execution batch:** P0.1–P0.3 as a focused documentation/process change, followed by P0.4–P0.5. Next do the P1 dependency inventory *before* modifying the data path. Work that is genuinely independent (P4 copy) need not block on the database migration.
+**Execution status:** P0.1–P0.5 and P1.1–P1.4 are complete as process changes, inventory, baseline fixtures and target decisions. Finish P1.5–P1.6 before changing the data path. Independent P4 copy work need not block on the database migration.
 
 ## Questions to settle during discovery (not reasons to stop planning)
 
-- Which database owns cross-source variant usage, Weapon-profile citations, and symbol-to-identity mappings?
+- **Resolved in P1.4:** `rules_n5.db` owns rule-derived variant usage and reviewed Weapon Chart citations; `army.db` owns runtime symbol-to-Army identity mappings.
 - Does the build need a `data/generated/` tracked artifact directory, an ignored output plus explicit release packaging, or some smaller combination? There should be **one contract**, not competing implicit defaults.
 - Which parts of `infinity.raw.db` provide unique research value versus raw ZIP snapshots?
 - How are core/ITS revisions selected when archived seasons or rules editions become supported? Source-family separation must not collapse revisions.
