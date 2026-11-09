@@ -17,6 +17,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
+from .army_reference_storage import ARMY_SCHEMA_VERSION as ARMY_REFERENCE_SCHEMA_VERSION
 from .build_provenance import validate_set_provenance
 from .database.repository import Database
 from .rules_database import RulesDatabase
@@ -76,6 +77,9 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         army_version = connection.execute("PRAGMA user_version").fetchone()[0]
     filter_semantics = (
         army.unit_filter_semantics() if army_version >= UNIT_FILTER_SCHEMA_VERSION else None
+    )
+    army_reference = (
+        army.army_reference_data() if army_version >= ARMY_REFERENCE_SCHEMA_VERSION else None
     )
     rules = RulesDatabase(rules_path)
     rules.validate()
@@ -149,6 +153,10 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         **({"ammunitionReferences": len(ammunition)} if ammunition is not None else {}),
         **({"weaponProperties": len(properties)} if properties is not None else {}),
         "sha256": fingerprints,
+        **({
+            "armyOverviewSummaries": len(army_reference[0]),
+            "legacyArmyIdentities": len(army_reference[1]),
+        } if army_reference is not None else {}),
         **({
             "hiddenUnitCharacteristics": len(filter_semantics.hidden_characteristics),
             "sourceClassificationMemberships": len(filter_semantics.classification_memberships),

@@ -129,7 +129,7 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     report = audit_database(_runtime_database(tmp_path), project_root=ROOT)
 
     assert report["summary"] == {
-        "surfaceCount": 42,
+        "surfaceCount": 45,
         "runtimeTableCount": 83,
         "runtimeFieldCount": 394,
         "tableWithOpenIssueCount": 0,
@@ -241,6 +241,7 @@ def test_runtime_surface_audit_is_deterministic_and_read_only(tmp_path: Path) ->
 
 def test_runtime_method_discovery_matches_current_runtime_helpers() -> None:
     assert discover_runtime_database_methods(ROOT) == {
+        "army_reference_data",
         "application_catalog_id",
         "application_domain_id",
         "application_slug",
@@ -261,6 +262,8 @@ def test_runtime_method_discovery_matches_current_runtime_helpers() -> None:
         "list_unit_filter_values",
         "list_units",
         "skill_source_ids",
+        "skill_source_classifications",
+        "unit_filter_semantics",
         "snapshot_downloaded_on",
         "source_data_changed_on",
         "trait_usage_index",

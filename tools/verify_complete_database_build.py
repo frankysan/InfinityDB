@@ -77,6 +77,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 or report["skillSourceClassifications"] != 6
                 or report["hiddenUnitCharacteristics"] != 2
                 or report["sourceClassificationMemberships"] != 1
+                or report["armyOverviewSummaries"] != 58
+                or report["legacyArmyIdentities"] != 2
             ):
                 raise ValueError("Complete build changed the reviewed source inventory")
 
@@ -208,6 +210,33 @@ def verify(source: Path, expected_sha256: str) -> dict:
                     units = _api(app, f"/api/units?classification={slug}&search=MARUTS&limit=200")
                     if "MARUTS" not in {unit["name"] for unit in units["items"]}:
                         raise ValueError("Combined classification lost its Unit filter membership")
+            from infinity_db.army_overview_copy import load_army_overview_copy
+            from infinity_db.legacy_armies import load_legacy_armies
+
+            army_copy, legacy_armies = Database(destination / "infinity.db").army_reference_data()
+            if (army_copy, legacy_armies) != (
+                load_army_overview_copy(ROOT / "data/curated/identities/army-overview.json"),
+                load_legacy_armies(ROOT / "data/curated/identities/legacy-armies.json"),
+            ):
+                raise ValueError("Embedded Army reference differs from authored inputs")
+            armies = _api(app, "/api/armies")["items"]
+            by_slug = {item.get("public_slug") or item["slug"]: item for item in armies}
+            if any(
+                by_slug[slug]["overview_description"] != text for slug, text in army_copy.items()
+            ):
+                raise ValueError("Army API changed authored overview summaries")
+            for legacy_army in legacy_armies:
+                item = by_slug[legacy_army.slug]
+                if not item.get("legacy") or item["playable"]:
+                    raise ValueError("Historical Army became playable in the overview")
+                query = legacy_army.slug.split("-")[0]
+                results = _api(app, f"/api/search?q={query}")["items"]
+                if not any(
+                    result["domain"] == "Army" and result["name"] == legacy_army.name
+                    and result["href"] == f"/armies#army-{legacy_army.slug}"
+                    for result in results
+                ):
+                    raise ValueError("Historical Army search navigation changed")
             baseline = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
             observed = capture(
                 app, paths=tuple(item["path"] for item in baseline["probes"]),
@@ -221,7 +250,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 f"6 saving-roll modes, 16 Ammunition references, "
                 f"12 Weapon Properties, 2 Equipment encodings, "
                 f"6 Skill classifications, 2 hidden characteristics, "
-                f"1 classification membership, 41 baseline routes; "
+                f"1 classification membership, 58 Army summaries, "
+                f"2 historical Army identities, 41 baseline routes; "
                 f"hashes {json.dumps(report['sha256'], sort_keys=True)}",
                 flush=True,
             )
@@ -247,6 +277,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
         "skillSourceClassifications": reports[0]["skillSourceClassifications"],
         "hiddenUnitCharacteristics": reports[0]["hiddenUnitCharacteristics"],
         "sourceClassificationMemberships": reports[0]["sourceClassificationMemberships"],
+        "armyOverviewSummaries": reports[0]["armyOverviewSummaries"],
+        "legacyArmyIdentities": reports[0]["legacyArmyIdentities"],
         "rebuilds": 2,
     }
 

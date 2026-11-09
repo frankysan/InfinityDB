@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in Rules v13, Trait Wiki links in v14, Combined Saving Rolls in v15, Ammunition links in v16 and Weapon Properties in v17; Army v27 adds Cube presentation encodings, v28 adds six Skill source classifications and v29 adds Unit Explorer filter semantics. Two maintained Army JSON datasets, symbol mappings and final cutover remain unfinished.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in Rules v13, Trait Wiki links in v14, Combined Saving Rolls in v15, Ammunition links in v16 and Weapon Properties in v17; Army v27 adds Cube presentation encodings, v28 adds six Skill source classifications, v29 adds Unit Explorer filter semantics and v30 adds Army summaries and historical identities. Runtime symbol mappings and final cutover remain unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1679,8 +1679,22 @@ owns storage details; [testing](testing.md#selected-runtime-database-set-validat
 owns focused and pinned-source acceptance. Earlier schemas retain
 their validated JSON adapter until the deliberate serving cutover.
 
-**Remaining P2.4:** Migrate two maintained Army JSON datasets
-and runtime symbol path mappings identified in P1.4.
+#### P2.4 — Ninth slice: Army overview and historical identities (2026-11-09)
+
+**Status:** Opt-in complete builds extend the matched Army v29/raw
+pair to **v30/compatibility 39**, embedding all 58 authored overview
+summaries together with the two explicit legacy Army identities.
+The summaries reference current application identities or historical
+identities through foreign keys; legacy parents are validated against
+the central current Army registry without inventing relationships.
+Authored ordering, exact text, historical IDs, grouping, logo locators
+and review reasons retain their source context and digest. The
+Army overview API and legacy-aware search read this projection
+without opening either maintained JSON input. The [data model](data-model.md#army-overview-and-historical-identities-in-army-v30-p24-opt-in)
+owns the relational/provenance contract; [testing](testing.md#selected-runtime-database-set-validation)
+owns focused parity and pinned-source acceptance.
+
+**Remaining P2.4:** Migrate runtime symbol path mappings identified in P1.4.
 The historical JSON adapters remain only while independently
 needed for release/research/presentation consumption;
 obsolete-path tests alone do not justify retaining them.
@@ -1766,7 +1780,7 @@ flowchart TD
     p5 --> p6
 ```
 
-**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has complete-build foundations, P2.2 embeds variant usage and P2.3 embeds reviewed Weapon citations. Continue P2.4 with Army overview, legacy Army identities and symbol mappings; final names/defaults and unified serving remain unfinished. Independent P4 copy work need not block on the database migration.
+**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has complete-build foundations, P2.2 embeds variant usage and P2.3 embeds reviewed Weapon citations. Continue P2.4 with symbol mappings; final names/defaults and unified serving remain unfinished. Independent P4 copy work need not block on the database migration.
 
 ## Questions to settle during discovery (not reasons to stop planning)
 

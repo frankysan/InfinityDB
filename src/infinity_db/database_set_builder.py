@@ -14,6 +14,7 @@ from typing import Any
 
 from infinity_army_data.cli import discover_metadata, latest_snapshot
 
+from .army_reference_storage import publish_army_reference_data
 from .build_provenance import (
     FAMILIES,
     MANIFEST_FORMAT,
@@ -188,6 +189,11 @@ def build_database_set(
             stage / "infinity.db",
             stage / "infinity.raw.db",
             root / "config/catalogs/unit-filter-semantics.json",
+        )
+        publish_army_reference_data(
+            stage / "infinity.db", stage / "infinity.raw.db",
+            root / "data/curated/identities/army-overview.json",
+            root / "data/curated/identities/legacy-armies.json",
         )
         _build_rules_and_publications(stage, root, manifest)
         result = validate_database_set(stage)

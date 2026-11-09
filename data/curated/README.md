@@ -17,6 +17,11 @@ provenance under `data/manifests/`.
   `army-overview.json` contains short editorial gameplay summaries keyed by public Army slug;
   the copy is synthesized from current Army/rules data with external faction background used only
   as secondary context, and is kept separate from source-derived identity semantics.
+  Opt-in complete builds embed these summaries and the explicitly authored
+  `legacy-armies.json` identities in Army v30; serving reads the selected
+  SQLite projection. Earlier schemas and source-only tools retain the JSON
+  adapters. The [data model](../../docs/data-model.md#army-overview-and-historical-identities-in-army-v30-p24-opt-in)
+  owns identity, parentage and provenance safeguards.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
   endpoints that cannot be resolved from the current Army snapshot alone.

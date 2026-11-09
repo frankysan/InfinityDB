@@ -59,6 +59,8 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         "config/catalogs/equipment-presentation-encodings.json",
         "config/catalogs/skill-source-classifications.json",
         "config/catalogs/unit-filter-semantics.json",
+        "data/curated/identities/army-overview.json",
+        "data/curated/identities/legacy-armies.json",
         "tools/build_weapon_profile_publication.py", "tools/audit_enrichment_coverage.py",
         "tools/audit_weapon_definition_gaps.py",
     ):
@@ -77,6 +79,11 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         RELEASE.parent.parent / "config/catalogs/unit-filter-semantics.json",
         root / "config/catalogs/unit-filter-semantics.json",
     )
+    for name in ("army-overview.json", "legacy-armies.json"):
+        shutil.copyfile(
+            RELEASE.parent.parent / "data/curated/identities" / name,
+            root / "data/curated/identities" / name,
+        )
     source = root / "army.zip"
     with zipfile.ZipFile(source, "w") as archive:
         archive.writestr("metadata.json", json.dumps({"factions": [{"id": 1, "name": "Test"}]}))

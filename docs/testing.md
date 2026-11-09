@@ -863,6 +863,36 @@ Build-set ID:
 Tracked release databases and default serving remain unchanged. This is local
 Windows opt-in acceptance; Linux, Docker and P2.6 cutover remain separate.
 
+**2026-11-09 P2.4 ninth slice, Army overview and historical identities (Windows local):**
+`tests/test_army_reference_storage.py` passed 26/26 across the focused
+storage and runtime-audit runs. These checks cover all 58 summaries, both
+historical identities, exact source digests/order, explicit parent identity,
+non-playability, API/search parity without authored JSON, invalid-input
+isolation, corrupt-row rejection and read-only runtime tracing. Related
+builder/set, Unit-filter, CLI, domain-slug and existing Army/API/search
+regressions passed another 92 tests. Seven runtime/separation audit tests
+also passed after adding probes for the current Skill, Unit-filter and Army
+reference readers (125 distinct focused tests total). This repairs the stale
+method inventory that failed Source run `42688197310` at `9b0630e5`; it does
+not relabel that failed hosted run as successful. Canonical Pyright,
+Ruff and documentation checks passed.
+
+Two independent complete builds of pinned `JSON 20260929-114335.zip`
+(SHA-256 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced Army v30/compatibility 39 with Rules v17. Each passed all
+73 normalization checks (116 known source warnings), selected-set health
+and provenance, existing projection inventories, 58 authored Army summaries
+and two historical identities. Both passed all 41 pinned P1.3 runtime routes
+plus exact Army-summary, historical non-playability and search-link checks.
+The two outputs were byte-identical: `infinity.db` SHA-256
+`f9aa1bbfd7eea4e3e146a9eafa4ca58cac6dd822249ed9e2ed0f46f9f8e2749f`;
+`rules.db` SHA-256
+`cbab3ccb272663921434eb24a24c23bfac44ca086885f3c575b5bf202e0af9f4`.
+Build-set ID:
+`aeeccb45b53710da1e067245682e1e66d77d74a8a3322aae7dd1b6207e10ba1d`.
+Tracked release databases and default serving remain unchanged; Linux,
+Docker and final cutover require their separate acceptance.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

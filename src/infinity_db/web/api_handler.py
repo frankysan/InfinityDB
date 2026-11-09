@@ -18,7 +18,6 @@ from infinity_db.army_overview import (
     army_overview_group,
     army_overview_out_of_catalog,
 )
-from infinity_db.army_overview_copy import load_army_overview_copy
 from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
@@ -36,7 +35,6 @@ from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
 from infinity_db.glossary_catalog import GlossaryCatalog
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
-from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.maintained_text_references import (
     enrich_maintained_text_references,
     maintained_text_tokens,
@@ -509,7 +507,7 @@ class ApiHandler:
         self.scenario_catalog = ScenarioCatalog(rules_database)
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
         self._glossary_items_cache: list[dict[str, Any]] | None = None
-        self.legacy_armies = load_legacy_armies()
+        self.army_overview_summaries, self.legacy_armies = database.army_reference_data()
         self.search_catalog = SearchCatalog(
             database,
             self.skill_catalog,
@@ -525,7 +523,6 @@ class ApiHandler:
         )
         self.catalog_rules = CatalogRules(rules_database, database=database)
         self.symbol_catalog = SymbolCatalog()
-        self.army_overview_summaries = load_army_overview_copy()
         self.fireteam_rules_reference = fireteam_reference(rules_database)
         if self.fireteam_rules_reference is not None:
             self.fireteam_rules_reference = enrich_maintained_text_references(

@@ -66,6 +66,13 @@ def _read_revisions(path: Path) -> tuple[int, int | None]:
 def database_health_report(path: Path, *, require_raw: bool = False) -> dict[str, Any]:
     """Validate one application database and optionally its expected raw sibling."""
 
+    from infinity_db.army_reference_storage import (
+        ARMY_COMPATIBILITY_VERSION as REFERENCE_COMPATIBILITY_VERSION,
+    )
+    from infinity_db.army_reference_storage import (
+        ARMY_SCHEMA_VERSION as REFERENCE_SCHEMA_VERSION,
+    )
+
     database_path = Path(path)
     raw_path = raw_database_path(database_path)
     application: dict[str, Any] = {
@@ -92,6 +99,9 @@ def database_health_report(path: Path, *, require_raw: bool = False) -> dict[str
         elif schema_revision == FILTER_SCHEMA_VERSION:
             application["expectedSchemaRevision"] = FILTER_SCHEMA_VERSION
             application["expectedCompatibilityRevision"] = FILTER_COMPATIBILITY_VERSION
+        elif schema_revision == REFERENCE_SCHEMA_VERSION:
+            application["expectedSchemaRevision"] = REFERENCE_SCHEMA_VERSION
+            application["expectedCompatibilityRevision"] = REFERENCE_COMPATIBILITY_VERSION
     except (OSError, sqlite3.Error, json.JSONDecodeError, TypeError, ValueError):
         pass
 

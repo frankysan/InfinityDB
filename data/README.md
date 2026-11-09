@@ -90,8 +90,9 @@ matched tracked release set.
 builds Army, Rules, variant usage, reviewed Weapon citations, the
 Restrictions chart, Trait Wiki links, Combined Saving Roll profiles,
 Ammunition links and reviewed Weapon Properties into one selected directory.
-Its opt-in Army v29 also embeds reviewed Cube/Cube 2.0 presentation encodings,
-six reviewed Skill source classifications and Unit Explorer filter semantics.
+Its opt-in Army v30 also embeds reviewed Cube/Cube 2.0 presentation encodings,
+six reviewed Skill source classifications, Unit Explorer filter semantics,
+58 Army summaries and two historical Army identities.
 It requires the source checkout, a local immutable Army ZIP and its
 selected Army API metadata.
 Omitting the source selects the
@@ -107,7 +108,8 @@ the tracked v10 release retains its JSON contract.
 
 The builder uses disposable work files under ignored `data/work/build/`,
 extends the *matched* Army/raw export pair with reviewed Equipment encodings
-and Skill source classifications plus Unit filter semantics, validates the full
+and Skill source classifications, Unit filter semantics and authored Army
+reference data, validates the full
 runtime set and matching input provenance, then replaces only the two
 selected runtime filenames: `infinity.db` and `rules.db`.
 Rules v17 extends v16 with 12 reviewed Weapon Properties and exact
@@ -115,8 +117,9 @@ profile/mode signatures. The opt-in complete builder also extends
 Army v26/compatibility 35 to v27/compatibility 36 for the two
 Equipment characteristic encodings, then v28/compatibility 37 for
 six reviewed Skill source classifications, then v29/compatibility 38
-for Unit Explorer filter semantics. Their maintained JSON remains
-a build input rather than a v29 serving dependency. The completed
+for Unit Explorer filter semantics, then v30/compatibility 39 for
+Army overview text and legacy Army identities. Their maintained JSON remains
+a build input rather than a v30 serving dependency. The completed
 build removes obsolete `variant-usage.json` and
 `weapon-profile-sources.json` from its selected output directory. It preserves
 unrelated files and leaves
@@ -170,11 +173,12 @@ Other intermediate files in the directory are ignored. The v10 candidate
 and Docker-bundle checks share this built-artifact validator while retaining
 their additional source-rebuild and pinned-content checks.
 
-The current two-file opt-in layout embeds Army v29 Equipment presentation
-encodings, reviewed Skill source classifications and Unit filter semantics,
+The current two-file opt-in layout embeds Army v30 Equipment presentation
+encodings, reviewed Skill source classifications, Unit filter semantics,
+Army overview text and legacy identities,
 plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
-and Ammunition publications. Two further P2.4-maintained Army JSON
-datasets and symbol path mappings remain open. Older v10–v16 Rules layouts
+and Ammunition publications. P2.4 runtime symbol path mappings remain open.
+Older v10–v16 Rules layouts
 remain transitional compatibility. The browser
 fetches `/api/restrictions/chart`; for a pre-v13 release the endpoint
 returns its original packaged static publication. The v13+ chart
@@ -193,6 +197,9 @@ are consumed by SkillCatalog and Unit-detail presentation from
 Army SQLite, while older snapshots use the reviewed JSON adapter.
 v29 Unit Explorer filtering and filter-choice presentation read their
 overlays from Army SQLite; earlier schemas retain the JSON adapter.
+v30 Army overview summaries and historical identities are read from Army
+SQLite for `/api/armies` and legacy-aware search; earlier schemas and
+explicit source tools retain their authored JSON adapters.
 The separate Army/raw pair remains source-identical through shared export metadata and
 each extended schema's checksum includes its relational rows.
 It does not verify working-tree curation/config freshness or graphical

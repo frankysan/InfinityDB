@@ -392,7 +392,7 @@ def test_database_health_command_reports_and_validates_pair(
     assert missing_raw["rawArchive"]["status"] == "invalid"
     assert "does not exist" in missing_raw["rawArchive"]["error"]
 
-    # v27–v29 are supported opt-in layouts; test an unknown schema instead.
+    # v27–v30 are supported opt-in layouts; test an unknown schema instead.
     unsupported = SCHEMA_VERSION + 100
     with sqlite3.connect(database) as connection:
         connection.execute(f"PRAGMA user_version = {unsupported}")

@@ -2913,6 +2913,42 @@ numeric filtering retain their existing results. Corrupt v29 data
 fails closed; earlier schemas and source-only presentation tools
 retain the validated maintained-JSON adapter.
 
+### Army overview and historical identities in Army v30 (P2.4 opt-in)
+
+The opt-in complete build extends the matched Army v29/raw pair to
+**v30/compatibility 39**, embedding the 58 summaries from
+`data/curated/identities/army-overview.json` and the two identities from
+`data/curated/identities/legacy-armies.json`. The JSON files remain editable
+build inputs; the summaries are InfinityDB editorial copy rather than official
+rules or newly inferred Army identities.
+
+`army_overview_text` is keyed by public Army slug and text role (`summary`),
+retaining authored order and exact text. Each row references either the
+existing current `application_armies` identity or an explicit historical
+identity through foreign keys. Current slugs resolve through the central
+application registry; all non-grouping current Armies and the authored legacy
+identities must be covered exactly once.
+
+`legacy_army_identities` is keyed by source context and explicit historical ID,
+with unique API ID/slug, original position, name, role, group ID/name/slug,
+logo locator and review reason. The context references
+`army_reference_metadata`, which names the authored legacy format/version
+and exact source digest. This identifies the curated evidence, not an
+unverified historical Army archive or edition. Parent information must match
+an existing current identity in all three fields; no parent is inferred from
+ID ranges or names. Historical IDs/slugs cannot collide with current Armies,
+and the historical records do not enter the playable application catalog.
+No aliases or current-identity replacement links are invented.
+
+`army_reference_metadata` also binds overview format/version/digest, Army
+export generation, both row counts and a full ordered content fingerprint.
+The v30 published checksum covers all three tables; the raw sibling retains
+matching compatibility/checksum metadata. `/api/armies` and legacy-aware
+search consume the database projection without reading either authored JSON
+file. Existing summary text, grouping, non-playability and search links remain
+unchanged. Corrupt or mismatched data fails closed; earlier schemas and
+source-review tools retain the validated JSON adapters.
+
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
 **Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**
