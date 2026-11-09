@@ -517,9 +517,9 @@ Run `tests/test_runtime_semantic_baseline.py` for its guardrail tests.
 **Project domains:** Data processing, Project infrastructure
 
 `infinity-db database-health --db-dir PATH --json` checks one explicit
-supported runtime directory with full SQLite integrity and source-paired
-publications. The [data lifecycle](../data/README.md) owns the current
-three-/four-file contract and the limits of this check. The command operates offline,
+supported runtime directory with full SQLite integrity and either
+embedded source-paired facts or older matched JSON publications. The
+[data lifecycle](../data/README.md) owns the current two-/three-/four-file contract and the limits of this check. The command operates offline,
 does not require a raw archive, and reports unhealthy/missing data without
 creating files or selecting another runtime directory.
 
@@ -561,10 +561,25 @@ The full-publication comparison uses the tracked v10 pair as migration evidence;
 retire that fixture dependency with the legacy path while preserving the relevant
 typed identity, source-parity and fail-closed assertions.
 
-The complete-build acceptance compares repeated three-file v11 outputs, runs
-schema-aware health and bundle checks, and reuses all 41 semantic baseline paths.
-Normal v10 release regressions stay distinct while that tracked pair remains
-supported. Actual Docker, Linux and exact-SHA hosted acceptance remain separate.
+The earlier complete-build acceptance compared repeated three-file v11 outputs,
+ran schema-aware health and bundle checks, and reused all 41 semantic baseline
+paths. P2.3 now emits two-file v12 outputs, with reviewed Weapon Chart citations
+embedded in Rules. `tests/test_weapon_profile_storage.py` verifies all 62 reviewed
+Weapons/69 exact profile modes against the existing publication, current PDF
+metadata, selected Army profile fingerprints, corrupted rows and absent sidecars.
+`tests/test_database_set_builder.py` covers source-binding, two-file publication,
+reproducibility and failed/interrupted replacement. Normal tracked v10 release
+regressions remain separate. Actual Docker, Linux and exact-SHA hosted acceptance
+remain separate and are not inferred from local focused checks.
+
+**2026-11-09 P2.3 Windows local verification (pre-commit):** Weapon storage
+10/10, two-file builder and HTTP citation read 16/16, v11 variant storage
+13/13, Weapon API 196/196, selected database-set 20/20, Rules database
+166/166 and legacy Weapon publication 19/19. Ruff, canonical Pyright,
+documentation and `git diff --check` passed. The real source-ZIP export,
+independent-platform reproducibility, Docker, Linux and exact-SHA hosted CI
+were not established by this batch. The builder regression uses shipped
+release-database fixtures, not a fresh Army normalization and source build.
 
 ## Phased development and validation
 

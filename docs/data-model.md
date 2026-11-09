@@ -114,16 +114,21 @@ condition or sentinel field is needed for the current profile model. Any future
 structured status must follow a source-reviewed distinction; display punctuation
 alone is not evidence for new semantics.
 
-For reviewed profile-only Weapons, the build materializes the corresponding
-Weapon Chart citations in `data/generated/weapon-profile-sources.json`. It
-pins both runtime databases, the reviewed decision file, the current primary
-PDF identity and its SHA-256, each Weapon's canonical identity and complete
-Army profile fingerprint, and every exact source ID/mode and chart page.
-The loader verifies the co-located database pair, current PDF metadata,
-profile fingerprints and complete mode sets without reading curation or raw
-sources. A present but mismatched publication fails startup; an absent or
-independently supplied mixed-pair publication exposes
-`profile_citations_available: false`. Each Weapon profile has a
+For reviewed profile-only Weapons, opt-in complete builds now materialize
+Weapon Chart citations in Rules v12 (compatibility 14). The relational
+`weapon_chart_profile_citations` table is keyed by exact Weapon/source-profile ID
+and a non-null mode key (`''` for an unqualified mode, `mode:<name>` otherwise);
+read projections restore the original nullable mode. A source-FK-backed metadata
+row pins the current primary PDF identity, page range, reviewed decision SHA-256,
+selected Army byte identity and complete 62-Weapon/69-profile inventory. Each
+Weapon also retains its canonical slug/name and complete Army profile fingerprint.
+The embedded reader validates source/page integrity, a deterministic content
+digest, exact profile fingerprints and complete modes against the selected Army.
+It does not read curation or the original JSON at runtime. The tracked v10
+release continues to use the byte-paired
+`data/generated/weapon-profile-sources.json` until P2.6. A mismatched embedded
+source is rejected; older absent or independently supplied mixed-pair JSON
+exposes `profile_citations_available: false`. Each Weapon profile has a
 `profile_citations` list: an empty list means no reviewed profile-chart
 citation was attached, not that no shared rule has a source. The browser
 shows the chart citation or an explicit unavailable notice when the

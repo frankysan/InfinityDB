@@ -27,12 +27,15 @@ from infinity_db.build_provenance import (
 )
 from infinity_db.cli import build_parser
 from infinity_db.database_set import (
-    EMBEDDED_VARIANT_RUNTIME_FILES,
+    EMBEDDED_WEAPON_RUNTIME_FILES,
     V10_RUNTIME_FILES,
     validate_database_set,
 )
 from infinity_db.sqlite_determinism import normalize_sqlite_header, vacuum_deterministic_sqlite
 from infinity_db.variant_usage_storage import stage_variant_usage
+from infinity_db.weapon_profile_storage import stage_weapon_profile_citations
+from infinity_db.web import create_app
+from tools.browser_wsgi_transport import wsgi_response
 
 RELEASE = Path(__file__).resolve().parents[1] / "data/generated"
 
@@ -108,19 +111,19 @@ def _fake_rules(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
             armyArchiveSha256=manifest["source"]["archiveSha256"], exportPairSha256=generation,
         )
         stage_variant_usage(connection, publication)
-        connection.execute("PRAGMA user_version=11")
-        connection.execute("UPDATE __rules_metadata SET value='11' WHERE key='formatVersion'")
+        document = json.loads(
+            (RELEASE / "weapon-profile-sources.json").read_text(encoding="utf-8")
+        )
+        document["sourceSnapshot"]["armyDatabaseSha256"] = file_sha256(army)
+        stage_weapon_profile_citations(connection, document, army)
+        connection.execute("PRAGMA user_version=12")
+        connection.execute("UPDATE __rules_metadata SET value='12' WHERE key='formatVersion'")
         connection.execute(
-            "UPDATE __rules_metadata SET value='13' WHERE key='databaseCompatibilityVersion'"
+            "UPDATE __rules_metadata SET value='14' WHERE key='databaseCompatibilityVersion'"
         )
     _update_metadata(rules, {
         BUILD_PROVENANCE_KEY: build_record(manifest, "rules-n5", army_generation=generation),
     }, rules=True)
-    for name in ("weapon-profile-sources.json",):
-        document = json.loads((RELEASE / name).read_text(encoding="utf-8"))
-        document["sourceSnapshot"]["armyDatabaseSha256"] = file_sha256(army)
-        document["sourceSnapshot"]["rulesDatabaseSha256"] = file_sha256(rules)
-        (stage / name).write_bytes(canonical_bytes(document) + b"\n")
 
 
 def _digests(directory: Path) -> dict[str, str]:
@@ -163,11 +166,22 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     args.db_dir.mkdir()
     (args.db_dir / "keep.txt").write_text("unrelated", encoding="utf-8")
     (args.db_dir / "variant-usage.json").write_bytes(b"obsolete publication")
+    (args.db_dir / "weapon-profile-sources.json").write_bytes(b"obsolete publication")
     first = builder.build_database_set(args, _fake_army, root=root)
     assert first["buildProvenance"]["status"] == "matched"
+    assert first["layout"] == "v12-two-file"
+    assert first["reviewedWeapons"] == 62
     assert validate_database_set(args.db_dir)["sha256"] == first["sha256"]
-    assert set(_digests(args.db_dir)) == {*EMBEDDED_VARIANT_RUNTIME_FILES, "keep.txt"}
+    assert set(_digests(args.db_dir)) == {*EMBEDDED_WEAPON_RUNTIME_FILES, "keep.txt"}
     assert (args.db_dir / "keep.txt").read_text(encoding="utf-8") == "unrelated"
+    app = create_app(args.db_dir / "infinity.db", rules_database_path=args.db_dir / "rules.db")
+    assert app.weapon_profile_citations is not None
+    assert len(app.weapon_profile_citations) == 69
+    status, _, body = wsgi_response(app, "http://local.test/api/weapons/uragan-mrl")
+    assert status == 200
+    item = json.loads(body)
+    assert item["profile_citations_available"] is True
+    assert all(profile["profile_citations"] for profile in item["profiles"])
     assert not (root / "must-not-write").exists()
     assert not list((root / "data/work/build").iterdir())
     second = builder.build_database_set(args, _fake_army, root=root)

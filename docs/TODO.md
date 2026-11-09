@@ -81,8 +81,10 @@ only when required to fix correctness, reproducibility, or release reliability.
   P0 workflow simplification and P1 dependency/tool discovery are complete;
   current-format shared validation and opt-in offline complete builds with
   input provenance are available in the [data lifecycle](../data/README.md).
-  Complete builds now embed variant usage in Rules v11. Continue with P2.3's
-  Weapon-profile citations, then the remaining fact migrations;
+  Complete builds now embed variant usage and reviewed Weapon-profile citations
+  in Rules v12, publishing a two-file SQLite set. Finish P2.3's extraction of
+  still-needed Weapon verification from historical audit tools and its real
+  source-build/API parity acceptance, then proceed with P2.4's remaining facts;
   final default/serving integration remains with P2.6. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;
   do not copy its complete roadmap into a second task ledger.

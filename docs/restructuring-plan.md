@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0 and P1 completed (P1.4–P1.5 are target designs, not implemented schemas/paths). P2.1 has shared validation, opt-in complete builds and input provenance; P2.2 has embedded exact variant usage in Rules v11. Continue with P2.3; final defaults, remaining SQLite-only facts and serving integration remain unfinished.
+**Status:** Active on `dev/v1.1.0`: P0 and P1 completed (P1.4–P1.5 are target designs, not implemented schemas/paths). P2.1 has shared validation, opt-in complete builds and input provenance; P2.2 embeds exact variant usage in Rules v11; P2.3 embeds reviewed Weapon-profile citations in Rules v12. Complete the P2.3 source-tool extraction and remaining P2.4 runtime facts next; final defaults and serving integration remain unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1416,13 +1416,14 @@ owns the command/format boundary, the [data model](data-model.md#shared-runtime-
 owns metadata, and [testing](testing.md#selected-runtime-database-set-validation)
 owns focused regressions and local acceptance.
 
-The complete build now produces two databases and one Weapon JSON publication;
-P2.2 embeds variant usage in Rules v11. Intermediates/raw archives are temporary; ordinary Army builds
-remain available for research outputs. It requires the source checkout while
-the reviewed Weapon builder still uses its three existing tool helpers;
-P2.3 owns their extraction with citation embedding. There are no final-family
-filename aliases or new implicit serving paths. Continue P2.3–P2.4 to
-materialize the missing database facts; P2.6 then finishes P2.1's final
+The opt-in complete build now produces a two-file v12 database set, with exact
+variant usage and reviewed Weapon Chart citations embedded. Intermediate JSON
+and raw archives are temporary; ordinary Army builds remain available for
+research outputs. It still requires the source checkout while the Weapon
+builder imports audit helpers; P2.3's remaining extraction removes those
+imports without discarding source-pinning/identity assertions. There are no
+final-family filename aliases or new implicit serving paths. Continue P2.3–P2.4
+to materialize the missing database facts; P2.6 then finishes P2.1's final
 defaults/directory interface with the filename/CLI/WSGI/Docker cutover.
 The final P2.1 target remains open until that integration is verified.
 
@@ -1432,16 +1433,39 @@ The final P2.1 target remains open until that integration is verified.
 reads. Rules v11/compatibility 13 stores typed source occurrences and extras,
 counts and reviewed rule coordinates, with Army generation/content validation.
 The public read model and Developer Mode browser journeys retain their semantics.
-Complete builds publish three files and remove the obsolete variant sidecar;
-schema-aware health, bundle/image checks and source validation read the embedded
-model. The [data model](data-model.md#rule-variant-usage-api) owns persistence/API
+Complete builds first published a three-file v11 set. The current v12 path
+publishes two SQLite files and removes obsolete variant/Weapon sidecars;
+schema-aware selected-set health reads the embedded model. Older release
+bundle/image checks continue to verify tracked v10 artifacts pending P2.6. The [data model](data-model.md#rule-variant-usage-api) owns persistence/API
 details; [testing](testing.md#selected-runtime-database-set-validation) owns checks.
 
 The tracked v10 release and old narrow/candidate build paths remain operational
 until the coordinated P2.6 cutover. Their source-paired JSON adapter is isolated
 to older schemas; it is never a v11 fallback. Retire it with the tracked sidecar
 and superseded publication tools during P2.5–P2.7 rather than breaking the current
-release path early. P2.3's Weapon citation migration is the next actionable slice.
+release path early. The P2.3 Weapon citation embedding retains the v11 invariant.
+
+#### P2.3 — Relational reviewed Weapon-profile citations (2026-11-09)
+
+**Status:** Schema v12 (compatibility 14) and the two-file selected-set
+builder/validator are implemented. Exact `(weapon_id, source_profile_id,
+mode_key)` coordinates and the original nullable mode are preserved, with
+current-primary-PDF source FKs, chart pages, reviewed-input and selected-Army
+fingerprints, complete per-Weapon profile coverage, and a content digest
+independent of final Rules database bytes. The runtime loader prefers the
+embedded model for v12, without reading a JSON sidecar; the v10 release and
+v11 interim schemas retain their existing paired-publication adapters until
+P2.5–P2.7. Focused storage/builder tests own validation evidence in
+[testing](testing.md#selected-runtime-database-set-validation).
+
+**Remaining P2.3 work:** Extract the source-reviewed Weapon builder's reusable
+eligibility/review checks from `tools.audit_enrichment_coverage` and
+`tools.audit_weapon_definition_gaps` into a maintained build module, without
+turning the whole historical source audit into a runtime/build dependency.
+Prove a real source-ZIP complete build, selected-directory API/source parity
+and reproducibility after extraction. Do not delete historical publication
+fixtures or declare the final serving cutover complete before their current
+consumers are migrated.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

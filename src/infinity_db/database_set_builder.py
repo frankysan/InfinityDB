@@ -24,7 +24,7 @@ from .build_provenance import (
 )
 from .curated import load_curated_directory
 from .database.publication import validate_database_pair
-from .database_set import EMBEDDED_VARIANT_RUNTIME_FILES, V10_RUNTIME_FILES, validate_database_set
+from .database_set import EMBEDDED_WEAPON_RUNTIME_FILES, validate_database_set
 from .deployed_object_builder import build_deployed_objects
 from .rules_database import export_rules_database
 from .variant_usage import build_variant_usage_projection
@@ -83,7 +83,7 @@ def collect_build_manifest(root: Path, source: Path, metadata: Path | None) -> d
 def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
     # P2.3 extracts the reviewed Weapon builder from its current source-audit
     # wrapper. Until then complete builds explicitly require this checkout.
-    from tools.build_weapon_profile_publication import build_publication, publication_bytes
+    from tools.build_weapon_profile_publication import build_publication
 
     army, rules = stage / "infinity.db", stage / "rules.db"
     generation = validate_database_pair(army)
@@ -118,7 +118,10 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
     weapons = build_publication(
         army, rules, root / "data/curated/weapon-shared-effect-reviews.json",
     )
-    (stage / "weapon-profile-sources.json").write_bytes(publication_bytes(weapons))
+    export_rules_database(
+        documents, rules, variant_usage=variants, weapon_citations=weapons,
+        army_database=army, **export_options,
+    )
 
 
 def build_database_set(
@@ -139,7 +142,7 @@ def build_database_set(
     protected = {source, *(root / name for name in manifest["inputs"])}
     if args.metadata is not None:
         protected.add(args.metadata.resolve())
-    for name in V10_RUNTIME_FILES:
+    for name in EMBEDDED_WEAPON_RUNTIME_FILES:
         output = target / name
         if output.resolve() in protected or (output.exists() and not output.is_file()):
             raise ValueError(f"Runtime output would replace an input or non-file: {name}")
@@ -163,9 +166,10 @@ def build_database_set(
         target.mkdir(parents=True, exist_ok=True)
         # Stop serving this directory before rebuilding. Individual replacements
         # are atomic; interruption leaves an invalid mixed set, recovered by rerun.
-        for name in sorted(EMBEDDED_VARIANT_RUNTIME_FILES):
+        for name in sorted(EMBEDDED_WEAPON_RUNTIME_FILES):
             os.replace(stage / name, target / name)
-        obsolete = target / "variant-usage.json"
-        if obsolete.is_file() or obsolete.is_symlink():
-            obsolete.unlink()
+        for name in ("variant-usage.json", "weapon-profile-sources.json"):
+            obsolete = target / name
+            if obsolete.is_file() or obsolete.is_symlink():
+                obsolete.unlink()
         return result

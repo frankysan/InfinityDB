@@ -175,7 +175,18 @@ def load_weapon_profile_publication(
 def load_runtime_weapon_profile_publication(
     army_database: Path, rules_database: Path | None,
 ) -> tuple[ProfileCitations | None, str | None]:
-    """Load and fingerprint only the publication attached to this runtime pair."""
+    """Read embedded v12 citations, or the release-paired older JSON publication."""
+    if rules_database is not None:
+        from .rules_database import RulesDatabase
+
+        rules = RulesDatabase(rules_database)
+        with rules._connect() as connection:
+            schema = connection.execute("PRAGMA user_version").fetchone()[0]
+        if schema == 12:
+            return (
+                rules.weapon_profile_citations_payload(army_database),
+                file_sha256(rules_database),
+            )
     if (
         rules_database is not None
         and rules_database.resolve().parent != army_database.resolve().parent
