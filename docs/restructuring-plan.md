@@ -75,6 +75,55 @@ The ordering below expresses **dependencies**, not a requirement to serialize in
 
 **Exit:** An agent can explain and execute a normal small change using a short workflow; focused validation and final release responsibilities are unambiguous; no new compatibility or staging policy is added merely for process continuity.
 
+#### P0.1 — Current procedural inventory (2026-11-09)
+
+**Status:** Read-only inventory completed on `dev/v1.1.0`, initial HEAD `baf1773c2d0d746e4f513827228592f620834003`. **Recommendations below are not yet active policy.** P0.2–P0.5 own the actual changes, including updates to dependent instructions and tests. Reviewed `AGENTS.md`, ignored local `AGENTS.local.md`, `docs/testing.md`, `docs/validation-queue.md`, `docs/ci.md`, `docs/releasing.md`, and the [documentation map](README.md).
+
+**Classification key:** **Keep** = correctness/safety-critical for relevant changes; **release-only** = verify at merge, release or deployment rather than every edit; **optional** = useful tool or workflow, chosen by need; **simplify/remove** = administrative duplication or disproportionate mandatory gate.
+
+1. **Start-of-task inspection — keep, narrowed.**
+   [Agent guidance](../AGENTS.md) requires branch/HEAD/status, current task, related sources/tests and canonical documents; local `AGENTS.local.md` guidance adds authorized checkout and scope protections. Keep branch/status, relevant context and preserving unrelated changes. Avoid rereading broad architecture, testing, releasing and historical reports for every minor edit. Use targeted documentation only when affected.
+
+2. **Git safety and change delivery — keep.**
+   [Agent guidance](../AGENTS.md) and local guidance require reviewed diffs, coherent commits, preserving unrelated changes, safe non-forced push, no uncontrolled checkout changes, and explicit release/deploy authorization. Keep these. Specialized remote Git API compare-and-swap guidance and optional [multi-agent coordination](multi-agent-workspaces.md) apply only to their respective access modes; they are **not** general task phases.
+
+3. **Ordinary backlog selection and closeout — simplify/remove.**
+   [Agent guidance](../AGENTS.md), [backlog rules](README.md#backlog-completion-and-retirement) and [historical V1S selection checks](testing.md#v1s-backlog-checks) require task-boundary reconciliation, staged-index historical closeout checks and stable-ID retirement evidence. The 1.0 V1S register has no active items. Keep a short active-backlog/acceptance check; scope V1S-specific selection and closeout tooling to an explicitly reopened V1S item, not normal 1.1 work. Do not create a second task ledger.
+
+4. **Per-change deferred-validation registration — simplify/remove.**
+   [Agent guidance](../AGENTS.md#phased-validation-and-task-boundary-checkpoint), local `AGENTS.local.md` preferences, [testing](testing.md#phased-development-and-validation) and the [queue](validation-queue.md#queue-rules) all prescribe VD design and VR execution entries even for routine changes. Keep a lightweight register for *genuinely deferred* verification, with a concrete selector/acceptance condition and revision. Eliminate the default obligation to generate queue records when a bounded task can simply run its focused checks and finish.
+
+5. **VD/VR strict scheduling — simplify/remove.**
+   The [queue](validation-queue.md#queue-rules) specifies **VD >= 3**, **VR >= 5**, complete drain-to-zero, seven-day age gates, repeated recounts, and independent reconciliation of every entry. The exact thresholds/drain and age rules are also copied into local agent guidance. These are process controls, not evidence that a test is necessary. P0.3 should replace them with explicit risk/merge triggers and sensible periodic batching, retaining visible blocked/missing checks rather than silently discarding them.
+
+6. **Test-design/implementation separation — simplify/remove.**
+   [Testing](testing.md#phased-development-and-validation) and the queue forbid routine tests during implementation and **all** tests during a VD design pass, except urgent integrity cases. A newly authored focused test can therefore be prevented from being run immediately. Proposed replacement: allow writing and running focused tests together when useful; separate design from execution only for actual queued or independently delegated work. Never present an unrun test as passed.
+
+7. **Focused-first coverage and immediate integrity gates — keep.**
+   [Focused-first VR guidance](testing.md#focused-first-vr-execution) already says to select affected cross-layer tests first, fix focused failures before widening, reuse compatible executions and avoid full-suite runs merely because the queue filled. Preserve that principle, along with immediately necessary security, schema, provenance, migration and published-artifact checks. Drop repeated approval/accounting around executing a small relevant test.
+
+8. **Linux worker and parallel-work restrictions — keep isolation, remove artificial serialization.**
+   The [queue](validation-queue.md#queue-rules), [validation batching](testing.md#validation-batch-planning) and [Linux protocol](testing.md#parallel-windows-development-and-linux-validation) permit unrelated Windows implementation **only during an independent full-suite Linux job**, not a focused Linux job. The meaningful safety boundary is an independent, pinned checkout and non-overlapping writes, not whether a job happens to be full-suite. Preserve explicit Git sync, tested-revision identity and artifact isolation; allow independent development during any isolated job in P0.3.
+
+9. **Task status reporting — optional.**
+   [Read-only development status](testing.md#read-only-development-status) consolidates repository, queues, jobs and exact-SHA CI observations. Retain the command as a useful opt-in view. Ordinary task reports should state changed behavior, actual checks, limitations and commit; queue counts, oldest age, worker/host and job receipts are relevant only when there is due or running validation.
+
+10. **Hosted CI monitoring — keep at integration boundaries; avoid per-edit ceremony.**
+    [CI guidance](ci.md#agent-ci-monitoring-and-repair) correctly allows non-blocking development between commits and requires actual exact-revision evidence for a final gate. Keep actionable failure diagnosis and correct claim boundaries. Do not require workflow polling/recordkeeping for every doc or intermediate commit with no relevant CI run. P0.4 should identify the smallest set of mandatory hosted gates for a given change class.
+
+11. **Release and Docker gates — release-only; simplify by impact.**
+    [Release checklist](releasing.md#4-run-local-release-validation) and [hosted policy](ci.md#risk-based-source-validation) already allow focused Source reuse for narrowly scoped candidates, but require much broader source, wheel, browser, image, publication and exact-SHA evidence at other gates. Preserve version/changelog consistency, a usable built artifact, relevant smoke tests, deployment authorization and production identity. Reassess mandatory four-browser matrices, exhaustive local/preflight reruns, candidate promotions and rollback-image inspections by actual release risk; do not weaken them silently before P0.4 establishes a replacement contract.
+
+12. **Project-wide documentation and one-use retirement — simplify scheduling.**
+    [Release documentation audit](releasing.md#2-audit-all-project-documentation) mandates reviewing the *entire* maintained corpus every release; [document retirement](README.md#one-use-tool-and-audit-lifecycle) and [agent guidance](../AGENTS.md#documentation-and-project-tracking) add task-level reconciliation. Keep one authoritative owner per contract, check affected links, and preserve necessary licensing/provenance. Use focused documentation review for routine edits and deliberate broader audits for architectural changes; leave one-use script retirement to its bounded task or P5 inventory instead of revisiting it on every small edit.
+
+13. **Source/gameplay correctness and external constraints — keep.**
+    Existing agent, architecture and source-reconciliation guidance protects stable identities, correct citations and revisions, unknown/ambiguous facts, offline builds, privacy, copyright permissions and safe rendering. These are product invariants, not optional paperwork. Maintain them while reducing ceremony.
+
+**Root cause and priority:** Mandatory instructions for the same VD/VR process are spread over four documents, historical V1S closeout is still referenced in normal task guidance, and release checks are described alongside ordinary development. First define a small normal lifecycle (P0.2), then reduce the queue rules and worker restrictions (P0.3), isolate release acceptance (P0.4), and reconcile tracked/local agent guidance and linked procedures (P0.5). Do not partially edit a single policy owner and leave contradictory mandatory instructions elsewhere.
+
+**Baseline observation:** The active queue reported no pending VD or VR entries at inspection. No implementation/test policy, required CI workflow or existing gate was changed in P0.1. This section records proposed dispositions for the next steps, not their approval as operational rules.
+
 ### P1 — Map the dependency graph and define the cutover
 
 **Outcome:** Evidence-based keep/migrate/extract/retire inventory and an executable database target contract.  
