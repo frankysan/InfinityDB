@@ -149,8 +149,10 @@ projection (v10 or later), bound to the selected Army database. Adjacent
 `deployed-objects.json` files are ignored, including beside older standalone
 Rules databases; they cannot enable a catalog or recover a damaged projection.
 Image assembly requires a complete supported database set and rejects v8/v9
-inputs before changing the destination. Source/build-side JSON interchange
-and historical migration commands remain separate pending their P2.5 retirement.
+inputs before changing the destination. The standalone deployed-object JSON
+publication/migration CLI is retired. The legacy read adapter remains
+build-only for older variant-usage workflows pending their replacement;
+it never supplies deployed objects to the runtime.
 
 `infinity_db.deployed_object_reference.project_deployed_references` consumes
 the validated N5.3 deployed-object audit and produces a **pure, read-only**

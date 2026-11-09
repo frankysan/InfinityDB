@@ -13,6 +13,17 @@ import pytest
 
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from tools.build_deployed_object_publication import build_publication, publication_bytes
+from tools.build_deployed_object_publication import main as retired_json_publisher
+
+
+def test_retired_json_publisher_rejects_invocation_without_writing_files(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Legacy promotion/JSON commands cannot recreate obsolete artifacts."""
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(SystemExit, match="JSON publisher and v8/v9 migration commands are retired"):
+        retired_json_publisher()
+    assert list(tmp_path.iterdir()) == []
 
 
 @pytest.fixture(scope="module")

@@ -1737,13 +1737,27 @@ The existing SVG/asset checks and source acceptance remain independent.
 Workflow and preflight regressions now assert the shared validator and
 failure propagation rather than preserving obsolete publication commands.
 
-**Remaining P2.5:** Retire the historical builder/migration flags,
-standalone JSON verifier and completed staging/promotion consumers together,
-extracting source/provenance guards that still serve a current purpose.
-The CLI and build-only reader remain pending that bounded dependency cleanup;
-their existing imports do not establish a permanent retention requirement.
-P2.6–P2.8 continue to own final default/naming, assembly-stage removal and
-full local/container integration acceptance.
+#### P2.5 — Third slice: retire legacy deployed-object CLI (2026-11-09)
+
+The standalone `tools.build_deployed_object_publication` JSON publisher/checker
+and its v8/v9 stage, promote and refresh flag dispatch are retired. Direct
+invocation now fails with an explicit migration message instead of creating
+sidecars or modifying old release pairs. The current source projection and
+embedded build remain in `infinity_db.deployed_object_builder`. The retired
+module's programmatic JSON projection/serialization helpers are temporarily
+retained because historical source tests and one-use stage/promotion modules
+still import them; imports alone are not a reason to keep those modules.
+Provenance, exact Army-source identities and fail-closed embedded-data
+behavior remain tested independently of the removed CLI.
+
+**Remaining P2.5:** Review and retire the completed staging/promotion tool
+cluster and its obsolete-path tests together; preserve any independently
+useful source/provenance guards in maintained builders or current-path tests.
+The legacy JSON read adapter is still a build-only dependency of older
+variant-usage workflows, not a serving fallback. Retire that adapter when its
+remaining build consumer is superseded rather than deleting a still-reachable
+path in isolation. P2.6–P2.8 continue to own final default/naming,
+assembly-stage removal and full local/container integration acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

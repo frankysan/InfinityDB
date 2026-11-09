@@ -970,6 +970,20 @@ failed on missing environment imports; the canonical type stage passed.
 This is local Windows acceptance only, not hosted CI or an integrated Docker test.
 The remaining historical builder/migration interfaces are separate P2.5 work.
 
+**2026-11-09 P2.5 third slice, retired standalone deployed-object CLI:**
+The v8/v9 stage, promote and refresh dispatch plus loose JSON build/check CLI
+were removed. A direct module invocation now fails with an explicit retirement
+message; the programmatic source projection/serializer remains temporarily
+reachable for historical tests and unretired one-use tools. The current embedded
+source builder and read path were not changed. Focused deployed-object
+publication and storage suites passed **22 tests** (13 and 9 respectively),
+including the rejection/no-output regression, source identity/provenance and
+current v10 candidate/serving checks. Ruff, canonical Pyright (0 errors),
+documentation lint/links/backlog and Git whitespace checks passed. The tracked
+runtime provenance/artifact check passed with SVG validation disabled.
+This is local Windows acceptance; full hosted CI and final Docker/name cutover
+are separate integration checks.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

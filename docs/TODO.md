@@ -40,9 +40,10 @@ when all contained work shares the same owner.
   for the opt-in two-file path with local source-build and API parity checks.
   P2.5 removed legacy JSON serving and image assembly; CI, browser CI and
   clean-export preflight now validate the selected database set without
-  generating historical JSON. Continue historical builder/migration modes
-  and standalone verifier retirement, extracting still-valid source guards
-  before removing their old wrappers.
+  generating historical JSON. The standalone deployed-object JSON publisher
+  and v8/v9 refresh/promotion CLI are retired. Continue removal of the
+  build-only legacy read adapter and its completed staging/promotion consumers,
+  preserving still-valid source guards without obsolete wrappers.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;
