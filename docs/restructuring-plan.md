@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Accepted planning direction; implementation not started.  
+**Status:** Active on `dev/v1.1.0`: P0.1–P0.4 implemented; P0.5 tracked guidance reconciled, with an outstanding local-only preference update. P1–P6 remain planned.  
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
 
@@ -126,7 +126,7 @@ The ordering below expresses **dependencies**, not a requirement to serialize in
 
 #### P0.2 — Proposed normal task lifecycle (2026-11-09)
 
-**Status:** Design defined on `dev/v1.1.0`; P0.3 implements the focused-test and deferred-queue rules in tracked guidance. P0.4–P0.5 still own release-policy and local-agent preference reconciliation. This section records the target rationale, not a second current operating manual. Active task instructions live in `docs/testing.md` and are linked from `AGENTS.md`.
+**Status:** Implemented on `dev/v1.1.0` through P0.3–P0.5 tracked guidance changes. This section records the rationale, not a second operating manual. Active task instructions live in `docs/testing.md`, linked from `AGENTS.md`. The Git-ignored local preference update remains a user-owned follow-up.
 
 **Default task unit:** One coherent, reviewable behavior change or closely coupled set of changes with an observable acceptance condition. Avoid splitting every file edit into its own investigation/test/commit cycle, but do not mix independent defects merely to fill a batch. Small, known tasks need no separate planning agent, formal handoff or pre-implementation approval.
 
@@ -225,10 +225,38 @@ real deployment remains separately authorized. Project-wide documentation
 audits, manual full-suite repetitions and large post-deployment browser
 matrices are risk-based, not blanket release gates.
 
-**Still to do:** P0.5 aligns personal/agent instructions; P2 owns deleting
+**Still to do:** P0.5's tracked reconciliation is recorded below; the
+Git-ignored user-local preferences need manual update. P2 owns deleting
 application data-candidate/promotion infrastructure and unifying local and
 Docker runtime publication. Those are *not* implicitly removed by the
 simplified release policy.
+
+#### P0.5 — Agent and documentation guidance reconciliation (2026-11-09)
+
+**Tracked reconciliation implemented:** `AGENTS.md` now makes the
+canonical short lifecycle the normal path and applies historical V1S
+selection/retirement only to reopened numbered work. The release-closeout
+agent skill now distinguishes normal tracked backlog closeout, genuinely
+deferred validation and actual release gates. The documentation map and
+read-only status entrypoint no longer mandate a whole-backlog or status
+inventory at every boundary. Preserve local Git safety, source semantics,
+release authorization and published evidence guarantees.
+
+**Local-only exception, not silently rewritten:** The Git-ignored
+`AGENTS.local.md` still contains its superseded VD/VR separation,
+3/5 thresholds, age and drain loop, ban on implementation-time tests,
+full-suite-only Linux concurrency exception and routine queue reporting
+(its Validation and reporting section and final Linux-work bullet).
+The workspace exposes this private file for inspection but **denies edits**
+to its path. Tracked policy takes precedence; the owner must reconcile those
+specific local lines separately. All unrelated local preferences remain
+untouched, and no private machine information was promoted into Git.
+
+**Exit:** One authoritative tracked workflow under `docs/testing.md`;
+`docs/validation-queue.md`, `docs/ci.md` and `docs/releasing.md`
+retain domain-specific rules. A small implementation no longer invokes
+historical V1S, VD/VR or release ceremony by default. The remaining local
+override is explicitly disclosed rather than treated as completed.
 
 ### P1 — Map the dependency graph and define the cutover
 

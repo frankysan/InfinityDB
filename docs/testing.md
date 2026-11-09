@@ -194,8 +194,8 @@ On Linux/macOS use `.venv/bin/python` instead.
 
 ## Read-only development status
 
-At a task boundary, use the small repository-local status command instead of
-manually repeating unrelated inventory and monitoring queries:
+When useful, inspect development status with the optional read-only
+repository-local command instead of repeating unrelated inventory queries:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.dev_status

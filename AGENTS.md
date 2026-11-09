@@ -42,25 +42,21 @@ Linux/macOS), not system Python. The [testing guide](docs/testing.md)
 owns `tools/run_checks.py` stages, profiles, asset policy, setup,
 test dispatch, reports and preflight requirements. Use its current
 commands rather than maintaining a second command reference here.
-Use the [read-only development status](docs/testing.md#read-only-development-status)
-for a compact task-boundary snapshot when useful; it does not replace the
-V1S selection gate, VD/VR rules or exact-SHA CI acceptance.
+The [read-only development status](docs/testing.md#read-only-development-status)
+is optional for inspecting active tasks, deferred checks, pinned jobs and CI;
+it never substitutes for tests or exact-SHA release acceptance.
 
 ### Backlog work selection and closeout
 
-For autonomous work, use the active [post-1.0 backlog](docs/TODO.md) and its
-[retirement contract](docs/README.md#backlog-completion-and-retirement).
-The 1.0 V1S register has no open tasks. If a numbered V1S slice is reopened,
-run the [selection gate](docs/testing.md#v1s-backlog-checks) and inspect all
-earlier open IDs and documented exceptions; never invent a priority override.
-Before retiring a V1S entry, run the Git-aware closeout check for the proposed
-staged index and cite the removed ID in the eventual commit. The historical
-audit requires a deliberate, documented baseline; it does not approve
-semantic completion. At every task boundary apply the
-[backlog retirement contract](docs/README.md#backlog-completion-and-retirement):
-reconcile the worked task and parent against actual evidence and VD/VR
-obligations; retire complete work in the same change, leave actionable
-incomplete work open, and record removed V1S IDs in its commit.
+For autonomous work, select from the active [post-1.0 backlog](docs/TODO.md)
+when the user has not specified the task. When changing a backlog item, apply
+its [completion/retirement contract](docs/README.md#backlog-completion-and-retirement):
+close completed items in the same commit, retain actionable incomplete work
+and do not claim acceptance while required checks are outstanding.
+The historical V1S register has no open tasks; use the
+[V1S selection/retirement gate](docs/testing.md#v1s-backlog-checks) **only**
+when a numbered V1S task is reopened, recording retired IDs in that commit.
+Ordinary tasks do not require V1S scans or administrative closeout passes.
 
 ### Phased validation and task-boundary checkpoint
 
@@ -130,12 +126,12 @@ designated integration owner apply within that scope.
   branch after reviewing its remote tip and ancestry. **Only in explicitly
   enabled coordinated mode**, development checkout owners hand off committed
   proposals and the designated integration owner publishes the shared branch.
-  Report each SHA and exact validation
-  outcomes, and proceed to the next clearly identifiable open task only when
-  the validation queue and workspace assignment permit it. Do not commit failed
-  or uncertain changes as accepted, fold unrelated user edits into the
-  commit, force-push, reset, rebase, deploy, or publish a release without
-  separate authorization. A pushed revision is not automatically a
+  Report the delivered SHA and checks actually run. Work on the next
+  independent task when its checkout and inputs are safe; only concrete
+  required blockers or explicit coordination/release gates prevent acceptance.
+  Do not commit failed or uncertain changes as accepted, fold unrelated edits
+  into the commit, force-push, reset, rebase, deploy, or publish a release
+  without separate authorization. A pushed revision is not automatically a
   validated Linux or CI revision.
 - Keep machine-specific configuration, operational diagnostics, and private
   evidence out of tracked files. The Git-ignored `local/` workspace is the
@@ -208,9 +204,9 @@ actual merge/release gates still require terminal results.
 Follow the [documentation map and ownership rules](docs/README.md).
 Update the canonical current-state owner for changed behavior, with
 planned or unimplemented contracts clearly labelled. The
-[backlog](docs/TODO.md) owns unfinished work and its V1S selection rules;
-[retirement](docs/README.md#backlog-completion-and-retirement) requires
-the corresponding acceptance evidence and same-change closeout.
+[backlog](docs/TODO.md) owns unfinished work;
+[retirement](docs/README.md#backlog-completion-and-retirement) applies when
+the task changes a tracked backlog item, with the required acceptance evidence.
 Use the [release-note writing rules](docs/releasing.md#3-prepare-release-notes-and-metadata)
 for substantive user/operator outcomes; do not add entries for
 internal-only tests, refactors or process updates.
@@ -221,8 +217,9 @@ Review the actual diff for documentation impact, update public
 documentation. An actual release requires the [risk-based release checks and
 release-relevant documentation review](docs/releasing.md).
 Apply the [one-use tool and audit retirement policy](docs/README.md#one-use-tool-and-audit-lifecycle)
-at bounded task closeout: check imports, tests, workflow/CLI consumers and
-release obligations before retiring transient scripts or dated audit reports.
+when creating, modifying or retiring a one-use tool/report, or during
+the planned P5 hygiene pass. Do not conduct a repository-wide retirement
+audit after every unrelated change.
 Do not duplicate active task lists, reference semantics or operational
 instructions in agent guidance.
 

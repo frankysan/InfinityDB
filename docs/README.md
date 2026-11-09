@@ -50,11 +50,11 @@ override tracked project policy.
 
 ## Active strategic plans
 
-- [restructuring-plan.md](restructuring-plan.md) — proposed phased simplification of
+- [restructuring-plan.md](restructuring-plan.md) — active phased simplification of
   developer workflow, SQLite runtime data, source-family databases, player-facing
-  presentation, tooling and repository structure. It maps dependencies and
-  acceptance criteria but does not override current behavior or duplicate the
-  live implementation backlog in `TODO.md`.
+  presentation, tooling and repository structure. Implemented P0 policy is owned
+  by the live testing/CI/release documents; future phases remain planned.
+  The plan maps dependencies without duplicating `TODO.md`.
 
 ## Maintained evidence and research
 
@@ -209,9 +209,10 @@ Complete the handoff at the same time as the work:
    obligations in the validation queue, source evidence in its maintained owner,
    and run logs, hashes and intermediate counts out of TODO.
 
-Apply this to subtasks at every depth during each change's closeout, not only at
-release preparation. Git history retains retired details; do not create another
-completed-task archive or append new status reports to completed entries.
+When a change modifies a tracked backlog task, reconcile the affected subtree
+at closeout rather than postponing it to release preparation. Unrelated edits
+do not require full-backlog or historical-V1S review. Git history retains
+retired details; do not create a second completed-task archive.
 
 **Make retirement auditable:** when removing numbered `V1S-*` entries, include
 *every retired ID* in the same Git commit's subject or body (for example,
@@ -223,13 +224,12 @@ Do not retire an open implementation or ruling requirement just because its
 bounded source review or related focused test passed; explicitly retain and
 re-scope the remainder under its existing task or correct independent owner.
 
-Before beginning the next task, reconcile the just-worked task and any touched
-parent against `TODO.md`, the [VD/VR queue](validation-queue.md), current
-documentation and the inspected diff. Retire fully finished work **in that
-closeout commit**; leave partial/blocked work unchecked with a concrete
-remaining action or dependency. For autonomous work selection, follow the
-[V1S checkpoint](TODO.md#v1s-work-selection-and-handoff); numeric gaps alone
-are not evidence of skipped or completed work.
+For a completed backlog item, reconcile its affected parent with the actual
+diff, required acceptance and any concrete [deferred checks](validation-queue.md).
+Retire finished work in that commit; leave incomplete work open with a specific
+remaining dependency. Invoke the [V1S checkpoint](TODO.md#v1s-work-selection-and-handoff)
+only for reopened numbered V1S work. Do not turn routine unrelated development
+into an administrative full-backlog or queue review.
 
 ## Private local workspace
 
