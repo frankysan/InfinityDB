@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in v13 and reviewed Trait Wiki links in v14. The remaining eight maintained datasets, symbol mappings and final build/serving cutover are unfinished.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in v13, reviewed Trait Wiki links in v14 and exact Combined Saving Roll annotations in v15. The remaining seven maintained datasets, symbol mappings and final build/serving cutover are unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1542,12 +1542,35 @@ remain unchanged. Focused storage/builder/HTTP and pinned real-source
 acceptance is recorded in
 [testing](testing.md#selected-runtime-database-set-validation).
 
-**Remaining P2.4:** Migrate the other eight maintained Army/Rules JSON
+#### P2.4 — Third slice: exact Combined Saving Roll annotations (2026-11-09)
+
+**Status:** Opt-in complete builds emit Rules v15/compatibility 17.
+Three reviewed Plasma Weapons (six exact named source modes) now
+materialize from `config/catalogs/weapon-combined-saving-rolls.json`
+into relational `weapon_combined_saving_roll_profiles`, with
+source-ordered modes, exact Army ammunition and saving-roll signatures.
+`combined_saving_roll_metadata` binds the current N5.3 source
+PDF/page and selected Army database SHA and fingerprints all six
+annotations. A malformed/missing/mismatched mode, source or
+Army signature fails closed; there is no general saving-roll solver.
+
+`CatalogRules` and `WeaponCombinedSavingRolls` use the v15
+database read model; the legacy JSON adapter remains for older
+schema/releases and standalone source review. The exact
+`combined_saving_roll` API payload, Plasma weapon detail/variant
+behavior and non-Plasma absence are unchanged. The editable
+configuration remains a pinned build input. The tracked v10 release
+files and default build/serve/Docker contract remain untouched.
+Local focused tests, two-source-build reproducibility and complete
+semantic baseline evidence are recorded in
+[testing](testing.md#selected-runtime-database-set-validation).
+
+**Remaining P2.4:** Migrate the other seven maintained Army/Rules JSON
 datasets and the runtime symbol path mappings identified in P1.4.
-The current v10–v13 adapters remain only while independently needed
-for actual release/research/presentation consumption; historical tests
-alone do not justify preserving obsolete build machinery. The final
-naming, serving and Docker cutover belongs to P2.6.
+The v10–v14 JSON adapters remain only while independently needed for
+actual release/research/presentation consumption; historical tests
+alone do not justify preserving obsolete build machinery. The
+final naming, serving and Docker cutover belongs to P2.6.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

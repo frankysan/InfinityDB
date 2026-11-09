@@ -57,6 +57,7 @@
         "test_availability",
         "test_availability_schema",
         "test_catalog_rules",
+        "test_combined_saving_roll_storage",
         "test_curated",
         "test_conditional_reactive_followup",
         "test_command_token_source_review",

@@ -30,6 +30,7 @@ from .rules_database import export_rules_database
 from .trait_wiki_references import load_trait_wiki_references
 from .variant_usage import build_variant_usage_projection
 from .variant_usage_reference import publication_from_candidate
+from .weapon_combined_saving_rolls import load_combined_saving_roll_map
 from .weapon_profile_builder import build_publication
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -119,9 +120,13 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
     trait_links = load_trait_wiki_references(
         root / "config/catalogs/trait-wiki-references.json"
     )
+    saving_rolls = load_combined_saving_roll_map(
+        root / "config/catalogs/weapon-combined-saving-rolls.json"
+    )
     export_rules_database(
         documents, rules, variant_usage=variants, weapon_citations=weapons,
         restriction_chart=chart, trait_wiki_links=trait_links,
+        combined_saving_rolls=saving_rolls,
         army_database=army, **export_options,
     )
 

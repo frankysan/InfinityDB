@@ -664,6 +664,42 @@ Build-set ID:
 No tracked generated database was changed. These runs prove Windows
 source-build reproducibility, not Linux, Docker or P2.6 serving cutover.
 
+**2026-11-09 P2.4 third slice, Combined Saving Roll profiles (Windows local):**
+`tests/test_combined_saving_roll_storage.py` (18/18) verifies six exact
+source-mode signatures on three Plasma Weapons, full Rules v15
+relational round trip, source PDF/Army pairing and content fingerprint,
+v10/v15 API parity for the Plasma and Feuerbach details, no packaged
+JSON read on v15, and rejection of missing, conflicting and malformed
+profiles. The standalone maintained JSON loader remains supported
+for source review and v10 compatibility. Existing `test_database_set_builder.py`
+passed 16/16, `test_database_set.py` 20/20,
+`test_rules_database.py` 166/166, the Plasma Critical suite 4/4,
+and the focused CatalogRules combined-roll projection 1/1.
+Ruff, canonical Pyright (zero errors/warnings), documentation and
+Git diff checks passed.
+
+The pinned immutable Army archive
+`JSON 20260929-114335.zip` SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`
+was rebuilt independently **twice** with stable source bytes.
+Both complete Rules v15/compatibility-17 two-file outputs passed
+73 source normalization checks (116 known baseline source warnings),
+selected-set integrity and provenance, 151 variant groups, 62 reviewed
+Weapons/69 profile citations, six Restrictions chart rows,
+33 reviewed Trait Wiki links and six exact Combined Saving Roll modes.
+Both passed all 41 pinned P1.3 runtime routes. The byte-identical hashes
+were `infinity.db` =
+`31d9d3c7f14ed89367f1c94311e54add1af9e3c9761aad7ffb6932e18f185761`,
+`rules.db` =
+`44bebcbf3bd5f70ec5ccf8b736605f446daec2e6cd96fe52a9948a2474627aad`.
+Build-set ID:
+`756d6a67d781ccc5565a7312b4988fd8eff87b6e1386c941bd1ddc30af1040d4`.
+A prior run whose code inputs were edited between attempts was
+correctly rejected by the byte-equality gate; it is not counted as
+reproducibility evidence. The stable repeatability run above passed.
+No tracked generated files were changed; this establishes local
+Windows opt-in acceptance, not Linux/Docker or P2.6 cutover.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

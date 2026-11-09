@@ -2741,6 +2741,29 @@ belongs to [testing](testing.md#selected-runtime-database-set-validation).
 Other Army/Rules maintained JSON migrations and symbol path mapping
 remain open in P2.4.
 
+### Exact Combined Saving Roll annotations in Rules v15 (P2.4 opt-in)
+
+The editable `config/catalogs/weapon-combined-saving-rolls.json`
+retains the three source-reviewed Plasma weapons and six exact
+Weapon-profile/mode annotations. Rules v15 (compatibility 17) embeds
+them in `weapon_combined_saving_roll_profiles`, keyed by
+`(weapon_id, mode)`. Each row retains the authored name, mode order,
+source Ammunition ID/string, Saving Roll text and count string;
+`combined_saving_roll_metadata` pins the selected Army database SHA,
+current N5.3 core PDF source ID/SHA, printed page 67, and the
+reviewed Critical extra-ARM-roll fact. The content fingerprint
+verifies the complete mode inventory.
+
+The build validates that all six exact source signatures match the
+selected Army Weapon catalog, without deriving any rule from punctuation.
+Source-only and unexplained Weapon modes do not acquire an annotation.
+The read model preserves the pre-v15 signature dictionary and existing
+`combined_saving_roll` API payload. `CatalogRules` reads v15
+annotations from SQLite, never the packaged JSON, while older Rules
+versions retain their current adapter until P2.6. This is a reviewed
+reference annotation **not** an executable saving-roll calculator,
+Ammunition composition parser or generic Critical rule expansion.
+
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
 **Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**
@@ -2774,12 +2797,13 @@ to expose fourteen normalized conditions separately.
 
 `RulesDatabase.validate()` accepts the exact schema / compatibility pairs
 **(8, 10)**, **(9, 11)**, **(10, 12)**, **(11, 13)**,
-**(12, 14)**, **(13, 15)** and **(14, 16)**. The tracked 1.0.1 release remains
+**(12, 14)**, **(13, 15)**, **(14, 16)** and **(15, 17)**. The tracked 1.0.1 release remains
 v10/compatibility-12. From v9 onward the validator checks fourteen
 Restrictions constraints, negative polarity, qualifiers and provenance;
 v10 adds normalized deployed objects, v11 embedded exact variant
 usage, v12 reviewed Weapon citations, v13 the relational chart and
-v14 the source-reviewed Trait Wiki links.
+v14 the source-reviewed Trait Wiki links and v15 the exact
+Combined Saving Roll signatures.
 Invalid combinations, missing rows and corrupted provenance fail closed.
 
 Shared release staging preserves the active supported schema. For v10 it

@@ -2,7 +2,8 @@
 
 The tracked v10 set includes two JSON publications; v11 embeds variant usage
 and v12 also embeds Weapon citations; v13 embeds the Restrictions chart;
-v14 embeds reviewed Trait Wiki references.
+v14 embeds reviewed Trait Wiki references; v15 embeds reviewed Combined
+Saving Roll annotations.
 This module never selects a fallback
 set, rebuilds inputs, or establishes working-tree curation freshness.
 """
@@ -55,7 +56,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     army_path, rules_path = directory / "infinity.db", directory / "rules.db"
     with closing(sqlite3.connect(rules_path.as_uri() + "?mode=ro", uri=True)) as connection:
         schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if schema_version not in {10, 11, 12, 13, 14}:
+    if schema_version not in {10, 11, 12, 13, 14, 15}:
         raise ValueError("Unsupported Rules schema for selected database set")
     names = (
         V10_RUNTIME_FILES if schema_version == 10 else
@@ -80,7 +81,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         raise ValueError("Database set lacks a source-matched v2 variant publication")
     weapons = (
         rules.weapon_profile_citations_payload(army_path)
-        if schema_version in {12, 13, 14} else
+        if schema_version in {12, 13, 14, 15} else
         load_weapon_profile_publication(
             directory / "weapon-profile-sources.json", army_path, rules_path,
         )
@@ -91,9 +92,16 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     if schema_version >= 13 and (chart is None or len(chart["rows"]) != 6):
         raise ValueError("Database set lacks a complete embedded Restrictions chart")
 
-    trait_links = rules.trait_wiki_links_payload() if schema_version == 14 else None
-    if schema_version == 14 and not trait_links:
+    trait_links = rules.trait_wiki_links_payload() if schema_version >= 14 else None
+    if schema_version >= 14 and not trait_links:
         raise ValueError("Database set lacks complete embedded Trait Wiki links")
+
+    saving_rolls = (
+        rules.combined_saving_rolls_payload(army_path)
+        if schema_version >= 15 else None
+    )
+    if schema_version >= 15 and (saving_rolls is None or len(saving_rolls) != 6):
+        raise ValueError("Database set lacks exact reviewed Combined Saving Roll profiles")
 
     fingerprints = {}
     for name in sorted(names):
@@ -102,7 +110,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     return {
         "layout": {
             10: "v10-four-file", 11: "v11-three-file",
-            12: "v12-two-file", 13: "v13-two-file", 14: "v14-two-file",
+            12: "v12-two-file", 13: "v13-two-file", 14: "v14-two-file", 15: "v15-two-file",
         }[schema_version],
         "integrityCheck": "full",
         "buildProvenance": provenance,
@@ -114,6 +122,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         "reviewedWeapons": len({key[0] for key in weapons}),
         **({"restrictionChartRows": len(chart["rows"])} if chart is not None else {}),
         **({"traitWikiLinks": len(trait_links)} if trait_links is not None else {}),
+        **({"combinedSavingRollProfiles": len(saving_rolls)} if saving_rolls is not None else {}),
         "sha256": fingerprints,
     }
 

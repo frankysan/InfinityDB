@@ -26,6 +26,7 @@ from infinity_db.build_provenance import (
     validate_set_provenance,
 )
 from infinity_db.cli import build_parser
+from infinity_db.combined_saving_roll_storage import stage_combined_saving_rolls
 from infinity_db.database_set import (
     EMBEDDED_WEAPON_RUNTIME_FILES,
     V10_RUNTIME_FILES,
@@ -36,6 +37,7 @@ from infinity_db.sqlite_determinism import normalize_sqlite_header, vacuum_deter
 from infinity_db.trait_wiki_references import load_trait_wiki_references
 from infinity_db.trait_wiki_storage import stage_trait_wiki_links
 from infinity_db.variant_usage_storage import stage_variant_usage
+from infinity_db.weapon_combined_saving_rolls import load_combined_saving_roll_map
 from infinity_db.weapon_profile_storage import stage_weapon_profile_citations
 from infinity_db.web import create_app
 from tools.browser_wsgi_transport import wsgi_response
@@ -132,9 +134,17 @@ def _fake_rules(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
             ),
         )
         connection.execute("PRAGMA user_version=14")
-        connection.execute("UPDATE __rules_metadata SET value='14' WHERE key='formatVersion'")
+        stage_combined_saving_rolls(
+            connection,
+            load_combined_saving_roll_map(
+                RELEASE.parent.parent / "config/catalogs/weapon-combined-saving-rolls.json"
+            ),
+            army,
+        )
+        connection.execute("PRAGMA user_version=15")
+        connection.execute("UPDATE __rules_metadata SET value='15' WHERE key='formatVersion'")
         connection.execute(
-            "UPDATE __rules_metadata SET value='16' WHERE key='databaseCompatibilityVersion'"
+            "UPDATE __rules_metadata SET value='17' WHERE key='databaseCompatibilityVersion'"
         )
     _update_metadata(rules, {
         BUILD_PROVENANCE_KEY: build_record(manifest, "rules-n5", army_generation=generation),
@@ -188,9 +198,10 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     (args.db_dir / "weapon-profile-sources.json").write_bytes(b"obsolete publication")
     first = builder.build_database_set(args, _fake_army, root=root)
     assert first["buildProvenance"]["status"] == "matched"
-    assert first["layout"] == "v14-two-file"
+    assert first["layout"] == "v15-two-file"
     assert first["restrictionChartRows"] == 6
     assert first["traitWikiLinks"] == 33
+    assert first["combinedSavingRollProfiles"] == 6
     assert first["reviewedWeapons"] == 62
     assert validate_database_set(args.db_dir)["sha256"] == first["sha256"]
     assert set(_digests(args.db_dir)) == {*EMBEDDED_WEAPON_RUNTIME_FILES, "keep.txt"}
