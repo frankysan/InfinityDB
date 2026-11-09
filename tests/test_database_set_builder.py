@@ -57,6 +57,7 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         "data/manifests/symbol-publication.json",
         "src/infinity_db/web/static/restrictions-reference.json",
         "config/catalogs/equipment-presentation-encodings.json",
+        "config/catalogs/skill-source-classifications.json",
         "tools/build_weapon_profile_publication.py", "tools/audit_enrichment_coverage.py",
         "tools/audit_weapon_definition_gaps.py",
     ):
@@ -66,6 +67,10 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
     shutil.copyfile(
         RELEASE.parent.parent / "config/catalogs/equipment-presentation-encodings.json",
         root / "config/catalogs/equipment-presentation-encodings.json",
+    )
+    shutil.copyfile(
+        RELEASE.parent.parent / "config/catalogs/skill-source-classifications.json",
+        root / "config/catalogs/skill-source-classifications.json",
     )
     source = root / "army.zip"
     with zipfile.ZipFile(source, "w") as archive:
@@ -231,6 +236,7 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert first["ammunitionReferences"] == 16
     assert first["weaponProperties"] == 12
     assert first["equipmentPresentationEncodings"] == 2
+    assert first["skillSourceClassifications"] == 6
     assert first["reviewedWeapons"] == 62
     assert validate_database_set(args.db_dir)["sha256"] == first["sha256"]
     assert set(_digests(args.db_dir)) == {*EMBEDDED_WEAPON_RUNTIME_FILES, "keep.txt"}

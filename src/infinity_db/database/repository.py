@@ -896,15 +896,26 @@ class Database:
                 ARMY_V27_PUBLISHED_TABLES,
                 read_equipment_encodings,
             )
+            from infinity_db.skill_classification_storage import (
+                ARMY_COMPATIBILITY_VERSION as SKILL_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.skill_classification_storage import (
+                ARMY_SCHEMA_VERSION as SKILL_SCHEMA_VERSION,
+            )
+            from infinity_db.skill_classification_storage import (
+                ARMY_V28_PUBLISHED_TABLES,
+                read_skill_classifications,
+            )
 
             if application_id != APPLICATION_ID or version not in {
-                SCHEMA_VERSION, ARMY_SCHEMA_VERSION,
+                SCHEMA_VERSION, ARMY_SCHEMA_VERSION, SKILL_SCHEMA_VERSION,
             }:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
             if source_consistency and version != SCHEMA_VERSION:
                 raise ValueError("Source consistency requires the base Army export schema")
             required_tables = (
                 DATABASE_TABLES if source_consistency else
+                ARMY_V28_PUBLISHED_TABLES if version == SKILL_SCHEMA_VERSION else
                 ARMY_V27_PUBLISHED_TABLES if version == ARMY_SCHEMA_VERSION else
                 PUBLISHED_DATABASE_TABLES
             )
@@ -938,7 +949,8 @@ class Database:
             except (json.JSONDecodeError, TypeError) as exc:
                 raise ValueError("Database has invalid compatibility metadata") from exc
             expected_compatibility = (
-                ARMY_COMPATIBILITY_VERSION if version == ARMY_SCHEMA_VERSION
+                SKILL_COMPATIBILITY_VERSION if version == SKILL_SCHEMA_VERSION
+                else ARMY_COMPATIBILITY_VERSION if version == ARMY_SCHEMA_VERSION
                 else DATABASE_COMPATIBILITY_VERSION
             )
             if compatibility_version != expected_compatibility:
@@ -946,8 +958,10 @@ class Database:
                     "Database compatibility revision does not match this application; "
                     "rebuild the database"
                 )
-            if version == ARMY_SCHEMA_VERSION:
+            if version >= ARMY_SCHEMA_VERSION:
                 read_equipment_encodings(connection)
+            if version >= SKILL_SCHEMA_VERSION:
+                read_skill_classifications(connection)
             identity_config = identity_config_from_connection(connection)
             validate_application_army_integrity(connection)
             validate_application_fireteam_integrity(connection)
@@ -1120,6 +1134,18 @@ class Database:
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Database contains broken foreign keys")
+
+    def skill_source_classifications(self):
+        """Read v28 reviewed Army source classifications without a maintained JSON file."""
+        from infinity_db.skill_classification_storage import (
+            ARMY_SCHEMA_VERSION,
+            read_skill_classifications,
+        )
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < ARMY_SCHEMA_VERSION:
+                return None
+            return read_skill_classifications(connection)
 
     def equipment_presentation_encodings(self):
         """Read v27 authored characteristic mappings; v26 uses the maintained adapter."""

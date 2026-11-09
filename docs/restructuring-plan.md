@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in Rules v13, Trait Wiki links in v14, Combined Saving Rolls in v15, Ammunition links in v16 and Weapon Properties in v17; Army v27 now embeds Cube presentation encodings. Four maintained Army JSON datasets, symbol mappings and final build/serving cutover remain unfinished.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in Rules v13, Trait Wiki links in v14, Combined Saving Rolls in v15, Ammunition links in v16 and Weapon Properties in v17; Army v27 adds Cube presentation encodings and v28 adds six Skill source classifications. Three maintained Army JSON datasets, symbol mappings and final cutover remain unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1636,12 +1636,39 @@ The tracked v10 release artifacts, default serving contract and
 Docker packaging are unchanged. Focused and repeated pinned-source
 acceptance is owned by [testing](testing.md#selected-runtime-database-set-validation).
 
-**Remaining P2.4:** Migrate four maintained Army JSON datasets and
-the symbol path mappings identified in P1.4. The legacy JSON
-adapters remain only while independently needed for actual
-release/research/presentation consumption; historical tests do
-not justify retaining superseded build machinery. Final naming,
-serving and Docker cutover belongs to P2.6.
+#### P2.4 — Seventh slice: Army source Skill classifications (2026-11-09)
+
+**Status:** The opt-in complete build extends the matched
+Army v27/raw pair to Army v28 (compatibility 37).
+The six exceptions in
+`config/catalogs/skill-source-classifications.json` are now
+published in `skill_source_classifications` with explicit
+numeric-or-slug Army source reference, resolved application
+Skill ID, reviewed classification, original source order
+and author reason. The composite key references the current
+Army `application_catalog_items` Skill identity rather than
+fabricating a N5 Skill definition. Source-only, duplicate,
+ambiguous or drifted identities fail closed. The metadata
+pins the maintained source digest, complete content fingerprint,
+row count and Army export generation; the v28 content checksum
+covers the new rows and both exported Army siblings retain
+paired-generation compatibility metadata.
+
+`SkillCatalog` and Unit-detail presentation consume the
+same Army SQLite projection at v28, avoiding runtime
+`skill-source-classifications.json` reads. Earlier v26/v27
+Army snapshots and explicit source review tools retain the
+validated JSON adapter. The tracked v10 release and ordinary
+build/serve/Docker defaults remain unchanged. Focused
+parity, corruption and real-source evidence is owned by
+[testing](testing.md#selected-runtime-database-set-validation).
+
+**Remaining P2.4:** Migrate three maintained Army JSON datasets
+and runtime symbol path mappings identified in P1.4.
+The historical JSON adapters remain only while independently
+needed for release/research/presentation consumption;
+obsolete-path tests alone do not justify retaining them.
+Final naming, serving and Docker cutover belongs to P2.6.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

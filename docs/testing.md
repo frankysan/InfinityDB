@@ -803,6 +803,39 @@ No tracked release database files were modified. This accepts
 the local Windows opt-in path, not Linux/Docker or the P2.6
 serving/name cutover.
 
+**2026-11-09 P2.4 seventh slice, Army Skill source classifications (Windows local):**
+`tests/test_skill_classification_storage.py` passed 15/15,
+checking six exact reviewed Army source identities, numeric-or-slug
+compatibility, composite Skill catalog resolution, JSON-free v28
+SkillCatalog and Unit-detail presentation, Army/raw pairing, and
+fail-closed missing/duplicate/drifted identity, source and fingerprint
+checks. `tests/test_database_set_builder.py` passed 16/16,
+`tests/test_database_set.py` passed 20/20, and
+`tests/test_skill_config.py` passed 3/3, and
+`tests/test_app_cli.py` passed 22/22, including the database-health
+unsupported-schema regression. The v28 source identity helper passed canonical Pyright with
+zero errors and warnings; Ruff and documentation checks passed.
+
+Two independent, complete opt-in builds of pinned
+`JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced a paired Army v28/compatibility-37 and Rules v17 set.
+Both passed 73 Army normalization checks (116 known source warnings),
+selected-set integrity and provenance, 151 variant groups,
+62 Weapons/69 citations, six Restrictions rows, 33 Trait Wiki
+links, six Combined Saving Roll profiles, 16 Ammunition references,
+12 Weapon Properties, two Equipment presentation encodings
+and six reviewed Skill source classifications. All 41 pinned
+P1.3 runtime routes passed in each build. The two results were
+byte-identical: `infinity.db` SHA-256
+`5d76383a0ae16039476f335ab093edca523acc7e740cb38c9f2d6aefa5c1a558`,
+`rules.db` SHA-256
+`3626a0e0e13991444ae438b15c0662c300df2b62c8c12a1d9e4fabee7411a524`.
+Build-set ID:
+`1462b5b1f9ce4223bbdef7e399728623a71b88c44bb61acd694900a39ad26234`.
+The tracked v10 release files were untouched; Linux, Docker
+and P2.6 serving cutover remain separate acceptance gates.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

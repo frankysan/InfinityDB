@@ -70,6 +70,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     army = Database(army_path)
     army.validate()
     encodings = army.equipment_presentation_encodings()
+    classifications = army.skill_source_classifications()
     rules = RulesDatabase(rules_path)
     rules.validate()
     provenance = validate_set_provenance(army_path, rules_path)
@@ -132,6 +133,8 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         "unresolvedDeliveries": len(objects["unresolvedDeliveries"]),
         "variantGroups": len(variants["variants"]),
         **({"equipmentPresentationEncodings": len(encodings)} if encodings is not None else {}),
+        **({"skillSourceClassifications": len(classifications)}
+           if classifications is not None else {}),
         "variantPublicationVersion": variants["formatVersion"],
         "reviewedWeapons": len({key[0] for key in weapons}),
         **({"restrictionChartRows": len(chart["rows"])} if chart is not None else {}),

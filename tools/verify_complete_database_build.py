@@ -74,6 +74,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 or report["ammunitionReferences"] != 16
                 or report["weaponProperties"] != 12
                 or report["equipmentPresentationEncodings"] != 2
+                or report["skillSourceClassifications"] != 6
             ):
                 raise ValueError("Complete build changed the reviewed source inventory")
 
@@ -179,6 +180,15 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 detail = _api(app, f"/api/equipment/{slug}")
                 if detail.get("slug") != slug:
                     raise ValueError(f"Missing presentation Equipment {slug}")
+            from infinity_db.skill_config import load_skill_source_config
+
+            classifications = Database(
+                destination / "infinity.db"
+            ).skill_source_classifications()
+            if classifications != load_skill_source_config(
+                ROOT / "config/catalogs/skill-source-classifications.json"
+            ):
+                raise ValueError("Embedded Skill source classifications differ from review")
             baseline = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
             observed = capture(
                 app, paths=tuple(item["path"] for item in baseline["probes"]),
@@ -190,7 +200,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 f"Complete build {attempt}: v17 healthy, 62 Weapons, "
                 f"69 citations, 6 chart rows, 33 Trait links, "
                 f"6 saving-roll modes, 16 Ammunition references, "
-                f"12 Weapon Properties, 2 Equipment encodings, 41 baseline routes; "
+                f"12 Weapon Properties, 2 Equipment encodings, "
+                f"6 Skill classifications, 41 baseline routes; "
                 f"hashes {json.dumps(report['sha256'], sort_keys=True)}",
                 flush=True,
             )
@@ -213,6 +224,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
         "ammunitionReferences": reports[0]["ammunitionReferences"],
         "weaponProperties": reports[0]["weaponProperties"],
         "equipmentPresentationEncodings": reports[0]["equipmentPresentationEncodings"],
+        "skillSourceClassifications": reports[0]["skillSourceClassifications"],
         "rebuilds": 2,
     }
 

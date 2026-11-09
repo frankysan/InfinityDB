@@ -2855,6 +2855,39 @@ Cube characteristic links and canonical rules references are
 unchanged. No Equipment identity is synthesized from characteristic
 spelling, and source-review mismatches fail closed.
 
+### Reviewed Army Skill source classifications in Army v28 (P2.4 opt-in)
+
+The editable `config/catalogs/skill-source-classifications.json`
+retains six reviewed exceptions for Army's skill-like source bucket:
+Bangbomb, BTS=3, GizmoKit, Infinity Team-Ops, MediKit and
+Regular. These are source classifications, **not** newly created
+N5 canonical Skills. The opt-in complete build extends the
+matched Army v27/raw pair to **v28/compatibility 37**.
+`skill_source_classifications` stores each exact numeric or
+slug source reference, explicit reference kind, ordered position,
+resolved application Skill identity, reviewed classification
+(`equipment`, `attribute-override`, `source-marker`, or
+`training`) and author reason. A composite foreign key targets
+`application_catalog_items` with catalog `skills`; the
+read-time resolver checks the original source reference still
+resolves uniquely without inferring an N5 rule definition.
+
+`skill_source_classification_metadata` binds the reviewed
+configuration digest, format/version, six-row count, content
+fingerprint and paired Army export generation. The v28
+published-content checksum includes these relational rows; the
+raw sibling is updated to the same generation/compatibility
+metadata. The standalone v26 importer and v27 transitional
+database remain supported.
+
+`SkillCatalog` reads v28 classifications from Army SQLite.
+The Unit-detail presentation backend receives the same selected
+database projection instead of re-opening maintained JSON; direct
+source-only tools and older v26/v27 snapshots retain the
+validated JSON adapter. The API continues to show the original
+training/equipment/attribute/source-marker classifications and
+preserves exact source Skill identity semantics.
+
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
 **Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**

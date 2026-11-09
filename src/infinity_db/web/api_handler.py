@@ -1431,6 +1431,7 @@ class ApiHandler:
                         payload,
                         optional_filters=optional_filters,
                         requested_army=requested_army,
+                        source_skill_classifications=self.database.skill_source_classifications(),
                     )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND

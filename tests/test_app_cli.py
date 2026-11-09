@@ -392,12 +392,14 @@ def test_database_health_command_reports_and_validates_pair(
     assert missing_raw["rawArchive"]["status"] == "invalid"
     assert "does not exist" in missing_raw["rawArchive"]["error"]
 
+    # v27/v28 are supported opt-in layouts; test an unknown schema instead.
+    unsupported = SCHEMA_VERSION + 100
     with sqlite3.connect(database) as connection:
-        connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION + 1}")
+        connection.execute(f"PRAGMA user_version = {unsupported}")
     assert main(["database-health", str(database), "--json"]) == 1
     wrong_schema = json.loads(capsys.readouterr().out)
     assert wrong_schema["status"] == "unhealthy"
-    assert wrong_schema["application"]["schemaRevision"] == SCHEMA_VERSION + 1
+    assert wrong_schema["application"]["schemaRevision"] == unsupported
     assert wrong_schema["application"]["expectedSchemaRevision"] == SCHEMA_VERSION
     assert "Unsupported InfinityDB database" in wrong_schema["application"]["error"]
 
