@@ -130,7 +130,6 @@
         "test_standard_game_reference_tables",
         "test_structured_skill_charts_publication",
         "test_terrain_scenery_source_gaps",
-        "test_terrain_scenery_reference_staging",
         "test_variant_usage",
         "test_variant_usage_storage",
         "test_visibility_zone_whole_record",
