@@ -196,25 +196,28 @@ def test_complete_v10_candidate_bundle_has_no_deployed_object_json(
         verify_candidate(candidate)
 
 
-def test_legacy_v9_image_bundle_keeps_matched_json(
+@pytest.mark.parametrize("schema", (8, 9))
+def test_legacy_image_bundle_is_rejected_before_modifying_output(
     pinned_inputs: tuple[Path, ...], tmp_path: Path,
+    schema: int,
 ) -> None:
     from tools.prepare_runtime_bundle import prepare_bundle
 
-    source = Path(__file__).resolve().parents[1] / "data/generated"
-    if not all((source / name).is_file() for name in (
-        "deployed-objects.json", "variant-usage.json", "weapon-profile-sources.json",
-    )):
-        pytest.skip("Generated legacy publication is unavailable")
+    source = tmp_path / "source"
+    source.mkdir()
+    shutil.copyfile(pinned_inputs[0], source / "infinity.db")
+    shutil.copyfile(pinned_inputs[1], source / "rules.db")
     with sqlite3.connect(source / "rules.db") as connection:
-        if connection.execute("PRAGMA user_version").fetchone()[0] != 9:
-            pytest.skip("Tracked rules database no longer uses legacy v9")
-    output = tmp_path / "legacy"
-    names = prepare_bundle(source, output)
-    assert names == {
-        "infinity.db", "rules.db", "deployed-objects.json",
-        "variant-usage.json", "weapon-profile-sources.json",
-    }
+        connection.execute(f"PRAGMA user_version={schema}")
+    (source / "deployed-objects.json").write_text("{", encoding="utf-8")
+    output = tmp_path / "bundle"
+    output.mkdir()
+    sentinel = output / "keep.txt"
+    sentinel.write_bytes(b"retained")
+    with pytest.raises(ValueError, match="Unsupported Rules schema"):
+        prepare_bundle(source, output)
+    assert {path.name for path in output.iterdir()} == {"keep.txt"}
+    assert sentinel.read_bytes() == b"retained"
 
 
 def test_normalized_snapshot_rejects_mismatched_army_sha(

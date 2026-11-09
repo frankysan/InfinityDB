@@ -22,34 +22,23 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Verify deployed-object publication for the tracked schema
+      - name: Verify embedded deployed objects in the tracked database set
         run: |
-          if PYTHONPATH=src python -c 'import sqlite3,sys; sys.exit(sqlite3.connect("data/generated/rules.db").execute("PRAGMA user_version").fetchone()[0] not in (10,11))'; then
-            echo "Embedded deployed objects require no legacy JSON publication."
-          else
-            PYTHONPATH=src python -m tools.build_deployed_object_publication
-            PYTHONPATH=src python -m tools.build_deployed_object_publication --check
-          fi
           PYTHONPATH=src python - <<'PY'
-          import sqlite3
           from pathlib import Path
 
-          from infinity_db.deployed_object_publication import load_deployed_object_publication
+          from infinity_db.database_set import validate_database_set
           from infinity_db.rules_database import RulesDatabase
 
-          army = Path("data/generated/infinity.db")
+          report = validate_database_set(Path("data/generated"))
+          assert report["deployedObjects"] == 17
+          assert report["unresolvedDeliveries"] == 1
           rules_path = Path("data/generated/rules.db")
           rules = RulesDatabase(rules_path)
           rules.validate()
           restrictions = rules.restrictions_payload()
           assert restrictions["available"] and len(restrictions["items"]) == 14
           assert restrictions["evaluationSupported"] is False
-          schema = sqlite3.connect(rules_path).execute("PRAGMA user_version").fetchone()[0]
-          paired = (rules.deployed_objects_payload(army) if schema in (10,11)
-              else load_deployed_object_publication(
-                  Path("data/generated/deployed-objects.json"), army, rules_path))
-          assert paired is not None and len(paired["objects"]) == 17
-          assert len(paired["unresolvedDeliveries"]) == 1
           PY
 
       - name: Validate pinned exact-variant release publication
@@ -58,7 +47,7 @@ jobs:
       - name: Prepare immutable runtime bundle
         run: PYTHONPATH=src python -m tools.prepare_runtime_bundle
 
-      - name: Build application image from tracked databases and generated publication
+      - name: Build application image from verified tracked databases
         run: docker build --tag infinity-db:deployment-smoke .
 
       - name: Validate image and production startup

@@ -32,7 +32,7 @@ def source_paths() -> tuple[Path, Path, Path, Path, Path]:
 
 @pytest.fixture(scope="module")
 def legacy_v9_rules(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """Keep legacy JSON binding tests independent of the tracked rules schema."""
+    """An older reference DB must never activate a loose deployed-object publication."""
     from infinity_db.cli import build_parser, cmd_build_rules
 
     output = tmp_path_factory.mktemp("deployed-v9-compatibility") / "rules.db"
@@ -531,7 +531,7 @@ def test_publication_rejects_identity_value_and_delivery_tampering(
     rejected(changed, "Unit-wide option cannot invent Army")
 
 
-def test_external_rules_database_does_not_inherit_adjacent_release_publication(
+def test_legacy_rules_never_attach_adjacent_deployed_object_json(
     source_paths: tuple[Path, Path, Path, Path, Path],
     legacy_v9_rules: Path, tmp_path: Path,
 ) -> None:
@@ -543,38 +543,31 @@ def test_external_rules_database_does_not_inherit_adjacent_release_publication(
     rules = release / "rules.db"
     shutil.copyfile(source_paths[0], army)
     shutil.copyfile(legacy_v9_rules, rules)
-    legacy_source = (source_paths[0], legacy_v9_rules, *source_paths[2:])
-    (release / "deployed-objects.json").write_bytes(
-        publication_bytes(build_publication(*legacy_source))
-    )
+    (release / "deployed-objects.json").write_text("{", encoding="utf-8")
     external_rules = tmp_path / "independent" / "rules.db"
     external_rules.parent.mkdir()
     shutil.copyfile(legacy_v9_rules, external_rules)
 
-    assert create_app(army, rules_database_path=rules).deployed_objects is not None
-    # Legacy v9 must not inherit a JSON publication across separate directories.
+    assert create_app(army, rules_database_path=rules).deployed_objects is None
     assert create_app(army, rules_database_path=external_rules).deployed_objects is None
 
 
 def test_release_pair_still_fails_closed_on_same_directory_rules_drift(
     source_paths: tuple[Path, Path, Path, Path, Path],
-    legacy_v9_rules: Path, tmp_path: Path,
+    tmp_path: Path,
 ) -> None:
     from infinity_db.web import create_app
 
     army = tmp_path / "infinity.db"
     rules = tmp_path / "rules.db"
     shutil.copyfile(source_paths[0], army)
-    shutil.copyfile(legacy_v9_rules, rules)
-    legacy_source = (source_paths[0], legacy_v9_rules, *source_paths[2:])
-    (tmp_path / "deployed-objects.json").write_bytes(
-        publication_bytes(build_publication(*legacy_source))
-    )
+    shutil.copyfile(source_paths[1], rules)
+    (tmp_path / "deployed-objects.json").write_text("{", encoding="utf-8")
     with sqlite3.connect(rules) as db:
         db.execute(
-            "UPDATE sources SET title = title || ' ' "
-            "WHERE rowid = (SELECT rowid FROM sources LIMIT 1)"
+            "UPDATE deployed_object_metadata SET value=? WHERE key='armyDatabaseSha256'",
+            (json.dumps("0" * 64),),
         )
-    with pytest.raises(ValueError, match="does not match release databases"):
+    with pytest.raises(ValueError, match="do not match"):
         create_app(army, rules_database_path=rules)
 

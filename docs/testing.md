@@ -937,6 +937,27 @@ passed, including installed CLI/configuration/database and HTTP probes.
 Ruff, Pyright and documentation checks passed. The failed hosted run remains
 failed; replacement-SHA hosted acceptance is separate.
 
+**2026-11-09 P2.5 first slice, embedded-only serving and image assembly:**
+The focused deployed-object/storage/database-set, deployment-script,
+two-file bundle, browser, web/API and CLI cohorts passed 432 distinct
+hermetic cases. Negative legacy input checks retained the output sentinel;
+current embedded-source binding, reviewed attributes/delivery provenance,
+all-object API behavior and Chromium navigation remained covered. Historical
+image-only assertions were removed; release-note and source-citation failure
+checks remain on the supported image path. Ruff and canonical Pyright passed.
+
+The Windows Docker Desktop Linux engine built a disposable image from the
+unchanged tracked v10 database set. Image ID:
+`sha256:e4ea3d816a82182a6260530b916c930691e9ca355a82894a269167cd3c627051`.
+The revised `verify-container-image.sh --published-assets` passed embedded
+database-set checks, complete packaged SVG/provenance validation, non-root
+read-only production startup and HTTP reference/citation/variant/release-note
+probes. The temporary container was removed by the verifier. This validates
+the current tracked-set image path, not the future P2.6 names/defaults or an
+opt-in v31 image. Shell syntax and documentation checks passed. No deployment
+was performed. Legacy build/migration commands and the standalone JSON verifier
+remain unfinished P2.5 work.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

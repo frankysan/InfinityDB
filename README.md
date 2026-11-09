@@ -327,12 +327,15 @@ infinity-db build-rules
 inputs, writing a v10 candidate to `local/rules-standalone.db` by default.
 The Restrictions chart and deployed-object reviews are applied automatically.
 Use `--legacy-v8` or `--legacy-v9` for older standalone formats.
+These source/research outputs are not supported by the current image builder;
+current deployed-object serving requires an embedded v10-or-later projection.
+Use a matching retained released image to roll back to an older data format.
 Direct writes to the tracked release `rules.db` are disallowed.
 
 The prepared 1.0.1 release uses v10 with deployed objects embedded in `rules.db`;
 the tagged 1.0.0 release used v9 with `deployed-objects.json`. See the
 [versioned storage contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted)
-and its release work in [TODO](docs/TODO.md#performance-storage-and-build-tooling).
+and its ongoing [restructuring work](docs/TODO.md#major-simplification-and-restructuring).
 A tagged immutable Docker image must receive a validated matching set of
 artifacts rather than rebuilding data at container startup.
 

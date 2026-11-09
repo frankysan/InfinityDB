@@ -29,8 +29,8 @@ RUN pip install --no-cache-dir ".[server]" \
     && useradd --create-home --uid 10001 appuser \
     && chown -R appuser:appuser /app
 
-# Prepared before Docker build: v9 includes deployed-objects.json;
-# v10 embeds those records in rules.db and packages no such JSON file.
+# Prepared before Docker build: deployed objects are embedded in rules.db;
+# only the selected database set and its required publications are packaged.
 COPY --chown=appuser:appuser data/runtime/ /app/data/
 
 USER appuser

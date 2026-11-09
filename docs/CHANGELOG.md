@@ -30,6 +30,13 @@ are not retroactively relabeled.
   the variant-usage JSON requirement while preserving group counts, source
   contexts and browser links. Rejected damaged or mismatched embedded data.
 
+### Changed
+
+- **Web backend + Deployment:** Retired loose deployed-object JSON serving
+  and legacy v8/v9 image assembly. Current images required database-embedded
+  deployed objects; older releases remained recoverable through their matching
+  retained images.
+
 ## [1.0.1] - 2026-11-09
 
 ### Player summary

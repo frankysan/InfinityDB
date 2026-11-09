@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 materialization is complete for opt-in Rules v17/Army v31 builds: reference facts, Army presentation data and symbol mappings/hashes are embedded. Legacy deployed-object paths, final naming/defaults and unified serving remain under P2.5–P2.8.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2–P2.4 projections are embedded in opt-in Rules v17/Army v31 sets. P2.5 removed legacy deployed-object serving and image assembly; historical builder/migration modes and the standalone verifier remain. Final naming/defaults and unified serving remain under P2.6–P2.8.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1712,6 +1712,26 @@ opt-in set. Older adapters remain while the tracked release and source
 tools independently need them; obsolete-path tests alone do not justify
 retention. Continue P2.5's deployed-object cleanup, then P2.6's final
 names/defaults and unified serving, followed by P2.7–P2.8 closeout.
+
+#### P2.5 — First slice: serving and image assembly (2026-11-09)
+
+HTTP startup now reads only the embedded, Army-bound deployed-object model;
+adjacent legacy JSON cannot enable a catalog or recover damaged data.
+Image assembly and container verification use the shared supported-set
+validator, including two-file opt-in layouts. Deployment no longer generates
+legacy JSON, and the image verifier requires the complete reviewed object,
+Restrictions, variant and Weapon-citation contracts. The former v9 image
+test was replaced with rejected-input/output-preservation checks; source
+and current embedded-content invariants remain covered. Historical-only
+image branches and assertions were retired rather than copied elsewhere.
+
+**Remaining P2.5:** Retire the historical builder/migration flags,
+standalone JSON verifier and completed staging/promotion consumers together,
+extracting source/provenance guards that still serve a current purpose.
+The CLI and build-only reader remain pending that bounded dependency cleanup;
+their existing imports do not establish a permanent retention requirement.
+P2.6–P2.8 continue to own final default/naming, assembly-stage removal and
+full local/container integration acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

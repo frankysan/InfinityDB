@@ -12,7 +12,6 @@ from typing import Any
 
 from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
-from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.snapshot_revision import runtime_snapshot_revision
 from infinity_db.symbol_catalog import SymbolCatalog
@@ -83,28 +82,11 @@ class Application:
         )
         self.variant_usage: dict[str, Any] | None = None
         self.variant_usage_revision: str | None = None
-        # The publication belongs to a co-located *release database pair*.
-        # An explicitly supplied rules database in another directory is an
-        # independent test/development source, not the release rules.db.
-        # Never auto-attach its neighbour's publication to that mixed pair.
         rules_path = self.rules_database.path if self.rules_database is not None else None
         self.deployed_objects = (
             self.rules_database.deployed_objects_payload(self.database.path)
             if self.rules_database is not None else None
         )
-        # v10 can be previewed from an independent staging directory because
-        # the embedded model verifies its Army hash; legacy publications
-        # remain restricted to a co-located release database pair.
-        if (
-            rules_path is None
-            or rules_path.resolve().parent == self.database.path.resolve().parent
-        ):
-            deployed_objects_path = self.database.path.with_name("deployed-objects.json")
-            if self.deployed_objects is None:
-                # Read-only fallback for v8/v9 release images.
-                self.deployed_objects = load_deployed_object_publication(
-                    deployed_objects_path, self.database.path, rules_path,
-                )
         self.variant_usage, self.variant_usage_revision = load_runtime_variant_usage(
             self.database.path, rules_path,
         )

@@ -6,8 +6,10 @@ For public internet serving, InfinityDB deploys an immutable Docker image
 containing the web application, processed graphical assets, release-matched
 `infinity.db` and `rules.db`. The tracked v10 release additionally contains exact-variant
 `variant-usage.json` and Weapon-profile `weapon-profile-sources.json` publications.
-Legacy v8/v9 images additionally include generated `deployed-objects.json`;
-the prepared 1.0.1 v10 image embeds these records directly in `rules.db`.
+Deployed objects must be embedded in `rules.db` (v10 or later).
+The current application and image builder no longer attach or package a
+legacy `deployed-objects.json`; use the matching retained released image
+when rolling back to an older data format.
 Caddy listens on HTTP and proxies traffic to the application, which is not exposed
 directly on the host. Put Caddy behind an external TLS reverse proxy for public HTTPS.
 
@@ -121,19 +123,18 @@ SHA-256, and compares `infinity.db`'s embedded `snapshotArchiveSha256` with
 data and graphical publication to the same exact source ZIP without requiring that raw archive
 or the terminal `army-symbol-build.json` on the server.
 
-For v8/v9 releases, `deploy.sh` deterministically generates and checks the
-ignored `data/generated/deployed-objects.json` publication before packaging.
 For the tracked v10 development pair, deployed objects are embedded in
 `rules.db` and validated against the exact Army database hash; no legacy
 JSON is generated or shipped. No raw snapshots or database rebuilds are
 needed on the Docker host. Before a direct Docker build, run
 `python -m tools.prepare_runtime_bundle` after verifying the tracked
 publications. It creates ignored `data/runtime/` with exactly the validated
-schema-specific four- or five-file image contents.
+schema-specific two-, three- or four-file image contents. Legacy v8/v9
+inputs are rejected before the output directory is modified.
 
 The exact-variant publication is a **tracked release file**, source-verified
-from the pinned raw Army archive during development. v9 uses the legacy JSON
-fingerprint; v10 uses the embedded deployed-object model and format v2.
+from the pinned raw Army archive during development. The tracked v10 set
+uses the embedded deployed-object model and format v2.
 Docker deployment and clean CI validate the paired, committed publication
 against the tracked databases without regenerating it. Changes to either
 database require promoting and committing the matching variant and Weapon JSON

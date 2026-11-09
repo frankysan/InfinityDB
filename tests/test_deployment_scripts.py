@@ -198,7 +198,7 @@ def test_checkout_builds_never_enter_immutable_docker_release_context() -> None:
     assert "checkout-runtime" not in deploy
 
 
-def test_deployed_object_publication_is_generated_and_verified_for_each_release_image() -> None:
+def test_release_images_require_embedded_deployed_objects() -> None:
     dockerfile = _read("Dockerfile")
     dockerignore = _read(".dockerignore")
     gitignore = _read(".gitignore")
@@ -212,15 +212,18 @@ def test_deployed_object_publication_is_generated_and_verified_for_each_release_
     assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
     assert "tools.prepare_runtime_bundle" in deploy
     assert deploy.index("tools.prepare_runtime_bundle") < deploy.index("docker compose build")
-    assert "tools.build_deployed_object_publication --check" in workflow
+    assert "tools.build_deployed_object_publication" not in workflow
+    assert "tools.build_deployed_object_publication" not in deploy
+    assert "validate_database_set" in workflow
     assert workflow.index("tools.prepare_runtime_bundle") < workflow.index("docker build")
-    assert 'expected_files.add("deployed-objects.json")' in smoke
-    assert "load_deployed_object_publication(" in smoke
+    assert "validate_database_set(data_dir)" in smoke
+    assert "load_deployed_object_publication(" not in smoke
+    assert 'rules.deployed_objects_payload(data_dir / "infinity.db")' in smoke
     assert '/api/deployed-objects' in smoke
     assert 'http://127.0.0.1:8000/deployed-objects' in smoke
 
 
-def test_variant_usage_publication_is_byte_exact_and_packaged_for_v9_release() -> None:
+def test_variant_usage_publication_is_byte_exact_and_packaged_for_tracked_release() -> None:
     gitignore = _read(".gitignore")
     attributes = _read(".gitattributes")
     dockerignore = _read(".dockerignore")
@@ -236,14 +239,14 @@ def test_variant_usage_publication_is_byte_exact_and_packaged_for_v9_release() -
     assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
     assert (ROOT / "data/generated/variant-usage.json").is_file()
     assert "tools.build_variant_usage --publish" not in deploy
-    assert "tools.build_deployed_object_publication --check" in deploy
-    assert 'expected_files.add("variant-usage.json")' in smoke
+    assert "tools.build_deployed_object_publication" not in deploy
+    assert 'expected_files = set(report["sha256"])' in smoke
     assert "load_runtime_variant_usage(" in smoke
     assert "/api/variant-usage?record_id=" in smoke
     assert "tools.verify_deployment_assets --skip-svg" in source_workflow
     assert "tools.verify_deployment_assets --skip-svg" in workflow
     assert workflow.index("Validate pinned exact-variant release publication") < workflow.index(
-        "Build application image from tracked databases"
+        "Build application image from verified tracked databases"
     )
 
 
@@ -261,25 +264,13 @@ def test_weapon_profile_citations_are_release_paired_and_packaged() -> None:
     assert "data/generated/*" in dockerignore
     assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
     assert (ROOT / "data/generated/weapon-profile-sources.json").is_file()
-    assert 'expected_files.add("weapon-profile-sources.json")' in smoke
-    assert "load_weapon_profile_publication(" in smoke
+    assert 'expected_files = set(report["sha256"])' in smoke
+    assert "load_runtime_weapon_profile_publication(" in smoke
     assert "/api/weapons/rifle" in smoke
     assert "RUN rm /app/data/weapon-profile-sources.json" not in workflow
     assert "Prepare immutable runtime bundle" in workflow
     assert "tools.build_weapon_profile_publication" in determinism
     assert "publication/weapon-profile-sources.json" in determinism
-
-
-def test_variant_usage_smoke_requires_matching_current_publication() -> None:
-    workflow = _read(".github/workflows/deployment-smoke.yml")
-    smoke = _read("scripts/verify-container-image.sh")
-
-    assert "RUN rm /app/data/variant-usage.json" not in workflow
-    assert "rollback-v8" not in workflow
-    assert 'if restrictions["available"]:' in smoke
-    assert 'expected_files.add("variant-usage.json")' in smoke
-    assert 'if not restrictions["available"] and usage is not None:' in smoke
-    assert "Legacy compatibility image unexpectedly published variant usage" in smoke
 
 
 def test_release_installer_deploys_tracked_runtime_databases_without_rebuilding() -> None:
@@ -406,13 +397,11 @@ def test_container_build_packages_canonical_changelog() -> None:
     "heading", ["## Unreleased", "## [1.0.1] - Unreleased", "## [0.10.0] - 2026-10-07"],
 )
 @pytest.mark.parametrize("matching_content", [True, False])
-@pytest.mark.parametrize("restrictions_version", [8, 9])
-def test_container_smoke_validates_canonical_notes_in_both_release_states(
+def test_container_smoke_validates_canonical_release_notes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     heading: str,
     matching_content: bool,
-    restrictions_version: int,
 ) -> None:
     changelog = tmp_path / "CHANGELOG.md"
     changelog.write_text(
@@ -426,50 +415,42 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
     if not matching_content:
         page = page.replace("New player highlight.", "Outdated player highlight.")
     page = f'<section aria-label="InfinityDB release notes">{page}</section>'
-    if restrictions_version == 9:
-        restrictions = {
-            "available": True, "evaluationSupported": False,
-            "items": [
-                *[
-                    {
-                        "subject": "TAG", "action": "enter-prone",
-                        "scope": "all", "operation": {
-                            "kind": "state-entry", "qualifier": {},
-                        },
-                    }
-                    for _ in range(11)
-                ],
+    restrictions = {
+        "available": True, "evaluationSupported": False,
+        "items": [
+            *[
                 {
-                    "subject": "Motorcycle", "action": "upward-jump",
-                    "scope": "while-mounted-upwards-only",
-                    "operation": {
-                        "kind": "directional-skill-movement",
-                        "qualifier": {"direction": "upward"},
+                    "subject": "TAG", "action": "enter-prone",
+                    "scope": "all", "operation": {
+                        "kind": "state-entry", "qualifier": {},
                     },
-                },
-                *[
-                    {
-                        "subject": subject, "action": "lieutenant-selection",
-                        "scope": "army-selection-only",
-                        "operation": {
-                            "kind": "army-role-selection",
-                            "qualifier": {"role": "lieutenant"},
-                        },
-                    }
-                    for subject in ("REM", "Irregular")
-                ],
+                }
+                for _ in range(11)
             ],
-        }
-    else:
-        restrictions = {
-            "available": False, "evaluationSupported": False, "items": [],
-        }
-    profile_citations = (
-        [{"source_id": "n5-core-v5.3-pdf", "page": 183}]
-        if restrictions_version == 9 else []
-    )
+            {
+                "subject": "Motorcycle", "action": "upward-jump",
+                "scope": "while-mounted-upwards-only",
+                "operation": {
+                    "kind": "directional-skill-movement",
+                    "qualifier": {"direction": "upward"},
+                },
+            },
+            *[
+                {
+                    "subject": subject, "action": "lieutenant-selection",
+                    "scope": "army-selection-only",
+                    "operation": {
+                        "kind": "army-role-selection",
+                        "qualifier": {"role": "lieutenant"},
+                    },
+                }
+                for subject in ("REM", "Irregular")
+            ],
+        ],
+    }
+    profile_citations = [{"source_id": "n5-core-v5.3-pdf", "page": 183}]
     rifle = {
-        "profile_citations_available": restrictions_version == 9,
+        "profile_citations_available": True,
         "profiles": [{"profile_citations": profile_citations}],
     }
     payloads = {
@@ -505,21 +486,16 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
     code = compile(runtime_probe, "verify-container-image.sh", "exec")
     if matching_content:
         exec(code, {})
-        rifle["profile_citations_available"] = restrictions_version != 9
+        rifle["profile_citations_available"] = False
         with pytest.raises(SystemExit, match="wrong Weapon Chart publication status"):
             exec(code, {})
-        rifle["profile_citations_available"] = restrictions_version == 9
-        if restrictions_version == 9:
-            for citation in (
-                {"source_id": "n5-core-v5.3-pdf", "page": 184},
-                {"source_id": "incorrect-source", "page": 183},
-            ):
-                profile_citations[:] = [citation]
-                with pytest.raises(SystemExit, match="lost its reviewed Weapon Chart citation"):
-                    exec(code, {})
-        else:
-            profile_citations.append({"source_id": "n5-core-v5.3-pdf", "page": 183})
-            with pytest.raises(SystemExit, match="incorrectly retained a v9 citation"):
+        rifle["profile_citations_available"] = True
+        for citation in (
+            {"source_id": "n5-core-v5.3-pdf", "page": 184},
+            {"source_id": "incorrect-source", "page": 183},
+        ):
+            profile_citations[:] = [citation]
+            with pytest.raises(SystemExit, match="lost its reviewed Weapon Chart citation"):
                 exec(code, {})
     else:
         with pytest.raises(SystemExit, match="canonical changelog"):
@@ -558,7 +534,7 @@ def test_deployment_smoke_validates_current_image_without_rollback_rehearsal() -
     expected_order = (
         "Validate pinned exact-variant release publication",
         "Prepare immutable runtime bundle",
-        "Build application image from tracked databases",
+        "Build application image from verified tracked databases",
         "Validate image and production startup",
     )
     positions = [workflow.index(fragment) for fragment in expected_order]

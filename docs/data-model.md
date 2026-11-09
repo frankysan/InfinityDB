@@ -144,6 +144,14 @@ checks change when reviewed locator bytes change.
 
 ### Deployed-object read-model and artifact-gated browser reference
 
+Current serving reads deployed objects only from their embedded Rules
+projection (v10 or later), bound to the selected Army database. Adjacent
+`deployed-objects.json` files are ignored, including beside older standalone
+Rules databases; they cannot enable a catalog or recover a damaged projection.
+Image assembly requires a complete supported database set and rejects v8/v9
+inputs before changing the destination. Source/build-side JSON interchange
+and historical migration commands remain separate pending their P2.5 retirement.
+
 `infinity_db.deployed_object_reference.project_deployed_references` consumes
 the validated N5.3 deployed-object audit and produces a **pure, read-only**
 reference projection. It currently covers 15 exact Army profiles plus the
@@ -229,37 +237,24 @@ It does not read raw Army archives or curated/review files on requests.
 The `/api/deployed-objects` catalog, exact-ID endpoint and browser page
 publish the same reviewed identities, attributes and delivery links.
 
-For legacy v8/v9 images, `tools.build_deployed_object_publication` compiles the
-validated review and current Army/rules database pair to deterministic
-`deployed-objects.json` once during release preparation. Every published object
+Every published object
 must carry an explicit `unitUses` list (which may be empty when no exact uses
-are established); an omitted list is invalid, not a claim of zero uses. The
-runtime loader checks the artifact's Army and rules database SHA-256 hashes and
-structural attribute/identity provenance. It does **not** access the raw normalized Army
-snapshot, curated JSON, or review files on requests. When the artifact is
-present, `/api/deployed-objects` and the `/deployed-objects` browser page
-publish its reviewed identities, attributes and delivery source links.
-`/api/deployed-objects/{id}` returns one exact reviewed identity.
-When the legacy publication is absent, the API returns 503
-rather than reconstructing source assertions from raw tables; a mismatched
-artifact fails closed on startup. Auto-discovery applies only to a
-**co-located legacy Army/rules database pair**: an explicitly supplied legacy rules database
-from another directory is an independent source, so the application does not
-attach a release publication from beside the Army database. The deployed-object
-API returns 503 in that mixed-source configuration. A mismatched publication
-beside a co-located release pair still fails closed on startup.
+are established); an omitted list is invalid, not a claim of zero uses.
+Without an embedded deployed-object model, the API returns 503 rather than
+reconstructing assertions or attaching a loose sidecar. A mismatched embedded
+Army binding fails closed on startup. Independently staged Rules databases
+remain supported through that exact binding rather than directory proximity.
 
-Legacy release packaging generates this deterministic, Git-ignored publication from
-the tracked database pair and reviewed source files immediately before the
-Docker build. The image copies it beside both databases; its startup smoke
-test verifies source-pair hashes, 17 reviewed objects, the unresolved Mine
-Dispenser origin and the HTTP/browser entry points. Hosted release packaging passed on commit `9c9a09f` (2026-10-22);
-repeat against the final release candidate. The selected snapshot's source,
+The deterministic JSON serializer and verifier remain source/build-side
+adapters pending retirement of their historical migration consumers. Their
+output is not an image input. Current container checks verify the embedded
+17 reviewed objects, unresolved Mine Dispenser origin, source binding and
+HTTP/browser entry points. The selected snapshot's source,
 full-depth Include and reverse-use reviews and three-width object browser
 acceptance are complete; their evidence is in the
 [source audit](v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05).
 Repeat those reviews after source changes. Final frozen-input source-wide and
-release-matched acceptance remain v1.0 gates.
+release-matched acceptance remain separate from focused development checks.
 Do not describe these delivery origins or partial reverse uses as proof of
 complete Unit ownership, Army List legality or an exhaustive N5.3 model.
 Weapon Ammunition navigation is a reviewed *projection*, not executable Ammunition

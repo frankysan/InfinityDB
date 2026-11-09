@@ -274,6 +274,11 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert all(profile["profile_citations"] for profile in item["profiles"])
     assert not (root / "must-not-write").exists()
     assert not list((root / "data/work/build").iterdir())
+    from tools.prepare_runtime_bundle import prepare_bundle
+
+    bundle = root / "bundle"
+    assert prepare_bundle(args.db_dir, bundle) == EMBEDDED_WEAPON_RUNTIME_FILES
+    assert _digests(bundle) == first["sha256"]
     second = builder.build_database_set(args, _fake_army, root=root)
     assert second == first
 

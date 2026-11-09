@@ -63,8 +63,8 @@ provenance/state, and build outputs.
   are tracked release artifacts. The tracked development release pair now
   uses schema v10: reviewed deployed objects are embedded in `rules.db`, and
   its v2 variant publication has no separate deployed-object JSON dependency.
-  `deployed-objects.json` remains ignored and is generated only for legacy
-  v8/v9 image compatibility; the previously tagged production release is v9.
+  `deployed-objects.json` remains ignored as a build/research interchange;
+  current serving and image assembly no longer read or package it.
   Variant usage requires the paired raw archive to regenerate, so a
   tagged/deployment checkout validates the tracked JSON and its source
   fingerprints rather than regenerating it without raw inputs.

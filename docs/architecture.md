@@ -133,7 +133,7 @@ InfinityDB deliberately separates four kinds of repository data:
   is a release contract, while acquisition/build manifests are normally local generated evidence.
 - `data/generated/` contains generated artifacts. `infinity.db`, `rules.db`, `variant-usage.json`,
   and `weapon-profile-sources.json` are tracked runtime release artifacts. Current Rules embed
-  deployed objects; legacy v8/v9 images regenerate a matching deployed-object JSON for deployment.
+  deployed objects; current serving and image assembly never read a deployed-object JSON fallback.
   Other intermediate JSON and `infinity.raw.db` remain rebuildable
   development outputs.
 
