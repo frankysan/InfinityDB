@@ -1353,7 +1353,8 @@ class ApiHandler:
             cache_control = API_CACHE_CONTROL
             try:
                 payload = enrich_unit_filter_presentation(
-                    self.database.list_unit_filter_values()
+                    self.database.list_unit_filter_values(),
+                    filter_semantics=self.database.unit_filter_semantics(),
                 )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit filter values")

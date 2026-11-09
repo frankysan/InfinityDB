@@ -75,6 +75,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 or report["weaponProperties"] != 12
                 or report["equipmentPresentationEncodings"] != 2
                 or report["skillSourceClassifications"] != 6
+                or report["hiddenUnitCharacteristics"] != 2
+                or report["sourceClassificationMemberships"] != 1
             ):
                 raise ValueError("Complete build changed the reviewed source inventory")
 
@@ -189,6 +191,23 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 ROOT / "config/catalogs/skill-source-classifications.json"
             ):
                 raise ValueError("Embedded Skill source classifications differ from review")
+            from infinity_db.unit_filter_config import load_unit_filter_config
+
+            semantics = Database(destination / "infinity.db").unit_filter_semantics()
+            if semantics != load_unit_filter_config(
+                ROOT / "config/catalogs/unit-filter-semantics.json",
+            ):
+                raise ValueError("Embedded Unit filter semantics differ from review")
+            filters = _api(app, "/api/unit-filters")
+            if semantics.hidden_characteristics.intersection(
+                item["slug"] for item in filters["characteristics"]
+            ):
+                raise ValueError("Hidden source characteristics leaked into filter choices")
+            for membership in semantics.classification_memberships:
+                for slug in membership.matches:
+                    units = _api(app, f"/api/units?classification={slug}&search=MARUTS&limit=200")
+                    if "MARUTS" not in {unit["name"] for unit in units["items"]}:
+                        raise ValueError("Combined classification lost its Unit filter membership")
             baseline = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
             observed = capture(
                 app, paths=tuple(item["path"] for item in baseline["probes"]),
@@ -201,7 +220,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 f"69 citations, 6 chart rows, 33 Trait links, "
                 f"6 saving-roll modes, 16 Ammunition references, "
                 f"12 Weapon Properties, 2 Equipment encodings, "
-                f"6 Skill classifications, 41 baseline routes; "
+                f"6 Skill classifications, 2 hidden characteristics, "
+                f"1 classification membership, 41 baseline routes; "
                 f"hashes {json.dumps(report['sha256'], sort_keys=True)}",
                 flush=True,
             )
@@ -225,6 +245,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
         "weaponProperties": reports[0]["weaponProperties"],
         "equipmentPresentationEncodings": reports[0]["equipmentPresentationEncodings"],
         "skillSourceClassifications": reports[0]["skillSourceClassifications"],
+        "hiddenUnitCharacteristics": reports[0]["hiddenUnitCharacteristics"],
+        "sourceClassificationMemberships": reports[0]["sourceClassificationMemberships"],
         "rebuilds": 2,
     }
 

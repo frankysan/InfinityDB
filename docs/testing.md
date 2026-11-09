@@ -836,6 +836,33 @@ Build-set ID:
 The tracked v10 release files were untouched; Linux, Docker
 and P2.6 serving cutover remain separate acceptance gates.
 
+**2026-11-09 P2.4 eighth slice, Unit Explorer filter semantics (Windows local):**
+`tests/test_unit_filter_storage.py` passed 19/19, covering source-bound
+rows/reasons/order, paired health and compatibility, unchanged source facts,
+numeric/slug filter equivalence, combined/contextual membership, filter-choice
+HTTP parity without maintained JSON, invalid-input isolation and corrupt-data
+rejection. The related builder/set,
+Equipment/Skill storage, CLI, Skill configuration and existing database/web
+filter regressions passed another 95 tests (114 distinct focused tests total).
+Canonical Pyright reported zero errors/warnings; Ruff, documentation links/lint
+and Git whitespace checks passed.
+
+Two independent complete builds of pinned `JSON 20260929-114335.zip`
+(SHA-256 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced Army v29/compatibility 38 with Rules v17. Each passed
+73 normalization checks (116 known source warnings), selected-set integrity
+and provenance, all existing reviewed projection inventories, the two hidden
+characteristics and one ordered classification membership. Both passed all
+41 pinned P1.3 routes plus the classification/filter-values HTTP probes.
+The outputs were byte-identical: `infinity.db` SHA-256
+`5d8266ff043cb0e4efd0b8cf3d9a3ec786c92da6d27a98bfc068d2b97046923a`;
+`rules.db` SHA-256
+`aa854498cd4f0c4ef4b1f0997af9a740eb1067acf32b64c288efd64666e58ac5`.
+Build-set ID:
+`68d20bc8669a67a2cdf535b06d166c49fdfb8536aa9d3b6c3e6b6772d2171695`.
+Tracked release databases and default serving remain unchanged. This is local
+Windows opt-in acceptance; Linux, Docker and P2.6 cutover remain separate.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

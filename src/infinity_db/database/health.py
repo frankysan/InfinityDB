@@ -18,6 +18,12 @@ from infinity_db.skill_classification_storage import (
 from infinity_db.skill_classification_storage import (
     ARMY_SCHEMA_VERSION as SKILL_SCHEMA_VERSION,
 )
+from infinity_db.unit_filter_storage import (
+    ARMY_COMPATIBILITY_VERSION as FILTER_COMPATIBILITY_VERSION,
+)
+from infinity_db.unit_filter_storage import (
+    ARMY_SCHEMA_VERSION as FILTER_SCHEMA_VERSION,
+)
 
 from .paths import raw_database_path
 from .publication import validate_database_pair
@@ -83,6 +89,9 @@ def database_health_report(path: Path, *, require_raw: bool = False) -> dict[str
         elif schema_revision == SKILL_SCHEMA_VERSION:
             application["expectedSchemaRevision"] = SKILL_SCHEMA_VERSION
             application["expectedCompatibilityRevision"] = SKILL_COMPATIBILITY_VERSION
+        elif schema_revision == FILTER_SCHEMA_VERSION:
+            application["expectedSchemaRevision"] = FILTER_SCHEMA_VERSION
+            application["expectedCompatibilityRevision"] = FILTER_COMPATIBILITY_VERSION
     except (OSError, sqlite3.Error, json.JSONDecodeError, TypeError, ValueError):
         pass
 

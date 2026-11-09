@@ -20,6 +20,7 @@ from typing import Any
 from .build_provenance import validate_set_provenance
 from .database.repository import Database
 from .rules_database import RulesDatabase
+from .unit_filter_storage import ARMY_SCHEMA_VERSION as UNIT_FILTER_SCHEMA_VERSION
 from .variant_usage_reference import load_runtime_variant_usage
 from .weapon_profile_publication import load_weapon_profile_publication
 
@@ -71,6 +72,11 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     army.validate()
     encodings = army.equipment_presentation_encodings()
     classifications = army.skill_source_classifications()
+    with closing(sqlite3.connect(army_path.as_uri() + "?mode=ro", uri=True)) as connection:
+        army_version = connection.execute("PRAGMA user_version").fetchone()[0]
+    filter_semantics = (
+        army.unit_filter_semantics() if army_version >= UNIT_FILTER_SCHEMA_VERSION else None
+    )
     rules = RulesDatabase(rules_path)
     rules.validate()
     provenance = validate_set_provenance(army_path, rules_path)
@@ -143,6 +149,10 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         **({"ammunitionReferences": len(ammunition)} if ammunition is not None else {}),
         **({"weaponProperties": len(properties)} if properties is not None else {}),
         "sha256": fingerprints,
+        **({
+            "hiddenUnitCharacteristics": len(filter_semantics.hidden_characteristics),
+            "sourceClassificationMemberships": len(filter_semantics.classification_memberships),
+        } if filter_semantics is not None else {}),
     }
 
 

@@ -90,9 +90,10 @@ matched tracked release set.
 builds Army, Rules, variant usage, reviewed Weapon citations, the
 Restrictions chart, Trait Wiki links, Combined Saving Roll profiles,
 Ammunition links and reviewed Weapon Properties into one selected directory.
-Its opt-in Army v28 also embeds reviewed Cube/Cube 2.0 presentation encodings
-and six reviewed Skill source classifications. It requires the source checkout,
-a local immutable Army ZIP and its selected Army API metadata.
+Its opt-in Army v29 also embeds reviewed Cube/Cube 2.0 presentation encodings,
+six reviewed Skill source classifications and Unit Explorer filter semantics.
+It requires the source checkout, a local immutable Army ZIP and its
+selected Army API metadata.
 Omitting the source selects the
 newest local Army ZIP once; `--metadata` selects external API metadata explicitly.
 It never downloads an input or inherits the serving-only `INFINITY_DB_DB_DIR`.
@@ -106,14 +107,16 @@ the tracked v10 release retains its JSON contract.
 
 The builder uses disposable work files under ignored `data/work/build/`,
 extends the *matched* Army/raw export pair with reviewed Equipment encodings
-and Skill source classifications, validates the full runtime set and matching input provenance, then replaces only the two
+and Skill source classifications plus Unit filter semantics, validates the full
+runtime set and matching input provenance, then replaces only the two
 selected runtime filenames: `infinity.db` and `rules.db`.
 Rules v17 extends v16 with 12 reviewed Weapon Properties and exact
 profile/mode signatures. The opt-in complete builder also extends
 Army v26/compatibility 35 to v27/compatibility 36 for the two
 Equipment characteristic encodings, then v28/compatibility 37 for
-six reviewed Skill source classifications. Maintained JSON remains
-a build input, not a v28 runtime dependency. The completed
+six reviewed Skill source classifications, then v29/compatibility 38
+for Unit Explorer filter semantics. Their maintained JSON remains
+a build input rather than a v29 serving dependency. The completed
 build removes obsolete `variant-usage.json` and
 `weapon-profile-sources.json` from its selected output directory. It preserves
 unrelated files and leaves
@@ -167,10 +170,10 @@ Other intermediate files in the directory are ignored. The v10 candidate
 and Docker-bundle checks share this built-artifact validator while retaining
 their additional source-rebuild and pinned-content checks.
 
-The current two-file opt-in layout embeds Army v28 Equipment presentation
-encodings and reviewed Skill source classifications, plus Rules v17
-Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
-and Ammunition publications. Three further P2.4-maintained Army JSON
+The current two-file opt-in layout embeds Army v29 Equipment presentation
+encodings, reviewed Skill source classifications and Unit filter semantics,
+plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
+and Ammunition publications. Two further P2.4-maintained Army JSON
 datasets and symbol path mappings remain open. Older v10–v16 Rules layouts
 remain transitional compatibility. The browser
 fetches `/api/restrictions/chart`; for a pre-v13 release the endpoint
@@ -188,8 +191,10 @@ EquipmentCatalog reads Cube mappings from Army SQLite; v26
 retains its validated JSON adapter. v28 Skill source classifications
 are consumed by SkillCatalog and Unit-detail presentation from
 Army SQLite, while older snapshots use the reviewed JSON adapter.
+v29 Unit Explorer filtering and filter-choice presentation read their
+overlays from Army SQLite; earlier schemas retain the JSON adapter.
 The separate Army/raw pair remains source-identical through shared export metadata and
-the v27 checksum includes the new relational rows.
+each extended schema's checksum includes its relational rows.
 It does not verify working-tree curation/config freshness or graphical
 assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual

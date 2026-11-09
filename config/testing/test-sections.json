@@ -120,6 +120,7 @@
         "test_scenario_map_svg",
         "test_skill_config",
         "test_skill_classification_storage",
+        "test_unit_filter_storage",
         "test_silhouette_template_source_table",
         "test_ammunition_reference_storage",
         "test_army_profile_publication",

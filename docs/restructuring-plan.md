@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in Rules v13, Trait Wiki links in v14, Combined Saving Rolls in v15, Ammunition links in v16 and Weapon Properties in v17; Army v27 adds Cube presentation encodings and v28 adds six Skill source classifications. Three maintained Army JSON datasets, symbol mappings and final cutover remain unfinished.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in Rules v13, Trait Wiki links in v14, Combined Saving Rolls in v15, Ammunition links in v16 and Weapon Properties in v17; Army v27 adds Cube presentation encodings, v28 adds six Skill source classifications and v29 adds Unit Explorer filter semantics. Two maintained Army JSON datasets, symbol mappings and final cutover remain unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1663,7 +1663,23 @@ build/serve/Docker defaults remain unchanged. Focused
 parity, corruption and real-source evidence is owned by
 [testing](testing.md#selected-runtime-database-set-validation).
 
-**Remaining P2.4:** Migrate three maintained Army JSON datasets
+#### P2.4 — Eighth slice: Unit Explorer filter semantics (2026-11-09)
+
+**Status:** Opt-in complete builds extend the matched Army v28/raw
+pair to **v29/compatibility 38**, embedding the two hidden
+characteristic choices and the ordered combined-classification
+membership from `config/catalogs/unit-filter-semantics.json`.
+Source slugs, resolved characteristic/category identities, authored
+reasons and ordering remain explicit; the projection is bound to
+the input digest, Army export generation and published checksum.
+Unit filtering and the filter-values API consume this SQLite
+projection without opening maintained JSON. Original source facts
+and numeric/slug filter behavior are preserved. The data model
+owns storage details; [testing](testing.md#selected-runtime-database-set-validation)
+owns focused and pinned-source acceptance. Earlier schemas retain
+their validated JSON adapter until the deliberate serving cutover.
+
+**Remaining P2.4:** Migrate two maintained Army JSON datasets
 and runtime symbol path mappings identified in P1.4.
 The historical JSON adapters remain only while independently
 needed for release/research/presentation consumption;
@@ -1750,7 +1766,7 @@ flowchart TD
     p5 --> p6
 ```
 
-**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has complete-build foundations and P2.2 has embedded variant usage. P2.3 is next; remaining SQLite-only facts, final names/defaults and unified serving remain unfinished. Independent P4 copy work need not block on the database migration.
+**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has complete-build foundations, P2.2 embeds variant usage and P2.3 embeds reviewed Weapon citations. Continue P2.4 with Army overview, legacy Army identities and symbol mappings; final names/defaults and unified serving remain unfinished. Independent P4 copy work need not block on the database migration.
 
 ## Questions to settle during discovery (not reasons to stop planning)
 

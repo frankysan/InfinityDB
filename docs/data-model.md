@@ -2888,6 +2888,31 @@ validated JSON adapter. The API continues to show the original
 training/equipment/attribute/source-marker classifications and
 preserves exact source Skill identity semantics.
 
+### Unit Explorer filter semantics in Army v29 (P2.4 opt-in)
+
+The opt-in complete build extends the matched Army v28/raw pair to
+**v29/compatibility 38** using the editable
+`config/catalogs/unit-filter-semantics.json` build input.
+`hidden_unit_characteristics` retains the two normalized slugs,
+source characteristic IDs, authored reasons and source ordering.
+`source_classification_memberships` retains the combined source
+classification, category ID, order and reason; ordered child rows
+in `source_classification_matches` retain each component filter
+slug and category ID. Foreign keys and the shared filter-vocabulary
+slug resolver reject missing, ambiguous or drifted source identities.
+These overlays do not rewrite source characteristics or categories.
+
+`unit_filter_metadata` binds source digest, format/version,
+Army export generation, row counts and full content fingerprint.
+The v29 published-content checksum covers all four tables and
+both export siblings retain matching compatibility/checksum metadata.
+Repository classification filtering and `/api/unit-filters`
+presentation use the selected SQLite projection. Numeric/slug
+compatibility, hidden choices, combined membership and contextual
+numeric filtering retain their existing results. Corrupt v29 data
+fails closed; earlier schemas and source-only presentation tools
+retain the validated maintained-JSON adapter.
+
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
 **Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**

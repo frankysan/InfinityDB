@@ -30,6 +30,7 @@ from .equipment_presentation_storage import publish_equipment_encodings
 from .rules_database import export_rules_database
 from .skill_classification_storage import publish_skill_classifications
 from .trait_wiki_references import load_trait_wiki_references
+from .unit_filter_storage import publish_unit_filter_semantics
 from .variant_usage import build_variant_usage_projection
 from .variant_usage_reference import publication_from_candidate
 from .weapon_ammunition_references import load_ammunition_reference_map
@@ -182,6 +183,11 @@ def build_database_set(
             stage / "infinity.db",
             stage / "infinity.raw.db",
             root / "config/catalogs/skill-source-classifications.json",
+        )
+        publish_unit_filter_semantics(
+            stage / "infinity.db",
+            stage / "infinity.raw.db",
+            root / "config/catalogs/unit-filter-semantics.json",
         )
         _build_rules_and_publications(stage, root, manifest)
         result = validate_database_set(stage)

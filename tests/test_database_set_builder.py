@@ -58,6 +58,7 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         "src/infinity_db/web/static/restrictions-reference.json",
         "config/catalogs/equipment-presentation-encodings.json",
         "config/catalogs/skill-source-classifications.json",
+        "config/catalogs/unit-filter-semantics.json",
         "tools/build_weapon_profile_publication.py", "tools/audit_enrichment_coverage.py",
         "tools/audit_weapon_definition_gaps.py",
     ):
@@ -71,6 +72,10 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
     shutil.copyfile(
         RELEASE.parent.parent / "config/catalogs/skill-source-classifications.json",
         root / "config/catalogs/skill-source-classifications.json",
+    )
+    shutil.copyfile(
+        RELEASE.parent.parent / "config/catalogs/unit-filter-semantics.json",
+        root / "config/catalogs/unit-filter-semantics.json",
     )
     source = root / "army.zip"
     with zipfile.ZipFile(source, "w") as archive:

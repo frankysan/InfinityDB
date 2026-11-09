@@ -34,9 +34,10 @@ when all contained work shares the same owner.
   citations, the Restrictions chart, Trait Wiki links, Combined Saving
   Roll annotations, Ammunition links and 12 reviewed Weapon Properties
   in Rules v17, plus two Cube characteristic encodings and six
-  reviewed Skill source classifications in Army v28.
+  reviewed Skill source classifications and Unit Explorer filter semantics
+  in Army v29.
   The opt-in two-file set has local source-build and API parity checks;
-  migrate P2.4's remaining three maintained Army JSON datasets and
+  migrate P2.4's remaining two maintained Army JSON datasets and
   symbol path mappings.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving

@@ -906,15 +906,26 @@ class Database:
                 ARMY_V28_PUBLISHED_TABLES,
                 read_skill_classifications,
             )
+            from infinity_db.unit_filter_storage import (
+                ARMY_COMPATIBILITY_VERSION as FILTER_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.unit_filter_storage import (
+                ARMY_SCHEMA_VERSION as FILTER_SCHEMA_VERSION,
+            )
+            from infinity_db.unit_filter_storage import (
+                ARMY_V29_PUBLISHED_TABLES,
+                read_unit_filter_semantics,
+            )
 
             if application_id != APPLICATION_ID or version not in {
-                SCHEMA_VERSION, ARMY_SCHEMA_VERSION, SKILL_SCHEMA_VERSION,
+                SCHEMA_VERSION, ARMY_SCHEMA_VERSION, SKILL_SCHEMA_VERSION, FILTER_SCHEMA_VERSION,
             }:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
             if source_consistency and version != SCHEMA_VERSION:
                 raise ValueError("Source consistency requires the base Army export schema")
             required_tables = (
                 DATABASE_TABLES if source_consistency else
+                ARMY_V29_PUBLISHED_TABLES if version == FILTER_SCHEMA_VERSION else
                 ARMY_V28_PUBLISHED_TABLES if version == SKILL_SCHEMA_VERSION else
                 ARMY_V27_PUBLISHED_TABLES if version == ARMY_SCHEMA_VERSION else
                 PUBLISHED_DATABASE_TABLES
@@ -949,7 +960,8 @@ class Database:
             except (json.JSONDecodeError, TypeError) as exc:
                 raise ValueError("Database has invalid compatibility metadata") from exc
             expected_compatibility = (
-                SKILL_COMPATIBILITY_VERSION if version == SKILL_SCHEMA_VERSION
+                FILTER_COMPATIBILITY_VERSION if version == FILTER_SCHEMA_VERSION
+                else SKILL_COMPATIBILITY_VERSION if version == SKILL_SCHEMA_VERSION
                 else ARMY_COMPATIBILITY_VERSION if version == ARMY_SCHEMA_VERSION
                 else DATABASE_COMPATIBILITY_VERSION
             )
@@ -962,6 +974,8 @@ class Database:
                 read_equipment_encodings(connection)
             if version >= SKILL_SCHEMA_VERSION:
                 read_skill_classifications(connection)
+            if version >= FILTER_SCHEMA_VERSION:
+                read_unit_filter_semantics(connection)
             identity_config = identity_config_from_connection(connection)
             validate_application_army_integrity(connection)
             validate_application_fireteam_integrity(connection)
@@ -1134,6 +1148,18 @@ class Database:
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Database contains broken foreign keys")
+
+    def unit_filter_semantics(self):
+        """Read v29 overlays from SQLite; earlier exports use the validated JSON adapter."""
+        from infinity_db.unit_filter_storage import (
+            ARMY_SCHEMA_VERSION,
+            read_unit_filter_semantics,
+        )
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] >= ARMY_SCHEMA_VERSION:
+                return read_unit_filter_semantics(connection)
+        return load_unit_filter_config()
 
     def skill_source_classifications(self):
         """Read v28 reviewed Army source classifications without a maintained JSON file."""
@@ -2219,7 +2245,7 @@ class Database:
         by_slug = {str(item["slug"]): item for item in items}
         selected = by_id[item_id]
         source_ids = {item_id}
-        for membership in load_unit_filter_config().classification_memberships:
+        for membership in self.unit_filter_semantics().classification_memberships:
             if selected["slug"] not in membership.matches:
                 continue
             source = by_slug.get(membership.source_classification)
