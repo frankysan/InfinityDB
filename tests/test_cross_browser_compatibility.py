@@ -90,6 +90,9 @@ def browser() -> Iterator[Any]:
 def _exercise(page: Any, origin: str, journey: str) -> None:
     if journey == "navigation":
         page.goto(f"{origin}/", wait_until="domcontentloaded")
+        # DOMContentLoaded can precede registration of the module-based
+        # soft-navigation handler on a cold browser startup.
+        page.wait_for_function("() => typeof window.infinityNavigate === 'function'")
         page.locator("main a[href='/units']").first.press("Enter")
         page.wait_for_url(f"{origin}/units")
         page.wait_for_function(
