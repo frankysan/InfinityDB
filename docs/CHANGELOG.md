@@ -19,16 +19,16 @@ are not retroactively relabeled.
 - **Data processing + Project infrastructure:** Added `database-health --db-dir`
   to inspect a complete runtime directory offline, including SQLite integrity,
   source-matched references and file fingerprints. Missing or mismatched data
-  produced an unhealthy report without changing the selected files.
+  produce an unhealthy report without changing the selected files.
 - **Data processing + Project infrastructure:** Added an offline complete-runtime
   build with `build --db-dir`, using a selected local Army archive and maintained
-  references. Recorded shared input provenance, validated all outputs before
-  replacing the selected files, and retained existing outputs when generation
-  or validation failed.
+  references. The build records shared input provenance, validates all outputs
+  before replacing the selected files, and retains existing outputs when
+  generation or validation fails.
 - **Data processing + Web backend + Deployment:** Embedded exact reviewed
   Skill/Equipment occurrences in Rules for complete runtime builds, removing
   the variant-usage JSON requirement while preserving group counts, source
-  contexts and browser links. Rejected damaged or mismatched embedded data.
+  contexts and browser links. Damaged or mismatched embedded data is rejected.
 
 ### Changed
 
@@ -51,36 +51,36 @@ are not retroactively relabeled.
 ### Added
 
 - **Deployment:** Added a disposable Docker image preview for staged or tracked runtime
-  artifacts. It checked packaged data, startup health and reference APIs, then cleaned up
+  artifacts. It checks packaged data, startup health and reference APIs, then cleans up
   the preview container and image without replacing the deployed service.
 
 ### Changed
 
 - **Web backend + Web frontend:** Added version-specific headings for upcoming release notes,
   showing the target version and Unreleased status without a release date.
-- **Web backend + Web frontend:** Kept scenario maps as ordinary images that could be
-  saved directly. Embedded the selected theme palette in each standalone SVG and updated
-  the map when display preferences changed.
+- **Web backend + Web frontend:** Kept scenario maps as ordinary images that can be
+  saved directly. Each standalone SVG embeds the selected theme palette, and the map
+  updates when display preferences change.
 - **Data processing + Web backend:** Made `build-rules` write current Rules to
   `local/rules-standalone.db` and prepare a complete local runtime for `serve` by default.
-  Explicit `--output` selected a standalone Rules-only build; `--legacy-v8` and `--legacy-v9`
-  retained older formats. Direct writes to the tracked release Rules database were rejected.
+  Explicit `--output` selects a standalone Rules-only build; `--legacy-v8` and `--legacy-v9`
+  retain older formats. Direct writes to the tracked release Rules database are rejected.
 
 ### Fixed
 
 - **Data processing + Web frontend:** Completed ITS Season 18 Battleground maps at every
   supported game size with Deployment Zone A/B labels, the table center line, Sector scoring
   for both players and depth measurements for both Deployment Zones and all three Sectors.
-  Measurements followed the selected inches/centimeters preference.
+  Measurements follow the selected inches/centimeters preference.
 - **Web frontend:** Added vertical spacing between Orders & AROs declaration controls,
   the optional scenario card and the following reference cards.
 - **Data processing + Web backend + Deployment:** Restored the
   `build --compact` → `build-rules` → `serve` checkout workflow, using
   up-to-date local Rules, exact-variant data and Weapon citations without
-  requiring Docker release publication. Docker continued to use only
-  verified, matched release artifacts. `serve` selected the verified local runtime when
-  present and reported incomplete or stale builds with instructions to rebuild. A checkout
-  without a local runtime used the tracked release data; an explicit `--database` bypassed
+  requiring Docker release publication. Docker uses only verified, matched release
+  artifacts. `serve` selects the verified local runtime when present and reports
+  incomplete or stale builds with instructions to rebuild. A checkout
+  without a local runtime uses the tracked release data; an explicit `--database` bypasses
   automatic selection.
 - **Data processing + Deployment:** Promoted the verified v10 Rules database
   and matching variant/Weapon publications together, retaining existing
@@ -93,24 +93,24 @@ are not retroactively relabeled.
   comparisons to read embedded objects without requiring a legacy JSON file.
 - **Web frontend:** Fixed keyboard navigation between Army overview cards and
   Back/Forward through their fragment links. Kept the existing page in place so
-  focus stayed on the linked card instead of racing a page reload.
+  focus stays on the linked card instead of racing a page reload.
 - **Deployment + Project infrastructure:** Fixed deployment file permissions after saving
   private installer settings. Kept the settings file restricted to its owner without
   applying that restriction to subsequent checkout files, and ensured the metrics-history
-  helper remained readable by its service user. Preserved fingerprinted SVG bytes across
+  helper remains readable by its service user. Preserved fingerprinted SVG bytes across
   checkouts to avoid line-ending changes invalidating release verification.
 
 ### Upgrade notes
 
 - **Deployment:** Changed direct Docker builds to require a prepared runtime bundle under
-  `data/runtime/`, created with `python -m tools.prepare_runtime_bundle`; `deploy.sh` handled
-  this preparation automatically. Current Rules stored deployed objects in the database,
-  while legacy images retained their separate JSON file. Deployment required the matched
+  `data/runtime/`, created with `python -m tools.prepare_runtime_bundle`; `deploy.sh` handles
+  this preparation automatically. Current Rules store deployed objects in the database,
+  while legacy images retain their separate JSON file. Deployment requires the matched
   Army/Rules databases and variant/Weapon publications for the selected release.
-- **Data processing + Web backend:** Preparing the automatic checkout runtime required
-  `build --compact` before `build-rules` so the paired raw Army data was available for
+- **Data processing + Web backend:** Preparing the automatic checkout runtime requires
+  `build --compact` before `build-rules` so the paired raw Army data is available for
   exact-variant references.
-  An existing stale local runtime required rebuilding before `serve` could use it.
+  An existing stale local runtime requires rebuilding before `serve` can use it.
 
 ## [1.0.0] - 2026-11-07
 
@@ -191,14 +191,14 @@ are not retroactively relabeled.
   reviewed delivery sources to their carrying Unit profiles and loadouts where established.
 - **Data processing + Web backend + Web frontend:** Added 29 dated FAQ clarifications beside
   the Equipment, Scenarios, Skills, Traits, States, General Rules, Hacking Programs and
-  Fireteams they affected. Linked current English/Spanish answers and retained the original
+  Fireteams they affect. Linked current English/Spanish answers and retained the original
   FAQ version where applicable. Added a General Deployment repositioning reference and
   identified the Ancillary scoring answer's Annihilation-only scope as InfinityDB's reviewed
   interpretation, with the source ambiguity disclosed.
 - **Data processing + Web backend + Web frontend:** Added a Specialist Troops reference and
   a Unit Explorer filter with InfinityDB Standard, Domination, Supplies and Firefight choices.
-  Results identified candidate Units for the selected context without implying that every
-  profile qualified.
+  Results identify candidate Units for the selected context without implying that every
+  profile qualifies.
 - **Data processing + Web backend + Web frontend:** Added optional Reinforcements Extra,
   Commlink and Request Reinforcements references, with links to Reinforcement Section pools,
   their owning Armies and filtered Unit Explorer views. Marked the procedures as **N4-origin**
@@ -247,8 +247,8 @@ are not retroactively relabeled.
   and the Ancillary-specific Disconnected exception.
 - **Data processing + Web frontend:** Added separate ECM: Guided and ECM: Hacker explanation
   cards with their attack scope and citations. Distinguished cited, reference-only Equipment
-  combinations from options present in current Army data, without implying that a Unit had
-  those combinations or that a family citation verified every named variant.
+  combinations from options present in current Army data, without implying that a Unit has
+  those combinations or that a family citation verifies every named variant.
 - **Data processing + Web backend + Web frontend:** Made known source disagreements visible
   beside the affected rules and retained imported Army values. Explained disputes over
   Weapon profiles and Saving Rolls, Mine/Dazer and Armed Turret Silhouettes, Dodge (ARM+3),
@@ -283,7 +283,7 @@ are not retroactively relabeled.
 - **Data processing + Web backend + Web frontend:** Corrected Doctor (2W) to remove
   **up to two Wounds**. Clarified an Isolated Lieutenant's next-Active-Turn Loss of Lieutenant
   trigger and the difference between clearing Isolated before that turn and after the
-  army-level situation had begun.
+  army-level situation has begun.
 - **Data processing + Web frontend:** Clarified Ammunition, Critical and Immunity exceptions,
   including PARA with missing PH, Shock's VITA condition, T2's additional Critical roll and
   Stun/Guts. Separated Smoke/Eclipse opposition, Visor interactions, Dodge, template retention,
@@ -307,7 +307,7 @@ are not retroactively relabeled.
 - **Data processing + Web backend + Web frontend:** Put Equipment imported in Army's Skill
   category, Regular Training and loadout Attribute overrides in their proper Unit categories.
   Removed nonexistent Skill links created by source-only markers. Explained how dashed
-  Attributes limited declarations and use, and retained SWC's support-weapon meaning.
+  Attributes limit declarations and use, and retained SWC's support-weapon meaning.
 - **Data processing + Web backend:** Restored fourteen source-scoped Restrictions in the
   shipped rules data and the Restrictions API without changing reviewed deployed-object
   profiles or existing relationships.
@@ -322,12 +322,12 @@ are not retroactively relabeled.
 
 ### Upgrade notes
 
-- **Deployment:** Required the complete release image with matched Army/rules databases,
+- **Deployment:** This release requires the complete image with matched Army/rules databases,
   deployed-object, variant-usage and Weapon-profile publications, and graphical assets.
   Mixing artifacts from different releases or rebuilding source data on the production
-  server remained unsupported.
-- **Data processing:** Required local installations maintaining generated data to use the
-  release's curated inputs and guarded v9 rules/publication workflow. Migration required
+  server remains unsupported.
+- **Data processing:** Local installations maintaining generated data require the
+  release's curated inputs and guarded v9 rules/publication workflow. Migration requires
   retaining original upstream snapshots and recovery copies.
 
 ## [0.10.1] - 2026-10-10
