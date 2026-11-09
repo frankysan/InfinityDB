@@ -2627,10 +2627,11 @@ source-only manifest at
 `config/validation/restrictions-source-chart.json`. Its six ordered
 subjects and 14 negative conditions are projected reproducibly to
 `src/infinity_db/web/static/restrictions-reference.json` by
-`tools.audit_restrictions_source_chart`. The packaged JSON is the
-runtime read model for the dedicated
-[General Rules Restrictions chart](/rules/restrictions); the browser
-does not inspect maintained configuration or infer rules semantics.
+`tools.audit_restrictions_source_chart`. The packaged JSON remains the tracked v10 source publication. The
+browser now fetches `GET /api/restrictions/chart`: pre-v13 servers return
+that exact packaged chart, while opt-in Rules v13 servers project the
+same response from relational SQLite. Neither path reads maintained
+configuration while serving nor infers action legality.
 
 Each condition retains a source action and scope, player-readable
 description, optional exact destination link and original
@@ -2687,6 +2688,31 @@ edges retain source-qualified display labels. No unsupported
 generic edge, Troop Type record or ladder Skill was added, and no
 Unit/profile permissions are inferred.
 
+### Embedded chart projection in Rules v13 (P2.4 opt-in)
+
+Rules v13/compatibility 15 embeds the source-reviewed educational chart
+in ordered `restriction_chart_rows` and
+`restriction_chart_conditions` tables, with a separate ordered
+`restriction_chart_qualifiers` key/value table and
+`restriction_chart_metadata` record for the current primary PDF
+and deterministic payload fingerprint. The build checks that every
+chart condition corresponds exactly to one of the 14 stored normalized
+`restriction_constraints` by source subject/action, scope, target,
+operation and qualifiers; it validates source PDF identity, URL, page
+and SHA. The two models intentionally remain separate: display labels,
+source order, qualified explanations and navigation are not rules
+evaluation semantics.
+
+`RulesDatabase.restriction_chart_payload()` and
+`GET /api/restrictions/chart` reconstruct the former JSON read model
+without a runtime file read in v13. Invalid/missing relational rows,
+provenance or fingerprints fail closed. The old static JSON asset and
+pre-v13 packaged-data fallback remain only for the currently released
+v10 layout until the coordinated P2.6 cutover. The standard
+`/api/restrictions` contract and absence-of-legality guarantee remain
+unchanged. This P2.4 slice does not implement the remaining Army/Rules
+policy, symbol and source-link migrations.
+
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
 **Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**
@@ -2714,16 +2740,18 @@ v8/compatibility-10 database, the endpoint returns
 fabricating a complete restriction set from generic relations.
 On v9/compatibility-11, it reads only the materialized table, with
 `available: true`. Zero matches never establishes legality.
-The **current browser still consumes the static Restrictions
-publication**; it does not require the new endpoint.
+The browser now uses the distinct `/api/restrictions/chart` endpoint
+for the six-row reference; this `/api/restrictions` endpoint continues
+to expose fourteen normalized conditions separately.
 
 `RulesDatabase.validate()` accepts the exact schema / compatibility pairs
-**(8, 10)**, **(9, 11)**, and **(10, 12)**. The prepared 1.0.1 release uses
-the tracked v10/compatibility-12 artifact. For v9 and v10,
-it validates the fourteen Restrictions constraints, negative polarity,
-qualifiers, and provenance. v10 additionally verifies normalized
-deployed-object structures, source-review fingerprints and foreign-key
-integrity. Invalid combinations fail closed.
+**(8, 10)**, **(9, 11)**, **(10, 12)**, **(11, 13)**,
+**(12, 14)** and **(13, 15)**. The tracked 1.0.1 release remains
+v10/compatibility-12. From v9 onward the validator checks fourteen
+Restrictions constraints, negative polarity, qualifiers and provenance;
+v10 adds normalized deployed objects, v11 embedded exact variant
+usage, v12 reviewed Weapon citations and v13 the relational chart.
+Invalid combinations, missing rows and corrupted provenance fail closed.
 
 Shared release staging preserves the active supported schema. For v10 it
 rebuilds the reviewed embedded object model from the pinned Army and curated

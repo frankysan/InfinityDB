@@ -21,6 +21,7 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.weapon_profile_publication import load_weapon_profile_publication
 from infinity_db.web import create_app
 from tools.browser_wsgi_transport import wsgi_response
+from tools.runtime_semantic_baseline import DEFAULT_BASELINE, capture, check
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://database-set-acceptance.test"
@@ -60,11 +61,14 @@ def verify(source: Path, expected_sha256: str) -> dict:
             )
             result = build_database_set(args, _build_army)
             report = validate_database_set(destination)
-            if report != result or report["layout"] != "v12-two-file":
+            if report != result or report["layout"] != "v13-two-file":
                 raise ValueError("Complete-build database health disagrees with publication")
             if set(report["sha256"]) != {"infinity.db", "rules.db"}:
                 raise ValueError("Complete build produced an unexpected runtime file set")
-            if report["variantGroups"] != 151 or report["reviewedWeapons"] != 62:
+            inventory = (
+                report["variantGroups"], report["reviewedWeapons"], report["restrictionChartRows"],
+            )
+            if inventory != (151, 62, 6):
                 raise ValueError("Complete build changed the reviewed source inventory")
 
             citations = RulesDatabase(
@@ -83,10 +87,25 @@ def verify(source: Path, expected_sha256: str) -> dict:
             variant = _api(app, "/api/variant-usage?record_id=skill:tagcom")
             if not variant.get("items"):
                 raise ValueError("Embedded exact variant usage is absent from the HTTP API")
+            chart = _api(app, "/api/restrictions/chart")
+            expected_chart = json.loads(
+                (ROOT / "src/infinity_db/web/static/restrictions-reference.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            if chart != expected_chart:
+                raise ValueError("Embedded Restrictions chart differs from source publication")
+            baseline = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
+            observed = capture(
+                app, paths=tuple(item["path"] for item in baseline["probes"]),
+            )
+            if check(baseline, observed) != len(baseline["probes"]):
+                raise ValueError("Runtime semantic baseline is incomplete")
             reports.append(report)
             print(
-                f"Complete build {attempt}: v12 healthy, 62 Weapons, "
-                f"69 citation rows; hashes {json.dumps(report['sha256'], sort_keys=True)}",
+                f"Complete build {attempt}: v13 healthy, 62 Weapons, "
+                f"69 citation rows, 6 chart rows, 41 baseline routes; "
+                f"hashes {json.dumps(report['sha256'], sort_keys=True)}",
                 flush=True,
             )
         if reports[0]["sha256"] != reports[1]["sha256"]:
@@ -102,6 +121,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
         "sha256": reports[0]["sha256"],
         "reviewedWeapons": reports[0]["reviewedWeapons"],
         "variantGroups": reports[0]["variantGroups"],
+        "restrictionChartRows": reports[0]["restrictionChartRows"],
         "rebuilds": 2,
     }
 

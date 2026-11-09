@@ -775,7 +775,7 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                     assert page.locator(".restrictions-context").count() == 0
                     if width == 320:
                         page.route(
-                            "**/static/restrictions-reference.json",
+                            "**/api/restrictions/chart",
                             lambda route: route.fulfill(
                                 status=503, content_type="application/json",
                                 body='{"error":"Controlled source failure"}',

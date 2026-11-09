@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 import sqlite3
 from http import HTTPStatus
+from importlib.resources import files
 from typing import Any, Literal
 from urllib.parse import parse_qs
 
@@ -579,6 +581,34 @@ class ApiHandler:
                 LOGGER.exception("Could not project scoped Orders/AROs")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The Orders/AROs reference is unavailable."}
+        elif path == "/api/restrictions/chart":
+            cache_control = API_CACHE_CONTROL
+            try:
+                _validated_query_params(query_string, {"cache_bust"})
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                if self.rules_database is not None:
+                    embedded_chart = self.rules_database.restriction_chart_payload()
+                else:
+                    embedded_chart = None
+                if embedded_chart is not None:
+                    payload = embedded_chart
+                else:
+                    # Only pre-v13 releases still use their packaged static
+                    # chart; v13 reads exclusively from Rules SQLite.
+                    payload = json.loads(
+                        files("infinity_db.web").joinpath(
+                            "static", "restrictions-reference.json",
+                        ).read_text(encoding="utf-8")
+                    )
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Restrictions chart")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "Restrictions chart is unavailable."}
         elif path == "/api/restrictions":
             cache_control = API_CACHE_CONTROL
             try:

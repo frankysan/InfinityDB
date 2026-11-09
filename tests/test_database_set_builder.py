@@ -31,6 +31,7 @@ from infinity_db.database_set import (
     V10_RUNTIME_FILES,
     validate_database_set,
 )
+from infinity_db.restriction_chart_storage import stage_restriction_chart
 from infinity_db.sqlite_determinism import normalize_sqlite_header, vacuum_deterministic_sqlite
 from infinity_db.variant_usage_storage import stage_variant_usage
 from infinity_db.weapon_profile_storage import stage_weapon_profile_citations
@@ -117,9 +118,14 @@ def _fake_rules(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
         document["sourceSnapshot"]["armyDatabaseSha256"] = file_sha256(army)
         stage_weapon_profile_citations(connection, document, army)
         connection.execute("PRAGMA user_version=12")
-        connection.execute("UPDATE __rules_metadata SET value='12' WHERE key='formatVersion'")
+        stage_restriction_chart(connection, json.loads(
+            (RELEASE.parent.parent /
+             "src/infinity_db/web/static/restrictions-reference.json").read_text(encoding="utf-8")
+        ))
+        connection.execute("PRAGMA user_version=13")
+        connection.execute("UPDATE __rules_metadata SET value='13' WHERE key='formatVersion'")
         connection.execute(
-            "UPDATE __rules_metadata SET value='14' WHERE key='databaseCompatibilityVersion'"
+            "UPDATE __rules_metadata SET value='15' WHERE key='databaseCompatibilityVersion'"
         )
     _update_metadata(rules, {
         BUILD_PROVENANCE_KEY: build_record(manifest, "rules-n5", army_generation=generation),
@@ -173,7 +179,8 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     (args.db_dir / "weapon-profile-sources.json").write_bytes(b"obsolete publication")
     first = builder.build_database_set(args, _fake_army, root=root)
     assert first["buildProvenance"]["status"] == "matched"
-    assert first["layout"] == "v12-two-file"
+    assert first["layout"] == "v13-two-file"
+    assert first["restrictionChartRows"] == 6
     assert first["reviewedWeapons"] == 62
     assert validate_database_set(args.db_dir)["sha256"] == first["sha256"]
     assert set(_digests(args.db_dir)) == {*EMBEDDED_WEAPON_RUNTIME_FILES, "keep.txt"}

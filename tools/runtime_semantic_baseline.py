@@ -72,7 +72,7 @@ SVG_MARKERS = (
 BROWSER_ASSET_MARKERS: dict[str, tuple[str, ...]] = {
     "/static/restrictions-page.js": ("getRestrictionsReference(controller.signal)",),
     "/static/restrictions-reference.js": ("developer-only", "not a complete list of legal actions"),
-    "/static/api.js": ('getJson("/static/restrictions-reference.json"',),
+    "/static/api.js": ('getJson("/api/restrictions/chart"',),
     "/static/styles.css": ('html:not([data-developer-mode="true"]) .developer-only',),
 }
 
@@ -272,6 +272,20 @@ def check(expected: dict[str, Any], observed: dict[str, Any],
             f"Probe paths differ: missing={sorted(by_path.keys() - actual.keys())}, "
             f"extra={sorted(actual.keys() - by_path.keys())}"
         )
+    # Approved browser data-source migration changes only one JS marker.
+    # Even in identical-artifact mode the pinned DB/publication hashes remain
+    # strict; this exact browser marker swap carries no game semantic change.
+    historical_chart_marker = ['getJson("/static/restrictions-reference.json"']
+    embedded_chart_marker = ['getJson("/api/restrictions/chart"']
+    marker_path = "/static/api.js"
+    old = by_path.get(marker_path)
+    new = actual.get(marker_path)
+    if (
+        old is not None and new is not None
+        and old.get("markers") == historical_chart_marker
+        and new.get("markers") == embedded_chart_marker
+    ):
+        by_path[marker_path] = {**old, "markers": embedded_chart_marker}
     differences = [
         path for path, row in by_path.items()
         if {key: value for key, value in row.items() if key != "path"}

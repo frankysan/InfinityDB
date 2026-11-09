@@ -88,7 +88,7 @@ export function getGlossary(signal) {
 }
 
 export function getRestrictionsReference(signal) {
-  return getJson("/static/restrictions-reference.json", signal);
+  return getJson("/api/restrictions/chart", signal);
 }
 
 export function getScenarios(signal, { collection = "", revision = "" } = {}) {

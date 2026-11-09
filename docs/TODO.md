@@ -81,11 +81,13 @@ only when required to fix correctness, reproducibility, or release reliability.
   P0 workflow simplification and P1 dependency/tool discovery are complete;
   current-format shared validation and opt-in offline complete builds with
   input provenance are available in the [data lifecycle](../data/README.md).
-  Complete builds now embed variant usage and reviewed Weapon-profile citations
-  in Rules v12, publishing a two-file SQLite set. P2.3's independent build
-  validation and real-source reproducibility are complete on Windows; continue
-  with P2.4's remaining runtime facts. Final default/serving integration and
-  platform acceptance remain under P2.6–P2.8. Keep current serving
+  Complete builds embed exact variant usage, reviewed Weapon-profile
+  citations and (P2.4's first slice) the six-row Restrictions chart
+  in Rules v13, publishing a two-file SQLite set. Local real-source
+  reproducibility and chart/browser parity pass on Windows; migrate
+  P2.4's remaining maintained Army/Rules facts and symbol path mappings.
+  Final default/serving integration and platform acceptance remain under
+  P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;
   do not copy its complete roadmap into a second task ledger.
 

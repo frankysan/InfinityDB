@@ -110,9 +110,14 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
     weapons = build_publication(
         army, rules, root / "data/curated/weapon-shared-effect-reviews.json",
     )
+    chart = json.loads(
+        (root / "src/infinity_db/web/static/restrictions-reference.json").read_text(
+            encoding="utf-8"
+        )
+    )
     export_rules_database(
         documents, rules, variant_usage=variants, weapon_citations=weapons,
-        army_database=army, **export_options,
+        restriction_chart=chart, army_database=army, **export_options,
     )
 
 

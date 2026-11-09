@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0 and P1 completed (P1.4–P1.5 are target designs, not implemented schemas/paths). P2.1 has shared validation, opt-in complete builds and input provenance; P2.2 embeds exact variant usage in Rules v11; P2.3 has completed reviewed Weapon-profile citations in Rules v12, including audit-helper extraction and local real-source reproducibility. Continue with P2.4 runtime facts; final defaults and serving integration remain unfinished.
+**Status:** Active on `dev/v1.1.0`: P0 and P1 completed (P1.4–P1.5 are target designs, not implemented schemas/paths). P2.1 has shared validation, opt-in complete builds and input provenance; P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon-profile citations in Rules v12, including audit-helper extraction and local real-source reproducibility. The first P2.4 slice embeds the source-reviewed Restrictions chart in Rules v13; remaining P2.4 facts and final defaults/serving integration are unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1484,6 +1484,45 @@ Linux, Docker and hosted acceptance. The verifier's comparison to tracked v10
 JSON is migration-specific: retire or replace it once that historical artifact
 has no independent purpose. Do not retain the sidecar solely to keep a test
 or diagnostic running. P2.4 is next.
+
+#### P2.4 — First slice: relational Restrictions chart (2026-11-09)
+
+**Status:** Partial. Opt-in complete builds now emit Rules v13
+(compatibility 15) with relational `restriction_chart_metadata`,
+`restriction_chart_rows`, `restriction_chart_conditions` and ordered
+`restriction_chart_qualifiers`. The six source-ordered educational chart
+rows retain category, subject kind, linked owner, player-facing labels,
+links, scope and notes. All 14 chart conditions are checked against the
+existing **separate** `restriction_constraints` and the pinned current
+primary N5.3 PDF identity, page and SHA; the chart is not a new action
+legality evaluator. Its deterministic fingerprint and row count fail
+closed on corruption or incomplete publication.
+
+The browser's `getRestrictionsReference` now requests
+`/api/restrictions/chart`. Rules v13 reads chart facts solely from
+SQLite, with the original JSON response semantics; pre-v13 releases
+retain their packaged-JSON compatibility path until P2.6. The old
+`/static/restrictions-reference.json` remains available during this
+transition for historical route checks and existing v10 consumers.
+A narrowly scoped browser-fetch marker change is allowed against the
+P1.3 semantic baseline; the pinned source, API, asset availability and
+geometry checks remain otherwise strict. The tracked release files
+and normal `build`/`build-rules`/`serve`/Docker defaults remain unchanged.
+
+The real immutable Army source ZIP was built **twice** on Windows into
+temporary independent v13 two-file sets with byte-identical hashes;
+both passed database-set health, source/Rules/Army provenance, 151
+variant groups, 62 reviewed Weapons/69 chart citations, six Restrictions
+chart rows and matching HTTP chart content. Focused relational,
+compatibility, browser and failure-path tests are recorded in
+[testing](testing.md#selected-runtime-database-set-validation).
+This is local P2.4 evidence, not Linux/Docker/hosted acceptance.
+
+**Remaining P2.4:** Migrate the nine maintained Army/Rules datasets and
+symbol path mappings identified in P1.4. Retain v10/v11/v12 adapters only
+while independent runtime/build/research consumers need them; their
+historical tests alone do not justify preserving old build machinery.
+The final naming, serving and Docker cutover belongs to P2.6.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

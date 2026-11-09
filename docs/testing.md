@@ -604,6 +604,37 @@ The historical citation builder and new maintained builder produced identical
 tracked publication bytes. These are Windows local checks, not cross-platform
 byte reproducibility, Docker, browser or hosted CI acceptance.
 
+**2026-11-09 P2.4 first slice, Restrictions chart (Windows local):**
+`tests/test_restriction_chart_storage.py` validates all six chart rows and
+14 separately normalized constraints, 4 ordered typed qualifiers, current
+source metadata, original JSON semantics and HTTP responses, v10 compatibility,
+absent/modified chart failure and no packaged-JSON reads for v13. The
+`tests/test_game_mode_source_table.py` browser checks exercise the
+new chart API at three viewport widths, including a simulated 503.
+The pinned `tests/test_runtime_semantic_baseline.py` continues to check
+original v10 artifacts and all migration baseline paths; its one authorized
+`/static/api.js` marker substitution recognizes the static-JSON to API
+fetch transition without weakening source or payload comparisons.
+
+The pinned source archive `JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+was independently built twice using `tools.verify_complete_database_build`
+into isolated ignored directories. Both complete v13/compatibility-15
+two-file outputs passed 73 Army normalization checks (116 known
+baseline warnings), full selected-set health, source/provenance matching,
+151 exact variant groups, 62 reviewed Weapons/69 chart citations and
+six chart rows. The returned chart API payload exactly matched the maintained historical
+chart JSON, and all 41 pinned runtime baseline routes passed in each build.
+The final source-collection mismatch rejection also passed its focused
+regression. Byte-identical output hashes were `infinity.db` =
+`9c53611e0e09898002c705e175e8c2b11f567b77ae15b4b8edb47b48c0a061ef`
+and `rules.db` =
+`abcf8a8cd21c9f891bcb450471c217791562224ea47844c12950d785bdd2093d`.
+Build-set ID:
+`4d7d6af4ff9ea95d04dd35eda4def7e5045b8ad63dd41499932dc599063ac921`.
+This proves local Windows reproducibility, not independent Linux,
+Docker or final default-serving cutover acceptance.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
