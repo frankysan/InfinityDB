@@ -19,26 +19,32 @@ not this data-model specification.
 
 Army-derived data flows through three conceptual layers:
 
-```text
-immutable Army snapshot
-        ↓
-lossless merged/master representation
-        ↓
-validated normalized source model
-        ↓
-SQLite export
-        ├─ infinity.db      canonical application/runtime data
-        └─ infinity.raw.db  lossless normalized source/audit archive
+```mermaid
+flowchart TD
+    snapshot["Immutable Army snapshot"]
+    master["Lossless merged/master representation"]
+    normalized["Validated normalized source model"]
+    export["SQLite export"]
+    runtime["infinity.db<br/>Canonical application/runtime data"]
+    archive["infinity.raw.db<br/>Lossless normalized source/audit archive"]
+
+    snapshot --> master
+    master --> normalized
+    normalized --> export
+    export --> runtime
+    export --> archive
 ```
 
 Curated rules data follows a separate path:
 
-```text
-reviewed data/curated/rules/*.json
-        ↓
-validation/composition
-        ↓
-rules.db
+```mermaid
+flowchart TD
+    curated["Reviewed data/curated/rules/*.json"]
+    validation["Validation/composition"]
+    database["rules.db"]
+
+    curated --> validation
+    validation --> database
 ```
 
 The two runtime databases are intentionally separate because Army data and reviewed rules knowledge

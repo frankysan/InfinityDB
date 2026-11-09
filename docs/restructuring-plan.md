@@ -451,22 +451,26 @@ non-runtime document or assume every JSON in `config/` needs migration.
 
 ## Dependency and delivery map
 
-```text
-P0 workflow simplification -----> P1 dependency inventory
-                                      |
-                                      v
-                         P2 database/runtime unification
-                                      |
-                                      v
-                         P3 N5 / ITS family separation
-                                      |
-                                      v
-                         P6 integrated acceptance
-                                      ^
-P1 UI baseline ------------> P4 player-first UI ----|
-                                      ^
-P1 tool inventory --> P5 retirement/extraction ----|
-                       (timing follows consumers)
+```mermaid
+flowchart TD
+    p0["P0 workflow simplification"]
+    p1["P1 dependency inventory"]
+    p2["P2 database/runtime unification"]
+    p3["P3 N5 / ITS family separation"]
+    ui["P1 UI baseline"]
+    p4["P4 player-first UI"]
+    tools["P1 tool inventory"]
+    p5["P5 retirement/extraction<br/>(timing follows consumers)"]
+    p6["P6 integrated acceptance"]
+
+    p0 --> p1
+    p1 --> p2
+    p2 --> p3
+    p3 --> p6
+    ui --> p4
+    p4 --> p6
+    tools --> p5
+    p5 --> p6
 ```
 
 **Suggested first execution batch:** P0.1–P0.3 as a focused documentation/process change, followed by P0.4–P0.5. Next do the P1 dependency inventory *before* modifying the data path. Work that is genuinely independent (P4 copy) need not block on the database migration.
