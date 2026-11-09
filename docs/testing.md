@@ -700,6 +700,40 @@ reproducibility evidence. The stable repeatability run above passed.
 No tracked generated files were changed; this establishes local
 Windows opt-in acceptance, not Linux/Docker or P2.6 cutover.
 
+**2026-11-09 P2.4 fourth slice, reviewed Ammunition links (Windows local):**
+`tests/test_ammunition_reference_storage.py` (17/17) validates all
+16 Army Ammunition ID/name pairs, 11 base links, five ordered combined
+compositions (10 component relationships), exact v10/v16 HTTP
+and resolver parity, v16 serving without JSON loader calls, and
+fail-closed missing/malformed/mixed-source relational rows.
+`tests/test_database_set_builder.py` passed 16/16 after correcting
+the v16 validator's Windows SQLite connection lifetime;
+`tests/test_ammunition_publication_parity.py` passed 8/8,
+`tests/test_rules_database.py` passed 166/166 and
+`tests/test_database_set.py` passed 20/20.
+Ruff, canonical Pyright (0 errors, 0 warnings), documentation and
+Git diff checks also passed.
+
+Two complete isolated builds of immutable source archive
+`JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+each passed 73 Army normalization checks (116 known baseline source
+warnings), provenance and database-set health, 151 exact variant
+groups, 62 reviewed Weapons/69 profile citations, six Restrictions
+chart rows, 33 Trait Wiki links, six Combined Saving Roll profiles
+and 16 Ammunition link identities. All 41 pinned runtime baseline
+routes passed in both builds. The complete v16/compatibility-18
+two-file SQLite outputs were byte-identical:
+`infinity.db` =
+`2f3eaf2b42271f6b8e824dcdcb9459f0eab84190442af355e713144b25b47a74`;
+`rules.db` =
+`3f21f9b4650ff37addd2786cb503399b8ef9434719f0373bc2633fa8931a9486`.
+Build-set ID:
+`d9b7276fd78bde74e32a61621a1139576e8fd12314f2be53f20c0f9f4990a83d`.
+The current tracked v10 release artifacts were not modified; these
+results establish the opt-in Windows path, not Linux/Docker or
+P2.6 serving cutover acceptance.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

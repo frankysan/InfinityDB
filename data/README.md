@@ -88,8 +88,8 @@ matched tracked release set.
 
 **Explicit complete runtime build:** `infinity-db build SOURCE.zip --db-dir PATH --compact`
 builds Army, Rules, variant usage, reviewed Weapon citations, the
-Restrictions chart, reviewed Trait Wiki links and exact Combined Saving Roll
-profiles offline into one selected directory. It requires the source checkout, a local immutable Army ZIP and its selected Army API metadata. Omitting the source selects the
+Restrictions chart, reviewed Trait Wiki links, exact Combined Saving Roll
+profiles, and reviewed Ammunition source links offline into one selected directory. It requires the source checkout, a local immutable Army ZIP and its selected Army API metadata. Omitting the source selects the
 newest local Army ZIP once; `--metadata` selects external API metadata explicitly.
 It never downloads an input or inherits the serving-only `INFINITY_DB_DB_DIR`.
 `--db-dir` and the existing narrow Army `--output-dir` are mutually exclusive;
@@ -103,10 +103,10 @@ the tracked v10 release retains its JSON contract.
 The builder uses disposable work files under ignored `data/work/build/`, validates
 the full runtime set and matching input provenance, then replaces only the two
 selected runtime filenames: `infinity.db` and `rules.db`.
-Rules v15 extends v14's reviewed Trait Wiki links and relational
-Restrictions chart with exact, source-reviewed Combined Saving Roll
-Weapon/mode annotations. All three JSON sources remain validated
-build inputs, not v15 runtime dependencies. The completed
+Rules v16 extends the v15 embedded reference data with 16 reviewed
+Army Ammunition source identities and ordered canonical N5 rule links.
+The maintained chart, Trait, Combined Saving Roll and Ammunition JSON
+remain validated build inputs, not v16 runtime dependencies. The completed
 build removes obsolete `variant-usage.json` and
 `weapon-profile-sources.json` from its selected output directory. It preserves
 unrelated files and leaves
@@ -118,7 +118,7 @@ selected directory before rebuilding and restart after success. An interruption
 between per-file replacements leaves an invalid mixed set; rerun the build to
 recover it. There is no live replacement lock or separate promotion step.
 
-This opt-in path uses the two-file v15 format. The tracked release pair remains
+This opt-in path uses the two-file v16 format. The tracked release pair remains
 v10 with four runtime files. Plain `build`,
 `build-rules`, `serve`, Docker and their current defaults retain their existing
 selection contracts until the planned cutover. An explicit old-style
@@ -128,11 +128,11 @@ selection contracts until the planned cutover. An explicit old-style
 validates exactly the selected directory through the shared
 `infinity_db.database_set` validator. All supported sets require `infinity.db`
 and `rules.db`; v10 also requires both JSON publications, while v11 needs only
-`weapon-profile-sources.json`. v12–v15 require no runtime JSON sidecars.
+`weapon-profile-sources.json`. v12–v16 require no runtime JSON sidecars.
 It checks schema/application compatibility, full SQLite integrity and foreign keys,
 embedded deployed-object/Army pairing, embedded variant identities/extras/counts
-in v11–v15, and current PDF, page, review and Army-profile bindings of the
-embedded v12–v15 Weapon citations or older JSON publication. v13 onward also
+in v11–v16, and current PDF, page, review and Army-profile bindings of the
+embedded v12–v16 Weapon citations or older JSON publication. v13 onward also
 checks six source-ordered Restrictions chart rows, fourteen exact conditions
 against the separate normalized constraints, original labels/notes/links,
 qualifiers, source identity and embedded content fingerprint. v14 checks
@@ -142,6 +142,10 @@ v15 validates six source-reviewed Combined Saving Roll Weapon/mode
 signatures against the selected Army, the current Rules PDF and the
 relational source fingerprint. No calculation of saving-roll outcomes
 or interpretation of Ammunition composition is added.
+v16 verifies 16 reviewed Ammunition ID/name pairs against the
+selected Army, the 11 base canonical N5 Ammunition records,
+five separately authored ordered combined compositions, and the
+content fingerprint. No component semantics are inferred from source text.
 It reports final file SHA-256 hashes and returns a nonzero status for an
 incomplete, corrupt or mismatched set. It never creates missing files,
 selects another directory, rebuilds curation or reads the raw archive.
@@ -152,17 +156,20 @@ Other intermediate files in the directory are ignored. The v10 candidate
 and Docker-bundle checks share this built-artifact validator while retaining
 their additional source-rebuild and pinned-content checks.
 
-The v15 two-file layout embeds variant/Weapon/Restrictions publications,
-reviewed Trait Wiki destinations and Combined Saving Roll annotations.
-Seven further P2.4-maintained JSON datasets and symbol path mappings
-remain open. Older v10–v14 layouts remain transitional compatibility. The browser
+The v16 two-file layout embeds variant/Weapon/Restrictions publications,
+reviewed Trait Wiki destinations, Combined Saving Roll annotations and
+Ammunition source references. Six further P2.4-maintained JSON datasets
+and symbol path mappings remain open. Older v10–v15 layouts remain
+transitional compatibility. The browser
 fetches `/api/restrictions/chart`; for a pre-v13 release the endpoint
 returns its original packaged static publication. The v13+ chart
 handler reads SQLite only. v14 Trait pages read reviewed Wiki links from
 Rules SQLite without loading their packaged configuration; pre-v14
 releases keep their existing JSON adapter. v15 Combined Saving Roll
 profiles are read from Rules SQLite; pre-v15 releases retain the
-maintained source JSON adapter.
+maintained source JSON adapter. v16 Ammunition display links and
+combined-component references are read from Rules SQLite; pre-v16
+releases retain the reviewed JSON adapter.
 It does not verify working-tree curation/config freshness or graphical
 assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual

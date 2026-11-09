@@ -30,6 +30,7 @@ from .rules_database import export_rules_database
 from .trait_wiki_references import load_trait_wiki_references
 from .variant_usage import build_variant_usage_projection
 from .variant_usage_reference import publication_from_candidate
+from .weapon_ammunition_references import load_ammunition_reference_map
 from .weapon_combined_saving_rolls import load_combined_saving_roll_map
 from .weapon_profile_builder import build_publication
 
@@ -123,10 +124,13 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
     saving_rolls = load_combined_saving_roll_map(
         root / "config/catalogs/weapon-combined-saving-rolls.json"
     )
+    ammunition = load_ammunition_reference_map(
+        root / "config/catalogs/weapon-ammunition-references.json"
+    )
     export_rules_database(
         documents, rules, variant_usage=variants, weapon_citations=weapons,
         restriction_chart=chart, trait_wiki_links=trait_links,
-        combined_saving_rolls=saving_rolls,
+        combined_saving_rolls=saving_rolls, ammunition_references=ammunition,
         army_database=army, **export_options,
     )
 

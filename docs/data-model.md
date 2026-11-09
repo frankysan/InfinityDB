@@ -2764,6 +2764,33 @@ versions retain their current adapter until P2.6. This is a reviewed
 reference annotation **not** an executable saving-roll calculator,
 Ammunition composition parser or generic Critical rule expansion.
 
+### Reviewed Ammunition identities and composition links in Rules v16 (P2.4 opt-in)
+
+`config/catalogs/weapon-ammunition-references.json` remains the
+editable reviewed source map. The opt-in Rules v16/compatibility-18
+builder embeds its 16 exact Army Ammunition source ID/name pairs
+in `weapon_ammunition_links`; ordered
+`weapon_ammunition_segments` retain literal display text and
+optional links to N5 `ammunition:<slug>` records, while
+`weapon_ammunition_components` holds the ten separately reviewed,
+ordered relationships for the five combined identities. Composite
+foreign keys bind all linked IDs to their existing N5 rule
+records; source-collection context, selected Army SHA, primary N5
+source identity and SHA, row counts, map format/version, and a
+deterministic fingerprint live in
+`weapon_ammunition_reference_metadata`.
+
+Build and read checks require the complete exact mapping,
+current canonical target kinds, reproducible segment spelling/order,
+and matching Army metadata ID/name pairs. They deliberately **do
+not** parse the `+` separator into gameplay effects, compute
+Saving Rolls or use Weapon names to infer source identifiers.
+The `WeaponAmmunitionReferences` resolver reads the same mapping
+from SQLite in v16 and returns unchanged `ammunition_parts`,
+`ammunition_effects` and `ammunition_composition` API fields.
+Pre-v16 releases and source-only review tools continue to load the
+maintained JSON; no released build or serving defaults change here.
+
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
 **Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**
@@ -2797,13 +2824,14 @@ to expose fourteen normalized conditions separately.
 
 `RulesDatabase.validate()` accepts the exact schema / compatibility pairs
 **(8, 10)**, **(9, 11)**, **(10, 12)**, **(11, 13)**,
-**(12, 14)**, **(13, 15)**, **(14, 16)** and **(15, 17)**. The tracked 1.0.1 release remains
+**(12, 14)**, **(13, 15)**, **(14, 16)**, **(15, 17)**
+and **(16, 18)**. The tracked 1.0.1 release remains
 v10/compatibility-12. From v9 onward the validator checks fourteen
 Restrictions constraints, negative polarity, qualifiers and provenance;
 v10 adds normalized deployed objects, v11 embedded exact variant
 usage, v12 reviewed Weapon citations, v13 the relational chart and
-v14 the source-reviewed Trait Wiki links and v15 the exact
-Combined Saving Roll signatures.
+v14 the source-reviewed Trait Wiki links, v15 the exact
+Combined Saving Roll signatures and v16 reviewed Ammunition links.
 Invalid combinations, missing rows and corrupted provenance fail closed.
 
 Shared release staging preserves the active supported schema. For v10 it

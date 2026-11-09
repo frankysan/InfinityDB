@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in v13, reviewed Trait Wiki links in v14 and exact Combined Saving Roll annotations in v15. The remaining seven maintained datasets, symbol mappings and final build/serving cutover are unfinished.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in v13, reviewed Trait Wiki links in v14, exact Combined Saving Roll annotations in v15 and reviewed Ammunition source links in v16. Six maintained datasets, symbol mappings and final build/serving cutover remain unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1565,12 +1565,36 @@ Local focused tests, two-source-build reproducibility and complete
 semantic baseline evidence are recorded in
 [testing](testing.md#selected-runtime-database-set-validation).
 
-**Remaining P2.4:** Migrate the other seven maintained Army/Rules JSON
-datasets and the runtime symbol path mappings identified in P1.4.
-The v10–v14 JSON adapters remain only while independently needed for
-actual release/research/presentation consumption; historical tests
-alone do not justify preserving obsolete build machinery. The
-final naming, serving and Docker cutover belongs to P2.6.
+#### P2.4 — Fourth slice: reviewed Ammunition link mapping (2026-11-09)
+
+**Status:** The opt-in complete build now emits Rules v16
+(compatibility 18) with `weapon_ammunition_links`,
+`weapon_ammunition_segments` and `weapon_ammunition_components`.
+The 16 reviewed source Ammunition IDs/names, 11 canonical N5
+base Ammunition identities, and five explicitly authored combined
+compositions retain their reviewed order and exact display text.
+Source PDF identity/SHA and selected Army database SHA are pinned
+in `weapon_ammunition_reference_metadata` with a deterministic
+full-map fingerprint. Each linked record has a composite foreign
+key to an existing current N5 rule record. Build/read checks
+reject missing, mismatched or otherwise unreviewed links and never
+infer effects from separator punctuation.
+
+`WeaponAmmunitionReferences` now consumes the v16 relational map
+without reading the packaged JSON, while pre-v16 release schemas
+and source-review tools use the existing validated JSON adapter.
+The public `ammunition_parts`, `ammunition_effects` and
+`ammunition_composition` projections remain unchanged.
+The tracked v10 release artifacts and ordinary build/serve/Docker
+defaults are untouched. Focused and pinned source-build evidence
+is owned by [testing](testing.md#selected-runtime-database-set-validation).
+
+**Remaining P2.4:** Migrate six maintained Army/Rules JSON datasets
+and the runtime symbol path mappings identified in P1.4.
+The v10–v15 JSON adapters remain only while independently needed
+for release/research/presentation consumption; historical tests
+alone do not justify preserving obsolete build machinery.
+Final naming, serving and Docker cutover belongs to P2.6.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 
