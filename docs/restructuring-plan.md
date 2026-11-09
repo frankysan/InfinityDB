@@ -376,6 +376,234 @@ runtime file reads and determine which structured facts belong in Army,
 N5 Rules or season databases. Do not equate a static JSON asset with a
 non-runtime document or assume every JSON in `config/` needs migration.
 
+#### P1.2 — Verified runtime read/producer dependency graph (2026-11-09)
+
+**Status:** Read-only code/packaging trace at
+`52c1407d58816272dbbc31adf45956b04a3880b1`; P1.1 is the
+path inventory above. This traces the **observed file-opening paths and
+their transitive API/build callers**; it is not a proposed schema or
+acceptance of a changed runtime. The intervening checkout revision
+changed documentation flow diagrams, not the serving model. P1.3–P1.5
+own baseline fixtures, final database placement and output layout.
+
+**SQLite databases:**
+
+- **`data/generated/infinity.db`:** `infinity-db build --compact`
+  invokes `infinity_db.cli.cmd_build` and `database.importer.export_database`
+  after Army ZIP merge, normalization and curation. `Database` in
+  `database/repository.py` is the read-only serving owner, used by
+  `web/app.py` and `web/api_handler.py` for Army/Unit/profile/catalog,
+  Fireteam, filters and cross-domain source relationships. The selected
+  file is validated on application startup; its provenance is included
+  in `/api/version` and release snapshot identity. Docker takes the
+  tracked database through `tools.prepare_runtime_bundle`; local serving
+  selects the checkout bundle when current. Tests include
+  `tests/test_database.py`, `test_api.py`, `test_app_cli.py` and
+  `test_web.py`.
+- **`data/generated/rules.db`:** `infinity-db build-rules`,
+  `tools.release_rules_export` and
+  `tools.build_v10_runtime_candidate` normalize reviewed
+  `data/curated/rules/`, the Restrictions manifest and deployed-object
+  review evidence through `export_rules_database`. Serving reads it
+  via `RulesDatabase` and the Skill/Equipment/Rules/FAQ/Scenario
+  catalogs, including `/api/restrictions`, `/api/scenarios` and
+  the scenario-map SVG API. v10 embeds deployed objects; source
+  collection/version, Army links and provenance must survive extraction
+  into `rules_n5.db` and later ITS databases. Tests include
+  `tests/test_rules_database.py`, `test_deployed_object_storage.py`,
+  `test_scenario_catalog.py` and API/browser acceptance.
+- **`data/generated/infinity.raw.db`:** produced alongside the Army
+  application database by the exporter, with matching export-pair
+  metadata. `variant_usage.build_variant_usage_projection`,
+  source audits and `tools.inspect_raw_archive` read raw occurrence
+  tables (including original owner/position/extras) for build-time
+  reconciliation; `Application`, `ApiHandler` and Docker's v10
+  serving bundle do **not** open it. Raw database output is not a
+  P2 serving file, although the exact-variant builder currently needs
+  it. Keep that distinction when selecting the final build directory.
+
+**Release-paired JSON beside the databases:**
+
+- **`variant-usage.json`:** producer
+  `variant_usage.build_variant_usage_projection(army, raw, rules, ...)`,
+  followed by `variant_usage_reference.publication_from_candidate`;
+  invoked by `tools.build_variant_usage` or checkout/release candidate
+  assembly. It records stable `variantKey`, Skill/Equipment record IDs,
+  exact source occurrence/owner coordinates, derived Unit/context counts
+  and Army/Rules/export-pair fingerprints. In v10 its format-v2
+  publication requires **embedded** deployed objects but no legacy
+  deployed-object JSON. `web/app.py` loads and fingerprints the
+  co-located file through `load_variant_usage_publication`, and
+  `/api/variant-usage?record_id=...` filters its groups; detail
+  pages report publication availability. Missing publication produces
+  unavailable results, not computed best-effort counts. Relevant tests:
+  `test_variant_usage.py`,
+  `test_verify_variant_usage_publication_browser.py` and
+  `test_deployed_object_storage.py`. **Migration invariant:** preserve
+  exact source-row identity, order, context and counts, and the
+  sourceSnapshot/public API projection without a runtime raw-file read.
+- **`weapon-profile-sources.json`:** producer
+  `tools.build_weapon_profile_publication`, using
+  `data/curated/weapon-shared-effect-reviews.json`, exact Army
+  Weapon/profile/mode signatures and current Rules PDF source/page
+  provenance. `weapon_profile_publication.load_runtime_weapon_profile_publication`
+  validates the co-located Army/Rules SHA pair and reconstructs a map
+  keyed by `(weapon_id, profile_source_id, mode)`.
+  `/api/weapons/<slug>` attaches `profile_citations` and
+  `profile_citations_available`; its file digest contributes to
+  `runtime_snapshot_revision`. Required for published release checks
+  by `tools.verify_deployment_assets`. Tests:
+  `test_weapon_profile_publication.py`,
+  `test_weaponry_catalog_api.py` and
+  `test_verify_deployment_assets.py`. **Migration invariant:** retain
+  mode-level identities and page/source version/URL/SHA provenance;
+  replacing this JSON must update snapshot revision semantics.
+- **`deployed-objects.json`:** produced for **legacy v8/v9** schemas by
+  `tools.build_deployed_object_publication` and checked via
+  `load_deployed_object_publication`. `Application` falls back to
+  that file only if no embedded payload exists. Current v10 reads
+  normalized deployed-object records from `RulesDatabase`, paired to
+  the Army source, and exposes list/detail through
+  `/api/deployed-objects`. `tools.prepare_runtime_bundle` packages
+  no deployed-object JSON for v10; its legacy branches still require
+  it. Tests: `test_deployed_object_storage.py`,
+  `test_deployed_object_publication.py` and
+  `test_deployment_scripts.py`. P2.5 should remove **proven dead
+  compatibility paths**, not rebuild the already normalized content.
+
+**Other required structured reads outside the four-file bundle:**
+
+- **`web/static/restrictions-reference.json`:** a separate *compiled
+  static browser publication*, produced/verified by
+  `tools.audit_restrictions_source_chart.project_public_restrictions`
+  from `config/validation/restrictions-source-chart.json`, selected
+  curated source records and N5.3 page 194. It is served by
+  `web/presentation.py`; `static/api.js` fetches it for
+  `restrictions-page.js`, `catalog-detail.js` and `skill.js`.
+  The source-specific six-row page representation is **not identical**
+  to the existing database-backed `/api/restrictions` payload, which
+  uses normalized prohibition records. Tests include
+  `test_game_mode_source_table.py` and Restrictions API checks.
+  P2.4 must preserve the developer-only display, anchor links,
+  labels, notes, source link and no-legality-evaluator boundary when
+  replacing this fetch; migrating the static file into a second
+  database table uncritically would perpetuate duplicated semantics.
+- **`data/manifests/symbol-publication.json`:** produced by symbol
+  acquisition/build publication (`tools.build_symbols` /
+  `tools.reorganize_symbols`) with validated processed SVGs and
+  browser path mappings. `SymbolCatalog` reads this **tracked
+  manifest at API initialization** to enrich Army/Unit/profile SVG
+  references; `web/presentation._static_asset_revision` also hashes
+  its exact bytes for static cache identity. The source checkout uses
+  the tracked manifest; installed wheels use
+  `share/infinity-db/data/manifests/`. Docker does not copy it into
+  `/app/data/` because the wheel already contains it. Tests:
+  `test_symbol_catalog.py`, `test_asset_validation.py`,
+  `test_build_symbols.py` and `test_deployment_scripts.py`.
+  **Migration invariant:** preserve path/identity mapping and correct
+  browser cache invalidation, independently of keeping SVG files
+  outside SQLite.
+
+**Further runtime reads via wheel-packaged maintained JSON:**
+
+The production image installs the package with `pip install ".[server]"`
+before deleting the temporary `/app/config`, `/app/data/curated`
+and manifest *source* directories. `project_resources.py` still
+resolves maintained resources from installed
+`share/infinity-db/`; `pyproject.toml` explicitly packages them.
+Consequently a four-file `data/runtime/` inventory is **not** a
+complete runtime dependency graph. These files are directly read by
+normal API services rather than merely by build commands:
+
+- `data/curated/identities/army-overview.json` →
+  `army_overview_copy.load_army_overview_copy` →
+  `ApiHandler` → `/api/armies` editorial summaries.
+- `data/curated/identities/legacy-armies.json` →
+  `legacy_armies.load_legacy_armies` → `ApiHandler` →
+  `/api/armies`, and legacy-aware Search.
+- `config/catalogs/equipment-presentation-encodings.json` →
+  `EquipmentCatalog` → `/api/equipment` and detail.
+- `config/catalogs/skill-source-classifications.json` →
+  `SkillCatalog` and `unit_presentation` →
+  Skill classification and Unit details.
+- `config/catalogs/unit-filter-semantics.json` →
+  `unit_presentation.enrich_unit_filter_presentation` and
+  `Database._classification_filter_source_ids` →
+  `/api/unit-filters` and Unit list/filter queries.
+- `config/catalogs/trait-wiki-references.json` →
+  `TraitCatalog` → Trait link/public source projection.
+- `config/catalogs/weapon-ammunition-references.json` →
+  `WeaponAmmunitionReferences` in `CatalogRules` →
+  exact Weapon/profile Ammunition references.
+- `config/catalogs/weapon-combined-saving-rolls.json` →
+  `WeaponCombinedSavingRolls` in `CatalogRules` →
+  reviewed Weapon-profile saving-roll information.
+- `config/catalogs/weapon-properties.json` →
+  `WeaponProperties` in `CatalogRules`, `GlossaryCatalog`
+  and maintained-text reference enrichment → Weapon/Glossary links,
+  summaries and exact profile associations.
+
+These nine maintained JSON inputs require **runtime projection or
+materialization** if the target is genuinely SQLite-only at serving
+time. Keep the editable source files as build inputs; P1.4 chooses
+their normalized owners. Representative existing regression coverage
+includes `test_weapon_properties.py`, `test_weaponry_catalog_api.py`,
+`test_api.py`, `test_web.py`, `test_app_cli.py` and
+`test_installed_wheel_smoke.py`. Add precise parity fixtures in
+P1.3 rather than assuming those tests cover every mapping.
+
+**Build-only / non-domain resources (do not migrate merely for being JSON):**
+`config/catalogs/weapon-categories.json`, `weapon-overrides.json`,
+`metadata-only-weapons.json`, source identity configuration,
+review/pinning evidence in `config/validation/`, and curated
+source snapshots feed exporter/audit/tooling paths; no normal
+`ApiHandler` file read was found for those inputs. They may still be
+needed by installed build commands even after serving becomes SQLite-only.
+`docs/CHANGELOG.md` is a rendered human-facing release document and
+`scenario_map_svg.py` reads CSS theme tokens; neither is a required
+structured JSON fact file. Search of browser static code found only
+one direct named `.json` fetch, the Restrictions publication; normal
+browser data calls otherwise use `/api/` routes.
+
+**Packaging and test boundaries:** `Dockerfile` stages `data/runtime/`
+at `/app/data/`, sets `INFINITY_DB_DATABASE` and
+`INFINITY_DB_RULES_DATABASE`; `web/wsgi.py` requires the Army
+database path and validates explicit Rules. Checkout `serve` chooses
+a source-matched local bundle via `checkout_runtime.py`.
+`tools.verify_deployment_assets` checks source binding, variant/Weapon
+publications and symbol manifest; `tools.prepare_runtime_bundle`
+enforces the four-file v10 contract. `tools.installed_wheel_smoke`
+verifies resources in a wheel-installed environment and exercises
+`/api/armies`. These entrypoints and `tests/test_deployment_scripts.py`
+must change together with any runtime cutover; the presence of valid
+SQLite files alone does **not** currently guarantee a standalone
+installed application can serve every route.
+
+**Handoffs:**
+
+- **P1.3:** Pin representative payloads for `/api/armies`,
+  `/api/unit-filters`, Skill/Equipment/Weapon/Traits, exact
+  `/api/variant-usage`, deployed objects, both Restrictions
+  representations, Glossary/legacy Search, symbols, and scenario
+  list/detail/map; include source/citation/revision metadata,
+  missing-publication behavior and relevant browser links.
+- **P1.4:** Decide ownership for each of the nine runtime-maintained
+  datasets, the two sidecars, Restrictions presentation and symbol
+  mappings; specify typed keys, source/version identity and API
+  projection. Existing `rules.db` Restrictions and deployed-object
+  tables should be reused rather than duplicated. Do not choose
+  `army.db` versus `rules_n5.db` solely from a file's current folder.
+- **P1.5:** Define one generated database directory and exact active
+  selection for checkout and Docker; validate packaging without
+  required wheel/share runtime JSON. Retain independently authored
+  config as **build inputs**, and continue packaging static SVG/JS/CSS
+  as files. Explicitly decide the policy for absent or mismatched
+  database sets; existing sidecars have different failure modes
+  (startup failure, 503/unavailable, optional feature absence).
+- **P1.6:** Classify publication, compat and audit tools by their
+  actual entrypoint/test/deployment consumers before retiring them.
+  The source trace does not authorize immediate deletion.
+
 ### P2 — Make runtime data SQLite-only and unify build/serve
 
 **Outcome:** No required loose JSON data publications and no competing checkout-vs-Docker data assembly model.  
