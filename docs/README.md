@@ -119,23 +119,32 @@ tool over accumulating a new wrapper when the operation is expected to recur.
 **Review at bounded task closeout**, after successful publication/acceptance of the intended
 artifact, or during a deliberate repository-hygiene pass. Use this order:
 
-1. **Establish completion and provenance.** Identify the last purpose and exact input/output
-   revisions or source hashes where material; verify the corresponding acceptance, rollback or
-   release obligation is closed. An older successful stage does not retire a tool still needed
-   for an open migration, reproducible source comparison or release-matched publication.
-2. **Check consumers, not just direct imports.** Search the tracked tree for imports, module
-   invocations and command strings, tests/fixtures, CI workflows, scripts, package entry points,
-   generated-file recipes, agent skills, TODO items, source audits and documentation links.
-   Check indirect/shared helpers and externally documented operator procedures. If a dependency
-   or intended future invocation remains, retain or replace it before retiring the file.
+1. **Establish completion and provenance.** Identify the original research, development
+   or presentation purpose and its exact input/output revisions or source hashes where material.
+   Determine whether that purpose has been fulfilled, superseded or remains independently
+   necessary for an open migration, a specific reproducible source investigation or a current
+   release requirement. Historical reproducibility by itself is not a mandate to retain
+   executable build and serving paths; Git history preserves their implementation.
+2. **Audit consumers to plan the change, not to justify retention by circular reference.**
+   Search imports, module invocations, tests/fixtures, CI, scripts, package entry points,
+   generated-file recipes, agent skills, TODO items, source audits and operator procedures.
+   For each consumer, identify its **independent current purpose** in research, development
+   or presentation. A test that exists only to verify a historical command, an obsolete
+   staging path or compatibility already superseded by the current format is not evidence
+   that the command must remain. Remove or replace that test and its fixture together with
+   the retired implementation. Keep or migrate tests that enforce **still-valid invariants**
+   such as source provenance, semantic parity, deterministic rebuilding and fail-closed
+   selection. Do not retain old code merely to keep its tests green.
 3. **Preserve lasting knowledge.** Transfer accepted semantics, source discrepancies, unresolved
    decisions, reproducibility requirements and current procedures to their canonical owners.
    Keep stable finding IDs and source-version/hash evidence that an open reconciliation relies on.
    A large frozen baseline can remain tracked while it is needed for acceptance, but it must be
    labeled historical rather than maintained current state.
-4. **Choose the smallest safe disposition:**
-   - **Retain** if the command/audit is active, a reusable validator, an imported helper, the
-     canonical generator, or necessary to satisfy an open release/validation/source gate.
+4. **Choose the smallest useful disposition based on purpose, not dependency count:**
+   - **Retain** only when there is a concrete, unsuperseded research, development or
+     presentation need, a current supported builder/runtime or reusable verification contract,
+     or a genuinely open source/release obligation. Mere imports, historical test coverage,
+     age, speculative future reuse or the ability to reproduce an old tool are insufficient.
    - **Extract and replace** if a one-use entry point contains reusable logic: move that logic to
      a maintained module, update its consumers/tests and then retire only the obsolete wrapper.
    - **Move evidence to `local/provenance/`** if unique raw findings, private inputs, recovery
@@ -145,13 +154,13 @@ artifact, or during a deliberate repository-hygiene pass. Use this order:
    - **Delete from the tracked tree** if the work is complete, references are cleared and
      its content is already recoverable from Git history or canonical records. Do not copy
      every obsolete script into `local/` by default; that would create a second archive.
-5. **Close out atomically.** Remove or replace stale command examples, links and imports in
-   the same change. State the retired paths, disposition, acceptance/replacement evidence and
-   any local-only archive location in the commit message or canonical closeout. Run relevant
-   dependency tests and the `docs` stage (including link checks), inspect the full diff and
-   confirm the intended release/CI path does not depend on ignored material. Respect the
-   [VD/VR queue](validation-queue.md) for deferred test work; never equate retirement with
-   acceptance of an unrelated pending gate.
+5. **Close out atomically.** Remove or replace historical-only tests/fixtures, stale
+   commands, links and imports in the same change, while moving relevant invariant checks
+   onto the replacement contract. State the retired paths, their fulfilled/superseded
+   purpose, preserved evidence and remaining independent consumers. Run focused tests for
+   current behavior and the `docs` stage (including links), inspect the diff, and verify
+   current CI/release paths no longer depend on retired material. Use the
+   [VD/VR queue](validation-queue.md) only for genuinely deferred checks.
 
 A one-use audit **report** follows the same procedure: first reconcile its actionable findings
 with `TODO.md`, `official-source-clarifications.md` or other appropriate owners; then delete the

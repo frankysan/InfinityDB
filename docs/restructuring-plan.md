@@ -268,7 +268,7 @@ local preference guidance is now aligned; other machines remain independent.
 3. **P1.3 — Capture baseline behavior.** Select representative Army/Unit/rules/FAQ/Fireteam/scenario/search responses and browser routes, including Battleground geometry, source citations and Developer mode. Record snapshot-specific fixtures or checks that can show semantic parity after migrations without demanding full-suite runs at each intermediate step.
 4. **P1.4 — Define database ownership.** For each runtime dataset specify physical database, stable identities, schema, provenance/version requirements and cross-database lookup. Resolve where Weapon citations, variant usage, restrictions, deployed objects and symbol mappings belong.
 5. **P1.5 — Define build/serve paths.** Choose one default generated database directory, an explicit way to select an alternate database set, and Docker's mechanism for packaging exactly those built artifacts. Keep local and Docker data expectations aligned; determine whether release DBs remain tracked or are generated as release outputs.
-6. **P1.6 — Classify tooling.** Mark each tool as maintained runtime/build utility, reusable check, completed one-use helper, extractable acquisition concern, or obsolete. Cite live imports, CI, commands and documentation consumers before removal.
+6. **P1.6 — Classify tooling by continuing purpose.** Distinguish maintained runtime/build utilities, genuinely reusable checks, completed one-use helpers, extractable acquisition concerns and obsolete paths. Establish the independent research, development or presentation purpose first; inspect imports, tests, CI, commands and documentation to plan replacement/removal, not to veto retirement automatically. Classify historical-path tests by the current invariant (if any) they protect.
 
 **Exit:** Each runtime data dependency has a named database destination and migration order; the two serve targets have one artifact contract; tool retirements are evidence-based; baseline comparisons are runnable.
 
@@ -799,9 +799,29 @@ compatibility-version increments belong to the implementing change.
 - `data/generated/deployed-objects.json` → **already
   `rules_n5.db` in v10**: retain
   `deployed_objects`, attributes, delivery sources, direct
-  Unit uses and unresolved entries. Only retire v8/v9 file
-  fallbacks once no accepted runtime/test/build consumer needs
-  them. No second migration of the same rows.
+  Unit uses and unresolved entries. Retire superseded v8/v9
+  JSON paths, builders and readers when their independent
+  research, development or player-facing purpose is fulfilled.
+  Tests of those historical paths do **not** establish a
+  continuing requirement: delete them or rework any
+  still-relevant provenance, pairing or fail-closed checks
+  against the current DB-backed model. No second migration
+  of the same rows.
+
+**P1.6 purpose audit examples (not blanket deletions):**
+`test_legacy_v8_opt_in_can_rebuild_existing_v8_database`
+and `tools.installed_wheel_smoke` explicitly exercise the
+old v8 builder; `test_legacy_v9_image_bundle_keeps_matched_json`
+skips when the tracked Rules database is v10. Their existence
+does not justify maintaining v8/v9 build or Docker publication
+support. Determine whether an independently useful, currently
+planned historical source comparison actually needs replay;
+otherwise retire those paths and their dedicated tests. By
+contrast, tests rejecting an Army/Rules pairing mismatch
+protect a live correctness invariant and should be rewritten
+against the new database-set validator rather than deleted.
+This is a **classification finding**, not authorization to
+delete code or tests before the scoped P2/P5 changes.
 
 **Typed identity and cross-database resolution:**
 
@@ -1145,7 +1165,7 @@ release change is made by this P1.5 planning entry.
 2. **P2.2 — Embed variant usage.** Normalize `variant-usage.json` into its agreed owning DB; migrate reference loading/API output; remove file/hash pairing and runtime fallback code.
 3. **P2.3 — Embed reviewed Weapon-profile citations.** Migrate `weapon-profile-sources.json` into its agreed DB, preserving source locators and relationship semantics; delete the sidecar consumer.
 4. **P2.4 — Embed remaining runtime-maintained and static structured facts.** Materialize the nine identified maintained JSON datasets and runtime symbol mappings in their P1.4 owner DBs; remove wheel-packaged JSON *serving* dependencies while retaining editable build inputs. Move `restrictions-reference.json` behind the Rules API/DB. Scan for missed direct static JSON facts; keep ordinary SVG/CSS/JS assets as files.
-5. **P2.5 — Finalize the deployed-object transition.** Retain v10's DB-backed model while removing only proven unused v8/v9 loose-file fallbacks, legacy builder modes and publication verifiers.
+5. **P2.5 — Finalize the deployed-object transition.** Retain v10's DB-backed model. Retire superseded v8/v9 loose-file fallbacks, legacy builder modes and publication verifiers once any genuinely outstanding research/development/presentation use is closed. Remove tests that exist only to exercise retired behavior; migrate still-relevant source, identity and fail-closed assertions to the embedded model. Do not make historical tests themselves a reason to keep legacy paths.
 6. **P2.6 — Cut over to `army.db` and `rules_n5.db` in one canonical `data/generated/` set.** Update CLI/WSGI `--db-dir` and `INFINITY_DB_DB_DIR`, output paths, Git tracking, source/build scripts, validators, docs, tests, Dockerfile and workflows together. Do not preserve permanent filename or environment-variable aliases.
 7. **P2.7 — Remove redundant publication stages.** Delete `local/checkout-runtime/`, standalone rules publication staging, candidate promotion, duplicated matched-release checks and `data/runtime/` copying after the P1.5 direct database-set contract is validated. Temporary files for complete, validated DB creation are acceptable; no public promotion workflow remains.
 8. **P2.8 — Prove both hosting targets.** Verify the local `build && serve` path and an actual Docker image built from the same DB set. Compare representative API payload semantics, citations, scenario SVG results, startup health and absence of missing sidecars.
@@ -1186,7 +1206,7 @@ release change is made by this P1.5 planning entry.
 **Owns:** Acquisition, Data processing, Project infrastructure.  
 **Prerequisite:** P1 tool inventory; final retirement after replacement consumers are stable.
 
-1. **P5.1 — Retire completed one-use tooling.** Inspect `stage_*`, `promote_*`, `audit_*`, one-off migrations and historic candidate/release helpers. Check dynamic command/CI/tests/docs consumers, not only Python imports.
+1. **P5.1 — Retire completed one-use tooling.** Inspect `stage_*`, `promote_*`, `audit_*`, one-off migrations and historic candidate/release helpers. Determine whether each still has an independent research, development or presentation purpose. Inspect dynamic command/CI/tests/docs consumers to identify changes required for retirement; remove obsolete-path tests and retain useful invariants in current-path tests. Consumer existence alone does not block removal.
 2. **P5.2 — Consolidate ongoing utilities.** Favor a few clear CLI subcommands and shared validators over wrappers that repeat the same generation or verification.
 3. **P5.3 — Evaluate acquisition repository boundaries.** Army JSON downloader, Wiki/Human Sphere mirroring, and symbol acquisition/processing are candidates for separate Git repositories. Split only if each has a stable input/output contract and remains independently useful. Keep necessary Army normalization and domain-specific publishing in InfinityDB.
 4. **P5.4 — Extract incrementally.** Move one downloader at a time, specify versioned archive/output format and provenance, update importer/operator documentation, and verify an offline build from its produced artifact. Avoid cross-repository runtime dependencies or a mandatory multi-repository development setup.
