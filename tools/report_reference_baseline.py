@@ -1380,8 +1380,14 @@ FROZEN_DECLARATION_SOURCE_SHA256 = (
     "9fed4f072387882f80d18f1e0dfb6c4db4827ab8233001f5ad21c96e809fa10f"
 )
 DECLARATION_REVIEW = PROJECT_ROOT / "config/validation/declaration-inventory-migration-v1.json"
-FROZEN_EXPLANATION_INVENTORY_SHA256 = (
+# The declaration review is bound to the original 2026-10-31 frozen file.
+# A later documentation-only TODO anchor correction did not modify its
+# 367 record rows, but did change the current Markdown file bytes.
+HISTORICAL_EXPLANATION_INVENTORY_SHA256 = (
     "3f6b21bc6ba7e508e63cfaa74b1bdb3fdefe3ab3968418d813be18a36275675e"
+)
+FROZEN_EXPLANATION_INVENTORY_SHA256 = (
+    "624e0406c1159a9131a876128e70639a2ee9374981a640b11e9dc11dfc69fc00"
 )
 SELECTED_EXPLANATION_BROWSER_TESTS = {
     "rule:initiative-roll": "test_initiative_roll_normal_reference_navigation",
@@ -2106,7 +2112,7 @@ def verify_declaration_review(
     if manifest.get("formatVersion") != 1 or manifest.get("historicalCommit") != (
         crosswalk["historicalCommit"]
     ) or manifest.get("historicalInventorySha256") != (
-        FROZEN_EXPLANATION_INVENTORY_SHA256
+        HISTORICAL_EXPLANATION_INVENTORY_SHA256
     ):
         raise ReferenceBaselineError("Declaration review has mismatched historical scope")
     retired = manifest.get("retiredTransitions")

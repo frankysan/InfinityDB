@@ -4172,7 +4172,8 @@ def test_candidate_version_rollout_requires_application_transition(
     connection.commit()
     with pytest.raises(ValueError, match="compatibility revision"):
         RulesDatabase(target).validate()
-    connection.execute("PRAGMA user_version = 11")
+    # v11 is now a supported transitional schema; test an actually unknown version.
+    connection.execute("PRAGMA user_version = 999")
     connection.commit()
     with pytest.raises(ValueError, match="Unsupported rules database schema"):
         RulesDatabase(target).validate()
