@@ -339,15 +339,27 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
 - [ ] Run `python tools/verify_deployment_assets.py` and require the tracked Army database,
   rules database, processed SVG publication, and publication snapshot provenance to pass as one
   release set.
+- [ ] Before the final candidate merge, run
+  `python -m tools.release_metadata`. Require matching package/module
+  versions, a **dated** first changelog heading, the README current-release
+  statement and a matching changelog link. `Unreleased` fails this gate.
+- [ ] Use the [risk-based Source validation policy](ci.md#risk-based-source-validation).
+  A previously hosted-green baseline may be reused only for recognized
+  documentation/independent-test changes, with the changed tests and fast
+  checks still running on the new SHA. Unverified baselines and executable,
+  generated-data, build, CI and unknown changes require the full Source matrix.
+  Browser, installed-wheel, Docker and production acceptance remain separate.
 - [ ] Install the pinned Markdownlint dependency with
-  `npm ci --ignore-scripts --no-audit --no-fund` (Node.js 22+), then run the complete local
-  validation suite with `python tools/run_checks.py --all` (for 1.0, include
-  `--source-occupancy-gate` as described above), including the `docs`
-  and Git-index `preflight` stages. The preflight checks staged release
-  content, including tracked `src/` files and configured wheel data, **not
-  unstaged tracked edits**. Run it again after staging the final candidate
-  when the index changes; the separate
-  `Installed wheel smoke` workflow remains mandatory for runtime validation.
+  `npm ci --ignore-scripts --no-audit --no-fund` (Node.js 22+).
+  For executable, build, CI, generated-asset or unverified candidate changes,
+  run `python tools/run_checks.py --all` (including
+  `--source-occupancy-gate` for the 1.0 data review). Include `docs` and
+  indexed `preflight` for these full candidates. Preflight checks **staged**
+  files rather than unstaged edits; rerun affected stages after changing the index.
+  For an eligible metadata-only or independent-test update against an already
+  validated release candidate, run focused affected tests, Ruff, metadata and
+  documentation checks instead of rerunning full local pytest/preflight.
+  Independent Installed wheel smoke remains required on the final SHA.
 - [ ] When the release is intended for a local/full-asset deployment, validate the
   complete published asset set with the `required` asset mode as documented in
   `docs/testing.md`.
