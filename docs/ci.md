@@ -58,11 +58,15 @@ and all four cross-browser jobs. Missing API access, incomplete/failed
 evidence or uncertain ancestry falls back to full validation. The exact new SHA
 still receives the fast Source job, including focused affected tests.
 
-This optimization currently applies to **Source checks only**. The separate
-wheel, deployment and four-browser workflows remain mandatory for release
-acceptance. Further per-gate fingerprint reuse requires its own explicit
-verification contract; do not treat a skipped full Source matrix as proof of
-new runtime coverage.
+This optimization currently applies to **Source checks only**. The release
+evidence collector inspects individual Source jobs: it accepts either the
+completed full matrix plus deterministic-output job, or a passed fast job with
+successful changed-test execution and explicit reuse steps in each matrix job
+(instead of running the expensive test/build commands).
+The generated tag annotation identifies focused Source reuse, while retained
+CI logs show the baseline verification. Partial, mixed or missing Source jobs
+block tagging. The separate wheel, deployment and four-browser workflows remain
+mandatory; further per-gate reuse requires its own proof contract.
 
 ## Cross-browser release compatibility gate
 

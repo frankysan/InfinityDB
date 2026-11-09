@@ -44,6 +44,14 @@ CROSS_BROWSER_JOBS = (
     "macos-latest / webkit",
     "windows-latest / msedge",
 )
+SOURCE_FAST_JOB = "Fast validation and scope"
+SOURCE_FULL_JOBS = (
+    "ubuntu-latest / Python 3.11",
+    "windows-latest / Python 3.11",
+    "macos-latest / Python 3.11",
+    "ubuntu-latest / Python 3.14",
+    "Cross-platform deterministic outputs",
+)
 
 
 @dataclass(frozen=True)
@@ -169,6 +177,67 @@ def verify_cross_browser_jobs(payload: dict[str, Any], *, run_id: int) -> list[d
     return sorted(result, key=lambda job: CROSS_BROWSER_JOBS.index(job["name"]))
 
 
+def verify_source_jobs(payload: dict[str, Any], *, run_id: int) -> dict[str, str]:
+    """Distinguish full Source coverage from justified, focused reuse."""
+    jobs = payload.get("jobs")
+    total = payload.get("total_count")
+    if not isinstance(jobs, list) or type(total) is not int or len(jobs) != total:
+        raise ReleaseEvidenceError("Source jobs response is incomplete")
+    by_name = {
+        job.get("name"): job for job in jobs
+        if isinstance(job, dict) and isinstance(job.get("name"), str)
+    }
+    expected = set(SOURCE_FULL_JOBS)
+    has_fast = SOURCE_FAST_JOB in by_name
+    if len(by_name) != len(jobs) or set(by_name) != (
+        expected | {SOURCE_FAST_JOB} if has_fast else expected
+    ):
+        raise ReleaseEvidenceError("Source matrix jobs are missing, unexpected or duplicated")
+    if any(job.get("run_id") != run_id for job in jobs):
+        raise ReleaseEvidenceError("Source matrix contains jobs from a different run")
+    if has_fast and by_name[SOURCE_FAST_JOB].get("conclusion") != "success":
+        raise ReleaseEvidenceError("Source fast-validation job did not pass")
+    if any(by_name[name].get("conclusion") != "success" for name in SOURCE_FULL_JOBS):
+        raise ReleaseEvidenceError("Source matrix contains incomplete or failed jobs")
+    if not has_fast:
+        return {"mode": "full"}
+
+    def passed_step(job: dict[str, Any], name: str) -> bool:
+        steps = job.get("steps")
+        return isinstance(steps, list) and any(
+            isinstance(step, dict)
+            and step.get("name") == name
+            and step.get("conclusion") == "success"
+            for step in steps
+        )
+
+    reuse = [
+        passed_step(
+            by_name[name],
+            "Reuse validated deterministic baseline"
+            if name == "Cross-platform deterministic outputs"
+            else "Reuse validated Source baseline",
+        )
+        for name in SOURCE_FULL_JOBS
+    ]
+    if all(reuse):
+        if not passed_step(
+            by_name[SOURCE_FAST_JOB], "Run changed tests with verified baseline"
+        ):
+            raise ReleaseEvidenceError("Scoped Source run lacks successful focused tests")
+        return {"mode": "focused", "basis": "verified hosted baseline"}
+    if any(reuse):
+        raise ReleaseEvidenceError("Source matrix mixed full and reused jobs")
+    for name in SOURCE_FULL_JOBS:
+        expected_step = (
+            "Compare artifact hashes"
+            if name == "Cross-platform deterministic outputs" else "Run source checks"
+        )
+        if not passed_step(by_name[name], expected_step):
+            raise ReleaseEvidenceError(f"Full Source job {name!r} did not run checks")
+    return {"mode": "full"}
+
+
 def _required_int(run: dict[str, Any], key: str, *, workflow: str) -> int:
     value = run.get(key)
     if not isinstance(value, int) or isinstance(value, bool):
@@ -272,6 +341,13 @@ def collect_release_evidence(
             commit_sha=commit_sha,
         )
         entry = asdict(evidence)
+        if requirement == REQUIRED_WORKFLOWS[0] and include_cross_browser:
+            source_jobs = _request_json(
+                cross_browser_jobs_url(repository, evidence.run_id), token=token,
+            )
+            entry["source_validation"] = verify_source_jobs(
+                source_jobs, run_id=evidence.run_id,
+            )
         if requirement == CROSS_BROWSER_WORKFLOW:
             job_payload = _request_json(
                 cross_browser_jobs_url(repository, evidence.run_id), token=token,
@@ -344,8 +420,13 @@ def render_tag_message(tag: str, evidence: dict[str, Any]) -> str:
             and isinstance(url, str)
         ):
             raise ReleaseEvidenceError("Release evidence contains incomplete workflow metadata")
+        scope = workflow.get("source_validation") if name == "Source checks" else None
+        suffix = (
+            " [focused; verified hosted baseline]"
+            if isinstance(scope, dict) and scope.get("mode") == "focused" else ""
+        )
         lines.append(
-            f"- {name}: {conclusion} (run {run_number}, attempt {run_attempt})"
+            f"- {name}: {conclusion} (run {run_number}, attempt {run_attempt}){suffix}"
         )
         lines.append(f"  {url}")
     return "\n".join(lines) + "\n"

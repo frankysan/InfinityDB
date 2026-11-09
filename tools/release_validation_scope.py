@@ -111,6 +111,8 @@ def main(argv: list[str] | None = None) -> int:
         scope = ChangeScope(True, "Git ancestry or diff unavailable", ())
     full = "true" if scope.full else "false"
     print(f"Source-validation scope: full={full}; {scope.reason}")
+    if not scope.full:
+        print(f"Reused fully validated baseline: {args.base.lower()}")
     if args.github_output is not None:
         with args.github_output.open("a", encoding="utf-8") as output:
             output.write(f"full={full}\n")

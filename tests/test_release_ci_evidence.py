@@ -177,6 +177,64 @@ def _browser_jobs(run_id: int = 200) -> list[dict[str, object]]:
     ]
 
 
+def _source_jobs(run_id: int = 101, *, focused: bool = False):
+    names = release_ci.SOURCE_FULL_JOBS
+    jobs = [
+        {
+            "id": 301 + index,
+            "run_id": run_id,
+            "name": name,
+            "status": "completed",
+            "conclusion": "success",
+            "steps": [{
+                "name": (
+                    "Reuse validated deterministic baseline"
+                    if name == "Cross-platform deterministic outputs"
+                    else "Reuse validated Source baseline"
+                ),
+                "conclusion": "success",
+            }] if focused else [],
+        }
+        for index, name in enumerate(names)
+    ]
+    if focused:
+        jobs.append({
+            "id": 309,
+            "run_id": run_id,
+            "name": release_ci.SOURCE_FAST_JOB,
+            "status": "completed",
+            "conclusion": "success",
+            "steps": [{
+                "name": "Run changed tests with verified baseline",
+                "conclusion": "success",
+            }],
+        })
+    return jobs
+
+
+def test_source_evidence_requires_full_matrix_or_proven_focused_run() -> None:
+    full = _source_jobs()
+    assert release_ci.verify_source_jobs(
+        {"jobs": full, "total_count": len(full)}, run_id=101
+    ) == {"mode": "full"}
+    focused = _source_jobs(focused=True)
+    assert release_ci.verify_source_jobs(
+        {"jobs": focused, "total_count": len(focused)}, run_id=101
+    ) == {"mode": "focused", "basis": "verified hosted baseline"}
+
+    with pytest.raises(release_ci.ReleaseEvidenceError, match="focused tests"):
+        missing_steps = [dict(job) for job in focused]
+        missing_steps[-1]["steps"] = []
+        release_ci.verify_source_jobs(
+            {"jobs": missing_steps, "total_count": len(missing_steps)}, run_id=101
+        )
+    with pytest.raises(release_ci.ReleaseEvidenceError):
+        broken = [*full[:-1], dict(full[-1], conclusion="failure")]
+        release_ci.verify_source_jobs(
+            {"jobs": broken, "total_count": len(broken)}, run_id=101
+        )
+
+
 def test_cross_browser_job_validation_fails_closed() -> None:
     jobs = _browser_jobs()
     expected = release_ci.verify_cross_browser_jobs(
@@ -209,6 +267,9 @@ def test_collect_release_evidence_requires_cross_browser_job_matrix(monkeypatch)
     def fake_request(url: str, *, token: str | None) -> dict[str, object]:
         requested.append(url)
         if "/jobs?" in url:
+            if url == release_ci.cross_browser_jobs_url(REPOSITORY, 101):
+                jobs = _source_jobs()
+                return {"jobs": jobs, "total_count": len(jobs)}
             assert url == release_ci.cross_browser_jobs_url(REPOSITORY, 200)
             return {"jobs": _browser_jobs(), "total_count": 4}
         requirement = next(item for item in requirements if item.filename in url)
@@ -223,7 +284,8 @@ def test_collect_release_evidence_requires_cross_browser_job_matrix(monkeypatch)
     evidence = release_ci.collect_release_evidence(
         REPOSITORY, COMMIT, include_cross_browser=True
     )
-    assert len(requested) == 5
+    assert len(requested) == 6
+    assert evidence["workflows"][0]["source_validation"] == {"mode": "full"}
     browser = evidence["workflows"][-1]
     assert browser["workflow"] == "Cross-browser compatibility"
     assert len(browser["jobs"]) == 4

@@ -236,6 +236,8 @@
         "test_path_sanitization",
         "test_pipeline_console",
         "test_release_ci_evidence",
+        "test_release_metadata",
+        "test_release_validation_scope",
         "test_report_metrics",
         "test_run_checks",
         "test_sample_test_host_resources",
