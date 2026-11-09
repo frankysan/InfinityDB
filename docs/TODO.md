@@ -43,11 +43,11 @@ when all contained work shares the same owner.
   generating historical JSON. The standalone deployed-object JSON publisher
   and v8/v9 refresh/promotion CLI are retired. Current variant-usage
   source builds now require embedded deployed objects; loose JSON cannot
-  recover older schemas. Standalone terrain/scenery staging and staged-pair
-  verification commands are disabled; their historical helper/test files
-  still require atomic deletion with test-section registry updates.
-  Continue retirement of the remaining legacy loader, migration modules
-  and obsolete-path tests while preserving current source guards.
+  recover older schemas. The obsolete terrain/scenery binary staging and
+  staged-pair verification modules and their staging-only tests have been
+  deleted with corresponding test-section registry cleanup. Continue
+  retiring the remaining legacy JSON loader, completed promotion/staging
+  modules and obsolete tests while preserving current source guards.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;

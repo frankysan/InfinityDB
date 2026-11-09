@@ -1017,6 +1017,23 @@ registry updates and independently maintained source/integrity guards.
 This is command retirement, **not** physical helper/test file removal;
 no Docker or deployment validation was run for this slice.
 
+**2026-11-09 P2.5 sixth slice, physical legacy staging deletion:**
+At commit `15a2ed23`, the two superseded terrain staging/verification
+tools and their three historical test modules were physically deleted
+together with their three `config/testing/test-sections.json` entries.
+No active build, CLI, CI or deployment consumer required the removed tools.
+The old runnable reproduction instructions were replaced with historical
+provenance and a reference to Git history. Current maintained regressions
+on the synchronized Windows checkout passed **60 cases**:
+test-section discovery (15), Restrictions chart storage/API (15),
+selected database-set health (20), deployed-object storage/build/serving (9)
+and core Rules export provenance (1). Ruff, canonical Pyright (0 errors),
+documentation lint/links/backlog, Git whitespace and tracked runtime
+artifact/provenance verification passed (SVG checks disabled). The removal
+commit's hosted installed-wheel and deployment-smoke runs passed; Source
+checks were still in progress when reviewed. No full suite, direct Docker
+run or deployment was performed as part of this slice.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -7665,49 +7682,22 @@ State references use canonical links, and the ordinary Terrain noun is
 pinned separately from the `skill:terrain` identity with exact
 passage hashes. The rules build now passes.
 
-The final two-binary refresh **was completed and verified** to pair the
-post-promotion source corrections with a matching `rules.db` and
-`deployed-objects.json` fingerprint. The following is the archived
-reproduction procedure; it requires a new, unused output directory
-if the original local staging directory still exists:
+The final historical two-binary refresh **was completed and verified**
+to match the promoted terrain/scenery source corrections with `rules.db`
+and `deployed-objects.json`. The archived staging report, source hash,
+release baseline, schema, Restrictions and deployed-object pair
+fingerprints were checked at the time. No deployment was performed by
+that migration procedure.
 
-```powershell
-& .\.venv\Scripts\python.exe -m tools.stage_promoted_terrain_artifacts --output-dir local/terrain-scenery-refresh-n53
-```
-
-The original `local/terrain-scenery-refresh-n53/staging-report.json`
-and promoted binary hashes were verified during the historical refresh.
-An older ignored staging directory is **not** automatically a safe source
-for a new promotion: its source, active release baseline or schema may
-have changed. Rebuild into a fresh directory, then use the read-only
-freshness gate before reviewing any manual promotion:
-
-```powershell
-$stage = "local/terrain-scenery-refresh-n53-new"
-& .\.venv\Scripts\python.exe -m tools.stage_promoted_terrain_artifacts --output-dir $stage
-& .\.venv\Scripts\python.exe -m tools.verify_staged_release_pair --stage $stage
-```
-
-The verifier also accepts new output from
-`tools.stage_deployed_object_citation_migration` and
-`tools.stage_terrain_scenery_references`. It requires the staging report
-to identify the original active `rules.db` and `deployed-objects.json`
-hashes, then checks that neither release baseline nor curated source
-changed. It verifies both staged hashes, schema version, reviewed
-Restrictions and deployed-object pair integrity. Reports created before
-the baseline-hash fields existed fail closed; retain them only as historical
-evidence. No staging tool or verifier applies the candidate automatically.
-After separately reviewed promotion, run the publication check and rules
-stage against the newly paired tracked binaries.
-
-The refreshed binary pair must be committed together with the curated
-source and corresponding review policy/checklist changes. No deployment
-has occurred. The regression
-`tests/test_promoted_terrain_artifacts.py` checks that an isolated rebuild
-does not modify tracked inputs and, when the ignored staging report is
-present, verifies its source hash and exact binary equality against the
-promoted files. The published `rules.db` fingerprint is checked even
-without local staging artifacts.
+**Historical procedure retired in P2.5:** the standalone terrain
+stager, staged-pair freshness verifier and their staging-only tests
+were deleted in commit `15a2ed23`. Their old commands and assertions
+remain available through Git history, not as live instructions.
+Do not reuse ignored historical staging directories: their source
+or release baseline may differ. The current path builds the selected
+database set and validates it with `infinity-db database-health --db-dir`.
+The maintained source, schema, embedded Restrictions and provenance
+checks are described in the current P2.5 acceptance record above.
 
 ### Core scenario-object source-domain boundary
 

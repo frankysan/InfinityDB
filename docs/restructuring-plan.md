@@ -1784,20 +1784,31 @@ output preservation on failure). Legacy staging layout, report-baseline
 checks, manual rollback choreography and the loose JSON pairing no longer
 establish independent product obligations.
 
-**Next atomic deletion group:** `tools/stage_promoted_terrain_artifacts.py`,
+#### P2.5 — Sixth slice: delete the retired terrain staging cluster (2026-11-09)
+
+The five historical files were **physically removed** in commit
+`15a2ed23`: `tools/stage_promoted_terrain_artifacts.py`,
 `tools/verify_staged_release_pair.py`,
 `tests/test_promoted_terrain_artifacts.py`,
 `tests/test_verify_staged_release_pair.py` and
-`tests/test_legacy_staging_schema_guards.py`, plus their three entries
-in `config/testing/test-sections.json`. Review historical prose as
-archived evidence, not a command reference. Separately evaluate
-`tools/stage_terrain_scenery_references.py` and its staging-only tests
-without dropping its source-review evidence. No historical tool/test
-import is by itself a reason to retain this cluster.
+`tests/test_legacy_staging_schema_guards.py`. The same atomic commit
+removed their three entries from `config/testing/test-sections.json`.
+No current application, CLI, CI or deployment consumer imported those tools.
+The removed tests asserted only historical staging/report behavior.
+The accepted source identities, curation and provenance checks remain
+maintained in the active Rules, Restrictions, deployed-object and
+selected database-set builders/tests identified above. The exact
+historical command and its outputs remain recoverable from Git history;
+no second executable archive was created.
 
-**Remaining P2.5:** Perform the atomic deletion above, then retire the
-broader stage/promotion dependency cluster and the standalone JSON
-read/serialization adapters after current-purpose checks are preserved.
+The historical testing notes now distinguish completed acceptance from
+runnable development instructions. The still-present
+`tools/stage_terrain_scenery_references.py` and its staging tests require
+a separate purpose/evidence review; they were not part of this deletion.
+
+**Remaining P2.5:** Retire the broader completed stage/promotion dependency
+cluster and the standalone JSON read/serialization adapters after extracting
+any independently useful current-path source or provenance assertions.
 P2.6–P2.8 still own final naming/defaults, assembly-stage removal and full
 local/container integration acceptance.
 
