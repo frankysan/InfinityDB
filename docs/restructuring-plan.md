@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0.1–P0.4 implemented; P0.5 tracked guidance reconciled, with an outstanding local-only preference update. P1–P6 remain planned.  
+**Status:** Active on `dev/v1.1.0`: P0 completed (including the verified checkout-local preference update); P1.1 inventory completed; P1.2–P6 remain planned.  
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
 
@@ -126,7 +126,7 @@ The ordering below expresses **dependencies**, not a requirement to serialize in
 
 #### P0.2 — Proposed normal task lifecycle (2026-11-09)
 
-**Status:** Implemented on `dev/v1.1.0` through P0.3–P0.5 tracked guidance changes. This section records the rationale, not a second operating manual. Active task instructions live in `docs/testing.md`, linked from `AGENTS.md`. The Git-ignored local preference update remains a user-owned follow-up.
+**Status:** Implemented on `dev/v1.1.0` through P0.3–P0.5 tracked guidance changes. This section records the rationale, not a second operating manual. Active task instructions live in `docs/testing.md`, linked from `AGENTS.md`. The checkout-local preference update was subsequently completed and verified.
 
 **Default task unit:** One coherent, reviewable behavior change or closely coupled set of changes with an observable acceptance condition. Avoid splitting every file edit into its own investigation/test/commit cycle, but do not mix independent defects merely to fill a batch. Small, known tasks need no separate planning agent, formal handoff or pre-implementation approval.
 
@@ -225,11 +225,10 @@ real deployment remains separately authorized. Project-wide documentation
 audits, manual full-suite repetitions and large post-deployment browser
 matrices are risk-based, not blanket release gates.
 
-**Still to do:** P0.5's tracked reconciliation is recorded below; the
-Git-ignored user-local preferences need manual update. P2 owns deleting
-application data-candidate/promotion infrastructure and unifying local and
-Docker runtime publication. Those are *not* implicitly removed by the
-simplified release policy.
+**Still to do:** P0.5's tracked and checkout-local reconciliation is recorded
+below. P2 owns deleting application data-candidate/promotion infrastructure
+and unifying local and Docker runtime publication. Those are *not* implicitly
+removed by the simplified release policy.
 
 #### P0.5 — Agent and documentation guidance reconciliation (2026-11-09)
 
@@ -242,21 +241,19 @@ read-only status entrypoint no longer mandate a whole-backlog or status
 inventory at every boundary. Preserve local Git safety, source semantics,
 release authorization and published evidence guarantees.
 
-**Local-only exception, not silently rewritten:** The Git-ignored
-`AGENTS.local.md` still contains its superseded VD/VR separation,
-3/5 thresholds, age and drain loop, ban on implementation-time tests,
-full-suite-only Linux concurrency exception and routine queue reporting
-(its Validation and reporting section and final Linux-work bullet).
-The workspace exposes this private file for inspection but **denies edits**
-to its path. Tracked policy takes precedence; the owner must reconcile those
-specific local lines separately. All unrelated local preferences remain
-untouched, and no private machine information was promoted into Git.
+**Local-only reconciliation verified:** The user manually updated the
+Git-ignored `AGENTS.local.md` on the current checkout. A subsequent read-only
+inspection confirmed that the old VD/VR 3/5 threshold, drain-to-zero,
+implementation-time test ban and full-suite-only Linux concurrency rules were
+replaced with the canonical focused-first policy. Other local preferences
+remain untracked and were not promoted to project policy. This verification
+does not imply that other checkouts have the same private file.
 
 **Exit:** One authoritative tracked workflow under `docs/testing.md`;
 `docs/validation-queue.md`, `docs/ci.md` and `docs/releasing.md`
 retain domain-specific rules. A small implementation no longer invokes
-historical V1S, VD/VR or release ceremony by default. The remaining local
-override is explicitly disclosed rather than treated as completed.
+historical V1S, VD/VR or release ceremony by default. This checkout's
+local preference guidance is now aligned; other machines remain independent.
 
 ### P1 — Map the dependency graph and define the cutover
 
@@ -272,6 +269,110 @@ override is explicitly disclosed rather than treated as completed.
 6. **P1.6 — Classify tooling.** Mark each tool as maintained runtime/build utility, reusable check, completed one-use helper, extractable acquisition concern, or obsolete. Cite live imports, CI, commands and documentation consumers before removal.
 
 **Exit:** Each runtime data dependency has a named database destination and migration order; the two serve targets have one artifact contract; tool retirements are evidence-based; baseline comparisons are runnable.
+
+#### P1.1 — Entry points and artifact-path inventory (2026-11-09)
+
+**Status:** Read-only inventory completed on `dev/v1.1.0` at
+`be70d859447b5c79541e1f885807918a21704d32`; no data, code,
+deployment or database files were changed. This is a **path/ownership
+classification**, not proof that every runtime consumer has been traced.
+P1.2 must establish those dependencies individually before any cutover.
+
+**Maintained and source inputs:**
+
+- `src/infinity_army_data/` — standalone Army merge, normalize and export
+  implementation. `src/infinity_db/` — integrated build/CLI, rules models,
+  SQLite repositories, and `web/` WSGI/API/presentation. The entrypoints in
+  `pyproject.toml` are `infinity-db` and `infinity-army`; production WSGI
+  enters via `infinity_db.web.wsgi:app`.
+- `data/raw/` — ignored immutable Army/symbol ZIP snapshots, acquired
+  explicitly by `tools/download_army_json.py` and related symbol tools.
+  `data/wiki/` and `data/pdf/` — ignored research source archives/documents,
+  not implicit normal-build inputs. `data/work/`, `data/logs/`,
+  `data/reports/`, `data/backups/` — local acquisition/transformation state.
+- `config/catalogs/`, `config/identity/`, `config/validation/` and
+  `config/symbols/` — maintained JSON mappings, review decisions,
+  validation evidence and symbol policy. Classify each file by actual build
+  or runtime reads in P1.2; being JSON does **not** make a file a runtime
+  sidecar.
+- `data/curated/rules/`, `identities/`, `peripherals/`,
+  `relationships/`, `enrichment-coverage/`, `rules-interactions/`,
+  `snapshot-notes/`, and reviewed root JSON — maintained knowledge and
+  source evidence. Rules curation feeds `build-rules`; Army/identity
+  curation also feeds normalization and publication.
+- `data/manifests/snapshots/` and `army-symbol-build.json` — ignored
+  generated provenance/build state. **`data/manifests/symbol-publication.json`
+  is different:** a tracked release publication and an observed **runtime
+  lookup input** for `SymbolCatalog`. Its mappings must be accounted for
+  before retiring any required runtime JSON.
+
+**Generated and release outputs (current v10):**
+
+- `data/generated/infinity.db` — tracked Army runtime release database;
+  `data/generated/rules.db` — tracked N5/Rules runtime release database,
+  with reviewed deployed objects embedded in v10.
+- `data/generated/variant-usage.json` and
+  `data/generated/weapon-profile-sources.json` — **tracked, required,
+  database-paired release publications**; runtime reads their JSON content.
+  These are first-class P2 migration candidates, not merely build diagnostics.
+- `data/generated/master.json`, `normalized.json`,
+  `normalized-validation.json`, `infinity.raw.db` and generated
+  reports — rebuildable intermediates/development source provenance.
+  `infinity.raw.db` is needed to produce exact-variant output **at build
+  time** but is not included in the v10 serving bundle.
+  `data/generated/deployed-objects.json` is a legacy v8/v9 compatibility
+  output, not a required v10 file.
+- `src/infinity_db/web/static/` — packaged HTML/CSS/JS, processed SVG
+  symbols, fonts and other browser assets. **`static/restrictions-reference.json`
+  is directly fetched by the browser**, via `static/api.js`, independently
+  of the database bundle. Treat it as runtime structured data in P1.2/P2.4.
+  SVGs, fonts and ordinary scripts remain files under the agreed target.
+- `build/`, `dist/`, `reports/`, `local/` and analogous cache/output
+  directories contain packaging, test, diagnostics or checkout-local work;
+  their existence does not make them tracked release inputs.
+
+**Two current serving and packaging paths:**
+
+1. **Checkout:** `infinity-db build --compact` writes the Army
+   application/raw pair, historically replacing tracked
+   `data/generated/infinity.db`. Plain `infinity-db build-rules` writes
+   ignored `local/rules-standalone.db` and calls
+   `tools.build_v10_runtime_candidate.publish_checkout_runtime`, which
+   validates and assembles four matched files under ignored
+   `local/checkout-runtime/`. Plain `infinity-db serve` selects that
+   bundle if present/current, otherwise the tracked release database pair;
+   an explicit `--database` bypasses selection. Entry points:
+   `src/infinity_db/cli.py`, `checkout_runtime.py`,
+   `web/server.py`, `web/app.py`.
+2. **Docker:** `scripts/deploy.sh` and
+   `.github/workflows/deployment-smoke.yml` run release asset checks and
+   `tools.prepare_runtime_bundle`: they validate the **tracked** release
+   pair/sidecars and copy exactly `infinity.db`, `rules.db`,
+   `variant-usage.json`, `weapon-profile-sources.json` into ignored
+   `data/runtime/` for **v10**. `Dockerfile` packages that directory at
+   `/app/data/`; WSGI receives `INFINITY_DB_DATABASE` and
+   `INFINITY_DB_RULES_DATABASE`. `compose.yaml` runs the app, the
+   separately packaged metrics-history collector and Caddy. No raw Army
+   snapshot, checkout bundle or local candidate is required by the image.
+   `Dockerfile.metrics-history` is an independent service image, not an
+   additional gameplay-data database owner.
+
+**Owners to preserve across P1.2–P1.6:** `tools/` contains explicit
+acquisition, symbol building, data-candidate publication, validators,
+CI/release preparation, metrics and migration/audit scripts; they must be
+classified by concrete consumers in P1.6 rather than deleted by naming
+convention. `scripts/` owns deploy/install, local-container and
+image-verification entrypoints; `.github/workflows/` owns Source, wheel,
+Docker, optional browser and full-asset gates. `tests/` and
+`config/testing/` own fixtures/test selection, not release data;
+`docs/` owns current contracts, plans and historical provenance.
+
+**P1.2 priority:** Trace the two JSON database companions, the directly
+served Restrictions JSON, and the symbol-publication manifest through their
+producers, read paths and externally visible results; then inspect other
+runtime file reads and determine which structured facts belong in Army,
+N5 Rules or season databases. Do not equate a static JSON asset with a
+non-runtime document or assume every JSON in `config/` needs migration.
 
 ### P2 — Make runtime data SQLite-only and unify build/serve
 
