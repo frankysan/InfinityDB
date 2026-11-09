@@ -323,8 +323,6 @@ def test_ci_source_workflow_checks_history_with_full_checkout() -> None:
     )
     assert "fetch-depth: 0" in workflow
     assert "python -m tools.check_v1_backlog_ci" in workflow
-    assert (
-        "if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'"
-        in workflow
-    )
+    assert "if: needs.fast-validation.outputs.full == 'true' && matrix.primary" in workflow
+    assert "matrix.check_args == '--all'" not in workflow
     assert "backlog_base:" in workflow
