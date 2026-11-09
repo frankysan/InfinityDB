@@ -1034,6 +1034,22 @@ commit's hosted installed-wheel and deployment-smoke runs passed; Source
 checks were still in progress when reviewed. No full suite, direct Docker
 run or deployment was performed as part of this slice.
 
+**2026-11-09 P2.5 seventh slice, retired pre-promotion terrain proposal:**
+At `4dbbb0d3`, the maintained source audit started requiring both
+accepted Special Terrain / Access Width rules and their N5.3 citations;
+negative tests prove that removing both rule records or changing the
+Access Width source page fails closed. At `7330c310`, the one-use
+terrain reference stager, staging-only tests, and superseded proposal JSON
+were deleted together with the single test-section registry entry.
+The authoritative accepted definitions and exact source examples remain
+in curated Rules and its maintained tests, not a second proposal source.
+Post-deletion focused validation passed **56 tests**: source/PDF/API
+(20), test-section registry (15), selected database-set health (20)
+and core Rules export provenance (1). Ruff, canonical Pyright (0
+errors), docs lint/links/backlog, Git whitespace and tracked runtime
+artifact/provenance checks passed (SVG validation disabled).
+No direct Docker or full suite run was performed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -7668,14 +7684,14 @@ their generated artifacts: `rule:special-terrain` (p. 143) and
 `rule:access-width` (p. 145). They specify optional table scope, terrain
 Types and characteristics, scenery Access Width precedence and the
 Silhouette X/Prone restriction, without creating extra object identities.
-The original one-time staging and promotion procedure was:
+The original one-time staging and three-file promotion are complete.
+The pre-promotion staging script, its tests and proposal JSON were retired
+in P2.5 at `7330c310`: their exact historical content is available in
+Git history, not as current instructions. The maintained terrain source
+audit now rejects the original fully unmodelled state and missing source
+citation pages. The accepted curated Rules definitions are authoritative.
 
-```powershell
-.venv\Scripts\python.exe -m tools.stage_terrain_scenery_references --output-dir local/terrain-scenery-references-n53 --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
-```
-
-The original staging and three-file promotion are complete. The first
-post-promotion rules check revealed two missing interaction-review entries
+The first post-promotion rules check revealed two missing interaction-review entries
 and reviewed maintained-text aliases. Those reviews are now recorded:
 the interaction checklist has **200/200 supporting identities**, Prone
 State references use canonical links, and the ordinary Terrain noun is

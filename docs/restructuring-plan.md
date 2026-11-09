@@ -1806,11 +1806,34 @@ runnable development instructions. The still-present
 `tools/stage_terrain_scenery_references.py` and its staging tests require
 a separate purpose/evidence review; they were not part of this deletion.
 
-**Remaining P2.5:** Retire the broader completed stage/promotion dependency
-cluster and the standalone JSON read/serialization adapters after extracting
-any independently useful current-path source or provenance assertions.
-P2.6–P2.8 still own final naming/defaults, assembly-stage removal and full
-local/container integration acceptance.
+#### P2.5 — Seventh slice: retire pre-promotion terrain proposal (2026-11-09)
+
+The original Special Terrain / Access Width reference insertion was
+accepted and published before v1.0. Its one-use stager and evidence
+were no longer independent build inputs. Commit `4dbbb0d3` tightened
+the maintained `audit_terrain_scenery_boundary` contract: both accepted
+rule identities, reviewed N5.3 citation pages and the distinct deployed
+object domain must be present; neither the fully absent pre-promotion
+state nor a partial migration passes. Existing tests continue checking
+the 18 source examples, gate-token ownership, pinned PDF cells, and
+Rules database / API equality.
+
+Commit `7330c310` physically removed
+`tools/stage_terrain_scenery_references.py`,
+`tests/test_terrain_scenery_reference_staging.py`, and the one-time
+`config/validation/terrain-scenery-reference-additions.json`, along
+with the test suite's registry entry. The proposal was superseded by
+the accepted curated `rule:special-terrain` and `rule:access-width`
+records. The original proposal, review date and staging implementation
+remain recoverable from Git history; no private duplicate archive or
+runtime fallback was added. Historical testing notes no longer advertise
+the removed command as runnable.
+
+**Remaining P2.5:** Retire the broader completed stage/promotion
+dependency cluster and standalone JSON read/serialization adapters after
+extracting independently useful current-path source or provenance checks.
+P2.6–P2.8 still own final naming/defaults, assembly-stage removal and
+full local/container integration acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

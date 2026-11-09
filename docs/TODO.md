@@ -45,8 +45,10 @@ when all contained work shares the same owner.
   source builds now require embedded deployed objects; loose JSON cannot
   recover older schemas. The obsolete terrain/scenery binary staging and
   staged-pair verification modules and their staging-only tests have been
-  deleted with corresponding test-section registry cleanup. Continue
-  retiring the remaining legacy JSON loader, completed promotion/staging
+  deleted with corresponding test-section registry cleanup. The separate
+  terrain/scenery pre-promotion stager, test module and proposal JSON have
+  also been retired; current source checks now require both accepted rules.
+  Continue retiring the legacy JSON loader, completed promotion/staging
   modules and obsolete tests while preserving current source guards.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
