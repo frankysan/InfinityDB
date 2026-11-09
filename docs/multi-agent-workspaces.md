@@ -313,7 +313,7 @@ use the CLI without the MCP gateway.
 
 Before work begins, an integration coordinator assigns a distinct agent,
 task ID, workspace, base revision and expected path scope. Check
-[TODO](TODO.md#v1s-work-selection-and-handoff) and
+[TODO](TODO.md) and
 [validation queue](validation-queue.md#queue-rules) before assigning a numbered
 slice. Avoid two agents implementing the same acceptance target without an
 explicit split or agreed dependency. Overlapping expected paths are a

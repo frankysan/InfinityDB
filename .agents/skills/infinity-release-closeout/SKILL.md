@@ -35,7 +35,7 @@ closeout and release readiness, not the feature itself.
    [backlog completion and retirement](../../../docs/README.md#backlog-completion-and-retirement)
    to the affected task and parent. Remove fully completed work in the same
    commit; leave a concrete, actionable remainder when blocked. Use the
-   historical [V1S selection gate](../../../docs/TODO.md#v1s-work-selection-and-handoff)
+   historical [V1S selection gate](../../../docs/testing.md#v1s-backlog-checks)
    only if a numbered V1S task is explicitly reopened; list retired V1S IDs
    in that commit. Unrelated small work does not require V1S bookkeeping.
 5. Update `README.md` for user-visible behavior, setup, or major capabilities. Update architecture,

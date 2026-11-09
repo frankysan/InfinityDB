@@ -290,11 +290,13 @@ build step is part of the application's runtime or packaging.
 
 ## V1S backlog checks
 
-The static V1S register check is part of the regular `docs` stage. The
-completed 1.0 development register currently has **zero active V1S entries**;
-do not run a task-selection command with a null ID. Only if a numbered task is
-reopened, run the following selection check. It examines every earlier open ID
-across workstreams and fails unexplained skips:
+The historical V1S check remains part of the regular `docs` stage. With
+no active V1S entries, the old register heading need not remain in TODO;
+unscoped V1S task declarations still fail validation. If a numbered V1S
+task is reopened, restore the `Pre-planned 1.0 execution slices` heading
+before adding it. Do not run task selection with a null ID. The selection
+check examines every earlier open ID across workstreams and fails
+unexplained skips:
 
 ```powershell
 $taskId = (.\.venv\Scripts\python.exe -m tools.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable
@@ -3794,7 +3796,7 @@ intermittent Windows Glossary/Spec-Ops full-load visibility
 timeouts, the Scenario FAQ browser lifecycle/long tail,
 pooled-versus-fresh browser comparisons, and optional source
 PDF/staging parity. They are tracked in
-[the Post-1.0 backlog](TODO.md#performance-storage-and-build-tooling),
+[the active backlog](TODO.md#performance-storage-and-build-tooling),
 not as an open VR-0023 acceptance gate. The validated Linux
 four-slot and Windows two-slot limits remain unchanged; no
 production browser or CI configuration changes.
@@ -3832,7 +3834,7 @@ configuration even when an aborted request still resolves. Responsive grid
 contracts are also checked in the web suite. Scenario browser visual review was
 user-confirmed on 2026-10-08; later bounded Chromium interaction acceptance is
 documented under [four-core-scenario acceptance](#10-four-core-scenario-browser-acceptance).
-Neither run replaces [final candidate acceptance](TODO.md#final-10-acceptance).
+Neither run replaces [final candidate acceptance](releasing.md#development-freeze-and-release-only-handoff).
 
 ## Silhouette manual browser acceptance
 

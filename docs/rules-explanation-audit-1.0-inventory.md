@@ -10,7 +10,7 @@ It is not generated runtime data or a replacement interaction ledger.
 The D/S classifications and original finding titles are historical evidence,
 **not the current implementation status**. In particular, REA-008, REA-017,
 and REA-026 have subsequently been completed within their stated scopes;
-consult the [current backlog](TODO.md#rules-and-reference-completeness)
+consult the [current backlog](TODO.md#active-development)
 and the main audit's follow-up notes before treating a finding as open.
 
 ## Coverage totals

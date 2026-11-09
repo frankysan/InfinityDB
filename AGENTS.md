@@ -48,14 +48,15 @@ it never substitutes for tests or exact-SHA release acceptance.
 
 ### Backlog work selection and closeout
 
-For autonomous work, select from the active [post-1.0 backlog](docs/TODO.md)
+For autonomous work, select from the [active backlog](docs/TODO.md)
 when the user has not specified the task. When changing a backlog item, apply
 its [completion/retirement contract](docs/README.md#backlog-completion-and-retirement):
 close completed items in the same commit, retain actionable incomplete work
 and do not claim acceptance while required checks are outstanding.
 The historical V1S register has no open tasks; use the
 [V1S selection/retirement gate](docs/testing.md#v1s-backlog-checks) **only**
-when a numbered V1S task is reopened, recording retired IDs in that commit.
+when a numbered V1S task is reopened, restoring the register heading and
+recording retired IDs in the eventual closeout commit.
 Ordinary tasks do not require V1S scans or administrative closeout passes.
 
 ### Phased validation and task-boundary checkpoint

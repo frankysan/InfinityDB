@@ -3707,7 +3707,7 @@ the four Core missions. Browser selection state uses the common versioned
 share-state token; legacy explicit `army_points` input remains readable.
 Broader geometry/element vocabularies remain post-1.0 work. The
 [Core scenario browser acceptance](testing.md#frozen-pair-four-scenario-interactions-v1s-045)
-is recorded separately from the [remaining release gates](TODO.md#final-10-acceptance);
+is recorded separately from the [release checklist](releasing.md#development-freeze-and-release-only-handoff);
 known source discrepancies retain their disclosed scope.
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses

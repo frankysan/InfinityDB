@@ -462,6 +462,31 @@ def test_duplicate_and_malformed_v1s_declarations_have_stable_diagnostics() -> N
     ]
 
 
+def test_retired_v1s_register_can_be_absent() -> None:
+    result = _analyze("""# Backlog
+## Active development
+Historical V1S-001 was closed; see the release records.
+- [ ] Add new unit search filters.
+```markdown
+- [ ] V1S-002 (S, test): Fenced historical example.
+```
+""")
+    assert result.tasks == ()
+    assert result.diagnostics == ()
+
+
+@pytest.mark.parametrize("declaration", [
+    "- [ ] V1S-001 (S, test): Reopened without register.",
+    "  - [x] **V1S-bad (S, test):** Malformed reopened task.",
+])
+def test_unscoped_v1s_declaration_requires_legacy_register(declaration: str) -> None:
+    result = _analyze(f"# Backlog\n## Active development\n{declaration}\n")
+    assert result.tasks == ()
+    assert [(item.code, item.line) for item in result.diagnostics] == [
+        ("V1B004", 3)
+    ]
+
+
 def test_valid_numeric_gaps_are_not_reported_as_missing_tasks() -> None:
     result = _analyze(
         """# Backlog

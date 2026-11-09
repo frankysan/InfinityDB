@@ -13,7 +13,7 @@ without changing rule/data implementations.
 **Historical assessment:** The comparison tables and their status totals describe
 that examined baseline, with explicitly dated follow-ups below. They are not a
 current defects list: many listed explanations and references have since been
-published. Use [TODO](TODO.md#rules-and-reference-completeness) for remaining
+published. Use [TODO](TODO.md#active-development) for remaining
 work and the canonical data/semantic documents for current behavior. Preserve
 the original source identities, counts and unresolved disagreements rather than
 reclassifying historical rows as current approvals.
@@ -25,8 +25,8 @@ This section is a **current disposition overlay**, not a revision to the
 notice's 26 numbered rule changes, the four additional Spanish-only subjects,
 20 separate Army changes and nine added FAQ rulings. A completed *selected
 change* is not whole-record, cross-source, or release-browser acceptance.
-The owning 1.0 work and release criteria remain in
-[TODO](TODO.md#source-inventory-and-gap-batches) and
+The historical 1.0 source scope and release criteria are preserved in
+[the source audit](v1.0-source-coverage-audit.md) and
 [releasing](releasing.md#version-10-data-completeness-gate).
 
 ### English rules changelog: 26 subjects
@@ -83,7 +83,7 @@ The owning 1.0 work and release criteria remain in
   Final hosted release acceptance remains open. The interactive
   list/session configurator is still deferred, not part of the
   read-only reference contract. See the scoped
-  [TODO](TODO.md#source-inventory-and-gap-batches).
+  [current configurator backlog](TODO.md#list-and-session-configuration).
 - **2 changes with disclosed official-source disagreements:**
   N53-07 (Kobra CC) preserves a proven DA two-save correction and an
   unresolved Anti-materiel disagreement between Army/Wiki and both PDFs.

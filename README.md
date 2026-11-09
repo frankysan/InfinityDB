@@ -147,8 +147,8 @@ InfinityDB **1.0.0** is the N5.3 current-reference release, following the
 0.6–0.10 series. It includes current-source rules citations, four core
 scenarios, reviewed FAQ and deployed objects, and exact-variant usage
 references. See the [changelog](docs/CHANGELOG.md) for the complete version
-history and the [post-1.0 backlog](docs/TODO.md#post-10--maintenance-and-product-expansion)
-for work outside this baseline.
+history and the [active backlog](docs/TODO.md#active-development)
+for unfinished development work.
 
 Version **1.0.1** is being prepared with improved scenario maps, reference-page
 spacing, version-specific release notes and safer local-build/deployment workflows.

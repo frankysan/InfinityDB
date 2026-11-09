@@ -119,6 +119,20 @@ def test_ci_push_adoption_merge_audits_full_feature_history(
     assert ("V1S CI retirement: PASS" if attributed else "V1B005") in report
 
 
+def test_ci_push_after_register_retirement_is_not_pre_adoption(tmp_path: Path) -> None:
+    root, adoption = _repository(tmp_path)
+    retired = _new_commit(root, "TODO.md", "# Backlog\n## Active development\n",
+                          "docs: retire empty historical register")
+    latest = _new_commit(root, "notes.md", "Maintenance notes.\n", "docs: notes")
+    result = choose_ci_range(
+        "push", {"before": retired, "after": latest},
+        latest, repository=root, adoption_base=adoption,
+    )
+    assert (result.base, result.target, result.origin) == (
+        retired, latest, "push",
+    )
+
+
 def test_ci_push_adoption_merge_refuses_unreviewed_merge_resolution(
     tmp_path: Path,
 ) -> None:

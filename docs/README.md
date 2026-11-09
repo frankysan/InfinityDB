@@ -81,7 +81,7 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   acceptance records. It preserves the reviewed 1.0 input scope without implying
   exhaustive whole-source coverage. Historical snapshots in this file are not
   current task status; `releasing.md` owns release handoff and `TODO.md`
-  owns post-1.0 development.
+  owns active development.
 - [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — dated
   source/interaction assessment with implementation follow-ups and remaining
   source conflicts. Its linked inventory, N5.3 reconciliation and source manifest
@@ -243,7 +243,7 @@ re-scope the remainder under its existing task or correct independent owner.
 For a completed backlog item, reconcile its affected parent with the actual
 diff, required acceptance and any concrete [deferred checks](validation-queue.md).
 Retire finished work in that commit; leave incomplete work open with a specific
-remaining dependency. Invoke the [V1S checkpoint](TODO.md#v1s-work-selection-and-handoff)
+remaining dependency. Invoke the [V1S checkpoint](testing.md#v1s-backlog-checks)
 only for reopened numbered V1S work. Do not turn routine unrelated development
 into an administrative full-backlog or queue review.
 

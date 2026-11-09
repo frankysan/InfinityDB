@@ -1,4 +1,4 @@
-"""Check the active V1S execution-slice register in docs/TODO.md."""
+"""Check historical V1S declarations when the legacy register is present."""
 
 from __future__ import annotations
 
@@ -168,12 +168,41 @@ def _declaration_id(body: str) -> tuple[str | None, str | None]:
     return token, None
 
 
+def _unscoped_v1s_declaration_line(lines: list[str]) -> int | None:
+    """Find a V1S task outside a register, ignoring fenced examples and prose."""
+    fence_char: str | None = None
+    fence_length = 0
+    for index, line in enumerate(lines):
+        fence_match = FENCE.match(line)
+        if fence_match is not None:
+            marker = fence_match.group("fence")
+            if fence_char is None:
+                fence_char, fence_length = marker[0], len(marker)
+            elif marker[0] == fence_char and len(marker) >= fence_length:
+                fence_char = None
+            continue
+        if fence_char is not None:
+            continue
+        item = LIST_ITEM.match(line)
+        if item is None:
+            continue
+        checkbox = CHECKBOX.match(item.group("body"))
+        if checkbox is not None and (checkbox.group("body") or "").lstrip().startswith(
+            ("V1S-", "**V1S-")
+        ):
+            return index + 1
+    return None
+
+
 def analyze_backlog(markdown: str, *, source: str = "docs/TODO.md") -> BacklogAnalysis:
-    """Parse and validate the designated V1S execution-slice section."""
+    """Validate legacy V1S entries; an empty retired register may be absent."""
     lines = markdown.splitlines()
     diagnostics: list[Diagnostic] = []
     bounds = _register_bounds(lines)
     if bounds is None:
+        declaration_line = _unscoped_v1s_declaration_line(lines)
+        if declaration_line is None:
+            return BacklogAnalysis(tasks=(), diagnostics=())
         return BacklogAnalysis(
             tasks=(),
             diagnostics=(
@@ -181,9 +210,9 @@ def analyze_backlog(markdown: str, *, source: str = "docs/TODO.md") -> BacklogAn
                     code="V1B004",
                     severity="error",
                     source=source,
-                    line=1,
-                    message=f"missing '{REGISTER_HEADING}' section",
-                    suggestion="Restore the designated pre-planned 1.0 execution-slice heading.",
+                    line=declaration_line,
+                    message=f"V1S declaration without '{REGISTER_HEADING}' section",
+                    suggestion="Restore the designated section before reopening V1S work.",
                 ),
             ),
         )
