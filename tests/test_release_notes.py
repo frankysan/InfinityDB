@@ -15,22 +15,29 @@ from infinity_db.web.release_notes import (
 def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     all_releases = load_release_notes()
     assert all_releases[0].version == "1.0.1"
-    assert all_releases[0].released_on is None
+    assert all_releases[0].released_on == date(2026, 11, 9)
     releases = tuple(release for release in all_releases if release.released_on is not None)
 
-    assert releases[0].version == "1.0.0"
-    assert releases[0].released_on == date(2026, 11, 7)
+    assert releases[0].version == "1.0.1"
+    assert releases[0].released_on == date(2026, 11, 9)
     assert releases[0].sections[0].heading == "Player summary"
-    assert any("Expanded the N5.3 reference" in item for item in releases[0].player_summary)
+    assert any(
+        "Added the ability to save scenario maps" in item
+        for item in releases[0].player_summary
+    )
     assert [section.heading for section in releases[0].detail_sections] == [
         "Added", "Changed", "Fixed", "Upgrade notes",
     ]
     assert all(release.version is not None for release in releases)
 
     previous = releases[1]
-    assert previous.version == "0.10.1"
-    assert previous.released_on == date(2026, 10, 10)
-    assert any("scenarios" in item for item in previous.player_summary)
+    assert previous.version == "1.0.0"
+    assert previous.released_on == date(2026, 11, 7)
+    assert any("Expanded the N5.3 reference" in item for item in previous.player_summary)
+
+    release_0101 = next(release for release in releases if release.version == "0.10.1")
+    assert release_0101.released_on == date(2026, 10, 10)
+    assert any("scenarios" in item for item in release_0101.player_summary)
     assert [section.heading for section in previous.detail_sections] == [
         "Added",
         "Changed",

@@ -16,7 +16,72 @@ permissions:
   contents: read
 
 jobs:
+  fast-validation:
+    name: Fast validation and scope
+    runs-on: ubuntu-latest
+    outputs:
+      full: ${{ steps.plan.outputs.full }}
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11.9"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install developer test dependencies
+        run: python -m pip install -e ".[dev,symbols]"
+
+      - name: Decide validated Source scope
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATION_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: >-
+          python -m tools.release_validation_scope
+          --base "$VALIDATION_BASE" --head HEAD
+          --repository "${{ github.repository }}" --github-output "$GITHUB_OUTPUT"
+
+      - name: Run Ruff before expensive tests
+        run: python -m ruff check src/infinity_db src/infinity_army_data tests tools
+
+      - name: Verify finalized version and release metadata
+        run: python -m tools.release_metadata
+
+      - name: Run changed tests with verified baseline
+        if: steps.plan.outputs.full == 'false'
+        run: python -m pytest -q ${{ steps.plan.outputs.test_targets }}
+
+      - name: Run focused release checks before full matrix
+        if: steps.plan.outputs.full == 'true'
+        run: >-
+          python -m pytest -q tests/test_release_metadata.py
+          tests/test_release_validation_scope.py tests/test_release_notes.py
+          tests/test_web.py::test_changes_page_renders_canonical_release_history
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install pinned documentation lint dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Validate documentation and backlog structure
+        run: |
+          npm run lint:docs
+          python -m tools.check_doc_links
+          python -m tools.check_v1_backlog
+
   source-checks:
+    needs: fast-validation
     name: ${{ matrix.os }} / Python ${{ matrix.label }}
     strategy:
       fail-fast: false
@@ -54,13 +119,20 @@ jobs:
     # The full check leg includes isolated preflight; Windows has a slower filesystem.
     timeout-minutes: ${{ matrix.timeout_minutes }}
     steps:
+      - name: Reuse validated Source baseline
+        if: needs.fast-validation.outputs.full == 'false'
+        run: echo "Reused Source validation from the hosted-green baseline"
+
       - name: Check out source
+        if: needs.fast-validation.outputs.full == 'true'
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           # Historical reference-evidence tests read pinned older revisions via git show.
           fetch-depth: 0
 
       - name: Set up Python
+        if: needs.fast-validation.outputs.full == 'true'
         uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
@@ -68,27 +140,30 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Check V1S retirement history
-        if: matrix.check_args == '--all'
+        if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'
         run: python -m tools.check_v1_backlog_ci
 
       - name: Install development dependencies
+        if: needs.fast-validation.outputs.full == 'true'
         run: python -m pip install -e ".[dev,symbols]"
 
       - name: Verify symbol Python dependencies
+        if: needs.fast-validation.outputs.full == 'true'
         run: python -c "import cssselect2, fontTools.ttLib, PIL.Image, tinycss2"
 
       - name: Set up Node.js for documentation linting
-        if: matrix.check_args == '--all'
+        if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: npm
 
       - name: Install pinned documentation lint dependencies
-        if: matrix.check_args == '--all'
+        if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'
         run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Validate deployed objects for the tracked rules schema
+        if: needs.fast-validation.outputs.full == 'true'
         # Legacy v8/v9 requires an ignored JSON companion. v10 embeds the same
         # reviewed model in rules.db; do not generate a mismatched legacy JSON.
         run: |
@@ -96,9 +171,11 @@ jobs:
           python -m tools.build_deployed_object_publication --check --when-legacy
 
       - name: Validate tracked exact-variant publication provenance
+        if: needs.fast-validation.outputs.full == 'true'
         run: python -m tools.verify_deployment_assets --skip-svg
 
       - name: Run source checks
+        if: needs.fast-validation.outputs.full == 'true'
         env:
           PYTEST_ADDOPTS: "--durations=20 -ra"
         run: >-
@@ -107,18 +184,18 @@ jobs:
           --assets required --build-source tests/fixtures/deployment-smoke
 
       - name: Report deterministic-output toolchain
-        if: matrix.determinism
+        if: needs.fast-validation.outputs.full == 'true' && matrix.determinism
         run: >-
           python -c "import sqlite3, sys, zlib;
           print('Python', sys.version.split()[0], 'SQLite', sqlite3.sqlite_version,
           'zlib', zlib.ZLIB_RUNTIME_VERSION)"
 
       - name: Build deterministic-output manifest
-        if: matrix.determinism
+        if: needs.fast-validation.outputs.full == 'true' && matrix.determinism
         run: python tools/build_determinism_manifest.py --output reports/determinism-manifest.json
 
       - name: Upload deterministic-output manifest
-        if: matrix.determinism
+        if: needs.fast-validation.outputs.full == 'true' && matrix.determinism
         uses: actions/upload-artifact@v7
         with:
           name: determinism-${{ runner.os }}
@@ -127,22 +204,32 @@ jobs:
 
   deterministic-outputs:
     name: Cross-platform deterministic outputs
-    needs: source-checks
+    needs: [fast-validation, source-checks]
     runs-on: ubuntu-latest
     steps:
+      - name: Reuse validated deterministic baseline
+        if: needs.fast-validation.outputs.full == 'false'
+        run: echo "Reused deterministic outputs from the hosted-green baseline"
+
       - name: Check out source
+        if: needs.fast-validation.outputs.full == 'true'
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Python
+        if: needs.fast-validation.outputs.full == 'true'
         uses: actions/setup-python@v7
         with:
           python-version: "3.11.9"
 
       - name: Download platform manifests
+        if: needs.fast-validation.outputs.full == 'true'
         uses: actions/download-artifact@v8
         with:
           pattern: determinism-*
           path: determinism-manifests
 
       - name: Compare artifact hashes
+        if: needs.fast-validation.outputs.full == 'true'
         run: python tools/compare_determinism_manifests.py determinism-manifests

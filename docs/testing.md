@@ -97,6 +97,16 @@ checks before commit. Exact-SHA hosted Source/Wheel/Deployment/Cross-browser
 acceptance, release dating, tagging and deployment remain separate release
 checklist obligations.
 
+## Focused release validation after a verified baseline
+
+Finalize README, version and changelog metadata **before** the release PR.
+For subsequent documentation or independent-test changes, run
+`python -m tools.release_metadata`, Ruff and the affected pytest selectors
+before considering full validation. The hosted Source workflow independently
+requires a green four-workflow baseline; without it, the complete Source
+matrix runs. This does not exempt the exact-SHA browser, wheel or deployment
+gates. See [the CI policy](ci.md#risk-based-source-validation).
+
 ## Agent coordination safety acceptance
 
 These checks validate the optional coordination CLI. They do not enable it or

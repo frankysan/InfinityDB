@@ -16,8 +16,8 @@ The local [phased validation workflow](testing.md#phased-development-and-validat
 may batch discretionary broad checks between implementation passes. Its
 [active VD/VR queue](validation-queue.md) records pending design and
 execution, including deferred asynchronous Linux runs against explicitly
-selected revisions. These do **not** change required hosted CI triggers,
-jobs, matrices, or acceptance criteria. Outstanding validation for the
+selected revisions. These do **not** waive hosted CI acceptance; the
+risk-based Source scope is verified separately below. Outstanding validation for the
 relevant change must be resolved before merge or release acceptance;
 a local deferral or a green worker run is not a CI exemption.
 
@@ -35,6 +35,38 @@ a local deferral or a green worker run is not a CI exemption.
    contract.
 6. **Keep extended external checks explicit.** Optional network/acquisition/performance workflows
    must not make an otherwise valid source commit fail because an external service is unavailable.
+
+## Risk-based Source validation
+
+The required **fast-validation** job runs before the expensive Source matrix.
+It validates release metadata (including the finalized README/changelog date),
+runs Ruff, focused release-note tests, Markdownlint, document links and backlog
+structure. This fails quickly on stale release headings or formatting errors.
+
+`tools.release_validation_scope` compares the exact PR/push candidate with
+its preceding branch SHA, requiring Git ancestry and an unambiguous path diff.
+Only tracked Markdown, explicit release metadata and independent
+`tests/test_*.py` modules qualify for focused Source checks. Changed test
+modules are executed. Changes to shared fixtures, project configuration,
+CI/tooling, Python/JS/CSS/runtime source, generated databases, deployment
+files or unknown paths **require the full Source matrix**.
+
+A narrow diff is not sufficient: a candidate may reuse Source validation only
+when the baseline SHA has already passed **all four hosted release workflows**:
+Source checks (including determinism), Installed wheel smoke, Deployment smoke
+and all four cross-browser jobs. Missing API access, incomplete/failed
+evidence or uncertain ancestry falls back to full validation. The exact new SHA
+still receives the fast Source job, including focused affected tests.
+
+This optimization currently applies to **Source checks only**. The release
+evidence collector inspects individual Source jobs: it accepts either the
+completed full matrix plus deterministic-output job, or a passed fast job with
+successful changed-test execution and explicit reuse steps in each matrix job
+(instead of running the expensive test/build commands).
+The generated tag annotation identifies focused Source reuse, while retained
+CI logs show the baseline verification. Partial, mixed or missing Source jobs
+block tagging. The separate wheel, deployment and four-browser workflows remain
+mandatory; further per-gate reuse requires its own proof contract.
 
 ## Cross-browser release compatibility gate
 
@@ -156,7 +188,7 @@ fixes unless those capabilities are actually connected and verified.
 ## Source checks
 
 `.github/workflows/source-checks.yml` runs on pull requests, pushes to `main`, and manual dispatch.
-The current matrix is:
+When full validation is required, its matrix is:
 
 - Ubuntu / Python 3.11 — `tools/run_checks.py --all`;
 - Windows / Python 3.11 — test + Army build + rules build, with two fixed pytest workers;
