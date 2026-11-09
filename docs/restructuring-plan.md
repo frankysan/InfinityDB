@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0 and P1 completed (P1.4–P1.5 are target designs, not implemented schemas/paths). P2.1 has shared validation, opt-in complete builds and input provenance; P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon-profile citations in Rules v12, including audit-helper extraction and local real-source reproducibility. The first P2.4 slice embeds the source-reviewed Restrictions chart in Rules v13; remaining P2.4 facts and final defaults/serving integration are unfinished.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in v13 and reviewed Trait Wiki links in v14. The remaining eight maintained datasets, symbol mappings and final build/serving cutover are unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1518,11 +1518,36 @@ compatibility, browser and failure-path tests are recorded in
 [testing](testing.md#selected-runtime-database-set-validation).
 This is local P2.4 evidence, not Linux/Docker/hosted acceptance.
 
-**Remaining P2.4:** Migrate the nine maintained Army/Rules datasets and
-symbol path mappings identified in P1.4. Retain v10/v11/v12 adapters only
-while independent runtime/build/research consumers need them; their
-historical tests alone do not justify preserving old build machinery.
-The final naming, serving and Docker cutover belongs to P2.6.
+#### P2.4 — Second slice: reviewed Trait Wiki links (2026-11-09)
+
+**Status:** Partial, opt-in complete build now emits Rules v14
+(compatibility 16). All 33 reviewed `trait:<slug>` Wiki destinations
+previously loaded by `TraitCatalog` from packaged
+`config/catalogs/trait-wiki-references.json` are stored in
+`trait_source_links` plus `trait_wiki_metadata`. Each source link
+has a current Rules record foreign key and retains its source
+collection, reviewed name, URL, and stable position. The model
+requires exact coverage of current canonical Traits, validates
+the source-observed HTTPS fragment destinations, and fingerprints
+the full link inventory. Malformed or incomplete rows fail closed.
+
+The v14 Trait API reads the embedded links and never calls the
+maintained JSON loader. Older schemas use the original adapter.
+Normal canonical Trait routes and all 33 public `wiki` links are
+unchanged; there is no automatic Wiki URL inference. The maintained
+mapping remains a source input whose SHA is recorded in the
+complete-build input manifest, not a runtime publication.
+The tracked v10 release files, ordinary build and serving defaults
+remain unchanged. Focused storage/builder/HTTP and pinned real-source
+acceptance is recorded in
+[testing](testing.md#selected-runtime-database-set-validation).
+
+**Remaining P2.4:** Migrate the other eight maintained Army/Rules JSON
+datasets and the runtime symbol path mappings identified in P1.4.
+The current v10–v13 adapters remain only while independently needed
+for actual release/research/presentation consumption; historical tests
+alone do not justify preserving obsolete build machinery. The final
+naming, serving and Docker cutover belongs to P2.6.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

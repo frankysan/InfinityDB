@@ -87,9 +87,9 @@ set. Docker ignores the local checkout paths and packages only a verified,
 matched tracked release set.
 
 **Explicit complete runtime build:** `infinity-db build SOURCE.zip --db-dir PATH --compact`
-builds Army, Rules, variant usage, reviewed Weapon citations and the
-Restrictions chart offline into one selected directory. It requires the source checkout, a local immutable
-Army ZIP and its selected Army API metadata. Omitting the source selects the
+builds Army, Rules, variant usage, reviewed Weapon citations, the
+Restrictions chart and reviewed Trait Wiki links offline into one selected
+directory. It requires the source checkout, a local immutable Army ZIP and its selected Army API metadata. Omitting the source selects the
 newest local Army ZIP once; `--metadata` selects external API metadata explicitly.
 It never downloads an input or inherits the serving-only `INFINITY_DB_DB_DIR`.
 `--db-dir` and the existing narrow Army `--output-dir` are mutually exclusive;
@@ -103,9 +103,9 @@ the tracked v10 release retains its JSON contract.
 The builder uses disposable work files under ignored `data/work/build/`, validates
 the full runtime set and matching input provenance, then replaces only the two
 selected runtime filenames: `infinity.db` and `rules.db`.
-Rules v13 extends v12's embedded variant usage and reviewed Weapon-profile
-citations with relational Restrictions chart rows and conditions. Chart source
-JSON is a validated build input, not a v13 runtime dependency. The completed
+Rules v14 extends v13's relational Restrictions chart with reviewed
+Trait-to-Wiki links in the source-owned Rules database. Both the chart
+and Trait Wiki JSON remain validated build inputs, not v14 runtime dependencies. The completed
 build removes obsolete `variant-usage.json` and
 `weapon-profile-sources.json` from its selected output directory. It preserves
 unrelated files and leaves
@@ -117,7 +117,7 @@ selected directory before rebuilding and restart after success. An interruption
 between per-file replacements leaves an invalid mixed set; rerun the build to
 recover it. There is no live replacement lock or separate promotion step.
 
-This opt-in path uses the two-file v13 format. The tracked release pair remains
+This opt-in path uses the two-file v14 format. The tracked release pair remains
 v10 with four runtime files. Plain `build`,
 `build-rules`, `serve`, Docker and their current defaults retain their existing
 selection contracts until the planned cutover. An explicit old-style
@@ -127,14 +127,16 @@ selection contracts until the planned cutover. An explicit old-style
 validates exactly the selected directory through the shared
 `infinity_db.database_set` validator. All supported sets require `infinity.db`
 and `rules.db`; v10 also requires both JSON publications, while v11 needs only
-`weapon-profile-sources.json`. v12/v13 require no runtime JSON sidecars.
+`weapon-profile-sources.json`. v12–v14 require no runtime JSON sidecars.
 It checks schema/application compatibility, full SQLite integrity and foreign keys,
 embedded deployed-object/Army pairing, embedded variant identities/extras/counts
-in v11–v13, and current PDF, page, review and Army-profile bindings of the
-embedded v12/v13 Weapon citations or older JSON publication. v13 additionally
+in v11–v14, and current PDF, page, review and Army-profile bindings of the
+embedded v12–v14 Weapon citations or older JSON publication. v13 onward also
 checks six source-ordered Restrictions chart rows, fourteen exact conditions
 against the separate normalized constraints, original labels/notes/links,
-qualifiers, source identity and embedded content fingerprint.
+qualifiers, source identity and embedded content fingerprint. v14 checks
+all current canonical Trait identities, their reviewed Wiki URLs and names,
+and a complete link inventory with a deterministic content fingerprint.
 It reports final file SHA-256 hashes and returns a nonzero status for an
 incomplete, corrupt or mismatched set. It never creates missing files,
 selects another directory, rebuilds curation or reads the raw archive.
@@ -145,12 +147,15 @@ Other intermediate files in the directory are ignored. The v10 candidate
 and Docker-bundle checks share this built-artifact validator while retaining
 their additional source-rebuild and pinned-content checks.
 
-The v13 two-file layout meets the database-only boundary for the migrated
-variant/Weapon/Restrictions publications; other P2.4 runtime-maintained JSON
-facts are not yet embedded. Older v10–v12 layouts remain transitional
-compatibility. The browser now fetches `/api/restrictions/chart`; for a
-pre-v13 release the endpoint returns its original packaged static publication.
-The v13 handler reads SQLite only and does not open that static JSON.
+The v14 two-file layout embeds the migrated variant/Weapon/Restrictions
+publications and reviewed Trait Wiki destinations; the other eight
+P2.4-maintained JSON datasets and symbol path mappings remain open.
+Older v10–v13 layouts remain transitional compatibility. The browser
+fetches `/api/restrictions/chart`; for a pre-v13 release the endpoint
+returns its original packaged static publication. The v13+ chart
+handler reads SQLite only. v14 Trait pages read reviewed Wiki links from
+Rules SQLite without loading their packaged configuration; pre-v14
+releases keep their existing JSON adapter.
 It does not verify working-tree curation/config freshness or graphical
 assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual

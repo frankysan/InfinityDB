@@ -131,6 +131,7 @@
         "test_variant_usage_storage",
         "test_visibility_zone_whole_record",
         "test_trait_wiki_references",
+        "test_trait_wiki_storage",
         "test_weapon_config",
         "test_weapon_profile_publication",
         "test_weapon_profile_storage",

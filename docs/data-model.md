@@ -2713,6 +2713,34 @@ v10 layout until the coordinated P2.6 cutover. The standard
 unchanged. This P2.4 slice does not implement the remaining Army/Rules
 policy, symbol and source-link migrations.
 
+### Reviewed Trait Wiki links in Rules v14 (P2.4 opt-in)
+
+`config/catalogs/trait-wiki-references.json` is editable maintained
+source curation. The opt-in v14/compatibility-16 Rules export materializes
+its 33 exact canonical `trait:<slug>` identities into relational
+`trait_source_links`: source collection ID and existing Trait record ID,
+stable position, reviewed display name and the exact observed Wiki
+`/Traits#fragment` URL. Composite foreign keys link each row to its
+current Rules record. `trait_wiki_metadata` stores the maintained
+format/version, complete row count and deterministic content fingerprint.
+
+At build and read time, the complete link set must match **all current
+canonical Traits**, names and valid HTTPS Wiki fragments. Missing,
+ambiguous, mismatched and altered source links fail closed; a link is a
+reviewed locator, not an independently authored Trait definition or a
+claim about live upstream Wiki availability. The exact source JSON
+and builder-input hash remain provenance; no runtime link inference
+from slugs, names or unverified URL transformations is introduced.
+
+`TraitCatalog` now calls `RulesDatabase.trait_wiki_links_payload()` and
+does not read packaged maintained JSON for v14. Earlier Rules versions
+retain the previous JSON adapter until P2.6. The public `/api/traits`
+listing and detail shape, `wiki` fields, canonical identifiers and
+browser links remain unchanged. Source and runtime parity evidence
+belongs to [testing](testing.md#selected-runtime-database-set-validation).
+Other Army/Rules maintained JSON migrations and symbol path mapping
+remain open in P2.4.
+
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
 **Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**
@@ -2746,11 +2774,12 @@ to expose fourteen normalized conditions separately.
 
 `RulesDatabase.validate()` accepts the exact schema / compatibility pairs
 **(8, 10)**, **(9, 11)**, **(10, 12)**, **(11, 13)**,
-**(12, 14)** and **(13, 15)**. The tracked 1.0.1 release remains
+**(12, 14)**, **(13, 15)** and **(14, 16)**. The tracked 1.0.1 release remains
 v10/compatibility-12. From v9 onward the validator checks fourteen
 Restrictions constraints, negative polarity, qualifiers and provenance;
 v10 adds normalized deployed objects, v11 embedded exact variant
-usage, v12 reviewed Weapon citations and v13 the relational chart.
+usage, v12 reviewed Weapon citations, v13 the relational chart and
+v14 the source-reviewed Trait Wiki links.
 Invalid combinations, missing rows and corrupted provenance fail closed.
 
 Shared release staging preserves the active supported schema. For v10 it

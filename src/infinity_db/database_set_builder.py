@@ -27,6 +27,7 @@ from .database.publication import validate_database_pair
 from .database_set import EMBEDDED_WEAPON_RUNTIME_FILES, validate_database_set
 from .deployed_object_builder import build_deployed_objects
 from .rules_database import export_rules_database
+from .trait_wiki_references import load_trait_wiki_references
 from .variant_usage import build_variant_usage_projection
 from .variant_usage_reference import publication_from_candidate
 from .weapon_profile_builder import build_publication
@@ -115,9 +116,13 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
             encoding="utf-8"
         )
     )
+    trait_links = load_trait_wiki_references(
+        root / "config/catalogs/trait-wiki-references.json"
+    )
     export_rules_database(
         documents, rules, variant_usage=variants, weapon_citations=weapons,
-        restriction_chart=chart, army_database=army, **export_options,
+        restriction_chart=chart, trait_wiki_links=trait_links,
+        army_database=army, **export_options,
     )
 
 

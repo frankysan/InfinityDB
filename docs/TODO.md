@@ -82,10 +82,11 @@ only when required to fix correctness, reproducibility, or release reliability.
   current-format shared validation and opt-in offline complete builds with
   input provenance are available in the [data lifecycle](../data/README.md).
   Complete builds embed exact variant usage, reviewed Weapon-profile
-  citations and (P2.4's first slice) the six-row Restrictions chart
-  in Rules v13, publishing a two-file SQLite set. Local real-source
-  reproducibility and chart/browser parity pass on Windows; migrate
-  P2.4's remaining maintained Army/Rules facts and symbol path mappings.
+  citations, the six-row Restrictions chart and reviewed Trait Wiki links
+  in Rules v14, publishing a two-file SQLite set. Local source-build
+  reproducibility and source/API parity are checked on Windows;
+  migrate P2.4's remaining eight maintained Army/Rules datasets and
+  symbol path mappings.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;

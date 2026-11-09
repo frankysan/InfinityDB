@@ -61,14 +61,14 @@ def verify(source: Path, expected_sha256: str) -> dict:
             )
             result = build_database_set(args, _build_army)
             report = validate_database_set(destination)
-            if report != result or report["layout"] != "v13-two-file":
+            if report != result or report["layout"] != "v14-two-file":
                 raise ValueError("Complete-build database health disagrees with publication")
             if set(report["sha256"]) != {"infinity.db", "rules.db"}:
                 raise ValueError("Complete build produced an unexpected runtime file set")
             inventory = (
                 report["variantGroups"], report["reviewedWeapons"], report["restrictionChartRows"],
             )
-            if inventory != (151, 62, 6):
+            if inventory != (151, 62, 6) or report["traitWikiLinks"] != 33:
                 raise ValueError("Complete build changed the reviewed source inventory")
 
             citations = RulesDatabase(
@@ -95,6 +95,18 @@ def verify(source: Path, expected_sha256: str) -> dict:
             )
             if chart != expected_chart:
                 raise ValueError("Embedded Restrictions chart differs from source publication")
+            links = RulesDatabase(destination / "rules.db").trait_wiki_links_payload()
+            from infinity_db.trait_wiki_references import load_trait_wiki_references
+
+            expected_links = load_trait_wiki_references(
+                ROOT / "config/catalogs/trait-wiki-references.json"
+            )
+            if links != expected_links:
+                raise ValueError("Embedded Trait Wiki links differ from reviewed curation")
+            for identity, entry in expected_links.items():
+                trait = _api(app, f"/api/traits/{identity.removeprefix('trait:')}")
+                if trait.get("wiki") != entry["url"]:
+                    raise ValueError(f"Missing embedded Wiki link for {identity}")
             baseline = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
             observed = capture(
                 app, paths=tuple(item["path"] for item in baseline["probes"]),
@@ -103,8 +115,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 raise ValueError("Runtime semantic baseline is incomplete")
             reports.append(report)
             print(
-                f"Complete build {attempt}: v13 healthy, 62 Weapons, "
-                f"69 citation rows, 6 chart rows, 41 baseline routes; "
+                f"Complete build {attempt}: v14 healthy, 62 Weapons, "
+                f"69 citation rows, 6 chart rows, 33 Trait links, 41 baseline routes; "
                 f"hashes {json.dumps(report['sha256'], sort_keys=True)}",
                 flush=True,
             )
@@ -122,6 +134,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
         "reviewedWeapons": reports[0]["reviewedWeapons"],
         "variantGroups": reports[0]["variantGroups"],
         "restrictionChartRows": reports[0]["restrictionChartRows"],
+        "traitWikiLinks": reports[0]["traitWikiLinks"],
         "rebuilds": 2,
     }
 

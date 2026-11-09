@@ -597,6 +597,7 @@ def export_rules_database(
     variant_usage: dict[str, Any] | None = None,
     weapon_citations: dict[str, Any] | None = None,
     restriction_chart: dict[str, Any] | None = None,
+    trait_wiki_links: dict[str, dict[str, str]] | None = None,
     army_database: Path | None = None,
 ) -> None:
     """Atomically replace a rules database from validated curated documents.
@@ -612,6 +613,8 @@ def export_rules_database(
         raise ValueError("Embedded Weapon citations require embedded variant usage")
     if restriction_chart is not None and weapon_citations is None:
         raise ValueError("Embedded Restrictions chart requires embedded Weapon citations")
+    if trait_wiki_links is not None and restriction_chart is None:
+        raise ValueError("Embedded Trait Wiki links require the Restrictions chart baseline")
     if build_provenance is not None:
         from .build_provenance import validate_build_record
 
@@ -750,6 +753,23 @@ def export_rules_database(
                     for key, value in (
                         ("formatVersion", CHART_SCHEMA_VERSION),
                         ("databaseCompatibilityVersion", CHART_COMPATIBILITY_VERSION),
+                    ):
+                        connection.execute(
+                            f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
+                            (_json_text(value), key),
+                        )
+                if trait_wiki_links is not None:
+                    from .trait_wiki_storage import (
+                        TRAIT_LINK_COMPATIBILITY_VERSION,
+                        TRAIT_LINK_SCHEMA_VERSION,
+                        stage_trait_wiki_links,
+                    )
+
+                    stage_trait_wiki_links(connection, trait_wiki_links)
+                    connection.execute(f"PRAGMA user_version = {TRAIT_LINK_SCHEMA_VERSION}")
+                    for key, value in (
+                        ("formatVersion", TRAIT_LINK_SCHEMA_VERSION),
+                        ("databaseCompatibilityVersion", TRAIT_LINK_COMPATIBILITY_VERSION),
                     ):
                         connection.execute(
                             f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
@@ -903,7 +923,7 @@ class RulesDatabase:
             if connection.execute("PRAGMA application_id").fetchone()[0] != RULES_APPLICATION_ID:
                 raise ValueError("Unsupported rules database application ID")
             schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if schema_version not in {RULES_SCHEMA_VERSION, 9, 10, 11, 12, 13}:
+            if schema_version not in {RULES_SCHEMA_VERSION, 9, 10, 11, 12, 13, 14}:
                 raise ValueError("Unsupported rules database schema; rebuild rules.db")
             metadata_rows = connection.execute(
                 f"SELECT key, value FROM {RULES_METADATA_TABLE} "
@@ -911,19 +931,20 @@ class RulesDatabase:
             ).fetchall()
             metadata = {row["key"]: _decode_json(row["value"], None) for row in metadata_rows}
             expected_compatibility = {
-                8: RULES_COMPATIBILITY_VERSION, 9: 11, 10: 12, 11: 13, 12: 14, 13: 15,
+                8: RULES_COMPATIBILITY_VERSION, 9: 11, 10: 12, 11: 13,
+                12: 14, 13: 15, 14: 16,
             }[schema_version]
             if (
                 metadata.get("databaseCompatibilityVersion") != expected_compatibility
                 or (
-                    schema_version in {9, 10, 11, 12}
+                    schema_version in {9, 10, 11, 12, 13, 14}
                     and metadata.get("formatVersion") != schema_version
                 )
             ):
                 raise ValueError(
                     "Rules database compatibility revision does not match this application"
                 )
-            if schema_version in {9, 10, 11, 12, 13}:
+            if schema_version in {9, 10, 11, 12, 13, 14}:
                 from infinity_db.restriction_storage import validate_restriction_snapshot
 
                 try:
@@ -932,7 +953,7 @@ class RulesDatabase:
                     raise ValueError(
                         "Invalid Restrictions snapshot: missing or damaged table"
                     ) from exc
-            if schema_version in {10, 11, 12, 13}:
+            if schema_version in {10, 11, 12, 13, 14}:
                 from infinity_db.deployed_object_storage import (
                     validate_deployed_object_snapshot,
                 )
@@ -941,27 +962,34 @@ class RulesDatabase:
                     validate_deployed_object_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid v10 deployed-object snapshot") from exc
-            if schema_version in {11, 12, 13}:
+            if schema_version in {11, 12, 13, 14}:
                 from .variant_usage_storage import validate_variant_usage_snapshot
 
                 try:
                     validate_variant_usage_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid embedded variant usage snapshot") from exc
-            if schema_version in {12, 13}:
+            if schema_version in {12, 13, 14}:
                 from .weapon_profile_storage import validate_weapon_profile_snapshot
 
                 try:
                     validate_weapon_profile_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid embedded Weapon citation snapshot") from exc
-            if schema_version == 13:
+            if schema_version in {13, 14}:
                 from .restriction_chart_storage import validate_restriction_chart_snapshot
 
                 try:
                     validate_restriction_chart_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid embedded Restrictions chart snapshot") from exc
+            if schema_version == 14:
+                from .trait_wiki_storage import validate_trait_wiki_snapshot
+
+                try:
+                    validate_trait_wiki_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid embedded Trait Wiki snapshot") from exc
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Rules database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -972,7 +1000,7 @@ class RulesDatabase:
         from infinity_db.deployed_object_storage import read_deployed_objects
 
         with self._connect() as connection:
-            if connection.execute("PRAGMA user_version").fetchone()[0] not in {10, 11, 12, 13}:
+            if connection.execute("PRAGMA user_version").fetchone()[0] not in {10, 11, 12, 13, 14}:
                 return None
             return read_deployed_objects(connection, army_database)
 
@@ -985,7 +1013,7 @@ class RulesDatabase:
             schema = connection.execute("PRAGMA user_version").fetchone()[0]
             if schema in {RULES_SCHEMA_VERSION, 9, 10}:
                 return None
-            if schema not in {11, 12, 13}:
+            if schema not in {11, 12, 13, 14}:
                 raise ValueError("Unsupported Rules schema for exact variant usage")
             publication = read_variant_usage(connection, army_database)
         publication["sourceSnapshot"]["rulesDatabaseSha256"] = file_sha256(self.path)
@@ -996,9 +1024,18 @@ class RulesDatabase:
         from .weapon_profile_storage import read_weapon_profile_citations
 
         with self._connect() as connection:
-            if connection.execute("PRAGMA user_version").fetchone()[0] not in {12, 13}:
+            if connection.execute("PRAGMA user_version").fetchone()[0] not in {12, 13, 14}:
                 raise ValueError("Embedded Weapon citations require Rules v12 or newer")
             return read_weapon_profile_citations(connection, army_database)
+
+    def trait_wiki_links_payload(self) -> dict[str, dict[str, str]] | None:
+        """Get v14 links from the database, without loading maintained JSON."""
+        from .trait_wiki_storage import read_trait_wiki_links
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < 14:
+                return None
+            return read_trait_wiki_links(connection)
 
     def restriction_chart_payload(self) -> dict[str, Any] | None:
         """Return the v13 source chart without accessing packaged JSON."""
@@ -1030,7 +1067,7 @@ class RulesDatabase:
                     "items": [],
                     "evaluationSupported": False,
                 }
-            if schema not in {9, 10, 11, 12, 13}:
+            if schema not in {9, 10, 11, 12, 13, 14}:
                 raise ValueError("Unsupported rules database schema")
             payload = candidate_restrictions_payload(
                 connection, subject=subject, record_id=record_id,

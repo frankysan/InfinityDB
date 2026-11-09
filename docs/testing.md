@@ -635,6 +635,35 @@ Build-set ID:
 This proves local Windows reproducibility, not independent Linux,
 Docker or final default-serving cutover acceptance.
 
+**2026-11-09 P2.4 second slice, Trait Wiki links (Windows local):**
+`tests/test_trait_wiki_storage.py` (13/13) exercises the complete
+33-link relational publication, exact v10/v14 Trait detail API parity,
+absence of packaged JSON loader calls on v14, source ID/name/URL
+validation and missing/corrupted row/fingerprint failures.
+`tests/test_database_set_builder.py` (16/16) covers repeatable v14
+two-file publication and failed/partial destination isolation. The
+existing Trait Wiki reference suite passed 22/22, Rules database
+regressions 166/166 and v10 selected-set validation 20/20; Ruff,
+canonical Pyright (0 errors), documentation checks and `git diff --check`
+passed.
+
+The same pinned Army source ZIP and metadata were built twice through
+`tools.verify_complete_database_build`. Both opt-in Rules v14
+(compatibility 16) sets passed 73 Army normalization checks (116 known
+source warnings), full selected database-set validation, 151 variant
+groups, 62 reviewed Weapons/69 profile citations, 6 Restrictions chart
+rows, and all 33 reviewed Trait Wiki API links. Every one of the
+41 pinned P1.3 semantic baseline routes passed in **both** runs.
+The two independent complete builds were byte-identical:
+`infinity.db` =
+`fe8741e831782dd7c13c8ab7b5fbaced27d15eb50862f01947cd8a9a6ad5215a`;
+`rules.db` =
+`ae4e5888c4407a9dce4243be1f0941cc3bdb9e47e25f97703c2b96b8d5975fb0`.
+Build-set ID:
+`5ce9b54936df6ee29fb49d6d9e1ad9dce4d789b9112ee640828e479b982c4285`.
+No tracked generated database was changed. These runs prove Windows
+source-build reproducibility, not Linux, Docker or P2.6 serving cutover.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

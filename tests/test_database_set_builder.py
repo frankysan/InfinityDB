@@ -33,6 +33,8 @@ from infinity_db.database_set import (
 )
 from infinity_db.restriction_chart_storage import stage_restriction_chart
 from infinity_db.sqlite_determinism import normalize_sqlite_header, vacuum_deterministic_sqlite
+from infinity_db.trait_wiki_references import load_trait_wiki_references
+from infinity_db.trait_wiki_storage import stage_trait_wiki_links
 from infinity_db.variant_usage_storage import stage_variant_usage
 from infinity_db.weapon_profile_storage import stage_weapon_profile_citations
 from infinity_db.web import create_app
@@ -123,9 +125,16 @@ def _fake_rules(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
              "src/infinity_db/web/static/restrictions-reference.json").read_text(encoding="utf-8")
         ))
         connection.execute("PRAGMA user_version=13")
-        connection.execute("UPDATE __rules_metadata SET value='13' WHERE key='formatVersion'")
+        stage_trait_wiki_links(
+            connection,
+            load_trait_wiki_references(
+                RELEASE.parent.parent / "config/catalogs/trait-wiki-references.json"
+            ),
+        )
+        connection.execute("PRAGMA user_version=14")
+        connection.execute("UPDATE __rules_metadata SET value='14' WHERE key='formatVersion'")
         connection.execute(
-            "UPDATE __rules_metadata SET value='15' WHERE key='databaseCompatibilityVersion'"
+            "UPDATE __rules_metadata SET value='16' WHERE key='databaseCompatibilityVersion'"
         )
     _update_metadata(rules, {
         BUILD_PROVENANCE_KEY: build_record(manifest, "rules-n5", army_generation=generation),
@@ -179,8 +188,9 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     (args.db_dir / "weapon-profile-sources.json").write_bytes(b"obsolete publication")
     first = builder.build_database_set(args, _fake_army, root=root)
     assert first["buildProvenance"]["status"] == "matched"
-    assert first["layout"] == "v13-two-file"
+    assert first["layout"] == "v14-two-file"
     assert first["restrictionChartRows"] == 6
+    assert first["traitWikiLinks"] == 33
     assert first["reviewedWeapons"] == 62
     assert validate_database_set(args.db_dir)["sha256"] == first["sha256"]
     assert set(_digests(args.db_dir)) == {*EMBEDDED_WEAPON_RUNTIME_FILES, "keep.txt"}
