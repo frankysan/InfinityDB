@@ -501,6 +501,17 @@ python -m pyright
 
 Do not report Ruff/Pyright as run when those tools are unavailable in the active environment.
 
+### P1 migration semantic baseline
+
+The [P1.3 snapshot-pinned baseline](restructuring-plan.md#p13--snapshot-pinned-runtime-and-browser-route-baseline-2026-11-09)
+is a focused, offline 41-route comparison for Army/Rules database restructuring.
+Use `python -m tools.runtime_semantic_baseline --check --identical-artifacts`
+for the current tracked DBs, or specify `--army-db` and `--rules-db`
+without `--identical-artifacts` to compare a rebuilt database set.
+It protects JSON source/citation semantics and Battleground SVG geometry
+but is **not** a visual browser or Docker acceptance test.
+Run `tests/test_runtime_semantic_baseline.py` for its guardrail tests.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

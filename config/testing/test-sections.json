@@ -150,6 +150,7 @@
         "test_public_relation_destinations",
         "test_release_notes",
         "test_runtime_import_boundary",
+        "test_runtime_semantic_baseline",
         "test_scenario_api",
         "test_theme_contrast",
         "test_web",

@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0 completed (including the verified checkout-local preference update); P1.1 inventory completed; P1.2–P6 remain planned.  
+**Status:** Active on `dev/v1.1.0`: P0 and P1.1–P1.3 completed; P1.4–P6 remain planned.  
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
 
@@ -603,6 +603,62 @@ installed application can serve every route.
 - **P1.6:** Classify publication, compat and audit tools by their
   actual entrypoint/test/deployment consumers before retiring them.
   The source trace does not authorize immediate deletion.
+
+#### P1.3 — Snapshot-pinned runtime and browser-route baseline (2026-11-09)
+
+**Implemented:** `tools/runtime_semantic_baseline.py` captures and checks
+`tests/fixtures/runtime-semantic-baseline-v1.json` offline through
+the actual WSGI `create_app` using the tracked Army/Rules database pair.
+The initial fixture pins SHA-256 identities of both DBs, reviewed Weapon
+citations and the symbol-publication manifest. It records **41 requests**,
+including Army/Unit/Skill/Equipment/Weapon/Traits, Fireteams,
+Orders/AROs, restrictions and deployed objects; a dated FAQ; exact
+Skill and Equipment variant usage; search and glossary; current N5
+and ITS-18 Battleground scenario data, its complete map SVG bytes and
+five geometry markers; and public HTML routes and developer-only
+CSS/JS markers. A reviewed Weapon with published profile citations
+is chosen by verified source identity, not by the compact list payload.
+
+**Comparison:** JSON responses are canonicalized with sorted keys and
+stable exact list order before hashing. Only database-byte binding fields
+(`armyDatabaseSha256`, `rulesDatabaseSha256`, `exportPairSha256`,
+legacy deployed-object publication hash) are omitted **inside**
+`sourceSnapshot`; source archive identities and citations remain
+in the semantic digest. The `/api/version` field names are checked
+without binding the candidate to the old app/static version. Battleground
+SVG bytes have an exact SHA-256 and geometry markers; browser HTML/JS/CSS
+are checked for route availability and selected contract markers rather
+than freezing versioned asset URLs. These checks do **not** substitute
+for actual Playwright user-interaction, accessibility or responsive tests.
+
+**Repeatable focused commands (repository root):**
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.runtime_semantic_baseline --check --identical-artifacts
+.\.venv\Scripts\python.exe -m tools.runtime_semantic_baseline --check --army-db data/generated/army.db --rules-db data/generated/rules_n5.db
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test tests/test_runtime_semantic_baseline.py
+```
+
+The first verifies the *unchanged pinned source pair*. The second is the
+planned post-P2 parity check against a rebuilt/renamed pair: differences
+in artifact bytes are permitted, but the selected API semantics and
+geometry must still agree. The tool can compare a documented intentional
+URL replacement using e.g.
+`--route-alias '/static/restrictions-reference.json=>/api/restrictions/chart'`
+provided that new route returns the same response contract. It does not
+silently remove probes, alter expected digests, regenerate the baseline
+or accept changed semantics. The fixture is an immutable reviewed
+reference; `--capture` refuses to overwrite it. A deliberate source
+update requires a **separate reviewed baseline** with corresponding
+new source/release identity, not a blind re-capture.
+
+**Remaining acceptance:** A new DB schema/packaging path, actual Docker
+startup, visual Developer-mode toggling, responsive layouts and
+full-feature parity are **not** yet tested. Use the relevant existing
+Playwright/HTTP selectors at P2 milestones; do not demand the full
+project suite for each intermediate step. P1.4 now specifies the
+database owners/schema and P1.5 the unified build directory/serving
+contract before any production data migration.
 
 ### P2 — Make runtime data SQLite-only and unify build/serve
 
