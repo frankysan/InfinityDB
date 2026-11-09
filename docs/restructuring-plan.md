@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0 and P1.1–P1.4 completed (P1.4 defines the design, not implemented schemas); P1.5–P6 remain planned.  
+**Status:** Active on `dev/v1.1.0`: P0 and P1.1–P1.5 completed (P1.4–P1.5 are target designs, not implemented schemas/paths); P1.6–P6 remain planned.  
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
 
@@ -902,12 +902,238 @@ and Docker smoke checks. The goal is a **single build
 contract**, not separate, recurring publish/promote
 ceremony for every artifact.
 
-**P1.5 handoff:** Select the default output directory,
-CLI `--db-dir`/environment override contract, package
-inputs for checkout and Docker, and file-required/optional
-policies. P1.4 assigns *owners and relations*, not
-unchecked changes to current CLI filenames or release
-publication expectations.
+**P1.5 boundary (resolved below):** P1.4 assigns
+*owners and relations*, while P1.5 decides the output
+directory, CLI/environment override, release tracking,
+package inputs, and required/optional set policies.
+Neither planning step changes current CLI filenames
+or release publication expectations.
+
+#### P1.5 — One database-set build, serve and release contract (2026-11-09)
+
+**Status:** Target design selected from the actual `infinity-db` CLI, current
+`data/generated/` tracking rules, `checkout_runtime.py`, `web/wsgi.py`,
+`tools.prepare_runtime_bundle`, Dockerfile, deployment smoke and
+`scripts/deploy.sh`. **Not yet implemented:** all existing CLI flags,
+environment variables, release files and Docker commands still use the
+v10 layout until the coordinated P2 cutover. P1.4 owns schema/data
+boundaries; P1.5 owns where a **complete validated set** lives and how
+both hosting targets select the exact same files.
+
+**Decision — retain tracked release databases and one canonical directory:**
+
+- The canonical database directory, relative to a repository checkout,
+  is **`data/generated/`**. It will contain the final, source-pinned
+  `army.db` and `rules_n5.db`, plus **`its_18.db` after P3**.
+  These are the only structured data files needed to serve the
+  corresponding supported game domains. A future ITS season adds an
+  explicitly named database to the same set; it never rewrites
+  `rules_n5.db` merely to select another season.
+- **Track the finished databases in Git** and include them in tagged
+  releases, as with today's `infinity.db`/`rules.db` pair.
+  The deployment checkout intentionally has **no raw Army ZIP** and
+  must not regenerate runtime data. Git preserves the exact
+  source-selected database bytes and allows a clean tagged checkout
+  to host directly. Trade-off: a deliberate local data rebuild can
+  dirty binary files and produces larger Git commits. This is
+  acceptable for the single-maintainer project and avoids an
+  external artifact registry, release asset download, separate
+  promotion checkout, or a second hosting data contract.
+- The final `.gitignore` whitelists only the three intended
+  database filenames under `data/generated/` (the third when
+  supported); remove the tracked old names and required
+  `variant-usage.json`/`weapon-profile-sources.json` together
+  at cutover. The normal build may create diagnostics and
+  `infinity.raw.db` under **ignored `data/work/build/`**;
+  audit tools receive an explicit path to this build-only raw
+  archive. Intermediate `master.json`, `normalized.json`,
+  validation reports and source-provenance JSON are never part
+  of the selected serving directory. Retain editable curated
+  JSON/config as **source inputs**, not runtime publications.
+- `data/generated/` is a **location, not another promotion stage**.
+  The source-controlled databases in that directory are the ones
+  the checkout runs and Docker packages. An alternate explicitly
+  selected directory is also one complete self-contained set,
+  not a staging tier silently preferred over the tracked one.
+
+**Normal and alternate CLI contract (proposed P2 interface):**
+
+```powershell
+infinity-db build --compact
+infinity-db serve
+infinity-db build --compact --db-dir local/alternate-dbs
+infinity-db serve --db-dir local/alternate-dbs
+```
+
+- Normal `infinity-db build` is one offline end-to-end command:
+  acquire **nothing** over the network; use the pinned selected
+  local Army archive, curated N5/season sources and maintained
+  mappings; produce and validate the full required DB set.
+  `--compact` retains its existing build-input formatting
+  meaning. Default output is `data/generated/`.
+  `--db-dir PATH` selects a different complete destination
+  for this invocation; it never copies the result back to the
+  default. The builder does **not** inherit the serving-only
+  `INFINITY_DB_DB_DIR` environment variable, so a service
+  setting cannot accidentally redirect an offline build.
+  P2 may retain explicit narrow developer commands
+  for independent audits, but `build-rules` no longer
+  assembles `local/checkout-runtime/` or implicitly changes
+  which set `serve` selects. Reconcile existing
+  `--output-dir` and standalone `infinity-army` build options
+  at implementation; **do not leave two implicit
+  `infinity-db build` output directories**.
+- `infinity-db serve` opens **only** the named complete
+  directory. Precedence: explicit `--db-dir PATH`, then
+  optional `INFINITY_DB_DB_DIR`, then `data/generated/`
+  from the checkout root. Relative operator paths resolve
+  against the current working directory; the documented
+  local workflow runs from the repository root. Print the
+  selected directory and build/source revisions on startup.
+  No automatic checking `local/checkout-runtime/`,
+  sibling `rules.db` discovery, or fallback to tracked/older
+  artifacts if the selected directory is invalid.
+- Production WSGI requires the single
+  **`INFINITY_DB_DB_DIR=/app/data`** environment variable
+  and resolves the same fixed filenames. A self-hosted
+  checkout service sets its own absolute directory.
+  Retire `INFINITY_DB_DATABASE` and
+  `INFINITY_DB_RULES_DATABASE` together with the legacy
+  naming/selection paths in P2.6; do not provide a permanent
+  mixed old/new configuration or silently load a partial
+  alternate directory.
+- No new `--rules-db` or `--its-db` override is needed
+  in the normal serving CLI; explicit selection is
+  **directory-wide**. Tests needing independently constructed
+  DBs may keep low-level Python `create_app`/repository
+  injection for fixtures, without establishing a third
+  operator-facing publication contract.
+
+**Complete-set requirements and error handling:**
+
+- During P2, `army.db` + `rules_n5.db` are **both
+  mandatory**, with ITS 18 still embedded in Rules until P3.
+  At the P3 cutover, `its_18.db` is **also mandatory for
+  a release advertising Season 18**. For installations
+  that explicitly do not publish an optional season, its
+  routes are clearly unavailable; they never fall through
+  to a different season's data or an old `rules_n5.db`
+  embedded copy.
+- Build uses ordinary temporary SQLite files to complete
+  each database, validates every required file, source
+  pairing/typed external reference, provenance and logical
+  content **before replacing selected outputs**, and
+  only then publishes the coherent set. This is not a
+  permanent candidate/promotion workflow. The independent
+  DB files cannot be replaced as one filesystem
+  transaction; **stop a local server before rebuilding
+  its selected directory and restart after success**.
+  If interrupted between replacements, a mixed set is
+  invalid at next startup; rerun `build` to recover.
+  Docker image inputs remain immutable throughout serving.
+- Startup cheaply validates each selected file's SQLite
+  application/schema/compatibility identity and embedded
+  `build_set_id`/source-generation references (P1.4);
+  build/release checks additionally run the thorough
+  relational, content and asset validations. Missing
+  directories or files, stale source bindings,
+  mismatched Army/Rules/season generations, unsupported
+  schemas, or incomplete embedded publications are
+  **errors**, not warnings with partial fallback.
+  If a user edited maintained source JSON but did not
+  rebuild, `serve` deliberately reads the **last built**
+  databases; there is no runtime JSON read or implicit
+  source rebuild. A release gate separately checks the
+  **tracked curation/config digests** against database
+  build metadata; stale domain-source edits block a release,
+  even though an unchanged checkout can still serve its
+  last committed set. Present-but-invalid optional
+  season files also fail validation; optional means
+  *absent by selection*, never silently ignored errors.
+- `/api/version` keeps `version`, `static_revision`
+  and `snapshot_revision`. Proposed runtime revision
+  algorithm: SHA-256 of a domain-separated,
+  deterministic encoding of the **sorted active
+  database filenames and their final byte SHA-256 hashes**.
+  It is computed outside the databases; it cannot create
+  self-referential file digests. Any DB/season change
+  invalidates API snapshot cache validators. Static
+  revision separately includes published SVG/other
+  static bytes and the embedded symbol-map revision.
+  Retain the public field names; test both revision
+  changes and identical-rebuild stability in P2/P3.
+
+**Docker and release path — no runtime directory assembly:**
+
+1. On the development checkout, `build`, validate the
+   entire selected set, and commit **all changed required
+   DBs together** with relevant source/config/code
+   changes. A tagged checkout includes the exact
+   released databases. A relevant source-only edit without a
+   rebuild is rejected by release verification rather than
+   silently becoming a new published fact.
+2. On the deployment checkout, the release script
+   verifies the committed set and processed graphical
+   assets, then `docker compose build app`. The
+   Dockerfile uses **explicit** `COPY` entries for
+   `data/generated/army.db`, `rules_n5.db` and later
+   `its_18.db` directly into `/app/data/`. The
+   `.dockerignore` excludes raw inputs/intermediates
+   and any unselected output while exposing those exact
+   tracked files. No `data/runtime/` copy, Docker-time
+   Army/Rules build, loose JSON sidecar or host bind mount
+   is required. The immutable runtime remains read-only.
+3. Use **one shared database-set verifier**, exposed
+   as `infinity-db database-health --db-dir PATH` and
+   callable by local build completion, source/release CI,
+   deployment preflight and image smoke. Extend the
+   existing Army-only command instead of adding a
+   competing verification CLI; preserve a separate
+   explicit raw-archive inspection option for research.
+   Perform optional graphical-asset checks when present.
+   Remove `tools.prepare_runtime_bundle` and its second
+   source/copy validation after consumers are updated.
+   Installed-wheel smoke must prove that server requests
+   no longer need curated/config JSON package resources
+   at runtime; build-only wheel resources are a
+   separate decision.
+4. `scripts/deploy.sh` still performs explicit
+   release/tag/image verification and starts the
+   existing Compose app/Caddy/metrics services; it
+   no longer generates legacy deployed-object JSON
+   or prepares `data/runtime/`. Both local checkout
+   `serve` and the deployed image must pass the
+   **same P1.3 41-probe semantic baseline** at the
+   appropriate P2 gate. A normal local test does not
+   require Docker; the actual image is tested once
+   the integrated data contract is ready.
+
+**Focused acceptance to implement during P2:**
+the same source inputs deterministically rebuild the selected
+databases without extra runtime JSON; `build --db-dir`
+changes only that output; `serve --db-dir` and WSGI select
+the exact set (including negative/missing/mismatched cases);
+a clean tagged checkout serves without raw archives;
+the Dockerfile copies only the selected committed DBs and
+processed static assets; `database-health --db-dir`
+and the 41-path baseline agree across direct and Docker
+serving; cache revision changes whenever any active
+database or symbol mapping changes. Test these as
+focused build/WSGI/CLI/Docker slices before the full
+integrated acceptance gate.
+
+**Delivery order:** P2.1 introduces the end-to-end
+builder and shared set validator while keeping old
+runtime paths operational until migration. P2.2–P2.5
+materialize all required structured facts and remove
+runtime JSON consumers. P2.6 makes one deliberate
+filename/directory/env/CLI/CI/Docker cutover; P2.7
+removes checkout-runtime and runtime-bundle staging
+after the new set is validated; P2.8 verifies both
+hosting targets. P3 then adds the separate ITS 18 DB
+and updates the mandatory release set atomically
+with its routing and acceptance. No deployment or
+release change is made by this P1.5 planning entry.
 
 ### P2 — Make runtime data SQLite-only and unify build/serve
 
@@ -915,13 +1141,13 @@ publication expectations.
 **Owns:** Data processing, Web backend, Deployment.  
 **Prerequisite:** P1 database and build decisions.
 
-1. **P2.1 — Establish the final DB build interface.** Design `infinity-db build` as the complete normal offline build. Retain narrower developer commands only when genuinely useful; `infinity-db serve` should consume the selected built database directory directly.
+1. **P2.1 — Establish the final DB build interface.** Implement the P1.5 complete offline `infinity-db build` and shared database-set verifier; preserve the normal `infinity-db build --compact` workflow and use the same explicit `--db-dir` contract for `serve`. Retain narrower developer commands only when useful.
 2. **P2.2 — Embed variant usage.** Normalize `variant-usage.json` into its agreed owning DB; migrate reference loading/API output; remove file/hash pairing and runtime fallback code.
 3. **P2.3 — Embed reviewed Weapon-profile citations.** Migrate `weapon-profile-sources.json` into its agreed DB, preserving source locators and relationship semantics; delete the sidecar consumer.
 4. **P2.4 — Embed remaining runtime-maintained and static structured facts.** Materialize the nine identified maintained JSON datasets and runtime symbol mappings in their P1.4 owner DBs; remove wheel-packaged JSON *serving* dependencies while retaining editable build inputs. Move `restrictions-reference.json` behind the Rules API/DB. Scan for missed direct static JSON facts; keep ordinary SVG/CSS/JS assets as files.
 5. **P2.5 — Finalize the deployed-object transition.** Retain v10's DB-backed model while removing only proven unused v8/v9 loose-file fallbacks, legacy builder modes and publication verifiers.
-6. **P2.6 — Rename `infinity.db` to `army.db` and `rules.db` to `rules_n5.db`.** Update CLI defaults, env vars, package/build scripts, path discovery, database validators, docs, tests, Dockerfile and workflows in one coordinated cutover. Do not preserve permanent filename aliases.
-7. **P2.7 — Remove redundant publication stages.** Collapse `local/checkout-runtime/`, standalone rules staging, candidate promotion, duplicated matched-release checks and `data/runtime/` copying where possible into the simple contract from P1. Temporary files used for atomic DB creation are still acceptable; do not equate implementation safety with a public promotion workflow.
+6. **P2.6 — Cut over to `army.db` and `rules_n5.db` in one canonical `data/generated/` set.** Update CLI/WSGI `--db-dir` and `INFINITY_DB_DB_DIR`, output paths, Git tracking, source/build scripts, validators, docs, tests, Dockerfile and workflows together. Do not preserve permanent filename or environment-variable aliases.
+7. **P2.7 — Remove redundant publication stages.** Delete `local/checkout-runtime/`, standalone rules publication staging, candidate promotion, duplicated matched-release checks and `data/runtime/` copying after the P1.5 direct database-set contract is validated. Temporary files for complete, validated DB creation are acceptable; no public promotion workflow remains.
 8. **P2.8 — Prove both hosting targets.** Verify the local `build && serve` path and an actual Docker image built from the same DB set. Compare representative API payload semantics, citations, scenario SVG results, startup health and absence of missing sidecars.
 
 **Exit:** Built DBs alone provide every runtime structured fact; normal local serving and Docker image serving agree; no silent fallback to older artifacts or required loose JSON; reviewed results meet P1 baseline.
@@ -1011,7 +1237,7 @@ flowchart TD
 ## Questions to settle during discovery (not reasons to stop planning)
 
 - **Resolved in P1.4:** `rules_n5.db` owns rule-derived variant usage and reviewed Weapon Chart citations; `army.db` owns runtime symbol-to-Army identity mappings.
-- Does the build need a `data/generated/` tracked artifact directory, an ignored output plus explicit release packaging, or some smaller combination? There should be **one contract**, not competing implicit defaults.
+- **Resolved in P1.5:** keep the final source-pinned runtime DBs tracked directly in `data/generated/`, with ignored intermediate artifacts in `data/work/build/`. Both checkout and Docker consume the selected database set directly, without additional assembly.
 - Which parts of `infinity.raw.db` provide unique research value versus raw ZIP snapshots?
 - How are core/ITS revisions selected when archived seasons or rules editions become supported? Source-family separation must not collapse revisions.
 - Which consumers legitimately require a public API/backward-compatibility guarantee, versus internal helpers that can be replaced outright?
