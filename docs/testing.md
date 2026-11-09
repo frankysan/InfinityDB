@@ -512,6 +512,26 @@ It protects JSON source/citation semantics and Battleground SVG geometry
 but is **not** a visual browser or Docker acceptance test.
 Run `tests/test_runtime_semantic_baseline.py` for its guardrail tests.
 
+### Selected runtime database-set validation
+
+**Project domains:** Data processing, Project infrastructure
+
+`infinity-db database-health --db-dir PATH --json` checks one explicit
+current v10 runtime directory with full SQLite integrity and source-paired
+publications. The [data lifecycle](../data/README.md) owns the current
+four-file contract and the limits of this check. The command operates offline,
+does not require a raw archive, and reports unhealthy/missing data without
+creating files or selecting another runtime directory.
+
+Run `tests/test_database_set.py` for selected-directory health, unchanged
+input bytes, missing/corrupt artifacts, unsupported schema/application IDs,
+stale publications, embedded Army mismatch and incompatible CLI selections.
+`tests/test_app_cli.py` retains the individual Army/raw health contract;
+`tests/test_deployed_object_storage.py` covers source-built v10 candidates,
+checkout publication and Docker-bundle assembly using the shared verifier.
+These focused checks do not establish actual Docker, Linux or hosted CI
+acceptance, nor complete P2.1's remaining offline builder/provenance work.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

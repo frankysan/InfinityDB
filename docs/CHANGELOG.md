@@ -8,6 +8,15 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
+## [1.1.0] - Unreleased
+
+### Added
+
+- **Data processing + Project infrastructure:** Added `database-health --db-dir`
+  to inspect a complete runtime directory offline, including SQLite integrity,
+  source-matched references and file fingerprints. Missing or mismatched data
+  produced an unhealthy report without changing the selected files.
+
 ## [1.0.1] - 2026-11-09
 
 ### Player summary

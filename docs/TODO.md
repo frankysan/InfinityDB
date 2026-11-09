@@ -79,9 +79,11 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 - [ ] Execute P2–P6 of the [phased restructuring plan](restructuring-plan.md).
   P0 workflow simplification and P1 dependency/tool discovery are complete;
-  begin P2.1's offline database-set builder and shared verifier using the
-  agreed ownership/build contract. Keep current serving functional until
-  the deliberate cutover. The plan owns ordering, decisions and exit criteria;
+  current-format shared set validation is available through
+  [directory health checks](../data/README.md). Finish P2.1's offline
+  database-set builder and shared build-input provenance using the agreed
+  ownership/build contract, then migrate embedded facts. Keep current serving
+  functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;
   do not copy its complete roadmap into a second task ledger.
 
 ### External source clarifications

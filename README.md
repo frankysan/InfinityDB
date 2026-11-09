@@ -309,6 +309,9 @@ infinity-db serve --database other-output/infinity.db --port 8001
 # Validate a published Army database and its development raw sibling
 infinity-db database-health data/generated/infinity.db --require-raw
 
+# Validate a complete current runtime directory (without raw build inputs)
+infinity-db database-health --db-dir data/generated --json
+
 # Validate a curated rules file
 infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 

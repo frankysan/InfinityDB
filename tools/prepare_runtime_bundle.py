@@ -9,9 +9,11 @@ from __future__ import annotations
 import argparse
 import shutil
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 from infinity_db.database.repository import Database
+from infinity_db.database_set import validate_database_set
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.variant_usage_reference import load_variant_usage_publication
@@ -28,25 +30,32 @@ LEGACY = {"deployed-objects.json"}
 def expected_files(source: Path) -> set[str]:
     """Validate the exact source pair and select schema-specific files."""
     army, rules_path = source / "infinity.db", source / "rules.db"
+    # Read the header without creating a missing database. Legacy formats keep
+    # their old packaging contract until the deliberate P2.5 retirement.
+    if not rules_path.is_file():
+        raise ValueError(f"Rules database does not exist: {rules_path}")
+    with closing(sqlite3.connect(
+        rules_path.resolve().as_uri() + "?mode=ro", uri=True,
+    )) as connection:
+        schema = connection.execute("PRAGMA user_version").fetchone()[0]
+    if schema == 10:
+        result = validate_database_set(source)
+        if result["deployedObjects"] != 17 or result["unresolvedDeliveries"] != 1:
+            raise ValueError("Incomplete reviewed deployed objects")
+        return set(result["sha256"])
+
     Database(army).validate()
     rules = RulesDatabase(rules_path)
     rules.validate()
-    with sqlite3.connect(rules_path) as connection:
-        schema = connection.execute("PRAGMA user_version").fetchone()[0]
-    if schema not in {8, 9, 10}:
+    if schema not in {8, 9}:
         raise ValueError("Unsupported runtime rules schema")
     files = set(COMMON)
-    if schema == 10:
-        objects = rules.deployed_objects_payload(army)
-        if objects is None:
-            raise ValueError("v10 rules database lacks deployed objects")
-    else:
-        files.update(LEGACY)
-        objects = load_deployed_object_publication(
-            source / "deployed-objects.json", army, rules_path,
-        )
-        if objects is None:
-            raise ValueError("Legacy rules require deployed-objects.json")
+    files.update(LEGACY)
+    objects = load_deployed_object_publication(
+        source / "deployed-objects.json", army, rules_path,
+    )
+    if objects is None:
+        raise ValueError("Legacy rules require deployed-objects.json")
     if len(objects["objects"]) != 17 or len(objects["unresolvedDeliveries"]) != 1:
         raise ValueError("Incomplete reviewed deployed objects")
 
@@ -56,9 +65,8 @@ def expected_files(source: Path) -> set[str]:
             source / "variant-usage.json", army, rules_path,
             source / "deployed-objects.json",
         )
-        expected_version = 2 if schema == 10 else 1
         if (variants is None or not variants["variants"]
-            or variants["formatVersion"] != expected_version):
+            or variants["formatVersion"] != 1):
             raise ValueError("Invalid schema-matched variant usage publication")
         if not load_weapon_profile_publication(
             source / "weapon-profile-sources.json", army, rules_path,

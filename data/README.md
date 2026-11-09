@@ -86,6 +86,27 @@ Git-visible and cannot be deployed with an unrelated tracked Rules/publication
 set. Docker ignores the local checkout paths and packages only a verified,
 matched tracked release set.
 
+**Selected runtime health:** `infinity-db database-health --db-dir PATH`
+validates exactly the selected current v10 runtime directory through the
+shared `infinity_db.database_set` validator. It requires `infinity.db`,
+`rules.db`, `variant-usage.json` and `weapon-profile-sources.json`, checks
+schema/application compatibility, full SQLite integrity and foreign keys,
+embedded deployed-object/Army pairing, and publication source bindings.
+It reports final file SHA-256 hashes and returns a nonzero status for an
+incomplete, corrupt or mismatched set. It never creates missing files,
+selects another directory, rebuilds curation or reads the raw archive.
+Other intermediate files in the directory are ignored. The v10 candidate
+and Docker-bundle checks share this built-artifact validator while retaining
+their additional source-rebuild and pinned-content checks.
+
+This is a transitional four-file check, not the planned SQLite-only set.
+It does not verify working-tree curation/config freshness or graphical
+assets; release/source and graphical-publication checks still own those
+obligations. `--db-dir` is explicit and cannot be combined with an individual
+database argument or `--require-raw`. The existing individual Army/raw health
+command remains available. Build/serve directory selection and final database
+names remain scheduled in the [restructuring plan](../docs/restructuring-plan.md).
+
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
 source control so machine-local snapshot state does not obscure code changes.
 For the private Linux worker, [Syncthing-staged development assets](../docs/syncthing-assets.md)

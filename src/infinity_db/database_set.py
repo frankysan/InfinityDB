@@ -1,0 +1,107 @@
+"""Shared validation of the built runtime set during the SQLite-only migration.
+
+The current v10 set still includes two JSON publications. P2 replaces those
+consumers and filenames together; this module does not select a fallback set,
+rebuild source inputs, or establish that working-tree curation is up to date.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import sqlite3
+from contextlib import closing
+from pathlib import Path
+from typing import Any
+
+from .database.repository import Database
+from .rules_database import RulesDatabase
+from .variant_usage_reference import load_variant_usage_publication
+from .weapon_profile_publication import load_weapon_profile_publication
+
+V10_RUNTIME_FILES = frozenset({
+    "infinity.db", "rules.db", "variant-usage.json", "weapon-profile-sources.json",
+})
+
+
+def _full_integrity_check(path: Path) -> None:
+    with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)) as connection:
+        if connection.execute("PRAGMA integrity_check").fetchall() != [("ok",)]:
+            raise ValueError(f"Database integrity check failed: {path.name}")
+        if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
+            raise ValueError(f"Database contains broken foreign keys: {path.name}")
+
+
+def validate_database_set(directory: Path) -> dict[str, Any]:
+    """Validate exactly the selected v10 runtime artifacts without writing files.
+
+    Other build outputs in the directory are ignored, never selected as data
+    or used to recover a missing publication. The raw archive, source curation
+    and graphical publication are outside this built-runtime validation scope.
+    """
+    directory = Path(directory).resolve()
+    if not directory.is_dir():
+        raise ValueError(f"Database-set directory does not exist: {directory}")
+    missing = sorted(name for name in V10_RUNTIME_FILES if not (directory / name).is_file())
+    if missing:
+        raise ValueError(f"Incomplete database set; missing: {', '.join(missing)}")
+
+    army_path, rules_path = directory / "infinity.db", directory / "rules.db"
+    Database(army_path).validate()
+    rules = RulesDatabase(rules_path)
+    rules.validate()
+    with closing(sqlite3.connect(rules_path.as_uri() + "?mode=ro", uri=True)) as connection:
+        schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
+    if schema_version != 10:
+        raise ValueError("Database-set validation requires the current v10 Rules schema")
+    for path in (army_path, rules_path):
+        _full_integrity_check(path)
+
+    objects = rules.deployed_objects_payload(army_path)
+    if objects is None or not objects["objects"]:
+        raise ValueError("Database set lacks source-matched embedded deployed objects")
+    variants = load_variant_usage_publication(
+        directory / "variant-usage.json", army_path, rules_path,
+        directory / "deployed-objects.json",
+    )
+    if variants is None or not variants["variants"] or variants["formatVersion"] != 2:
+        raise ValueError("Database set lacks a source-matched v2 variant publication")
+    weapons = load_weapon_profile_publication(
+        directory / "weapon-profile-sources.json", army_path, rules_path,
+    )
+    if not weapons:
+        raise ValueError("Database set lacks source-matched Weapon profile citations")
+
+    fingerprints = {}
+    for name in sorted(V10_RUNTIME_FILES):
+        with (directory / name).open("rb") as stream:
+            fingerprints[name] = hashlib.file_digest(stream, "sha256").hexdigest()
+    return {
+        "layout": "v10-four-file",
+        "integrityCheck": "full",
+        "schemaVersion": schema_version,
+        "deployedObjects": len(objects["objects"]),
+        "unresolvedDeliveries": len(objects["unresolvedDeliveries"]),
+        "variantGroups": len(variants["variants"]),
+        "variantPublicationVersion": variants["formatVersion"],
+        "reviewedWeapons": len({key[0] for key in weapons}),
+        "sha256": fingerprints,
+    }
+
+
+def database_set_health_report(directory: Path) -> dict[str, Any]:
+    """Report selected-set health, including failures, for the existing health CLI."""
+    report: dict[str, Any] = {
+        "format": "InfinityDB database-set health",
+        "formatVersion": 1,
+        "directory": str(Path(directory).resolve()),
+        "status": "unhealthy",
+        "sourcePolicyFreshness": "not-checked",
+        "graphicalAssets": "not-checked",
+    }
+    try:
+        report.update(validate_database_set(directory))
+    except (OSError, sqlite3.Error, ValueError, KeyError, TypeError) as exc:
+        report["error"] = str(exc)
+    else:
+        report["status"] = "healthy"
+    return report

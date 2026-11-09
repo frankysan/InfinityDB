@@ -13,8 +13,9 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory
+from infinity_db.database_set import V10_RUNTIME_FILES, validate_database_set
 from infinity_db.deployed_object_builder import build_deployed_objects
-from infinity_db.rules_database import RulesDatabase, export_rules_database
+from infinity_db.rules_database import export_rules_database
 from infinity_db.variant_usage import build_variant_usage_projection
 from infinity_db.variant_usage_reference import (
     load_variant_usage_publication,
@@ -31,9 +32,7 @@ from tools.build_weapon_profile_publication import (
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STAGE = ROOT / "local" / "v10-candidate"
-REQUIRED = frozenset({
-    "infinity.db", "rules.db", "variant-usage.json", "weapon-profile-sources.json",
-})
+REQUIRED = V10_RUNTIME_FILES
 
 
 def _digest(path: Path) -> str:
@@ -69,20 +68,6 @@ def verify_candidate(stage: Path, *, root: Path = ROOT) -> dict[str, Any]:
     staged_rules = stage / "rules.db"
     if _digest(staged_army) != _digest(army):
         raise ValueError("Staged Army database differs from pinned build input")
-    rules = RulesDatabase(staged_rules)
-    rules.validate()
-    with rules._connect() as connection:
-        version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if version != 10:
-        raise ValueError(f"Staged rules database is v{version}, not v10")
-    objects = rules.deployed_objects_payload(staged_army)
-    if (
-        objects is None
-        or len(objects["objects"]) != 17
-        or len(objects["unresolvedDeliveries"]) != 1
-    ):
-        raise ValueError("Staged deployed objects are incomplete")
-
     expected_variant = publication_from_candidate(
         build_variant_usage_projection(
             staged_army, raw, staged_rules, stage / "deployed-objects.json",
@@ -101,15 +86,10 @@ def verify_candidate(stage: Path, *, root: Path = ROOT) -> dict[str, Any]:
         raise ValueError("Staged Weapon-profile publication differs from reviewed inputs")
     if not load_weapon_profile_publication(weapon_path, staged_army, staged_rules):
         raise ValueError("Staged Weapon-profile publication failed runtime validation")
-    return {
-        "schemaVersion": version,
-        "deployedObjects": len(objects["objects"]),
-        "unresolvedDeliveries": len(objects["unresolvedDeliveries"]),
-        "variantGroups": len(expected_variant["variants"]),
-        "variantPublicationVersion": expected_variant["formatVersion"],
-        "reviewedWeapons": len(expected_weapon["weapons"]),
-        "sha256": {name: _digest(stage / name) for name in sorted(REQUIRED)},
-    }
+    result = validate_database_set(stage)
+    if result["deployedObjects"] != 17 or result["unresolvedDeliveries"] != 1:
+        raise ValueError("Staged deployed objects are incomplete")
+    return result
 
 
 def _write_companion_publications(stage: Path, *, root: Path = ROOT) -> None:

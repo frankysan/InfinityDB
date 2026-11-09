@@ -61,6 +61,7 @@
         "test_conditional_reactive_followup",
         "test_command_token_source_review",
         "test_database",
+        "test_database_set",
         "test_display_identities",
         "test_distance_semantics",
         "test_domain_slugs",

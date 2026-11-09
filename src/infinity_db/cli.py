@@ -15,6 +15,7 @@ from infinity_army_data.cli import cmd_normalize as normalize_dataset
 from . import __version__
 from .curated import load_curated_directory, load_curated_document
 from .database import database_health_report, export_database, raw_database_path
+from .database_set import database_set_health_report
 from .display_identities import display_identity_metadata, load_display_identity_curated
 from .identities import identity_metadata, load_identity_config
 from .peripheral_identities import (
@@ -120,6 +121,24 @@ def cmd_export(args: argparse.Namespace) -> int:
 
 
 def cmd_database_health(args: argparse.Namespace) -> int:
+    if args.db_dir is not None:
+        if args.require_raw:
+            raise ValueError("--require-raw applies to an Army database, not --db-dir")
+        report = database_set_health_report(args.db_dir)
+        if args.json:
+            print(json.dumps(report, indent=2, sort_keys=True))
+        else:
+            print(f"Database-set health: {report['status']}")
+            print(f"Database directory: {report['directory']}")
+            if error := report.get("error"):
+                print(f"Database-set error: {error}")
+            else:
+                print(f"Layout: {report['layout']}; integrity: {report['integrityCheck']}")
+                for name, digest in report["sha256"].items():
+                    print(f"{name}: {digest}")
+            print("Source-policy freshness and graphical assets: not checked")
+        return 0 if report["status"] == "healthy" else 1
+
     report = database_health_report(args.database, require_raw=args.require_raw)
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
@@ -358,9 +377,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_health = sub.add_parser(
         "database-health",
-        help="Validate a published application database and report revision metadata",
+        help="Validate an Army database or an explicitly selected runtime directory",
     )
-    p_health.add_argument("database", nargs="?", type=Path, default=DEFAULT_DATABASE)
+    health_selection = p_health.add_mutually_exclusive_group()
+    health_selection.add_argument("database", nargs="?", type=Path, default=DEFAULT_DATABASE)
+    health_selection.add_argument(
+        "--db-dir", type=Path,
+        help="Validate one complete current v10 runtime directory without fallback",
+    )
     p_health.add_argument(
         "--require-raw",
         action="store_true",
