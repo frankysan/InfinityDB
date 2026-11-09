@@ -124,6 +124,44 @@ The ordering below expresses **dependencies**, not a requirement to serialize in
 
 **Baseline observation:** The active queue reported no pending VD or VR entries at inspection. No implementation/test policy, required CI workflow or existing gate was changed in P0.1. This section records proposed dispositions for the next steps, not their approval as operational rules.
 
+#### P0.2 — Proposed normal task lifecycle (2026-11-09)
+
+**Status:** Design defined on `dev/v1.1.0`; **not active policy until P0.3–P0.5 reconcile the queue, testing, agent and CI/release instructions**. This section is the target contract for ordinary implementation, not a second current operating manual. When activated, `AGENTS.md` will point to the short workflow in `docs/testing.md`; this design section can then be retired or reduced to a decision record.
+
+**Default task unit:** One coherent, reviewable behavior change or closely coupled set of changes with an observable acceptance condition. Avoid splitting every file edit into its own investigation/test/commit cycle, but do not mix independent defects merely to fill a batch. Small, known tasks need no separate planning agent, formal handoff or pre-implementation approval.
+
+**Proposed five-step default:**
+
+1. **Orient.** Verify the intended branch, HEAD, working-tree status and active task. Read only directly affected source, tests and the relevant canonical guidance; identify existing changes to preserve. For ambiguous/high-risk semantics, perform a bounded read-only investigation first. A task is ready when the desired behavior and a practical check are clear.
+2. **Implement.** Make the smallest coherent change, preserving unrelated work. Update focused tests alongside code where useful. Do not create separate VD/VR entries or invoke a test-design agent merely because source changed. A newly written test may be run immediately.
+3. **Verify.** Select the smallest sufficient checks for the affected contract: existing/new regression tests, lint/type/docs or data/asset integrity as appropriate. Broaden only for a demonstrated cross-cutting impact or an independently required gate; resolve relevant failures before acceptance. **Documentation-only edits:** documentation checks; no automatic app test. **Executable/data edits:** focused behavioral checks plus any necessary schema/source/provenance gates. **Cumulative/release changes:** follow the separately applicable integration or release acceptance owner.
+4. **Deliver.** Review the actual diff and status; update the canonical documentation and active backlog only if behavior or remaining work changed. Stage task-related files, commit a coherent validated result, and safely push only where authorized by the normal development workflow. A completed implementation task does not imply that unrun CI, Docker or release tests passed.
+5. **Report and stop.** State what changed, checks actually run and outcomes, blocked/unrun verification (if any), commit/branch and any meaningful next dependency. Do not require routine queue counts, old V1S bookkeeping, GitHub run receipts or repeated checklists when none are relevant.
+
+**Decision rules for exceptional work:**
+
+| Situation | Action; not a default extra phase |
+| --- | --- |
+| Small known code/UI bug | Implement and execute focused regression(s) in the same pass. |
+| Documentation-only change | Update owned documentation, run docs checks, commit. |
+| Rule/source interpretation, cross-source revision, database/schema or security-sensitive change | Investigate affected invariants first; validate the relevant semantic/integrity boundaries before acceptance. |
+| Test execution is genuinely deferred (for example, a required browser/asset/host unavailable locally) | Register **one concrete open obligation** with selector/expected evidence, owning task, relevant revision and intended execution trigger. Do not mark it passed or silently discard it. P0.3 will define the streamlined register and scheduling. |
+| Multiple related implementation changes | Run the union of impacted focused tests once where compatible; do not repeat a full suite for every edit. |
+| An isolated Linux/other worker is testing an exact revision | Independent work may continue in a **separate checkout** if no shared mutable inputs are affected. The result validates only the pinned revision/assets. P0.3 updates the concurrency rule. |
+| CI/PR merge, release or deployment | Hand off to the separately defined relevant gate. Do not run all release checks for ordinary commits and do not conflate passing focused tests with a shippable release. |
+
+**Minimal per-task acceptance evidence:** a specific intended result, reviewed changed files, passing applicable focused checks (with failures/skips disclosed), and an unambiguous delivered revision. For source/data changes retain the source publication/revision and reproducible build evidence needed to substantiate the changed facts. No additional status document, task diary or audit report is required solely for process compliance.
+
+**Conditions that still block closeout:** a known correctness regression; a required immediate integrity check that fails or was not performed; loss of source scope/provenance or required licensing attribution; uncertain Git state; or a stated acceptance condition that remains unmet. In contrast, an independently owned future CI/release gate is reported as pending without forcing an otherwise validated implementation to stay in an administrative loop.
+
+**Implementation handoff to P0.3–P0.5:**
+
+- **P0.3:** Replace default-per-change VD/VR creation, strict numeric drain loops, all-tests-forbidden design passes and the full-suite-only concurrency exception. Retain actual deferred obligations and focused-first checks. Check users of the queue format (especially `tools.dev_status` and backlog/test helpers) before removing fields or IDs.
+- **P0.4:** Separate the minimal normal development acceptance from release/merge, image, cross-platform and deployed-smoke acceptance. Make the release choice risk-based and explicit rather than removing product-level protection by implication.
+- **P0.5:** Give the active default one authoritative short owner in `docs/testing.md`; keep `AGENTS.md` an entry point and align `docs/validation-queue.md`, `docs/ci.md`, `docs/releasing.md` and local `AGENTS.local.md` without conflicting MUST rules. Do not edit ignored personal preferences without an explicit reconciliation decision.
+
+**Exit decision for P0.2:** The normal path is **orient → implement → verify → deliver → report**. Specialized investigation, queued testing, multi-agent delegation and release operations are opt-in by actual risk or need, not mandatory steps per edit. No behavior, queue threshold or existing mandatory gate changes merely because this target lifecycle has been documented.
+
 ### P1 — Map the dependency graph and define the cutover
 
 **Outcome:** Evidence-based keep/migrate/extract/retire inventory and an executable database target contract.  
