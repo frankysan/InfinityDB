@@ -137,7 +137,8 @@
         "test_weapon_config",
         "test_weapon_profile_publication",
         "test_weapon_profile_storage",
-        "test_weapon_properties"
+        "test_weapon_properties",
+        "test_weapon_property_storage"
       ]
     },
     "web": {

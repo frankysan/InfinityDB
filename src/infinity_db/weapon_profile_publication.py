@@ -182,7 +182,7 @@ def load_runtime_weapon_profile_publication(
         rules = RulesDatabase(rules_database)
         with rules._connect() as connection:
             schema = connection.execute("PRAGMA user_version").fetchone()[0]
-        if schema in {12, 13, 14, 15, 16}:
+        if schema in {12, 13, 14, 15, 16, 17}:
             return (
                 rules.weapon_profile_citations_payload(army_database),
                 file_sha256(rules_database),

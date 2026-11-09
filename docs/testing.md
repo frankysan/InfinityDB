@@ -736,6 +736,39 @@ The current tracked v10 release artifacts were not modified; these
 results establish the opt-in Windows path, not Linux/Docker or
 P2.6 serving cutover acceptance.
 
+**2026-11-09 P2.4 fifth slice, reviewed Weapon Properties (Windows local):**
+`tests/test_weapon_property_storage.py` (17/17) validates all 12
+reviewed property definitions, ordered current-rule origins, exact
+nullable mode/source signatures, ordered original Trait strings,
+v10/v17 Glossary/search/Weapon HTTP parity with v17 JSON reads disabled,
+and fail-closed source/Army/profile/fingerprint corruption. The
+existing `tests/test_weapon_properties.py` passed 26/26,
+`tests/test_database_set_builder.py` 16/16,
+`tests/test_rules_database.py` 166/166, and
+`tests/test_database_set.py` 20/20. Ruff, canonical Pyright
+(zero errors/warnings), documentation checks and `git diff --check`
+passed.
+
+Two independent complete opt-in builds from pinned
+`JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced Rules v17 (compatibility 19) paired with the selected Army.
+Both passed 73 Army source normalization checks (116 known baseline
+warnings), selected-set health and provenance, 151 variant groups,
+62 reviewed Weapons/69 citations, six Restrictions chart rows,
+33 Trait Wiki links, six Combined Saving Roll profiles,
+16 Ammunition references and 12 Weapon Properties. All 41 pinned
+P1.3 runtime routes passed in both builds. The sets were
+byte-identical:
+`infinity.db` =
+`884219134b942e2ad389f5bab0ad0ebeba0464bcd4f29e3f96ba2125eca21076`,
+`rules.db` =
+`0feb0994c0d81860f119c6d81eedd5822232ec639da4d2aeba57e3632952e862`.
+Build-set ID:
+`94a51879eab0aba64e60a349cb1da036fda1f46f40a3289094fe9adcb796c9d1`.
+No tracked release databases were modified. This accepts the Windows
+opt-in path, not Linux/Docker or P2.6 default serving cutover.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

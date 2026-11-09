@@ -33,6 +33,7 @@ from .variant_usage_reference import publication_from_candidate
 from .weapon_ammunition_references import load_ammunition_reference_map
 from .weapon_combined_saving_rolls import load_combined_saving_roll_map
 from .weapon_profile_builder import build_publication
+from .weapon_properties import load_weapon_properties
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -127,10 +128,14 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
     ammunition = load_ammunition_reference_map(
         root / "config/catalogs/weapon-ammunition-references.json"
     )
+    properties = load_weapon_properties(
+        root / "config/catalogs/weapon-properties.json"
+    )
     export_rules_database(
         documents, rules, variant_usage=variants, weapon_citations=weapons,
         restriction_chart=chart, trait_wiki_links=trait_links,
         combined_saving_rolls=saving_rolls, ammunition_references=ammunition,
+        weapon_properties=properties,
         army_database=army, **export_options,
     )
 

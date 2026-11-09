@@ -31,11 +31,11 @@ when all contained work shares the same owner.
   current-format shared validation and opt-in offline complete builds with
   input provenance are available in the [data lifecycle](../data/README.md).
   Complete builds embed exact variant usage, reviewed Weapon-profile
-  citations, the Restrictions chart, reviewed Trait Wiki links,
-  Combined Saving Roll annotations and 16 authored Ammunition
-  source links in Rules v16. The opt-in two-file set has local
-  source-build and API parity checks; migrate P2.4's remaining
-  six maintained Army/Rules datasets and symbol path mappings.
+  citations, the Restrictions chart, Trait Wiki links, Combined Saving
+  Roll annotations, Ammunition links and 12 reviewed Weapon Properties
+  in Rules v17. The opt-in two-file set has local source-build and
+  API parity checks; migrate P2.4's remaining five maintained Army
+  JSON datasets and symbol path mappings.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;

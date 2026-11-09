@@ -61,7 +61,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
             )
             result = build_database_set(args, _build_army)
             report = validate_database_set(destination)
-            if report != result or report["layout"] != "v16-two-file":
+            if report != result or report["layout"] != "v17-two-file":
                 raise ValueError("Complete-build database health disagrees with publication")
             if set(report["sha256"]) != {"infinity.db", "rules.db"}:
                 raise ValueError("Complete build produced an unexpected runtime file set")
@@ -72,6 +72,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 inventory != (151, 62, 6) or report["traitWikiLinks"] != 33
                 or report["combinedSavingRollProfiles"] != 6
                 or report["ammunitionReferences"] != 16
+                or report["weaponProperties"] != 12
             ):
                 raise ValueError("Complete build changed the reviewed source inventory")
 
@@ -142,6 +143,27 @@ def verify(source: Path, expected_sha256: str) -> dict:
                     for profile in weapon.get("profiles", [])
                 ):
                     raise ValueError(f"Reviewed Ammunition links are missing for {slug}")
+            from infinity_db.weapon_properties import load_weapon_properties
+
+            properties = RulesDatabase(
+                destination / "rules.db"
+            ).weapon_properties_payload(destination / "infinity.db")
+            if properties != load_weapon_properties(
+                ROOT / "config/catalogs/weapon-properties.json"
+            ):
+                raise ValueError("Embedded Weapon Properties differ from reviewed source")
+            for slug, property_id in (
+                ("plasma-rifle", "plasma"), ("viral-rifle", "viral"),
+                ("feuerbach", "ap-da"), ("silenced-pistol", "silenced"),
+            ):
+                weapon = _api(app, f"/api/weapons/{slug}")
+                profiles = weapon.get("profiles", [])
+                if not any(
+                    any(item["id"] == f"weapon-property:{property_id}"
+                        for item in profile.get("weapon_properties", []))
+                    for profile in profiles
+                ):
+                    raise ValueError(f"Missing reviewed Weapon Property for {slug}")
             baseline = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
             observed = capture(
                 app, paths=tuple(item["path"] for item in baseline["probes"]),
@@ -150,9 +172,10 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 raise ValueError("Runtime semantic baseline is incomplete")
             reports.append(report)
             print(
-                f"Complete build {attempt}: v16 healthy, 62 Weapons, "
+                f"Complete build {attempt}: v17 healthy, 62 Weapons, "
                 f"69 citations, 6 chart rows, 33 Trait links, "
-                f"6 saving-roll modes, 16 Ammunition references, 41 baseline routes; "
+                f"6 saving-roll modes, 16 Ammunition references, "
+                f"12 Weapon Properties, 41 baseline routes; "
                 f"hashes {json.dumps(report['sha256'], sort_keys=True)}",
                 flush=True,
             )
@@ -173,6 +196,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
         "traitWikiLinks": reports[0]["traitWikiLinks"],
         "combinedSavingRollProfiles": reports[0]["combinedSavingRollProfiles"],
         "ammunitionReferences": reports[0]["ammunitionReferences"],
+        "weaponProperties": reports[0]["weaponProperties"],
         "rebuilds": 2,
     }
 

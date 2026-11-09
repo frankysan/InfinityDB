@@ -2791,6 +2791,39 @@ from SQLite in v16 and returns unchanged `ammunition_parts`,
 Pre-v16 releases and source-only review tools continue to load the
 maintained JSON; no released build or serving defaults change here.
 
+### Reviewed Weapon Properties in Rules v17 (P2.4 opt-in)
+
+The authored `config/catalogs/weapon-properties.json` retains
+12 distinct application-owned Weapon Properties; these do **not**
+become official N5 Ammunition, Traits or Skills. The opt-in Rules
+v17/compatibility-19 export stores their exact slug, name, summary
+and authored order in `weapon_properties`. Ordered
+`weapon_property_origins` retain domain, role, optional current
+canonical rule-record foreign key and optional exact source-section
+string; they do not infer references from source text.
+
+`weapon_property_profiles` preserves each reviewed exact Army
+Weapon ID, nullable mode, name, Ammunition source ID/name, Saving
+Roll field and count. Ordered `weapon_property_profile_traits`
+retain the unmodified printed Trait strings, including annotation
+markers, without reinterpreting them. A non-null `mode_key`
+distinguishes NULL from named modes for unique source signatures.
+`weapon_property_metadata` binds the selected Army database SHA,
+current N5.3 primary PDF source identity/SHA, row counts,
+maintained format/version and a fingerprint of the complete
+ordered source publication. Relational records keep canonical-rule
+and source collection ownership explicit.
+
+Build and read validation check the reviewed inventory,
+current rule origins, source-profile/mode identities and the
+exact selected Army Weapon fields; mismatched, missing or corrupted
+source facts fail closed. The `WeaponProperties` resolver reads
+SQLite for v17, preserving its existing exact-match guard,
+Glossary/search links, origin previews and Weapon detail payload.
+Earlier schemas and explicit source-review calls keep the
+validated JSON adapter until P2.6. No released serving defaults
+or generated v10 assets change in this slice.
+
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
 **Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**
@@ -2824,14 +2857,15 @@ to expose fourteen normalized conditions separately.
 
 `RulesDatabase.validate()` accepts the exact schema / compatibility pairs
 **(8, 10)**, **(9, 11)**, **(10, 12)**, **(11, 13)**,
-**(12, 14)**, **(13, 15)**, **(14, 16)**, **(15, 17)**
-and **(16, 18)**. The tracked 1.0.1 release remains
+**(12, 14)**, **(13, 15)**, **(14, 16)**, **(15, 17)**,
+**(16, 18)** and **(17, 19)**. The tracked 1.0.1 release remains
 v10/compatibility-12. From v9 onward the validator checks fourteen
 Restrictions constraints, negative polarity, qualifiers and provenance;
 v10 adds normalized deployed objects, v11 embedded exact variant
 usage, v12 reviewed Weapon citations, v13 the relational chart and
 v14 the source-reviewed Trait Wiki links, v15 the exact
-Combined Saving Roll signatures and v16 reviewed Ammunition links.
+Combined Saving Roll signatures, v16 reviewed Ammunition links
+and v17 relational Weapon Properties.
 Invalid combinations, missing rows and corrupted provenance fail closed.
 
 Shared release staging preserves the active supported schema. For v10 it

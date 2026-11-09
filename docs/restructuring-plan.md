@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in v13, reviewed Trait Wiki links in v14, exact Combined Saving Roll annotations in v15 and reviewed Ammunition source links in v16. Six maintained datasets, symbol mappings and final build/serving cutover remain unfinished.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in v13, Trait Wiki links in v14, Combined Saving Roll annotations in v15, Ammunition source links in v16 and reviewed Weapon Properties in v17. Five maintained Army JSON datasets, symbol mappings and final build/serving cutover remain unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1589,10 +1589,35 @@ The tracked v10 release artifacts and ordinary build/serve/Docker
 defaults are untouched. Focused and pinned source-build evidence
 is owned by [testing](testing.md#selected-runtime-database-set-validation).
 
-**Remaining P2.4:** Migrate six maintained Army/Rules JSON datasets
-and the runtime symbol path mappings identified in P1.4.
-The v10–v15 JSON adapters remain only while independently needed
-for release/research/presentation consumption; historical tests
+#### P2.4 — Fifth slice: reviewed Weapon Property vocabulary (2026-11-09)
+
+**Status:** The opt-in complete build emits Rules v17
+(compatibility 19). The 12 authored Weapon Properties in
+`config/catalogs/weapon-properties.json` now materialize as
+`weapon_properties`, ordered `weapon_property_origins`,
+`weapon_property_profiles` with exact Army Weapon ID and
+nullable source mode, and ordered
+`weapon_property_profile_traits`. Current canonical rule
+origins are source-linked via composite foreign keys. Authored
+source-section strings, all original signature fields and Trait
+lists remain intact. `weapon_property_metadata` binds the
+current N5.3 primary PDF, selected Army database SHA, counts
+and deterministic full-publication fingerprint. Unreviewed,
+missing or conflicting signatures fail closed.
+
+`WeaponProperties` reads its v17 vocabulary exclusively from
+Rules SQLite, while older releases and explicit source-review
+calls retain the maintained JSON loader. Glossary/search and
+Weapon-detail API responses, cross-links, previews, and exact
+mode/profile match guards remain unchanged. The v10 release,
+default build/serve/Docker behavior and packaged SVG assets are
+unchanged. Focused and independent real-source-build evidence
+is recorded in [testing](testing.md#selected-runtime-database-set-validation).
+
+**Remaining P2.4:** Migrate five maintained Army JSON datasets and
+the symbol path mappings identified in P1.4. The v10–v16 JSON
+adapters remain only while independently needed for actual
+release/research/presentation consumption; historical tests
 alone do not justify preserving obsolete build machinery.
 Final naming, serving and Docker cutover belongs to P2.6.
 

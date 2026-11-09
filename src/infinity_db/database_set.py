@@ -3,7 +3,8 @@
 The tracked v10 set includes two JSON publications; v11 embeds variant usage
 and v12 also embeds Weapon citations; v13 embeds the Restrictions chart;
 v14 embeds reviewed Trait Wiki references; v15 embeds reviewed Combined
-Saving Roll annotations; v16 embeds reviewed Ammunition links.
+Saving Roll annotations; v16 embeds reviewed Ammunition links; v17 embeds
+exact authored Weapon Property definitions and source profiles.
 This module never selects a fallback
 set, rebuilds inputs, or establishes working-tree curation freshness.
 """
@@ -56,7 +57,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     army_path, rules_path = directory / "infinity.db", directory / "rules.db"
     with closing(sqlite3.connect(rules_path.as_uri() + "?mode=ro", uri=True)) as connection:
         schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if schema_version not in {10, 11, 12, 13, 14, 15, 16}:
+    if schema_version not in {10, 11, 12, 13, 14, 15, 16, 17}:
         raise ValueError("Unsupported Rules schema for selected database set")
     names = (
         V10_RUNTIME_FILES if schema_version == 10 else
@@ -81,7 +82,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         raise ValueError("Database set lacks a source-matched v2 variant publication")
     weapons = (
         rules.weapon_profile_citations_payload(army_path)
-        if schema_version in {12, 13, 14, 15, 16} else
+        if schema_version in {12, 13, 14, 15, 16, 17} else
         load_weapon_profile_publication(
             directory / "weapon-profile-sources.json", army_path, rules_path,
         )
@@ -107,6 +108,10 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     if schema_version >= 16 and (ammunition is None or len(ammunition) != 16):
         raise ValueError("Database set lacks complete reviewed Ammunition links")
 
+    properties = rules.weapon_properties_payload(army_path) if schema_version >= 17 else None
+    if schema_version >= 17 and (properties is None or len(properties) != 12):
+        raise ValueError("Database set lacks source-matched Weapon Properties")
+
     fingerprints = {}
     for name in sorted(names):
         with (directory / name).open("rb") as stream:
@@ -115,7 +120,8 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         "layout": {
             10: "v10-four-file", 11: "v11-three-file",
             12: "v12-two-file", 13: "v13-two-file",
-            14: "v14-two-file", 15: "v15-two-file", 16: "v16-two-file",
+            14: "v14-two-file", 15: "v15-two-file",
+            16: "v16-two-file", 17: "v17-two-file",
         }[schema_version],
         "integrityCheck": "full",
         "buildProvenance": provenance,
@@ -129,6 +135,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         **({"traitWikiLinks": len(trait_links)} if trait_links is not None else {}),
         **({"combinedSavingRollProfiles": len(saving_rolls)} if saving_rolls is not None else {}),
         **({"ammunitionReferences": len(ammunition)} if ammunition is not None else {}),
+        **({"weaponProperties": len(properties)} if properties is not None else {}),
         "sha256": fingerprints,
     }
 
