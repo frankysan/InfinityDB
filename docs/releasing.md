@@ -205,11 +205,17 @@ the features and changes implemented in each release, with the **end-user
 perspective first and the developer/maintainer perspective second**. The
 v1.0.0 entry in `docs/CHANGELOG.md` is the style example for future entries.
 
-- Write in **past tense**, including the Player summary and implemented
-  changes in pending release sections: “Added the ability to …”, “Expanded …”,
-  “Clarified the use of …” or “Corrected …”. Describe what changed; avoid
-  imperative browsing instructions or a general present-tense feature guide.
-  Planned work belongs in the backlog, not the changelog.
+- Use **past tense for completed changes**, including the Player summary and
+  implemented changes in pending release sections: “Added the ability to …”,
+  “Expanded …”, “Clarified the use of …” or “Corrected …”. Use **present tense
+  for ongoing behavior, capabilities, requirements and compatibility** in the
+  version being described. Mix tenses within an entry when their meanings
+  differ: “Retired loose deployed-object JSON serving. Current images require
+  database-embedded deployed objects; older releases remain recoverable through
+  their matching retained images.” Use past tense for behavior that applied
+  only before the change. Describe release outcomes rather than imperative
+  browsing instructions or a general feature guide. Planned work belongs in
+  the backlog, not the changelog.
 - Lead with the capability, correction or practical effect for players or
   operators. Name the affected feature and explain what was added, changed
   or fixed in language accessible without internal development context.
@@ -243,7 +249,8 @@ instructions, because the web application parses it to render **What's changed**
   missing outcomes, but do not turn commits, tests or internal refactors into
   individual release-note entries.
 - [ ] Review the complete pending section of `docs/CHANGELOG.md` as one release:
-  use past tense and an end-user-first perspective, keep its `Player summary`
+  use past tense for completed changes and present tense for ongoing behavior
+  in that version, with an end-user-first perspective. Keep its `Player summary`
   concise and player-visible only, and retain concrete feature and correction
   detail below it. Merge overlapping entries, remove implementation-only
   detail, and make upgrade consequences explicit.

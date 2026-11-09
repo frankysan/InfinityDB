@@ -33,8 +33,8 @@ are not retroactively relabeled.
 ### Changed
 
 - **Web backend + Deployment:** Retired loose deployed-object JSON serving
-  and legacy v8/v9 image assembly. Current images required database-embedded
-  deployed objects; older releases remained recoverable through their matching
+  and legacy v8/v9 image assembly. Current images require database-embedded
+  deployed objects; older releases remain recoverable through their matching
   retained images.
 
 ## [1.0.1] - 2026-11-09
