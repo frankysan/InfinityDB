@@ -312,6 +312,10 @@ infinity-db database-health data/generated/infinity.db --require-raw
 # Validate a complete current runtime directory (without raw build inputs)
 infinity-db database-health --db-dir data/generated --json
 
+# Build and inspect a complete alternate runtime from a pinned local archive
+infinity-db build "data/raw/JSON YYYYMMDD-HHMMSS.zip" --db-dir local/alternate-runtime --compact
+infinity-db database-health --db-dir local/alternate-runtime --json
+
 # Validate a curated rules file
 infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 

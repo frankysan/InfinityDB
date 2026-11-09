@@ -193,6 +193,7 @@
       "description": "Army acquisition, normalization, deterministic build, provenance, and ingestion.",
       "modules": [
         "test_cli",
+        "test_database_set_builder",
         "test_deterministic_io",
         "test_download_army_json",
         "test_download_human_sphere_snapshot",

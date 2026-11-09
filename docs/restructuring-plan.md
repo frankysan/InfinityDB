@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0 and P1 completed (P1.4–P1.5 are target designs, not implemented schemas/paths); P2.1 is in progress with shared current-format set validation delivered. The offline builder and remaining P2–P6 work are not complete.
+**Status:** Active on `dev/v1.1.0`: P0 and P1 completed (P1.4–P1.5 are target designs, not implemented schemas/paths). P2.1 has shared current-format validation, opt-in offline complete builds and input provenance. Continue with P2.2; final defaults, SQLite-only facts and serving integration remain unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1402,23 +1402,29 @@ planning work and needs no changelog entry.
 
 **Exit:** Built DBs alone provide every runtime structured fact; normal local serving and Docker image serving agree; no silent fallback to older artifacts or required loose JSON; reviewed results meet P1 baseline.
 
-#### P2.1 — Shared current-format verifier slice (2026-11-09)
+#### P2.1 — Current-format builder, verifier and input provenance (2026-11-09)
 
-**Status:** Implemented the initial shared verifier, not the complete P2.1
-builder or SQLite-only target. `infinity_db.database_set` validates the
-current v10 built runtime artifacts and supplies the explicit
-`database-health --db-dir PATH` command. Current v10 candidate and Docker
-bundle verification reuse it; source regeneration and fixed-snapshot
+**Status:** Implemented the shared current-format verifier and the opt-in
+offline `build SOURCE.zip --db-dir PATH` orchestration. Both databases carry
+the same input-derived build identity, and Rules requires the selected Army
+export generation. Temporary outputs validate before the selected files are
+replaced; a changed input or pre-publication failure preserves the destination.
+`database-health --db-dir PATH` and current v10 candidate/Docker-bundle checks
+share the built-artifact verifier; source regeneration and fixed-snapshot
 acceptance remain additional checks. The [data lifecycle](../data/README.md)
-owns the implemented command/format boundary and [testing](testing.md#selected-runtime-database-set-validation)
-owns its focused regressions.
+owns the command/format boundary, the [data model](data-model.md#shared-runtime-build-input-provenance)
+owns metadata, and [testing](testing.md#selected-runtime-database-set-validation)
+owns focused regressions and local acceptance.
 
-The directory check deliberately still requires today's two database files
-and two JSON publications. It neither adds final-family filename aliases nor
-switches build/serve selection. Complete P2.1's offline orchestration and
-shared build-input/generation metadata next; extend this verifier as
-P2.2–P2.4 materialize the missing database facts, then perform the P2.6
-filename/CLI/WSGI/Docker cutover together. P2.1 remains open.
+The complete build still produces today's two databases and two JSON
+publications. Intermediates/raw archives are temporary; ordinary Army builds
+remain available for research outputs. It requires the source checkout while
+the reviewed Weapon builder still uses its three existing tool helpers;
+P2.3 owns their extraction with citation embedding. There are no final-family
+filename aliases or new implicit serving paths. Continue P2.2–P2.4 to
+materialize the missing database facts; P2.6 then finishes P2.1's final
+defaults/directory interface with the filename/CLI/WSGI/Docker cutover.
+The final P2.1 target remains open until that integration is verified.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 
@@ -1500,7 +1506,7 @@ flowchart TD
     p5 --> p6
 ```
 
-**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has shared current-format set validation; offline orchestration and build-set provenance remain next. Target schemas and unified serving are not implemented yet. Independent P4 copy work need not block on the database migration.
+**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has current-format validation, opt-in complete offline builds and shared provenance. P2.2 is next; SQLite-only facts, final names/defaults and unified serving remain unfinished. Independent P4 copy work need not block on the database migration.
 
 ## Questions to settle during discovery (not reasons to stop planning)
 
@@ -1525,4 +1531,4 @@ At the final integrated milestone, verify:
 - Routine agent tasks require fewer mandatory process operations; focused tests run when relevant and full checks run at meaningful integration/release points.
 - Reduction in tool entrypoints and duplicated documentation is demonstrated from P1 baselines, with regressions and deliberate product changes called out separately.
 
-**Current status:** P0 policy and P1 discovery/design have been delivered as described above. P2.1 has an implemented verifier slice; the remaining P2–P6 scope still requires implementation and appropriate validation. The target architecture is not current runtime behavior.
+**Current status:** P0 policy and P1 discovery/design have been delivered as described above. P2.1 has current-format build/verification foundations; the remaining P2–P6 scope still requires implementation and appropriate validation. The target architecture is not current runtime behavior.

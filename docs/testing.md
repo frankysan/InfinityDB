@@ -530,7 +530,23 @@ stale publications, embedded Army mismatch and incompatible CLI selections.
 `tests/test_deployed_object_storage.py` covers source-built v10 candidates,
 checkout publication and Docker-bundle assembly using the shared verifier.
 These focused checks do not establish actual Docker, Linux or hosted CI
-acceptance, nor complete P2.1's remaining offline builder/provenance work.
+acceptance or the final SQLite-only cutover.
+
+`tests/test_database_set_builder.py` exercises input identity, source/code
+changes, matched/tampered provenance, repeatable selected outputs, preservation
+of unrelated files, source overwrite rejection, pre-publication failures,
+interrupted mixed-set rejection and rerun recovery. Its orchestration fixtures
+stand in for the Army/Rules generation phases using shipped runtime data;
+normalization/export semantics remain covered by the existing CLI/curated tests.
+
+**2026-11-09 Windows acceptance:** Two real offline complete builds from the
+pinned Army ZIP SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`
+produced identical bytes for all four runtime artifacts and matched shared
+provenance. The rebuilt set passed all 41 P1.3 semantic baseline paths.
+Its 116 source warnings matched the existing anomaly baseline; these were not
+newly accepted source changes. This is local current-format build evidence,
+not cross-platform byte acceptance, an actual Docker run or hosted approval.
 
 ## Phased development and validation
 

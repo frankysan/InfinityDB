@@ -86,6 +86,31 @@ Git-visible and cannot be deployed with an unrelated tracked Rules/publication
 set. Docker ignores the local checkout paths and packages only a verified,
 matched tracked release set.
 
+**Explicit complete runtime build:** `infinity-db build SOURCE.zip --db-dir PATH --compact`
+builds Army, Rules, variant usage and reviewed Weapon citations offline into
+one selected directory. It requires the source checkout, a local immutable
+Army ZIP and its selected Army API metadata. Omitting the source selects the
+newest local Army ZIP once; `--metadata` selects external API metadata explicitly.
+It never downloads an input or inherits the serving-only `INFINITY_DB_DB_DIR`.
+`--db-dir` and the existing narrow Army `--output-dir` are mutually exclusive;
+complete builds require lossless verification and reject `--no-verify`.
+
+The builder uses disposable work files under ignored `data/work/build/`, validates
+the full runtime set and matching input provenance, then replaces only the four
+selected runtime filenames. It preserves unrelated destination files and leaves
+all destination bytes unchanged if generation, validation or the final input
+freshness check fails before replacement. Intermediate JSON and the raw database
+are removed with the work directory; the narrow Army build remains available for
+raw-archive research. Source inputs are never rewritten. Stop a server using the
+selected directory before rebuilding and restart after success. An interruption
+between per-file replacements leaves an invalid mixed set; rerun the build to
+recover it. There is no live replacement lock or separate promotion step.
+
+This opt-in path still uses the current four-file v10 format. Plain `build`,
+`build-rules`, `serve`, Docker and their current defaults retain their existing
+selection contracts until the planned cutover. An explicit old-style
+`serve --database PATH/infinity.db` can serve the completed alternate set.
+
 **Selected runtime health:** `infinity-db database-health --db-dir PATH`
 validates exactly the selected current v10 runtime directory through the
 shared `infinity_db.database_set` validator. It requires `infinity.db`,
@@ -95,6 +120,9 @@ embedded deployed-object/Army pairing, and publication source bindings.
 It reports final file SHA-256 hashes and returns a nonzero status for an
 incomplete, corrupt or mismatched set. It never creates missing files,
 selects another directory, rebuilds curation or reads the raw archive.
+For recorded complete builds it also verifies the shared build-set ID, source
+manifest, family roles and required Army export generation; older tracked sets
+report provenance as `not-recorded`. A partial or mismatched recorded pair fails.
 Other intermediate files in the directory are ignored. The v10 candidate
 and Docker-bundle checks share this built-artifact validator while retaining
 their additional source-rebuild and pinned-content checks.
@@ -104,8 +132,9 @@ It does not verify working-tree curation/config freshness or graphical
 assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual
 database argument or `--require-raw`. The existing individual Army/raw health
-command remains available. Build/serve directory selection and final database
-names remain scheduled in the [restructuring plan](../docs/restructuring-plan.md).
+command remains available. The [data model](../docs/data-model.md#shared-metadata-and-integrity)
+owns the embedded build-provenance fields. Final defaults, serving directory
+selection and database names remain scheduled in the [restructuring plan](../docs/restructuring-plan.md).
 
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
 source control so machine-local snapshot state does not obscure code changes.

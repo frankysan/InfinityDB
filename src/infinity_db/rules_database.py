@@ -593,6 +593,7 @@ def export_rules_database(
     finalize: bool = True,
     restrictions_manifest: dict[str, Any] | None = None,
     deployed_objects: dict[str, Any] | None = None,
+    build_provenance: dict[str, Any] | None = None,
 ) -> None:
     """Atomically replace a rules database from validated curated documents.
 
@@ -601,6 +602,12 @@ def export_rules_database(
     """
     if not documents:
         raise ValueError("No curated documents supplied")
+    if build_provenance is not None:
+        from .build_provenance import validate_build_record
+
+        validate_build_record(build_provenance, "rules-n5")
+        if deployed_objects is None:
+            raise ValueError("Database-set provenance requires current embedded deployed objects")
     if deployed_objects is not None and restrictions_manifest is None:
         raise ValueError("Normalized deployed objects require the v9 Restrictions baseline")
     _validate_documents(documents)
@@ -625,6 +632,10 @@ def export_rules_database(
                     "collectionCount": len(documents),
                     "databaseCompatibilityVersion": RULES_COMPATIBILITY_VERSION,
                 }
+                if build_provenance is not None:
+                    from .build_provenance import BUILD_PROVENANCE_KEY
+
+                    metadata[BUILD_PROVENANCE_KEY] = build_provenance
                 _insert_many(
                     connection,
                     f"INSERT INTO {RULES_METADATA_TABLE} (key, value) VALUES (?, ?)",

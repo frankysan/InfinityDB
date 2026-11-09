@@ -13,6 +13,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
+from .build_provenance import validate_set_provenance
 from .database.repository import Database
 from .rules_database import RulesDatabase
 from .variant_usage_reference import load_variant_usage_publication
@@ -53,6 +54,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
     if schema_version != 10:
         raise ValueError("Database-set validation requires the current v10 Rules schema")
+    provenance = validate_set_provenance(army_path, rules_path)
     for path in (army_path, rules_path):
         _full_integrity_check(path)
 
@@ -78,6 +80,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     return {
         "layout": "v10-four-file",
         "integrityCheck": "full",
+        "buildProvenance": provenance,
         "schemaVersion": schema_version,
         "deployedObjects": len(objects["objects"]),
         "unresolvedDeliveries": len(objects["unresolvedDeliveries"]),

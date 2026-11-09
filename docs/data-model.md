@@ -3778,6 +3778,52 @@ finalization. A SQLite connection context manager does not itself begin a transa
 DDL; the rules schema script starts its transaction internally because `executescript` commits any
 previously pending transaction.
 
+### Shared runtime build-input provenance
+
+**Project domains:** Data processing, Project infrastructure
+
+The opt-in complete runtime builder records `database_set_build` in both Army
+metadata (including its build-only raw sibling) and Rules metadata. This is
+additive build provenance in the existing metadata tables, not new gameplay
+facts or a mandatory schema migration for older tracked sets.
+
+The version-1 record contains `formatVersion`, `buildSetId`, `family` and
+`manifest`. Rules additionally requires `requiredArmyExportPairSha256` matching
+the selected Army's existing `export_pair_sha256`. Families are currently
+`army` and `rules-n5`; ITS 18 remains embedded in Rules during P2.
+
+`buildSetId` is SHA-256 of the domain prefix `InfinityDB database-set build v1`
+followed by a null byte and the canonical UTF-8 JSON input manifest (sorted
+object keys, no whitespace, preserved Unicode, no non-finite numbers).
+The manifest declares its format/version, selected families, `builderRevision`,
+Army archive and API-metadata basenames/exact SHA-256 values, and repository-relative
+input file digests. `builderRevision` hashes the sorted source-code path/digest
+map; it is a code-content identity, not a Git commit or an output-file hash.
+Source-code digests use LF bytes under the repository's text policy, so an
+older Windows CRLF checkout does not create a different builder identity.
+Army archive/API metadata and maintained-input file digests remain byte-exact.
+
+The current input envelope conservatively includes JSON under `config/catalogs`,
+`config/identity`, `config/validation`, `config/symbols` and `data/curated`
+(excluding the reserved `example.json` template), the symbol-publication manifest,
+static Restrictions chart, `pyproject.toml`, package Python sources and the three
+current Weapon publication/audit helpers. Declaring a file does not promote
+unimplemented review knowledge into game semantics or make research PDFs/Wiki
+archives implicit inputs. Absolute host/output paths, temporary filenames, Git
+state, wall-clock timestamps and final database hashes are excluded.
+
+The ID is computed before output creation. Army export fingerprints include
+the shared metadata; Rules binds that export generation and its normal embedded
+model binds the completed Army bytes in one direction. Neither database embeds
+its own final byte digest. The shared set validator rejects altered/unsupported
+records, different IDs, missing family provenance, wrong Army generations and
+archive/API-metadata identities that disagree with the selected Army metadata.
+Older sets with neither record remain identifiable as `not-recorded` during
+this transition. Runtime health does not compare the manifest with current
+working-tree files; the builder rechecks the declared inputs before publication.
+Final release/source freshness enforcement and mandatory metadata at cutover
+remain part of [P2 integration](restructuring-plan.md).
+
 ## Snapshot provenance
 
 Army, wiki, and symbol acquisition uses generated snapshot provenance records described in

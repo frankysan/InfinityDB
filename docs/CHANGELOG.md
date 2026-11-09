@@ -10,12 +10,21 @@ are not retroactively relabeled.
 
 ## [1.1.0] - Unreleased
 
+### Player summary
+
+- No player-facing changes.
+
 ### Added
 
 - **Data processing + Project infrastructure:** Added `database-health --db-dir`
   to inspect a complete runtime directory offline, including SQLite integrity,
   source-matched references and file fingerprints. Missing or mismatched data
   produced an unhealthy report without changing the selected files.
+- **Data processing + Project infrastructure:** Added an offline complete-runtime
+  build with `build --db-dir`, using a selected local Army archive and maintained
+  references. Recorded shared input provenance, validated all outputs before
+  replacing the selected files, and retained existing outputs when generation
+  or validation failed.
 
 ## [1.0.1] - 2026-11-09
 

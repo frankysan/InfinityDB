@@ -89,6 +89,8 @@ read-only application/API and validated database models:
   publications fail closed, not silently against the older release. Explicit
   database selection remains available. Host-side WSGI deployments point
   explicitly at the corresponding checkout runtime pair.
+  The opt-in complete-runtime `build --db-dir` path is described in the
+  [data lifecycle](../data/README.md); it does not change these defaults.
 - **Docker for public internet serving.** A release builds an immutable image
   exclusively from verified, tracked `data/generated/` publications, assembled
   into `data/runtime/` during image preparation. Docker never automatically
