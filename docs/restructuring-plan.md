@@ -2,7 +2,8 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0 and P1.1–P1.5 completed (P1.4–P1.5 are target designs, not implemented schemas/paths); P1.6–P6 remain planned.  
+**Status:** Active on `dev/v1.1.0`: P0 and P1 completed (P1.4–P1.5 are target designs, not implemented schemas/paths); P2–P6 remain planned.
+
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
 
@@ -1155,6 +1156,235 @@ and updates the mandatory release set atomically
 with its routing and acceptance. No deployment or
 release change is made by this P1.5 planning entry.
 
+#### P1.6 — Tool purpose and retirement map (2026-11-09)
+
+**Status:** Classification completed against `e6d009f2` on `dev/v1.1.0`.
+No tools, tests, source inputs or publications were removed. This is the
+disposition map for P2/P5, not a claim that replacement code exists.
+The inspected tree contains **146 tracked Python modules under `tools/`**
+(including `__init__.py`), **seven shell scripts**, **five workflows** and
+the two installed CLI entrypoints in `pyproject.toml`. These are file and
+entrypoint counts, not a count of independent capabilities or measured savings.
+
+**Method and scope:** Reviewed module responsibilities, cross-tool imports,
+application CLI calls, test consumers, workflow/shell commands, packaging and
+the current documentation owners. Imports and textual command references
+identify work needed at removal; they do not prove a continuing purpose.
+No migration/promotion/download command was executed. Historical acceptance
+and source findings remain evidence for their original inputs. Each group
+below names modules by basename, omitting `.py`; `__init__` is package
+scaffolding, retained with whatever maintained modules remain.
+
+**Maintain the capability; adapt paths/contracts during P2 where needed:**
+
+| Modules | Independent continuing purpose and disposition |
+| --- | --- |
+| `run_checks`, `test_sections`, `check_doc_links`, `ci_preflight`, `installed_wheel_smoke` | Local checks, offline documentation integrity, clean-index/package isolation and actual installed-wheel behavior. Keep; update data-set inputs without multiplying check runners. |
+| `build_determinism_manifest`, `compare_determinism_manifests`, `release_metadata`, `prepare_release_ci_evidence`, `release_validation_scope` | Reproducible output comparison and exact-revision release/CI identity. Keep the contracts used by Source/wheel/release checks; update generated-file expectations at cutover. |
+| `asset_validation`, `verify_deployment_assets` | Validate published graphical assets and source-bound runtime content. Extract the structured-data checks into P1.5's shared database-set verifier; retain graphical verification. Retire duplicated sidecar/pair checks after their replacements pass. |
+| `audit_unit_semantics`, `audit_profile_semantics`, `audit_loadout_semantics`, `audit_army_faction_semantics`, `audit_peripheral_semantics`, `audit_relationship_semantics`, `audit_fireteam_semantics`, `audit_semantic_deduplication` | Verify current Army identities, payload ownership, memberships, source relationships and canonical reuse. Keep applicable checks against `army.db`; do not carry obsolete schema branches merely to keep old fixtures. |
+| `audit_database_separation`, `audit_runtime_database_surface`, `audit_normalization_links`, `audit_source_presentation`, `payload_audit_common`, `paired_audit_connection` | Enforce runtime/raw separation and explain represented versus unrepresented source constructs. Keep reusable queries/helpers; supply the build-only raw archive explicitly after its move. No runtime dependency on that archive is authorized. |
+| `audit_enrichment_coverage`, `audit_rules_interactions`, `audit_maintained_text_links`, `audit_source_variant_inputs`, `audit_deployed_object_inventory`, `audit_core_scenario_objects` | Current curation, exact source-variant identity, link-review and core/season/object ownership checks. Keep relevant validators and maintained configuration. Consolidate thin wrappers only if their independent check remains reachable. |
+| `runtime_semantic_baseline` | P1.3's pinned API/route/geometry comparison for the migration. Keep through P2/P3 acceptance; P6 then transfers useful regressions and retires the migration-only capture contract. This is not a permanent release gate for one frozen snapshot. |
+
+**Replace current build/publication machinery, then remove its wrappers:**
+
+| Modules | Continuing logic, observed consumers and replacement/removal point |
+| --- | --- |
+| `build_variant_usage`, `build_weapon_profile_publication` | Exact Army/source occurrence derivation and reviewed Weapon locators are current facts, even though standalone JSON publication is being retired. Move derivation/validation into the DB builder in P2.2/P2.3. The Weapon tool is also called by determinism and deployment checks; migrate those callers. |
+| `build_deployed_object_publication` | Its builder calls the maintained `infinity_db.deployed_object_builder`, while its CLI contains legacy v8/v9 refresh/promotion modes and a v10 embedded validation path. Source, Deployment and Cross-browser workflows, preflight and `scripts/deploy.sh` still call it. P2.5 keeps the embedded/source-pair assertions in database health/build tests and removes loose JSON and historical refresh commands with their callers. |
+| `build_v10_runtime_candidate` | Despite the name, `src/infinity_db/cli.py` calls `publish_checkout_runtime` for normal `build-rules`. It also has candidate build/verify/promotion operations. P2.1 establishes the replacement builder; P2.6/P2.7 move the CLI onto the selected DB set, then delete candidate/promotion and checkout-bundle assembly. Preserve required content, source binding and complete-set validation. |
+| `release_rules_export`, `audit_rules_rebuild_equivalence` | Mixed responsibility: legacy schema-preserving export and JSON adapters alongside logical SQLite comparison and v10 rebuild diagnostics. `build_v10_runtime_candidate` uses `audit_v10_candidate`; source audits and current API fixtures also import export/adaptation helpers. Extract useful comparison/build logic into maintained modules and migrate those consumers before P2.5/P2.7 retirement. No permanent v8/v9 exporter is required. |
+| `prepare_runtime_bundle`, `preview_runtime_image` | The former copies verified files into `data/runtime/` for deployment and is called by the latter's isolated image preview. P2.6/P2.7 remove the copy stage from Docker, `deploy.sh`, Deployment smoke and preview. Preserve disposable image startup/API checks on the direct DB-set input; retire the v10-specific preview wrapper if the normal image smoke supplies that capability. |
+
+**Completed bounded publication/migration paths — retire in P2.5/P5.1:**
+
+- `restrictions_v9_release`, `refresh_reference_summary_layout`;
+  `promote_aro_deployment_reference`, `promote_cover_reference`,
+  `promote_geometry_reference`, `promote_hackable_profile_help`,
+  `promote_movement_reference`, `promote_terrain_condition_reference`,
+  `promote_turn_sequence_reference`.
+- `review_camouflage_variant`, `review_combat_jump_variant`,
+  `review_infiltration_ph_variant`, `review_lieutenant_variant`,
+  `review_terrain_variant`.
+- `stage_commlink_v9_candidate`, `stage_deployed_object_citation_migration`,
+  `stage_hacking_device_chart_citations`, `stage_immunity_plasma_saving_roll`,
+  `stage_promoted_terrain_artifacts`, `stage_terrain_scenery_references`,
+  `verify_staged_release_pair`.
+- `migrate_symbol_publication_provenance`: its one-time addition of compact
+  Army snapshot identity is superseded by the current symbol publisher,
+  which writes `sourceSnapshot` itself; the tracked publication already
+  contains that identity. Remove the migration CLI and migration-only
+  fixture/test in P5, keeping source/hash validation on normal publication.
+
+The publication tools above implement delivered Restrictions, variant,
+Commlink, citation, reference-content and paragraph-layout changes. Their
+old stage/promote interface has no independent future hosting requirement.
+Some share helpers through `restrictions_v9_release`,
+`promote_aro_deployment_reference`, `promote_hackable_profile_help` and
+`review_lieutenant_variant`; replace useful source-delta/identity assertions
+in current builder tests, then remove that dependency cluster together.
+The accepted curation, source locators and review decisions stay in their
+maintained owners; Git history preserves the procedural implementation.
+An unresolved publisher question does not require retaining a tool that
+promoted an earlier local interpretation.
+
+**Bounded source investigations — extract lasting checks/evidence, retire
+the completed investigation wrapper in P5 rather than preserving a second
+research application:**
+
+- `audit_deployed_object_citation_migrations`,
+  `audit_deployed_object_delivery_coverage`, `audit_deployed_object_detail_queue`,
+  `audit_deployed_object_expanded_queue`, `audit_deployed_object_non_catalog_queue`,
+  `audit_deployed_object_quick_profiles`, `audit_orders_aro_object_adjacent_chart`.
+- `audit_game_mode_source_table`, `audit_standard_game_reference_tables`,
+  `audit_hacking_device_program_source_chart`,
+  `audit_hacking_program_statistics_chart`, `audit_restrictions_source_chart`,
+  `audit_silhouette_template_source_table`, `audit_terrain_scenery_source_gaps`.
+- `audit_weapon_chart_profiles`, `audit_weapon_definition_gaps`,
+  `audit_weapon_trait_cross_sources`, `audit_weapon_traits_prose`,
+  `audit_weaponry_family_clauses`, `audit_wiki_weapon_chart_names`.
+
+These fixed-source probes reconcile named reviewed charts/clauses or discover
+candidates; the completed inventory itself is not a new product capability.
+Move current source-pin, domain-ownership, reviewed chart/locator and unknown
+mapping assertions into build validators or focused source fixtures. Preserve
+unique findings and outstanding SRC wording in `rules-semantics.md`,
+`rules-research.md`, `official-source-clarifications.md` or the existing
+frozen source evidence, as appropriate. The Weapon publication builder
+currently imports `audit_weapon_definition_gaps` and
+`audit_enrichment_coverage`; source chart helpers also import one another.
+P2.3/P5 must replace those dependencies rather than retaining every audit
+entrypoint. Reusable parsing can be extracted if a still-supported source
+review needs it; historical parser tests alone do not establish that need.
+
+**Research/evidence capabilities with a present independent use:**
+
+- `audit_pdf_revision_deltas`: explicit pinned PDF comparison supports the
+  open N5/ITS revision intake; retain as research triage, never semantic
+  approval or an implicit build input.
+- `audit_auxiliary_silhouette_provenance`, `audit_reinforcements_applicability`:
+  retain the exact cross-source discrepancy and N4/N5 applicability checks
+  while their unresolved source questions/current disclosures need them.
+  At P5, keep the useful assertions/evidence without requiring these dated
+  CLI wrappers indefinitely.
+- `audit_1_0_reference_inputs`, `report_reference_baseline`,
+  `source_coverage_dispositions`: split reusable exact-source/fingerprint
+  verification from the frozen 1.0 inventory/report. The first supplies
+  Reinforcements source checks; the second supplies disposition validation
+  and served-candidate identity checks. Preserve those capabilities where
+  still needed; retire completed inventory/reporting branches in P5.
+  Do not expand the historical whole-source review into a v1.1 gate.
+- `audit_trait_wiki_anchors`: retained saved-page heading/link validation
+  used by the Trait browser verifier; migrate extracted source parsers if
+  consolidating research tools.
+
+**Presentation and test infrastructure — retain current assertions, not
+one checker per historical migration:**
+
+- Browser acceptance: `verify_ammunition_browser`, `verify_general_rules_browser`,
+  `verify_hacking_programs_browser`, `verify_labels_browser`,
+  `verify_non_skill_army_browser`, `verify_rule_fragment_browser`,
+  `verify_states_browser`, `verify_structured_skill_charts_browser`,
+  `verify_trait_wiki_browser`, `verify_traits_catalog_browser`,
+  `verify_unit_skill_presentation_browser`, `verify_release_candidate_browser`.
+  These check current catalog/detail rendering, fragment/source destinations,
+  Unit relationships or served revision identity. Keep those checks; P5 may
+  consolidate repeated harness code without discarding DOM/API/error checks.
+- `browser_wsgi_transport`, `browser_test_capacity`, `browser_test_host_profile`,
+  `browser_test_metrics`, `pytest_startup_profile`, `resource_waits`,
+  `run_cross_browser_compatibility`: current test transport, isolation,
+  capacity, diagnostics and explicitly selected browser cohort. Retain;
+  machine-specific captures/settings remain ignored and optional.
+- `benchmark_runtime`, `compare_runtime_benchmarks`, `capacity_test`,
+  `benchmark_test_workers`, `sample_test_host_resources`,
+  `analyze_test_host_resources`, `analyze_chromium_timeline`,
+  `probe_docker_test_host`: optional reproducible performance/test-host
+  investigation, supporting the active performance and Chromium backlog.
+  Keep separate from routine checks; no inferred production capacity from
+  a diagnostic run. Revisit overlapping wrappers during P5 consolidation.
+
+**Acquisition and optional operations — keep independent of serving:**
+
+- `download_army_json`, `download_wiki_snapshot`, `download_army_symbols`,
+  `snapshot_archive`, `path_sanitization`: extraction candidates for P5.3
+  because they explicitly acquire immutable source archives or support safe
+  archive paths. First specify archive members, logical/byte identities,
+  provenance and versioning. `build_symbols` still imports both Army
+  downloaders; extraction must preserve offline use of an already pinned ZIP.
+- `build_symbols`, `symbol_work`, `svg_processor`, `svg_compress`,
+  `reorganize_symbols`, `pipeline_console`, `prepare_web_fonts`: maintain
+  source-asset processing/publication. Generic acquisition/conversion may
+  move after its contract is independent; Army-to-browser naming and source
+  binding remain app-owned. Do not turn extraction into a runtime dependency
+  or require cloning several repositories for a normal database build.
+- `build_full_asset_bundle`, `stage_full_asset_bundle`, `activate_synced_assets`:
+  retain optional private asset transfer/integrity. `stage_full_asset_bundle`
+  is used by Full-asset CI; its name does not make it a completed migration.
+- `report_metrics`, `metrics_history`, `deployment_alerts`,
+  `deployment_resources`, `deployment_diagnostics`: recurring aggregate
+  operational visibility and bounded diagnostics. Keep privacy safeguards
+  and the independently packaged metrics-history service; it is not another
+  gameplay database or a normal reference build input.
+- `inspect_raw_archive`: recurring explicit lossless-source inspection;
+  keep build-side only, with an explicit archive path after P2 relocation.
+- `create_work_archive`: optional transfer artifact, also supplies archive
+  byte normalization to determinism tooling. Keep useful deterministic
+  archive logic; ordinary local work does not require an archive handoff.
+- `dev_status`, `check_v1_backlog`, `check_v1_backlog_ci`: optional status and
+  narrowly scoped historical V1S integrity/retirement checks. Keep current
+  P0 scope; they neither select normal restructuring work nor add a V1S gate.
+- `agent_coordination`, `agent_global_coordination`, `agent_workspaces`:
+  supported opt-in collaboration tools, not active for this task. Do not
+  acquire claims or alter existing assignments to inventory/retire tools.
+
+The seven `scripts/` entrypoints retain independent hosting purposes:
+`deploy.sh`, `install-or-update.sh`, `deploy-local-test.sh`,
+`stop-local-test.sh`, `prune-app-images.sh`, `verify-container-image.sh`,
+`verify-metrics-history-image.sh`. Update DB selection/build inputs and
+remove legacy generation/bundle preparation in P2; preserve explicit
+deployment authorization, image health, safe cleanup and metrics verification.
+The five workflows retain Source, installed-wheel, Deployment, optional
+Full-asset and release-selected Cross-browser responsibilities under P0 policy;
+update the commands above rather than retaining obsolete commands for CI.
+Both installed CLIs stay until P2 reconciles overlapping build options;
+`infinity-army` still has an independent offline transformation/export use.
+
+**Test disposition and concrete removal sequence:**
+
+1. **Keep current product invariants.** Tests for deployed-object identity,
+   unknown delivery, exact source variants/Weapon citations, Restrictions,
+   scenario boundaries and public API/browser behavior move to the embedded
+   DB model. In particular, `tests/test_audit_source_variant_inputs.py` and
+   `tests/test_restriction_storage_candidate.py` contain useful source-delta
+   checks as well as historical promotion coverage; do not delete either
+   file wholesale or retain every branch wholesale.
+2. **Remove historical-operation-only assertions with their tools.** Examples:
+   `tests/test_verify_staged_release_pair.py`, legacy stage/promote cases in
+   `tests/test_legacy_staging_schema_guards.py`, bounded `*_publication.py`
+   promotion tests, and provenance-migration fixtures. Stage directory
+   layout, rollback copying and v8/v9 export are not independent requirements
+   once those interfaces are retired. Test unchanged-output-on-build-failure
+   and rejected mixed DB sets on the replacement builder instead.
+3. **Extract useful helpers first.**
+   `tests/test_rules_rebuild_logical_equality.py` protects meaningful row,
+   schema/index and database-identity comparison despite SQLite writer-header
+   differences. Keep it against the extracted comparator. Update source/API
+   fixtures importing `release_rules_export`; migrate v10 content assertions
+   from `tests/test_deployed_object_storage.py` to shared builder/health checks.
+4. **Cut over complete consumers together.** P2.2–P2.5 embed facts and move
+   assertions; P2.6 updates CLI, WSGI, Docker, workflows and scripts; P2.7
+   deletes obsolete assembly/promotion. P5 then retires completed source
+   probes/doc commands and evaluates extraction. Clear dynamic command,
+   import, fixture, skill and documentation references in each removal diff;
+   verify focused current behavior and documentation links before committing.
+
+P1 discovery is complete. **Next: P2.1**, implemented in coherent builder
+and verifier slices using the P1.4/P1.5 contract, with existing serving kept
+functional until the deliberate cutover. This classification does not
+authorize deployment, tagging or source reinterpretation. It is internal
+planning work and needs no changelog entry.
+
 ### P2 — Make runtime data SQLite-only and unify build/serve
 
 **Outcome:** No required loose JSON data publications and no competing checkout-vs-Docker data assembly model.  
@@ -1252,7 +1482,7 @@ flowchart TD
     p5 --> p6
 ```
 
-**Execution status:** P0.1–P0.5 and P1.1–P1.4 are complete as process changes, inventory, baseline fixtures and target decisions. Finish P1.5–P1.6 before changing the data path. Independent P4 copy work need not block on the database migration.
+**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 is the next data-path step; target schemas and unified serving are not implemented yet. Independent P4 copy work need not block on the database migration.
 
 ## Questions to settle during discovery (not reasons to stop planning)
 
@@ -1277,4 +1507,4 @@ At the final integrated milestone, verify:
 - Routine agent tasks require fewer mandatory process operations; focused tests run when relevant and full checks run at meaningful integration/release points.
 - Reduction in tool entrypoints and duplicated documentation is demonstrated from P1 baselines, with regressions and deliberate product changes called out separately.
 
-**Current status:** Only this plan and its documentation/backlog pointers are authorized by the planning request. All changes described in P0–P6 remain proposals until implemented and validated.
+**Current status:** P0 policy and P1 discovery/design have been delivered as described above. P2–P6 remain planned; their completion requires implementation and appropriate validation. The target architecture is not current runtime behavior.

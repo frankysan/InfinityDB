@@ -77,11 +77,12 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-- [ ] Execute the [phased restructuring plan](restructuring-plan.md), starting with
-  simpler agent/validation rules (P0) and a dependency inventory (P1) before
-  changing the runtime data path. The plan owns step ordering, decisions and
-  exit criteria; record individual implementation work here only when actionable,
-  without copying the complete roadmap into a second task ledger.
+- [ ] Execute P2–P6 of the [phased restructuring plan](restructuring-plan.md).
+  P0 workflow simplification and P1 dependency/tool discovery are complete;
+  begin P2.1's offline database-set builder and shared verifier using the
+  agreed ownership/build contract. Keep current serving functional until
+  the deliberate cutover. The plan owns ordering, decisions and exit criteria;
+  do not copy its complete roadmap into a second task ledger.
 
 ### External source clarifications
 
