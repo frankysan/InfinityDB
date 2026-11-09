@@ -1,11 +1,8 @@
 name: Cross-browser compatibility
 
+# Optional cross-platform browser coverage for changes that warrant it.
+# The v1.0.x release contract remains preserved by its historical tags.
 on:
-  pull_request:
-  # The final main SHA must have a complete independent browser matrix.
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:

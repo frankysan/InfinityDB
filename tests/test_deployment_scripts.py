@@ -264,19 +264,18 @@ def test_weapon_profile_citations_are_release_paired_and_packaged() -> None:
     assert 'expected_files.add("weapon-profile-sources.json")' in smoke
     assert "load_weapon_profile_publication(" in smoke
     assert "/api/weapons/rifle" in smoke
-    assert "RUN rm /app/data/weapon-profile-sources.json" in workflow
+    assert "RUN rm /app/data/weapon-profile-sources.json" not in workflow
+    assert "Prepare immutable runtime bundle" in workflow
     assert "tools.build_weapon_profile_publication" in determinism
     assert "publication/weapon-profile-sources.json" in determinism
 
 
-def test_variant_usage_legacy_image_removes_v9_publication_before_smoke() -> None:
+def test_variant_usage_smoke_requires_matching_current_publication() -> None:
     workflow = _read(".github/workflows/deployment-smoke.yml")
     smoke = _read("scripts/verify-container-image.sh")
 
-    assert "RUN rm /app/data/variant-usage.json" in workflow
-    assert workflow.index("RUN rm /app/data/variant-usage.json") < workflow.index(
-        "Validate v8 rollback image and production startup"
-    )
+    assert "RUN rm /app/data/variant-usage.json" not in workflow
+    assert "rollback-v8" not in workflow
     assert 'if restrictions["available"]:' in smoke
     assert 'expected_files.add("variant-usage.json")' in smoke
     assert 'if not restrictions["available"] and usage is not None:' in smoke
@@ -553,36 +552,36 @@ def test_wheel_packages_runtime_unit_filter_semantics() -> None:
     assert "config/catalogs/unit-filter-semantics.json" in catalog_data
 
 
-def test_deployment_smoke_builds_and_exercises_v8_rollback_image() -> None:
-    """Rehearse v8 with the same installed application, never overwrite v9."""
+def test_deployment_smoke_validates_current_image_without_rollback_rehearsal() -> None:
+    """One immutable current image and startup check replace the v8 rollback rehearsal."""
     workflow = _read(".github/workflows/deployment-smoke.yml")
     expected_order = (
-        "sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets",
-        "python -m infinity_db build-rules --legacy-v8 --output local/restrictions-v8-ci/rules.db",
-        (
-            "python -m tools.build_deployed_object_publication "
-            "--rules-db local/restrictions-v8-ci/rules.db "
-            "--output local/restrictions-v8-ci/deployed-objects.json"
-        ),
-        "--output local/restrictions-v8-ci/deployed-objects.json --check",
-        'if old.execute("PRAGMA user_version").fetchone()[0] != 8:',
-        "FROM ${BASE_IMAGE}",
-        "COPY --chown=appuser:appuser rules.db /app/data/rules.db",
-        "COPY --chown=appuser:appuser deployed-objects.json /app/data/deployed-objects.json",
-        (
-            "docker build --build-arg BASE_IMAGE=infinity-db:deployment-smoke "
-            "--tag infinity-db:rollback-v8 local/restrictions-v8-ci"
-        ),
-        "sh scripts/verify-container-image.sh infinity-db:rollback-v8 --published-assets",
-        "Verify v9 image remains valid after rollback rehearsal",
+        "Validate pinned exact-variant release publication",
+        "Prepare immutable runtime bundle",
+        "Build application image from tracked databases",
+        "Validate image and production startup",
     )
     positions = [workflow.index(fragment) for fragment in expected_order]
     assert positions == sorted(positions)
-    assert 'if expected != current_publication:' in workflow
-    assert "Rollback modified the canonical legacy relationship graph" in workflow
-    assert 'assert r.restrictions_payload()["available"] is False' in workflow
+    assert (
+        "sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets"
+        in workflow
+    )
+    assert "rollback" not in workflow.lower()
+    assert "--legacy-v8" not in workflow
     assert "data/generated/rules.db /app/data/rules.db" not in workflow
     assert "data/generated/deployed-objects.json /app/data/deployed-objects.json" not in workflow
+
+
+def test_release_metadata_and_browser_matrix_are_not_default_pr_gates() -> None:
+    source = _read(".github/workflows/source-checks.yml")
+    browser = _read(".github/workflows/cross-browser-compatibility.yml")
+
+    assert "python -m tools.release_metadata" not in source
+    assert "tests/test_release_metadata.py" not in source
+    assert "workflow_dispatch:" in browser
+    assert "  pull_request:" not in browser
+    assert "  push:" not in browser
 
 
 def test_source_and_cross_browser_ci_prepare_only_legacy_deployed_json() -> None:
@@ -607,11 +606,11 @@ def test_source_and_cross_browser_ci_prepare_only_legacy_deployed_json() -> None
     assert "python tools/run_checks.py" in source
 
 
-def test_source_ci_matrix_time_budgets_include_isolated_preflight() -> None:
+def test_source_ci_runs_one_full_suite_and_cross_platform_build_checks() -> None:
     workflow = _read(".github/workflows/source-checks.yml")
     job = workflow.split("  source-checks:", 1)[1].split("    steps:", 1)[0]
     matrix = job.split("      matrix:", 1)[1].split("    runs-on:", 1)[0]
-    legs: dict[tuple[str, str], tuple[str, int]] = {}
+    legs: dict[tuple[str, str], tuple[str, bool, int]] = {}
     for block in matrix.split("          - os: ")[1:]:
         os_name, *lines = block.splitlines()
         fields: dict[str, str] = {}
@@ -624,15 +623,24 @@ def test_source_ci_matrix_time_budgets_include_isolated_preflight() -> None:
             fields[key] = value.strip().strip('"')
         identity = (os_name.strip(), fields["label"])
         assert identity not in legs
-        legs[identity] = (fields["check_args"], int(fields["timeout_minutes"]))
+        legs[identity] = (
+            fields["check_args"], fields["primary"] == "true",
+            int(fields["timeout_minutes"]),
+        )
 
-    standard_checks = "--stage test --stage build --stage rules"
+    primary_checks = (
+        "--stage test --stage lint --stage docs "
+        "--stage type --stage build --stage rules"
+    )
+    portable_checks = "--stage build --stage rules"
     assert legs == {
-        ("ubuntu-latest", "3.11"): ("--all", 30),
-        ("windows-latest", "3.11"): (standard_checks, 30),
-        ("macos-latest", "3.11"): (standard_checks, 15),
-        ("ubuntu-latest", "3.14"): (standard_checks, 15),
+        ("ubuntu-latest", "3.11"): (primary_checks, True, 30),
+        ("windows-latest", "3.11"): (portable_checks, False, 30),
+        ("macos-latest", "3.11"): (portable_checks, False, 15),
+        ("ubuntu-latest", "3.14"): (portable_checks, False, 15),
     }
+    assert "matrix.check_args == '--all'" not in workflow
+    assert "&& matrix.primary" in workflow
     assert "timeout-minutes: ${{ matrix.timeout_minutes }}" in job
     source_checks = workflow.split("- name: Run source checks", 1)[1].split(
         "- name: Report deterministic-output toolchain", 1

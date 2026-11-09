@@ -39,9 +39,10 @@ a local deferral or a green worker run is not a CI exemption.
 ## Risk-based Source validation
 
 The required **fast-validation** job runs before the expensive Source matrix.
-It validates release metadata (including the finalized README/changelog date),
-runs Ruff, focused release-note tests, Markdownlint, document links and backlog
-structure. This fails quickly on stale release headings or formatting errors.
+It runs Ruff, focused release-note tests, Markdownlint, document links and
+backlog integrity. Finalized version/changelog/README metadata is **release-only**:
+run `python -m tools.release_metadata` before the approved release merge,
+not for every development PR with a legitimate `Unreleased` heading.
 
 `tools.release_validation_scope` compares the exact PR/push candidate with
 its preceding branch SHA, requiring Git ancestry and an unambiguous path diff.
@@ -52,34 +53,33 @@ CI/tooling, Python/JS/CSS/runtime source, generated databases, deployment
 files or unknown paths **require the full Source matrix**.
 
 A narrow diff is not sufficient: a candidate may reuse Source validation only
-when the baseline SHA has already passed **all four hosted release workflows**:
-Source checks (including determinism), Installed wheel smoke, Deployment smoke
-and all four cross-browser jobs. Missing API access, incomplete/failed
-evidence or uncertain ancestry falls back to full validation. The exact new SHA
-still receives the fast Source job, including focused affected tests.
+when the baseline SHA has passed the **three core hosted workflows**:
+Source checks (including verified job-level determinism), Installed wheel
+smoke and Deployment smoke. Cross-browser checks are not a baseline
+prerequisite for v1.1+; they are chosen by browser risk. Missing API access,
+failed/incomplete evidence or uncertain ancestry falls back to full validation.
+The exact new SHA still receives fast checks and focused affected tests.
 
-This optimization currently applies to **Source checks only**. The release
-evidence collector inspects individual Source jobs: it accepts either the
-completed full matrix plus deterministic-output job, or a passed fast job with
-successful changed-test execution and explicit reuse steps in each matrix job
-(instead of running the expensive test/build commands).
-The generated tag annotation identifies focused Source reuse, while retained
-CI logs show the baseline verification. Partial, mixed or missing Source jobs
-block tagging. The separate wheel, deployment and four-browser workflows remain
-mandatory; further per-gate reuse requires its own proof contract.
+This optimization applies to **Source checks only**. The release evidence
+collector verifies the individual Source jobs: either the complete full matrix
+plus deterministic-output job, or a passed fast job with affected tests and
+explicit, successful baseline-reuse steps. The tag annotation records scoped
+reuse. Partial, mixed or missing Source jobs block release evidence **even
+when the optional cross-browser workflow is not requested**. Installed-wheel
+and deployment smoke remain independent mandatory workflows.
 
 ## Cross-browser release compatibility gate
 
 The [Cross-browser compatibility workflow](../.github/workflows/cross-browser-compatibility.yml)
-is an independent, **mandatory v1.0 release gate**. It runs on pull
-requests, pushes to `main`, and manual dispatch once registered on the
-default branch. The four required jobs are Ubuntu/Chromium, Ubuntu/Firefox,
-macOS/WebKit and Windows/Microsoft Edge; all must complete successfully
-for the **same exact candidate SHA**. No job uses `continue-on-error`.
-Ordinary development pushes without a pull request do not launch this
-matrix by default. Configure repository branch protection/rulesets
-separately if these checks are to block PR merging; the release-evidence
-collector independently fails closed before tagging v1.0 or later.
+is an **opt-in, manually dispatched** four-platform diagnostic for v1.1+
+releases. Dispatch it for significant navigation, layout, accessibility,
+browser-API or compatibility risks; it is not automatically multiplied
+across ordinary PRs or `main` pushes. The four jobs cover
+Ubuntu/Chromium, Ubuntu/Firefox, macOS/WebKit and Windows/Microsoft Edge.
+If selected, all four must succeed on the same exact candidate SHA.
+The historical **v1.0.x** release-evidence contract still requires all four.
+External branch-protection/rulesets may need adjustment if they previously
+required this workflow on every PR.
 
 Each job installs Python 3.11.9, **Playwright 1.64.1** and its selected browser,
 checks the embedded v10 deployed objects or generates and checks the legacy
@@ -95,17 +95,14 @@ is logged. Playwright is pinned; branded Edge and rolling hosted images must
 still be identified by their recorded actual versions, not treated as frozen
 browser binaries. No external Army/PDF acquisition is needed.
 
-For **v1.0 and later**, `tools.prepare_release_ci_evidence` requires the
-Cross-browser compatibility workflow in addition to Source checks,
-Installed wheel smoke and Deployment smoke. It validates each of the
-**four exact job identities and successful terminal conclusions** from
-the latest GitHub Actions attempt. Missing, skipped, failed, incomplete or
-duplicated jobs and green aggregate workflow runs with failed matrix legs
-are **not accepted**. The annotated tag evidence includes the verified
-workflow run; structured JSON records all four jobs. This does not replace
-the comprehensive Chromium and 81-page Unit matrices, exact hosted
-candidate checks or human Safari/iOS/touch acceptance. macOS WebKit is
-not a real-device Safari/iOS test.
+For **v1.0.x**, `tools.prepare_release_ci_evidence` still requires the
+Cross-browser workflow. For **v1.1+**, use its `--include-cross-browser`
+option when broad browser coverage was deliberately selected. Whenever
+browser evidence is included, the collector validates all four exact job
+identities and successful terminal conclusions; missing, skipped, failed
+or duplicated jobs are never accepted. This optional suite does not
+substitute for source correctness, Docker smoke, or real-device manual
+testing when genuinely necessary. macOS WebKit is not an iOS Safari test.
 
 **V1S-097 acceptance baseline:** the reporting-only four-platform pilot
 at `6892e7e6094288b6c7eb1cc51abe0b3fb6b6ac84` passed **56/56**
@@ -188,17 +185,23 @@ fixes unless those capabilities are actually connected and verified.
 ## Source checks
 
 `.github/workflows/source-checks.yml` runs on pull requests, pushes to `main`, and manual dispatch.
-When full validation is required, its matrix is:
+When full Source validation is required, its matrix is:
 
-- Ubuntu / Python 3.11 — `tools/run_checks.py --all`;
-- Windows / Python 3.11 — test + Army build + rules build, with two fixed pytest workers;
-- macOS / Python 3.11 — test + Army build + rules build;
-- Ubuntu / Python 3.14 — test + Army build + rules build.
+- Ubuntu / Python 3.11 — **one** pytest suite plus Ruff, Markdownlint,
+  Pyright, Army build and Rules build;
+- Windows / Python 3.11 — Army/Rules build and deterministic-output checks;
+- macOS / Python 3.11 — Army/Rules build and deterministic-output checks;
+- Ubuntu / Python 3.14 — Army/Rules build for interpreter portability.
 
-The full Ubuntu 3.11 leg and filesystem-heavy Windows leg each have a
-30-minute job limit. The other legs have 15-minute limits. The full leg needs
-time for both the ordinary checks and the isolated preflight's additional
-pytest run; its time limit does not omit or relax either pass.
+The Windows/macOS/Python 3.14 legs do not repeat the complete pytest
+suite. The Ubuntu primary job no longer runs `--all` with an additional
+isolated preflight that reruns pytest: source tests execute **once** on
+Linux, while independent [installed-wheel](../.github/workflows/installed-wheel.yml)
+and [Docker smoke](../.github/workflows/deployment-smoke.yml) cover
+package/install and production-image behavior. The isolated preflight is
+still available on demand for an identified packaging/index risk. Four
+platforms and deterministic-output comparisons remain part of the full
+Source gate, but no longer multiply the full source suite.
 
 **2026-11-07 timeout repair:** In
 [Source run 42315535265](https://github.com/frankysan/InfinityDB/actions/runs/42315535265)

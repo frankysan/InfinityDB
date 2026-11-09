@@ -136,62 +136,28 @@ sign-offs, exhaustive omission disposition, or a new cross-publication study.
 - [ ] Confirm that any schema, compatibility, data-rebuild, deployment, or asset
   consequences are understood before preparing the release metadata.
 
-## 2. Audit all project documentation
+## 2. Review release-relevant documentation
 
-A **project-wide documentation audit is mandatory for every release**. Do not limit
-this review to files changed since the previous release. The purpose is to catch
-stale statements that survived earlier work or became inaccurate through cumulative
-changes.
+Review documentation affected by the changes being released. A full
+project-wide document audit is **not** a recurring release gate: reserve it
+for architectural migrations, renamed subsystems or a known inconsistency
+that cannot be reviewed narrowly.
 
-Review the complete maintained documentation corpus, including `README.md`, all
-tracked Markdown under `docs/` and `data/`, `THIRD_PARTY_NOTICES.md`, and project
-development guidance such as `AGENTS.md`. Use `git ls-files "*.md"` as the baseline
-inventory rather than relying on memory.
+- [ ] Reconcile implemented behavior and current setup/CLI/deployment guidance
+  in the authoritative documentation owners.
+- [ ] Review the pending changelog, current-release README statement, and any
+  version, source/publication or schema information affected by this release.
+- [ ] Update cross-references to changed or retired paths; run the documentation
+  checks (Markdown lint, local links and backlog integrity).
+- [ ] Review player-facing text and accessibility when the release changes those
+  surfaces. Preserve licensing/provenance obligations.
+- [ ] Keep genuinely unfinished implementation work in `TODO.md`, not
+  post-merge administrative closeout commits.
 
-During the audit:
-
-- [ ] Verify that unqualified descriptions of current behavior match the repository.
-  Planned or partially implemented behavior must be labelled as design direction or
-  future work.
-- [ ] Verify current version references, release dates, schema/compatibility revisions,
-  supported source/version statements, commands, paths, filenames, workflow names,
-  and deployment instructions. Historical values may remain when clearly identified
-  as historical evidence.
-- [ ] Review `docs/architecture.md` and `docs/data-model.md` against the implemented
-  architectural and semantic boundaries, including any new InfinityDB-specific
-  abstractions and their derivation/provenance rules.
-- [ ] Verify new or materially revised change/feature/design/backlog documentation uses
-  the canonical project-domain labels from `docs/project-domains.md`, including
-  multi-domain labels only where responsibility genuinely crosses a boundary.
-- [ ] Review `docs/testing.md`, `docs/ci.md`, `docs/deployment.md`, and
-  `docs/server-migration.md` against the actual validation and operational workflows.
-- [ ] Review `docs/TODO.md` using the
-  [completion and retirement rules](README.md#backlog-completion-and-retirement):
-  no checked entry may retain unfinished descendants or required validation.
-  Confirm practical outcomes are documented, completed tasks/subtrees are removed,
-  completed child context is brief and linked, and open work describes only what remains.
-- [ ] Review `docs/AI_CONTEXT.md` for durable, non-obvious invariants that changed
-  during the release, without duplicating ordinary reference documentation.
-- [ ] Audit normal player-visible browser copy against `docs/web-design-guidelines.md`: titles,
-  introductions, navigation, controls, badges, and empty/error/loading states should use player/game
-  language rather than implementation or maintainer-workflow vocabulary, and data-review-only
-  surfaces should not be discoverable through the normal player journey.
-- [ ] Check documentation links and references to renamed, removed, or superseded
-  files and sections.
-- [ ] Search deliberately for stale references to the previous release and previous
-  schema/compatibility values. Inspect every match rather than replacing historical
-  evidence mechanically.
-- [ ] Resolve contradictory or duplicated descriptions by updating the canonical
-  document and linking to it from secondary documentation where appropriate.
-
-The audit is complete only when stale documentation discovered during the review has
-been corrected in the release preparation, or is explicitly retained and labelled as
-historical context. Keep new private/raw audit evidence under ignored `local/audits/`;
-existing ignored `docs/audits/` and `reports/` paths remain supported for
-compatibility. Do not create a permanent release-specific audit document by default:
-promote lasting conclusions into the canonical document owner, record release outcomes in `CHANGELOG.md`, and let Git history preserve the
-review narrative. Keep a tracked audit/closeout file only when it contains unique rationale that
-will actively guide later work.
+A broader documentation inventory is appropriate when the change warrants
+it, not as a default gate for metadata-only releases. Do not create an
+additional release audit diary: Git history and the canonical documents
+supply the record.
 
 ## 3. Prepare release notes and metadata
 
@@ -300,201 +266,113 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
 
 ## 4. Run local release validation
 
-- [ ] Rebuild and validate any release runtime database whose source/curated inputs changed,
-  then ensure `data/generated/infinity.db` and `data/generated/rules.db` are the intended
-  tracked release artifacts.
-- [ ] For 1.0, after rebuilding the tracked `rules.db`, run the
-  [opt-in FAQ release-artifact parity gate](testing.md#10-four-core-scenario-browser-acceptance)
-  with `INFINITYDB_RELEASE_FAQ_PARITY=1`. Require all 29 current FAQ
-  records, citations, source metadata and 48 topic associations to
-  match a fresh curated export. A stale tracked binary blocks release,
-  even when source and browser tests using fresh exports pass.
-- [ ] After rebuilding either database, follow the schema-specific
-  [matched-artifact workflow](deployment.md#normal-updates-from-081-onward).
-  For v10, verify embedded deployed objects and use
-  `tools.build_v10_runtime_candidate --check` for the source-matched
-  candidate; tracked promotion is a separate explicit operation.
-  Only legacy v8/v9 releases generate and `--check` the pinned
-  `data/generated/deployed-objects.json` with
-  `tools.build_deployed_object_publication`. Regenerate the tracked
-  `data/generated/variant-usage.json` with `tools.build_variant_usage --publish`
-  from the matched raw Army archive, then run `--check-publication` before
-  staging the exact bytes. Deployment/CI without raw inputs must validate the
-  tracked variant publication against the released Army/rules/deployed-object
-  fingerprints; a stale or absent publication blocks current-release packaging.
-  Also rebuild and `--check` the tracked
-  `data/generated/weapon-profile-sources.json` using
-  `tools.build_weapon_profile_publication`; its database, review and PDF
-  fingerprints must match before staging.
-  With `INFINITYDB_RELEASE_FAQ_PARITY=1`, run the tracked-pair FAQ
-  primary, secondary and conflict Chromium tests. Fresh-export browser
-  tests alone do not verify the release database pair.
-- [ ] For 1.0, require source-field occupancy verification against the release-matched
-  `data/generated/infinity.db` and its paired `infinity.raw.db`. Use
-  `python tools/run_checks.py --all --source-occupancy-gate` for the local
-  release-candidate validation. The opt-in gate fails closed when the raw
-  source pair is missing or any statically unrepresented player field is
-  populated; re-audit changed inputs instead of suppressing a failure.
-  Ordinary development and CI `--all` runs remain unchanged.
-- [ ] Run `python tools/verify_deployment_assets.py` and require the tracked Army database,
-  rules database, processed SVG publication, and publication snapshot provenance to pass as one
-  release set.
-- [ ] Before the final candidate merge, run
-  `python -m tools.release_metadata`. Require matching package/module
-  versions, a **dated** first changelog heading, the README current-release
-  statement and a matching changelog link. `Unreleased` fails this gate.
-- [ ] Use the [risk-based Source validation policy](ci.md#risk-based-source-validation).
-  A previously hosted-green baseline may be reused only for recognized
-  documentation/independent-test changes, with the changed tests and fast
-  checks still running on the new SHA. Unverified baselines and executable,
-  generated-data, build, CI and unknown changes require the full Source matrix.
-  Browser, installed-wheel, Docker and production acceptance remain separate.
-- [ ] Install the pinned Markdownlint dependency with
-  `npm ci --ignore-scripts --no-audit --no-fund` (Node.js 22+).
-  For executable, build, CI, generated-asset or unverified candidate changes,
-  run `python tools/run_checks.py --all` (including
-  `--source-occupancy-gate` for the 1.0 data review). Include `docs` and
-  indexed `preflight` for these full candidates. Preflight checks **staged**
-  files rather than unstaged edits; rerun affected stages after changing the index.
-  For an eligible metadata-only or independent-test update against an already
-  validated release candidate, run focused affected tests, Ruff, metadata and
-  documentation checks instead of rerunning full local pytest/preflight.
-  Independent Installed wheel smoke remains required on the final SHA.
-- [ ] When the release is intended for a local/full-asset deployment, validate the
-  complete published asset set with the `required` asset mode as documented in
-  `docs/testing.md`.
-- [ ] Run any additional release-specific acceptance, benchmark, migration, or
-  reproducibility checks required by `docs/TODO.md` or the affected subsystem docs.
-- [ ] Confirm the working tree contains only the intentional release-preparation
-  changes before creating the release commit.
+Run **one relevant acceptance set**, rather than repeating the whole
+development suite and an isolated preflight merely because a release is due:
 
-If any release-preparation edit is made after validation, rerun the affected checks;
-rerun the full gate when the edit can affect executable, generated, packaged, or
-deployment behavior.
+- [ ] Check that the intended release inputs and runtime data match. When
+  Army/rules/curation or published assets changed, rebuild with the current
+  supported pipeline and validate source identity, citations, SQLite schema,
+  derived publications and source/asset pairing. Until P2 replaces the
+  publication pipeline, use its existing matched-artifact checks rather than
+  hand-editing a tracked release database.
+- [ ] Run `python -m tools.verify_deployment_assets` for the actual published
+  database and SVG set. Invalid/stale release artifacts are blockers.
+- [ ] Run changed-behavior focused tests and relevant lint/type/docs checks.
+  Run a broader test set only for a genuine cross-cutting risk or an explicit
+  release-specific acceptance requirement. A successful, equivalent hosted
+  Source matrix counts as the cumulative run; **do not automatically run the
+  same full suite locally and again in preflight**.
+- [ ] Run `python -m tools.release_metadata` **after finalizing** the target
+  version, README and dated `docs/CHANGELOG.md` heading. `Unreleased` is
+  valid during development but **not** for this release gate.
+- [ ] Confirm the intended changes to user-facing routes work, with focused
+  browser checks when UI/navigation/layout changed. A large multi-browser or
+  whole-site matrix is optional unless a specific product risk justifies it.
+- [ ] Confirm the release commit contains only intentional changes and that
+  required pending test obligations for the release are resolved.
+
+The [Source workflow](ci.md#risk-based-source-validation) retains its
+change-aware hosted validation: one complete Linux suite with cross-platform
+build/determinism checks for executable or unknown changes, and focused
+reuse for eligible narrow updates.
+Installed-wheel and Docker smoke run as separate hosted checks on the final
+release SHA; they need not be reproduced locally when they already cover the
+exact intended artifact. Check newly changed components after any correction;
+a metadata-only adjustment does not invalidate an unrelated completed suite.
 
 ## 5. Land the release commit, verify hosted CI, and tag
 
 ### Development freeze and release-only handoff
 
-For 1.0.0, **the development branch and its active implementation TODO must be
-final before the approved merge**. The merge is the final *planned* tracked
-source/documentation change. Afterward, exact-main-SHA CI, the annotated tag,
-deployment and production verification are operator release steps. Record their
-results in GitHub Actions, the immutable tag annotation, release/deployment
-records and ignored operational reports, **not by editing TODO and making a
-routine second merge**.
+The approved merge should include the **final** version, dated changelog,
+README and affected documentation. After merging, verify CI, tag and deploy;
+do not create another routine PR just to mark release-only checklist items
+complete. Historical v1.0 V1S-093–095 handoff details remain in Git history
+and the 1.0 acceptance records.
 
-The following former V1S entries are **transferred obligations, not completed
-tasks**. They are accepted only as their corresponding checklist steps pass:
-
-- **V1S-093 — integration and tag:** Approve and merge the frozen candidate;
-  require exact-main-SHA Source, wheel, deployment smoke and all four
-  cross-browser jobs, optional full-asset evidence where configured, and the
-  annotated tag. Investigate any recurring Windows scenario lifecycle timeout
-  if it affects hosted acceptance. Tag approval remains a separate release-owner
-  decision.
-- **V1S-094 — authorized deployment:** Deploy the verified tagged artifact only
-  with explicit operator approval; confirm previous-image/database and recovery
-  assets exist. No live rollback rehearsal is required.
-- **V1S-095 — deployed acceptance:** Verify the exact source/runtime database
-  pair, application version, static assets and representative browser paths on
-  the actual hosted deployment.
-
-If a post-merge gate reveals a defect requiring tracked changes, **stop release
-acceptance**, prepare and validate a corrected development candidate, then
-perform another approved merge and exact-SHA checks. That is an exceptional
-repair, not a routine second merge merely to retire operational TODO entries.
-
-- [ ] Before merge, when the optional checksum-pinned publication bundle is part of the release
-  gate, manually dispatch `Full-asset checks` against the release-candidate branch and record the
-  successful run SHA. This pre-merge validation does not require the candidate to be on `main`.
-- [ ] After the local release checklist is green, create the release-preparation commit and land
-  it on protected `main` through the normal pull-request workflow. The resulting `main` revision is
-  the candidate release commit; if the repository uses a merge or squash commit, use that resulting
-  commit rather than assuming the branch-head SHA is the release SHA.
-- [ ] For 1.0, require all four **Cross-browser compatibility** jobs
-  (Ubuntu Chromium/Firefox, macOS WebKit and Windows Edge) successful on the
-  exact candidate SHA. A green aggregate run cannot replace individual job
-  acceptance. The version-aware release-evidence collector verifies the four
-  terminal job conclusions before preparing the tag; a missing workflow,
-  skipped job or previous candidate's run blocks tagging. Retain JUnit and
-  failure traces, and preserve independent human/real-device sign-off.
-- [ ] Confirm the required hosted workflows are green for that exact candidate release commit,
-  including the `Source checks` cross-platform deterministic-output comparison. `Source checks`,
-  `Deployment smoke test`, and `Installed wheel smoke` provide the normal
-  clean-source/package/deployment evidence. Source checks validate the tracked processed SVG
-  publication with required asset coverage; use `Full-asset checks` when release evidence should
-  also cover the configured checksum-pinned external bundle. See `docs/ci.md` for the authoritative
-  workflow contract.
-- [ ] If a hosted failure requires any code, data, generated-artifact, or documentation change, land
-  a new candidate release commit and repeat the affected local and hosted validation. Do not tag the
-  superseded candidate.
-- [ ] For the exact hosted-green candidate SHA, prepare the retained workflow evidence and annotated
-  tag message. The outputs belong under ignored `reports/`; do not commit them back into the release
-  candidate:
+- [ ] Merge the approved, locally verified candidate through the intended
+  PR workflow. The resulting `main` SHA (which may differ from the branch
+  tip after a merge/squash) is the candidate for tagging.
+- [ ] Verify that the latest **Source checks**, **Installed wheel smoke** and
+  **Deployment smoke test** workflows on this **exact SHA** are successful.
+  Source acceptance requires each applicable matrix job and its deterministic
+  output check, or a demonstrably valid focused baseline-reuse path. The
+  Docker workflow builds and smoke-tests the current immutable image; no
+  v8 rollback rehearsal is required.
+- [ ] The four-platform **Cross-browser compatibility** workflow is **opt-in
+  for v1.1.0 onward**: dispatch it for changes whose browser compatibility
+  risk warrants the extra coverage. The existing v1.0.x tag contract still
+  requires all four successful jobs. Also run optional `Full-asset checks`
+  only for a release that needs the external checksum-pinned bundle.
+- [ ] If a required check fails, repair on the development branch and
+  produce a new approved SHA. Re-run only affected local checks, but obtain
+  exact-SHA hosted evidence for the corrected candidate before tagging.
+- [ ] Run the release-evidence collector, substituting the actual target SHA
+  and version; output belongs under ignored `reports/`:
 
   ```text
   python -m tools.prepare_release_ci_evidence --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output reports/release-ci-v<version>.json --tag-message-output reports/release-tag-v<version>.txt
   ```
 
-  The command must verify successful `Source checks`, `Installed wheel smoke`, and
-  `Deployment smoke test` runs for that exact SHA. For tags **v1.0 or later**,
-  it also automatically requires the `Cross-browser compatibility` workflow and
-  its four successful matrix jobs; no optional flag can bypass this release gate.
-  Add `--include-full-assets` when this release's
-  retained evidence should also require the optional checksum-pinned `Full-asset checks` workflow.
-  If merge/squash created a different SHA from the pre-merge candidate, dispatch the optional
-  workflow again for the final `main` SHA before collecting evidence.
-  Set `GITHUB_TOKEN` when authenticated GitHub API access is required or desirable for rate limits.
-- [ ] Create an **annotated** version tag at that exact commit using the generated evidence message:
+  Use `--include-cross-browser` when the optional browser matrix is selected
+  for v1.1+; `--include-full-assets` when its independent bundle check is
+  selected. Run it from the checkout at the **exact final release SHA**:
+  the collector rejects a mismatched HEAD, still-`Unreleased` metadata,
+  mismatched package/tag versions, and incomplete Source jobs. It enforces
+  v1.0.x browser requirements automatically even when optional browser
+  coverage is omitted for v1.1+.
+- [ ] Create and push the **annotated** tag on the verified `main` SHA:
 
   ```text
   git tag -a v<version> <release-sha> -F reports/release-tag-v<version>.txt
   ```
 
-  The annotation is the durable hosted-CI evidence record; a lightweight tag does not satisfy this
-  release contract.
-- [ ] Push the tag, then verify that the remote annotated tag resolves to the intended commit and its
-  annotation contains the expected hosted workflow records (four for v1.0
-  and later, or five when optional Full-asset checks are included).
-
-A published release tag is immutable project history. Correct a material release
-error with a subsequent release rather than silently moving a published tag.
+  Verify the remote tag points to the intended SHA and preserves its
+  verified workflow evidence. A published tag is immutable; correct a
+  release defect with a subsequent version rather than moving the tag.
 
 ## 6. Deployment and post-release verification
 
-For releases that are deployed to the hosted InfinityDB instance:
+Deployment is a separate **operator-authorized** action. The tagged,
+self-contained image contains the already-verified databases and static assets;
+the production host must not substitute newly built data.
 
-- [ ] Deploy the tagged self-contained release using the workflow in `docs/deployment.md`;
-  production must not rebuild or substitute runtime databases after the tag is validated.
-- [ ] Verify the deployed application reports the intended release version and source
-  snapshot. For 1.0, use the opt-in
-  `tools.report_reference_baseline --verify-server <server-origin>` check
-  against the exact retained candidate Army/rules databases and applicable
-  Weapon-profile publication to reject stale or substituted runtime artifacts.
-  This check does not validate symbol/PDF/Wiki inputs or rules completeness.
-- [ ] Smoke-test the release's principal changed user-facing paths in the deployed
-  application. For 1.0, run `tools.verify_release_candidate_browser` against
-  the served candidate, explicitly specifying `--expected-version` and the
-  release-matched Army/rules database pair and applicable Weapon-profile
-  publication. It checks the exact runtime revision, release version and local
-  static asset fingerprint **before and after** representative Unit-detail
-  Chromium checks, aborting on any mismatch.
-  Retain its JSON report under ignored `local/audits/` only after success.
-  The default hosted Unit check is seven Units at three widths (21 pages).
-  The separate local 81-page matrix includes additional layouts, optional-unit
-  Settings and distance variants; see [testing](testing.md#10-source-evidence-baseline).
-  Neither replaces the 1.0 source-to-browser completeness verdict or acceptance
-  of the release's other changed surfaces.
-- [ ] Confirm required database/schema rebuilds and published assets are actually the
-  release-matched versions.
-- [ ] Confirm the retained prior release image/database and documented recovery
-  path remain available before considering deployment acceptance complete.
-  For the single-operator 1.0 deployment, this is an availability check,
-  **not** a required live-host rollback/forward rehearsal. Retain the normal
-  deployment smoke, exact-version and runtime-pair verification gates.
+- [ ] Deploy the selected immutable release through
+  [deployment instructions](deployment.md), without a fresh application/data
+  rebuild on the server.
+- [ ] Confirm `/health`, `/api/version`, the release tag/version and
+  expected runtime snapshot and static revision. Use the available paired
+  database/source verifier when the release changes data publications.
+- [ ] Smoke-test the main application route and the release's changed
+  player-facing paths. Browser coverage should reflect affected UI,
+  navigation and accessibility—not a compulsory 21/81-page acceptance
+  matrix for every deployment.
+- [ ] Investigate a failed health, identity or changed-route check before
+  claiming the deployment accepted. Git tags and previously built images
+  provide the normal recovery baseline; rollback *rehearsal*, old-schema
+  compatibility images and mandatory prior-image inventory are not routine
+  release gates.
 
-Record durable release outcomes in the changelog/reference documentation. Detailed
-check logs and one-off acceptance evidence should remain in their normal reports, CI,
-or Git history rather than turning `docs/TODO.md` into an archive of completed
-release checklists.
+Record concise release outcomes in the changelog or normal release/deployment
+records. Keep detailed operational reports under ignored `local/` or
+`reports/`, not a second tracked release checklist.

@@ -558,10 +558,9 @@ libraries are installed with `--with-deps`). The helper runs the dedicated
 nonzero on failed/missing browser setup and writes JUnit and failure traces
 under ignored `local/cross-browser-compatibility/`. The ordinary source
 suite does not require Playwright and skips this opt-in module without an
-engine. The authoritative mandatory hosted matrix and exact-SHA evidence
-contract are in [CI](ci.md#cross-browser-release-compatibility-gate).
-A successful local cohort never replaces hosted acceptance, and the 81-page
-Unit matrix is not multiplied across browser engines.
+engine. The hosted matrix is [optional for v1.1+, mandatory for v1.0.x](ci.md#cross-browser-release-compatibility-gate).
+A successful local cohort cannot replace any selected hosted gate, and the
+81-page Unit matrix is not multiplied across browser engines.
 
 ### Focused-first VR execution
 

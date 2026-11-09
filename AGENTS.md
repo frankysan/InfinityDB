@@ -218,8 +218,8 @@ internal-only tests, refactors or process updates.
 Review the actual diff for documentation impact, update public
 `README.md` for user-visible capabilities or setup, and use canonical
 [project-domain labels](docs/project-domains.md) for new/revised
-documentation. An actual release requires the complete
-[release and project-wide documentation audit](docs/releasing.md).
+documentation. An actual release requires the [risk-based release checks and
+release-relevant documentation review](docs/releasing.md).
 Apply the [one-use tool and audit retirement policy](docs/README.md#one-use-tool-and-audit-lifecycle)
 at bounded task closeout: check imports, tests, workflow/CLI consumers and
 release obligations before retiring transient scripts or dated audit reports.

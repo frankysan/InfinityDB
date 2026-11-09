@@ -51,9 +51,6 @@ jobs:
       - name: Run Ruff before expensive tests
         run: python -m ruff check src/infinity_db src/infinity_army_data tests tools
 
-      - name: Verify finalized version and release metadata
-        run: python -m tools.release_metadata
-
       - name: Run changed tests with verified baseline
         if: steps.plan.outputs.full == 'false'
         run: python -m pytest -q ${{ steps.plan.outputs.test_targets }}
@@ -61,8 +58,8 @@ jobs:
       - name: Run focused release checks before full matrix
         if: steps.plan.outputs.full == 'true'
         run: >-
-          python -m pytest -q tests/test_release_metadata.py
-          tests/test_release_validation_scope.py tests/test_release_notes.py
+          python -m pytest -q tests/test_release_validation_scope.py
+          tests/test_release_notes.py
           tests/test_web.py::test_changes_page_renders_canonical_release_history
 
       - name: Set up Node.js
@@ -90,33 +87,37 @@ jobs:
           - os: ubuntu-latest
             python: "3.11.9"
             label: "3.11"
-            check_args: "--all"
+            check_args: "--stage test --stage lint --stage docs --stage type --stage build --stage rules"
+            primary: true
             test_workers: "auto"
             determinism: true
             timeout_minutes: 30
           - os: windows-latest
             python: "3.11.9"
             label: "3.11"
-            check_args: "--stage test --stage build --stage rules"
+            check_args: "--stage build --stage rules"
+            primary: false
             test_workers: "2"
             determinism: true
             timeout_minutes: 30
           - os: macos-latest
             python: "3.11.9"
             label: "3.11"
-            check_args: "--stage test --stage build --stage rules"
+            check_args: "--stage build --stage rules"
+            primary: false
             test_workers: "auto"
             determinism: true
             timeout_minutes: 15
           - os: ubuntu-latest
             python: "3.14"
             label: "3.14"
-            check_args: "--stage test --stage build --stage rules"
+            check_args: "--stage build --stage rules"
+            primary: false
             test_workers: "auto"
             determinism: false
             timeout_minutes: 15
     runs-on: ${{ matrix.os }}
-    # The full check leg includes isolated preflight; Windows has a slower filesystem.
+    # Run the complete source suite once on Linux; other legs validate cross-platform builds.
     timeout-minutes: ${{ matrix.timeout_minutes }}
     steps:
       - name: Reuse validated Source baseline
@@ -140,7 +141,7 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Check V1S retirement history
-        if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'
+        if: needs.fast-validation.outputs.full == 'true' && matrix.primary
         run: python -m tools.check_v1_backlog_ci
 
       - name: Install development dependencies
@@ -152,14 +153,14 @@ jobs:
         run: python -c "import cssselect2, fontTools.ttLib, PIL.Image, tinycss2"
 
       - name: Set up Node.js for documentation linting
-        if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'
+        if: needs.fast-validation.outputs.full == 'true' && matrix.primary
         uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: npm
 
       - name: Install pinned documentation lint dependencies
-        if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'
+        if: needs.fast-validation.outputs.full == 'true' && matrix.primary
         run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Validate deployed objects for the tracked rules schema

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from tools.release_metadata import check_repository, metadata_errors
+from tools.release_metadata import metadata_errors
 
 README = (
     "Current release: **1.0.1** (2026-11-09). "
@@ -10,8 +10,8 @@ README = (
 )
 
 
-def test_current_release_metadata_passes() -> None:
-    assert check_repository() == []
+def test_finalized_metadata_fixture_is_valid() -> None:
+    assert metadata_errors("1.0.1", "1.0.1", README, "## [1.0.1] - 2026-11-09\n") == []
 
 
 def test_stale_and_mismatched_release_metadata_fails() -> None:

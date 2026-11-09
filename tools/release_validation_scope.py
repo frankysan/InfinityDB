@@ -1,7 +1,7 @@
 """Fail-closed, change-aware Source CI with verified baseline reuse.
 
-Only documentation and independent test-module edits can reuse a previously
-successful complete release matrix. Browser, wheel and Docker remain separate.
+Documentation and independent test-module edits can reuse a verified Source,
+wheel and Docker baseline; optional cross-browser runs are not prerequisites.
 """
 
 from __future__ import annotations
@@ -48,7 +48,6 @@ def classify_paths(paths: list[str]) -> ChangeScope:
             tests.add(path)
             continue
         return ChangeScope(True, f"broad or unknown change: {path}", ())
-    tests.add("tests/test_release_metadata.py")
     tests.add("tests/test_release_notes.py")
     if "tests/test_web.py" not in tests:
         tests.add(RELEASE_WEB_TEST)
@@ -65,12 +64,12 @@ def changed_paths(base: str, head: str = "HEAD") -> list[str]:
 
 
 def baseline_is_valid(repository: str, sha: str, token: str | None) -> bool:
-    """Require successful Source, wheel, deployment and all four browser jobs."""
+    """Require a verified Source, wheel and deployment baseline."""
     if SHA.fullmatch(sha) is None:
         return False
     try:
         collect_release_evidence(
-            repository, sha, token=token, include_cross_browser=True,
+            repository, sha, token=token, include_cross_browser=False,
         )
     except (ReleaseEvidenceError, OSError, ValueError):
         return False

@@ -329,15 +329,16 @@ stable entry point; do not add a CSS build step or link the source parts directl
 - Database exporters explicitly begin schema/data write transactions after deterministic connection
   configuration. A SQLite connection context manager alone does not group schema DDL; rules-schema
   `executescript` must begin inside its script. Preserve validation, finalization and atomic publication.
-- `tools/run_checks.py` is the canonical local orchestrator. Test design and
-  execution follow the [active VD/VR queue](validation-queue.md#queue-rules);
-  focused tests are immediate only for an explicitly justified safety-critical
-  exception or when VR is due. Mandatory CI and release gates remain separate.
+- `tools/run_checks.py` is the canonical local orchestrator. Focused tests
+  may run during implementation; [VD/VR](validation-queue.md#queue-rules) records
+  only genuinely deferred work. Mandatory CI and release checks have separate
+  owners.
 - Required hosted CI covers source/build checks, cross-platform deterministic outputs, installed
   wheel behavior, and deployment smoke. See `docs/ci.md` for current workflow/ruleset details.
-- A release requires a project-wide documentation audit, release-matched runtime artifacts, hosted
-  checks green for the exact release commit, an immutable version tag, and post-deployment smoke
-  verification where deployed.
+- A release requires documentation review proportionate to changed behavior,
+  release-matched runtime artifacts, required hosted checks on the exact release
+  commit, an immutable version tag, and relevant post-deployment smoke where deployed.
+  Four-browser matrices are optional from v1.1 onward; v1.0.x retains its historical gate.
 - Hosted release evidence is retained without mutating the validated release commit: prepare the
   exact-commit workflow evidence after CI is green, then create an annotated `v<version>` tag whose
   message records the required GitHub Actions run identities/URLs. Lightweight release tags do not

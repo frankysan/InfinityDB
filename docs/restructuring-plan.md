@@ -115,7 +115,7 @@ The ordering below expresses **dependencies**, not a requirement to serialize in
     [Release checklist](releasing.md#4-run-local-release-validation) and [hosted policy](ci.md#risk-based-source-validation) already allow focused Source reuse for narrowly scoped candidates, but require much broader source, wheel, browser, image, publication and exact-SHA evidence at other gates. Preserve version/changelog consistency, a usable built artifact, relevant smoke tests, deployment authorization and production identity. Reassess mandatory four-browser matrices, exhaustive local/preflight reruns, candidate promotions and rollback-image inspections by actual release risk; do not weaken them silently before P0.4 establishes a replacement contract.
 
 12. **Project-wide documentation and one-use retirement — simplify scheduling.**
-    [Release documentation audit](releasing.md#2-audit-all-project-documentation) mandates reviewing the *entire* maintained corpus every release; [document retirement](README.md#one-use-tool-and-audit-lifecycle) and [agent guidance](../AGENTS.md#documentation-and-project-tracking) add task-level reconciliation. Keep one authoritative owner per contract, check affected links, and preserve necessary licensing/provenance. Use focused documentation review for routine edits and deliberate broader audits for architectural changes; leave one-use script retirement to its bounded task or P5 inventory instead of revisiting it on every small edit.
+    [Former release documentation audit](releasing.md#2-review-release-relevant-documentation) previously required reviewing the *entire* maintained corpus every release; [document retirement](README.md#one-use-tool-and-audit-lifecycle) and [agent guidance](../AGENTS.md#documentation-and-project-tracking) add task-level reconciliation. Keep one authoritative owner per contract, check affected links, and preserve necessary licensing/provenance. Use focused documentation review for routine edits and deliberate broader audits for architectural changes; leave one-use script retirement to its bounded task or P5 inventory instead of revisiting it on every small edit.
 
 13. **Source/gameplay correctness and external constraints — keep.**
     Existing agent, architecture and source-reconciliation guidance protects stable identities, correct citations and revisions, unknown/ambiguous facts, offline builds, privacy, copyright permissions and safe rendering. These are product invariants, not optional paperwork. Maintain them while reducing ceremony.
@@ -184,8 +184,51 @@ testing evidence retain that history.
 Copilot guidance and the optional coordination entrypoint are aligned.
 `AGENTS.local.md` remains Git-ignored and contains superseded strict-queue
 preferences; tracked policy takes precedence, but explicit local-preference
-reconciliation belongs to **P0.5**. P0.4 still owns substantive release and
-hosted-gate simplification. Neither was silently rewritten here.
+reconciliation belongs to **P0.5**. Substantive release and hosted-gate
+simplification is recorded in the P0.4 implementation section below.
+
+#### P0.4 — Release and CI simplification (2026-11-09)
+
+**Implemented for development toward v1.1.0:** Normal development no longer
+needs finalized release metadata, a repeated isolated preflight or a
+cross-browser matrix. Release metadata (`Unreleased` to a dated version,
+package/module version and README link) is explicitly checked with
+`tools.release_metadata` **before the release merge/tag**, not on every PR.
+Pending release notes remain valid in ordinary source and web tests.
+
+**Source CI:** the primary Ubuntu/Python 3.11 leg runs the complete source
+suite **once**, with lint, types, documentation and builds. Other OS/Python
+legs check portable Army/Rules builds and deterministic output without
+duplicating the full pytest suite. The optional isolated preflight remains
+available for a specific packaging/index risk; installed-wheel and Docker
+smoke are separate exact-SHA workflows. Broad or unknown changes still
+invoke the full Source *matrix*, while eligible documentation/test-only
+deltas can reuse a verified Source/wheel/deployment baseline.
+
+**Release evidence:** the three core workflows are Source checks, Installed
+wheel smoke and Deployment smoke. Source job-level verification now runs
+whether or not browser evidence was selected. The four-platform browser
+matrix is manual/opt-in for **v1.1+**, required only when browser risk
+warrants it; the historical v1.0.x tag rule remains fail-closed. The
+evidence CLI accepts `--include-cross-browser` and still verifies every
+selected browser job. At tag preparation, it also checks exact local HEAD
+and finalized metadata/tag identity so an `Unreleased` heading cannot slip
+through merely because ordinary development CI permits it. A previously
+configured GitHub branch ruleset may
+still require the now-manual browser status and must be reconciled by the
+repository owner if so.
+
+**Deployment:** Docker CI validates **one current release image** and its
+startup/asset contract, not a fabricated v8 rollback image or recovery
+exercise. Tagged images and Git history remain normal recovery mechanisms;
+real deployment remains separately authorized. Project-wide documentation
+audits, manual full-suite repetitions and large post-deployment browser
+matrices are risk-based, not blanket release gates.
+
+**Still to do:** P0.5 aligns personal/agent instructions; P2 owns deleting
+application data-candidate/promotion infrastructure and unifying local and
+Docker runtime publication. Those are *not* implicitly removed by the
+simplified release policy.
 
 ### P1 — Map the dependency graph and define the cutover
 

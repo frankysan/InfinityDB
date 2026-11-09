@@ -386,7 +386,7 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     assert b"<strong>What&#x27;s changed</strong>" in body
     assert b"Player-visible highlights are shown first" in body
     assert b'href="/changes" aria-current="page"' in body
-    assert b'id="changes-unreleased"' not in body
+    # A named pending release may appear before the dated history.
     assert b'id="changes-1-0-1"' in body
     assert b"<h2>Version 1.0.1</h2>" in body
     assert (
