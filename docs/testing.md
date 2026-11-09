@@ -958,6 +958,18 @@ opt-in v31 image. Shell syntax and documentation checks passed. No deployment
 was performed. Legacy build/migration commands and the standalone JSON verifier
 remain unfinished P2.5 work.
 
+**2026-11-09 P2.5 second slice, CI/preflight selected-set verification:**
+Source CI, cross-browser CI and clean-export preflight now call the read-only
+`database-health --db-dir data/generated` check in place of the historical
+deployed-object JSON build/check pair. Focused preflight, workflow and database-set
+tests passed **174 cases** with **one skipped**. Ruff, canonical Pyright (0
+errors), documentation lint/links/backlog and Git whitespace checks passed;
+the tracked runtime artifact/provenance verifier passed with SVG checks disabled.
+A direct Pyright invocation without the repository's required `--pythonpath`
+failed on missing environment imports; the canonical type stage passed.
+This is local Windows acceptance only, not hosted CI or an integrated Docker test.
+The remaining historical builder/migration interfaces are separate P2.5 work.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

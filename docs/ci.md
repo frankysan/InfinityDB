@@ -416,12 +416,13 @@ and cross-platform determinism remain unchanged.
 
 Source-check logs include the twenty slowest pytest durations and skipped-test reasons so
 hosted performance problems can be traced to individual tests or fixture setup.
-Before the test matrix runs, each source-check leg verifies the deployed-object
-model against the tracked Army and rules databases. Current Rules embed
-that model. The historical publication CLI remains a temporary source-check
-entry point pending P2.5 builder retirement; its JSON output is not a serving
-or image input. Tests must not depend on an existing local JSON publication.
-This stage does not modify either tracked database.
+Before the test matrix runs, each source-check leg runs the shared read-only
+database-set health check against the selected tracked runtime directory. It
+verifies SQLite integrity, source binding, and the embedded deployed-object,
+variant and reviewed Weapon-citation models without generating legacy JSON.
+Cross-browser CI and clean-export preflight use the same selected-set check.
+These checks do not establish source-curation freshness or replace the
+separate asset/source acceptance gates, and do not modify tracked databases.
 
 The manually dispatched `Full-asset checks` workflow also runs `--all`, so it performs the same
 pinned npm installation and both documentation checks. The installed-wheel and deployment-smoke jobs

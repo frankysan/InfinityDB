@@ -560,7 +560,7 @@ def test_release_metadata_and_browser_matrix_are_not_default_pr_gates() -> None:
     assert "  push:" not in browser
 
 
-def test_source_and_cross_browser_ci_prepare_only_legacy_deployed_json() -> None:
+def test_source_and_cross_browser_ci_validate_selected_database_set() -> None:
     source = _read(".github/workflows/source-checks.yml")
     browser = _read(".github/workflows/cross-browser-compatibility.yml")
     source_checkout = source.split("- name: Check out source", 1)[1].split(
@@ -568,17 +568,12 @@ def test_source_and_cross_browser_ci_prepare_only_legacy_deployed_json() -> None
     )[0]
     # Frozen reference-evidence tests use git show against pinned older commits.
     assert "fetch-depth: 0" in source_checkout
+    command = "python -m infinity_db database-health --db-dir data/generated"
     for workflow in (source, browser):
-        assert "python -m tools.build_deployed_object_publication --when-legacy" in workflow
-        assert (
-            "python -m tools.build_deployed_object_publication --check --when-legacy"
-            in workflow
-        )
-    generate = source.index("python -m tools.build_deployed_object_publication --when-legacy")
-    verify = source.index(
-        "python -m tools.build_deployed_object_publication --check --when-legacy"
-    )
-    assert generate < verify < source.index("- name: Run source checks")
+        assert workflow.count(command) == 1
+        assert "tools.build_deployed_object_publication" not in workflow
+    assert source.index(command) < source.index("- name: Run source checks")
+    assert browser.index(command) < browser.index("- name: Run selected critical journeys")
     assert "python tools/run_checks.py" in source
 
 

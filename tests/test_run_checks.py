@@ -1228,7 +1228,7 @@ def test_isolated_preflight_checks_only_declared_environment_and_preserves_failu
     def run(command, *, cwd, env):
         assert cwd == tmp_path / "checkout"
         assert not {"PYTHONHOME", "GIT_INDEX_FILE", "PYTEST_ADDOPTS"} & env.keys()
-        if command[2] == "tools.build_deployed_object_publication":
+        if command[2] == "infinity_db":
             assert env["PYTHONPATH"] == str(tmp_path / "checkout/src")
         else:
             assert "PYTHONPATH" not in env
@@ -1243,15 +1243,14 @@ def test_isolated_preflight_checks_only_declared_environment_and_preserves_failu
     assert calls[1][1:] == ["-m", "pip", "install", "-e", ".[dev,symbols]"]
     assert calls[1][0] != sys.executable
     assert calls[2][1:] == [
-        "-m", "tools.build_deployed_object_publication", "--when-legacy",
+        "-m", "infinity_db", "database-health", "--db-dir", "data/generated",
     ]
-    assert calls[3][-2:] == ["--check", "--when-legacy"]
-    assert calls[4][1:] == ["-m", "tools.verify_deployment_assets"]
-    assert calls[5][1:] == ["-m", "tools.run_checks", "--stage", "lint"]
-    assert calls[6][1:] == [
+    assert calls[3][1:] == ["-m", "tools.verify_deployment_assets"]
+    assert calls[4][1:] == ["-m", "tools.run_checks", "--stage", "lint"]
+    assert calls[5][1:] == [
         "-m", "pytest", "-q", "-m", "full_assets or not full_assets", "-n", "2",
     ]
-    assert calls[7][1:] == ["-m", "pyright", "--pythonpath", calls[1][0]]
+    assert calls[6][1:] == ["-m", "pyright", "--pythonpath", calls[1][0]]
 
 
 @pytest.mark.parametrize("module,message", [
@@ -1271,8 +1270,8 @@ def test_indexed_artifact_and_lint_failures_propagate_even_with_svg_checks_off(
     assert ci_preflight.check_export(
         tmp_path, tmp_path / "venv", [], include_full_assets=False,
     ) == [message]
-    assert calls[4][-1] == "--skip-svg"
-    assert calls[6][-2:] == ["-m", "not full_assets"]
+    assert calls[3][-1] == "--skip-svg"
+    assert calls[5][-2:] == ["-m", "not full_assets"]
 
 
 @pytest.mark.parametrize("wheel_fails", [False, True])
@@ -1304,8 +1303,8 @@ def test_isolated_preflight_runs_built_wheel_smoke_only_after_successful_wheel_a
         assert "installed-wheel CLI/runtime smoke failed" in output
 
 
-@pytest.mark.parametrize("failed_step", ["venv", "pip", "tools.build_deployed_object_publication"])
-def test_isolated_preflight_stops_when_environment_or_publication_is_unusable(
+@pytest.mark.parametrize("failed_step", ["venv", "pip", "infinity_db"])
+def test_isolated_preflight_stops_when_environment_or_database_set_is_unusable(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failed_step: str,
 ) -> None:
     calls = []
@@ -1320,7 +1319,7 @@ def test_isolated_preflight_stops_when_environment_or_publication_is_unusable(
     assert all(command[2] not in {"pytest", "pyright"} for command in calls)
 
 
-def test_preflight_prepares_publication_before_using_current_environment(
+def test_preflight_validates_selected_set_before_using_current_environment(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = []
@@ -1328,10 +1327,7 @@ def test_preflight_prepares_publication_before_using_current_environment(
         calls.append(command) or SimpleNamespace(returncode=0)
     ))
     assert ci_preflight.check_export(tmp_path, None, ["--collect-only"]) == []
-    assert [command[2] for command in calls] == [
-        "tools.build_deployed_object_publication", "tools.build_deployed_object_publication",
-        "pytest",
-    ]
+    assert [command[2] for command in calls] == ["infinity_db", "pytest"]
     assert calls[-1][0] == sys.executable
 
 

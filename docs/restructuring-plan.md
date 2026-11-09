@@ -1725,6 +1725,18 @@ test was replaced with rejected-input/output-preservation checks; source
 and current embedded-content invariants remain covered. Historical-only
 image branches and assertions were retired rather than copied elsewhere.
 
+#### P2.5 — Second slice: read-only CI and clean-export verification (2026-11-09)
+
+Source CI, manual cross-browser CI and clean-export preflight no longer invoke
+the legacy deployed-object JSON publication builder or create/check its
+sidecar. They run `infinity_db database-health --db-dir data/generated`,
+which validates the selected set's full SQLite integrity, provenance
+binding, embedded deployed objects, variant usage and reviewed Weapon
+citations for both the tracked v10 layout and opt-in v17 two-file layout.
+The existing SVG/asset checks and source acceptance remain independent.
+Workflow and preflight regressions now assert the shared validator and
+failure propagation rather than preserving obsolete publication commands.
+
 **Remaining P2.5:** Retire the historical builder/migration flags,
 standalone JSON verifier and completed staging/promotion consumers together,
 extracting source/provenance guards that still serve a current purpose.

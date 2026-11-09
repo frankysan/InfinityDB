@@ -159,13 +159,10 @@ jobs:
         if: needs.fast-validation.outputs.full == 'true' && matrix.primary
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Validate deployed objects for the tracked rules schema
+      - name: Validate selected runtime database set
         if: needs.fast-validation.outputs.full == 'true'
-        # Legacy v8/v9 requires an ignored JSON companion. v10 embeds the same
-        # reviewed model in rules.db; do not generate a mismatched legacy JSON.
-        run: |
-          python -m tools.build_deployed_object_publication --when-legacy
-          python -m tools.build_deployed_object_publication --check --when-legacy
+        # Read-only schema, integrity, source binding and embedded-content checks.
+        run: python -m infinity_db database-health --db-dir data/generated
 
       - name: Validate tracked exact-variant publication provenance
         if: needs.fast-validation.outputs.full == 'true'
