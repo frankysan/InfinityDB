@@ -38,7 +38,7 @@ def expected_files(source: Path) -> set[str]:
         rules_path.resolve().as_uri() + "?mode=ro", uri=True,
     )) as connection:
         schema = connection.execute("PRAGMA user_version").fetchone()[0]
-    if schema == 10:
+    if schema in {10, 11}:
         result = validate_database_set(source)
         if result["deployedObjects"] != 17 or result["unresolvedDeliveries"] != 1:
             raise ValueError("Incomplete reviewed deployed objects")

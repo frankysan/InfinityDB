@@ -24,8 +24,8 @@ jobs:
 
       - name: Verify deployed-object publication for the tracked schema
         run: |
-          if PYTHONPATH=src python -c 'import sqlite3,sys; sys.exit(sqlite3.connect("data/generated/rules.db").execute("PRAGMA user_version").fetchone()[0] != 10)'; then
-            echo "Normalized v10 deployed objects require no JSON publication."
+          if PYTHONPATH=src python -c 'import sqlite3,sys; sys.exit(sqlite3.connect("data/generated/rules.db").execute("PRAGMA user_version").fetchone()[0] not in (10,11))'; then
+            echo "Embedded deployed objects require no legacy JSON publication."
           else
             PYTHONPATH=src python -m tools.build_deployed_object_publication
             PYTHONPATH=src python -m tools.build_deployed_object_publication --check
@@ -45,7 +45,7 @@ jobs:
           assert restrictions["available"] and len(restrictions["items"]) == 14
           assert restrictions["evaluationSupported"] is False
           schema = sqlite3.connect(rules_path).execute("PRAGMA user_version").fetchone()[0]
-          paired = (rules.deployed_objects_payload(army) if schema == 10
+          paired = (rules.deployed_objects_payload(army) if schema in (10,11)
               else load_deployed_object_publication(
                   Path("data/generated/deployed-objects.json"), army, rules_path))
           assert paired is not None and len(paired["objects"]) == 17

@@ -129,8 +129,8 @@ start_metrics_history() {
 }
 
 # Only legacy rules databases require an adjacent deployed-object JSON.
-if "$python" -c 'import sqlite3,sys; sys.exit(sqlite3.connect("data/generated/rules.db").execute("PRAGMA user_version").fetchone()[0] != 10)' 2>/dev/null; then
-  echo "Using normalized v10 deployed objects from rules.db."
+if "$python" -c 'import sqlite3,sys; sys.exit(sqlite3.connect("data/generated/rules.db").execute("PRAGMA user_version").fetchone()[0] not in (10,11))' 2>/dev/null; then
+  echo "Using embedded deployed objects from rules.db."
 else
   echo "Generating release-paired legacy deployed-object reference publication..."
   "$python" -m tools.build_deployed_object_publication

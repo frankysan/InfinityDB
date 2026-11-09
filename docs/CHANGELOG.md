@@ -25,6 +25,10 @@ are not retroactively relabeled.
   references. Recorded shared input provenance, validated all outputs before
   replacing the selected files, and retained existing outputs when generation
   or validation failed.
+- **Data processing + Web backend + Deployment:** Embedded exact reviewed
+  Skill/Equipment occurrences in Rules for complete runtime builds, removing
+  the variant-usage JSON requirement while preserving group counts, source
+  contexts and browser links. Rejected damaged or mismatched embedded data.
 
 ## [1.0.1] - 2026-11-09
 

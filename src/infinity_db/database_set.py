@@ -1,8 +1,8 @@
 """Shared validation of the built runtime set during the SQLite-only migration.
 
-The current v10 set still includes two JSON publications. P2 replaces those
-consumers and filenames together; this module does not select a fallback set,
-rebuild source inputs, or establish that working-tree curation is up to date.
+The tracked v10 set includes two JSON publications; v11 embeds variant usage
+and needs only the Weapon publication. This module never selects a fallback
+set, rebuilds inputs, or establishes working-tree curation freshness.
 """
 
 from __future__ import annotations
@@ -16,12 +16,13 @@ from typing import Any
 from .build_provenance import validate_set_provenance
 from .database.repository import Database
 from .rules_database import RulesDatabase
-from .variant_usage_reference import load_variant_usage_publication
+from .variant_usage_reference import load_runtime_variant_usage
 from .weapon_profile_publication import load_weapon_profile_publication
 
 V10_RUNTIME_FILES = frozenset({
     "infinity.db", "rules.db", "variant-usage.json", "weapon-profile-sources.json",
 })
+EMBEDDED_VARIANT_RUNTIME_FILES = V10_RUNTIME_FILES - {"variant-usage.json"}
 
 
 def _full_integrity_check(path: Path) -> None:
@@ -33,7 +34,7 @@ def _full_integrity_check(path: Path) -> None:
 
 
 def validate_database_set(directory: Path) -> dict[str, Any]:
-    """Validate exactly the selected v10 runtime artifacts without writing files.
+    """Validate exactly the selected supported runtime artifacts without writing files.
 
     Other build outputs in the directory are ignored, never selected as data
     or used to recover a missing publication. The raw archive, source curation
@@ -42,18 +43,24 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     directory = Path(directory).resolve()
     if not directory.is_dir():
         raise ValueError(f"Database-set directory does not exist: {directory}")
-    missing = sorted(name for name in V10_RUNTIME_FILES if not (directory / name).is_file())
+    missing = sorted(
+        name for name in EMBEDDED_VARIANT_RUNTIME_FILES if not (directory / name).is_file()
+    )
     if missing:
         raise ValueError(f"Incomplete database set; missing: {', '.join(missing)}")
 
     army_path, rules_path = directory / "infinity.db", directory / "rules.db"
+    with closing(sqlite3.connect(rules_path.as_uri() + "?mode=ro", uri=True)) as connection:
+        schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
+    if schema_version not in {10, 11}:
+        raise ValueError("Unsupported Rules schema for database sets; requires v10 or v11")
+    names = V10_RUNTIME_FILES if schema_version == 10 else EMBEDDED_VARIANT_RUNTIME_FILES
+    missing = sorted(name for name in names if not (directory / name).is_file())
+    if missing:
+        raise ValueError(f"Incomplete database set; missing: {', '.join(missing)}")
     Database(army_path).validate()
     rules = RulesDatabase(rules_path)
     rules.validate()
-    with closing(sqlite3.connect(rules_path.as_uri() + "?mode=ro", uri=True)) as connection:
-        schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if schema_version != 10:
-        raise ValueError("Database-set validation requires the current v10 Rules schema")
     provenance = validate_set_provenance(army_path, rules_path)
     for path in (army_path, rules_path):
         _full_integrity_check(path)
@@ -61,10 +68,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     objects = rules.deployed_objects_payload(army_path)
     if objects is None or not objects["objects"]:
         raise ValueError("Database set lacks source-matched embedded deployed objects")
-    variants = load_variant_usage_publication(
-        directory / "variant-usage.json", army_path, rules_path,
-        directory / "deployed-objects.json",
-    )
+    variants, _ = load_runtime_variant_usage(army_path, rules_path)
     if variants is None or not variants["variants"] or variants["formatVersion"] != 2:
         raise ValueError("Database set lacks a source-matched v2 variant publication")
     weapons = load_weapon_profile_publication(
@@ -74,11 +78,11 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         raise ValueError("Database set lacks source-matched Weapon profile citations")
 
     fingerprints = {}
-    for name in sorted(V10_RUNTIME_FILES):
+    for name in sorted(names):
         with (directory / name).open("rb") as stream:
             fingerprints[name] = hashlib.file_digest(stream, "sha256").hexdigest()
     return {
-        "layout": "v10-four-file",
+        "layout": "v10-four-file" if schema_version == 10 else "v11-three-file",
         "integrityCheck": "full",
         "buildProvenance": provenance,
         "schemaVersion": schema_version,

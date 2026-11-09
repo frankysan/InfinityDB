@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0 and P1 completed (P1.4–P1.5 are target designs, not implemented schemas/paths). P2.1 has shared current-format validation, opt-in offline complete builds and input provenance. Continue with P2.2; final defaults, SQLite-only facts and serving integration remain unfinished.
+**Status:** Active on `dev/v1.1.0`: P0 and P1 completed (P1.4–P1.5 are target designs, not implemented schemas/paths). P2.1 has shared validation, opt-in complete builds and input provenance; P2.2 has embedded exact variant usage in Rules v11. Continue with P2.3; final defaults, remaining SQLite-only facts and serving integration remain unfinished.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1416,15 +1416,32 @@ owns the command/format boundary, the [data model](data-model.md#shared-runtime-
 owns metadata, and [testing](testing.md#selected-runtime-database-set-validation)
 owns focused regressions and local acceptance.
 
-The complete build still produces today's two databases and two JSON
-publications. Intermediates/raw archives are temporary; ordinary Army builds
+The complete build now produces two databases and one Weapon JSON publication;
+P2.2 embeds variant usage in Rules v11. Intermediates/raw archives are temporary; ordinary Army builds
 remain available for research outputs. It requires the source checkout while
 the reviewed Weapon builder still uses its three existing tool helpers;
 P2.3 owns their extraction with citation embedding. There are no final-family
-filename aliases or new implicit serving paths. Continue P2.2–P2.4 to
+filename aliases or new implicit serving paths. Continue P2.3–P2.4 to
 materialize the missing database facts; P2.6 then finishes P2.1's final
 defaults/directory interface with the filename/CLI/WSGI/Docker cutover.
 The final P2.1 target remains open until that integration is verified.
+
+#### P2.2 — Relational exact variant usage (2026-11-09)
+
+**Status:** Functional embedding delivered for complete builds and v11 runtime
+reads. Rules v11/compatibility 13 stores typed source occurrences and extras,
+counts and reviewed rule coordinates, with Army generation/content validation.
+The public read model and Developer Mode browser journeys retain their semantics.
+Complete builds publish three files and remove the obsolete variant sidecar;
+schema-aware health, bundle/image checks and source validation read the embedded
+model. The [data model](data-model.md#rule-variant-usage-api) owns persistence/API
+details; [testing](testing.md#selected-runtime-database-set-validation) owns checks.
+
+The tracked v10 release and old narrow/candidate build paths remain operational
+until the coordinated P2.6 cutover. Their source-paired JSON adapter is isolated
+to older schemas; it is never a v11 fallback. Retire it with the tracked sidecar
+and superseded publication tools during P2.5–P2.7 rather than breaking the current
+release path early. P2.3's Weapon citation migration is the next actionable slice.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 
@@ -1506,7 +1523,7 @@ flowchart TD
     p5 --> p6
 ```
 
-**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has current-format validation, opt-in complete offline builds and shared provenance. P2.2 is next; SQLite-only facts, final names/defaults and unified serving remain unfinished. Independent P4 copy work need not block on the database migration.
+**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has complete-build foundations and P2.2 has embedded variant usage. P2.3 is next; remaining SQLite-only facts, final names/defaults and unified serving remain unfinished. Independent P4 copy work need not block on the database migration.
 
 ## Questions to settle during discovery (not reasons to stop planning)
 

@@ -15,7 +15,7 @@ from infinity_db.database import Database
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.snapshot_revision import runtime_snapshot_revision
-from infinity_db.variant_usage_reference import load_variant_usage_publication
+from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 from infinity_db.web.api_handler import ApiHandler
 from infinity_db.web.metrics import RequestMetrics
@@ -105,27 +105,12 @@ class Application:
                 self.deployed_objects = load_deployed_object_publication(
                     deployed_objects_path, self.database.path, rules_path,
                 )
-            variant_usage_path = self.database.path.with_name("variant-usage.json")
-            self.variant_usage = load_variant_usage_publication(
-                variant_usage_path,
-                self.database.path,
-                rules_path,
-                deployed_objects_path,
-            )
-            self.variant_usage_revision = (
-                _snapshot_revision(variant_usage_path)
-                if self.variant_usage is not None
-                else None
-            )
+        self.variant_usage, self.variant_usage_revision = load_runtime_variant_usage(
+            self.database.path, rules_path,
+        )
         self.weapon_profile_citations, weapon_profile_revision = (
             load_runtime_weapon_profile_publication(self.database.path, rules_path)
         )
-        if (
-            rules_path is None
-            or rules_path.resolve().parent != self.database.path.resolve().parent
-        ):
-            self.variant_usage = None
-            self.variant_usage_revision = None
         self.snapshot_revision = runtime_snapshot_revision(
             _snapshot_revision(self.database.path), rules_revision, weapon_profile_revision,
         )

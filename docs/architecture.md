@@ -331,6 +331,11 @@ InfinityDB serves two tracked runtime databases:
 production runtime dependency. Runtime repositories query application tables and materialized
 provenance; they do not fall back to raw normalized tables for convenience.
 
+Opt-in complete builds use Rules v11 with relational exact variant usage; the
+tracked release retains v10 until the integrated cutover. In v11, runtime
+loads variant facts from Rules and ignores adjacent variant JSON. The
+[data lifecycle](../data/README.md) owns the three-/four-file packaging boundary.
+
 Database validation checks application/schema identity, compatibility revision, and required
 metadata before normal reads. Persistent user-authored state is not part of the current runtime
 model, so generated databases remain replaceable release artifacts.

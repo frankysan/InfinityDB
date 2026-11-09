@@ -12,7 +12,7 @@ from infinity_db.deployment_provenance import (
     validate_database_symbol_provenance,
 )
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.variant_usage_reference import load_variant_usage_publication
+from infinity_db.variant_usage_reference import load_runtime_variant_usage
 
 try:
     from tools.asset_validation import (
@@ -96,15 +96,9 @@ def verify_variant_release_publication(
     database_path: Path, rules_database_path: Path,
 ) -> None:
     """Require the tracked, release-paired exact-variant publication before packaging."""
-    directory = database_path.parent
-    publication = load_variant_usage_publication(
-        directory / "variant-usage.json",
-        database_path,
-        rules_database_path,
-        directory / "deployed-objects.json",
-    )
+    publication, _ = load_runtime_variant_usage(database_path, rules_database_path)
     if publication is None or not publication["variants"]:
-        raise DeploymentAssetError("Release-matched variant-usage.json is missing or empty")
+        raise DeploymentAssetError("Release-matched exact variant usage is missing or empty")
 
 
 def verify_weapon_profile_release_publication(

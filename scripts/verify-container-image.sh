@@ -36,7 +36,7 @@ from pathlib import Path
 from infinity_db.database import Database
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.variant_usage_reference import load_variant_usage_publication
+from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_weapon_profile_publication
 
 expected_environment = {
@@ -57,14 +57,15 @@ rules = RulesDatabase(data_dir / "rules.db")
 rules.validate()
 restrictions = rules.restrictions_payload()
 # Each immutable image contains only the artifacts for its exact schema.
-# v10 embeds deployed objects; v8/v9 retain the adjacent legacy JSON.
+# v10 embeds deployed objects; v11 also embeds variants; v8/v9 retain legacy JSON.
 with sqlite3.connect(data_dir / "rules.db") as connection:
     schema = connection.execute("PRAGMA user_version").fetchone()[0]
 expected_files = {"infinity.db", "rules.db"}
 if schema in {8, 9}:
     expected_files.add("deployed-objects.json")
 if restrictions["available"]:
-    expected_files.add("variant-usage.json")
+    if schema != 11:
+        expected_files.add("variant-usage.json")
     expected_files.add("weapon-profile-sources.json")
 actual_files = {path.name for path in data_dir.iterdir()}
 if actual_files != expected_files:
@@ -85,7 +86,7 @@ elif restrictions["items"] or restrictions["evaluationSupported"] is not False:
     raise SystemExit("Legacy release image invented positive Restrictions data")
 publication = (
     rules.deployed_objects_payload(data_dir / "infinity.db")
-    if schema == 10 else
+    if schema in (10,11) else
     load_deployed_object_publication(
         data_dir / "deployed-objects.json", data_dir / "infinity.db", data_dir / "rules.db"
     )
@@ -94,12 +95,7 @@ if publication is None or len(publication["objects"]) != 17:
     raise SystemExit("Release image has no complete reviewed deployed-object publication")
 if len(publication["unresolvedDeliveries"]) != 1:
     raise SystemExit("Release image lost the unresolved deployed-object delivery")
-usage = load_variant_usage_publication(
-    data_dir / "variant-usage.json",
-    data_dir / "infinity.db",
-    data_dir / "rules.db",
-    data_dir / "deployed-objects.json",
-)
+usage, _ = load_runtime_variant_usage(data_dir / "infinity.db", data_dir / "rules.db")
 if restrictions["available"] and (usage is None or not usage["variants"]):
     raise SystemExit("Release image is missing the reviewed exact-variant publication")
 if not restrictions["available"] and usage is not None:
@@ -362,7 +358,7 @@ if not expected_release_notes or expected_release_notes not in changes:
     raise SystemExit("/changes did not render the installed canonical changelog")
 '
 
-# v9 releases must expose a real reviewed source group through the installed API.
+# Current releases must expose a real reviewed source group through the installed API.
 # The v8 compatibility image deliberately contains no variant publication.
 docker exec "$container" python -c '
 import json
@@ -370,9 +366,11 @@ from pathlib import Path
 from urllib.parse import quote
 from urllib.request import urlopen
 
-path = Path("/app/data/variant-usage.json")
-if path.is_file():
-    publication = json.loads(path.read_text(encoding="utf-8"))
+from infinity_db.variant_usage_reference import load_runtime_variant_usage
+
+directory = Path("/app/data")
+publication, _ = load_runtime_variant_usage(directory / "infinity.db", directory / "rules.db")
+if publication is not None:
     record_id = publication["variants"][0]["variant"]["recordId"]
     url = "http://127.0.0.1:8000/api/variant-usage?record_id=" + quote(record_id)
     with urlopen(url, timeout=3) as response:

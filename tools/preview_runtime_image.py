@@ -1,4 +1,4 @@
-"""Build and smoke-test an isolated v10 Docker image without deploying it.
+"""Build and smoke-test an isolated runtime Docker image without deploying it.
 
 The preview uses an ignored, source-matched staging bundle, never replaces
 production containers, and restores the tracked release's Docker build inputs.
@@ -23,22 +23,20 @@ import sqlite3
 from pathlib import Path
 from infinity_db.database import Database
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.variant_usage_reference import load_variant_usage_publication
+from infinity_db.database_set import validate_database_set
+from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_weapon_profile_publication
 from infinity_db.web import create_app
 d = Path('/app/data')
-expected = {'infinity.db','rules.db','variant-usage.json','weapon-profile-sources.json'}
+expected = set(validate_database_set(d)['sha256'])
 assert {p.name for p in d.iterdir()} == expected, 'unexpected packaged files'
 Database(d / 'infinity.db').validate()
 r = RulesDatabase(d / 'rules.db')
 r.validate()
-assert sqlite3.connect(d / 'rules.db').execute('PRAGMA user_version').fetchone()[0] == 10
+assert sqlite3.connect(d / 'rules.db').execute('PRAGMA user_version').fetchone()[0] in (10,11)
 data = r.deployed_objects_payload(d / 'infinity.db')
 assert data and len(data['objects']) == 17 and len(data['unresolvedDeliveries']) == 1
-usage = load_variant_usage_publication(
-    d / 'variant-usage.json', d / 'infinity.db', d / 'rules.db',
-    d / 'deployed-objects.json',
-)
+usage, _ = load_runtime_variant_usage(d / 'infinity.db', d / 'rules.db')
 assert usage and usage['formatVersion'] == 2 and len(usage['variants']) == 151
 assert load_weapon_profile_publication(
     d / 'weapon-profile-sources.json', d / 'infinity.db', d / 'rules.db',
@@ -46,7 +44,7 @@ assert load_weapon_profile_publication(
 app = create_app(d / 'infinity.db', d / 'rules.db')
 assert app.deployed_objects and len(app.deployed_objects['objects']) == 17
 assert app.variant_usage is not None
-print('v10 immutable image artifacts: PASS')
+print('Runtime immutable image artifacts: PASS')
 """
 
 _HEALTH_PROBE = r"""
@@ -74,7 +72,10 @@ deployed = get_json('/api/deployed-objects')
 assert len(deployed['items']) == 17
 assert len(deployed['unresolved_deliveries']) == 1
 
-publication = json.loads(Path('/app/data/variant-usage.json').read_text(encoding='utf-8'))
+from infinity_db.variant_usage_reference import load_runtime_variant_usage
+directory = Path('/app/data')
+publication, _ = load_runtime_variant_usage(directory / 'infinity.db', directory / 'rules.db')
+assert publication is not None
 record_id = publication['variants'][0]['variant']['recordId']
 usage = get_json('/api/variant-usage?record_id=' + quote(record_id))
 assert usage['recordId'] == record_id and usage['items']
@@ -86,7 +87,7 @@ assert any(
     citation['source_id'] == 'n5-core-v5.3-pdf' and citation['page'] == 183
     for citation in rifle['profiles'][0]['profile_citations']
 )
-print('v10 container HTTP smoke: PASS')
+print('Runtime container HTTP smoke: PASS')
 """
 
 

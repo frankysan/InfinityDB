@@ -594,6 +594,7 @@ def export_rules_database(
     restrictions_manifest: dict[str, Any] | None = None,
     deployed_objects: dict[str, Any] | None = None,
     build_provenance: dict[str, Any] | None = None,
+    variant_usage: dict[str, Any] | None = None,
 ) -> None:
     """Atomically replace a rules database from validated curated documents.
 
@@ -602,6 +603,8 @@ def export_rules_database(
     """
     if not documents:
         raise ValueError("No curated documents supplied")
+    if variant_usage is not None and deployed_objects is None:
+        raise ValueError("Embedded variant usage requires the deployed-object baseline")
     if build_provenance is not None:
         from .build_provenance import validate_build_record
 
@@ -692,6 +695,23 @@ def export_rules_database(
                         (_json_text(DEPLOYED_OBJECT_COMPATIBILITY_VERSION),
                          "databaseCompatibilityVersion"),
                     )
+                if variant_usage is not None:
+                    from .variant_usage_storage import (
+                        VARIANT_USAGE_COMPATIBILITY_VERSION,
+                        VARIANT_USAGE_SCHEMA_VERSION,
+                        stage_variant_usage,
+                    )
+
+                    stage_variant_usage(connection, variant_usage)
+                    connection.execute(f"PRAGMA user_version = {VARIANT_USAGE_SCHEMA_VERSION}")
+                    for key, value in (
+                        ("formatVersion", VARIANT_USAGE_SCHEMA_VERSION),
+                        ("databaseCompatibilityVersion", VARIANT_USAGE_COMPATIBILITY_VERSION),
+                    ):
+                        connection.execute(
+                            f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
+                            (_json_text(value), key),
+                        )
                 connection.execute("ANALYZE")
             if finalize:
                 vacuum_deterministic_sqlite(connection)
@@ -840,7 +860,7 @@ class RulesDatabase:
             if connection.execute("PRAGMA application_id").fetchone()[0] != RULES_APPLICATION_ID:
                 raise ValueError("Unsupported rules database application ID")
             schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if schema_version not in {RULES_SCHEMA_VERSION, 9, 10}:
+            if schema_version not in {RULES_SCHEMA_VERSION, 9, 10, 11}:
                 raise ValueError("Unsupported rules database schema; rebuild rules.db")
             metadata_rows = connection.execute(
                 f"SELECT key, value FROM {RULES_METADATA_TABLE} "
@@ -848,19 +868,19 @@ class RulesDatabase:
             ).fetchall()
             metadata = {row["key"]: _decode_json(row["value"], None) for row in metadata_rows}
             expected_compatibility = {
-                8: RULES_COMPATIBILITY_VERSION, 9: 11, 10: 12,
+                8: RULES_COMPATIBILITY_VERSION, 9: 11, 10: 12, 11: 13,
             }[schema_version]
             if (
                 metadata.get("databaseCompatibilityVersion") != expected_compatibility
                 or (
-                    schema_version in {9, 10}
+                    schema_version in {9, 10, 11}
                     and metadata.get("formatVersion") != schema_version
                 )
             ):
                 raise ValueError(
                     "Rules database compatibility revision does not match this application"
                 )
-            if schema_version in {9, 10}:
+            if schema_version in {9, 10, 11}:
                 from infinity_db.restriction_storage import validate_restriction_snapshot
 
                 try:
@@ -869,7 +889,7 @@ class RulesDatabase:
                     raise ValueError(
                         "Invalid Restrictions snapshot: missing or damaged table"
                     ) from exc
-            if schema_version == 10:
+            if schema_version in {10, 11}:
                 from infinity_db.deployed_object_storage import (
                     validate_deployed_object_snapshot,
                 )
@@ -878,6 +898,13 @@ class RulesDatabase:
                     validate_deployed_object_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid v10 deployed-object snapshot") from exc
+            if schema_version == 11:
+                from .variant_usage_storage import validate_variant_usage_snapshot
+
+                try:
+                    validate_variant_usage_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid embedded variant usage snapshot") from exc
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Rules database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -888,9 +915,24 @@ class RulesDatabase:
         from infinity_db.deployed_object_storage import read_deployed_objects
 
         with self._connect() as connection:
-            if connection.execute("PRAGMA user_version").fetchone()[0] != 10:
+            if connection.execute("PRAGMA user_version").fetchone()[0] not in {10, 11}:
                 return None
             return read_deployed_objects(connection, army_database)
+
+    def variant_usage_payload(self, army_database: Path) -> dict[str, Any] | None:
+        """Read embedded exact occurrences, binding final Rules bytes outside the database."""
+        from .build_provenance import file_sha256
+        from .variant_usage_storage import read_variant_usage
+
+        with self._connect() as connection:
+            schema = connection.execute("PRAGMA user_version").fetchone()[0]
+            if schema in {RULES_SCHEMA_VERSION, 9, 10}:
+                return None
+            if schema != 11:
+                raise ValueError("Unsupported Rules schema for exact variant usage")
+            publication = read_variant_usage(connection, army_database)
+        publication["sourceSnapshot"]["rulesDatabaseSha256"] = file_sha256(self.path)
+        return publication
 
     def restrictions_payload(
         self, *, subject: str | None = None, record_id: str | None = None,
@@ -913,7 +955,7 @@ class RulesDatabase:
                     "items": [],
                     "evaluationSupported": False,
                 }
-            if schema not in {9, 10}:
+            if schema not in {9, 10, 11}:
                 raise ValueError("Unsupported rules database schema")
             payload = candidate_restrictions_payload(
                 connection, subject=subject, record_id=record_id,

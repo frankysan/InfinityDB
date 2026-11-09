@@ -818,9 +818,10 @@ The cross-Army index answers **which Units can field a reviewed
 Skill/Equipment variant**. It is a read-only projection of existing identity,
 payload and occurrence relationships, not a second source of Skill definitions,
 a loadout builder, or a record of randomized game results. The verified exact
-source-row projection has an API and normal Skill/Equipment browser consumers;
-its byte-exact release publication is tracked and is required in current images.
-The ignored candidate and tracked publication have separate contracts
+source-row projection has an API and normal Skill/Equipment browser consumers.
+Complete builds embed it in Rules v11; the tracked v10 release still uses a
+byte-exact JSON publication until the coordinated cutover. The embedded model,
+ignored candidate and legacy tracked publication have separate contracts
 below. Exact-SHA hosted release acceptance belongs in
 [releasing](releasing.md#5-land-the-release-commit-verify-hosted-ci-and-tag).
 
@@ -2425,6 +2426,44 @@ before staging. See the [candidate evidence](v1.0-source-coverage-audit.md#varia
 
 #### Rule-variant usage API
 
+Rules v11 (compatibility revision 13) supplies the exact public read model
+from SQLite. The API shape, canonical `variantKey`, set counts, source paths,
+reviewed extras and Developer Mode presentation are unchanged. It never reads
+or falls back to `variant-usage.json`; stale adjacent JSON is ignored. v11
+also supports an explicitly selected Rules file outside the Army directory,
+provided the embedded source fingerprint and export generation match.
+
+`variant_usage_groups` stores the canonical identity, collection/record foreign
+key, counts, and typed coordinates into that existing reviewed variant definition.
+`variant_usage_source_rows` has globally unique `(catalog, owner_kind, occurrence_id)`,
+ordered group membership, source/application Army and Unit identities, explicit
+profile/loadout/shared-option paths, payload context and the exact reviewed
+parameter/extra/combination coordinates. `variant_usage_extras` preserves each
+row's ordered source positions, IDs, types and raw values. Shared Unit options
+retain their unverified compatibility source and contribute zero direct Army,
+Unit and profile/loadout totals. Includes and Peripheral context remain outside
+direct usage; unresolved/family-only rows remain build diagnostics.
+
+The new tables contain no opaque usage-payload/effect JSON. Meanings remain owned
+by the existing canonical Rules definitions in `records.variant_json`, which
+is pre-existing rule-model serialization debt rather than a second usage model.
+Reads use the resolved coordinates, not a new source-interpretation pass; they
+reconstruct and verify the canonical signature. Equivalent reviewed TAGCom
+spellings can share a semantic group while keeping their distinct exact source
+coordinates and extras. Missing, negative, out-of-range or mismatched references
+fail validation instead of silently selecting another definition.
+
+`variant_usage_metadata` records the Army archive/file/export-pair SHA-256 values,
+logical content fingerprint and exact group/row inventory. It never stores the
+Rules database's own final file hash. The API adds that hash after opening the
+completed file, and variant/API cache validators change with Rules bytes. Startup
+and database-set health check typed relationships, counts and fingerprints;
+missing or damaged v11 data cannot fall back to a sidecar. The offline builder
+uses a temporary v10 Rules model for source projection and then exports the
+final v11 model within its disposable work directory.
+
+**Legacy v9/v10 publication path, pending cutover:**
+
 `tools.build_variant_usage --publish` derives the byte-exact, tracked
 `data/generated/variant-usage.json` read model from the same source-verified
 candidate. Regeneration needs the ignored, pinned raw Army archive; release
@@ -2437,8 +2476,8 @@ inputs. Raw SQLite file bytes can differ across platforms even for the same
 validated Army export pair. Their byte hash stays in the local candidate's
 diagnostic source snapshot but is excluded from the portable public publication;
 the Army archive and export-pair fingerprints are preserved. At runtime, the
-co-located Army/rules database hashes and deployed-object publication hash
-must match; stale or malformed artifacts fail closed. When no matched
+co-located Army/rules database hashes and, for v9, deployed-object publication hash
+must match; stale or malformed artifacts fail closed. When no matched read model
 publication exists, `/api/variant-usage` returns `503`.
 
 The API requires one canonical `record_id` such as

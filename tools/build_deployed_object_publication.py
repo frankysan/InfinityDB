@@ -216,12 +216,12 @@ def main() -> int:
 
         with sqlite3.connect(args.rules_db) as connection:
             version = connection.execute("PRAGMA user_version").fetchone()[0]
-        if version == 10:
+        if version in {10, 11}:
             rules = RulesDatabase(args.rules_db)
             rules.validate()
             if rules.deployed_objects_payload(args.army_db) is None:
-                raise ValueError("v10 rules database lacks the matched embedded objects")
-            print("v10 reviewed deployed objects verified in rules.db (no legacy JSON)")
+                raise ValueError("Rules database lacks the matched embedded objects")
+            print(f"v{version} reviewed deployed objects verified in rules.db (no legacy JSON)")
             return 0
     if (
         args.stage_restrictions_v9 is not None

@@ -4,7 +4,7 @@
 
 For public internet serving, InfinityDB deploys an immutable Docker image
 containing the web application, processed graphical assets, release-matched
-`infinity.db` and `rules.db`, and tracked exact-variant
+`infinity.db` and `rules.db`. The tracked v10 release additionally contains exact-variant
 `variant-usage.json` and Weapon-profile `weapon-profile-sources.json` publications.
 Legacy v8/v9 images additionally include generated `deployed-objects.json`;
 the prepared 1.0.1 v10 image embeds these records directly in `rules.db`.
@@ -165,6 +165,9 @@ Use `python -m tools.preview_runtime_image --tracked-release` for a
 disposable image build/startup and API smoke test against the **actual tracked
 release pair**. It cleans up the preview container/image and restores
 `data/runtime/` to the tracked bundle. Requires an active Docker Linux engine.
+The preview and schema-aware image checks also support complete-build v11 sets
+with embedded variant usage and three runtime files; the
+[data lifecycle](../data/README.md) owns that transitional artifact contract.
 Normal `deploy.sh` always reconstructs the bundle from tracked
 `data/generated/` and never selects ignored local candidates. The
 development branch has promoted v10; the prior tagged production release

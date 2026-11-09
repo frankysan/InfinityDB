@@ -170,18 +170,16 @@ def test_deployment_assets_validate_rules_database(
 def test_deployment_requires_release_paired_variant_publication(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, state: str, expected_error: str,
 ) -> None:
-    def load(publication: Path, army: Path, rules: Path, objects: Path) -> dict | None:
-        assert publication == tmp_path / "variant-usage.json"
+    def load(army: Path, rules: Path) -> tuple[dict | None, str | None]:
         assert army == tmp_path / "infinity.db"
         assert rules == tmp_path / "rules.db"
-        assert objects == tmp_path / "deployed-objects.json"
         if state == "missing":
-            return None
+            return None, None
         if state == "empty":
-            return {"variants": []}
+            return {"variants": []}, None
         raise ValueError("Variant usage publication does not match release artifacts")
 
-    monkeypatch.setattr(deployment_assets, "load_variant_usage_publication", load)
+    monkeypatch.setattr(deployment_assets, "load_runtime_variant_usage", load)
     with pytest.raises((DeploymentAssetError, ValueError), match=expected_error):
         deployment_assets.verify_variant_release_publication(
             tmp_path / "infinity.db", tmp_path / "rules.db",
@@ -192,8 +190,8 @@ def test_deployment_accepts_release_paired_variant_publication(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        deployment_assets, "load_variant_usage_publication",
-        lambda *_: {"variants": [{"variantKey": "reviewed"}]},
+        deployment_assets, "load_runtime_variant_usage",
+        lambda *_: ({"variants": [{"variantKey": "reviewed"}]}, "reviewed"),
     )
     deployment_assets.verify_variant_release_publication(
         tmp_path / "infinity.db", tmp_path / "rules.db",

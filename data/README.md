@@ -96,8 +96,10 @@ It never downloads an input or inherits the serving-only `INFINITY_DB_DB_DIR`.
 complete builds require lossless verification and reject `--no-verify`.
 
 The builder uses disposable work files under ignored `data/work/build/`, validates
-the full runtime set and matching input provenance, then replaces only the four
-selected runtime filenames. It preserves unrelated destination files and leaves
+the full runtime set and matching input provenance, then replaces only the three
+selected runtime filenames: `infinity.db`, `rules.db` and `weapon-profile-sources.json`.
+Rules v11 embeds exact variant usage. The completed build removes an obsolete
+`variant-usage.json` from its selected output directory. It preserves unrelated files and leaves
 all destination bytes unchanged if generation, validation or the final input
 freshness check fails before replacement. Intermediate JSON and the raw database
 are removed with the work directory; the narrow Army build remains available for
@@ -106,17 +108,20 @@ selected directory before rebuilding and restart after success. An interruption
 between per-file replacements leaves an invalid mixed set; rerun the build to
 recover it. There is no live replacement lock or separate promotion step.
 
-This opt-in path still uses the current four-file v10 format. Plain `build`,
+This opt-in path uses the three-file v11 format. The tracked release pair remains
+v10 with four runtime files. Plain `build`,
 `build-rules`, `serve`, Docker and their current defaults retain their existing
 selection contracts until the planned cutover. An explicit old-style
 `serve --database PATH/infinity.db` can serve the completed alternate set.
 
 **Selected runtime health:** `infinity-db database-health --db-dir PATH`
-validates exactly the selected current v10 runtime directory through the
-shared `infinity_db.database_set` validator. It requires `infinity.db`,
-`rules.db`, `variant-usage.json` and `weapon-profile-sources.json`, checks
+validates exactly the selected directory through the shared
+`infinity_db.database_set` validator. It requires `infinity.db`, `rules.db` and
+`weapon-profile-sources.json`; v10 additionally requires `variant-usage.json`.
+It checks
 schema/application compatibility, full SQLite integrity and foreign keys,
-embedded deployed-object/Army pairing, and publication source bindings.
+embedded deployed-object/Army pairing, embedded variant identities/extras/counts
+in v11, and publication source bindings.
 It reports final file SHA-256 hashes and returns a nonzero status for an
 incomplete, corrupt or mismatched set. It never creates missing files,
 selects another directory, rebuilds curation or reads the raw archive.
@@ -127,7 +132,7 @@ Other intermediate files in the directory are ignored. The v10 candidate
 and Docker-bundle checks share this built-artifact validator while retaining
 their additional source-rebuild and pinned-content checks.
 
-This is a transitional four-file check, not the planned SQLite-only set.
+These are transitional three-/four-file layouts, not the planned SQLite-only set.
 It does not verify working-tree curation/config freshness or graphical
 assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual

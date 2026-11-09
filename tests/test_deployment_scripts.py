@@ -238,7 +238,7 @@ def test_variant_usage_publication_is_byte_exact_and_packaged_for_v9_release() -
     assert "tools.build_variant_usage --publish" not in deploy
     assert "tools.build_deployed_object_publication --check" in deploy
     assert 'expected_files.add("variant-usage.json")' in smoke
-    assert "load_variant_usage_publication(" in smoke
+    assert "load_runtime_variant_usage(" in smoke
     assert "/api/variant-usage?record_id=" in smoke
     assert "tools.verify_deployment_assets --skip-svg" in source_workflow
     assert "tools.verify_deployment_assets --skip-svg" in workflow

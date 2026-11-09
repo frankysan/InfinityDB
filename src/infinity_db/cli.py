@@ -402,7 +402,7 @@ def build_parser() -> argparse.ArgumentParser:
     health_selection.add_argument("database", nargs="?", type=Path, default=DEFAULT_DATABASE)
     health_selection.add_argument(
         "--db-dir", type=Path,
-        help="Validate one complete current v10 runtime directory without fallback",
+        help="Validate one complete runtime directory without fallback",
     )
     p_health.add_argument(
         "--require-raw",

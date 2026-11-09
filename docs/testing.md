@@ -517,9 +517,9 @@ Run `tests/test_runtime_semantic_baseline.py` for its guardrail tests.
 **Project domains:** Data processing, Project infrastructure
 
 `infinity-db database-health --db-dir PATH --json` checks one explicit
-current v10 runtime directory with full SQLite integrity and source-paired
+supported runtime directory with full SQLite integrity and source-paired
 publications. The [data lifecycle](../data/README.md) owns the current
-four-file contract and the limits of this check. The command operates offline,
+three-/four-file contract and the limits of this check. The command operates offline,
 does not require a raw archive, and reports unhealthy/missing data without
 creating files or selecting another runtime directory.
 
@@ -539,7 +539,7 @@ interrupted mixed-set rejection and rerun recovery. Its orchestration fixtures
 stand in for the Army/Rules generation phases using shipped runtime data;
 normalization/export semantics remain covered by the existing CLI/curated tests.
 
-**2026-11-09 Windows acceptance:** Two real offline complete builds from the
+**2026-11-09 initial v10 Windows acceptance:** Two real offline complete builds from the
 pinned Army ZIP SHA-256
 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`
 produced identical bytes for all four runtime artifacts and matched shared
@@ -547,6 +547,24 @@ provenance. The rebuilt set passed all 41 P1.3 semantic baseline paths.
 Its 116 source warnings matched the existing anomaly baseline; these were not
 newly accepted source changes. This is local current-format build evidence,
 not cross-platform byte acceptance, an actual Docker run or hosted approval.
+
+**Rules v11 embedding:** `tests/test_variant_usage_storage.py` round-trips all
+151 committed groups and 10,923 exact source rows, including equivalent TAGCom
+spellings, ordered extras and source-only shared-option exclusions. It checks
+API/ETag parity, missing/corrupt tables, invalid reviewed coordinates, duplicate
+source identities, Army mismatch and export failure preservation. The six
+`tests/test_verify_embedded_variant_usage_browser.py` cases reuse the existing
+Skill/Equipment Developer Mode journey at 1440/390/320 px, retaining API/DOM,
+page-error, failed-request, Unit-link and overflow assertions against v11 fixtures
+without variant JSON. These are direct browser checks, not visual or source meaning changes.
+The full-publication comparison uses the tracked v10 pair as migration evidence;
+retire that fixture dependency with the legacy path while preserving the relevant
+typed identity, source-parity and fail-closed assertions.
+
+The complete-build acceptance compares repeated three-file v11 outputs, runs
+schema-aware health and bundle checks, and reuses all 41 semantic baseline paths.
+Normal v10 release regressions stay distinct while that tracked pair remains
+supported. Actual Docker, Linux and exact-SHA hosted acceptance remain separate.
 
 ## Phased development and validation
 

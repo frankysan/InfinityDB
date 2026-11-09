@@ -24,7 +24,7 @@ from .build_provenance import (
 )
 from .curated import load_curated_directory
 from .database.publication import validate_database_pair
-from .database_set import V10_RUNTIME_FILES, validate_database_set
+from .database_set import EMBEDDED_VARIANT_RUNTIME_FILES, V10_RUNTIME_FILES, validate_database_set
 from .deployed_object_builder import build_deployed_objects
 from .rules_database import export_rules_database
 from .variant_usage import build_variant_usage_projection
@@ -101,21 +101,20 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
         army, core, root / "config/validation/deployed-object-delivery-reviews.json",
         root / "config/validation/deployed-object-candidate-reviews.json",
     )
-    export_rules_database(
-        documents, rules,
+    export_options = dict(
         restrictions_manifest=json.loads(
             (root / "config/validation/restrictions-source-chart.json").read_text(encoding="utf-8")
         ),
         deployed_objects=objects,
         build_provenance=build_record(manifest, "rules-n5", army_generation=generation),
     )
+    # The source projection uses the temporary v10 Rules model. The final export
+    # embeds its resolved facts without storing its own completed byte hash.
+    export_rules_database(documents, rules, **export_options)
     variants = publication_from_candidate(build_variant_usage_projection(
         army, stage / "infinity.raw.db", rules, stage / "deployed-objects.json",
     ))
-    (stage / "variant-usage.json").write_bytes(
-        (json.dumps(variants, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False)
-         + "\n").encode("utf-8")
-    )
+    export_rules_database(documents, rules, variant_usage=variants, **export_options)
     weapons = build_publication(
         army, rules, root / "data/curated/weapon-shared-effect-reviews.json",
     )
@@ -164,6 +163,9 @@ def build_database_set(
         target.mkdir(parents=True, exist_ok=True)
         # Stop serving this directory before rebuilding. Individual replacements
         # are atomic; interruption leaves an invalid mixed set, recovered by rerun.
-        for name in sorted(V10_RUNTIME_FILES):
+        for name in sorted(EMBEDDED_VARIANT_RUNTIME_FILES):
             os.replace(stage / name, target / name)
+        obsolete = target / "variant-usage.json"
+        if obsolete.is_file() or obsolete.is_symlink():
+            obsolete.unlink()
         return result

@@ -248,3 +248,23 @@ def load_variant_usage_publication(
         if RulesDatabase(rules_database).deployed_objects_payload(army_database) is None:
             raise ValueError("Variant usage v2 requires normalized deployed objects")
     return publication
+
+
+def load_runtime_variant_usage(
+    army_database: Path, rules_database: Path | None,
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Prefer schema-owned facts; only older co-located pairs use a JSON publication."""
+    if rules_database is None:
+        return None, None
+    from .rules_database import RulesDatabase
+
+    embedded = RulesDatabase(rules_database).variant_usage_payload(army_database)
+    if embedded is not None:
+        return embedded, _sha256(rules_database)
+    if army_database.resolve().parent != rules_database.resolve().parent:
+        return None, None
+    path = army_database.with_name("variant-usage.json")
+    publication = load_variant_usage_publication(
+        path, army_database, rules_database, army_database.with_name("deployed-objects.json"),
+    )
+    return publication, _sha256(path) if publication is not None else None

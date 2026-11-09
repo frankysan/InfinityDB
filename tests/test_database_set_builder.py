@@ -26,8 +26,13 @@ from infinity_db.build_provenance import (
     validate_set_provenance,
 )
 from infinity_db.cli import build_parser
-from infinity_db.database_set import V10_RUNTIME_FILES, validate_database_set
+from infinity_db.database_set import (
+    EMBEDDED_VARIANT_RUNTIME_FILES,
+    V10_RUNTIME_FILES,
+    validate_database_set,
+)
 from infinity_db.sqlite_determinism import normalize_sqlite_header, vacuum_deterministic_sqlite
+from infinity_db.variant_usage_storage import stage_variant_usage
 
 RELEASE = Path(__file__).resolve().parents[1] / "data/generated"
 
@@ -97,10 +102,21 @@ def _fake_rules(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
             "UPDATE deployed_object_metadata SET value=? WHERE key='armyDatabaseSha256'",
             (json.dumps(file_sha256(army)),),
         )
+        publication = json.loads((RELEASE / "variant-usage.json").read_text(encoding="utf-8"))
+        publication["sourceSnapshot"].update(
+            armyDatabaseSha256=file_sha256(army),
+            armyArchiveSha256=manifest["source"]["archiveSha256"], exportPairSha256=generation,
+        )
+        stage_variant_usage(connection, publication)
+        connection.execute("PRAGMA user_version=11")
+        connection.execute("UPDATE __rules_metadata SET value='11' WHERE key='formatVersion'")
+        connection.execute(
+            "UPDATE __rules_metadata SET value='13' WHERE key='databaseCompatibilityVersion'"
+        )
     _update_metadata(rules, {
         BUILD_PROVENANCE_KEY: build_record(manifest, "rules-n5", army_generation=generation),
     }, rules=True)
-    for name in ("variant-usage.json", "weapon-profile-sources.json"):
+    for name in ("weapon-profile-sources.json",):
         document = json.loads((RELEASE / name).read_text(encoding="utf-8"))
         document["sourceSnapshot"]["armyDatabaseSha256"] = file_sha256(army)
         document["sourceSnapshot"]["rulesDatabaseSha256"] = file_sha256(rules)
@@ -146,10 +162,11 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
     args.db_dir.mkdir()
     (args.db_dir / "keep.txt").write_text("unrelated", encoding="utf-8")
+    (args.db_dir / "variant-usage.json").write_bytes(b"obsolete publication")
     first = builder.build_database_set(args, _fake_army, root=root)
     assert first["buildProvenance"]["status"] == "matched"
     assert validate_database_set(args.db_dir)["sha256"] == first["sha256"]
-    assert set(_digests(args.db_dir)) == {*V10_RUNTIME_FILES, "keep.txt"}
+    assert set(_digests(args.db_dir)) == {*EMBEDDED_VARIANT_RUNTIME_FILES, "keep.txt"}
     assert (args.db_dir / "keep.txt").read_text(encoding="utf-8") == "unrelated"
     assert not (root / "must-not-write").exists()
     assert not list((root / "data/work/build").iterdir())
@@ -172,7 +189,10 @@ def test_failure_before_publication_retains_all_destination_bytes(
             raise ValueError("deliberate source rejection")
         _fake_rules(stage, root, manifest)
         if failure == "validation":
-            (stage / "variant-usage.json").write_bytes(b"invalid")
+            with closing(sqlite3.connect(stage / "rules.db")) as connection, connection:
+                connection.execute(
+                    "UPDATE variant_usage_groups SET unique_units=unique_units+1 WHERE id=1"
+                )
         else:
             (root / "data/curated/rules/sample.json").write_text("changed", encoding="utf-8")
 
