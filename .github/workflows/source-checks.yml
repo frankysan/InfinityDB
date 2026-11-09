@@ -89,7 +89,6 @@ jobs:
             label: "3.11"
             check_args: "--stage test --stage lint --stage docs --stage type --stage build --stage rules"
             primary: true
-            test_workers: "auto"
             determinism: true
             timeout_minutes: 30
           - os: windows-latest
@@ -97,7 +96,6 @@ jobs:
             label: "3.11"
             check_args: "--stage build --stage rules"
             primary: false
-            test_workers: "2"
             determinism: true
             timeout_minutes: 30
           - os: macos-latest
@@ -105,7 +103,6 @@ jobs:
             label: "3.11"
             check_args: "--stage build --stage rules"
             primary: false
-            test_workers: "auto"
             determinism: true
             timeout_minutes: 15
           - os: ubuntu-latest
@@ -113,7 +110,6 @@ jobs:
             label: "3.14"
             check_args: "--stage build --stage rules"
             primary: false
-            test_workers: "auto"
             determinism: false
             timeout_minutes: 15
     runs-on: ${{ matrix.os }}
@@ -181,7 +177,6 @@ jobs:
           PYTEST_ADDOPTS: "--durations=20 -ra"
         run: >-
           python tools/run_checks.py ${{ matrix.check_args }}
-          --test-workers ${{ matrix.test_workers }}
           --assets required --build-source tests/fixtures/deployment-smoke
 
       - name: Report deterministic-output toolchain

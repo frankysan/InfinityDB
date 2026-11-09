@@ -646,6 +646,9 @@ def test_source_ci_runs_one_full_suite_and_cross_platform_build_checks() -> None
         "- name: Report deterministic-output toolchain", 1
     )[0]
     assert "python tools/run_checks.py ${{ matrix.check_args }}" in source_checks
+    assert "--test-workers" not in source_checks
+    assert "matrix.test_workers" not in workflow
+    assert "--assets required --build-source tests/fixtures/deployment-smoke" in source_checks
 
 
 def test_wheel_packages_all_registered_static_assets() -> None:
