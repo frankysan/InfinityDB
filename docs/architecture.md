@@ -359,6 +359,10 @@ adapter. Each application computes its static cache identity from the selected
 mapping revision and actual packaged asset bytes, verifying the embedded SVG
 hashes. Immutable package bytes are hashed once per process; selecting another
 database does not mutate an existing application's URLs or module versions.
+For older manifest-backed Army schemas, a reference-only installation may
+omit SVGs and return 404 for them, as checked by installed-wheel acceptance.
+Present but incorrect SVG bytes still fail validation. Embedded v31
+publications require all declared SVGs at startup.
 
 Raw/source symbol archives, conversion work trees, detailed stage reports, and terminal build state
 remain local processing evidence. Production deployment requires the tracked publication, not the

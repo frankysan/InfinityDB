@@ -925,6 +925,18 @@ P2.4 materialization is accepted at this opt-in Windows boundary. Tracked
 release files and default artifact selection were not changed; Linux,
 Docker and final serving cutover remain separate acceptance.
 
+**2026-11-09 installed-wheel compatibility correction after P2.4:**
+The v31 asset check initially rejected the deliberately asset-free legacy
+installation in hosted wheel run `42693677485` at `88d307ec`.
+Older manifest-backed Army schemas again permit absent SVGs while rejecting
+present but incorrect bytes; embedded v31 publications remain strict about
+both missing and corrupt assets. Ten focused asset/isolation tests passed.
+A freshly built wheel was installed offline into a disposable Windows
+environment outside the checkout; both normal and asset-free runtime modes
+passed, including installed CLI/configuration/database and HTTP probes.
+Ruff, Pyright and documentation checks passed. The failed hosted run remains
+failed; replacement-SHA hosted acceptance is separate.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

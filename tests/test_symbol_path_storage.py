@@ -156,6 +156,20 @@ def test_cache_revision_rejects_incorrect_packaged_assets(v31, monkeypatch, muta
         static_asset_revision(symbols)
 
 
+def test_legacy_asset_free_reference_serving_preserves_integrity(monkeypatch) -> None:
+    import infinity_db.web.presentation as presentation
+
+    symbols = SymbolCatalog(MANIFEST)
+    actual = dict(presentation._packaged_static_hashes())
+    path = next(iter(symbols.asset_hashes))
+    actual.pop(path)
+    monkeypatch.setattr(presentation, "_packaged_static_hashes", lambda: actual)
+    assert static_asset_revision(symbols)
+    actual[path] = "0" * 64
+    with pytest.raises(SymbolCatalogError):
+        static_asset_revision(symbols)
+
+
 @pytest.mark.parametrize("mutation", (
     "archive", "unpublished", "hash", "traversal", "backslash", "unknown-assets",
 ))

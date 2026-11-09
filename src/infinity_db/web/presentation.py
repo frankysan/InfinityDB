@@ -540,6 +540,10 @@ def static_asset_revision(symbols: SymbolCatalog) -> str:
     """Bind one selected mapping projection to verified, packaged graphical bytes."""
     hashes = _packaged_static_hashes()
     for path, expected in symbols.asset_hashes.items():
+        if path not in hashes and symbols.path is not None:
+            # Earlier Army schemas support reference-only installs without SVGs.
+            # An embedded publication requires its complete, verified package.
+            continue
         if hashes.get(path) != expected:
             raise SymbolCatalogError(f"Packaged symbol bytes differ or are missing: {path}")
     digest = sha256(symbols.revision.encode("ascii"))
