@@ -33,20 +33,22 @@ This is a **target architecture and execution sequence**, not a statement of cur
 
 ## Target boundary (proposed, not yet implemented)
 
-```text
-Explicit source acquisition     Human-maintained curation
-(Army, wiki, symbols, PDFs)     (JSON, identity maps, reviewed rules)
-             \                 /
-              --> Validate / normalize / resolve / build
-                              |
-                    data/generated/
-                      army.db
-                      rules_n5.db
-                      its_18.db   (when season extracted)
-                              |
-                   One read-only API/backend
-                         /          \
-                 local serve      Docker image
+```mermaid
+flowchart TD
+    sources["Explicit source acquisition<br/>(Army, wiki, symbols, PDFs)"]
+    curation["Human-maintained curation<br/>(JSON, identity maps, reviewed rules)"]
+    build["Validate / normalize / resolve / build"]
+    databases["data/generated/<br/>army.db<br/>rules_n5.db<br/>its_18.db (when season extracted)"]
+    backend["One read-only API/backend"]
+    local["Local serve"]
+    docker["Docker image"]
+
+    sources --> build
+    curation --> build
+    build --> databases
+    databases --> backend
+    backend --> local
+    backend --> docker
 ```
 
 - **`army.db`:** normalized Army snapshots, application Army/Unit/profile identities and usage/relationships derived from Army data. Cross-source information placed here only when Army ownership makes sense.

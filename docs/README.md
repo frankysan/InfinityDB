@@ -48,6 +48,13 @@ domain-specific actions, not second copies of operational thresholds or rules.
 `AGENTS.local.md` is private, machine/user-specific guidance and must not
 override tracked project policy.
 
+## Diagram notation
+
+Prefer fenced `mermaid` blocks for charts, graphs and diagrams in Markdown
+documentation when Mermaid can clearly express the content. Use this for
+architecture flows, dependency graphs and similar relationships instead of
+ASCII art, keeping labels readable in both source and rendered form.
+
 ## Active strategic plans
 
 - [restructuring-plan.md](restructuring-plan.md) — active phased simplification of
