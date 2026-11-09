@@ -60,7 +60,7 @@ def audit_terrain_scenery_boundary(
     if len(objects) != 17:
         raise ValueError("Reviewed deployed-object publication count changed")
     present = set(EXPECTED_SOURCE_RECORDS).intersection(records)
-    if present and present != set(EXPECTED_SOURCE_RECORDS):
+    if present != set(EXPECTED_SOURCE_RECORDS):
         raise ValueError("Partial terrain/access source publication")
     for record_id in present:
         page, name = EXPECTED_SOURCE_RECORDS[record_id]
@@ -101,12 +101,8 @@ def audit_terrain_scenery_boundary(
         ],
         "reviewStatus": {
             "terrainSkill": "maintained",
-            "specialTerrainRule": (
-                "maintained" if present else "unmodelled"
-            ),
-            "accessWidthRule": (
-                "maintained" if present else "unmodelled"
-            ),
+            "specialTerrainRule": "maintained",
+            "accessWidthRule": "maintained",
             "accessWidthTokens": (
                 "owner-aliases" if set(GATE_MARKERS) <= set(
                     records.get("rule:access-width", {}).get("aliases", [])
