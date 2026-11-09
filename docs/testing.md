@@ -893,6 +893,38 @@ Build-set ID:
 Tracked release databases and default serving remain unchanged; Linux,
 Docker and final cutover require their separate acceptance.
 
+**2026-11-09 P2.4 final slice, symbol mappings and cache identity (Windows local):**
+`tests/test_symbol_path_storage.py` passed 18/18 across storage and Chromium
+runs: all 2,019 keys/808 asset hashes round-trip exactly, paired health and
+source binding remain strict, invalid paths/assets and corrupt rows fail
+closed, a fresh subprocess starts v31 with manifest reads forbidden, and
+two selected projections keep independent HTML/module cache versions.
+The v31 Army overview also loaded in Chrome at 390 and 1280 pixels with
+matching version metadata, loaded symbols, no page/request/HTTP errors
+and no horizontal overflow. Related builder/set/audit, legacy symbol,
+candidate-identity, full web/API, CLI and reference regressions passed
+another 495 distinct cases (513 total). Canonical Pyright, Ruff and
+documentation checks passed. The preceding `848657a3` Source run
+`42690711332`, wheel run `42690711054` and deployment run `42690711307`
+all completed successfully; they validate that earlier SHA only.
+
+Two independent complete builds of pinned `JSON 20260929-114335.zip`
+(SHA-256 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced Army v31/compatibility 40 and Rules v17. Each passed
+73 normalization checks (116 known source warnings), selected-set health,
+provenance and all existing reviewed inventories, plus exact embedded symbol
+parity and actual hashes for all 808 SVGs. Both passed all 41 pinned P1.3
+routes. The resulting SQLite files were byte-identical:
+`infinity.db` SHA-256
+`385ed6d7c5df165ea8783c16fb9f6fd74b072aa90eee6af5ed6a9881edd47f14`;
+`rules.db` SHA-256
+`3e026d291a257cb4df202dd40b7baa94c68b4d403a4fb707baaa2b006bd0732c`.
+Build-set ID:
+`18514ab77a5295223432bb3c3a35aac7bba4fa70bd3deeeba118e23975c4544d`.
+P2.4 materialization is accepted at this opt-in Windows boundary. Tracked
+release files and default artifact selection were not changed; Linux,
+Docker and final serving cutover remain separate acceptance.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

@@ -479,6 +479,7 @@ class ApiHandler:
         *,
         static_revision: str,
         snapshot_revision: str,
+        symbol_catalog: SymbolCatalog,
         deployed_objects: dict[str, Any] | None = None,
         variant_usage: dict[str, Any] | None = None,
         variant_usage_revision: str | None = None,
@@ -522,7 +523,7 @@ class ApiHandler:
             self.legacy_armies,
         )
         self.catalog_rules = CatalogRules(rules_database, database=database)
-        self.symbol_catalog = SymbolCatalog()
+        self.symbol_catalog = symbol_catalog
         self.fireteam_rules_reference = fireteam_reference(rules_database)
         if self.fireteam_rules_reference is not None:
             self.fireteam_rules_reference = enrich_maintained_text_references(

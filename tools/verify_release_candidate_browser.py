@@ -17,9 +17,11 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
+from infinity_db.database.repository import Database
 from infinity_db.snapshot_revision import runtime_snapshot_revision
+from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
-from infinity_db.web.presentation import STATIC_ASSET_REVISION
+from infinity_db.web.presentation import static_asset_revision
 from tools.report_reference_baseline import (
     PROJECT_ROOT,
     ReferenceBaselineError,
@@ -35,6 +37,11 @@ from tools.verify_unit_skill_presentation_browser import (
 
 class ReleaseCandidateError(ValueError):
     """The served release candidate cannot be accepted."""
+
+
+def local_static_revision(army_db: Path) -> str:
+    """Resolve the candidate's selected mapping revision and actual package assets."""
+    return static_asset_revision(SymbolCatalog(publication=Database(army_db).symbol_publication()))
 
 
 def local_revision(army_db: Path, rules_db: Path) -> str:
@@ -90,8 +97,9 @@ def verify_release_candidate(
     if not widths or any(width < 240 or width > 3840 for width in widths):
         raise ReleaseCandidateError("Browser widths must be between 240 and 3840 px")
     revision = local_revision(army_db, rules_db)
+    static_revision = local_static_revision(army_db)
     before = _check_served(
-        origin, revision, expected_version, STATIC_ASSET_REVISION
+        origin, revision, expected_version, static_revision
     )
     browser = browser_check(
         origin, slugs=slugs, widths=widths, channel=channel
@@ -112,7 +120,7 @@ def verify_release_candidate(
             f"failures={failed[:12]!r}"
         )
     after = _check_served(
-        origin, revision, expected_version, STATIC_ASSET_REVISION
+        origin, revision, expected_version, static_revision
     )
     if (before["snapshotRevision"], before["appVersion"], before["staticRevision"]) != (
         after["snapshotRevision"], after["appVersion"], after["staticRevision"]
@@ -124,7 +132,7 @@ def verify_release_candidate(
         "origin": origin.rstrip("/"),
         "expectedVersion": expected_version,
         "snapshotRevision": revision,
-        "staticRevision": STATIC_ASSET_REVISION,
+        "staticRevision": static_revision,
         "servedVersion": before,
         "browser": browser,
         "postflightVersion": after,

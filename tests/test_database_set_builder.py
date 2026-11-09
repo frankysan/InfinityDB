@@ -87,6 +87,17 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
     source = root / "army.zip"
     with zipfile.ZipFile(source, "w") as archive:
         archive.writestr("metadata.json", json.dumps({"factions": [{"id": 1, "name": "Test"}]}))
+    symbols = json.loads(
+        (RELEASE.parent / "manifests/symbol-publication.json").read_text(encoding="utf-8")
+    )
+    symbols["sourceSnapshot"]["armyArtifact"]["sha256"] = file_sha256(source)
+    (root / "data/manifests/symbol-publication.json").write_text(
+        json.dumps(symbols), encoding="utf-8",
+    )
+    for relative in symbols["publishedSha256ByPath"]:
+        target = root / "src/infinity_db/web/static" / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(RELEASE.parent.parent / "src/infinity_db/web/static" / relative, target)
     args = build_parser().parse_args(["build", str(source), "--db-dir", str(root / "output")])
     return root, args
 

@@ -16,11 +16,11 @@ import pytest
 
 from infinity_db import __version__
 from infinity_db.web import create_app
-from infinity_db.web.presentation import STATIC_ASSET_REVISION
 from tools.report_reference_baseline import ReferenceBaselineError, build_baseline
 from tools.verify_release_candidate_browser import (
     ReleaseCandidateError,
     local_revision,
+    local_static_revision,
     main,
     verify_release_candidate,
 )
@@ -28,6 +28,7 @@ from tools.verify_release_candidate_browser import (
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_DB = ROOT / "data/generated/infinity.db"
 RULES_DB = ROOT / "data/generated/rules.db"
+STATIC_ASSET_REVISION = local_static_revision(ARMY_DB)
 
 
 def _browser_ok(origin: str, *, slugs: tuple[str, ...],

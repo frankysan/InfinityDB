@@ -72,6 +72,12 @@ def database_health_report(path: Path, *, require_raw: bool = False) -> dict[str
     from infinity_db.army_reference_storage import (
         ARMY_SCHEMA_VERSION as REFERENCE_SCHEMA_VERSION,
     )
+    from infinity_db.symbol_path_storage import (
+        ARMY_COMPATIBILITY_VERSION as SYMBOL_COMPATIBILITY_VERSION,
+    )
+    from infinity_db.symbol_path_storage import (
+        ARMY_SCHEMA_VERSION as SYMBOL_SCHEMA_VERSION,
+    )
 
     database_path = Path(path)
     raw_path = raw_database_path(database_path)
@@ -102,6 +108,9 @@ def database_health_report(path: Path, *, require_raw: bool = False) -> dict[str
         elif schema_revision == REFERENCE_SCHEMA_VERSION:
             application["expectedSchemaRevision"] = REFERENCE_SCHEMA_VERSION
             application["expectedCompatibilityRevision"] = REFERENCE_COMPATIBILITY_VERSION
+        elif schema_revision == SYMBOL_SCHEMA_VERSION:
+            application["expectedSchemaRevision"] = SYMBOL_SCHEMA_VERSION
+            application["expectedCompatibilityRevision"] = SYMBOL_COMPATIBILITY_VERSION
     except (OSError, sqlite3.Error, json.JSONDecodeError, TypeError, ValueError):
         pass
 

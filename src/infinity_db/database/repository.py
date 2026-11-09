@@ -916,6 +916,16 @@ class Database:
                 ARMY_V28_PUBLISHED_TABLES,
                 read_skill_classifications,
             )
+            from infinity_db.symbol_path_storage import (
+                ARMY_COMPATIBILITY_VERSION as SYMBOL_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.symbol_path_storage import (
+                ARMY_SCHEMA_VERSION as SYMBOL_SCHEMA_VERSION,
+            )
+            from infinity_db.symbol_path_storage import (
+                ARMY_V31_PUBLISHED_TABLES,
+                read_symbol_publication,
+            )
             from infinity_db.unit_filter_storage import (
                 ARMY_COMPATIBILITY_VERSION as FILTER_COMPATIBILITY_VERSION,
             )
@@ -930,12 +940,14 @@ class Database:
             if application_id != APPLICATION_ID or version not in {
                 SCHEMA_VERSION, ARMY_SCHEMA_VERSION, SKILL_SCHEMA_VERSION, FILTER_SCHEMA_VERSION,
                 REFERENCE_SCHEMA_VERSION,
+                SYMBOL_SCHEMA_VERSION,
             }:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
             if source_consistency and version != SCHEMA_VERSION:
                 raise ValueError("Source consistency requires the base Army export schema")
             required_tables = (
                 DATABASE_TABLES if source_consistency else
+                ARMY_V31_PUBLISHED_TABLES if version == SYMBOL_SCHEMA_VERSION else
                 ARMY_V30_PUBLISHED_TABLES if version == REFERENCE_SCHEMA_VERSION else
                 ARMY_V29_PUBLISHED_TABLES if version == FILTER_SCHEMA_VERSION else
                 ARMY_V28_PUBLISHED_TABLES if version == SKILL_SCHEMA_VERSION else
@@ -972,7 +984,8 @@ class Database:
             except (json.JSONDecodeError, TypeError) as exc:
                 raise ValueError("Database has invalid compatibility metadata") from exc
             expected_compatibility = (
-                REFERENCE_COMPATIBILITY_VERSION if version == REFERENCE_SCHEMA_VERSION
+                SYMBOL_COMPATIBILITY_VERSION if version == SYMBOL_SCHEMA_VERSION
+                else REFERENCE_COMPATIBILITY_VERSION if version == REFERENCE_SCHEMA_VERSION
                 else FILTER_COMPATIBILITY_VERSION if version == FILTER_SCHEMA_VERSION
                 else SKILL_COMPATIBILITY_VERSION if version == SKILL_SCHEMA_VERSION
                 else ARMY_COMPATIBILITY_VERSION if version == ARMY_SCHEMA_VERSION
@@ -991,6 +1004,8 @@ class Database:
                 read_unit_filter_semantics(connection)
             if version >= REFERENCE_SCHEMA_VERSION:
                 read_army_reference_data(connection)
+            if version >= SYMBOL_SCHEMA_VERSION:
+                read_symbol_publication(connection)
             identity_config = identity_config_from_connection(connection)
             validate_application_army_integrity(connection)
             validate_application_fireteam_integrity(connection)
@@ -1163,6 +1178,15 @@ class Database:
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Database contains broken foreign keys")
+
+    def symbol_publication(self):
+        """Read v31 runtime symbol mappings; earlier schemas retain the manifest adapter."""
+        from infinity_db.symbol_path_storage import ARMY_SCHEMA_VERSION, read_symbol_publication
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < ARMY_SCHEMA_VERSION:
+                return None
+            return read_symbol_publication(connection)
 
     def army_reference_data(self):
         """Read v30 editorial/historical data; older schemas use the authored adapters."""

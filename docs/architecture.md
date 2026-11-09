@@ -352,6 +352,14 @@ mappings, and the compact Army source identity needed to prove that runtime Army
 come from the intended source snapshot. Peripheral profile artwork has its own
 `peripherals/<main-army>/` publication namespace rather than inheriting parent-Unit filenames.
 
+Opt-in complete builds embed the four serving mappings and published SVG hashes
+in Army v31. For that schema the manifest is a build/provenance input rather
+than a runtime lookup dependency; older Army schemas retain its validated
+adapter. Each application computes its static cache identity from the selected
+mapping revision and actual packaged asset bytes, verifying the embedded SVG
+hashes. Immutable package bytes are hashed once per process; selecting another
+database does not mutate an existing application's URLs or module versions.
+
 Raw/source symbol archives, conversion work trees, detailed stage reports, and terminal build state
 remain local processing evidence. Production deployment requires the tracked publication, not the
 raw symbol pipeline.

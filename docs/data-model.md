@@ -2949,6 +2949,42 @@ file. Existing summary text, grouping, non-playability and search links remain
 unchanged. Corrupt or mismatched data fails closed; earlier schemas and
 source-review tools retain the validated JSON adapters.
 
+### Published symbol mappings in Army v31 (P2.4 opt-in)
+
+The opt-in complete build extends the matched Army v30/raw pair to
+**v31/compatibility 40**. `published_symbol_paths` stores all 2,019 exact
+mapping keys, unique by mapping kind and identity: 60 faction/source IDs,
+918 Unit slugs, 1,033 source profile-logo URLs and eight semantic profile
+identities. These retain the existing source lookup namespaces; they are
+not inferred canonical Army/Unit identities. Their foreign keys reference
+`published_symbol_assets`, which stores paths and hashes for all 808 SVGs
+in the publication, including assets not selected by those four maps.
+
+`symbol_path_metadata` binds publication format/version, exact manifest
+digest, Army archive SHA, paired export generation, row counts and the full
+mapping/asset fingerprint. Build-time checks require the publication's named
+Army archive to match the selected database and verify every published SVG's
+actual bytes. Paths must be canonical relative SVG paths in the supported
+asset namespaces; traversal, Windows separators and unpublished targets fail
+closed. The v31 published checksum includes all three tables and the raw
+sibling retains matching compatibility/checksum metadata.
+
+`SymbolCatalog` consumes this projection at v31; earlier schemas and explicit
+source tools retain the manifest adapter. Unit/Army/profile symbol selection,
+semantic-profile precedence, contextual ambiguity and existing API fields are
+unchanged. Other manifest fields remain build/graphical-publication evidence.
+The manifest is no longer read when importing or starting a v31 application.
+
+Browser HTML, version responses, module imports and cache headers share one
+per-application static revision derived from the selected mapping fingerprint
+and actual packaged static/SVG bytes. Published SVG hashes are verified against
+that immutable package inventory, cached once per process. Different selected
+mapping projections receive different versions without changing an existing
+application's responses. The optional legacy static JSON route uses a short
+cache lifetime and does not participate in the asset fingerprint. Release
+candidate checks compute the same revision from the candidate's selected Army
+database rather than a process-global default publication.
+
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
 **Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**

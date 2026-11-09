@@ -462,6 +462,7 @@ def test_current_trait_routes_are_served_by_presentation_handler() -> None:
         source_data_changed_on=None,
         snapshot_downloaded_on=None,
         snapshot_revision="test",
+        static_revision="test",
     )
     for trait_id in load_trait_wiki_references():
         slug = trait_id.removeprefix("trait:")

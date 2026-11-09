@@ -79,6 +79,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 or report["sourceClassificationMemberships"] != 1
                 or report["armyOverviewSummaries"] != 58
                 or report["legacyArmyIdentities"] != 2
+                or report["publishedSymbolMappings"] != 2019
+                or report["publishedSymbolAssets"] != 808
             ):
                 raise ValueError("Complete build changed the reviewed source inventory")
 
@@ -237,6 +239,17 @@ def verify(source: Path, expected_sha256: str) -> dict:
                     for result in results
                 ):
                     raise ValueError("Historical Army search navigation changed")
+            from infinity_db.symbol_catalog import SymbolCatalog
+
+            embedded = SymbolCatalog(
+                publication=Database(destination / "infinity.db").symbol_publication(),
+            )
+            authored = SymbolCatalog(ROOT / "data/manifests/symbol-publication.json")
+            if embedded.revision != authored.revision:
+                raise ValueError("Embedded symbol maps differ from the selected publication")
+            version = _api(app, "/api/version")
+            if version["static_revision"] != app.presentation.static_revision:
+                raise ValueError("Server and presentation disagree on selected asset revision")
             baseline = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
             observed = capture(
                 app, paths=tuple(item["path"] for item in baseline["probes"]),
@@ -251,7 +264,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 f"12 Weapon Properties, 2 Equipment encodings, "
                 f"6 Skill classifications, 2 hidden characteristics, "
                 f"1 classification membership, 58 Army summaries, "
-                f"2 historical Army identities, 41 baseline routes; "
+                f"2 historical Army identities, 2019 symbol mappings, "
+                f"808 verified SVGs, 41 baseline routes; "
                 f"hashes {json.dumps(report['sha256'], sort_keys=True)}",
                 flush=True,
             )
@@ -279,6 +293,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
         "sourceClassificationMemberships": reports[0]["sourceClassificationMemberships"],
         "armyOverviewSummaries": reports[0]["armyOverviewSummaries"],
         "legacyArmyIdentities": reports[0]["legacyArmyIdentities"],
+        "publishedSymbolMappings": reports[0]["publishedSymbolMappings"],
+        "publishedSymbolAssets": reports[0]["publishedSymbolAssets"],
         "rebuilds": 2,
     }
 

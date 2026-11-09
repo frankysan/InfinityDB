@@ -36,8 +36,11 @@ from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web import create_app
-from infinity_db.web.app import STATIC_ASSET_REVISION, STATIC_ASSET_VERSION
+from infinity_db.web.presentation import static_asset_revision
 from tools.verify_general_rules_browser import source_rules
+
+STATIC_ASSET_REVISION = static_asset_revision(SymbolCatalog())
+STATIC_ASSET_VERSION = f"{__version__}-{STATIC_ASSET_REVISION}"
 
 
 def _refresh_published_content_checksum(path: Path) -> None:

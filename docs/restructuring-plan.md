@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 has embedded the Restrictions chart in Rules v13, Trait Wiki links in v14, Combined Saving Rolls in v15, Ammunition links in v16 and Weapon Properties in v17; Army v27 adds Cube presentation encodings, v28 adds six Skill source classifications, v29 adds Unit Explorer filter semantics and v30 adds Army summaries and historical identities. Runtime symbol mappings and final cutover remain unfinished.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2 embeds exact variant usage in Rules v11; P2.3 completed reviewed Weapon citations in v12 with real-source reproducibility. P2.4 materialization is complete for opt-in Rules v17/Army v31 builds: reference facts, Army presentation data and symbol mappings/hashes are embedded. Legacy deployed-object paths, final naming/defaults and unified serving remain under P2.5–P2.8.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -1694,11 +1694,24 @@ without opening either maintained JSON input. The [data model](data-model.md#arm
 owns the relational/provenance contract; [testing](testing.md#selected-runtime-database-set-validation)
 owns focused parity and pinned-source acceptance.
 
-**Remaining P2.4:** Migrate runtime symbol path mappings identified in P1.4.
-The historical JSON adapters remain only while independently
-needed for release/research/presentation consumption;
-obsolete-path tests alone do not justify retaining them.
-Final naming, serving and Docker cutover belongs to P2.6.
+#### P2.4 — Final slice: published symbol mappings (2026-11-09)
+
+**Status:** Complete at the opt-in SQLite boundary. Army v31/compatibility
+40 embeds all 2,019 exact lookup keys and all 808 published SVG hashes.
+The build verifies the publication's Army archive identity and actual SVG
+bytes before extending the matched Army/raw pair. Runtime lookup reads
+SQLite only; cache identity combines the selected mapping fingerprint with
+verified packaged asset bytes, independently for each application. HTML,
+module imports, cache headers and candidate verification share that identity.
+No import/startup manifest read remains for v31. The [data model](data-model.md#published-symbol-mappings-in-army-v31-p24-opt-in)
+owns storage details and [testing](testing.md#selected-runtime-database-set-validation)
+owns exact parity, cache isolation and pinned-source evidence.
+
+All P2.4-maintained JSON projections are now available in the two-file
+opt-in set. Older adapters remain while the tracked release and source
+tools independently need them; obsolete-path tests alone do not justify
+retention. Continue P2.5's deployed-object cleanup, then P2.6's final
+names/defaults and unified serving, followed by P2.7–P2.8 closeout.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 
@@ -1780,7 +1793,7 @@ flowchart TD
     p5 --> p6
 ```
 
-**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has complete-build foundations, P2.2 embeds variant usage and P2.3 embeds reviewed Weapon citations. Continue P2.4 with symbol mappings; final names/defaults and unified serving remain unfinished. Independent P4 copy work need not block on the database migration.
+**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has complete-build foundations; P2.2–P2.4 projections are available in opt-in Army v31/Rules v17 sets. Continue P2.5's deployed-object transition before final names/defaults and unified serving. Independent P4 copy work need not block on the database migration.
 
 ## Questions to settle during discovery (not reasons to stop planning)
 

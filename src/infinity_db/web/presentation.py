@@ -6,15 +6,16 @@ import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date
+from functools import lru_cache
 from hashlib import sha256
 from html import escape
 from http import HTTPStatus
 from importlib.resources import files
 from urllib.parse import parse_qs
 
-from infinity_army_data.project_resources import maintained_manifest_path
 from infinity_db import __display_version__, __version__
 from infinity_db.application_domains import application_domain
+from infinity_db.symbol_catalog import SymbolCatalog, SymbolCatalogError
 from infinity_db.web.release_notes import render_current_release_notes_html
 from infinity_db.web.response import WebResponse
 from infinity_db.web.routes import (
@@ -177,7 +178,9 @@ STYLESHEET_PARTS = (
     "components.css",
     "page-overrides.css",
 )
-_STATIC_REVISION_FILES = tuple(sorted(filename for filename, _ in ASSETS.values()))
+_STATIC_REVISION_FILES = tuple(sorted(
+    filename for filename, _ in ASSETS.values() if not filename.endswith(".json")
+))
 _LEGACY_STATIC_ASSET_ALIASES = {"/static/app.js": "/static/units.js"}
 
 
@@ -509,32 +512,48 @@ _DETAIL_PAGES = (
 )
 
 
-def _static_asset_revision() -> str:
-    """Fingerprint cache-immutable browser assets and the canonical symbol contract."""
-
+@lru_cache(maxsize=1)
+def _packaged_static_hashes() -> dict[str, str]:
+    """Hash immutable package assets once per process, without reading structured JSON."""
     static = files("infinity_db.web").joinpath("static")
-    digest = sha256()
-    for filename in _STATIC_REVISION_FILES:
-        digest.update(filename.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(sha256(static.joinpath(*filename.split("/")).read_bytes()).digest())
+    hashes = {
+        name: sha256(static.joinpath(*name.split("/")).read_bytes()).hexdigest()
+        for name in _STATIC_REVISION_FILES
+    }
 
-    publication_manifest = maintained_manifest_path("symbol-publication.json")
-    digest.update(b"data/manifests/symbol-publication.json\0")
-    digest.update(sha256(publication_manifest.read_bytes()).digest())
+    def walk(directory, prefix: str) -> None:
+        if not directory.is_dir():
+            return
+        for child in sorted(directory.iterdir(), key=lambda item: item.name):
+            name = prefix + "/" + child.name
+            if child.is_dir():
+                walk(child, name)
+            elif child.name.endswith(".svg"):
+                hashes[name] = sha256(child.read_bytes()).hexdigest()
+
+    for category in ("armies", "characteristics", "orders", "peripherals", "units"):
+        walk(static.joinpath(category), category)
+    return hashes
+
+
+def static_asset_revision(symbols: SymbolCatalog) -> str:
+    """Bind one selected mapping projection to verified, packaged graphical bytes."""
+    hashes = _packaged_static_hashes()
+    for path, expected in symbols.asset_hashes.items():
+        if hashes.get(path) != expected:
+            raise SymbolCatalogError(f"Packaged symbol bytes differ or are missing: {path}")
+    digest = sha256(symbols.revision.encode("ascii"))
+    for name, value in sorted(hashes.items()):
+        digest.update(name.encode("utf-8") + b"\0" + value.encode("ascii"))
     return digest.hexdigest()[:16]
 
 
-STATIC_ASSET_REVISION = _static_asset_revision()
-STATIC_ASSET_VERSION = f"{__version__}-{STATIC_ASSET_REVISION}"
-
-
-def _version_static_urls(document: str) -> str:
+def _version_static_urls(document: str, static_version: str) -> str:
     """Give page assets a content-derived immutable URL."""
 
     return _STATIC_URL.sub(
         lambda match: (
-            f"{match.group(0)[:-1]}?v={STATIC_ASSET_VERSION}{match.group('quote')}"
+            f"{match.group(0)[:-1]}?v={static_version}{match.group('quote')}"
         ),
         document,
     )
@@ -547,22 +566,22 @@ def _composed_stylesheet() -> bytes:
     return b"".join(static.joinpath(filename).read_bytes() for filename in STYLESHEET_PARTS)
 
 
-def _asset_cache_control(query: str) -> str:
+def _asset_cache_control(query: str, static_version: str) -> str:
     """Cache fingerprinted assets forever and imported modules briefly."""
 
     version = parse_qs(query).get("v")
-    if version == [STATIC_ASSET_VERSION]:
+    if version == [static_version]:
         return "public, max-age=31536000, immutable"
     return "public, max-age=300, stale-while-revalidate=600"
 
 
-def _version_module_imports(source: str) -> str:
+def _version_module_imports(source: str, static_version: str) -> str:
     """Keep an ES module and every relative dependency in the same release."""
 
     return _MODULE_IMPORT_URL.sub(
         lambda match: (
             f"{match.group('prefix')}{match.group('quote')}"
-            f"{match.group('path')}?v={STATIC_ASSET_VERSION}{match.group('quote')}"
+            f"{match.group('path')}?v={static_version}{match.group('quote')}"
         ),
         source,
     )
@@ -574,10 +593,12 @@ def _render_page(
     source_data_changed_on: date | None,
     snapshot_downloaded_on: date | None,
     snapshot_revision: str,
+    static_revision: str,
 ) -> bytes:
     """Render a page with the project-wide navigation and page shell."""
 
     static = files("infinity_db.web").joinpath("static")
+    static_version = f"{__version__}-{static_revision}"
     navigation = static.joinpath("navigation.html").read_text(encoding="utf-8")
     navigation_markers = {
         "armies": "ARMIES_CURRENT",
@@ -656,8 +677,8 @@ def _render_page(
         document.replace(
             '<html lang="en">',
             f'<html lang="en" data-app-version="{__version__}" '
-            f'data-static-version="{STATIC_ASSET_VERSION}" '
-            f'data-static-revision="{STATIC_ASSET_REVISION}" '
+            f'data-static-version="{static_version}" '
+            f'data-static-revision="{static_revision}" '
             f'data-snapshot-revision="{snapshot_revision}">',
         )
         .replace(
@@ -678,13 +699,14 @@ def _render_page(
             "</head>",
             (
                 '<script type="module" '
-                f'src="/static/version-check.js?v={STATIC_ASSET_VERSION}"></script>'
+                f'src="/static/version-check.js?v={static_version}"></script>'
                 "</head>"
             ),
         )
         .replace("<!-- navigation -->", navigation)
         .replace("<!-- page-header -->", page_header)
-        .replace("<!-- page-footer -->", page_footer)
+        .replace("<!-- page-footer -->", page_footer),
+        static_version,
     ).encode("utf-8")
 
 
@@ -697,10 +719,13 @@ class PresentationHandler:
         source_data_changed_on: date | None,
         snapshot_downloaded_on: date | None,
         snapshot_revision: str,
+        static_revision: str,
     ) -> None:
         self.source_data_changed_on = source_data_changed_on
         self.snapshot_downloaded_on = snapshot_downloaded_on
         self.snapshot_revision = snapshot_revision
+        self.static_revision = static_revision
+        self.static_version = f"{__version__}-{static_revision}"
 
     def _page_response(self, spec: PageSpec) -> WebResponse:
         return WebResponse(
@@ -709,6 +734,7 @@ class PresentationHandler:
                 source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
+                static_revision=self.static_revision,
             ),
             content_type="text/html; charset=utf-8",
         )
@@ -729,12 +755,16 @@ class PresentationHandler:
                     "static", *filename.split("/")
                 ).read_bytes()
             version = parse_qs(query).get("v")
-            if filename.endswith(".js") and version == [STATIC_ASSET_VERSION]:
-                body = _version_module_imports(body.decode("utf-8")).encode("utf-8")
+            if filename.endswith(".js") and version == [self.static_version]:
+                body = _version_module_imports(
+                    body.decode("utf-8"), self.static_version,
+                ).encode("utf-8")
             return WebResponse(
                 body=body,
                 content_type=content_type,
-                cache_control=_asset_cache_control(query),
+                cache_control=_asset_cache_control(
+                    "" if filename.endswith(".json") else query, self.static_version,
+                ),
             )
 
         symbol = self._symbol_response(path, query)
@@ -746,8 +776,7 @@ class PresentationHandler:
                 return self._page_response(spec)
         return None
 
-    @staticmethod
-    def _symbol_response(path: str, query: str) -> WebResponse | None:
+    def _symbol_response(self, path: str, query: str) -> WebResponse | None:
         asset = None
         if ARMY_SYMBOL_PATH.fullmatch(path):
             filename = path.removeprefix("/static/armies/")
@@ -776,5 +805,5 @@ class PresentationHandler:
         return WebResponse(
             body=asset.read_bytes(),
             content_type="image/svg+xml",
-            cache_control=_asset_cache_control(query),
+            cache_control=_asset_cache_control(query, self.static_version),
         )

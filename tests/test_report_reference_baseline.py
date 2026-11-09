@@ -1091,6 +1091,7 @@ def test_route_hints_reuse_published_surfaces_without_claiming_coverage() -> Non
         source_data_changed_on=None,
         snapshot_downloaded_on=None,
         snapshot_revision="audit-test",
+        static_revision="audit-test",
     )
     for entry in entries.values():
         hint = entry["routeHint"]

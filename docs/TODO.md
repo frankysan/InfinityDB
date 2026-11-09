@@ -35,9 +35,10 @@ when all contained work shares the same owner.
   Roll annotations, Ammunition links and 12 reviewed Weapon Properties
   in Rules v17, plus two Cube characteristic encodings and six
   reviewed Skill source classifications and Unit Explorer filter semantics
-  plus 58 Army summaries and two legacy Army identities in Army v30.
-  The opt-in two-file set has local source-build and API parity checks;
-  migrate P2.4's remaining symbol path mappings.
+  plus 58 Army summaries, two legacy Army identities and the published
+  symbol mappings/hashes in Army v31. P2.4 materialization is complete
+  for the opt-in two-file path with local source-build and API parity checks.
+  Continue P2.5's deployed-object transition and obsolete-path retirement.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;

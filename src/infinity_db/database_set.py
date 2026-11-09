@@ -73,6 +73,7 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     army.validate()
     encodings = army.equipment_presentation_encodings()
     classifications = army.skill_source_classifications()
+    symbols = army.symbol_publication()
     with closing(sqlite3.connect(army_path.as_uri() + "?mode=ro", uri=True)) as connection:
         army_version = connection.execute("PRAGMA user_version").fetchone()[0]
     filter_semantics = (
@@ -153,6 +154,13 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
         **({"ammunitionReferences": len(ammunition)} if ammunition is not None else {}),
         **({"weaponProperties": len(properties)} if properties is not None else {}),
         "sha256": fingerprints,
+        **({
+            "publishedSymbolMappings": sum(len(symbols[field]) for field in (
+                "factionIdToPublishedPath", "unitSlugToPublishedPath",
+                "unitProfileLogoToPublishedPath", "profileIdentityToPublishedPath",
+            )),
+            "publishedSymbolAssets": len(symbols["publishedSha256ByPath"]),
+        } if symbols is not None else {}),
         **({
             "armyOverviewSummaries": len(army_reference[0]),
             "legacyArmyIdentities": len(army_reference[1]),

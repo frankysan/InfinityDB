@@ -30,6 +30,7 @@ from .deployed_object_builder import build_deployed_objects
 from .equipment_presentation_storage import publish_equipment_encodings
 from .rules_database import export_rules_database
 from .skill_classification_storage import publish_skill_classifications
+from .symbol_path_storage import publish_symbol_paths
 from .trait_wiki_references import load_trait_wiki_references
 from .unit_filter_storage import publish_unit_filter_semantics
 from .variant_usage import build_variant_usage_projection
@@ -194,6 +195,11 @@ def build_database_set(
             stage / "infinity.db", stage / "infinity.raw.db",
             root / "data/curated/identities/army-overview.json",
             root / "data/curated/identities/legacy-armies.json",
+        )
+        publish_symbol_paths(
+            stage / "infinity.db", stage / "infinity.raw.db",
+            root / "data/manifests/symbol-publication.json",
+            root / "src/infinity_db/web/static",
         )
         _build_rules_and_publications(stage, root, manifest)
         result = validate_database_set(stage)
