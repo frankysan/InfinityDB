@@ -984,6 +984,22 @@ runtime provenance/artifact check passed with SVG validation disabled.
 This is local Windows acceptance; full hosted CI and final Docker/name cutover
 are separate integration checks.
 
+**2026-11-09 P2.5 fourth slice, embedded-only variant source builds:**
+The maintained variant source projection rejects Rules databases without
+source-matched embedded deployed objects even when a legacy JSON sidecar is
+present. Complete-set and maintained candidate/variant builders no longer
+supply that sidecar argument; a temporarily ignored optional argument keeps
+retirement-stage one-use callers importable. The source snapshot no longer
+conditionally hashes the legacy publication. Focused variant-usage tests
+passed **98 cases** including negative sidecar/output-preservation checks.
+The complete database-set builder suite passed **16 cases** on the initial
+candidate; after removing an unreachable legacy-only digest expression,
+the representative repeatable complete-build case passed again.
+The targeted v10 variant-publication storage test also passed.
+Ruff, canonical Pyright (0 errors), documentation checks, Git whitespace
+checks and tracked runtime provenance verification passed (SVG checks disabled).
+No tracked publication, deployment or final filename/default was changed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

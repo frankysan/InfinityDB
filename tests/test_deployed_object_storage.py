@@ -115,7 +115,7 @@ def test_v10_variant_usage_publication_needs_no_deployed_json(
     ])
     assert cmd_build_rules(args) == 0
     missing_json = tmp_path / "deployed-objects.json"
-    candidate = build_variant_usage_projection(army, raw, rules, missing_json)
+    candidate = build_variant_usage_projection(army, raw, rules)
     assert "deployedObjectPublicationSha256" not in candidate["sourceSnapshot"]
     publication = publication_from_candidate(candidate)
     assert publication["formatVersion"] == 2

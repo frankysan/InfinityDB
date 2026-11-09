@@ -70,7 +70,7 @@ def verify_candidate(stage: Path, *, root: Path = ROOT) -> dict[str, Any]:
         raise ValueError("Staged Army database differs from pinned build input")
     expected_variant = publication_from_candidate(
         build_variant_usage_projection(
-            staged_army, raw, staged_rules, stage / "deployed-objects.json",
+            staged_army, raw, staged_rules,
         )
     )
     path = stage / "variant-usage.json"
@@ -97,7 +97,7 @@ def _write_companion_publications(stage: Path, *, root: Path = ROOT) -> None:
     stage.joinpath("variant-usage.json").write_bytes(_json_bytes(
         publication_from_candidate(build_variant_usage_projection(
             stage / "infinity.db", root / "data/generated/infinity.raw.db",
-            stage / "rules.db", stage / "deployed-objects.json",
+            stage / "rules.db",
         ))
     ))
     stage.joinpath("weapon-profile-sources.json").write_bytes(weapon_bytes(

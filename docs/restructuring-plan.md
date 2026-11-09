@@ -1750,14 +1750,25 @@ still import them; imports alone are not a reason to keep those modules.
 Provenance, exact Army-source identities and fail-closed embedded-data
 behavior remain tested independently of the removed CLI.
 
-**Remaining P2.5:** Review and retire the completed staging/promotion tool
-cluster and its obsolete-path tests together; preserve any independently
-useful source/provenance guards in maintained builders or current-path tests.
-The legacy JSON read adapter is still a build-only dependency of older
-variant-usage workflows, not a serving fallback. Retire that adapter when its
-remaining build consumer is superseded rather than deleting a still-reachable
-path in isolation. P2.6–P2.8 continue to own final default/naming,
-assembly-stage removal and full local/container integration acceptance.
+#### P2.5 — Fourth slice: detach variant source builds from legacy JSON (2026-11-09)
+
+The maintained `build_variant_usage_projection` now requires deployed
+objects embedded in Rules SQLite and never calls the standalone JSON loader,
+even if a sidecar exists. Complete-set assembly and both current candidate
+and developer variant builders omit the obsolete sidecar input. The optional
+fourth positional argument remains ignored temporarily for one-use tool
+callers until their independent purpose/retirement review is complete;
+it cannot enable v8/v9 schemas. Source archive/export-generation parity,
+exact variants and reviewed delivery provenance retain their existing checks.
+A negative regression verifies that a legacy sidecar cannot recover an
+unembedded Rules model, without writing to the sidecar.
+
+**Remaining P2.5:** Review and retire completed staging/promotion modules,
+their obsolete-path tests and the now historical standalone JSON loader and
+programmatic serialization adapter together. Preserve independently useful
+source/provenance guards in maintained builders or current-path tests.
+P2.6–P2.8 still own final naming/defaults, assembly-stage removal and full
+local/container integration acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

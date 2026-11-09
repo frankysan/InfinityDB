@@ -415,6 +415,28 @@ def test_variant_usage_ambiguous_catalog_mapping_is_excluded(
             assert mapping["applicationItemId"] is None
 
 
+def test_variant_usage_requires_embedded_objects_even_with_legacy_json(
+    usage_databases: tuple[sqlite3.Connection, sqlite3.Connection],
+    tmp_path: Path,
+) -> None:
+    application, raw = usage_databases
+    paths = [tmp_path / name for name in ("infinity.db", "infinity.raw.db")]
+    for source, path in zip((application, raw), paths, strict=True):
+        source.commit()
+        with sqlite3.connect(path) as destination:
+            source.backup(destination)
+    rules = tmp_path / "rules.db"
+    with sqlite3.connect(rules) as connection:
+        connection.execute("PRAGMA user_version = 9")
+    legacy = tmp_path / "deployed-objects.json"
+    legacy.write_text('{"objects": [{}]}', encoding="utf-8")
+    unchanged = legacy.read_bytes()
+
+    with pytest.raises(ValueError, match="requires source-matched embedded deployed objects"):
+        build_variant_usage_projection(paths[0], paths[1], rules, legacy)
+    assert legacy.read_bytes() == unchanged
+
+
 def test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts(
     usage_databases: tuple[sqlite3.Connection, sqlite3.Connection],
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
@@ -434,9 +456,10 @@ def test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts(
             source.backup(destination)
     with sqlite3.connect(paths[2]) as rules:
         rules.execute("CREATE TABLE marker (id)")
-    publication = tmp_path / "publication.json"
-    publication.write_text("{}", encoding="utf-8")
-    monkeypatch.setattr(variant_usage, "load_deployed_object_publication", lambda *_args: {})
+    monkeypatch.setattr(
+        variant_usage.RulesDatabase, "deployed_objects_payload",
+        lambda _self, _army: {"objects": [{"id": "test:object"}]},
+    )
     monkeypatch.setattr(variant_usage, "_source_mapping", lambda *_args: {
         ("skills", 47): {"applicationItemId": 47, "rules": {
             "recordId": "skill:example-l1", "collectionId": "core",
@@ -444,7 +467,7 @@ def test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts(
         }},
     })
     projection = build_variant_usage_projection(
-        paths[0], paths[1], paths[2], publication,
+        paths[0], paths[1], paths[2],
     )
     group, = projection["variants"]
     assert (group["uniqueUnits"], group["uniqueArmyUnits"], group["distinctContexts"],
@@ -813,7 +836,6 @@ def test_variant_usage_mismatched_export_generation_fails_before_reading_rows(
         connection.commit()
         with sqlite3.connect(path) as destination:
             connection.backup(destination)
-    monkeypatch.setattr(variant_usage, "load_deployed_object_publication", lambda *_args: {})
     with pytest.raises(ValueError, match="different exports"):
         build_variant_usage_projection(
             paths[0], paths[1], tmp_path / "rules.db", tmp_path / "pub.json",

@@ -39,7 +39,6 @@ def main() -> None:
         ROOT / "data/generated/infinity.db",
         ROOT / "data/generated/infinity.raw.db",
         ROOT / "data/generated/rules.db",
-        ROOT / "data/generated/deployed-objects.json",
     )
     if args.check is not None:
         validate_variant_usage_candidate(ROOT / args.check, result)

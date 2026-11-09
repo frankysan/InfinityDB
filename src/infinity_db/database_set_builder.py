@@ -113,7 +113,7 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
     # embeds its resolved facts without storing its own completed byte hash.
     export_rules_database(documents, rules, **export_options)
     variants = publication_from_candidate(build_variant_usage_projection(
-        army, stage / "infinity.raw.db", rules, stage / "deployed-objects.json",
+        army, stage / "infinity.raw.db", rules,
     ))
     export_rules_database(documents, rules, variant_usage=variants, **export_options)
     weapons = build_publication(

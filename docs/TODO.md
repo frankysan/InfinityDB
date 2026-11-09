@@ -41,9 +41,11 @@ when all contained work shares the same owner.
   P2.5 removed legacy JSON serving and image assembly; CI, browser CI and
   clean-export preflight now validate the selected database set without
   generating historical JSON. The standalone deployed-object JSON publisher
-  and v8/v9 refresh/promotion CLI are retired. Continue removal of the
-  build-only legacy read adapter and its completed staging/promotion consumers,
-  preserving still-valid source guards without obsolete wrappers.
+  and v8/v9 refresh/promotion CLI are retired. Current variant-usage
+  source builds now require embedded deployed objects; loose JSON cannot
+  recover older schemas. Continue retirement of the historical loader,
+  completed staging/promotion modules and obsolete-path tests, preserving
+  still-valid source guards without obsolete wrappers.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;
