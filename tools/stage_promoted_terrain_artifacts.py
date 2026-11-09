@@ -1,12 +1,11 @@
-"""Stage refreshed binary publications after terrain/scenery source promotion.
+"""Historical terrain/scenery staging helper for old source-review tests.
 
-The source definitions are already in the tracked curated JSON; this command
-never rewrites them or the currently tracked binary artifacts.
+The standalone command is retired. Current builds publish embedded Rules
+data instead of generating a redundant Rules/JSON staging pair.
 """
 
 from __future__ import annotations
 
-import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -136,15 +135,11 @@ def stage_promoted_terrain_artifacts(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, required=True)
-    args = parser.parse_args()
-    result = stage_promoted_terrain_artifacts(args.output_dir)
-    print(f"Staged {len(result['stagedPaths'])} generated artifacts.")
-    print(f"Reviewed deployed objects: {result['reviewedObjects']}")
-    print(f"Staging report: {args.output_dir / 'staging-report.json'}")
-    print("Tracked source and generated artifacts remain unchanged.")
-    return 0
+    """Disable superseded post-promotion Rules/JSON assembly."""
+    raise SystemExit(
+        "Historical terrain/scenery Rules/JSON staging is retired. "
+        "Use the current complete database-set build and validation path."
+    )
 
 
 if __name__ == "__main__":

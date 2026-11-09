@@ -1763,10 +1763,41 @@ exact variants and reviewed delivery provenance retain their existing checks.
 A negative regression verifies that a legacy sidecar cannot recover an
 unembedded Rules model, without writing to the sidecar.
 
-**Remaining P2.5:** Review and retire completed staging/promotion modules,
-their obsolete-path tests and the now historical standalone JSON loader and
-programmatic serialization adapter together. Preserve independently useful
-source/provenance guards in maintained builders or current-path tests.
+#### P2.5 — Fifth slice: bound the retired terrain staging cluster (2026-11-09)
+
+Two superseded *command interfaces* are disabled: standalone
+`tools.stage_promoted_terrain_artifacts` and
+`tools.verify_staged_release_pair`. Calling either module now fails
+explicitly with guidance to the supported complete database-set builder
+and `database-health --db-dir`. Their imported historical functions remain
+available temporarily; this slice does **not** delete their implementation
+or source-review tests. Neither command has a current CI/deployment caller.
+
+The independently useful assertions are already owned by maintained
+`tests/test_rules_database.py` (the two terrain General Rule identities),
+`tests/test_restriction_chart_storage.py` (source/condition fingerprint
+and chart integrity), `tests/test_deployed_object_storage.py` (embedded
+source identities and uses), `tests/test_database_set.py` (read-only,
+fail-closed selected-set integrity), and
+`tests/test_database_set_builder.py` (source-pinned repeatability and
+output preservation on failure). Legacy staging layout, report-baseline
+checks, manual rollback choreography and the loose JSON pairing no longer
+establish independent product obligations.
+
+**Next atomic deletion group:** `tools/stage_promoted_terrain_artifacts.py`,
+`tools/verify_staged_release_pair.py`,
+`tests/test_promoted_terrain_artifacts.py`,
+`tests/test_verify_staged_release_pair.py` and
+`tests/test_legacy_staging_schema_guards.py`, plus their three entries
+in `config/testing/test-sections.json`. Review historical prose as
+archived evidence, not a command reference. Separately evaluate
+`tools/stage_terrain_scenery_references.py` and its staging-only tests
+without dropping its source-review evidence. No historical tool/test
+import is by itself a reason to retain this cluster.
+
+**Remaining P2.5:** Perform the atomic deletion above, then retire the
+broader stage/promotion dependency cluster and the standalone JSON
+read/serialization adapters after current-purpose checks are preserved.
 P2.6–P2.8 still own final naming/defaults, assembly-stage removal and full
 local/container integration acceptance.
 

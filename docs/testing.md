@@ -1000,6 +1000,23 @@ Ruff, canonical Pyright (0 errors), documentation checks, Git whitespace
 checks and tracked runtime provenance verification passed (SVG checks disabled).
 No tracked publication, deployment or final filename/default was changed.
 
+**2026-11-09 P2.5 fifth slice, retired historical terrain staging commands:**
+The standalone `stage_promoted_terrain_artifacts` and
+`verify_staged_release_pair` module entrypoints now fail explicitly instead
+of staging/validating legacy Rules/JSON release pairs. Their imported
+historical helpers remain temporarily available for the planned atomic
+tool/test deletion; no runtime or source-projection path was changed.
+Both CLI smoke invocations returned the expected retirement errors.
+Focused staging/helper regressions passed **11 tests** across
+`test_promoted_terrain_artifacts` (3),
+`test_verify_staged_release_pair` (5) and
+`test_legacy_staging_schema_guards` (3). Ruff, canonical Pyright (0 errors),
+documentation lint/links/backlog and Git whitespace checks passed.
+The plan records the five-file removal group, associated test-section
+registry updates and independently maintained source/integrity guards.
+This is command retirement, **not** physical helper/test file removal;
+no Docker or deployment validation was run for this slice.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

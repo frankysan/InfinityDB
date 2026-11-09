@@ -1,12 +1,11 @@
-"""Verify that a legacy staged rules/publication pair is still safe to review.
+"""Historical staged-pair verifier retained only for old source-review tests.
 
-This is a read-only pre-promotion gate. It never copies or replaces release files.
-Historical staging reports without baseline fingerprints are evidence only.
+The standalone command has been retired. Maintained builds use the selected
+database-set health check; legacy helper removal follows the P2.5 test cleanup.
 """
 
 from __future__ import annotations
 
-import argparse
 import hashlib
 import json
 import sqlite3
@@ -115,14 +114,12 @@ def verify_staged_release_pair(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", type=Path, required=True)
-    args = parser.parse_args()
-    result = verify_staged_release_pair(args.stage)
-    print(f"Verified unchanged schema v{result['schemaVersion']} and "
-          f"{result['reviewedObjects']} deployed objects.")
-    print("Candidate and original release pair are unmodified.")
-    return 0
+    """Disable the superseded loose-JSON staging gate."""
+    raise SystemExit(
+        "Historical staged Rules/JSON pair verification is retired. "
+        "Use 'infinity-db database-health --db-dir <selected-directory>' "
+        "for supported embedded runtime sets."
+    )
 
 
 if __name__ == "__main__":
