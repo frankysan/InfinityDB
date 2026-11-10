@@ -563,8 +563,21 @@ def test_live_chromium_spec_ops_source_charts() -> None:
                                     pytrace=False,
                                 )
                             assert chart.locator(".source-choice-chart").count() == 1
-                            assert chart.locator("summary").first.inner_text().endswith(
-                                f"Source Unit #{source_id}"
+                            source_id_label = chart.locator(
+                                ".source-choice-chart summary .developer-only"
+                            )
+                            assert source_id_label.inner_text().strip() == (
+                                f"· Source Unit #{source_id}"
+                            )
+                            assert not source_id_label.is_visible()
+                            assert "Army source version" not in chart.inner_text()
+                            page.evaluate(
+                                "() => document.documentElement.dataset.developerMode = 'true'"
+                            )
+                            assert source_id_label.is_visible()
+                            assert "Army source version" in chart.inner_text()
+                            page.evaluate(
+                                "() => document.documentElement.dataset.developerMode = 'false'"
                             )
                             assert chart.locator(".source-choice-list li").count() == total
                             assert chart.locator("a[href^='/skills/']").count() > 0
@@ -574,7 +587,7 @@ def test_live_chromium_spec_ops_source_charts() -> None:
                             assert chart.locator(
                                 "a[href='/skills/request-specball']"
                             ).count() == 1
-                            assert "Army source version" in chart.inner_text()
+                            assert "Army source version" not in chart.inner_text()
                             assert page.evaluate(
                                 "document.documentElement.scrollWidth <= window.innerWidth + 1"
                             ), (slug, width)

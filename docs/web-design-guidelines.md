@@ -241,6 +241,18 @@ also Developer Mode only; ordinary rules, variants and their citations
 stay visible. The chart is
 a finite source reference, not a general action-legality evaluator.
 
+### Spec-Ops source choices and technical identity
+
+The Unit detail page lists source-defined Spec-Ops/TEAM-OPS and SpecBall
+choices without implying that an option has already been selected or is
+legal for every Army List. The chart's player label is its source name.
+Show raw source Unit IDs and Army source-version diagnostics in Developer
+Mode only, retaining them in the API. Keep source chart entries,
+compound choices, Skill links, and literal `q` source notation visible:
+`q` must not be rewritten as an unverified stat modifier or final value.
+Keep a clear warning that the chart is a choice inventory, not a
+configured Army List.
+
 ### Specialist Troops filtering is contextual
 
 The Unit Explorer exposes an optional Specialist Troops selector with an

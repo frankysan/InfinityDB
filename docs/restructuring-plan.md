@@ -2593,11 +2593,23 @@ notice, About/privacy disclosures, and representative empty/error states.
   2/3/4-lane scheduling. The new module is now assigned across all
   lane maps, with focused scheduler checks passing locally. Independent
   new-SHA hosted CI acceptance remains required.
+- **Unit choice-chart metadata:** Normal Spec-Ops/TEAM-OPS choices now show
+  their source names without raw source Unit IDs and Army source-version
+  diagnostics. Developer Mode retains both. The actual choices, linked
+  Skills, compound entries, and literal source `q` parameters remain visible:
+  no source-backed interpretation of `q` has been established.
+- **CI test resilience:** Hosted Source checks on
+  `db81adcc4bd3b379f765744e6c00147eb3399c33` failed in one Linux
+  Python 3.11 test because the shared table verifier required an exact
+  one-symbol import statement; the renderer now imports two named helpers.
+  Replace that brittle assertion with a shared-module import/usage check.
+  The other 4,436 tests passed (1,315 skipped); both smoke workflows and
+  all other Source jobs passed. New-SHA hosted acceptance is still required.
 
-P4.4's source/editorial audit still needs its final page-level closeout;
-P4.5 has focused automated coverage but not a renewed manual screen-reader
-review. P4 is not yet closed. Shared rendering must preserve citations and
-material source notes.
+P4.1–P4.4's bounded player-first copy and presentation improvements have
+focused local tests. P4.5 has automated browser/theme/viewport/keyboard
+coverage, but not a renewed manual screen-reader review. P4 is not yet
+closed. Preserve citations, source notes and genuine gameplay uncertainty.
 
 ### P5 — Retire, consolidate and selectively extract tools
 

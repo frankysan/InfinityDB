@@ -1694,6 +1694,28 @@ Source jobs and both smoke workflows passed. A local lane-map repair
 is part of the next commit; independent hosted CI acceptance remains
 required.
 
+**2026-11-10 P4 editorial and CI test repair (local development checkout
+based on `db81adcc4bd3b379f765744e6c00147eb3399c33`):**
+Source-chart raw Unit identifiers and source-version metadata moved to
+Developer Mode; the chart content and uninterpreted `q` parameters remain
+visible. The existing 30-Unit/three-viewport Chromium acceptance
+`test_live_chromium_spec_ops_source_charts` passed **1/1** (90 page/viewport
+checks), including visibility in both display modes. The repaired
+shared-table import/usage assertion passed **1/1**. Ruff, Markdown
+and link checks passed. This is local validation, not human screen-reader
+or exact-SHA hosted acceptance.
+
+**Hosted CI follow-up:** Source checks run 1085 at
+`db81adcc4bd3b379f765744e6c00147eb3399c33` failed on
+Ubuntu Python 3.11 with **one** `test_secondary_tables_use_shared_semantic_layout`
+assertion expecting a literal one-symbol import. The production
+`catalog-detail.js` had correctly added `referenceLoadMessage` to the
+`tableViewport` import. The other **4,436 tests passed** (1,315 skipped);
+all other Source jobs and both smoke workflows passed. The assertion
+now checks that `tableViewport` is imported from the shared module
+and used, independent of other imported names; a new hosted run is
+needed for acceptance.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

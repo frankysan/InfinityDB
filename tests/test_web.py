@@ -2961,7 +2961,11 @@ def test_secondary_tables_use_shared_semantic_layout(app: Callable) -> None:
 
     status, _, catalog_detail = request(app, "/static/catalog-detail.js")
     assert status == 200
-    assert b'import { tableViewport } from "./view-components.js";' in catalog_detail
+    assert re.search(
+        rb'import\s*\{[^}]*\btableViewport\b[^}]*\}\s*from\s*["\']\./view-components\.js["\']',
+        catalog_detail,
+    )
+    assert b'tableViewport(' in catalog_detail
     assert b'data-table--compact data-table--profile weapon-statline' in catalog_detail
     assert (
         b'data-table--compact data-table--listing data-table--unit-list '

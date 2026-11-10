@@ -28,7 +28,10 @@ when all contained work shares the same owner.
 
 - [ ] Execute P4–P6 of the
   [phased restructuring plan](restructuring-plan.md).
-  P0–P3 are implemented and locally validated. P3 hosted Source checks,
+  P4's player-facing copy and shared-renderer updates are implemented
+  with focused local browser coverage; P4.5 still needs accessibility
+  closeout, including renewed manual screen-reader review. P5–P6 remain
+  open. P0–P3 are implemented and locally validated. P3 hosted Source checks,
   installed-wheel smoke and deployment smoke passed on
   `09f91f442f82abba4df76641ef7ad688402673d4`.
   P3.5 also exercised a synthetic second season with a duplicate
