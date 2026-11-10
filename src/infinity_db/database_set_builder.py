@@ -202,7 +202,7 @@ def build_database_set(
             root / "src/infinity_db/web/static",
         )
         _build_rules_and_publications(stage, root, manifest)
-        result = validate_database_set(stage)
+        result = validate_database_set(stage, require_complete=True)
         if result["buildProvenance"].get("buildSetId") != build_set_id(manifest):
             raise ValueError("Built runtime set does not match the selected build inputs")
         if collect_build_manifest(root, source, args.metadata) != manifest:

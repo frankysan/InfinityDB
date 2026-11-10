@@ -43,7 +43,7 @@ from infinity_db.weapon_combined_saving_rolls import load_combined_saving_roll_m
 from infinity_db.weapon_profile_storage import stage_weapon_profile_citations
 from infinity_db.weapon_properties import load_weapon_properties
 from infinity_db.weapon_property_storage import stage_weapon_properties
-from infinity_db.web import create_app
+from infinity_db.web import create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
 
 RELEASE = Path(__file__).resolve().parents[1] / "data/generated"
@@ -264,7 +264,10 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert validate_database_set(args.db_dir)["sha256"] == first["sha256"]
     assert set(_digests(args.db_dir)) == {*EMBEDDED_WEAPON_RUNTIME_FILES, "keep.txt"}
     assert (args.db_dir / "keep.txt").read_text(encoding="utf-8") == "unrelated"
-    app = create_app(args.db_dir / "infinity.db", rules_database_path=args.db_dir / "rules.db")
+    app = create_app_from_database_set(args.db_dir)
+    assert app.database.path == args.db_dir / "infinity.db"
+    assert app.rules_database is not None
+    assert app.rules_database.path == args.db_dir / "rules.db"
     assert app.weapon_profile_citations is not None
     assert len(app.weapon_profile_citations) == 69
     status, _, body = wsgi_response(app, "http://local.test/api/weapons/uragan-mrl")
@@ -281,6 +284,35 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert _digests(bundle) == first["sha256"]
     second = builder.build_database_set(args, _fake_army, root=root)
     assert second == first
+
+
+def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
+    project, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, args = project
+    monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
+    builder.build_database_set(args, _fake_army, root=root)
+    army, rules = args.db_dir / "infinity.db", args.db_dir / "rules.db"
+    original = {path: path.read_bytes() for path in (army, rules)}
+    for case, message in (
+        ("army", "require Army schema v31"),
+        ("rules", "require Rules schema v17"),
+        ("provenance", "require recorded matched build provenance"),
+    ):
+        if case == "provenance":
+            for path, table in ((army, "__infinity_metadata"), (rules, "__rules_metadata")):
+                with closing(sqlite3.connect(path)) as connection, connection:
+                    connection.execute(f"DELETE FROM {table} WHERE key=?", (BUILD_PROVENANCE_KEY,))
+        else:
+            path, version = (army, 30) if case == "army" else (rules, 16)
+            with closing(sqlite3.connect(path)) as connection, connection:
+                connection.execute(f"PRAGMA user_version={version}")
+        before = _digests(args.db_dir)
+        with pytest.raises(ValueError, match=message):
+            create_app_from_database_set(args.db_dir)
+        assert _digests(args.db_dir) == before
+        for path, content in original.items():
+            path.write_bytes(content)
 
 
 @pytest.mark.parametrize("failure", ["generation", "validation", "changed-input"])

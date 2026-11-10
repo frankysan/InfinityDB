@@ -514,6 +514,19 @@ It protects JSON source/citation semantics and Battleground SVG geometry
 but is **not** a visual browser or Docker acceptance test.
 Run `tests/test_runtime_semantic_baseline.py` for its guardrail tests.
 
+For a complete embedded candidate, use the shared startup factory through:
+
+```powershell
+.venv\Scripts\python.exe -m tools.runtime_semantic_baseline --check --db-dir local/complete-dbs --route-alias "/static/restrictions-reference.json=>/api/restrictions/chart"
+```
+
+`--db-dir` requires current complete projections and recorded matched build
+provenance before probing routes. It cannot be combined with individual database
+paths or initial baseline capture, and never selects a different directory on
+failure. The route alias is the reviewed static-to-API Restrictions migration;
+the pinned response/geometry assertions still apply. This does not change normal
+serving defaults or establish visual-browser, Docker or release acceptance.
+
 ### Selected runtime database-set validation
 
 **Project domains:** Data processing, Project infrastructure
@@ -524,6 +537,16 @@ embedded source-paired facts or older matched JSON publications. The
 [data lifecycle](../data/README.md) owns the current two-/three-/four-file contract and the limits of this check. The command operates offline,
 does not require a raw archive, and reports unhealthy/missing data without
 creating files or selecting another runtime directory.
+
+The complete builder and `create_app_from_database_set` call the same validator
+with `require_complete=True`. Their additional gate requires Army v31, Rules v17
+and recorded matched build provenance. `tests/test_database_set_builder.py`
+checks current complete startup, exact selected paths and rejection of partial
+schemas/unrecorded provenance, while retaining all unchanged-output and
+interrupted-build recovery checks. `tests/test_database_set.py` additionally
+checks that complete startup rejects a transitional set and never creates a
+missing selected directory. The ordinary health CLI retains the supported-layout
+profile until the coordinated default cutover.
 
 Run `tests/test_database_set.py` for selected-directory health, unchanged
 input bytes, missing/corrupt artifacts, unsupported schema/application IDs,
@@ -1292,6 +1315,34 @@ the starting revision; it is not a passed release gate or a new regression.
 This closes the bounded P2.5 transition; P2.6/P2.7/P2.8 retain filename/default
 cutover, assembly removal and final local/container integration acceptance.
 No full suite, Linux, hosted or release acceptance is implied.
+
+**2026-11-10 P2.6 preparation, shared complete-set startup:**
+The complete builder and application factory now share the validator's complete
+mode, requiring Army v31/Rules v17 and recorded matched provenance. The parity
+tool's `--db-dir` checks the selected set through this factory, rejecting mixed
+selectors, transitional/partial schemas, missing directories and unrecorded
+provenance without selecting fallback files or creating outputs.
+Focused Windows validation passed **49 tests, zero skips** across
+`test_database_set.py`, `test_database_set_builder.py` and
+`test_runtime_semantic_baseline.py` (101.57 seconds), including actual application
+composition, repeatable fixture builds, unchanged-output failure and interrupted
+replacement recovery. Ruff, focused Pyright (0 errors), docs lint/links/backlog,
+Git whitespace and tracked artifact/provenance checks passed (SVG excluded).
+A fresh offline build of pinned `JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+passed 73 normalization checks with the existing 116 source warnings. Its complete
+set passed shared validation and all **41 pinned semantic/HTML/SVG probes** through
+`--db-dir`, with the reviewed Restrictions static-to-API route alias.
+Build-set ID:
+`ba3dd0533872b8773a4fdbd209e99a6cce005759d273af18be1d4c7480a48baa`.
+The ignored alternate output had `infinity.db` SHA-256
+`111c134d8d8760c09157b7ceb713400510c68c6ae07803ad930ccab0d94cad4f`
+and `rules.db` SHA-256
+`989013625357d6d2762e48ca4b6ee39880997109e7d814fcc345f153da7c4dc7`.
+This is one real source build and focused startup/parity acceptance, not a
+cross-platform determinism result. Tracked data and CLI/WSGI/Docker defaults
+remain unchanged pending the coordinated P2.6 cutover. No full suite, browser
+interaction, Linux, Docker, hosted or release acceptance is implied.
 
 ## Phased development and validation
 

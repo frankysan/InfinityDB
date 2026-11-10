@@ -178,6 +178,16 @@ Other intermediate files in the directory are ignored. The v10 candidate
 and Docker-bundle checks share this built-artifact validator while retaining
 their additional source-rebuild and pinned-content checks.
 
+Complete builds use the same validator with `require_complete=True`: Army v31,
+Rules v17, every embedded projection and recorded matched build provenance are
+mandatory. `infinity_db.web.create_app_from_database_set(PATH)` applies that
+read-only check before opening an application from exactly the selected pair.
+It does not select from environment variables, discover another directory or
+recover missing data from sidecars. The migration parity tool's `--db-dir`
+option exercises this factory. General health checks still cover transitional
+release layouts; normal CLI/WSGI/Docker selection and the tracked v10 files
+remain under the pending coordinated P2.6 cutover.
+
 The current two-file opt-in layout embeds Army v31 Equipment presentation
 encodings, reviewed Skill source classifications, Unit filter semantics,
 Army overview text, legacy identities and symbol mappings/hashes,

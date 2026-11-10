@@ -21,15 +21,21 @@ from .army_reference_storage import ARMY_SCHEMA_VERSION as ARMY_REFERENCE_SCHEMA
 from .build_provenance import validate_set_provenance
 from .database.repository import Database
 from .rules_database import RulesDatabase
+from .symbol_path_storage import ARMY_SCHEMA_VERSION as COMPLETE_ARMY_SCHEMA_VERSION
 from .unit_filter_storage import ARMY_SCHEMA_VERSION as UNIT_FILTER_SCHEMA_VERSION
 from .variant_usage_reference import load_runtime_variant_usage
 from .weapon_profile_publication import load_weapon_profile_publication
+from .weapon_property_storage import SCHEMA_VERSION as COMPLETE_RULES_SCHEMA_VERSION
+
+ARMY_DATABASE_FILENAME = "infinity.db"
+RULES_DATABASE_FILENAME = "rules.db"
 
 V10_RUNTIME_FILES = frozenset({
-    "infinity.db", "rules.db", "variant-usage.json", "weapon-profile-sources.json",
+    ARMY_DATABASE_FILENAME, RULES_DATABASE_FILENAME,
+    "variant-usage.json", "weapon-profile-sources.json",
 })
 EMBEDDED_VARIANT_RUNTIME_FILES = V10_RUNTIME_FILES - {"variant-usage.json"}
-EMBEDDED_WEAPON_RUNTIME_FILES = frozenset({"infinity.db", "rules.db"})
+EMBEDDED_WEAPON_RUNTIME_FILES = frozenset({ARMY_DATABASE_FILENAME, RULES_DATABASE_FILENAME})
 
 
 def _full_integrity_check(path: Path) -> None:
@@ -40,12 +46,14 @@ def _full_integrity_check(path: Path) -> None:
             raise ValueError(f"Database contains broken foreign keys: {path.name}")
 
 
-def validate_database_set(directory: Path) -> dict[str, Any]:
+def validate_database_set(directory: Path, *, require_complete: bool = False) -> dict[str, Any]:
     """Validate exactly the selected supported runtime artifacts without writing files.
 
     Other build outputs in the directory are ignored, never selected as data
     or used to recover a missing publication. The raw archive, source curation
     and graphical publication are outside this built-runtime validation scope.
+    Complete mode requires all current embedded projections and recorded shared
+    build provenance, without consulting transitional JSON publications.
     """
     directory = Path(directory).resolve()
     if not directory.is_dir():
@@ -56,11 +64,22 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     if missing:
         raise ValueError(f"Incomplete database set; missing: {', '.join(missing)}")
 
-    army_path, rules_path = directory / "infinity.db", directory / "rules.db"
+    army_path = directory / ARMY_DATABASE_FILENAME
+    rules_path = directory / RULES_DATABASE_FILENAME
     with closing(sqlite3.connect(rules_path.as_uri() + "?mode=ro", uri=True)) as connection:
         schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
     if schema_version not in {10, 11, 12, 13, 14, 15, 16, 17}:
         raise ValueError("Unsupported Rules schema for selected database set")
+    if require_complete and schema_version != COMPLETE_RULES_SCHEMA_VERSION:
+        raise ValueError(
+            f"Complete embedded sets require Rules schema v{COMPLETE_RULES_SCHEMA_VERSION}"
+        )
+    with closing(sqlite3.connect(army_path.as_uri() + "?mode=ro", uri=True)) as connection:
+        army_version = connection.execute("PRAGMA user_version").fetchone()[0]
+    if require_complete and army_version != COMPLETE_ARMY_SCHEMA_VERSION:
+        raise ValueError(
+            f"Complete embedded sets require Army schema v{COMPLETE_ARMY_SCHEMA_VERSION}"
+        )
     names = (
         V10_RUNTIME_FILES if schema_version == 10 else
         EMBEDDED_VARIANT_RUNTIME_FILES if schema_version == 11 else
@@ -74,8 +93,6 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     encodings = army.equipment_presentation_encodings()
     classifications = army.skill_source_classifications()
     symbols = army.symbol_publication()
-    with closing(sqlite3.connect(army_path.as_uri() + "?mode=ro", uri=True)) as connection:
-        army_version = connection.execute("PRAGMA user_version").fetchone()[0]
     filter_semantics = (
         army.unit_filter_semantics() if army_version >= UNIT_FILTER_SCHEMA_VERSION else None
     )
@@ -85,6 +102,8 @@ def validate_database_set(directory: Path) -> dict[str, Any]:
     rules = RulesDatabase(rules_path)
     rules.validate()
     provenance = validate_set_provenance(army_path, rules_path)
+    if require_complete and provenance["status"] != "matched":
+        raise ValueError("Complete embedded sets require recorded matched build provenance")
     for path in (army_path, rules_path):
         _full_integrity_check(path)
 

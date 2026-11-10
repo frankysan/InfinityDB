@@ -8,11 +8,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sqlite3
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
-from infinity_db.web import create_app
+from infinity_db.web import create_app, create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -298,7 +299,7 @@ def check(expected: dict[str, Any], observed: dict[str, Any],
     return len(actual)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     action = parser.add_mutually_exclusive_group(required=True)
     action.add_argument("--capture", action="store_true",
@@ -306,15 +307,21 @@ def main() -> int:
     action.add_argument("--check", action="store_true",
                         help="compare a candidate offline without changing either database")
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
-    parser.add_argument("--army-db", type=Path, default=ROOT / "data/generated/infinity.db")
-    parser.add_argument("--rules-db", type=Path, default=ROOT / "data/generated/rules.db")
+    parser.add_argument("--army-db", type=Path)
+    parser.add_argument("--rules-db", type=Path)
+    parser.add_argument("--db-dir", type=Path,
+                        help="check one complete embedded set through shared application startup")
     parser.add_argument("--identical-artifacts", action="store_true",
                         help="also require exact source database and publication bytes")
     parser.add_argument(
         "--route-alias", action="append", default=[], metavar="PINNED=>ACTUAL",
         help="explicitly map a retired baseline URL to its migrated local API route",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    if args.db_dir is not None and (args.army_db is not None or args.rules_db is not None):
+        parser.error("--db-dir cannot be combined with --army-db or --rules-db")
+    if args.db_dir is not None and args.capture:
+        parser.error("--db-dir checks candidates; initial capture uses the reviewed release pair")
     if args.capture and (args.identical_artifacts or args.route_alias):
         parser.error("--identical-artifacts and --route-alias apply to --check")
     aliases: dict[str, str] = {}
@@ -338,8 +345,15 @@ def main() -> int:
         else:
             expected = None
             paths = None
-        app = create_app(args.army_db, args.rules_db)
-        identity = _artifact_identity(args.army_db, args.rules_db)
+        if args.db_dir is not None:
+            app = create_app_from_database_set(args.db_dir)
+            assert app.rules_database is not None
+            army, rules = app.database.path, app.rules_database.path
+        else:
+            army = args.army_db or ROOT / "data/generated/infinity.db"
+            rules = args.rules_db or ROOT / "data/generated/rules.db"
+            app = create_app(army, rules)
+        identity = _artifact_identity(army, rules)
         if args.capture and len(identity) != 4:
             raise BaselineError("Initial baseline needs both sidecars and the symbol manifest")
         observed = capture(app, paths=paths, artifacts=identity, route_aliases=aliases)
@@ -355,7 +369,7 @@ def main() -> int:
             print(f"Runtime semantic parity PASS: {count} pinned paths"
                   + (" (exact artifacts)" if args.identical_artifacts else ""))
         return 0
-    except (BaselineError, OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+    except (BaselineError, OSError, ValueError, KeyError, sqlite3.Error) as exc:
         parser.exit(1, f"Runtime baseline BLOCKED: {exc}\n")
 
 

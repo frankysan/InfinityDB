@@ -161,6 +161,29 @@ def test_missing_directory_is_never_created(tmp_path: Path) -> None:
     assert not directory.exists()
 
 
+def test_complete_startup_rejects_transitional_set_without_fallback(
+    runtime_set: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db.web import create_app_from_database_set
+
+    monkeypatch.setenv("INFINITY_DB_DB_DIR", str(RELEASE))
+    monkeypatch.setenv("INFINITY_DB_DATABASE", str(RELEASE / "infinity.db"))
+    (runtime_set / "deployed-objects.json").write_text("invalid JSON", encoding="utf-8")
+    before = fingerprints(runtime_set)
+    with pytest.raises(ValueError, match="require Rules schema v17"):
+        create_app_from_database_set(runtime_set)
+    assert fingerprints(runtime_set) == before
+
+
+def test_complete_startup_does_not_create_missing_selected_directory(tmp_path: Path) -> None:
+    from infinity_db.web import create_app_from_database_set
+
+    directory = tmp_path / "missing"
+    with pytest.raises(ValueError, match="directory does not exist"):
+        create_app_from_database_set(directory)
+    assert not directory.exists()
+
+
 def test_directory_selection_conflicts_with_individual_database_or_raw_inspection(
     runtime_set: Path, capsys: pytest.CaptureFixture[str],
 ) -> None:

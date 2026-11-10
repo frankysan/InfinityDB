@@ -2169,6 +2169,30 @@ and serving cutover. P2.7/P2.8 still own assembly-stage removal and full
 local/container integration acceptance; no Linux, hosted or release gate is
 waived by this bounded closeout.
 
+#### P2.6 — Preparation: shared complete-set application startup (2026-11-10)
+
+`infinity_db.web.create_app_from_database_set(PATH)` now creates an application
+only after the shared validator accepts the selected complete embedded pair.
+The validator's `require_complete=True` mode requires current Army v31/Rules v17
+schemas, all embedded projections and recorded matched build provenance.
+The complete builder uses that mode before replacing any selected output.
+General supported-layout validation remains available for current transitional
+release paths; this introduces no filename aliases or second verifier.
+
+The P1 semantic checker now accepts `--db-dir` for complete candidates and uses
+the shared factory. Conflicting individual-file selectors and baseline capture
+are rejected before file access. Its existing explicit database inputs still
+support historical source comparison. Focused startup checks preserve exact
+path selection, readonly failure, complete build determinism/recovery and
+provenance refusal. A fresh source build passed all 41 pinned response/geometry
+probes through the new path; evidence is in [testing](testing.md).
+
+**Remaining P2.6:** Perform the single coordinated `army.db`/`rules_n5.db`,
+CLI/WSGI/default, tracked artifact, script, workflow, Docker and cache-revision
+cutover from P1.5. The new factory currently opens the existing two-file names;
+it is preparation for that switch, not acceptance of the final serving contract.
+P2.7/P2.8 still own assembly retirement and final local/container checks.
+
 ### P3 — Separate seasonal ITS data from N5 core rules
 
 **Outcome:** Source-family boundaries support current and historical seasons without duplicating core rules.  

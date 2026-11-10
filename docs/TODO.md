@@ -36,6 +36,8 @@ when all contained work shares the same owner.
   - [ ] Complete P2.6–P2.8: cut over names/defaults and serving together,
     retire transitional candidate/checkout assembly, and validate the final
     local/container paths. Keep current build/serve functional until cutover.
+    Shared complete-set startup and the parity checker's explicit directory
+    path are available; the coordinated filename/default switch remains open.
   - [ ] Continue P3–P6 in dependency order under the plan's source-family,
     presentation, tooling and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in

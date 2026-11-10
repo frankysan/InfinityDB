@@ -280,3 +280,16 @@ def create_app(database_path: Path, rules_database_path: Path | None = None) -> 
     """Create the app after verifying the database, without starting a server."""
 
     return Application(database_path, rules_database_path)
+
+
+def create_app_from_database_set(directory: Path) -> Application:
+    """Open exactly one complete embedded set after shared, read-only validation."""
+    from infinity_db.database_set import (
+        ARMY_DATABASE_FILENAME,
+        RULES_DATABASE_FILENAME,
+        validate_database_set,
+    )
+
+    selected = Path(directory).resolve()
+    validate_database_set(selected, require_complete=True)
+    return create_app(selected / ARMY_DATABASE_FILENAME, selected / RULES_DATABASE_FILENAME)

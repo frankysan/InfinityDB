@@ -15,6 +15,7 @@ from tools.runtime_semantic_baseline import (
     _artifact_identity,
     capture,
     check,
+    main,
     semantic_payload,
 )
 
@@ -131,3 +132,30 @@ def test_released_data_matches_pinned_p1_baseline() -> None:
         artifacts=_artifact_identity(army, rules),
     )
     assert check(fixture, observed, identical_artifacts=True) == len(fixture["probes"])
+
+
+@pytest.mark.parametrize("arguments", (
+    ("--check", "--army-db", "army.db"),
+    ("--check", "--rules-db", "rules_n5.db"),
+    ("--capture",),
+))
+def test_baseline_directory_selection_rejects_mixed_or_capture_modes(
+    arguments: tuple[str, ...], tmp_path: Path,
+) -> None:
+    with pytest.raises(SystemExit) as exc:
+        main([*arguments, "--db-dir", str(tmp_path / "selected")])
+    assert exc.value.code == 2
+    assert not list(tmp_path.iterdir())
+
+
+def test_baseline_directory_selection_fails_before_falling_back_to_release(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    selected = tmp_path / "missing"
+    with pytest.raises(SystemExit) as exc:
+        main(["--check", "--db-dir", str(selected)])
+    assert exc.value.code == 1
+    assert "Runtime baseline BLOCKED: Database-set directory does not exist" in (
+        capsys.readouterr().err
+    )
+    assert not selected.exists()

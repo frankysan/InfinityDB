@@ -342,6 +342,16 @@ Database validation checks application/schema identity, compatibility revision, 
 metadata before normal reads. Persistent user-authored state is not part of the current runtime
 model, so generated databases remain replaceable release artifacts.
 
+Complete embedded-set application composition now has one explicit factory,
+`infinity_db.web.create_app_from_database_set`. It uses the shared database-set
+validator's complete mode before creating the application with both exact file
+paths. Current Army/Rules projections and matched recorded provenance are
+required; incomplete or transitional sets fail before application creation.
+The migration parity checker uses this path. This is P2.6 preparation: the normal
+CLI, production WSGI, filename/default and Docker cutover remains unimplemented.
+Low-level `create_app` retains explicit database injection for semantic fixtures
+and current transitional consumers.
+
 Current semantic/storage details are in `docs/data-model.md`.
 
 ## Symbol publication boundary
