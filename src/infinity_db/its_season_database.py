@@ -24,7 +24,7 @@ from .sqlite_determinism import (
 )
 
 ITS_APPLICATION_ID = 0x49445331  # "IDS1", distinct from Rules/Army databases
-ITS_SCHEMA_VERSION = 1
+ITS_SCHEMA_VERSION = 2
 ITS_METADATA_TABLE = "__its_metadata"
 SEASON_ID = "its-18"
 DEFAULT_CORE_REVISION = "5.3"
@@ -79,6 +79,79 @@ def _input_identity(source: Path, document: dict[str, Any], core_revision: str) 
     }
 
 
+def _validate_season_policy(
+    policy: dict[str, Any], *, revision: str, source_ids: set[str],
+) -> None:
+    """Validate ITS-only published event policy data, never core definitions."""
+    from datetime import date
+
+    from .domain_slugs import require_domain_slug, validate_typed_domain_id
+
+    if not isinstance(policy, dict) or set(policy) != {
+        "id", "title", "target", "applicability", "effect", "citations", "review",
+    }:
+        raise ValueError("ITS season policy requires exact maintained fields")
+    identity = require_domain_slug(policy["id"], context="ITS season policy")
+    context = f"ITS season policy {identity!r}"
+    if not isinstance(policy["title"], str) or not policy["title"].strip():
+        raise ValueError(f"{context}: title is required")
+    target = policy["target"]
+    if not isinstance(target, dict) or set(target) != {"domain", "recordId"}:
+        raise ValueError(f"{context}: invalid target reference")
+    if target["domain"] != "rules-n5":
+        raise ValueError(f"{context}: target must explicitly reference rules-n5")
+    record_id = target["recordId"]
+    if not isinstance(record_id, str) or ":" not in record_id:
+        raise ValueError(f"{context}: target requires a typed record ID")
+    kind = record_id.partition(":")[0]
+    if kind not in {"skill", "rule"}:
+        raise ValueError(f"{context}: unsupported target kind")
+    validate_typed_domain_id(record_id, expected_domain=kind, context=context)
+    applicability = policy["applicability"]
+    if not isinstance(applicability, dict) or set(applicability) != {
+        "seasonId", "revision", "context",
+    }:
+        raise ValueError(f"{context}: invalid applicability")
+    if (
+        applicability["seasonId"] != SEASON_ID
+        or applicability["revision"] != revision
+        or applicability["context"] not in {
+            "official-tournament", "team-ops-extra", "reinforcements-extra",
+        }
+    ):
+        raise ValueError(f"{context}: not applicable to the selected ITS publication")
+    effect = policy["effect"]
+    if (
+        not isinstance(effect, dict) or set(effect) != {"kind", "text"}
+        or effect["kind"] not in {"prohibited", "optional-availability"}
+        or not isinstance(effect["text"], str) or not effect["text"].strip()
+    ):
+        raise ValueError(f"{context}: invalid effect")
+    citations = policy["citations"]
+    if not isinstance(citations, list) or not citations:
+        raise ValueError(f"{context}: requires official source citations")
+    for citation in citations:
+        if (
+            not isinstance(citation, dict)
+            or set(citation) != {"sourceId", "page", "section"}
+            or citation["sourceId"] not in source_ids
+            or type(citation["page"]) is not int or citation["page"] <= 0
+            or not isinstance(citation["section"], str) or not citation["section"].strip()
+        ):
+            raise ValueError(f"{context}: invalid source citation")
+    review = policy["review"]
+    if not isinstance(review, dict) or set(review) != {"status", "reviewedOn"}:
+        raise ValueError(f"{context}: invalid review metadata")
+    if review["status"] != "reviewed":
+        raise ValueError(f"{context}: requires source review")
+    try:
+        if date.fromisoformat(review["reviewedOn"]).isoformat() != review["reviewedOn"]:
+            raise ValueError("noncanonical date")
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{context}: invalid review date") from exc
+
+
+
 def _validate_its_document(document: dict[str, Any], core_revision: str) -> None:
     collection = document["collection"]
     season = document.get("scenarioCollection")
@@ -106,10 +179,24 @@ def _validate_its_document(document: dict[str, Any], core_revision: str) -> None
         for item in document["sources"]
     ):
         raise ValueError("ITS publication requires a revision-matched primary PDF source")
+    source_ids = {source["id"] for source in document["sources"]}
+    policies = document.get("seasonPolicies", [])
+    if not isinstance(policies, list):
+        raise ValueError("ITS season policies must be an array")
+    seen_policy_ids: set[str] = set()
+    for policy in policies:
+        _validate_season_policy(
+            policy, revision=season["revision"], source_ids=source_ids,
+        )
+        if policy["id"] in seen_policy_ids:
+            raise ValueError(f"Duplicate ITS season policy {policy['id']!r}")
+        seen_policy_ids.add(policy["id"])
     for record in document["records"]:
         scope = record["scope"]
         if scope.get("game") != "N5" or SEASON_ID not in scope.get("seasons", []):
             raise ValueError(f"ITS 18 publication contains out-of-season record {record['id']!r}")
+        if record["kind"] != "scenario":
+            raise ValueError(f"ITS 18 publication contains unsupported record {record['id']!r}")
 
 
 def _schema(connection: sqlite3.Connection) -> None:
@@ -169,6 +256,25 @@ def _schema(connection: sqlite3.Connection) -> None:
             PRIMARY KEY (collection_id, scenario_id, configuration_id),
             FOREIGN KEY (collection_id, scenario_id) REFERENCES records(collection_id, id)
         );
+        CREATE TABLE season_policies (
+            source_collection_id TEXT NOT NULL, id TEXT NOT NULL,
+            context TEXT NOT NULL, target_domain TEXT NOT NULL,
+            target_id TEXT NOT NULL, payload_json TEXT NOT NULL,
+            content_sha256 TEXT NOT NULL,
+            PRIMARY KEY (source_collection_id, id),
+            FOREIGN KEY (source_collection_id) REFERENCES collections(id)
+        );
+        CREATE TABLE season_policy_citations (
+            source_collection_id TEXT NOT NULL, policy_id TEXT NOT NULL,
+            position INTEGER NOT NULL, source_id TEXT NOT NULL,
+            page INTEGER NOT NULL, section TEXT NOT NULL,
+            PRIMARY KEY (source_collection_id, policy_id, position),
+            FOREIGN KEY (source_collection_id, policy_id)
+                REFERENCES season_policies(source_collection_id, id),
+            FOREIGN KEY (source_collection_id, source_id)
+                REFERENCES sources(collection_id, id)
+        );
+        CREATE INDEX season_policies_by_target ON season_policies(target_domain, target_id);
         CREATE INDEX scenario_memberships_by_identity ON scenario_memberships(scenario_id);
         """
     )
@@ -225,12 +331,31 @@ def _populate(
             "INSERT INTO scenario_memberships VALUES (?, ?, ?, ?, ?)",
             (season["id"], season["revision"], position, member["scenarioId"], collection_id),
         )
+    for policy in document.get("seasonPolicies", []):
+        payload = _canonical(policy)
+        connection.execute(
+            "INSERT INTO season_policies VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (
+                collection_id, policy["id"], policy["applicability"]["context"],
+                policy["target"]["domain"], policy["target"]["recordId"],
+                payload.decode("utf-8"), hashlib.sha256(payload).hexdigest(),
+            ),
+        )
+        for position, citation in enumerate(policy["citations"]):
+            connection.execute(
+                "INSERT INTO season_policy_citations VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    collection_id, policy["id"], position, citation["sourceId"],
+                    citation["page"], citation["section"],
+                ),
+            )
     for key, value in {
         "format": "InfinityDB ITS season database",
         "formatVersion": ITS_SCHEMA_VERSION,
         "inputIdentity": identity,
         "buildId": _digest(identity),
         "scenarioCount": len(season["members"]),
+        "policyCount": len(document.get("seasonPolicies", [])),
     }.items():
         connection.execute(
             f"INSERT INTO {ITS_METADATA_TABLE} VALUES (?, ?)",
@@ -261,7 +386,8 @@ def inspect_its_database(
         }
         if (
             set(metadata) != {
-                "format", "formatVersion", "inputIdentity", "buildId", "scenarioCount"
+                "format", "formatVersion", "inputIdentity", "buildId",
+                "scenarioCount", "policyCount",
             }
             or metadata["format"] != "InfinityDB ITS season database"
             or metadata["formatVersion"] != ITS_SCHEMA_VERSION
@@ -283,6 +409,19 @@ def inspect_its_database(
             raise ValueError("ITS database requires a different N5 core revision")
         if source is not None and _file_sha(source) != identity.get("sourceSha256"):
             raise ValueError("ITS source bytes do not match the built database")
+        source_rows = connection.execute(
+            "SELECT id, descriptor_json FROM sources ORDER BY id"
+        ).fetchall()
+        stored_sources = [
+            {"id": row["id"], "sha256": json.loads(row["descriptor_json"]).get("sha256")}
+            for row in source_rows
+        ]
+        if stored_sources != sorted(identity["sources"], key=lambda item: item["id"]):
+            raise ValueError("ITS stored source descriptors differ from build provenance")
+        if connection.execute("SELECT count(*) FROM records").fetchone()[0] != (
+            metadata["scenarioCount"]
+        ):
+            raise ValueError("ITS season contains unexpected non-scenario definitions")
         publications = connection.execute(
             "SELECT s.id, s.revision, s.source_collection_id, m.scenario_id, m.position, "
             "r.payload_json, r.content_sha256 FROM scenario_sets AS s "
@@ -340,12 +479,58 @@ def inspect_its_database(
                 "configurationCount": len(parsed.configurations),
                 "citations": len(citations),
             })
+        policies = []
+        stored = connection.execute(
+            "SELECT * FROM season_policies ORDER BY source_collection_id, id"
+        ).fetchall()
+        if len(stored) != metadata["policyCount"]:
+            raise ValueError("ITS season policy count differs from provenance")
+        source_ids = {
+            row["id"] for row in connection.execute(
+                "SELECT id FROM sources WHERE collection_id=?",
+                (identity["sourceCollectionId"],),
+            )
+        }
+        for row in stored:
+            policy = json.loads(row["payload_json"])
+            if row["source_collection_id"] != identity["sourceCollectionId"]:
+                raise ValueError("ITS policy belongs to a different source collection")
+            _validate_season_policy(
+                policy, revision=identity["seasonRevision"], source_ids=source_ids,
+            )
+            if (
+                _digest(policy) != row["content_sha256"]
+                or policy["id"] != row["id"]
+                or policy["target"] != {
+                    "domain": row["target_domain"], "recordId": row["target_id"],
+                }
+                or policy["applicability"]["context"] != row["context"]
+            ):
+                raise ValueError("ITS season policy content hash or target differs")
+            citations = [
+                {"sourceId": entry["source_id"], "page": entry["page"],
+                 "section": entry["section"]}
+                for entry in connection.execute(
+                    "SELECT source_id, page, section FROM season_policy_citations "
+                    "WHERE source_collection_id=? AND policy_id=? ORDER BY position",
+                    (identity["sourceCollectionId"], policy["id"]),
+                )
+            ]
+            if citations != policy["citations"]:
+                raise ValueError("ITS season policy citations differ from publication")
+            policies.append({
+                "id": policy["id"],
+                "context": policy["applicability"]["context"],
+                "target": policy["target"]["recordId"],
+                "contentSha256": row["content_sha256"],
+            })
         return {
             "schemaVersion": ITS_SCHEMA_VERSION,
             "inputIdentity": identity,
             "buildId": metadata["buildId"],
             "sha256": _file_sha(path),
             "scenarios": scenarios,
+            "policies": policies,
         }
 
 
@@ -373,7 +558,8 @@ def select_its_scenario(
         connection.row_factory = sqlite3.Row
         row = connection.execute(
             "SELECT r.payload_json, r.content_sha256, s.source_collection_id, "
-            "s.title, c.effective_from, c.status, c.authority, m.position "
+            "s.title, c.title AS source_collection_title, "
+            "c.effective_from, c.status, c.authority, m.position "
             "FROM scenario_memberships AS m "
             "JOIN scenario_sets AS s ON s.id=m.set_id AND s.revision=m.set_revision "
             "JOIN collections AS c ON c.id=s.source_collection_id "
@@ -395,21 +581,64 @@ def select_its_scenario(
                 (row["source_collection_id"], scenario_id),
             )
         ]
+        unique_sources = list({source["id"]: source for source in sources}.values())
         return {
             "record": json.loads(row["payload_json"]),
             "publication": {
                 "collectionId": season_id,
                 "revision": revision,
                 "sourceCollectionId": row["source_collection_id"],
+                "sourceCollectionTitle": row["source_collection_title"],
                 "title": row["title"],
                 "effectiveFrom": row["effective_from"],
                 "status": row["status"],
                 "authority": row["authority"],
                 "position": row["position"],
                 "contentSha256": row["content_sha256"],
-                "sources": sources,
+                "sources": unique_sources,
             },
         }
+
+
+
+def select_its_policies(
+    path: Path, *,
+    season_id: str, revision: str, context: str,
+    target_id: str | None = None,
+) -> list[dict[str, Any]]:
+    """Select only ITS-owned policies for an exact event/Extra context.
+
+    Does not apply a policy to a core Skill or resolve cross-domain targets.
+    That joined resolution and the UI presentation belong to P3.4.
+    """
+    from .domain_slugs import require_domain_slug, validate_typed_domain_id
+
+    require_domain_slug(season_id, context="ITS policy season")
+    require_domain_slug(context, context="ITS policy context")
+    if not isinstance(revision, str) or not revision.strip() or revision != revision.strip():
+        raise ValueError("ITS policy revision must be an exact non-empty string")
+    if target_id is not None:
+        kind = target_id.partition(":")[0]
+        if kind not in {"skill", "rule"}:
+            raise ValueError("ITS policy target must be a Skill or Rule identity")
+        validate_typed_domain_id(target_id, expected_domain=kind, context="ITS policy target")
+    inspected = inspect_its_database(path)
+    identity = inspected["inputIdentity"]
+    if season_id != identity["seasonId"] or revision != identity["seasonRevision"]:
+        return []
+    with closing(sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)) as connection:
+        connection.row_factory = sqlite3.Row
+        rows = connection.execute(
+            "SELECT payload_json FROM season_policies WHERE source_collection_id=? "
+            "AND context=? ORDER BY id",
+            (identity["sourceCollectionId"], context),
+        ).fetchall()
+    return [
+        policy
+        for row in rows
+        if (policy := json.loads(row["payload_json"]))
+        and (target_id is None or policy["target"]["recordId"] == target_id)
+    ]
 
 def build_its_database(
     source: Path, output: Path, *, core_revision: str = DEFAULT_CORE_REVISION,

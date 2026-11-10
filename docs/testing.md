@@ -1475,8 +1475,37 @@ with **13/13** new ITS tests passed. Ruff, Pyright and documentation checks
 pass. The source-bound Army/Rules pair was regenerated from pinned inputs;
 `tools.verify_deployment_assets` now passes, including **808/808** published
 SVGs, **808/808** browser references and embedded source/citation checks.
-No new ITS DB isauthoritative for web serving, and no full-suite/hosted/Docker P3
-acceptance is claimed.
+No new ITS DB is authoritative for web serving, and no full-suite/hosted/Docker
+P3 acceptance is claimed.
+
+**2026-11-10 P3.3 ITS 18 pilot and source-policy ownership — focused
+pre-commit evidence:** `tools.verify_its_pilot_parity` builds `its_18.db`
+from the maintained ITS Season 18 source in an ignored temporary directory,
+selects `scenario:battleground` under `its-18@2026.09.01`, and compares
+the standalone scenario through the shared ScenarioCatalog and
+`_enrich_scenario_api_item` against the existing two-file WSGI runtime.
+**6/6 full JSON scenario details** and **24/24 exact SVG byte strings**
+matched, covering all 150–400 Army Point selections, light/dark themes and
+inch/centimetre rendering. A negative test changes source-authored mission
+copy and confirms parity fails. Publication digest remains
+`2dd4ab5c9f7c83bcdc4f94e156f29c4b6c2d9e34770a03da85e8886f4c0d5b31`.
+
+Three source-cited ITS 18 policy records for Spec-Ops (official tournaments),
+TEAM-OPS and optional Reinforcements now occupy dedicated ITS schema-v2
+tables rather than the generic N5 Rules catalog. Read-only integrity,
+scoped selection, malformed applicability, citation corruption and
+absence from core Rules are covered by focused tests. The existing
+Rules interaction audit and standalone Rules build pass.
+
+The tracked Army/Rules pair was regenerated from pinned inputs after these
+maintained source changes. The complete `tools.verify_deployment_assets`
+gate now passes **808/808** published SVGs and **808/808** browser references,
+with embedded runtime data and reviewed citations source-matched. Final
+focused evidence: **17/17** ITS database tests, **2/2** P3.3 parity tests,
+**43/43** existing Scenario catalog tests; Ruff, Pyright, Rules audit/build,
+docs and Git whitespace checks passed. P3.4 owns actual cross-DB serving;
+this is an independent candidate/publication comparison, **not** a deployed
+three-database runtime test or a complete browser/CI release gate.
 
 ## Phased development and validation
 

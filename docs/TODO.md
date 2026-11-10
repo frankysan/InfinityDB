@@ -29,12 +29,12 @@ when all contained work shares the same owner.
 - [ ] Execute P3–P6 of the [phased restructuring plan](restructuring-plan.md).
   P0–P2 are complete, including the verified shared Army v31 / Rules v17
   `army.db`/`rules_n5.db` build and real local/Docker serving acceptance.
-  - [ ] Continue P3.3–P3.5. P3.1 source/publication ownership is mapped in
-    [season publication ownership](season-publication-ownership.md), and P3.2's
-    [standalone ITS 18 schema and builder](its-season-database.md) are complete,
-    with the rebuilt source-bound Army/Rules pair and deployment assets verified.
-    Next migrate Battleground and season-owned constraints without changing the
-    normal two-file server until P3.4.
+  - [ ] Continue P3.4–P3.5. P3.1–P3.3 are complete: Battleground
+    independent-data parity passed (6 API payloads and 24 SVG variants),
+    three reviewed ITS-only policies are isolated in schema v2, and the
+    regenerated Army/Rules release pair passed deployment-asset verification.
+    See [ITS season database](its-season-database.md). P3.4 will cut over the
+    shared registry and retire transitional season notes from core cards.
   - [ ] Continue P4–P6 under the plan's player-facing presentation, tooling
     retirement and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in

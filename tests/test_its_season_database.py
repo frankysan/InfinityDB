@@ -8,15 +8,16 @@ from pathlib import Path
 
 import pytest
 
-from infinity_db.curated import load_curated_document
+from infinity_db.curated import load_curated_directory, load_curated_document
 from infinity_db.its_season_database import (
     ITS_APPLICATION_ID,
     ITS_SCHEMA_VERSION,
     build_its_database,
     inspect_its_database,
+    select_its_policies,
     select_its_scenario,
 )
-from infinity_db.rules_database import RulesDatabase
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 from tools.build_its_season import main
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,6 +57,10 @@ def test_isolated_its_database_is_deterministic_and_matches_existing_publication
     assert report["scenarios"][0]["id"] == "scenario:battleground"
     assert report["scenarios"][0]["configurationCount"] == 3
     assert report["scenarios"][0]["citations"] == 3
+    assert len(report["policies"]) == 3
+    assert {entry["context"] for entry in report["policies"]} == {
+        "official-tournament", "team-ops-extra", "reinforcements-extra",
+    }
     current = RulesDatabase(TRACKED_RULES).scenario_publications("scenario:battleground")
     assert len(current) == 1
     assert current[0]["content_sha256"] == report["scenarios"][0]["contentSha256"]
@@ -75,6 +80,9 @@ def test_isolated_its_database_is_deterministic_and_matches_existing_publication
         assert connection.execute("SELECT count(*) FROM sources").fetchone()[0] == 1
         assert connection.execute("SELECT count(*) FROM scenario_memberships").fetchone()[0] == 1
         assert connection.execute("SELECT count(*) FROM scenario_configurations").fetchone()[0] == 3
+        assert connection.execute("SELECT count(*) FROM season_policies").fetchone()[0] == 3
+        assert connection.execute("SELECT count(*) FROM season_policy_citations").fetchone()[0] == 3
+        assert connection.execute("SELECT count(*) FROM records").fetchone()[0] == 1
 
 
 def test_select_its_scenario_requires_exact_season_and_revision(tmp_path: Path) -> None:
@@ -104,6 +112,94 @@ def test_select_its_scenario_requires_exact_season_and_revision(tmp_path: Path) 
         select_its_scenario(
             path, season_id="its-18", revision="", scenario_id="scenario:battleground",
         )
+
+
+def test_policy_selection_requires_explicit_season_revision_and_play_context(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "its_18.db"
+    build_its_database(SOURCE, path)
+    policies = select_its_policies(
+        path, season_id="its-18", revision="2026.09.01", context="official-tournament",
+    )
+    assert len(policies) == 1
+    assert policies[0]["id"] == "its18-spec-ops-tournament"
+    assert policies[0]["target"] == {
+        "domain": "rules-n5", "recordId": "skill:infinity-spec-ops",
+    }
+    assert policies[0]["citations"][0]["page"] == 26
+    assert len(select_its_policies(
+        path, season_id="its-18", revision="2026.09.01", context="team-ops-extra",
+        target_id="skill:infinity-spec-ops",
+    )) == 1
+    assert len(select_its_policies(
+        path, season_id="its-18", revision="2026.09.01", context="reinforcements-extra",
+        target_id="rule:reinforcements-extra",
+    )) == 1
+    assert select_its_policies(
+        path, season_id="its-17", revision="2026.09.01", context="official-tournament",
+    ) == []
+    assert select_its_policies(
+        path, season_id="its-18", revision="2025.09.01", context="official-tournament",
+    ) == []
+    assert select_its_policies(
+        path, season_id="its-18", revision="2026.09.01", context="free-play",
+    ) == []
+    with pytest.raises(ValueError, match="revision must be an exact"):
+        select_its_policies(path, season_id="its-18", revision="", context="official-tournament")
+
+
+def test_policy_mutations_are_rejected(tmp_path: Path) -> None:
+    modifications = [
+        (lambda doc: doc["seasonPolicies"][0]["target"].update(domain="its-18"),
+         "target must explicitly"),
+        (lambda doc: doc["seasonPolicies"][0]["applicability"].update(revision="2025.09.01"),
+         "not applicable"),
+        (lambda doc: doc["seasonPolicies"][0]["citations"][0].update(sourceId="unknown"),
+         "invalid source citation"),
+        (lambda doc: doc["seasonPolicies"][0]["effect"].update(kind="unconditional"),
+         "invalid effect"),
+    ]
+    for mutation, expected in modifications:
+        source = _modified_source(tmp_path, mutation)
+        with pytest.raises(ValueError, match=expected):
+            build_its_database(source, tmp_path / "bad.db")
+        assert not (tmp_path / "bad.db").exists()
+
+
+def test_corrupted_policy_or_policy_citation_fails_closed(tmp_path: Path) -> None:
+    path = tmp_path / "its_18.db"
+    build_its_database(SOURCE, path)
+    with closing(sqlite3.connect(path)) as connection, connection:
+        connection.execute(
+            "UPDATE season_policies SET content_sha256=? "
+            "WHERE id='its18-spec-ops-tournament'",
+            ("0" * 64,),
+        )
+    with pytest.raises(ValueError, match="policy content hash"):
+        inspect_its_database(path)
+    build_its_database(SOURCE, path)
+    with closing(sqlite3.connect(path)) as connection, connection:
+        connection.execute(
+            "UPDATE season_policy_citations SET page=99 "
+            "WHERE policy_id='its18-spec-ops-tournament'"
+        )
+    with pytest.raises(ValueError, match="policy citations"):
+        inspect_its_database(path)
+
+
+def test_its_policies_are_absent_from_core_rules_database(tmp_path: Path) -> None:
+    core = tmp_path / "rules_n5.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated"), core)
+    with sqlite3.connect(core) as connection:
+        assert connection.execute(
+            "SELECT count(*) FROM records WHERE id LIKE 'rule:its18-%'"
+        ).fetchone()[0] == 0
+    its = tmp_path / "its_18.db"
+    build_its_database(SOURCE, its)
+    assert len(select_its_policies(
+        its, season_id="its-18", revision="2026.09.01", context="official-tournament",
+    )) == 1
 
 
 def test_builder_replaces_only_validated_output_and_is_repeatable(tmp_path: Path) -> None:

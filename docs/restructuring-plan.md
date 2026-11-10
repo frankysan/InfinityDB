@@ -2348,8 +2348,41 @@ Army/Rules pair was regenerated from pinned inputs and the full deployment-
 asset gate passed, including all 808 published SVGs, 808 browser references,
 and embedded runtime citations. The new ITS artifact remains a separately
 built ignored developer output, not a third hosted database.
-P3.3 will move season-specific content and compare rendered behavior; P3.4
-will perform the coordinated multi-database runtime cutover.
+P3.3 compares the pilot's independent publication and map rendering and
+stages season-only policies. P3.4 performs the coordinated multi-database
+runtime cutover.
+
+#### P3.3 — ITS 18 Battleground pilot and event-policy separation (2026-11-10)
+
+**Complete.** The independently built `its_18.db` continues to
+own the exact Battleground scenario and source-selected citations. A
+standalone acceptance verifier (`tools.verify_its_pilot_parity`) checks
+**6/6 complete HTTP JSON detail responses** and **24/24 byte-identical SVG
+maps** against the current Rules-backed application, covering all 150–400
+Army Point selections, both color themes and both distance units. It
+uses the same scenario read model and SVG renderer, not an ITS-specific
+replacement. P3.4 remains responsible for replacing the diagnostic
+cross-domain adapter with a proper backend registry.
+
+The reviewed ITS 18 source now has three explicit season-scoped policies:
+ordinary Spec-Ops prohibited in official tournaments (p. 26), TEAM-OPS
+not permitting Infinity Spec-Ops (p. 28), and optional Reinforcements
+Extra availability without a claim that N4-origin procedures are revised
+N5 rules (p. 27). These live in standalone ITS schema **v2** under
+`season_policies` with ordered source citations and exact play-context
+selection, **not** as N5 core Rule records. The Rules interaction audit
+therefore remains unchanged. Existing N5 card caveats and the shared
+marker-size source continue to work until the P3.4 cutover, when
+season overlays can replace those transitional presentations.
+
+The source-bound Army/Rules release pair was regenerated and verified after
+the maintained code/curation changes: deployment assets passed **808/808**
+published SVGs and **808/808** browser references, with embedded runtime
+data and reviewed citations source-matched. P3.3 passed **17/17** ITS
+database tests, **2/2** pilot parity tests and **43/43** existing scenario
+catalog tests; the Rules build/audit, Ruff, Pyright, documentation and
+whitespace checks were green. No third production database, API cutover,
+implicit season selection, or authored ITS FAQ has been added.
 
 ### P4 — Make the interface player-first
 

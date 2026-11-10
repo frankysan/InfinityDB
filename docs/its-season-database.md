@@ -1,4 +1,4 @@
-# ITS 18 SQLite database (P3.2)
+# ITS 18 SQLite database (P3.2–P3.3)
 
 **Status:** Standalone offline schema/builder; not part of the serving set before P3.4.
 
@@ -11,7 +11,7 @@ developer entry point in `tools/build_its_season.py`.
 
 - **Input:** `data/curated/rules/n5-its-season-18-2026.09.01.json`
   (curated document SHA-256:
-  `e06df90f134587db2fd2f6af239e19ae8d2b3cce8dc85965f94cf73698e1fb42`).
+  `f002d279f711c5ac27e87cc3e91686beb85ec4e42aa7a740e2cebab1c4b2bbab`).
 - **Collection:** `its-season-18-2026.09.01`; season set
   `its-18@2026.09.01`; effective 2026-09-01.
 - **Official source:** `its-season-18-en-pdf`, SHA-256
@@ -20,15 +20,17 @@ developer entry point in `tools/build_its_season.py`.
   declaration. Cross-domain reference resolution remains P3.4 work, **not**
   something this standalone build claims to have verified.
 - **Currently authored:** `scenario:battleground`, three source citations,
-  three geometry configurations spanning 150, 200–250 and 300–400 Army Points.
-  ITS tournament constraints, Extras and season-published FAQ are not yet
-  curated as independent ITS-owned records. P3.3 will deal with existing
-  season-specific caveats currently embedded in N5/annex records.
+  three geometry configurations spanning 150, 200–250 and 300–400 Army Points;
+  three ITS-owned season policies for Spec-Ops in official tournaments,
+  TEAM-OPS applicability and the optional Reinforcements Extra (pp. 26–28).
+  These are source-cited event policies, **not** new N5 core Rule definitions.
+  There is no ITS-authored FAQ publication in the curated set.
 
-## Schema v1 and read contract
+## Schema v2 and read contract
 
 The database has a distinct SQLite application ID (`0x49445331`) and
-`user_version=1`; it does **not** masquerade as a Rules database.
+`user_version=2` (v1 was the unhosted P3.2 pilot, superseded by dedicated
+season policy storage). It does **not** masquerade as a Rules database.
 
 | Table | Ownership |
 | --- | --- |
@@ -40,6 +42,8 @@ The database has a distinct SQLite application ID (`0x49445331`) and
 | `scenario_sets` | Collection ID, exact revision, title and originating collection |
 | `scenario_memberships` | Ordered scenario IDs within the exact season revision |
 | `scenario_configurations` | Configuration ID, Army Points and original validated geometry |
+| `season_policies` | ITS-only event or Extra policy, exact typed N5 target, context and content digest |
+| `season_policy_citations` | Ordered official ITS citations, bound to the policy and source collection |
 
 All relational links are foreign-key constrained. The shared
 `load_curated_document`, `compose_scenario_document` and
@@ -58,6 +62,16 @@ this freshness gate. `select_its_scenario` requires
 `(season_id, revision, scenario_id)`; missing or unknown selections cannot
 fall back to core missions or another season. It returns the composed
 record and the selected publication's precise source identity.
+
+P3.3 adds `seasonPolicies` to the **same** reviewed ITS curated document,
+but keeps them outside `records`. The Rules exporter therefore does not
+import event constraints as N5 rules or broaden its interaction-audit scope.
+The ITS builder separately validates exact `(seasonId, revision, context)`,
+typed `rules-n5` targets, source citations, review provenance and effect
+kind. `select_its_policies` returns policies only for a supplied season,
+exact revision and explicit play/Extra context; a missing or incorrect
+context never causes the policy to apply by default. Cross-database target
+resolution and overlay presentation belong to P3.4.
 
 ## Local commands
 
@@ -85,13 +99,23 @@ replacement.
 
 ## Migration boundary
 
-The currently served `rules_n5.db` still owns its copy of Battleground
-until P3.3 migration and P3.4 coordinated serving cutover. The first
-standalone ITS database is an **ignored inspection/build artifact**, not a
-third deployment input or an independently selected runtime source.
-Adding the `src/` implementation changes the current complete build
-fingerprint, so the tracked Army/Rules pair must be regenerated with the
-normal `infinity-db build` before merging/releasing this source change.
+The currently served `rules_n5.db` still owns its transitional copy of
+Battleground until the P3.4 coordinated serving cutover. The independent
+ITS database now proves the *same* player-visible Battleground content via
+`tools.verify_its_pilot_parity`: six complete API JSON comparisons plus
+24 byte-exact SVG maps (six sizes, both themes and distance units), using
+the existing ScenarioCatalog and map renderer. The parity verifier uses
+N5/Army lookups for maintained-text enrichment; their independent domain
+resolution belongs to P3.4. The pilot remains an **ignored inspection/build
+artifact**, not a third deployment input.
+
+The existing N5 cards still carry transitional ITS season notes and the
+shared Scenario catalog still attributes marker sizes to ITS 18 p. 17.
+The new ITS-only policies are retained alongside those legacy presentations
+until P3.4 can cut them over atomically without losing the player-visible
+restrictions or caveats. Adding/modifying maintained `src/` or curated
+files changes the complete build fingerprint; regenerate the tracked
+Army/Rules pair before source-bound deployment checks or merge.
 
 For the ownership and scope exceptions (Spec-Ops, TEAM-OPS,
 Reinforcements, marker citations, FAQ), see
