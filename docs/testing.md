@@ -1050,6 +1050,21 @@ errors), docs lint/links/backlog, Git whitespace and tracked runtime
 artifact/provenance checks passed (SVG validation disabled).
 No direct Docker or full suite run was performed.
 
+**2026-11-10 P2.5 eighth slice, v9 profile/summary promoters:**
+Commit `dab737d1` deleted the completed Hackable and paragraph-layout
+v9 promotion modules without touching current curated Rules or release
+artifacts. Their retained assertions are independently covered by
+the bilingual Hackable PDF pin/source tests, fresh Rules export and
+published profile-help API, and curated long-summary paragraph test.
+The historical paragraph-only V1S-082 commands were removed from the
+maintained testing instructions. No staging-only test modules or
+test-section entries were attached to either retired module.
+Focused tests on the deletion commit: **5 passed** (Hackable EN/ES PDF
+pins, fresh Rules export/API, long-summary paragraphs and profile-help
+list). Ruff, canonical Pyright (0 errors), documentation lint/links/backlog,
+Git whitespace and tracked runtime provenance passed (SVG checks disabled).
+No full suite, direct Docker run or deployment was performed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -5294,27 +5309,21 @@ remains authoritative for missing or deferred regressions.
 
 ### Paragraph-only rules-summary refresh
 
-For a reviewed v9 summary that differs from its released record **only
-by paragraph whitespace**, use
-`tools.refresh_reference_summary_layout` rather than manually overwriting
-`rules.db`. The default command is a read-only double-export and matched
-publication integrity check; `--promote` replaces the rules database,
-deployed-object and variant-usage publications together under rollback
-protection. It rejects any change to other records, target facts,
-typed Restrictions, identities, or publication content other than the
-required fingerprints. Source-derived wording changes require their
-own reviewed migration; this tool cannot approve them.
+The v9 one-use `tools.refresh_reference_summary_layout` command was
+retired during P2.5 (commit `dab737d1`). Its 2026-11-06 V1S-082
+migration checked a paragraph-only change to `rule:loss-of-lieutenant`
+while preserving the other 498 composed records and storing recovery
+copies under ignored `local/`. That procedure and its three-file JSON
+publication contract are historical evidence, recoverable from Git
+history, not supported build instructions.
 
-```powershell
-.\.venv\Scripts\python.exe -m tools.refresh_reference_summary_layout rule:loss-of-lieutenant
-.\.venv\Scripts\python.exe -m tools.refresh_reference_summary_layout rule:loss-of-lieutenant --promote
-```
-
-The 2026-11-06 V1S-082 use of this gate retained 498 unchanged
-composed records and recovery copies under ignored `local/`. After
-promotion verify both dependent publications and run the required
-source/API/normal-browser regressions at the matched commit; the
-promoter's success is an artifact-integrity check, not a VR/CI pass.
+For a new reviewed summary-layout correction, edit the owning curated
+Rules source and use the current complete database-set build and
+`infinity-db database-health --db-dir` validation. Review the diff for
+semantic changes; use focused curated text, Rules export, API, and
+browser tests as applicable. Existing paragraph-length checks protect
+readability. Neither a rebuild nor whitespace equivalence constitutes
+approval of new source-derived wording.
 
 ### Frozen explanation-inventory reconciliation (V1-A08)
 

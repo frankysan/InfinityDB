@@ -1829,11 +1829,32 @@ remain recoverable from Git history; no private duplicate archive or
 runtime fallback was added. Historical testing notes no longer advertise
 the removed command as runnable.
 
-**Remaining P2.5:** Retire the broader completed stage/promotion
-dependency cluster and standalone JSON read/serialization adapters after
-extracting independently useful current-path source or provenance checks.
-P2.6–P2.8 still own final naming/defaults, assembly-stage removal and
-full local/container integration acceptance.
+#### P2.5 — Eighth slice: retire standalone v9 summary promotions (2026-11-10)
+
+The completed Hackable profile-help and paragraph-layout promotion paths
+are retired at commit `dab737d1`, removing
+`tools/promote_hackable_profile_help.py` and
+`tools/refresh_reference_summary_layout.py`. The second module only
+imported the first; neither had independent runtime, current-build,
+CI, script, agent-skill or test consumers. Both relied on v9 Rules and
+two loose, mutually fingerprinted JSON publications and rollback copy
+procedures that current complete-set builds supersede.
+
+The accepted bilingual Hackable source locators (EN p.8; ES p.9),
+reviewed wording, fresh Rules export and published profile-help/glossary
+API remain protected by `tests/test_application_rule_references.py`;
+readable long summaries remain protected by the maintained curated
+paragraph test. The historical V1S-082 loss-of-lieutenant migration,
+including its 498-record equality check and published fingerprints,
+remains documented in the source audit and Git history. The testing
+guide no longer presents its command as a current maintenance path.
+No preserved source interpretation depends on these deleted wrappers.
+
+**Remaining P2.5:** Continue retiring v9 staging/promotion wrappers,
+extract reusable source-delta checks from `restrictions_v9_release`,
+then retire the standalone JSON reader/serializer when all historical
+callers are replaced. P2.6–P2.8 still own final naming/defaults,
+assembly-stage removal and full local/container acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 
