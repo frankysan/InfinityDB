@@ -58,7 +58,10 @@ provenance/state, and build outputs.
 - `generated/` — the two tracked, complete runtime databases: `army.db`
   (Army v31/compatibility 40) and `rules_n5.db` (Rules v17). Exact variants,
   reviewed Weapon citations, deployed objects, Restrictions, reviewed reference
-  facts and symbol mappings are embedded. ITS Season 18 remains in Rules until P3.
+  facts and symbol mappings are embedded. ITS Season 18 remains in Rules
+  until the P3 serving cutover. The P3.2 standalone ITS source builder produces
+  an ignored inspection artifact at `work/its/its_18.db`, not a third tracked
+  runtime database; see [ITS season database](../docs/its-season-database.md).
   The old filenames and required JSON publications are retired.
 
 **Complete runtime build:** `infinity-db build --compact` uses the newest local

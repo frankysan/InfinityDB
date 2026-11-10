@@ -2325,8 +2325,31 @@ remain N5 FAQ-owned because applicability does not change publication
 authority. Future duplicate Scenario slugs must resolve by season and
 revision, rather than today’s globally unique slug assumption.
 
-P3.2 is next: a deterministic standalone ITS 18 database and builder,
-retaining the current serving contract until the coordinated P3.4 cutover.
+P3.2 follows with a deterministic standalone ITS 18 database and builder;
+the serving contract remains unchanged until the coordinated P3.4 cutover.
+
+#### P3.2 — Standalone ITS schema and builder (2026-11-10)
+
+**Complete.** The
+[ITS season database contract](its-season-database.md) defines an independent
+SQLite application ID and schema v1. The standalone builder reuses the
+validated ITS 18 curated document and existing Scenario component/definition/
+geometry models. It records explicit season `its-18@2026.09.01`, source
+collection, N5 compatibility `5.3`, official PDF SHA-256 and its own input/
+builder SHA-256 provenance. Scenario publications, citations and configuration
+geometry are stored with relational identity, and a read-only inspection and
+exact-selection interface fails closed on unsupported or mismatched inputs.
+
+The Battleground record's content hash matches the present Rules publication;
+the builder creates only an ignored `data/work/its/its_18.db`, not a third
+serving file. Deterministic byte builds and focused source/corruption tests
+passed (13 new tests and 43 existing scenario-catalog tests). The tracked
+Army/Rules pair was regenerated from pinned inputs and the full deployment-
+asset gate passed, including all 808 published SVGs, 808 browser references,
+and embedded runtime citations. The new ITS artifact remains a separately
+built ignored developer output, not a third hosted database.
+P3.3 will move season-specific content and compare rendered behavior; P3.4
+will perform the coordinated multi-database runtime cutover.
 
 ### P4 — Make the interface player-first
 

@@ -1455,6 +1455,29 @@ closeout). The P2.8 checks are integration/semantic acceptance on Windows
 plus its local Docker Linux engine, not a full project suite, independent
 Linux-dev worker run, hosted CI, deployment, or manual visual-browser test.
 
+**2026-11-10 P3.2 standalone ITS database — focused pre-commit evidence:**
+The independent `tools.build_its_season` builder and
+`src/infinity_db/its_season_database.py` produce a schema-v1 ITS 18
+SQLite artifact under ignored `data/work/its/`, while the current
+`data/generated/` two-file serving contract remains unchanged. The
+source and official PDF are SHA-bound, the builder/parser modules are
+fingerprinted, and N5 compatibility `5.3` is explicit. The new database
+contains Battleground, all three authored geometry configurations and all
+three citations. Its canonical content SHA-256 matches the existing
+`rules_n5.db` publication. Repeated builds are byte-identical.
+
+The focused `tests/test_its_season_database.py` suite covers schema,
+source/compatibility provenance, exact season-revision selection, corrupt
+record/geometry refusal, invalid source preserving the prior artifact,
+read-only checking, and refusal to publish under `data/generated/`.
+The existing Scenario catalog regression remains green (**43 passed**),
+with **13/13** new ITS tests passed. Ruff, Pyright and documentation checks
+pass. The source-bound Army/Rules pair was regenerated from pinned inputs;
+`tools.verify_deployment_assets` now passes, including **808/808** published
+SVGs, **808/808** browser references and embedded source/citation checks.
+No new ITS DB isauthoritative for web serving, and no full-suite/hosted/Docker P3
+acceptance is claimed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
