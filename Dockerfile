@@ -32,6 +32,7 @@ RUN pip install --no-cache-dir ".[server]" \
 # Package exactly the committed complete runtime set; no assembly directory.
 COPY --chown=appuser:appuser data/generated/army.db /app/data/army.db
 COPY --chown=appuser:appuser data/generated/rules_n5.db /app/data/rules_n5.db
+COPY --chown=appuser:appuser data/generated/its_18.db /app/data/its_18.db
 
 USER appuser
 EXPOSE 8000

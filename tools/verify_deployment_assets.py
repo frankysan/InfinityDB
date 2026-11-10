@@ -8,11 +8,12 @@ import sqlite3
 from pathlib import Path
 
 from infinity_db.build_provenance import validate_build_input_freshness
-from infinity_db.database_set import validate_database_set
+from infinity_db.database_set import SEASON_DATABASE_SOURCES, validate_database_set
 from infinity_db.deployment_provenance import (
     DeploymentProvenanceError,
     validate_database_symbol_provenance,
 )
+from infinity_db.its_season_database import inspect_its_database
 from infinity_db.rules_database import RulesDatabase
 
 try:
@@ -145,9 +146,17 @@ def main(argv: list[str] | None = None) -> int:
         directory = args.database.resolve().parent
         if (args.rules_database.resolve() != directory / "rules_n5.db"
                 or args.database.name != "army.db"):
-            raise DeploymentAssetError("Select one complete army.db/rules_n5.db directory")
-        validate_database_set(directory, require_complete=True)
+            raise DeploymentAssetError("Select the complete Army/Rules/ITS runtime directory")
+        report = validate_database_set(directory, require_complete=True)
         validate_build_input_freshness(args.database, PROJECT_ROOT)
+        for season, (filename, source) in SEASON_DATABASE_SOURCES.items():
+            inspected = inspect_its_database(
+                directory / filename, source=PROJECT_ROOT / source,
+                core_revision=report["seasons"][season]["requiredCoreRulesRevision"],
+                require_current_builder=True,
+            )
+            if inspected["sha256"] != report["sha256"][filename]:
+                raise DeploymentAssetError(f"ITS publication {season} changed after validation")
         if args.skip_svg:
             verify_runtime_artifacts(
                 args.database, args.rules_database, args.publication_manifest,

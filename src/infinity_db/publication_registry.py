@@ -252,6 +252,7 @@ class PublicationRegistry:
             season: {
                 "revision": self._season_revisions[season],
                 "sourceCollectionId": report["inputIdentity"]["sourceCollectionId"],
+                "sourceSha256": report["inputIdentity"]["sourceSha256"],
                 "requiredCoreRulesRevision": self.core_revision,
                 "sha256": report["sha256"],
             }

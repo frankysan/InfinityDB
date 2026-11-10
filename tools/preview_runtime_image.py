@@ -22,7 +22,7 @@ from infinity_db.web import create_app_from_database_set
 from infinity_db.database_set import validate_database_set
 d = Path('/app/data')
 report = validate_database_set(d, require_complete=True)
-assert set(report['sha256']) == {'army.db', 'rules_n5.db'}
+assert set(report['sha256']) == {'army.db', 'rules_n5.db', 'its_18.db'}
 assert {p.name for p in d.iterdir()} == set(report['sha256'])
 app = create_app_from_database_set(d)
 assert len(app.deployed_objects['objects']) == 17
@@ -58,7 +58,7 @@ def _copy_build_context(context: Path, selected: Path) -> None:
             shutil.copyfile(source, destination)
     output = context / "data/generated"
     output.mkdir(parents=True, exist_ok=True)
-    for name in ("army.db", "rules_n5.db"):
+    for name in ("army.db", "rules_n5.db", "its_18.db"):
         shutil.copyfile(selected / name, output / name)
 
 
@@ -100,6 +100,20 @@ def preview_image(selected: Path, tag: str, baseline: Path = DEFAULT_BASELINE) -
             else:
                 subprocess.run(["docker", "logs", container], check=False)
                 raise ValueError("Preview did not become healthy")
+
+            selected_its = subprocess.run([
+                "docker", "exec", container, "python", "-c", _HTTP_FETCH,
+                "/api/scenarios/battleground?"
+                "army_points=300&collection=its-18&revision=2026.09.01",
+            ], capture_output=True, text=True, check=True)
+            its_status, _its_headers, its_body = json.loads(selected_its.stdout)
+            its_payload = json.loads(base64.b64decode(its_body))
+            if (
+                its_status != 200
+                or its_payload.get("publication", {}).get("collection_id") != "its-18"
+                or its_payload.get("selected_army_points") != 300
+            ):
+                raise ValueError("Docker preview did not select ITS-owned Battleground")
 
             def transport(environ, start_response):
                 path = environ["PATH_INFO"]

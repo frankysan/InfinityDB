@@ -55,14 +55,13 @@ provenance/state, and build outputs.
 - `curated/snapshot-notes/` — source-controlled, human-authored descriptions,
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
-- `generated/` — the two tracked, complete runtime databases: `army.db`
-  (Army v31/compatibility 40) and `rules_n5.db` (Rules v17). Exact variants,
-  reviewed Weapon citations, deployed objects, Restrictions, reviewed reference
-  facts and symbol mappings are embedded. ITS Season 18 remains in Rules
-  until the P3 serving cutover. The standalone ITS builder now produces a
-  schema-v2 inspection artifact at `work/its/its_18.db`, with Battleground
-  and ITS-only, context-scoped tournament/Extra policies. It is not a third
-  tracked runtime database; see [ITS season database](../docs/its-season-database.md).
+- `generated/` — the three tracked runtime databases: `army.db`
+  (Army v31/compatibility 40), `rules_n5.db` (Rules v17), and
+  `its_18.db` (ITS v2). Exact variants, reviewed Weapon citations,
+  deployed objects, Restrictions, and symbol mappings remain embedded in
+  Army/Rules. The ITS database owns Season 18 Battleground and scoped
+  tournament/Extra policies; it is selected by exact season and revision.
+  See [ITS season database](../docs/its-season-database.md).
   The old filenames and required JSON publications are retired.
 
 **Complete runtime build:** `infinity-db build --compact` uses the newest local
@@ -73,10 +72,11 @@ metadata. It never downloads data. Default output is `data/generated/`;
 the serving-only `INFINITY_DB_DB_DIR` setting. The old `--output-dir` form is
 retired from the integrated build. Lossless verification is mandatory.
 
-Disposable files under ignored `data/work/build/` hold normalization, the matched
-Army/raw pair and Rules construction. The builder validates both final files,
-embedded source relationships and shared build provenance, checks that its inputs
-remain unchanged, then replaces the selected pair and discards intermediates.
+Disposable files under ignored `data/work/build/` hold normalization, the
+matched Army/raw pair, Rules and ITS construction. The builder validates all
+three runtime databases, cross-domain references and source/build provenance,
+checks that its inputs remain unchanged, then replaces the selected set and
+discards intermediates.
 Generation/validation failure before replacement preserves destination bytes.
 Unrelated destination files are preserved. Stop serving before rebuilding; a
 mid-replacement interruption leaves an invalid mixed set, recovered by rerun.
@@ -85,8 +85,8 @@ Normal serving opens only that completed directory. Precedence is explicit
 `serve --db-dir PATH`, `INFINITY_DB_DB_DIR`, then `data/generated/` relative
 to the working directory. WSGI requires the environment setting. The retired
 individual-database variables are rejected. There is no automatic checkout
-bundle selection or older-file fallback. Docker copies the same tracked pair
-directly into its image. The cache revision hashes sorted active filenames and
+bundle selection or older-file fallback. Docker copies the same tracked
+three-file set into its image. The cache revision hashes sorted active filenames and
 their exact file hashes.
 
 `infinity-army build --output-dir PATH` retains the source JSON pipeline;
@@ -104,8 +104,9 @@ exist for independent development commands; they are not serving dependencies.
 
 **Selected runtime health:** `infinity-db database-health --db-dir PATH`
 validates exactly the selected directory through the shared
-`infinity_db.database_set` validator. Normal startup and directory health require the complete `army.db` and
-`rules_n5.db` pair, Army v31 and Rules v17, with recorded matched provenance.
+`infinity_db.database_set` validator. Startup and directory health require `army.db`, `rules_n5.db`
+and `its_18.db`, Army v31 / Rules v17 / ITS v2, with matched provenance
+and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;
 they do not establish an operator-facing alternate selection contract.
 

@@ -1,6 +1,7 @@
-# ITS 18 SQLite database (P3.2–P3.3)
+# ITS 18 SQLite database (P3)
 
-**Status:** Standalone offline schema/builder. P3.4 backend registry foundation exists, but ITS is not yet in the serving set.
+**Status:** Schema v2 participates in the complete three-file build and
+serving set; release/hosted acceptance is separately tracked.
 
 The ITS season database is an independently validated, deterministic SQLite
 artifact created from the existing reviewed curated ITS collection. The
@@ -17,8 +18,9 @@ developer entry point in `tools/build_its_season.py`.
 - **Official source:** `its-season-18-en-pdf`, SHA-256
   `9e16874924112e62d51acf78d622f5c0cf6196064cc36f003b515de9dc448baf`.
 - **Required core revision:** N5 `5.3`, recorded as an explicit compatibility
-  declaration. Cross-domain reference resolution remains P3.4 work, **not**
-  something this standalone build claims to have verified.
+  declaration. Complete-set validation resolves ITS dependencies against the
+  selected Rules database and checks source identity against the Army/Rules
+  build manifest.
 - **Currently authored:** `scenario:battleground`, three source citations,
   three geometry configurations spanning 150, 200–250 and 300–400 Army Points;
   three ITS-owned season policies for Spec-Ops in official tournaments,
@@ -83,13 +85,13 @@ From the repository root, with the project virtual environment:
 .\.venv\Scripts\python.exe -m tools.build_its_season --output local/its_18.db
 ```
 
-The default output is the ignored `data/work/its/its_18.db`. The tool rejects
-output under `data/generated/` before P3.4 and does not modify either
-tracked release database. Builders create a temporary sibling, validate
-it, and replace the destination only after success; a changed or invalid
-source leaves a prior output intact. A second identical build produces
-byte-identical SQLite data (normalized page settings and transaction
-header).
+The standalone developer tool still defaults to the ignored
+`data/work/its/its_18.db` and cannot overwrite the tracked runtime artifact.
+Use `infinity-db build --compact` to regenerate the complete
+`army.db` / `rules_n5.db` / `its_18.db` set. The builder first validates
+all three outputs and their cross-publication references, then replaces the
+selected files. A changed or invalid source before replacement preserves
+the previous outputs. Identical builds produce byte-identical SQLite data.
 
 The test module is `tests/test_its_season_database.py`, assigned to the
 model test section. It covers byte determinism, matched P2 Battleground
@@ -97,7 +99,7 @@ publication content, full configuration/citation preservation, exact
 selection, source drift, core compatibility, corruption, and safe
 replacement.
 
-## P3.4 registry and explicitly registered HTTP candidate
+## P3.4 registry and selected runtime
 
 `src/infinity_db/publication_registry.py` provides typed
 `PublicationReference(domain, record_id, revision)` selection and
@@ -107,33 +109,32 @@ against current N5 definitions. `season_policies` returns resolved targets
 only for an exact season, revision and explicit play context. The validated
 manifest exposes publication identity and SHA, not physical paths.
 
-`ScenarioCatalog` now accepts the registry and uses it for ITS publications,
-while N5 core missions continue to use the Rules database. The internal
-`create_app(..., season_databases={"its-18": path})` integration fixture
-exercises the same public API collection/revision selectors and SVG renderer;
-the explicit ITS database contributes to the runtime cache fingerprint.
-The normal checkout `serve` and Docker factories still select the validated
-**two-file** set. ITS is not auto-discovered, published in `data/generated`,
-or deployed until the coordinated P3.4 three-file build/selection/packaging
-cutover. Unknown seasons/revisions never fall back to core definitions.
+`ScenarioCatalog` uses the registry for ITS-owned publications, while
+N5 core missions continue to use Rules. The complete-set factory registers
+`its-18` from the selected `its_18.db` and validates the full three-file
+set. Both local `serve` and production WSGI/Docker use this same factory;
+the runtime cache fingerprint includes all three exact file hashes.
+The HTTP API retains its existing collection/revision selectors; unknown
+seasons/revisions never fall back to core. The internal explicit
+`create_app(..., season_databases={"its-18": path})` remains useful for
+isolated parity tests.
 
 ## Migration boundary
 
-The currently deployed `rules_n5.db` still owns its transitional
-Battleground copy until the coordinated serving cutover. Both the standalone
-P3.3 verifier and the registered three-file HTTP candidate compare the full
-ITS Battleground API output across six point sizes and 24 byte-identical SVG
-maps. The candidate resolves scenario content through the ITS owner, with
-the same N5/Army maintained-text enrichment. The pilot ITS file remains an
-**ignored inspection/build artifact**, not a third deployment input.
+For staged migration compatibility, the Rules exporter still retains the
+historical Battleground copy. The complete three-file runtime deliberately
+selects its ITS-owned publication instead. The P3.3 verifier and registry
+tests compare six complete Battleground JSON outputs and 24 byte-identical
+SVG maps, retaining N5/Army maintained-text enrichment. Retirement of the
+duplicate Rules-owned record and transitional ITS text remains open.
 
 The existing N5 cards still carry transitional ITS season notes and the
 shared Scenario catalog still attributes marker sizes to ITS 18 p. 17.
 The new ITS-only policies are retained alongside those legacy presentations
-until P3.4 can cut them over atomically without losing the player-visible
+until P3.4 removes redundant wording without losing player-visible
 restrictions or caveats. Adding/modifying maintained `src/` or curated
-files changes the complete build fingerprint; regenerate the tracked
-Army/Rules pair before source-bound deployment checks or merge.
+files changes the complete build fingerprint; regenerate the three-file
+release set before source-bound deployment checks or merge.
 
 For the ownership and scope exceptions (Spec-Ops, TEAM-OPS,
 Reinforcements, marker citations, FAQ), see

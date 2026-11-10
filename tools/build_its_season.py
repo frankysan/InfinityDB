@@ -1,6 +1,6 @@
 """Build or inspect the isolated ITS 18 SQLite publication (P3.2).
 
-This deliberately does not change data/generated or the current serving set.
+This standalone developer command never replaces the validated serving set.
 """
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     reserved = ROOT / "data/generated"
     if args.output.resolve().is_relative_to(reserved.resolve()):
-        parser.error("ITS is not a serving artifact before the P3.4 cutover")
+        parser.error("Use infinity-db build to replace the validated three-file serving set")
     try:
         if args.check:
             result = inspect_its_database(

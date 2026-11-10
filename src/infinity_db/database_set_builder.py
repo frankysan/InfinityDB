@@ -26,9 +26,14 @@ from .build_provenance import (
 )
 from .curated import load_curated_directory
 from .database.publication import validate_database_pair
-from .database_set import EMBEDDED_WEAPON_RUNTIME_FILES, validate_database_set
+from .database_set import (
+    COMPLETE_RUNTIME_FILES,
+    SEASON_DATABASE_SOURCES,
+    validate_database_set,
+)
 from .deployed_object_builder import build_deployed_objects
 from .equipment_presentation_storage import publish_equipment_encodings
+from .its_season_database import build_its_database
 from .rules_database import export_rules_database
 from .skill_classification_storage import publish_skill_classifications
 from .symbol_path_storage import publish_symbol_paths
@@ -147,7 +152,7 @@ def build_database_set(
     protected = {source, *(root / name for name in manifest["inputs"])}
     if args.metadata is not None:
         protected.add(args.metadata.resolve())
-    for name in EMBEDDED_WEAPON_RUNTIME_FILES:
+    for name in COMPLETE_RUNTIME_FILES:
         output = target / name
         if output.resolve() in protected or (output.exists() and not output.is_file()):
             raise ValueError(f"Runtime output would replace an input or non-file: {name}")
@@ -186,6 +191,13 @@ def build_database_set(
             root / "src/infinity_db/web/static",
         )
         _build_rules_and_publications(stage, root, manifest)
+        from .rules_database import RulesDatabase
+
+        core_revision = RulesDatabase(stage / "rules_n5.db").current_core_scenario_revision()
+        for _season, (filename, season_source) in SEASON_DATABASE_SOURCES.items():
+            build_its_database(
+                root / season_source, stage / filename, core_revision=core_revision,
+            )
         result = validate_database_set(stage, require_complete=True)
         if result["buildProvenance"].get("buildSetId") != build_set_id(manifest):
             raise ValueError("Built runtime set does not match the selected build inputs")
@@ -196,7 +208,7 @@ def build_database_set(
         target.mkdir(parents=True, exist_ok=True)
         # Stop serving this directory before rebuilding. Individual replacements
         # are atomic; interruption leaves an invalid mixed set, recovered by rerun.
-        for name in sorted(EMBEDDED_WEAPON_RUNTIME_FILES):
+        for name in sorted(COMPLETE_RUNTIME_FILES):
             os.replace(stage / name, target / name)
         for name in ("variant-usage.json", "weapon-profile-sources.json"):
             obsolete = target / name

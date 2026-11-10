@@ -305,10 +305,12 @@ def test_isolated_tool_rejects_serving_target_and_supports_read_only_check(
         "--source", str(SOURCE), "--output", str(output), "--check"
     ]) == 0
     assert output.read_bytes() == before
+    serving_artifact = ROOT / "data/generated/its_18.db"
+    before_serving = serving_artifact.read_bytes()
     with pytest.raises(SystemExit) as exc:
-        main(["--output", str(ROOT / "data/generated/its_18.db")])
+        main(["--output", str(serving_artifact)])
     assert exc.value.code == 2
-    assert not (ROOT / "data/generated/its_18.db").exists()
+    assert serving_artifact.read_bytes() == before_serving
 
 
 def test_missing_or_wrong_database_fails_without_creating_outputs(tmp_path: Path) -> None:

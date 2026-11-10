@@ -22,6 +22,7 @@ data/raw/
 data/generated/*
 !data/generated/army.db
 !data/generated/rules_n5.db
+!data/generated/its_18.db
 data/runtime/
 data/manifests/*
 !data/manifests/symbol-publication.json

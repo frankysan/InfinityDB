@@ -168,6 +168,15 @@ def validate_set_provenance(army: Path, rules: Path) -> dict[str, Any]:
     }
 
 
+def recorded_build_input_sha256(army: Path, relative_path: str) -> str:
+    """Read the selected build's recorded input digest without touching source files."""
+    record = validate_build_record(_metadata(army).get(BUILD_PROVENANCE_KEY), "army")
+    digest = record["manifest"]["inputs"].get(relative_path)
+    if not _is_digest(digest):
+        raise ValueError(f"Selected database build lacks input identity: {relative_path}")
+    return digest
+
+
 def validate_build_input_freshness(army: Path, root: Path) -> None:
     """Release/source gate: require the maintained checkout inputs recorded by the build."""
     record = validate_build_record(_metadata(army).get(BUILD_PROVENANCE_KEY), "army")

@@ -115,6 +115,7 @@ prepare_tracked_release_file() {
 
 prepare_tracked_release_file data/generated/army.db
 prepare_tracked_release_file data/generated/rules_n5.db
+prepare_tracked_release_file data/generated/its_18.db
 
 echo "Checking out $release_tag..."
 git checkout --detach "$release_tag"
@@ -131,6 +132,8 @@ echo "Installing application dependencies..."
   "release $release_tag does not contain tracked data/generated/army.db."
 [ -f data/generated/rules_n5.db ] || fail \
   "release $release_tag does not contain tracked data/generated/rules_n5.db."
+[ -f data/generated/its_18.db ] || fail \
+  "release $release_tag does not contain tracked data/generated/its_18.db."
 
 echo "Deploying tracked release artifacts as image app-$release_tag..."
 DOMAIN="$domain" IMAGE_TAG="app-$release_tag" RETAIN_APP_IMAGES="$retain" \

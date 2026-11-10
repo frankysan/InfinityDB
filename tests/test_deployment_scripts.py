@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import fnmatch
 import io
 import json
@@ -50,6 +51,13 @@ def test_preview_waits_for_health_and_cleans_only_owned_resources(
             return SimpleNamespace(returncode=1)
         if args[:2] == ["docker", "exec"]:
             probes += 1
+            if "collection=its-18" in args[-1]:
+                payload = {
+                    "publication": {"collection_id": "its-18"},
+                    "selected_army_points": 300,
+                }
+                body = base64.b64encode(json.dumps(payload).encode("utf-8")).decode("ascii")
+                return SimpleNamespace(returncode=0, stdout=json.dumps([200, [], body]))
             return SimpleNamespace(returncode=1 if probes == 1 else 0, stdout='[200, [], ""]')
         return SimpleNamespace(returncode=0)
     monkeypatch.setattr(preview.shutil, "which", lambda _: "docker")
@@ -64,7 +72,7 @@ def test_preview_waits_for_health_and_cleans_only_owned_resources(
     start = next(c for c in calls if c[:3] == ("docker", "run", "-d"))
     assert "--read-only" in start
     assert "-p" not in start and "--publish" not in start
-    assert probes == 2
+    assert probes == 3
     assert calls[-2][:2] == ("docker", "stop")
     assert calls[-2][2].startswith("infinitydb-preview-")
     assert calls[-1] == ("docker", "image", "rm", "infinity-db:preview-test")
@@ -448,6 +456,10 @@ def test_container_smoke_validates_canonical_release_notes(
             "unresolved_deliveries": [{}],
         },
         "/api/weapons/rifle": rifle,
+        "/api/scenarios/battleground?army_points=300&collection=its-18&revision=2026.09.01": {
+            "publication": {"collection_id": "its-18"},
+            "selected_army_points": 300,
+        },
         "/api/version": {"version": "0.10.0", "snapshot_revision": "fixture"},
     }
 
@@ -488,6 +500,15 @@ def test_container_symbol_route_smoke_uses_embedded_database_publication() -> No
     route_probe = script.split('if [ "$packaged_assets" -eq 1 ]; then', 1)[1]
     assert 'Database(Path("/app/data/army.db")).symbol_publication()' in route_probe
     assert "maintained_manifest_path" not in route_probe
+
+
+def test_install_and_docker_require_the_complete_three_database_set() -> None:
+    install = _read("scripts/install-or-update.sh")
+    docker = _read("Dockerfile")
+    for name in ("army.db", "rules_n5.db", "its_18.db"):
+        assert f"prepare_tracked_release_file data/generated/{name}" in install
+        assert f"[ -f data/generated/{name} ] || fail" in install
+        assert f"data/generated/{name} /app/data/{name}" in docker
 
 
 def test_installed_wheel_smoke_runs_database_health_check() -> None:

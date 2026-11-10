@@ -27,7 +27,7 @@ from infinity_db.build_provenance import (
 )
 from infinity_db.cli import build_parser
 from infinity_db.database_set import (
-    EMBEDDED_WEAPON_RUNTIME_FILES,
+    COMPLETE_RUNTIME_FILES,
     validate_database_set,
 )
 from infinity_db.sqlite_determinism import normalize_sqlite_header, vacuum_deterministic_sqlite
@@ -44,6 +44,7 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         "pyproject.toml",
         "src/sample.py",
         "data/curated/rules/sample.json",
+        "data/curated/rules/n5-its-season-18-2026.09.01.json",
         "data/manifests/symbol-publication.json",
         "src/infinity_db/web/static/restrictions-reference.json",
         "config/catalogs/equipment-presentation-encodings.json",
@@ -58,6 +59,10 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("{}", encoding="utf-8")
+    shutil.copyfile(
+        RELEASE.parent.parent / "data/curated/rules/n5-its-season-18-2026.09.01.json",
+        root / "data/curated/rules/n5-its-season-18-2026.09.01.json",
+    )
     shutil.copyfile(
         RELEASE.parent.parent / "config/catalogs/equipment-presentation-encodings.json",
         root / "config/catalogs/equipment-presentation-encodings.json",
@@ -280,7 +285,8 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     (args.db_dir / "weapon-profile-sources.json").write_bytes(b"obsolete publication")
     first = builder.build_database_set(args, _fake_army, root=root)
     assert first["buildProvenance"]["status"] == "matched"
-    assert first["layout"] == "v17-two-file"
+    assert first["layout"] == "v17-three-file"
+    assert first["seasons"]["its-18"]["revision"] == "2026.09.01"
     assert first["restrictionChartRows"] == 6
     assert first["traitWikiLinks"] == 33
     assert first["combinedSavingRollProfiles"] == 6
@@ -290,12 +296,13 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert first["skillSourceClassifications"] == 6
     assert first["reviewedWeapons"] == 62
     assert validate_database_set(args.db_dir)["sha256"] == first["sha256"]
-    assert set(_digests(args.db_dir)) == {*EMBEDDED_WEAPON_RUNTIME_FILES, "keep.txt"}
+    assert set(_digests(args.db_dir)) == {*COMPLETE_RUNTIME_FILES, "keep.txt"}
     assert (args.db_dir / "keep.txt").read_text(encoding="utf-8") == "unrelated"
     app = create_app_from_database_set(args.db_dir)
     assert app.database.path == args.db_dir / "army.db"
     assert app.rules_database is not None
     assert app.rules_database.path == args.db_dir / "rules_n5.db"
+    assert app.publication_registry is not None
     assert app.weapon_profile_citations is not None
     assert len(app.weapon_profile_citations) == 69
     status, _, body = wsgi_response(app, "http://local.test/api/weapons/uragan-mrl")
@@ -317,7 +324,7 @@ def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
     monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
     builder.build_database_set(args, _fake_army, root=root)
     army, rules = args.db_dir / "army.db", args.db_dir / "rules_n5.db"
-    original = {path: path.read_bytes() for path in (army, rules)}
+    original = {path: path.read_bytes() for path in (army, rules, args.db_dir / "its_18.db")}
     for case, message in (
         ("army", "require Army schema v31"),
         ("rules", "require Rules schema v17"),
@@ -347,7 +354,7 @@ def test_failure_before_publication_retains_all_destination_bytes(
 ) -> None:
     root, args = project
     args.db_dir.mkdir()
-    for name in EMBEDDED_WEAPON_RUNTIME_FILES:
+    for name in COMPLETE_RUNTIME_FILES:
         shutil.copyfile(RELEASE / name, args.db_dir / name)
     before = _digests(args.db_dir)
 
@@ -376,7 +383,7 @@ def test_interrupted_replacement_is_rejected_and_rerun_recovers(
 ) -> None:
     root, args = project
     args.db_dir.mkdir()
-    for name in EMBEDDED_WEAPON_RUNTIME_FILES:
+    for name in COMPLETE_RUNTIME_FILES:
         shutil.copyfile(RELEASE / name, args.db_dir / name)
     monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
     replace = os.replace

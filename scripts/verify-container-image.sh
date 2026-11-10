@@ -33,7 +33,7 @@ import os
 from pathlib import Path
 
 from infinity_db.database import Database
-from infinity_db.database_set import validate_database_set
+from infinity_db.database_set import COMPLETE_RUNTIME_FILES, validate_database_set
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
@@ -51,6 +51,8 @@ if hasattr(os, "geteuid") and os.geteuid() == 0:
 
 data_dir = Path("/app/data")
 report = validate_database_set(data_dir, require_complete=True)
+if set(report["sha256"]) != COMPLETE_RUNTIME_FILES:
+    raise SystemExit("Image is missing one of the three required runtime databases")
 rules = RulesDatabase(data_dir / "rules_n5.db")
 rules.validate()
 restrictions = rules.restrictions_payload()
@@ -274,6 +276,17 @@ if not any(
     for citation in profile_sources
 ):
     raise SystemExit("/api/weapons/rifle lost its reviewed Weapon Chart citation")
+
+with urlopen(
+    "http://127.0.0.1:8000/api/scenarios/battleground"
+    "?army_points=300&collection=its-18&revision=2026.09.01", timeout=3,
+) as response:
+    battleground = json.load(response)
+if (
+    battleground.get("publication", {}).get("collection_id") != "its-18"
+    or battleground.get("selected_army_points") != 300
+):
+    raise SystemExit("ITS Battleground is not resolved from the selected season")
 
 with urlopen("http://127.0.0.1:8000/api/version", timeout=3) as response:
     version = json.load(response)

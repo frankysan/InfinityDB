@@ -1,8 +1,9 @@
 """Validate the selected SQLite runtime set without loose JSON fallbacks.
 
-Current serving requires the complete Army v31 / Rules v17 pair. Earlier
-two-file embedded schemas remain inspectable for explicit development/research
-fixtures; v10/v11 layouts requiring JSON publications are unsupported.
+Current serving requires Army v31, Rules v17, and the independently
+published ITS Season 18 database. Earlier two-file embedded schemas remain
+inspectable for explicit development/research fixtures; v10/v11 layouts
+requiring JSON publications are unsupported.
 This module never rebuilds inputs or checks working-tree curation freshness.
 """
 
@@ -19,6 +20,7 @@ from typing import Any
 from .army_reference_storage import ARMY_SCHEMA_VERSION as ARMY_REFERENCE_SCHEMA_VERSION
 from .build_provenance import validate_set_provenance
 from .database.repository import Database
+from .publication_registry import PublicationRegistry
 from .rules_database import RulesDatabase
 from .symbol_path_storage import ARMY_SCHEMA_VERSION as COMPLETE_ARMY_SCHEMA_VERSION
 from .unit_filter_storage import ARMY_SCHEMA_VERSION as UNIT_FILTER_SCHEMA_VERSION
@@ -51,6 +53,14 @@ def select_database_directory(
     return DEFAULT_DATABASE_DIRECTORY.resolve()
 
 EMBEDDED_WEAPON_RUNTIME_FILES = frozenset({ARMY_DATABASE_FILENAME, RULES_DATABASE_FILENAME})
+# Explicit release registration; neither source names nor season defaults are
+# inferred from the contents of an operator-selected directory.
+SEASON_DATABASE_SOURCES = {
+    "its-18": ("its_18.db", "data/curated/rules/n5-its-season-18-2026.09.01.json"),
+}
+COMPLETE_RUNTIME_FILES = EMBEDDED_WEAPON_RUNTIME_FILES | frozenset(
+    filename for filename, _source in SEASON_DATABASE_SOURCES.values()
+)
 
 
 def _full_integrity_check(path: Path) -> None:
@@ -73,9 +83,8 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
     directory = Path(directory).resolve()
     if not directory.is_dir():
         raise ValueError(f"Database-set directory does not exist: {directory}")
-    missing = sorted(
-        name for name in EMBEDDED_WEAPON_RUNTIME_FILES if not (directory / name).is_file()
-    )
+    required = COMPLETE_RUNTIME_FILES if require_complete else EMBEDDED_WEAPON_RUNTIME_FILES
+    missing = sorted(name for name in required if not (directory / name).is_file())
     if missing:
         raise ValueError(f"Incomplete database set; missing: {', '.join(missing)}")
 
@@ -95,7 +104,14 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
         raise ValueError(
             f"Complete embedded sets require Army schema v{COMPLETE_ARMY_SCHEMA_VERSION}"
         )
-    names = EMBEDDED_WEAPON_RUNTIME_FILES
+    registered_seasons = {
+        season: directory / filename
+        for season, (filename, _source) in SEASON_DATABASE_SOURCES.items()
+        if (directory / filename).is_file()
+    }
+    names = EMBEDDED_WEAPON_RUNTIME_FILES | frozenset(
+        path.name for path in registered_seasons.values()
+    )
     army = Database(army_path)
     army.validate()
     encodings = army.equipment_presentation_encodings()
@@ -112,8 +128,22 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
     provenance = validate_set_provenance(army_path, rules_path)
     if require_complete and provenance["status"] != "matched":
         raise ValueError("Complete embedded sets require recorded matched build provenance")
-    for path in (army_path, rules_path):
+    for path in (army_path, rules_path, *registered_seasons.values()):
         _full_integrity_check(path)
+    season_manifest: dict[str, dict[str, Any]] = {}
+    if registered_seasons:
+        registry = PublicationRegistry(rules, registered_seasons)
+        season_manifest = registry.season_manifest()
+        if provenance["status"] == "matched":
+            from .build_provenance import recorded_build_input_sha256
+
+            for season, publication in season_manifest.items():
+                _filename, source = SEASON_DATABASE_SOURCES[season]
+                expected = recorded_build_input_sha256(army_path, source)
+                if publication["sourceSha256"] != expected:
+                    raise ValueError(
+                        f"ITS database {season} does not match selected build source identity"
+                    )
 
     objects = rules.deployed_objects_payload(army_path)
     if objects is None or not objects["objects"]:
@@ -152,11 +182,14 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
         with (directory / name).open("rb") as stream:
             fingerprints[name] = hashlib.file_digest(stream, "sha256").hexdigest()
     return {
-        "layout": {
-            12: "v12-two-file", 13: "v13-two-file",
-            14: "v14-two-file", 15: "v15-two-file",
-            16: "v16-two-file", 17: "v17-two-file",
-        }[schema_version],
+        "layout": (
+            "v17-three-file" if require_complete and registered_seasons
+            else {
+                12: "v12-two-file", 13: "v13-two-file",
+                14: "v14-two-file", 15: "v15-two-file",
+                16: "v16-two-file", 17: "v17-two-file",
+            }[schema_version]
+        ),
         "integrityCheck": "full",
         "buildProvenance": provenance,
         "schemaVersion": schema_version,
@@ -174,6 +207,7 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
         **({"ammunitionReferences": len(ammunition)} if ammunition is not None else {}),
         **({"weaponProperties": len(properties)} if properties is not None else {}),
         "sha256": fingerprints,
+        "seasons": season_manifest,
         **({
             "publishedSymbolMappings": sum(len(symbols[field]) for field in (
                 "factionIdToPublishedPath", "unitSlugToPublishedPath",

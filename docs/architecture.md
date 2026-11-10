@@ -82,12 +82,12 @@ read-only application/API and validated database models:
 
 - **Directly from a checkout (local or self-hosted).** Run
   `infinity-db build --compact`, then `infinity-db serve` from the repository
-  root. One offline build produces the complete `data/generated/army.db` and
-  `rules_n5.db` set. Serving selects explicit `--db-dir`, then
+  root. One offline build produces the complete `data/generated/army.db`,
+  `rules_n5.db` and `its_18.db` set. Serving selects explicit `--db-dir`, then
   `INFINITY_DB_DB_DIR`, then the working-directory-relative default. Production
   WSGI requires that single environment setting. An invalid selected set fails
   closed. Stop the service before rebuilding its selected directory.
-- **Docker for public internet serving.** The image copies those same two
+- **Docker for public internet serving.** The image copies those same three
   tracked databases directly into `/app/data/`, configured with
   `INFINITY_DB_DB_DIR=/app/data`. No host promotion directory, raw archive,
   curation or JSON publication is a serving dependency. Source/release checks
@@ -125,8 +125,8 @@ InfinityDB deliberately separates four kinds of repository data:
 - `data/curated/` contains human-reviewed source-derived knowledge and rules-reference content.
 - `data/manifests/` contains publication/provenance state; the tracked symbol publication manifest
   is a release contract, while acquisition/build manifests are normally local generated evidence.
-- `data/generated/` contains the two tracked runtime databases, `army.db`
-  and `rules_n5.db`. Structured reference facts and symbol mappings are embedded.
+- `data/generated/` contains the three tracked runtime databases: `army.db`,
+  `rules_n5.db` and `its_18.db`. Structured reference facts and symbol mappings are embedded.
   SVG/CSS/JS remain ordinary static files. Development intermediates and raw
   exports belong under ignored `data/work/build/`.
 
@@ -314,22 +314,22 @@ The detailed snapshot/archive contract is owned by `data/README.md`.
 
 ## Generated database boundary
 
-InfinityDB serves two tracked runtime databases:
+InfinityDB serves three tracked runtime databases:
 
 - `data/generated/army.db` — canonical application data derived from Army snapshots and reviewed
   source relationships;
-- `data/generated/rules_n5.db` — curated rules/reference semantics.
+- `data/generated/rules_n5.db` — curated N5 rules/reference semantics;
+- `data/generated/its_18.db` — ITS Season 18 scenario publications and scoped policies.
 
 `army.raw.db` is a development/audit archive of normalized source structures and is not a
 production runtime dependency. Runtime repositories query application tables and materialized
 provenance; they do not fall back to raw normalized tables for convenience.
 
-Opt-in complete builds now use Rules v12, with relational exact variant usage
-and reviewed Weapon Chart profile citations. The tracked release retains v10
-until the integrated cutover. Schema-aware runtime reads v12 citations and
-variant facts from Rules without JSON sidecars; older release schemas keep their
-matched-publication contract. The [data lifecycle](../data/README.md) owns the
-two-/three-/four-file transitional build and verification boundary.
+The complete serving contract requires Army v31, Rules v17 and ITS v2,
+with source-bound embedded publications and no runtime JSON sidecars.
+Explicit two-file historical fixture validation is retained for research,
+not as an alternate serving path. The [data lifecycle](../data/README.md)
+owns the current build, publication and selection contracts.
 
 Database validation checks application/schema identity, compatibility revision, and required
 metadata before normal reads. Persistent user-authored state is not part of the current runtime
@@ -337,12 +337,12 @@ model, so generated databases remain replaceable release artifacts.
 
 Complete embedded-set application composition now has one explicit factory,
 `infinity_db.web.create_app_from_database_set`. It uses the shared database-set
-validator's complete mode before creating the application with both exact file
-paths. Current Army/Rules projections and matched recorded provenance are
-required; incomplete or transitional sets fail before application creation.
-The migration parity checker, normal CLI server and production WSGI now use
-this path. The default tracked `army.db`/`rules_n5.db` set is shared with the
-Docker image, with explicit `--db-dir` or `INFINITY_DB_DB_DIR` selection.
+validator's complete mode before opening the selected three-file set.
+Current Army/Rules projections, matched recorded provenance and ITS season/core
+source identity are required; incomplete or stale sets fail before application
+creation. The CLI server and production WSGI use this path. The default
+tracked Army/Rules/ITS set is shared with Docker, with explicit `--db-dir`
+or `INFINITY_DB_DB_DIR` selection.
 Low-level `create_app` retains explicit database injection for source-semantic
 fixtures, not an alternative operator-facing serving contract.
 

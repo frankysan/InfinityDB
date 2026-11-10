@@ -8,10 +8,11 @@ and which invariants runtime queries rely on. Historical audit counts, release b
 migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this current-state
 contract.
 
-The current complete runtime uses Army v31 in `army.db` and Rules v17 in
-`rules_n5.db`. Structured reference facts and symbol mappings are embedded,
-with matched source/build provenance. Normal serving requires both files and
-does not read build JSON. ITS Season 18 remains in Rules pending P3.
+The complete serving runtime uses Army v31 in `army.db`, Rules v17 in
+`rules_n5.db` and ITS schema v2 in `its_18.db`. Structured references,
+source/citation identity and symbol mappings are embedded. Serving requires
+all three, validates the source-compatible ITS publication against the matched
+Army/Rules build and does not read build JSON.
 The [data lifecycle](../data/README.md) owns current build/serve paths.
 Earlier schema/publication migration descriptions below are historical where
 they explicitly identify an older version. **Dated source-variant review notes** record the findings
@@ -52,8 +53,10 @@ flowchart TD
     validation --> database
 ```
 
-The two runtime databases are intentionally separate because Army data and reviewed rules knowledge
-have different sources, provenance, and update cadence.
+The Army and N5 Rules databases remain separate because their sources,
+provenance and update cadences differ. Independently published ITS season
+data resides in `its_18.db`, with explicit revision and N5 compatibility
+validation at serving time.
 
 **Optional legacy-source annexes:** The `reinforcements-extra-n4-reference`
 collection is deliberately separate from `n5-core-v5.3`. Its three

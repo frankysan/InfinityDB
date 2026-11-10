@@ -2423,6 +2423,29 @@ fail-closed unknown revisions, N5 default and cache identity.
 contract, transitional Rules-owned ITS retirement, and scoped overlay/FAQ
 presentation as appropriate. P3.5 owns future-season collision acceptance.
 
+#### P3.4 — Third slice: coordinated three-database serving (2026-11-10)
+
+The integrated `infinity-db build` now constructs Army v31, Rules v17 and
+ITS v2 together from pinned inputs. Complete-set validation requires all three
+files, matches ITS source SHA against the Army/Rules input manifest, verifies
+core compatibility and typed cross-domain references, and rejects missing or
+mixed season files. The standard CLI, WSGI, Docker, installed-wheel checks,
+deployment preflight, installer, build determinism and runtime snapshot cache
+identity use the same three-file selection. Legacy two-file schemas remain
+available only for explicit research/fixture inspection, never normal serving.
+
+Local validation: the integrated build and 21/21 strict-set tests passed,
+18/18 builder tests passed, asset/source verification passed 808/808 SVGs
+and 808/808 browser references, and real checkout plus isolated Docker preview
+each passed 41/41 pinned HTTP routes. A first Docker preview found that
+`.dockerignore` excluded the new file; correcting the allowlist produced
+a passing repeat. The repository MCP currently refuses to stage the
+newly generated `data/generated/its_18.db` (`untracked_release_database`);
+therefore delivery and hosted CI for this complete change remain pending.
+The intermediate standalone/Rules copy of ITS content and certain
+transitional season copy/FAQ surfaces still await the remaining P3.4 cleanup.
+P3.5 retains future-season collision and isolation acceptance.
+
 ### P4 — Make the interface player-first
 
 **Outcome:** Less user-visible implementation language without loss of relevant gameplay accuracy.  

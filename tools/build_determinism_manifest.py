@@ -68,6 +68,12 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
             load_curated_directory(project_root / "data/curated/rules"),
             generated / "rules_n5.db",
         )
+        from infinity_db.its_season_database import build_its_database
+
+        build_its_database(
+            project_root / "data/curated/rules/n5-its-season-18-2026.09.01.json",
+            generated / "its_18.db",
+        )
         fixture_files = sorted(path for path in fixture.rglob("*") if path.is_file())
         snapshot = create_timestamped_archive(
             fixture_files,
@@ -87,6 +93,7 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
                 "normalized-validation.json",
                 "normalized.json",
                 "rules_n5.db",
+                "its_18.db",
             )
         }
         artifacts["archives/snapshot.zip"] = sha256_file(snapshot)

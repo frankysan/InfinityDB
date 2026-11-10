@@ -48,7 +48,7 @@ def verify_checkout_server(
     selected = (db_dir if db_dir is not None else ROOT / "data/generated").resolve()
     report = validate_database_set(selected, require_complete=True)
     # Leftover ignored sidecars may exist in old checkout directories. They
-    # must not be required or consulted; only the selected SQLite pair counts.
+    # must not be required or consulted; only the selected SQLite set counts.
     ignored_sidecars = [name for name in LEGACY_FILES if (selected / name).exists()]
     expected_revision = database_set_snapshot_revision(report["sha256"])
     expected = json.loads(baseline.read_text(encoding="utf-8"))
@@ -90,6 +90,16 @@ def verify_checkout_server(
             version = _get_json(origin, "/api/version")
             if version.get("snapshot_revision") != expected_revision:
                 raise ValueError("Checkout server selected unexpected database bytes")
+            its = _get_json(
+                origin,
+                "/api/scenarios/battleground?army_points=300"
+                "&collection=its-18&revision=2026.09.01",
+            )
+            if (
+                its.get("publication", {}).get("collection_id") != "its-18"
+                or its.get("selected_army_points") != 300
+            ):
+                raise ValueError("Checkout server did not select registered ITS Battleground")
 
             def transport(environ: dict[str, Any], start_response: Any) -> list[bytes]:
                 path = environ["PATH_INFO"]
@@ -109,7 +119,7 @@ def verify_checkout_server(
                 },
             )
             count = check(expected, observed)
-            # Guard against modifications to the selected immutable input pair.
+            # Guard against modifications to the selected immutable input set.
             after = validate_database_set(selected, require_complete=True)
             if after["sha256"] != report["sha256"]:
                 raise ValueError("Runtime database bytes changed during checkout acceptance")

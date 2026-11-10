@@ -58,9 +58,9 @@ def verify(source: Path, expected_sha256: str) -> dict:
             )
             result = build_database_set(args, _build_army)
             report = validate_database_set(destination, require_complete=True)
-            if report != result or report["layout"] != "v17-two-file":
+            if report != result or report["layout"] != "v17-three-file":
                 raise ValueError("Complete-build database health disagrees with publication")
-            if set(report["sha256"]) != {"army.db", "rules_n5.db"}:
+            if set(report["sha256"]) != {"army.db", "rules_n5.db", "its_18.db"}:
                 raise ValueError("Complete build produced an unexpected runtime file set")
             inventory = (
                 report["variantGroups"], report["reviewedWeapons"], report["restrictionChartRows"],

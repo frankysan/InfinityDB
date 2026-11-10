@@ -11,6 +11,7 @@ src/infinity_db/web/static/units/** binary
 # Runtime SQLite databases are byte-deterministic release artifacts.
 data/generated/army.db binary
 data/generated/rules_n5.db binary
+data/generated/its_18.db binary
 
 # Byte-exact static graphical assets used in release fingerprints.
 src/infinity_db/web/static/*.svg -text

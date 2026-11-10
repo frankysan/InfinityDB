@@ -33,10 +33,11 @@ when all contained work shares the same owner.
     independent-data parity passed (6 API payloads and 24 SVG variants),
     three reviewed ITS-only policies are isolated in schema v2, and the
     regenerated Army/Rules release pair passed deployment-asset verification.
-    See [ITS season database](its-season-database.md). P3.4's typed
-    registry and explicit three-file HTTP candidate are implemented;
-    production build/factory/CLI/Docker selection, deployment and
-    transitional core-card cleanup remain open.
+    See [ITS season database](its-season-database.md). The three-file
+    runtime cutover is implemented and locally validated; publishing the
+    newly tracked ITS database through MCP and hosted CI acceptance are
+    still pending. Retire transitional Rules-owned ITS content and card
+    caveats and finish scoped FAQ/overlay presentation before P3.4 closeout.
   - [ ] Continue P4–P6 under the plan's player-facing presentation, tooling
     retirement and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in

@@ -12,7 +12,7 @@ import pytest
 
 from infinity_db.cli import build_parser, main
 from infinity_db.database_set import (
-    EMBEDDED_WEAPON_RUNTIME_FILES,
+    COMPLETE_RUNTIME_FILES,
     database_set_health_report,
     validate_database_set,
 )
@@ -24,7 +24,7 @@ RELEASE = Path(__file__).resolve().parents[1] / "data/generated"
 def runtime_set(tmp_path: Path) -> Path:
     directory = tmp_path / "selected"
     directory.mkdir()
-    for name in EMBEDDED_WEAPON_RUNTIME_FILES:
+    for name in COMPLETE_RUNTIME_FILES:
         shutil.copyfile(RELEASE / name, directory / name)
     return directory
 
@@ -46,7 +46,7 @@ def test_selected_set_validates_without_build_sources_or_raw_archive(
                  "weapon-profile-sources.json"):
         (runtime_set / name).write_text("invalid", encoding="utf-8")
     result = validate_database_set(Path("selected"), require_complete=True)
-    assert result["layout"] == "v17-two-file"
+    assert result["layout"] == "v17-three-file"
     assert result["integrityCheck"] == "full"
     assert result["schemaVersion"] == 17
     assert result["deployedObjects"] == 17
@@ -55,11 +55,12 @@ def test_selected_set_validates_without_build_sources_or_raw_archive(
     assert result["variantGroups"] > 0
     assert result["reviewedWeapons"] > 0
     assert result["sha256"] == before
-    assert set(result["sha256"]) == EMBEDDED_WEAPON_RUNTIME_FILES
+    assert set(result["sha256"]) == COMPLETE_RUNTIME_FILES
+    assert result["seasons"]["its-18"]["revision"] == "2026.09.01"
     assert {k: v for k, v in fingerprints(runtime_set).items() if k in before} == before
 
 
-@pytest.mark.parametrize("missing", sorted(EMBEDDED_WEAPON_RUNTIME_FILES))
+@pytest.mark.parametrize("missing", sorted(COMPLETE_RUNTIME_FILES))
 def test_missing_selected_file_does_not_fall_back_or_create_outputs(
     runtime_set: Path, missing: str, capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -86,6 +87,33 @@ def test_json_dependent_schemas_are_retired_even_with_sidecars(
         connection.execute(f"PRAGMA user_version={schema}")
     with pytest.raises(ValueError, match="Unsupported Rules schema"):
         validate_database_set(runtime_set)
+
+
+def test_complete_set_rejects_stale_or_mismatched_its(runtime_set: Path) -> None:
+    its = runtime_set / "its_18.db"
+    with sqlite3.connect(its) as connection:
+        connection.execute(
+            "UPDATE __its_metadata SET value=? WHERE key='buildId'",
+            (json.dumps("0" * 64),),
+        )
+    with pytest.raises(ValueError, match="ITS build provenance"):
+        validate_database_set(runtime_set, require_complete=True)
+
+
+def test_complete_set_rejects_its_from_a_different_source_build(
+    runtime_set: Path, tmp_path: Path,
+) -> None:
+    from infinity_db.its_season_database import build_its_database
+
+    source = (
+        Path(__file__).resolve().parents[1]
+        / "data/curated/rules/n5-its-season-18-2026.09.01.json"
+    )
+    modified = tmp_path / "same-semantics-different-source.json"
+    modified.write_bytes(source.read_bytes() + b"\n")
+    build_its_database(modified, runtime_set / "its_18.db")
+    with pytest.raises(ValueError, match="does not match selected build source identity"):
+        validate_database_set(runtime_set, require_complete=True)
 
 
 def test_embedded_objects_must_match_selected_army(runtime_set: Path) -> None:
@@ -121,7 +149,7 @@ def test_embedded_variant_fingerprint_rejects_tampering(runtime_set: Path) -> No
     assert fingerprints(runtime_set) == before
 
 
-@pytest.mark.parametrize("filename", sorted(EMBEDDED_WEAPON_RUNTIME_FILES))
+@pytest.mark.parametrize("filename", sorted(COMPLETE_RUNTIME_FILES))
 def test_corrupt_selected_artifact_is_an_unhealthy_report(
     runtime_set: Path, filename: str,
 ) -> None:

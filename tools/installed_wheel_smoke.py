@@ -94,7 +94,7 @@ def verify_runtime(work: Path, *, asset_free: bool, require_assets: bool) -> Non
     with context:
         from infinity_db.web import create_app, create_app_from_database_set
 
-        # Both smoke modes exercise the same complete embedded release pair.
+        # Both smoke modes exercise the same complete embedded runtime set.
         # The standalone generated/ fixture only covers the exporter CLI and
         # lacks the v12+ projections required by the application runtime.
         selected = work / "runtime"
@@ -195,7 +195,7 @@ def smoke_wheel(wheel: Path, source: Path, work: Path, *, require_assets: bool) 
     ))], inputs)
     runtime = inputs / "runtime"
     runtime.mkdir()
-    for name in ("army.db", "rules_n5.db"):
+    for name in ("army.db", "rules_n5.db", "its_18.db"):
         shutil.copyfile(source / "data/generated" / name, runtime / name)
     for mode in ("normal", "asset-free"):
         run([

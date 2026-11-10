@@ -1537,6 +1537,25 @@ The runtime snapshot/ETag differs when the ITS database is registered.
 This does **not** validate the still-pending automatic three-file serving,
 Docker image, or release artifacts.
 
+**2026-11-10 P3.4 integrated three-file serving candidate:**
+The normal `infinity-db build` generated Army v31, Rules v17 and ITS v2
+(build set `f97eb0a1aee25d768736c2feeb213af26dfb02349aac68acd2cbfffd21e649e0`).
+The complete validator now requires all three, binds ITS source identity to
+the Army/Rules build manifest, checks season/core compatibility and typed
+cross-domain references, and hashes the full set for runtime caches. The
+ordinary checkout CLI and Docker runtime use the strict three-file factory.
+Focused results: database-set **22/22**, builder **18/18**, deployment
+scripts **45/45**, publication registry **13/13**, checkout HTTP **41/41**,
+Docker preview HTTP **41/41** plus a direct ITS-owned Battleground probe,
+and 808/808 SVG and browser-reference asset verification. Pyright, Ruff,
+documentation checks and Git whitespace checks passed. The initial Docker
+build failed
+because `.dockerignore` omitted `its_18.db`; after correction, the clean
+disposable image built and passed. No hosted three-file CI acceptance yet.
+The MCP Git stage operation refuses the new untracked binary release artifact
+with `untracked_release_database`; this blocks committing/pushing the cutover
+until that capability or a one-time local `git add` is used.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

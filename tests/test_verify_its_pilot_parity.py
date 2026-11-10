@@ -27,6 +27,8 @@ def test_its_pilot_detects_authored_mission_drift(tmp_path: Path) -> None:
     document["records"][0]["summary"] = "An altered Battleground description"
     changed = tmp_path / "changed-its.json"
     changed.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
+    serving_artifact = ROOT / "data/generated/its_18.db"
+    before_serving = serving_artifact.read_bytes()
     with pytest.raises(ValueError, match="differs from current Rules baseline: summary"):
         verify_pilot(source=changed)
-    assert not (ROOT / "data/generated/its_18.db").exists()
+    assert serving_artifact.read_bytes() == before_serving

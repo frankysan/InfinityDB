@@ -318,6 +318,7 @@ def create_app_from_database_set(directory: Path) -> Application:
     from infinity_db.database_set import (
         ARMY_DATABASE_FILENAME,
         RULES_DATABASE_FILENAME,
+        SEASON_DATABASE_SOURCES,
         validate_database_set,
     )
 
@@ -326,4 +327,8 @@ def create_app_from_database_set(directory: Path) -> Application:
     return Application(
         selected / ARMY_DATABASE_FILENAME, selected / RULES_DATABASE_FILENAME,
         runtime_fingerprints=report["sha256"],
+        season_databases={
+            season: selected / filename
+            for season, (filename, _source) in SEASON_DATABASE_SOURCES.items()
+        },
     )
