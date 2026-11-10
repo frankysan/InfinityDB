@@ -58,8 +58,10 @@ when all contained work shares the same owner.
   The ARO/movement/geometry v9 promotion dependency chain is retired;
   the shared browser test now validates embedded deployed objects through
   the current database-set contract, not loose JSON. Continue retiring
-  the legacy JSON loader, review/staging helpers and obsolete transition
-  tests while preserving current source guards.
+  the legacy JSON loader and remaining staging/transition helpers.
+  The five one-use Lieutenant/Terrain/Camouflage/Combat Jump/Infiltration
+  v9 source reviewers and their matched-pair tests are retired; the
+  accepted source semantics remain independently tested.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;

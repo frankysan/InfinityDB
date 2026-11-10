@@ -389,20 +389,6 @@ def test_lieutenant_reviewed_resource_extras_fresh_release_pair(tmp_path: Path) 
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
-def test_lieutenant_review_gate_verifies_published_matched_pair(require_source_files) -> None:
-    from tools.review_lieutenant_variant import check_candidate
-
-    require_source_files(ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf")
-    report = check_candidate()
-    assert report["scope"] == "lieutenant-resource-v9-verified-published"
-    assert report["qualifiedOccurrences"] == 83
-    assert report["unqualifiedOccurrences"] == 355
-    assert report["logicalContentVerified"] is True
-    assert len(report["previousRulesSha256"]) == 64
-    assert len(report["candidateRulesSha256"]) == 64
-
-
-@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_terrain_source_58_exact_types_and_reviewed_effects(tmp_path: Path) -> None:
     """All seven signatures remain distinct; Total is not choose-one."""
     counts = (918, 164, 65, 29, 30, 19, 10)
@@ -507,21 +493,6 @@ def test_terrain_type_semantics_fail_closed_on_drift(mutation) -> None:
         _validate_variant_semantics(
             reviewed, "skill:terrain", [{"entity": "skill", "id": "terrain"}],
         )
-
-
-@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
-def test_terrain_review_gate_verifies_published_matched_pair(require_source_files) -> None:
-    from tools.review_terrain_variant import check_candidate
-
-    require_source_files(ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf")
-    report = check_candidate()
-    assert report["scope"] == "terrain-v9-verified-published"
-    assert report["qualifiedOccurrences"] == 1235
-    assert report["unqualifiedOccurrences"] == 1
-    assert report["sourceVariants"] == 7
-    assert report["logicalContentVerified"] is True
-    assert len(report["previousRulesSha256"]) == 64
-    assert len(report["candidateRulesSha256"]) == 64
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -802,21 +773,6 @@ def test_combat_jump_reviewed_extras_reject_semantic_drift(mutate) -> None:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
-def test_combat_jump_review_gate_preserves_release_pair(require_source_files) -> None:
-    from tools.review_combat_jump_variant import check_candidate
-
-    require_source_files(ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf")
-    report = check_candidate()
-    assert report["qualifiedOccurrences"] == 121
-    assert report["unqualifiedOccurrences"] == 90
-    assert report["sourceVariants"] == 6
-    assert report["scope"] in {
-        "combat-jump-v9-candidate-not-promoted",
-        "combat-jump-v9-verified-published",
-    }
-
-
-@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_camouflage_one_use_source_29_signature_and_faq_scope() -> None:
     """Pin exact Army one-use qualifier to the reviewed FAQ boundary."""
     reviewed = RulesDatabase(ROOT / "data/generated/rules.db").skill_reviewed_extra_semantics()
@@ -946,23 +902,6 @@ def test_camouflage_one_use_metadata_rejects_unsafe_mutations(mutation) -> None:
         _validate_variant_semantics(
             variant, "skill:camouflage", [{"entity": "skill", "id": "camouflage"}],
         )
-
-
-@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
-def test_camouflage_review_gate_verifies_published_matched_pair() -> None:
-    """Read-only release check also works when Linux omits ignored FAQ PDFs."""
-    from tools.review_camouflage_variant import check_candidate
-
-    report = check_candidate()
-    assert report["scope"] == "camouflage-one-use-v9-verified-published"
-    assert report["qualifiedOccurrences"] == 223
-    assert report["unqualifiedOccurrences"] == 374
-    assert report["logicalContentVerified"] is True
-    assert set(report["verifiedFaqPdfs"]) <= {
-        "n5-faq-v0.0-en-pdf",
-        "n5-faq-v0.1-en-pdf",
-        "n5-faq-v0.1-es-pdf",
-    }
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -3351,23 +3290,6 @@ def test_infiltration_ph_review_rejects_unapproved_values_and_type() -> None:
     })
     with pytest.raises(ValueError, match="invalid N5.3 Infiltration PH"):
         _validate_variant_semantics(altered, "infiltration", links)
-
-
-@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
-def test_infiltration_ph_review_gate_preserves_matched_pair(require_source_files) -> None:
-    from tools.review_infiltration_ph_variant import check_candidate
-
-    require_source_files(ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf")
-    result = check_candidate()
-    assert result["scope"] == "infiltration-ph-v9-verified-published"
-    assert result["qualifiedPHOccurrences"] == 17
-    assert result["unreviewedReRollOccurrences"] == 5
-    assert result["unqualifiedOccurrences"] == 194
-    # SQLite byte layout (including ANALYZE statistics) is OS-specific.
-    # The reviewer validates all application-owned table rows and schema.
-    assert len(result["previousRulesSha256"]) == 64
-    assert len(result["candidateRulesSha256"]) == 64
-    assert result["logicalContentVerified"] is True
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

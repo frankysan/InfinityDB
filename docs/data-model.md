@@ -2548,8 +2548,9 @@ Neither entry changes a Unit Attribute, grants a Regular Order to a
 Combat Group's Order Pool, assumes both extras co-occur or implements
 roster legality. Source counts and the closed validation grammar are
 guarded by `tests/test_audit_source_variant_inputs.py`; the published
-schema-v9 rules/publication pair was refreshed via
-`tools.review_lieutenant_variant`. The current source audit reports
+schema-v9 rules/publication pair was historically refreshed using the
+now-retired `tools.review_lieutenant_variant` procedure. The current
+source audit reports
 **21 reviewed-extra / 13 unresolved Skill source IDs**. This metadata
 is not a published cross-Army Unit usage index.
 

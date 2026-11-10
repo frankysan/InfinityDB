@@ -1139,6 +1139,28 @@ Git whitespace and tracked runtime artifact/provenance checks passed
 (SVG validation excluded). The full suite, direct Docker validation and
 deployment were not performed.
 
+**2026-11-10 P2.5 thirteenth slice, source-variant v9 reviewers:**
+The five one-use Lieutenant, Terrain, Camouflage, Combat Jump and
+Infiltration source review/promote wrappers have been retired. Their
+`test_*_review_gate_*` cases reran the completed v9
+Rules/loose-deployed-object matched-publication rebuild verification,
+not independent current data semantics. The maintained
+`tests/test_audit_source_variant_inputs.py` continues to verify
+individual pinned Army source occurrence signatures, raw owner scope,
+approved typed extra effects, unresolved qualifiers (including
+Infiltration bare ReRoll and Religious Troop Total), and negative
+semantic mutations. No independent source finding was deleted.
+`infinity_db.sqlite_comparison` and `infinity_db.database_set`
+separately own current rebuild-equivalence and selected-set integrity;
+historical tool code is recoverable from Git.
+Focused Windows validation passed **138 tests**: the entire maintained
+source-variant module (99), read-only logical SQLite rebuild comparison
+(4), current selected database-set integrity/fail-closed behavior (20)
+and test-section registry (15). Ruff, canonical Pyright (0 errors),
+docs lint/links/backlog, Git whitespace and tracked runtime artifact/
+provenance verification passed (SVG excluded). No full suite, direct
+Docker test or deployment was performed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -2885,7 +2907,8 @@ the published FAQ answer. Three pinned FAQ PDF hashes verified on Windows.
 The guarded read-only candidate checked the exact v9 single-record
 delta, all 223 raw owners and unchanged unrelated deployed-object data.
 The variant was promoted using the rollback-capable matched-v9 path;
-`tools.review_camouflage_variant` now verifies the published pair.
+`tools.review_camouflage_variant` verified the published pair at the time
+(the one-use reviewer has since been retired under P2.5).
 Five negative mutation cases reject widened use counts, changed
 consumption conditions and invented extras. Windows source-variant
 module **89/89**, curated collection module **670/670**, and rules
@@ -2922,7 +2945,7 @@ The reviewed typed effect metadata is closed to exactly the six
 source signatures; six negative mutation tests reject invented
 modifiers, PH values, Explosion-use/attack changes and extras.
 
-The read-only `tools.review_combat_jump_variant` verifies the
+The historical read-only `tools.review_combat_jump_variant` verified the
 pinned source PDF, 211 direct occurrences, all qualified raw
 owners, exact single-record schema-v9 delta, and matched
 deployed-object publication invariance. The rollback-capable
@@ -2974,8 +2997,10 @@ normal PH-3 Infiltration Roll. The pinned Skill source-47 inventory has
 five carry bare `ReRoll` without the explicit PH=X required by the
 printed reroll rule, and 194 carry neither. Only the five fixed-PH
 signatures are typed. The original source-47 owner/ID assertion,
-negative combination/type tests and exact new read-only reviewer
-`python -m tools.review_infiltration_ph_variant` protect those bounds.
+negative combination/type tests and the then-current read-only reviewer
+`python -m tools.review_infiltration_ph_variant` protected those bounds.
+The original reviewer has been retired; current source and type checks
+retain this contract.
 Its guarded `--promote` updated the tracked v9 rules database and
 matched ignored deployed-object publication with a local rollback;
 Windows read-only regeneration exactly matches the promoted rules SHA-256

@@ -1946,12 +1946,38 @@ with embedded deployed objects before checking browser navigation. The
 maintained `infinity_db.database_set` and `sqlite_comparison` contracts
 cover current artifact matching and logical rebuild equivalence.
 
-**Remaining P2.5:** Audit and retire the source-variant review helpers and
-remaining completed staging/transition tests. When no historical callers
-remain, remove the loose JSON read/serialization layer and
-`restrictions_v9_release`. Preserve accepted source semantics and current
-selected-set checks. P2.6–P2.8 still own final naming/defaults,
-assembly-stage removal and full local/container acceptance.
+#### P2.5 — Thirteenth slice: retire one-use source-variant promotion reviewers (2026-11-10)
+
+Five completed v9 reviewers are retired as one dependency cluster:
+`tools/review_lieutenant_variant.py`, `tools/review_terrain_variant.py`,
+`tools/review_camouflage_variant.py`, `tools/review_combat_jump_variant.py`
+and `tools/review_infiltration_ph_variant.py`. The other four imported
+Lieutenant's logical SQLite comparison helper; all five imported the
+legacy v9 Restrictions refresh and loose deployed-object JSON publisher.
+None is a supported build or current runtime, CI, or operator interface.
+
+Their five `test_*_review_gate_*` cases existed to exercise completed
+matched-v9 rebuild/promotion procedures. Current-purpose source checks
+remain in `tests/test_audit_source_variant_inputs.py`: exact Army source
+IDs, occurrence/extra counts and owner scope; independently reviewed
+Lieutenant, Terrain, Combat Jump, Camouflage and Infiltration semantics;
+negative variant mutations; the five bare Infiltration ReRolls and
+Religious Troop's unreviewed Total anomaly. The current source inventory
+and curated grammar, Rules export, and selected database-set validation
+are the maintained owners. The OS-independent SQLite rebuild comparator
+already has a separate owner in `infinity_db.sqlite_comparison`.
+
+The original v9 command execution details remain recoverable in Git and
+the dated historical test/source audit logs. Historical testing prose
+is not a supported modern release or promotion procedure.
+
+**Remaining P2.5:** Retire the remaining completed `stage_commlink_v9_candidate`
+and other staging/release transition callers after a source-purpose review.
+Then remove `restrictions_v9_release`, the old release exporter and loose
+deployed-object JSON read/serialization helpers only when their independent
+consumers are resolved. Preserve current source and complete-set checks.
+P2.6–P2.8 still own final naming/defaults, assembly-stage removal and
+full local/container acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 
