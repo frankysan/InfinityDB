@@ -2304,6 +2304,30 @@ Linux-dev worker test or manual visual browser acceptance.
 
 **Exit:** N5 and ITS ownership is explicit, the current Battleground pilot works against `its_18.db`, and the model is ready for more seasons. Curating all ITS missions remains separate feature work in `TODO.md`, not a restructuring prerequisite.
 
+#### P3.1 — Source and publication ownership mapped (2026-11-10)
+
+**Status: Complete as design/ownership work; no schema or serving cutover.**
+The maintained [season publication ownership contract](season-publication-ownership.md)
+maps the five active source collections, the four N5.3 core scenarios and
+one ITS 18 Battleground pilot, and defines how `rules_n5.db` and the future
+`its_18.db` own definitions, season constraints, Extras, FAQs, source
+citations and effective versions. Explicit season identity is
+`(collection_id, revision, scenario_id)`; selected source collection,
+citation and content hash remain separate publication evidence.
+
+The audit identified current cross-boundary exceptions: ITS 18 p. 26/28
+Spec-Ops/TEAM-OPS restrictions embedded in two N5.3 Skill cards; the
+N4-origin Reinforcements reference citing ITS 18 p. 27; and ITS 18 p. 17
+marker sizes hard-coded into the shared Scenario catalog. These require
+scoped overlays or provenance resolution, **not** deletion of N5 core
+mechanics. The N5 FAQ's Supplies/Annihilation scenario-specific rulings
+remain N5 FAQ-owned because applicability does not change publication
+authority. Future duplicate Scenario slugs must resolve by season and
+revision, rather than today’s globally unique slug assumption.
+
+P3.2 is next: a deterministic standalone ITS 18 database and builder,
+retaining the current serving contract until the coordinated P3.4 cutover.
+
 ### P4 — Make the interface player-first
 
 **Outcome:** Less user-visible implementation language without loss of relevant gameplay accuracy.  

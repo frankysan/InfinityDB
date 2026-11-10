@@ -29,8 +29,10 @@ when all contained work shares the same owner.
 - [ ] Execute P3–P6 of the [phased restructuring plan](restructuring-plan.md).
   P0–P2 are complete, including the verified shared Army v31 / Rules v17
   `army.db`/`rules_n5.db` build and real local/Docker serving acceptance.
-  - [ ] Start P3.1 by assigning core N5/FAQ versus season-scoped ITS source
-    and publication ownership, before designing the `its_18.db` builder.
+  - [ ] Continue P3.2–P3.5. P3.1 source/publication ownership is mapped in
+    [season publication ownership](season-publication-ownership.md); next
+    define the standalone `its_18.db` schema and deterministic builder
+    without changing serving defaults until the coordinated P3.4 cutover.
   - [ ] Continue P4–P6 under the plan's player-facing presentation, tooling
     retirement and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in
