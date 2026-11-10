@@ -129,15 +129,25 @@ pre-cutover digest independently guards six Battleground JSON payloads and
 response without retaining a second Rules-owned record. N5 scenario facts,
 source attribution and shared renderer behavior remain unchanged.
 
-The existing N5 cards still carry transitional ITS season notes and the
-shared Scenario catalog still attributes marker sizes to ITS 18 p. 17.
-The separate ITS-only policies retain their exact context and citation
-without applying to free play by default. P3.4 must still replace
-transitional N5-card event wording with explicit-context presentation
-without losing player-visible restrictions or caveats. Changing maintained
-`src/` or curated
-files changes the complete build fingerprint; regenerate the three-file
-release set before source-bound deployment checks or merge.
+The N5 Spec-Ops and Request SpecBall cards no longer duplicate ITS 18
+tournament and TEAM-OPS restrictions. The season database remains the sole
+authority for those reviewed policies, including the optional
+Reinforcements Extra availability. `GET /api/season-policies` requires
+`season_id` and `season_revision`; without an explicit `context` it
+returns only the authored available context names and **no applied policies**.
+Selecting an exact play context returns the season-owned effects, target and
+citations, optionally filtered by typed `target_id`. Unknown contexts,
+seasons and revisions return no policies; malformed selectors return 400.
+The ITS scenario page offers a context selector with no selection by default.
+It does not add tournament restrictions to core/free play automatically.
+
+The N5/Spanish SpecBall printing discrepancy stays in the core card, and
+the Reinforcements annex preserves its N4-origin procedural caution.
+The shared Scenario catalog still attributes marker dimensions to
+ITS 18 p. 17 as an external source of measurement evidence. Changing
+maintained `src/` or curated files changes the complete build fingerprint;
+regenerate the three-file release set before source-bound deployment
+checks or merge.
 
 For the ownership and scope exceptions (Spec-Ops, TEAM-OPS,
 Reinforcements, marker citations, FAQ), see

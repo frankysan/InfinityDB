@@ -30,7 +30,7 @@ from infinity_db.domain_references import (
     enrich_rule_relation_references,
     rule_record_public_reference,
 )
-from infinity_db.domain_slugs import require_domain_slug
+from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
 from infinity_db.glossary_catalog import GlossaryCatalog
@@ -640,6 +640,72 @@ class ApiHandler:
                 LOGGER.exception("Could not read Restrictions reference")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "Restrictions reference is unavailable. Please try again."}
+        elif path == "/api/season-policies":
+            cache_control = API_CACHE_CONTROL
+            try:
+                params = _validated_query_params(
+                    query_string,
+                    {"season_id", "season_revision", "context", "target_id", "cache_bust"},
+                )
+                for key in ("season_id", "season_revision"):
+                    if key not in params or not params[key][0]:
+                        raise ValueError(f"Provide {key} exactly once")
+                season_id, revision = params["season_id"][0], params["season_revision"][0]
+                require_domain_slug(season_id, context="ITS policy season")
+                if revision.strip() != revision:
+                    raise ValueError("ITS policy selection requires an exact season revision")
+                context = params.get("context", [None])[0]
+                if context is not None:
+                    require_domain_slug(context, context="ITS play context")
+                target_id = params.get("target_id", [None])[0]
+                if target_id is not None:
+                    if context is None:
+                        raise ValueError("Provide context when filtering by target_id")
+                    kind = target_id.partition(":")[0]
+                    if kind not in {"skill", "rule"}:
+                        raise ValueError("ITS policy target must be a Skill or Rule identity")
+                    validate_typed_domain_id(
+                        target_id, expected_domain=kind, context="ITS policy target",
+                    )
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                registry = self.scenario_catalog.publication_registry
+                contexts = (
+                    registry.season_contexts(season_id=season_id, revision=revision)
+                    if registry is not None else []
+                )
+                resolved = (
+                    registry.season_policies(
+                        season_id=season_id, revision=revision,
+                        context=context, target_id=target_id,
+                    )
+                    if registry is not None and context is not None else []
+                )
+                payload = {
+                    "selection": {
+                        "season_id": season_id, "season_revision": revision,
+                        "context": context, "target_id": target_id,
+                    },
+                    "contexts": contexts,
+                    "items": [
+                        {
+                            **entry["policy"],
+                            "target": {
+                                **entry["policy"]["target"],
+                                "name": entry["target"]["name"],
+                            },
+                        }
+                        for entry in resolved
+                    ],
+                }
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read ITS season policies")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "ITS season policies are unavailable. Please try again."}
         elif path == "/api/faq-rulings":
             cache_control = API_CACHE_CONTROL
             try:

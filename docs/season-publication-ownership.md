@@ -88,14 +88,12 @@ explicit context-scoped relation resolved at read time.
 
 ## Cross-boundary inventory and migration dispositions
 
-- **Spec-Ops:** `n5-core-v5.3.json` currently embeds the ITS 18 prohibition
-  and TEAM-OPS distinction directly in `skill:infinity-spec-ops` restrictions
-  and `skill:request-specball` source notes, with ITS citations on pages
-  26/28. Keep the N5.3 Special Skills and core SpecBall procedure in
-  `rules_n5.db`; move the *season-only* prohibition, TEAM-OPS applicability
-  and related source-selected presentation into explicit ITS 18 overlays.
-  Do not simply delete the player-visible qualification or infer a change to
-  the underlying SpecBall Skill.
+- **Spec-Ops:** `n5-core-v5.3.json` now retains only the N5.3
+  Special Skills, the core SpecBall procedure and its bilingual
+  source discrepancy. ITS 18 official-tournament and TEAM-OPS restrictions
+  are owned by `its_18.db`, surfaced only after exact play-context selection
+  from the ITS scenario page or policy API. Their season citations no longer
+  appear as if they were default N5 Skill restrictions.
 - **Reinforcements Extra:** The separate N4-origin annex cites ITS 18 page 27
   for optional-mode availability. Retain its provenance and N4 caveat;
   rehome any ITS-specific availability/event restrictions to ITS 18 without

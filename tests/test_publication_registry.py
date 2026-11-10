@@ -91,6 +91,16 @@ def test_policy_targets_resolve_from_core_only_in_explicit_context(
     ) == []
 
 
+def test_season_policy_contexts_are_discoverable_but_never_applied_by_default(
+    registry: PublicationRegistry,
+) -> None:
+    assert registry.season_contexts(season_id="its-18", revision=REVISION) == [
+        "official-tournament", "reinforcements-extra", "team-ops-extra",
+    ]
+    assert registry.season_contexts(season_id="its-18", revision="wrong") == []
+    assert registry.season_contexts(season_id="its-17", revision=REVISION) == []
+
+
 def test_registry_rejects_wrong_season_registration_and_core_revision(tmp_path: Path) -> None:
     its = tmp_path / "its_18.db"
     build_its_database(ITS_SOURCE, its)
@@ -210,6 +220,84 @@ def test_registered_http_core_default_and_cache_isolation(registered_http_apps) 
     new_status, new_headers, _ = wsgi_response(registered, url)
     assert old_status == new_status == 200
     assert dict(old_headers)["ETag"] != dict(new_headers)["ETag"]
+
+
+def test_published_season_policies_require_explicit_play_context(
+    registered_http_apps,
+) -> None:
+    core, registered = registered_http_apps
+    base = f"http://registry.test/api/season-policies?season_id=its-18&season_revision={REVISION}"
+    status, _, data = wsgi_response(registered, base)
+    assert status == 200
+    initial = json.loads(data)
+    assert initial["selection"]["context"] is None
+    assert initial["items"] == []
+    assert initial["contexts"] == [
+        "official-tournament", "reinforcements-extra", "team-ops-extra",
+    ]
+    assert json.loads(wsgi_response(core, base)[2])["items"] == []
+    cases = (
+        ("official-tournament", "its18-spec-ops-tournament", "skill:infinity-spec-ops", 26),
+        ("team-ops-extra", "its18-team-ops-spec-ops", "skill:infinity-spec-ops", 28),
+        ("reinforcements-extra", "its18-reinforcements-availability",
+         "rule:reinforcements-extra", 27),
+    )
+    for context, expected_id, target, page in cases:
+        status, _, body = wsgi_response(registered, base + f"&context={context}")
+        assert status == 200
+        policy, = json.loads(body)["items"]
+        assert policy["id"] == expected_id
+        assert policy["target"]["recordId"] == target
+        assert policy["target"]["name"]
+        assert policy["citations"][0]["page"] == page
+        assert policy["citations"][0]["sourceTitle"] == "ITS Season 18: Overheat (English)"
+        assert policy["citations"][0]["sourceUrl"] == (
+            "https://experience.corvusbelli.com/en/infinity/its-rules"
+        )
+        assert policy["applicability"]["context"] == context
+        status, _, body = wsgi_response(
+            registered, base + f"&context={context}&target_id={target}",
+        )
+        assert status == 200 and len(json.loads(body)["items"]) == 1
+        status, _, body = wsgi_response(
+            registered, base + f"&context={context}&target_id=rule:missing",
+        )
+        assert status == 200 and json.loads(body)["items"] == []
+    for url in (
+        base + "&context=free-play",
+        base + "&context=official-tournament&target_id=rule:reinforcements-extra",
+        "http://registry.test/api/season-policies?"
+        "season_id=its-18&season_revision=wrong&context=official-tournament",
+        "http://registry.test/api/season-policies?"
+        f"season_id=its-17&season_revision={REVISION}&context=official-tournament",
+    ):
+        status, _, body = wsgi_response(registered, url)
+        assert status == 200 and json.loads(body)["items"] == []
+
+
+@pytest.mark.parametrize("query", [
+    "",
+    "season_id=its-18",
+    "season_id=its-18&season_revision=",
+    "season_id=ITS-18&season_revision=2026.09.01",
+    "season_id=its-18&season_revision=2026.09.01&context=bad context",
+    "season_id=its-18&season_revision=2026.09.01&target_id=skill:infinity-spec-ops",
+    "season_id=its-18&season_revision=2026.09.01&context=official-tournament"
+    "&target_id=scenario:battleground",
+    "season_id=its-18&season_revision=2026.09.01&context=official-tournament"
+    "&target_id=skill:CAPS",
+    "season_id=its-18&season_revision=2026.09.01&season_id=its-18",
+    "season_id=its-18&season_revision=2026.09.01&unexpected=1",
+])
+def test_season_policies_api_rejects_incomplete_or_malformed_selection(
+    registered_http_apps, query: str,
+) -> None:
+    _, registered = registered_http_apps
+    status, _, payload = wsgi_response(
+        registered, "http://registry.test/api/season-policies?" + query,
+    )
+    assert status == 400
+    assert "error" in json.loads(payload)
 
 
 def test_registered_its_matches_pinned_pre_cutover_json_and_svg_bytes(

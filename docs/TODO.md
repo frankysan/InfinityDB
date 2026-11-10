@@ -36,8 +36,9 @@ when all contained work shares the same owner.
     See [ITS season database](its-season-database.md). The three-file
     runtime is committed and locally validated; hosted Source CI still
     contains legacy fixture failures. The duplicate ITS Rules export has
-    been retired; remaining P3.4 work covers scoped tournament/Extras
-    overlays, transitional N5 card caveats and FAQ applicability review.
+    been retired; explicit-context ITS policies and the associated N5
+    Spec-Ops card cleanup are implemented. Complete P3.4 FAQ/scenario
+    source-attribution review and P3.5 cross-season isolation acceptance.
   - [ ] Continue P4–P6 under the plan's player-facing presentation, tooling
     retirement and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in

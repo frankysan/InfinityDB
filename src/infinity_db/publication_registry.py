@@ -7,7 +7,10 @@ independent of the HTTP and browser layers.
 
 from __future__ import annotations
 
+import json
+import sqlite3
 from collections.abc import Mapping
+from contextlib import closing
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
@@ -69,6 +72,7 @@ class PublicationRegistry:
         self._season_paths: dict[str, Path] = {}
         self._season_revisions: dict[str, str] = {}
         self._season_reports: dict[str, dict[str, Any]] = {}
+        self._season_sources: dict[str, dict[str, dict[str, Any]]] = {}
         for season_id, path in season_databases.items():
             require_domain_slug(season_id, context="registered ITS season")
             if not season_id.startswith("its-"):
@@ -83,6 +87,17 @@ class PublicationRegistry:
             self._season_paths[season_id] = resolved
             self._season_revisions[season_id] = identity["seasonRevision"]
             self._season_reports[season_id] = report
+            with closing(sqlite3.connect(resolved.as_uri() + "?mode=ro", uri=True)) as db:
+                descriptors = [
+                    json.loads(row[0])
+                    for row in db.execute(
+                        "SELECT descriptor_json FROM sources WHERE collection_id=?",
+                        (identity["sourceCollectionId"],),
+                    )
+                ]
+            self._season_sources[season_id] = {
+                descriptor["id"]: descriptor for descriptor in descriptors
+            }
 
         # Validate cross-domain references at registration, before any HTTP read.
         # No policy is applied by default, but unresolved targets cannot be hosted.
@@ -216,6 +231,15 @@ class PublicationRegistry:
             skills.append(skill)
         return {"scenario": record, "rules": rules, "skills": skills}
 
+    def season_contexts(self, *, season_id: str, revision: str) -> list[str]:
+        """List authored play contexts without selecting or applying any policy."""
+        require_domain_slug(season_id, context="ITS policy season")
+        if not isinstance(revision, str) or not revision.strip() or revision.strip() != revision:
+            raise ValueError("ITS policy selection requires an exact season revision")
+        if season_id not in self._season_reports or revision != self._season_revisions[season_id]:
+            return []
+        return sorted({policy["context"] for policy in self._season_reports[season_id]["policies"]})
+
     def season_policies(
         self, *, season_id: str, revision: str, context: str,
         target_id: str | None = None,
@@ -243,7 +267,19 @@ class PublicationRegistry:
             ))
             if target is None:
                 raise ValueError(f"ITS policy {policy['id']!r} has an unknown N5 target")
-            result.append({"policy": policy, "target": target})
+            published = deepcopy(policy)
+            for citation in published["citations"]:
+                source = self._season_sources[season_id].get(citation["sourceId"])
+                if source is None:
+                    raise ValueError(
+                        f"ITS policy {policy['id']!r} has unknown source {citation['sourceId']!r}"
+                    )
+                citation.update({
+                    "sourceTitle": source["title"],
+                    "sourceVersion": source["version"],
+                    "sourceUrl": source.get("url"),
+                })
+            result.append({"policy": published, "target": target})
         return result
 
     def season_manifest(self) -> dict[str, dict[str, Any]]:

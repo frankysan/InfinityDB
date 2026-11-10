@@ -885,6 +885,32 @@ def test_scenario_selection_ignores_stale_requests() -> None:
     assert "scenario selection race: passed" in completed.stdout
 
 
+def test_scenario_its_context_opt_in_never_applies_on_default_or_stale_selection() -> None:
+    node = shutil.which("node")
+    if node is not None:
+        command = [node]
+    else:
+        try:
+            importlib.import_module("nodejs_wheel")
+        except ImportError:
+            pytest.skip("Node.js is unavailable for scenario ITS context regression")
+        command = [sys.executable, "-m", "nodejs_wheel"]
+    root = Path(__file__).parents[1]
+    completed = subprocess.run(
+        [
+            *command,
+            str(root / "tests" / "scenario_policy_harness.cjs"),
+            str(root / "src" / "infinity_db" / "web" / "static" / "scenario.js"),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert "scenario ITS context selection: passed" in completed.stdout
+
+
 def test_scenario_grid_can_shrink_to_narrow_viewports(scenario_app: Application) -> None:
     status, _, stylesheet = request(scenario_app, "/static/page-overrides.css")
     assert status == 200

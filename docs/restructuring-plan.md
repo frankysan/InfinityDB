@@ -2465,6 +2465,20 @@ scope is explicit-context policy presentation, transitional N5 core-card
 qualifications and FAQ applicability review; P3.5 owns additional-season
 slug/revision isolation.
 
+#### P3.4 — Fifth slice: context-selected ITS policies (2026-11-10)
+
+The N5 Spec-Ops and Request SpecBall card data no longer carries ITS 18
+tournament and TEAM-OPS restrictions or their season-only citations. The
+separate ITS source remains authoritative, preserving the N5 Spanish/English
+SpecBall wording discrepancy and N4-origin Reinforcements caveats.
+`/api/season-policies` accepts an exact season and revision, exposing
+authored context choices without applying them; only explicit play-context
+selection returns effect, target and source citations. The ITS scenario
+detail page offers the explicit context selector with no tournament/Extra
+context selected by default. Unknown seasons/revisions/contexts are empty
+and malformed selectors fail closed. P3.5 should verify growth/collision
+semantics and P3.4 still needs a final FAQ/source-attribution closeout.
+
 ### P4 — Make the interface player-first
 
 **Outcome:** Less user-visible implementation language without loss of relevant gameplay accuracy.  

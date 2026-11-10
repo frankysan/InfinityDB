@@ -881,7 +881,7 @@ def test_faq_api_uses_explicit_context_without_merging_base_rules(
     import json
     from wsgiref.util import setup_testing_defaults
 
-    from infinity_db.web import create_app
+    from infinity_db.web import create_app_from_database_set
 
     old = _ruling("faq-ruling:old")
     new = _ruling(
@@ -891,7 +891,11 @@ def test_faq_api_uses_explicit_context_without_merging_base_rules(
     for record in (old, new):
         record["review"]["status"] = "reviewed"
     db = _export(base_documents, tmp_path, [old, new])
-    app = create_app(Path("data/generated/army.db"), db.path)
+    # Use a complete runtime for the HTTP transport. Substitute only the
+    # synthetic FAQ resolver; a v8 standalone Rules export is not a
+    # supported modern full-application database.
+    app = create_app_from_database_set(Path("data/generated"))
+    app.api.rules_database = db
 
     def query(query_string: str) -> tuple[int, dict]:
         environ: dict[str, Any] = {}
@@ -1230,13 +1234,15 @@ def test_published_faq_pilot_reaches_api_with_unmodified_base_reference(
     from urllib.parse import urlencode
     from wsgiref.util import setup_testing_defaults
 
-    from infinity_db.web import create_app
+    from infinity_db.web import create_app_from_database_set
     from infinity_db.web.presentation import ASSETS
 
     assert "/static/faq-rulings.js" in ASSETS
     assert published_pilot.composed_record("equipment:hacking-device") is not None
     assert published_pilot.composed_record("scenario:annihilation") is not None
-    app = create_app(Path("data/generated/army.db"), published_pilot.path)
+    # The public API is served by the complete three-file set. The
+    # standalone published_pilot still checks curated FAQ storage in isolation.
+    app = create_app_from_database_set(Path("data/generated"))
 
     def request(topic: str, **extra: str) -> tuple[int, dict]:
         query = urlencode({

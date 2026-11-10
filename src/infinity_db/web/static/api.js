@@ -28,6 +28,16 @@ export function getFaqRulings(topicId, context, signal) {
   return getJson(`/api/faq-rulings?${params}`, signal);
 }
 
+/** Season selection alone never opts a player into tournament or Extra rules. */
+export function getSeasonPolicies(seasonId, revision, context, signal) {
+  const params = new URLSearchParams({
+    season_id: seasonId,
+    season_revision: revision,
+  });
+  if (context) params.set("context", context);
+  return getJson(`/api/season-policies?${params}`, signal);
+}
+
 export function getOrdersAros(signal, scenario = "") {
   const params = new URLSearchParams();
   if (scenario) params.set("scenario", scenario);

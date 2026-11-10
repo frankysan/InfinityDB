@@ -14,7 +14,7 @@ from infinity_db.weapon_ammunition_references import (
     WeaponAmmunitionReferences,
     load_ammunition_reference_map,
 )
-from infinity_db.web import create_app
+from infinity_db.web import create_app, create_app_from_database_set
 
 
 def _rules_database(tmp_path: Path) -> RulesDatabase:
@@ -1696,11 +1696,10 @@ def test_vulnerability_example_is_explicit_and_not_a_component_rule(
         assert "reviewedVulnerabilityCases" not in load_ammunition_reference_map()[source_id]
 
 
-def test_n53_specball_core_procedure_reaches_public_skill_routes(tmp_path: Path) -> None:
-    """N53-02: public Skills expose the reviewed core procedure, not ITS-only rules."""
-    rules_db = _rules_database(tmp_path)
+def test_n53_specball_core_procedure_reaches_public_skill_routes() -> None:
+    """N53-02: the complete runtime serves core SpecBall without ITS restrictions."""
     root = Path(__file__).resolve().parents[1]
-    app = create_app(root / "data/generated/army.db", rules_database_path=rules_db.path)
+    app = create_app_from_database_set(root / "data/generated")
 
     def request(path: str) -> tuple[str, bytes]:
         environ: dict[str, Any] = {}
@@ -1748,8 +1747,12 @@ def test_n53_specball_core_procedure_reaches_public_skill_routes(tmp_path: Path)
     )
     assert "once per game" in " ".join(facts["restrictions"])
     assert "At the end of the collecting Order" in " ".join(facts["effects"])
+    assert len(facts["sourceNotes"]) == 1
     assert "English printing discrepancy" in facts["sourceNotes"][0]
-    assert "ITS applicability" in facts["sourceNotes"][1]
+    assert not any("ITS Season 18" in note for note in facts["sourceNotes"])
+    assert {citation["source_id"] for citation in request_rule[0]["citations"]} == {
+        "n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf",
+    }
     assert ("uses-effects-of", "outbound", "Combat Jump") in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in request_rule[0]["display_relations"]

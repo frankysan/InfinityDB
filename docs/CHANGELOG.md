@@ -12,10 +12,17 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- No player-facing changes.
+- ITS Season 18 scenario pages offer explicit tournament and optional Extra
+  context selection. Event-only Spec-Ops restrictions no longer appear as
+  default N5 Skill restrictions.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Added source-cited ITS Season 18
+  play-context policies with explicit tournament, TEAM-OPS and Reinforcements
+  Extra selection. The policy API never applies a context by default; scenario
+  pages show only policies chosen by the player and link to their official
+  source references.
 - **Data processing + Project infrastructure:** Added `database-health --db-dir`
   to inspect a complete runtime directory offline, including SQLite integrity,
   source-matched references and file fingerprints. Missing or mismatched data
@@ -32,6 +39,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Removed ITS-specific Spec-Ops/TEAM-OPS
+  restrictions from the default N5 Spec-Ops and Request SpecBall rules cards,
+  retaining their core Skill semantics and bilingual printing caveat.
 - **Data processing + Web backend + Deployment:** Retired loose deployed-object
   JSON serving, legacy v8/v9 build modes and image assembly, and v1 variant
   publications. Current builds and images require database-embedded deployed

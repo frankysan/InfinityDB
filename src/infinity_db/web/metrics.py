@@ -55,6 +55,7 @@ ROUTES = (
     "/api/skill-extras",
     "/api/search",
     "/api/scenarios",
+    "/api/season-policies",
     "/api/scenarios/:id",
     "/api/scenarios/:id/map.svg",
     "/static/:asset",

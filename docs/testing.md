@@ -1582,6 +1582,26 @@ not serving inputs and were not changed. Hosted full Source matrix is still
 failing older standalone Rules-v8 and retired CLI fixture expectations; do
 not treat this section as a hosted-CI pass.
 
+**2026-11-10 P3.4 explicit ITS context presentation (development checkout):**
+The complete Army/Rules/ITS build passed after removing ITS-only Spec-Ops
+and TEAM-OPS text/citations from the N5 core records (build set
+`1c41a5c1491860fa596041c04c1a6a1913bd9a633bfda445b3ac693de15aab9b`).
+The season policy API requires an exact season/revision, reveals available
+contexts without applying any, and serves policies with citation descriptors
+only after an explicit context choice. The ITS scenario page adds a
+no-selection default and prevents stale async responses from applying after
+selection changes/navigation. FAQ source/supersession tests use the complete
+runtime for HTTP while retaining synthetic FAQ resolver coverage.
+Results: curated **671/671**, registry/policy API **26/26**, FAQ
+**79 passed / 1 skipped**, scenario API/JS lifecycle **96 passed /
+4 skipped**, public SpecBall route **1/1**, Pyright **0 errors**, Ruff
+and docs/links green. Source-bound assets passed **808/808** published
+SVGs and **808/808** browser references; checkout and actual disposable
+Docker each passed **41/41** pinned routes, with immutable image
+validation and cleanup. Hosted full Source CI from the prior pinned SHA
+remains red on legacy fixture expectations; hosted acceptance of this new
+revision has not yet occurred.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
