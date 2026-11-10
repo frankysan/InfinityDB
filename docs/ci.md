@@ -443,9 +443,11 @@ checksum-bound publication metadata. The matrix pins the same CPython patch line
 cross-platform comparison. **This does not itself pin the SQLite library**: CPython's Windows
 build and Linux system packages may provide different SQLite versions, which can encode
 identical rows in different B-tree layouts. The manifest's exact-byte comparison remains
-mandatory. If it fails, inspect the host SQLite versions and run the strict logical
-comparison (`tools.audit_rules_rebuild_equivalence`) before deciding whether to align
-the SQLite toolchain or revise the documented byte-reproducibility contract. Neither
+mandatory. If it fails, inspect the host SQLite versions and compare the two existing
+files with `infinity_db.sqlite_comparison.same_logical_rules_contents` before
+deciding whether to align the SQLite toolchain or revise the documented
+byte-reproducibility contract. This read-only comparison checks schema, identity
+and all row multisets without rebuilding or changing either file. Neither
 logical parity nor the installed tracked database alone replaces that hosted check.
 
 Generators remain responsible for canonical bytes; `.gitattributes` only prevents tracked

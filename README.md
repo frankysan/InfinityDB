@@ -236,11 +236,9 @@ Use `--output` for a **standalone Rules-only** build with no checkout
 publication, or `--legacy-v8`/`--legacy-v9` for compatibility work.
 For an independently staged, source-matched v10 candidate, run
 `python -m tools.build_v10_runtime_candidate` and repeat with `--check`.
-Use `--promote-release` to explicitly verify v9→v10 semantic parity and
-promote the three matched v10 tracked files (Rules, variant usage and Weapon
-citations). The development branch now contains this promoted v10 set;
-the previous tagged production release remains v9 until separate acceptance
-and deployment.
+The initial v9-to-v10 migration is complete and its one-use promotion command
+is retired. The development branch contains the matched v10 set; deployment
+and release acceptance follow the [release checklist](docs/releasing.md).
 
 Reference PDFs and wiki snapshots are research inputs rather than direct runtime
 inputs. Human-reviewed rules collections live under `data/curated/rules/`.

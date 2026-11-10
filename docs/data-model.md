@@ -156,9 +156,10 @@ even a present loose JSON publication cannot restore a missing model.
 The core-scenario and terrain/scenery boundary audits likewise read this
 embedded model from explicitly selected Army and Rules paths; their reports
 pin the actual database bytes, without synthesizing a JSON publication or
-guessing sibling files. Historical staging tools still use the standalone
-JSON reader pending their retirement, but runtime serving, current source
-boundary audits and supported complete builds do not.
+guessing sibling files. The standalone JSON reader and projection adapter
+remain only in source/storage/browser test fixtures pending their P2.5
+reconciliation; runtime serving, current source boundary audits and supported
+complete builds do not use them.
 
 `infinity_db.deployed_object_reference.project_deployed_references` consumes
 the validated N5.3 deployed-object audit and produces a **pure, read-only**
@@ -3033,12 +3034,11 @@ Combined Saving Roll signatures, v16 reviewed Ammunition links
 and v17 relational Weapon Properties.
 Invalid combinations, missing rows and corrupted provenance fail closed.
 
-Shared release staging preserves the active supported schema. For v10 it
-rebuilds the reviewed embedded object model from the pinned Army and curated
-inputs, retaining Restrictions. Audit and staging comparisons can serialize
-that embedded model in memory with a transient rules-file fingerprint;
-they do not require or regenerate an adjacent legacy JSON file for v10.
-Legacy v8/v9 comparisons continue to use the exact publication bytes.
+The one-use schema-preserving release exporter and v9-to-v10 parity/rebuild
+diagnostic are retired after the completed migration. General logical SQLite
+comparison is maintained in `infinity_db.sqlite_comparison`; current database-set
+validation owns source binding, integrity and publication completeness. Neither
+requires replaying an old schema transition or synthesizing deployed-object JSON.
 
 Normal `build-rules` now creates a **v10/compatibility-12** candidate under
 ignored `local/rules-standalone.db`, using the tracked Restrictions chart,
@@ -3056,10 +3056,12 @@ on 2026-11-08; the tagged 1.0.0 v9/JSON release remains available for rollback.
 four-file runtime set in ignored `local/v10-candidate/`, including v2
 `variant-usage.json` without a deployed-object publication fingerprint and
 matching reviewed Weapon-profile citations. `--check` rederives the publication
-inputs and checks their bytes and database provenance. `tools.prepare_runtime_bundle`
-copies the source-verified four-file v10 (or five-file legacy v9) set into
-ignored `data/runtime/` for Docker packaging. This is image-build preparation,
-not runtime migration or multi-file publication locking.
+inputs and checks their bytes and database provenance. Its one-use
+`--promote-release` operation is retired; build/check and checkout assembly
+remain until the complete-set cutover. `tools.prepare_runtime_bundle` copies
+the selected supported database set into ignored `data/runtime/` for Docker
+packaging, rejecting v8/v9 before modifying the destination. This is image-build
+preparation, not runtime migration or multi-file publication locking.
 
 The v9 build is byte-deterministic in tests, and read-only HTTP
 checks confirm both v8-unavailable and v9-available responses,

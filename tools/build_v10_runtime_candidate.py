@@ -168,71 +168,10 @@ def publish_checkout_runtime(
             shutil.rmtree(temporary)
 
 
-def promote_release_candidate(
-    stage: Path, *, root: Path = ROOT,
-) -> dict[str, Any]:
-    """Copy a source-verified candidate into tracked release files, without deployment.
-
-    This is deliberately a Git-working-tree operation, not a live multi-file
-    transaction. Before the first v9→v10 copy, enforce semantic parity. The
-    operation is retryable when the tracked rules.db already matches the stage.
-    """
-    import os
-    import tempfile
-
-    from tools.audit_rules_rebuild_equivalence import audit_v10_candidate
-    from tools.prepare_runtime_bundle import expected_files
-    from tools.verify_deployment_assets import (
-        verify_runtime_artifacts,
-        verify_variant_release_publication,
-        verify_weapon_profile_release_publication,
-    )
-
-    stage = stage.resolve()
-    root = root.resolve()
-    if not stage.is_relative_to((root / "local").resolve()):
-        raise ValueError("Release candidates must be staged under ignored local/")
-    result = verify_candidate(stage, root=root)
-    release = root / "data/generated"
-    tracked_rules = release / "rules.db"
-    if _digest(tracked_rules) != result["sha256"]["rules.db"]:
-        parity = audit_v10_candidate(stage / "rules.db", tracked_rules)
-        if parity["parity"] != "passed":
-            raise ValueError("Frozen v10 candidate does not preserve legacy rules")
-    # infinity.db is already byte-identical, as required by verify_candidate.
-    # Never promote the obsolete v9 deployed-objects.json.
-    for name in ("rules.db", "variant-usage.json", "weapon-profile-sources.json"):
-        destination = release / name
-        descriptor, filename = tempfile.mkstemp(prefix=".v10-", dir=release)
-        temporary = Path(filename)
-        try:
-            with os.fdopen(descriptor, "wb") as output, (stage / name).open("rb") as source:
-                shutil.copyfileobj(source, output)
-            if _digest(temporary) != result["sha256"][name]:
-                raise ValueError(f"Promoted bytes differ from v10 candidate: {name}")
-            temporary.replace(destination)
-        finally:
-            temporary.unlink(missing_ok=True)
-    verify_runtime_artifacts(
-        release / "infinity.db", tracked_rules,
-        root / "data/manifests/symbol-publication.json",
-    )
-    verify_variant_release_publication(release / "infinity.db", tracked_rules)
-    verify_weapon_profile_release_publication(release / "infinity.db", tracked_rules)
-    if expected_files(release) != set(REQUIRED):
-        raise ValueError("Promoted release does not use the four-file v10 image contract")
-    result["promotion"] = "verified-tracked-working-tree"
-    return result
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--check", action="store_true", help="Validate an existing candidate")
-    parser.add_argument(
-        "--promote-release", action="store_true",
-        help="Validate and copy the matched v10 artifacts to tracked data/generated/ (no deploy)",
-    )
     parser.add_argument(
         "--checkout", action="store_true",
         help="Refresh ignored local/checkout-runtime from the standalone v10 rules DB",
@@ -242,15 +181,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Source v10 Rules database for --checkout",
     )
     args = parser.parse_args(argv)
-    if args.promote_release and (args.checkout or args.check):
-        parser.error("--promote-release is incompatible with --checkout and --check")
     default = ROOT / "local/checkout-runtime" if args.checkout else DEFAULT_STAGE
     destination = (args.output_dir or default).resolve()
     if not destination.is_relative_to((ROOT / "local").resolve()):
         parser.error("Staging must be inside the ignored local/ directory")
-    if args.promote_release:
-        result = promote_release_candidate(destination)
-    elif args.checkout:
+    if args.checkout:
         result = (
             verify_candidate(destination) if args.check
             else publish_checkout_runtime(args.rules_db, destination)

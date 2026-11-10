@@ -2072,9 +2072,42 @@ their own purpose review before retirement; they are not retained merely to
 support current research checks. The standalone JSON reader/builder still
 has historical staging/test consumers to reconcile separately.
 
-**Remaining P2.5:** Review the legacy rebuild/candidate diagnostic cluster,
-then retire the schema-preserving exporter and remaining obsolete JSON
-reader/builder and transition helpers after their consumers are separated.
+#### P2.5 — Eighteenth slice: retire completed v9-to-v10 release diagnostics (2026-11-10)
+
+The initial v9-to-v10 publication completed on 2026-11-08. The one-use
+`audit_v10_candidate` check encoded that exact transition: seven added
+deployed-object tables, the v9/v10 metadata change and Battleground geometry
+annotations. Its only live caller was `build_v10_runtime_candidate`'s
+`promote_release_candidate` operation. That operation and `--promote-release`
+are now removed together with `tools/audit_rules_rebuild_equivalence.py`
+and its otherwise unused schema-preserving `tools/release_rules_export.py`.
+No runtime, CI, current source audit or test imports the retired modules.
+
+The physically retained `tools/restrictions_v9_release.py` is also deleted.
+Its callers and completed transition-test matrix were retired in the sixteenth
+slice, leaving no independent consumer. Current source-variant, Restrictions
+and database-set tests already own its continuing source and integrity
+invariants; its one-time mutations are preserved only in Git history.
+
+The diagnostic's general logical-comparison invariant already has a maintained
+owner in `infinity_db.sqlite_comparison`, including schema/index, identity,
+row multiplicity and missing-file checks. CI now points there for comparing
+existing files without rebuilding a historical schema. The frozen source
+audit retains its exact cross-host byte/row evidence and source hashes;
+Git retains the migration implementation. No second executable archive is
+needed for the completed transition.
+
+The candidate module's independent build/check and `publish_checkout_runtime`
+paths remain: normal `build-rules` still assembles the matching ignored checkout
+set, and its current candidate test still checks source verification, exact
+files, tamper rejection and selected runtime behavior. Shared database-set and
+complete-build tests own current integrity, deterministic builds and rejected
+mixed inputs. P2.6/P2.7 still own the deliberate replacement of this assembly
+path; retiring the one-use promoter does not change build/serve defaults.
+
+**Remaining P2.5:** Reconcile the standalone deployed-object JSON
+reader/builder and remaining transition/test consumers, then retire obsolete
+paths while preserving current source, provenance and embedded-model checks.
 P2.6–P2.8 own final naming/defaults, assembly-stage removal and
 full local/container integration acceptance.
 

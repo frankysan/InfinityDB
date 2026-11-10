@@ -1230,6 +1230,23 @@ geometry, scoring, terrain-cell, citation and API checks also passed. Ruff,
 focused Pyright (0 errors), docs lint/links/backlog and Git whitespace passed.
 No full suite, Linux, Docker or hosted acceptance is implied.
 
+**2026-11-10 P2.5 eighteenth slice, completed release diagnostics:**
+Removed the one-use v9-to-v10 promotion path and its schema-preserving
+export/rebuild diagnostics, plus the physically retained Restrictions v9
+transition module whose callers/tests had already been retired. Current
+candidate build/check, checkout assembly and complete-set validation remain.
+The maintained logical SQLite comparator owns cross-host semantic comparison;
+frozen source evidence and hashes remain in the source audit and Git history.
+Focused Windows validation passed **223 tests, zero skips**: 109 storage,
+candidate/checkout, complete-builder, database-set, Restrictions compatibility,
+logical-comparison and deployment-script tests (168.44 seconds), followed by
+114 current source-variant and section-registry tests (43.32 seconds). Ruff,
+focused Pyright (0 errors), CLI help, docs lint/links/backlog, Git whitespace
+and tracked runtime artifact/provenance verification passed (SVG excluded).
+Current code/config/workflows have no imports of the retired modules.
+No full suite, Linux, Docker or hosted acceptance is implied. This internal
+migration-tool retirement needs no release-note entry.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

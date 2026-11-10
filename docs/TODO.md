@@ -27,58 +27,20 @@ when all contained work shares the same owner.
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
 - [ ] Execute P2–P6 of the [phased restructuring plan](restructuring-plan.md).
-  P0 workflow simplification and P1 dependency/tool discovery are complete;
-  current-format shared validation and opt-in offline complete builds with
-  input provenance are available in the [data lifecycle](../data/README.md).
-  Complete builds embed exact variant usage, reviewed Weapon-profile
-  citations, the Restrictions chart, Trait Wiki links, Combined Saving
-  Roll annotations, Ammunition links and 12 reviewed Weapon Properties
-  in Rules v17, plus two Cube characteristic encodings and six
-  reviewed Skill source classifications and Unit Explorer filter semantics
-  plus 58 Army summaries, two legacy Army identities and the published
-  symbol mappings/hashes in Army v31. P2.4 materialization is complete
-  for the opt-in two-file path with local source-build and API parity checks.
-  P2.5 removed legacy JSON serving and image assembly; CI, browser CI and
-  clean-export preflight now validate the selected database set without
-  generating historical JSON. The standalone deployed-object JSON publisher
-  and v8/v9 refresh/promotion CLI are retired. Current variant-usage
-  source builds now require embedded deployed objects; loose JSON cannot
-  recover older schemas. The obsolete terrain/scenery binary staging and
-  staged-pair verification modules and their staging-only tests have been
-  deleted with corresponding test-section registry cleanup. The separate
-  terrain/scenery pre-promotion stager, test module and proposal JSON have
-  also been retired; current source checks now require both accepted rules.
-  The completed Hackable and paragraph-layout v9 promotion wrappers
-  have also been retired. Generic cross-host logical SQLite comparison
-  now has a maintained owner independent of the v9 exporter. The
-  completed Game Sequence/Order Pool and Plasma/Immunity v9 staging
-  commands are retired, with current source/Rules/API tests retained.
-  Cover and terrain-condition v9 promoters are also retired; their
-  source, gameplay and API checks now own the accepted evidence directly.
-  The ARO/movement/geometry v9 promotion dependency chain is retired;
-  the shared browser test now validates embedded deployed objects through
-  the current database-set contract, not loose JSON. Continue retiring
-  the legacy JSON loader and remaining staging/transition helpers.
-  The five one-use Lieutenant/Terrain/Camouflage/Combat Jump/Infiltration
-  v9 source reviewers and their matched-pair tests are retired.
-  Commlink's completed v9 paired-release stager and disposable rollback
-  tests are also retired; fresh Rules and source-variant checks now own
-  the accepted optional annex semantics. The completed 14-citation
-  and four-device-chart citation staging tools and historical rollback
-  tests are retired; read-only source audits now enforce all accepted
-  N5.3 citations and current Rules database parity. The completed
-  Restrictions v9 source-pin/variant-migration checker matrix has been
-  retired; canonical Rules source tests and supported v8/v9 CLI/reader
-  compatibility tests remain. Core-scenario and terrain/scenery boundary
-  audits now read explicitly selected embedded models and pin database
-  hashes; their release-JSON adapters and the Pheroware citation test's
-  historical exporter dependency are removed. Next, review the legacy
-  rebuild/candidate diagnostic cluster and retire remaining release-export,
-  JSON reader/builder and transition helpers as their current uses close.
-  Final default/serving integration and platform acceptance remain under
-  P2.6–P2.8. Keep current serving
-  functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;
-  do not copy its complete roadmap into a second task ledger.
+  P0/P1 are complete, and the opt-in Army v31/Rules v17 two-file build
+  materializes the P2.2–P2.4 reference data with source/build provenance;
+  see the [current data lifecycle](../data/README.md). P2.5 has retired
+  loose deployed-object serving and completed v9 staging/release diagnostics
+  while retaining current source, embedded-model and integrity checks.
+  - [ ] Finish P2.5: reconcile remaining standalone deployed-object JSON
+    reader/builder and transition/test consumers, then remove obsolete paths.
+  - [ ] Complete P2.6–P2.8: cut over names/defaults and serving together,
+    retire transitional candidate/checkout assembly, and validate the final
+    local/container paths. Keep current build/serve functional until cutover.
+  - [ ] Continue P3–P6 in dependency order under the plan's source-family,
+    presentation, tooling and repository-structure exit criteria.
+  The plan owns ordering and decisions; acceptance evidence lives in
+  [testing](testing.md). Completed migration details stay out of this backlog.
 
 ### External source clarifications
 

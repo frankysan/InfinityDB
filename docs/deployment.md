@@ -151,14 +151,13 @@ serves it independently of the curated files.
 The v10 candidate builder embeds reviewed deployed objects directly in
 `rules.db` and prepares v2 variant usage plus matching Weapon citations.
 It stages exactly four files under ignored `local/v10-candidate/` by default,
-without `deployed-objects.json`. After `--check`, the explicit
-`--promote-release` command verifies preserved v9 semantics plus the
-Battleground map additions and promotes the three changed tracked release
-artifacts together. `infinity.db` remains byte-identical. For example:
+without `deployed-objects.json`. Its build/check and checkout assembly paths
+remain transitional tools until the complete database-set cutover. The
+initial v9-to-v10 publication is complete; its one-use promotion command is
+retired. To verify an existing source-matched candidate and tracked artifacts:
 
 ```sh
 python -m tools.build_v10_runtime_candidate --output-dir local/v10-candidate --check
-python -m tools.build_v10_runtime_candidate --output-dir local/v10-candidate --promote-release
 python -m tools.verify_deployment_assets --skip-svg
 ```
 
