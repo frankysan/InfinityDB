@@ -1389,6 +1389,36 @@ lint/links/backlog and Git whitespace checks passed. This is focused
 tool/source/deployment integration evidence, not a full suite,
 independent Linux/Docker image, hosted CI or P2.8 acceptance.
 
+**2026-11-10 P2.7 second slice, runtime fallback removal:**
+The runtime no longer reads `variant-usage.json` or
+`weapon-profile-sources.json`, even for explicit low-level database
+fixtures. The selected-set validator rejects former v10/v11 JSON-dependent
+layouts, while v12–v16 two-file relational fixtures remain inspectable
+outside complete serving. Public runtime startup continues to require the
+current v31/v17 pair with shared provenance. API cache identity and
+release-candidate/baseline tooling hash the same canonical inventory of the
+selected database filenames and bytes. Obsolete file-loader tests have
+been removed or replaced with embedded source/corruption checks.
+
+Two independent full source-ZIP builds retained every reviewed inventory,
+passed 41 pinned API/geometry probes each, and produced byte-identical
+`army.db` and `rules_n5.db` outputs (expected SHA-256:
+`e306700aa2ea02729b25a82edb732bba74465daf7fadb09191c10f346d7e7dfe`
+and `26b27d6e4b2394d2535817e5b0e153d16dd98b42e864149ce67922164929f8f5`
+respectively). The regenerated tracked artifacts match both exact SHA-256
+hashes. `tools.verify_deployment_assets` passed with 808/808 SVGs and
+browser references, current source-input freshness and embedded citation
+matching. The isolated acceptance tool did not publish the results;
+`infinity-db build` regenerated the tracked pair. This completes P2.7;
+P2.8 remains separate local/Docker acceptance.
+
+Focused Windows results: **220 passed, 2 skipped** across database-set
+(18), variant-usage (98 pass/2 skip), variant storage (13), Weapon citation
+(14), deployed objects (12), complete builder (17), release-candidate
+browser (16), source-reference baseline (1), P1 semantic baseline (10),
+and CLI (21). Ruff and Pyright (zero errors) passed. This is not an
+independent Linux, deployed Docker, full-suite or hosted acceptance result.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

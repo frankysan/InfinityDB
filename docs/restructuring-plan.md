@@ -2228,6 +2228,36 @@ database build-input hash and requires rebuilding both release DBs. Preserve
 source research and explicit fixture injection only where independently useful.
 P2.8 still owns actual local-server and Docker integration acceptance.
 
+#### P2.7 — Second slice: remove runtime file fallbacks (2026-11-10)
+
+Removed the v10/v11 loose-JSON loaders for variant usage and Weapon citations.
+The shared database-set validator rejects those JSON-dependent layouts,
+regardless of adjacent sidecars; it still admits v12–v16 **embedded two-file**
+sets for explicit relational research fixtures, while all normal complete-set
+startup requires Army v31 / Rules v17 with matched build provenance. Low-level
+API fixtures can still inject explicitly selected database paths; no sidecar
+recovery path survives. Runtime snapshot identity and release/baseline tooling
+now share the canonical filename-to-SHA-256 inventory calculation, with no
+separate Weapon publication hash. Tests for obsolete file loaders were removed
+or replaced with embedded data validation and fail-closed assertions. The
+complete builder's removal of leftover ignored sidecars remains hygiene, not
+a runtime dependency or publication stage.
+
+Two isolated full builds from the pinned 2026-09-29 Army archive reproduced
+byte-identical outputs (Army
+`e306700aa2ea02729b25a82edb732bba74465daf7fadb09191c10f346d7e7dfe`;
+Rules
+`26b27d6e4b2394d2535817e5b0e153d16dd98b42e864149ce67922164929f8f5`).
+All 41 pinned routes/geometry probes and reviewed embedded inventories
+passed on both builds. The tracked `data/generated/army.db` and `rules_n5.db`
+were regenerated from the same pinned inputs and their exact SHA-256 hashes
+match those independently verified outputs. Full deployment-asset validation
+passes (808/808 SVG assets and browser references), including source-input
+freshness, embedded data and reviewed citation checks. The isolated verifier
+did not publish artifacts; the normal complete builder performed that step.
+**P2.7 is complete**. P2.8 retains independent local/Docker integration
+acceptance; no Linux, hosted CI or Docker acceptance is implied.
+
 ### P3 — Separate seasonal ITS data from N5 core rules
 
 **Outcome:** Source-family boundaries support current and historical seasons without duplicating core rules.  

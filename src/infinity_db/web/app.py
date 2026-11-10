@@ -13,7 +13,7 @@ from typing import Any
 from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.snapshot_revision import database_set_snapshot_revision, runtime_snapshot_revision
+from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
@@ -93,15 +93,14 @@ class Application:
         self.variant_usage, self.variant_usage_revision = load_runtime_variant_usage(
             self.database.path, rules_path,
         )
-        self.weapon_profile_citations, weapon_profile_revision = (
+        self.weapon_profile_citations, _ = (
             load_runtime_weapon_profile_publication(self.database.path, rules_path)
         )
-        self.snapshot_revision = database_set_snapshot_revision(runtime_fingerprints) if (
-            runtime_fingerprints is not None
-        ) else runtime_snapshot_revision(
-            _snapshot_revision(self.database.path), rules_revision, weapon_profile_revision,
-            army_filename=self.database.path.name,
-            rules_filename=candidate_rules_path.name,
+        fingerprints = {self.database.path.name: _snapshot_revision(self.database.path)}
+        if rules_revision is not None:
+            fingerprints[candidate_rules_path.name] = rules_revision
+        self.snapshot_revision = database_set_snapshot_revision(
+            runtime_fingerprints if runtime_fingerprints is not None else fingerprints
         )
         symbols = SymbolCatalog(publication=self.database.symbol_publication())
         static_revision = static_asset_revision(symbols)

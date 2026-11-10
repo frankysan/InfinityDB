@@ -14,6 +14,7 @@ import pytest
 
 from infinity_army_data.merge import load_sources
 from infinity_db.curated import load_curated_document
+from infinity_db.snapshot_revision import database_set_snapshot_revision
 from tools.report_reference_baseline import (
     _NESTED_SOURCE_FIELDS,
     CURRENT_CITATION_COLLECTIONS,
@@ -1007,17 +1008,15 @@ def test_baseline_reports_pinned_publication_without_claiming_completeness() -> 
     assert report["armySnapshot"]["archiveVerification"] == "not-supplied"
     assert len(report["armySnapshot"]["archiveSha256"]) == 64
     assert len(report["rulesPublication"]["publishedDatabaseSha256"]) == 64
-    profile_sha = hashlib.sha256(
-        ARMY_DB.with_name("weapon-profile-sources.json").read_bytes()
-    ).hexdigest()
-    assert report["weaponProfilePublicationSha256"] == profile_sha
-    combined = (
-        report["armySnapshot"]["publishedDatabaseSha256"] + ":"
-        + report["rulesPublication"]["publishedDatabaseSha256"] + ":" + profile_sha
+    # The historical report field now identifies the Rules bytes containing
+    # embedded Weapon citations; no loose JSON publication is required.
+    assert report["weaponProfilePublicationSha256"] == (
+        report["rulesPublication"]["publishedDatabaseSha256"]
     )
-    assert report["runtimeSnapshotRevision"] == hashlib.sha256(
-        combined.encode()
-    ).hexdigest()
+    assert report["runtimeSnapshotRevision"] == database_set_snapshot_revision({
+        "army.db": report["armySnapshot"]["publishedDatabaseSha256"],
+        "rules_n5.db": report["rulesPublication"]["publishedDatabaseSha256"],
+    })
     # The published rules database includes four core missions and one
     # separately scoped ITS Season 18 Battleground pilot.
     assert report["scenarioMembershipCount"] == 5

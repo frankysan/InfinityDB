@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
-import shutil
 import sqlite3
 from collections.abc import Iterator
 from pathlib import Path
@@ -24,10 +22,7 @@ from infinity_db.variant_usage import (
 )
 from infinity_db.variant_usage_includes import build_include_provenance
 from infinity_db.variant_usage_peripherals import build_peripheral_provenance
-from infinity_db.variant_usage_reference import (
-    load_variant_usage_publication,
-    publication_from_candidate,
-)
+from infinity_db.variant_usage_reference import publication_from_candidate
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -98,45 +93,15 @@ def _variant_usage_candidate(
     }
 
 
-def _write_variant_usage_artifacts(
-    tmp_path: Path, *, duplicate: bool = False,
-) -> tuple[Path, Path, Path]:
-    army = tmp_path / "army.db"
-    rules = tmp_path / "rules_n5.db"
-    publication = tmp_path / "variant-usage.json"
-    shutil.copyfile(ROOT / "data/generated/army.db", army)
-    shutil.copyfile(ROOT / "data/generated/rules_n5.db", rules)
+def test_variant_publication_projection_excludes_candidate_diagnostics() -> None:
     snapshot = {
         "armyArchiveSha256": "a" * 64,
-        "armyDatabaseSha256": hashlib.sha256(army.read_bytes()).hexdigest(),
-        "rawDatabaseSha256": "b" * 64,
-        "rulesDatabaseSha256": hashlib.sha256(rules.read_bytes()).hexdigest(),
-        "exportPairSha256": "c" * 64,
+        "armyDatabaseSha256": "b" * 64,
+        "rawDatabaseSha256": "c" * 64,
+        "rulesDatabaseSha256": "d" * 64,
+        "exportPairSha256": "e" * 64,
     }
-    candidate = _variant_usage_candidate(snapshot, duplicate=duplicate)
-    if duplicate:
-        document = {
-            "format": "infinitydb-rule-variant-usage",
-            "formatVersion": 2,
-            "scope": "exact-reviewed-source-variants",
-            "sourceSnapshot": snapshot,
-            "variants": candidate["variants"],
-        }
-    else:
-        document = publication_from_candidate(candidate)
-    publication.write_text(json.dumps(document), encoding="utf-8")
-    return army, rules, publication
-
-
-def test_variant_usage_publication_exposes_only_exact_source_variants(
-    tmp_path: Path,
-) -> None:
-    army, rules, publication = _write_variant_usage_artifacts(tmp_path)
-    (tmp_path / "deployed-objects.json").write_text("invalid JSON", encoding="utf-8")
-
-    result = load_variant_usage_publication(publication, army, rules)
-
-    assert result is not None
+    result = publication_from_candidate(_variant_usage_candidate(snapshot))
     assert result["formatVersion"] == 2
     assert result["scope"] == "exact-reviewed-source-variants"
     assert len(result["variants"]) == 1
@@ -146,24 +111,25 @@ def test_variant_usage_publication_exposes_only_exact_source_variants(
 
 
 @pytest.mark.parametrize("legacy_version", [True, False])
-def test_variant_publication_rejects_retired_format_and_json_dependency(
-    tmp_path: Path, legacy_version: bool,
+def test_variant_publication_validation_rejects_retired_contract(
+    legacy_version: bool,
 ) -> None:
-    army, rules, publication = _write_variant_usage_artifacts(tmp_path)
-    objects = tmp_path / "deployed-objects.json"
-    objects.write_bytes(b"historical publication")
-    document = json.loads(publication.read_text(encoding="utf-8"))
-    document["sourceSnapshot"]["deployedObjectPublicationSha256"] = (
-        hashlib.sha256(objects.read_bytes()).hexdigest()
-    )
+    from infinity_db.variant_usage_reference import _validate_publication
+
+    snapshot = {
+        "armyArchiveSha256": "a" * 64,
+        "armyDatabaseSha256": "b" * 64,
+        "rulesDatabaseSha256": "d" * 64,
+        "exportPairSha256": "e" * 64,
+    }
+    publication = publication_from_candidate(_variant_usage_candidate(snapshot))
+    publication["sourceSnapshot"]["deployedObjectPublicationSha256"] = "f" * 64
     if legacy_version:
-        document["formatVersion"] = 1
-    publication.write_text(json.dumps(document), encoding="utf-8")
-    before = {path: path.read_bytes() for path in tmp_path.iterdir()}
-    message = "Unsupported variant" if legacy_version else "must not depend"
-    with pytest.raises(ValueError, match=message):
-        load_variant_usage_publication(publication, army, rules)
-    assert {path: path.read_bytes() for path in tmp_path.iterdir()} == before
+        publication["formatVersion"] = 1
+    with pytest.raises(
+        ValueError, match="Unsupported variant" if legacy_version else "must not depend"
+    ):
+        _validate_publication(publication)
 
 
 def test_candidate_conversion_rejects_retired_deployed_object_fingerprint() -> None:
@@ -189,27 +155,15 @@ def test_variant_usage_publication_ignores_raw_sqlite_byte_layout() -> None:
     assert "rawDatabaseSha256" not in original["sourceSnapshot"]
 
 
-def test_variant_usage_publication_rejects_duplicate_source_rows(
-    tmp_path: Path,
-) -> None:
-    army, rules, publication = _write_variant_usage_artifacts(
-        tmp_path, duplicate=True,
-    )
-
+def test_variant_usage_publication_rejects_duplicate_source_rows() -> None:
+    snapshot = {
+        "armyArchiveSha256": "a" * 64,
+        "armyDatabaseSha256": "b" * 64,
+        "rulesDatabaseSha256": "d" * 64,
+        "exportPairSha256": "e" * 64,
+    }
     with pytest.raises(ValueError, match="duplicate variant usage source identity"):
-        load_variant_usage_publication(publication, army, rules)
-
-
-@pytest.mark.parametrize("artifact", ["army", "rules"])
-def test_variant_usage_publication_rejects_stale_release_artifacts(
-    tmp_path: Path, artifact: str,
-) -> None:
-    army, rules, publication = _write_variant_usage_artifacts(tmp_path)
-    stale = {"army": army, "rules": rules}[artifact]
-    stale.write_bytes(f"changed {artifact}".encode())
-
-    with pytest.raises(ValueError, match="does not match release artifacts"):
-        load_variant_usage_publication(publication, army, rules)
+        publication_from_candidate(_variant_usage_candidate(snapshot, duplicate=True))
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: Any) -> None:

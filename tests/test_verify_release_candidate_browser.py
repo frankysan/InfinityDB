@@ -134,10 +134,10 @@ def test_release_identity_rejects_corrupt_embedded_weapon_publication(tmp_path: 
         connection.execute("UPDATE weapon_chart_profile_metadata SET content_sha256=?", ("0" * 64,))
     with pytest.raises(ValueError, match="fingerprint differs"):
         create_app(army, rules_database_path=rules)
-    with pytest.raises(ReferenceBaselineError, match="Weapon-profile publication"):
+    with pytest.raises(ReferenceBaselineError, match="embedded Weapon citations"):
         build_baseline(army, rules)
     browser = Mock()
-    with pytest.raises(ReleaseCandidateError, match="Weapon-profile publication"):
+    with pytest.raises(ReleaseCandidateError, match="embedded Weapon citations"):
         verify_release_candidate(
             "http://127.0.0.1:8000", expected_version=__version__,
             army_db=army, rules_db=rules, browser_check=browser,

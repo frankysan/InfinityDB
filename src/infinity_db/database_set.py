@@ -1,12 +1,9 @@
-"""Shared validation of the built runtime set during the SQLite-only migration.
+"""Validate the selected SQLite runtime set without loose JSON fallbacks.
 
-The tracked v10 set includes two JSON publications; v11 embeds variant usage
-and v12 also embeds Weapon citations; v13 embeds the Restrictions chart;
-v14 embeds reviewed Trait Wiki references; v15 embeds reviewed Combined
-Saving Roll annotations; v16 embeds reviewed Ammunition links; v17 embeds
-exact authored Weapon Property definitions and source profiles.
-This module never selects a fallback
-set, rebuilds inputs, or establishes working-tree curation freshness.
+Current serving requires the complete Army v31 / Rules v17 pair. Earlier
+two-file embedded schemas remain inspectable for explicit development/research
+fixtures; v10/v11 layouts requiring JSON publications are unsupported.
+This module never rebuilds inputs or checks working-tree curation freshness.
 """
 
 from __future__ import annotations
@@ -26,7 +23,6 @@ from .rules_database import RulesDatabase
 from .symbol_path_storage import ARMY_SCHEMA_VERSION as COMPLETE_ARMY_SCHEMA_VERSION
 from .unit_filter_storage import ARMY_SCHEMA_VERSION as UNIT_FILTER_SCHEMA_VERSION
 from .variant_usage_reference import load_runtime_variant_usage
-from .weapon_profile_publication import load_weapon_profile_publication
 from .weapon_property_storage import SCHEMA_VERSION as COMPLETE_RULES_SCHEMA_VERSION
 
 ARMY_DATABASE_FILENAME = "army.db"
@@ -54,11 +50,6 @@ def select_database_directory(
         raise ValueError("INFINITY_DB_DB_DIR must name the complete database directory")
     return DEFAULT_DATABASE_DIRECTORY.resolve()
 
-V10_RUNTIME_FILES = frozenset({
-    ARMY_DATABASE_FILENAME, RULES_DATABASE_FILENAME,
-    "variant-usage.json", "weapon-profile-sources.json",
-})
-EMBEDDED_VARIANT_RUNTIME_FILES = V10_RUNTIME_FILES - {"variant-usage.json"}
 EMBEDDED_WEAPON_RUNTIME_FILES = frozenset({ARMY_DATABASE_FILENAME, RULES_DATABASE_FILENAME})
 
 
@@ -73,11 +64,11 @@ def _full_integrity_check(path: Path) -> None:
 def validate_database_set(directory: Path, *, require_complete: bool = False) -> dict[str, Any]:
     """Validate exactly the selected supported runtime artifacts without writing files.
 
-    Other build outputs in the directory are ignored, never selected as data
-    or used to recover a missing publication. The raw archive, source curation
-    and graphical publication are outside this built-runtime validation scope.
-    Complete mode requires all current embedded projections and recorded shared
-    build provenance, without consulting transitional JSON publications.
+    Other build outputs are ignored, never used to recover missing data.
+    Raw archives, curation and graphical assets are outside this check.
+    Complete mode requires current embedded projections and matched recorded
+    build provenance; older relational schemas are inspectable only through
+    non-complete validation.
     """
     directory = Path(directory).resolve()
     if not directory.is_dir():
@@ -92,7 +83,7 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
     rules_path = directory / RULES_DATABASE_FILENAME
     with closing(sqlite3.connect(rules_path.as_uri() + "?mode=ro", uri=True)) as connection:
         schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if schema_version not in {10, 11, 12, 13, 14, 15, 16, 17}:
+    if schema_version not in {12, 13, 14, 15, 16, COMPLETE_RULES_SCHEMA_VERSION}:
         raise ValueError("Unsupported Rules schema for selected database set")
     if require_complete and schema_version != COMPLETE_RULES_SCHEMA_VERSION:
         raise ValueError(
@@ -104,14 +95,7 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
         raise ValueError(
             f"Complete embedded sets require Army schema v{COMPLETE_ARMY_SCHEMA_VERSION}"
         )
-    names = (
-        V10_RUNTIME_FILES if schema_version == 10 else
-        EMBEDDED_VARIANT_RUNTIME_FILES if schema_version == 11 else
-        EMBEDDED_WEAPON_RUNTIME_FILES
-    )
-    missing = sorted(name for name in names if not (directory / name).is_file())
-    if missing:
-        raise ValueError(f"Incomplete database set; missing: {', '.join(missing)}")
+    names = EMBEDDED_WEAPON_RUNTIME_FILES
     army = Database(army_path)
     army.validate()
     encodings = army.equipment_presentation_encodings()
@@ -137,13 +121,7 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
     variants, _ = load_runtime_variant_usage(army_path, rules_path)
     if variants is None or not variants["variants"] or variants["formatVersion"] != 2:
         raise ValueError("Database set lacks a source-matched v2 variant publication")
-    weapons = (
-        rules.weapon_profile_citations_payload(army_path)
-        if schema_version in {12, 13, 14, 15, 16, 17} else
-        load_weapon_profile_publication(
-            directory / "weapon-profile-sources.json", army_path, rules_path,
-        )
-    )
+    weapons = rules.weapon_profile_citations_payload(army_path)
     if not weapons:
         raise ValueError("Database set lacks source-matched Weapon profile citations")
     chart = rules.restriction_chart_payload() if schema_version >= 13 else None
@@ -175,7 +153,6 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
             fingerprints[name] = hashlib.file_digest(stream, "sha256").hexdigest()
     return {
         "layout": {
-            10: "v10-four-file", 11: "v11-three-file",
             12: "v12-two-file", 13: "v13-two-file",
             14: "v14-two-file", 15: "v15-two-file",
             16: "v16-two-file", 17: "v17-two-file",

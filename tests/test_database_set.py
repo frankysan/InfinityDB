@@ -42,7 +42,9 @@ def test_selected_set_validates_without_build_sources_or_raw_archive(
     before = fingerprints(runtime_set)
     monkeypatch.chdir(tmp_path)
     # A legacy file is not a source or fallback for the embedded v10 model.
-    (runtime_set / "deployed-objects.json").write_text("invalid", encoding="utf-8")
+    for name in ("deployed-objects.json", "variant-usage.json",
+                 "weapon-profile-sources.json"):
+        (runtime_set / name).write_text("invalid", encoding="utf-8")
     result = validate_database_set(Path("selected"), require_complete=True)
     assert result["layout"] == "v17-two-file"
     assert result["integrityCheck"] == "full"
@@ -72,6 +74,18 @@ def test_missing_selected_file_does_not_fall_back_or_create_outputs(
     assert "Incomplete database set" in report["error"]
     assert missing in report["error"]
     assert fingerprints(runtime_set) == before
+
+
+@pytest.mark.parametrize("schema", [10, 11])
+def test_json_dependent_schemas_are_retired_even_with_sidecars(
+    runtime_set: Path, schema: int,
+) -> None:
+    (runtime_set / "variant-usage.json").write_text("invalid", encoding="utf-8")
+    (runtime_set / "weapon-profile-sources.json").write_text("invalid", encoding="utf-8")
+    with sqlite3.connect(runtime_set / "rules_n5.db") as connection:
+        connection.execute(f"PRAGMA user_version={schema}")
+    with pytest.raises(ValueError, match="Unsupported Rules schema"):
+        validate_database_set(runtime_set)
 
 
 def test_embedded_objects_must_match_selected_army(runtime_set: Path) -> None:

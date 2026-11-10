@@ -27,7 +27,7 @@ from infinity_army_data.merge import SourceDocument, load_sources, merge_sources
 from infinity_db.application_domains import application_domain, semantic_record_domain
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
-from infinity_db.snapshot_revision import runtime_snapshot_revision
+from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -1047,12 +1047,11 @@ def build_baseline(
         )
     except (OSError, sqlite3.Error, ValueError) as exc:
         raise ReferenceBaselineError(
-            f"Cannot verify runtime Weapon-profile publication: {exc}"
+            f"Cannot verify embedded Weapon citations: {exc}"
         ) from exc
-    runtime_revision = runtime_snapshot_revision(
-        army_sha, rules_sha, weapon_profile_sha,
-        army_filename=army_database.name, rules_filename=rules_database.name,
-    )
+    runtime_revision = database_set_snapshot_revision({
+        army_database.name: army_sha, rules_database.name: rules_sha,
+    })
     return {
         "format": REPORT_FORMAT,
         "formatVersion": REPORT_VERSION,

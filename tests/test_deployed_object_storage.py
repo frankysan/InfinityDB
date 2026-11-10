@@ -1,11 +1,9 @@
 """SQLite deployed-object projection: normalized persistence and source pairing."""
 from __future__ import annotations
 
-import json
 import shutil
 import sqlite3
 from pathlib import Path
-from wsgiref.util import setup_testing_defaults
 
 import pytest
 
@@ -46,10 +44,11 @@ def test_normalized_snapshot_round_trips_exact_reviewed_projection(
 
 
 
-def test_v10_runtime_serves_embedded_deployed_objects_without_json(
+def test_standalone_rules_build_preserves_deployed_object_source_facts(
     pinned_inputs: tuple[Path, ...], tmp_path: Path,
 ) -> None:
     from infinity_db.cli import build_parser, cmd_build_rules
+    from infinity_db.rules_database import RulesDatabase
     from infinity_db.web import create_app
 
     army = tmp_path / "army.db"
@@ -60,63 +59,16 @@ def test_v10_runtime_serves_embedded_deployed_objects_without_json(
     ])
     assert cmd_build_rules(args) == 0
     assert not (tmp_path / "deployed-objects.json").exists()
-    application = create_app(army, rules)
-    assert application.deployed_objects is not None
-    assert len(application.deployed_objects["objects"]) == 17
 
-    staged_rules = tmp_path / "staging" / "rules_n5.db"
-    staged_rules.parent.mkdir()
-    shutil.copyfile(rules, staged_rules)
-    preview = create_app(army, staged_rules)
-    assert preview.deployed_objects is not None
-    assert len(preview.deployed_objects["objects"]) == 17
+    embedded = RulesDatabase(rules).deployed_objects_payload(army)
+    assert embedded is not None
+    assert len(embedded["objects"]) == 17
+    assert len(embedded["unresolvedDeliveries"]) == 1
 
-    environ: dict[str, str] = {}
-    setup_testing_defaults(environ)
-    environ.update(REQUEST_METHOD="GET", PATH_INFO="/api/deployed-objects")
-    statuses: list[str] = []
-
-    def start_response(status: str, _headers: object, _exc_info: object = None) -> None:
-        statuses.append(status)
-
-    payload = json.loads(b"".join(application(environ, start_response)))
-    assert statuses[0].startswith("200")
-    assert len(payload["items"]) == 17
-    assert payload["scope"] == "reviewed-projection-not-complete-unit-usage"
-    assert len(payload["unresolved_deliveries"]) == 1
-
-
-def test_v10_variant_usage_publication_needs_no_deployed_json(
-    pinned_inputs: tuple[Path, ...], tmp_path: Path,
-) -> None:
-    from infinity_db.cli import build_parser, cmd_build_rules
-    from infinity_db.variant_usage import build_variant_usage_projection
-    from infinity_db.variant_usage_reference import (
-        load_variant_usage_publication,
-        publication_from_candidate,
-    )
-
-    root = Path(__file__).resolve().parents[1]
-    raw = root / "data/work/build/army.raw.db"
-    if not raw.is_file():
-        pytest.skip("Matched raw Army archive is unavailable")
-    army = tmp_path / "army.db"
-    rules = tmp_path / "rules_n5.db"
-    shutil.copyfile(pinned_inputs[0], army)
-    args = build_parser().parse_args([
-        "build-rules", "--army-db", str(army), "--output", str(rules),
-    ])
-    assert cmd_build_rules(args) == 0
-    missing_json = tmp_path / "deployed-objects.json"
-    candidate = build_variant_usage_projection(army, raw, rules)
-    assert "deployedObjectPublicationSha256" not in candidate["sourceSnapshot"]
-    publication = publication_from_candidate(candidate)
-    assert publication["formatVersion"] == 2
-    output = tmp_path / "variant-usage.json"
-    output.write_text(json.dumps(publication), encoding="utf-8")
-    assert not missing_json.exists()
-    assert load_variant_usage_publication(output, army, rules) == publication
-
+    # Standalone v10 remains useful for inspecting source facts, not for
+    # launching an incomplete runtime set.
+    with pytest.raises(ValueError, match="Embedded Weapon citations require Rules v12"):
+        create_app(army, rules)
 
 
 def test_v10_validator_rejects_missing_embedded_table(tmp_path: Path) -> None:

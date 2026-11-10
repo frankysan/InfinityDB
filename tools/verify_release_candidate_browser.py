@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Fail-closed hosted Unit browser acceptance for an exact InfinityDB release candidate.
 
-Runs no deployment actions. The server must match the local candidate's
-immutable Army/rules database bytes, applicable Weapon-profile publication,
-static asset fingerprint, and explicit release version before and after the
-browser checks.
+Runs no deployment actions. The server must match the selected immutable
+Army/Rules databases, embedded citations, static fingerprint and explicit
+release version before and after the browser checks.
 """
 
 from __future__ import annotations
@@ -18,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.database.repository import Database
-from infinity_db.snapshot_revision import runtime_snapshot_revision
+from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 from infinity_db.web.presentation import static_asset_revision
@@ -50,15 +49,16 @@ def local_revision(army_db: Path, rules_db: Path) -> str:
         if not database.is_file():
             raise ReleaseCandidateError(f"Missing release database: {database}")
     try:
-        _, weapon_profile_sha = load_runtime_weapon_profile_publication(army_db, rules_db)
+        citations, _ = load_runtime_weapon_profile_publication(army_db, rules_db)
+        if not citations:
+            raise ReleaseCandidateError("Embedded Weapon citations are missing")
     except (OSError, sqlite3.Error, ValueError) as exc:
         raise ReleaseCandidateError(
-            f"Cannot verify runtime Weapon-profile publication: {exc}"
+            f"Cannot verify embedded Weapon citations: {exc}"
         ) from exc
-    return runtime_snapshot_revision(
-        _sha256(army_db), _sha256(rules_db), weapon_profile_sha,
-        army_filename=army_db.name, rules_filename=rules_db.name,
-    )
+    return database_set_snapshot_revision({
+        army_db.name: _sha256(army_db), rules_db.name: _sha256(rules_db),
+    })
 
 
 def _check_served(

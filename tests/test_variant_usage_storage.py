@@ -171,7 +171,7 @@ def test_damaged_relational_projection_fails_without_json_fallback(
             )
     with pytest.raises(ValueError):
         RulesDatabase(path).validate()
-    (tmp_path / "variant-usage.json").write_bytes((RELEASE / "variant-usage.json").read_bytes())
+    (tmp_path / "variant-usage.json").write_bytes(b"obsolete JSON cannot repair relational data")
     with pytest.raises((ValueError, sqlite3.Error)):
         load_runtime_variant_usage(directory / "army.db", path)
 
@@ -224,20 +224,15 @@ def test_explicit_rules_selection_and_byte_revision_change_cache_validators(
 
 
 def test_unknown_schema_does_not_attempt_a_legacy_json_fallback(
-    embedded, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    embedded, tmp_path: Path,
 ) -> None:
     directory, _ = embedded
     path = tmp_path / "rules_n5.db"
     shutil.copyfile(directory / "rules_n5.db", path)
+    (tmp_path / "variant-usage.json").write_text("invalid JSON", encoding="utf-8")
     with closing(sqlite3.connect(path)) as connection:
         connection.execute("PRAGMA user_version=999")
 
-    def forbidden(*args: Any) -> None:
-        pytest.fail("Unsupported schemas must not select a JSON publication")
-
-    monkeypatch.setattr(
-        "infinity_db.variant_usage_reference.load_variant_usage_publication", forbidden,
-    )
     with pytest.raises(ValueError, match="Unsupported Rules schema"):
         load_runtime_variant_usage(directory / "army.db", path)
 

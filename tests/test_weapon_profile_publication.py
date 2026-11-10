@@ -13,11 +13,7 @@ import pytest
 from storage_fixture_support import weapon_publication
 
 from infinity_db.database.repository import Database
-from infinity_db.weapon_profile_publication import (
-    file_sha256,
-    load_weapon_profile_publication,
-    profile_sha256,
-)
+from infinity_db.weapon_profile_publication import file_sha256, profile_sha256
 from tools.audit_enrichment_coverage import audit_coverage
 from tools.audit_weapon_chart_profiles import audit_chart
 from tools.build_weapon_profile_publication import (
@@ -122,67 +118,18 @@ def test_pinned_pdf_contains_every_published_weapon_profile_mode_and_page(
     assert katyusha["rangeComparison"]["army"][1:3] == ["+3", "+3"]
 
 
-@pytest.mark.parametrize(
-    ("mutation", "message"),
-    (
-        ("army", "does not match release databases"),
-        ("rules", "does not match release databases"),
-        ("review", "lacks review provenance"),
-        ("source", "source does not match current rules"),
-        ("fingerprint", "profile identity changed"),
-        ("slug", "profile identity changed"),
-        ("page", "Invalid or duplicate reviewed Weapon mode"),
-        ("duplicate", "Invalid or duplicate reviewed Weapon mode"),
-        ("missing-mode", "modes do not match"),
-        ("unknown-mode", "modes do not match"),
-    ),
-)
-def test_loader_rejects_stale_or_ambiguous_publication(
-    tmp_path: Path, publication: dict[str, Any], mutation: str, message: str,
-) -> None:
-    document = deepcopy(publication)
-    weapon = next(item for item in document["weapons"] if item["slug"] == "uragan-mrl")
-    if mutation == "army":
-        document["sourceSnapshot"]["armyDatabaseSha256"] = "0" * 64
-    elif mutation == "rules":
-        document["sourceSnapshot"]["rulesDatabaseSha256"] = "0" * 64
-    elif mutation == "review":
-        document["sourceSnapshot"]["reviewsSha256"] = "invalid"
-    elif mutation == "source":
-        document["source"]["sha256"] = "0" * 64
-    elif mutation == "fingerprint":
-        weapon["profileSha256"] = "0" * 64
-    elif mutation == "slug":
-        weapon["slug"] = "not-uragan"
-    elif mutation == "page":
-        weapon["profiles"][0]["page"] = 189
-    elif mutation == "duplicate":
-        weapon["profiles"].append(deepcopy(weapon["profiles"][0]))
-    elif mutation == "missing-mode":
-        weapon["profiles"].pop()
-    elif mutation == "unknown-mode":
-        weapon["profiles"][0]["mode"] = "Unknown Mode"
-    with pytest.raises(ValueError, match=message):
-        load_weapon_profile_publication(
-            _write(tmp_path / "weapon-profile-sources.json", document),
-            DEFAULT_ARMY,
-            DEFAULT_RULES,
-        )
+def test_runtime_weapon_citations_ignore_invalid_json_sidecar(tmp_path: Path) -> None:
+    from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 
+    army, rules = tmp_path / "army.db", tmp_path / "rules_n5.db"
+    shutil.copyfile(DEFAULT_ARMY, army)
+    shutil.copyfile(DEFAULT_RULES, rules)
+    (tmp_path / "weapon-profile-sources.json").write_bytes(b"obsolete invalid JSON")
 
-def test_missing_or_malformed_publication_is_explicit(
-    tmp_path: Path, publication: dict[str, Any],
-) -> None:
-    path = tmp_path / "weapon-profile-sources.json"
-    assert load_weapon_profile_publication(path, DEFAULT_ARMY, DEFAULT_RULES) is None
-    # Only the explicit historical file loader is exercised here; the release
-    # verifier no longer accepts or requires a loose JSON publication.
-    path.write_text("{", encoding="utf-8")
-    with pytest.raises(ValueError, match="Invalid Weapon profile publication JSON"):
-        load_weapon_profile_publication(path, DEFAULT_ARMY, DEFAULT_RULES)
-    _write(path, publication)
-    with pytest.raises(ValueError, match="requires a rules database"):
-        load_weapon_profile_publication(path, DEFAULT_ARMY, None)
+    citations, digest = load_runtime_weapon_profile_publication(army, rules)
+    assert citations is not None and len(citations) == 69
+    assert digest == file_sha256(rules)
+    assert load_runtime_weapon_profile_publication(army, None) == (None, None)
 
 
 @pytest.mark.parametrize(
