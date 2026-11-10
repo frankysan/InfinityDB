@@ -1161,6 +1161,23 @@ docs lint/links/backlog, Git whitespace and tracked runtime artifact/
 provenance verification passed (SVG excluded). No full suite, direct
 Docker test or deployment was performed.
 
+**2026-11-10 P2.5 fourteenth slice, Commlink v9 staging retirement:**
+The one-use Commlink paired-release stager and its synthetic pre-promotion
+rollback/tamper tests were retired. The optional Reinforcements annex
+test now uses a fresh current-format Rules export and checks three
+annex records plus Commlink's reviewed +1/+2 effects against active
+Rules. Maintained source-inventory, N4-origin authority boundaries,
+exact Army loadout provenance and curated fail-closed variant grammar
+remain independent of v9 promotion machinery. Historical command
+examples were converted to dated evidence, not runnable instructions.
+Focused validation passed **63 tests**: optional annex (4), Commlink
+source/fresh export (2), Reinforcements applicability (16), database-set
+health (20), test registry (15), and invalid Commlink variants (6).
+Ruff, canonical Pyright (0 errors), docs lint/links/backlog, Git
+whitespace and tracked runtime artifact/provenance checks passed
+(SVG validation excluded). No full suite, direct Docker test or
+deployment was performed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -2556,15 +2573,12 @@ release-pair promotion; matched deployed-object publication
 and normal-mode acceptance are still required.
 
 **2026-11-03 Commlink v9 staging and subsequent promotion (VR-0037):**
-By default, `tools.stage_commlink_v9_candidate` accepts a **new**
-`--destination local/<candidate-directory>` and does not modify the
-tracked release pair. From repository root on Windows:
-
-```powershell
-.\.venv\Scripts\python.exe -m tools.stage_commlink_v9_candidate --destination local/commlink-v9-candidate-NEXT
-```
-
-Use a previously unused directory name. The command refuses destinations outside the
+The historical `tools.stage_commlink_v9_candidate` accepted a new
+ignored `local/` destination and staged a matching v9 Rules and loose
+deployed-object JSON pair without modifying the release. The one-use
+script was retired in P2.5; the original command remains in Git
+history, **not as a runnable development instruction**.
+The procedure refused destinations outside the
 ignored `local/` directory, preexisting destinations, dirty
 tracked release artifacts, mismatched source/publication pairs,
 unreviewed source records, unexpected database changes or
@@ -2599,13 +2613,8 @@ Windows regression exposed an SQLite handle held by the staging
 exporter; explicit connection closure fixed that before promotion.
 The disposable promotion, tamper-rejection and injected-failure
 rollback suite passed **6/6**; the separate release-storage module
-passed **530/530**. Under explicit authorization, the command
-
-```powershell
-.\\.venv\\Scripts\\python.exe -m tools.stage_commlink_v9_candidate --destination local/commlink-v9-candidate-20261103 --promote-staged
-```
-
-promoted tracked `data/generated/rules.db` and refreshed its matched,
+passed **530/530**. Under explicit authorization, that now-retired
+command promoted tracked `data/generated/rules.db` and refreshed its matched,
 Git-ignored `data/generated/deployed-objects.json`. Verified recovery
 copies are retained under ignored `local/commlink-v9-recovery-tscycrly/`.
 Before SHA-256:

@@ -60,8 +60,10 @@ when all contained work shares the same owner.
   the current database-set contract, not loose JSON. Continue retiring
   the legacy JSON loader and remaining staging/transition helpers.
   The five one-use Lieutenant/Terrain/Camouflage/Combat Jump/Infiltration
-  v9 source reviewers and their matched-pair tests are retired; the
-  accepted source semantics remain independently tested.
+  v9 source reviewers and their matched-pair tests are retired.
+  Commlink's completed v9 paired-release stager and disposable rollback
+  tests are also retired; fresh Rules and source-variant checks now own
+  the accepted optional annex semantics.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;

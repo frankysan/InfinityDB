@@ -1971,13 +1971,37 @@ The original v9 command execution details remain recoverable in Git and
 the dated historical test/source audit logs. Historical testing prose
 is not a supported modern release or promotion procedure.
 
-**Remaining P2.5:** Retire the remaining completed `stage_commlink_v9_candidate`
-and other staging/release transition callers after a source-purpose review.
-Then remove `restrictions_v9_release`, the old release exporter and loose
-deployed-object JSON read/serialization helpers only when their independent
-consumers are resolved. Preserve current source and complete-set checks.
-P2.6–P2.8 still own final naming/defaults, assembly-stage removal and
-full local/container acceptance.
+#### P2.5 — Fourteenth slice: retire Commlink paired-release staging (2026-11-10)
+
+`tools/stage_commlink_v9_candidate.py` staged and promoted a one-time
+N4-origin Commlink (+1/+2) Rules v9 and loose deployed-object JSON
+publication pair. That review/promotion was completed in November 2026.
+No supported runtime, current builder, CI, or other tool imports its
+entrypoints. Its only remaining code consumer was the optional
+Reinforcements test module, where a disposable pre-promotion v9 database
+was reconstructed to exercise the old stage, rollback and tamper gates.
+
+The test module now discards those five historical promotion checks and
+the synthetic paired-release fixture. Its current annex acceptance instead
+builds fresh Rules directly from curated sources and checks Commlink
+typed-effect and three annex-record facts/summary parity with active
+Rules. It retains N4-origin disclosure, core matrix separation, exact
+source Army profiles/loadouts and Commlink +1/+2 owner scope.
+`tests/test_audit_source_variant_inputs.py` continues pinning the
+51 source occurrences, qualified extra counts/owners and independent
+fresh Rules semantics; curated grammar rejects invented modifiers.
+Current selected-set integrity is covered by `infinity_db.database_set`,
+not the superseded loose JSON publication/rollback helper. Historical
+source hashes, staging records and instructions remain in Git and dated
+acceptance notes; no separate code archive is required.
+
+**Remaining P2.5:** Audit the still-present citation/migration and v9
+Restrictions transition consumers, then retire the legacy release exporter
+and loose JSON serialization/read layer when independent current-purpose
+consumers have been separated. Preserve source semantics, current
+database-set integrity and normal serving. P2.6–P2.8 own final
+naming/defaults, assembly-stage removal and full local/container
+acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 
