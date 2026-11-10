@@ -228,6 +228,27 @@ def test_input_identity_is_order_independent_and_contains_no_host_paths(project)
     )
 
 
+def test_maintained_text_inputs_ignore_checkout_line_endings(project) -> None:
+    root, args = project
+    original = builder.collect_build_manifest(root, args.source, None)
+    paths = (
+        "config/catalogs/equipment-presentation-encodings.json",
+        "data/curated/rules/sample.json",
+        "data/manifests/symbol-publication.json",
+        "src/infinity_db/web/static/restrictions-reference.json",
+        "pyproject.toml",
+    )
+    for name in paths:
+        path = root / name
+        data = path.read_bytes().replace(b"\\r\\n", b"\\n")
+        path.write_bytes(data.replace(b"\\n", b"\\r\\n"))
+    assert builder.collect_build_manifest(root, args.source, None) == original
+
+    config = root / paths[0]
+    config.write_bytes(config.read_bytes() + b" ")
+    assert builder.collect_build_manifest(root, args.source, None) != original
+
+
 def test_builder_code_and_selected_metadata_are_inputs(project) -> None:
     root, args = project
     original = builder.collect_build_manifest(root, args.source, None)

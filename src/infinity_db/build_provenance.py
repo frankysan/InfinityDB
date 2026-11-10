@@ -43,9 +43,9 @@ def build_input_fingerprints(root: Path) -> dict[str, str]:
     result = {}
     for path in paths:
         name = path.relative_to(root).as_posix()
-        data = path.read_bytes()
-        if name.startswith("src/") and name.endswith(".py"):
-            data = data.replace(b"\r\n", b"\n")
+        # The envelope consists exclusively of maintained text inputs. Normalize
+        # checkout line endings for the same identity on Windows and Unix.
+        data = path.read_bytes().replace(b"\r\n", b"\n")
         result[name] = hashlib.sha256(data).hexdigest()
     return dict(sorted(result.items()))
 

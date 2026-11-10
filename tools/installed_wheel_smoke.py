@@ -94,7 +94,10 @@ def verify_runtime(work: Path, *, asset_free: bool, require_assets: bool) -> Non
     with context:
         from infinity_db.web import create_app, create_app_from_database_set
 
-        selected = work / ("generated" if asset_free else "runtime")
+        # Both smoke modes exercise the same complete embedded release pair.
+        # The standalone generated/ fixture only covers the exporter CLI and
+        # lacks the v12+ projections required by the application runtime.
+        selected = work / "runtime"
         database = Database(selected / "army.db")
         database.validate()
         rules = RulesDatabase(selected / "rules_n5.db")
