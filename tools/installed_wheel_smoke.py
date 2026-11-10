@@ -138,10 +138,18 @@ def smoke_wheel(wheel: Path, source: Path, work: Path, *, require_assets: bool) 
         [main_cli, "build", "army", "--output-dir", "generated", "--compact"],
         [main_cli, "database-health", "generated/infinity.db", "--require-raw"],
         [army_cli, "build", "army", "--output-dir", "army-only", "--compact"],
-        [main_cli, "build-rules", "rules", "--legacy-v8", "--output", "generated/rules.db"],
+        [main_cli, "build-rules", "--help"],
         [main_cli, "validate-curated", "rules"],
     ):
         run(command, inputs)
+    # This controlled reference fixture tests the installed exporter and runtime.
+    # Full source/Army-bound Rules builds belong to the checkout build workflow.
+    run([python, "-I", "-c", "\n".join((
+        "from pathlib import Path",
+        "from infinity_db.curated import load_curated_directory",
+        "from infinity_db.rules_database import export_rules_database",
+        "export_rules_database(load_curated_directory(Path('rules')), Path('generated/rules.db'))",
+    ))], inputs)
     for mode in ("normal", "asset-free"):
         run([
             python, "-I", str(source / "tools/installed_wheel_smoke.py"),

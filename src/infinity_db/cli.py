@@ -228,46 +228,38 @@ def cmd_build_rules(args: argparse.Namespace) -> int:
     if output.resolve() == DEFAULT_RULES_DATABASE.resolve():
         raise ValueError(
             "build-rules cannot write the tracked release rules.db directly; "
-            "stage outside data/generated/ and use guarded release publication"
+            "build outside data/generated/ and review the complete matched set"
         )
-    if args.legacy_v8 and args.restrictions_manifest is not None:
-        raise ValueError("--legacy-v8 cannot be combined with --restrictions-manifest")
-
     documents = load_curated_directory(args.input)
-    manifest = None
-    deployed_objects = None
-    if not args.legacy_v8:
-        source = (
-            args.restrictions_manifest
-            if args.restrictions_manifest is not None
-            else Path("config/validation/restrictions-source-chart.json")
-        )
-        manifest = json.loads(source.read_text(encoding="utf-8"))
-        if not args.legacy_v9:
-            from infinity_db.deployed_object_builder import build_deployed_objects
+    source = (
+        args.restrictions_manifest
+        if args.restrictions_manifest is not None
+        else Path("config/validation/restrictions-source-chart.json")
+    )
+    manifest = json.loads(source.read_text(encoding="utf-8"))
+    from infinity_db.deployed_object_builder import build_deployed_objects
 
-            curated_source = next(
-                (
-                    path for path, document in documents
-                    if document["collection"]["id"] == "n5-core-v5.3"
-                    and document["collection"]["status"] == "current"
-                ),
-                None,
-            )
-            if curated_source is None:
-                raise ValueError("Current N5.3 core source required for deployed objects")
-            deployed_objects = build_deployed_objects(
-                args.army_db, curated_source, args.delivery_reviews,
-                args.candidate_reviews,
-            )
+    curated_source = next(
+        (
+            path for path, document in documents
+            if document["collection"]["id"] == "n5-core-v5.3"
+            and document["collection"]["status"] == "current"
+        ),
+        None,
+    )
+    if curated_source is None:
+        raise ValueError("Current N5.3 core source required for deployed objects")
+    deployed_objects = build_deployed_objects(
+        args.army_db, curated_source, args.delivery_reviews,
+        args.candidate_reviews,
+    )
     export_rules_database(
         documents, output, restrictions_manifest=manifest,
         deployed_objects=deployed_objects,
     )
-    version = 8 if args.legacy_v8 else 9 if args.legacy_v9 else 10
-    print(f"Rules database ready: {output} (schema v{version})")
+    print(f"Rules database ready: {output} (schema v10)")
     print(f"Collections: {len(documents)}")
-    if args.output is None and not (args.legacy_v8 or args.legacy_v9):
+    if args.output is None:
         # A checkout has two supported targets: this ignored, complete runtime
         # for local/LAN hosting, and the separately promoted tracked Docker data.
         # Do not publish a mismatched variant/Weapon view during development.
@@ -445,15 +437,6 @@ def build_parser() -> argparse.ArgumentParser:
             "Standalone output (default: local/rules-standalone.db); without --output "
             "also prepares the ignored complete checkout runtime; never writes tracked rules.db"
         ),
-    )
-    legacy = p_rules.add_mutually_exclusive_group()
-    legacy.add_argument(
-        "--legacy-v8", action="store_true",
-        help="Export obsolete v8 format explicitly for compatibility tests",
-    )
-    legacy.add_argument(
-        "--legacy-v9", action="store_true",
-        help="Export pre-deployed-object v9 format explicitly for compatibility tests",
     )
     p_rules.add_argument(
         "--restrictions-manifest", type=Path,

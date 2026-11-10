@@ -29,13 +29,10 @@ when all contained work shares the same owner.
 - [ ] Execute P2–P6 of the [phased restructuring plan](restructuring-plan.md).
   P0/P1 are complete, and the opt-in Army v31/Rules v17 two-file build
   materializes the P2.2–P2.4 reference data with source/build provenance;
-  see the [current data lifecycle](../data/README.md). P2.5 has retired
-  loose deployed-object serving and completed v9 staging/release diagnostics
-  while retaining current source, embedded-model and integrity checks.
-  - [ ] Finish P2.5: review remaining explicit legacy Rules build modes and
-    v1 variant-publication compatibility, including their test/wheel consumers.
-    The deployed-object JSON builder/reader and test adapters are retired;
-    shared storage guards and current source/API/browser checks remain.
+  see the [current data lifecycle](../data/README.md). P2.5's deployed-object
+  transition is complete: loose JSON serving/builders, migration tools,
+  explicit v8/v9 CLI build modes and v1 variant publications are retired,
+  with current source, embedded-model, wheel and integrity checks retained.
   - [ ] Complete P2.6–P2.8: cut over names/defaults and serving together,
     retire transitional candidate/checkout assembly, and validate the final
     local/container paths. Keep current build/serve functional until cutover.

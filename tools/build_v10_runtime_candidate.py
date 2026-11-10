@@ -77,7 +77,7 @@ def verify_candidate(stage: Path, *, root: Path = ROOT) -> dict[str, Any]:
     if path.read_bytes() != _json_bytes(expected_variant):
         raise ValueError("Staged exact-variant publication differs from reviewed inputs")
     if load_variant_usage_publication(
-        path, staged_army, staged_rules, stage / "deployed-objects.json",
+        path, staged_army, staged_rules,
     ) != expected_variant:
         raise ValueError("Staged variant publication failed runtime validation")
     weapon_path = stage / "weapon-profile-sources.json"

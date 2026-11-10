@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2–P2.4 projections are embedded in opt-in Rules v17/Army v31 sets. P2.5 retired deployed-object JSON serving, image assembly, migration tools and builder/reader test adapters; explicit legacy Rules builds and v1 variant-publication compatibility remain for purpose review. Final naming/defaults and unified serving remain under P2.6–P2.8.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2–P2.4 projections are embedded in opt-in Rules v17/Army v31 sets. P2.5's deployed-object transition is complete, including retirement of legacy CLI build modes and v1 variant publications. Final naming/defaults and unified serving remain under P2.6–P2.8.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -2131,12 +2131,43 @@ contexts, evidence and duplicate source selectors. No schema, reviewed
 source meaning or generated artifact changes; historical JSON procedures
 remain recoverable through Git rather than an executable compatibility archive.
 
-**Remaining P2.5:** Review explicit legacy Rules build modes and v1
-variant-publication compatibility, including their test and installed-wheel
-consumers; retire superseded paths without weakening current source/integrity
-checks. Compatibility is not retained solely to satisfy its own tests.
-P2.6–P2.8 own final naming/defaults, assembly-stage removal and
-full local/container integration acceptance.
+#### P2.5 — Twentieth slice: retire legacy CLI builds and v1 variants (2026-11-10)
+
+The explicit `build-rules --legacy-v8`/`--legacy-v9` modes had no independent
+current source/publication purpose. Their remaining callers were compatibility
+fixtures and installed-wheel smoke. The flags and conditional builder branches
+are removed; normal standalone/default builds still produce the reviewed v10
+model and preserve the tracked-release write guard and checkout assembly.
+Current source-semantic fixtures use the low-level canonical exporter directly.
+Obsolete CLI conflict/rebuild tests are retired, while existing-output safety,
+reviewed chart overrides, additive semantics and unchanged relations remain.
+
+Installed-wheel smoke now creates its controlled Rules fixture through the
+installed canonical API in isolated Python, after exercising both CLI entry
+points, Army builds, Rules help and curated validation. The normal and
+asset-free runtime checks still run outside the checkout with no developer
+imports. This is a present packaging/runtime fixture, not a supported historical
+release builder; current full Army/source-bound Rules builds belong to source
+checkout acceptance.
+
+The v1 exact-variant format depended on retired deployed-object JSON and has
+no current producer. Publication conversion and loading now accept only v2,
+rejecting v1 and any legacy JSON fingerprint without writing or upgrading files.
+The source builder, loader and all consumers no longer pass an obsolete sidecar
+argument. Unit fixtures use real matched v10 databases, retaining duplicate-row,
+source-fingerprint, diagnostic-exclusion and current embedded-model checks.
+Browser acceptance still rederives every published group from pinned raw sources
+and checks canonical owners, stale pairs, source-specific detail and Developer
+mode. The tracked v2 publication and generated databases are unchanged.
+
+**P2.5 closeout:** The deployed-object transition is complete at the focused
+Windows/source/browser and isolated installed-wheel boundary recorded in
+[testing](testing.md). Base reference export/read support remains useful for
+current semantic fixtures; it does not retain an obsolete CLI, sidecar fallback
+or publication workflow. **Handoff: P2.6**, the coordinated filename/default
+and serving cutover. P2.7/P2.8 still own assembly-stage removal and full
+local/container integration acceptance; no Linux, hosted or release gate is
+waived by this bounded closeout.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

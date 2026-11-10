@@ -41,12 +41,11 @@ def published_pair(requires_pinned_raw_army_archive: None) -> dict[str, Any]:
     army = DATA / "infinity.db"
     raw = DATA / "infinity.raw.db"
     rules = DATA / "rules.db"
-    objects = DATA / "deployed-objects.json"
     publication = DATA / "variant-usage.json"
     assert publication.is_file(), (
         "V1S-066 requires an explicit tools.build_variant_usage --publish before acceptance"
     )
-    candidate = build_variant_usage_projection(army, raw, rules, objects)
+    candidate = build_variant_usage_projection(army, raw, rules)
     expected = publication_from_candidate(candidate)
     expected_bytes = (
         json.dumps(expected, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
@@ -54,7 +53,7 @@ def published_pair(requires_pinned_raw_army_archive: None) -> dict[str, Any]:
     assert publication.read_bytes() == expected_bytes, (
         "Published exact-variant bytes are stale or differ from source-pair regeneration"
     )
-    loaded = load_variant_usage_publication(publication, army, rules, objects)
+    loaded = load_variant_usage_publication(publication, army, rules)
     assert loaded == expected
     app = create_app(army, rules_database_path=rules)
     assert app.variant_usage == expected
@@ -156,15 +155,12 @@ def test_variant_usage_stale_release_pair_fails_closed(
     objects = tmp_path / "deployed-objects.json"
     shutil.copyfile(DATA / "infinity.db", army)
     shutil.copyfile(DATA / "rules.db", rules)
-    if published_pair["publication"]["formatVersion"] == 1:
-        shutil.copyfile(DATA / "deployed-objects.json", objects)
-    else:
-        assert not objects.exists()
-    assert load_variant_usage_publication(publication, army, rules, objects)
+    assert not objects.exists()
+    assert load_variant_usage_publication(publication, army, rules)
     with rules.open("ab") as output:
         output.write(b"\nintentionally stale pairing\n")
     with pytest.raises(ValueError, match="does not match release artifacts"):
-        load_variant_usage_publication(publication, army, rules, objects)
+        load_variant_usage_publication(publication, army, rules)
 
 
 def _browser_catalog_case(

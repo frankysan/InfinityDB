@@ -466,7 +466,8 @@ and reject application imports outside that environment.
 The job verifies:
 
 - `infinity-db` and `infinity-army` entry points;
-- installed Army build and rules build/validation;
+- installed Army builds, Rules CLI help/curated validation, and canonical
+  reference export through the installed Python API;
 - packaged maintained configuration resolution;
 - runtime `Database` / `RulesDatabase` validation;
 - application startup against generated test databases; and
@@ -476,7 +477,9 @@ The job verifies:
 
 This is deliberately different from source-tree tests: installed build commands may use packaged
 shared configuration, while runtime opening of already-built databases must remain independent of
-repository-relative normalization policy. The asset-free subcheck mutates only the disposable wheel
+repository-relative normalization policy. The small Rules fixture exercises the installed
+exporter and runtime without preserving an obsolete CLI build mode. Current full
+Army/source-bound Rules builds are validated in the source checkout. The asset-free subcheck mutates only the disposable wheel
 virtual environment after the normal installed-package contract has already passed; production
 images still require the complete tracked publication through deployment-smoke validation.
 

@@ -2490,8 +2490,11 @@ inputs. Raw SQLite file bytes can differ across platforms even for the same
 validated Army export pair. Their byte hash stays in the local candidate's
 diagnostic source snapshot but is excluded from the portable public publication;
 the Army archive and export-pair fingerprints are preserved. At runtime, the
-co-located Army/rules database hashes and, for v9, deployed-object publication hash
-must match; stale or malformed artifacts fail closed. When no matched read model
+co-located Army/rules database hashes must match, and Rules must contain the
+source-matched deployed-object model. Only v2 variant publications are supported;
+v1 and the retired `deployedObjectPublicationSha256` dependency fail closed.
+The builder and loader no longer accept a deployed-object sidecar path.
+Stale or malformed artifacts fail closed. When no matched read model
 publication exists, `/api/variant-usage` returns `503`.
 
 The API requires one canonical `record_id` such as
@@ -3053,8 +3056,10 @@ unresolved paths, and exact Unit uses in relational tables within rules.db.
 It records the source Army database fingerprint without embedding the
 rules database's own hash, which would be self-referential.
 
-Explicit `--legacy-v8` and `--legacy-v9` preserve older standalone
-builders. All CLI modes reject writes directly to tracked
+The obsolete `--legacy-v8` and `--legacy-v9` CLI modes are retired.
+The low-level reference exporter still supports controlled semantic fixtures
+and source inspection; those base exports are not complete runtime sets.
+All CLI builds reject writes directly to tracked
 `data/generated/rules.db`. The v10 development artifacts were promoted together
 on 2026-11-08; the tagged 1.0.0 v9/JSON release remains available for rollback.
 `python -m tools.build_v10_runtime_candidate` stages the full pinned
@@ -3068,11 +3073,10 @@ the selected supported database set into ignored `data/runtime/` for Docker
 packaging, rejecting v8/v9 before modifying the destination. This is image-build
 preparation, not runtime migration or multi-file publication locking.
 
-The v9 build is byte-deterministic in tests, and read-only HTTP
-checks confirm both v8-unavailable and v9-available responses,
-filtering, backward-compatible Skills/Equipment responses, and
-unchanged legacy relations. The application also accepts the original
-v8 snapshot as a rollback source.
+Low-level source fixtures retain deterministic reference export, additive
+Restrictions responses, filtering and unchanged legacy relations. They do not
+establish support for rebuilding or serving a historical release set. Rollback
+uses the matching retained release artifacts and image.
 
 **Historical v1.0.0 development artifacts (2026-11-07):**
 

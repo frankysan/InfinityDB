@@ -864,8 +864,9 @@ Shared prose participates in the full semantic maintained-text syntax, target, a
 audits, including objective/ending payloads in the component library. No plain-reference exception
 is broadened for the new model. The rules builder consumes curated format v23.
 Its base schema/compatibility is 8/10. The normal CLI builds v10/12 with
-Restrictions and embedded deployed objects; explicit compatibility builds retain
-v8/10 and v9/11. Complete `build --db-dir` exports v11/13 with relational exact
+Restrictions and embedded deployed objects; obsolete v8/v9 CLI modes are retired.
+Low-level base reference exports remain useful for controlled semantic fixtures,
+not complete runtime publication. Complete `build --db-dir` exports v11/13 with relational exact
 variant usage linked to the existing reviewed definitions; it does not change
 curated format v23. The [data model](../../docs/data-model.md#rule-variant-usage-api)
 owns that projection and its source safeguards. The prepared 1.0.1 tracked release uses v10/12, while the

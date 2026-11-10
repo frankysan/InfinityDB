@@ -51,7 +51,6 @@ def select_checkout_database(
         raise ValueError(message)
     variants = load_variant_usage_publication(
         checkout / "variant-usage.json", army, rules_path,
-        checkout / "deployed-objects.json",
     )
     if variants is None or variants["formatVersion"] != 2:
         raise ValueError(message)

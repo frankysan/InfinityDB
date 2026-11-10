@@ -1264,6 +1264,35 @@ Git whitespace and tracked runtime artifact/provenance checks passed
 (SVG excluded). No full suite, Linux, Docker or hosted acceptance is implied.
 This internal adapter retirement needs no separate release-note entry.
 
+**2026-11-10 P2.5 twentieth slice and transition closeout:**
+Retired explicit v8/v9 Rules CLI builds and v1 exact-variant publications.
+Current builds preserve reviewed Restrictions/deployed objects, tracked-file
+write refusal and checkout assembly; all variant consumers use the v2-only
+loader without a deployed-object sidecar argument. Low-level source-semantic
+fixtures retain their independent exporter/read-model checks. Wheel smoke
+creates its controlled Rules fixture through the installed canonical API,
+preserving isolated CLI, configuration, normal and asset-free runtime coverage.
+Focused Windows validation passed **287 tests, zero skips**: 161 variant/source,
+CLI, Rules, wheel-isolation and variant-browser cases (62.03 seconds), followed
+by 94 storage, actual candidate/checkout assembly, database-set, deployment-script
+and section-registry cases (81.77 seconds), plus 32 release-note/metadata
+regressions (1.10 seconds). Source/browser checks retain every
+published group's canonical ownership, stale-pair refusal, Developer mode,
+request/page errors and overflow assertions at 1440/390/320 px. Rejection tests
+cover v1 and legacy fingerprint inputs without modifying files.
+An offline-built wheel (`1.0.1`, SHA-256
+`0a146f05b064b6ce1a2fcd92fe3064b6de5768248993f8b53ca59317edf0c20f`)
+passed normal and asset-free installed runtime smoke in a disposable environment
+outside the checkout. This is development packaging evidence, not publication.
+Ruff, focused Pyright (0 errors), docs lint/links/backlog, Git whitespace and
+tracked runtime artifact/provenance verification passed (SVG excluded).
+The finalized-release metadata command still rejects the pending 1.1.0
+heading and package-version difference, with exactly the same two errors as
+the starting revision; it is not a passed release gate or a new regression.
+This closes the bounded P2.5 transition; P2.6/P2.7/P2.8 retain filename/default
+cutover, assembly removal and final local/container integration acceptance.
+No full suite, Linux, hosted or release acceptance is implied.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -10006,8 +10035,9 @@ rewrites the artifact.
 Run this gate against the tracked release artifact, and repeat it against
 the final frozen release candidate. It never rebuilds the artifact. The
 normal `build-rules` export now produces a v10 candidate at ignored
-`local/rules-standalone.db`. Explicit `--legacy-v8`/`--legacy-v9` flags
-are available for compatibility testing. All CLI modes reject direct writes to
+`local/rules-standalone.db`; the obsolete `--legacy-v8`/`--legacy-v9` CLI modes
+are retired. Low-level semantic fixtures are not release build modes.
+All CLI builds reject direct writes to
 the tracked rules database. The prepared 1.0.1 tracked release uses v10;
 its schema-specific publication contract is in
 [the data-model contract](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).

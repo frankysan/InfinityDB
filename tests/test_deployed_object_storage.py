@@ -114,7 +114,8 @@ def test_v10_variant_usage_publication_needs_no_deployed_json(
     assert publication["formatVersion"] == 2
     output = tmp_path / "variant-usage.json"
     output.write_text(json.dumps(publication), encoding="utf-8")
-    assert load_variant_usage_publication(output, army, rules, missing_json) == publication
+    assert not missing_json.exists()
+    assert load_variant_usage_publication(output, army, rules) == publication
 
 
 

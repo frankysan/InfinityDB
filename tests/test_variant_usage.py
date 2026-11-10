@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import sqlite3
 from collections.abc import Iterator
 from pathlib import Path
@@ -85,27 +86,24 @@ def _variant_usage_candidate(
 
 def _write_variant_usage_artifacts(
     tmp_path: Path, *, duplicate: bool = False,
-) -> tuple[Path, Path, Path, Path]:
+) -> tuple[Path, Path, Path]:
     army = tmp_path / "infinity.db"
     rules = tmp_path / "rules.db"
-    objects = tmp_path / "deployed-objects.json"
     publication = tmp_path / "variant-usage.json"
-    army.write_bytes(b"army")
-    rules.write_bytes(b"rules")
-    objects.write_bytes(b"deployed objects")
+    shutil.copyfile(ROOT / "data/generated/infinity.db", army)
+    shutil.copyfile(ROOT / "data/generated/rules.db", rules)
     snapshot = {
         "armyArchiveSha256": "a" * 64,
         "armyDatabaseSha256": hashlib.sha256(army.read_bytes()).hexdigest(),
         "rawDatabaseSha256": "b" * 64,
         "rulesDatabaseSha256": hashlib.sha256(rules.read_bytes()).hexdigest(),
         "exportPairSha256": "c" * 64,
-        "deployedObjectPublicationSha256": hashlib.sha256(objects.read_bytes()).hexdigest(),
     }
     candidate = _variant_usage_candidate(snapshot, duplicate=duplicate)
     if duplicate:
         document = {
             "format": "infinitydb-rule-variant-usage",
-            "formatVersion": 1,
+            "formatVersion": 2,
             "scope": "exact-reviewed-source-variants",
             "sourceSnapshot": snapshot,
             "variants": candidate["variants"],
@@ -113,22 +111,53 @@ def _write_variant_usage_artifacts(
     else:
         document = publication_from_candidate(candidate)
     publication.write_text(json.dumps(document), encoding="utf-8")
-    return army, rules, objects, publication
+    return army, rules, publication
 
 
 def test_variant_usage_publication_exposes_only_exact_source_variants(
     tmp_path: Path,
 ) -> None:
-    army, rules, objects, publication = _write_variant_usage_artifacts(tmp_path)
+    army, rules, publication = _write_variant_usage_artifacts(tmp_path)
+    (tmp_path / "deployed-objects.json").write_text("invalid JSON", encoding="utf-8")
 
-    result = load_variant_usage_publication(publication, army, rules, objects)
+    result = load_variant_usage_publication(publication, army, rules)
 
     assert result is not None
+    assert result["formatVersion"] == 2
     assert result["scope"] == "exact-reviewed-source-variants"
     assert len(result["variants"]) == 1
     assert "diagnosticCounts" not in result
     assert "unresolvedSourceRows" not in result
     assert "rawDatabaseSha256" not in result["sourceSnapshot"]
+
+
+@pytest.mark.parametrize("legacy_version", [True, False])
+def test_variant_publication_rejects_retired_format_and_json_dependency(
+    tmp_path: Path, legacy_version: bool,
+) -> None:
+    army, rules, publication = _write_variant_usage_artifacts(tmp_path)
+    objects = tmp_path / "deployed-objects.json"
+    objects.write_bytes(b"historical publication")
+    document = json.loads(publication.read_text(encoding="utf-8"))
+    document["sourceSnapshot"]["deployedObjectPublicationSha256"] = (
+        hashlib.sha256(objects.read_bytes()).hexdigest()
+    )
+    if legacy_version:
+        document["formatVersion"] = 1
+    publication.write_text(json.dumps(document), encoding="utf-8")
+    before = {path: path.read_bytes() for path in tmp_path.iterdir()}
+    message = "Unsupported variant" if legacy_version else "must not depend"
+    with pytest.raises(ValueError, match=message):
+        load_variant_usage_publication(publication, army, rules)
+    assert {path: path.read_bytes() for path in tmp_path.iterdir()} == before
+
+
+def test_candidate_conversion_rejects_retired_deployed_object_fingerprint() -> None:
+    candidate = _variant_usage_candidate({
+        "deployedObjectPublicationSha256": "f" * 64,
+    })
+    with pytest.raises(ValueError, match="must not depend"):
+        publication_from_candidate(candidate)
 
 
 def test_variant_usage_publication_ignores_raw_sqlite_byte_layout() -> None:
@@ -138,7 +167,6 @@ def test_variant_usage_publication_ignores_raw_sqlite_byte_layout() -> None:
         "rawDatabaseSha256": "c" * 64,
         "rulesDatabaseSha256": "d" * 64,
         "exportPairSha256": "e" * 64,
-        "deployedObjectPublicationSha256": "f" * 64,
     }
     original = publication_from_candidate(_variant_usage_candidate(snapshot))
     changed = {**snapshot, "rawDatabaseSha256": "0" * 64}
@@ -150,24 +178,24 @@ def test_variant_usage_publication_ignores_raw_sqlite_byte_layout() -> None:
 def test_variant_usage_publication_rejects_duplicate_source_rows(
     tmp_path: Path,
 ) -> None:
-    army, rules, objects, publication = _write_variant_usage_artifacts(
+    army, rules, publication = _write_variant_usage_artifacts(
         tmp_path, duplicate=True,
     )
 
     with pytest.raises(ValueError, match="duplicate variant usage source identity"):
-        load_variant_usage_publication(publication, army, rules, objects)
+        load_variant_usage_publication(publication, army, rules)
 
 
-@pytest.mark.parametrize("artifact", ["army", "rules", "objects"])
+@pytest.mark.parametrize("artifact", ["army", "rules"])
 def test_variant_usage_publication_rejects_stale_release_artifacts(
     tmp_path: Path, artifact: str,
 ) -> None:
-    army, rules, objects, publication = _write_variant_usage_artifacts(tmp_path)
-    stale = {"army": army, "rules": rules, "objects": objects}[artifact]
+    army, rules, publication = _write_variant_usage_artifacts(tmp_path)
+    stale = {"army": army, "rules": rules}[artifact]
     stale.write_bytes(f"changed {artifact}".encode())
 
     with pytest.raises(ValueError, match="does not match release artifacts"):
-        load_variant_usage_publication(publication, army, rules, objects)
+        load_variant_usage_publication(publication, army, rules)
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: Any) -> None:
@@ -433,7 +461,7 @@ def test_variant_usage_requires_embedded_objects_even_with_legacy_json(
     unchanged = legacy.read_bytes()
 
     with pytest.raises(ValueError, match="requires source-matched embedded deployed objects"):
-        build_variant_usage_projection(paths[0], paths[1], rules, legacy)
+        build_variant_usage_projection(paths[0], paths[1], rules)
     assert legacy.read_bytes() == unchanged
 
 
@@ -664,7 +692,6 @@ def test_variant_usage_mismatched_raw_snapshot_fails_closed(
             ROOT / "data/generated/infinity.db",
             ROOT / "data/generated/infinity.raw.db",
             ROOT / "data/generated/rules.db",
-            ROOT / "data/generated/deployed-objects.json",
         )
 
 
@@ -674,7 +701,6 @@ def test_variant_usage_pinned_pair_has_source_ownership_not_inferred_includes() 
         ROOT / "data/generated/infinity.db",
         ROOT / "data/generated/infinity.raw.db",
         ROOT / "data/generated/rules.db",
-        ROOT / "data/generated/deployed-objects.json",
     )
     assert projection["scope"] == "read-only-candidate-not-published"
     assert projection["formatVersion"] == 2
@@ -838,7 +864,7 @@ def test_variant_usage_mismatched_export_generation_fails_before_reading_rows(
             connection.backup(destination)
     with pytest.raises(ValueError, match="different exports"):
         build_variant_usage_projection(
-            paths[0], paths[1], tmp_path / "rules.db", tmp_path / "pub.json",
+            paths[0], paths[1], tmp_path / "rules.db",
         )
 
 

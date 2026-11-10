@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, TypeGuard
 
 PUBLICATION_FORMAT = "infinitydb-rule-variant-usage"
-PUBLICATION_VERSION = 1
+PUBLICATION_VERSION = 2
 PUBLICATION_SCOPE = "exact-reviewed-source-variants"
 
 
@@ -36,9 +36,7 @@ def publication_from_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Unsupported variant usage candidate")
     publication = {
         "format": PUBLICATION_FORMAT,
-        "formatVersion": 2 if "deployedObjectPublicationSha256" not in candidate[
-            "sourceSnapshot"
-        ] else PUBLICATION_VERSION,
+        "formatVersion": PUBLICATION_VERSION,
         "scope": PUBLICATION_SCOPE,
         # Raw SQLite bytes may differ across hosts even for the same validated
         # export pair. Keep the raw byte digest in build diagnostics, not in
@@ -72,7 +70,7 @@ def _validate_publication(document: Any) -> dict[str, Any]:
     if (
         not isinstance(document, dict)
         or document.get("format") != PUBLICATION_FORMAT
-        or document.get("formatVersion") not in {PUBLICATION_VERSION, 2}
+        or document.get("formatVersion") != PUBLICATION_VERSION
         or document.get("scope") != PUBLICATION_SCOPE
         or not isinstance(document.get("sourceSnapshot"), dict)
         or not isinstance(document.get("variants"), list)
@@ -85,12 +83,8 @@ def _validate_publication(document: Any) -> dict[str, Any]:
         "armyDatabaseSha256",
         "rulesDatabaseSha256",
         "exportPairSha256",
-        *(
-            ("deployedObjectPublicationSha256",)
-            if document["formatVersion"] == 1 else ()
-        ),
     )
-    if document["formatVersion"] == 2 and "deployedObjectPublicationSha256" in snapshot:
+    if "deployedObjectPublicationSha256" in snapshot:
         raise ValueError("v2 variant usage must not depend on deployed-object JSON")
     if any(
         not isinstance(snapshot.get(field), str)
@@ -217,7 +211,6 @@ def load_variant_usage_publication(
     path: Path,
     army_database: Path,
     rules_database: Path | None,
-    deployed_object_publication: Path,
 ) -> dict[str, Any] | None:
     """Load an exact-variant publication only when its release pair matches."""
     if not path.is_file():
@@ -235,18 +228,10 @@ def load_variant_usage_publication(
         or snapshot["rulesDatabaseSha256"] != _sha256(rules_database)
     ):
         raise ValueError("Variant usage publication does not match release artifacts")
-    if publication["formatVersion"] == 1:
-        if (
-            not deployed_object_publication.is_file()
-            or snapshot["deployedObjectPublicationSha256"]
-            != _sha256(deployed_object_publication)
-        ):
-            raise ValueError("Variant usage publication does not match release artifacts")
-    else:
-        from infinity_db.rules_database import RulesDatabase
+    from infinity_db.rules_database import RulesDatabase
 
-        if RulesDatabase(rules_database).deployed_objects_payload(army_database) is None:
-            raise ValueError("Variant usage v2 requires normalized deployed objects")
+    if RulesDatabase(rules_database).deployed_objects_payload(army_database) is None:
+        raise ValueError("Variant usage v2 requires normalized deployed objects")
     return publication
 
 
@@ -265,6 +250,6 @@ def load_runtime_variant_usage(
         return None, None
     path = army_database.with_name("variant-usage.json")
     publication = load_variant_usage_publication(
-        path, army_database, rules_database, army_database.with_name("deployed-objects.json"),
+        path, army_database, rules_database,
     )
     return publication, _sha256(path) if publication is not None else None

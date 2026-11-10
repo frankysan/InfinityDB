@@ -372,13 +372,8 @@ def build_variant_usage_projection(
     application_path: Path,
     raw_path: Path,
     rules_path: Path,
-    _legacy_publication_path: Path | None = None,
 ) -> dict[str, Any]:
-    """Create a source-bound projection using embedded deployed objects only.
-
-    The obsolete optional sidecar argument is ignored for old tool callers;
-    it cannot enable a legacy Rules schema or recover missing embedded data.
-    """
+    """Create a source-bound projection using embedded deployed objects only."""
     export_pair = validate_database_pair(application_path, raw_path=raw_path)
     if export_pair is None:
         raise ValueError("Variant usage requires a pinned Army export pair")

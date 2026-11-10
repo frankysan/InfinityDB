@@ -503,18 +503,7 @@ def test_v9_cli_rejects_tracked_release_path(
     assert not path.exists()
 
 
-def test_v8_manifest_conflict_fails_closed() -> None:
-    from infinity_db.cli import build_parser, cmd_build_rules
-
-    args = build_parser().parse_args([
-        "build-rules", "--legacy-v8", "--restrictions-manifest",
-        "config/validation/restrictions-source-chart.json",
-    ])
-    with pytest.raises(ValueError, match="cannot be combined"):
-        cmd_build_rules(args)
-
-
-def test_explicit_v8_build_rules_cannot_replace_tracked_v9_database(
+def test_build_rules_preserves_existing_tracked_release_database(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from infinity_db import cli
@@ -530,34 +519,13 @@ def test_explicit_v8_build_rules_cannot_replace_tracked_v9_database(
     monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", output)
     args = cli.build_parser().parse_args([
         "build-rules", str(ROOT / "data/curated/rules"),
-        "--legacy-v8", "--output", str(output),
+        "--output", str(output),
     ])
     assert args.output.resolve() == output.resolve()
     with pytest.raises(ValueError, match="cannot write the tracked release"):
         cli.cmd_build_rules(args)
 
     assert output.read_bytes() == original
-
-
-def test_legacy_v8_opt_in_can_rebuild_existing_v8_database(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    from infinity_db import cli
-
-    output = tmp_path / "rules.db"
-    documents = load_curated_directory(ROOT / "data/curated/rules")
-    export_rules_database(documents, output)
-
-    args = cli.build_parser().parse_args([
-        "build-rules", str(ROOT / "data/curated/rules"),
-        "--legacy-v8", "--output", str(output),
-    ])
-    assert args.output.resolve() == output.resolve()
-    assert cli.cmd_build_rules(args) == 0
-
-    database = RulesDatabase(output)
-    database.validate()
-    assert database.restrictions_payload()["available"] is False
 
 
 def test_v8_reader_preserves_preexisting_metadata_contract(
@@ -573,12 +541,12 @@ def test_v8_reader_preserves_preexisting_metadata_contract(
     assert RulesDatabase(target).restrictions_payload()["available"] is False
 
 
-def test_explicit_build_rules_cli_exports_v9_to_separate_path(tmp_path: Path) -> None:
+def test_explicit_build_rules_cli_exports_embedded_model_to_separate_path(tmp_path: Path) -> None:
     from infinity_db.cli import build_parser, cmd_build_rules
 
-    output = tmp_path / "restrictions-v9.db"
+    output = tmp_path / "rules-v10.db"
     args = build_parser().parse_args([
-        "build-rules", "--legacy-v9", "--restrictions-manifest",
+        "build-rules", "--restrictions-manifest",
         "config/validation/restrictions-source-chart.json",
         "--output", str(output),
     ])

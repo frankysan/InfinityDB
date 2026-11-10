@@ -32,10 +32,11 @@ are not retroactively relabeled.
 
 ### Changed
 
-- **Web backend + Deployment:** Retired loose deployed-object JSON serving
-  and legacy v8/v9 image assembly. Current images require database-embedded
-  deployed objects; older releases remain recoverable through their matching
-  retained images.
+- **Data processing + Web backend + Deployment:** Retired loose deployed-object
+  JSON serving, legacy v8/v9 build modes and image assembly, and v1 variant
+  publications. Current builds and images require database-embedded deployed
+  objects and v2 variant data; obsolete inputs fail closed. Older releases
+  remain recoverable through their matching retained images.
 
 ## [1.0.1] - 2026-11-09
 

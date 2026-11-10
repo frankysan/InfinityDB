@@ -11,9 +11,10 @@ from pathlib import Path
 
 import pytest
 
+from infinity_db.curated import load_curated_directory
 from infinity_db.deployed_object_builder import build_deployed_objects
 from infinity_db.deployed_object_storage import stage_deployed_objects
-from infinity_db.rules_database import RulesDatabase
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 
 
 @pytest.fixture(scope="module")
@@ -34,13 +35,14 @@ def source_paths() -> tuple[Path, Path, Path, Path, Path]:
 @pytest.fixture(scope="module")
 def legacy_v9_rules(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """An older reference DB must never activate a loose deployed-object publication."""
-    from infinity_db.cli import build_parser, cmd_build_rules
-
+    root = Path(__file__).resolve().parents[1]
     output = tmp_path_factory.mktemp("deployed-v9-compatibility") / "rules.db"
-    args = build_parser().parse_args([
-        "build-rules", "--legacy-v9", "--output", str(output),
-    ])
-    assert cmd_build_rules(args) == 0
+    export_rules_database(
+        load_curated_directory(root / "data/curated/rules"), output,
+        restrictions_manifest=json.loads(
+            (root / "config/validation/restrictions-source-chart.json").read_text(encoding="utf-8")
+        ),
+    )
     with sqlite3.connect(output) as connection:
         assert connection.execute("PRAGMA user_version").fetchone()[0] == 9
     return output

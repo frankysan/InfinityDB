@@ -233,7 +233,8 @@ and assembles the matching `local/checkout-runtime/` for checkout-based
 serving. It requires the paired raw Army database produced by
 `infinity-db build --compact` to publish reviewed exact-variant usage.
 Use `--output` for a **standalone Rules-only** build with no checkout
-publication, or `--legacy-v8`/`--legacy-v9` for compatibility work.
+publication. `build-rules` always includes reviewed Restrictions and deployed
+objects; older standalone CLI formats are retired.
 For an independently staged, source-matched v10 candidate, run
 `python -m tools.build_v10_runtime_candidate` and repeat with `--check`.
 The initial v9-to-v10 migration is complete and its one-use promotion command
@@ -324,9 +325,8 @@ infinity-db build-rules
 `build-rules` reads `data/curated/rules/` and the reviewed Army-source
 inputs, writing a v10 candidate to `local/rules-standalone.db` by default.
 The Restrictions chart and deployed-object reviews are applied automatically.
-Use `--legacy-v8` or `--legacy-v9` for older standalone formats.
-These source/research outputs are not supported by the current image builder;
-current deployed-object serving requires an embedded v10-or-later projection.
+Older standalone build modes are retired; current deployed-object serving
+requires an embedded v10-or-later projection.
 Use a matching retained released image to roll back to an older data format.
 Direct writes to the tracked release `rules.db` are disallowed.
 
