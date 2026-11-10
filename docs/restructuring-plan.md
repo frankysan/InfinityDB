@@ -2499,6 +2499,30 @@ remain intact. This completes the planned P3.4 code/ownership work; local
 validation and hosted CI are independently recorded. P3.5 owns synthetic
 cross-season collision and multi-database growth acceptance.
 
+#### P3.5 — Synthetic multi-season isolation and growth (2026-11-10)
+
+The isolated ITS SQLite builder/inspector now derives its exact season owner
+from authored `scenarioCollection` metadata rather than hardcoding ITS 18.
+Source collection, record scope and policy applicability remain checked
+against that owner, with the existing deterministic geometry and reference
+model retained. This does **not** automatically register or publish a new
+season. The complete checkout/Docker runtime still builds, validates and
+packages exactly Army, N5 Rules and the reviewed ITS 18 database.
+
+A temporary, clearly synthetic ITS 17 fixture duplicates
+`scenario:battleground` (same public name and slug), but has a distinct
+publication revision, source metadata, authored summary, policy and input
+digest. The multi-season registry/HTTP tests verify independent list/detail
+and SVG routing, correct source attribution, exact policy/FAQ applicability,
+unchanged N5 defaults and ITS 18 maps, ETag and snapshot cache separation,
+rejection of unknown N5 targets or wrong registration, and no implicit
+discovery of extra SQLite files. Explicitly registering a new file without
+its source in the selected build manifest fails closed. Actual ITS S16/S17
+content remains separate future curation work, not required for P3 exit.
+
+P3 implementation and local validation are complete; hosted Source CI
+remains a separate outstanding acceptance gate.
+
 ### P4 — Make the interface player-first
 
 **Outcome:** Less user-visible implementation language without loss of relevant gameplay accuracy.  

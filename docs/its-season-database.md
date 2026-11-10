@@ -93,11 +93,15 @@ all three outputs and their cross-publication references, then replaces the
 selected files. A changed or invalid source before replacement preserves
 the previous outputs. Identical builds produce byte-identical SQLite data.
 
-The test module is `tests/test_its_season_database.py`, assigned to the
-model test section. It covers byte determinism, matched P2 Battleground
-publication content, full configuration/citation preservation, exact
-selection, source drift, core compatibility, corruption, and safe
-replacement.
+The test module `tests/test_its_season_database.py` covers the
+production ITS 18 schema, deterministic bytes, citation and geometry
+preservation, exact selection, drift, core compatibility, corruption
+and safe replacement. The P3.5 `tests/test_its_multiseason.py` uses
+a temporary, explicitly **synthetic** ITS 17 document and SQLite file
+to prove multiple independent seasons with the *same* Battleground
+slug, different publication content, isolated policy/citation sources,
+FAQ selection, cache fingerprints, ETags and invalid registration
+behavior. It is not an assertion about actual Season 17 rules.
 
 ## P3.4 registry and selected runtime
 
@@ -118,6 +122,24 @@ The HTTP API retains its existing collection/revision selectors; unknown
 seasons/revisions never fall back to core. The internal explicit
 `create_app(..., season_databases={"its-18": path})` remains useful for
 isolated parity tests.
+
+## P3.5 — Multi-season growth acceptance
+
+The isolated ITS builder/inspector derives the owner from the validated
+`scenarioCollection.id` and requires a matching
+`its-season-<season-number>-` source collection and exact record/policy
+scope. A second season can be built and registered independently without
+modifying N5/Army storage, overriding another season or creating
+alternate renderers. Reused `scenario:battleground` identities are resolved
+by their registered season and revision, not by slug alone. An absent or
+mismatched owner, missing N5 target, stale revision, unregistered source
+or altered source/geometry fails closed.
+
+**The production release is still intentionally three files:**
+`army.db`, `rules_n5.db`, `its_18.db`. It does not autodiscover
+additional files in the selected directory. Adding an actual future season
+requires its own reviewed source, explicit release registration, recorded
+build input and packaging; the synthetic test database is never published.
 
 ## Migration boundary
 

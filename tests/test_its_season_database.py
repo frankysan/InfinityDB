@@ -213,8 +213,8 @@ def test_builder_replaces_only_validated_output_and_is_repeatable(tmp_path: Path
 @pytest.mark.parametrize(
     ("mutation", "message"),
     (
-        (lambda doc: doc["collection"].update(domain="core-rules"), "ITS 18 source"),
-        (lambda doc: doc["scenarioCollection"].update(id="its-17"), "ITS 18 source"),
+        (lambda doc: doc["collection"].update(domain="core-rules"), "matching season"),
+        (lambda doc: doc["scenarioCollection"].update(id="its-17"), "matching season"),
         (lambda doc: doc["records"][0]["scope"].update(seasons=["its-17"]), "out-of-season"),
         (lambda doc: doc["sources"][0].update(version="2025.09.01"), "revision-matched"),
         (

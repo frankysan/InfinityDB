@@ -26,17 +26,15 @@ when all contained work shares the same owner.
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-- [ ] Execute P3–P6 of the [phased restructuring plan](restructuring-plan.md).
-  P0–P2 are complete, including the verified shared Army v31 / Rules v17
-  `army.db`/`rules_n5.db` build and real local/Docker serving acceptance.
-  - [ ] Complete P3.5 multi-season publication isolation and growth
-    acceptance. P3.1–P3.4 have implemented the coordinated three-database
-    runtime, independent ITS 18 Battleground, explicit tournament/Extra
-    policies, Rules ownership retirement, FAQ season isolation and
-    authoritative source-provenance selection. See
-    [ITS season database](its-season-database.md). Hosted Source CI
-    still has legacy fixture failures; do not count it as accepted until
-    repaired and re-run at the selected SHA.
+- [ ] Execute P4–P6 and complete hosted CI acceptance for P3 of the
+  [phased restructuring plan](restructuring-plan.md).
+  P0–P3 are implemented and locally validated. P3.5 exercised a
+  synthetic second season with a duplicate Battleground slug without
+  adding actual Season 17 content or modifying the three-file production
+  contract. See [ITS season database](its-season-database.md).
+  The remaining P3 release gate is hosted Source CI, including outstanding
+  legacy fixture failures; do not count the phase as hosted-accepted until
+  those checks are repaired and re-run on the selected SHA.
   - [ ] Continue P4–P6 under the plan's player-facing presentation, tooling
     retirement and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in

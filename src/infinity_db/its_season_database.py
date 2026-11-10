@@ -1,7 +1,8 @@
 """Build and inspect an isolated ITS season database, independent of the serving set.
 
-P3.2: this database is an offline development artifact, not yet read by the web
-runtime. The existing scenario authoring/geometry parser remains authoritative.
+The database has one explicit season owner. The current complete runtime
+registers ITS 18; other season IDs may be built for isolated acceptance tests
+without silently changing the production publication set.
 """
 from __future__ import annotations
 
@@ -26,7 +27,6 @@ from .sqlite_determinism import (
 ITS_APPLICATION_ID = 0x49445331  # "IDS1", distinct from Rules/Army databases
 ITS_SCHEMA_VERSION = 2
 ITS_METADATA_TABLE = "__its_metadata"
-SEASON_ID = "its-18"
 DEFAULT_CORE_REVISION = "5.3"
 
 
@@ -80,7 +80,7 @@ def _input_identity(source: Path, document: dict[str, Any], core_revision: str) 
 
 
 def _validate_season_policy(
-    policy: dict[str, Any], *, revision: str, source_ids: set[str],
+    policy: dict[str, Any], *, season_id: str, revision: str, source_ids: set[str],
 ) -> None:
     """Validate ITS-only published event policy data, never core definitions."""
     from datetime import date
@@ -113,7 +113,7 @@ def _validate_season_policy(
     }:
         raise ValueError(f"{context}: invalid applicability")
     if (
-        applicability["seasonId"] != SEASON_ID
+        applicability["seasonId"] != season_id
         or applicability["revision"] != revision
         or applicability["context"] not in {
             "official-tournament", "team-ops-extra", "reinforcements-extra",
@@ -153,17 +153,22 @@ def _validate_season_policy(
 
 
 def _validate_its_document(document: dict[str, Any], core_revision: str) -> None:
+    from .domain_slugs import require_domain_slug
+
     collection = document["collection"]
     season = document.get("scenarioCollection")
+    if not isinstance(season, dict):
+        raise ValueError("ITS builder requires a season scenario set")
+    season_id = require_domain_slug(season.get("id"), context="ITS season")
     if (
-        collection["domain"] != "its"
-        or not collection["id"].startswith("its-season-18-")
-        or not isinstance(season, dict)
-        or season.get("id") != SEASON_ID
+        not season_id.startswith("its-")
+        or not season_id[4:]
+        or collection["domain"] != "its"
+        or not collection["id"].startswith(f"its-season-{season_id[4:]}-")
         or not isinstance(season.get("revision"), str)
         or not season["revision"]
     ):
-        raise ValueError("ITS 18 builder requires an ITS 18 source collection and scenario set")
+        raise ValueError("ITS builder requires matching season and source collection identities")
     if (
         not isinstance(core_revision, str)
         or not core_revision.strip()
@@ -186,17 +191,18 @@ def _validate_its_document(document: dict[str, Any], core_revision: str) -> None
     seen_policy_ids: set[str] = set()
     for policy in policies:
         _validate_season_policy(
-            policy, revision=season["revision"], source_ids=source_ids,
+            policy, season_id=season_id,
+            revision=season["revision"], source_ids=source_ids,
         )
         if policy["id"] in seen_policy_ids:
             raise ValueError(f"Duplicate ITS season policy {policy['id']!r}")
         seen_policy_ids.add(policy["id"])
     for record in document["records"]:
         scope = record["scope"]
-        if scope.get("game") != "N5" or SEASON_ID not in scope.get("seasons", []):
-            raise ValueError(f"ITS 18 publication contains out-of-season record {record['id']!r}")
+        if scope.get("game") != "N5" or season_id not in scope.get("seasons", []):
+            raise ValueError(f"ITS publication contains out-of-season record {record['id']!r}")
         if record["kind"] != "scenario":
-            raise ValueError(f"ITS 18 publication contains unsupported record {record['id']!r}")
+            raise ValueError(f"ITS publication contains unsupported record {record['id']!r}")
 
 
 def _schema(connection: sqlite3.Connection) -> None:
@@ -397,7 +403,13 @@ def inspect_its_database(
             raise ValueError("ITS build provenance is invalid")
         identity = metadata["inputIdentity"]
         if (
-            identity.get("seasonId") != SEASON_ID
+            not isinstance(identity.get("seasonId"), str)
+            or not identity["seasonId"].startswith("its-")
+            or not identity["seasonId"][4:]
+            or not isinstance(identity.get("sourceCollectionId"), str)
+            or not identity["sourceCollectionId"].startswith(
+                f"its-season-{identity['seasonId'][4:]}-"
+            )
             or identity.get("schemaVersion") != ITS_SCHEMA_VERSION
             or not isinstance(identity.get("builderRevision"), str)
             or len(identity["builderRevision"]) != 64
@@ -441,6 +453,12 @@ def inspect_its_database(
             record = json.loads(row["payload_json"])
             if _digest(record) != row["content_sha256"] or record.get("id") != row["scenario_id"]:
                 raise ValueError("ITS scenario publication content hash mismatch")
+            scope = record.get("scope", {})
+            if (
+                scope.get("game") != "N5"
+                or identity["seasonId"] not in scope.get("seasons", [])
+            ):
+                raise ValueError("ITS scenario record does not belong to selected season")
             parsed = parse_scenario_definition_record(record)
             configs = connection.execute(
                 "SELECT configuration_id, army_points_json, geometry_json "
@@ -496,7 +514,8 @@ def inspect_its_database(
             if row["source_collection_id"] != identity["sourceCollectionId"]:
                 raise ValueError("ITS policy belongs to a different source collection")
             _validate_season_policy(
-                policy, revision=identity["seasonRevision"], source_ids=source_ids,
+                policy, season_id=identity["seasonId"],
+                revision=identity["seasonRevision"], source_ids=source_ids,
             )
             if (
                 _digest(policy) != row["content_sha256"]

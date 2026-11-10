@@ -18,6 +18,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend:** Added deterministic multi-season ITS
+  publication validation and synthetic duplicate-slug acceptance, preserving
+  explicit source ownership and independent season/revision selection.
+  No additional real season content is included in this release.
 - **Data processing + Web backend + Web frontend:** Added source-cited ITS Season 18
   play-context policies with explicit tournament, TEAM-OPS and Reinforcements
   Extra selection. The policy API never applies a context by default; scenario

@@ -95,6 +95,7 @@
         "test_identity_database",
         "test_inspect_raw_archive",
         "test_its_season_database",
+        "test_its_multiseason",
         "test_publication_registry",
         "test_interim_reference_consistency",
         "test_logical_unit_identity",

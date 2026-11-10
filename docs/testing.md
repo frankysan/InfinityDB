@@ -1625,6 +1625,31 @@ immutable Docker image each passed **41/41** pinned HTTP paths; Docker
 container and image were cleaned up. These are local results only;
 full hosted Source CI is separately required and unresolved on prior SHAs.
 
+**2026-11-10 P3.5 synthetic multi-season isolation (development checkout):**
+The ITS builder/inspector now validates a season owner selected from its
+curated source rather than fixing the owner to ITS 18. The production build
+remains an explicit three-file set and has been regenerated under build-set
+`8f79b69519aacb5bbaa78b486e0609d8d77ee74f9b5ad37b3346cdd87a2ec390`.
+A temporary, non-published synthetic ITS 17 SQLite database reuses the
+`scenario:battleground` slug but has distinct publication revision,
+review-source descriptor, facts and policy. Five focused multi-season tests
+pass: exact owner/revision HTTP and registry resolution across multiple
+Army Point configurations, N5 default stability, independent SVG/Season 18
+parity, scoped FAQ/policies and official-vs-synthetic citations, separate
+ETags/cache identities, rejection of invalid references and mismatched
+registration, and no implicit release registration of extra files.
+This does not claim authentic ITS 17 rules or content coverage.
+
+Focused results: synthetic multiseason **5/5**, ITS builder/database **17/17**,
+publication registry **29/29**, strict selected database set **23/23**,
+scenario API **96 passed / 4 skipped**; Pyright **0 errors**,
+Ruff and docs/links/backlog and Git whitespace checks passed.
+Source-bound asset validation verified **808/808** published SVGs and
+**808/808** browser references. The real checkout and ephemeral Docker
+image each passed **41/41** pinned HTTP paths, including health/geometry;
+image/container cleaned up. The hosted Source matrix remains a separate,
+unaccepted gate until green on the exact release candidate SHA.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
