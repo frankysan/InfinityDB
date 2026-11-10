@@ -52,20 +52,21 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
         _run(
             project_root,
             "-m",
-            "infinity_db",
+            "infinity_army_data",
             "build",
             str(fixture),
             "--output-dir",
             str(generated),
             "--compact",
         )
-        _run(
-            project_root,
-            "-m",
-            "infinity_db",
-            "build-rules",
-            "--output",
-            str(generated / "rules.db"),
+        _run(project_root, "-m", "infinity_db", "export",
+             str(generated / "normalized.json"), str(generated / "army.db"))
+        from infinity_db.curated import load_curated_directory
+        from infinity_db.rules_database import export_rules_database
+
+        export_rules_database(
+            load_curated_directory(project_root / "data/curated/rules"),
+            generated / "rules_n5.db",
         )
         _run(
             project_root,
@@ -88,12 +89,12 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
         artifacts = {
             f"build/{name}": sha256_file(generated / name)
             for name in (
-                "infinity.db",
-                "infinity.raw.db",
+                "army.db",
+                "army.raw.db",
                 "master.json",
                 "normalized-validation.json",
                 "normalized.json",
-                "rules.db",
+                "rules_n5.db",
             )
         }
         artifacts["archives/snapshot.zip"] = sha256_file(snapshot)

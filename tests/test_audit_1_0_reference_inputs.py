@@ -117,7 +117,7 @@ def test_historical_reinforcements_report_uses_actual_availability(
     core.write_bytes(b"synthetic N5 core")
     faq = tmp_path / "faq.pdf"
     faq.write_bytes(b"synthetic FAQ")
-    rules = tmp_path / "rules.db"
+    rules = tmp_path / "rules_n5.db"
     with sqlite3.connect(rules) as db:
         db.execute("CREATE TABLE sources(id, url, kind, title, version, sha256)")
         core_hash = hashlib.sha256(core.read_bytes()).hexdigest()

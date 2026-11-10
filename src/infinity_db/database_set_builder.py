@@ -1,4 +1,4 @@
-"""Offline orchestration of the current runtime set before the P2 filename cutover."""
+"""Offline construction and validated replacement of one complete runtime set."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ from .army_reference_storage import publish_army_reference_data
 from .build_provenance import (
     FAMILIES,
     MANIFEST_FORMAT,
+    build_input_fingerprints,
     build_record,
     build_set_id,
     canonical_bytes,
@@ -51,26 +52,9 @@ def collect_build_manifest(root: Path, source: Path, metadata: Path | None) -> d
         raise ValueError("Complete runtime builds require the project source checkout")
     envelope = discover_metadata(source, metadata, required=True)
     assert envelope is not None
-    code = sorted((root / "src").rglob("*.py"))
-    maintained = [
-        path for directory in (
-            "config/catalogs", "config/identity", "config/validation", "config/symbols",
-            "data/curated",
-        ) for path in (root / directory).rglob("*.json") if path.name != "example.json"
-    ]
-    maintained.extend([
-        root / "pyproject.toml", root / "data/manifests/symbol-publication.json",
-        root / "src/infinity_db/web/static/restrictions-reference.json",
-    ])
-    # Match the repository's LF source-text policy even in an older Windows
-    # worktree containing CRLF. Upstream archive/API metadata stay byte-exact.
-    code_digests = {
-        path.relative_to(root).as_posix(): hashlib.sha256(
-            path.read_bytes().replace(b"\r\n", b"\n")
-        ).hexdigest()
-        for path in code
-    }
-    inputs = {path.relative_to(root).as_posix(): file_sha256(path) for path in maintained}
+    inputs = build_input_fingerprints(root)
+    code_digests = {name: digest for name, digest in inputs.items()
+                    if name.startswith("src/") and name.endswith(".py")}
     manifest = {
         "format": MANIFEST_FORMAT, "formatVersion": 1, "families": list(FAMILIES),
         "builderRevision": hashlib.sha256(canonical_bytes(code_digests)).hexdigest(),
@@ -79,14 +63,14 @@ def collect_build_manifest(root: Path, source: Path, metadata: Path | None) -> d
             "metadataName": envelope["sourceFile"],
             "metadataSha256": envelope["sourceSha256"],
         },
-        "inputs": dict(sorted({**inputs, **code_digests}.items())),
+        "inputs": inputs,
     }
     build_set_id(manifest)
     return manifest
 
 
 def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
-    army, rules = stage / "infinity.db", stage / "rules.db"
+    army, rules = stage / "army.db", stage / "rules_n5.db"
     generation = validate_database_pair(army)
     if generation is None:
         raise ValueError("Complete builds require an Army export generation fingerprint")
@@ -113,7 +97,7 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
     # embeds its resolved facts without storing its own completed byte hash.
     export_rules_database(documents, rules, **export_options)
     variants = publication_from_candidate(build_variant_usage_projection(
-        army, stage / "infinity.raw.db", rules,
+        army, stage / "army.raw.db", rules,
     ))
     export_rules_database(documents, rules, variant_usage=variants, **export_options)
     weapons = build_publication(
@@ -177,27 +161,27 @@ def build_database_set(
         if build_army(army_args, build_record(manifest, "army")) != 0:
             raise ValueError("Army build failed before runtime publication")
         publish_equipment_encodings(
-            stage / "infinity.db",
-            stage / "infinity.raw.db",
+            stage / "army.db",
+            stage / "army.raw.db",
             root / "config/catalogs/equipment-presentation-encodings.json",
         )
         publish_skill_classifications(
-            stage / "infinity.db",
-            stage / "infinity.raw.db",
+            stage / "army.db",
+            stage / "army.raw.db",
             root / "config/catalogs/skill-source-classifications.json",
         )
         publish_unit_filter_semantics(
-            stage / "infinity.db",
-            stage / "infinity.raw.db",
+            stage / "army.db",
+            stage / "army.raw.db",
             root / "config/catalogs/unit-filter-semantics.json",
         )
         publish_army_reference_data(
-            stage / "infinity.db", stage / "infinity.raw.db",
+            stage / "army.db", stage / "army.raw.db",
             root / "data/curated/identities/army-overview.json",
             root / "data/curated/identities/legacy-armies.json",
         )
         publish_symbol_paths(
-            stage / "infinity.db", stage / "infinity.raw.db",
+            stage / "army.db", stage / "army.raw.db",
             root / "data/manifests/symbol-publication.json",
             root / "src/infinity_db/web/static",
         )

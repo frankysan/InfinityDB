@@ -59,7 +59,7 @@ def test_cli_reports_pinned_review_coverage(
 ) -> None:
     monkeypatch.setattr(sys, "argv", ["audit_deployed_object_detail_queue"])
     root = Path(__file__).resolve().parents[1]
-    if not (root / "data/generated/infinity.db").is_file():
+    if not (root / "data/generated/army.db").is_file():
         pytest.skip("Pinned Army database unavailable")
     assert main() == 0
     output = capsys.readouterr().out
@@ -71,7 +71,7 @@ def test_cli_reports_pinned_review_coverage(
 def test_pinned_detailed_keyword_inventory_has_explicit_review_boundaries() -> None:
     root = Path(__file__).resolve().parents[1]
     inputs = (
-        root / "data/generated/infinity.db",
+        root / "data/generated/army.db",
         root / "data/curated/rules/n5-core-v5.3.json",
         root / "config/validation/deployed-object-delivery-reviews.json",
         root / "config/validation/deployed-object-candidate-reviews.json",

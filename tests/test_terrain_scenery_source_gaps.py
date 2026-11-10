@@ -199,8 +199,8 @@ def test_pinned_terrain_source_comparison_detects_changed_cell_meaning(
 
 def test_terrain_table_and_gate_aliases_reach_storage_api_search_and_glossary() -> None:
     root = CURATED.parents[3]
-    db = RulesDatabase(root / "data/generated/rules.db")
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=db.path)
+    db = RulesDatabase(root / "data/generated/rules_n5.db")
+    app = create_app(root / "data/generated/army.db", rules_database_path=db.path)
 
     def get(path: str, query: str = "") -> dict:
         env = {}

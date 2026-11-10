@@ -17,74 +17,58 @@ def _read(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
-def test_v10_preview_requires_linux_engine_before_staging(
+def test_preview_rejects_unavailable_engine_before_staging(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import subprocess
+
+    from tools import preview_runtime_image as preview
+
+    monkeypatch.setattr(preview.shutil, "which", lambda _name: "docker")
+    monkeypatch.setattr(preview, "validate_database_set", lambda *a, **kw: {"sha256": {}})
+    def fail(*a, **kw):
+        raise subprocess.CalledProcessError(1, "docker info")
+    monkeypatch.setattr(preview.subprocess, "run", fail)
+    monkeypatch.setattr(preview, "_copy_build_context", lambda *a: pytest.fail("No staging"))
+    with pytest.raises(subprocess.CalledProcessError):
+        preview.preview_image(tmp_path, "infinity-db:preview-test")
+
+
+def test_preview_waits_for_health_and_cleans_only_owned_resources(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from types import SimpleNamespace
 
-    from tools import preview_runtime_image
+    from tools import preview_runtime_image as preview
 
-    stage = tmp_path / "candidate"
-    stage.mkdir()
-    monkeypatch.setattr(preview_runtime_image.shutil, "which", lambda _name: "docker")
-    monkeypatch.setattr(
-        preview_runtime_image.subprocess, "run",
-        lambda *_args, **_kwargs: SimpleNamespace(returncode=1),
-    )
-    monkeypatch.setattr(
-        preview_runtime_image, "prepare_bundle",
-        lambda *_args: pytest.fail("Must not change image bundle without Docker"),
-    )
-    with pytest.raises(ValueError, match="Docker Desktop Linux engine is unavailable"):
-        preview_runtime_image.preview_image(stage, "infinity-db:v10-preview-test")
-
-
-def test_v10_preview_waits_for_health_then_checks_http_without_published_ports(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    from types import SimpleNamespace
-
-    from tools import preview_runtime_image
-
-    stage = tmp_path / "candidate"
-    stage.mkdir()
-    calls: list[tuple[str, ...]] = []
-    bundles: list[tuple[Path, Path]] = []
+    calls = []
     probes = 0
-
-    def fake_run(
-        args: list[str] | tuple[str, ...], **_kwargs: object,
-    ) -> SimpleNamespace:
+    def run(args, **kwargs):
         nonlocal probes
-        command = tuple(args)
-        calls.append(command)
-        if command[:3] == ("docker", "exec", "infinitydb-v10-preview-check"):
-            if command[-1] == preview_runtime_image._HEALTH_PROBE:
-                probes += 1
-                return SimpleNamespace(returncode=1 if probes == 1 else 0)
+        calls.append(tuple(args))
+        if args[:3] == ["docker", "image", "inspect"]:
+            return SimpleNamespace(returncode=1)
+        if args[:2] == ["docker", "exec"]:
+            probes += 1
+            return SimpleNamespace(returncode=1 if probes == 1 else 0, stdout='[200, [], ""]')
         return SimpleNamespace(returncode=0)
-
-    monkeypatch.setattr(preview_runtime_image.shutil, "which", lambda _name: "docker")
-    monkeypatch.setattr(preview_runtime_image.subprocess, "run", fake_run)
-    monkeypatch.setattr(preview_runtime_image.time, "sleep", lambda _seconds: None)
-    monkeypatch.setattr(
-        preview_runtime_image, "prepare_bundle",
-        lambda source, output: bundles.append((source, output)),
-    )
-    preview_runtime_image.preview_image(stage, "infinity-db:v10-preview-test")
-
-    run = next(call for call in calls if call[:3] == ("docker", "run", "-d"))
-    assert "--network" not in run
-    assert "-p" not in run and "--publish" not in run
-    assert "--read-only" in run
+    monkeypatch.setattr(preview.shutil, "which", lambda _: "docker")
+    monkeypatch.setattr(preview, "ROOT", tmp_path)
+    monkeypatch.setattr(preview, "validate_database_set", lambda *a, **kw: {"sha256": {}})
+    monkeypatch.setattr(preview, "_copy_build_context", lambda *a: None)
+    monkeypatch.setattr(preview.subprocess, "run", run)
+    monkeypatch.setattr(preview.time, "sleep", lambda _: None)
+    monkeypatch.setattr(preview, "capture", lambda *a, **kw: {})
+    monkeypatch.setattr(preview, "check", lambda *a: 41)
+    preview.preview_image(tmp_path, "infinity-db:preview-test")
+    start = next(c for c in calls if c[:3] == ("docker", "run", "-d"))
+    assert "--read-only" in start
+    assert "-p" not in start and "--publish" not in start
     assert probes == 2
-    assert sum(call[-1] == preview_runtime_image._HTTP_VERIFY for call in calls) == 1
     assert calls[-2][:2] == ("docker", "stop")
-    assert calls[-1][:3] == ("docker", "image", "rm")
-    assert bundles == [
-        (stage, preview_runtime_image.DEFAULT_OUTPUT),
-        (preview_runtime_image.DEFAULT_SOURCE, preview_runtime_image.DEFAULT_OUTPUT),
-    ]
+    assert calls[-2][2].startswith("infinitydb-preview-")
+    assert calls[-1] == ("docker", "image", "rm", "infinity-db:preview-test")
+    assert not list((tmp_path / "local").iterdir())
 
 
 def test_compose_supports_explicit_bind_address_and_host_port() -> None:
@@ -179,23 +163,23 @@ def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     gitignore = _read(".gitignore")
     attributes = _read(".gitattributes")
 
-    assert "!data/generated/infinity.db" in gitignore
-    assert "!data/generated/rules.db" in gitignore
-    assert "data/generated/infinity.db binary" in attributes
-    assert "data/generated/rules.db binary" in attributes
+    assert "!data/generated/army.db" in gitignore
+    assert "!data/generated/rules_n5.db" in gitignore
+    assert "data/generated/army.db binary" in attributes
+    assert "data/generated/rules_n5.db binary" in attributes
 
 
-def test_checkout_builds_never_enter_immutable_docker_release_context() -> None:
-    dockerignore = _read(".dockerignore")
+def test_docker_packages_only_explicit_complete_databases() -> None:
     dockerfile = _read("Dockerfile")
-    prepare = _read("tools/prepare_runtime_bundle.py")
-    deploy = _read("scripts/deploy.sh")
-
+    dockerignore = _read(".dockerignore")
     assert "local/" in dockerignore
-    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
-    assert 'DEFAULT_SOURCE = ROOT / "data/generated"' in prepare
-    assert '"$python" -m tools.prepare_runtime_bundle' in deploy
-    assert "checkout-runtime" not in deploy
+    assert "data/runtime/" in dockerignore
+    for name in ("army.db", "rules_n5.db"):
+        assert f"data/generated/{name} /app/data/{name}" in dockerfile
+        assert f"!data/generated/{name}" in dockerignore
+    assert "tools.prepare_runtime_bundle" not in _read("scripts/deploy.sh")
+    assert "INFINITY_DB_DB_DIR=/app/data" in dockerfile
+    assert "INFINITY_DB_DATABASE=" not in dockerfile
 
 
 def test_release_images_require_embedded_deployed_objects() -> None:
@@ -209,16 +193,14 @@ def test_release_images_require_embedded_deployed_objects() -> None:
     assert "data/generated/*" in gitignore
     assert "!data/generated/deployed-objects.json" not in gitignore
     assert "!data/generated/deployed-objects.json" not in dockerignore
-    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
-    assert "tools.prepare_runtime_bundle" in deploy
-    assert deploy.index("tools.prepare_runtime_bundle") < deploy.index("docker compose build")
+    assert "data/generated/rules_n5.db /app/data/rules_n5.db" in dockerfile
+    assert "tools.prepare_runtime_bundle" not in deploy
     assert "tools.build_deployed_object_publication" not in workflow
     assert "tools.build_deployed_object_publication" not in deploy
     assert "validate_database_set" in workflow
-    assert workflow.index("tools.prepare_runtime_bundle") < workflow.index("docker build")
-    assert "validate_database_set(data_dir)" in smoke
+    assert "validate_database_set(data_dir, require_complete=True)" in smoke
     assert "load_deployed_object_publication(" not in smoke
-    assert 'rules.deployed_objects_payload(data_dir / "infinity.db")' in smoke
+    assert 'rules.deployed_objects_payload(data_dir / "army.db")' in smoke
     assert '/api/deployed-objects' in smoke
     assert 'http://127.0.0.1:8000/deployed-objects' in smoke
 
@@ -233,11 +215,10 @@ def test_variant_usage_publication_is_byte_exact_and_packaged_for_tracked_releas
     workflow = _read(".github/workflows/deployment-smoke.yml")
     source_workflow = _read(".github/workflows/source-checks.yml")
 
-    assert "!data/generated/variant-usage.json" in gitignore
-    assert "data/generated/variant-usage.json binary" in attributes
+    assert "!data/generated/variant-usage.json" not in gitignore
+    assert "data/generated/variant-usage.json binary" not in attributes
     assert "data/generated/*" in dockerignore
-    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
-    assert (ROOT / "data/generated/variant-usage.json").is_file()
+    assert "data/generated/rules_n5.db /app/data/rules_n5.db" in dockerfile
     assert "tools.build_variant_usage --publish" not in deploy
     assert "tools.build_deployed_object_publication" not in deploy
     assert 'expected_files = set(report["sha256"])' in smoke
@@ -259,16 +240,15 @@ def test_weapon_profile_citations_are_release_paired_and_packaged() -> None:
     workflow = _read(".github/workflows/deployment-smoke.yml")
     determinism = _read("tools/build_determinism_manifest.py")
 
-    assert "!data/generated/weapon-profile-sources.json" in gitignore
-    assert "data/generated/weapon-profile-sources.json binary" in attributes
+    assert "!data/generated/weapon-profile-sources.json" not in gitignore
+    assert "data/generated/weapon-profile-sources.json binary" not in attributes
     assert "data/generated/*" in dockerignore
-    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
-    assert (ROOT / "data/generated/weapon-profile-sources.json").is_file()
+    assert "data/generated/rules_n5.db /app/data/rules_n5.db" in dockerfile
     assert 'expected_files = set(report["sha256"])' in smoke
     assert "load_runtime_weapon_profile_publication(" in smoke
     assert "/api/weapons/rifle" in smoke
     assert "RUN rm /app/data/weapon-profile-sources.json" not in workflow
-    assert "Prepare immutable runtime bundle" in workflow
+    assert "Prepare immutable runtime bundle" not in workflow
     assert "tools.build_weapon_profile_publication" in determinism
     assert "publication/weapon-profile-sources.json" in determinism
 
@@ -277,8 +257,8 @@ def test_release_installer_deploys_tracked_runtime_databases_without_rebuilding(
     script = _read("scripts/install-or-update.sh")
     assert "infinity-db build" not in script
     assert "build-rules" not in script
-    assert "data/generated/infinity.db" in script
-    assert "data/generated/rules.db" in script
+    assert "data/generated/army.db" in script
+    assert "data/generated/rules_n5.db" in script
     assert 'git cat-file -e "$release_tag:$path"' in script
     assert "Removing legacy untracked" in script
     assert "sh ./scripts/deploy.sh" in script
@@ -507,7 +487,7 @@ def test_installed_wheel_smoke_runs_database_health_check() -> None:
 
     assert "python tools/installed_wheel_smoke.py" in workflow
     smoke = _read("tools/installed_wheel_smoke.py")
-    assert '[main_cli, "database-health", "generated/infinity.db", "--require-raw"]' in smoke
+    assert '[main_cli, "database-health", "generated/army.db", "--require-raw"]' in smoke
 
 
 def test_full_asset_checks_can_run_against_candidate_branch() -> None:
@@ -533,7 +513,6 @@ def test_deployment_smoke_validates_current_image_without_rollback_rehearsal() -
     workflow = _read(".github/workflows/deployment-smoke.yml")
     expected_order = (
         "Validate pinned exact-variant release publication",
-        "Prepare immutable runtime bundle",
         "Build application image from verified tracked databases",
         "Validate image and production startup",
     )
@@ -545,7 +524,7 @@ def test_deployment_smoke_validates_current_image_without_rollback_rehearsal() -
     )
     assert "rollback" not in workflow.lower()
     assert "--legacy-v8" not in workflow
-    assert "data/generated/rules.db /app/data/rules.db" not in workflow
+    assert "data/generated/rules_n5.db /app/data/rules_n5.db" not in workflow
     assert "data/generated/deployed-objects.json /app/data/deployed-objects.json" not in workflow
 
 
@@ -685,9 +664,8 @@ def test_container_verifier_uses_installed_tracked_publication_provenance() -> N
 
     assert "--packaged-assets|--published-assets" in verifier
     assert 'if [ "$packaged_assets" -eq 1 ]; then' in verifier
-    assert 'if [ "$published_assets" -eq 1 ]; then' in verifier
-    assert "validate_database_symbol_provenance" in verifier
-    assert 'maintained_manifest_path("symbol-publication.json")' in verifier
+    assert "symbol_publication()" in verifier
+    assert "publishedSha256ByPath" in verifier
     assert "army-symbol-build.json" not in verifier
     assert '-v "$(pwd)/data/manifests' not in verifier
 

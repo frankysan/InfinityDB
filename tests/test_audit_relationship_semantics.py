@@ -24,7 +24,7 @@ def _insert(connection: sqlite3.Connection, table: str, **values: object) -> Non
 
 
 def _fixture_database(tmp_path: Path) -> Path:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     connection = sqlite3.connect(path)
     try:
         for table, columns in REQUIRED_COLUMNS.items():

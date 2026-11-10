@@ -9,7 +9,9 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import tomllib
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +40,29 @@ def remove_symbol_assets(static: Path, prefix: Path, *, require_assets: bool) ->
             shutil.rmtree(target)
 
 
+@contextmanager
+def without_build_inputs(prefix: Path, static: Path):
+    """Prove complete runtime startup cannot read installed build JSON."""
+    with tempfile.TemporaryDirectory(prefix="runtime-inputs-", dir=prefix) as name:
+        holding = Path(name).resolve()
+        assert holding.is_relative_to(prefix.resolve())
+        moved = []
+        candidates = [prefix / "share/infinity-db/config", prefix / "share/infinity-db/data"]
+        candidates.extend(static.rglob("*.json"))
+        try:
+            for index, source in enumerate(candidates):
+                if source.exists():
+                    if not source.resolve().is_relative_to(prefix.resolve()):
+                        raise ValueError("Runtime resource move escaped installed environment")
+                    target = holding / str(index)
+                    shutil.move(str(source), str(target))
+                    moved.append((source, target))
+            yield
+        finally:
+            for source, target in reversed(moved):
+                shutil.move(str(target), str(source))
+
+
 def verify_runtime(work: Path, *, asset_free: bool, require_assets: bool) -> None:
     # This function runs under the wheel interpreter with -I, never the editable
     # source environment. Imports remain local so the orchestrator is stdlib-only.
@@ -48,7 +73,6 @@ def verify_runtime(work: Path, *, asset_free: bool, require_assets: bool) -> Non
     from infinity_army_data.project_resources import maintained_config_path
     from infinity_db.database import Database
     from infinity_db.rules_database import RulesDatabase
-    from infinity_db.web import create_app
 
     prefix = Path(sys.prefix).resolve()
     if (infinity_db.__file__ is None
@@ -60,40 +84,46 @@ def verify_runtime(work: Path, *, asset_free: bool, require_assets: bool) -> Non
         if not path.is_file() or not path.is_relative_to(share_root):
             raise ValueError(f"Installed configuration unavailable: {'/'.join(parts)}")
 
+    resource = files("infinity_db.web").joinpath("static")
+    if not isinstance(resource, Path):
+        raise ValueError("Installed wheel resources must be filesystem paths")
+    static = resource.resolve()
     if asset_free:
-        resource = files("infinity_db.web").joinpath("static")
-        if not isinstance(resource, Path):
-            raise ValueError("Installed wheel resources must be filesystem paths")
-        static = resource.resolve()
         remove_symbol_assets(static, prefix, require_assets=require_assets)
+    context = nullcontext() if asset_free else without_build_inputs(prefix, static)
+    with context:
+        from infinity_db.web import create_app, create_app_from_database_set
 
-    database = Database(work / "generated/infinity.db")
-    database.validate()
-    rules = RulesDatabase(work / "generated/rules.db")
-    rules.validate()
-    app = create_app(database.path, rules.path)
-    assert app.database.path == database.path
-    assert app.rules_database is not None
+        selected = work / ("generated" if asset_free else "runtime")
+        database = Database(selected / "army.db")
+        database.validate()
+        rules = RulesDatabase(selected / "rules_n5.db")
+        rules.validate()
+        app = create_app(database.path, rules.path) if asset_free else (
+            create_app_from_database_set(selected)
+        )
+        assert app.database.path == database.path
+        assert app.rules_database is not None
 
-    def request(path: str) -> int:
-        environ: dict[str, Any] = {}
-        setup_testing_defaults(environ)
-        environ.update(PATH_INFO=path, QUERY_STRING="", REQUEST_METHOD="GET")
-        statuses: list[int] = []
+        def request(path: str) -> int:
+            environ: dict[str, Any] = {}
+            setup_testing_defaults(environ)
+            environ.update(PATH_INFO=path, QUERY_STRING="", REQUEST_METHOD="GET")
+            statuses: list[int] = []
 
-        def start_response(status: str, _headers: Any, _exc_info: Any = None) -> None:
-            statuses.append(int(status.split()[0]))
+            def start_response(status: str, _headers: Any, _exc_info: Any = None) -> None:
+                statuses.append(int(status.split()[0]))
 
-        b"".join(app(environ, start_response))
-        return statuses[0]
+            b"".join(app(environ, start_response))
+            return statuses[0]
 
-    for path in ("/", "/api/armies", "/units", "/skills", "/internal/health",
-                 "/static/unit-symbols.js", "/changes"):
-        assert request(path) == 200, path
-    if asset_free:
-        symbol = app.symbol_catalog.army_path(101)
-        assert symbol is not None
-        assert request(f"/static/{symbol}") == 404
+        for path in ("/", "/api/armies", "/units", "/skills", "/internal/health",
+                     "/static/unit-symbols.js", "/changes"):
+            assert request(path) == 200, path
+        if asset_free:
+            symbol = app.symbol_catalog.army_path(101)
+            assert symbol is not None
+            assert request(f"/static/{symbol}") == 404
     print(f"Installed wheel {'asset-free' if asset_free else 'normal'} runtime: PASS", flush=True)
 
 
@@ -135,8 +165,9 @@ def smoke_wheel(wheel: Path, source: Path, work: Path, *, require_assets: bool) 
     army_cli = str(scripts / f"infinity-army{suffix}")
     for command in (
         [main_cli, "--version"], [army_cli, "--version"],
-        [main_cli, "build", "army", "--output-dir", "generated", "--compact"],
-        [main_cli, "database-health", "generated/infinity.db", "--require-raw"],
+        [army_cli, "build", "army", "--output-dir", "generated", "--compact"],
+        [main_cli, "export", "generated/normalized.json", "generated/army.db"],
+        [main_cli, "database-health", "generated/army.db", "--require-raw"],
         [army_cli, "build", "army", "--output-dir", "army-only", "--compact"],
         [main_cli, "build-rules", "--help"],
         [main_cli, "validate-curated", "rules"],
@@ -148,8 +179,13 @@ def smoke_wheel(wheel: Path, source: Path, work: Path, *, require_assets: bool) 
         "from pathlib import Path",
         "from infinity_db.curated import load_curated_directory",
         "from infinity_db.rules_database import export_rules_database",
-        "export_rules_database(load_curated_directory(Path('rules')), Path('generated/rules.db'))",
+        "export_rules_database(load_curated_directory(Path('rules')), "
+        "Path('generated/rules_n5.db'))",
     ))], inputs)
+    runtime = inputs / "runtime"
+    runtime.mkdir()
+    for name in ("army.db", "rules_n5.db"):
+        shutil.copyfile(source / "data/generated" / name, runtime / name)
     for mode in ("normal", "asset-free"):
         run([
             python, "-I", str(source / "tools/installed_wheel_smoke.py"),

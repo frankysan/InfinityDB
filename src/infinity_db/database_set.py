@@ -12,7 +12,9 @@ set, rebuilds inputs, or establishes working-tree curation freshness.
 from __future__ import annotations
 
 import hashlib
+import os
 import sqlite3
+from collections.abc import Mapping
 from contextlib import closing
 from pathlib import Path
 from typing import Any
@@ -27,8 +29,30 @@ from .variant_usage_reference import load_runtime_variant_usage
 from .weapon_profile_publication import load_weapon_profile_publication
 from .weapon_property_storage import SCHEMA_VERSION as COMPLETE_RULES_SCHEMA_VERSION
 
-ARMY_DATABASE_FILENAME = "infinity.db"
-RULES_DATABASE_FILENAME = "rules.db"
+ARMY_DATABASE_FILENAME = "army.db"
+RULES_DATABASE_FILENAME = "rules_n5.db"
+DEFAULT_DATABASE_DIRECTORY = Path("data/generated")
+
+
+def select_database_directory(
+    directory: Path | None = None, *, required_environment: bool = False,
+    environment: Mapping[str, str] | None = None,
+) -> Path:
+    """Resolve one operator-selected set without filename or environment aliases."""
+    settings = os.environ if environment is None else environment
+    retired = ("INFINITY_DB_DATABASE", "INFINITY_DB_RULES_DATABASE")
+    if any(settings.get(name) for name in retired):
+        raise ValueError(
+            "Individual database environment settings are retired; use INFINITY_DB_DB_DIR"
+        )
+    value = settings.get("INFINITY_DB_DB_DIR")
+    if directory is not None:
+        return Path(directory).resolve()
+    if value:
+        return Path(value).resolve()
+    if required_environment:
+        raise ValueError("INFINITY_DB_DB_DIR must name the complete database directory")
+    return DEFAULT_DATABASE_DIRECTORY.resolve()
 
 V10_RUNTIME_FILES = frozenset({
     ARMY_DATABASE_FILENAME, RULES_DATABASE_FILENAME,
@@ -202,7 +226,7 @@ def database_set_health_report(directory: Path) -> dict[str, Any]:
         "graphicalAssets": "not-checked",
     }
     try:
-        report.update(validate_database_set(directory))
+        report.update(validate_database_set(directory, require_complete=True))
     except (OSError, sqlite3.Error, ValueError, KeyError, TypeError) as exc:
         report["error"] = str(exc)
     else:

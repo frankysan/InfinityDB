@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-import shutil
 import sqlite3
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_army
 
 from infinity_db.army_overview_copy import load_army_overview_copy
 from infinity_db.army_reference_storage import (
@@ -35,9 +35,9 @@ LEGACY = ROOT / "data/curated/identities/legacy-armies.json"
 
 @pytest.fixture
 def v29(tmp_path: Path) -> tuple[Path, Path]:
-    army, raw = tmp_path / "infinity.db", tmp_path / "infinity.raw.db"
-    shutil.copyfile(RELEASE / "infinity.db", army)
-    shutil.copyfile(RELEASE / "infinity.db", raw)
+    army, raw = tmp_path / "army.db", tmp_path / "army.raw.db"
+    copy_base_army(army)
+    copy_base_army(raw)
     publish_equipment_encodings(
         army, raw, ROOT / "config/catalogs/equipment-presentation-encodings.json",
     )
@@ -83,14 +83,14 @@ def test_exact_source_roundtrip_and_identity_boundaries(v30) -> None:
         ).fetchall() == [("spiral-corps", None, 1, 906), ("foreign-company", None, 1, 907)]
     assert Database(army).application_army_id("spiral-corps") is None
     assert Database(army).application_army_id(906) is None
-    assert Database(army).list_armies() == Database(RELEASE / "infinity.db").list_armies()
+    assert Database(army).list_armies() == Database(RELEASE / "army.db").list_armies()
 
 
 def test_http_and_search_parity_without_authored_json(v30, monkeypatch) -> None:
     import infinity_db.army_overview_copy as copy_adapter
     import infinity_db.legacy_armies as legacy_adapter
 
-    previous = create_app(RELEASE / "infinity.db")
+    previous = create_app(RELEASE / "army.db")
     paths = ("/api/armies", "/api/search?q=spiral", "/api/search?q=foreign")
 
     def payload(app, path):

@@ -26,7 +26,7 @@ from infinity_db.rules_database import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-DB = ROOT / "data/generated/rules.db"
+DB = ROOT / "data/generated/rules_n5.db"
 CHART = ROOT / "config/validation/restrictions-source-chart.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 
@@ -43,7 +43,7 @@ def test_english_core_pdf_pin_survives_curated_export(tmp_path: Path) -> None:
         "n5-core-v5.3": chart["sourcePdfSha256"],
         "n5-hacking-programs-v5.3": chart["sourcePdfSha256"],
     }
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
     with sqlite3.connect(output) as db:
         stored = dict(db.execute(
@@ -76,7 +76,7 @@ def test_all_selected_pdf_sources_have_consistent_pins_and_exports(tmp_path: Pat
         if path.exists():
             assert hashlib.sha256(path.read_bytes()).hexdigest() == source["sha256"]
     assert len(source_pins) == 8
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
     with sqlite3.connect(output) as db:
         actual = db.execute(
@@ -101,7 +101,7 @@ def legacy_v8_db(tmp_path_factory: pytest.TempPathFactory) -> Path:
     with sqlite3.connect(DB) as current:
         if current.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION:
             return DB
-    output = tmp_path_factory.mktemp("restrictions-legacy-v8") / "rules.db"
+    output = tmp_path_factory.mktemp("restrictions-legacy-v8") / "rules_n5.db"
     export_rules_database(load_curated_directory(ROOT / "data/curated"), output)
     RulesDatabase(output).validate()
     return output
@@ -372,7 +372,7 @@ def test_restrictions_http_v8_and_v9_are_additive(
                 close()
         return result["status"], json.loads(body)
 
-    v8 = create_app(ROOT / "data/generated/infinity.db", rules_database_path=legacy_v8_db)
+    v8 = create_app(ROOT / "data/generated/army.db", rules_database_path=legacy_v8_db)
     status, payload = get(v8, "/api/restrictions")
     assert status == 200
     assert payload["available"] is False
@@ -391,7 +391,7 @@ def test_restrictions_http_v8_and_v9_are_additive(
         "WHERE key = 'databaseCompatibilityVersion'"
     )
     connection.commit()
-    v9 = create_app(ROOT / "data/generated/infinity.db", rules_database_path=target)
+    v9 = create_app(ROOT / "data/generated/army.db", rules_database_path=target)
     status, payload = get(v9, "/api/restrictions")
     assert status == 200
     assert payload["available"] is True
@@ -467,24 +467,17 @@ def test_default_build_rules_writes_standalone_v10_database(
 
     output = tmp_path / "rules-standalone.db"
     monkeypatch.setattr(cli, "DEFAULT_STANDALONE_RULES_DATABASE", output)
-    from tools import build_v10_runtime_candidate
-
-    published: list[Path] = []
-    monkeypatch.setattr(
-        build_v10_runtime_candidate, "publish_checkout_runtime", published.append,
-    )
     args = cli.build_parser().parse_args([
         "build-rules", str(ROOT / "data/curated/rules"),
     ])
     assert args.output is None
     assert cli.cmd_build_rules(args) == 0
-    assert published == [output]
     with sqlite3.connect(output) as connection:
         assert connection.execute("PRAGMA user_version").fetchone()[0] == 10
     RulesDatabase(output).validate()
     assert len(RulesDatabase(output).restrictions_payload()["items"]) == 14
     deployed = RulesDatabase(output).deployed_objects_payload(
-        ROOT / "data/generated/infinity.db"
+        ROOT / "data/generated/army.db"
     )
     assert deployed is not None
     assert len(deployed["objects"]) == 17
@@ -495,7 +488,7 @@ def test_v9_cli_rejects_tracked_release_path(
 ) -> None:
     from infinity_db import cli
 
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", path)
     args = cli.build_parser().parse_args(["build-rules", "--output", str(path)])
     with pytest.raises(ValueError, match="cannot write the tracked release"):
@@ -508,7 +501,7 @@ def test_build_rules_preserves_existing_tracked_release_database(
 ) -> None:
     from infinity_db import cli
 
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     documents = load_curated_directory(ROOT / "data/curated")
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     export_rules_database(documents, output, restrictions_manifest=chart)

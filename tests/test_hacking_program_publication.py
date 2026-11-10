@@ -20,8 +20,8 @@ from infinity_db.web import create_app
 from tools.verify_hacking_programs_browser import WIDTHS, source_programs
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_DB = ROOT / "data/generated/infinity.db"
-RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_DB = ROOT / "data/generated/army.db"
+RULES_DB = ROOT / "data/generated/rules_n5.db"
 
 
 def _get(app: Any, path: str) -> tuple[str, bytes]:
@@ -216,7 +216,7 @@ def test_generated_core_orders_aros_matrix_matches_pinned_source_and_routes() ->
             if section != "short-skill"
         )
         # The Equipment Short Skill type is now authored in the current
-        # curated definition and carried by rules.db, not a runtime ID list.
+        # curated definition and carried by rules_n5.db, not a runtime ID list.
         record = rules.composed_record(action)
         assert record is not None
         assert record["facts"]["typeIds"] == ["short-skill"]

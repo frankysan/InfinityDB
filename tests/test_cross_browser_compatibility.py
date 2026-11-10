@@ -48,8 +48,8 @@ class _QuietHandler(WSGIRequestHandler):
 def origin() -> Iterator[str]:
     """Serve the exact tracked release-pair inputs, not a fresh curated export."""
     app = create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
     server = make_server(
         "127.0.0.1", 0, app,

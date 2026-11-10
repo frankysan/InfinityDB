@@ -18,9 +18,9 @@ from infinity_db.web import create_app
 @pytest.fixture(scope="module")
 def app(tmp_path_factory: pytest.TempPathFactory) -> Callable:
     root = Path(__file__).resolve().parents[1]
-    rules_path = tmp_path_factory.mktemp("support-weapon-rules") / "rules.db"
+    rules_path = tmp_path_factory.mktemp("support-weapon-rules") / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
-    return create_app(root / "data/generated/infinity.db", rules_path)
+    return create_app(root / "data/generated/army.db", rules_path)
 
 
 def weapon_detail(app: Callable, slug: str) -> dict[str, Any]:

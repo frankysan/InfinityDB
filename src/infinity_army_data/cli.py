@@ -305,13 +305,13 @@ def add_data_commands(
         default=None,
         help="Source directory or ZIP archive (default: newest ZIP in data/raw)",
     )
-    output_selection = p_build.add_mutually_exclusive_group() if database_set_build else p_build
-    output_selection.add_argument("--output-dir", type=Path, default=Path("data/generated"))
     if database_set_build:
-        output_selection.add_argument(
-            "--db-dir", type=Path,
-            help="Build one complete current runtime set from a local Army ZIP into this directory",
+        p_build.add_argument(
+            "--db-dir", type=Path, default=Path("data/generated"),
+            help="Build the complete runtime set from a local Army ZIP (default: data/generated)",
         )
+    else:
+        p_build.add_argument("--output-dir", type=Path, default=Path("data/work/build"))
     p_build.add_argument("--compact", action="store_true", help="Minify generated data files")
     p_build.add_argument(
         "--no-verify", action="store_true", help="Skip lossless reconstruction verification"

@@ -17,5 +17,5 @@ def test_embedded_exact_occurrences_preserve_browser_journey(
     embedded, catalog: str, width: int,
 ) -> None:
     directory, publication = embedded
-    app = create_app(directory / "infinity.db", rules_database_path=directory / "rules.db")
+    app = create_app(directory / "army.db", rules_database_path=directory / "rules_n5.db")
     _verify_browser({"app": app, "publication": publication}, catalog, width)

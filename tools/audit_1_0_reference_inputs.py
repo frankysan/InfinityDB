@@ -812,8 +812,8 @@ def report_markdown(report: dict[str, Any]) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--army-db", type=Path, default=Path("data/generated/infinity.db"))
-    parser.add_argument("--rules-db", type=Path, default=Path("data/generated/rules.db"))
+    parser.add_argument("--army-db", type=Path, default=Path("data/generated/army.db"))
+    parser.add_argument("--rules-db", type=Path, default=Path("data/generated/rules_n5.db"))
     parser.add_argument("--wiki-history", type=Path, required=True)
     parser.add_argument("--wiki-history-es", type=Path)
     parser.add_argument("--wiki-snapshot", type=Path)

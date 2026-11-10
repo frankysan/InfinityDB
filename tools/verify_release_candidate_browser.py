@@ -55,7 +55,10 @@ def local_revision(army_db: Path, rules_db: Path) -> str:
         raise ReleaseCandidateError(
             f"Cannot verify runtime Weapon-profile publication: {exc}"
         ) from exc
-    return runtime_snapshot_revision(_sha256(army_db), _sha256(rules_db), weapon_profile_sha)
+    return runtime_snapshot_revision(
+        _sha256(army_db), _sha256(rules_db), weapon_profile_sha,
+        army_filename=army_db.name, rules_filename=rules_db.name,
+    )
 
 
 def _check_served(
@@ -143,8 +146,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", required=True, help="Hosted candidate HTTP(S) origin")
     parser.add_argument("--expected-version", required=True, help="Exact deployed release version")
-    parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/infinity.db")
-    parser.add_argument("--rules-db", type=Path, default=PROJECT_ROOT / "data/generated/rules.db")
+    parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/army.db")
+    parser.add_argument(
+        "--rules-db", type=Path, default=PROJECT_ROOT / "data/generated/rules_n5.db",
+    )
     parser.add_argument("--channel", help="Playwright browser channel, e.g. chrome")
     parser.add_argument("--slug", action="append", dest="slugs")
     parser.add_argument("--width", action="append", type=int, dest="widths")

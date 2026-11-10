@@ -64,7 +64,7 @@ def _army_database(tmp_path: Path) -> Path:
     }
     normalized = normalize_master(master)
     validate_normalized(normalized)
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized, path)
     return path
 

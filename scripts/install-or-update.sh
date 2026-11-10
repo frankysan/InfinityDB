@@ -113,8 +113,8 @@ prepare_tracked_release_file() {
   fi
 }
 
-prepare_tracked_release_file data/generated/infinity.db
-prepare_tracked_release_file data/generated/rules.db
+prepare_tracked_release_file data/generated/army.db
+prepare_tracked_release_file data/generated/rules_n5.db
 
 echo "Checking out $release_tag..."
 git checkout --detach "$release_tag"
@@ -127,10 +127,10 @@ fi
 echo "Installing application dependencies..."
 .venv/bin/pip install -e .
 
-[ -f data/generated/infinity.db ] || fail \
-  "release $release_tag does not contain tracked data/generated/infinity.db."
-[ -f data/generated/rules.db ] || fail \
-  "release $release_tag does not contain tracked data/generated/rules.db."
+[ -f data/generated/army.db ] || fail \
+  "release $release_tag does not contain tracked data/generated/army.db."
+[ -f data/generated/rules_n5.db ] || fail \
+  "release $release_tag does not contain tracked data/generated/rules_n5.db."
 
 echo "Deploying tracked release artifacts as image app-$release_tag..."
 DOMAIN="$domain" IMAGE_TAG="app-$release_tag" RETAIN_APP_IMAGES="$retain" \

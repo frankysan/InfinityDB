@@ -343,9 +343,9 @@ def test_katyusha_range_notation_review_preserves_source_values() -> None:
     assert candidate["resolvedRangeMod"] == f"+{candidate['pdfUnsignedLabel']}"
     assert candidate["wikiRangeBands"] == candidate["armyRangeBands"]
 
-    metadata, _ = _metadata(root / "data/generated/infinity.db")
+    metadata, _ = _metadata(root / "data/generated/army.db")
     (army,) = metadata["katyushamrl"]
-    with sqlite3.connect(root / "data/generated/infinity.db") as connection:
+    with sqlite3.connect(root / "data/generated/army.db") as connection:
         assert connection.execute(
             "SELECT id FROM metadata_weapons WHERE name=? AND mode IS NULL",
             (candidate["name"],),
@@ -489,7 +489,7 @@ def test_pinned_n53_pdf_chart_source_differences() -> None:
     if not pdf.is_file():
         pytest.skip("Ignored N5.3 PDF unavailable")
     pytest.importorskip("fitz")
-    report = audit_chart(pdf, root / "data/generated/infinity.db")
+    report = audit_chart(pdf, root / "data/generated/army.db")
     assert report["corePdfSha256"] == (
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
     )

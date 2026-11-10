@@ -43,7 +43,7 @@ provenance/state, and build outputs.
   data.
 - `manifests/symbol-publication.json` — tracked release manifest for the processed SVG
   publication. It owns the published path/SHA-256 inventory, browser mappings, summary,
-  and compact Army source archive identity used to bind `infinity.db` during deployment.
+  and compact Army source archive identity used to bind `army.db` during deployment.
 - `manifests/army-symbol-build.json` — generated current symbol-build state from
   acquisition version 2 through terminal publication version 8. It binds the
   pinned Army/SYMBOLS artifacts, stage reports/settings, canonical mapping, and
@@ -55,98 +55,56 @@ provenance/state, and build outputs.
 - `curated/snapshot-notes/` — source-controlled, human-authored descriptions,
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
-- `generated/` — generated `master.json`, normalized data, validation reports,
-  the application `infinity.db`, development-only `infinity.raw.db`, and the
-  separate curated-rules `rules.db`, `variant-usage.json` and
-  `weapon-profile-sources.json` reference publications. The two SQLite
-  databases and the **byte-exact variant-usage and Weapon-profile JSON files**
-  are tracked release artifacts. The tracked development release pair now
-  uses schema v10: reviewed deployed objects are embedded in `rules.db`, and
-  its v2 variant publication has no separate deployed-object JSON dependency.
-  Historical `deployed-objects.json` files remain ignored; the standalone JSON
-  builder/reader are retired. Current builds, serving, image assembly and
-  core-scenario/terrain-scenery boundary audits use the embedded model.
-  Those audits report the actual
-  selected Army and Rules file hashes, without serializing a replacement JSON.
-  Variant usage requires the paired raw archive to regenerate, so a
-  tagged/deployment checkout validates the tracked JSON and its source
-  fingerprints rather than regenerating it without raw inputs.
-  Intermediate JSON/raw archives and other generated build products remain ignored.
+- `generated/` — the two tracked, complete runtime databases: `army.db`
+  (Army v31/compatibility 40) and `rules_n5.db` (Rules v17). Exact variants,
+  reviewed Weapon citations, deployed objects, Restrictions, reviewed reference
+  facts and symbol mappings are embedded. ITS Season 18 remains in Rules until P3.
+  The old filenames and required JSON publications are retired.
 
-**Checkout runtime:** `infinity-db build-rules` (without an explicit
-`--output`) writes ignored `local/rules-standalone.db`, then assembles
-`local/checkout-runtime/` with the currently built Army database, v10 Rules
-database, v2 variant usage and matching reviewed Weapon citations. This
-requires the raw Army sibling produced by `infinity-db build --compact`.
-`infinity-db serve` automatically uses this complete bundle, checking that
-its Army and Rules hashes still match the latest checkout builds. An explicit
-`--database` selects exactly the requested pair. An explicit
-`build-rules --output` produces a standalone database only. Neither Rules build
-path changes the tracked Rules or dependent release publications. The Army
-`build --compact` command still writes the tracked
-`data/generated/infinity.db` by historical design; its changes are
-Git-visible and cannot be deployed with an unrelated tracked Rules/publication
-set. Docker ignores the local checkout paths and packages only a verified,
-matched tracked release set.
+**Complete runtime build:** `infinity-db build --compact` uses the newest local
+Army ZIP and selected API metadata plus maintained Rules/configuration inputs.
+An explicit source ZIP pins another input; `--metadata` selects external
+metadata. It never downloads data. Default output is `data/generated/`;
+`--db-dir PATH` selects a complete alternate destination and is independent of
+the serving-only `INFINITY_DB_DB_DIR` setting. The old `--output-dir` form is
+retired from the integrated build. Lossless verification is mandatory.
 
-**Explicit complete runtime build:** `infinity-db build SOURCE.zip --db-dir PATH --compact`
-builds Army, Rules, variant usage, reviewed Weapon citations, the
-Restrictions chart, Trait Wiki links, Combined Saving Roll profiles,
-Ammunition links and reviewed Weapon Properties into one selected directory.
-Its opt-in Army v31 also embeds reviewed Cube/Cube 2.0 presentation encodings,
-six reviewed Skill source classifications, Unit Explorer filter semantics,
-58 Army summaries, two historical Army identities, all 2,019 symbol lookup
-keys and the hashes of all 808 published SVGs.
-It requires the source checkout, a local immutable Army ZIP and its
-selected Army API metadata.
-Omitting the source selects the
-newest local Army ZIP once; `--metadata` selects external API metadata explicitly.
-It never downloads an input or inherits the serving-only `INFINITY_DB_DB_DIR`.
-`--db-dir` and the existing narrow Army `--output-dir` are mutually exclusive;
-complete builds require lossless verification and reject `--no-verify`.
-Reviewed Weapon citation eligibility and current PDF/profile provenance are
-validated by the maintained `infinity_db.weapon_profile_builder`; historical
-cross-domain enrichment and Weapon-gap audits are not complete-build inputs.
-The legacy Weapon JSON publication command delegates to the same builder while
-the tracked v10 release retains its JSON contract.
+Disposable files under ignored `data/work/build/` hold normalization, the matched
+Army/raw pair and Rules construction. The builder validates both final files,
+embedded source relationships and shared build provenance, checks that its inputs
+remain unchanged, then replaces the selected pair and discards intermediates.
+Generation/validation failure before replacement preserves destination bytes.
+Unrelated destination files are preserved. Stop serving before rebuilding; a
+mid-replacement interruption leaves an invalid mixed set, recovered by rerun.
 
-The builder uses disposable work files under ignored `data/work/build/`,
-extends the *matched* Army/raw export pair with reviewed Equipment encodings
-and Skill source classifications, Unit filter semantics and authored Army
-reference data and symbol mappings, validates the full
-runtime set and matching input provenance, then replaces only the two
-selected runtime filenames: `infinity.db` and `rules.db`.
-Rules v17 extends v16 with 12 reviewed Weapon Properties and exact
-profile/mode signatures. The opt-in complete builder also extends
-Army v26/compatibility 35 to v27/compatibility 36 for the two
-Equipment characteristic encodings, then v28/compatibility 37 for
-six reviewed Skill source classifications, then v29/compatibility 38
-for Unit Explorer filter semantics, then v30/compatibility 39 for
-Army overview text and legacy Army identities, then v31/compatibility 40
-for symbol mappings and published SVG hashes. Their maintained JSON remains
-a build input rather than a v31 serving dependency. The completed
-build removes obsolete `variant-usage.json` and
-`weapon-profile-sources.json` from its selected output directory. It preserves
-unrelated files and leaves
-all destination bytes unchanged if generation, validation or the final input
-freshness check fails before replacement. Intermediate JSON and the raw database
-are removed with the work directory; the narrow Army build remains available for
-raw-archive research. Source inputs are never rewritten. Stop a server using the
-selected directory before rebuilding and restart after success. An interruption
-between per-file replacements leaves an invalid mixed set; rerun the build to
-recover it. There is no live replacement lock or separate promotion step.
+Normal serving opens only that completed directory. Precedence is explicit
+`serve --db-dir PATH`, `INFINITY_DB_DB_DIR`, then `data/generated/` relative
+to the working directory. WSGI requires the environment setting. The retired
+individual-database variables are rejected. There is no automatic checkout
+bundle selection or older-file fallback. Docker copies the same tracked pair
+directly into its image. The cache revision hashes sorted active filenames and
+their exact file hashes.
 
-This opt-in path uses the two-file v17 format. The tracked release pair remains
-v10 with four runtime files. Plain `build`,
-`build-rules`, `serve`, Docker and their current defaults retain their existing
-selection contracts until the planned cutover. An explicit old-style
-`serve --database PATH/infinity.db` can serve the completed alternate set.
+`infinity-army build --output-dir PATH` retains the source JSON pipeline;
+`infinity-db export NORMALIZED.json OUTPUT.db` explicitly creates an Army/raw
+development pair. Their work outputs are not complete serving sets.
+`build-rules` retains a narrow standalone v10 export in ignored
+`data/work/build/rules-standalone.db`, without runtime assembly or promotion.
+Research tools receive an explicit raw archive path; normal serving never opens it.
+
+Source/release verification compares the recorded build-input hashes against
+maintained files and validates SVG bytes before image creation. Runtime startup
+validates embedded provenance, schemas and contents without re-reading build
+JSON, raw sources or working-tree policy. Installed build resources may still
+exist for independent development commands; they are not serving dependencies.
 
 **Selected runtime health:** `infinity-db database-health --db-dir PATH`
 validates exactly the selected directory through the shared
-`infinity_db.database_set` validator. All supported sets require `infinity.db`
-and `rules.db`; v10 also requires both JSON publications, while v11 needs only
-`weapon-profile-sources.json`. v12–v17 require no runtime JSON sidecars.
+`infinity_db.database_set` validator. Normal startup and directory health require the complete `army.db` and
+`rules_n5.db` pair, Army v31 and Rules v17, with recorded matched provenance.
+Low-level fixture APIs retain explicit older-model injection for semantic tests;
+they do not establish an operator-facing alternate selection contract.
+
 It checks schema/application compatibility, full SQLite integrity and foreign keys,
 embedded deployed-object/Army pairing, embedded variant identities/extras/counts
 in v11–v17, and current PDF, page, review and Army-profile bindings of the
@@ -171,28 +129,21 @@ fingerprints are checked without creating official rules records.
 It reports final file SHA-256 hashes and returns a nonzero status for an
 incomplete, corrupt or mismatched set. It never creates missing files,
 selects another directory, rebuilds curation or reads the raw archive.
-For recorded complete builds it also verifies the shared build-set ID, source
-manifest, family roles and required Army export generation; older tracked sets
-report provenance as `not-recorded`. A partial or mismatched recorded pair fails.
-Other intermediate files in the directory are ignored. The v10 candidate
-and Docker-bundle checks share this built-artifact validator while retaining
-their additional source-rebuild and pinned-content checks.
+The strict check also verifies shared build-set identity, family roles and
+required Army export generation. Other files are ignored and cannot repair a
+missing projection. The builder, health CLI, direct server, WSGI and image checks
+all apply this complete-set contract. The low-level validator can inspect
+transitional fixtures when explicitly requested by development code.
 
-Complete builds use the same validator with `require_complete=True`: Army v31,
-Rules v17, every embedded projection and recorded matched build provenance are
-mandatory. `infinity_db.web.create_app_from_database_set(PATH)` applies that
-read-only check before opening an application from exactly the selected pair.
-It does not select from environment variables, discover another directory or
-recover missing data from sidecars. The migration parity tool's `--db-dir`
-option exercises this factory. General health checks still cover transitional
-release layouts; normal CLI/WSGI/Docker selection and the tracked v10 files
-remain under the pending coordinated P2.6 cutover.
+`infinity_db.web.create_app_from_database_set(PATH)` validates and opens exactly
+the selected pair, without selecting environment paths or discovering another
+directory. The semantic-baseline tool's `--db-dir` exercises this factory.
 
-The current two-file opt-in layout embeds Army v31 Equipment presentation
+The current two-file layout embeds Army v31 Equipment presentation
 encodings, reviewed Skill source classifications, Unit filter semantics,
 Army overview text, legacy identities and symbol mappings/hashes,
 plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
-and Ammunition publications. P2.4 materialization is complete for this opt-in path.
+and Ammunition publications. P2.4 materialization is complete for the normal runtime.
 Older v10–v16 Rules layouts
 remain transitional compatibility. The browser
 fetches `/api/restrictions/chart`; for a pre-v13 release the endpoint
@@ -252,12 +203,12 @@ that do not appear in the application database.
 The two destination files cannot be replaced as one filesystem transaction, so
 publication has an explicit commit order and recovery policy:
 
-1. replace `infinity.raw.db` first;
-2. replace `infinity.db` last; the application replacement is the commit point.
+1. replace `army.raw.db` first;
+2. replace `army.db` last; the application replacement is the commit point.
 
 If a process stops before the raw replacement, the previous pair remains. If it
 stops between replacements, normal serving remains on the previous validated
-`infinity.db`, while the newer raw archive is intentionally treated as unpaired.
+`army.db`, while the newer raw archive is intentionally treated as unpaired.
 Raw-dependent audit tooling must validate the pair metadata and fail closed rather
 than combine generations. Rerunning the export rolls both siblings forward and is
 the supported recovery operation; temporary files are not a rollback contract. On
@@ -267,7 +218,7 @@ both destination siblings already belong to the new generation.
 
 Older pairs created before `export_pair_sha256` remain acceptable when their full
 shared metadata dictionaries match. New exports always carry the stronger pair
-fingerprint. `infinity-db database-health data/generated/infinity.db --require-raw` is the
+fingerprint. `infinity-db database-health data/generated/army.db --require-raw` is the
 operator-facing validation command for this pair contract; omitting `--require-raw` validates only
 the published application database.
 
@@ -410,7 +361,7 @@ Belli graphical assets are not covered by InfinityDB's MIT License. Corvus Belli
 has explicitly permitted redistribution of the processed graphical publication used by this
 non-commercial project. By project policy, the generated runtime databases are also distributed
 only as part of the non-commercial InfinityDB application/release and remain outside the MIT
-License. The tracked `data/generated/infinity.db` and `rules.db` are therefore release artifacts,
+License. The tracked `data/generated/army.db` and `rules_n5.db` are therefore release artifacts,
 while raw Army/wiki/PDF/source-symbol archives remain separate local provenance inputs. Review the
 repository's
 [third-party notices](../THIRD_PARTY_NOTICES.md) for the full boundary.

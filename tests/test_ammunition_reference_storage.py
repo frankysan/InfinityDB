@@ -9,6 +9,7 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_rules, variant_publication, weapon_publication
 
 from infinity_db.ammunition_reference_storage import (
     read_ammunition_references,
@@ -35,29 +36,27 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / "data/generated"
-ARMY = RELEASE / "infinity.db"
+ARMY = RELEASE / "army.db"
 CONFIG = ROOT / "config/catalogs/weapon-ammunition-references.json"
 
 
 @pytest.fixture(scope="module")
 def v16(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, dict]:
     directory = tmp_path_factory.mktemp("v16-ammunition-references")
-    rules = directory / "rules.db"
-    shutil.copyfile(RELEASE / "rules.db", rules)
-    shutil.copyfile(ARMY, directory / "infinity.db")
+    rules = directory / "rules_n5.db"
+    copy_base_rules(rules)
+    shutil.copyfile(ARMY, directory / "army.db")
     mapping = load_ammunition_reference_map(CONFIG)
     with sqlite3.connect(rules) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
         with connection:
             stage_variant_usage(
                 connection,
-                json.loads((RELEASE / "variant-usage.json").read_text(encoding="utf-8")),
+                variant_publication(),
             )
             stage_weapon_profile_citations(
                 connection,
-                json.loads(
-                    (RELEASE / "weapon-profile-sources.json").read_text(encoding="utf-8")
-                ),
+                weapon_publication(),
                 ARMY,
             )
             connection.execute("PRAGMA user_version=12")
@@ -113,14 +112,14 @@ def test_full_reviewed_mapping_round_trip_and_database_health(v16) -> None:
     report = validate_database_set(path.parent)
     assert report["layout"] == "v16-two-file"
     assert report["ammunitionReferences"] == 16
-    assert set(report["sha256"]) == {"infinity.db", "rules.db"}
+    assert set(report["sha256"]) == {"army.db", "rules_n5.db"}
 
 
 def test_v16_player_api_parity_without_runtime_json_reads(v16, monkeypatch) -> None:
     import infinity_db.weapon_ammunition_references as adapter
 
     path, expected = v16
-    previous = create_app(ARMY, rules_database_path=RELEASE / "rules.db")
+    previous = create_app(ARMY, rules_database_path=RELEASE / "rules_n5.db")
 
     def forbidden(*_args, **_kwargs):
         raise AssertionError("v16 must not read maintained Ammunition JSON")
@@ -142,7 +141,7 @@ def test_v16_player_api_parity_without_runtime_json_reads(v16, monkeypatch) -> N
 def test_all_16_identity_and_ordered_components_preserved(v16) -> None:
     path, expected = v16
     refs = WeaponAmmunitionReferences(RulesDatabase(path))
-    old = WeaponAmmunitionReferences(RulesDatabase(RELEASE / "rules.db"))
+    old = WeaponAmmunitionReferences(RulesDatabase(RELEASE / "rules_n5.db"))
     for source_id, entry in expected.items():
         profile = {"ammunition_source_id": source_id, "ammunition": entry["name"]}
         assert refs.for_profile(profile) == old.for_profile(profile)
@@ -154,7 +153,7 @@ def test_all_16_identity_and_ordered_components_preserved(v16) -> None:
         raw = database.get_catalog_item("weapons", slug)
         assert raw is not None
         assert CatalogRules(RulesDatabase(path)).enrich_catalog_item("weapons", raw) == (
-            CatalogRules(RulesDatabase(RELEASE / "rules.db")).enrich_catalog_item(
+            CatalogRules(RulesDatabase(RELEASE / "rules_n5.db")).enrich_catalog_item(
                 "weapons", raw,
             )
         )
@@ -165,7 +164,7 @@ def test_all_16_identity_and_ordered_components_preserved(v16) -> None:
 ))
 def test_stage_rejects_source_drift(v16, tmp_path: Path, mutation: str) -> None:
     original, reviewed = v16
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     shutil.copyfile(original, path)
     mapping = deepcopy(reviewed)
     if mutation == "missing":
@@ -195,7 +194,7 @@ def test_stage_rejects_source_drift(v16, tmp_path: Path, mutation: str) -> None:
 ))
 def test_read_rejects_corrupt_relational_data(v16, tmp_path: Path, mutation: str) -> None:
     original, _ = v16
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     shutil.copyfile(original, path)
     with sqlite3.connect(path) as connection:
         if mutation == "missing-link":
@@ -238,6 +237,6 @@ def test_read_rejects_corrupt_relational_data(v16, tmp_path: Path, mutation: str
 
 def test_previous_releases_keep_reviewed_json_adapter(v16) -> None:
     path, expected = v16
-    assert RulesDatabase(RELEASE / "rules.db").ammunition_references_payload() is None
+    assert RulesDatabase(RELEASE / "rules_n5.db").ammunition_references_payload() is None
     assert RulesDatabase(path).ammunition_references_payload(ARMY) == expected
     assert load_ammunition_reference_map(CONFIG) == expected

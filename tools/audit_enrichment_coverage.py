@@ -763,8 +763,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Audit user-facing catalog rules-enrichment coverage."
     )
-    parser.add_argument("database", type=Path, help="Path to infinity.db")
-    parser.add_argument("--rules", type=Path, required=True, help="Path to rules.db")
+    parser.add_argument("database", type=Path, help="Path to army.db")
+    parser.add_argument("--rules", type=Path, required=True, help="Path to rules_n5.db")
     parser.add_argument(
         "--include-complete",
         action="store_true",

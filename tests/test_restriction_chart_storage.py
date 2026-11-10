@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import json
-import shutil
 import sqlite3
 from copy import deepcopy
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_rules, variant_publication, weapon_publication
 
 from infinity_db.restriction_chart_storage import (
     read_restriction_chart,
@@ -23,25 +23,25 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / "data/generated"
-ARMY = RELEASE / "infinity.db"
+ARMY = RELEASE / "army.db"
 CHART = ROOT / "src/infinity_db/web/static/restrictions-reference.json"
 
 
 @pytest.fixture
 def published(tmp_path: Path) -> tuple[Path, dict]:
-    rules = tmp_path / "rules.db"
-    shutil.copyfile(RELEASE / "rules.db", rules)
+    rules = tmp_path / "rules_n5.db"
+    copy_base_rules(rules)
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     with sqlite3.connect(rules) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
         with connection:
             stage_variant_usage(
                 connection,
-                json.loads((RELEASE / "variant-usage.json").read_text(encoding="utf-8")),
+                variant_publication(),
             )
             stage_weapon_profile_citations(
                 connection,
-                json.loads((RELEASE / "weapon-profile-sources.json").read_text(encoding="utf-8")),
+                weapon_publication(),
                 ARMY,
             )
             connection.execute("PRAGMA user_version=12")
@@ -95,20 +95,22 @@ def test_v13_api_ignores_old_static_json_path(published, monkeypatch) -> None:
     assert "error" in json.loads(body)
 
 
-def test_v10_legacy_chart_api_retains_original_payload() -> None:
-    app = create_app(ARMY, rules_database_path=RELEASE / "rules.db")
+def test_tracked_chart_api_retains_original_payload() -> None:
+    app = create_app(ARMY, rules_database_path=RELEASE / "rules_n5.db")
     status, _, body = wsgi_response(app, "http://chart.test/api/restrictions/chart")
     assert status == 200
     assert json.loads(body) == json.loads(CHART.read_text(encoding="utf-8"))
-    assert RulesDatabase(RELEASE / "rules.db").restriction_chart_payload() is None
+    assert RulesDatabase(RELEASE / "rules_n5.db").restriction_chart_payload() == json.loads(
+        CHART.read_text(encoding="utf-8"),
+    )
 
 
 @pytest.mark.parametrize("mutation", ("source", "row", "action", "scope", "qualifier", "missing"))
 def test_chart_staging_rejects_unreviewed_drift(
     tmp_path: Path, mutation: str,
 ) -> None:
-    rules = tmp_path / "rules.db"
-    shutil.copyfile(RELEASE / "rules.db", rules)
+    rules = tmp_path / "rules_n5.db"
+    copy_base_rules(rules)
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     if mutation == "source":
         chart["source"]["page"] = 195

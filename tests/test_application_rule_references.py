@@ -129,7 +129,7 @@ def _reference_database(tmp_path: Path) -> Database:
     }
     normalized = normalize_master(master)
     validate_normalized(normalized)
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized, path)
     return Database(path)
 
@@ -255,7 +255,7 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
 
 def test_attributes_are_current_canonical_embedded_records(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_database = RulesDatabase(rules_path)
 
@@ -317,7 +317,7 @@ def test_attribute_dash_and_swc_export_and_api(tmp_path: Path) -> None:
     assert len(owners) == 2
     fresh = tmp_path / "attributes.db"
     export_rules_database(documents, fresh)
-    for database in (RulesDatabase(fresh), RulesDatabase(root / "data/generated/rules.db")):
+    for database in (RulesDatabase(fresh), RulesDatabase(root / "data/generated/rules_n5.db")):
         for identity, authored in owners.items():
             stored = database.composed_record(identity)
             assert stored is not None
@@ -326,7 +326,7 @@ def test_attribute_dash_and_swc_export_and_api(tmp_path: Path) -> None:
             assert authored["review"] == {"status": "reviewed", "reviewedOn": "2026-11-06"}
             assert authored["citations"][0]["page"] == 9
             assert authored["citations"][0]["sourceId"] == "n5-core-v5.3-pdf"
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=fresh)
+    app = create_app(root / "data/generated/army.db", rules_database_path=fresh)
     status, body = _published_get(app, "/api/glossary")
     assert status == "200 OK"
     entries = {item["id"]: item for item in json.loads(body)["items"]}
@@ -399,7 +399,7 @@ def test_hackable_profile_help_export_and_api(tmp_path: Path) -> None:
     ]
     fresh = tmp_path / "hackable.db"
     export_rules_database(documents, fresh)
-    for database_path in (fresh, root / "data/generated/rules.db"):
+    for database_path in (fresh, root / "data/generated/rules_n5.db"):
         record = RulesDatabase(database_path).composed_record(authored["id"])
         assert record is not None
         assert record["summary"] == authored["summary"]
@@ -407,8 +407,8 @@ def test_hackable_profile_help_export_and_api(tmp_path: Path) -> None:
         assert {(citation["source_id"], citation["page"]) for citation in record["citations"]} == {
             ("n5-core-v5.3-pdf", 8), ("n5-core-v5.3-es-pdf", 9),
         }
-    app = create_app(root / "data/generated/infinity.db",
-                     rules_database_path=root / "data/generated/rules.db")
+    app = create_app(root / "data/generated/army.db",
+                     rules_database_path=root / "data/generated/rules_n5.db")
     status, body = _published_get(app, "/api/unit-profile-help")
     assert status == "200 OK"
     contextual = next(
@@ -436,7 +436,7 @@ def test_hackable_profile_help_export_and_api(tmp_path: Path) -> None:
 
 def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_database = RulesDatabase(rules_path)
 
@@ -536,7 +536,7 @@ def test_v1s082_p173_glossary_matches_published_release(
         record for _, document in documents for record in document["records"]
         if record["id"] == identity
     )
-    published = RulesDatabase(root / "data/generated/rules.db").composed_record(identity)
+    published = RulesDatabase(root / "data/generated/rules_n5.db").composed_record(identity)
     assert published is not None
     assert published["summary"] == source["summary"]
     assert published["facts"] == source["facts"]
@@ -559,7 +559,7 @@ def test_v1s082_p173_glossary_matches_published_release(
 
 def test_null_state_glossary_lists_the_five_n53_source_states(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules = RulesDatabase(rules_path)
     null_state = next(
@@ -585,7 +585,7 @@ def test_null_state_glossary_lists_the_five_n53_source_states(tmp_path: Path) ->
 
 def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_database = RulesDatabase(rules_path)
 
@@ -758,7 +758,7 @@ def test_all_published_ammunition_records_reach_normal_browser_routes() -> None:
     }
     assert WIDTHS == (1440, 390, 320)
 
-    rules_path = root / "data/generated/rules.db"
+    rules_path = root / "data/generated/rules_n5.db"
     with sqlite3.connect(rules_path) as connection:
         stored_ids = {
             record_id
@@ -768,7 +768,7 @@ def test_all_published_ammunition_records_reach_normal_browser_routes() -> None:
         }
     assert stored_ids == set(curated_records)
 
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    app = create_app(root / "data/generated/army.db", rules_database_path=rules_path)
 
     get = partial(_published_get, app)
     status, body = get("/api/ammunition")
@@ -847,7 +847,7 @@ def test_all_published_labels_preserve_curated_vocabulary_and_public_routes() ->
     with pytest.raises(ValueError, match="Expected 24 reviewed labels entries"):
         verify("http://127.0.0.1:8000", catalog="labels", expected_names={})
 
-    rules_path = root / "data/generated/rules.db"
+    rules_path = root / "data/generated/rules_n5.db"
     with sqlite3.connect(rules_path) as connection:
         stored_rows = set(connection.execute(
             "SELECT l.collection_id, l.id, l.name, l.description FROM labels AS l "
@@ -856,7 +856,7 @@ def test_all_published_labels_preserve_curated_vocabulary_and_public_routes() ->
         ))
     assert stored_rows == source_rows
 
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    app = create_app(root / "data/generated/army.db", rules_database_path=rules_path)
     get = partial(_published_get, app)
     status, body = get("/api/labels")
     assert status == "200 OK"
@@ -927,7 +927,7 @@ def test_label_vocabulary_sources_reach_published_details() -> None:
     assert expected[0]["member"] == "Labels"
     assert expected[1]["page"] == 174
 
-    rules_path = root / "data/generated/rules.db"
+    rules_path = root / "data/generated/rules_n5.db"
     with sqlite3.connect(rules_path) as connection:
         assert connection.execute("PRAGMA user_version").fetchone() == (10,)
     rules = RulesDatabase(rules_path)
@@ -935,7 +935,7 @@ def test_label_vocabulary_sources_reach_published_details() -> None:
     assert len(labels) == len(document["labels"]) == 24
     assert all(label["vocabulary_sources"] == expected for label in labels)
 
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    app = create_app(root / "data/generated/army.db", rules_database_path=rules_path)
     for label in labels:
         status, body = _published_get(app, f"/api/labels/{label['id']}")
         assert status == "200 OK", label["id"]
@@ -1128,7 +1128,7 @@ def test_v1s082_label_vocabulary_primary_citation_and_export() -> None:
         {"sourceId": "wiki-en-20260926-200832", "heading": "Labels", "member": "Labels"},
         {"sourceId": "n5-core-v5.3-pdf", "page": 174, "heading": "Labels"},
     ]
-    with closing(sqlite3.connect(root / "data/generated/rules.db")) as connection:
+    with closing(sqlite3.connect(root / "data/generated/rules_n5.db")) as connection:
         assert connection.execute(
             "SELECT source_id, page, heading FROM vocabulary_sources "
             "WHERE collection_id = 'n5-core-v5.3' AND vocabulary = 'labels' "
@@ -1177,8 +1177,8 @@ def test_v1s082_label_definition_api_qualifications(
     slug: str, required: tuple[str, ...], targets: set[str],
 ) -> None:
     root = Path(__file__).parents[1]
-    app = create_app(root / "data/generated/infinity.db",
-                     rules_database_path=root / "data/generated/rules.db")
+    app = create_app(root / "data/generated/army.db",
+                     rules_database_path=root / "data/generated/rules_n5.db")
     status, body = _published_get(app, f"/api/labels/{slug}")
     assert status == "200 OK"
     item = json.loads(body)
@@ -1235,7 +1235,7 @@ def test_all_current_general_rules_preserve_category_scoped_publication() -> Non
             },
         )
 
-    rules_path = root / "data/generated/rules.db"
+    rules_path = root / "data/generated/rules_n5.db"
     with sqlite3.connect(rules_path) as connection:
         rows = list(connection.execute(
             "SELECT r.collection_id, r.id, r.name, r.summary, r.facts_json "
@@ -1255,7 +1255,7 @@ def test_all_current_general_rules_preserve_category_scoped_publication() -> Non
             collection_id, record["name"], record["summary"], record.get("facts", {})
         ), record_id
 
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    app = create_app(root / "data/generated/army.db", rules_database_path=rules_path)
     get = partial(_published_get, app)
     status, body = get("/api/rules")
     assert status == "200 OK"
@@ -1421,7 +1421,7 @@ def test_peripheral_subtype_relations_resolve_to_general_rules_routes(
 ) -> None:
     database = _reference_database(tmp_path)
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_database = RulesDatabase(rules_path)
 
@@ -1550,7 +1550,7 @@ def test_hacking_program_catalog_composes_army_profiles_with_rules_semantics(
     tmp_path: Path,
 ) -> None:
     database = _reference_database(tmp_path)
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     root = Path(__file__).parents[1]
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     catalog = HackingProgramCatalog(database, RulesDatabase(rules_path))
@@ -1597,7 +1597,7 @@ def test_weapon_glossary_uses_opt_in_army_links_for_routable_definitions(
     tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), output)
     rules = RulesDatabase(output)
     database = _reference_database(tmp_path)
@@ -1632,9 +1632,9 @@ def test_weapon_glossary_uses_opt_in_army_links_for_routable_definitions(
 
 def test_equipment_glossary_source_cited_routes_cover_current_concepts() -> None:
     root = Path(__file__).parents[1]
-    rules = RulesDatabase(root / "data/generated/rules.db")
+    rules = RulesDatabase(root / "data/generated/rules_n5.db")
     app = create_app(
-        root / "data/generated/infinity.db", rules_database_path=rules.path
+        root / "data/generated/army.db", rules_database_path=rules.path
     )
     records = rules.composed_records_by_kind("equipment", include_army_links=True)
     expected = {
@@ -1678,8 +1678,8 @@ def test_equipment_glossary_source_cited_routes_cover_current_concepts() -> None
 
 def test_tinbot_reference_only_variants_preserve_citations_and_routes() -> None:
     root = Path(__file__).parents[1]
-    rules = RulesDatabase(root / "data/generated/rules.db")
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules.path)
+    rules = RulesDatabase(root / "data/generated/rules_n5.db")
+    app = create_app(root / "data/generated/army.db", rules_database_path=rules.path)
     status, body = _published_get(app, "/api/equipment/tinbot")
     assert status == "200 OK"
     item = json.loads(body)
@@ -1736,7 +1736,7 @@ def test_tinbot_reference_only_variants_preserve_citations_and_routes() -> None:
 
 def test_embedded_glossary_and_profile_help_preserve_definition_citations() -> None:
     root = Path(__file__).parents[1]
-    rules = RulesDatabase(root / "data/generated/rules.db")
+    rules = RulesDatabase(root / "data/generated/rules_n5.db")
     core = next(
         document for _, document in load_curated_directory(root / "data/curated")
         if document["collection"]["id"] == "n5-core-v5.3"
@@ -1754,7 +1754,7 @@ def test_embedded_glossary_and_profile_help_preserve_definition_citations() -> N
         for kind in ("attribute", "term", "rule")
     } == {"attribute": 13, "term": 23, "rule": 12}
 
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules.path)
+    app = create_app(root / "data/generated/army.db", rules_database_path=rules.path)
     status, body = _published_get(app, "/api/glossary")
     assert status == "200 OK"
     glossary = {item["id"]: item for item in json.loads(body)["items"]}
@@ -1804,7 +1804,7 @@ def test_embedded_glossary_handles_missing_sources_and_isolates_cache(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
     missing = ("attribute:mov", "term:trooper", "rule:profile-help:attributes")
     with sqlite3.connect(rules_path) as connection:
@@ -1912,7 +1912,7 @@ def test_equipment_glossary_omits_stale_routes_but_keeps_encoded_equipment(
 ) -> None:
     root = Path(__file__).parents[1]
     database = _reference_database(tmp_path)
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     with sqlite3.connect(rules_path) as connection:
         result = connection.execute(

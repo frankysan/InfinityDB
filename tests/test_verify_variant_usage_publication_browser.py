@@ -15,12 +15,12 @@ from urllib.parse import quote
 
 import pytest
 
+from infinity_db.rules_database import RulesDatabase
 from infinity_db.variant_usage import build_variant_usage_projection
 from infinity_db.variant_usage_reference import (
-    load_variant_usage_publication,
     publication_from_candidate,
 )
-from infinity_db.web import create_app
+from infinity_db.web import create_app_from_database_set
 from tools.browser_wsgi_transport import route_browser_page, wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,24 +38,14 @@ def _get_json(app: Any, path: str) -> dict[str, Any]:
 @pytest.fixture(scope="module")
 def published_pair(requires_pinned_raw_army_archive: None) -> dict[str, Any]:
     """Full pinned source parity: never silently rebuild a stale publication."""
-    army = DATA / "infinity.db"
-    raw = DATA / "infinity.raw.db"
-    rules = DATA / "rules.db"
-    publication = DATA / "variant-usage.json"
-    assert publication.is_file(), (
-        "V1S-066 requires an explicit tools.build_variant_usage --publish before acceptance"
-    )
+    army = DATA / "army.db"
+    raw = ROOT / "data/work/build/army.raw.db"
+    rules = DATA / "rules_n5.db"
     candidate = build_variant_usage_projection(army, raw, rules)
     expected = publication_from_candidate(candidate)
-    expected_bytes = (
-        json.dumps(expected, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
-    ).encode("utf-8")
-    assert publication.read_bytes() == expected_bytes, (
-        "Published exact-variant bytes are stale or differ from source-pair regeneration"
-    )
-    loaded = load_variant_usage_publication(publication, army, rules)
+    loaded = RulesDatabase(rules).variant_usage_payload(army)
     assert loaded == expected
-    app = create_app(army, rules_database_path=rules)
+    app = create_app_from_database_set(DATA)
     assert app.variant_usage == expected
     return {"app": app, "candidate": candidate, "publication": expected}
 
@@ -148,25 +138,19 @@ def test_variant_usage_every_group_has_a_canonical_owner(
 def test_variant_usage_stale_release_pair_fails_closed(
     published_pair: dict[str, Any], tmp_path: Path,
 ) -> None:
-    """Reusing real publication bytes with a changed rules pair cannot be accepted."""
-    publication = DATA / "variant-usage.json"
-    army = tmp_path / "infinity.db"
-    rules = tmp_path / "rules.db"
-    objects = tmp_path / "deployed-objects.json"
-    shutil.copyfile(DATA / "infinity.db", army)
-    shutil.copyfile(DATA / "rules.db", rules)
-    assert not objects.exists()
-    assert load_variant_usage_publication(publication, army, rules)
-    with rules.open("ab") as output:
-        output.write(b"\nintentionally stale pairing\n")
-    with pytest.raises(ValueError, match="does not match release artifacts"):
-        load_variant_usage_publication(publication, army, rules)
+    import sqlite3
+    for name in ("army.db", "rules_n5.db"):
+        shutil.copyfile(DATA / name, tmp_path / name)
+    with sqlite3.connect(tmp_path / "rules_n5.db") as connection:
+        connection.execute("UPDATE variant_usage_metadata SET army_database_sha256=?", ("0" * 64,))
+    with pytest.raises(ValueError):
+        create_app_from_database_set(tmp_path)
 
 
 def _browser_catalog_case(
     published_pair: dict[str, Any], catalog: str,
 ) -> tuple[str, int]:
-    """Pick a real page with an exact group, preferring source-specific variants."""
+    """Select a real catalog detail with source-matched reviewed variants."""
     app = published_pair["app"]
     by_record: dict[str, list[dict[str, Any]]] = {}
     for group in published_pair["publication"]["variants"]:
@@ -179,8 +163,10 @@ def _browser_catalog_case(
     for item_id, groups in by_record.items():
         detail = _get_json(app, f"/api/{catalog}/{item_id}")
         ids = _rule_ids(detail)
-        expected = {group["variantKey"] for group in groups
-                    if group["variant"]["recordId"] in ids}
+        expected = {
+            group["variantKey"] for group in groups
+            if group["variant"]["recordId"] in ids
+        }
         if expected:
             family_ids = {rule["id"] for rule in detail.get("rules", [])}
             source_specific = any(

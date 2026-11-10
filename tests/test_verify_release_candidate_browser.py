@@ -15,6 +15,7 @@ from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 import pytest
 
 from infinity_db import __version__
+from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.web import create_app
 from tools.report_reference_baseline import ReferenceBaselineError, build_baseline
 from tools.verify_release_candidate_browser import (
@@ -26,8 +27,8 @@ from tools.verify_release_candidate_browser import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_DB = ROOT / "data/generated/infinity.db"
-RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_DB = ROOT / "data/generated/army.db"
+RULES_DB = ROOT / "data/generated/rules_n5.db"
 STATIC_ASSET_REVISION = local_static_revision(ARMY_DB)
 
 
@@ -45,12 +46,12 @@ def _browser_ok(origin: str, *, slugs: tuple[str, ...],
 
 
 def _copy_runtime_pair(tmp_path: Path, *, include_profile: bool) -> tuple[Path, Path, Path]:
-    army, rules = tmp_path / "infinity.db", tmp_path / "rules.db"
+    army, rules = tmp_path / "army.db", tmp_path / "rules_n5.db"
     profile = tmp_path / "weapon-profile-sources.json"
     shutil.copyfile(ARMY_DB, army)
     shutil.copyfile(RULES_DB, rules)
     if include_profile:
-        shutil.copyfile(ARMY_DB.with_name(profile.name), profile)
+        profile.write_text("obsolete and invalid sidecar", encoding="utf-8")
     return army, rules, profile
 
 
@@ -66,14 +67,10 @@ def test_release_identity_matches_runtime_publication_layouts(
         shutil.copyfile(rules, independent_rules)
         rules = independent_rules
 
-    profile_sha = (
-        hashlib.sha256(profile.read_bytes()).hexdigest() if layout == "attached" else None
-    )
     army_sha = hashlib.sha256(army.read_bytes()).hexdigest()
     rules_sha = hashlib.sha256(rules.read_bytes()).hexdigest()
-    expected = hashlib.sha256(
-        f"{army_sha}:{rules_sha}:{profile_sha or 'none'}".encode()
-    ).hexdigest()
+    expected = database_set_snapshot_revision({army.name: army_sha, rules.name: rules_sha})
+    profile_sha = rules_sha
 
     app = create_app(army, rules_database_path=rules)
     report = build_baseline(army, rules)
@@ -84,10 +81,10 @@ def test_release_identity_matches_runtime_publication_layouts(
 
 
 def test_runtime_snapshot_without_rules_uses_absent_artifact_markers(tmp_path: Path) -> None:
-    army = tmp_path / "infinity.db"
+    army = tmp_path / "army.db"
     shutil.copyfile(ARMY_DB, army)
     army_sha = hashlib.sha256(army.read_bytes()).hexdigest()
-    expected = hashlib.sha256(f"{army_sha}:none:none".encode()).hexdigest()
+    expected = database_set_snapshot_revision({army.name: army_sha})
     assert create_app(army).snapshot_revision == expected
 
 
@@ -95,16 +92,17 @@ class _VersionResponse(BytesIO):
     status = 200
 
 
-def test_release_preflight_rejects_changed_weapon_profile_bytes(tmp_path: Path) -> None:
+def test_release_preflight_rejects_changed_database_bytes(tmp_path: Path) -> None:
     army, rules, profile = _copy_runtime_pair(tmp_path, include_profile=True)
     previous_app = create_app(army, rules_database_path=rules)
     previous_report = build_baseline(army, rules)
 
-    document = json.loads(profile.read_text(encoding="utf-8"))
-    profile.write_text(json.dumps(document, indent=2), encoding="utf-8", newline="\n")
+    content = bytearray(rules.read_bytes())
+    content[96:100] = (3040000).to_bytes(4, "big")
+    rules.write_bytes(content)
     changed_app = create_app(army, rules_database_path=rules)
     changed_report = build_baseline(army, rules)
-    changed_sha = hashlib.sha256(profile.read_bytes()).hexdigest()
+    changed_sha = hashlib.sha256(rules.read_bytes()).hexdigest()
     assert changed_report["weaponProfilePublicationSha256"] == changed_sha
     assert changed_report["runtimeSnapshotRevision"] == changed_app.snapshot_revision
     assert changed_app.snapshot_revision == local_revision(army, rules)
@@ -129,19 +127,12 @@ def test_release_preflight_rejects_changed_weapon_profile_bytes(tmp_path: Path) 
     browser.assert_not_called()
 
 
-@pytest.mark.parametrize("failure", ("malformed", "stale"))
-def test_release_identity_rejects_invalid_attached_weapon_publication(
-    tmp_path: Path, failure: str,
-) -> None:
-    army, rules, profile = _copy_runtime_pair(tmp_path, include_profile=True)
-    if failure == "malformed":
-        profile.write_text("{", encoding="utf-8")
-    else:
-        document = json.loads(profile.read_text(encoding="utf-8"))
-        document["sourceSnapshot"]["rulesDatabaseSha256"] = "0" * 64
-        profile.write_text(json.dumps(document), encoding="utf-8")
-
-    with pytest.raises(ValueError, match="Weapon profile publication"):
+def test_release_identity_rejects_corrupt_embedded_weapon_publication(tmp_path: Path) -> None:
+    import sqlite3
+    army, rules, _ = _copy_runtime_pair(tmp_path, include_profile=True)
+    with sqlite3.connect(rules) as connection:
+        connection.execute("UPDATE weapon_chart_profile_metadata SET content_sha256=?", ("0" * 64,))
+    with pytest.raises(ValueError, match="fingerprint differs"):
         create_app(army, rules_database_path=rules)
     with pytest.raises(ReferenceBaselineError, match="Weapon-profile publication"):
         build_baseline(army, rules)

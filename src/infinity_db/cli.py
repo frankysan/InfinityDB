@@ -17,7 +17,7 @@ from . import __version__
 from .build_provenance import BUILD_PROVENANCE_KEY
 from .curated import load_curated_directory, load_curated_document
 from .database import database_health_report, export_database, raw_database_path
-from .database_set import database_set_health_report
+from .database_set import DEFAULT_DATABASE_DIRECTORY, database_set_health_report
 from .display_identities import display_identity_metadata, load_display_identity_curated
 from .identities import identity_metadata, load_identity_config
 from .peripheral_identities import (
@@ -38,9 +38,9 @@ from .source_anomalies import (
     validate_normalized_source_anomalies,
 )
 
-DEFAULT_DATABASE = Path("data/generated/infinity.db")
-DEFAULT_RULES_DATABASE = Path("data/generated/rules.db")
-DEFAULT_STANDALONE_RULES_DATABASE = Path("local/rules-standalone.db")
+DEFAULT_DATABASE = Path("data/generated/army.db")
+DEFAULT_RULES_DATABASE = Path("data/generated/rules_n5.db")
+DEFAULT_STANDALONE_RULES_DATABASE = Path("data/work/build/rules-standalone.db")
 DEFAULT_CURATED_RULES = Path("data/curated/rules")
 DEFAULT_PERIPHERAL_IDENTITIES = Path("data/curated/peripherals/army-identities.json")
 
@@ -96,14 +96,12 @@ def cmd_normalize(args: argparse.Namespace) -> int:
 
 
 def cmd_build(args: argparse.Namespace) -> int:
-    if args.db_dir is not None:
-        from .database_set_builder import build_database_set
+    from .database_set_builder import build_database_set
 
-        result = build_database_set(args, _build_army)
-        print(f"Runtime database set ready: {args.db_dir.resolve()}")
-        print(f"Build set: {result['buildProvenance']['buildSetId']}")
-        return 0
-    return _build_army(args)
+    result = build_database_set(args, _build_army)
+    print(f"Runtime database set ready: {args.db_dir.resolve()}")
+    print(f"Build set: {result['buildProvenance']['buildSetId']}")
+    return 0
 
 
 def _build_army(
@@ -123,7 +121,7 @@ def _build_army(
     )
     normalized = args.output_dir / "normalized.json"
     _validate_source_anomaly_baseline(normalized)
-    database = args.output_dir / "infinity.db"
+    database = args.output_dir / "army.db"
     _export(normalized, database)
     print(f"Application database size: {database.stat().st_size:,} bytes")
     print(f"Raw archive size: {raw_database_path(database).stat().st_size:,} bytes")
@@ -137,10 +135,10 @@ def cmd_export(args: argparse.Namespace) -> int:
 
 
 def cmd_database_health(args: argparse.Namespace) -> int:
-    if args.db_dir is not None:
+    if args.database is None:
         if args.require_raw:
             raise ValueError("--require-raw applies to an Army database, not --db-dir")
-        report = database_set_health_report(args.db_dir)
+        report = database_set_health_report(args.db_dir or DEFAULT_DATABASE_DIRECTORY)
         if args.json:
             print(json.dumps(report, indent=2, sort_keys=True))
         else:
@@ -204,7 +202,7 @@ def cmd_database_health(args: argparse.Namespace) -> int:
 def cmd_serve(args: argparse.Namespace) -> int:
     from .web.server import serve
 
-    serve(args.database, host=args.host, port=args.port)
+    serve(args.db_dir, host=args.host, port=args.port)
     return 0
 
 
@@ -227,7 +225,7 @@ def cmd_build_rules(args: argparse.Namespace) -> int:
     output = args.output if args.output is not None else DEFAULT_STANDALONE_RULES_DATABASE
     if output.resolve() == DEFAULT_RULES_DATABASE.resolve():
         raise ValueError(
-            "build-rules cannot write the tracked release rules.db directly; "
+            "build-rules cannot write the tracked release rules_n5.db directly; "
             "build outside data/generated/ and review the complete matched set"
         )
     documents = load_curated_directory(args.input)
@@ -259,14 +257,6 @@ def cmd_build_rules(args: argparse.Namespace) -> int:
     )
     print(f"Rules database ready: {output} (schema v10)")
     print(f"Collections: {len(documents)}")
-    if args.output is None:
-        # A checkout has two supported targets: this ignored, complete runtime
-        # for local/LAN hosting, and the separately promoted tracked Docker data.
-        # Do not publish a mismatched variant/Weapon view during development.
-        from tools.build_v10_runtime_candidate import publish_checkout_runtime
-
-        publish_checkout_runtime(output)
-        print("Checkout runtime ready: local/checkout-runtime")
     return 0
 
 
@@ -383,7 +373,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_export = sub.add_parser("export", help="Import validated normalized JSON into SQLite")
     p_export.add_argument("input", type=Path, help="normalized.json input")
-    p_export.add_argument("output", nargs="?", type=Path, default=DEFAULT_DATABASE)
+    p_export.add_argument("output", type=Path, help="Explicit development output SQLite file")
     p_export.set_defaults(func=cmd_export)
 
     p_health = sub.add_parser(
@@ -391,7 +381,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Validate an Army database or an explicitly selected runtime directory",
     )
     health_selection = p_health.add_mutually_exclusive_group()
-    health_selection.add_argument("database", nargs="?", type=Path, default=DEFAULT_DATABASE)
+    health_selection.add_argument("database", nargs="?", type=Path)
     health_selection.add_argument(
         "--db-dir", type=Path,
         help="Validate one complete runtime directory without fallback",
@@ -410,8 +400,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_serve = sub.add_parser("serve", help="Start the local unit browser and read-only API")
     p_serve.add_argument(
-        "--database", type=Path,
-        help="Explicit Army database (disables automatic checkout runtime selection)",
+        "--db-dir", type=Path,
+        help="Complete database directory (then INFINITY_DB_DB_DIR, then data/generated)",
     )
     p_serve.add_argument(
         "--host",
@@ -434,8 +424,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_rules.add_argument(
         "--output", type=Path,
         help=(
-            "Standalone output (default: local/rules-standalone.db); without --output "
-            "also prepares the ignored complete checkout runtime; never writes tracked rules.db"
+            "Standalone output (default: ignored data/work/build/rules-standalone.db); "
+            "not a complete serving set"
         ),
     )
     p_rules.add_argument(

@@ -63,9 +63,9 @@ def request(
 @pytest.fixture(scope="module")
 def scenario_app(tmp_path_factory: pytest.TempPathFactory) -> Application:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path_factory.mktemp("scenario-api") / "rules.db"
+    rules_path = tmp_path_factory.mktemp("scenario-api") / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    return create_app(root / "data" / "generated" / "infinity.db", rules_path)
+    return create_app(root / "data" / "generated" / "army.db", rules_path)
 
 
 def test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills() -> None:
@@ -109,7 +109,7 @@ def test_pinned_chain_of_command_non_specialist_owners_do_not_qualify_alone(
 
     root = Path(__file__).parents[1]
     owners = source_extra_owner_context(
-        root / "data/generated/infinity.raw.db",
+        root / "data/work/build/army.raw.db",
         catalog="skills", source_id=26, extra_id=375,
     )
     assert len(owners) == 11

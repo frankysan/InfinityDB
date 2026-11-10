@@ -9,6 +9,7 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_rules, variant_publication, weapon_publication
 
 from infinity_db.restriction_chart_storage import stage_restriction_chart
 from infinity_db.rules_database import RulesDatabase
@@ -25,29 +26,27 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / "data/generated"
-ARMY = RELEASE / "infinity.db"
+ARMY = RELEASE / "army.db"
 CONFIG = ROOT / "config/catalogs/trait-wiki-references.json"
 
 
 @pytest.fixture(scope="module")
 def v14(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, dict]:
     directory = tmp_path_factory.mktemp("rules-v14-trait-links")
-    rules = directory / "rules.db"
-    shutil.copyfile(RELEASE / "rules.db", rules)
-    shutil.copyfile(ARMY, directory / "infinity.db")
+    rules = directory / "rules_n5.db"
+    copy_base_rules(rules)
+    shutil.copyfile(ARMY, directory / "army.db")
     mapping = load_trait_wiki_references(CONFIG)
     with sqlite3.connect(rules) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
         with connection:
             stage_variant_usage(
                 connection,
-                json.loads((RELEASE / "variant-usage.json").read_text(encoding="utf-8")),
+                variant_publication(),
             )
             stage_weapon_profile_citations(
                 connection,
-                json.loads(
-                    (RELEASE / "weapon-profile-sources.json").read_text(encoding="utf-8")
-                ),
+                weapon_publication(),
                 ARMY,
             )
             connection.execute("PRAGMA user_version=12")
@@ -84,7 +83,7 @@ def test_v14_round_trip_matches_all_33_source_reviewed_links(v14) -> None:
     report = validate_database_set(path.parent)
     assert report["layout"] == "v14-two-file"
     assert report["traitWikiLinks"] == 33
-    assert set(report["sha256"]) == {"infinity.db", "rules.db"}
+    assert set(report["sha256"]) == {"army.db", "rules_n5.db"}
 
 
 def test_v14_public_api_matches_v10_without_legacy_config_reads(
@@ -93,7 +92,7 @@ def test_v14_public_api_matches_v10_without_legacy_config_reads(
     import infinity_db.trait_wiki_references as legacy
 
     path, expected = v14
-    previous = create_app(ARMY, rules_database_path=RELEASE / "rules.db")
+    previous = create_app(ARMY, rules_database_path=RELEASE / "rules_n5.db")
 
     def no_runtime_json(*_args, **_kwargs):
         raise AssertionError("Rules v14 must not read packaged Trait Wiki JSON")
@@ -114,7 +113,7 @@ def test_staging_rejects_unreviewed_trait_links(
     v14, tmp_path: Path, mutation: str,
 ) -> None:
     source, expected = v14
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     shutil.copyfile(source, path)
     entries = deepcopy(expected)
     if mutation == "missing":
@@ -139,7 +138,7 @@ def test_staging_rejects_unreviewed_trait_links(
 @pytest.mark.parametrize("mutation", ("name", "url", "missing", "fingerprint", "position"))
 def test_corrupt_relational_trait_links_fail_closed(v14, tmp_path: Path, mutation: str) -> None:
     source, _ = v14
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     shutil.copyfile(source, path)
     with sqlite3.connect(path) as connection:
         if mutation == "name":
@@ -172,11 +171,11 @@ def test_corrupt_relational_trait_links_fail_closed(v14, tmp_path: Path, mutatio
         RulesDatabase(path).validate()
 
 
-def test_older_rules_preserve_read_only_json_adapter(v14) -> None:
+def test_tracked_rules_preserve_reviewed_wiki_links(v14) -> None:
     source, expected = v14
     assert RulesDatabase(source).trait_wiki_links_payload() == expected
-    assert RulesDatabase(RELEASE / "rules.db").trait_wiki_links_payload() is None
-    app = create_app(ARMY, rules_database_path=RELEASE / "rules.db")
+    assert RulesDatabase(RELEASE / "rules_n5.db").trait_wiki_links_payload() == expected
+    app = create_app(ARMY, rules_database_path=RELEASE / "rules_n5.db")
     status, _, body = wsgi_response(app, "http://trait.test/api/traits/non-lethal")
     assert status == 200
     assert json.loads(body)["wiki"] == expected["trait:non-lethal"]["url"]

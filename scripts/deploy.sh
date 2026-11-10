@@ -132,7 +132,6 @@ start_metrics_history() {
 # Its generating raw archive is intentionally absent from deployment hosts.
 echo "Validating tracked runtime databases and release publications..."
 "$python" tools/verify_deployment_assets.py
-"$python" -m tools.prepare_runtime_bundle
 
 display_version="$("$python" -c 'import infinity_db; print(infinity_db.__display_version__)')"
 echo "Building application image infinity-db:$IMAGE_TAG (display $display_version)..."

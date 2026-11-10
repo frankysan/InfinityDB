@@ -13,8 +13,8 @@ from tools.inspect_raw_archive import inspect_raw_archive, main
 
 
 def _paired_fixture(tmp_path: Path) -> tuple[Path, Path]:
-    app = tmp_path / "infinity.db"
-    raw = tmp_path / "infinity.raw.db"
+    app = tmp_path / "army.db"
+    raw = tmp_path / "army.raw.db"
     metadata = {
         "export_pair_sha256": json.dumps("a" * 64),
         "source_version": json.dumps("fixture"),
@@ -116,7 +116,7 @@ def test_raw_inspection_cli_read_only(
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_pinned_real_raw_archive_has_same_export_pair() -> None:
-    app = Path(__file__).resolve().parents[1] / "data/generated/infinity.db"
+    app = Path(__file__).resolve().parents[1] / "data/generated/army.db"
     report = inspect_raw_archive(app, command="tables")
     assert report["pairStatus"] == "verified"
     assert {entry["name"] for entry in report["tables"]} <= set(TABLES)

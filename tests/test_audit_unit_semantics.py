@@ -64,7 +64,7 @@ def _option(unit_id: int, *, points: int) -> dict[str, object]:
 
 
 def _fixture_database(tmp_path: Path) -> Path:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     connection = sqlite3.connect(path)
     try:
         for table, columns in EXPECTED_COLUMNS.items():

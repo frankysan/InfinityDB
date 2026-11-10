@@ -17,7 +17,7 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-RULES = ROOT / "data/generated/rules.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 CITATIONS = {
     "rule:cover": {41, 42},
@@ -160,7 +160,7 @@ def test_vertical_procedures_keep_landing_declaration_and_cover_conditions() -> 
 
 
 def test_cover_skill_storage_api_search_and_dated_vaulting_faq() -> None:
-    app = create_app(ROOT / "data/generated/infinity.db", rules_database_path=RULES)
+    app = create_app(ROOT / "data/generated/army.db", rules_database_path=RULES)
     db = RulesDatabase(RULES)
     source = _records()
     for identity, pages in CITATIONS.items():

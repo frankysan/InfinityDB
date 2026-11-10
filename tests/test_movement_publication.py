@@ -16,7 +16,7 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-RULES = ROOT / "data/generated/rules.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 CITATIONS = {
     "rule:moving-and-measuring": {27, 28},
@@ -114,7 +114,7 @@ def test_move_and_shared_rules_preserve_conditional_boundaries() -> None:
 
 
 def test_published_movement_source_api_search_and_routes() -> None:
-    app = create_app(ROOT / "data/generated/infinity.db", rules_database_path=RULES)
+    app = create_app(ROOT / "data/generated/army.db", rules_database_path=RULES)
     db = RulesDatabase(RULES)
     records = _records()
     for identity in CITATIONS:

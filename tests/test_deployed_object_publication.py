@@ -21,8 +21,8 @@ from infinity_db.rules_database import RulesDatabase, export_rules_database
 def source_paths() -> tuple[Path, Path, Path, Path, Path]:
     root = Path(__file__).resolve().parents[1]
     files = (
-        root / "data/generated/infinity.db",
-        root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        root / "data/generated/rules_n5.db",
         root / "data/curated/rules/n5-core-v5.3.json",
         root / "config/validation/deployed-object-delivery-reviews.json",
         root / "config/validation/deployed-object-candidate-reviews.json",
@@ -36,7 +36,7 @@ def source_paths() -> tuple[Path, Path, Path, Path, Path]:
 def legacy_v9_rules(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """An older reference DB must never activate a loose deployed-object publication."""
     root = Path(__file__).resolve().parents[1]
-    output = tmp_path_factory.mktemp("deployed-v9-compatibility") / "rules.db"
+    output = tmp_path_factory.mktemp("deployed-v9-compatibility") / "rules_n5.db"
     export_rules_database(
         load_curated_directory(root / "data/curated/rules"), output,
         restrictions_manifest=json.loads(
@@ -525,12 +525,12 @@ def test_legacy_rules_never_attach_adjacent_deployed_object_json(
 
     release = tmp_path / "release"
     release.mkdir()
-    army = release / "infinity.db"
-    rules = release / "rules.db"
+    army = release / "army.db"
+    rules = release / "rules_n5.db"
     shutil.copyfile(source_paths[0], army)
     shutil.copyfile(legacy_v9_rules, rules)
     (release / "deployed-objects.json").write_text("{", encoding="utf-8")
-    external_rules = tmp_path / "independent" / "rules.db"
+    external_rules = tmp_path / "independent" / "rules_n5.db"
     external_rules.parent.mkdir()
     shutil.copyfile(legacy_v9_rules, external_rules)
 
@@ -544,8 +544,8 @@ def test_release_pair_still_fails_closed_on_same_directory_rules_drift(
 ) -> None:
     from infinity_db.web import create_app
 
-    army = tmp_path / "infinity.db"
-    rules = tmp_path / "rules.db"
+    army = tmp_path / "army.db"
+    rules = tmp_path / "rules_n5.db"
     shutil.copyfile(source_paths[0], army)
     shutil.copyfile(source_paths[1], rules)
     (tmp_path / "deployed-objects.json").write_text("{", encoding="utf-8")

@@ -452,7 +452,7 @@ def test_component_cycles_unknown_references_and_wrong_kinds_fail(document: dict
 def test_scope_is_explicit_and_skill_definitions_are_separate(
     document: dict, tmp_path: Path
 ) -> None:
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(Path("data/curated")), output, finalize=False)
     database = RulesDatabase(output)
     database.validate()
@@ -524,10 +524,10 @@ def test_scoped_skills_and_specialist_arrays_use_the_existing_detail_renderer(
     from infinity_db.database import Database
     from infinity_db.maintained_text_references import enrich_maintained_text_references
 
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(Path("data/curated")), output, finalize=False)
     rules = RulesDatabase(output)
-    army = Database(Path("data/generated/infinity.db"))
+    army = Database(Path("data/generated/army.db"))
     dom = rules.scenario_reference("domination")
     sup = rules.scenario_reference("supplies")
     assert dom and sup

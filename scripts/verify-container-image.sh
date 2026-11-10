@@ -39,8 +39,7 @@ from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 
 expected_environment = {
-    "INFINITY_DB_DATABASE": "/app/data/infinity.db",
-    "INFINITY_DB_RULES_DATABASE": "/app/data/rules.db",
+    "INFINITY_DB_DB_DIR": "/app/data",
 }
 for name, expected in expected_environment.items():
     actual = os.environ.get(name)
@@ -51,8 +50,8 @@ if hasattr(os, "geteuid") and os.geteuid() == 0:
     raise SystemExit("Application image must not run as root")
 
 data_dir = Path("/app/data")
-report = validate_database_set(data_dir)
-rules = RulesDatabase(data_dir / "rules.db")
+report = validate_database_set(data_dir, require_complete=True)
+rules = RulesDatabase(data_dir / "rules_n5.db")
 rules.validate()
 restrictions = rules.restrictions_payload()
 expected_files = set(report["sha256"])
@@ -71,18 +70,18 @@ if (
     or restrictions["evaluationSupported"] is not False
 ):
     raise SystemExit("Release image has incomplete reviewed Restrictions data")
-publication = rules.deployed_objects_payload(data_dir / "infinity.db")
+publication = rules.deployed_objects_payload(data_dir / "army.db")
 if publication is None or len(publication["objects"]) != 17:
     raise SystemExit("Release image has no complete reviewed deployed-object publication")
 if len(publication["unresolvedDeliveries"]) != 1:
     raise SystemExit("Release image lost the unresolved deployed-object delivery")
-usage, _ = load_runtime_variant_usage(data_dir / "infinity.db", data_dir / "rules.db")
+usage, _ = load_runtime_variant_usage(data_dir / "army.db", data_dir / "rules_n5.db")
 if usage is None or not usage["variants"]:
     raise SystemExit("Release image is missing the reviewed exact-variant publication")
 weapon_sources, _ = load_runtime_weapon_profile_publication(
-    data_dir / "infinity.db", data_dir / "rules.db",
+    data_dir / "army.db", data_dir / "rules_n5.db",
 )
-rifle = Database(data_dir / "infinity.db").get_catalog_item("weapons", "rifle")
+rifle = Database(data_dir / "army.db").get_catalog_item("weapons", "rifle")
 if not weapon_sources or rifle is None:
     raise SystemExit("Release image is missing reviewed Weapon Chart citations")
 profile = rifle["profiles"][0]
@@ -105,25 +104,15 @@ import json
 from importlib.resources import files
 from pathlib import Path, PurePosixPath
 
-from infinity_army_data.project_resources import maintained_manifest_path
+from infinity_db.database import Database
 
 root = Path(files("infinity_db.web").joinpath("static"))
-manifest_path = maintained_manifest_path("symbol-publication.json")
-try:
-    publication = json.loads(manifest_path.read_text(encoding="utf-8"))
-except (OSError, json.JSONDecodeError) as exc:
-    raise SystemExit(f"Installed symbol publication manifest is unavailable: {exc}") from exc
-
-if publication.get("format") != "InfinityDB symbol publication mapping":
-    raise SystemExit("Installed symbol publication manifest has an unexpected format")
-if publication.get("formatVersion") != 2:
-    raise SystemExit("Installed symbol publication manifest has an unsupported formatVersion")
+publication = Database(Path("/app/data/army.db")).symbol_publication()
+if publication is None:
+    raise SystemExit("Embedded symbol publication is missing")
 expected = publication.get("publishedSha256ByPath")
-summary = publication.get("summary")
-if not isinstance(expected, dict) or not expected or not isinstance(summary, dict):
-    raise SystemExit("Installed symbol publication manifest is incomplete")
-if summary.get("publishedAssetCount") != len(expected):
-    raise SystemExit("Installed symbol publication manifest count does not match its paths")
+if not isinstance(expected, dict) or not expected:
+    raise SystemExit("Embedded symbol hashes are missing")
 
 categories = {"armies", "characteristics", "orders", "peripherals", "units"}
 actual = set()
@@ -160,25 +149,6 @@ for relative, digest in sorted(expected.items()):
     actual_digest = hashlib.sha256(data).hexdigest()
     if actual_digest != digest:
         raise SystemExit(f"Installed symbol SHA-256 mismatch: {relative}")
-if summary.get("publishedBytes") != published_bytes:
-    raise SystemExit("Installed symbol publication byte total does not match installed files")
-'
-fi
-
-if [ "$published_assets" -eq 1 ]; then
-  # The installed publication manifest carries the compact Army snapshot identity
-  # needed to prove that the embedded database and published symbols match.
-  docker run --rm \
-    --entrypoint python "$image" -c '
-from pathlib import Path
-
-from infinity_army_data.project_resources import maintained_manifest_path
-from infinity_db.deployment_provenance import validate_database_symbol_provenance
-
-validate_database_symbol_provenance(
-    Path("/app/data/infinity.db"),
-    maintained_manifest_path("symbol-publication.json"),
-)
 '
 fi
 
@@ -336,7 +306,7 @@ from urllib.request import urlopen
 from infinity_db.variant_usage_reference import load_runtime_variant_usage
 
 directory = Path("/app/data")
-publication, _ = load_runtime_variant_usage(directory / "infinity.db", directory / "rules.db")
+publication, _ = load_runtime_variant_usage(directory / "army.db", directory / "rules_n5.db")
 if publication is None or not publication["variants"]:
     raise SystemExit("Release image has no reviewed exact-variant publication")
 record_id = publication["variants"][0]["variant"]["recordId"]

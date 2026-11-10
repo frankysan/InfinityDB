@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-import shutil
 import sqlite3
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_army
 
 from infinity_db.database.health import database_health_report
 from infinity_db.database.publication import validate_database_pair
@@ -33,9 +33,9 @@ CONFIG = ROOT / "config/catalogs/unit-filter-semantics.json"
 
 @pytest.fixture
 def v28(tmp_path: Path) -> tuple[Path, Path]:
-    army, raw = tmp_path / "infinity.db", tmp_path / "infinity.raw.db"
-    shutil.copyfile(RELEASE / "infinity.db", army)
-    shutil.copyfile(RELEASE / "infinity.db", raw)
+    army, raw = tmp_path / "army.db", tmp_path / "army.raw.db"
+    copy_base_army(army)
+    copy_base_army(raw)
     publish_equipment_encodings(
         army, raw, ROOT / "config/catalogs/equipment-presentation-encodings.json",
     )
@@ -75,7 +75,7 @@ def test_source_bound_roundtrip_and_paired_health(v29) -> None:
         assert rows == [
             (item["characteristic"], item["reason"]) for item in document["hiddenCharacteristics"]
         ]
-    previous = Database(RELEASE / "infinity.db")
+    previous = Database(RELEASE / "army.db")
     assert database.list_unit_filter_values() == previous.list_unit_filter_values()
 
 
@@ -83,7 +83,7 @@ def test_public_filter_choices_and_results_match_without_json(v29, monkeypatch) 
     import infinity_db.database.repository as repository
     import infinity_db.unit_presentation as presentation
 
-    previous = Database(RELEASE / "infinity.db")
+    previous = Database(RELEASE / "army.db")
     raw = previous.list_unit_filter_values()
     expected_filters = enrich_unit_filter_presentation(raw)
     classifications = [

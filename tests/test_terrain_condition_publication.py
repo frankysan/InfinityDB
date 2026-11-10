@@ -15,7 +15,7 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-RULES = ROOT / "data/generated/rules.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 CITATIONS = {
     "rule:difficult-terrain": {143, 144},
@@ -106,7 +106,7 @@ def test_terrain_conditions_keep_distinct_timing_exemptions_and_owners() -> None
 
 
 def test_terrain_conditions_storage_api_search_and_citations() -> None:
-    app = create_app(ROOT / "data/generated/infinity.db", rules_database_path=RULES)
+    app = create_app(ROOT / "data/generated/army.db", rules_database_path=RULES)
     db = RulesDatabase(RULES)
     records = _records()
     for identity, pages in CITATIONS.items():

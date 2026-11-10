@@ -30,10 +30,10 @@ jobs:
           from infinity_db.database_set import validate_database_set
           from infinity_db.rules_database import RulesDatabase
 
-          report = validate_database_set(Path("data/generated"))
+          report = validate_database_set(Path("data/generated"), require_complete=True)
           assert report["deployedObjects"] == 17
           assert report["unresolvedDeliveries"] == 1
-          rules_path = Path("data/generated/rules.db")
+          rules_path = Path("data/generated/rules_n5.db")
           rules = RulesDatabase(rules_path)
           rules.validate()
           restrictions = rules.restrictions_payload()
@@ -43,9 +43,6 @@ jobs:
 
       - name: Validate pinned exact-variant release publication
         run: PYTHONPATH=src python -m tools.verify_deployment_assets --skip-svg
-
-      - name: Prepare immutable runtime bundle
-        run: PYTHONPATH=src python -m tools.prepare_runtime_bundle
 
       - name: Build application image from verified tracked databases
         run: docker build --tag infinity-db:deployment-smoke .

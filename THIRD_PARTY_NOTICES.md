@@ -41,7 +41,7 @@ PDF, and source-symbol archives outside the public repository by project policy.
 The processed graphical publication used by InfinityDB is tracked in the public
 repository and may be included in wheels, Docker images, releases, deployment
 packages, or other non-commercial InfinityDB distributions under that permission.
-The generated runtime databases `data/generated/infinity.db` and `rules.db` are tracked
+The generated runtime databases `data/generated/army.db` and `rules_n5.db` are tracked
 and may be redistributed as part of the non-commercial InfinityDB application/release. They
 contain or derive from Corvus Belli game data and are not relicensed under InfinityDB's MIT
 License. The local terminal symbol-build manifest, raw snapshots, wiki/PDF/source-symbol

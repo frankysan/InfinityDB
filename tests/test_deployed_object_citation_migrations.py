@@ -98,7 +98,7 @@ def test_pinned_citation_migration_preflight_preserves_provenance() -> None:
     )
     ids = [row["recordId"] for row in all_reviews]
     placeholders = ", ".join("?" for _ in ids)
-    with sqlite3.connect(CURATED.parents[2] / "generated/rules.db") as database:
+    with sqlite3.connect(CURATED.parents[2] / "generated/rules_n5.db") as database:
         actual = database.execute(
             "SELECT record_id, source_id, page FROM record_citations "
             f"WHERE source_id = ? AND record_id IN ({placeholders}) "

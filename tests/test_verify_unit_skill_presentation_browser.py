@@ -252,9 +252,9 @@ def test_reinforcement_parentage_is_developer_mode_only() -> None:
     sync_playwright = playwright_api.sync_playwright
 
     root = Path(__file__).resolve().parents[1]
-    database = root / "data/generated/infinity.db"
+    database = root / "data/generated/army.db"
     app = create_app(
-        database, rules_database_path=root / "data/generated/rules.db",
+        database, rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -366,7 +366,7 @@ def test_reinforcement_parentage_is_developer_mode_only() -> None:
 
 def test_source_backed_relationship_cohort_is_distinct() -> None:
     root = Path(__file__).resolve().parents[1]
-    cohort = _relationship_cohort(root / "data/generated/infinity.db")
+    cohort = _relationship_cohort(root / "data/generated/army.db")
     assert len(cohort) == len(set(cohort)) == 4
 
 
@@ -376,8 +376,8 @@ def test_live_chromium_contextual_relationship_cohort() -> None:
     pytest.importorskip("playwright.sync_api")
     root = Path(__file__).resolve().parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -394,7 +394,7 @@ def test_live_chromium_contextual_relationship_cohort() -> None:
     thread = Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        slugs = _relationship_cohort(root / "data/generated/infinity.db")
+        slugs = _relationship_cohort(root / "data/generated/army.db")
         try:
             evidence = verify(
                 f"http://127.0.0.1:{server.server_port}",
@@ -415,7 +415,7 @@ def test_live_chromium_contextual_relationship_cohort() -> None:
             for key in ("includes", "peripherals", "controllerTargets")
         }
         assert totals["includes"] > 0, (slugs, totals)
-        with sqlite3.connect(root / "data/generated/infinity.db") as db:
+        with sqlite3.connect(root / "data/generated/army.db") as db:
             peripheral_counts = {
                 table: db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
                 for table in (
@@ -445,8 +445,8 @@ def test_live_chromium_spec_ops_source_charts() -> None:
     playwright_module = pytest.importorskip("playwright.sync_api")
     root = Path(__file__).resolve().parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -590,7 +590,7 @@ def test_live_chromium_spec_ops_source_charts() -> None:
 
 def test_optional_mode_source_selectors_are_nonempty() -> None:
     root = Path(__file__).resolve().parents[1]
-    path = root / "data/generated/infinity.db"
+    path = root / "data/generated/army.db"
     assert _optional_source_candidates(path, "specops")
     assert _optional_source_candidates(path, "reinforcement")
     with pytest.raises(ValueError, match="Unsupported source selector"):
@@ -599,7 +599,7 @@ def test_optional_mode_source_selectors_are_nonempty() -> None:
 
 def test_complex_unit_cohort_has_nonempty_published_profile_variants() -> None:
     root = Path(__file__).resolve().parents[1]
-    slugs = _complex_unit_cases(root / "data/generated/infinity.db")
+    slugs = _complex_unit_cases(root / "data/generated/army.db")
     assert len(slugs) == len(set(slugs)) == 3
     assert all(slug not in ("", None) for slug in slugs)
 
@@ -613,8 +613,8 @@ def test_live_chromium_unit_detail_matrix_when_available(matrix: str) -> None:
     pytest.importorskip("playwright.sync_api")
     root = Path(__file__).resolve().parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -653,7 +653,7 @@ def test_live_chromium_unit_detail_matrix_when_available(matrix: str) -> None:
             return
 
         if matrix == "core_rich":
-            rich_slugs = _complex_unit_cases(root / "data/generated/infinity.db")
+            rich_slugs = _complex_unit_cases(root / "data/generated/army.db")
             rich_widths = (*WIDTHS, 768)
             rich = verify_case(
                 base_url, slugs=rich_slugs, channel="chrome", widths=rich_widths,
@@ -665,7 +665,7 @@ def test_live_chromium_unit_detail_matrix_when_available(matrix: str) -> None:
             return
 
         if matrix == "distance":
-            source_db = root / "data/generated/infinity.db"
+            source_db = root / "data/generated/army.db"
             with sqlite3.connect(source_db) as db:
                 distance_slugs = tuple(row[0] for row in db.execute(
                     "SELECT DISTINCT lu.slug FROM profile_payload_skill_extras AS x "
@@ -739,7 +739,7 @@ def test_live_chromium_unit_detail_matrix_when_available(matrix: str) -> None:
 
         # The source corpus, rather than a hardcoded display name or an
         # already-filtered API response, selects these optional-mode cases.
-        source_db = root / "data/generated/infinity.db"
+        source_db = root / "data/generated/army.db"
         base_url = f"http://127.0.0.1:{server.server_port}"
         specops_slug = _source_backed_optional_case(base_url, source_db, "specops")
         reinforcement_slug = _source_backed_optional_case(

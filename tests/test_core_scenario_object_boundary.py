@@ -171,7 +171,7 @@ def test_boundary_audits_reject_missing_or_mismatched_embedded_models(
     audit: Callable[..., dict], case: str, error: type[Exception], match: str | None,
     tmp_path: Path,
 ) -> None:
-    army, rules = tmp_path / "infinity.db", tmp_path / "rules.db"
+    army, rules = tmp_path / "army.db", tmp_path / "rules_n5.db"
     shutil.copyfile(ARMY, army)
     shutil.copyfile(RULES, rules)
     if case == "missing-army":

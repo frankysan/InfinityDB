@@ -293,6 +293,7 @@ def materialize_application_catalogs(
 def validate_application_catalogs(
     connection: sqlite3.Connection,
     identity_config: IdentityConfig,
+    *, source_consistency: bool = False,
 ) -> None:
     del identity_config
     source_count = 0
@@ -305,7 +306,18 @@ def validate_application_catalogs(
         ).fetchone()[0]
     # Reviewed metadata-only publications add one mapped source identity
     # without inventing a row in the upstream usage-derived weapons table.
-    source_count += len(_reviewed_metadata_only_weapons(connection))
+    if source_consistency:
+        source_count += len(_reviewed_metadata_only_weapons(connection))
+    else:
+        # Eligibility is reviewed at build time. Runtime validates the stored
+        # projection against embedded source profiles, without reopening policy.
+        source_count += connection.execute(
+            "SELECT COUNT(*) FROM application_catalog_sources AS s "
+            "WHERE s.catalog='weapons' AND s.has_metadata=1 "
+            "AND NOT EXISTS (SELECT 1 FROM weapons AS w WHERE w.id=s.source_item_id) "
+            "AND (SELECT COUNT(*) FROM metadata_weapons AS m "
+            "WHERE m.id=s.source_item_id AND m.name=s.source_name)=1"
+        ).fetchone()[0]
     empty_item = connection.execute(
         "SELECT 1 FROM application_catalog_items AS aci "
         "LEFT JOIN application_catalog_sources AS acs "

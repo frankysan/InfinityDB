@@ -755,7 +755,7 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
     export_database(data, database_path)
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_database = RulesDatabase(rules_path)
     rules_database.validate()
@@ -849,7 +849,7 @@ def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
     export_database(data, database_path)
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
 
@@ -923,8 +923,8 @@ def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
 def test_published_weapon_properties_have_navigable_reference_destinations() -> None:
     """Audit all distinct published source properties, not just selected weapons."""
     root = Path(__file__).resolve().parents[1]
-    database = Database(root / "data" / "generated" / "infinity.db")
-    rules = RulesDatabase(root / "data" / "generated" / "rules.db")
+    database = Database(root / "data" / "generated" / "army.db")
+    rules = RulesDatabase(root / "data" / "generated" / "rules_n5.db")
     catalog = TraitCatalog(database, rules)
     labels = {label["id"] for label in rules.current_labels()}
     states = {
@@ -986,7 +986,7 @@ def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
         if record["id"] == "trait:continuous-damage"
     )
     record["name"] = "Persistent Damage"
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(
         [(root / "curated.json", document), hacking_programs], rules_path
     )
@@ -1051,7 +1051,7 @@ def test_trait_catalog_enriches_catalog_profiles_from_curated_rules(
     database_path = tmp_path / "army.sqlite3"
     export_database(data, database_path)
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
 
@@ -3114,7 +3114,7 @@ def test_unit_catalog_filter_expands_logical_equipment_identity(
 
 
 def test_tracked_unit_filter_semantics_preserve_source_facts_and_public_filter_meaning() -> None:
-    database = Database(Path("data/generated/infinity.db"))
+    database = Database(Path("data/generated/army.db"))
     raw = database.list_unit_filter_values()
     public = enrich_unit_filter_presentation(raw)
     config = load_unit_filter_config()
@@ -3472,7 +3472,7 @@ def test_skill_catalog_uses_curated_declaration_categories(
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
 
@@ -3585,7 +3585,7 @@ def test_skill_catalog_full_definition_overrides_fallback_across_equivalent_army
     fallback["armyLinks"] = [{"entity": "skill", "id": 1}]
     document["records"].append(fallback)
 
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(documents, rules_path)
     catalog = SkillCatalog(database, RulesDatabase(rules_path))
 
@@ -3609,7 +3609,7 @@ def test_skill_catalog_adds_curated_distance_parameter_semantics(
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     database = Database(database_path)
     catalog = SkillCatalog(database, RulesDatabase(rules_path))
@@ -3659,7 +3659,7 @@ def test_jump_climb_distance_semantics_use_exact_source_ids(
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
     catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
     expected = {"kind": "distance", "positive_sign": "omit"}
@@ -3712,7 +3712,7 @@ def test_skill_catalog_rules_view_excludes_known_non_skills_and_adds_rules_only_
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
 
@@ -4220,7 +4220,7 @@ def test_dual_identifier_contract_traits_keep_slug_owned_identity(
     export_database(data, database_path)
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "trait-contract-rules.db"
+    rules_path = tmp_path / "trait-contract-rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
 
@@ -4367,7 +4367,7 @@ def test_skill_catalog_keeps_source_specific_rules_on_matching_variant(
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
 
     catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
@@ -4395,7 +4395,7 @@ def test_skill_catalog_attaches_common_rule_to_same_named_army_skill(
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
 
     catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
@@ -4417,7 +4417,7 @@ def test_skill_catalog_caches_composed_skill_records(
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules = RulesDatabase(rules_path)
     original = rules.composed_records_by_kind

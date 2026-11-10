@@ -21,8 +21,8 @@ from infinity_db.scenario_mission import ElementStatusComparison, ElementStatusC
 
 ROOT = Path(__file__).resolve().parents[1]
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
-ARMY = ROOT / "data/generated/infinity.db"
-RULES = ROOT / "data/generated/rules.db"
+ARMY = ROOT / "data/generated/army.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 SOURCE = "n5-core-v5.3-pdf"
 
 # Printed English N5.3 pp. 149-155; these are scenario-placed elements,

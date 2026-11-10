@@ -734,9 +734,9 @@ def _verify_army_archive_sources(
         "matchedUnitMembershipOccurrences": len(expected_memberships),
         "matchedNestedSourceRows": nested_counts,
         "nestedStorage": {
-            "profile_groups": "published-infinity.db",
-            "profiles": "paired-infinity.raw.db",
-            "loadout_options": "paired-infinity.raw.db",
+            "profile_groups": "published-army.db",
+            "profiles": "paired-army.raw.db",
+            "loadout_options": "paired-army.raw.db",
         },
     }
 
@@ -995,7 +995,7 @@ def build_baseline(
                 evidence_rows.append(_row(
                     f"army:{category}", "Infinity Army snapshot", table,
                     "pinned Army snapshot + reviewed identity configuration",
-                    f"infinity.db::{table}", count,
+                    f"army.db::{table}", count,
                 ))
             catalogs = army.execute(
                 "SELECT catalog, COUNT(*) AS count FROM application_catalog_items "
@@ -1006,7 +1006,7 @@ def build_baseline(
                     f"army:catalog:{catalog['catalog']}", "Infinity Army snapshot",
                     f"application catalog {catalog['catalog']}",
                     "pinned Army snapshot + reviewed catalog configuration",
-                    "infinity.db::application_catalog_items", catalog["count"],
+                    "army.db::application_catalog_items", catalog["count"],
                 ))
             records = rules.execute(
                 "SELECT r.kind AS kind, COUNT(*) AS count, "
@@ -1019,7 +1019,7 @@ def build_baseline(
                 evidence_rows.append(_row(
                     f"rules:{item['kind']}", "Curated N5 rules and wiki evidence",
                     f"rules record kind {item['kind']}", "data/curated/rules/",
-                    "rules.db::records", item["count"], citations=item["cited"],
+                    "rules_n5.db::records", item["count"], citations=item["cited"],
                 ))
             scenario_memberships = [
                 {
@@ -1049,7 +1049,10 @@ def build_baseline(
         raise ReferenceBaselineError(
             f"Cannot verify runtime Weapon-profile publication: {exc}"
         ) from exc
-    runtime_revision = runtime_snapshot_revision(army_sha, rules_sha, weapon_profile_sha)
+    runtime_revision = runtime_snapshot_revision(
+        army_sha, rules_sha, weapon_profile_sha,
+        army_filename=army_database.name, rules_filename=rules_database.name,
+    )
     return {
         "format": REPORT_FORMAT,
         "formatVersion": REPORT_VERSION,
@@ -1169,11 +1172,11 @@ def render_markdown(report: dict[str, Any]) -> str:
         *(
             [f"- Nested Army source row parity: "
              f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['profile_groups']} "
-             "profile groups in published infinity.db; "
+             "profile groups in published army.db; "
              f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['profiles']} "
              "profiles and "
              f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['loadout_options']} "
-             "loadouts in export-paired infinity.raw.db. "
+             "loadouts in export-paired army.raw.db. "
              "Derived runtime payloads and browser presentation remain unverified."]
             if (snapshot.get("sourceIdentityEvidence") or {}).get("matchedNestedSourceRows")
             else []
@@ -3092,8 +3095,10 @@ def audit_current_rule_citation_minimum(
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=REPORT_FORMAT)
-    parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/infinity.db")
-    parser.add_argument("--rules-db", type=Path, default=PROJECT_ROOT / "data/generated/rules.db")
+    parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/army.db")
+    parser.add_argument(
+        "--rules-db", type=Path, default=PROJECT_ROOT / "data/generated/rules_n5.db",
+    )
     parser.add_argument("--army-archive", type=Path, help="Verify exact ZIP bytes against Army pin")
     parser.add_argument(
         "--verify-server", metavar="BASE_URL",

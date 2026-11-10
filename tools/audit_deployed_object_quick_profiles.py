@@ -200,7 +200,7 @@ def audit_p74(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pdf", type=Path, default=Path("data/pdf/rules/n5-rules-v5.3-en.pdf"))
-    parser.add_argument("--army-db", type=Path, default=Path("data/generated/infinity.db"))
+    parser.add_argument("--army-db", type=Path, default=Path("data/generated/army.db"))
     parser.add_argument(
         "--curated", type=Path,
         default=Path("data/curated/rules/n5-core-v5.3.json"),

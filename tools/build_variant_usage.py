@@ -36,9 +36,9 @@ def main() -> None:
     )
     args = parser.parse_args()
     result = build_variant_usage_projection(
-        ROOT / "data/generated/infinity.db",
-        ROOT / "data/generated/infinity.raw.db",
-        ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        ROOT / "data/work/build/army.raw.db",
+        ROOT / "data/generated/rules_n5.db",
     )
     if args.check is not None:
         validate_variant_usage_candidate(ROOT / args.check, result)

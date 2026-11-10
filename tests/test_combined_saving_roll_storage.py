@@ -9,6 +9,7 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_rules, variant_publication, weapon_publication
 
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.combined_saving_roll_storage import (
@@ -33,29 +34,27 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / "data/generated"
-ARMY = RELEASE / "infinity.db"
+ARMY = RELEASE / "army.db"
 CONFIG = ROOT / "config/catalogs/weapon-combined-saving-rolls.json"
 
 
 @pytest.fixture(scope="module")
 def v15(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, dict]:
     directory = tmp_path_factory.mktemp("v15-saving-roll-profiles")
-    rules = directory / "rules.db"
-    shutil.copyfile(RELEASE / "rules.db", rules)
-    shutil.copyfile(ARMY, directory / "infinity.db")
+    rules = directory / "rules_n5.db"
+    copy_base_rules(rules)
+    shutil.copyfile(ARMY, directory / "army.db")
     mapping = load_combined_saving_roll_map(CONFIG)
     with sqlite3.connect(rules) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
         with connection:
             stage_variant_usage(
                 connection,
-                json.loads((RELEASE / "variant-usage.json").read_text(encoding="utf-8")),
+                variant_publication(),
             )
             stage_weapon_profile_citations(
                 connection,
-                json.loads(
-                    (RELEASE / "weapon-profile-sources.json").read_text(encoding="utf-8")
-                ),
+                weapon_publication(),
                 ARMY,
             )
             connection.execute("PRAGMA user_version=12")
@@ -99,14 +98,14 @@ def test_six_modes_are_relational_and_source_matched(v15) -> None:
     report = validate_database_set(path.parent)
     assert report["layout"] == "v15-two-file"
     assert report["combinedSavingRollProfiles"] == 6
-    assert set(report["sha256"]) == {"infinity.db", "rules.db"}
+    assert set(report["sha256"]) == {"army.db", "rules_n5.db"}
 
 
 def test_exact_plasma_profile_and_api_parity_without_json_reads(v15, monkeypatch) -> None:
     import infinity_db.weapon_combined_saving_rolls as adapter
 
     rules, _mapping = v15
-    previous = create_app(ARMY, rules_database_path=RELEASE / "rules.db")
+    previous = create_app(ARMY, rules_database_path=RELEASE / "rules_n5.db")
 
     def forbidden(*_args, **_kwargs):
         raise AssertionError("v15 runtime must not read combined saving roll JSON")
@@ -134,7 +133,7 @@ def test_staging_rejects_changed_or_ambiguous_review(
     v15, tmp_path: Path, mutation: str,
 ) -> None:
     old, original = v15
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     shutil.copyfile(old, path)
     mapping = deepcopy(original)
     key = (40, "Blast Mode")
@@ -167,7 +166,7 @@ def test_staging_rejects_changed_or_ambiguous_review(
 ))
 def test_embedded_corruption_is_rejected(v15, tmp_path: Path, mutation: str) -> None:
     original, _ = v15
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     shutil.copyfile(original, path)
     with sqlite3.connect(path) as connection:
         if mutation == "name":
@@ -213,12 +212,12 @@ def test_embedded_corruption_is_rejected(v15, tmp_path: Path, mutation: str) -> 
 
 def test_standalone_and_old_rules_keep_reviewed_source_adapter(v15) -> None:
     path, mapping = v15
-    assert RulesDatabase(RELEASE / "rules.db").combined_saving_rolls_payload(ARMY) is None
+    assert RulesDatabase(RELEASE / "rules_n5.db").combined_saving_rolls_payload(ARMY) is None
     assert WeaponCombinedSavingRolls()._mapping == mapping
     assert WeaponCombinedSavingRolls(RulesDatabase(path))._mapping == mapping
     raw = Database(ARMY).get_catalog_item("weapons", "plasma-rifle")
     assert raw is not None
-    old = CatalogRules(RulesDatabase(RELEASE / "rules.db")).enrich_catalog_item(
+    old = CatalogRules(RulesDatabase(RELEASE / "rules_n5.db")).enrich_catalog_item(
         "weapons", raw,
     )
     new = CatalogRules(RulesDatabase(path)).enrich_catalog_item("weapons", raw)

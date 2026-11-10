@@ -18,8 +18,8 @@ import pytest
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-DATABASE = ROOT / "data/generated/infinity.db"
-RULES = ROOT / "data/generated/rules.db"
+DATABASE = ROOT / "data/generated/army.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 
 
 @pytest.fixture(scope="module")

@@ -12,7 +12,7 @@ def _report(*, size: int = 1000, cold: int = 20, warm: int = 200) -> dict:
     return {
         "format": BENCHMARK_FORMAT,
         "formatVersion": BENCHMARK_FORMAT_VERSION,
-        "database": "data/generated/infinity.db",
+        "database": "data/generated/army.db",
         "databaseBytes": size,
         "coldIterations": cold,
         "warmIterations": warm,

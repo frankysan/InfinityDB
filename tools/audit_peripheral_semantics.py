@@ -501,7 +501,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Audit peripheral identity, availability, and attachment semantics."
     )
-    parser.add_argument("database", type=Path, help="Path to infinity.db")
+    parser.add_argument("database", type=Path, help="Path to army.db")
     parser.add_argument("--details", action="store_true", help="Include row-level evidence")
     parser.add_argument("--output", type=Path, help="Write the JSON report to this path")
     return parser

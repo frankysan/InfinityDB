@@ -986,7 +986,7 @@ class RulesDatabase:
                 raise ValueError("Unsupported rules database application ID")
             schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
             if schema_version not in {RULES_SCHEMA_VERSION, 9, 10, 11, 12, 13, 14, 15, 16, 17}:
-                raise ValueError("Unsupported rules database schema; rebuild rules.db")
+                raise ValueError("Unsupported rules database schema; rebuild rules_n5.db")
             metadata_rows = connection.execute(
                 f"SELECT key, value FROM {RULES_METADATA_TABLE} "
                 "WHERE key IN ('formatVersion', 'databaseCompatibilityVersion')"
@@ -1732,7 +1732,7 @@ class RulesDatabase:
         return candidates[0]
 
     def scenario_reference(self, reference: str) -> dict[str, Any] | None:
-        """Return composed scenario Rules and standard Skill-detail records from rules.db."""
+        """Return composed scenario Rules and standard Skill-detail records from rules_n5.db."""
         identifier = scenario_typed_id(reference)
         scenario = self.composed_record(identifier)
         if scenario is None or scenario["kind"] != "scenario":

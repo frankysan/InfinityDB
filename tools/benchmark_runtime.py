@@ -155,7 +155,7 @@ def benchmark_database(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("database", type=Path, help="Path to a built infinity.db snapshot.")
+    parser.add_argument("database", type=Path, help="Path to a built army.db snapshot.")
     parser.add_argument("--cold-iterations", type=int, default=20)
     parser.add_argument("--warm-iterations", type=int, default=200)
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")

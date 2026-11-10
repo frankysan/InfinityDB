@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_army
 
 from infinity_db.army_reference_storage import publish_army_reference_data
 from infinity_db.database.health import database_health_report
@@ -33,9 +34,9 @@ STATIC = ROOT / "src/infinity_db/web/static"
 @pytest.fixture(scope="module")
 def base_v30(tmp_path_factory) -> tuple[Path, Path]:
     directory = tmp_path_factory.mktemp("symbol-base")
-    army, raw = directory / "infinity.db", directory / "infinity.raw.db"
-    shutil.copyfile(RELEASE / "infinity.db", army)
-    shutil.copyfile(RELEASE / "infinity.db", raw)
+    army, raw = directory / "army.db", directory / "army.raw.db"
+    copy_base_army(army)
+    copy_base_army(raw)
     publish_equipment_encodings(
         army, raw, ROOT / "config/catalogs/equipment-presentation-encodings.json",
     )
@@ -52,7 +53,7 @@ def base_v30(tmp_path_factory) -> tuple[Path, Path]:
 
 @pytest.fixture
 def v30(base_v30, tmp_path: Path) -> tuple[Path, Path]:
-    paths = tmp_path / "infinity.db", tmp_path / "infinity.raw.db"
+    paths = tmp_path / "army.db", tmp_path / "army.raw.db"
     for source, target in zip(base_v30, paths, strict=True):
         shutil.copyfile(source, target)
     return paths
@@ -82,12 +83,12 @@ def test_exact_mapping_roundtrip_and_paired_health(v31) -> None:
     assert health["status"] == "healthy"
     assert health["application"]["schemaRevision"] == 31
     assert health["application"]["compatibilityRevision"] == 40
-    assert Database(RELEASE / "infinity.db").symbol_publication() is None
+    assert Database(RELEASE / "army.db").symbol_publication() == actual
 
 
 def test_http_symbol_parity_and_fresh_start_without_manifest(v31) -> None:
     paths = ("/api/armies", "/api/units?limit=200")
-    previous, current = create_app(RELEASE / "infinity.db"), create_app(v31[0])
+    previous, current = create_app(RELEASE / "army.db"), create_app(v31[0])
     for path in paths:
         before_status, _headers, before = wsgi_response(previous, "http://symbol.test" + path)
         status, _headers, after = wsgi_response(current, "http://symbol.test" + path)
@@ -118,7 +119,7 @@ assert app.presentation.static_revision
 def test_selected_mappings_have_independent_cache_versions(v31, base_v30, tmp_path: Path) -> None:
     directory = tmp_path / "alternative"
     directory.mkdir()
-    army, raw = directory / "infinity.db", directory / "infinity.raw.db"
+    army, raw = directory / "army.db", directory / "army.raw.db"
     for source, target in zip(base_v30, (army, raw), strict=True):
         shutil.copyfile(source, target)
     document = json.loads(MANIFEST.read_text(encoding="utf-8"))

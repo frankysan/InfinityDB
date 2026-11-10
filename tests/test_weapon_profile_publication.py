@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from storage_fixture_support import weapon_publication
 
 from infinity_db.database.repository import Database
 from infinity_db.weapon_profile_publication import (
@@ -19,7 +20,6 @@ from tools.audit_enrichment_coverage import audit_coverage
 from tools.audit_weapon_chart_profiles import audit_chart
 from tools.build_weapon_profile_publication import (
     DEFAULT_ARMY,
-    DEFAULT_OUTPUT,
     DEFAULT_REVIEWS,
     DEFAULT_RULES,
     build_publication,
@@ -32,7 +32,7 @@ PDF_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 
 @pytest.fixture(scope="module")
 def publication() -> dict[str, Any]:
-    return json.loads(DEFAULT_OUTPUT.read_text(encoding="utf-8"))
+    return weapon_publication()
 
 
 def _write(path: Path, document: dict[str, Any]) -> Path:
@@ -81,13 +81,14 @@ def test_reviewed_profile_publication_matches_every_eligible_identity_and_mode(
         }
 
 
-def test_weapon_profile_publication_rebuilds_to_exact_tracked_bytes(
-    publication: dict[str, Any],
+def test_weapon_profile_diagnostic_matches_embedded_projection(
+    publication: dict[str, Any], tmp_path: Path,
 ) -> None:
     rebuilt = build_publication(DEFAULT_ARMY, DEFAULT_RULES, DEFAULT_REVIEWS)
     assert publication_bytes(rebuilt) == publication_bytes(publication)
-    assert publication_bytes(rebuilt) == DEFAULT_OUTPUT.read_bytes()
-    check_publication(DEFAULT_ARMY, DEFAULT_RULES, DEFAULT_REVIEWS, DEFAULT_OUTPUT)
+    output = tmp_path / "weapon-profile-sources.json"
+    output.write_bytes(publication_bytes(rebuilt))
+    check_publication(DEFAULT_ARMY, DEFAULT_RULES, DEFAULT_REVIEWS, output)
 
 
 def test_pinned_pdf_contains_every_published_weapon_profile_mode_and_page(

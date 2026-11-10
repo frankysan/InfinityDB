@@ -7,6 +7,8 @@ import argparse
 import sqlite3
 from pathlib import Path
 
+from infinity_db.build_provenance import validate_build_input_freshness
+from infinity_db.database_set import validate_database_set
 from infinity_db.deployment_provenance import (
     DeploymentProvenanceError,
     validate_database_symbol_provenance,
@@ -34,8 +36,8 @@ except ImportError:  # pragma: no cover - direct script execution fallback
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STATIC_ROOT = PROJECT_ROOT / "src" / "infinity_db" / "web" / "static"
-DEFAULT_DATABASE = PROJECT_ROOT / "data" / "generated" / "infinity.db"
-DEFAULT_RULES_DATABASE = PROJECT_ROOT / "data" / "generated" / "rules.db"
+DEFAULT_DATABASE = PROJECT_ROOT / "data" / "generated" / "army.db"
+DEFAULT_RULES_DATABASE = PROJECT_ROOT / "data" / "generated" / "rules_n5.db"
 DEFAULT_PUBLICATION_MANIFEST = PROJECT_ROOT / "data" / "manifests" / "symbol-publication.json"
 
 
@@ -105,6 +107,27 @@ def verify_weapon_profile_release_publication(
     database_path: Path, rules_database_path: Path,
 ) -> None:
     """Require the exact reviewed Weapon Chart publication before packaging."""
+    rules = RulesDatabase(rules_database_path)
+    embedded = rules.weapon_profile_citations_payload(database_path)
+    if embedded:
+        from infinity_db.weapon_profile_builder import build_publication
+
+        document = build_publication(database_path, rules_database_path, DEFAULT_REVIEWS)
+        source = document["source"]
+        expected = {
+            (weapon["id"], profile["sourceId"], profile["mode"]): {
+                "source_id": source["id"], "source_title": source["title"],
+                "source_version": source["version"], "source_url": source["url"],
+                "source_sha256": source["sha256"], "source_collection_id": source["collectionId"],
+                "page": profile["page"],
+            }
+            for weapon in document["weapons"] for profile in weapon["profiles"]
+        }
+        if embedded != expected:
+            raise DeploymentAssetError(
+                "Embedded Weapon citations differ from reviewed source inputs"
+            )
+        return
     check_publication(
         database_path, rules_database_path, DEFAULT_REVIEWS,
         database_path.with_name("weapon-profile-sources.json"),
@@ -124,13 +147,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Published browser static root (default: repository web/static directory)",
     )
     parser.add_argument(
-        "--database", type=Path, default=DEFAULT_DATABASE, help="Tracked runtime infinity.db"
+        "--database", type=Path, default=DEFAULT_DATABASE, help="Tracked runtime army.db"
     )
     parser.add_argument(
         "--rules-database",
         type=Path,
         default=DEFAULT_RULES_DATABASE,
-        help="Tracked runtime rules.db",
+        help="Tracked runtime rules_n5.db",
     )
     parser.add_argument(
         "--publication-manifest",
@@ -144,6 +167,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        directory = args.database.resolve().parent
+        if (args.rules_database.resolve() != directory / "rules_n5.db"
+                or args.database.name != "army.db"):
+            raise DeploymentAssetError("Select one complete army.db/rules_n5.db directory")
+        validate_database_set(directory, require_complete=True)
+        validate_build_input_freshness(args.database, PROJECT_ROOT)
         if args.skip_svg:
             verify_runtime_artifacts(
                 args.database, args.rules_database, args.publication_manifest,

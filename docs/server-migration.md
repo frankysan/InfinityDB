@@ -3,10 +3,10 @@
 **Project domain:** Deployment
 
 A released InfinityDB checkout is self-contained for runtime deployment. The tracked Git
-revision supplies the application, `infinity.db`, `rules.db`, exact-variant
+revision supplies the application, `army.db`, `rules_n5.db`, exact-variant
 `variant-usage.json`, Weapon-profile `weapon-profile-sources.json`, processed SVGs
 and `symbol-publication.json`. Current v10 Rules embed deployed objects in
-`rules.db`; legacy v8/v9 deployment generates matching ignored
+`rules_n5.db`; legacy v8/v9 deployment generates matching ignored
 `deployed-objects.json` from tracked release inputs. Deployment prepares the
 schema-specific image bundle as described in [deployment](deployment.md).
 Raw Army/wiki/PDF/source-symbol
@@ -68,7 +68,7 @@ intended, not when preserving the recorded version. For an upgrade from 0.8.0, f
 bootstrap in [Linux deployment](deployment.md).
 
 The deployment guard validates the tracked databases and complete processed symbol publication and
-proves that `infinity.db` and `symbol-publication.json` name the same Army source ZIP SHA-256 before
+proves that `army.db` and `symbol-publication.json` name the same Army source ZIP SHA-256 before
 building/activating the image.
 
 ## Reproducible development/build migration
@@ -108,7 +108,7 @@ Later-stage resume validates that work and its SHA-bound reports instead of sile
 it. `data/logs/symbols/` is diagnostic history and `data/backups/symbols/` is optional removed-symbol
 history; preserve either only when that history matters.
 
-The current `rules.db` is reproducible from tracked curated data under `data/curated/rules/`.
+The current `rules_n5.db` is reproducible from tracked curated data under `data/curated/rules/`.
 Local PDF/wiki research collections are not runtime build inputs.
 
 ## Processing environment for regenerated symbols

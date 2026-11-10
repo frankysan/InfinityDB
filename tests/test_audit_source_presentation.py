@@ -63,7 +63,7 @@ def test_pinned_published_army_has_no_occupied_unrepresented_source_fields() -> 
     The raw database is intentionally ignored and absent in clean CI. A
     release's explicit --source-occupancy-gate is still required there.
     """
-    published = ROOT / "data/generated/infinity.db"
+    published = ROOT / "data/generated/army.db"
     raw = raw_database_path(published)
     if not raw.is_file():
         pytest.skip("Ignored raw Army database is unavailable in clean CI")

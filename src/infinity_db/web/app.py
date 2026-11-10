@@ -13,7 +13,7 @@ from typing import Any
 from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.snapshot_revision import runtime_snapshot_revision
+from infinity_db.snapshot_revision import database_set_snapshot_revision, runtime_snapshot_revision
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
@@ -56,11 +56,14 @@ def _etag_matches(header: str | None, etag: str) -> bool:
 class Application:
     """Top-level WSGI dispatch and observability around focused route handlers."""
 
-    def __init__(self, database_path: Path, rules_database_path: Path | None = None) -> None:
+    def __init__(
+        self, database_path: Path, rules_database_path: Path | None = None,
+        *, runtime_fingerprints: dict[str, str] | None = None,
+    ) -> None:
         self.database = Database(database_path)
         self.database.validate()
         self.rules_database: RulesDatabase | None = None
-        candidate_rules_path = rules_database_path or Path(database_path).with_name("rules.db")
+        candidate_rules_path = rules_database_path or Path(database_path).with_name("rules_n5.db")
         if rules_database_path is not None:
             rules_database = RulesDatabase(candidate_rules_path)
             rules_database.validate()
@@ -93,8 +96,12 @@ class Application:
         self.weapon_profile_citations, weapon_profile_revision = (
             load_runtime_weapon_profile_publication(self.database.path, rules_path)
         )
-        self.snapshot_revision = runtime_snapshot_revision(
+        self.snapshot_revision = database_set_snapshot_revision(runtime_fingerprints) if (
+            runtime_fingerprints is not None
+        ) else runtime_snapshot_revision(
             _snapshot_revision(self.database.path), rules_revision, weapon_profile_revision,
+            army_filename=self.database.path.name,
+            rules_filename=candidate_rules_path.name,
         )
         symbols = SymbolCatalog(publication=self.database.symbol_publication())
         static_revision = static_asset_revision(symbols)
@@ -291,5 +298,8 @@ def create_app_from_database_set(directory: Path) -> Application:
     )
 
     selected = Path(directory).resolve()
-    validate_database_set(selected, require_complete=True)
-    return create_app(selected / ARMY_DATABASE_FILENAME, selected / RULES_DATABASE_FILENAME)
+    report = validate_database_set(selected, require_complete=True)
+    return Application(
+        selected / ARMY_DATABASE_FILENAME, selected / RULES_DATABASE_FILENAME,
+        runtime_fingerprints=report["sha256"],
+    )

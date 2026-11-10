@@ -350,8 +350,8 @@ def main(argv: list[str] | None = None) -> int:
             assert app.rules_database is not None
             army, rules = app.database.path, app.rules_database.path
         else:
-            army = args.army_db or ROOT / "data/generated/infinity.db"
-            rules = args.rules_db or ROOT / "data/generated/rules.db"
+            army = args.army_db or ROOT / "data/generated/army.db"
+            rules = args.rules_db or ROOT / "data/generated/rules_n5.db"
             app = create_app(army, rules)
         identity = _artifact_identity(army, rules)
         if args.capture and len(identity) != 4:

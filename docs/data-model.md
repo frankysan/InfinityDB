@@ -8,8 +8,13 @@ and which invariants runtime queries rely on. Historical audit counts, release b
 migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this current-state
 contract.
 
-Unless explicitly marked otherwise, statements below describe the 1.0
-repository model. **Dated source-variant review notes** record the findings
+The current complete runtime uses Army v31 in `army.db` and Rules v17 in
+`rules_n5.db`. Structured reference facts and symbol mappings are embedded,
+with matched source/build provenance. Normal serving requires both files and
+does not read build JSON. ITS Season 18 remains in Rules pending P3.
+The [data lifecycle](../data/README.md) owns current build/serve paths.
+Earlier schema/publication migration descriptions below are historical where
+they explicitly identify an older version. **Dated source-variant review notes** record the findings
 and state of an earlier migration step, not the present implementation status;
 the maintained publication, API and browser contracts take precedence.
 Release/CI status belongs to [releasing](releasing.md) and [CI](ci.md),
@@ -25,8 +30,8 @@ flowchart TD
     master["Lossless merged/master representation"]
     normalized["Validated normalized source model"]
     export["SQLite export"]
-    runtime["infinity.db<br/>Canonical application/runtime data"]
-    archive["infinity.raw.db<br/>Lossless normalized source/audit archive"]
+    runtime["army.db<br/>Canonical application/runtime data"]
+    archive["army.raw.db<br/>Lossless normalized source/audit archive"]
 
     snapshot --> master
     master --> normalized
@@ -41,7 +46,7 @@ Curated rules data follows a separate path:
 flowchart TD
     curated["Reviewed data/curated/rules/*.json"]
     validation["Validation/composition"]
-    database["rules.db"]
+    database["rules_n5.db"]
 
     curated --> validation
     validation --> database
@@ -3048,30 +3053,18 @@ comparison is maintained in `infinity_db.sqlite_comparison`; current database-se
 validation owns source binding, integrity and publication completeness. Neither
 requires replaying an old schema transition or synthesizing deployed-object JSON.
 
-Normal `build-rules` now creates a **v10/compatibility-12** candidate under
-ignored `local/rules-standalone.db`, using the tracked Restrictions chart,
-reviewed deployed-object source evidence and pinned Army database. The v10
-build places identities, attributes, attribute evidence, delivery paths,
-unresolved paths, and exact Unit uses in relational tables within rules.db.
-It records the source Army database fingerprint without embedding the
-rules database's own hash, which would be self-referential.
+Normal `infinity-db build` creates Army v31 and Rules v17 together in the
+selected complete directory. Rules embeds object identities, attributes and
+evidence, delivery paths, unresolved paths and exact Unit uses, recording the
+required Army fingerprint without a self-referential Rules hash. Other embedded
+projections and shared build provenance are validated before replacement.
 
-The obsolete `--legacy-v8` and `--legacy-v9` CLI modes are retired.
-The low-level reference exporter still supports controlled semantic fixtures
-and source inspection; those base exports are not complete runtime sets.
-All CLI builds reject writes directly to tracked
-`data/generated/rules.db`. The v10 development artifacts were promoted together
-on 2026-11-08; the tagged 1.0.0 v9/JSON release remains available for rollback.
-`python -m tools.build_v10_runtime_candidate` stages the full pinned
-four-file runtime set in ignored `local/v10-candidate/`, including v2
-`variant-usage.json` without a deployed-object publication fingerprint and
-matching reviewed Weapon-profile citations. `--check` rederives the publication
-inputs and checks their bytes and database provenance. Its one-use
-`--promote-release` operation is retired; build/check and checkout assembly
-remain until the complete-set cutover. `tools.prepare_runtime_bundle` copies
-the selected supported database set into ignored `data/runtime/` for Docker
-packaging, rejecting v8/v9 before modifying the destination. This is image-build
-preparation, not runtime migration or multi-file publication locking.
+The narrow `build-rules` developer command retains a standalone v10 export under
+ignored `data/work/build/rules-standalone.db`; it cannot overwrite the tracked
+Rules file and does not assemble a serving directory. Legacy CLI schema modes,
+checkout assembly, v10 candidate publication and Docker bundle-copy wrappers
+are retired. Current serving requires the complete schemas; low-level fixture
+export remains explicit. Historical v9/v10 release state is preserved in Git.
 
 Low-level source fixtures retain deterministic reference export, additive
 Restrictions responses, filtering and unchanged legacy relations. They do not

@@ -95,7 +95,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     root = Path(__file__).resolve().parents[1]
     parser.add_argument(
-        "--army-db", type=Path, default=root / "data/generated/infinity.db"
+        "--army-db", type=Path, default=root / "data/generated/army.db"
     )
     parser.add_argument(
         "--curated-source", type=Path,

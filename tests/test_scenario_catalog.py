@@ -14,7 +14,7 @@ from infinity_db.scenario_definition import parse_scenario_definition_record
 @pytest.fixture(scope="module")
 def scenario_catalog(tmp_path_factory: pytest.TempPathFactory) -> ScenarioCatalog:
     root = Path(__file__).parents[1]
-    output = tmp_path_factory.mktemp("scenario-catalog") / "rules.db"
+    output = tmp_path_factory.mktemp("scenario-catalog") / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), output)
     return ScenarioCatalog(RulesDatabase(output))
 

@@ -18,8 +18,7 @@ from infinity_db.cli import _build_army, build_parser
 from infinity_db.database_set import validate_database_set
 from infinity_db.database_set_builder import build_database_set
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.weapon_profile_publication import load_weapon_profile_publication
-from infinity_db.web import create_app
+from infinity_db.web import create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
 from tools.runtime_semantic_baseline import DEFAULT_BASELINE, capture, check
 
@@ -42,10 +41,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
     source = source.resolve()
     if not source.is_file() or file_sha256(source) != expected_sha256:
         raise ValueError("Selected source ZIP does not match its expected SHA-256")
-    expected = load_weapon_profile_publication(
-        ROOT / "data/generated/weapon-profile-sources.json",
-        ROOT / "data/generated/infinity.db",
-        ROOT / "data/generated/rules.db",
+    expected = RulesDatabase(ROOT / "data/generated/rules_n5.db").weapon_profile_citations_payload(
+        ROOT / "data/generated/army.db",
     )
     if expected is None:
         raise ValueError("Tracked release lacks reviewed Weapon citation baseline")
@@ -60,10 +57,10 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 ["build", str(source), "--db-dir", str(destination), "--compact"]
             )
             result = build_database_set(args, _build_army)
-            report = validate_database_set(destination)
+            report = validate_database_set(destination, require_complete=True)
             if report != result or report["layout"] != "v17-two-file":
                 raise ValueError("Complete-build database health disagrees with publication")
-            if set(report["sha256"]) != {"infinity.db", "rules.db"}:
+            if set(report["sha256"]) != {"army.db", "rules_n5.db"}:
                 raise ValueError("Complete build produced an unexpected runtime file set")
             inventory = (
                 report["variantGroups"], report["reviewedWeapons"], report["restrictionChartRows"],
@@ -85,13 +82,11 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 raise ValueError("Complete build changed the reviewed source inventory")
 
             citations = RulesDatabase(
-                destination / "rules.db"
-            ).weapon_profile_citations_payload(destination / "infinity.db")
+                destination / "rules_n5.db"
+            ).weapon_profile_citations_payload(destination / "army.db")
             if citations != expected:
                 raise ValueError("Complete build changed reviewed Weapon citation semantics")
-            app = create_app(
-                destination / "infinity.db", rules_database_path=destination / "rules.db",
-            )
+            app = create_app_from_database_set(destination)
             weapon = _api(app, "/api/weapons/uragan-mrl")
             if not weapon["profile_citations_available"] or not all(
                 profile["profile_citations"] for profile in weapon["profiles"]
@@ -108,7 +103,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
             )
             if chart != expected_chart:
                 raise ValueError("Embedded Restrictions chart differs from source publication")
-            links = RulesDatabase(destination / "rules.db").trait_wiki_links_payload()
+            links = RulesDatabase(destination / "rules_n5.db").trait_wiki_links_payload()
             from infinity_db.trait_wiki_references import load_trait_wiki_references
 
             expected_links = load_trait_wiki_references(
@@ -123,8 +118,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
             from infinity_db.weapon_combined_saving_rolls import load_combined_saving_roll_map
 
             saving_rolls = RulesDatabase(
-                destination / "rules.db"
-            ).combined_saving_rolls_payload(destination / "infinity.db")
+                destination / "rules_n5.db"
+            ).combined_saving_rolls_payload(destination / "army.db")
             if saving_rolls != load_combined_saving_roll_map(
                 ROOT / "config/catalogs/weapon-combined-saving-rolls.json"
             ):
@@ -137,8 +132,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 load_ammunition_reference_map,
             )
 
-            ammunition = RulesDatabase(destination / "rules.db").ammunition_references_payload(
-                destination / "infinity.db"
+            ammunition = RulesDatabase(destination / "rules_n5.db").ammunition_references_payload(
+                destination / "army.db"
             )
             if ammunition != load_ammunition_reference_map(
                 ROOT / "config/catalogs/weapon-ammunition-references.json"
@@ -154,8 +149,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
             from infinity_db.weapon_properties import load_weapon_properties
 
             properties = RulesDatabase(
-                destination / "rules.db"
-            ).weapon_properties_payload(destination / "infinity.db")
+                destination / "rules_n5.db"
+            ).weapon_properties_payload(destination / "army.db")
             if properties != load_weapon_properties(
                 ROOT / "config/catalogs/weapon-properties.json"
             ):
@@ -176,7 +171,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
             from infinity_db.equipment_config import load_equipment_presentation_config
 
             encodings = Database(
-                destination / "infinity.db"
+                destination / "army.db"
             ).equipment_presentation_encodings()
             if encodings != load_equipment_presentation_config(
                 ROOT / "config/catalogs/equipment-presentation-encodings.json"
@@ -189,7 +184,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
             from infinity_db.skill_config import load_skill_source_config
 
             classifications = Database(
-                destination / "infinity.db"
+                destination / "army.db"
             ).skill_source_classifications()
             if classifications != load_skill_source_config(
                 ROOT / "config/catalogs/skill-source-classifications.json"
@@ -197,7 +192,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 raise ValueError("Embedded Skill source classifications differ from review")
             from infinity_db.unit_filter_config import load_unit_filter_config
 
-            semantics = Database(destination / "infinity.db").unit_filter_semantics()
+            semantics = Database(destination / "army.db").unit_filter_semantics()
             if semantics != load_unit_filter_config(
                 ROOT / "config/catalogs/unit-filter-semantics.json",
             ):
@@ -215,7 +210,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
             from infinity_db.army_overview_copy import load_army_overview_copy
             from infinity_db.legacy_armies import load_legacy_armies
 
-            army_copy, legacy_armies = Database(destination / "infinity.db").army_reference_data()
+            army_copy, legacy_armies = Database(destination / "army.db").army_reference_data()
             if (army_copy, legacy_armies) != (
                 load_army_overview_copy(ROOT / "data/curated/identities/army-overview.json"),
                 load_legacy_armies(ROOT / "data/curated/identities/legacy-armies.json"),
@@ -242,7 +237,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
             from infinity_db.symbol_catalog import SymbolCatalog
 
             embedded = SymbolCatalog(
-                publication=Database(destination / "infinity.db").symbol_publication(),
+                publication=Database(destination / "army.db").symbol_publication(),
             )
             authored = SymbolCatalog(ROOT / "data/manifests/symbol-publication.json")
             if embedded.revision != authored.revision:

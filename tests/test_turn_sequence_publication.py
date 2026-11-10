@@ -16,8 +16,8 @@ from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
-RULES = ROOT / "data/generated/rules.db"
-ARMY = ROOT / "data/generated/infinity.db"
+RULES = ROOT / "data/generated/rules_n5.db"
+ARMY = ROOT / "data/generated/army.db"
 IDENTITIES = frozenset({"rule:game-sequence", "rule:order-pool"})
 CITATIONS = {
     "rule:game-sequence": {

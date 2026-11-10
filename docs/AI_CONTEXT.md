@@ -77,7 +77,7 @@ release/audit narrative belongs in the changelog and Git history.
   shared geometry; a full ITS map library and interactive editor remain
   post-1.0 and are not part of the mandatory Core-scenario gate.
 - Scenario authoring composes exact shared Rules/Skills and typed components
-  into self-contained `rules.db` output. Scoped records do not leak into
+  into self-contained `rules_n5.db` output. Scoped records do not leak into
   core rules or acquire Army links. Browser and API use the selected
   versioned scenario identity; backend detail requires explicit Army
   Points, while an unshared browser visit defaults to 300 via the common
@@ -146,26 +146,21 @@ release/audit narrative belongs in the changelog and Git history.
 
 ## Runtime artifacts
 
-- `data/generated/infinity.db`: tracked Army-derived application runtime database.
-- `data/generated/rules.db`: tracked curated-rules runtime database.
-- `data/generated/variant-usage.json`: tracked, release-matched exact-variant
-  Skill/Equipment usage publication; built from pinned raw Army inputs during
-  development and validated without those inputs on the release host.
-- `data/generated/weapon-profile-sources.json`: tracked, reviewed Weapon-profile
-  source locator publication.
-- Current v10 Rules embed reviewed deployed objects. The ignored
-  `data/generated/deployed-objects.json` publication is generated only for
-  legacy v8/v9 deployment; see [the artifact lifecycle](../data/README.md).
-- `data/generated/infinity.raw.db`: development/audit archive of normalized
-  source structures, not a production dependency.
-- `data/manifests/symbol-publication.json`: tracked processed-SVG publication
-  contract and Army source binding.
-- Raw Army/wiki/PDF/source-symbol archives plus detailed symbol-build state remain local inputs and
-  provenance, not deployment requirements.
+- `data/generated/army.db`: tracked Army-derived application runtime database.
+- `data/generated/rules_n5.db`: tracked curated-rules runtime database.
+- Army v31 and Rules v17 embed exact variants, reviewed Weapon citations,
+  deployed objects, maintained reference facts and symbol mappings/hashes.
+- Build-only raw Army exports and intermediate JSON belong in ignored
+  `data/work/build/`. Research tools take explicit raw paths.
+- `data/manifests/symbol-publication.json`: tracked processed-SVG build/release
+  contract and Army source binding; normal serving uses embedded mappings/hashes.
+- Raw Army/wiki/PDF/source-symbol archives and detailed build state remain local.
 
-A release must deploy its tracked databases, JSON read models and processed SVG
-publication as one matched, validated set. Production must not regenerate
-tracked publications or substitute a server-side database rebuild.
+One complete offline `infinity-db build --compact` produces both tracked files.
+`serve --db-dir` selects an alternate set; `INFINITY_DB_DB_DIR` precedes the
+default working-directory-relative `data/generated/`. WSGI requires that
+environment setting. Docker copies the same pair directly. See
+[data lifecycle](../data/README.md) for the canonical contract.
 
 ## Army/application identity invariants
 
@@ -221,7 +216,7 @@ because the source does not attach them to a profile group.
 
 ## Rules/reference invariants
 
-- Curated rules data is independent from Army data and builds into `rules.db`.
+- Curated rules data is independent from Army data and builds into `rules_n5.db`.
 - General Rules is a **published** fallback domain for reviewed `rule:*` categories without a clearer
   owner. Fireteam general rules remain owned by Fireteams; profile notation help remains contextual.
 - Ammunition and Labels are published top-level reference domains.

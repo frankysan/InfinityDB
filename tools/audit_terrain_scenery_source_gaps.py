@@ -19,8 +19,8 @@ from infinity_db.rules_database import RulesDatabase
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
-ARMY = ROOT / "data/generated/infinity.db"
-RULES = ROOT / "data/generated/rules.db"
+ARMY = ROOT / "data/generated/army.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 
 # The printed table is titled "Special Terrain Suggestions and Examples".
 # Its example names are NOT extra Type-of-Terrain identities.

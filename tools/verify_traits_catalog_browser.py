@@ -43,7 +43,7 @@ def main(argv: list[str] | None = None) -> int:
     urls = {identity.removeprefix("trait:"): ref["url"] for identity, ref in wiki.items()}
     if set(traits) != set(urls):
         raise ValueError("Canonical Traits and curated Wiki destinations differ")
-    raw = Database(ROOT / "data/generated/infinity.db").list_traits()
+    raw = Database(ROOT / "data/generated/army.db").list_traits()
     report = verify(
         args.base_url,
         headed=args.headed,

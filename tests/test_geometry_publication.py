@@ -17,7 +17,7 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-RULES = ROOT / "data/generated/rules.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 NEW_IDS = {
     "rule:line-of-fire", "rule:zone-of-control", "rule:zones-and-contact",
@@ -162,7 +162,7 @@ def test_coherency_measurement_and_replacement_keep_scoped_conditions() -> None:
 
 
 def test_geometry_storage_api_search_and_separate_trait_owner() -> None:
-    app = create_app(ROOT / "data/generated/infinity.db", rules_database_path=RULES)
+    app = create_app(ROOT / "data/generated/army.db", rules_database_path=RULES)
     db = RulesDatabase(RULES)
     source = _records()
     for identity, pages in CITATIONS.items():

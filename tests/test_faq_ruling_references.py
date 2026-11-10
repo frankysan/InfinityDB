@@ -110,7 +110,7 @@ def _fixture(
 
 def _export(base: list[tuple[Path, dict]], temp: Path, records: list[dict],
             *, history: list[dict] | None = None) -> RulesDatabase:
-    output = temp / "rules.db"
+    output = temp / "rules_n5.db"
     export_rules_database(_fixture(base, records, history=history), output, finalize=False)
     db = RulesDatabase(output)
     db.validate()
@@ -701,7 +701,7 @@ def test_export_rejects_bad_faq_references(
     records = [new] + ([old] if old else [])
     with pytest.raises(ValueError, match=message):
         _export(base_documents, tmp_path, records, history=history)
-    assert not (tmp_path / "rules.db").exists()
+    assert not (tmp_path / "rules_n5.db").exists()
 
 
 def test_valid_explicit_supersession_does_not_override_base_rule(
@@ -891,7 +891,7 @@ def test_faq_api_uses_explicit_context_without_merging_base_rules(
     for record in (old, new):
         record["review"]["status"] = "reviewed"
     db = _export(base_documents, tmp_path, [old, new])
-    app = create_app(Path("data/generated/infinity.db"), db.path)
+    app = create_app(Path("data/generated/army.db"), db.path)
 
     def query(query_string: str) -> tuple[int, dict]:
         environ: dict[str, Any] = {}
@@ -931,7 +931,7 @@ def test_faq_api_uses_explicit_context_without_merging_base_rules(
 @pytest.fixture(scope="module")
 def published_pilot(tmp_path_factory: pytest.TempPathFactory) -> RulesDatabase:
     """Real reviewed FAQ sources, separate from the synthetic validation fixture."""
-    path = tmp_path_factory.mktemp("faq-pilot") / "rules.db"
+    path = tmp_path_factory.mktemp("faq-pilot") / "rules_n5.db"
     export_rules_database(load_curated_directory(Path("data/curated")), path)
     db = RulesDatabase(path)
     db.validate()
@@ -940,7 +940,7 @@ def published_pilot(tmp_path_factory: pytest.TempPathFactory) -> RulesDatabase:
 
 @pytest.mark.skipif(
     os.environ.get("INFINITYDB_RELEASE_FAQ_PARITY") != "1",
-    reason="Opt in when validating a rebuilt, release-matched tracked rules.db",
+    reason="Opt in when validating a rebuilt, release-matched tracked rules_n5.db",
 )
 def test_tracked_faq_database_matches_current_curated_release_projection(
     published_pilot: RulesDatabase,
@@ -953,8 +953,8 @@ def test_tracked_faq_database_matches_current_curated_release_projection(
     rebuilt, so ordinary source checks do not fail on a known interim DB.
     """
     root = Path(__file__).resolve().parents[1]
-    tracked_path = root / "data/generated/rules.db"
-    assert tracked_path.is_file(), "Release rules.db is missing"
+    tracked_path = root / "data/generated/rules_n5.db"
+    assert tracked_path.is_file(), "Release rules_n5.db is missing"
     tracked = RulesDatabase(tracked_path)
     tracked.validate()
 
@@ -966,7 +966,7 @@ def test_tracked_faq_database_matches_current_curated_release_projection(
     }
     assert len(fresh_records) == 29
     assert set(release_records) == set(fresh_records), (
-        "Tracked rules.db FAQ inventory differs from the curated release",
+        "Tracked rules_n5.db FAQ inventory differs from the curated release",
         sorted(set(fresh_records) - set(release_records)),
         sorted(set(release_records) - set(fresh_records)),
     )
@@ -1010,11 +1010,11 @@ def test_tracked_faq_database_matches_current_curated_release_projection(
                 scenario_id=scenario,
             ) == [], (topic, scenario, "different-rules-revision")
     assert not record_drift and not selection_drift, (
-        f"Tracked rules.db FAQ drift: {len(record_drift)} record-field "
+        f"Tracked rules_n5.db FAQ drift: {len(record_drift)} record-field "
         f"differences, {len(selection_drift)} topic/scenario projection "
         f"differences. First record fields: {record_drift[:5]}; "
         f"first topic contexts: {selection_drift[:3]}. "
-        "Rebuild data/generated/rules.db from reviewed curation "
+        "Rebuild data/generated/rules_n5.db from reviewed curation "
         "before final 1.0 FAQ acceptance."
     )
 
@@ -1236,7 +1236,7 @@ def test_published_faq_pilot_reaches_api_with_unmodified_base_reference(
     assert "/static/faq-rulings.js" in ASSETS
     assert published_pilot.composed_record("equipment:hacking-device") is not None
     assert published_pilot.composed_record("scenario:annihilation") is not None
-    app = create_app(Path("data/generated/infinity.db"), published_pilot.path)
+    app = create_app(Path("data/generated/army.db"), published_pilot.path)
 
     def request(topic: str, **extra: str) -> tuple[int, dict]:
         query = urlencode({

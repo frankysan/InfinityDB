@@ -50,8 +50,8 @@ from tools.report_reference_baseline import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_DB = ROOT / "data/generated/infinity.db"
-RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_DB = ROOT / "data/generated/army.db"
+RULES_DB = ROOT / "data/generated/rules_n5.db"
 
 
 @pytest.mark.parametrize(
@@ -1597,9 +1597,9 @@ def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path)
                 "profile_groups": 1, "profiles": 1, "loadout_options": 1,
             },
             "nestedStorage": {
-                "profile_groups": "published-infinity.db",
-                "profiles": "paired-infinity.raw.db",
-                "loadout_options": "paired-infinity.raw.db",
+                "profile_groups": "published-army.db",
+                "profiles": "paired-army.raw.db",
+                "loadout_options": "paired-army.raw.db",
             },
         }
         raw_db.execute("UPDATE profiles SET cc = 99 WHERE army_id = 101")
@@ -1773,9 +1773,9 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
     assert "58 matched published Army-list IDs" in markdown
     assert "58 matched per-file provenance records" in markdown
     assert "12345 ordered Unit membership occurrences" in markdown
-    assert "4748 profile groups in published infinity.db" in markdown
+    assert "4748 profile groups in published army.db" in markdown
     assert "5020 profiles and 9000 loadouts" in markdown
-    assert "export-paired infinity.raw.db" in markdown
+    assert "export-paired army.raw.db" in markdown
     assert "loadout.weapons=30, profile.skills=20" in markdown
     assert "loadout.weapons=17, profile.skills=12" in markdown
     assert "loadout.characteristics=37, loadout.orders=26" in markdown
@@ -1834,7 +1834,7 @@ def test_served_revision_rejects_stale_and_invalid_runtime() -> None:
         with pytest.raises(ReferenceBaselineError, match="does not match"):
             verify_served_revision(report, "http://localhost:8000/")
     for base in (
-        "file:///data/generated/infinity.db",
+        "file:///data/generated/army.db",
         "http://user:pass@localhost:8000",
         "http://localhost:8000/api",
         "http://localhost:8000?skip=1",

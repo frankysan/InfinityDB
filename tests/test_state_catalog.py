@@ -15,7 +15,7 @@ from tools.verify_states_browser import source_states
 
 def test_state_catalog_exposes_reviewed_states_and_reverse_relations(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     catalog = StateCatalog(RulesDatabase(rules_path))
 
@@ -78,7 +78,7 @@ def test_isolated_state_fireteam_and_coordinated_order_navigation_source_boundar
 ) -> None:
     """Pin reviewed context without equating membership with generic rule use."""
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
     database = RulesDatabase(rules_path)
     database.validate()
@@ -168,8 +168,8 @@ def test_isolated_state_contextual_links_are_routable_in_both_api_directions() -
     """The packaged v9 rules pair publishes exact reciprocal reference links."""
     root = Path(__file__).parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     def api(path: str) -> dict[str, Any]:
@@ -235,8 +235,8 @@ def test_isolated_navigation_browser_links(chromium_test_slot: None) -> None:
     playwright = pytest.importorskip("playwright.sync_api")
     root = Path(__file__).parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -308,7 +308,7 @@ def test_every_current_state_reaches_published_api_and_player_template() -> None
         for record_id, (_, record) in source.items()
     }
 
-    rules_path = root / "data/generated/rules.db"
+    rules_path = root / "data/generated/rules_n5.db"
     with sqlite3.connect(rules_path) as connection:
         stored = list(connection.execute(
             "SELECT r.collection_id, r.id, r.name, r.summary, r.facts_json "
@@ -322,7 +322,7 @@ def test_every_current_state_reaches_published_api_and_player_template() -> None
             expected_collection, record["name"], record["summary"], record.get("facts", {})
         ), record_id
 
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    app = create_app(root / "data/generated/army.db", rules_database_path=rules_path)
 
     def get(path: str) -> tuple[str, bytes]:
         environ: dict[str, Any] = {}
@@ -396,7 +396,7 @@ def test_state_catalog_caches_composed_records_and_isolates_detail_results(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules = RulesDatabase(rules_path)
     original = rules.composed_records_by_kind

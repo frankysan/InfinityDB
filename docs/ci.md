@@ -486,23 +486,14 @@ images still require the complete tracked publication through deployment-smoke v
 ## Deployment smoke
 
 `.github/workflows/deployment-smoke.yml` builds the production container directly from the tracked
-release `infinity.db`, `rules.db`, byte-exact tracked `variant-usage.json`,
-byte-exact tracked `weapon-profile-sources.json` and processed SVG publication,
-with embedded deployed objects, then runs
-`scripts/verify-container-image.sh` with published-asset validation.
+release `army.db` and `rules_n5.db` plus processed SVG assets, then runs
+`scripts/verify-container-image.sh` with published-asset validation. The
+source/release gate requires the strict current schemas, shared provenance and
+recorded build-input freshness. Exact variants and reviewed Weapon citations are
+validated from embedded tables and exercised through the API. The container
+verifies symbol bytes against embedded hashes without installed source manifests.
+The separate source matrix validates the same tracked pair without raw archives.
 
-Deployment smoke validates the variant publication's schema-specific Army/rules
-fingerprints, image presence and representative exact-variant API response.
-Legacy format v1 additionally pins deployed-object JSON bytes; current format
-v2 uses the embedded model. The separate source matrix checks the same tracked
-publication without requiring an ignored raw archive in CI.
-Both checks also compare the Weapon-profile publication with its reviewed
-inputs and validate exact source-pair binding; the container smoke checks a
-representative Weapon citation through the API. Cross-platform determinism
-rebuilds and compares the Weapon-profile JSON bytes on each supported OS.
-
-Deployment smoke first tests the exact tracked release set (v10 for the prepared
-1.0.1 release; tagged 1.0.0 used v9).
 It does not rebuild the tracked release databases and is not a substitute for the source or
 installed-wheel checks. The `/changes` probe compares the served release-note content with
 the installed canonical changelog. It accepts version-specific pending notes

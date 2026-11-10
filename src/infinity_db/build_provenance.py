@@ -27,6 +27,29 @@ def file_sha256(path: Path) -> str:
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def build_input_fingerprints(root: Path) -> dict[str, str]:
+    """Hash the maintained input envelope without requiring upstream archives."""
+    paths = [
+        path for directory in (
+            "config/catalogs", "config/identity", "config/validation", "config/symbols",
+            "data/curated",
+        ) for path in (root / directory).rglob("*.json") if path.name != "example.json"
+    ]
+    paths.extend((root / "src").rglob("*.py"))
+    paths.extend([
+        root / "pyproject.toml", root / "data/manifests/symbol-publication.json",
+        root / "src/infinity_db/web/static/restrictions-reference.json",
+    ])
+    result = {}
+    for path in paths:
+        name = path.relative_to(root).as_posix()
+        data = path.read_bytes()
+        if name.startswith("src/") and name.endswith(".py"):
+            data = data.replace(b"\r\n", b"\n")
+        result[name] = hashlib.sha256(data).hexdigest()
+    return dict(sorted(result.items()))
+
+
 def _is_digest(value: Any) -> bool:
     return isinstance(value, str) and _SHA256.fullmatch(value) is not None
 
@@ -143,3 +166,15 @@ def validate_set_provenance(army: Path, rules: Path) -> dict[str, Any]:
         "builderRevision": army_record["manifest"]["builderRevision"],
         "armyExportPairSha256": generation,
     }
+
+
+def validate_build_input_freshness(army: Path, root: Path) -> None:
+    """Release/source gate: require the maintained checkout inputs recorded by the build."""
+    record = validate_build_record(_metadata(army).get(BUILD_PROVENANCE_KEY), "army")
+    root = root.resolve()
+    expected = record["manifest"]["inputs"]
+    actual = build_input_fingerprints(root)
+    changed = sorted(name for name in expected.keys() | actual.keys()
+                     if expected.get(name) != actual.get(name))
+    if changed:
+        raise ValueError(f"Runtime databases require rebuilding after input change: {changed[0]}")

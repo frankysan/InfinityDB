@@ -268,7 +268,7 @@ rules-only relation targets that already support an exposed item are classified 
 `catalogGapCodes` records reviewed release-scope decisions that apply to one gap kind across a
 whole catalog. More-specific item or relation `overrides` record reviewed exceptions with a
 reason and take precedence over catalog-level decisions. Item/relation overrides must match a gap
-in the selected `infinity.db` + `rules.db` pair; stale or mistyped overrides fail the audit instead
+in the selected `army.db` + `rules_n5.db` pair; stale or mistyped overrides fail the audit instead
 of silently surviving after the underlying data changes.
 
 The published 0.10.0 scope classified missing Weapon rule definitions as `later-product-work`
@@ -325,8 +325,8 @@ When the Army/application catalog snapshot changes, validate or refresh the main
 scope against the generated databases:
 
 ```powershell
-python tools/audit_rules_interactions.py --database data/generated/infinity.db --rules-database data/generated/rules.db
-python tools/audit_rules_interactions.py --database data/generated/infinity.db --rules-database data/generated/rules.db --refresh-catalog-scope --output docs/rules-interaction-checklist.md
+python tools/audit_rules_interactions.py --database data/generated/army.db --rules-database data/generated/rules_n5.db
+python tools/audit_rules_interactions.py --database data/generated/army.db --rules-database data/generated/rules_n5.db --refresh-catalog-scope --output docs/rules-interaction-checklist.md
 ```
 
 A release gate may be inspected explicitly with `--require-release <version>`. Pending
@@ -375,7 +375,7 @@ During mapping review, validate it against the exact generated Army snapshot and
 deterministic coverage/review queue with:
 
 ```powershell
-infinity-db validate-peripheral-identities --database data/generated/infinity.db --output "reports/PERIPHERAL IDENTITY COVERAGE.json"
+infinity-db validate-peripheral-identities --database data/generated/army.db --output "reports/PERIPHERAL IDENTITY COVERAGE.json"
 ```
 
 The snapshot-bound pass requires the database SHA-256 provenance to match exactly one
@@ -496,7 +496,7 @@ Every record declares `composition.role` as `definition` or `supplement`. Across
 current collections, each semantic record ID has exactly one definition; supplements
 retain their own scope, facts, citations, relations, and publication provenance rather
 than being field-merged by load order. Related concepts use typed one-way `relations`;
-reverse navigation is derived by `rules.db`.
+reverse navigation is derived by `rules_n5.db`.
 
 ### Dated FAQ ruling authoring contract (published subset)
 
@@ -882,7 +882,7 @@ Weapon records may use `facts.specialProfile` for rulebook-defined deployable
 profiles that are not fully represented by Army weapon metadata. The special
 profile stores ordered stat name/value pairs, equipment, skills, and a CC weapon;
 the application composes it into the existing weapon-reference API only when a
-validated `rules.db` is available.
+validated `rules_n5.db` is available.
 
 Full Skill definitions own their declaration/action categories directly through an
 ordered, non-empty `facts.typeIds` array referencing the canonical `skillTypes`

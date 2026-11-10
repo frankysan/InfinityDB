@@ -77,7 +77,7 @@ def audit_delivery_coverage(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--army-db", type=Path, default=ROOT / "data/generated/infinity.db")
+    parser.add_argument("--army-db", type=Path, default=ROOT / "data/generated/army.db")
     parser.add_argument(
         "--curated-source", type=Path, default=ROOT / "data/curated/rules/n5-core-v5.3.json",
     )

@@ -339,8 +339,8 @@ def test_published_traits_reconcile_curated_rules_army_usage_and_public_api() ->
     """Audit all canonical Traits without misclassifying raw Army properties."""
 
     root = Path(__file__).resolve().parents[1]
-    army_db = root / "data/generated/infinity.db"
-    rules_db = root / "data/generated/rules.db"
+    army_db = root / "data/generated/army.db"
+    rules_db = root / "data/generated/rules_n5.db"
     curated = {
         record["id"]: (document["collection"]["id"], record)
         for _, document in load_curated_directory(root / "data/curated")

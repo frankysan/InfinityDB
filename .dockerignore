@@ -19,8 +19,10 @@ dist/
 .vscode/
 data/raw/
 # No development archives or loose generated artifacts enter the image.
-# tools.prepare_runtime_bundle creates the selected, validated data/runtime/ files.
 data/generated/*
+!data/generated/army.db
+!data/generated/rules_n5.db
+data/runtime/
 data/manifests/*
 !data/manifests/symbol-publication.json
 data/work/

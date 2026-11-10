@@ -522,8 +522,8 @@ def test_restrictions_reference_has_standalone_rules_page() -> None:
     from tools.audit_restrictions_source_chart import ROOT
 
     app = create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
     def get(path: str) -> tuple[int, dict[str, str], bytes]:
@@ -586,8 +586,8 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
     from tools.audit_restrictions_source_chart import ROOT
 
     app = create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):

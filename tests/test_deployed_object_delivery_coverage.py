@@ -64,7 +64,7 @@ def test_same_source_alias_is_only_a_review_lead(
 def test_pinned_delivery_review_gap_is_explicit() -> None:
     root = Path(__file__).resolve().parents[1]
     paths = (
-        root / "data/generated/infinity.db",
+        root / "data/generated/army.db",
         root / "data/curated/rules/n5-core-v5.3.json",
         root / "config/validation/deployed-object-delivery-reviews.json",
         root / "config/validation/deployed-object-candidate-reviews.json",
@@ -105,7 +105,7 @@ def test_cli_reports_queue_without_assigning_object_ownership(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
 ) -> None:
     root = Path(__file__).resolve().parents[1]
-    if not (root / "data/generated/infinity.db").is_file():
+    if not (root / "data/generated/army.db").is_file():
         pytest.skip("Pinned Army database unavailable")
     monkeypatch.setattr(sys, "argv", ["audit_deployed_object_delivery_coverage"])
     assert audit.main() == 0

@@ -91,7 +91,7 @@ def metadata_value(path: Path, key: str) -> object:
 
 
 def test_export_pins_identity_manifest_and_hash_in_both_database_siblings(tmp_path: Path) -> None:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     config = load_identity_config()
 
     export_database(normalized_empty(), path)
@@ -116,7 +116,7 @@ def test_export_prefers_identity_policy_pinned_in_normalized_data(tmp_path: Path
     config = parse_identity_config(document)
     data = normalized_empty()
     data.update(identity_metadata(config))
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
 
     export_database(data, path)
 
@@ -141,7 +141,7 @@ def test_export_rejects_explicit_identity_policy_mismatch(tmp_path: Path) -> Non
     explicit = parse_identity_config(document)
     data = normalized_empty()
     data.update(identity_metadata(pinned))
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
 
     with pytest.raises(ValueError, match="does not match the policy pinned"):
         export_database(data, path, identity_config=explicit)
@@ -154,11 +154,11 @@ def test_export_rejects_incomplete_normalized_identity_metadata(tmp_path: Path) 
     data[IDENTITY_CONFIG_METADATA_KEY] = load_identity_config().document
 
     with pytest.raises(ValueError, match="incomplete identity configuration metadata"):
-        export_database(data, tmp_path / "infinity.db")
+        export_database(data, tmp_path / "army.db")
 
 
 def test_database_validation_rejects_tampered_identity_metadata(tmp_path: Path) -> None:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized_empty(), path)
 
     connection = sqlite3.connect(path)
@@ -185,7 +185,7 @@ def test_repository_uses_identity_policy_pinned_into_database(tmp_path: Path) ->
         }
     )
     config = parse_identity_config(document)
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
 
     export_database(normalized_two_units(), path, identity_config=config)
 
@@ -247,7 +247,7 @@ def test_application_army_materialization_resolves_reviewed_source_aliases(
             },
         }
     )
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
 
     export_database(data, path)
 
@@ -307,7 +307,7 @@ def test_application_army_materialization_resolves_reviewed_source_aliases(
 def test_database_validation_rejects_tampered_application_army_materialization(
     tmp_path: Path,
 ) -> None:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized_two_units(), path)
 
     with sqlite3.connect(path) as connection:

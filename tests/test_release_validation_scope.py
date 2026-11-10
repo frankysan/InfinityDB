@@ -28,7 +28,7 @@ def test_runtime_build_ci_or_shared_test_changes_fail_closed() -> None:
     for paths in (
         [],
         ["src/infinity_db/web/static/page-navigation.js"],
-        ["data/generated/rules.db"],
+        ["data/generated/rules_n5.db"],
         ["pyproject.toml"],
         [".github/workflows/source-checks.yml"],
         ["tests/conftest.py"],

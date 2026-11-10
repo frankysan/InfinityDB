@@ -22,8 +22,8 @@ ORIGIN = "http://infinitydb-accessible-navigation.test"
 @pytest.fixture(scope="module")
 def app() -> Any:
     return create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
 

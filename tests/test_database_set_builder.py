@@ -17,7 +17,6 @@ import pytest
 
 from infinity_army_data.cli import build_parser as army_parser
 from infinity_db import database_set_builder as builder
-from infinity_db.ammunition_reference_storage import stage_ammunition_references
 from infinity_db.build_provenance import (
     BUILD_PROVENANCE_KEY,
     build_record,
@@ -27,22 +26,11 @@ from infinity_db.build_provenance import (
     validate_set_provenance,
 )
 from infinity_db.cli import build_parser
-from infinity_db.combined_saving_roll_storage import stage_combined_saving_rolls
 from infinity_db.database_set import (
     EMBEDDED_WEAPON_RUNTIME_FILES,
-    V10_RUNTIME_FILES,
     validate_database_set,
 )
-from infinity_db.restriction_chart_storage import stage_restriction_chart
 from infinity_db.sqlite_determinism import normalize_sqlite_header, vacuum_deterministic_sqlite
-from infinity_db.trait_wiki_references import load_trait_wiki_references
-from infinity_db.trait_wiki_storage import stage_trait_wiki_links
-from infinity_db.variant_usage_storage import stage_variant_usage
-from infinity_db.weapon_ammunition_references import load_ammunition_reference_map
-from infinity_db.weapon_combined_saving_rolls import load_combined_saving_roll_map
-from infinity_db.weapon_profile_storage import stage_weapon_profile_citations
-from infinity_db.weapon_properties import load_weapon_properties
-from infinity_db.weapon_property_storage import stage_weapon_properties
 from infinity_db.web import create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
 
@@ -53,7 +41,9 @@ RELEASE = Path(__file__).resolve().parents[1] / "data/generated"
 def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
     root = tmp_path / "project"
     for name in (
-        "pyproject.toml", "src/sample.py", "data/curated/rules/sample.json",
+        "pyproject.toml",
+        "src/sample.py",
+        "data/curated/rules/sample.json",
         "data/manifests/symbol-publication.json",
         "src/infinity_db/web/static/restrictions-reference.json",
         "config/catalogs/equipment-presentation-encodings.json",
@@ -61,7 +51,8 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         "config/catalogs/unit-filter-semantics.json",
         "data/curated/identities/army-overview.json",
         "data/curated/identities/legacy-armies.json",
-        "tools/build_weapon_profile_publication.py", "tools/audit_enrichment_coverage.py",
+        "tools/build_weapon_profile_publication.py",
+        "tools/audit_enrichment_coverage.py",
         "tools/audit_weapon_definition_gaps.py",
     ):
         path = root / name
@@ -92,7 +83,8 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
     )
     symbols["sourceSnapshot"]["armyArtifact"]["sha256"] = file_sha256(source)
     (root / "data/manifests/symbol-publication.json").write_text(
-        json.dumps(symbols), encoding="utf-8",
+        json.dumps(symbols),
+        encoding="utf-8",
     )
     for relative in symbols["publishedSha256ByPath"]:
         target = root / "src/infinity_db/web/static" / relative
@@ -119,90 +111,104 @@ def _update_metadata(path: Path, values: dict[str, Any], *, rules: bool = False)
 
 def _fake_army(args: argparse.Namespace, record: dict[str, Any]) -> int:
     """Stand in for normalization/export; exercise real runtime validation afterward."""
-    army = args.output_dir / "infinity.db"
-    shutil.copyfile(RELEASE / "infinity.db", army)
+    army = args.output_dir / "army.db"
+    shutil.copyfile(RELEASE / "army.db", army)
+    # Recreate the maintained base exporter boundary before running real overlays.
+    with closing(sqlite3.connect(army)) as db, db:
+        for name in (
+            "equipment_presentation_metadata",
+            "equipment_presentation_encodings",
+            "skill_source_classification_metadata",
+            "skill_source_classifications",
+            "unit_filter_metadata",
+            "hidden_unit_characteristics",
+            "source_classification_memberships",
+            "source_classification_matches",
+            "army_reference_metadata",
+            "legacy_army_identities",
+            "army_overview_text",
+            "symbol_path_metadata",
+            "published_symbol_assets",
+            "published_symbol_paths",
+        ):
+            db.execute(f"DROP TABLE IF EXISTS {name}")
+        db.execute("PRAGMA user_version=26")
+        db.execute(
+            "UPDATE __infinity_metadata SET value='35' WHERE key='database_compatibility_version'"
+        )
     with closing(sqlite3.connect(army)) as connection:
-        meta = {key: json.loads(value) for key, value in connection.execute(
-            "SELECT key,value FROM __infinity_metadata"
-        )}
+        meta = {
+            key: json.loads(value)
+            for key, value in connection.execute("SELECT key,value FROM __infinity_metadata")
+        }
     meta["_meta"]["snapshotArchiveSha256"] = record["manifest"]["source"]["archiveSha256"]
     meta["armyMetadata"]["sourceSha256"] = record["manifest"]["source"]["metadataSha256"]
     meta["armyMetadata"]["sourceFile"] = record["manifest"]["source"]["metadataName"]
-    _update_metadata(army, {
-        BUILD_PROVENANCE_KEY: record, "_meta": meta["_meta"], "armyMetadata": meta["armyMetadata"],
-    })
-    shutil.copyfile(army, args.output_dir / "infinity.raw.db")
+    _update_metadata(
+        army,
+        {
+            BUILD_PROVENANCE_KEY: record,
+            "_meta": meta["_meta"],
+            "armyMetadata": meta["armyMetadata"],
+        },
+    )
+    shutil.copyfile(army, args.output_dir / "army.raw.db")
     (args.output_dir / "normalized.json").write_text("build-only", encoding="utf-8")
     return 0
 
 
 def _fake_rules(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
-    army, rules = stage / "infinity.db", stage / "rules.db"
-    shutil.copyfile(RELEASE / "rules.db", rules)
+    """Use the current complete semantic fixture with this build generation."""
+    from infinity_db.rules_database import RulesDatabase
+    from infinity_db.variant_usage_storage import _fingerprint
+    from infinity_db.weapon_profile_storage import _digest, _read_document
+
+    army, rules = stage / "army.db", stage / "rules_n5.db"
+    shutil.copyfile(RELEASE / "rules_n5.db", rules)
+    with closing(sqlite3.connect(rules)) as connection:
+        document = _read_document(connection)
+    document["sourceSnapshot"]["armyDatabaseSha256"] = file_sha256(army)
     with closing(sqlite3.connect(army)) as connection:
-        generation = json.loads(connection.execute(
-            "SELECT value FROM __infinity_metadata WHERE key='export_pair_sha256'",
-        ).fetchone()[0])
+        generation = json.loads(
+            connection.execute(
+                "SELECT value FROM __infinity_metadata WHERE key='export_pair_sha256'"
+            ).fetchone()[0]
+        )
+    publication = RulesDatabase(RELEASE / "rules_n5.db").variant_usage_payload(RELEASE / "army.db")
+    assert publication is not None
+    publication["sourceSnapshot"].update(
+        armyDatabaseSha256=file_sha256(army),
+        armyArchiveSha256=manifest["source"]["archiveSha256"],
+        exportPairSha256=generation,
+    )
     with closing(sqlite3.connect(rules)) as connection, connection:
         connection.execute(
             "UPDATE deployed_object_metadata SET value=? WHERE key='armyDatabaseSha256'",
             (json.dumps(file_sha256(army)),),
         )
-        publication = json.loads((RELEASE / "variant-usage.json").read_text(encoding="utf-8"))
-        publication["sourceSnapshot"].update(
-            armyDatabaseSha256=file_sha256(army),
-            armyArchiveSha256=manifest["source"]["archiveSha256"], exportPairSha256=generation,
-        )
-        stage_variant_usage(connection, publication)
-        document = json.loads(
-            (RELEASE / "weapon-profile-sources.json").read_text(encoding="utf-8")
-        )
-        document["sourceSnapshot"]["armyDatabaseSha256"] = file_sha256(army)
-        stage_weapon_profile_citations(connection, document, army)
-        connection.execute("PRAGMA user_version=12")
-        stage_restriction_chart(connection, json.loads(
-            (RELEASE.parent.parent /
-             "src/infinity_db/web/static/restrictions-reference.json").read_text(encoding="utf-8")
-        ))
-        connection.execute("PRAGMA user_version=13")
-        stage_trait_wiki_links(
-            connection,
-            load_trait_wiki_references(
-                RELEASE.parent.parent / "config/catalogs/trait-wiki-references.json"
-            ),
-        )
-        connection.execute("PRAGMA user_version=14")
-        stage_combined_saving_rolls(
-            connection,
-            load_combined_saving_roll_map(
-                RELEASE.parent.parent / "config/catalogs/weapon-combined-saving-rolls.json"
-            ),
-            army,
-        )
-        connection.execute("PRAGMA user_version=15")
-        stage_ammunition_references(
-            connection,
-            load_ammunition_reference_map(
-                RELEASE.parent.parent / "config/catalogs/weapon-ammunition-references.json"
-            ),
-            army,
-        )
-        connection.execute("PRAGMA user_version=16")
-        stage_weapon_properties(
-            connection,
-            load_weapon_properties(
-                RELEASE.parent.parent / "config/catalogs/weapon-properties.json"
-            ),
-            army,
-        )
-        connection.execute("PRAGMA user_version=17")
-        connection.execute("UPDATE __rules_metadata SET value='17' WHERE key='formatVersion'")
+        for (table,) in connection.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%metadata'"
+        ).fetchall():
+            columns = {row[1] for row in connection.execute(f"PRAGMA table_info({table})")}
+            if "army_database_sha256" in columns:
+                connection.execute(
+                    f"UPDATE {table} SET army_database_sha256=?", (file_sha256(army),)
+                )
         connection.execute(
-            "UPDATE __rules_metadata SET value='19' WHERE key='databaseCompatibilityVersion'"
+            "UPDATE variant_usage_metadata SET army_archive_sha256=?,content_sha256=?",
+            (manifest["source"]["archiveSha256"], _fingerprint(publication)),
         )
-    _update_metadata(rules, {
-        BUILD_PROVENANCE_KEY: build_record(manifest, "rules-n5", army_generation=generation),
-    }, rules=True)
+    with closing(sqlite3.connect(rules)) as connection, connection:
+        connection.execute(
+            "UPDATE weapon_chart_profile_metadata SET content_sha256=?", (_digest(document),)
+        )
+    _update_metadata(
+        rules,
+        {
+            BUILD_PROVENANCE_KEY: build_record(manifest, "rules-n5", army_generation=generation),
+        },
+        rules=True,
+    )
 
 
 def _digests(directory: Path) -> dict[str, str]:
@@ -241,7 +247,8 @@ def test_builder_code_and_selected_metadata_are_inputs(project) -> None:
 
 
 def test_complete_build_publishes_only_selected_files_and_is_repeatable(
-    project, monkeypatch: pytest.MonkeyPatch,
+    project,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     root, args = project
     monkeypatch.setenv("INFINITY_DB_DB_DIR", str(root / "must-not-write"))
@@ -265,9 +272,9 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert set(_digests(args.db_dir)) == {*EMBEDDED_WEAPON_RUNTIME_FILES, "keep.txt"}
     assert (args.db_dir / "keep.txt").read_text(encoding="utf-8") == "unrelated"
     app = create_app_from_database_set(args.db_dir)
-    assert app.database.path == args.db_dir / "infinity.db"
+    assert app.database.path == args.db_dir / "army.db"
     assert app.rules_database is not None
-    assert app.rules_database.path == args.db_dir / "rules.db"
+    assert app.rules_database.path == args.db_dir / "rules_n5.db"
     assert app.weapon_profile_citations is not None
     assert len(app.weapon_profile_citations) == 69
     status, _, body = wsgi_response(app, "http://local.test/api/weapons/uragan-mrl")
@@ -277,22 +284,18 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert all(profile["profile_citations"] for profile in item["profiles"])
     assert not (root / "must-not-write").exists()
     assert not list((root / "data/work/build").iterdir())
-    from tools.prepare_runtime_bundle import prepare_bundle
-
-    bundle = root / "bundle"
-    assert prepare_bundle(args.db_dir, bundle) == EMBEDDED_WEAPON_RUNTIME_FILES
-    assert _digests(bundle) == first["sha256"]
     second = builder.build_database_set(args, _fake_army, root=root)
     assert second == first
 
 
 def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
-    project, monkeypatch: pytest.MonkeyPatch,
+    project,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     root, args = project
     monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
     builder.build_database_set(args, _fake_army, root=root)
-    army, rules = args.db_dir / "infinity.db", args.db_dir / "rules.db"
+    army, rules = args.db_dir / "army.db", args.db_dir / "rules_n5.db"
     original = {path: path.read_bytes() for path in (army, rules)}
     for case, message in (
         ("army", "require Army schema v31"),
@@ -317,11 +320,13 @@ def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
 
 @pytest.mark.parametrize("failure", ["generation", "validation", "changed-input"])
 def test_failure_before_publication_retains_all_destination_bytes(
-    project, monkeypatch: pytest.MonkeyPatch, failure: str,
+    project,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: str,
 ) -> None:
     root, args = project
     args.db_dir.mkdir()
-    for name in V10_RUNTIME_FILES:
+    for name in EMBEDDED_WEAPON_RUNTIME_FILES:
         shutil.copyfile(RELEASE / name, args.db_dir / name)
     before = _digests(args.db_dir)
 
@@ -330,7 +335,7 @@ def test_failure_before_publication_retains_all_destination_bytes(
             raise ValueError("deliberate source rejection")
         _fake_rules(stage, root, manifest)
         if failure == "validation":
-            with closing(sqlite3.connect(stage / "rules.db")) as connection, connection:
+            with closing(sqlite3.connect(stage / "rules_n5.db")) as connection, connection:
                 connection.execute(
                     "UPDATE variant_usage_groups SET unique_units=unique_units+1 WHERE id=1"
                 )
@@ -345,30 +350,35 @@ def test_failure_before_publication_retains_all_destination_bytes(
 
 
 def test_interrupted_replacement_is_rejected_and_rerun_recovers(
-    project, monkeypatch: pytest.MonkeyPatch,
+    project,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     root, args = project
     args.db_dir.mkdir()
-    for name in V10_RUNTIME_FILES:
+    for name in EMBEDDED_WEAPON_RUNTIME_FILES:
         shutil.copyfile(RELEASE / name, args.db_dir / name)
     monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
     replace = os.replace
 
     def interrupted(source: Path, destination: Path) -> None:
-        if destination.name == "rules.db":
+        if destination.name == "rules_n5.db":
             raise OSError("deliberate interrupted replacement")
         replace(source, destination)
 
     monkeypatch.setattr(builder.os, "replace", interrupted)
     with pytest.raises(OSError, match="interrupted"):
         builder.build_database_set(args, _fake_army, root=root)
-    with pytest.raises(ValueError, match="provenance"):
+    with pytest.raises(ValueError, match="generations do not match"):
         validate_database_set(args.db_dir)
     monkeypatch.setattr(builder.os, "replace", replace)
     builder.build_database_set(args, _fake_army, root=root)
-    assert validate_set_provenance(
-        args.db_dir / "infinity.db", args.db_dir / "rules.db",
-    )["status"] == "matched"
+    assert (
+        validate_set_provenance(
+            args.db_dir / "army.db",
+            args.db_dir / "rules_n5.db",
+        )["status"]
+        == "matched"
+    )
 
 
 def test_complete_build_requires_zip_and_lossless_verification(project) -> None:
@@ -384,16 +394,19 @@ def test_complete_build_requires_zip_and_lossless_verification(project) -> None:
 
 
 @pytest.mark.parametrize(
-    "damage", ["id", "version", "mixed", "army-generation", "archive", "metadata"],
+    "damage",
+    ["id", "version", "mixed", "army-generation", "archive", "metadata"],
 )
 def test_recorded_provenance_rejects_tampered_or_mixed_inputs(
-    project, monkeypatch: pytest.MonkeyPatch, damage: str,
+    project,
+    monkeypatch: pytest.MonkeyPatch,
+    damage: str,
 ) -> None:
     root, args = project
     monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
     result = builder.build_database_set(args, _fake_army, root=root)
     manifest = builder.collect_build_manifest(root, args.source, None)
-    army, rules = args.db_dir / "infinity.db", args.db_dir / "rules.db"
+    army, rules = args.db_dir / "army.db", args.db_dir / "rules_n5.db"
     generation = result["buildProvenance"]["armyExportPairSha256"]
     if damage in {"id", "version", "mixed", "army-generation"}:
         record = build_record(manifest, "rules-n5", army_generation=generation)
@@ -411,9 +424,12 @@ def test_recorded_provenance_rejects_tampered_or_mixed_inputs(
     else:
         key = "_meta" if damage == "archive" else "armyMetadata"
         with closing(sqlite3.connect(army)) as connection:
-            value = json.loads(connection.execute(
-                "SELECT value FROM __infinity_metadata WHERE key=?", (key,),
-            ).fetchone()[0])
+            value = json.loads(
+                connection.execute(
+                    "SELECT value FROM __infinity_metadata WHERE key=?",
+                    (key,),
+                ).fetchone()[0]
+            )
         value["snapshotArchiveSha256" if damage == "archive" else "sourceSha256"] = "0" * 64
         _update_metadata(army, {key: value})
     with pytest.raises(ValueError, match="provenance|generations|generation|manifest"):
@@ -422,7 +438,7 @@ def test_recorded_provenance_rejects_tampered_or_mixed_inputs(
 
 def test_output_cannot_replace_the_selected_source_archive(project) -> None:
     root, args = project
-    source = root / "infinity.db"
+    source = root / "army.db"
     shutil.copyfile(args.source, source)
     before = file_sha256(source)
     args.source, args.db_dir = source, root

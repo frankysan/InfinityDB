@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import json
-import shutil
 import sqlite3
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_army
 
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.database.repository import Database
@@ -31,9 +31,9 @@ SKILL_CONFIG = ROOT / "config/catalogs/skill-source-classifications.json"
 
 @pytest.fixture
 def v28(tmp_path: Path) -> tuple[Path, Path]:
-    army, raw = tmp_path / "infinity.db", tmp_path / "infinity.raw.db"
-    shutil.copyfile(RELEASE / "infinity.db", army)
-    shutil.copyfile(RELEASE / "infinity.db", raw)
+    army, raw = tmp_path / "army.db", tmp_path / "army.raw.db"
+    copy_base_army(army)
+    copy_base_army(raw)
     publish_equipment_encodings(army, raw, EQUIPMENT_CONFIG)
     publish_skill_classifications(army, raw, SKILL_CONFIG)
     return army, raw
@@ -51,7 +51,7 @@ def test_v28_roundtrip_and_paired_generation(v28) -> None:
     Database(army).validate()
     assert validate_database_pair(army, raw_path=raw) is not None
     assert Database(army).skill_source_classifications() == expected
-    assert Database(RELEASE / "infinity.db").skill_source_classifications() is None
+    assert Database(RELEASE / "army.db").skill_source_classifications() == expected
     with sqlite3.connect(army) as connection:
         assert connection.execute("PRAGMA user_version").fetchone()[0] == ARMY_SCHEMA_VERSION
         assert json.loads(connection.execute(
@@ -68,8 +68,8 @@ def test_skills_catalog_v28_parity_and_zero_json_reads(v28, monkeypatch) -> None
     import infinity_db.skill_catalog as adapter
 
     army, _ = v28
-    rules = RulesDatabase(RELEASE / "rules.db")
-    legacy = SkillCatalog(Database(RELEASE / "infinity.db"), rules)
+    rules = RulesDatabase(RELEASE / "rules_n5.db")
+    legacy = SkillCatalog(Database(RELEASE / "army.db"), rules)
     old_ids = legacy._rules_catalog_excluded_source_ids()
     assert len(old_ids) == 6
 
@@ -107,9 +107,9 @@ def test_unit_presentation_accepts_explicit_v28_projection(v28, monkeypatch) -> 
     "repeat-identity",
 ))
 def test_build_rejects_unreviewed_source_changes(tmp_path: Path, mutation: str) -> None:
-    army, raw = tmp_path / "infinity.db", tmp_path / "infinity.raw.db"
-    shutil.copyfile(RELEASE / "infinity.db", army)
-    shutil.copyfile(RELEASE / "infinity.db", raw)
+    army, raw = tmp_path / "army.db", tmp_path / "army.raw.db"
+    copy_base_army(army)
+    copy_base_army(raw)
     publish_equipment_encodings(army, raw, EQUIPMENT_CONFIG)
     document = json.loads(SKILL_CONFIG.read_text(encoding="utf-8"))
     if mutation == "missing":
@@ -172,9 +172,9 @@ def test_read_rejects_corrupt_source_rows(v28, mutation: str) -> None:
 
 
 def test_numeric_source_identity_retained_without_slug_inference(tmp_path: Path) -> None:
-    army, raw = tmp_path / "infinity.db", tmp_path / "infinity.raw.db"
-    shutil.copyfile(RELEASE / "infinity.db", army)
-    shutil.copyfile(RELEASE / "infinity.db", raw)
+    army, raw = tmp_path / "army.db", tmp_path / "army.raw.db"
+    copy_base_army(army)
+    copy_base_army(raw)
     publish_equipment_encodings(army, raw, EQUIPMENT_CONFIG)
     source = json.loads(SKILL_CONFIG.read_text(encoding="utf-8"))
     skill_id = Database(army).application_catalog_id("skills", "bangbomb")

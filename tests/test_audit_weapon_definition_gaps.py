@@ -279,8 +279,8 @@ def test_1_0_enrichment_assessment_keeps_commlink_and_unreviewed_weapons_pending
 
 def test_current_enrichment_preserves_reviews_after_definitions_are_published() -> None:
     root = Path(__file__).resolve().parents[1]
-    army_path = root / "data/generated/infinity.db"
-    rules_path = root / "data/generated/rules.db"
+    army_path = root / "data/generated/army.db"
+    rules_path = root / "data/generated/rules_n5.db"
     policy_path = root / "data/curated/weapon-shared-effect-reviews.json"
     db = Database(army_path)
     rules = RulesDatabase(rules_path)
@@ -310,7 +310,7 @@ def test_current_enrichment_preserves_reviews_after_definitions_are_published() 
 
 def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[1]
-    db = Database(root / "data/generated/infinity.db")
+    db = Database(root / "data/generated/army.db")
     original = json.loads(
         (root / "data/curated/weapon-shared-effect-reviews.json").read_text(
             encoding="utf8",
@@ -410,7 +410,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
 
 def test_hmg_shared_only_reviews_are_profile_pinned(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[1]
-    db = Database(root / "data/generated/infinity.db")
+    db = Database(root / "data/generated/army.db")
     policy = json.loads(
         (root / "data/curated/weapon-shared-effect-reviews.json").read_text(
             encoding="utf8",
@@ -444,7 +444,7 @@ def test_hmg_shared_only_reviews_are_profile_pinned(tmp_path: Path) -> None:
 
 def test_spitfire_shared_reviews_are_profile_pinned(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[1]
-    db = Database(root / "data/generated/infinity.db")
+    db = Database(root / "data/generated/army.db")
     policy = json.loads(
         (root / "data/curated/weapon-shared-effect-reviews.json").read_text(
             encoding="utf8",

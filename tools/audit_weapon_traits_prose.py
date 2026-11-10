@@ -448,8 +448,8 @@ def markdown_report(report: dict[str, Any]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--core-pdf", required=True, type=Path)
-    parser.add_argument("--army-db", type=Path, default=Path("data/generated/infinity.db"))
-    parser.add_argument("--rules-db", type=Path, default=Path("data/generated/rules.db"))
+    parser.add_argument("--army-db", type=Path, default=Path("data/generated/army.db"))
+    parser.add_argument("--rules-db", type=Path, default=Path("data/generated/rules_n5.db"))
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     parser.add_argument("--trait-review", type=Path, default=DEFAULT_REVIEW)

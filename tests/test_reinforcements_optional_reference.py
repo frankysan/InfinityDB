@@ -76,14 +76,14 @@ def test_annex_current_optional_reference_discloses_n4_source_boundary() -> None
 
 def test_annex_read_model_is_discoverable_and_separate_from_core_matrix(tmp_path: Path) -> None:
     documents = load_curated_directory(ROOT / "data/curated/rules")
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
     rules = RulesDatabase(output)
     rules.validate()
 
     # The optional annex must survive a fresh current-format Rules export,
     # not only a historical v9 paired-publication promotion.
-    published = RulesDatabase(ROOT / "data/generated/rules.db")
+    published = RulesDatabase(ROOT / "data/generated/rules_n5.db")
     assert rules.skill_reviewed_extra_semantics()["commlink"] == (
         published.skill_reviewed_extra_semantics()["commlink"]
     )
@@ -95,7 +95,7 @@ def test_annex_read_model_is_discoverable_and_separate_from_core_matrix(tmp_path
         assert fresh_record["summary"] == active_record["summary"]
         assert fresh_record["facts"] == active_record["facts"]
 
-    army = Database(ROOT / "data/generated/infinity.db")
+    army = Database(ROOT / "data/generated/army.db")
 
     general = RulesRecordCatalog(rules, "rules")
     assert any(item["slug"] == "reinforcements-extra" for item in general.list_items())
@@ -127,7 +127,7 @@ def test_every_published_reinforcement_profile_and_loadout_keeps_source_army() -
     """Canonical Units must retain each Section's exact source profile/loadout rows."""
     from collections import defaultdict
 
-    path = ROOT / "data/generated/infinity.db"
+    path = ROOT / "data/generated/army.db"
     profiles: dict[int, dict[int, set[tuple[int, str]]]] = defaultdict(
         lambda: defaultdict(set)
     )
@@ -199,7 +199,7 @@ def test_commlink_source_extras_remain_on_their_exact_army_loadouts() -> None:
     """Source Commlink (+X) signatures must not leak across canonical Unit/Army rows."""
     from collections import Counter, defaultdict
 
-    path = ROOT / "data/generated/infinity.db"
+    path = ROOT / "data/generated/army.db"
     # Include unqualified Commlink and preserve all extras belonging to each
     # source Skill occurrence. Source IDs are not inferred from display names.
     occurrences: dict[tuple[int, int, int, int, int], list[tuple[int, str]]] = defaultdict(

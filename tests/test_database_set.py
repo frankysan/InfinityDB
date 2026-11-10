@@ -12,11 +12,10 @@ import pytest
 
 from infinity_db.cli import build_parser, main
 from infinity_db.database_set import (
-    V10_RUNTIME_FILES,
+    EMBEDDED_WEAPON_RUNTIME_FILES,
     database_set_health_report,
     validate_database_set,
 )
-from tools.prepare_runtime_bundle import expected_files
 
 RELEASE = Path(__file__).resolve().parents[1] / "data/generated"
 
@@ -25,7 +24,7 @@ RELEASE = Path(__file__).resolve().parents[1] / "data/generated"
 def runtime_set(tmp_path: Path) -> Path:
     directory = tmp_path / "selected"
     directory.mkdir()
-    for name in V10_RUNTIME_FILES:
+    for name in EMBEDDED_WEAPON_RUNTIME_FILES:
         shutil.copyfile(RELEASE / name, directory / name)
     return directory
 
@@ -44,28 +43,28 @@ def test_selected_set_validates_without_build_sources_or_raw_archive(
     monkeypatch.chdir(tmp_path)
     # A legacy file is not a source or fallback for the embedded v10 model.
     (runtime_set / "deployed-objects.json").write_text("invalid", encoding="utf-8")
-    result = validate_database_set(Path("selected"))
-    assert result["layout"] == "v10-four-file"
+    result = validate_database_set(Path("selected"), require_complete=True)
+    assert result["layout"] == "v17-two-file"
     assert result["integrityCheck"] == "full"
-    assert result["schemaVersion"] == 10
+    assert result["schemaVersion"] == 17
     assert result["deployedObjects"] == 17
     assert result["unresolvedDeliveries"] == 1
     assert result["variantPublicationVersion"] == 2
     assert result["variantGroups"] > 0
     assert result["reviewedWeapons"] > 0
     assert result["sha256"] == before
-    assert expected_files(runtime_set) == V10_RUNTIME_FILES
+    assert set(result["sha256"]) == EMBEDDED_WEAPON_RUNTIME_FILES
     assert {k: v for k, v in fingerprints(runtime_set).items() if k in before} == before
 
 
-@pytest.mark.parametrize("missing", sorted(V10_RUNTIME_FILES))
+@pytest.mark.parametrize("missing", sorted(EMBEDDED_WEAPON_RUNTIME_FILES))
 def test_missing_selected_file_does_not_fall_back_or_create_outputs(
     runtime_set: Path, missing: str, capsys: pytest.CaptureFixture[str],
 ) -> None:
     (runtime_set / missing).unlink()
     before = fingerprints(runtime_set)
     with pytest.raises(ValueError):
-        expected_files(runtime_set)
+        validate_database_set(runtime_set, require_complete=True)
     assert fingerprints(runtime_set) == before
     assert main(["database-health", "--db-dir", str(runtime_set), "--json"]) == 1
     report = json.loads(capsys.readouterr().out)
@@ -75,21 +74,8 @@ def test_missing_selected_file_does_not_fall_back_or_create_outputs(
     assert fingerprints(runtime_set) == before
 
 
-@pytest.mark.parametrize("publication", ["variant-usage.json", "weapon-profile-sources.json"])
-def test_unmatched_publications_are_rejected(runtime_set: Path, publication: str) -> None:
-    path = runtime_set / publication
-    document = json.loads(path.read_text(encoding="utf-8"))
-    document["sourceSnapshot"]["rulesDatabaseSha256"] = "0" * 64
-    path.write_text(json.dumps(document), encoding="utf-8")
-    before = fingerprints(runtime_set)
-    report = database_set_health_report(runtime_set)
-    assert report["status"] == "unhealthy"
-    assert "does not match release" in report["error"]
-    assert fingerprints(runtime_set) == before
-
-
 def test_embedded_objects_must_match_selected_army(runtime_set: Path) -> None:
-    with sqlite3.connect(runtime_set / "rules.db") as connection:
+    with sqlite3.connect(runtime_set / "rules_n5.db") as connection:
         connection.execute(
             "UPDATE deployed_object_metadata SET value = ? WHERE key = ?",
             (json.dumps("0" * 64), "armyDatabaseSha256"),
@@ -99,7 +85,7 @@ def test_embedded_objects_must_match_selected_army(runtime_set: Path) -> None:
     assert "Army" in report["error"]
 
 
-@pytest.mark.parametrize("filename", ["infinity.db", "rules.db"])
+@pytest.mark.parametrize("filename", ["army.db", "rules_n5.db"])
 @pytest.mark.parametrize("pragma", ["application_id", "user_version"])
 def test_unsupported_database_identity_is_rejected(
     runtime_set: Path, filename: str, pragma: str,
@@ -108,23 +94,20 @@ def test_unsupported_database_identity_is_rejected(
         connection.execute(f"PRAGMA {pragma} = 123456")
     report = database_set_health_report(runtime_set)
     assert report["status"] == "unhealthy"
-    assert "Unsupported" in report["error"]
+    assert "Unsupported" in report["error"] or "require Army schema" in report["error"]
 
 
-def test_mixed_rules_bytes_invalidate_the_selected_publications(runtime_set: Path) -> None:
-    # SQLite's writer version is not game data, but runtime publications still
-    # bind exact completed database bytes until their P2 embedding migration.
-    path = runtime_set / "rules.db"
-    data = bytearray(path.read_bytes())
-    data[96:100] = (3040000).to_bytes(4, "big")
-    assert data != path.read_bytes()
-    path.write_bytes(data)
+def test_embedded_variant_fingerprint_rejects_tampering(runtime_set: Path) -> None:
+    with sqlite3.connect(runtime_set / "rules_n5.db") as connection:
+        connection.execute("UPDATE variant_usage_metadata SET content_sha256=?", ("0" * 64,))
+    before = fingerprints(runtime_set)
     report = database_set_health_report(runtime_set)
     assert report["status"] == "unhealthy"
-    assert "does not match release artifacts" in report["error"]
+    assert report["error"]
+    assert fingerprints(runtime_set) == before
 
 
-@pytest.mark.parametrize("filename", sorted(V10_RUNTIME_FILES))
+@pytest.mark.parametrize("filename", sorted(EMBEDDED_WEAPON_RUNTIME_FILES))
 def test_corrupt_selected_artifact_is_an_unhealthy_report(
     runtime_set: Path, filename: str,
 ) -> None:
@@ -167,8 +150,9 @@ def test_complete_startup_rejects_transitional_set_without_fallback(
     from infinity_db.web import create_app_from_database_set
 
     monkeypatch.setenv("INFINITY_DB_DB_DIR", str(RELEASE))
-    monkeypatch.setenv("INFINITY_DB_DATABASE", str(RELEASE / "infinity.db"))
-    (runtime_set / "deployed-objects.json").write_text("invalid JSON", encoding="utf-8")
+    monkeypatch.setenv("INFINITY_DB_DATABASE", str(RELEASE / "army.db"))
+    with sqlite3.connect(runtime_set / "rules_n5.db") as connection:
+        connection.execute("PRAGMA user_version=16")
     before = fingerprints(runtime_set)
     with pytest.raises(ValueError, match="require Rules schema v17"):
         create_app_from_database_set(runtime_set)

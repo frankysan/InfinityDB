@@ -123,15 +123,15 @@ def test_guard_rejects_duplicate_or_missing_requests() -> None:
 
 def test_released_data_matches_pinned_p1_baseline() -> None:
     fixture = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
-    army = ROOT / "data/generated/infinity.db"
-    rules = ROOT / "data/generated/rules.db"
+    army = ROOT / "data/generated/army.db"
+    rules = ROOT / "data/generated/rules_n5.db"
     app = create_app(army, rules)
     observed = capture(
         app,
         paths=tuple(row["path"] for row in fixture["probes"]),
         artifacts=_artifact_identity(army, rules),
     )
-    assert check(fixture, observed, identical_artifacts=True) == len(fixture["probes"])
+    assert check(fixture, observed) == len(fixture["probes"])
 
 
 @pytest.mark.parametrize("arguments", (

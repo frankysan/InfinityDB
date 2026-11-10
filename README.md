@@ -182,21 +182,23 @@ a local rebuild, the development server uses the tracked database pair:
 infinity-db serve
 ```
 
-To use the latest Army and curated Rules changes, the original development
-workflow remains supported:
+To rebuild from the latest local Army archive and maintained Rules inputs:
 
 ```powershell
 infinity-db build --compact
-infinity-db build-rules
 infinity-db serve
 ```
 
-The Rules build publishes a complete, ignored `local/checkout-runtime/` with
-co-located Army and v10 Rules databases, exact-variant usage and reviewed Weapon
-citations. `serve` automatically selects that **verified local build** over
-the tracked release pair; a stale/mismatched local build fails with instructions
-to rebuild instead of silently falling back. Explicit `serve --database PATH`
-bypasses automatic selection. Docker never reads this directory.
+The offline build validates and replaces the complete tracked pair in
+`data/generated/`: `army.db` and `rules_n5.db`. Stop a server before rebuilding
+its selected directory and restart after success. A failed build before
+replacement preserves the previous pair; rerun an interrupted replacement.
+
+`serve --db-dir PATH` selects another complete directory. Otherwise serving
+uses `INFINITY_DB_DB_DIR`, then `data/generated/` relative to the working
+directory. Missing or incompatible files fail startup. Production WSGI requires
+`INFINITY_DB_DB_DIR` explicitly. Both hosting targets use the same two databases;
+Docker copies them directly into its immutable image.
 
 Open <http://127.0.0.1:8000> on the development machine. The development server
 listens on local network interfaces by default; use the machine's LAN address
@@ -210,7 +212,6 @@ Acquisition is explicit and separate from normal builds:
 ```powershell
 python tools/download_army_json.py data/raw
 infinity-db build --compact
-infinity-db build-rules
 infinity-db serve
 ```
 
@@ -221,25 +222,15 @@ the detailed snapshot contract.
 
 ### Build the rules reference
 
-The current rules build combines curated rule definitions with reviewed Army-derived
-deployed-object evidence, while keeping its complete reference model in rules.db:
+The normal `infinity-db build --compact` includes curated Rules, reviewed
+deployed objects, exact variants, Weapon citations and maintained reference facts
+in the complete SQLite pair. ITS Season 18 remains embedded in Rules until its
+planned extraction. No JSON sidecar is required to serve the built set.
 
-```powershell
-infinity-db build-rules
-```
-
-The default command writes v10 Rules to `local/rules-standalone.db`
-and assembles the matching `local/checkout-runtime/` for checkout-based
-serving. It requires the paired raw Army database produced by
-`infinity-db build --compact` to publish reviewed exact-variant usage.
-Use `--output` for a **standalone Rules-only** build with no checkout
-publication. `build-rules` always includes reviewed Restrictions and deployed
-objects; older standalone CLI formats are retired.
-For an independently staged, source-matched v10 candidate, run
-`python -m tools.build_v10_runtime_candidate` and repeat with `--check`.
-The initial v9-to-v10 migration is complete and its one-use promotion command
-is retired. The development branch contains the matched v10 set; deployment
-and release acceptance follow the [release checklist](docs/releasing.md).
+For independent Rules-export development, `infinity-db build-rules` writes a
+standalone v10 database under ignored `data/work/build/rules-standalone.db`.
+An explicit `--output` selects its destination. This narrow command does not
+produce a complete serving set or change which directory `serve` opens.
 
 Reference PDFs and wiki snapshots are research inputs rather than direct runtime
 inputs. Human-reviewed rules collections live under `data/curated/rules/`.
@@ -296,58 +287,30 @@ The snapshot filename below is a pattern; replace the timestamp with the local
 immutable Army ZIP you intend to process.
 
 ```powershell
-# Run individual Army-data stages
-infinity-db merge "data/raw/JSON YYYYMMDD-HHMMSS.zip" data/generated/master.json --compact
-infinity-db normalize data/generated/master.json data/generated/normalized.json --compact
-infinity-db export data/generated/normalized.json data/generated/infinity.db
+# Run individual source-development stages into ignored work files
+infinity-db merge "data/raw/JSON YYYYMMDD-HHMMSS.zip" data/work/build/master.json --compact
+infinity-db normalize data/work/build/master.json data/work/build/normalized.json --compact
+infinity-db export data/work/build/normalized.json data/work/build/army.db
 
-# Use an alternate output directory or database/server port
-infinity-db build --output-dir other-output --compact
-infinity-db serve --database other-output/infinity.db --port 8001
+# Build and serve a complete alternate set
+infinity-db build --db-dir local/alternate-dbs --compact
+infinity-db serve --db-dir local/alternate-dbs --port 8001
 
-# Validate a published Army database and its development raw sibling
-infinity-db database-health data/generated/infinity.db --require-raw
-
-# Validate a complete current runtime directory (without raw build inputs)
+# Validate the complete serving set without raw inputs
 infinity-db database-health --db-dir data/generated --json
 
-# Build and inspect a complete alternate runtime from a pinned local archive
-infinity-db build "data/raw/JSON YYYYMMDD-HHMMSS.zip" --db-dir local/alternate-runtime --compact
-infinity-db database-health --db-dir local/alternate-runtime --json
+# Inspect a development Army export and its raw sibling
+infinity-db database-health data/work/build/army.db --require-raw
 
 # Validate a curated rules file
 infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
-
-# Build the complete v10 rules-reference candidate
-infinity-db build-rules
 ```
 
-`build-rules` reads `data/curated/rules/` and the reviewed Army-source
-inputs, writing a v10 candidate to `local/rules-standalone.db` by default.
-The Restrictions chart and deployed-object reviews are applied automatically.
-Older standalone build modes are retired; current deployed-object serving
-requires an embedded v10-or-later projection.
-Use a matching retained released image to roll back to an older data format.
-Direct writes to the tracked release `rules.db` are disallowed.
-
-The prepared 1.0.1 release uses v10 with deployed objects embedded in `rules.db`;
-the tagged 1.0.0 release used v9 with `deployed-objects.json`. See the
-[versioned storage contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted)
-and its ongoing [restructuring work](docs/TODO.md#major-simplification-and-restructuring).
-A tagged immutable Docker image must receive a validated matching set of
-artifacts rather than rebuilding data at container startup.
-
-`infinity-army` and `python -m infinity_army_data` remain available for the
-JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)
-adds SQLite export and web-server commands.
-
-A normal Army build writes generated artifacts under `data/generated/`,
-including the application database `infinity.db`, the lossless development
-archive `infinity.raw.db`, and intermediate normalized JSON.
-
-Database replacement is fail-safe: a failed import leaves the previous database
-available. On Windows, stop the server before rebuilding if an active reader
-prevents replacement.
+`infinity-army` and `python -m infinity_army_data` retain the JSON source
+pipeline with explicit `--output-dir` support; their default is ignored
+`data/work/build/`. `infinity-db export` requires an explicit output path for
+narrow Army development. Normal complete builds discard their intermediate
+JSON and raw archive after validation. Source archives remain untouched.
 
 ## Linux deployment
 

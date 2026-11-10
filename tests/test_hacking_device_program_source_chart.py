@@ -75,7 +75,7 @@ def test_current_p58_device_citations_match_rules_database() -> None:
         (record_id, "n5-core-v5.3-pdf", 58)
         for record_id, _name, _programs in PINNED
     )
-    path = CURATED.parents[2] / "generated/rules.db"
+    path = CURATED.parents[2] / "generated/rules_n5.db"
     with sqlite3.connect(path) as connection:
         actual = connection.execute(
             "SELECT record_id, source_id, page FROM record_citations "
@@ -177,7 +177,7 @@ def test_adjacent_statistics_cli_dispatch(
 # but is never interpreted as a second Equipment entitlement source.
 def test_n53_program_statistics_match_published_army_metadata() -> None:
     manifest = json.loads(STATISTICS.read_text(encoding="utf-8"))
-    rows = Database(STATISTICS.parents[2] / "data/generated/infinity.db").list_hacking_programs()
+    rows = Database(STATISTICS.parents[2] / "data/generated/army.db").list_hacking_programs()
     report = audit_statistics(manifest, rows)
     assert report["rowCount"] == 12
     assert report["statisticsMismatches"] == []

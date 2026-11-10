@@ -14,8 +14,8 @@ from infinity_db.web import create_app
 from tools.browser_wsgi_transport import route_browser_page
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY = Path("data/generated/infinity.db")
-RULES = Path("data/generated/rules.db")
+ARMY = Path("data/generated/army.db")
+RULES = Path("data/generated/rules_n5.db")
 ORIGIN = "http://infinitydb-movement.test"
 
 

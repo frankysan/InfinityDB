@@ -38,10 +38,8 @@ data/raw/*
 !data/raw/.gitkeep
 data/generated/*
 !data/generated/.gitkeep
-!data/generated/infinity.db
-!data/generated/rules.db
-!data/generated/variant-usage.json
-!data/generated/weapon-profile-sources.json
+!data/generated/army.db
+!data/generated/rules_n5.db
 data/manifests/*
 !data/manifests/symbol-publication.json
 data/curated/*

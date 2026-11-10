@@ -24,9 +24,9 @@ CHART_RANGES = {
 @pytest.fixture(scope="module")
 def app(tmp_path_factory: pytest.TempPathFactory) -> Any:
     root = Path(__file__).resolve().parents[1]
-    output = tmp_path_factory.mktemp("marksman-rifle-reference") / "rules.db"
+    output = tmp_path_factory.mktemp("marksman-rifle-reference") / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), output)
-    return create_app(root / "data/generated/infinity.db", output)
+    return create_app(root / "data/generated/army.db", output)
 
 
 def detail(app: Any, slug: str) -> dict[str, Any]:

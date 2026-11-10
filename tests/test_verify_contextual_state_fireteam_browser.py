@@ -28,10 +28,10 @@ def state_fireteam_app(
     tmp_path_factory: pytest.TempPathFactory,
 ) -> Any:
     """Export changed curated content, never silently use an older tracked DB."""
-    rules_path = tmp_path_factory.mktemp("contextual-state-fireteam") / "rules.db"
+    rules_path = tmp_path_factory.mktemp("contextual-state-fireteam") / "rules_n5.db"
     export_rules_database(load_curated_directory(ROOT / "data/curated"), rules_path)
     return create_app(
-        ROOT / "data/generated/infinity.db", rules_database_path=rules_path,
+        ROOT / "data/generated/army.db", rules_database_path=rules_path,
     )
 
 

@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import json
-import shutil
 import sqlite3
 from copy import deepcopy
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_rules, weapon_publication
 
-from infinity_db.weapon_profile_publication import load_weapon_profile_publication
+from infinity_db.rules_database import RulesDatabase
 from infinity_db.weapon_profile_storage import (
     read_weapon_profile_citations,
     stage_weapon_profile_citations,
@@ -19,15 +18,14 @@ from infinity_db.weapon_profile_storage import (
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / "data/generated"
-ARMY = RELEASE / "infinity.db"
-SIDECAR = RELEASE / "weapon-profile-sources.json"
+ARMY = RELEASE / "army.db"
 
 
 @pytest.fixture
 def embedded(tmp_path: Path) -> tuple[Path, dict]:
-    path = tmp_path / "rules.db"
-    shutil.copyfile(RELEASE / "rules.db", path)
-    document = json.loads(SIDECAR.read_text(encoding="utf-8"))
+    path = tmp_path / "rules_n5.db"
+    copy_base_rules(path)
+    document = weapon_publication()
     with sqlite3.connect(path) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
         with connection:
@@ -41,7 +39,7 @@ def test_embedded_citations_match_the_current_api_publication(embedded) -> None:
     with sqlite3.connect(path) as connection:
         validate_weapon_profile_snapshot(connection)
         actual = read_weapon_profile_citations(connection, ARMY)
-    expected = load_weapon_profile_publication(SIDECAR, ARMY, RELEASE / "rules.db")
+    expected = RulesDatabase(RELEASE / "rules_n5.db").weapon_profile_citations_payload(ARMY)
     assert actual == expected
     assert len({key[0] for key in actual}) == len(document["weapons"]) == 62
     assert len(actual) == sum(len(weapon["profiles"]) for weapon in document["weapons"]) == 69
@@ -64,7 +62,7 @@ def test_embedded_citations_match_the_current_api_publication(embedded) -> None:
 def test_rejects_mixed_or_ambiguous_curation(
     tmp_path: Path, mutation: str, message: str,
 ) -> None:
-    document = json.loads(SIDECAR.read_text(encoding="utf-8"))
+    document = weapon_publication()
     reviewed = next(row for row in document["weapons"] if row["slug"] == "uragan-mrl")
     if mutation == "source":
         document["source"]["sha256"] = "0" * 64
@@ -80,8 +78,8 @@ def test_rejects_mixed_or_ambiguous_curation(
         reviewed["profiles"].append(deepcopy(reviewed["profiles"][0]))
     elif mutation == "page":
         reviewed["profiles"][0]["page"] = 999
-    path = tmp_path / "rules.db"
-    shutil.copyfile(RELEASE / "rules.db", path)
+    path = tmp_path / "rules_n5.db"
+    copy_base_rules(path)
     with sqlite3.connect(path) as connection:
         with pytest.raises(ValueError, match=message):
             stage_weapon_profile_citations(connection, document, ARMY)

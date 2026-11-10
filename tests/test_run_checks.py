@@ -104,7 +104,7 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
     assert stages[4].command == (
         sys.executable,
         "-m",
-        "infinity_db",
+        "infinity_army_data",
         "build",
         str(Path("data/raw/example.zip")),
         "--output-dir",
@@ -752,7 +752,7 @@ def test_opt_in_source_occupancy_gate_runs_before_rules_review_and_build(
     assert commands == [
         (
             sys.executable, "-m", "tools.audit_source_presentation",
-            "data/generated/infinity.db", "--require-no-occupied-gaps",
+            "data/generated/army.db", "--require-no-occupied-gaps",
         ),
         (
             sys.executable, "-m", "tools.audit_rules_interactions",
@@ -1344,7 +1344,7 @@ def test_local_source_guard_skips_missing_but_not_present_invalid_bytes(
 def test_fixture_build_stage_never_replaces_runtime_database(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    runtime_database = tmp_path / "data" / "generated" / "infinity.db"
+    runtime_database = tmp_path / "data" / "generated" / "army.db"
     runtime_database.parent.mkdir(parents=True)
     runtime_database.write_bytes(b"real-production-database")
     fixture = Path(__file__).resolve().parent / "fixtures" / "deployment-smoke"

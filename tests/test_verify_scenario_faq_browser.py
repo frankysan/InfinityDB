@@ -143,17 +143,17 @@ def test_known_source_disclosures_normal_browser(
 @pytest.fixture(scope="module")
 def scenario_app(tmp_path_factory: pytest.TempPathFactory) -> Callable[..., Any]:
     """Use freshly exported curated rules; the checked-in rules DB may lag."""
-    rules_path = tmp_path_factory.mktemp("scenario-faq-browser") / "rules.db"
+    rules_path = tmp_path_factory.mktemp("scenario-faq-browser") / "rules_n5.db"
     export_rules_database(load_curated_directory(ROOT / "data/curated"), rules_path)
-    return create_app(ROOT / "data/generated/infinity.db", rules_database_path=rules_path)
+    return create_app(ROOT / "data/generated/army.db", rules_database_path=rules_path)
 
 
 @pytest.fixture(scope="module")
 def release_scenario_app() -> Callable[..., Any]:
     """Serve the tracked Army/rules database pair, never a fresh test export."""
     return create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
 

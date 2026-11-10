@@ -11,10 +11,11 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from storage_fixture_support import rules_build_provenance, variant_publication, weapon_publication
 
 from infinity_db.build_provenance import file_sha256
 from infinity_db.curated import load_curated_directory
-from infinity_db.database_set import EMBEDDED_VARIANT_RUNTIME_FILES, validate_database_set
+from infinity_db.database_set import validate_database_set
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.web import create_app
@@ -30,40 +31,40 @@ def _export(path: Path, publication: dict[str, Any]) -> None:
         restrictions_manifest=json.loads(
             (ROOT / "config/validation/restrictions-source-chart.json").read_text(encoding="utf-8")
         ),
-        deployed_objects=RulesDatabase(RELEASE / "rules.db").deployed_objects_payload(
-            RELEASE / "infinity.db",
+        deployed_objects=RulesDatabase(RELEASE / "rules_n5.db").deployed_objects_payload(
+            RELEASE / "army.db",
         ),
         variant_usage=publication,
+        weapon_citations=weapon_publication(),
+        army_database=RELEASE / "army.db",
+        build_provenance=rules_build_provenance(),
     )
 
 
 @pytest.fixture(scope="module")
 def embedded(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, dict[str, Any]]:
     directory = tmp_path_factory.mktemp("embedded-variants")
-    publication = json.loads((RELEASE / "variant-usage.json").read_text(encoding="utf-8"))
-    shutil.copyfile(RELEASE / "infinity.db", directory / "infinity.db")
-    _export(directory / "rules.db", publication)
-    weapons = json.loads((RELEASE / "weapon-profile-sources.json").read_text(encoding="utf-8"))
-    weapons["sourceSnapshot"]["rulesDatabaseSha256"] = file_sha256(directory / "rules.db")
-    (directory / "weapon-profile-sources.json").write_text(json.dumps(weapons), encoding="utf-8")
+    publication = variant_publication()
+    shutil.copyfile(RELEASE / "army.db", directory / "army.db")
+    _export(directory / "rules_n5.db", publication)
     expected = copy.deepcopy(publication)
-    expected["sourceSnapshot"]["rulesDatabaseSha256"] = file_sha256(directory / "rules.db")
+    expected["sourceSnapshot"]["rulesDatabaseSha256"] = file_sha256(directory / "rules_n5.db")
     return directory, expected
 
 
 def test_all_committed_groups_and_source_rows_round_trip_without_a_sidecar(embedded) -> None:
     directory, expected = embedded
-    rules = RulesDatabase(directory / "rules.db")
+    rules = RulesDatabase(directory / "rules_n5.db")
     rules.validate()
-    assert rules.variant_usage_payload(directory / "infinity.db") == expected
+    assert rules.variant_usage_payload(directory / "army.db") == expected
     report = validate_database_set(directory)
-    assert report["layout"] == "v11-three-file"
-    assert set(report["sha256"]) == EMBEDDED_VARIANT_RUNTIME_FILES
+    assert report["layout"] == "v12-two-file"
+    assert set(report["sha256"]) == {"army.db", "rules_n5.db"}
     assert report["variantGroups"] == 151
     assert sum(len(group["sourceRows"]) for group in expected["variants"]) == 10923
     assert not (directory / "variant-usage.json").exists()
-    with closing(sqlite3.connect(directory / "rules.db")) as connection:
-        assert connection.execute("PRAGMA user_version").fetchone()[0] == 11
+    with closing(sqlite3.connect(directory / "rules_n5.db")) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == 12
         assert not connection.execute("PRAGMA foreign_key_check").fetchall()
         counts = connection.execute(
             "SELECT group_count,row_count FROM variant_usage_metadata"
@@ -85,10 +86,10 @@ def test_runtime_api_preserves_exact_groups_and_ignores_obsolete_json(
     embedded, tmp_path: Path,
 ) -> None:
     directory, expected = embedded
-    for name in EMBEDDED_VARIANT_RUNTIME_FILES:
+    for name in ("army.db", "rules_n5.db"):
         shutil.copyfile(directory / name, tmp_path / name)
     (tmp_path / "variant-usage.json").write_bytes(b"obsolete and invalid")
-    app = create_app(tmp_path / "infinity.db", rules_database_path=tmp_path / "rules.db")
+    app = create_app(tmp_path / "army.db", rules_database_path=tmp_path / "rules_n5.db")
     assert app.variant_usage == expected
     record = "skill:doctor"
     url = f"http://variants.test/api/variant-usage?record_id={record}"
@@ -99,7 +100,7 @@ def test_runtime_api_preserves_exact_groups_and_ignores_obsolete_json(
     assert payload["items"] == [
         group for group in expected["variants"] if group["variant"]["recordId"] == record
     ]
-    assert app.variant_usage_revision == file_sha256(tmp_path / "rules.db")
+    assert app.variant_usage_revision == file_sha256(tmp_path / "rules_n5.db")
     etag = dict(headers)["ETag"]
     cached, _, content = wsgi_response(app, url, headers={"If-None-Match": etag})
     assert cached == 304 and content == b""
@@ -136,9 +137,9 @@ def test_shared_options_keep_unverified_context_and_zero_direct_counts(
         group[key] = 0
     group["sourceRelationshipRows"] = 1
     publication["variants"] = [group]
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     _export(path, publication)
-    result = RulesDatabase(path).variant_usage_payload(RELEASE / "infinity.db")
+    result = RulesDatabase(path).variant_usage_payload(RELEASE / "army.db")
     assert result is not None and result["variants"] == [group]
 
 
@@ -149,8 +150,8 @@ def test_damaged_relational_projection_fails_without_json_fallback(
     embedded, tmp_path: Path, damage: str,
 ) -> None:
     directory, _ = embedded
-    path = tmp_path / "rules.db"
-    shutil.copyfile(directory / "rules.db", path)
+    path = tmp_path / "rules_n5.db"
+    shutil.copyfile(directory / "rules_n5.db", path)
     with closing(sqlite3.connect(path)) as connection, connection:
         if damage == "missing-table":
             connection.execute("DROP TABLE variant_usage_extras")
@@ -172,13 +173,13 @@ def test_damaged_relational_projection_fails_without_json_fallback(
         RulesDatabase(path).validate()
     (tmp_path / "variant-usage.json").write_bytes((RELEASE / "variant-usage.json").read_bytes())
     with pytest.raises((ValueError, sqlite3.Error)):
-        load_runtime_variant_usage(directory / "infinity.db", path)
+        load_runtime_variant_usage(directory / "army.db", path)
 
 
 def test_source_occurrences_cannot_be_duplicated(embedded, tmp_path: Path) -> None:
     directory, _ = embedded
-    path = tmp_path / "rules.db"
-    shutil.copyfile(directory / "rules.db", path)
+    path = tmp_path / "rules_n5.db"
+    shutil.copyfile(directory / "rules_n5.db", path)
     with closing(sqlite3.connect(path)) as connection, connection:
         first = connection.execute(
             "SELECT catalog,owner_kind,occurrence_id FROM variant_usage_source_rows WHERE id=1"
@@ -193,12 +194,12 @@ def test_source_occurrences_cannot_be_duplicated(embedded, tmp_path: Path) -> No
 
 def test_wrong_army_bytes_are_rejected(embedded, tmp_path: Path) -> None:
     directory, _ = embedded
-    army = tmp_path / "infinity.db"
-    content = bytearray((directory / "infinity.db").read_bytes())
+    army = tmp_path / "army.db"
+    content = bytearray((directory / "army.db").read_bytes())
     content[96:100] = (int.from_bytes(content[96:100], "big") + 1).to_bytes(4, "big")
     army.write_bytes(content)
     with pytest.raises(ValueError, match="selected Army"):
-        RulesDatabase(directory / "rules.db").variant_usage_payload(army)
+        RulesDatabase(directory / "rules_n5.db").variant_usage_payload(army)
 
 
 def test_explicit_rules_selection_and_byte_revision_change_cache_validators(
@@ -206,13 +207,13 @@ def test_explicit_rules_selection_and_byte_revision_change_cache_validators(
 ) -> None:
     directory, expected = embedded
     url = "http://variants.test/api/variant-usage?record_id=skill:doctor"
-    original = create_app(directory / "infinity.db", rules_database_path=directory / "rules.db")
+    original = create_app(directory / "army.db", rules_database_path=directory / "rules_n5.db")
     _, original_headers, _ = wsgi_response(original, url)
-    path = tmp_path / "rules.db"
-    content = bytearray((directory / "rules.db").read_bytes())
+    path = tmp_path / "rules_n5.db"
+    content = bytearray((directory / "rules_n5.db").read_bytes())
     content[96:100] = (int.from_bytes(content[96:100], "big") + 1).to_bytes(4, "big")
     path.write_bytes(content)
-    changed = create_app(directory / "infinity.db", rules_database_path=path)
+    changed = create_app(directory / "army.db", rules_database_path=path)
     assert changed.variant_usage is not None
     assert changed.variant_usage["variants"] == expected["variants"]
     status, headers, _ = wsgi_response(
@@ -226,8 +227,8 @@ def test_unknown_schema_does_not_attempt_a_legacy_json_fallback(
     embedded, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     directory, _ = embedded
-    path = tmp_path / "rules.db"
-    shutil.copyfile(directory / "rules.db", path)
+    path = tmp_path / "rules_n5.db"
+    shutil.copyfile(directory / "rules_n5.db", path)
     with closing(sqlite3.connect(path)) as connection:
         connection.execute("PRAGMA user_version=999")
 
@@ -238,7 +239,7 @@ def test_unknown_schema_does_not_attempt_a_legacy_json_fallback(
         "infinity_db.variant_usage_reference.load_variant_usage_publication", forbidden,
     )
     with pytest.raises(ValueError, match="Unsupported Rules schema"):
-        load_runtime_variant_usage(directory / "infinity.db", path)
+        load_runtime_variant_usage(directory / "army.db", path)
 
 
 def test_unreviewed_rule_reference_cannot_replace_a_valid_export(embedded, tmp_path: Path) -> None:
@@ -249,7 +250,7 @@ def test_unreviewed_rule_reference_cannot_replace_a_valid_export(embedded, tmp_p
         changed["variants"][0]["variant"], sort_keys=True, separators=(",", ":"),
     )
     changed["variants"].sort(key=lambda group: group["variantKey"])
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     path.write_bytes(b"previous output")
     with pytest.raises(ValueError, match="reviewed rule definition"):
         _export(path, changed)

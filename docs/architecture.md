@@ -80,32 +80,26 @@ The canonical ownership definitions are in `docs/project-domains.md`.
 InfinityDB permanently supports two serving targets that share the same
 read-only application/API and validated database models:
 
-- **Directly from a checkout (local or self-hosted).** The sequence
-  `infinity-db build --compact`, `infinity-db build-rules`,
-  `infinity-db serve` builds the
-  Army data and an ignored, source-matched `local/checkout-runtime/` bundle.
-  Plain `serve` selects the complete checkout bundle when present and current;
-  otherwise it uses the tracked release pair. Missing/mismatched local
-  publications fail closed, not silently against the older release. Explicit
-  database selection remains available. Host-side WSGI deployments point
-  explicitly at the corresponding checkout runtime pair.
-  The opt-in complete-runtime `build --db-dir` path is described in the
-  [data lifecycle](../data/README.md); it does not change these defaults.
-- **Docker for public internet serving.** A release builds an immutable image
-  exclusively from verified, tracked `data/generated/` publications, assembled
-  into `data/runtime/` during image preparation. Docker never automatically
-  reads `local/checkout-runtime/`, raw snapshots, or a loose standalone Rules
-  database. Checkout Rules builds never promote tracked Rules or their
-  dependent JSON publications, and no development command deploys an image.
-  The existing `build --compact` default still refreshes the tracked Army
-  `data/generated/infinity.db`; this Git-visible change must not be
-  mistaken for a validated, release-paired Docker publication.
+- **Directly from a checkout (local or self-hosted).** Run
+  `infinity-db build --compact`, then `infinity-db serve` from the repository
+  root. One offline build produces the complete `data/generated/army.db` and
+  `rules_n5.db` set. Serving selects explicit `--db-dir`, then
+  `INFINITY_DB_DB_DIR`, then the working-directory-relative default. Production
+  WSGI requires that single environment setting. An invalid selected set fails
+  closed. Stop the service before rebuilding its selected directory.
+- **Docker for public internet serving.** The image copies those same two
+  tracked databases directly into `/app/data/`, configured with
+  `INFINITY_DB_DB_DIR=/app/data`. No host promotion directory, raw archive,
+  curation or JSON publication is a serving dependency. Source/release checks
+  verify recorded build-input freshness before image creation; runtime startup
+  validates the built set independently of source files.
 
-The first target prioritizes an uncomplicated edit/build/serve cycle; the
-second requires deliberate paired publication and image verification. Both
-must remain supported when changing CLI defaults, storage schemas, or release
-tooling. The [data directory contract](../data/README.md) owns artifact
-paths; [deployment](deployment.md) owns image preparation and hosting.
+Both targets use the strict complete-set startup factory and shared validator.
+Runtime cache identity includes the sorted active database filenames and their
+exact SHA-256 values. A changed file or filename changes snapshot identity.
+The [data lifecycle](../data/README.md) owns artifact paths and provenance;
+[deployment](deployment.md) owns hosting. These development changes do not
+authorize deployment or a release.
 
 ## Semantic provenance
 
@@ -131,11 +125,10 @@ InfinityDB deliberately separates four kinds of repository data:
 - `data/curated/` contains human-reviewed source-derived knowledge and rules-reference content.
 - `data/manifests/` contains publication/provenance state; the tracked symbol publication manifest
   is a release contract, while acquisition/build manifests are normally local generated evidence.
-- `data/generated/` contains generated artifacts. `infinity.db`, `rules.db`, `variant-usage.json`,
-  and `weapon-profile-sources.json` are tracked runtime release artifacts. Current Rules embed
-  deployed objects; current serving and image assembly never read a deployed-object JSON fallback.
-  Other intermediate JSON and `infinity.raw.db` remain rebuildable
-  development outputs.
+- `data/generated/` contains the two tracked runtime databases, `army.db`
+  and `rules_n5.db`. Structured reference facts and symbol mappings are embedded.
+  SVG/CSS/JS remain ordinary static files. Development intermediates and raw
+  exports belong under ignored `data/work/build/`.
 
 Runtime code must not reach back into raw archives or working-tree curation to reinterpret an
 already-built database. Build-time configuration may be packaged for installed build commands, but
@@ -170,10 +163,10 @@ The shared Specialist Rule owns its Skill-reference array and common restriction
 only additions/removals. Backend composition resolves semantics and scope, while the common Skill-card
 renderer owns labels, links, list formatting, and ordinary Skill detail structure. Scoped definitions
 are excluded from default core help, and cannot grant permanent Army profile facts. Runtime reads
-consume the materialized `rules.db`, independently of curation files.
+consume the materialized `rules_n5.db`, independently of curation files.
 
 [The data model](data-model.md#scenario-model-implemented-core-and-future-extensions) owns the implemented contract. Dedicated
-scenario collection/publication indexes and central revision-aware selection live in `rules.db`. The
+scenario collection/publication indexes and central revision-aware selection live in `rules_n5.db`. The
 JSON API exposes the current list plus exact Army-Points detail projections, and `/scenarios` plus
 `/scenarios/<slug>` provide the corresponding player-facing catalog/detail surface. The backend
 remains configuration-explicit; in the browser an absent selection defaults to 300 Army Points and is
@@ -188,7 +181,7 @@ The comparison is retained in `docs/rules-semantics.md`; it establishes that cor
 would be too narrow for deployment geometry, scoring cadence, asymmetric sides, Classified
 Objectives, scenario elements, and revision/season provenance.
 
-The accepted design places scenario definitions in the rules curation pipeline and `rules.db`,
+The accepted design places scenario definitions in the rules curation pipeline and `rules_n5.db`,
 not in Army export or mutable match state. Publication uses a hybrid model: stable identities,
 provenance, collection membership, and cross-domain references are relational; ordered and nested
 scenario structures remain validated typed payloads. Scenario identity, source revision, and
@@ -198,7 +191,7 @@ Geometry and scoring are maintained semantic data. Core diagrams and reference v
 from that data, with source/season overlays kept distinct from canonical Army or rules facts.
 A **post-1.0 scenario editor** will reuse this component model and renderer for
 new player-defined scenarios and edits of existing ones. It will compose local
-copies/overlays, not mutate authoritative source publications or `rules.db`.
+copies/overlays, not mutate authoritative source publications or `rules_n5.db`.
 Its serialization follows the stateless-sharing direction below and its custom
 rule semantics follow `docs/data-model.md`.
 The implemented deterministic SVG projection covers all four N5.3 Core
@@ -323,11 +316,11 @@ The detailed snapshot/archive contract is owned by `data/README.md`.
 
 InfinityDB serves two tracked runtime databases:
 
-- `data/generated/infinity.db` — canonical application data derived from Army snapshots and reviewed
+- `data/generated/army.db` — canonical application data derived from Army snapshots and reviewed
   source relationships;
-- `data/generated/rules.db` — curated rules/reference semantics.
+- `data/generated/rules_n5.db` — curated rules/reference semantics.
 
-`infinity.raw.db` is a development/audit archive of normalized source structures and is not a
+`army.raw.db` is a development/audit archive of normalized source structures and is not a
 production runtime dependency. Runtime repositories query application tables and materialized
 provenance; they do not fall back to raw normalized tables for convenience.
 
@@ -572,7 +565,7 @@ Release tags are self-contained for runtime deployment. A normal server update:
 1. resolves the target release tag;
 2. hands off to the installer shipped by that target release;
 3. checks out the tag;
-4. uses the tracked `infinity.db`, `rules.db`, processed SVG publication, and publication manifest;
+4. uses the tracked `army.db`, `rules_n5.db`, processed SVG publication, and publication manifest;
 5. builds/verifies an immutable application image; and
 6. activates it while retaining configured rollback images.
 

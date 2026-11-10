@@ -1,7 +1,7 @@
 """Preflight the audit-only N5.3 citations pending coordinated publication.
 
 Reconciles three independently reviewed manifests against the current curated
-source, without editing source data, rules.db, or deployment fingerprints.
+source, without editing source data, rules_n5.db, or deployment fingerprints.
 """
 
 from __future__ import annotations

@@ -150,7 +150,7 @@ def test_source_domain_reviews_fail_closed_on_source_and_provenance_drift() -> N
 
 
 def test_inventory_preserves_source_modes_and_review_candidates(tmp_path: Path) -> None:
-    db_path = tmp_path / "infinity.db"
+    db_path = tmp_path / "army.db"
     with sqlite3.connect(db_path) as conn:
         conn.execute(
             "CREATE TABLE metadata_weapons ("
@@ -240,7 +240,7 @@ def test_inventory_preserves_source_modes_and_review_candidates(tmp_path: Path) 
 
 def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries() -> None:
     root = Path(__file__).resolve().parents[1]
-    db_path = root / "data/generated/infinity.db"
+    db_path = root / "data/generated/army.db"
     if not db_path.is_file():
         pytest.skip("Generated Army source database unavailable")
     result = audit_inventory(

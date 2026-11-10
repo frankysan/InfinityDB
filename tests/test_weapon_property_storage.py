@@ -9,6 +9,7 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_rules, variant_publication, weapon_publication
 
 from infinity_db.ammunition_reference_storage import stage_ammunition_references
 from infinity_db.combined_saving_roll_storage import stage_combined_saving_rolls
@@ -33,29 +34,27 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / "data/generated"
-ARMY = RELEASE / "infinity.db"
+ARMY = RELEASE / "army.db"
 CONFIG = ROOT / "config/catalogs/weapon-properties.json"
 
 
 @pytest.fixture(scope="module")
 def v17(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, list[dict]]:
     directory = tmp_path_factory.mktemp("v17-property-reference")
-    rules = directory / "rules.db"
-    shutil.copyfile(RELEASE / "rules.db", rules)
-    shutil.copyfile(ARMY, directory / "infinity.db")
+    rules = directory / "rules_n5.db"
+    copy_base_rules(rules)
+    shutil.copyfile(ARMY, directory / "army.db")
     entries = load_weapon_properties(CONFIG)
     with sqlite3.connect(rules) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
         with connection:
             stage_variant_usage(
                 connection,
-                json.loads((RELEASE / "variant-usage.json").read_text(encoding="utf-8")),
+                variant_publication(),
             )
             stage_weapon_profile_citations(
                 connection,
-                json.loads(
-                    (RELEASE / "weapon-profile-sources.json").read_text(encoding="utf-8")
-                ),
+                weapon_publication(),
                 ARMY,
             )
             connection.execute("PRAGMA user_version=12")
@@ -128,7 +127,7 @@ def test_source_order_and_relational_round_trip(v17) -> None:
     report = validate_database_set(path.parent)
     assert report["layout"] == "v17-two-file"
     assert report["weaponProperties"] == 12
-    assert set(report["sha256"]) == {"infinity.db", "rules.db"}
+    assert set(report["sha256"]) == {"army.db", "rules_n5.db"}
 
 
 def test_v17_glossary_search_and_weapon_api_parity_without_json_reads(
@@ -137,7 +136,7 @@ def test_v17_glossary_search_and_weapon_api_parity_without_json_reads(
     import infinity_db.weapon_properties as source_module
 
     path, source = v17
-    previous = create_app(ARMY, rules_database_path=RELEASE / "rules.db")
+    previous = create_app(ARMY, rules_database_path=RELEASE / "rules_n5.db")
     routes = (
         "/api/glossary", "/api/search?q=plasma", "/api/search?q=viral",
         "/api/weapons/plasma-rifle", "/api/weapons/viral-rifle",
@@ -177,7 +176,7 @@ def test_v17_source_profile_matching_is_still_exact(v17) -> None:
         changed = deepcopy(reviewed)
         changed[field] = alternate
         assert properties.for_profile(changed) == []
-    assert RulesDatabase(RELEASE / "rules.db").weapon_properties_payload() is None
+    assert RulesDatabase(RELEASE / "rules_n5.db").weapon_properties_payload() is None
     assert source == load_weapon_properties(CONFIG)
 
 
@@ -187,7 +186,7 @@ def test_v17_source_profile_matching_is_still_exact(v17) -> None:
 ))
 def test_stage_rejects_maintained_source_drift(v17, tmp_path: Path, mutation: str) -> None:
     original, source = v17
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     shutil.copyfile(original, path)
     entries = deepcopy(source)
     if mutation == "missing":
@@ -216,7 +215,7 @@ def test_stage_rejects_maintained_source_drift(v17, tmp_path: Path, mutation: st
 ))
 def test_reader_rejects_corrupted_relational_mapping(v17, tmp_path: Path, mutation: str) -> None:
     original, _ = v17
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     shutil.copyfile(original, path)
     with sqlite3.connect(path) as connection:
         if mutation == "summary":

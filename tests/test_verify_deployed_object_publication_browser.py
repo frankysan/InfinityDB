@@ -31,10 +31,10 @@ class _QuietHandler(WSGIRequestHandler):
 def published_app(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[Callable, str]]:
     root = Path(__file__).resolve().parents[1]
     tmp = tmp_path_factory.mktemp("deployed-pub")
-    army = tmp / "infinity.db"
-    rules = tmp / "rules.db"
-    shutil.copyfile(root / "data/generated/infinity.db", army)
-    shutil.copyfile(root / "data/generated/rules.db", rules)
+    army = tmp / "army.db"
+    rules = tmp / "rules_n5.db"
+    shutil.copyfile(root / "data/generated/army.db", army)
+    shutil.copyfile(root / "data/generated/rules_n5.db", rules)
     assert not (tmp / "deployed-objects.json").exists()
     app = create_app(army, rules_database_path=rules)
     server = make_server(
@@ -362,9 +362,9 @@ def test_unpublished_legacy_database_does_not_infer_object_catalog(
     from infinity_db.rules_database import export_rules_database
 
     root = Path(__file__).resolve().parents[1]
-    army = tmp_path / "infinity.db"
-    rules = tmp_path / "rules.db"
-    shutil.copyfile(root / "data/generated/infinity.db", army)
+    army = tmp_path / "army.db"
+    rules = tmp_path / "rules_n5.db"
+    shutil.copyfile(root / "data/generated/army.db", army)
     export_rules_database(load_curated_directory(root / "data/curated/rules"), rules)
     app = create_app(army, rules_database_path=rules)
     for path in ("/api/deployed-objects", "/api/deployed-objects/army-weapon-199"):

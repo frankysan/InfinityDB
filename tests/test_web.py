@@ -240,14 +240,14 @@ def app_database_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
     ]
     normalized["_meta"]["sourceDataChangedOn"] = "2026-09-03"
     normalized["_meta"]["snapshotDownloadedOn"] = "2026-09-10"
-    database_path = tmp_path_factory.mktemp("web-app") / "infinity.db"
+    database_path = tmp_path_factory.mktemp("web-app") / "army.db"
     export_database(normalized, database_path)
     return database_path
 
 
 @pytest.fixture
 def app(tmp_path: Path, app_database_template: Path) -> Callable:
-    database_path = tmp_path / "infinity.db"
+    database_path = tmp_path / "army.db"
     shutil.copy2(app_database_template, database_path)
     return create_app(database_path)
 
@@ -321,7 +321,7 @@ def test_internal_health_fails_closed_without_exposing_database_errors(
 
 def test_curated_army_overview_copy_covers_tracked_player_facing_armies() -> None:
     summaries = load_army_overview_copy()
-    database = Database(Path("data/generated/infinity.db"))
+    database = Database(Path("data/generated/army.db"))
     current = {
         database.application_slug("armies", item["id"]) or item["slug"]
         for item in database.list_armies()
@@ -684,7 +684,7 @@ def test_reinforcement_catalog_status_uses_main_overview_group_only() -> None:
 def test_fireteam_chart_page_and_api_use_application_projection(
     tmp_path: Path, app_database_template: Path
 ) -> None:
-    database_path = tmp_path / "infinity.db"
+    database_path = tmp_path / "army.db"
     shutil.copy2(app_database_template, database_path)
     with sqlite3.connect(database_path) as connection:
         connection.execute(
@@ -765,7 +765,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert member["required"] is True
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(database_path, rules_database_path=rules_path)
     status, _, body = request(rules_app, "/api/fireteams")
@@ -1210,7 +1210,7 @@ def test_global_pagination_counts_unique_units(app: Callable) -> None:
 def test_unit_details_api_exposes_include_relationships(
     tmp_path: Path, app_database_template: Path
 ) -> None:
-    database_path = tmp_path / "infinity.db"
+    database_path = tmp_path / "army.db"
     shutil.copy2(app_database_template, database_path)
 
     with sqlite3.connect(database_path) as connection:
@@ -1353,7 +1353,7 @@ def test_unit_profile_help_is_rules_backed_and_optional(
     assert json.loads(body) == {"items": [], "attributes": []}
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
 
@@ -1731,7 +1731,7 @@ def test_unit_details_expose_source_attributed_notes(app: Callable) -> None:
 def test_unit_details_expose_bidirectional_peripheral_controller_links(
     tmp_path: Path, app_database_template: Path
 ) -> None:
-    database_path = tmp_path / "infinity.db"
+    database_path = tmp_path / "army.db"
     shutil.copy2(app_database_template, database_path)
     peripheral_app = create_app(database_path)
 
@@ -3768,18 +3768,19 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
     assert rebuilt_headers["etag"] != headers["etag"]
 
 
-def test_weapon_profile_publication_changes_snapshot_etag(tmp_path: Path) -> None:
+def test_database_bytes_change_snapshot_etag(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[1] / "data/generated"
-    for filename in ("infinity.db", "rules.db", "weapon-profile-sources.json"):
+    for filename in ("army.db", "rules_n5.db"):
         shutil.copyfile(root / filename, tmp_path / filename)
-    army, rules = tmp_path / "infinity.db", tmp_path / "rules.db"
+    army, rules = tmp_path / "army.db", tmp_path / "rules_n5.db"
     first = create_app(army, rules_database_path=rules)
     status, headers, body = request(first, "/api/weapons/rifle")
     assert status == 200
 
-    artifact = tmp_path / "weapon-profile-sources.json"
-    document = json.loads(artifact.read_text(encoding="utf-8"))
-    artifact.write_text(json.dumps(document, indent=2), encoding="utf-8")
+    # A harmless SQLite header change preserves semantics but changes exact bytes.
+    content = bytearray(rules.read_bytes())
+    content[96:100] = (3040000).to_bytes(4, "big")
+    rules.write_bytes(content)
     changed = create_app(army, rules_database_path=rules)
     status, changed_headers, changed_body = request(
         changed, "/api/weapons/rifle", request_headers={"If-None-Match": headers["etag"]},
@@ -4840,7 +4841,7 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
         assert json.loads(body) == {"items": []}
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(app.database.path, rules_path)
 
@@ -5266,7 +5267,7 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
     assert json.loads(body) == {"items": []}
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(app.database.path, rules_path)
 
@@ -5333,7 +5334,7 @@ def test_cube_profile_characteristic_resolves_to_canonical_equipment(
     _refresh_published_content_checksum(database_path)
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(database_path, rules_path)
 
@@ -5480,7 +5481,7 @@ def test_game_modes_recommended_setup_is_public_and_searchable(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
     for query in ("Game Modes", "Game"):
@@ -5517,7 +5518,7 @@ def test_army_retreat_and_standard_game_are_source_scoped_and_routable(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
     for query, name, href in (
@@ -5576,7 +5577,7 @@ def test_combat_group_source_limit_and_links_are_searchable(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
     expected = {
@@ -5635,7 +5636,7 @@ def test_initiative_roll_is_linked_and_searchable_in_normal_mode(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
 
@@ -5691,7 +5692,7 @@ def test_specialist_troops_general_rule_is_searchable_with_scenario_context(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
     expected = {
@@ -5737,8 +5738,8 @@ def test_glossary_frozen_pair_reuses_resolved_payload(monkeypatch: pytest.Monkey
     """A repeat Glossary request must not recompute every source-linked description."""
     root = Path(__file__).parents[1]
     rules_app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
     status, _, original = request(rules_app, "/api/glossary")
     assert status == 200
@@ -5763,7 +5764,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
 
@@ -6068,7 +6069,7 @@ def test_curated_weapon_families_are_discoverable_in_glossary(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
     status, _, body = request(rules_app, "/api/glossary")
@@ -6087,7 +6088,7 @@ def test_curated_weapon_families_are_discoverable_in_glossary(
 def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
     app: Callable, tmp_path: Path,
 ) -> None:
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
 
@@ -6202,7 +6203,7 @@ def test_mobile_glossary_hash_targets_clear_sticky_navigation(app: Callable) -> 
 def test_visibility_zone_inline_links_have_glossary_previews(
     app: Callable, tmp_path: Path,
 ) -> None:
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
 
@@ -6644,7 +6645,7 @@ def test_unit_api_adds_training_to_order_occurrences_only_when_rules_exist(
     app: Callable, tmp_path: Path
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(app.database.path, rules_path)
 
@@ -6733,7 +6734,7 @@ def test_trait_apis_compose_army_usage_with_curated_rules(app: Callable, tmp_pat
     _refresh_published_content_checksum(app.database.path)
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(app.database.path, rules_path)
 
@@ -6812,7 +6813,7 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
         if record["id"] == "declaration-category:automatic:p87"
     )
     declaration["armyLinks"].append({"entity": "skill", "id": 11})
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(
         [(root / "curated.json", document), hacking_programs], rules_path
     )
@@ -6881,7 +6882,7 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
 
 def test_equipment_api_adds_curated_declaration_category(app: Callable, tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(app.database.path, rules_path)
 
@@ -7081,7 +7082,7 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     app: Callable, tmp_path: Path
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(app.database.path, rules_path)
 
@@ -7323,7 +7324,7 @@ def test_072_detail_and_catalog_presentation_contract(app: Callable, tmp_path: P
         assert b"intro-copy developer-only" in body
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(app.database.path, rules_path)
     status, _, body = request(rules_app, "/states/unconscious")
@@ -7579,8 +7580,8 @@ def test_weapon_api_adds_curated_special_profile_when_rules_database_is_availabl
         }
     ]
 
-    database_path = tmp_path / "infinity.db"
-    rules_path = tmp_path / "rules.db"
+    database_path = tmp_path / "army.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_database(normalized, database_path)
     documents = load_curated_directory(Path(__file__).parents[1] / "data" / "curated" / "rules")
     export_rules_database(documents, rules_path)
@@ -7608,11 +7609,11 @@ def test_weapon_api_adds_curated_special_profile_when_rules_database_is_availabl
 
 
 def test_explicit_rules_database_path_is_required(app: Callable, tmp_path: Path) -> None:
-    missing = tmp_path / "missing-rules.db"
+    missing = tmp_path / "missing-rules_n5.db"
     with pytest.raises(ValueError, match="Rules database does not exist"):
         create_app(app.database.path, missing)
 
-    invalid = tmp_path / "invalid-rules.db"
+    invalid = tmp_path / "invalid-rules_n5.db"
     invalid.write_text("not a SQLite database", encoding="utf-8")
     with pytest.raises(sqlite3.DatabaseError):
         create_app(app.database.path, invalid)
@@ -7623,9 +7624,9 @@ def test_adjacent_rules_database_remains_optional_for_local_use(
 ) -> None:
     local_root = tmp_path / "local"
     local_root.mkdir()
-    database_path = local_root / "infinity.db"
+    database_path = local_root / "army.db"
     shutil.copy2(app.database.path, database_path)
-    (local_root / "rules.db").write_text("not a SQLite database", encoding="utf-8")
+    (local_root / "rules_n5.db").write_text("not a SQLite database", encoding="utf-8")
 
     local_app = create_app(database_path)
 
@@ -7637,7 +7638,7 @@ def test_local_app_without_rules_database_keeps_army_data_available(
 ) -> None:
     local_root = tmp_path / "rules-optional"
     local_root.mkdir()
-    database_path = local_root / "infinity.db"
+    database_path = local_root / "army.db"
     shutil.copy2(app.database.path, database_path)
 
     local_app = create_app(database_path)
@@ -7656,30 +7657,22 @@ def test_local_app_without_rules_database_keeps_army_data_available(
     assert json.loads(body)["items"] == []
 
 
-def test_wsgi_uses_explicit_rules_database_from_environment(
-    app: Callable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    root = Path(__file__).parents[1]
-    rules_path = tmp_path / "wsgi-rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated" / "rules"), rules_path)
-    monkeypatch.setenv("INFINITY_DB_DATABASE", str(app.database.path))
-    monkeypatch.setenv("INFINITY_DB_RULES_DATABASE", str(rules_path))
+def test_wsgi_uses_explicit_complete_directory_from_environment(monkeypatch) -> None:
+    directory = Path(__file__).parents[1] / "data/generated"
+    monkeypatch.delenv("INFINITY_DB_DATABASE", raising=False)
+    monkeypatch.delenv("INFINITY_DB_RULES_DATABASE", raising=False)
+    monkeypatch.setenv("INFINITY_DB_DB_DIR", str(directory))
     sys.modules.pop("infinity_db.web.wsgi", None)
-
     module = importlib.import_module("infinity_db.web.wsgi")
+    assert module.app.database.path == directory / "army.db"
+    assert module.app.rules_database.path == directory / "rules_n5.db"
 
-    assert module.app.rules_database is not None
-    assert module.app.rules_database.path == rules_path
 
-
-def test_wsgi_rejects_missing_explicit_rules_database(
-    app: Callable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setenv("INFINITY_DB_DATABASE", str(app.database.path))
-    monkeypatch.setenv("INFINITY_DB_RULES_DATABASE", str(tmp_path / "missing-rules.db"))
+def test_wsgi_rejects_retired_individual_database_environment(monkeypatch) -> None:
+    monkeypatch.setenv("INFINITY_DB_DATABASE", "retired.db")
+    monkeypatch.delenv("INFINITY_DB_DB_DIR", raising=False)
     sys.modules.pop("infinity_db.web.wsgi", None)
-
-    with pytest.raises(ValueError, match="Rules database does not exist"):
+    with pytest.raises(ValueError, match="settings are retired"):
         importlib.import_module("infinity_db.web.wsgi")
 
 
@@ -7695,7 +7688,7 @@ def test_glossary_boost_exposes_distinct_placement_and_triggering_references(
     app: Callable, tmp_path: Path,
 ) -> None:
     """Boost's linked comparison must reach canonical rules without inventing mechanics."""
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
     rules_app = create_app(app.database.path, rules_database_path=rules_path)
     status, _, body = request(rules_app, "/api/glossary")
@@ -7742,8 +7735,8 @@ def test_mine_detail_profile_order_and_absent_ammunition_source_preservation(
 
     root = Path(__file__).resolve().parents[1]
     catalog_app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
     status, _, body = request(catalog_app, "/api/weapons/cybermine")
     assert status == 200

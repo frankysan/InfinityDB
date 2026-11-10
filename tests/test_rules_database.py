@@ -47,7 +47,7 @@ def test_rules_export_creates_schema_inside_transaction(
 
     monkeypatch.setattr(sqlite3, "connect", traced_connect)
     root = Path(__file__).parents[1]
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     export_release_rules_database(load_curated_directory(root / "data/curated"), path)
 
     assert schema_transactions
@@ -59,7 +59,7 @@ def test_rules_export_creates_schema_inside_transaction(
 def current_rules_database(tmp_path_factory: pytest.TempPathFactory) -> RulesDatabase:
     """Build the unchanged current rules corpus once for read-only query tests."""
     root = Path(__file__).parents[1]
-    output = tmp_path_factory.mktemp("rules-database-current") / "rules.db"
+    output = tmp_path_factory.mktemp("rules-database-current") / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), output)
     database = RulesDatabase(output)
     database.validate()
@@ -599,7 +599,7 @@ def test_weapon_source_notes_remain_distinct_from_gameplay_summary(
 def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
 
     export_rules_database(documents, output)
 
@@ -1192,7 +1192,7 @@ def test_reviewed_trait_critical_and_wip_restrictions_are_published(
 def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
 
     database = RulesDatabase(output)
@@ -1267,7 +1267,7 @@ def test_training_classifies_normal_order_types_without_conflating_tactical_orde
     tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), output)
     database = RulesDatabase(output)
     training = database.training_by_order_type()
@@ -1295,7 +1295,7 @@ def test_tracked_army_irregular_order_occurrences_map_to_training_without_unit_i
     evidence for context-scoped navigation only, never every Unit option.
     """
     root = Path(__file__).parents[1]
-    path = root / "data/generated/infinity.db"
+    path = root / "data/generated/army.db"
     assert path.is_file()
     database = Database(path)
     database.validate()
@@ -1389,7 +1389,7 @@ def test_training_enrichment_preserves_all_other_orders(
 def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
 
     database = RulesDatabase(output)
@@ -1448,7 +1448,7 @@ def test_rea037_published_turret_profile_preserves_s2_and_source_conflict(
 def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
 
     assert RulesDatabase(output).skill_parameter_semantics() == {
@@ -1489,7 +1489,7 @@ def test_rules_database_preserves_reviewed_numeric_mod_extra_maps(
                 record["variantSemantics"]["occurrenceParameters"].append(
                     {"source": "army-extra", "kind": "distance", "positiveSign": "omit"}
                 )
-    output = tmp_path / "numeric-mod-rules.db"
+    output = tmp_path / "numeric-mod-rules_n5.db"
     export_rules_database(documents, output)
     rules = RulesDatabase(output)
     mods = rules.skill_numeric_mod_semantics()
@@ -2659,7 +2659,7 @@ def test_rules_database_returns_reviewed_source_variant_semantics(
 def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
 
     database = RulesDatabase(output)
@@ -2693,7 +2693,7 @@ def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> 
 def test_rules_database_returns_equipment_declaration_categories(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
 
     categories = RulesDatabase(output).declaration_categories("equipment")
@@ -2780,7 +2780,7 @@ def test_army_link_records_use_current_collections_by_default(tmp_path: Path) ->
         "effectiveFrom": "2026-01-01",
     }
     superseded["scenarioCollection"]["revision"] = "5.2"
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(
         [
             (current_path, current),
@@ -2832,7 +2832,7 @@ def test_composed_records_attach_current_supplements_without_field_merging(
             "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
         }
     ]
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(
         [
             (current_path, current),
@@ -2881,7 +2881,7 @@ def test_export_rejects_ambiguous_current_definitions(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="exactly one definition contribution"):
         export_rules_database(
             [(current_path, current), (root / "annex.json", duplicate)],
-            tmp_path / "rules.db",
+            tmp_path / "rules_n5.db",
         )
 
 
@@ -2896,7 +2896,7 @@ def test_export_rejects_unresolved_current_label_reference(tmp_path: Path) -> No
     with pytest.raises(ValueError, match="does not resolve to a current canonical Label"):
         export_rules_database(
             [(current_path, current), (hacking_path, document)],
-            tmp_path / "rules.db",
+            tmp_path / "rules_n5.db",
         )
 
 
@@ -2915,14 +2915,14 @@ def test_export_rejects_conflicting_current_label_definition(tmp_path: Path) -> 
     with pytest.raises(ValueError, match="conflicting canonical definitions"):
         export_rules_database(
             [(current_path, current), (hacking_path, document)],
-            tmp_path / "rules.db",
+            tmp_path / "rules_n5.db",
         )
 
 
 def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
 
     database = RulesDatabase(output)
@@ -4056,7 +4056,7 @@ def test_rules_database_preserves_variant_inheritance_and_variant_links(
             },
         ]
     )
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database([(current_path, document), hacking_programs], output)
 
     database = RulesDatabase(output)
@@ -4110,7 +4110,7 @@ def test_export_rejects_source_specific_variant_without_family_relation(
 
     with pytest.raises(ValueError, match="requires exactly one 'variant-of' relation"):
         export_rules_database(
-            [(current_path, document), hacking_programs], tmp_path / "rules.db"
+            [(current_path, document), hacking_programs], tmp_path / "rules_n5.db"
         )
 
 
@@ -4739,7 +4739,7 @@ def test_scenario_publication_resolution_can_select_exact_historical_revision(
             source["version"] = "5.2"
             source["publishedDate"] = "2026-01-01"
 
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(
         [*documents, (core_path.with_name("n5-core-v5.2.json"), historical)],
         output,

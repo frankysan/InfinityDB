@@ -403,7 +403,7 @@ def stage_definitions(
         elif name == "type":
             command = [python, "-m", "pyright", "--pythonpath", python]
         elif name == "build":
-            command = [python, "-m", "infinity_db", "build"]
+            command = [python, "-m", "infinity_army_data", "build"]
             if build_source is not None:
                 command.append(str(build_source))
             command.extend(
@@ -416,7 +416,7 @@ def stage_definitions(
                 "infinity_db",
                 "build-rules",
                 "--output",
-                str(Path(tempfile.mkdtemp(prefix="infinitydb-check-rules-")) / "rules.db"),
+                str(Path(tempfile.mkdtemp(prefix="infinitydb-check-rules-")) / "rules_n5.db"),
             ]
         else:  # pragma: no cover - guarded by argparse/selected_stage_names
             raise ValueError(f"Unknown stage: {name}")
@@ -477,7 +477,7 @@ def run_stage(
         if source_occupancy_gate:
             commands.append((
                 sys.executable, "-m", "tools.audit_source_presentation",
-                "data/generated/infinity.db", "--require-no-occupied-gaps",
+                "data/generated/army.db", "--require-no-occupied-gaps",
             ))
         commands.append((
             sys.executable, "-m", "tools.audit_rules_interactions",
@@ -485,6 +485,14 @@ def run_stage(
             "--require-release", "1.0.0",
         ))
     commands.append(stage.command)
+    if stage.name == "build":
+        # The small portable fixture need not match the full symbol publication.
+        # Still exercise the application/raw exporter after the source pipeline.
+        output = Path(stage.command[stage.command.index("--output-dir") + 1])
+        commands.append((
+            sys.executable, "-m", "infinity_db", "export",
+            str(output / "normalized.json"), str(output / "army.db"),
+        ))
     if stage.name == "docs":
         commands.append((sys.executable, "-m", "tools.check_doc_links"))
         commands.append((sys.executable, "-m", "tools.check_v1_backlog"))

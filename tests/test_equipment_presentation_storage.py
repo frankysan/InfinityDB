@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import json
-import shutil
 import sqlite3
 from pathlib import Path
 
 import pytest
+from storage_fixture_support import copy_base_army
 
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.database.repository import Database
@@ -31,10 +31,10 @@ CONFIG = ROOT / "config/catalogs/equipment-presentation-encodings.json"
 
 @pytest.fixture
 def v27(tmp_path: Path) -> tuple[Path, Path]:
-    army = tmp_path / "infinity.db"
-    raw = tmp_path / "infinity.raw.db"
-    shutil.copyfile(RELEASE / "infinity.db", army)
-    shutil.copyfile(RELEASE / "infinity.db", raw)
+    army = tmp_path / "army.db"
+    raw = tmp_path / "army.raw.db"
+    copy_base_army(army)
+    copy_base_army(raw)
     publish_equipment_encodings(army, raw, CONFIG)
     return army, raw
 
@@ -48,7 +48,7 @@ def test_v27_source_rows_pair_checksum_and_legacy_compatibility(v27) -> None:
     Database(army).validate()
     assert validate_database_pair(army, raw_path=raw) is not None
     assert Database(army).equipment_presentation_encodings() == expected
-    assert Database(RELEASE / "infinity.db").equipment_presentation_encodings() is None
+    assert Database(RELEASE / "army.db").equipment_presentation_encodings() == expected
     with sqlite3.connect(army) as connection:
         assert connection.execute("PRAGMA user_version").fetchone()[0] == ARMY_SCHEMA_VERSION
         assert json.loads(connection.execute(
@@ -65,8 +65,8 @@ def test_v27_equipment_projection_parity_without_runtime_json(v27, monkeypatch) 
     import infinity_db.equipment_catalog as adapter
 
     army, _ = v27
-    rules = RulesDatabase(RELEASE / "rules.db")
-    previous = EquipmentCatalog(Database(RELEASE / "infinity.db"), rules)
+    rules = RulesDatabase(RELEASE / "rules_n5.db")
+    previous = EquipmentCatalog(Database(RELEASE / "army.db"), rules)
     baseline = (
         previous.list_equipment(),
         previous.get_equipment("cube"),
@@ -95,10 +95,10 @@ def test_v27_equipment_projection_parity_without_runtime_json(v27, monkeypatch) 
 def test_publication_rejects_source_drift(
     tmp_path: Path, mutation: str,
 ) -> None:
-    army = tmp_path / "infinity.db"
-    raw = tmp_path / "infinity.raw.db"
-    shutil.copyfile(RELEASE / "infinity.db", army)
-    shutil.copyfile(RELEASE / "infinity.db", raw)
+    army = tmp_path / "army.db"
+    raw = tmp_path / "army.raw.db"
+    copy_base_army(army)
+    copy_base_army(raw)
     document = json.loads(CONFIG.read_text(encoding="utf-8"))
     if mutation == "missing":
         document["encodings"].pop()

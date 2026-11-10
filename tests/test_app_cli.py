@@ -25,6 +25,21 @@ from infinity_db.identities import (
 )
 
 
+def build_source_fixture(arguments: list[str]) -> int:
+    """Exercise the current complete builder Army callback with small source fixtures."""
+    import sys
+
+    from infinity_army_data.cli import build_parser as source_parser
+
+    args = source_parser().parse_args(arguments)
+    args.require_metadata_for_build = True
+    try:
+        return app_cli._build_army(args)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+
 @pytest.fixture
 def source_directory(tmp_path: Path) -> Path:
     source_dir = tmp_path / "source"
@@ -61,7 +76,9 @@ def source_directory(tmp_path: Path) -> Path:
 
 @pytest.mark.parametrize("archive", [False, True])
 def test_build_creates_verified_json_and_queryable_database(
-    source_directory: Path, tmp_path: Path, archive: bool,
+    source_directory: Path,
+    tmp_path: Path,
+    archive: bool,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     source = source_directory
@@ -71,11 +88,14 @@ def test_build_creates_verified_json_and_queryable_database(
             for path in source_directory.glob("*.json"):
                 output.write(path, f"army/{path.name}")
     output_dir = tmp_path / "generated"
-    assert main(["build", str(source), "--output-dir", str(output_dir), "--compact"]) == 0
+    assert (
+        build_source_fixture(["build", str(source), "--output-dir", str(output_dir), "--compact"])
+        == 0
+    )
     output = capsys.readouterr().out
     for filename, label in (
-        ("infinity.db", "Application database size"),
-        ("infinity.raw.db", "Raw archive size"),
+        ("army.db", "Application database size"),
+        ("army.raw.db", "Raw archive size"),
     ):
         size = (output_dir / filename).stat().st_size
         assert f"{label}: {size:,} bytes" in output
@@ -91,25 +111,30 @@ def test_build_creates_verified_json_and_queryable_database(
     assert normalized[IDENTITY_CONFIG_METADATA_KEY] == identity_config.document
     assert normalized[IDENTITY_CONFIG_SHA256_METADATA_KEY] == identity_config.content_sha256
     if archive:
-        assert normalized["_meta"]["snapshotArchiveSha256"] == hashlib.sha256(
-            source.read_bytes()
-        ).hexdigest()
+        assert (
+            normalized["_meta"]["snapshotArchiveSha256"]
+            == hashlib.sha256(source.read_bytes()).hexdigest()
+        )
     for path in source_directory.glob("*.json"):
         if path.name == "metadata.json":
             continue
         army_id = int(path.name.split("-")[0])
         assert reconstruct_source(master, army_id) == json.loads(path.read_text(encoding="utf-8"))
-    with sqlite3.connect(output_dir / "infinity.db") as connection:
+    with sqlite3.connect(output_dir / "army.db") as connection:
         assert connection.execute("SELECT id, name FROM units").fetchall() == [(17, "Test Ranger")]
         assert connection.execute("SELECT COUNT(*) FROM army_units").fetchone()[0] == 2
-        assert connection.execute(
-            "SELECT COUNT(*) FROM profile_payload_occurrences"
-        ).fetchone()[0] == 2
-        assert connection.execute(
-            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'profiles'"
-        ).fetchone() is None
+        assert (
+            connection.execute("SELECT COUNT(*) FROM profile_payload_occurrences").fetchone()[0]
+            == 2
+        )
+        assert (
+            connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'profiles'"
+            ).fetchone()
+            is None
+        )
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
-    with sqlite3.connect(output_dir / "infinity.raw.db") as raw_connection:
+    with sqlite3.connect(output_dir / "army.raw.db") as raw_connection:
         assert raw_connection.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 2
 
 
@@ -125,12 +150,9 @@ def test_separate_merge_normalize_export_commands(
     assert normalized[IDENTITY_CONFIG_SHA256_METADATA_KEY] == identity_config.content_sha256
     display_identities = load_display_identity_curated()
     assert normalized[DISPLAY_IDENTITY_METADATA_KEY] == display_identities.document
-    assert (
-        normalized[DISPLAY_IDENTITY_SHA256_METADATA_KEY]
-        == display_identities.content_sha256
-    )
-    assert main(["export", "data/generated/normalized.json"]) == 0
-    default_database = tmp_path / "data/generated/infinity.db"
+    assert normalized[DISPLAY_IDENTITY_SHA256_METADATA_KEY] == display_identities.content_sha256
+    assert main(["export", "data/generated/normalized.json", "data/generated/army.db"]) == 0
+    default_database = tmp_path / "data/generated/army.db"
     assert default_database.is_file()
     custom_database = tmp_path / "custom.db"
     assert main(["export", "data/generated/normalized.json", str(custom_database)]) == 0
@@ -185,9 +207,12 @@ def test_invalid_source_reports_error_without_database(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     output_dir = tmp_path / "generated"
-    assert main(["build", str(tmp_path / "missing"), "--output-dir", str(output_dir)]) == 1
+    assert (
+        build_source_fixture(["build", str(tmp_path / "missing"), "--output-dir", str(output_dir)])
+        == 1
+    )
     assert "ERROR" in capsys.readouterr().err
-    assert not (output_dir / "infinity.db").exists()
+    assert not (output_dir / "army.db").exists()
 
 
 def test_source_anomaly_regression_blocks_database_export(
@@ -203,100 +228,44 @@ def test_source_anomaly_regression_blocks_database_export(
 
     monkeypatch.setattr(app_cli, "_validate_source_anomaly_baseline", reject)
 
-    assert main(["build", str(source_directory), "--output-dir", str(output_dir)]) == 1
+    assert (
+        build_source_fixture(["build", str(source_directory), "--output-dir", str(output_dir)]) == 1
+    )
     assert "synthetic source anomaly regression" in capsys.readouterr().err
     assert (output_dir / "normalized.json").is_file()
-    assert not (output_dir / "infinity.db").exists()
+    assert not (output_dir / "army.db").exists()
 
 
 def test_serve_defaults_and_explicit_binding() -> None:
     parser = build_parser()
     defaults = parser.parse_args(["serve"])
-    assert defaults.database is None  # Auto-select complete checkout build, else tracked release
+    assert defaults.db_dir is None  # Auto-select complete checkout build, else tracked release
     assert defaults.host == "0.0.0.0"
     assert defaults.port == 8000
     configured = parser.parse_args(
-        ["serve", "--database", "custom.db", "--host", "0.0.0.0", "--port", "9000"]
+        ["serve", "--db-dir", "custom.db", "--host", "0.0.0.0", "--port", "9000"]
     )
-    assert configured.database == Path("custom.db")
+    assert configured.db_dir == Path("custom.db")
     assert configured.host == "0.0.0.0"
     assert configured.port == 9000
 
 
-
-def test_checkout_serve_uses_verified_local_build_and_fails_closed_on_staleness(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+def test_server_directory_precedence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from infinity_db import checkout_runtime as runtime
-
-    tracked = tmp_path / "generated" / "infinity.db"
-    tracked.parent.mkdir()
-    tracked.write_bytes(b"army")
-    standalone = tmp_path / "local" / "rules-standalone.db"
-    standalone.parent.mkdir()
-    standalone.write_bytes(b"rules")
-    checkout = tmp_path / "local" / "checkout-runtime"
-
-    assert runtime.select_checkout_database(
-        tracked_army=tracked, standalone_rules=standalone, checkout=checkout,
-    ) == tracked
-
-    checkout.mkdir()
-    for name, data in (
-        ("infinity.db", b"army"), ("rules.db", b"rules"),
-        ("variant-usage.json", b"variant"), ("weapon-profile-sources.json", b"weapon"),
-    ):
-        (checkout / name).write_bytes(data)
-
-    class FakeRules:
-        def __init__(self, path: Path):
-            assert path == checkout / "rules.db"
-
-        def validate(self) -> None:
-            pass
-
-        def deployed_objects_payload(self, _army: Path) -> dict:
-            return {"objects": [{}]}
-
-    monkeypatch.setattr(runtime, "RulesDatabase", FakeRules)
-    monkeypatch.setattr(
-        runtime, "load_variant_usage_publication", lambda *_args: {"formatVersion": 2},
-    )
-    monkeypatch.setattr(
-        runtime, "load_weapon_profile_publication", lambda *_args: {(1, 2, None): {}},
-    )
-
-    def select() -> Path:
-        return runtime.select_checkout_database(
-            tracked_army=tracked, standalone_rules=standalone, checkout=checkout,
-        )
-    assert select() == checkout / "infinity.db"
-
-    tracked.write_bytes(b"new-army")
-    with pytest.raises(ValueError, match="rerun 'infinity-db build-rules'"):
-        select()
-    tracked.write_bytes(b"army")
-    standalone.write_bytes(b"new-rules")
-    with pytest.raises(ValueError, match="rerun 'infinity-db build-rules'"):
-        select()
-    standalone.write_bytes(b"rules")
-    (checkout / "variant-usage.json").unlink()
-    with pytest.raises(ValueError, match="incomplete or stale"):
-        select()
-
-
-def test_checkout_server_default_vs_explicit_database(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    from infinity_db import checkout_runtime
     from infinity_db.web import server
 
-    selected = tmp_path / "checkout" / "infinity.db"
-    explicit = tmp_path / "release" / "infinity.db"
+    selected = tmp_path / "selected"
+    explicit = tmp_path / "explicit"
     opened: list[Path] = []
     monkeypatch.setattr(server, "_ensure_port_is_available", lambda *_args: None)
-    monkeypatch.setattr(checkout_runtime, "select_checkout_database", lambda: selected)
-    monkeypatch.setattr(server, "create_app", lambda path: opened.append(path) or object())
+    monkeypatch.setenv("INFINITY_DB_DB_DIR", str(selected))
+    monkeypatch.setattr(
+        server,
+        "create_app_from_database_set",
+        lambda path: opened.append(path) or type("App", (), {"snapshot_revision": "test"})(),
+    )
 
     class FakeServer:
         server_port = 8000
@@ -320,13 +289,12 @@ def test_checkout_server_default_vs_explicit_database(
 def test_database_health_command_defaults_and_options() -> None:
     parser = build_parser()
     defaults = parser.parse_args(["database-health"])
-    assert defaults.database == Path("data/generated/infinity.db")
+    assert defaults.database is None
+    assert defaults.db_dir is None
     assert defaults.require_raw is False
     assert defaults.json is False
 
-    configured = parser.parse_args(
-        ["database-health", "custom.db", "--require-raw", "--json"]
-    )
+    configured = parser.parse_args(["database-health", "custom.db", "--require-raw", "--json"])
     assert configured.database == Path("custom.db")
     assert configured.require_raw is True
     assert configured.json is True
@@ -338,9 +306,14 @@ def test_database_health_command_reports_and_validates_pair(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     output_dir = tmp_path / "generated"
-    assert main(["build", str(source_directory), "--output-dir", str(output_dir), "--compact"]) == 0
+    assert (
+        build_source_fixture(
+            ["build", str(source_directory), "--output-dir", str(output_dir), "--compact"]
+        )
+        == 0
+    )
     capsys.readouterr()
-    database = output_dir / "infinity.db"
+    database = output_dir / "army.db"
 
     assert main(["database-health", str(database)]) == 0
     output = capsys.readouterr().out
@@ -354,9 +327,10 @@ def test_database_health_command_reports_and_validates_pair(
     assert report["status"] == "healthy"
     assert report["application"]["status"] == "valid"
     assert report["application"]["schemaRevision"] == SCHEMA_VERSION
-    assert report["application"]["compatibilityRevision"] == report["application"][
-        "expectedCompatibilityRevision"
-    ]
+    assert (
+        report["application"]["compatibilityRevision"]
+        == report["application"]["expectedCompatibilityRevision"]
+    )
     assert report["application"]["bytes"] > 0
     assert report["application"]["validationMs"] >= 0
     assert report["rawArchive"]["status"] == "valid"
@@ -416,8 +390,8 @@ def test_build_rules_command_defaults_to_curated_rules() -> None:
     assert args.input == Path("data/curated/rules")
     assert args.output is None
 
-    explicit = parser.parse_args(["build-rules", "--output", "rules.db"])
-    assert explicit.output == Path("rules.db")
+    explicit = parser.parse_args(["build-rules", "--output", "rules_n5.db"])
+    assert explicit.output == Path("rules_n5.db")
 
 
 def test_validate_peripheral_identities_command_defaults_to_curated_contract() -> None:
@@ -434,12 +408,12 @@ def test_validate_peripheral_identities_command_accepts_coverage_database() -> N
         [
             "validate-peripheral-identities",
             "--database",
-            "data/generated/infinity.db",
+            "data/generated/army.db",
             "--output",
             "reports/peripheral-coverage.json",
         ]
     )
-    assert args.database == Path("data/generated/infinity.db")
+    assert args.database == Path("data/generated/army.db")
     assert args.output == Path("reports/peripheral-coverage.json")
 
 
@@ -513,7 +487,7 @@ def test_render_scenario_map_command_uses_maintained_scenario_definition(
     assert 'viewBox="0 0 32 48"' in svg
     assert 'data-marker-type="console" data-diameter-mm="40"' in svg
     assert 'id="deployment-a-depth" class="measurement"' in svg
-    assert '>12″</text></g>' in svg
+    assert ">12″</text></g>" in svg
     # Reviewed Domination maps measure Console centers instead of labeling quadrant sizes.
     assert 'id="quadrant-1-size" class="area-size"' not in svg
     assert 'id="console-q1-center-left" class="center-measurement"' in svg

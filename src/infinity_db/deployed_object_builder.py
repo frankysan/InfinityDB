@@ -19,7 +19,7 @@ def build_deployed_objects(
     delivery_reviews: Path,
     candidate_reviews: Path,
 ) -> dict[str, Any]:
-    """Produce a reviewed model pinned to Army and source evidence, not rules.db bytes."""
+    """Produce a reviewed model pinned to Army and source evidence, not rules_n5.db bytes."""
     report = audit_inventory(
         army_db, curated_source, delivery_reviews, candidate_reviews,
     )

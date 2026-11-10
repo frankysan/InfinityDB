@@ -13,8 +13,8 @@ from infinity_db.weapon_profile_builder import build_publication
 from infinity_db.weapon_profile_publication import load_weapon_profile_publication
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_ARMY = ROOT / "data" / "generated" / "infinity.db"
-DEFAULT_RULES = ROOT / "data" / "generated" / "rules.db"
+DEFAULT_ARMY = ROOT / "data" / "generated" / "army.db"
+DEFAULT_RULES = ROOT / "data" / "generated" / "rules_n5.db"
 DEFAULT_REVIEWS = ROOT / "data" / "curated" / "weapon-shared-effect-reviews.json"
 DEFAULT_OUTPUT = ROOT / "data" / "generated" / "weapon-profile-sources.json"
 

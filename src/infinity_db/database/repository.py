@@ -1012,7 +1012,9 @@ class Database:
             if source_consistency:
                 validate_application_armies(connection, identity_config)
                 validate_application_fireteams(connection)
-            validate_application_catalogs(connection, identity_config)
+            validate_application_catalogs(
+                connection, identity_config, source_consistency=source_consistency,
+            )
             validate_application_domain_slugs(connection)
             source_unit_count = connection.execute(
                 "SELECT COUNT(*) FROM units WHERE source_defined = 1"

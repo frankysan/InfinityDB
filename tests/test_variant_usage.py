@@ -87,11 +87,11 @@ def _variant_usage_candidate(
 def _write_variant_usage_artifacts(
     tmp_path: Path, *, duplicate: bool = False,
 ) -> tuple[Path, Path, Path]:
-    army = tmp_path / "infinity.db"
-    rules = tmp_path / "rules.db"
+    army = tmp_path / "army.db"
+    rules = tmp_path / "rules_n5.db"
     publication = tmp_path / "variant-usage.json"
-    shutil.copyfile(ROOT / "data/generated/infinity.db", army)
-    shutil.copyfile(ROOT / "data/generated/rules.db", rules)
+    shutil.copyfile(ROOT / "data/generated/army.db", army)
+    shutil.copyfile(ROOT / "data/generated/rules_n5.db", rules)
     snapshot = {
         "armyArchiveSha256": "a" * 64,
         "armyDatabaseSha256": hashlib.sha256(army.read_bytes()).hexdigest(),
@@ -448,12 +448,12 @@ def test_variant_usage_requires_embedded_objects_even_with_legacy_json(
     tmp_path: Path,
 ) -> None:
     application, raw = usage_databases
-    paths = [tmp_path / name for name in ("infinity.db", "infinity.raw.db")]
+    paths = [tmp_path / name for name in ("army.db", "army.raw.db")]
     for source, path in zip((application, raw), paths, strict=True):
         source.commit()
         with sqlite3.connect(path) as destination:
             source.backup(destination)
-    rules = tmp_path / "rules.db"
+    rules = tmp_path / "rules_n5.db"
     with sqlite3.connect(rules) as connection:
         connection.execute("PRAGMA user_version = 9")
     legacy = tmp_path / "deployed-objects.json"
@@ -477,7 +477,7 @@ def test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts(
     for army, occurrence in ((701, 3), (702, 4)):
         _add_direct(application, raw, "skills", "profile", army=army,
                     occurrence=occurrence, position=2)
-    paths = [tmp_path / name for name in ("application.db", "raw.db", "rules.db")]
+    paths = [tmp_path / name for name in ("application.db", "raw.db", "rules_n5.db")]
     for source, path in zip((application, raw), paths, strict=False):
         source.commit()
         with sqlite3.connect(path) as destination:
@@ -689,18 +689,18 @@ def test_variant_usage_mismatched_raw_snapshot_fails_closed(
     monkeypatch.setattr(variant_usage, "_snapshot", lambda _db: next(values))
     with pytest.raises(ValueError, match="raw archive does not match"):
         build_variant_usage_projection(
-            ROOT / "data/generated/infinity.db",
-            ROOT / "data/generated/infinity.raw.db",
-            ROOT / "data/generated/rules.db",
+            ROOT / "data/generated/army.db",
+            ROOT / "data/work/build/army.raw.db",
+            ROOT / "data/generated/rules_n5.db",
         )
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_variant_usage_pinned_pair_has_source_ownership_not_inferred_includes() -> None:
     projection = build_variant_usage_projection(
-        ROOT / "data/generated/infinity.db",
-        ROOT / "data/generated/infinity.raw.db",
-        ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        ROOT / "data/work/build/army.raw.db",
+        ROOT / "data/generated/rules_n5.db",
     )
     assert projection["scope"] == "read-only-candidate-not-published"
     assert projection["formatVersion"] == 2
@@ -864,7 +864,7 @@ def test_variant_usage_mismatched_export_generation_fails_before_reading_rows(
             connection.backup(destination)
     with pytest.raises(ValueError, match="different exports"):
         build_variant_usage_projection(
-            paths[0], paths[1], tmp_path / "rules.db",
+            paths[0], paths[1], tmp_path / "rules_n5.db",
         )
 
 

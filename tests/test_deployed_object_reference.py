@@ -14,10 +14,10 @@ from tools.audit_deployed_object_inventory import audit_inventory
 @pytest.fixture(scope="module")
 def pinned_inventory() -> dict:
     root = Path(__file__).resolve().parents[1]
-    if not (root / "data/generated/infinity.db").is_file():
+    if not (root / "data/generated/army.db").is_file():
         pytest.skip("Generated Army snapshot unavailable")
     return audit_inventory(
-        root / "data/generated/infinity.db",
+        root / "data/generated/army.db",
         root / "data/curated/rules/n5-core-v5.3.json",
         root / "config/validation/deployed-object-delivery-reviews.json",
         root / "config/validation/deployed-object-candidate-reviews.json",

@@ -18,12 +18,12 @@ PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 WIKI = ROOT / "data/wiki/WIKI-en 20260926-200832.zip"
 WIKI_PIN = "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"
-RULES = ROOT / "data/generated/rules.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 ORIGIN = "http://infinitydb-source-acceptance.test"
 
 
 def app() -> Any:
-    return create_app(ROOT / "data/generated/infinity.db", rules_database_path=RULES)
+    return create_app(ROOT / "data/generated/army.db", rules_database_path=RULES)
 
 
 def records(name: str = "n5-core-v5.3.json") -> dict[str, Any]:
