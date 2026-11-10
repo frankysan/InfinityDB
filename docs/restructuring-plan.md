@@ -2404,6 +2404,25 @@ remaining P3.4 work is the coordinated ITS scenario/overlay reader cutover,
 three-file build/selection/validation/deployment contract and parity acceptance;
 P3.5 then proves future-season isolation.
 
+#### P3.4 — Second slice: explicit registry-backed HTTP candidate (2026-11-10)
+
+`ScenarioCatalog` now accepts a `PublicationRegistry` and routes explicit
+ITS collection/revision selections to its owning database, retaining the
+unchanged N5 default and the same scenario-detail/SVG renderers. Publication
+identity is keyed by collection, revision and scenario slug, rather than by
+globally unique slugs. The optional internal `create_app(...,
+season_databases={"its-18": path})` candidate validates the ITS file at
+startup and includes it in the snapshot cache identity. The existing
+two-file checkout/Docker factory remains authoritative; no automatic
+discovery or implicit season policy application has been introduced.
+
+Local focused HTTP tests compare original and registry-backed ITS data across
+six full JSON detail responses and 24 SVG variants, plus collection selection,
+fail-closed unknown revisions, N5 default and cache identity.
+**Remaining P3.4:** the atomic three-file build/factory/CLI/Docker/CI serving
+contract, transitional Rules-owned ITS retirement, and scoped overlay/FAQ
+presentation as appropriate. P3.5 owns future-season collision acceptance.
+
 ### P4 — Make the interface player-first
 
 **Outcome:** Less user-visible implementation language without loss of relevant gameplay accuracy.  

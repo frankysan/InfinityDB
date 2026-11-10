@@ -97,30 +97,35 @@ publication content, full configuration/citation preservation, exact
 selection, source drift, core compatibility, corruption, and safe
 replacement.
 
-## P3.4 registry foundation (not yet served)
+## P3.4 registry and explicitly registered HTTP candidate
 
 `src/infinity_db/publication_registry.py` provides typed
 `PublicationReference(domain, record_id, revision)` selection and
-`PublicationRegistry` for explicitly registered season files. At
-registration it compares each ITS file's declared core revision to the
-currently published N5 core revision and rejects unknown N5 targets from ITS
-policies or scenario Rule/Skill references. `season_policies` returns
-resolved targets only for an exact season, revision and explicit play context.
-The registry's validated season manifest exposes published identity and SHA,
-not local file paths. It never attaches SQLite databases or searches another
-season on a failed match. The P3.4 HTTP/build/Docker cutover is still pending.
+`PublicationRegistry` for registered season files. Registration validates
+the ITS core revision and all cross-domain policy and scenario references
+against current N5 definitions. `season_policies` returns resolved targets
+only for an exact season, revision and explicit play context. The validated
+manifest exposes publication identity and SHA, not physical paths.
+
+`ScenarioCatalog` now accepts the registry and uses it for ITS publications,
+while N5 core missions continue to use the Rules database. The internal
+`create_app(..., season_databases={"its-18": path})` integration fixture
+exercises the same public API collection/revision selectors and SVG renderer;
+the explicit ITS database contributes to the runtime cache fingerprint.
+The normal checkout `serve` and Docker factories still select the validated
+**two-file** set. ITS is not auto-discovered, published in `data/generated`,
+or deployed until the coordinated P3.4 three-file build/selection/packaging
+cutover. Unknown seasons/revisions never fall back to core definitions.
 
 ## Migration boundary
 
-The currently served `rules_n5.db` still owns its transitional copy of
-Battleground until the P3.4 coordinated serving cutover. The independent
-ITS database now proves the *same* player-visible Battleground content via
-`tools.verify_its_pilot_parity`: six complete API JSON comparisons plus
-24 byte-exact SVG maps (six sizes, both themes and distance units), using
-the existing ScenarioCatalog and map renderer. The parity verifier uses
-N5/Army lookups for maintained-text enrichment; their independent domain
-resolution belongs to P3.4. The pilot remains an **ignored inspection/build
-artifact**, not a third deployment input.
+The currently deployed `rules_n5.db` still owns its transitional
+Battleground copy until the coordinated serving cutover. Both the standalone
+P3.3 verifier and the registered three-file HTTP candidate compare the full
+ITS Battleground API output across six point sizes and 24 byte-identical SVG
+maps. The candidate resolves scenario content through the ITS owner, with
+the same N5/Army maintained-text enrichment. The pilot ITS file remains an
+**ignored inspection/build artifact**, not a third deployment input.
 
 The existing N5 cards still carry transitional ITS season notes and the
 shared Scenario catalog still attributes marker sizes to ITS 18 p. 17.

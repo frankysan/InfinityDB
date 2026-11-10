@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from collections.abc import Mapping
 from hashlib import file_digest, sha256
 from http import HTTPStatus
 from pathlib import Path
@@ -12,6 +13,7 @@ from typing import Any
 
 from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
+from infinity_db.publication_registry import PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.symbol_catalog import SymbolCatalog
@@ -59,6 +61,7 @@ class Application:
     def __init__(
         self, database_path: Path, rules_database_path: Path | None = None,
         *, runtime_fingerprints: dict[str, str] | None = None,
+        season_databases: Mapping[str, Path] | None = None,
     ) -> None:
         self.database = Database(database_path)
         self.database.validate()
@@ -75,6 +78,13 @@ class Application:
                 self.rules_database = rules_database
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.warning("Ignoring invalid rules database: %s", candidate_rules_path)
+
+        if season_databases and self.rules_database is None:
+            raise ValueError("ITS season registration requires a validated N5 Rules database")
+        self.publication_registry = (
+            PublicationRegistry(self.rules_database, season_databases)
+            if season_databases and self.rules_database is not None else None
+        )
 
         self.source_data_changed_on = self.database.source_data_changed_on()
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
@@ -99,6 +109,15 @@ class Application:
         fingerprints = {self.database.path.name: _snapshot_revision(self.database.path)}
         if rules_revision is not None:
             fingerprints[candidate_rules_path.name] = rules_revision
+        if self.publication_registry is not None:
+            for season_id, manifest in self.publication_registry.season_manifest().items():
+                filename = f"{season_id.replace('-', '_')}.db"
+                if filename in fingerprints:
+                    raise ValueError(f"Duplicate runtime database filename: {filename}")
+                fingerprints[filename] = manifest["sha256"]
+        if runtime_fingerprints is not None and self.publication_registry is not None:
+            if fingerprints != runtime_fingerprints:
+                raise ValueError("Registered ITS database fingerprints differ from selected set")
         self.snapshot_revision = database_set_snapshot_revision(
             runtime_fingerprints if runtime_fingerprints is not None else fingerprints
         )
@@ -120,6 +139,7 @@ class Application:
             variant_usage=self.variant_usage,
             variant_usage_revision=self.variant_usage_revision,
             weapon_profile_citations=self.weapon_profile_citations,
+            publication_registry=self.publication_registry,
         )
         # Preserve the existing Application service attributes while request ownership moves
         # behind the API handler. They remain internal compatibility aliases, not dispatch logic.
@@ -282,10 +302,15 @@ class Application:
         return [] if method == "HEAD" else [body]
 
 
-def create_app(database_path: Path, rules_database_path: Path | None = None) -> Application:
-    """Create the app after verifying the database, without starting a server."""
+def create_app(
+    database_path: Path, rules_database_path: Path | None = None,
+    *, season_databases: Mapping[str, Path] | None = None,
+) -> Application:
+    """Create the app with optionally registered, explicitly selected ITS files."""
 
-    return Application(database_path, rules_database_path)
+    return Application(
+        database_path, rules_database_path, season_databases=season_databases,
+    )
 
 
 def create_app_from_database_set(directory: Path) -> Application:

@@ -6,6 +6,7 @@ from copy import deepcopy
 from typing import Any
 
 from infinity_db.domain_slugs import require_domain_slug, route_slug_from_typed_domain_id
+from infinity_db.publication_registry import PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.scenario_geometry import MarkerElement, marker_diameter_mm, parse_scenario_geometry
 
@@ -108,8 +109,12 @@ def _marker_dimensions(geometry: dict[str, Any]) -> list[dict[str, Any]]:
 class ScenarioCatalog:
     """Expose current scenario publications as explicit configuration-aware read models."""
 
-    def __init__(self, rules_database: RulesDatabase | None) -> None:
+    def __init__(
+        self, rules_database: RulesDatabase | None,
+        publication_registry: PublicationRegistry | None = None,
+    ) -> None:
         self.rules_database = rules_database
+        self.publication_registry = publication_registry
         self._records_cache: list[tuple[dict[str, Any], dict[str, Any]]] | None = None
 
     def _records(self) -> list[tuple[dict[str, Any], dict[str, Any]]]:
@@ -120,18 +125,32 @@ class ScenarioCatalog:
             return self._records_cache
 
         records: list[tuple[dict[str, Any], dict[str, Any]]] = []
-        seen_slugs: set[str] = set()
         for record in self.rules_database.composed_records_by_kind("scenario"):
-            slug = _scenario_slug(record)
-            if slug in seen_slugs:
-                raise ValueError(f"Scenario catalog contains duplicate route slug {slug!r}")
-            seen_slugs.add(slug)
             publication = self.rules_database.resolve_scenario_publication(str(record["id"]))
             if publication is None:
                 raise ValueError(
                     f"Current Scenario {record['id']!r} has no current publication membership"
                 )
+            if (
+                self.publication_registry is not None
+                and publication["collection"] != "n5-core"
+            ):
+                # Registered ITS publications supersede the transitional Rules copy.
+                continue
             records.append((record, publication))
+
+        if self.publication_registry is not None:
+            records.extend(self.publication_registry.scenario_entries())
+
+        seen: set[tuple[str, str, str]] = set()
+        for record, publication in records:
+            key = (
+                str(publication["collection"]), str(publication["revision"]),
+                _scenario_slug(record),
+            )
+            if key in seen:
+                raise ValueError(f"Scenario catalog contains duplicate publication {key!r}")
+            seen.add(key)
 
         records.sort(
             key=lambda item: (
@@ -280,7 +299,12 @@ class ScenarioCatalog:
             if item["awards"]:
                 objectives.append(item)
 
-        reference = rules_database.scenario_reference(str(record["id"]))
+        reference = (
+            self.publication_registry.scenario_reference(record)
+            if self.publication_registry is not None
+            and publication["collection"] != "n5-core"
+            else rules_database.scenario_reference(str(record["id"]))
+        )
         if reference is None:
             raise ValueError(f"Scenario {record['id']!r} has no composed rules reference")
         rules_by_id = {str(rule["id"]): rule for rule in reference["rules"]}

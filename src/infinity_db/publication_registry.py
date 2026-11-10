@@ -8,6 +8,7 @@ independent of the HTTP and browser layers.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -128,6 +129,92 @@ class PublicationRegistry:
             revision=reference.revision or "",
             scenario_id=reference.record_id,
         )
+
+    def scenario_entries(self) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+        """Return validated ITS scenarios in the existing catalog's read format.
+
+        Selection is scoped by the registered owner and exact revision. Different
+        seasons may publish the same scenario slug without overwriting each other.
+        """
+        entries: list[tuple[dict[str, Any], dict[str, Any]]] = []
+        for season_id, report in self._season_reports.items():
+            for scenario in report["scenarios"]:
+                selected = self.resolve(PublicationReference(
+                    season_id, scenario["id"], self._season_revisions[season_id],
+                ))
+                if selected is None:
+                    raise ValueError(f"Missing ITS scenario: {scenario['id']}")
+                record = deepcopy(selected["record"])
+                published = selected["publication"]
+                sources = {source["id"]: source for source in published["sources"]}
+                record["citations"] = [
+                    {
+                        "source_id": citation["sourceId"],
+                        "source_title": sources[citation["sourceId"]]["title"],
+                        "source_version": sources[citation["sourceId"]]["version"],
+                        "source_url": sources[citation["sourceId"]].get("url"),
+                        "page": citation.get("page"),
+                        "member": citation.get("member"),
+                        "heading": citation.get("heading"),
+                        "section": citation.get("section"),
+                    }
+                    for citation in record["citations"]
+                ]
+                publication = {
+                    "scenario_id": record["id"],
+                    "name": record["name"],
+                    "collection": published["collectionId"],
+                    "collection_title": published["title"],
+                    "revision": published["revision"],
+                    "position": published["position"],
+                    "publication_revision": published["sourceCollectionId"],
+                    "publication_title": published["sourceCollectionTitle"],
+                    "content_sha256": published["contentSha256"],
+                    "status": published["status"],
+                    "effective_from": published["effectiveFrom"],
+                    "authority": published["authority"],
+                    "sources": [
+                        {
+                            "id": source["id"],
+                            "kind": source["kind"],
+                            "title": source["title"],
+                            "version": source["version"],
+                            "published_date": source.get("publishedDate"),
+                            "retrieved_date": source.get("retrievedDate"),
+                            "language": source.get("language"),
+                            "authority": source["authority"],
+                        }
+                        for source in published["sources"]
+                    ],
+                }
+                entries.append((record, publication))
+        return entries
+
+    def scenario_reference(self, record: dict[str, Any]) -> dict[str, Any]:
+        """Resolve an ITS mission's reusable N5 definitions without shadowing."""
+        mission = record["facts"]["mission"]
+        rules = []
+        for inclusion in mission["rules"]:
+            definition_id = inclusion.get("definitionId")
+            if definition_id is None:
+                continue
+            rule = self.rules_database.composed_record(
+                definition_id, scenario_id=record["id"],
+            )
+            if rule is None:
+                raise ValueError(f"Missing N5 scenario Rule {definition_id!r}")
+            if "specialists" in inclusion:
+                rule["facts"]["specialists"] = inclusion["specialists"]
+            rules.append(rule)
+        skills = []
+        for skill_id in mission.get("skills", []):
+            skill = self.rules_database.composed_record(
+                skill_id, scenario_id=record["id"],
+            )
+            if skill is None:
+                raise ValueError(f"Missing N5 scenario Skill {skill_id!r}")
+            skills.append(skill)
+        return {"scenario": record, "rules": rules, "skills": skills}
 
     def season_policies(
         self, *, season_id: str, revision: str, context: str,

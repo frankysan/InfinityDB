@@ -1527,6 +1527,16 @@ regenerated pair; the P3.3 parity verifier still passed **6/6** API JSON and
 **24/24** byte-identical SVG comparisons. This is local validation, not a
 three-database hosted/Docker/CI acceptance or a full suite.
 
+**2026-11-10 P3.4 explicit HTTP candidate — focused acceptance:** The
+`create_app(..., season_databases={...})` fixture registers an independent
+ITS 18 database. Its six Battleground JSON responses and 24 SVG variants
+match the existing HTTP implementation exactly; the N5 default, explicit
+collection selection and fail-closed absent season/revision remain unchanged.
+The runtime snapshot/ETag differs when the ITS database is registered.
+`ScenarioCatalog` and the new registry remain separately testable.
+This does **not** validate the still-pending automatic three-file serving,
+Docker image, or release artifacts.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

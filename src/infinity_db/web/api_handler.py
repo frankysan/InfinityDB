@@ -40,6 +40,7 @@ from infinity_db.maintained_text_references import (
     maintained_text_tokens,
     maintained_text_tokens_batch,
 )
+from infinity_db.publication_registry import PublicationRegistry
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.scenario_catalog import ScenarioCatalog
@@ -484,6 +485,7 @@ class ApiHandler:
         variant_usage: dict[str, Any] | None = None,
         variant_usage_revision: str | None = None,
         weapon_profile_citations: ProfileCitations | None = None,
+        publication_registry: PublicationRegistry | None = None,
     ) -> None:
         self.database = database
         self.rules_database = rules_database
@@ -505,7 +507,7 @@ class ApiHandler:
         self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
         self.label_catalog = LabelCatalog(rules_database)
         self.general_rules_catalog = RulesRecordCatalog(rules_database, "rules")
-        self.scenario_catalog = ScenarioCatalog(rules_database)
+        self.scenario_catalog = ScenarioCatalog(rules_database, publication_registry)
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
         self._glossary_items_cache: list[dict[str, Any]] | None = None
         self.army_overview_summaries, self.legacy_armies = database.army_reference_data()
