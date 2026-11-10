@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
-from collections import Counter
 from contextlib import closing
 from pathlib import Path
 from typing import Any
@@ -13,6 +12,7 @@ from typing import Any
 from infinity_db.deployed_object_builder import build_deployed_objects
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase, export_rules_database
+from infinity_db.sqlite_comparison import same_logical_rules_contents as same_logical_rules_contents
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_RULES = ROOT / "data/generated/rules.db"
@@ -104,37 +104,3 @@ def export_release_rules(
         or staged.restrictions_payload() != existing.restrictions_payload()
     ):
         raise ValueError("Staging changed release schema or reviewed Restrictions")
-
-
-def same_logical_rules_contents(reference: Path, candidate: Path) -> bool:
-    """Compare all SQLite schema objects and row multisets, not physical pages.
-
-    SQLite minor versions may write different B-tree layouts and writer-version
-    headers even when the curated rules database contains identical data.
-    Match the complete schema (including indexes), version/identity pragmas
-    and every table's exact stored rows, including optimizer statistics.
-    This is a read-only *rebuild* check; it does not alter either release file.
-    """
-    with closing(sqlite3.connect(reference)) as old, closing(
-        sqlite3.connect(candidate)
-    ) as new:
-        for pragma in ("application_id", "user_version", "encoding", "page_size"):
-            if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
-                f"PRAGMA {pragma}"
-            ).fetchone():
-                return False
-        schema = (
-            "SELECT type, name, tbl_name, sql "
-            "FROM sqlite_master ORDER BY type, name, tbl_name"
-        )
-        entries = old.execute(schema).fetchall()
-        if entries != new.execute(schema).fetchall():
-            return False
-        for kind, name, _owner, _sql in entries:
-            if kind != "table":
-                continue
-            quoted = '"' + name.replace('"', '""') + '"'
-            query = f"SELECT * FROM {quoted}"
-            if Counter(old.execute(query)) != Counter(new.execute(query)):
-                return False
-    return True

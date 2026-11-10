@@ -1065,6 +1065,26 @@ list). Ruff, canonical Pyright (0 errors), documentation lint/links/backlog,
 Git whitespace and tracked runtime provenance passed (SVG checks disabled).
 No full suite, direct Docker run or deployment was performed.
 
+**2026-11-10 P2.5 ninth slice, logical SQLite rebuild comparison:**
+`same_logical_rules_contents` now belongs to
+`infinity_db.sqlite_comparison`, independent of legacy v9 source
+promotion or JSON publication. It reads SQLite files in read-only mode,
+compares identity/encoding/page-size pragmas, exact schema objects and
+the multiset of every table's rows (including optimizer statistics),
+and returns false for missing or invalid files without creating them.
+`tests/test_rules_rebuild_logical_equality.py` tests the maintained
+contract directly, including cross-host header and row-order variance,
+schema drift, changed data and missing/invalid files. An older v9-only
+Lieutenant comparison case was retired because its useful insertion
+order invariant is now covered here. The legacy exporter re-exports
+the comparator temporarily for historical callers; it does not own
+this validation contract. Focused Windows checks passed **7 tests**:
+logical comparison (4), source-variant selection (1), the current
+selected-PDF pin/export invariant (1) and repeatable complete database-set
+build (1). Ruff, canonical Pyright (0 errors), docs lint/links/backlog and
+Git whitespace checks passed. No full suite, direct Docker run or
+deployment was performed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

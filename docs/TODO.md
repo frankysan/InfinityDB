@@ -49,9 +49,10 @@ when all contained work shares the same owner.
   terrain/scenery pre-promotion stager, test module and proposal JSON have
   also been retired; current source checks now require both accepted rules.
   The completed Hackable and paragraph-layout v9 promotion wrappers
-  have also been retired. Continue retiring the legacy JSON loader,
-  remaining stage/promotion modules and obsolete tests while preserving
-  current source guards.
+  have also been retired. Generic cross-host logical SQLite comparison
+  now has a maintained owner independent of the v9 exporter. Continue
+  retiring the legacy JSON loader, remaining stage/promotion modules
+  and obsolete transition tests while preserving current source guards.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;

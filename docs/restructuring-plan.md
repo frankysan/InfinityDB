@@ -1850,10 +1850,34 @@ remains documented in the source audit and Git history. The testing
 guide no longer presents its command as a current maintenance path.
 No preserved source interpretation depends on these deleted wrappers.
 
-**Remaining P2.5:** Continue retiring v9 staging/promotion wrappers,
-extract reusable source-delta checks from `restrictions_v9_release`,
-then retire the standalone JSON reader/serializer when all historical
-callers are replaced. P2.6–P2.8 still own final naming/defaults,
+#### P2.5 — Ninth slice: isolate reusable logical SQLite comparison (2026-11-10)
+
+The cross-host Rules rebuild comparator has been moved out of the mixed
+`tools.release_rules_export` legacy exporter into
+`infinity_db.sqlite_comparison.same_logical_rules_contents`. The old
+export module temporarily re-exports it for completed v9 promotion callers.
+The maintained `test_rules_rebuild_logical_equality` suite now calls
+the canonical function directly and checks writer-header differences,
+table insertion order, database identity, full schema/index changes and
+logical row changes. Missing or invalid databases fail closed without
+creating files. A v9 Lieutenant-only duplicate insertion-order test was
+retired; its useful invariant is now checked without importing a
+migration promoter.
+
+**Source-delta decision:** `restrictions_v9_release` contains numerous
+exact *one-time transitions* (NULL-to-PDF-sha256 cells and pre-publication
+variant JSON mutations). Those transitions should **not** be copied to a
+maintained validator solely because old staging scripts/tests import them.
+Current source pins and accepted variant parameters are checked through
+curated-data validation, fresh Rules export and database-set tests.
+Only generally reusable assertions should be extracted; the remaining
+transition fixtures and their dependent wrappers are retirement
+candidates, not permanent product compatibility contracts.
+
+**Remaining P2.5:** Retire completed v9 stage/review/promotion wrappers,
+retire the v9-only transition tests after confirming equivalent current
+source invariants, and remove the standalone JSON reader/serializer once
+its historical callers are gone. P2.6–P2.8 still own final naming/defaults,
 assembly-stage removal and full local/container acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules

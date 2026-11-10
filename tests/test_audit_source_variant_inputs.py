@@ -388,35 +388,6 @@ def test_lieutenant_reviewed_resource_extras_fresh_release_pair(tmp_path: Path) 
         )
 
 
-def test_lieutenant_release_comparison_accepts_sqlite_layout_only_drift(
-    tmp_path: Path,
-) -> None:
-    """Equivalent rows in different insertion order do not require byte identity."""
-    import hashlib
-    import sqlite3
-
-    from tools.review_lieutenant_variant import verify_equivalent_rules_content
-
-    original, alternate = tmp_path / "published.db", tmp_path / "rebuilt.db"
-    for path, values in (
-        (original, [("a", 1), ("b", 2)]),
-        (alternate, [("b", 2), ("a", 1)]),
-    ):
-        with sqlite3.connect(path) as db:
-            db.execute("PRAGMA user_version = 9")
-            db.execute("PRAGMA application_id = 12345")
-            db.execute("CREATE TABLE example (label TEXT, count INTEGER)")
-            db.executemany("INSERT INTO example VALUES (?, ?)", values)
-    assert hashlib.sha256(original.read_bytes()).digest() != hashlib.sha256(
-        alternate.read_bytes()
-    ).digest()
-    verify_equivalent_rules_content(original, alternate)
-    with sqlite3.connect(alternate) as db:
-        db.execute("UPDATE example SET count = 5 WHERE label = 'a'")
-    with pytest.raises(ValueError, match="rows differ: example"):
-        verify_equivalent_rules_content(original, alternate)
-
-
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_lieutenant_review_gate_verifies_published_matched_pair(require_source_files) -> None:
     from tools.review_lieutenant_variant import check_candidate
