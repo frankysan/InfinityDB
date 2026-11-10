@@ -27,8 +27,6 @@ from tools.audit_source_variant_inputs import (
     select_source_variants,
     source_extra_owner_context,
 )
-from tools.release_rules_export import export_release_rules
-from tools.restrictions_v9_release import _check_variant_semantics_delta
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -338,8 +336,8 @@ def test_lieutenant_reviewed_resource_extras_fresh_release_pair(tmp_path: Path) 
     assert records["skill:lieutenant"]["citations"][0]["page"] == 99
 
     current = ROOT / "data/generated/rules.db"
-    fresh = tmp_path / "lieutenant-v9.db"
-    export_release_rules(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    fresh = tmp_path / "lieutenant-current.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
     typed = RulesDatabase(fresh).skill_reviewed_extra_semantics()["lieutenant"]
     assert typed == {
         "source": "army-extra",
@@ -379,13 +377,7 @@ def test_lieutenant_reviewed_resource_extras_fresh_release_pair(tmp_path: Path) 
     assert 438 - sum(row["count"] for row in item["extraSignatures"]) == 355
     assert item["reviewedNumericMod"] is None
     assert all("modifier" not in row["effect"] for row in typed["extra_values"])
-    if "lieutenant" not in RulesDatabase(current).skill_reviewed_extra_semantics():
-        _check_variant_semantics_delta(
-            current, fresh, {
-                ("n5-core-v5.3", "skill:lieutenant"):
-                    json.dumps(LIEUTENANT_VARIANT, ensure_ascii=False, separators=(",", ":")),
-            },
-        )
+    assert RulesDatabase(current).skill_reviewed_extra_semantics()["lieutenant"] == typed
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -403,8 +395,8 @@ def test_terrain_source_58_exact_types_and_reviewed_effects(tmp_path: Path) -> N
         c["sourceId"] == "n5-core-v5.3-pdf" and c["page"] == 116
         for c in terrain["citations"]
     )
-    candidate = tmp_path / "terrain-v9.db"
-    export_release_rules(docs, candidate, baseline=current)
+    candidate = tmp_path / "terrain-current.db"
+    export_rules_database(docs, candidate)
     typed = RulesDatabase(candidate).skill_reviewed_extra_semantics()["terrain"]
     assert typed == {
         "source": "army-extra", "kind": "reviewed-extra",
@@ -456,13 +448,7 @@ def test_terrain_source_58_exact_types_and_reviewed_effects(tmp_path: Path) -> N
     assert religious["extraSignatures"] == [{
         "extras": [[33, "TEXT", "Total"]], "reviewed": False, "count": 1,
     }]
-    if "terrain" not in RulesDatabase(current).skill_reviewed_extra_semantics():
-        _check_variant_semantics_delta(
-            current, candidate, {
-                ("n5-core-v5.3", "skill:terrain"):
-                    json.dumps(TERRAIN_VARIANT, ensure_ascii=False, separators=(",", ":")),
-            },
-        )
+    assert RulesDatabase(current).skill_reviewed_extra_semantics()["terrain"] == typed
 
 
 @pytest.mark.parametrize(
@@ -684,8 +670,8 @@ def test_combat_jump_exact_source_35_landings_and_explosion(tmp_path: Path) -> N
     assert any(c.get("sourceId") == "n5-core-v5.3-pdf" and c.get("page") == 89
                for c in record["citations"])
     original = ROOT / "data/generated/rules.db"
-    candidate = tmp_path / "combat-jump-v9.db"
-    export_release_rules(docs, candidate, baseline=original)
+    candidate = tmp_path / "combat-jump-current.db"
+    export_rules_database(docs, candidate)
     typed = RulesDatabase(candidate).skill_reviewed_extra_semantics()["combat-jump"]
     assert len(typed["extra_values"]) == 6
     assert typed["extra_values"][0]["effect"] == {
@@ -705,23 +691,14 @@ def test_combat_jump_exact_source_35_landings_and_explosion(tmp_path: Path) -> N
         "ammunition": "ammunition:normal", "savingAttribute": "ARM",
         "singleUse": True, "affectsUser": False,
     }
-    published = RulesDatabase(original).skill_reviewed_extra_semantics().get("combat-jump")
-    if published is None:
-        _check_variant_semantics_delta(
-            original, candidate, {
-                ("n5-core-v5.3", "skill:combat-jump"): json.dumps(
-                    COMBAT_JUMP_VARIANT, ensure_ascii=False, separators=(",", ":"),
-                ),
-            },
-        )
-    else:
-        assert published == typed
+    published = RulesDatabase(original).skill_reviewed_extra_semantics()["combat-jump"]
+    assert published == typed
     for rules in (original, candidate):
         [source] = select_source_variants(inventory_source_variants(
             ROOT / "data/generated/infinity.db",
             ROOT / "data/generated/infinity.raw.db", rules,
         ), "skills", [35])["items"]
-        reviewed = rules == candidate or published is not None
+        reviewed = True
         assert (source["name"], source["applicationId"], source["occurrences"]) == (
             "Combat Jump", 35, 211,
         )
@@ -833,8 +810,8 @@ def test_camouflage_one_use_fresh_v9_effect_and_source_29(tmp_path: Path) -> Non
         ("n5-faq-v0.1-es-pdf", 2),
     }
     base = ROOT / "data/generated/rules.db"
-    candidate = tmp_path / "camouflage-v9.db"
-    export_release_rules(docs, candidate, baseline=base)
+    candidate = tmp_path / "camouflage-current.db"
+    export_rules_database(docs, candidate)
     typed = RulesDatabase(candidate).skill_reviewed_extra_semantics()["camouflage"]
     assert typed == {
         "source": "army-extra", "kind": "reviewed-extra",
@@ -860,16 +837,7 @@ def test_camouflage_one_use_fresh_v9_effect_and_source_29(tmp_path: Path) -> Non
     assert source["extraSignatures"] == [{
         "extras": [[43, "TEXT", "1 Use"]], "reviewed": True, "count": 223,
     }]
-    if "camouflage" not in RulesDatabase(base).skill_reviewed_extra_semantics():
-        _check_variant_semantics_delta(
-            base, candidate, {
-                ("n5-core-v5.3", "skill:camouflage"):
-                    json.dumps(
-                        CAMOUFLAGE_ONE_USE_VARIANT,
-                        ensure_ascii=False, separators=(",", ":"),
-                    ),
-            },
-        )
+    assert RulesDatabase(base).skill_reviewed_extra_semantics()["camouflage"] == typed
 
 
 @pytest.mark.parametrize(

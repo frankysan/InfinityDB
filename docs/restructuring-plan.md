@@ -2026,13 +2026,36 @@ owner is the complete database-set build and
 `tests/test_restriction_chart_storage.py`, not the superseded
 `tools.release_rules_export` staging path.
 
-**Remaining P2.5:** Review the v9-only Restrictions transition tests,
-separate reusable source checks from `restrictions_v9_release`, and
-retire the legacy release exporter/loose JSON serialization adapters
-once their independent consumers are resolved. Preserve current
-database-set integrity and serving. P2.6–P2.8 still own final
-naming/defaults, assembly-stage removal and full local/container
-acceptance.
+#### P2.5 — Sixteenth slice: retire v9 Restrictions transition machinery (2026-11-10)
+
+The one-use `tools/restrictions_v9_release.py` accumulated exact v9
+source-pin, variant-metadata and staged-publication migration operations.
+Its synthetic delta-test matrix in
+`tests/test_restriction_storage_candidate.py` verified those **completed
+transitions**, not current source semantics. These tests and the two final
+paired-publication rollback checks are retired. No current builder,
+runtime, CI or other tool imports `restrictions_v9_release`; Git history
+preserves the original implementation and research evidence.
+
+The remaining Restrictions candidate suite retains current curated
+PDF/source-pin export assertions and supported v8/v9 reader and CLI
+compatibility gates pending the deliberate P2.6 cutover. The current
+source-variant suite no longer imports v9 transition checks or the
+legacy release exporter: Lieutenant, Terrain, Combat Jump and
+Camouflage now compare accepted typed source effects from a fresh
+canonical `export_rules_database` against the current Rules database.
+Other reviewed signatures, negative semantic mutations and raw Army
+owner scopes remain tested independently. Relational Restrictions and
+complete database-set tests own ongoing integrity and fail-closed
+validation; historical NULL-to-hash checks need not become permanent
+development contracts.
+
+**Remaining P2.5:** Resolve independent current-purpose consumers of
+`tools.release_rules_export`, particularly research audits that
+synthesize loose `deployed-objects.json`. Retire obsolete JSON
+read/serialization adapters only after consumers are separated.
+P2.6–P2.8 own final naming/defaults, assembly-stage removal and
+full local/container integration acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

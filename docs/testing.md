@@ -1196,6 +1196,26 @@ storage (15), selected-set health (20), repeatable complete builder
 Git whitespace and tracked runtime artifact/provenance checks passed
 (SVG excluded). No full suite, direct Docker run or deployment occurred.
 
+**2026-11-10 P2.5 sixteenth slice, v9 Restrictions transition retirement:**
+The completed v9 Restrictions/source-pin/variant metadata migration
+checker matrix and synthetic source-delta fixtures were retired along
+with the one-use `tools/restrictions_v9_release` stager/promoter.
+Maintained source variants now compare independently reviewed Lieutenant,
+Terrain, Combat Jump and Camouflage effects using fresh
+`export_rules_database` results and the currently selected Rules DB.
+The surviving `test_restriction_storage_candidate.py` cases protect
+supported v8/v9 reader and explicit CLI compatibility, plus reviewed
+PDF pin export. Relational Restrictions and complete database-set tests
+own ongoing integrity. Historical publication-rollback tests are no
+longer current development obligations; Git retains the old migration
+implementation. Focused Windows validation passed **170 tests**:
+source-variant semantics (99), Restrictions CLI/reader and PDF pins (17),
+relational Restrictions storage (15), selected database-set integrity
+(20), SQLite logical rebuild comparison (4), and test-section registry
+(15). Ruff, canonical Pyright (0 errors), docs lint/links/backlog,
+Git whitespace and tracked runtime artifact/provenance checks passed
+(SVG excluded). No full suite, direct Docker run or deployment occurred.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

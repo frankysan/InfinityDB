@@ -66,7 +66,11 @@ when all contained work shares the same owner.
   the accepted optional annex semantics. The completed 14-citation
   and four-device-chart citation staging tools and historical rollback
   tests are retired; read-only source audits now enforce all accepted
-  N5.3 citations and current Rules database parity.
+  N5.3 citations and current Rules database parity. The completed
+  Restrictions v9 source-pin/variant-migration checker matrix has been
+  retired; canonical Rules source tests and supported v8/v9 CLI/reader
+  compatibility tests remain. Legacy release-export and loose JSON
+  research consumers are the next P2.5 retirement target.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;
