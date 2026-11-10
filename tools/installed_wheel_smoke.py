@@ -102,9 +102,21 @@ def verify_runtime(work: Path, *, asset_free: bool, require_assets: bool) -> Non
         database.validate()
         rules = RulesDatabase(selected / "rules_n5.db")
         rules.validate()
-        app = create_app(database.path, rules.path) if asset_free else (
-            create_app_from_database_set(selected)
-        )
+        if asset_free:
+            # Embedded symbol provenance requires the published assets at
+            # startup. An install with missing assets must fail closed.
+            from infinity_db.symbol_catalog import SymbolCatalogError
+
+            try:
+                create_app(database.path, rules.path)
+            except SymbolCatalogError as exc:
+                if "Packaged symbol bytes differ or are missing" not in str(exc):
+                    raise
+            else:
+                raise ValueError("Runtime accepted missing published symbol assets")
+            print("Installed wheel missing-symbol rejection: PASS", flush=True)
+            return
+        app = create_app_from_database_set(selected)
         assert app.database.path == database.path
         assert app.rules_database is not None
 
@@ -123,11 +135,7 @@ def verify_runtime(work: Path, *, asset_free: bool, require_assets: bool) -> Non
         for path in ("/", "/api/armies", "/units", "/skills", "/internal/health",
                      "/static/unit-symbols.js", "/changes"):
             assert request(path) == 200, path
-        if asset_free:
-            symbol = app.symbol_catalog.army_path(101)
-            assert symbol is not None
-            assert request(f"/static/{symbol}") == 404
-    print(f"Installed wheel {'asset-free' if asset_free else 'normal'} runtime: PASS", flush=True)
+    print("Installed wheel normal runtime: PASS", flush=True)
 
 
 def smoke_wheel(wheel: Path, source: Path, work: Path, *, require_assets: bool) -> None:

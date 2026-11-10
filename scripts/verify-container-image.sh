@@ -321,14 +321,16 @@ if result.get("sourceSnapshot") != publication["sourceSnapshot"]:
 
 if [ "$packaged_assets" -eq 1 ]; then
   docker exec "$container" python -c '
-import json
+from pathlib import Path
 from urllib.request import urlopen
 
-from infinity_army_data.project_resources import maintained_manifest_path
+from infinity_db.database import Database
 
-publication = json.loads(
-    maintained_manifest_path("symbol-publication.json").read_text(encoding="utf-8")
-)
+# The runtime publishes source identity in the Army database. Standalone
+# build manifests are intentionally absent from the immutable container.
+publication = Database(Path("/app/data/army.db")).symbol_publication()
+if publication is None:
+    raise SystemExit("Embedded symbol publication is missing")
 paths = sorted(publication["publishedSha256ByPath"])
 present_categories = {path.split("/", 1)[0] for path in paths}
 required_categories = {"armies", "characteristics", "orders", "units"}

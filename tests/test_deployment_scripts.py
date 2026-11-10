@@ -483,6 +483,13 @@ def test_container_smoke_validates_canonical_release_notes(
             exec(code, {})
 
 
+def test_container_symbol_route_smoke_uses_embedded_database_publication() -> None:
+    script = _read("scripts/verify-container-image.sh")
+    route_probe = script.split('if [ "$packaged_assets" -eq 1 ]; then', 1)[1]
+    assert 'Database(Path("/app/data/army.db")).symbol_publication()' in route_probe
+    assert "maintained_manifest_path" not in route_probe
+
+
 def test_installed_wheel_smoke_runs_database_health_check() -> None:
     workflow = _read(".github/workflows/installed-wheel.yml")
 
