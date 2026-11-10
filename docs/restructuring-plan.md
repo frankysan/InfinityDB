@@ -1920,11 +1920,37 @@ historical-only v9 paired-publication tests were removed rather than
 retaining a migration path to satisfy their own tests. The original
 publication implementation and acceptance evidence remain in Git history.
 
-**Remaining P2.5:** Retire the dependent v9 ARO/movement/geometry and
-source-variant review cluster, then delete completed transition tests and
-the loose JSON serialization/read adapters after their final historical
-consumers have been removed. Preserve current source and selected-set
-validation throughout. P2.6–P2.8 still own final naming/defaults,
+#### P2.5 — Twelfth slice: retire ARO, movement and geometry promoters (2026-11-10)
+
+The completed v9 promotion chain for ARO/Deployment Phase,
+Moving/Measuring and General Movement, and geometry/LoF is retired:
+`tools/promote_aro_deployment_reference.py`,
+`tools/promote_movement_reference.py`, and
+`tools/promote_geometry_reference.py`. The movement and geometry wrappers
+depended on the ARO promoter for staging constants and SQLite helpers;
+none has a current build, runtime, CI or production consumer.
+
+The three maintained source tests now own their original N5.3 citations
+and exact canonical record identity, definition role and scope without
+importing any old promoter. They preserve pinned PDF/wiki evidence,
+reviewed ARO and deployment conditions, movement restrictions,
+geometric exceptions, Rules database parity, public routes and search.
+The superseded v9 staged-pair rebuild, rollback and repeated-promotion
+checks were removed, rather than retaining an obsolete release format to
+satisfy its own tests. Source and migration history remain available in Git.
+
+The movement Chromium acceptance test no longer imports a historical
+promoter or calls `load_release_deployed_objects` on loose
+`deployed-objects.json`. It validates the complete selected database set
+with embedded deployed objects before checking browser navigation. The
+maintained `infinity_db.database_set` and `sqlite_comparison` contracts
+cover current artifact matching and logical rebuild equivalence.
+
+**Remaining P2.5:** Audit and retire the source-variant review helpers and
+remaining completed staging/transition tests. When no historical callers
+remain, remove the loose JSON read/serialization layer and
+`restrictions_v9_release`. Preserve accepted source semantics and current
+selected-set checks. P2.6–P2.8 still own final naming/defaults,
 assembly-stage removal and full local/container acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules

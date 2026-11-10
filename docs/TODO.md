@@ -55,9 +55,11 @@ when all contained work shares the same owner.
   commands are retired, with current source/Rules/API tests retained.
   Cover and terrain-condition v9 promoters are also retired; their
   source, gameplay and API checks now own the accepted evidence directly.
-  Continue retiring the legacy JSON loader, remaining stage/promotion
-  modules and obsolete transition tests while preserving current source
-  guards.
+  The ARO/movement/geometry v9 promotion dependency chain is retired;
+  the shared browser test now validates embedded deployed objects through
+  the current database-set contract, not loose JSON. Continue retiring
+  the legacy JSON loader, review/staging helpers and obsolete transition
+  tests while preserving current source guards.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;

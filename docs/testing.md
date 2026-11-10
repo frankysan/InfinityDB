@@ -1120,6 +1120,25 @@ whitespace, and tracked runtime artifact/provenance checks passed
 (SVG verification excluded). No full suite, Docker run, or deployment
 was performed.
 
+**2026-11-10 P2.5 twelfth slice, ARO/movement/geometry v9 promoters:**
+The three accepted source and API suites now own their N5.3 citation
+tables and canonical record checks (identity, N5 scope, definition role),
+without importing historical v9 promoters. Their staged-pair rebuild and
+rollback-only tests were removed; equivalent current-purpose database
+set and logical SQLite comparison tests remain maintained separately.
+The shared responsive Chromium acceptance fixture now calls
+`validate_database_set` for embedded deployed objects before navigating
+the ARO/movement/geometry/Cover/Terrain family; no loose
+`deployed-objects.json` fallback is needed. Historical code and original
+publication evidence remain recoverable through Git history.
+Focused Windows validation passed **49 cases**: ARO (4), movement (3),
+geometry (4), shared responsive Chromium acceptance across three
+viewports (3), selected database-set health (20) and test-section
+registry (15). Ruff, canonical Pyright (0 errors), docs lint/links/backlog,
+Git whitespace and tracked runtime artifact/provenance checks passed
+(SVG validation excluded). The full suite, direct Docker validation and
+deployment were not performed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

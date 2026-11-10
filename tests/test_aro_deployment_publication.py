@@ -1,4 +1,4 @@
-"""V1S-032C2 pinned core ARO and Deployment publication regressions."""
+"""Accepted core ARO and Deployment source, Rules and API regressions."""
 
 from __future__ import annotations
 
@@ -13,19 +13,19 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
-from tools.promote_aro_deployment_reference import (
-    CHANGED_ID,
-    CITATIONS,
-    NEW_ID,
-    PDF,
-    SOURCE_SHA256,
-    verify_candidate,
-)
 
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RULES = ROOT / "data/generated/rules.db"
 ARMY = ROOT / "data/generated/infinity.db"
+PDF = Path("data/pdf/rules/n5-rules-v5.3-en.pdf")
+SOURCE_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+NEW_ID = "rule:automatic-reaction-order"
+CHANGED_ID = "rule:deployment-phase"
+CITATIONS = {
+    NEW_ID: {("n5-core-v5.3-pdf", 13), ("n5-core-v5.3-pdf", 14)},
+    CHANGED_ID: {("n5-core-v5.3-pdf", 15), ("n5-core-v5.3-pdf", 16)},
+}
 
 
 def _get(app: Any, route: str, query: str = "") -> tuple[str, bytes]:
@@ -44,7 +44,10 @@ def _get(app: Any, route: str, query: str = "") -> tuple[str, bytes]:
 
 
 def _records() -> dict[str, dict[str, Any]]:
-    return {record["id"]: record for record in load_curated_document(CORE)["records"]}
+    records = load_curated_document(CORE)["records"]
+    assert all(sum(row["id"] == identity for row in records) == 1
+               for identity in CITATIONS)
+    return {record["id"]: record for record in records}
 
 
 def test_n5_3_core_aro_and_deployment_clauses_match_pinned_source() -> None:
@@ -141,6 +144,11 @@ def test_public_aro_and_deployment_routes_preserve_source_prose() -> None:
     rules = RulesDatabase(RULES)
     for identity in (NEW_ID, CHANGED_ID):
         record = source[identity]
+        assert record["kind"] == "rule"
+        assert record["composition"] == {"role": "definition"}
+        assert record["scope"] == {"game": "N5", "seasons": ["current"]}
+        assert record["facts"]["category"] == "basic-rule"
+        assert {(c["sourceId"], c["page"]) for c in record["citations"]} == CITATIONS[identity]
         published = rules.composed_record(identity)
         assert published is not None
         assert published["summary"] == record["summary"]
@@ -162,15 +170,3 @@ def test_public_aro_and_deployment_routes_preserve_source_prose() -> None:
     status, body = _get(app, "/api/orders-aros")
     assert status == "200 OK"
     assert json.loads(body)["legalityEvaluation"] is False
-
-
-def test_guarded_aro_deployment_pair_rebuild_is_deterministic() -> None:
-    if not (ROOT / PDF).is_file() or not (ROOT / "local").is_dir():
-        pytest.skip("Pinned source and ignored local staging not available")
-    checked = verify_candidate()
-    assert checked["alreadyPublished"]
-    assert checked["deterministic"] and checked["matchedPublication"]
-    assert checked["candidateRecords"] >= 487
-    assert checked["existingRecordsVerifiedUnchanged"] == checked["candidateRecords"] - 1
-    assert checked["logicallyEquivalentWithPublished"] is True
-    assert checked["publishedRulesSha256"] == hashlib.sha256(RULES.read_bytes()).hexdigest()
