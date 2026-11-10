@@ -203,6 +203,7 @@
         "test_cli",
         "test_database_set_builder",
         "test_deterministic_io",
+        "test_discover_store_assets",
         "test_download_army_json",
         "test_download_human_sphere_snapshot",
         "test_download_wiki_history",
