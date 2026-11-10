@@ -9,17 +9,13 @@ from wsgiref.util import setup_testing_defaults
 
 import pytest
 
-from infinity_db.curated import load_curated_directory
-from infinity_db.rules_database import export_rules_database
-from infinity_db.web import create_app
+from infinity_db.web import create_app_from_database_set
 
 
 @pytest.fixture(scope="module")
-def app(tmp_path_factory: pytest.TempPathFactory) -> Any:
+def app() -> Any:
     root = Path(__file__).resolve().parents[1]
-    rules = tmp_path_factory.mktemp("flamethrower-reference") / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data/curated"), rules)
-    return create_app(root / "data/generated/army.db", rules)
+    return create_app_from_database_set(root / "data/generated")
 
 
 def weapon_detail(app: Any, slug: str) -> dict[str, Any]:

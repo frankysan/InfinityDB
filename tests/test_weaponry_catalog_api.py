@@ -21,7 +21,7 @@ from storage_fixture_support import weapon_publication
 from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase, export_rules_database
-from infinity_db.web import create_app
+from infinity_db.web import create_app, create_app_from_database_set
 
 
 @pytest.fixture(scope="module")
@@ -168,8 +168,11 @@ def test_unreviewed_profile_does_not_inherit_chart_or_ammunition_citation(
 ) -> None:
     payload = _weapon_detail(weaponry_app, "ap-mine")
     assert payload["profile_citations_available"] is True
-    assert all(profile["profile_citations"] for profile in payload["profiles"])
+    # The chart publication covers reviewed exact profiles; it does not
+    # attribute an unrelated chart row to this unreviewed Mine profile.
+    assert all(not profile["profile_citations"] for profile in payload["profiles"])
     assert "weapon:mines" in _weapon_rules(payload)
+    # Ammunition effects still retain their independently reviewed citations.
     assert any(effect["citations"] for effect in payload["profiles"][0]["ammunition_effects"])
 
 
@@ -2663,17 +2666,10 @@ def test_remaining_multimode_shared_reviews_preserve_exact_profiles(
         ]
 
 @pytest.fixture(scope="module")
-def source_discrepancy_app(tmp_path_factory: pytest.TempPathFactory) -> Callable:
-    """Exercise the current curated corpus, not an older generated rules_n5.db."""
+def source_discrepancy_app() -> Callable:
+    """Exercise the source-bound complete Rules/Army/ITS runtime."""
     root = Path(__file__).resolve().parents[1]
-    output = tmp_path_factory.mktemp("weapon-discrepancy-rules") / "rules_n5.db"
-    export_rules_database(
-        load_curated_directory(root / "data/curated"), output, finalize=False,
-    )
-    RulesDatabase(output).validate()
-    return create_app(
-        root / "data/generated/army.db", rules_database_path=output,
-    )
+    return create_app_from_database_set(root / "data/generated")
 
 
 @pytest.mark.parametrize(
@@ -3203,12 +3199,10 @@ def test_deactivator_api_keeps_same_order_device_trigger_families_separate(
 
 
 @pytest.fixture(scope="module")
-def mixed_weapons_app(tmp_path_factory: pytest.TempPathFactory) -> Callable:
-    """A fresh curated rules build, not the previously generated deployment snapshot."""
+def mixed_weapons_app() -> Callable:
+    """The published mixed-mode projection needs embedded source-matched citations."""
     root = Path(__file__).resolve().parents[1]
-    rules_path = tmp_path_factory.mktemp("mixed-weapons") / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
-    return create_app(root / "data/generated/army.db", rules_database_path=rules_path)
+    return create_app_from_database_set(root / "data/generated")
 
 
 def test_mixed_weapons_shared_modes_and_source_provenance(

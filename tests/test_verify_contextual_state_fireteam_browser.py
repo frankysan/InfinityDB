@@ -9,8 +9,7 @@ from typing import Any
 import pytest
 
 from infinity_db.curated import load_curated_directory
-from infinity_db.rules_database import export_rules_database
-from infinity_db.web import create_app
+from infinity_db.web import create_app_from_database_set
 from tools.browser_wsgi_transport import route_browser_page, wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,15 +23,9 @@ STATES = {
 
 
 @pytest.fixture(scope="module")
-def state_fireteam_app(
-    tmp_path_factory: pytest.TempPathFactory,
-) -> Any:
-    """Export changed curated content, never silently use an older tracked DB."""
-    rules_path = tmp_path_factory.mktemp("contextual-state-fireteam") / "rules_n5.db"
-    export_rules_database(load_curated_directory(ROOT / "data/curated"), rules_path)
-    return create_app(
-        ROOT / "data/generated/army.db", rules_database_path=rules_path,
-    )
+def state_fireteam_app() -> Any:
+    """Use the validated, source-bound embedded runtime for public HTTP checks."""
+    return create_app_from_database_set(ROOT / "data/generated")
 
 
 def _json_response(app: Any, path: str) -> dict[str, Any]:

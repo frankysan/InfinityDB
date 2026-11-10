@@ -13,8 +13,7 @@ from xml.etree import ElementTree
 import pytest
 
 from infinity_db.curated import load_curated_directory
-from infinity_db.rules_database import export_rules_database
-from infinity_db.web import create_app
+from infinity_db.web import create_app_from_database_set
 from tools.browser_wsgi_transport import route_browser_page, wsgi_response
 from tools.verify_unit_skill_presentation_browser import (
     DOM_SNAPSHOT,
@@ -141,20 +140,15 @@ def test_known_source_disclosures_normal_browser(
 
 
 @pytest.fixture(scope="module")
-def scenario_app(tmp_path_factory: pytest.TempPathFactory) -> Callable[..., Any]:
-    """Use freshly exported curated rules; the checked-in rules DB may lag."""
-    rules_path = tmp_path_factory.mktemp("scenario-faq-browser") / "rules_n5.db"
-    export_rules_database(load_curated_directory(ROOT / "data/curated"), rules_path)
-    return create_app(ROOT / "data/generated/army.db", rules_database_path=rules_path)
+def scenario_app() -> Callable[..., Any]:
+    """Serve the source-bound three-file runtime, not a standalone Rules-v10 export."""
+    return create_app_from_database_set(ROOT / "data/generated")
 
 
 @pytest.fixture(scope="module")
 def release_scenario_app() -> Callable[..., Any]:
-    """Serve the tracked Army/rules database pair, never a fresh test export."""
-    return create_app(
-        ROOT / "data/generated/army.db",
-        rules_database_path=ROOT / "data/generated/rules_n5.db",
-    )
+    """Exercise the same validated set used for checkout and Docker serving."""
+    return create_app_from_database_set(ROOT / "data/generated")
 
 
 @pytest.fixture(scope="module")
@@ -335,7 +329,7 @@ def test_stealth_counter_reaction_permissions_normal_browser(
                 "Game Round 2 or 3", "Active Turn", "55 mm",
                 "PH 15", "two different items", "once per game",
                 "at the end of that Order", "English printing discrepancy",
-                "TEAM-OPS", "Request Speedball",
+                "Request Speedball",
             ),
             "/skills/infinity-spec-ops", "/skills/combat-jump",
         ),
@@ -363,6 +357,10 @@ def test_added_source_skills_normal_browser(
         visible = rule.inner_text()
         for phrase in expected:
             assert phrase in visible, (slug, width, phrase)
+        if slug == "request-specball":
+            # ITS 18 TEAM-OPS restrictions are shown only after selecting
+            # that season's explicit Extra context, never on this N5 Skill.
+            assert "TEAM-OPS" not in visible
         assert f"p. {source_page}" in rule.locator(
             ".rules-source-citations"
         ).inner_text()
