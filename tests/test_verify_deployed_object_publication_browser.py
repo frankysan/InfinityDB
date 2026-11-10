@@ -366,11 +366,9 @@ def test_unpublished_legacy_database_does_not_infer_object_catalog(
     rules = tmp_path / "rules_n5.db"
     shutil.copyfile(root / "data/generated/army.db", army)
     export_rules_database(load_curated_directory(root / "data/curated/rules"), rules)
-    app = create_app(army, rules_database_path=rules)
-    for path in ("/api/deployed-objects", "/api/deployed-objects/army-weapon-199"):
-        status, content = _request(app, path)
-        assert status == 503
-        assert b"not published" in content
-    status, _ = _request(app, "/deployed-objects")
-    assert status == 200
+    # Standalone Rules v8 is a research export, not a complete served set.
+    # Reject it at startup rather than resurrecting historical 503 routes
+    # or inferring a deployed-object catalog from adjacent artifacts.
+    with pytest.raises(ValueError, match="Embedded Weapon citations"):
+        create_app(army, rules_database_path=rules)
 

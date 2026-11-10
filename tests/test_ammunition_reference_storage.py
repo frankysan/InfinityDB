@@ -235,8 +235,9 @@ def test_read_rejects_corrupt_relational_data(v16, tmp_path: Path, mutation: str
             RulesDatabase(path).validate()
 
 
-def test_previous_releases_keep_reviewed_json_adapter(v16) -> None:
+def test_current_release_embeds_reviewed_ammunition_references(v16) -> None:
     path, expected = v16
-    assert RulesDatabase(RELEASE / "rules_n5.db").ammunition_references_payload() is None
+    assert RulesDatabase(RELEASE / "rules_n5.db").ammunition_references_payload(ARMY) == expected
     assert RulesDatabase(path).ammunition_references_payload(ARMY) == expected
+    # The authored source is a build-time validation input, not a runtime fallback.
     assert load_ammunition_reference_map(CONFIG) == expected

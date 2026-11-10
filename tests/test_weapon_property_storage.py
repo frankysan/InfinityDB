@@ -176,7 +176,7 @@ def test_v17_source_profile_matching_is_still_exact(v17) -> None:
         changed = deepcopy(reviewed)
         changed[field] = alternate
         assert properties.for_profile(changed) == []
-    assert RulesDatabase(RELEASE / "rules_n5.db").weapon_properties_payload() is None
+    assert RulesDatabase(RELEASE / "rules_n5.db").weapon_properties_payload(ARMY) == source
     assert source == load_weapon_properties(CONFIG)
 
 

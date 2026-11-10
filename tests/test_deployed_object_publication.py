@@ -534,8 +534,12 @@ def test_legacy_rules_never_attach_adjacent_deployed_object_json(
     external_rules.parent.mkdir()
     shutil.copyfile(legacy_v9_rules, external_rules)
 
-    assert create_app(army, rules_database_path=rules).deployed_objects is None
-    assert create_app(army, rules_database_path=external_rules).deployed_objects is None
+    # Legacy v9 lacks the embedded Weapon Chart and deployed-object model.
+    # Modern serving rejects it before a stale/invalid adjacent JSON could
+    # be interpreted as an independent publication fallback.
+    for candidate in (rules, external_rules):
+        with pytest.raises(ValueError, match="Embedded Weapon citations"):
+            create_app(army, rules_database_path=candidate)
 
 
 def test_release_pair_still_fails_closed_on_same_directory_rules_drift(

@@ -11,6 +11,7 @@ from copy import deepcopy
 from functools import partial
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 from wsgiref.util import setup_testing_defaults
 
 import pytest
@@ -39,7 +40,7 @@ from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
-from infinity_db.web import create_app
+from infinity_db.web import create_app, create_app_from_database_set
 from tools.audit_1_0_reference_inputs import _WikiHeadings
 from tools.verify_ammunition_browser import WIDTHS, source_names, verify
 from tools.verify_general_rules_browser import source_rules
@@ -327,7 +328,9 @@ def test_attribute_dash_and_swc_export_and_api(tmp_path: Path) -> None:
             assert authored["review"] == {"status": "reviewed", "reviewedOn": "2026-11-06"}
             assert authored["citations"][0]["page"] == 9
             assert authored["citations"][0]["sourceId"] == "n5-core-v5.3-pdf"
-    app = create_app(root / "data/generated/army.db", rules_database_path=fresh)
+    # Source-only v8 export is inspected above; published HTTP requires the
+    # complete Army/Rules/ITS database set and its embedded citations.
+    app = create_app_from_database_set(root / "data/generated")
     status, body = _published_get(app, "/api/glossary")
     assert status == "200 OK"
     entries = {item["id"]: item for item in json.loads(body)["items"]}
@@ -1862,7 +1865,14 @@ def test_embedded_glossary_handles_missing_sources_and_isolates_cache(
     assert fresh["attribute:cc"]["citations"] == expected
     assert "injected" not in fresh["attribute:cc"]["aliases"]
 
-    app = create_app(database.path, rules_database_path=rules_path)
+    # This is an intentionally incomplete synthetic Rules-v8 fixture for
+    # missing-citation and cache-isolation behavior. Stub only the unrelated
+    # Weapon Chart loader, rather than weakening real runtime validation.
+    with patch(
+        "infinity_db.web.app.load_runtime_weapon_profile_publication",
+        return_value=(None, None),
+    ):
+        app = create_app(database.path, rules_database_path=rules_path)
     status, body = _published_get(app, "/api/glossary")
     assert status == "200 OK"
     api_entries = {item["id"]: item for item in json.loads(body)["items"]}

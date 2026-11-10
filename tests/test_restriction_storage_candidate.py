@@ -353,43 +353,20 @@ def test_explicit_v9_export_is_deterministic_and_legacy_relations_unchanged(
     }
 
 
-def test_restrictions_http_v8_and_v9_are_additive(
+def test_restrictions_v8_v9_research_read_model_is_not_servable(
     candidate: tuple[sqlite3.Connection, dict, dict, Path], legacy_v8_db: Path,
 ) -> None:
-    from urllib.parse import urlsplit
-    from wsgiref.util import setup_testing_defaults
-
     from infinity_db.web import create_app
 
     connection, chart, records, target = candidate
-
-    def get(app, path: str) -> tuple[int, dict]:
-        parsed = urlsplit(path)
-        environ: dict = {}
-        setup_testing_defaults(environ)
-        environ["PATH_INFO"] = parsed.path
-        environ["QUERY_STRING"] = parsed.query
-        result: dict = {}
-
-        def respond(status: str, headers: list[tuple[str, str]], exc_info=None) -> None:
-            result["status"] = int(status.split()[0])
-
-        response = app(environ, respond)
-        try:
-            body = b"".join(response)
-        finally:
-            if close := getattr(response, "close", None):
-                close()
-        return result["status"], json.loads(body)
-
-    v8 = create_app(ROOT / "data/generated/army.db", rules_database_path=legacy_v8_db)
-    status, payload = get(v8, "/api/restrictions")
-    assert status == 200
-    assert payload["available"] is False
-    assert payload["items"] == []
-    assert payload["evaluationSupported"] is False
-    assert get(v8, "/api/restrictions?subject=TAG")[1]["available"] is False
-    assert get(v8, "/api/restrictions?subject=UNKNOWN")[0] == 400
+    v8 = RulesDatabase(legacy_v8_db)
+    assert v8.restrictions_payload() == {
+        "formatVersion": 1, "available": False, "source": None,
+        "polarity": "prohibition", "items": [], "evaluationSupported": False,
+    }
+    assert v8.restrictions_payload(subject="TAG")["available"] is False
+    with pytest.raises(ValueError):
+        v8.restrictions_payload(subject="UNKNOWN")
 
     stage_candidate_restrictions(connection, chart, records)
     connection.execute("PRAGMA user_version = 9")
@@ -401,28 +378,33 @@ def test_restrictions_http_v8_and_v9_are_additive(
         "WHERE key = 'databaseCompatibilityVersion'"
     )
     connection.commit()
-    v9 = create_app(ROOT / "data/generated/army.db", rules_database_path=target)
-    status, payload = get(v9, "/api/restrictions")
-    assert status == 200
+
+    # Preserve direct source-research constraints, not the retired HTTP
+    # serving path for incomplete v8/v9 Rules publication schemas.
+    v9 = RulesDatabase(target)
+    payload = v9.restrictions_payload()
     assert payload["available"] is True
     assert payload["polarity"] == "prohibition"
     assert len(payload["items"]) == 14
-    assert get(v9, "/api/restrictions?subject=Motorcycle")[1]["items"][4][
+    assert v9.restrictions_payload(subject="Motorcycle")["items"][4][
         "operation"
     ] == {"kind": "directional-skill-movement", "qualifier": {"direction": "upward"}}
-    assert len(get(v9, "/api/restrictions?record_id=skill:lieutenant")[1]["items"]) == 2
-    assert get(v9, "/api/restrictions?record_id=skill:dodge")[1]["items"] == []
-    assert get(v9, "/api/restrictions?subject=REM&record_id=skill:lieutenant")[
-        1
-    ]["items"][0]["action"] == "lieutenant-selection"
-    for query in (
-        "?subject=UNKNOWN", "?record_id=not-an-id",
-        "?subject=TAG&subject=REM", "?extra=true",
+    assert len(v9.restrictions_payload(record_id="skill:lieutenant")["items"]) == 2
+    assert v9.restrictions_payload(record_id="skill:dodge")["items"] == []
+    assert v9.restrictions_payload(
+        subject="REM", record_id="skill:lieutenant",
+    )["items"][0]["action"] == "lieutenant-selection"
+    for kwargs in (
+        {"subject": "UNKNOWN"}, {"record_id": "not-an-id"},
     ):
-        assert get(v9, "/api/restrictions" + query)[0] == 400
-    # No changes to existing API schemas or record relation semantics.
-    for path in ("/api/skills/lieutenant", "/api/equipment/motorcycle"):
-        assert get(v8, path) == get(v9, path)
+        with pytest.raises(ValueError):
+            v9.restrictions_payload(**kwargs)
+
+    # Current runtime requires an embedded Weapon Chart publication from v12+;
+    # an adjacent legacy JSON sidecar may never make v8/v9 serveable.
+    for old in (legacy_v8_db, target):
+        with pytest.raises(ValueError, match="Embedded Weapon citations"):
+            create_app(ROOT / "data/generated/army.db", rules_database_path=old)
 
 
 def test_v9_validator_rejects_missing_table_and_broadened_constraint(

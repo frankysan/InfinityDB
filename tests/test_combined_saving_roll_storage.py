@@ -210,9 +210,9 @@ def test_embedded_corruption_is_rejected(v15, tmp_path: Path, mutation: str) -> 
             RulesDatabase(path).validate()
 
 
-def test_standalone_and_old_rules_keep_reviewed_source_adapter(v15) -> None:
+def test_current_release_embeds_reviewed_saving_rolls(v15) -> None:
     path, mapping = v15
-    assert RulesDatabase(RELEASE / "rules_n5.db").combined_saving_rolls_payload(ARMY) is None
+    assert RulesDatabase(RELEASE / "rules_n5.db").combined_saving_rolls_payload(ARMY) == mapping
     assert WeaponCombinedSavingRolls()._mapping == mapping
     assert WeaponCombinedSavingRolls(RulesDatabase(path))._mapping == mapping
     raw = Database(ARMY).get_catalog_item("weapons", "plasma-rifle")

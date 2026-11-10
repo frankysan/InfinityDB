@@ -38,7 +38,7 @@ def test_normalized_validation_is_stable_across_hash_seeds(tmp_path: Path) -> No
             [
                 sys.executable,
                 "-m",
-                "infinity_db",
+                "infinity_army_data",
                 "build",
                 str(fixture),
                 "--output-dir",
