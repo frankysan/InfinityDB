@@ -14,7 +14,6 @@ from infinity_db.deployment_provenance import (
     validate_database_symbol_provenance,
 )
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.variant_usage_reference import load_runtime_variant_usage
 
 try:
     from tools.asset_validation import (
@@ -22,7 +21,7 @@ try:
         AssetValidationError,
         validate_asset_set,
     )
-    from tools.build_weapon_profile_publication import DEFAULT_REVIEWS, check_publication
+    from tools.build_weapon_profile_publication import DEFAULT_REVIEWS, check_embedded_profiles
 except ImportError:  # pragma: no cover - direct script execution fallback
     from asset_validation import (  # type: ignore[no-redef]
         AssetSetValidation,
@@ -31,7 +30,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
     )
     from build_weapon_profile_publication import (  # type: ignore[no-redef]
         DEFAULT_REVIEWS,
-        check_publication,
+        check_embedded_profiles,
     )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -97,41 +96,17 @@ def verify_runtime_artifacts(
 def verify_variant_release_publication(
     database_path: Path, rules_database_path: Path,
 ) -> None:
-    """Require the tracked, release-paired exact-variant publication before packaging."""
-    publication, _ = load_runtime_variant_usage(database_path, rules_database_path)
+    """Require embedded, source-paired exact-variant data before packaging."""
+    publication = RulesDatabase(rules_database_path).variant_usage_payload(database_path)
     if publication is None or not publication["variants"]:
-        raise DeploymentAssetError("Release-matched exact variant usage is missing or empty")
+        raise DeploymentAssetError("Embedded exact variant usage is missing or empty")
 
 
 def verify_weapon_profile_release_publication(
     database_path: Path, rules_database_path: Path,
 ) -> None:
-    """Require the exact reviewed Weapon Chart publication before packaging."""
-    rules = RulesDatabase(rules_database_path)
-    embedded = rules.weapon_profile_citations_payload(database_path)
-    if embedded:
-        from infinity_db.weapon_profile_builder import build_publication
-
-        document = build_publication(database_path, rules_database_path, DEFAULT_REVIEWS)
-        source = document["source"]
-        expected = {
-            (weapon["id"], profile["sourceId"], profile["mode"]): {
-                "source_id": source["id"], "source_title": source["title"],
-                "source_version": source["version"], "source_url": source["url"],
-                "source_sha256": source["sha256"], "source_collection_id": source["collectionId"],
-                "page": profile["page"],
-            }
-            for weapon in document["weapons"] for profile in weapon["profiles"]
-        }
-        if embedded != expected:
-            raise DeploymentAssetError(
-                "Embedded Weapon citations differ from reviewed source inputs"
-            )
-        return
-    check_publication(
-        database_path, rules_database_path, DEFAULT_REVIEWS,
-        database_path.with_name("weapon-profile-sources.json"),
-    )
+    """Reject missing, outdated or divergent embedded reviewed Chart citations."""
+    check_embedded_profiles(database_path, rules_database_path, DEFAULT_REVIEWS)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -201,7 +176,7 @@ def main(argv: list[str] | None = None) -> int:
         "Deployment release artifacts verified: "
         f"{validation.present_count}/{validation.expected_count} published SVGs; "
         f"{validation.browser_present_count}/{validation.browser_expected_count} "
-        "browser-referenced; runtime databases and reference publications source-matched"
+        "browser-referenced; embedded runtime data and reviewed citations source-matched"
     )
     return 0
 

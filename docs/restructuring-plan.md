@@ -2206,6 +2206,28 @@ raw archive were skipped, not passed. This closes **P2.6**, not P2.7's
 remaining duplication audit or P2.8's real local/Docker acceptance. No full
 suite, Linux, hosted or release acceptance is implied.
 
+#### P2.7 — First slice: retire release-facing loose JSON commands (2026-11-10)
+
+The exact-variant source diagnostic retains its optional ignored `local/`
+candidate and read-only comparison with an explicitly selected `--raw-db`,
+but no longer exposes `--publish` or `--check-publication` for
+`data/generated/variant-usage.json`.
+The reviewed Weapon Chart utility is now read-only: it rederives source
+citations and compares them with the embedded Rules projection, without
+writing a JSON publication. Deployment verification uses that shared check
+and requires embedded variants; the old Weapon JSON fallback is gone from
+the packaging check. The determinism manifest now hashes the canonical
+reviewed citation meaning in memory rather than producing a sidecar from
+unrelated tracked release inputs. The standalone Army provenance test fixture
+uses the supported `infinity-army build` plus `infinity-db export` commands.
+
+This is a **bounded P2.7 slice**, not the final closeout. The low-level
+transitional schema/file adapters in `src/` and historical-only tests still
+need a separate disposition; changing that source code changes the tracked
+database build-input hash and requires rebuilding both release DBs. Preserve
+source research and explicit fixture injection only where independently useful.
+P2.8 still owns actual local-server and Docker integration acceptance.
+
 ### P3 — Separate seasonal ITS data from N5 core rules
 
 **Outcome:** Source-family boundaries support current and historical seasons without duplicating core rules.  

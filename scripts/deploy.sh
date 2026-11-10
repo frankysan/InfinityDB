@@ -128,9 +128,8 @@ start_metrics_history() {
   fi
 }
 
-# The variant-usage publication is an immutable tracked release artifact.
-# Its generating raw archive is intentionally absent from deployment hosts.
-echo "Validating tracked runtime databases and release publications..."
+# All runtime structured facts are embedded; source ZIPs stay off the deploy host.
+echo "Validating tracked runtime databases and published SVGs..."
 "$python" tools/verify_deployment_assets.py
 
 display_version="$("$python" -c 'import infinity_db; print(infinity_db.__display_version__)')"

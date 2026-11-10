@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import shutil
+import sqlite3
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -23,8 +25,8 @@ from tools.build_weapon_profile_publication import (
     DEFAULT_REVIEWS,
     DEFAULT_RULES,
     build_publication,
-    check_publication,
-    publication_bytes,
+    check_embedded_profiles,
+    main,
 )
 
 PDF_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
@@ -82,13 +84,16 @@ def test_reviewed_profile_publication_matches_every_eligible_identity_and_mode(
 
 
 def test_weapon_profile_diagnostic_matches_embedded_projection(
-    publication: dict[str, Any], tmp_path: Path,
+    publication: dict[str, Any],
 ) -> None:
-    rebuilt = build_publication(DEFAULT_ARMY, DEFAULT_RULES, DEFAULT_REVIEWS)
-    assert publication_bytes(rebuilt) == publication_bytes(publication)
-    output = tmp_path / "weapon-profile-sources.json"
-    output.write_bytes(publication_bytes(rebuilt))
-    check_publication(DEFAULT_ARMY, DEFAULT_RULES, DEFAULT_REVIEWS, output)
+    assert build_publication(DEFAULT_ARMY, DEFAULT_RULES, DEFAULT_REVIEWS) == publication
+    assert check_embedded_profiles(DEFAULT_ARMY, DEFAULT_RULES, DEFAULT_REVIEWS) == 69
+    assert main([]) == 0
+
+
+def test_weapon_profile_diagnostic_does_not_publish_json() -> None:
+    with pytest.raises(SystemExit, match="2"):
+        main(["--output", "data/generated/weapon-profile-sources.json"])
 
 
 def test_pinned_pdf_contains_every_published_weapon_profile_mode_and_page(
@@ -170,8 +175,8 @@ def test_missing_or_malformed_publication_is_explicit(
 ) -> None:
     path = tmp_path / "weapon-profile-sources.json"
     assert load_weapon_profile_publication(path, DEFAULT_ARMY, DEFAULT_RULES) is None
-    with pytest.raises(ValueError, match="missing or differs"):
-        check_publication(DEFAULT_ARMY, DEFAULT_RULES, DEFAULT_REVIEWS, path)
+    # Only the explicit historical file loader is exercised here; the release
+    # verifier no longer accepts or requires a loose JSON publication.
     path.write_text("{", encoding="utf-8")
     with pytest.raises(ValueError, match="Invalid Weapon profile publication JSON"):
         load_weapon_profile_publication(path, DEFAULT_ARMY, DEFAULT_RULES)
@@ -217,11 +222,15 @@ def test_builder_rejects_stale_or_incomplete_review(
         build_publication(DEFAULT_ARMY, DEFAULT_RULES, _write(tmp_path / "reviews.json", policy))
 
 
-def test_deployment_check_rejects_changed_publication_bytes(
-    tmp_path: Path, publication: dict[str, Any],
+def test_embedded_weapon_diagnostic_rejects_corrupted_relational_citations(
+    tmp_path: Path,
 ) -> None:
-    document = deepcopy(publication)
-    document["weapons"][0]["profiles"][0]["page"] += 1
-    path = _write(tmp_path / "weapon-profile-sources.json", document)
-    with pytest.raises(ValueError, match="missing or differs"):
-        check_publication(DEFAULT_ARMY, DEFAULT_RULES, DEFAULT_REVIEWS, path)
+    rules = tmp_path / "rules_n5.db"
+    shutil.copyfile(DEFAULT_RULES, rules)
+    with sqlite3.connect(rules) as connection:
+        connection.execute(
+            "DELETE FROM weapon_chart_profile_citations "
+            "WHERE rowid=(SELECT MIN(rowid) FROM weapon_chart_profile_citations)"
+        )
+    with pytest.raises(ValueError):
+        check_embedded_profiles(DEFAULT_ARMY, rules, DEFAULT_REVIEWS)

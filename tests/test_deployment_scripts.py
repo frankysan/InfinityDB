@@ -249,8 +249,9 @@ def test_weapon_profile_citations_are_release_paired_and_packaged() -> None:
     assert "/api/weapons/rifle" in smoke
     assert "RUN rm /app/data/weapon-profile-sources.json" not in workflow
     assert "Prepare immutable runtime bundle" not in workflow
-    assert "tools.build_weapon_profile_publication" in determinism
-    assert "publication/weapon-profile-sources.json" in determinism
+    assert "tools.build_weapon_profile_publication" not in determinism
+    assert "publication/weapon-profile-sources.json" not in determinism
+    assert "reviewed/weapon-profile-citations" in determinism
 
 
 def test_release_installer_deploys_tracked_runtime_databases_without_rebuilding() -> None:

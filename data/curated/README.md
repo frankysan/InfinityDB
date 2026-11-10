@@ -672,9 +672,9 @@ checks that the source identity, chart page, profile fingerprint, absence of sou
 and full reviewed ammunition-link coverage still match. Any drift reopens
 review rather than silently preserving acceptance. These approvals concern
 Weapon-specific explanation needs, **not** gameplay resolution or release-wide
-browser acceptance. `tools.build_weapon_profile_publication` separately
-materializes the profile-only chart locators for the matched release pair;
-the browser does not read this curation file.
+browser acceptance. The complete Rules database build embeds the reviewed
+profile-only chart locators. Source verification compares those citations
+with this file; the browser does not read the curation input.
 
 Ammunition definitions may additionally publish reviewed, **non-executable**
 `facts.ammunitionResolution` operations. This is a bounded typed-effects pilot; the

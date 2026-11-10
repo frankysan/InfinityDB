@@ -30,10 +30,11 @@ when all contained work shares the same owner.
   P0/P1 and P2.1–P2.6 are implemented. The tracked Army v31/Rules v17
   `army.db`/`rules_n5.db` pair is the default complete build and shared
   checkout/Docker serving input; see the [data lifecycle](../data/README.md).
-  - [ ] Complete P2.7–P2.8: remove any remaining redundant publication
-    and compatibility procedures, then validate the final local and actual
-    Docker hosting paths against the pinned baseline. P2.6's filename,
-    default and direct-packaging cutover is complete.
+  - [ ] Complete P2.7–P2.8: loose JSON publishing commands and the
+    deployment-side Weapon JSON fallback are retired; review remaining low-level
+    transitional file/schema adapters and historical-only tests, then validate
+    the final local and actual Docker hosting paths against the pinned baseline.
+    P2.6's filename, default and direct-packaging cutover is complete.
   - [ ] Continue P3–P6 in dependency order under the plan's source-family,
     presentation, tooling and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in

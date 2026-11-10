@@ -32,6 +32,20 @@ from infinity_db.variant_usage_reference import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.mark.parametrize("retired_flag", ("--publish", "--check-publication"))
+def test_variant_usage_tool_has_no_loose_json_publication_mode(
+    monkeypatch: pytest.MonkeyPatch, retired_flag: str,
+) -> None:
+    from tools.build_variant_usage import main
+
+    monkeypatch.setattr(
+        "sys.argv", ["build_variant_usage", "--raw-db", "local/army.raw.db", retired_flag],
+    )
+    with pytest.raises(SystemExit) as error:
+        main()
+    assert error.value.code == 2
+
+
 def _variant_usage_candidate(
     snapshot: dict[str, str], *, duplicate: bool = False,
 ) -> dict[str, Any]:
@@ -919,7 +933,10 @@ def test_variant_usage_cli_check_never_writes_candidate(
     original = json.dumps(result).encode("utf-8")
     candidate.write_bytes(original)
     monkeypatch.setattr(cli, "build_variant_usage_projection", lambda *_args: result)
-    monkeypatch.setattr("sys.argv", ["build_variant_usage", "--check", str(candidate)])
+    monkeypatch.setattr(
+        "sys.argv", ["build_variant_usage", "--raw-db", str(tmp_path / "raw.db"),
+                     "--check", str(candidate)],
+    )
     cli.main()
     assert candidate.read_bytes() == original
     result["scope"] = "changed"
