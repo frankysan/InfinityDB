@@ -15,10 +15,11 @@ from infinity_db.curated import load_curated_document
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
 from tools.audit_terrain_scenery_source_gaps import (
+    ARMY,
     CURATED,
     EXAMPLE_LABELS,
     GATE_MARKERS,
-    PUBLICATION,
+    RULES,
     SOURCE,
     TERRAIN_TYPES,
     audit_source_files,
@@ -27,13 +28,14 @@ from tools.audit_terrain_scenery_source_gaps import (
     verify_example_values,
     verify_pinned_pdf,
 )
-from tools.release_rules_export import release_deployed_object_bytes
 
 
 def _inputs() -> tuple[dict, dict]:
+    publication = RulesDatabase(RULES).deployed_objects_payload(ARMY)
+    assert publication is not None
     return (
         load_curated_document(CURATED),
-        json.loads(release_deployed_object_bytes(PUBLICATION)),
+        publication,
     )
 
 
@@ -55,7 +57,8 @@ def test_terrain_scenery_inventory_remains_outside_deployed_objects() -> None:
     }
     assert report["publishedDeployedObjectCount"] == 17
     assert len(report["curatedSha256"]) == 64
-    assert len(report["publishedObjectSha256"]) == 64
+    assert len(report["armyDatabaseSha256"]) == 64
+    assert len(report["rulesDatabaseSha256"]) == 64
     assert report["verifiedPdfSha256"] is None
 
 

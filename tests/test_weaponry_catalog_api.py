@@ -21,7 +21,6 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.web import create_app
-from tools.release_rules_export import export_release_rules
 
 
 @pytest.fixture(scope="module")
@@ -479,7 +478,7 @@ def test_pheroware_citations_match_curated_fresh_and_published_rules(
         ] == [locator]
 
     fresh_path = tmp_path / "fresh-rules.db"
-    export_release_rules(documents, fresh_path)
+    export_rules_database(documents, fresh_path)
     for path in (fresh_path, root / "data/generated/rules.db"):
         database = RulesDatabase(path)
         database.validate()

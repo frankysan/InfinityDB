@@ -153,9 +153,12 @@ inputs before changing the destination. The standalone deployed-object JSON
 publication/migration CLI is retired. Variant-usage source builds now require
 source-matched deployed objects embedded in the selected Rules database;
 even a present loose JSON publication cannot restore a missing model.
-Historical staging/release-comparison tools still use the standalone JSON
-reader pending their retirement, but runtime serving and supported complete
-builds do not.
+The core-scenario and terrain/scenery boundary audits likewise read this
+embedded model from explicitly selected Army and Rules paths; their reports
+pin the actual database bytes, without synthesizing a JSON publication or
+guessing sibling files. Historical staging tools still use the standalone
+JSON reader pending their retirement, but runtime serving, current source
+boundary audits and supported complete builds do not.
 
 `infinity_db.deployed_object_reference.project_deployed_references` consumes
 the validated N5.3 deployed-object audit and produces a **pure, read-only**

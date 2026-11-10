@@ -1216,6 +1216,20 @@ relational Restrictions storage (15), selected database-set integrity
 Git whitespace and tracked runtime artifact/provenance checks passed
 (SVG excluded). No full suite, direct Docker run or deployment occurred.
 
+**2026-11-10 P2.5 seventeenth slice, database-backed research boundaries:**
+Core-scenario and terrain/scenery audits now read explicitly selected embedded
+deployed objects and report Army/Rules file hashes. Their legacy JSON adapters
+are retired, and Pheroware citation parity uses canonical Rules export.
+Focused Windows validation passed **233 tests, zero skips** across
+`test_core_scenario_object_boundary.py`, `test_terrain_scenery_source_gaps.py`
+and `test_weaponry_catalog_api.py` (33.15 seconds). This includes independent
+database locations/names, CLI selection, malformed adjacent JSON, exact hash
+reporting, nonmutation, and rejection of missing files, v8 models, corrupt
+Rules, missing embedded tables and mismatched Army bytes. Existing source PDF,
+geometry, scoring, terrain-cell, citation and API checks also passed. Ruff,
+focused Pyright (0 errors), docs lint/links/backlog and Git whitespace passed.
+No full suite, Linux, Docker or hosted acceptance is implied.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -7808,12 +7822,21 @@ standalone Special Terrain and Access Width reference definitions are
 now **promoted** as N5.3 general rules. The subsequent maintained-text
 review and coordinated binary refresh are complete (see below).
 Gate Token labels do not have separate canonical definitions.
-The audit accepts both the original two-gap state and the fully
-published two-rule state but rejects partial migration or unsupported
+The audit requires both accepted rules and rejects missing or unsupported
 definitions. Its optional `--pdf` mode verifies source headings, names and
 Narrow Gate eligibility against the local English N5.3 source. Without
 the ignored PDF, it still checks maintained and published domain boundaries;
 it does not claim to have re-extracted the PDF.
+
+The terrain/scenery and core-scenario boundary audits read deployed objects
+directly from validated Rules SQLite, bound to the selected Army bytes. Use
+`--army-database PATH --rules-database PATH` to select alternate files;
+their locations and names are independent. Both default to the tracked
+database pair. Reports include `armyDatabaseSha256` and
+`rulesDatabaseSha256`, replacing hashes of a synthesized JSON publication.
+The retired `--publication` option and loose JSON recovery path are gone.
+Missing, incompatible or mismatched embedded models fail closed without
+creating or modifying inputs; adjacent `deployed-objects.json` is ignored.
 
 Special Terrain zones are game-table/session configurations, with a Terrain
 Type and at least one other characteristic (Difficult Terrain, Saturation
@@ -7877,6 +7900,9 @@ scoring references, and the published deployed-object identities:
 .venv\Scripts\python.exe -m tools.audit_core_scenario_objects
 .venv\Scripts\python.exe -m tools.audit_core_scenario_objects --json
 ```
+
+Alternate database selection and input hashes follow the
+[terrain/scenery audit contract](#terrain-and-scenery-structures-source-gaps).
 
 Annihilation and Firefight have no scenario-object Marker instances.
 Domination (pp. 151–152) places exactly **four Consoles** across all three

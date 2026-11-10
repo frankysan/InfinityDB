@@ -14,12 +14,13 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_document
-from tools.release_rules_export import release_deployed_object_bytes
+from infinity_db.rules_database import RulesDatabase
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
-PUBLICATION = ROOT / "data/generated/deployed-objects.json"
+ARMY = ROOT / "data/generated/infinity.db"
+RULES = ROOT / "data/generated/rules.db"
 
 # The printed table is titled "Special Terrain Suggestions and Examples".
 # Its example names are NOT extra Type-of-Terrain identities.
@@ -163,14 +164,19 @@ def verify_pinned_pdf(source: Path) -> str:
 
 def audit_source_files(
     curated_path: Path = CURATED,
-    publication_path: Path = PUBLICATION,
+    army_database: Path = ARMY,
+    rules_database: Path = RULES,
     pdf_path: Path | None = None,
 ) -> dict[str, Any]:
     source = curated_path.read_bytes()
-    published = release_deployed_object_bytes(publication_path)
+    rules = RulesDatabase(rules_database)
+    rules.validate()
+    publication = rules.deployed_objects_payload(army_database)
+    if publication is None:
+        raise ValueError("Research audit requires embedded deployed objects")
     report = audit_terrain_scenery_boundary(
         load_curated_document(curated_path),
-        json.loads(published),
+        publication,
     )
     if pdf_path is not None:
         curated = load_curated_document(curated_path)
@@ -182,7 +188,8 @@ def audit_source_files(
     return {
         **report,
         "curatedSha256": hashlib.sha256(source).hexdigest(),
-        "publishedObjectSha256": hashlib.sha256(published).hexdigest(),
+        "armyDatabaseSha256": hashlib.sha256(army_database.read_bytes()).hexdigest(),
+        "rulesDatabaseSha256": hashlib.sha256(rules_database.read_bytes()).hexdigest(),
         "verifiedPdfSha256": verify_pinned_pdf(pdf_path) if pdf_path else None,
     }
 
@@ -208,11 +215,14 @@ def verify_example_values(source: Path, rows: list[dict[str, str]]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--curated", type=Path, default=CURATED)
-    parser.add_argument("--publication", type=Path, default=PUBLICATION)
+    parser.add_argument("--army-database", type=Path, default=ARMY)
+    parser.add_argument("--rules-database", type=Path, default=RULES)
     parser.add_argument("--pdf", type=Path, help="Check the locally pinned English N5.3 PDF")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
-    report = audit_source_files(args.curated, args.publication, args.pdf)
+    report = audit_source_files(
+        args.curated, args.army_database, args.rules_database, args.pdf,
+    )
     if args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:

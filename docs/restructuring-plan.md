@@ -2050,10 +2050,31 @@ complete database-set tests own ongoing integrity and fail-closed
 validation; historical NULL-to-hash checks need not become permanent
 development contracts.
 
-**Remaining P2.5:** Resolve independent current-purpose consumers of
-`tools.release_rules_export`, particularly research audits that
-synthesize loose `deployed-objects.json`. Retire obsolete JSON
-read/serialization adapters only after consumers are separated.
+#### P2.5 — Seventeenth slice: detach current research from release JSON (2026-11-10)
+
+The core-scenario and terrain/scenery boundary audits retain a current
+research purpose: keeping scenario objectives, terrain examples and access
+tokens distinct from reviewed deployed Weapon/Equipment objects. They now
+read `RulesDatabase.deployed_objects_payload` directly from explicit Army
+and Rules paths, validating Rules and the embedded Army binding. Reports
+pin the actual database hashes, rather than hashes of a synthesized legacy
+publication. Missing, incompatible, damaged or mismatched embedded models
+fail closed; neither sibling-path inference nor loose JSON recovery remains.
+The source/citation, geometry, scoring, terrain-cell and negative domain
+checks stay intact. The Pheroware citation parity test now uses the canonical
+Rules exporter because it checks citations, not historical release assembly.
+
+The unused `release_deployed_object_bytes`, `load_release_deployed_objects`
+and logical-comparator re-export are removed from `tools.release_rules_export`.
+Only `audit_rules_rebuild_equivalence` still imports its schema-preserving
+exporter. That diagnostic and its `build_v10_runtime_candidate` consumer need
+their own purpose review before retirement; they are not retained merely to
+support current research checks. The standalone JSON reader/builder still
+has historical staging/test consumers to reconcile separately.
+
+**Remaining P2.5:** Review the legacy rebuild/candidate diagnostic cluster,
+then retire the schema-preserving exporter and remaining obsolete JSON
+reader/builder and transition helpers after their consumers are separated.
 P2.6–P2.8 own final naming/defaults, assembly-stage removal and
 full local/container integration acceptance.
 

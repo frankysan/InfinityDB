@@ -69,8 +69,12 @@ when all contained work shares the same owner.
   N5.3 citations and current Rules database parity. The completed
   Restrictions v9 source-pin/variant-migration checker matrix has been
   retired; canonical Rules source tests and supported v8/v9 CLI/reader
-  compatibility tests remain. Legacy release-export and loose JSON
-  research consumers are the next P2.5 retirement target.
+  compatibility tests remain. Core-scenario and terrain/scenery boundary
+  audits now read explicitly selected embedded models and pin database
+  hashes; their release-JSON adapters and the Pheroware citation test's
+  historical exporter dependency are removed. Next, review the legacy
+  rebuild/candidate diagnostic cluster and retire remaining release-export,
+  JSON reader/builder and transition helpers as their current uses close.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;

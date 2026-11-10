@@ -73,8 +73,10 @@ provenance/state, and build outputs.
   are tracked release artifacts. The tracked development release pair now
   uses schema v10: reviewed deployed objects are embedded in `rules.db`, and
   its v2 variant publication has no separate deployed-object JSON dependency.
-  `deployed-objects.json` remains ignored as a build/research interchange;
-  current serving and image assembly no longer read or package it.
+  `deployed-objects.json` remains ignored as a legacy build interchange;
+  current serving, image assembly and core-scenario/terrain-scenery boundary
+  audits read the embedded model instead. Those audits report the actual
+  selected Army and Rules file hashes, without serializing a replacement JSON.
   Variant usage requires the paired raw archive to regenerate, so a
   tagged/deployment checkout validates the tracked JSON and its source
   fingerprints rather than regenerating it without raw inputs.

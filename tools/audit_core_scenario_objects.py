@@ -13,15 +13,16 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_document
+from infinity_db.rules_database import RulesDatabase
 from infinity_db.scenario_components import ScenarioComponents
 from infinity_db.scenario_definition import parse_scenario_definition_record
 from infinity_db.scenario_geometry import MarkerElement
 from infinity_db.scenario_mission import ElementStatusComparison, ElementStatusCount
-from tools.release_rules_export import release_deployed_object_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
-PUBLICATION = ROOT / "data/generated/deployed-objects.json"
+ARMY = ROOT / "data/generated/infinity.db"
+RULES = ROOT / "data/generated/rules.db"
 SOURCE = "n5-core-v5.3-pdf"
 
 # Printed English N5.3 pp. 149-155; these are scenario-placed elements,
@@ -176,26 +177,36 @@ def audit_scenario_object_boundary(
     }
 
 
-def audit_source_files(curated_path: Path, publication_path: Path) -> dict[str, Any]:
+def audit_source_files(
+    curated_path: Path = CURATED,
+    army_database: Path = ARMY,
+    rules_database: Path = RULES,
+) -> dict[str, Any]:
     source_bytes = curated_path.read_bytes()
-    publication_bytes = release_deployed_object_bytes(publication_path)
+    rules = RulesDatabase(rules_database)
+    rules.validate()
+    publication = rules.deployed_objects_payload(army_database)
+    if publication is None:
+        raise ValueError("Research audit requires embedded deployed objects")
     return {
         **audit_scenario_object_boundary(
             load_curated_document(curated_path),
-            json.loads(publication_bytes),
+            publication,
         ),
         "curatedSourceSha256": hashlib.sha256(source_bytes).hexdigest(),
-        "deployedPublicationSha256": hashlib.sha256(publication_bytes).hexdigest(),
+        "armyDatabaseSha256": hashlib.sha256(army_database.read_bytes()).hexdigest(),
+        "rulesDatabaseSha256": hashlib.sha256(rules_database.read_bytes()).hexdigest(),
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--curated", type=Path, default=CURATED)
-    parser.add_argument("--publication", type=Path, default=PUBLICATION)
+    parser.add_argument("--army-database", type=Path, default=ARMY)
+    parser.add_argument("--rules-database", type=Path, default=RULES)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
-    report = audit_source_files(args.curated, args.publication)
+    report = audit_source_files(args.curated, args.army_database, args.rules_database)
     if args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
