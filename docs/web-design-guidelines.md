@@ -209,6 +209,17 @@ When a layout problem appears, first look for unnecessary width, spacing, wrappe
 
 An exception should exist because the information has different requirements, not because the current cascade makes the common structure inconvenient to reuse.
 
+### Readable reference loading failures
+
+For Skill, Equipment, Hacking Program, General Rule and other reference detail
+pages, distinguish a missing reference (HTTP 404) from a temporary loading
+failure, without displaying raw server errors, schema diagnostics or storage
+messages. Keep technical details in the developer console. Shared feedback
+copy belongs in the frontend presentation helper, not in page-specific error
+strings. Expose failure text through the existing status region; Glossary
+errors use an alert region. Do not suppress meaningful source disagreements
+or genuine unsupported-season explanations as though they were transport errors.
+
 ### Standalone source charts and contextual links
 
 Full source tables, such as the N5.3 Restrictions chart, belong on their

@@ -2377,6 +2377,16 @@ def test_player_loading_empty_and_error_states_hide_storage_language(app: Callab
 
 
 
+def test_reference_load_errors_keep_diagnostics_out_of_player_copy() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "reference_load_error_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "Reference errors: missing, unavailable" in result.stdout
+
+
 def test_invalid_unit_and_skill_links_use_player_language(app: Callable) -> None:
     status, _, unit_script = request(app, "/static/unit.js")
     assert status == 200

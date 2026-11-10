@@ -1657,6 +1657,20 @@ Source acceptance recorded below.
 closes P3 hosted acceptance on that SHA, without implying hosted
 approval of later P4 or P5 changes.
 
+**2026-11-10 P4 reference failure copy and representative browser acceptance
+(local development worktree based on `9b2a693a39e32ed4d48ed697596d625b71ce08be`):**
+The shared display helper selects not-found versus temporarily unavailable
+messages without echoing server diagnostics. Node transport/copy harness:
+**1 passed**; simulated 404/503 reference-page browser acceptance across five
+page families, both themes and 1440/390/320 widths: **10 passed**. Accessible
+status/alert regions were checked, but no human screen-reader test was
+performed. Representative soft-navigation keyboard focus and announcements:
+**2 passed**; ITS 18 map as a saveable `img` SVG with theme/unit switching:
+**4 passed**; cited rule/FAQ source lines: **4 passed**; accuracy notice
+touch/keyboard, responsive and theme behavior: **10 passed**.
+These are focused local tests of the changed surface, not full-suite or hosted
+CI acceptance. Catalog/overview/scenario error-copy audit remains open.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

@@ -2569,12 +2569,25 @@ notice, About/privacy disclosures, and representative empty/error states.
   Preserve these distinctions and the critical-roll/weapon-scope caveats in
   normal mode; they prevent unsupported gameplay inferences. Technical
   identifiers and maintenance vocabulary can be reduced separately.
-- **Continue the audit:** Review remaining reference-page labels and
-  loading/error text in actual context. Avoid removing useful coverage limits.
+- **Reference detail failure copy (P4.4):** Shared status-aware presentation
+  now distinguishes missing references (404) from unavailable data across
+  Skill, Equipment, General Rule, Hacking Program and Glossary detail views.
+  Internal API error text stays in diagnostic logs rather than ordinary
+  page content; a visible Glossary failure has an alert role.
+- **Representative P4.5 checks:** Focused Chromium coverage includes
+  desktop/mobile light/dark, source citations, keyboard route/focus handoff,
+  the accuracy notice and saveable ITS 18 scenario SVGs. See
+  [testing](testing.md) for exact local results. No human screen-reader
+  acceptance was re-run.
+- **Remaining audit:** Catalogs, Army/unit, Fireteam, search and scenario
+  loading surfaces still interpolate raw `error.message` in places. Review
+  their status-specific gameplay copy rather than applying one indiscriminate
+  fallback. Preserve useful unsupported-context and source-ambiguity messages.
 
-These are bounded P4 presentation changes, not complete P4.5
-visual/accessibility acceptance or P4 closeout. The shared renderer
-must continue to preserve citation and source-note behavior.
+P4.4 remains open for the other page families and a final source-copy review;
+P4.5 has focused automated coverage but not a renewed manual screen-reader
+review. P4 is not yet closed. Shared rendering must continue to preserve
+citations and material source notes.
 
 ### P5 — Retire, consolidate and selectively extract tools
 

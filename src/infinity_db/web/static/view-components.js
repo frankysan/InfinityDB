@@ -6,6 +6,12 @@ export function createPanelSwitcher({ container, loading, panels }) {
   };
 }
 
+/** Player-facing load failures must not expose backend validation or schema details. */
+export function referenceLoadMessage(error, subject) {
+  if (error?.status === 404) return `This ${subject} was not found. Check the link or search for it.`;
+  return `Could not load this ${subject}. Please try again.`;
+}
+
 export function tableViewport(table, className = "") {
   const container = document.createElement("div");
   container.className = `table-viewport${className ? ` ${className}` : ""}`;

@@ -185,6 +185,7 @@
         "test_verify_immunity_plasma_browser",
         "test_verify_orders_aros_browser",
         "test_verify_page_footer_browser",
+        "test_reference_player_errors_browser",
         "test_verify_reinforcements_optional_browser",
         "test_verify_contextual_state_fireteam_browser",
         "test_verify_release_candidate_browser",

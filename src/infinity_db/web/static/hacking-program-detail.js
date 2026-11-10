@@ -2,7 +2,7 @@ import { getCatalogItem } from "./api.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { rulesReferenceArticle } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
-import { tableViewport } from "./view-components.js";
+import { referenceLoadMessage, tableViewport } from "./view-components.js";
 
 const itemId = window.location.pathname.split("/").pop();
 const name = document.getElementById("item-name");
@@ -177,5 +177,6 @@ getCatalogItem("hacking-programs", itemId, pageController.signal)
   .catch((error) => {
     if (error.name === "AbortError") return;
     name.firstChild.textContent = "Hacking Program unavailable";
-    status.textContent = error.message || "Could not load this Hacking Program.";
+    status.textContent = referenceLoadMessage(error, "Hacking Program");
+    console.error("Could not load Hacking Program detail", error);
   });
