@@ -1507,6 +1507,26 @@ docs and Git whitespace checks passed. P3.4 owns actual cross-DB serving;
 this is an independent candidate/publication comparison, **not** a deployed
 three-database runtime test or a complete browser/CI release gate.
 
+**2026-11-10 P3.4 first registry slice — validated but not yet served:**
+The backend `PublicationRegistry` now validates exact ITS season identity and
+core revision against the current N5 scenario publication, checks ITS policy
+targets and external mission dependencies against composed N5 records, and
+requires typed owner/revision selection without fallback or default policy
+application. The existing two-file `ScenarioCatalog` and HTTP paths remain
+unchanged; packaging `its_18.db` awaits the coordinated cutover.
+
+Focused checks: **10/10** new registry tests, **43/43** Scenario catalog
+tests, **17/17** ITS builder/selection tests and **166/166** Rules database
+tests. Ruff, canonical Pyright, documentation/link checks and Git whitespace
+checks passed. The updated MCP integrated build regenerated the source-bound
+`army.db`/`rules_n5.db` pair (build set
+`4117851f06cd81862878d257de912d3a5a489ac2c974f31aa4fc1560a42ce800`);
+deployment assets passed **808/808** SVGs and browser references. A real
+checkout CLI server passed **41/41** pinned HTTP paths and health using the
+regenerated pair; the P3.3 parity verifier still passed **6/6** API JSON and
+**24/24** byte-identical SVG comparisons. This is local validation, not a
+three-database hosted/Docker/CI acceptance or a full suite.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

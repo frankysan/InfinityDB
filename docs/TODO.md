@@ -33,8 +33,9 @@ when all contained work shares the same owner.
     independent-data parity passed (6 API payloads and 24 SVG variants),
     three reviewed ITS-only policies are isolated in schema v2, and the
     regenerated Army/Rules release pair passed deployment-asset verification.
-    See [ITS season database](its-season-database.md). P3.4 will cut over the
-    shared registry and retire transitional season notes from core cards.
+    See [ITS season database](its-season-database.md). P3.4's typed registry
+    foundation is implemented; the Scenario/API, build, release, Docker and
+    cache-identity cutover and transitional core-card cleanup remain open.
   - [ ] Continue P4–P6 under the plan's player-facing presentation, tooling
     retirement and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in

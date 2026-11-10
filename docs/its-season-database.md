@@ -1,6 +1,6 @@
 # ITS 18 SQLite database (P3.2–P3.3)
 
-**Status:** Standalone offline schema/builder; not part of the serving set before P3.4.
+**Status:** Standalone offline schema/builder. P3.4 backend registry foundation exists, but ITS is not yet in the serving set.
 
 The ITS season database is an independently validated, deterministic SQLite
 artifact created from the existing reviewed curated ITS collection. The
@@ -96,6 +96,19 @@ model test section. It covers byte determinism, matched P2 Battleground
 publication content, full configuration/citation preservation, exact
 selection, source drift, core compatibility, corruption, and safe
 replacement.
+
+## P3.4 registry foundation (not yet served)
+
+`src/infinity_db/publication_registry.py` provides typed
+`PublicationReference(domain, record_id, revision)` selection and
+`PublicationRegistry` for explicitly registered season files. At
+registration it compares each ITS file's declared core revision to the
+currently published N5 core revision and rejects unknown N5 targets from ITS
+policies or scenario Rule/Skill references. `season_policies` returns
+resolved targets only for an exact season, revision and explicit play context.
+The registry's validated season manifest exposes published identity and SHA,
+not local file paths. It never attaches SQLite databases or searches another
+season on a failed match. The P3.4 HTTP/build/Docker cutover is still pending.
 
 ## Migration boundary
 

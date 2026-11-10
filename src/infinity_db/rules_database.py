@@ -1621,6 +1621,18 @@ class RulesDatabase:
                 self._attach_current_army_links(connection, records)
             return records
 
+    def current_core_scenario_revision(self) -> str:
+        """Return the one current core scenario revision, or fail on ambiguity."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT r.revision FROM scenario_collection_revisions AS r "
+                "JOIN collections AS c ON c.id = r.source_collection_id "
+                "WHERE r.collection_id='n5-core' AND c.status='current'"
+            ).fetchall()
+        if len(rows) != 1:
+            raise ValueError("Expected exactly one current N5 core scenario revision")
+        return str(rows[0]["revision"])
+
     def scenario_publications(self, reference: str) -> list[dict[str, Any]]:
         """Return indexed collection memberships/publications for one scenario identity."""
 

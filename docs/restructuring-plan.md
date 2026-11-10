@@ -2384,6 +2384,26 @@ catalog tests; the Rules build/audit, Ruff, Pyright, documentation and
 whitespace checks were green. No third production database, API cutover,
 implicit season selection, or authored ITS FAQ has been added.
 
+#### P3.4 — First slice: publication registry and cross-domain validation (2026-11-10)
+
+**Foundation implemented; runtime cutover remains open.** The backend
+`PublicationRegistry` now accepts individually validated ITS season snapshots
+alongside N5 Rules. `PublicationReference` identifies records by explicit owner,
+typed ID and (for ITS) exact revision; even matching scenario IDs in N5 and
+ITS remain separately resolvable, with no implied season default. Registration
+checks each ITS snapshot's required core revision against the current
+`n5-core` scenario revision and resolves every ITS-only policy target and
+external mission Rule/Skill against current N5 records, failing closed on
+unknown identities. Scoped policy reads never implicitly apply tournament or
+Extra restrictions to free play.
+
+The new registry is not yet connected to `ScenarioCatalog`, the HTTP handler,
+build/CLI entrypoints, the generated release set, Docker or the snapshot cache
+identity. The current two-database runtime is intentionally unchanged. The
+remaining P3.4 work is the coordinated ITS scenario/overlay reader cutover,
+three-file build/selection/validation/deployment contract and parity acceptance;
+P3.5 then proves future-season isolation.
+
 ### P4 — Make the interface player-first
 
 **Outcome:** Less user-visible implementation language without loss of relevant gameplay accuracy.  
