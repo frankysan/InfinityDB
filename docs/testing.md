@@ -1671,6 +1671,29 @@ touch/keyboard, responsive and theme behavior: **10 passed**.
 These are focused local tests of the changed surface, not full-suite or hosted
 CI acceptance. Catalog/overview/scenario error-copy audit remains open.
 
+**2026-11-10 P4 broader error-state pass (local development checkout based on
+`eca905fda8b4e9752a137a16c9d4b51927aaa8e7`):**
+The shared collection-load copy now covers Army overview, catalogs,
+Unit Explorer/details, Fireteams, search, skill modifiers, Orders/AROs
+and scenarios. Browser failure injection, including 404/503 API responses,
+400 unsupported contexts, ordinary theme/mobile layouts and accessible alert
+or status roles: **36 passed**; Fireteam invalid-Army chart: **1 passed**;
+ordinary scenario keyboard navigation at 1440/390/320: **3 passed**;
+Node transport/display-copy regression: **1 passed**. The locally
+repaired 2/3/4 Chromium scheduling registries pass **4 targeted
+checks** (1 two-lane + 3 experimental lane configurations).
+No human screen-reader test or full hosted acceptance is implied.
+
+**Hosted CI follow-up:** Source checks run 1084 on
+`eca905fda8b4e9752a137a16c9d4b51927aaa8e7` failed in Ubuntu
+Python 3.11 with five browser-scheduling coverage checks: the new
+`test_reference_player_errors_browser` module was included in
+`test-sections.json` but not in the explicit lane maps. The other
+4,432 tests in that job passed (1,288 skipped), and the other three
+Source jobs and both smoke workflows passed. A local lane-map repair
+is part of the next commit; independent hosted CI acceptance remains
+required.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

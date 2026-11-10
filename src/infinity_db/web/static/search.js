@@ -1,6 +1,6 @@
 import { getSearchResults } from "./api.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
-import { createPanelSwitcher } from "./view-components.js";
+import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -54,7 +54,8 @@ async function search() {
     render(payload.items);
   } catch (error) {
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || "Please try again.";
+    elements.errorMessage.textContent = collectionLoadMessage(error, "search results");
+    console.error("Could not load search results", error);
     show(elements.error);
   }
 }

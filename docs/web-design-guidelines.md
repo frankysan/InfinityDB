@@ -211,14 +211,21 @@ An exception should exist because the information has different requirements, no
 
 ### Readable reference loading failures
 
-For Skill, Equipment, Hacking Program, General Rule and other reference detail
-pages, distinguish a missing reference (HTTP 404) from a temporary loading
-failure, without displaying raw server errors, schema diagnostics or storage
-messages. Keep technical details in the developer console. Shared feedback
-copy belongs in the frontend presentation helper, not in page-specific error
-strings. Expose failure text through the existing status region; Glossary
-errors use an alert region. Do not suppress meaningful source disagreements
-or genuine unsupported-season explanations as though they were transport errors.
+For Skill, Equipment, Hacking Program, General Rule and Unit detail pages,
+distinguish a missing reference (HTTP 404) from a temporary loading failure.
+Catalogs, Army overview, Unit Explorer, Fireteams, search, skill modifiers,
+Orders/AROs and scenarios use shared collection-loading feedback. Neither
+route may display raw server errors, schema diagnostics or storage messages;
+log technical details to the developer console instead.
+
+Preserve specific player decisions separately: unsupported Army or scenario
+selection, unavailable publication/revision, and unsupported Army Points
+are not interchangeable with a network failure. Do not claim a game size is
+unsupported solely because an API request returned HTTP 400. Use the actual
+selected scenario's supported values when validating sizes. Error panels use
+an accessible alert role; existing detail/Orders status regions retain their
+polite status role. Do not hide material source disagreements under generic
+load-failure copy.
 
 ### Standalone source charts and contextual links
 

@@ -7,6 +7,7 @@ import { staticSymbolPath } from "./unit-symbols.js";
 import { formatMovement } from "./unit-presentation.js";
 import { formatSkillDistanceExtra } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
+import { referenceLoadMessage } from "./view-components.js";
 
 const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
@@ -1517,6 +1518,7 @@ if (!unitIdentifier) {
   }).catch((error) => {
     if (error.name === "AbortError") return;
     name.textContent = "Unit unavailable";
-    status.textContent = error.message || "Could not load this unit.";
+    status.textContent = referenceLoadMessage(error, "Unit");
+    console.error("Could not load Unit detail", error);
   });
 }

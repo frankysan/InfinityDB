@@ -4,7 +4,7 @@ import { appendMaintainedText } from "./maintained-text.js";
 import { rulesCitationNode, rulesReferenceArticle } from "./rules-reference.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { readShareState, writeShareState } from "./share-state.js";
-import { createPanelSwitcher } from "./view-components.js";
+import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -569,7 +569,10 @@ async function loadDetail(points) {
   } catch (error) {
     if (controller.signal.aborted || pageController.signal.aborted) return;
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || "Could not load this scenario.";
+    elements.errorMessage.textContent = error.status === 400
+      ? "This scenario setup is unavailable for the selected publication and Army Points value. Check the selection."
+      : collectionLoadMessage(error, "scenario");
+    console.error("Could not load scenario setup", error);
     show(elements.error);
   }
 }
@@ -625,7 +628,10 @@ async function initialize() {
     show(elements.choice);
   } catch (error) {
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || "Could not load this scenario.";
+    elements.errorMessage.textContent = error.status === 400
+      ? "This scenario collection or revision is not supported. Open Scenarios to choose another collection."
+      : collectionLoadMessage(error, "scenario");
+    console.error("Could not load scenario collection", error);
     show(elements.error);
   }
 }

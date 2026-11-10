@@ -43,6 +43,7 @@ CHROMIUM_SCHEDULING_LANES = {
     "test_verify_sidebar_density_browser": "chromium-b",
     "test_verify_fireteam_fto_browser": "chromium-b",
     "test_verify_page_footer_browser": "chromium-b",
+    "test_reference_player_errors_browser": "chromium-b",
     "test_verify_deployed_object_publication_browser": "chromium-b",
     "test_verify_variant_usage_publication_browser": "chromium-b",
     "test_verify_embedded_variant_usage_browser": "chromium-b",
@@ -66,7 +67,8 @@ _EXTRA_BROWSER_LANES: dict[int, tuple[tuple[str, ...], ...]] = {
         ("test_verify_unit_skill_presentation_browser", "test_verify_fireteam_context_browser",
          "test_verify_immunity_plasma_browser", "test_verify_ammunition_publication_browser",
          "test_verify_sidebar_density_browser", "test_verify_page_footer_browser",
-         "test_hacking_source_followup", "test_verify_contextual_state_fireteam_browser"),
+         "test_reference_player_errors_browser", "test_hacking_source_followup",
+         "test_verify_contextual_state_fireteam_browser"),
     ),
     4: (
         ("test_verify_scenario_faq_browser", "test_verify_release_candidate_browser"),
@@ -81,8 +83,8 @@ _EXTRA_BROWSER_LANES: dict[int, tuple[tuple[str, ...], ...]] = {
         ("test_verify_army_overview_browser", "test_verify_fireteam_fto_browser",
          "test_verify_reinforcements_optional_browser",
          "test_verify_deployed_object_publication_browser", "test_verify_immunity_plasma_browser",
-         "test_verify_page_footer_browser", "test_hacking_source_followup",
-         "test_verify_variant_usage_publication_browser",
+         "test_verify_page_footer_browser", "test_reference_player_errors_browser",
+         "test_hacking_source_followup", "test_verify_variant_usage_publication_browser",
          "test_verify_embedded_variant_usage_browser"),
     ),
 }

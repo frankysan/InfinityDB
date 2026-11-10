@@ -2579,15 +2579,25 @@ notice, About/privacy disclosures, and representative empty/error states.
   the accuracy notice and saveable ITS 18 scenario SVGs. See
   [testing](testing.md) for exact local results. No human screen-reader
   acceptance was re-run.
-- **Remaining audit:** Catalogs, Army/unit, Fireteam, search and scenario
-  loading surfaces still interpolate raw `error.message` in places. Review
-  their status-specific gameplay copy rather than applying one indiscriminate
-  fallback. Preserve useful unsupported-context and source-ambiguity messages.
+- **Broader load/error pass (P4.4):** Catalogs, Army overview/Unit Explorer,
+  Unit details, Fireteams, search, skill modifiers, Orders/AROs and scenario
+  list/details now use shared player-readable loading failures, with
+  diagnostic details retained in the console. Context-specific unsupported
+  Army, publication, scenario and Army Points selections remain visible.
+  Ordinary error panels are alert regions; existing detail and Orders/AROs
+  status regions remain polite. No gameplay source or API contract changed.
+- **CI scheduler follow-up:** The preceding P4 commit
+  `eca905fda8b4e9752a137a16c9d4b51927aaa8e7` had five hosted
+  Chromium-lane coverage failures on Ubuntu Python 3.11 because the new
+  reference-error browser test was in the section registry but omitted from
+  2/3/4-lane scheduling. The new module is now assigned across all
+  lane maps, with focused scheduler checks passing locally. Independent
+  new-SHA hosted CI acceptance remains required.
 
-P4.4 remains open for the other page families and a final source-copy review;
+P4.4's source/editorial audit still needs its final page-level closeout;
 P4.5 has focused automated coverage but not a renewed manual screen-reader
-review. P4 is not yet closed. Shared rendering must continue to preserve
-citations and material source notes.
+review. P4 is not yet closed. Shared rendering must preserve citations and
+material source notes.
 
 ### P5 — Retire, consolidate and selectively extract tools
 
