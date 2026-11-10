@@ -28,6 +28,7 @@ from infinity_db.application_domains import (
 )
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database
+from infinity_db.database_set import COMPLETE_RULES_SCHEMA_VERSION
 from infinity_db.domain_references import (
     enrich_rule_relation_references,
     rule_record_public_reference,
@@ -929,7 +930,9 @@ def test_label_vocabulary_sources_reach_published_details() -> None:
 
     rules_path = root / "data/generated/rules_n5.db"
     with sqlite3.connect(rules_path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchone() == (10,)
+        assert connection.execute("PRAGMA user_version").fetchone() == (
+            COMPLETE_RULES_SCHEMA_VERSION,
+        )
     rules = RulesDatabase(rules_path)
     labels = rules.current_labels()
     assert len(labels) == len(document["labels"]) == 24
@@ -1137,7 +1140,9 @@ def test_v1s082_label_vocabulary_primary_citation_and_export() -> None:
             ("wiki-en-20260926-200832", None, "Labels"),
             ("n5-core-v5.3-pdf", 174, "Labels"),
         ]
-        assert connection.execute("PRAGMA user_version").fetchone() == (10,)
+        assert connection.execute("PRAGMA user_version").fetchone() == (
+            COMPLETE_RULES_SCHEMA_VERSION,
+        )
     assert len(document["labels"]) == 24  # 23 printed Labels plus the Wiki FAQs category.
     assert next(row for row in document["labels"] if row["id"] == "faqs")[
         "description"

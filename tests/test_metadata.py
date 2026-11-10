@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import sqlite3
@@ -10,8 +11,20 @@ import pytest
 
 from infinity_army_data.metadata import MetadataError, decode_metadata
 from infinity_army_data.normalize import normalize_master, validate_normalized
-from infinity_db.cli import main
+from infinity_db.cli import _build_army
 from infinity_db.database import Database, export_database, raw_database_path
+
+
+def _build_army_fixture(source: Path, output_dir: Path) -> int:
+    """Test the Army ingestion stage, not the retired standalone build CLI.
+
+    Production's complete-set builder invokes this stage with required Army
+    metadata before assembling the independently published Rules/ITS databases.
+    """
+    return _build_army(argparse.Namespace(
+        source=source, output_dir=output_dir, metadata=None,
+        compact=False, no_verify=False, require_metadata_for_build=True,
+    ))
 
 
 def metadata_source() -> dict:
@@ -454,7 +467,7 @@ def test_build_discovers_required_sidecar_metadata(
     )
     (source / "metadata.json").write_text(json.dumps(metadata_source()), encoding="utf-8")
     output = tmp_path / "generated"
-    assert main(["build", str(source), "--output-dir", str(output)]) == 0
+    assert _build_army_fixture(source, output) == 0
     assert "Skipped non-Army JSON files: metadata.json" not in capsys.readouterr().err
     with sqlite3.connect(output / "army.db") as connection:
         assert connection.execute("SELECT name FROM army_lists").fetchone()[0] == "Official First"
@@ -470,7 +483,8 @@ def test_build_rejects_a_source_without_metadata(tmp_path: Path) -> None:
     )
 
     output = tmp_path / "generated"
-    assert main(["build", str(source), "--output-dir", str(output)]) == 1
+    with pytest.raises(MetadataError, match="No metadata.json found"):
+        _build_army_fixture(source, output)
     assert not (output / "army.db").exists()
 
 
@@ -494,6 +508,6 @@ def test_build_discovers_unique_metadata_inside_zip(tmp_path: Path) -> None:
         output.writestr("army/101-first.json", json.dumps({"version": "test", "units": []}))
         output.writestr("army/metadata.json", json.dumps(metadata_source()))
     output_dir = tmp_path / "generated"
-    assert main(["build", str(archive), "--output-dir", str(output_dir)]) == 0
+    assert _build_army_fixture(archive, output_dir) == 0
     normalized = json.loads((output_dir / "normalized.json").read_text(encoding="utf-8"))
     assert normalized["armyMetadata"]["sourceFile"] == "metadata.json"

@@ -59,7 +59,14 @@ def test_all_selected_pdf_sources_have_consistent_pins_and_exports(tmp_path: Pat
     documents = load_curated_directory(ROOT / "data/curated/rules")
     pdfs = [(doc["collection"]["id"], source)
             for _, doc in documents for source in doc["sources"] if source["kind"] == "pdf"]
-    assert len(pdfs) == 14
+    # The ITS 18 source remains pinned in its authored source document, but
+    # the Rules export no longer duplicates ITS-owned source publications.
+    assert len(pdfs) == 13
+    assert {
+        (collection, source["id"])
+        for collection, source in pdfs
+        if collection == "its-season-18-2026.09.01"
+    } == {("its-season-18-2026.09.01", "its-season-18-en-pdf")}
     assert {
         (collection, source["id"])
         for collection, source in pdfs
@@ -83,8 +90,11 @@ def test_all_selected_pdf_sources_have_consistent_pins_and_exports(tmp_path: Pat
             "SELECT collection_id, id, sha256 FROM sources WHERE kind='pdf' "
             "ORDER BY collection_id,id",
         ).fetchall()
-    assert actual == sorted((collection, source["id"], source["sha256"])
-                            for collection, source in pdfs)
+    assert actual == sorted(
+        (collection, source["id"], source["sha256"])
+        for collection, source in pdfs
+        if collection != "its-season-18-2026.09.01"
+    )
 
 
 def source_data() -> tuple[dict, dict]:

@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-from infinity_db.web import create_app
+from infinity_db.web import create_app_from_database_set
 from tools.runtime_semantic_baseline import (
     DEFAULT_BASELINE,
     BaselineError,
@@ -125,7 +125,9 @@ def test_released_data_matches_pinned_p1_baseline() -> None:
     fixture = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
     army = ROOT / "data/generated/army.db"
     rules = ROOT / "data/generated/rules_n5.db"
-    app = create_app(army, rules)
+    # P3 requires the registered ITS database for the explicitly selected
+    # Season 18 probes; an unregistered Rules-only app must fail closed.
+    app = create_app_from_database_set(ROOT / "data/generated")
     observed = capture(
         app,
         paths=tuple(row["path"] for row in fixture["probes"]),

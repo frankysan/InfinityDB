@@ -383,9 +383,10 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
         "selectedBrowserTestAnchors": 36,
         "currentIdentitiesWithLaterEvidence": 56,
         "wholeRecordApprovals": 0,
-        # V1S-083 adds the Engineer omission and two FAQ-scope citations;
-        # none becomes a whole-record or clause approval.
-        "pendingSourceSections": 832,
+        # P3 moves ITS Battleground source ownership to its_18.db; the
+        # N5 Rules source-section inventory loses those two non-core entries.
+        # Neither that migration nor V1S-083 grants whole-record approval.
+        "pendingSourceSections": 830,
     }
     historical = {row["id"]: row for row in evidence["historicalRecords"]}
     current = {row["id"]: row for row in evidence["currentRecords"]}
