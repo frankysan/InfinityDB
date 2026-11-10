@@ -16,16 +16,6 @@ provenance/state, and build outputs.
   distinct English-only `HUMAN-SPHERE YYYYMMDD-HHMMSS.zip` identity. History-enabled
   acquisitions add `-history` before the timestamp. Ignored by Git.
 - `pdf/` — local rules/FAQ/ITS research documents. Ignored by Git.
-- `../local/images/corvus-belli/store/discovery/` — ignored, metadata-only store
-  product-page probes from the explicitly invoked `python -m tools.discover_store_assets`
-  command. Supply a Corvus Belli store product URL, or omit it to probe Myrmidons;
-  `--save-html` preserves the source HTML beside the JSON report. The report
-  records HTTP provenance, source hash, discovered image URLs and their HTML
-  locations, and script entrypoints; it never fetches image assets. The store
-  currently serves an Angular application shell, so an HTTP 200 with zero images
-  means product gallery data was not present in the initial HTML, **not** that
-  the product has no gallery images. This probe is research-only, not a build
-  or public image-publication input.
 - `work/wiki/` — local wiki crawl work. Successful acquisitions remove their
   work directory after publishing the immutable archive and provenance;
   incomplete/error runs preserve downloaded work here for inspection. Ignored
