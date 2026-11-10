@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import copy
-import hashlib
 import json
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -16,11 +16,6 @@ from tools.audit_deployed_object_citation_migrations import (
     audit_citations,
     build_citation_migration_plan,
     main,
-)
-from tools.release_rules_export import release_deployed_object_bytes
-from tools.stage_deployed_object_citation_migration import (
-    prepare_migrated_inputs,
-    stage_citation_migration,
 )
 
 
@@ -57,7 +52,7 @@ def test_pinned_citation_migration_preflight_preserves_provenance() -> None:
     report = audit_citations()
     assert report["scope"] == "citation-preflight-only-no-source-or-runtime-modification"
     assert report["source"] == "n5-core-v5.3-pdf"
-    assert (report["pendingCount"], report["migratedCount"]) in ((14, 0), (0, 14))
+    assert (report["pendingCount"], report["migratedCount"]) == (0, 14)
     assert report["countsByManifest"] == {
         "non-catalog": 6, "expanded": 5, "source-domain": 3,
     }
@@ -95,6 +90,22 @@ def test_pinned_citation_migration_preflight_preserves_provenance() -> None:
         key in row for row in all_reviews
         for key in ("objectProfile", "delivery", "sourceProfile", "unitCarriers")
     )
+    # Accepted citation provenance must survive the current Rules export.
+    expected = sorted(
+        (row["recordId"], row["proposedCitation"]["sourceId"],
+         row["proposedCitation"]["page"])
+        for row in all_reviews
+    )
+    ids = [row["recordId"] for row in all_reviews]
+    placeholders = ", ".join("?" for _ in ids)
+    with sqlite3.connect(CURATED.parents[2] / "generated/rules.db") as database:
+        actual = database.execute(
+            "SELECT record_id, source_id, page FROM record_citations "
+            f"WHERE source_id = ? AND record_id IN ({placeholders}) "
+            "ORDER BY record_id, page",
+            ("n5-core-v5.3-pdf", *ids),
+        ).fetchall()
+    assert actual == expected
 
 
 def test_preflight_rejects_lost_review_and_stale_or_published_citation() -> None:
@@ -154,114 +165,4 @@ def test_preflight_does_not_write_sources(
     copied.write_bytes(original)
     assert audit_citations(copied)["pendingCount"] == current["pendingCount"]
     assert copied.read_bytes() == original
-
-
-def test_migration_staging_is_complete_and_does_not_touch_inputs(tmp_path: Path) -> None:
-    if audit_citations()["pendingCount"] == 0:
-        pytest.skip("Migration already promoted; staging covered before promotion")
-    original_curated = CURATED.read_bytes()
-    original_manifests = {name: path.read_bytes() for name, path in MANIFEST_PATHS.items()}
-    original_rules = (CURATED.parents[2] / "generated/rules.db").read_bytes()
-    original_publication = (
-        CURATED.parents[2] / "generated/deployed-objects.json"
-    ).read_bytes()
-
-    output = tmp_path / "stage"
-    report = stage_citation_migration(output)
-    assert report["migratedCount"] == 14
-    assert report["reviewedObjects"] == 17
-    assert len(report["stagedPaths"]) == 6
-    staged = json.loads(
-        (output / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
-    )
-    manifests = {
-        name: json.loads((output / "config/validation" / path.name).read_text(
-            encoding="utf-8",
-        ))
-        for name, path in MANIFEST_PATHS.items()
-    }
-    after = build_citation_migration_plan(staged, manifests)
-    assert after["pendingCount"] == 0
-    assert after["migratedCount"] == 14
-    assert len((output / "data/generated/rules.db").read_bytes()) > 0
-    publication = json.loads(
-        (output / "data/generated/deployed-objects.json").read_text(encoding="utf-8")
-    )
-    assert len(publication["objects"]) == 17
-    assert publication["sourceSnapshot"]["rulesDatabaseSha256"] == (
-        report["stagedSha256"]["rulesDatabase"]
-    )
-    assert (output / "migration-report.json").is_file()
-    assert original_curated == CURATED.read_bytes()
-    assert original_rules == (CURATED.parents[2] / "generated/rules.db").read_bytes()
-    assert original_publication == (
-        CURATED.parents[2] / "generated/deployed-objects.json"
-    ).read_bytes()
-    assert original_manifests == {
-        name: path.read_bytes() for name, path in MANIFEST_PATHS.items()
-    }
-    with pytest.raises(FileExistsError):
-        stage_citation_migration(output)
-
-
-def test_migration_staging_rejects_partial_and_duplicate_inputs() -> None:
-    curated, manifests = _pending_inputs()
-    plan = build_citation_migration_plan(curated, manifests)
-    migrated, manifest_changes = prepare_migrated_inputs(
-        copy.deepcopy(curated), copy.deepcopy(manifests), plan,
-    )
-    with pytest.raises(ValueError, match="already cites"):
-        prepare_migrated_inputs(migrated, manifest_changes, plan)
-    # Neither a source-only citation nor a manifest-only update may be
-    # mistaken for a complete coordinated migration.
-    partial = copy.deepcopy(curated)
-    next(record for record in partial["records"] if record["id"] == "skill:frenzy")[
-        "citations"
-    ].append({"sourceId": "n5-core-v5.3-pdf", "page": 93})
-    with pytest.raises(ValueError, match="PDF-only provenance"):
-        build_citation_migration_plan(partial, manifests)
-
-
-def test_promoted_artifacts_match_staging_report_when_available() -> None:
-    """Verify historical staging evidence without freezing later release bytes."""
-    repo = CURATED.parents[3]
-    stage = repo / "local/citation-migration-n53"
-    report_path = stage / "migration-report.json"
-    if not report_path.is_file():
-        pytest.skip("Local migration staging report is unavailable")
-    report = audit_citations()
-    if report["migratedCount"] != 14:
-        pytest.skip("Citation migration has not yet been promoted")
-
-    staged = json.loads(report_path.read_text(encoding="utf-8"))
-    assert staged["scope"] == "staged-artifacts-only-not-applied-or-committed"
-    assert staged["migratedCount"] == 14
-    assert staged["reviewedObjects"] == 17
-    assert len(staged["stagedPaths"]) == 6
-
-    # The ignored staging directory records the earlier citation migration.
-    # Later source reviews and schema v9 must not invalidate that evidence.
-    assert all((stage / relative).is_file() for relative in staged["stagedPaths"])
-    for key, relative in (
-        ("rulesDatabase", "data/generated/rules.db"),
-        ("deployedObjects", "data/generated/deployed-objects.json"),
-    ):
-        digest = hashlib.sha256((stage / relative).read_bytes()).hexdigest()
-        assert digest == staged["stagedSha256"][key]
-
-    staged_publication = json.loads(
-        (stage / "data/generated/deployed-objects.json").read_text(encoding="utf-8")
-    )
-    assert staged_publication["sourceSnapshot"]["rulesDatabaseSha256"] == (
-        staged["stagedSha256"]["rulesDatabase"]
-    )
-    publication = json.loads(
-        release_deployed_object_bytes(repo / "data/generated/deployed-objects.json")
-    )
-    assert len(publication["objects"]) == 17
-    assert publication["sourceSnapshot"]["rulesDatabaseSha256"] == hashlib.sha256(
-        (repo / "data/generated/rules.db").read_bytes()
-    ).hexdigest()
-    assert publication["objects"] == staged_publication["objects"]
-    assert publication["unresolvedDeliveries"] == staged_publication["unresolvedDeliveries"]
 

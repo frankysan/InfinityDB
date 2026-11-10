@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import sqlite3
 import sys
 
 import pytest
@@ -50,10 +51,7 @@ def test_n53_device_chart_exactly_reconciles_maintained_program_sets() -> None:
     assert report["deviceCount"] == 4
     assert report["distinctProgramCount"] == 11
     assert report["programStatisticsIncluded"] is False
-    assert report["missingMaintainedN53ChartCitations"] in (
-        [],
-        [row[0] for row in PINNED],
-    )
+    assert report["missingMaintainedN53ChartCitations"] == []
     assert [
         (row["deviceId"], row["name"],
          tuple(program_id.removeprefix("hacking-program:") for program_id in row["programIds"]))
@@ -65,6 +63,28 @@ def test_n53_device_chart_exactly_reconciles_maintained_program_sets() -> None:
         len(report[name]) == 64
         for name in ("manifestSha256", "curatedSha256", "programsSha256")
     )
+
+
+def test_current_p58_device_citations_match_rules_database() -> None:
+    """All four accepted chart citations must also be in the built Rules DB."""
+    manifest, curated, programs = _inputs()
+    assert audit_device_program_chart(manifest, curated, programs)[
+        "missingMaintainedN53ChartCitations"
+    ] == []
+    expected = sorted(
+        (record_id, "n5-core-v5.3-pdf", 58)
+        for record_id, _name, _programs in PINNED
+    )
+    path = CURATED.parents[2] / "generated/rules.db"
+    with sqlite3.connect(path) as connection:
+        actual = connection.execute(
+            "SELECT record_id, source_id, page FROM record_citations "
+            "WHERE record_id IN (?, ?, ?, ?) AND source_id = ? "
+            "ORDER BY record_id, page",
+            (*[record_id for record_id, _name, _programs in PINNED],
+             "n5-core-v5.3-pdf"),
+        ).fetchall()
+    assert actual == expected
 
 
 def test_device_chart_rejects_unreviewed_changes_or_program_gaps() -> None:

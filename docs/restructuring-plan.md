@@ -1995,11 +1995,42 @@ not the superseded loose JSON publication/rollback helper. Historical
 source hashes, staging records and instructions remain in Git and dated
 acceptance notes; no separate code archive is required.
 
-**Remaining P2.5:** Audit the still-present citation/migration and v9
-Restrictions transition consumers, then retire the legacy release exporter
-and loose JSON serialization/read layer when independent current-purpose
-consumers have been separated. Preserve source semantics, current
-database-set integrity and normal serving. P2.6–P2.8 own final
+#### P2.5 — Fifteenth slice: retire completed N5.3 citation stagers (2026-11-10)
+
+The 14-citation deployed-object source migration (six non-catalog,
+five expanded and three source-domain reviews) and the four N5.3 p.58
+Hacking Device chart citations are already accepted in curated Rules.
+Their completed staging tools, `tools/stage_deployed_object_citation_migration.py`
+and `tools/stage_hacking_device_chart_citations.py`, built obsolete
+`rules.db` plus loose `deployed-objects.json` publication pairs.
+The Hacking Device stager depended on the earlier stager for a one-time
+text insertion helper. Both have no current build, runtime or CI consumers.
+
+Current-purpose source and presentation evidence remains independently
+tested: `tools/audit_deployed_object_citation_migrations.py` checks all
+14 verified source/manifest citations and rejects incomplete/stale
+review data; `tools/audit_hacking_device_program_source_chart.py`
+checks exact Equipment-to-Program sets and N5.3 p.58 provenance.
+The source-chart test now **requires** all four accepted citations
+and verifies they are present in the built Rules database. The citation
+audit test now **requires** all 14 migrated citations. Historical
+stage-only tests, rollback simulations and their registry entry are
+retired. The dated staging hashes and previous procedure remain
+recoverable in Git history, not the current maintenance instructions.
+
+The old `test_shared_promotion_refuses_v9_to_v8_downgrade` in the
+Restrictions storage candidate suite also exercised only the Hacking
+Device batch rollback helper, so it is retired. A direct Rules export
+does not materialize relational Restrictions; their current integration
+owner is the complete database-set build and
+`tests/test_restriction_chart_storage.py`, not the superseded
+`tools.release_rules_export` staging path.
+
+**Remaining P2.5:** Review the v9-only Restrictions transition tests,
+separate reusable source checks from `restrictions_v9_release`, and
+retire the legacy release exporter/loose JSON serialization adapters
+once their independent consumers are resolved. Preserve current
+database-set integrity and serving. P2.6–P2.8 still own final
 naming/defaults, assembly-stage removal and full local/container
 acceptance.
 

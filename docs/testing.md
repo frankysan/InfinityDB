@@ -1178,6 +1178,24 @@ whitespace and tracked runtime artifact/provenance checks passed
 (SVG validation excluded). No full suite, direct Docker test or
 deployment was performed.
 
+**2026-11-10 P2.5 fifteenth slice, citation migration stagers:**
+The 14 N5.3 source/manifest citations and four Hacking Device p.58
+citations are already accepted; their one-use v9 paired-publication
+stagers and stage/rollback-only tests were retired. The maintained
+14-citation audit now requires 0 pending / 14 migrated, preserving
+cross-manifest ownership, exact reviewed pages and pinned English PDF
+checks. The independent device/program chart audit now requires all
+four accepted p.58 citations and verifies the exact citation rows
+in the current Rules database. Restrictions are verified through
+relational chart storage and complete selected-set builds rather than
+an incomplete isolated Rules export or old v9 promotion gate.
+Focused Windows checks passed **51 tests**: 14-citation source audit
+(4), Hacking Device source/chart/Rules parity (11), Restrictions
+storage (15), selected-set health (20), repeatable complete builder
+(1). Ruff, canonical Pyright (0 errors), docs lint/links/backlog,
+Git whitespace and tracked runtime artifact/provenance checks passed
+(SVG excluded). No full suite, direct Docker run or deployment occurred.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -7154,21 +7172,16 @@ and existing Equipment facts. Because the tracked rules database
 changes, the dependent deployed-object publication was rebuilt and
 promoted **in the same batch**.
 
-From the repository root, after committing the staging tool/tests
-and with unchanged curated source and Army database:
-
-```powershell
-& .\.venv\Scripts\python.exe -m tools.stage_hacking_device_chart_citations --output-dir local/hacking-device-citations-n53 --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
-```
-
-The command refuses an existing staging directory and writes
-`staging-report.json` with the original source and Army SHA-256,
-the verified PDF SHA-256, four migrated IDs, and three artifact
-hashes. It **never changes the tracked checkout**. The isolated
-regression `tests/test_hacking_device_chart_citation_staging.py`
-builds and validates the same three artifacts under a temporary
-directory, compares the published 17 object records byte-for-byte
-and checks all tracked inputs remain unchanged.
+This was a one-time staging and promotion procedure. The old command
+and `tests/test_hacking_device_chart_citation_staging.py` were retired
+during P2.5; they can be recovered from Git history, **not run as a
+current build or release workflow**. The original stage refused an
+existing directory and wrote `staging-report.json` with the original
+source and Army SHA-256, verified PDF SHA-256, four migrated IDs, and
+three artifact hashes. It did not change the tracked checkout.
+The retired staging-only test module built and validated the three
+artifacts in a temporary directory, compared 17 object records
+byte-for-byte and checked the tracked inputs remained unchanged.
 
 **Staging and promotion verified 2026-10-30, HEAD `5e4647c`.**
 Before promotion, the live input hashes matched the staging report: curated source
@@ -7885,18 +7898,15 @@ reports its SHA-256; this requires PyMuPDF. Normal CI validation does
 not require the ignored PDF. The curated citations specify verified
 pages without adding unverified section labels.
 
-The migration was first built in an isolated staging directory, using
-the following command **from the pre-migration checkout**. This command
-requires the 14 citations to be pending and is not rerunnable from
-the already migrated working tree:
+The migration was originally built in an isolated staging directory
+from the pre-migration checkout, requiring all 14 citations to be
+pending. Its one-use `tools.stage_deployed_object_citation_migration`
+command was retired during P2.5 and remains available in Git history,
+**not as a current build instruction**.
 
-```powershell
-.venv\Scripts\python.exe -m tools.stage_deployed_object_citation_migration --output-dir local/citation-migration-n53 --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
-```
-
-The exclusive staging directory contains a citation-only edit to the
-maintained N5.3 curated JSON, the three reviewed manifests with only temporary
-`citationStatus` and `pdfExcerpt` fields removed, a freshly built
+The original exclusive staging directory contained a citation-only edit
+to the maintained N5.3 curated JSON, three reviewed manifests with only
+temporary `citationStatus` and `pdfExcerpt` fields removed, and a freshly built
 `data/generated/rules.db`, the matching fingerprinted
 `data/generated/deployed-objects.json`, and `migration-report.json`.
 All 14 migrated records are validated through their post-migration

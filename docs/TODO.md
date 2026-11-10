@@ -63,7 +63,10 @@ when all contained work shares the same owner.
   v9 source reviewers and their matched-pair tests are retired.
   Commlink's completed v9 paired-release stager and disposable rollback
   tests are also retired; fresh Rules and source-variant checks now own
-  the accepted optional annex semantics.
+  the accepted optional annex semantics. The completed 14-citation
+  and four-device-chart citation staging tools and historical rollback
+  tests are retired; read-only source audits now enforce all accepted
+  N5.3 citations and current Rules database parity.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;
