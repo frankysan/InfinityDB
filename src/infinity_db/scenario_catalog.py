@@ -67,9 +67,11 @@ def _supported_army_points(record: dict[str, Any]) -> list[int]:
     return points
 
 
-# Source: pinned official ITS Season 18 v2026.09.01, printed p. 17
-# ("Diameter of ITS Tokens"). Core N5.3 pp. 151/153 identify the
-# corresponding Console A and Supply Box markers, but do not print mm sizes.
+# Legacy/core-only catalog fallback. The selected three-file runtime resolves
+# this external measurement source from the ITS 18 publication registry.
+# Core N5.3 pp. 151/153 identify Console A and Supply Box markers but do not
+# print their physical diameters; ITS 18 p. 17 is explicit measurement evidence,
+# not ownership of the core scenario definitions.
 _MARKER_SIZE_CITATION = {
     "source_id": "its-season-18-en-pdf",
     "source_title": "ITS Season 18: Overheat (English)",
@@ -83,7 +85,9 @@ _MARKER_LABELS = {
 }
 
 
-def _marker_dimensions(geometry: dict[str, Any]) -> list[dict[str, Any]]:
+def _marker_dimensions(
+    geometry: dict[str, Any], source_citation: dict[str, Any],
+) -> list[dict[str, Any]]:
     """Project marker counts and *physical* footprints from canonical geometry."""
     parsed = parse_scenario_geometry(geometry)
     counts: dict[str, int] = {}
@@ -101,7 +105,7 @@ def _marker_dimensions(geometry: dict[str, Any]) -> list[dict[str, Any]]:
             "name": label,
             "count": count,
             "diameter_mm": diameter,
-            "citation": dict(_MARKER_SIZE_CITATION),
+            "citation": dict(source_citation),
         })
     return result
 
@@ -116,6 +120,20 @@ class ScenarioCatalog:
         self.rules_database = rules_database
         self.publication_registry = publication_registry
         self._records_cache: list[tuple[dict[str, Any], dict[str, Any]]] | None = None
+
+    def _marker_size_source(self) -> dict[str, Any]:
+        """Source attribution for shared marker sizes, not mission ownership."""
+        if self.publication_registry is not None:
+            citation = self.publication_registry.source_citation(
+                season_id="its-18", source_id="its-season-18-en-pdf", page=17,
+            )
+            if citation is not None:
+                return citation
+            if self.publication_registry.has_season("its-18", "2026.09.01"):
+                raise ValueError("Registered ITS 18 marker size source is unavailable")
+        # Isolated Rules-only research fixtures (or a future set without ITS 18)
+        # retain the pinned external measurement provenance.
+        return dict(_MARKER_SIZE_CITATION)
 
     def _records(self) -> list[tuple[dict[str, Any], dict[str, Any]]]:
         if self._records_cache is not None:
@@ -337,7 +355,9 @@ class ScenarioCatalog:
                 "configuration_id": configuration_id,
                 "configuration_army_points": deepcopy(configuration_points),
                 "geometry": deepcopy(configuration["geometry"]),
-                "marker_dimensions": _marker_dimensions(configuration["geometry"]),
+                "marker_dimensions": _marker_dimensions(
+                    configuration["geometry"], self._marker_size_source(),
+                ),
             },
             "objectives": objectives,
             "special_rules": special_rules,

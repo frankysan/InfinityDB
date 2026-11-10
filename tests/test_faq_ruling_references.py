@@ -832,6 +832,38 @@ def test_faq_supersession_only_hides_eligible_active_predecessor(
     assert selected("2026-09-21") == ["faq-ruling:old"]
 
 
+def test_core_scenario_faq_does_not_leak_to_same_id_in_an_its_season(
+    base_documents: list[tuple[Path, dict]], tmp_path: Path,
+) -> None:
+    core_only = _ruling(
+        "faq-ruling:core-scenario", scenario_ids=["scenario:annihilation"],
+    )
+    season_only = _ruling(
+        "faq-ruling:its-scenario", scenario_ids=["scenario:annihilation"],
+        season={"id": "its-18", "revision": "2026.09.01"},
+    )
+    global_n5 = _ruling("faq-ruling:global")
+    for record in (core_only, season_only, global_n5):
+        record["review"]["status"] = "reviewed"
+    db = _export(base_documents, tmp_path, [core_only, season_only, global_n5])
+
+    def selected(**kwargs: str) -> set[str]:
+        return {
+            item["id"] for item in db.faq_rulings_for_topic(
+                "skill:camouflage", rules_revision="5.3", as_of="2026-10-15",
+                scenario_id="scenario:annihilation", **kwargs,
+            )
+        }
+
+    assert selected() == {"faq-ruling:core-scenario", "faq-ruling:global"}
+    assert selected(season_id="its-18", season_revision="2026.09.01") == {
+        "faq-ruling:its-scenario", "faq-ruling:global",
+    }
+    assert selected(season_id="its-17", season_revision="2025.09.01") == {
+        "faq-ruling:global",
+    }
+
+
 def test_faq_season_revision_is_exact_not_inferred(
     base_documents: list[tuple[Path, dict]], tmp_path: Path,
 ) -> None:

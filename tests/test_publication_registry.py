@@ -10,6 +10,7 @@ import pytest
 from infinity_db.its_season_database import build_its_database
 from infinity_db.publication_registry import PublicationReference, PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.scenario_catalog import ScenarioCatalog
 from infinity_db.web import create_app
 from tools.browser_wsgi_transport import wsgi_response
 
@@ -89,6 +90,42 @@ def test_policy_targets_resolve_from_core_only_in_explicit_context(
         season_id="its-18", revision=REVISION, context="official-tournament",
         target_id="rule:reinforcements-extra",
     ) == []
+
+
+def test_core_marker_provenance_is_resolved_from_its_source_metadata(
+    registry: PublicationRegistry,
+) -> None:
+    citation = registry.source_citation(
+        season_id="its-18", source_id="its-season-18-en-pdf", page=17,
+    )
+    assert citation == {
+        "source_id": "its-season-18-en-pdf",
+        "source_title": "ITS Season 18: Overheat (English)",
+        "source_version": REVISION,
+        "source_url": "https://experience.corvusbelli.com/en/infinity/its-rules",
+        "page": 17,
+    }
+    catalog = ScenarioCatalog(registry.rules_database, registry)
+    core = catalog.get_scenario("domination", army_points=300)
+    assert core is not None
+    assert core["placement"]["marker_dimensions"][0]["citation"] == citation
+    # Attribution can originate in ITS without transferring core-mission ownership.
+    assert core["publication"]["collection_id"] == "n5-core"
+    assert registry.source_citation(
+        season_id="its-17", source_id="its-season-18-en-pdf", page=17,
+    ) is None
+    assert registry.source_citation(
+        season_id="its-18", source_id="unknown", page=17,
+    ) is None
+
+
+def test_registered_marker_provenance_missing_fails_closed(
+    registry: PublicationRegistry, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delitem(registry._season_sources["its-18"], "its-season-18-en-pdf")
+    catalog = ScenarioCatalog(registry.rules_database, registry)
+    with pytest.raises(ValueError, match="marker size source is unavailable"):
+        catalog.get_scenario("domination", army_points=300)
 
 
 def test_season_policy_contexts_are_discoverable_but_never_applied_by_default(
@@ -220,6 +257,36 @@ def test_registered_http_core_default_and_cache_isolation(registered_http_apps) 
     new_status, new_headers, _ = wsgi_response(registered, url)
     assert old_status == new_status == 200
     assert dict(old_headers)["ETag"] != dict(new_headers)["ETag"]
+
+
+def test_faq_api_requires_registered_season_and_mission_identity(
+    registered_http_apps,
+) -> None:
+    _core, registered = registered_http_apps
+    root = (
+        "http://registry.test/api/faq-rulings?"
+        "topic_id=equipment%3Ahacking-device&rules_revision=5.3&as_of=2026-09-01"
+    )
+    valid_season = "&season_id=its-18&season_revision=2026.09.01"
+    invalid_season = "&season_id=its-17&season_revision=2025.09.01"
+    assert json.loads(wsgi_response(registered, root)[2])["items"]
+    # General N5 FAQ is still applicable to a registered season when not
+    # scoped to a particular mission.
+    assert json.loads(wsgi_response(registered, root + valid_season)[2])["items"]
+    assert json.loads(wsgi_response(registered, root + invalid_season)[2])["items"] == []
+    # A non-member mission cannot impersonate a season's namesake scenario.
+    assert json.loads(wsgi_response(
+        registered, root + valid_season + "&scenario_id=scenario%3Aannihilation",
+    )[2])["items"] == []
+    scoped = (
+        "http://registry.test/api/faq-rulings?"
+        "topic_id=scenario%3Asupplies&rules_revision=5.3&as_of=2026-09-01"
+        "&scenario_id=scenario%3Asupplies"
+    )
+    assert json.loads(wsgi_response(registered, scoped)[2])["items"]
+    assert json.loads(wsgi_response(
+        registered, scoped + valid_season,
+    )[2])["items"] == []
 
 
 def test_published_season_policies_require_explicit_play_context(

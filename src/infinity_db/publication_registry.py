@@ -231,6 +231,30 @@ class PublicationRegistry:
             skills.append(skill)
         return {"scenario": record, "rules": rules, "skills": skills}
 
+    def has_season(self, season_id: str, revision: str) -> bool:
+        """Whether this exact season and revision are registered for serving."""
+        return self._season_revisions.get(season_id) == revision
+
+    def source_citation(
+        self, *, season_id: str, source_id: str, page: int,
+    ) -> dict[str, Any] | None:
+        """Resolve an external citation against a registered publication source.
+
+        Source attribution does not transfer ownership of the citing N5 record.
+        Do not infer a new season or substitute another source when the requested
+        provenance is absent.
+        """
+        source = self._season_sources.get(season_id, {}).get(source_id)
+        if source is None:
+            return None
+        return {
+            "source_id": source["id"],
+            "source_title": source["title"],
+            "source_version": source["version"],
+            "source_url": source.get("url"),
+            "page": page,
+        }
+
     def season_contexts(self, *, season_id: str, revision: str) -> list[str]:
         """List authored play contexts without selecting or applying any policy."""
         require_domain_slug(season_id, context="ITS policy season")

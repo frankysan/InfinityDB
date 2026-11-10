@@ -39,6 +39,10 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web backend + Data processing:** Preserved scenario-specific N5 FAQ
+  applicability across seasons: a core mission's ruling cannot follow an
+  independently published ITS mission merely because both share an ID.
+  General N5 rulings remain available in valid selected seasons.
 - **Data processing + Web frontend:** Removed ITS-specific Spec-Ops/TEAM-OPS
   restrictions from the default N5 Spec-Ops and Request SpecBall rules cards,
   retaining their core Skill semantics and bilingual printing caveat.

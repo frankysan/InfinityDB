@@ -2479,6 +2479,26 @@ context selected by default. Unknown seasons/revisions/contexts are empty
 and malformed selectors fail closed. P3.5 should verify growth/collision
 semantics and P3.4 still needs a final FAQ/source-attribution closeout.
 
+#### P3.4 — Sixth slice: FAQ and external source provenance closeout (2026-11-10)
+
+The Scenario catalog resolves ITS 18 p. 17 marker-size citation metadata
+from the registered season source descriptor. Core scenario ownership and
+physical marker sizes do not change, nor does the JSON citation shape. A
+pinned external citation is retained only for intentionally isolated
+research configurations without the ITS 18 registry. An incomplete
+registered ITS 18 citation source is rejected rather than silently
+substituted.
+
+The N5 FAQ remains owned by Rules. Exact ITS FAQ queries now require a
+registered season/revision and an actual season mission when a scenario is
+specified. N5 rules-wide FAQ remains applicable under a valid season,
+but N5 core-scenario-scoped FAQ does not leak to same-named independently
+published ITS scenarios. No ITS-authored FAQ publication has been inferred.
+Existing original-source, citation, effective-date and supersession controls
+remain intact. This completes the planned P3.4 code/ownership work; local
+validation and hosted CI are independently recorded. P3.5 owns synthetic
+cross-season collision and multi-database growth acceptance.
+
 ### P4 — Make the interface player-first
 
 **Outcome:** Less user-visible implementation language without loss of relevant gameplay accuracy.  

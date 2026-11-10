@@ -1602,6 +1602,29 @@ validation and cleanup. Hosted full Source CI from the prior pinned SHA
 remains red on legacy fixture expectations; hosted acceptance of this new
 revision has not yet occurred.
 
+**2026-11-10 P3.4 FAQ isolation and marker provenance closeout (development
+checkout):** The complete Army/Rules/ITS build passed (build set
+`5bbefd9253bcf82347a3175928070d0fa7f8a17bee1c885b165033f69fe73e95`).
+Exact N5 FAQ applicability now excludes a core-scenario-scoped ruling
+from same-ID ITS missions; general N5 FAQ remains available for valid
+registered ITS selection, and the HTTP API rejects unknown season/revision
+or nonmember mission by returning no rulings. Scenario marker-size source
+citation metadata now resolves through the registered ITS 18 source
+descriptor, retaining the pinned external fallback only for isolated
+Rules-only or future no-ITS-18 configurations; missing metadata in a
+registered ITS 18 file fails closed. No N5 scenario geometry or content
+was changed.
+
+Focused checks: FAQ selection and HTTP **80 passed / 1 skipped**,
+registry/HTTP/source provenance **29/29**, scenario HTTP and browser
+**96 passed / 4 skipped**. Ruff passed, Pyright reported **0 errors**,
+documentation/links/backlog and Git whitespace checks passed. Rebuilt
+runtime source and asset validation passed **808/808** published SVGs
+and **808/808** browser references. Real checkout and disposable
+immutable Docker image each passed **41/41** pinned HTTP paths; Docker
+container and image were cleaned up. These are local results only;
+full hosted Source CI is separately required and unresolved on prior SHAs.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

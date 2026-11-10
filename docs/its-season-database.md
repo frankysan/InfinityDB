@@ -143,9 +143,14 @@ It does not add tournament restrictions to core/free play automatically.
 
 The N5/Spanish SpecBall printing discrepancy stays in the core card, and
 the Reinforcements annex preserves its N4-origin procedural caution.
-The shared Scenario catalog still attributes marker dimensions to
-ITS 18 p. 17 as an external source of measurement evidence. Changing
-maintained `src/` or curated files changes the complete build fingerprint;
+Core Scenario marker dimensions remain unchanged; their external ITS 18
+p. 17 citation is resolved against the selected season source descriptor in
+the complete runtime. The N5 FAQ remains N5-owned: source- and
+scenario-scoped rulings cannot leak into an unrelated ITS mission with a
+reused scenario ID, while rules-wide N5 FAQ applies to a valid selected
+season. Exact season/revision/mission selection fails closed when unregistered.
+No ITS-authored FAQ is inferred. Changing maintained `src/` or curated files
+changes the complete build fingerprint;
 regenerate the three-file release set before source-bound deployment
 checks or merge.
 

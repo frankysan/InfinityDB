@@ -1,7 +1,8 @@
 # P3 — Source and publication ownership contract
 
-**Status:** P3.1–P3.3 complete; P3.4 three-file serving and physical
-ITS ownership implemented. Scoped overlays and P3.5 isolation remain open.
+**Status:** P3.1–P3.4 locally implemented and acceptance-tested,
+including exact-context overlays, FAQ isolation and source provenance.
+P3.5 multi-season isolation remains open; hosted Source CI acceptance is pending.
 **Branch:** `dev/v1.1.0`.
 **Domains:** Data processing, Web backend, Web frontend.
 
@@ -98,12 +99,14 @@ explicit context-scoped relation resolved at read time.
   for optional-mode availability. Retain its provenance and N4 caveat;
   rehome any ITS-specific availability/event restrictions to ITS 18 without
   certifying N4 procedures as N5 official rules.
-- **Shared marker references:** `scenario_catalog.py` currently hard-codes
-  ITS 18 page 17 as the source for marker diameters even when serving core
-  scenarios. Treat this as an explicitly external *source attribution*, not
-  proof that ITS owns core missions. P3.2/P3.4 must move the source selection
-  behind the correct provenance lookup; preserve accurate displayed marker
-  measurements/citations during transition.
+- **Shared marker references:** In the complete runtime,
+  `ScenarioCatalog` resolves the source metadata for marker diameters
+  directly from the registered ITS 18 publication descriptor (p. 17);
+  this is **external measurement evidence**, not ownership of the N5
+  Domination/Supplies missions. Isolated Rules-only research or future
+  configurations without ITS 18 retain the pinned historical citation,
+  while an incomplete registered ITS 18 source fails closed. The resulting
+  marker sizes and public citation shape remain unchanged.
 - **Battleground:** Move `scenario:battleground`, its full scenario
   definition, all 150–400 Army Point configurations, scoring, SVG geometry,
   collection `its-18@2026.09.01`, and PDF pages 121–123 to the ITS owner
@@ -113,12 +116,15 @@ explicit context-scoped relation resolved at read time.
   independently publish a mission with the same typed scenario ID; do not
   force a globally unique slug or copy a core publication into ITS to make
   navigation work.
-- **FAQ:** The current N5 FAQ has scenario-restricted rulings but no curated
-  ITS-authored FAQ publication. Preserve rules revision, exact season
-  ID/revision when supplied, scenario IDs, effective interval, original
-  publication, selected citation, conflict/supersession evidence and the
-  existing fail-closed selection logic. Adding ITS FAQ content requires its
-  own curated source, not relabeling N5 FAQ records.
+- **FAQ:** The selected N5 FAQ remains N5-owned; there is no reviewed
+  ITS-authored FAQ publication. General N5 rulings remain applicable to a
+  registered season, but a core-scenario-scoped FAQ does not follow an
+  independently published ITS mission merely because it uses the same
+  `scenario_id`. A ruling explicitly selecting an ITS season and revision
+  remains eligible only for that exact context. HTTP selection of a season
+  requires a registered revision and a real member mission when
+  `scenario_id` is given. Source dates, source selection, conflicts,
+  supersession and source citations retain their existing constraints.
 
 ## Stable selection and identity contract
 

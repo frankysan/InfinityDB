@@ -357,6 +357,12 @@ def select_applicable_faq_rulings(
             scenarios = scope.get("scenarioIds", [])
             if scenarios and scenario_id not in scenarios:
                 continue
+            # Scenario IDs may be reused by independently authored ITS seasons.
+            # A ruling restricted to a scenario but not a season refers to the
+            # N5/core publication; do not project it onto a namesake ITS mission.
+            # Rules-wide N5 FAQ clauses remain applicable across seasons.
+            if scenarios and season_id is not None and season is None:
+                continue
             matches.append(scope)
         if matches:
             applicable.append((record, matches))

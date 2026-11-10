@@ -40,7 +40,7 @@ from infinity_db.maintained_text_references import (
     maintained_text_tokens,
     maintained_text_tokens_batch,
 )
-from infinity_db.publication_registry import PublicationRegistry
+from infinity_db.publication_registry import PublicationReference, PublicationRegistry
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.scenario_catalog import ScenarioCatalog
@@ -739,16 +739,33 @@ class ApiHandler:
                     cache_control=cache_control,
                 )
             try:
+                registry = self.scenario_catalog.publication_registry
+                selected_season = context.get("season_id")
+                selected_revision = context.get("season_revision")
+                selected_scenario = context.get("scenario_id")
+                valid_selection = (
+                    selected_season is None
+                    or (
+                        registry is not None
+                        and registry.has_season(selected_season, selected_revision or "")
+                        and (
+                            selected_scenario is None
+                            or registry.resolve(PublicationReference(
+                                selected_season, selected_scenario, selected_revision,
+                            )) is not None
+                        )
+                    )
+                )
                 items = (
                     self.rules_database.faq_rulings_for_topic(
                         context["topic_id"],
                         rules_revision=context["rules_revision"],
                         as_of=context["as_of"],
-                        season_id=context.get("season_id"),
-                        season_revision=context.get("season_revision"),
-                        scenario_id=context.get("scenario_id"),
+                        season_id=selected_season,
+                        season_revision=selected_revision,
+                        scenario_id=selected_scenario,
                     )
-                    if self.rules_database is not None else []
+                    if self.rules_database is not None and valid_selection else []
                 )
                 payload = {"context": context, "items": items}
             except (OSError, ValueError, sqlite3.Error):

@@ -29,16 +29,14 @@ when all contained work shares the same owner.
 - [ ] Execute P3–P6 of the [phased restructuring plan](restructuring-plan.md).
   P0–P2 are complete, including the verified shared Army v31 / Rules v17
   `army.db`/`rules_n5.db` build and real local/Docker serving acceptance.
-  - [ ] Continue P3.4–P3.5. P3.1–P3.3 are complete: Battleground
-    independent-data parity passed (6 API payloads and 24 SVG variants),
-    three reviewed ITS-only policies are isolated in schema v2, and the
-    regenerated Army/Rules release pair passed deployment-asset verification.
-    See [ITS season database](its-season-database.md). The three-file
-    runtime is committed and locally validated; hosted Source CI still
-    contains legacy fixture failures. The duplicate ITS Rules export has
-    been retired; explicit-context ITS policies and the associated N5
-    Spec-Ops card cleanup are implemented. Complete P3.4 FAQ/scenario
-    source-attribution review and P3.5 cross-season isolation acceptance.
+  - [ ] Complete P3.5 multi-season publication isolation and growth
+    acceptance. P3.1–P3.4 have implemented the coordinated three-database
+    runtime, independent ITS 18 Battleground, explicit tournament/Extra
+    policies, Rules ownership retirement, FAQ season isolation and
+    authoritative source-provenance selection. See
+    [ITS season database](its-season-database.md). Hosted Source CI
+    still has legacy fixture failures; do not count it as accepted until
+    repaired and re-run at the selected SHA.
   - [ ] Continue P4–P6 under the plan's player-facing presentation, tooling
     retirement and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in
