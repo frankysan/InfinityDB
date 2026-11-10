@@ -1874,10 +1874,35 @@ Only generally reusable assertions should be extracted; the remaining
 transition fixtures and their dependent wrappers are retirement
 candidates, not permanent product compatibility contracts.
 
+#### P2.5 — Tenth slice: retire isolated v9 turn and Immunity staging (2026-11-10)
+
+The completed `tools/promote_turn_sequence_reference.py` and
+`tools/stage_immunity_plasma_saving_roll.py` have no active build, CI,
+script or external tool imports. The former published the already-accepted
+Game Sequence and Order Pool v9 Rules/loose-deployed-object pair; the
+latter staged reviewed Plasma Rifle Immunity examples through the old
+three-file batch rollback contract. Neither operation is supported by
+the current selected database-set builder.
+
+The Game Sequence test module now owns its exact bilingual source pins,
+rule identity/composition/scope, ordered Tactical Phase and Order Pool
+semantics, SRC-031 disclosure, and current Rules/API/search equality
+without importing the promoter. Its historical released-v9-pair rebuild
+test was retired: current deterministic rebuild/selected-set checks
+and the maintained `sqlite_comparison` cover ongoing concerns.
+Plasma/Immunity has independent current source, curated, Weapon profile,
+Rules export, API and browser regressions, so the historical stager's
+source checker and matched-JSON promotion assertions are not copied to
+a second active owner. Git history preserves both old procedures.
+
+The remaining v9 review/staging dependencies still require a separate
+current-purpose audit and retirement; removal of one-use leaf tools is
+not an excuse to delete the accepted source evidence.
+
 **Remaining P2.5:** Retire completed v9 stage/review/promotion wrappers,
-retire the v9-only transition tests after confirming equivalent current
-source invariants, and remove the standalone JSON reader/serializer once
-its historical callers are gone. P2.6–P2.8 still own final naming/defaults,
+retire v9-only transition tests after confirming current source invariants,
+and remove the standalone JSON reader/serializer once its historical
+callers are gone. P2.6–P2.8 still own final naming/defaults,
 assembly-stage removal and full local/container acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules

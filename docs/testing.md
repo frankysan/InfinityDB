@@ -1085,6 +1085,21 @@ build (1). Ruff, canonical Pyright (0 errors), docs lint/links/backlog and
 Git whitespace checks passed. No full suite, direct Docker run or
 deployment was performed.
 
+**2026-11-10 P2.5 tenth slice, standalone turn and Immunity staging:**
+The Game Sequence/Order Pool source test no longer imports the v9
+paired-publication promoter. It now checks bilingual PDF hashes,
+exact curated source identity/scope/citations, ordered turn and Order
+Pool semantics, SRC-031 disclosure, and current Rules/API/search parity.
+The former v9 paired-publication rebuild test was removed.
+The Plasma/Immunity staging script is superseded by independently
+maintained pinned source, Army Weapon, Rules and API tests for Enhanced
+and Critical cases. Focused tests passed **27 cases**: Game Sequence/Order
+Pool (5), Plasma Combined Saving Roll (3), Plasma Critical (4) and
+test-section registry (15). Ruff, canonical Pyright (0 errors),
+docs lint/links/backlog, Git whitespace and tracked runtime artifact
+provenance checks passed (SVG excluded). No full suite or direct
+Docker run was performed, and no deployment occurred.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -9633,12 +9648,14 @@ Ammunition, Saving Roll count, Traits, and
 derived evidence. The JS and Chromium renderer
 at 1440/390/320 px verifies the twelfth case,
 mode exclusion, source label and links, with
-no horizontal overflow. The existing rollback-
-aware `tools/stage_immunity_plasma_saving_roll.py`
-rebuilds and promotes the synchronized DB and
-deployed-object publication, retaining all 17
-reviewed objects. This is not an attack evaluator
-or a universal Weapon Trait ruling.
+no horizontal overflow. The original rollback-aware
+Plasma/Immunity staging step retained all 17 reviewed deployed objects;
+its one-use command is retired under P2.5. Current
+source and API checks live in
+`tests/test_immunity_combined_saving_roll_example.py`
+and `tests/test_immunity_plasma_critical.py`.
+This is not an attack evaluator or a universal
+Weapon Trait ruling.
 
 **Monofilament / printed Immunity (ARM) Example 2, 2026-10-30:**
 `tests/test_immunity_monofilament_example.py` pins N5.3
@@ -9650,10 +9667,12 @@ not inherit a calculated Immunity outcome. Curated mutation
 tests fail closed on changed Weapon, category, source Traits,
 roll counts and death-State behavior. The JS renderer and
 Chromium at 1440/390/320 px verify the eleventh case,
-source label, semantic links and no overflow. The existing
-rollback-aware `tools/stage_immunity_plasma_saving_roll.py`
-promotes the synchronized database/publication pair; all
-17 reviewed deployed objects remain unchanged.
+source label, semantic links and no overflow. The
+historical rollback-aware staging procedure
+promoted a synchronized database/publication pair;
+all 17 reviewed deployed objects remained unchanged.
+The one-use staging script is retired; current source,
+curated and API tests remain authoritative.
 
 **AP+T2 CC Weapon / partial Immunity (AP), 2026-10-30:**
 `tests/test_immunity_ap_t2_cc.py` checks the pinned English

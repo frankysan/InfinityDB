@@ -1,4 +1,4 @@
-"""V1S-032C1 source-scoped Game Sequence and Order Pool publication tests."""
+"""Accepted Game Sequence and Order Pool source, Rules, and API regressions."""
 
 from __future__ import annotations
 
@@ -13,18 +13,28 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
-from tools.promote_turn_sequence_reference import (
-    CITATIONS,
-    EN,
-    ES,
-    IDENTITIES,
-    verify_candidate,
-)
 
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RULES = ROOT / "data/generated/rules.db"
 ARMY = ROOT / "data/generated/infinity.db"
+IDENTITIES = frozenset({"rule:game-sequence", "rule:order-pool"})
+CITATIONS = {
+    "rule:game-sequence": {
+        ("n5-core-v5.3-pdf", 16), ("n5-core-v5.3-pdf", 17),
+    },
+    "rule:order-pool": {
+        ("n5-core-v5.3-pdf", 11), ("n5-core-v5.3-pdf", 12),
+        ("n5-core-v5.3-pdf", 16), ("n5-core-v5.3-pdf", 17),
+        ("n5-core-v5.3-es-pdf", 17),
+    },
+}
+SOURCE_PINS = (
+    ("data/pdf/rules/n5-rules-v5.3-en.pdf",
+     "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"),
+    ("data/pdf/rules/n5-rules-v5.3-es.pdf",
+     "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"),
+)
 
 
 def _get(app: Any, path: str, query: str = "") -> tuple[str, bytes]:
@@ -43,15 +53,27 @@ def _get(app: Any, path: str, query: str = "") -> tuple[str, bytes]:
 
 
 def _records() -> dict[str, dict[str, Any]]:
-    return {
-        record["id"]: record for record in load_curated_document(CORE)["records"]
-    }
+    records = load_curated_document(CORE)["records"]
+    assert all(sum(row["id"] == identity for row in records) == 1
+               for identity in IDENTITIES)
+    return {record["id"]: record for record in records}
+
+
+@pytest.mark.parametrize("relative,digest", SOURCE_PINS)
+def test_turn_sequence_reviewed_source_pins(
+    relative: str, digest: str, require_source_files: Any,
+) -> None:
+    source = ROOT / relative
+    require_source_files(source)
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == digest
 
 
 def test_game_sequence_has_five_phases_and_source_ordered_tactical_checks() -> None:
     record = _records()["rule:game-sequence"]
     assert record["name"] == "Game Sequence"
     assert record["facts"]["category"] == "basic-rule"
+    assert record["composition"] == {"role": "definition"}
+    assert record["scope"] == {"game": "N5", "seasons": ["current"]}
     effects = record["facts"]["effects"]
     assert len(effects) == 5
     for index, phase in enumerate((
@@ -79,6 +101,8 @@ def test_game_sequence_has_five_phases_and_source_ordered_tactical_checks() -> N
 def test_order_pool_has_distinct_order_owners_and_source_discrepancy() -> None:
     record = _records()["rule:order-pool"]
     assert record["facts"]["category"] == "basic-rule"
+    assert record["composition"] == {"role": "definition"}
+    assert record["scope"] == {"game": "N5", "seasons": ["current"]}
     reqs = record["facts"]["requirements"]
     assert len(reqs) == 4
     assert all(word in reqs[0] for word in ("Regular", "Model or Marker", "Null"))
@@ -99,7 +123,7 @@ def test_order_pool_has_distinct_order_owners_and_source_discrepancy() -> None:
     )
 
 
-def test_two_new_references_match_rules_database_and_normal_web_api() -> None:
+def test_accepted_references_match_rules_database_and_normal_web_api() -> None:
     app = create_app(ARMY, rules_database_path=RULES)
     published = RulesDatabase(RULES)
     records = _records()
@@ -126,16 +150,3 @@ def test_two_new_references_match_rules_database_and_normal_web_api() -> None:
             item.get("href") == f"/rules/{slug}"
             for item in json.loads(body)["items"]
         ), slug
-
-
-def test_published_turn_sequence_release_pair_rebuilds_deterministically() -> None:
-    if not EN.is_file() or not ES.is_file() or not (ROOT / "local").is_dir():
-        pytest.skip("Pinned bilingual source and ignored local staging not available")
-    report = verify_candidate()
-    assert report["identities"] == sorted(IDENTITIES)
-    assert report["alreadyPublished"] is True
-    assert report["candidateRecords"] >= 486
-    assert report["existingRecordsUnchanged"] == report["candidateRecords"]
-    assert report["deterministic"] and report["matchedPublication"]
-    assert report["logicallyEquivalentWithPublished"] is True
-    assert report["publishedRulesSha256"] == hashlib.sha256(RULES.read_bytes()).hexdigest()

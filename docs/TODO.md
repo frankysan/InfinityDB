@@ -50,9 +50,12 @@ when all contained work shares the same owner.
   also been retired; current source checks now require both accepted rules.
   The completed Hackable and paragraph-layout v9 promotion wrappers
   have also been retired. Generic cross-host logical SQLite comparison
-  now has a maintained owner independent of the v9 exporter. Continue
-  retiring the legacy JSON loader, remaining stage/promotion modules
-  and obsolete transition tests while preserving current source guards.
+  now has a maintained owner independent of the v9 exporter. The
+  completed Game Sequence/Order Pool and Plasma/Immunity v9 staging
+  commands are retired, with current source/Rules/API tests retained.
+  Continue retiring the legacy JSON loader, remaining stage/promotion
+  modules and obsolete transition tests while preserving current source
+  guards.
   Final default/serving integration and platform acceptance remain under
   P2.6–P2.8. Keep current serving
   functional until the deliberate cutover. The plan owns ordering, decisions and exit criteria;
