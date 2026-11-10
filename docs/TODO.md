@@ -26,16 +26,13 @@ when all contained work shares the same owner.
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-- [ ] Execute P2–P6 of the [phased restructuring plan](restructuring-plan.md).
-  P0/P1 and P2.1–P2.7 are implemented. The tracked Army v31/Rules v17
-  `army.db`/`rules_n5.db` pair is the default complete build and shared
-  checkout/Docker serving input; see the [data lifecycle](../data/README.md).
-  - [ ] Complete P2.8: validate independent local checkout serving and an
-    actual Docker image against the pinned API, citation, scenario geometry,
-    startup health and no-sidecar baseline. P2.7's runtime fallback retirement,
-    publication-stage cleanup and verified database regeneration are complete.
-  - [ ] Continue P3–P6 in dependency order under the plan's source-family,
-    presentation, tooling and repository-structure exit criteria.
+- [ ] Execute P3–P6 of the [phased restructuring plan](restructuring-plan.md).
+  P0–P2 are complete, including the verified shared Army v31 / Rules v17
+  `army.db`/`rules_n5.db` build and real local/Docker serving acceptance.
+  - [ ] Start P3.1 by assigning core N5/FAQ versus season-scoped ITS source
+    and publication ownership, before designing the `its_18.db` builder.
+  - [ ] Continue P4–P6 under the plan's player-facing presentation, tooling
+    retirement and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in
   [testing](testing.md). Completed migration details stay out of this backlog.
 

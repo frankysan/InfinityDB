@@ -2258,6 +2258,38 @@ did not publish artifacts; the normal complete builder performed that step.
 **P2.7 is complete**. P2.8 retains independent local/Docker integration
 acceptance; no Linux, hosted CI or Docker acceptance is implied.
 
+#### P2.8 — Both hosting targets accepted (2026-11-10)
+
+**Status: Complete.** On `dev/v1.1.0` commit
+`52e0a4c5b99cf4c7db3ab2a72252970f124fd64c`, the pinned source build
+and the tracked Army v31 / Rules v17 pair were already byte-validated under
+P2.7. A real checkout `python -m infinity_db serve` process was launched
+on localhost using both the default `data/generated/` selection and explicit
+`--db-dir data/generated`. Both returned healthy `/internal/health`,
+the expected `/api/version` snapshot
+(`21e7ef4bb29739c006b7f17942140f9927fa8aeb1ec61b3af6e504a17a2c2925`),
+and **41/41 pinned HTTP semantic, citation, browser-asset and Battleground
+SVG geometry probes**. The reusable `tools.verify_checkout_server` starts
+and stops this loopback-only subprocess without changing the database pair.
+
+An actual Docker image was independently built from the same tracked pair
+using Docker Desktop's Linux engine (29.9.2). The disposable image
+`infinity-db:preview-p28-20261110` validated its exact two-file
+`/app/data` contents, embedded deployed objects, 151 variant groups and
+69 Weapon citations. The container started under read-only/runtime
+restrictions, passed its health endpoint and all **41/41** pinned route and
+SVG probes via real container HTTP. `tools.preview_runtime_image` then
+removed its disposable container and image. Deployment asset/source checks
+also passed **808/808** published SVGs and browser references. One ignored
+historical `deployed-objects.json` remains in the local checkout's generated
+directory; it is neither selected nor read, and was not packaged in the image.
+
+**P2 exit criteria met:** Local and Docker serving independently use the
+same two source-matched databases, with no required JSON sidecars or legacy
+fallback paths and no change to reviewed player-visible baseline semantics.
+This is local Windows/Docker acceptance, not a full suite, hosted deployment,
+Linux-dev worker test or manual visual browser acceptance.
+
 ### P3 — Separate seasonal ITS data from N5 core rules
 
 **Outcome:** Source-family boundaries support current and historical seasons without duplicating core rules.  

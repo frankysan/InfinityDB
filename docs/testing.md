@@ -1419,6 +1419,42 @@ browser (16), source-reference baseline (1), P1 semantic baseline (10),
 and CLI (21). Ruff and Pyright (zero errors) passed. This is not an
 independent Linux, deployed Docker, full-suite or hosted acceptance result.
 
+**2026-11-10 P2.8 local checkout and actual Docker hosting acceptance:**
+The complete P2.7 pair was built from pinned Army ZIP and was already
+byte-matched to the tracked artifacts. `tools.verify_checkout_server`
+launched the actual checkout CLI server on loopback (both normal default
+selection and explicit `--db-dir data/generated`), checked HTTP health
+and exact snapshot identity, and verified **41/41** pinned representative
+API/citation/HTML/JS/SVG responses in each mode. Both subprocesses were
+stopped after acceptance. Snapshot:
+`21e7ef4bb29739c006b7f17942140f9927fa8aeb1ec61b3af6e504a17a2c2925`.
+
+An actual image built with Docker Desktop Linux engine **29.9.2** from the
+same checked-out source and tracked pair passed the `tools.preview_runtime_image`
+immutable file-set check (exactly `army.db` and `rules_n5.db`), embedded
+reference checks (17 deployed objects, 151 variant groups, 69 Weapon
+citations), health startup under read-only/container restrictions and
+**41/41** pinned HTTP routes, including Battleground map SVG geometry.
+The disposable container and image were removed. Source/deployment
+verification passed **808/808** SVG assets and browser references.
+A leftover ignored `data/generated/deployed-objects.json` is not used
+by checkout runtime and is absent from the actual image. Neither hosting
+path depends on JSON sidecars.
+
+Repeat the acceptance from the repository root with:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_checkout_server
+.\.venv\Scripts\python.exe -m tools.verify_checkout_server --db-dir data/generated
+.\.venv\Scripts\python.exe -m tools.preview_runtime_image --source-dir data/generated --tag infinity-db:preview-local
+```
+
+**P2 exit accepted** on commit
+`52e0a4c5b99cf4c7db3ab2a72252970f124fd64c` (before documentation
+closeout). The P2.8 checks are integration/semantic acceptance on Windows
+plus its local Docker Linux engine, not a full project suite, independent
+Linux-dev worker run, hosted CI, deployment, or manual visual-browser test.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
