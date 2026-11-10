@@ -16,7 +16,6 @@ import pytest
 
 from infinity_db.web import create_app
 from tools.browser_wsgi_transport import route_browser_page
-from tools.build_deployed_object_publication import build_publication, publication_bytes
 
 
 class _ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -32,21 +31,11 @@ class _QuietHandler(WSGIRequestHandler):
 def published_app(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[Callable, str]]:
     root = Path(__file__).resolve().parents[1]
     tmp = tmp_path_factory.mktemp("deployed-pub")
-    inputs = (
-        root / "data/generated/infinity.db",
-        root / "data/generated/rules.db",
-        root / "data/curated/rules/n5-core-v5.3.json",
-        root / "config/validation/deployed-object-delivery-reviews.json",
-        root / "config/validation/deployed-object-candidate-reviews.json",
-    )
-    if not all(path.is_file() for path in inputs):
-        pytest.skip("Pinned source databases unavailable")
     army = tmp / "infinity.db"
     rules = tmp / "rules.db"
-    shutil.copyfile(inputs[0], army)
-    shutil.copyfile(inputs[1], rules)
-    publication = build_publication(*inputs)
-    (tmp / "deployed-objects.json").write_bytes(publication_bytes(publication))
+    shutil.copyfile(root / "data/generated/infinity.db", army)
+    shutil.copyfile(root / "data/generated/rules.db", rules)
+    assert not (tmp / "deployed-objects.json").exists()
     app = create_app(army, rules_database_path=rules)
     server = make_server(
         "127.0.0.1", 0, app, server_class=_ThreadedServer, handler_class=_QuietHandler

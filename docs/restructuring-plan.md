@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2–P2.4 projections are embedded in opt-in Rules v17/Army v31 sets. P2.5 removed legacy deployed-object serving and image assembly; historical builder/migration modes and the standalone verifier remain. Final naming/defaults and unified serving remain under P2.6–P2.8.
+**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2–P2.4 projections are embedded in opt-in Rules v17/Army v31 sets. P2.5 retired deployed-object JSON serving, image assembly, migration tools and builder/reader test adapters; explicit legacy Rules builds and v1 variant-publication compatibility remain for purpose review. Final naming/defaults and unified serving remain under P2.6–P2.8.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -2105,9 +2105,36 @@ complete-build tests own current integrity, deterministic builds and rejected
 mixed inputs. P2.6/P2.7 still own the deliberate replacement of this assembly
 path; retiring the one-use promoter does not change build/serve defaults.
 
-**Remaining P2.5:** Reconcile the standalone deployed-object JSON
-reader/builder and remaining transition/test consumers, then retire obsolete
-paths while preserving current source, provenance and embedded-model checks.
+#### P2.5 — Nineteenth slice: retire deployed-object JSON test adapters (2026-11-10)
+
+The standalone `infinity_db.deployed_object_publication` reader and
+`tools.build_deployed_object_publication` adapter had only test consumers.
+They are removed with the JSON round-trip/refusal/missing-file checks and
+the obsolete disposable v8 rollback-publication fixture. The current
+Restrictions tests still check standalone v8/v9 compatibility, additive
+conditions and unchanged legacy relations independently.
+
+Source tests now call `infinity_db.deployed_object_builder` directly and compare
+the reconstructed model with current embedded Rules. They retain exact mine
+subtypes, direct and Include occurrence coordinates, missing Unit-name handling,
+raw reverse-coverage comparisons and unknown Army context for Unit-wide options.
+Storage tests compare the model without adding a self-referential Rules hash.
+The browser fixture copies only the matched database pair, retaining all API,
+navigation, missing-value, request/error and viewport/overflow assertions.
+
+The old reader's still-valid identity, source/review provenance, attribute
+evidence, reviewed delivery and Unit/Include ownership checks now form a
+shared storage model guard, used before inserting and after reading rows.
+Negative model tests preserve those checks without an obsolete file format;
+database-tampering tests also verify the current reader rejects invalid
+contexts, evidence and duplicate source selectors. No schema, reviewed
+source meaning or generated artifact changes; historical JSON procedures
+remain recoverable through Git rather than an executable compatibility archive.
+
+**Remaining P2.5:** Review explicit legacy Rules build modes and v1
+variant-publication compatibility, including their test and installed-wheel
+consumers; retire superseded paths without weakening current source/integrity
+checks. Compatibility is not retained solely to satisfy its own tests.
 P2.6–P2.8 own final naming/defaults, assembly-stage removal and
 full local/container integration acceptance.
 

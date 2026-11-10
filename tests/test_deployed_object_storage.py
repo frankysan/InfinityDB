@@ -9,11 +9,11 @@ from wsgiref.util import setup_testing_defaults
 
 import pytest
 
+from infinity_db.deployed_object_builder import build_deployed_objects
 from infinity_db.deployed_object_storage import (
     read_deployed_objects,
     stage_deployed_objects,
 )
-from tools.build_deployed_object_publication import build_publication
 
 
 @pytest.fixture(scope="module")
@@ -34,19 +34,12 @@ def pinned_inputs() -> tuple[Path, ...]:
 def test_normalized_snapshot_round_trips_exact_reviewed_projection(
     pinned_inputs: tuple[Path, ...],
 ) -> None:
-    publication = build_publication(*pinned_inputs)
+    publication = build_deployed_objects(pinned_inputs[0], *pinned_inputs[2:])
     with sqlite3.connect(":memory:") as connection:
         connection.execute("PRAGMA foreign_keys = ON")
         stage_deployed_objects(connection, publication)
         rebuilt = read_deployed_objects(connection, pinned_inputs[0])
-        expected = {
-            **publication,
-            "sourceSnapshot": {
-                key: value for key, value in publication["sourceSnapshot"].items()
-                if key != "rulesDatabaseSha256"
-            },
-        }
-        assert rebuilt == expected
+        assert rebuilt == publication
         assert len(rebuilt["objects"]) == 17
         assert len(rebuilt["unresolvedDeliveries"]) == 1
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
@@ -223,7 +216,7 @@ def test_legacy_image_bundle_is_rejected_before_modifying_output(
 def test_normalized_snapshot_rejects_mismatched_army_sha(
     pinned_inputs: tuple[Path, ...],
 ) -> None:
-    publication = build_publication(*pinned_inputs)
+    publication = build_deployed_objects(pinned_inputs[0], *pinned_inputs[2:])
     with sqlite3.connect(":memory:") as connection:
         connection.execute("PRAGMA foreign_keys = ON")
         stage_deployed_objects(connection, publication)
@@ -232,4 +225,49 @@ def test_normalized_snapshot_rejects_mismatched_army_sha(
             ('"not-the-army-sha"', "armyDatabaseSha256"),
         )
         with pytest.raises(ValueError, match="do not match"):
+            read_deployed_objects(connection, pinned_inputs[0])
+
+
+@pytest.fixture(scope="module")
+def reviewed_model(pinned_inputs: tuple[Path, ...]) -> dict:
+    return build_deployed_objects(pinned_inputs[0], *pinned_inputs[2:])
+
+
+@pytest.mark.parametrize("mutation,message", (
+    ("UPDATE deployed_object_unit_uses SET army_id=1 "
+     "WHERE kind='unit-option-include'", "Unit-wide option cannot invent Army"),
+    ("UPDATE deployed_object_unit_uses SET profile_id=1 "
+     "WHERE kind='loadout'", "profile/loadout usage context"),
+    ("UPDATE deployed_object_unit_uses SET target_loadout_payload_id=NULL "
+     "WHERE kind='loadout-include'", "Include provenance"),
+    ("UPDATE deployed_object_unit_uses SET kind='invented'", "Invalid or unreviewed"),
+    ("UPDATE deployed_object_attribute_sources SET source_json='{}'", "missing source provenance"),
+    ("UPDATE deployed_object_metadata SET value='\"bad\"' "
+     "WHERE key='candidateReviewSha256'", "source provenance"),
+))
+def test_embedded_reader_rejects_tampered_evidence_and_unit_context(
+    reviewed_model: dict, pinned_inputs: tuple[Path, ...], mutation: str, message: str,
+) -> None:
+    with sqlite3.connect(":memory:") as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+        stage_deployed_objects(connection, reviewed_model)
+        assert connection.execute(mutation).rowcount > 0
+        with pytest.raises(ValueError, match=message):
+            read_deployed_objects(connection, pinned_inputs[0])
+
+
+def test_embedded_reader_rejects_duplicate_army_source_selectors(
+    reviewed_model: dict, pinned_inputs: tuple[Path, ...],
+) -> None:
+    with sqlite3.connect(":memory:") as connection:
+        stage_deployed_objects(connection, reviewed_model)
+        first, second = connection.execute(
+            "SELECT id,source_profile_json FROM deployed_objects "
+            "WHERE source_profile_json IS NOT NULL ORDER BY id LIMIT 2"
+        ).fetchall()
+        connection.execute(
+            "UPDATE deployed_objects SET source_profile_json=? WHERE id=?",
+            (first[1], second[0]),
+        )
+        with pytest.raises(ValueError, match="Duplicate deployed-object Army source selector"):
             read_deployed_objects(connection, pinned_inputs[0])

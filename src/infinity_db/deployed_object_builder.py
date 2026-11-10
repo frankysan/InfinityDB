@@ -1,7 +1,7 @@
 """Build the reviewed deployed-object model from pinned Army and curated inputs.
 
-This build-time projection belongs in the packaged data layer. The legacy
-standalone JSON publication is only an output adapter, not a canonical source.
+This build-time projection belongs in the packaged data layer. Rules SQLite
+stores the reviewed model; runtime reads do not require loose JSON files.
 """
 from __future__ import annotations
 

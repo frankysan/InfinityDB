@@ -1247,6 +1247,23 @@ Current code/config/workflows have no imports of the retired modules.
 No full suite, Linux, Docker or hosted acceptance is implied. This internal
 migration-tool retirement needs no release-note entry.
 
+**2026-11-10 P2.5 nineteenth slice, retired deployed-object JSON adapters:**
+Removed the standalone JSON loader and publisher adapter after migrating all
+source/storage/browser consumers. Source-model, occurrence/reverse-use and
+embedded-release parity checks remain; the browser fixture now uses only
+matched databases. The shared storage guard retains valid object/source,
+attribute/provenance, delivery and Unit/Include context checks at insertion
+and read time. It rejects a self-referential Rules hash before staging.
+Focused Windows validation passed **96 distinct tests, zero skips**: 60 current
+source, storage, Restrictions, database-set and API/browser cases (95.18 seconds),
+seven additional embedded-row tampering cases (4.25 seconds), and 29 complete-build,
+variant-storage and section-registry cases (35.74 seconds). Chromium retained
+navigation, missing-value, request/page-error and overflow checks at
+1440/390/320 px. Ruff, focused Pyright (0 errors), docs lint/links/backlog,
+Git whitespace and tracked runtime artifact/provenance checks passed
+(SVG excluded). No full suite, Linux, Docker or hosted acceptance is implied.
+This internal adapter retirement needs no separate release-note entry.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -8015,23 +8032,23 @@ staging report exists) byte-for-byte equality of all six promoted files.
 
 ### Deployed-object release publication
 
-The read-only inventory is for review; ordinary web requests must not read
-the raw curated source files. In a development/release checkout, after
-building both matching databases, compile the reviewed reference payload:
+The read-only inventory is for source review; web requests use the embedded
+Rules model. The standalone deployed-object JSON builder, reader and legacy
+publication fixtures are retired. Validate a selected complete database set with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
+infinity-db database-health --db-dir data/generated
 ```
 
-The builder writes deterministic `data/generated/deployed-objects.json` with
-the source and rules review evidence, direct Army profile/loadout occurrences,
-source-wide Unit options, and explicit one-level included loadout occurrences
-for reviewed delivery sources, along with the **exact** current
-`infinity.db`/`rules.db` SHA-256 fingerprints. Changes to either database
-require regenerating and revalidating the publication. The corresponding
-`tests/test_deployed_object_publication.py` tests prove deterministic bytes
-and rejection of corrupt, duplicate, stale or unsupported values. When
+`infinity_db.deployed_object_builder` owns the deterministic reviewed model;
+Rules SQLite stores it with the selected Army fingerprint and source/review
+evidence. `tests/test_deployed_object_publication.py` checks deterministic
+source reconstruction against the actual embedded release, exact subtypes,
+reviewed delivery edges and direct/Include occurrence identity. Its negative
+model cases reject malformed evidence before storage creates any tables.
+`tests/test_deployed_object_storage.py` checks exact relational round trips,
+Army pairing and rejection of tampered evidence/source selectors and Unit
+ownership after reading stored rows. When
 `data/generated/infinity.raw.db` is available alongside the published Army
 database, two additional local-only tests compare every reviewed origin's
 published direct and one-level Include reverse-use rows against independent
@@ -8046,8 +8063,8 @@ reusable Weapon templates from Unit ownership, and guards all three source
 Include selector shapes against drift. New source context types must be
 reviewed rather than automatically promoted to reverse Unit uses.
 `tests/test_verify_deployed_object_publication_browser.py` exercises the
-real API and Chromium at 1440/390 px with an isolated, freshly generated
-publication. There are 17 reviewed entries, not the entire game-object corpus;
+real API and Chromium at 1440/390/320 px with an isolated, matched database
+pair and no deployed-object JSON. There are 17 reviewed entries, not the entire game-object corpus;
 Mine Dispenser's subtype remains unresolved. The reverse-usage projection
 includes only exact source occurrences linked to reviewed delivery origins.
 Unit-wide options retain an unknown Army context; one-level Include targets
@@ -8062,15 +8079,12 @@ same-context payload and cycle are handled explicitly. This is a source-drift
 gate, **not** a claim that other unreviewed delivery sources or missing objects
 cannot have additional uses.
 
-The release deployment command generates and verifies this ignored publication
-from the checked-out pinned database pair before building the Docker image.
-The Docker image must contain the publication beside both databases. The image
-smoke test verifies the publication against the actual installed database
-hashes, its 17 reviewed entries and unresolved delivery, and the HTTP/API
-browser entry point. Deployment-smoke CI generates the same deterministic
-artifact from the tracked sources before Docker build. Passing the isolated
-browser test alone is not proof of hosted availability; final hosted acceptance
-and the separate Unit/loadout reverse-usage work remain open.
+Image assembly and deployment-smoke CI validate the selected database set and
+its embedded model rather than generating or packaging deployed-object JSON.
+Current v10 images still require matched variant and Weapon-profile JSON;
+the opt-in complete build embeds those projections as documented in the
+[data lifecycle](../data/README.md). Browser success alone does not establish
+hosted, container or final-release acceptance.
 
 For the older Wiki Weapon Chart name inventory, use the read-only
 explicit-alias audit. It preserves repeated alternative tables and reports
@@ -10013,16 +10027,10 @@ Current v10 Rules embed deployed objects. Verify the matched four-file
 runtime set with `tools.build_v10_runtime_candidate --check` and
 `tools.verify_deployment_assets`, following the
 [release checklist](releasing.md#4-run-local-release-validation).
-For legacy v8/v9 only, the tracked rules DB hash also anchors ignored
-`data/generated/deployed-objects.json`; regenerate and verify it whenever
-the legacy release workflow calls for a rebuild. Its guarded paired-promotion
-workflow preserves both artifacts; application startup rejects a mismatched
-pair. For a standalone legacy publication rebuild, run:
-
-```powershell
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
-```
+Historical v8/v9 releases used a separate deployed-object JSON fingerprint;
+their builder/reader and promotion commands are retired. Use their retained
+release artifacts for historical inspection. Current startup never enables
+an object catalog from adjacent legacy JSON.
 
 Then opt in with `INFINITYDB_RELEASE_FAQ_PARITY=1` for the tracked
 FAQ browser cases in `tests/test_verify_scenario_faq_browser.py`:

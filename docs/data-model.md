@@ -157,9 +157,14 @@ The core-scenario and terrain/scenery boundary audits likewise read this
 embedded model from explicitly selected Army and Rules paths; their reports
 pin the actual database bytes, without synthesizing a JSON publication or
 guessing sibling files. The standalone JSON reader and projection adapter
-remain only in source/storage/browser test fixtures pending their P2.5
-reconciliation; runtime serving, current source boundary audits and supported
-complete builds do not use them.
+are retired. Source tests use the maintained deployed-object builder, storage
+tests round-trip that model directly, and browser fixtures need only the matched
+databases. Storage applies a shared model guard before inserting rows and after
+reading them: source/review fingerprints, exact object/source identities,
+attribute evidence, reviewed delivery edges and direct/Include Unit ownership
+must remain valid. A model containing its own Rules-file hash is rejected
+before staging rather than silently dropping that field. No schema or
+source-meaning change is required.
 
 `infinity_db.deployed_object_reference.project_deployed_references` consumes
 the validated N5.3 deployed-object audit and produces a **pure, read-only**

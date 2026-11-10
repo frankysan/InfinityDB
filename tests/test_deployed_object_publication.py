@@ -1,4 +1,4 @@
-"""Release-time generation and fail-closed loading of deployed-object references."""
+"""Reviewed deployed-object source parity and embedded-model integrity."""
 
 from __future__ import annotations
 
@@ -11,19 +11,9 @@ from pathlib import Path
 
 import pytest
 
-from infinity_db.deployed_object_publication import load_deployed_object_publication
-from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.build_deployed_object_publication import main as retired_json_publisher
-
-
-def test_retired_json_publisher_rejects_invocation_without_writing_files(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Legacy promotion/JSON commands cannot recreate obsolete artifacts."""
-    monkeypatch.chdir(tmp_path)
-    with pytest.raises(SystemExit, match="JSON publisher and v8/v9 migration commands are retired"):
-        retired_json_publisher()
-    assert list(tmp_path.iterdir()) == []
+from infinity_db.deployed_object_builder import build_deployed_objects
+from infinity_db.deployed_object_storage import stage_deployed_objects
+from infinity_db.rules_database import RulesDatabase
 
 
 @pytest.fixture(scope="module")
@@ -57,23 +47,21 @@ def legacy_v9_rules(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 def test_pinned_publication_is_deterministic_and_source_complete(
-    source_paths: tuple[Path, Path, Path, Path, Path], tmp_path: Path,
+    source_paths: tuple[Path, Path, Path, Path, Path],
 ) -> None:
-    publication = build_publication(*source_paths)
-    assert publication_bytes(publication) == publication_bytes(build_publication(*source_paths))
+    publication = build_deployed_objects(source_paths[0], *source_paths[2:])
+    assert publication == build_deployed_objects(source_paths[0], *source_paths[2:])
     assert len(publication["objects"]) == 17
     assert len(publication["unresolvedDeliveries"]) == 1
-    path = tmp_path / "deployed-objects.json"
-    path.write_bytes(publication_bytes(publication))
-    assert load_deployed_object_publication(path, source_paths[0], source_paths[1]) == (
-        publication
-    )
+    rules = RulesDatabase(source_paths[1])
+    rules.validate()
+    assert rules.deployed_objects_payload(source_paths[0]) == publication
 
 
 def test_named_mines_use_only_their_exact_army_source_subtype(
     source_paths: tuple[Path, Path, Path, Path, Path],
 ) -> None:
-    publication = build_publication(*source_paths)
+    publication = build_deployed_objects(source_paths[0], *source_paths[2:])
     by_name = {obj["name"]: obj for obj in publication["objects"]}
     for name in (
         "AP Mine", "E/M Mine", "Monofilament Mine",
@@ -106,7 +94,7 @@ def test_named_mines_use_only_their_exact_army_source_subtype(
 def test_reviewed_delivery_uses_have_complete_source_context(
     source_paths: tuple[Path, Path, Path, Path, Path],
 ) -> None:
-    publication = build_publication(*source_paths)
+    publication = build_deployed_objects(source_paths[0], *source_paths[2:])
     for obj in publication["objects"]:
         for use in obj["unitUses"]:
             required_numbers = ("unitId", "sourceItemId", "sourcePosition")
@@ -123,7 +111,7 @@ def test_reviewed_delivery_uses_have_complete_source_context(
 def test_missing_source_unit_names_use_normalized_logical_identity(
     source_paths: tuple[Path, Path, Path, Path, Path],
 ) -> None:
-    publication = build_publication(*source_paths)
+    publication = build_deployed_objects(source_paths[0], *source_paths[2:])
     found_missing_name = False
     with sqlite3.connect(source_paths[0]) as db:
         for obj in publication["objects"]:
@@ -147,7 +135,7 @@ def test_missing_source_unit_names_use_normalized_logical_identity(
 def test_reviewed_delivery_uses_are_exact_army_occurrences_only(
     source_paths: tuple[Path, Path, Path, Path, Path],
 ) -> None:
-    publication = build_publication(*source_paths)
+    publication = build_deployed_objects(source_paths[0], *source_paths[2:])
     uses_count = 0
     with sqlite3.connect(source_paths[0]) as db:
         for obj in publication["objects"]:
@@ -252,7 +240,7 @@ def test_reviewed_direct_uses_cover_every_matching_raw_source_occurrence(
     raw_path = raw_database_path(source_paths[0])
     if not raw_path.is_file():
         pytest.skip("Ignored raw Army database is unavailable in clean CI")
-    publication = build_publication(*source_paths)
+    publication = build_deployed_objects(source_paths[0], *source_paths[2:])
     observed_kinds: set[str] = set()
     with (
         sqlite3.connect(f"{source_paths[0].resolve().as_uri()}?mode=ro", uri=True) as db,
@@ -323,7 +311,7 @@ def test_reviewed_include_uses_cover_matching_raw_target_loadouts(
     raw_path = raw_database_path(source_paths[0])
     if not raw_path.is_file():
         pytest.skip("Ignored raw Army database is unavailable in clean CI")
-    publication = build_publication(*source_paths)
+    publication = build_deployed_objects(source_paths[0], *source_paths[2:])
     observed_kinds: set[str] = set()
     with (
         sqlite3.connect(f"{source_paths[0].resolve().as_uri()}?mode=ro", uri=True) as db,
@@ -454,35 +442,16 @@ def test_unit_wide_occurrence_preserves_missing_army_context(
         assert match[0]["sourceItemId"] == source_id
 
 
-def test_publication_missing_is_legacy_compatible_but_corrupt_fails_closed(
-    source_paths: tuple[Path, Path, Path, Path, Path], tmp_path: Path,
+def test_embedded_model_rejects_identity_value_and_delivery_tampering(
+    source_paths: tuple[Path, Path, Path, Path, Path],
 ) -> None:
-    output = tmp_path / "deployed-objects.json"
-    assert load_deployed_object_publication(output, source_paths[0], source_paths[1]) is None
-    output.write_text("{", encoding="utf-8", newline="\n")
-    with pytest.raises(ValueError, match="JSON"):
-        load_deployed_object_publication(output, source_paths[0], source_paths[1])
-
-    output.write_bytes(publication_bytes(build_publication(*source_paths)))
-    with pytest.raises(ValueError, match="requires a rules database"):
-        load_deployed_object_publication(output, source_paths[0], None)
-    wrong = tmp_path / "wrong.db"
-    shutil.copyfile(source_paths[1], wrong)
-    wrong.write_bytes(b"wrong")
-    with pytest.raises(ValueError, match="does not match"):
-        load_deployed_object_publication(output, source_paths[0], wrong)
-
-
-def test_publication_rejects_identity_value_and_delivery_tampering(
-    source_paths: tuple[Path, Path, Path, Path, Path], tmp_path: Path,
-) -> None:
-    original = build_publication(*source_paths)
-    output = tmp_path / "deployed-objects.json"
+    original = build_deployed_objects(source_paths[0], *source_paths[2:])
 
     def rejected(document: dict, message: str) -> None:
-        output.write_text(json.dumps(document), encoding="utf-8", newline="\n")
-        with pytest.raises(ValueError, match=message):
-            load_deployed_object_publication(output, source_paths[0], source_paths[1])
+        with sqlite3.connect(":memory:") as connection:
+            with pytest.raises(ValueError, match=message):
+                stage_deployed_objects(connection, document)
+            assert connection.execute("SELECT name FROM sqlite_master").fetchall() == []
 
     changed = copy.deepcopy(original)
     changed["objects"].append(copy.deepcopy(changed["objects"][0]))
@@ -540,6 +509,10 @@ def test_publication_rejects_identity_value_and_delivery_tampering(
     )
     unit_option["armyId"] = unit_option["targetArmyId"]
     rejected(changed, "Unit-wide option cannot invent Army")
+
+    changed = copy.deepcopy(original)
+    changed["sourceSnapshot"]["rulesDatabaseSha256"] = "0" * 64
+    rejected(changed, "source provenance")
 
 
 def test_legacy_rules_never_attach_adjacent_deployed_object_json(
