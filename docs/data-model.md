@@ -119,8 +119,8 @@ condition or sentinel field is needed for the current profile model. Any future
 structured status must follow a source-reviewed distinction; display punctuation
 alone is not evidence for new semantics.
 
-For reviewed profile-only Weapons, opt-in complete builds now materialize
-Weapon Chart citations in Rules v12 (compatibility 14). The relational
+For reviewed profile-only Weapons, complete builds embed Weapon Chart
+citations (introduced in Rules v12/compatibility 14 and retained in current v17). The relational
 `weapon_chart_profile_citations` table is keyed by exact Weapon/source-profile ID
 and a non-null mode key (`''` for an unqualified mode, `mode:<name>` otherwise);
 read projections restore the original nullable mode. A source-FK-backed metadata
@@ -129,23 +129,22 @@ selected Army byte identity and complete 62-Weapon/69-profile inventory. Each
 Weapon also retains its canonical slug/name and complete Army profile fingerprint.
 The embedded reader validates source/page integrity, a deterministic content
 digest, exact profile fingerprints and complete modes against the selected Army.
-It does not read curation or the original JSON at runtime. The tracked v10
-release continues to use the byte-paired
-`data/generated/weapon-profile-sources.json` until P2.6. A mismatched embedded
-source is rejected; older absent or independently supplied mixed-pair JSON
-exposes `profile_citations_available: false`. Each Weapon profile has a
+It does not read curation or the original JSON at runtime. The tracked
+complete v17 pair requires these embedded citations; the old loose
+`weapon-profile-sources.json` is not a serving dependency. A mismatched
+embedded source is rejected. Explicit low-level historical fixtures can still
+report `profile_citations_available: false` for absent citations. Each Weapon profile has a
 `profile_citations` list: an empty list means no reviewed profile-chart
 citation was attached, not that no shared rule has a source. The browser
 shows the chart citation or an explicit unavailable notice when the
 publication is missing. This is a locator for the corresponding chart
 entry, not a claim that Army and print values agree or an Ammunition rule.
-The API snapshot revision is the SHA-256 of the colon-separated Army
-database, rules database and attached Weapon-profile publication SHA-256
-values. An unavailable rules database or publication contributes `none`;
-an independently located rules database does not attach a neighboring
-Weapon-profile publication. Release identity tools use the same validated
-attachment and revision calculation, so cache validators and exact-candidate
-checks change when reviewed locator bytes change.
+For normal complete-set serving, the API snapshot revision hashes a
+canonical, sorted inventory of active database filenames and their exact
+SHA-256 digests, with a domain separator. It therefore changes when either
+`army.db` or `rules_n5.db` changes. Explicit low-level historical fixtures
+may supply an independent publication hash; those do not establish another
+operator-facing runtime-set contract.
 
 ### Deployed-object read-model and artifact-gated browser reference
 

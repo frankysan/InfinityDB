@@ -177,22 +177,22 @@ assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual
 database argument or `--require-raw`. The existing individual Army/raw health
 command remains available. The [data model](../docs/data-model.md#shared-metadata-and-integrity)
-owns the embedded build-provenance fields. Final defaults, serving directory
-selection and database names remain scheduled in the [restructuring plan](../docs/restructuring-plan.md).
+owns the embedded build-provenance fields. The P2.6 filename, default
+selection and shared serving-directory contract are implemented; remaining
+cleanup and integration acceptance are in the [restructuring plan](../docs/restructuring-plan.md).
 
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
 source control so machine-local snapshot state does not obscure code changes.
 For the private Linux worker, [Syncthing-staged development assets](../docs/syncthing-assets.md)
 defines the separate source staging and explicit, verified checkout activation procedure.
-The tracked SQLite databases and byte-exact reference publications are release artifacts:
-a tagged checkout includes what production serves. The variant JSON also pins the verified
-raw archive digest, which may differ between independent host rebuilds even when the
-logical export pair agrees. Never regenerate it on a deployment host or rewrite its bytes
-through line-ending conversion. The Weapon-profile JSON is built from the tracked database
-pair and reviewed source decisions without raw archives; rebuild and commit it when either
-database or those decisions change. Its deployment check independently regenerates expected
-bytes and refuses a missing or stale publication. Generated manifests remain local
-provenance records.
+The tracked `army.db` and `rules_n5.db` are release artifacts: a tagged
+checkout includes exactly what production serves. Their embedded projections
+bind reviewed source relationships and common build provenance; runtime JSON
+sidecars are not release inputs. Rebuild the complete pair from pinned source
+inputs when maintained code or curation changes, then validate its source
+freshness and published symbols before commit or deployment. Never rebuild on
+the deployment host or rewrite binary artifacts during packaging. Ignored
+build/acquisition manifests remain local provenance records.
 
 Generated Army database data is replaceable. Builds create temporary application
 and raw-archive siblings, validate both before publication, and bind them with the

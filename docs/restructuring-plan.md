@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 complete (P1.4–P1.5 are target designs, not final serving paths). P2.1 provides shared validation, opt-in complete builds and provenance. P2.2–P2.4 projections are embedded in opt-in Rules v17/Army v31 sets. P2.5's deployed-object transition is complete, including retirement of legacy CLI build modes and v1 variant publications. Final naming/defaults and unified serving remain under P2.6–P2.8.
+**Status:** Active on `dev/v1.1.0`: P0/P1 and P2.1–P2.6 are implemented. The default complete Army v31/Rules v17 set is tracked as `data/generated/army.db` and `rules_n5.db`; checkout serving and Docker consume that same pair. P2.7 owns remaining redundant-publication cleanup; P2.8 owns final independent local/Docker acceptance.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -2187,11 +2187,24 @@ path selection, readonly failure, complete build determinism/recovery and
 provenance refusal. A fresh source build passed all 41 pinned response/geometry
 probes through the new path; evidence is in [testing](testing.md).
 
-**Remaining P2.6:** Perform the single coordinated `army.db`/`rules_n5.db`,
-CLI/WSGI/default, tracked artifact, script, workflow, Docker and cache-revision
-cutover from P1.5. The new factory currently opens the existing two-file names;
-it is preparation for that switch, not acceptance of the final serving contract.
-P2.7/P2.8 still own assembly retirement and final local/container checks.
+**P2.6 cutover accepted (2026-11-10):** `infinity-db build --compact` now
+produces the complete `data/generated/army.db`/`rules_n5.db` set by default.
+`serve --db-dir`, `INFINITY_DB_DB_DIR`, CLI/WSGI startup, cache identity,
+tracked artifacts, Dockerfile, deployment scripts and CI use the same validated
+pair without legacy filename or environment aliases. Standalone development
+exports remain distinct from complete serving sets; the superseded checkout
+assembly, candidate builder and runtime-bundle copy entrypoints are removed.
+
+The pinned source ZIP was rebuilt twice with byte-identical outputs (Army
+SHA-256 `63b090d1e580498532e90e8bf1da63bdda124dc5e7d9c4de536795cef006d3ee`;
+Rules SHA-256 `99650884f1964d76d362ebdaaf3d4197f71b665335565d153048fb4cf9e93ae5`),
+including all 41 baseline probes. The tracked pair matches those bytes.
+Focused database-set, builder, CLI, deployment-script, release-scope and P1
+baseline tests, Ruff, Pyright, documentation checks, and the full 808-SVG
+release asset verification passed. Optional browser tests without their pinned
+raw archive were skipped, not passed. This closes **P2.6**, not P2.7's
+remaining duplication audit or P2.8's real local/Docker acceptance. No full
+suite, Linux, hosted or release acceptance is implied.
 
 ### P3 — Separate seasonal ITS data from N5 core rules
 

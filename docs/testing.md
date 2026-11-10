@@ -1339,10 +1339,33 @@ The ignored alternate output had `infinity.db` SHA-256
 `111c134d8d8760c09157b7ceb713400510c68c6ae07803ad930ccab0d94cad4f`
 and `rules.db` SHA-256
 `989013625357d6d2762e48ca4b6ee39880997109e7d814fcc345f153da7c4dc7`.
-This is one real source build and focused startup/parity acceptance, not a
-cross-platform determinism result. Tracked data and CLI/WSGI/Docker defaults
-remain unchanged pending the coordinated P2.6 cutover. No full suite, browser
-interaction, Linux, Docker, hosted or release acceptance is implied.
+This was one real source build and focused startup/parity acceptance before
+the coordinated P2.6 cutover. It is retained as historical preparation evidence;
+it is not a cross-platform determinism result.
+
+**2026-11-10 P2.6 filename/default and shared serving cutover:**
+The default complete builder, CLI/WSGI directory selection, tracked
+`army.db`/`rules_n5.db`, Docker packaging, deployment scripts, CI and
+cache identity now use the same validated two-file set without filename
+or environment aliases. The source ZIP
+`JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced **two byte-identical complete builds**, each with 41 pinned API,
+HTML and scenario geometry probes and all reviewed inventories intact.
+The tracked Army/Rules database hashes match the resulting
+`63b090d1e580`/`99650884f196` prefixes exactly. Full deployment-asset
+verification passed: **808/808** SVGs and **808/808** browser references,
+with embedded runtime data and source checks valid.
+
+**120 focused tests passed** across database-set, builder, CLI, deployment,
+release-scope and P1 semantic-baseline modules. Nine optional variant-browser
+cases were skipped because their ignored pinned raw archive was unavailable;
+they are not browser acceptance evidence. Ruff, Pyright (zero errors),
+documentation lint/links/backlog and Git whitespace passed. This completes
+the bounded P2.6 data/entrypoint cutover on `dev/v1.1.0`; it is not a full
+suite, Linux, hosted, independent local-server or Docker acceptance result.
+P2.7 owns residual publication-ceremony cleanup and P2.8 owns the final
+local/container integration check.
 
 ## Phased development and validation
 

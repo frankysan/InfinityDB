@@ -340,10 +340,11 @@ Complete embedded-set application composition now has one explicit factory,
 validator's complete mode before creating the application with both exact file
 paths. Current Army/Rules projections and matched recorded provenance are
 required; incomplete or transitional sets fail before application creation.
-The migration parity checker uses this path. This is P2.6 preparation: the normal
-CLI, production WSGI, filename/default and Docker cutover remains unimplemented.
-Low-level `create_app` retains explicit database injection for semantic fixtures
-and current transitional consumers.
+The migration parity checker, normal CLI server and production WSGI now use
+this path. The default tracked `army.db`/`rules_n5.db` set is shared with the
+Docker image, with explicit `--db-dir` or `INFINITY_DB_DB_DIR` selection.
+Low-level `create_app` retains explicit database injection for source-semantic
+fixtures, not an alternative operator-facing serving contract.
 
 Current semantic/storage details are in `docs/data-model.md`.
 

@@ -27,17 +27,13 @@ when all contained work shares the same owner.
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
 - [ ] Execute P2–P6 of the [phased restructuring plan](restructuring-plan.md).
-  P0/P1 are complete, and the opt-in Army v31/Rules v17 two-file build
-  materializes the P2.2–P2.4 reference data with source/build provenance;
-  see the [current data lifecycle](../data/README.md). P2.5's deployed-object
-  transition is complete: loose JSON serving/builders, migration tools,
-  explicit v8/v9 CLI build modes and v1 variant publications are retired,
-  with current source, embedded-model, wheel and integrity checks retained.
-  - [ ] Complete P2.6–P2.8: cut over names/defaults and serving together,
-    retire transitional candidate/checkout assembly, and validate the final
-    local/container paths. Keep current build/serve functional until cutover.
-    Shared complete-set startup and the parity checker's explicit directory
-    path are available; the coordinated filename/default switch remains open.
+  P0/P1 and P2.1–P2.6 are implemented. The tracked Army v31/Rules v17
+  `army.db`/`rules_n5.db` pair is the default complete build and shared
+  checkout/Docker serving input; see the [data lifecycle](../data/README.md).
+  - [ ] Complete P2.7–P2.8: remove any remaining redundant publication
+    and compatibility procedures, then validate the final local and actual
+    Docker hosting paths against the pinned baseline. P2.6's filename,
+    default and direct-packaging cutover is complete.
   - [ ] Continue P3–P6 in dependency order under the plan's source-family,
     presentation, tooling and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in
