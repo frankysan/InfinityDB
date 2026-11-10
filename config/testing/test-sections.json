@@ -248,7 +248,6 @@
         "test_doc_links",
         "test_installed_wheel_smoke",
         "test_metrics_history",
-        "test_migrate_symbol_publication_provenance",
         "test_path_sanitization",
         "test_pipeline_console",
         "test_release_ci_evidence",

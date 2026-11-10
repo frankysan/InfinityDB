@@ -147,16 +147,11 @@ The terminal `data/manifests/army-symbol-build.json` remains ignored local build
 is useful for symbol processing/resume but is not part of the deployment contract. The tracked
 `symbol-publication.json` carries only the compact Army archive name/SHA-256 needed by deployment
 plus the published SVG hashes/mappings. Current symbol publication writes that provenance
-automatically. Only when preparing a legacy publication created before this provenance
-field was tracked, run the one-time migration in the development checkout:
-
-```powershell
-python tools/migrate_symbol_publication_provenance.py
-```
-
-That command copies the Army archive identity from the local terminal build manifest into the
-tracked publication manifest and refreshes the ignored local binding. It does not rebuild or
-modify any SVG.
+automatically. A legacy publication without `sourceSnapshot.armyArtifact`
+is not a valid release input: republish symbols from the pinned Army archive
+rather than modifying an old publication manifest in place. The normal publisher
+creates the provenance and deployment validation compares its SHA-256 with
+`army.db`.
 
 ## Isolated local deployment test
 

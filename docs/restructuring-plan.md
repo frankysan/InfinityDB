@@ -2625,6 +2625,27 @@ closed. Preserve citations, source notes and genuine gameplay uncertainty.
 
 **Exit:** The main repository clearly separates app/build responsibilities from optional acquisition; unused tools and obsolete guidance are gone; a normal build does not require fetching or cloning new tool repositories.
 
+#### P5.1 — First retirement: legacy symbol publication migration (2026-11-10)
+
+- **Retired entrypoint:** `tools/migrate_symbol_publication_provenance.py`
+  only promoted `sourceSnapshot.armyArtifact` from an ignored terminal symbol
+  build manifest into an already-published manifest. The current
+  `tools/reorganize_symbols.py` publisher writes that field directly.
+- **Current invariant:** `tests/test_reorganize_symbols.py` verifies the
+  emitted Army ZIP identity; `tests/test_verify_deployment_assets.py`
+  verifies exact database/publication identity and rejects a publication
+  without `sourceSnapshot`. Those checks supersede the old migration-only
+  test, which can be retired with the CLI and its test-section registration.
+- **Consumer audit:** No active application, tool, shell script or CI workflow
+  invokes the migration. Its remaining executable consumer was its dedicated
+  test module. Remove the historical command from deployment instructions;
+  keep the manifest itself, its hash checks and the current symbol publisher.
+- **Bounded scope:** This removes a completed one-use migration, not
+  symbol acquisition, SVG processing, the external full-asset staging
+  workflow or general audit/research capabilities. Continue P5.1 with the
+  remaining `audit_*` and dated publication helpers based on independent
+  purpose rather than filename alone.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
