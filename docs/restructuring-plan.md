@@ -1899,10 +1899,32 @@ The remaining v9 review/staging dependencies still require a separate
 current-purpose audit and retirement; removal of one-use leaf tools is
 not an excuse to delete the accepted source evidence.
 
-**Remaining P2.5:** Retire completed v9 stage/review/promotion wrappers,
-retire v9-only transition tests after confirming current source invariants,
-and remove the standalone JSON reader/serializer once its historical
-callers are gone. P2.6–P2.8 still own final naming/defaults,
+#### P2.5 — Eleventh slice: retire Cover and terrain-condition promoters (2026-11-10)
+
+The accepted Cover/vertical-movement and Difficult Terrain/Saturation
+references no longer require the one-use v9 paired-publication promoters
+`tools/promote_cover_reference.py` and
+`tools/promote_terrain_condition_reference.py`. Neither had a supported
+build, runtime, CI or other tool consumer. Both performed historical
+`rules.db` plus loose `deployed-objects.json` rebuilding, repeated
+promotion refusal and rollback checks, superseded by the complete selected
+database-set builder and its maintained integrity tests.
+
+`tests/test_cover_publication.py` and
+`tests/test_terrain_condition_publication.py` now own their source
+citations and exact curated rule identity, definition role and N5 scope.
+They continue checking pinned source PDF text, accepted gameplay
+semantics, reviewed Army variants where applicable, Rules database
+equality, current web routes/search and dated FAQ selection. The
+historical-only v9 paired-publication tests were removed rather than
+retaining a migration path to satisfy their own tests. The original
+publication implementation and acceptance evidence remain in Git history.
+
+**Remaining P2.5:** Retire the dependent v9 ARO/movement/geometry and
+source-variant review cluster, then delete completed transition tests and
+the loose JSON serialization/read adapters after their final historical
+consumers have been removed. Preserve current source and selected-set
+validation throughout. P2.6–P2.8 still own final naming/defaults,
 assembly-stage removal and full local/container acceptance.
 
 ### P3 — Separate seasonal ITS data from N5 core rules

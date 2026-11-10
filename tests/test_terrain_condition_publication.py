@@ -13,17 +13,24 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
-from tools import promote_terrain_condition_reference
-from tools.promote_terrain_condition_reference import CITATIONS, verify_candidate
 
 ROOT = Path(__file__).resolve().parents[1]
 RULES = ROOT / "data/generated/rules.db"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+CITATIONS = {
+    "rule:difficult-terrain": {143, 144},
+    "rule:saturation": {143, 144},
+    "rule:special-terrain": {143, 145},
+    "skill:terrain": {116},
+}
 
 
 def _records() -> dict[str, Any]:
     doc = load_curated_document(ROOT / "data/curated/rules/n5-core-v5.3.json")
-    return {item["id"]: item for item in doc["records"]}
+    records = doc["records"]
+    assert all(sum(row["id"] == identity for row in records) == 1
+               for identity in CITATIONS)
+    return {item["id"]: item for item in records}
 
 
 def _text(record: dict[str, Any]) -> str:
@@ -104,6 +111,11 @@ def test_terrain_conditions_storage_api_search_and_citations() -> None:
     records = _records()
     for identity, pages in CITATIONS.items():
         source = records[identity]
+        assert source["kind"] == identity.partition(":")[0]
+        assert source["scope"] == {"game": "N5", "seasons": ["current"]}
+        assert source["composition"] == {"role": "definition"}
+        assert {cite["page"] for cite in source["citations"]
+                if cite["sourceId"] == "n5-core-v5.3-pdf"} == pages
         published = db.composed_record(identity)
         assert published is not None
         assert published["summary"] == source["summary"]
@@ -122,23 +134,3 @@ def test_terrain_conditions_storage_api_search_and_citations() -> None:
         assert status == "200 OK"
         assert any(item.get("href") == "/rules/" + identity.partition(":")[2]
                    for item in json.loads(body)["items"])
-
-
-def test_terrain_conditions_matched_pair_guard_and_repeated_promotion_refusal(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    if not PDF.is_file() or not (ROOT / "local").is_dir():
-        pytest.skip("Pinned PDF or ignored recovery path unavailable")
-    objects = ROOT / "data/generated/deployed-objects.json"
-    original = RULES.read_bytes(), objects.read_bytes() if objects.is_file() else None
-    report = verify_candidate()
-    assert report["alreadyPublished"] and report["deterministic"]
-    assert report["matchedPublication"] and report["logicallyEquivalentWithPublished"]
-    assert report["candidateRecords"] >= 498
-    with pytest.raises(ValueError, match="repeated terrain-condition promotion"):
-        verify_candidate(promote=True)
-    monkeypatch.setattr(promote_terrain_condition_reference,
-                        "load_release_deployed_objects", lambda *_args: None)
-    with pytest.raises(ValueError, match="publication does not match"):
-        verify_candidate()
-    assert (RULES.read_bytes(), objects.read_bytes() if objects.is_file() else None) == original

@@ -1100,6 +1100,26 @@ docs lint/links/backlog, Git whitespace and tracked runtime artifact
 provenance checks passed (SVG excluded). No full suite or direct
 Docker run was performed, and no deployment occurred.
 
+**2026-11-10 P2.5 eleventh slice, Cover/terrain-condition promoters:**
+The old v9 Rules/loose-object paired-publication and repeated-promotion
+tests were removed from `tests/test_cover_publication.py` and
+`tests/test_terrain_condition_publication.py`. Both suites now own exact
+accepted PDF citation sets, curated rule identities, role and current N5
+scope. Their remaining tests enforce reviewed Cover/Climb/Jump/Climbing
+Plus and Difficult Terrain/Saturation/Terrain semantics, pinned N5.3
+source evidence, composed Rules database parity, and public API, search
+and FAQ behavior. These remain current-purpose tests independent of the
+deleted migration entrypoints. Deterministic rebuilding and selected
+database-set integrity remain covered by the maintained builder/health
+suites; no historical loose-JSON interface was retained for its own test.
+Focused Windows validation passed **43 tests**: Cover (4), terrain
+conditions (3), test-section registry (15), complete selected-set
+repeatable build (1), and selected-set health/fail-closed behavior (20).
+Ruff, canonical Pyright (0 errors), docs lint/links/backlog, Git
+whitespace, and tracked runtime artifact/provenance checks passed
+(SVG verification excluded). No full suite, Docker run, or deployment
+was performed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
