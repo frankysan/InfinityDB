@@ -1028,7 +1028,9 @@ def test_request_specball_is_published_and_linked_without_replacing_speedball(
     assert "At the end of the collecting Order" in " ".join(
         request["facts"]["effects"]
     )
-    assert any("TEAM-OPS" in note for note in request["facts"]["sourceNotes"])
+    # TEAM-OPS is scoped to explicitly selected ITS 18 play context; the
+    # ordinary N5 Skill card only retains its own source discrepancies.
+    assert not any("TEAM-OPS" in note for note in request["facts"]["sourceNotes"])
     assert any("Spanish N5.3" in note for note in request["facts"]["sourceNotes"])
     assert ("uses-effects-of", "outbound", "Combat Jump") in {
         (edge["type"], edge["direction"], edge["record"]["name"])

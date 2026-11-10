@@ -11,6 +11,7 @@ import sys
 from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 from urllib.parse import urlencode, urlsplit
 from wsgiref.util import setup_testing_defaults
 
@@ -35,7 +36,7 @@ from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
-from infinity_db.web import create_app
+from infinity_db.web import create_app, create_app_from_database_set
 from infinity_db.web.presentation import static_asset_revision
 from tools.verify_general_rules_browser import source_rules
 
@@ -91,6 +92,20 @@ def request(
         if close is not None:
             close()
     return response["status"], response["headers"], body
+
+
+def _isolated_rules_projection(army_path: Path, rules_path: Path) -> Callable:
+    """Exercise synthetic Army/Rules joins, not release startup or chart provenance.
+
+    The standalone curated test exporter intentionally does not publish embedded
+    Weapon Chart citations. Complete-set startup validation is tested separately;
+    this scoped adapter leaves only that unrelated citation loader unavailable.
+    """
+    with patch(
+        "infinity_db.web.app.load_runtime_weapon_profile_publication",
+        return_value=(None, None),
+    ):
+        return create_app(army_path, rules_database_path=rules_path)
 
 
 def _normalized_css_selector(selector: str) -> str:
@@ -765,9 +780,9 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert member["required"] is True
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(database_path, rules_database_path=rules_path)
+    # The synthetic Army test above owns chart projection; source-backed
+    # Fireteam rule publication is a separate complete-set assertion.
+    rules_app = create_app_from_database_set(root / "data/generated")
     status, _, body = request(rules_app, "/api/fireteams")
     assert status == 200
     reference = json.loads(body)["reference"]
@@ -802,7 +817,18 @@ def test_fireteam_chart_page_and_api_use_application_projection(
         for citation in reference["levels"]["citations"]
     )
 
-    status, _, body = request(rules_app, "/api/fireteams", query="army_id=zulu-company")
+    # Zulu Company belongs to the synthetic Army fixture, not the current
+    # published Army set. Check selected-chart suppression on an actual
+    # registered Army, keeping the two publication contexts independent.
+    status, _, body = request(rules_app, "/api/fireteams")
+    assert status == 200
+    published_army = next(
+        item["public_slug"] for item in json.loads(body)["items"]
+        if item["fireteam_count"] > 0
+    )
+    status, _, body = request(
+        rules_app, "/api/fireteams", query=f"army_id={published_army}",
+    )
     assert status == 200
     assert "reference" not in json.loads(body)
 
@@ -1353,9 +1379,7 @@ def test_unit_profile_help_is_rules_backed_and_optional(
     assert json.loads(body) == {"items": [], "attributes": []}
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
 
     status, _, body = request(rules_app, "/api/unit-profile-help")
     assert status == 200
@@ -4841,9 +4865,7 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
         assert json.loads(body) == {"items": []}
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
 
     status, _, body = request(rules_app, "/api/ammunition")
     assert status == 200
@@ -5036,9 +5058,10 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     )
     assert rule_record_public_reference(rules_app.database, neuro_variant) is None
     assert rules_app.api.equipment_catalog.get_equipment("tinbot-neurocinetics") is None
-    # Army-backed Equipment must not appear without its source catalog identity.
-    assert "repeater" not in equipment_items
-    assert rules_app.api.equipment_catalog.get_equipment("repeater") is None
+    # The current published Army *does* contain Repeater. It must resolve
+    # from that source, not be dropped by the older synthetic Army fixture.
+    assert "repeater" in equipment_items
+    assert rules_app.api.equipment_catalog.get_equipment("repeater") is not None
 
     assert "fireteam-general" not in general_rules
     assert "profile-help-unit-profile" not in general_rules
@@ -5267,9 +5290,7 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
     assert json.loads(body) == {"items": []}
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
 
     status, _, body = request(rules_app, "/api/states")
     assert status == 200
@@ -5336,7 +5357,7 @@ def test_cube_profile_characteristic_resolves_to_canonical_equipment(
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(database_path, rules_path)
+    rules_app = _isolated_rules_projection(database_path, rules_path)
 
     status, _, body = request(rules_app, "/api/equipment")
     assert status == 200
@@ -5481,9 +5502,7 @@ def test_game_modes_recommended_setup_is_public_and_searchable(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
     for query in ("Game Modes", "Game"):
         status, _, body = request(
             rules_app, "/api/search", query=urlencode({"q": query}),
@@ -5518,9 +5537,7 @@ def test_army_retreat_and_standard_game_are_source_scoped_and_routable(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
     for query, name, href in (
         ("Army Retreat", "Army Retreat!", "/rules/army-retreat"),
         ("Retreat", "Army Retreat!", "/rules/army-retreat"),
@@ -5577,9 +5594,7 @@ def test_combat_group_source_limit_and_links_are_searchable(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
     expected = {
         "domain": "General rule", "name": "Combat Group",
         "href": "/rules/combat-group",
@@ -5636,9 +5651,7 @@ def test_initiative_roll_is_linked_and_searchable_in_normal_mode(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
 
     expected = {
         "domain": "General rule", "name": "Initiative Roll",
@@ -5692,9 +5705,7 @@ def test_specialist_troops_general_rule_is_searchable_with_scenario_context(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
     expected = {
         "domain": "General rule", "name": "Specialist Troops",
         "href": "/rules/specialist-troops-standard",
@@ -5764,9 +5775,8 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
+    rules_path = root / "data/generated/rules_n5.db"
 
     status, headers, body = request(rules_app, "/glossary")
     assert status == 200
@@ -6069,9 +6079,7 @@ def test_curated_weapon_families_are_discoverable_in_glossary(
     app: Callable, tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
     status, _, body = request(rules_app, "/api/glossary")
     assert status == 200
     entries = {
@@ -6088,9 +6096,8 @@ def test_curated_weapon_families_are_discoverable_in_glossary(
 def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
     app: Callable, tmp_path: Path,
 ) -> None:
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(Path(__file__).parents[1] / "data/generated")
+    rules_path = Path(__file__).parents[1] / "data/generated/rules_n5.db"
 
     expected = {
         "Visibility Zone": "term-visibility-zone",
@@ -6203,9 +6210,8 @@ def test_mobile_glossary_hash_targets_clear_sticky_navigation(app: Callable) -> 
 def test_visibility_zone_inline_links_have_glossary_previews(
     app: Callable, tmp_path: Path,
 ) -> None:
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(Path(__file__).parents[1] / "data/generated")
+    rules_path = Path(__file__).parents[1] / "data/generated/rules_n5.db"
 
     expected = {
         "/api/skills/sixth-sense": {
@@ -6647,7 +6653,7 @@ def test_unit_api_adds_training_to_order_occurrences_only_when_rules_exist(
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_path)
+    rules_app = _isolated_rules_projection(app.database.path, rules_path)
 
     status, _, body = request(rules_app, "/api/units/1")
     assert status == 200
@@ -6736,7 +6742,7 @@ def test_trait_apis_compose_army_usage_with_curated_rules(app: Callable, tmp_pat
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_path)
+    rules_app = _isolated_rules_projection(app.database.path, rules_path)
 
     status, _, body = request(rules_app, "/api/traits")
     assert status == 200
@@ -6817,7 +6823,7 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     export_rules_database(
         [(root / "curated.json", document), hacking_programs], rules_path
     )
-    rules_app = create_app(app.database.path, rules_path)
+    rules_app = _isolated_rules_projection(app.database.path, rules_path)
 
     status, _, body = request(rules_app, "/api/skills/11")
 
@@ -6884,7 +6890,7 @@ def test_equipment_api_adds_curated_declaration_category(app: Callable, tmp_path
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_path)
+    rules_app = _isolated_rules_projection(app.database.path, rules_path)
 
     status, _, body = request(rules_app, "/api/equipment/medikit")
 
@@ -7082,9 +7088,7 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     app: Callable, tmp_path: Path
 ) -> None:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
 
     status, _, body = request(rules_app, "/api/skills/super-jump")
     assert status == 200
@@ -7324,9 +7328,7 @@ def test_072_detail_and_catalog_presentation_contract(app: Callable, tmp_path: P
         assert b"intro-copy developer-only" in body
 
     root = Path(__file__).parents[1]
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    rules_app = create_app(app.database.path, rules_path)
+    rules_app = create_app_from_database_set(root / "data/generated")
     status, _, body = request(rules_app, "/states/unconscious")
     assert status == 200
     assert b"intro-copy developer-only" in body
@@ -7585,7 +7587,7 @@ def test_weapon_api_adds_curated_special_profile_when_rules_database_is_availabl
     export_database(normalized, database_path)
     documents = load_curated_directory(Path(__file__).parents[1] / "data" / "curated" / "rules")
     export_rules_database(documents, rules_path)
-    rules_app = create_app(database_path, rules_database_path=rules_path)
+    rules_app = _isolated_rules_projection(database_path, rules_path)
 
     status, _, body = request(rules_app, "/api/weapons/226")
 
@@ -7688,9 +7690,7 @@ def test_glossary_boost_exposes_distinct_placement_and_triggering_references(
     app: Callable, tmp_path: Path,
 ) -> None:
     """Boost's linked comparison must reach canonical rules without inventing mechanics."""
-    rules_path = tmp_path / "rules_n5.db"
-    export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
-    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    rules_app = create_app_from_database_set(Path(__file__).parents[1] / "data/generated")
     status, _, body = request(rules_app, "/api/glossary")
     assert status == 200
     boost = next(

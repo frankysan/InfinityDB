@@ -56,6 +56,12 @@ are not retroactively relabeled.
   objects and v2 variant data; obsolete inputs fail closed. Older releases
   remain recoverable through their matching retained images.
 
+### Fixed
+
+- **Deployment + Web backend:** Added the ITS season-policy API route to the
+  bounded metrics-history allowlist, preserving request history for that route
+  without accepting arbitrary metric labels.
+
 ## [1.0.1] - 2026-11-09
 
 ### Player summary
