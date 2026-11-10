@@ -218,7 +218,8 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     page.locator("#deployed-list").wait_for(state="visible", timeout=60000)
                     cards = page.locator(".deployed-object-entry")
                     assert cards.count() == 17
-                    assert "17 reviewed" in page.locator("#deployed-count").inner_text()
+                    assert page.locator("#deployed-count").inner_text() == "17 profiles"
+                    assert page.get_by_role("heading", name="Object profiles").count() == 1
                     assert not page.locator(".deployed-objects-reference").evaluate(
                         "(node) => node.classList.contains('surface')"
                     )
@@ -324,8 +325,20 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     first = usage.first
                     first.locator("summary").click()
                     first.locator("li").first.wait_for(state="visible", timeout=10000)
+                    assert first.locator("summary").inner_text().startswith("Unit uses (")
                     assert first.locator("li").count() > 0
                     assert first.locator('a[href^="/units/"]').count() > 0
+                    source_id = first.locator(".deployed-use-source-id").first
+                    assert source_id.is_hidden()
+                    page.evaluate(
+                        "() => document.documentElement.setAttribute('data-developer-mode', 'true')"
+                    )
+                    assert source_id.is_visible()
+                    assert "Source ID:" in source_id.inner_text()
+                    page.evaluate(
+                        "() => document.documentElement.removeAttribute('data-developer-mode')"
+                    )
+                    assert source_id.is_hidden()
                     included = page.locator(
                         f'.deployed-object-entry[id="{include_object["id"]}"]'
                     ).locator(".deployed-object-unit-uses")

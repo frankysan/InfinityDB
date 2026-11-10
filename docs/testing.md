@@ -1647,8 +1647,15 @@ Ruff and docs/links/backlog and Git whitespace checks passed.
 Source-bound asset validation verified **808/808** published SVGs and
 **808/808** browser references. The real checkout and ephemeral Docker
 image each passed **41/41** pinned HTTP paths, including health/geometry;
-image/container cleaned up. The hosted Source matrix remains a separate,
-unaccepted gate until green on the exact release candidate SHA.
+image/container cleaned up. This dated local result preceded the hosted
+Source acceptance recorded below.
+
+**2026-11-10 P3 hosted acceptance:** On exact commit
+`09f91f442f82abba4df76641ef7ad688402673d4`, GitHub Actions
+**Source checks** run 1081, **Installed wheel smoke** run 1078 and
+**Deployment smoke test** run 1099 all completed successfully. This
+closes P3 hosted acceptance on that SHA, without implying hosted
+approval of later P4 or P5 changes.
 
 ## Phased development and validation
 

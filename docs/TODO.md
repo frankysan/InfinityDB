@@ -26,17 +26,14 @@ when all contained work shares the same owner.
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-- [ ] Execute P4–P6 and complete hosted CI acceptance for P3 of the
+- [ ] Execute P4–P6 of the
   [phased restructuring plan](restructuring-plan.md).
-  P0–P3 are implemented and locally validated. P3.5 exercised a
-  synthetic second season with a duplicate Battleground slug without
-  adding actual Season 17 content or modifying the three-file production
-  contract. See [ITS season database](its-season-database.md).
-  The remaining P3 release gate is hosted Source CI, including outstanding
-  legacy fixture failures; do not count the phase as hosted-accepted until
-  those checks are repaired and re-run on the selected SHA.
-  - [ ] Continue P4–P6 under the plan's player-facing presentation, tooling
-    retirement and repository-structure exit criteria.
+  P0–P3 are implemented and locally validated. P3 hosted Source checks,
+  installed-wheel smoke and deployment smoke passed on
+  `09f91f442f82abba4df76641ef7ad688402673d4`.
+  P3.5 also exercised a synthetic second season with a duplicate
+  Battleground slug without adding actual Season 17 content or changing
+  the three-file production contract. See [ITS season database](its-season-database.md).
   The plan owns ordering and decisions; acceptance evidence lives in
   [testing](testing.md). Completed migration details stay out of this backlog.
 

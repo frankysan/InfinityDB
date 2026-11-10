@@ -1,8 +1,10 @@
 # P3 — Source and publication ownership contract
 
-**Status:** P3.1–P3.5 locally implemented and focused acceptance-tested,
-including synthetic multi-season duplicate-slug isolation. The production
-set still registers ITS 18 only. Hosted Source CI acceptance remains separate.
+**Status:** P3.1–P3.5 implemented and locally acceptance-tested,
+including synthetic multi-season duplicate-slug isolation. Hosted Source
+checks and both smoke workflows passed on
+`09f91f442f82abba4df76641ef7ad688402673d4`. The production
+set still registers ITS 18 only.
 **Branch:** `dev/v1.1.0`.
 **Domains:** Data processing, Web backend, Web frontend.
 

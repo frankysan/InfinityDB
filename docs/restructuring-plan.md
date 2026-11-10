@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0/P1 and P2.1–P2.6 are implemented. The default complete Army v31/Rules v17 set is tracked as `data/generated/army.db` and `rules_n5.db`; checkout serving and Docker consume that same pair. P2.7 owns remaining redundant-publication cleanup; P2.8 owns final independent local/Docker acceptance.
+**Status:** Active on `dev/v1.1.0`: P0–P3 are implemented and validated, including hosted P3 checks on `09f91f442f82abba4df76641ef7ad688402673d4`. The normal runtime builds and serves Army v31 (`army.db`), Rules v17 (`rules_n5.db`), and the reviewed ITS 18 publication (`its_18.db`) as one selected set for both checkout and Docker. P4 is in progress; P5–P6 remain open.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -2520,8 +2520,10 @@ discovery of extra SQLite files. Explicitly registering a new file without
 its source in the selected build manifest fails closed. Actual ITS S16/S17
 content remains separate future curation work, not required for P3 exit.
 
-P3 implementation and local validation are complete; hosted Source CI
-remains a separate outstanding acceptance gate.
+P3 implementation and local validation are complete. Hosted Source checks,
+installed-wheel smoke and deployment smoke passed on exact SHA
+`09f91f442f82abba4df76641ef7ad688402673d4` (2026-11-10);
+P3 hosted acceptance is complete for that revision.
 
 ### P4 — Make the interface player-first
 
@@ -2556,14 +2558,23 @@ notice, About/privacy disclosures, and representative empty/error states.
   diagnostics and raw identifiers are already developer-only on examined
   pages. About remains the proper home for licensing, development and
   privacy disclosures rather than repeating them on every rules card.
-- **Continue the audit:** Review remaining `Reviewed`/evidence qualifiers,
-  coverage warnings on deployed-object and Immunity pages, and loading/error
-  text in their actual page context before changing them. Some qualify
-  gameplay coverage and must not be deleted merely for terseness.
+- **Deployed-object follow-up:** Replace repeated `Reviewed`/source-processing
+  labels with object profiles, delivery methods and listed Unit uses. Keep
+  playable delivery paths, linked Units, disputed attributes and unresolved
+  loadout-specific Mine limitations. Show raw origin record IDs only in
+  Developer Mode; the public API remains unchanged. Use a player-readable
+  fetch error rather than exposing an underlying diagnostic message.
+- **Keep material review limits:** Immunity interaction evidence distinguishes
+  explicit source examples from cases derived from reviewed general rules.
+  Preserve these distinctions and the critical-roll/weapon-scope caveats in
+  normal mode; they prevent unsupported gameplay inferences. Technical
+  identifiers and maintenance vocabulary can be reduced separately.
+- **Continue the audit:** Review remaining reference-page labels and
+  loading/error text in actual context. Avoid removing useful coverage limits.
 
-This is the first bounded P4 presentation slice, not P4.5 visual/accessibility
-acceptance or complete P4 closeout. The shared renderer change must retain
-the existing citation and source-note tests.
+These are bounded P4 presentation changes, not complete P4.5
+visual/accessibility acceptance or P4 closeout. The shared renderer
+must continue to preserve citation and source-note behavior.
 
 ### P5 — Retire, consolidate and selectively extract tools
 
@@ -2617,7 +2628,7 @@ flowchart TD
     p5 --> p6
 ```
 
-**Execution status:** P0 and P1 are complete as process changes, dependency/tool inventory, baseline fixtures and target decisions. P2.1 has complete-build foundations; P2.2–P2.4 projections are available in opt-in Army v31/Rules v17 sets. Continue P2.5's deployed-object transition before final names/defaults and unified serving. Independent P4 copy work need not block on the database migration.
+**Execution status:** P0–P3 have completed implementation and applicable validation. The three-file Army/Rules/ITS 18 runtime contract is the default for both checkout and Docker. P4 player-first presentation work is underway; P5 retirement/extraction and P6 integrated closeout remain. Earlier P2 candidate/export notes are historical and do not describe current serving.
 
 ## Questions to settle during discovery (not reasons to stop planning)
 
@@ -2642,4 +2653,4 @@ At the final integrated milestone, verify:
 - Routine agent tasks require fewer mandatory process operations; focused tests run when relevant and full checks run at meaningful integration/release points.
 - Reduction in tool entrypoints and duplicated documentation is demonstrated from P1 baselines, with regressions and deliberate product changes called out separately.
 
-**Current status:** P0 policy and P1 discovery/design have been delivered as described above. P2.1 has current-format build/verification foundations; the remaining P2–P6 scope still requires implementation and appropriate validation. The target architecture is not current runtime behavior.
+**Current status:** P0–P3 are implemented and locally/hosted-validated as described above. P4 remains active; P5 and P6 require implementation and acceptance. The three-file runtime database boundary is already the default, while the broader simplification goals are not yet complete.

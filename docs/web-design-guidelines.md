@@ -104,11 +104,11 @@ references, with theme tokens and a second cue beyond color:
   merely because its values differ from a maintained summary. Display a
   specific authoritative revision/change only when a verified publication
   record identifies it.
-- **InfinityDB-maintained reference:** the shared Rule card labels curated
-  summaries, requirements and effects as an **InfinityDB-maintained reference**,
-  explicitly pointing to citations for source wording. This label identifies
-  editorial ownership, **not** a claim that the rules are unofficial or
-  mechanically different.
+- **InfinityDB-maintained reference:** shared Rule cards present curated
+  summaries, requirements and effects alongside a concise **Sources** line.
+  The project-wide accuracy/independence notice explains editorial ownership;
+  do not repeat a maintenance disclaimer on every card or suggest that its
+  gameplay meaning differs from cited official rules.
 - **Explanations, examples and reviewed interpretations:** keep gameplay
   requirements/effects at body size. Distinguish explanations under
   **Clarifications and examples**, with an explicit InfinityDB-reviewed
@@ -132,9 +132,9 @@ references, with theme tokens and a second cue beyond color:
   visible uncertainty labels. Do not silently select a winner or hide
   material gameplay ambiguity in Developer Mode.
 
-The shared renderer owns the first four presentation roles, and the
-source-reviewed FAQ renderer owns the last two. This is a provenance
-**presentation contract**; it does not authorize invented source
+The shared Rule renderer owns curated explanations, source context and rule
+citations; the FAQ renderer owns source-dated rulings and conflict warnings.
+This **provenance presentation contract** does not authorize invented source
 classifications or complete an audit of every Army statline, scenario
 discrepancy, or possible historical update. Maintain the source-model
 boundaries in [data-model.md](data-model.md) and test both light/dark,
