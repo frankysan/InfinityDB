@@ -57,8 +57,8 @@ class PublicationReference:
 class PublicationRegistry:
     """Resolve typed N5 and ITS publications from independently stored SQLite files.
 
-    This is the P3.4 backend foundation. The existing two-file HTTP runtime is
-    unchanged until the integrated serving/build/packaging cutover.
+    The selected complete runtime registers independently owned ITS season
+    databases and retains N5 core definitions in the Rules database.
     """
 
     def __init__(

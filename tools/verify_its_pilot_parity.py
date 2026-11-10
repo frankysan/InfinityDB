@@ -1,7 +1,7 @@
-"""P3.3 acceptance: ITS-owned Battleground versus the currently served Rules publication.
+"""P3 acceptance: independent ITS Battleground source and registered HTTP output.
 
-Uses the same ScenarioCatalog and deterministic SVG renderer on both inputs.
-The ITS adapter below is diagnostic only; runtime registration belongs to P3.4.
+Compare the independently built source projection with the selected runtime,
+including all six JSON variants and 24 map SVGs. Never use a shadow Rules copy.
 """
 from __future__ import annotations
 
@@ -35,8 +35,8 @@ ORIGIN = "http://its-pilot-parity.test"
 class _StandalonePilotSource:
     """Narrow diagnostic adapter to exercise the unchanged ScenarioCatalog.
 
-    Rejects external scenario rules rather than silently reading the legacy
-    rules copy; future cross-DB rule resolution is explicitly P3.4 work.
+    Rejects external scenario rules rather than silently omitting unresolved
+    cross-domain dependencies in this bounded Battleground test.
     """
 
     def __init__(self, item: dict[str, Any]):
@@ -118,28 +118,30 @@ def verify_pilot(
         )
         if season is None:
             raise ValueError("Built ITS publication does not contain Battleground")
-        old_database = RulesDatabase(database_set / "rules_n5.db")
-        old_record = old_database.composed_record(SCENARIO)
-        if old_record is None:
-            raise ValueError("Current Rules publication has no Battleground baseline")
-        for key in ("id", "kind", "name", "summary", "facts"):
-            if old_record[key] != season["record"][key]:
-                raise ValueError(f"ITS record differs from current Rules baseline: {key}")
-        legacy = ScenarioCatalog(old_database)
-        # Exercise ScenarioCatalog unchanged with an ITS-owned record. The
-        # explicit diagnostic adapter is not a production multi-DB resolver.
-        adapter = _StandalonePilotSource(season)
-        if old_record["citations"] != adapter.record["citations"]:
-            raise ValueError("ITS citations differ from current Rules baseline")
-        standalone = ScenarioCatalog(cast(RulesDatabase, cast(object, adapter)))
-        if legacy.list_scenarios(collection=SEASON, revision=REVISION) != (
-            standalone.list_scenarios(collection=SEASON, revision=REVISION)
+        if season["publication"]["contentSha256"] != (
+            "2dd4ab5c9f7c83bcdc4f94e156f29c4b6c2d9e34770a03da85e8886f4c0d5b31"
         ):
-            raise ValueError("ITS scenario list differs from current Rules baseline")
+            raise ValueError("ITS record differs from pinned pre-cutover publication")
+        rules_database = RulesDatabase(database_set / "rules_n5.db")
+        if rules_database.scenario_publications(SCENARIO):
+            raise ValueError("ITS Battleground remains duplicated in N5 Rules")
+        # Exercise the independent season model against the registered runtime
+        # without treating a legacy Rules copy as an ongoing dependency.
+        adapter = _StandalonePilotSource(season)
+        standalone = ScenarioCatalog(cast(RulesDatabase, cast(object, adapter)))
         if standalone.list_scenarios() != []:
             raise ValueError("Standalone ITS scenario leaked into default core selection")
         app = create_app_from_database_set(database_set)
         army_database = Database(database_set / "army.db")
+        status, _, body = wsgi_response(
+            app, ORIGIN + f"/api/scenarios?collection={SEASON}&revision={REVISION}",
+        )
+        expected_items = [
+            _enrich_scenario_api_item(army_database, rules_database, item)
+            for item in standalone.list_scenarios(collection=SEASON, revision=REVISION)
+        ]
+        if status != 200 or json.loads(body)["items"] != expected_items:
+            raise ValueError("ITS HTTP scenario list differs from independent publication")
         geometry_count = 0
         svg_count = 0
         for points in POINTS:
@@ -147,20 +149,14 @@ def verify_pilot(
                 f"/api/scenarios/battleground?army_points={points}"
                 f"&collection={SEASON}&revision={REVISION}"
             )
-            legacy_detail = legacy.get_scenario(
-                "battleground", army_points=points, collection=SEASON, revision=REVISION,
-            )
             candidate_detail = standalone.get_scenario(
                 "battleground", army_points=points, collection=SEASON, revision=REVISION,
             )
-            if (
-                legacy_detail is None or candidate_detail is None
-                or candidate_detail != legacy_detail
-            ):
-                raise ValueError(f"ITS projection differs for {points} points")
+            if candidate_detail is None:
+                raise ValueError(f"ITS projection unavailable for {points} points")
             status, _, body = wsgi_response(app, ORIGIN + path)
             enriched_candidate = _enrich_scenario_api_item(
-                army_database, old_database, candidate_detail,
+                army_database, rules_database, candidate_detail,
             )
             if status != 200 or json.loads(body) != enriched_candidate:
                 raise ValueError(f"ITS HTTP JSON differs for {points} points")

@@ -606,11 +606,14 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
     with sqlite3.connect(output) as connection:
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
-        assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 5
+        assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 4
+        assert connection.execute(
+            "SELECT COUNT(*) FROM collections WHERE domain='its'"
+        ).fetchone()[0] == 0
         # Special Terrain, Difficult Terrain, Saturation, Access Width,
         # Initiative Roll and Combat Group are General Rules,
         # not deployed-object identities.
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 499
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 498
         assert connection.execute(
             "SELECT id FROM records WHERE id IN (?, ?) ORDER BY id",
             ("rule:access-width", "rule:special-terrain"),
@@ -620,17 +623,11 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         ]
         assert connection.execute(
             "SELECT id, title FROM scenario_collections ORDER BY id"
-        ).fetchall() == [
-            ("its-18", "ITS Season 18: Overheat"),
-            ("n5-core", "N5 Core Scenarios"),
-        ]
+        ).fetchall() == [("n5-core", "N5 Core Scenarios")]
         assert connection.execute(
             "SELECT collection_id, revision, source_collection_id "
             "FROM scenario_collection_revisions ORDER BY collection_id"
-        ).fetchall() == [
-            ("its-18", "2026.09.01", "its-season-18-2026.09.01"),
-            ("n5-core", "5.3", "n5-core-v5.3"),
-        ]
+        ).fetchall() == [("n5-core", "5.3", "n5-core-v5.3")]
         assert connection.execute(
             "SELECT scenario_id, position FROM scenario_memberships "
             "WHERE collection_id = 'n5-core' ORDER BY position"
@@ -646,7 +643,6 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         ).fetchall()
         assert [row[0] for row in publication_rows] == [
             "scenario:annihilation",
-            "scenario:battleground",
             "scenario:domination",
             "scenario:firefight",
             "scenario:supplies",

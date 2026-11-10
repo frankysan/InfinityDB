@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.curated import load_curated_directory
+from infinity_db.publication_registry import PublicationRegistry
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.scenario_catalog import ScenarioCatalog
 from infinity_db.scenario_definition import parse_scenario_definition_record
@@ -16,7 +17,9 @@ def scenario_catalog(tmp_path_factory: pytest.TempPathFactory) -> ScenarioCatalo
     root = Path(__file__).parents[1]
     output = tmp_path_factory.mktemp("scenario-catalog") / "rules_n5.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    return ScenarioCatalog(RulesDatabase(output))
+    rules = RulesDatabase(output)
+    registry = PublicationRegistry(rules, {"its-18": root / "data/generated/its_18.db"})
+    return ScenarioCatalog(rules, registry)
 
 
 def test_current_scenario_collections_are_derived_from_readable_publications(

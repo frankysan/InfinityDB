@@ -131,12 +131,6 @@ class ScenarioCatalog:
                 raise ValueError(
                     f"Current Scenario {record['id']!r} has no current publication membership"
                 )
-            if (
-                self.publication_registry is not None
-                and publication["collection"] != "n5-core"
-            ):
-                # Registered ITS publications supersede the transitional Rules copy.
-                continue
             records.append((record, publication))
 
         if self.publication_registry is not None:

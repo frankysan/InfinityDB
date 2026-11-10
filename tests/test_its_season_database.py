@@ -61,9 +61,10 @@ def test_isolated_its_database_is_deterministic_and_matches_existing_publication
     assert {entry["context"] for entry in report["policies"]} == {
         "official-tournament", "team-ops-extra", "reinforcements-extra",
     }
-    current = RulesDatabase(TRACKED_RULES).scenario_publications("scenario:battleground")
-    assert len(current) == 1
-    assert current[0]["content_sha256"] == report["scenarios"][0]["contentSha256"]
+    assert RulesDatabase(TRACKED_RULES).scenario_publications("scenario:battleground") == []
+    assert report["scenarios"][0]["contentSha256"] == (
+        "2dd4ab5c9f7c83bcdc4f94e156f29c4b6c2d9e34770a03da85e8886f4c0d5b31"
+    )
 
     with sqlite3.connect(first) as connection:
         assert connection.execute("PRAGMA application_id").fetchone()[0] == ITS_APPLICATION_ID

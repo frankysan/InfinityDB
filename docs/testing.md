@@ -1552,9 +1552,35 @@ documentation checks and Git whitespace checks passed. The initial Docker
 build failed
 because `.dockerignore` omitted `its_18.db`; after correction, the clean
 disposable image built and passed. No hosted three-file CI acceptance yet.
-The MCP Git stage operation refuses the new untracked binary release artifact
-with `untracked_release_database`; this blocks committing/pushing the cutover
-until that capability or a one-time local `git add` is used.
+The first publication required a one-time local `git add`/`git commit`
+because the MCP restricted newly tracked binary database files. The complete
+set was committed as `1b8d527de61d0751e7387b7b0d9e62013cf86ff0` and
+synchronized with GitHub. Hosted wheel and deployment smoke passed; the
+Ubuntu 3.11 Source matrix failed on retired CLI/Rules fixture assumptions
+and two deployment-asset season fixture stubs. A focused season-stub correction
+is included in the following P3.4 cleanup. Overall hosted Source CI remains
+unaccepted until the separate full-suite fixture migration is addressed.
+
+**2026-11-10 P3.4 ITS publication ownership retirement (development checkout):**
+The normal three-database build completed with build-set
+`29ead25e1ab15370d05c976fa2b5b9ad5a5094051f325ff54d5ce006e8c9d23a`.
+The N5 Rules exporter now excludes ITS-owned collections and the strict
+complete-set validator rejects a shadow ITS collection in Rules. A frozen
+pre-cutover digest guards six Battleground API JSON payloads and 24 SVG
+byte streams. Registry tests passed **14/14**, scenario catalog **43/43**,
+scenario API **95 passed / 4 skipped**, Rules database **166/166**,
+strict database set **23/23**, complete-set builder **18/18**,
+ITS database **17/17**, standalone ITS parity **2/2** and deployment-asset
+fixtures **13/13**; both modified Rules-only historical report assertions
+passed. Deployment source and asset verification passed 808/808 SVG assets
+and 808/808 browser references. Real checkout CLI and disposable Docker
+image parity each passed 41/41 pinned paths; the Docker image was removed.
+The complete historical
+report module had two unrelated local failures when optional research tests
+encountered a stale ignored `data/generated/army.raw.db` sibling; they are
+not serving inputs and were not changed. Hosted full Source matrix is still
+failing older standalone Rules-v8 and retired CLI fixture expectations; do
+not treat this section as a hosted-CI pass.
 
 ## Phased development and validation
 

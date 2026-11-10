@@ -34,8 +34,8 @@ def test_registry_resolves_same_scenario_id_by_owner_and_revision(
     season = registry.resolve(PublicationReference(
         "its-18", "scenario:battleground", REVISION,
     ))
-    assert core is not None and season is not None
-    assert core["id"] == season["record"]["id"]
+    assert core is None
+    assert season is not None and season["record"]["id"] == "scenario:battleground"
     assert season["publication"]["collectionId"] == "its-18"
     assert season["publication"]["sourceCollectionId"] == "its-season-18-2026.09.01"
     manifest = registry.season_manifest()["its-18"]
@@ -155,17 +155,17 @@ def test_registered_http_catalog_preserves_default_and_exact_season_selection(
     baseline, registered = registered_http_apps
     assert baseline.snapshot_revision != registered.snapshot_revision
 
-    for query in (
-        "",
-        "?collection=n5-core&revision=5.3",
-        f"?collection=its-18&revision={REVISION}",
-    ):
+    for query in ("", "?collection=n5-core&revision=5.3"):
         url = "http://registry.test/api/scenarios" + query
         old_status, _, old_body = wsgi_response(baseline, url)
         new_status, _, new_body = wsgi_response(registered, url)
         assert old_status == new_status == 200
-        assert json.loads(new_body) == json.loads(old_body)
+        assert json.loads(new_body)["items"] == json.loads(old_body)["items"]
 
+    its_url = f"http://registry.test/api/scenarios?collection=its-18&revision={REVISION}"
+    assert json.loads(wsgi_response(baseline, its_url)[2])["items"] == []
+    its_items = json.loads(wsgi_response(registered, its_url)[2])["items"]
+    assert [item["slug"] for item in its_items] == ["battleground"]
     default = json.loads(wsgi_response(
         registered, "http://registry.test/api/scenarios",
     )[2])
@@ -182,27 +182,14 @@ def test_registered_http_catalog_preserves_default_and_exact_season_selection(
         assert status == 200 and json.loads(body)["items"] == []
 
 
-def test_registered_http_scenario_and_maps_match_original_pilot(
-    registered_http_apps,
-) -> None:
-    baseline, registered = registered_http_apps
-    for points in (150, 200, 250, 300, 350, 400):
-        selector = f"army_points={points}&collection=its-18&revision={REVISION}"
-        url = f"http://registry.test/api/scenarios/battleground?{selector}"
-        old_status, _, old_body = wsgi_response(baseline, url)
-        new_status, _, new_body = wsgi_response(registered, url)
-        assert old_status == new_status == 200
-        assert json.loads(new_body) == json.loads(old_body)
-        for theme in ("light", "dark"):
-            for unit in ("in", "cm"):
-                svg = (
-                    f"http://registry.test/api/scenarios/battleground/map.svg?"
-                    f"{selector}&theme={theme}&distance_unit={unit}"
-                )
-                old_status, _, old_body = wsgi_response(baseline, svg)
-                new_status, _, new_body = wsgi_response(registered, svg)
-                assert old_status == new_status == 200
-                assert new_body == old_body
+def test_its_scenario_is_unavailable_without_its_owner(registered_http_apps) -> None:
+    core, registered = registered_http_apps
+    url = (
+        "http://registry.test/api/scenarios/battleground?"
+        f"army_points=300&collection=its-18&revision={REVISION}"
+    )
+    assert wsgi_response(core, url)[0] == 404
+    assert wsgi_response(registered, url)[0] == 200
 
 
 def test_registered_http_core_default_and_cache_isolation(registered_http_apps) -> None:
@@ -218,10 +205,43 @@ def test_registered_http_core_default_and_cache_isolation(registered_http_apps) 
         assert (new_status, json.loads(new_body)) == (
             old_status, json.loads(old_body),
         )
-    url = (
-        "http://registry.test/api/scenarios/battleground?"
-        f"army_points=300&collection=its-18&revision={REVISION}"
-    )
-    _, old_headers, _ = wsgi_response(baseline, url)
-    _, new_headers, _ = wsgi_response(registered, url)
+    url = "http://registry.test/api/scenarios/annihilation?army_points=300"
+    old_status, old_headers, _ = wsgi_response(baseline, url)
+    new_status, new_headers, _ = wsgi_response(registered, url)
+    assert old_status == new_status == 200
     assert dict(old_headers)["ETag"] != dict(new_headers)["ETag"]
+
+
+def test_registered_its_matches_pinned_pre_cutover_json_and_svg_bytes(
+    registered_http_apps,
+) -> None:
+    import hashlib
+
+    _core, registered = registered_http_apps
+    combined = hashlib.sha256()
+    for points in (150, 200, 250, 300, 350, 400):
+        selector = f"army_points={points}&collection=its-18&revision={REVISION}"
+        path = f"http://registry.test/api/scenarios/battleground?{selector}"
+        status, _, body = wsgi_response(registered, path)
+        assert status == 200
+        canonical = json.dumps(
+            json.loads(body), ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+        ).encode("utf-8")
+        combined.update(len(canonical).to_bytes(8, "big"))
+        combined.update(canonical)
+        for theme in ("light", "dark"):
+            for unit in ("in", "cm"):
+                path = (
+                    "http://registry.test/api/scenarios/battleground/map.svg?"
+                    f"{selector}&theme={theme}&distance_unit={unit}"
+                )
+                status, _, body = wsgi_response(registered, path)
+                assert status == 200
+                combined.update(len(body).to_bytes(8, "big"))
+                combined.update(body)
+    # Frozen from the pre-cutover Rules-owned Battleground HTTP responses.
+    # Length-prefixed six canonical JSON payloads and 24 SVG byte streams.
+    assert combined.hexdigest() == (
+        "b631c0c677c0c8b1276a606b1367c4c6"
+        "c0e5a9f61479506a7ceee608f33594b2"
+    )

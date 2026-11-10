@@ -89,6 +89,18 @@ def test_json_dependent_schemas_are_retired_even_with_sidecars(
         validate_database_set(runtime_set)
 
 
+def test_complete_set_rejects_shadow_its_collection_in_rules(runtime_set: Path) -> None:
+    with sqlite3.connect(runtime_set / "rules_n5.db") as connection:
+        connection.execute(
+            "INSERT INTO collections "
+            "(id, title, domain, status, effective_from, authority) "
+            "VALUES ('unexpected-its', 'Shadow season', 'its', 'current', "
+            "'2026-09-01', 'primary')"
+        )
+    with pytest.raises(ValueError, match="ITS-owned collection"):
+        validate_database_set(runtime_set, require_complete=True)
+
+
 def test_complete_set_rejects_stale_or_mismatched_its(runtime_set: Path) -> None:
     its = runtime_set / "its_18.db"
     with sqlite3.connect(its) as connection:

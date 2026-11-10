@@ -1273,8 +1273,8 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"`{item['id']}` ({item['status']})"
             for item in report["rulesPublication"]["collections"]
         ) + ".",
-        f"- Published scenario collection memberships: {report['scenarioMembershipCount']} "
-        "(all collections; not just core missions).",
+        f"- N5 Rules scenario memberships: {report['scenarioMembershipCount']} "
+        "(this is not an inventory of separate ITS season databases).",
         "- Source evidence statuses: " + ", ".join(
             f"{count} {status}"
             for status, count in report["sourceVerificationCounts"].items()
@@ -1282,9 +1282,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         "## Published scenario memberships by collection",
         "",
-        "These are source-scoped membership facts, **not a core-only scenario count "
-        "or a browser-completeness verdict**. ITS memberships remain separate "
-        "from the N5 core mission scope.",
+        "These are source-scoped memberships in the selected N5 Rules database, "
+        "not a browser-completeness verdict. ITS publications are stored separately "
+        "in season databases and are not included in this Rules-only report.",
         "",
         "| Collection | Revision | Position | Scenario ID | Source collection |",
         "| --- | --- | ---: | --- | --- |",

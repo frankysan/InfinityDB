@@ -1,6 +1,7 @@
 # P3 — Source and publication ownership contract
 
-**Status:** P3.1 ownership design complete (2026-11-10); implementation belongs to P3.2–P3.5.
+**Status:** P3.1–P3.3 complete; P3.4 three-file serving and physical
+ITS ownership implemented. Scoped overlays and P3.5 isolation remain open.
 **Branch:** `dev/v1.1.0`.
 **Domains:** Data processing, Web backend, Web frontend.
 
@@ -11,10 +12,10 @@ no database format or serving behavior changes during P3.1.
 
 ## Existing source and runtime inventory
 
-The complete build currently calls `load_curated_directory(data/curated/rules)`
-and exports **every collection** into `rules_n5.db`
-(`src/infinity_db/database_set_builder.py`, `rules_database.py`).
-The source files and current publication roles are:
+The complete build loads reviewed curated Rules and ITS sources, but the
+Rules exporter accepts only N5-owned collections. ITS-authored publications
+are built independently into `its_18.db` using the same selected source
+envelope. The following inventory records the pre-separation source roles:
 
 - `n5-core-v5.3.json` — `core-rules`, `n5-core-v5.3`, effective
   2026-08-10. Owns canonical N5 rules and four core scenario definitions:
@@ -37,13 +38,11 @@ The source files and current publication roles are:
   `its-18@2026.09.01`, with source `its-season-18-en-pdf`,
   printed pages 121–123.
 
-`rules_n5.db` currently stores all of those sources in `collections`,
-`sources`, `records`, `record_citations`, `scenario_collections`,
-`scenario_collection_revisions`, `scenario_publications` and
-`scenario_memberships`. This physical co-location is **not** authority or
-ownership. The relational scenario model already preserves the scenario-set
-ID, revision, source-collection ID, definition identity, source citations,
-membership position and publication content SHA-256.
+Before the P3.4 export split, `rules_n5.db` stored the ITS collection
+alongside N5 in its scenario tables. That co-location has been retired:
+the selected `rules_n5.db` now owns N5/FAQ/annex data, while
+`its_18.db` alone stores ITS Battleground and its season policies.
+Both preserve source authority, revision, citation and content digest.
 
 ## Ownership decisions
 

@@ -15,14 +15,12 @@ from wsgiref.util import setup_testing_defaults
 
 import pytest
 
-from infinity_db.curated import load_curated_directory
-from infinity_db.rules_database import export_rules_database
 from infinity_db.specialist_filter import (
     _non_specialist_chain_variant,
     _qualifying_skills,
     candidate_unit_ids,
 )
-from infinity_db.web.app import Application, create_app
+from infinity_db.web.app import Application, create_app_from_database_set
 
 
 def request(
@@ -61,11 +59,9 @@ def request(
 
 
 @pytest.fixture(scope="module")
-def scenario_app(tmp_path_factory: pytest.TempPathFactory) -> Application:
+def scenario_app() -> Application:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path_factory.mktemp("scenario-api") / "rules_n5.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    return create_app(root / "data" / "generated" / "army.db", rules_path)
+    return create_app_from_database_set(root / "data/generated")
 
 
 def test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills() -> None:

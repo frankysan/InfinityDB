@@ -2446,6 +2446,25 @@ The intermediate standalone/Rules copy of ITS content and certain
 transitional season copy/FAQ surfaces still await the remaining P3.4 cleanup.
 P3.5 retains future-season collision and isolation acceptance.
 
+#### P3.4 — Fourth slice: remove ITS-owned Rules shadow publication (2026-11-10)
+
+The Rules exporter now excludes curated ITS-domain collections in all
+export modes; only the Season 18 database publishes Battleground, its
+membership and season-only policy records. The complete three-file
+validator also rejects a Rules file containing an ITS-owned collection.
+The selected HTTP backend uses explicit registry selection without
+transitional shadow-record skipping. Source-review and marker-size citations
+from ITS may still appear in core/annex records where they accurately
+attribute evidence; that citation does not transfer N5 rule ownership.
+
+The six previously served ITS Battleground JSON payloads and 24 SVG
+variants were hashed as a single length-prefixed immutable regression
+fixture before removing the shadow copy. The isolated ITS projection and
+real HTTP renderer remain independently comparable. The remaining P3.4
+scope is explicit-context policy presentation, transitional N5 core-card
+qualifications and FAQ applicability review; P3.5 owns additional-season
+slug/revision isolation.
+
 ### P4 — Make the interface player-first
 
 **Outcome:** Less user-visible implementation language without loss of relevant gameplay accuracy.  

@@ -278,6 +278,9 @@ def test_svg_skip_still_checks_real_database_publication_binding(
     # this standalone export is deliberately not a complete runtime pair.
     monkeypatch.setattr(deployment_assets, "validate_database_set", lambda *_a, **_kw: {})
     monkeypatch.setattr(deployment_assets, "validate_build_input_freshness", lambda *_a: None)
+    # Season registration belongs to the complete-set validator tests; this
+    # fixture isolates source-SVG/Army pairing without a season file.
+    monkeypatch.setattr(deployment_assets, "SEASON_DATABASE_SOURCES", {})
     # The embedded variant and Weapon checks need a complete Rules projection.
     monkeypatch.setattr(
         deployment_assets, "verify_variant_release_publication", lambda *_: None,

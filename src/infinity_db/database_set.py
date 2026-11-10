@@ -130,6 +130,12 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
         raise ValueError("Complete embedded sets require recorded matched build provenance")
     for path in (army_path, rules_path, *registered_seasons.values()):
         _full_integrity_check(path)
+    if require_complete:
+        with closing(sqlite3.connect(rules_path.as_uri() + "?mode=ro", uri=True)) as db:
+            if db.execute(
+                "SELECT 1 FROM collections WHERE domain='its' LIMIT 1"
+            ).fetchone() is not None:
+                raise ValueError("Complete N5 Rules database contains an ITS-owned collection")
     season_manifest: dict[str, dict[str, Any]] = {}
     if registered_seasons:
         registry = PublicationRegistry(rules, registered_seasons)

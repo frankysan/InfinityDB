@@ -1017,17 +1017,9 @@ def test_baseline_reports_pinned_publication_without_claiming_completeness() -> 
         "army.db": report["armySnapshot"]["publishedDatabaseSha256"],
         "rules_n5.db": report["rulesPublication"]["publishedDatabaseSha256"],
     })
-    # The published rules database includes four core missions and one
-    # separately scoped ITS Season 18 Battleground pilot.
-    assert report["scenarioMembershipCount"] == 5
+    # The published Rules database owns core missions only; ITS lives in its_18.db.
+    assert report["scenarioMembershipCount"] == 4
     assert report["scenarioMemberships"] == [
-        {
-            "collectionId": "its-18",
-            "collectionRevision": "2026.09.01",
-            "position": 0,
-            "scenarioId": "scenario:battleground",
-            "publicationCollectionId": "its-season-18-2026.09.01",
-        },
         *[
             {
                 "collectionId": "n5-core",
@@ -1045,7 +1037,7 @@ def test_baseline_reports_pinned_publication_without_claiming_completeness() -> 
         assert db.execute(
             "SELECT collection_id, COUNT(*) FROM scenario_memberships "
             "GROUP BY collection_id ORDER BY collection_id"
-        ).fetchall() == [("its-18", 1), ("n5-core", 4)]
+        ).fetchall() == [("n5-core", 4)]
     assert "rules:scenario" in {item["id"] for item in report["inventory"]}
     assert "army:profiles" in {item["id"] for item in report["inventory"]}
     assert all(item["scopeDecision"] == "pending" for item in report["inventory"])
@@ -2011,12 +2003,12 @@ def test_baseline_cli_writes_stable_local_reports(tmp_path: Path) -> None:
     assert json_output.read_bytes() == first
     saved = json.loads(first)
     assert saved["formatVersion"] == 2
-    assert len(saved["scenarioMemberships"]) == saved["scenarioMembershipCount"] == 5
+    assert len(saved["scenarioMemberships"]) == saved["scenarioMembershipCount"] == 4
     markdown = markdown_output.read_text(encoding="utf-8")
     assert "## Published scenario memberships by collection" in markdown
-    assert "| `its-18` | `2026.09.01` | 0 | `scenario:battleground` |" in markdown
+    assert "| `its-18` |" not in markdown
     assert "| `n5-core` | `5.3` | 0 | `scenario:annihilation` |" in markdown
-    assert "not a core-only scenario count" in markdown
+    assert "ITS publications are stored separately" in markdown
     assert "Candidate browser / API" in markdown
     assert "pending source/API/browser review" in markdown
     assert "## Outstanding 1.0 evidence" in markdown

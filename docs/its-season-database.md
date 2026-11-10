@@ -121,18 +121,21 @@ isolated parity tests.
 
 ## Migration boundary
 
-For staged migration compatibility, the Rules exporter still retains the
-historical Battleground copy. The complete three-file runtime deliberately
-selects its ITS-owned publication instead. The P3.3 verifier and registry
-tests compare six complete Battleground JSON outputs and 24 byte-identical
-SVG maps, retaining N5/Army maintained-text enrichment. Retirement of the
-duplicate Rules-owned record and transitional ITS text remains open.
+The Rules exporter excludes ITS-owned curated collections, so Battleground
+and its scenario membership now exist in `its_18.db` only. The selected
+three-file runtime resolves its publication through the registry. A pinned
+pre-cutover digest independently guards six Battleground JSON payloads and
+24 SVG maps; the isolated ITS reader remains comparable to the real HTTP
+response without retaining a second Rules-owned record. N5 scenario facts,
+source attribution and shared renderer behavior remain unchanged.
 
 The existing N5 cards still carry transitional ITS season notes and the
 shared Scenario catalog still attributes marker sizes to ITS 18 p. 17.
-The new ITS-only policies are retained alongside those legacy presentations
-until P3.4 removes redundant wording without losing player-visible
-restrictions or caveats. Adding/modifying maintained `src/` or curated
+The separate ITS-only policies retain their exact context and citation
+without applying to free play by default. P3.4 must still replace
+transitional N5-card event wording with explicit-context presentation
+without losing player-visible restrictions or caveats. Changing maintained
+`src/` or curated
 files changes the complete build fingerprint; regenerate the three-file
 release set before source-bound deployment checks or merge.
 

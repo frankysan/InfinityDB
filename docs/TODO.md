@@ -34,10 +34,10 @@ when all contained work shares the same owner.
     three reviewed ITS-only policies are isolated in schema v2, and the
     regenerated Army/Rules release pair passed deployment-asset verification.
     See [ITS season database](its-season-database.md). The three-file
-    runtime cutover is implemented and locally validated; publishing the
-    newly tracked ITS database through MCP and hosted CI acceptance are
-    still pending. Retire transitional Rules-owned ITS content and card
-    caveats and finish scoped FAQ/overlay presentation before P3.4 closeout.
+    runtime is committed and locally validated; hosted Source CI still
+    contains legacy fixture failures. The duplicate ITS Rules export has
+    been retired; remaining P3.4 work covers scoped tournament/Extras
+    overlays, transitional N5 card caveats and FAQ applicability review.
   - [ ] Continue P4–P6 under the plan's player-facing presentation, tooling
     retirement and repository-structure exit criteria.
   The plan owns ordering and decisions; acceptance evidence lives in

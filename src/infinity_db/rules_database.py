@@ -608,8 +608,15 @@ def export_rules_database(
     ``finalize=False`` is intended for semantic tests that only need valid SQLite
     contents. Production/release builds keep the default byte-canonical finalization.
     """
+    # Curated ITS sources remain shared build inputs, but their scenario and
+    # event publications have their own season databases. Never duplicate them
+    # in the N5 Rules export, including standalone developer builds.
+    documents = [
+        (source, document) for source, document in documents
+        if document["collection"]["domain"] != "its"
+    ]
     if not documents:
-        raise ValueError("No curated documents supplied")
+        raise ValueError("No N5-owned curated documents supplied")
     if variant_usage is not None and deployed_objects is None:
         raise ValueError("Embedded variant usage requires the deployed-object baseline")
     if weapon_citations is not None and variant_usage is None:
