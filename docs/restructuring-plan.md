@@ -2537,6 +2537,34 @@ remains a separate outstanding acceptance gate.
 
 **Exit:** Normal reference pages prioritize gameplay; technical material is not repeated across cards; genuine uncertainty stays visible and accessible.
 
+#### P4.1–P4.3 — Initial player-facing copy audit and shared-card change (2026-11-10)
+
+The first pass inspected the shared rules renderer and its source lines, FAQ
+clarifications, scenario diagnostics, developer-only selectors, the accuracy
+notice, About/privacy disclosures, and representative empty/error states.
+
+- **Remove repeated chrome:** The shared rules-card banner
+  `InfinityDB-maintained reference · consult citations for source wording`
+  adds no card-specific information. It duplicates each card's existing
+  `Sources:` line and project-wide disclosure. Remove it once in the shared
+  renderer and update its rendering/browser assertions, not each page.
+- **Retain player-relevant provenance:** Keep cited source links, meaningful
+  source notes, applicable-season labels, visibly distinct authored
+  clarifications, and FAQ discrepancies. Do not hide unresolved gameplay
+  conflicts or the accuracy/independence notice in Developer Mode.
+- **Keep technical context out of ordinary flows:** Scenario publication
+  diagnostics and raw identifiers are already developer-only on examined
+  pages. About remains the proper home for licensing, development and
+  privacy disclosures rather than repeating them on every rules card.
+- **Continue the audit:** Review remaining `Reviewed`/evidence qualifiers,
+  coverage warnings on deployed-object and Immunity pages, and loading/error
+  text in their actual page context before changing them. Some qualify
+  gameplay coverage and must not be deleted merely for terseness.
+
+This is the first bounded P4 presentation slice, not P4.5 visual/accessibility
+acceptance or complete P4 closeout. The shared renderer change must retain
+the existing citation and source-note tests.
+
 ### P5 — Retire, consolidate and selectively extract tools
 
 **Outcome:** A smaller InfinityDB repository with clearly maintained entrypoints.  

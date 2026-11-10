@@ -328,7 +328,7 @@ def test_every_base_weapon_link_has_cited_player_ammunition_detail(
         assert article.locator(".rules-source-citations a").count() == len(
             rule["citations"]
         )
-        assert "InfinityDB-maintained reference" in article.inner_text()
+        assert article.locator(".rules-card-provenance").count() == 0
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         )

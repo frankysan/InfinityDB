@@ -3280,7 +3280,7 @@ def test_specialist_troops_search_leads_to_general_rule_and_scenarios(
 
 @pytest.mark.parametrize("width", [1440, 390])
 @pytest.mark.parametrize("theme", ["light", "dark"])
-def test_reference_provenance_labels_remain_distinct_across_themes(
+def test_reference_source_lines_remain_distinct_across_themes(
     scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
 ) -> None:
     page = chrome.new_page(viewport={"width": width, "height": 900})
@@ -3298,9 +3298,7 @@ def test_reference_provenance_labels_remain_distinct_across_themes(
             "(value) => document.documentElement.setAttribute('data-theme', value)",
             theme,
         )
-        assert "InfinityDB-maintained reference" in card.locator(
-            ".rules-card-provenance"
-        ).inner_text()
+        assert card.locator(".rules-card-provenance").count() == 0
         sources = card.locator(".rules-source-citations")
         assert sources.count() == 1
         assert sources.locator(".rules-provenance-label").inner_text().strip() == "Sources:"
@@ -3317,7 +3315,7 @@ def test_reference_provenance_labels_remain_distinct_across_themes(
             "(value) => document.documentElement.setAttribute('data-theme', value)",
             theme,
         )
-        assert card.locator(".rules-card-provenance").is_visible()
+        assert card.locator(".rules-card-provenance").count() == 0
         assert "Sources:" in card.locator(".rules-source-citations").inner_text()
         faq = page.locator("#scenario-content .faq-dated-clarification")
         faq.wait_for(state="visible", timeout=60000)
