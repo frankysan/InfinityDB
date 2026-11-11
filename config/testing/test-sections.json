@@ -274,6 +274,7 @@
         "test_verify_deployment_assets",
         "test_verify_effective_symbol_handoff",
         "test_verify_raw_symbol_handoff",
+        "test_verify_processed_symbol_handoff",
         "test_verify_symbol_duplicate_handoff"
       ]
     }

@@ -3480,8 +3480,26 @@ were added. Cross-platform source-tools CI for `cac47f8f`
 was pending at the time this handoff was written; real
 renderer/SVGO production-source parity remains untested.
 
-**Next:** Build an independent InfinityDB-side final
-processed-artifact verifier. Test end-to-end production
+#### P5.6 — Independent processed-artifact verifier (2026-11-11)
+
+InfinityDB now provides `tools.verify_processed_symbol_handoff`
+on `dev/v1.1.0`. It independently validates the passed
+text-conversion and compression receipts, canonical mapping,
+ZIP membership, source/output SHA-256 hashes, XML structure,
+absence of active text, compressor CSV coverage, and pinned
+renderer/SVGO versions and validation parameters. The verifier
+uses no symbol-tools package, renderer or network access.
+It is an **artifact-integrity verifier**, not an independent
+visual comparison or a publication switch.
+
+**Validation:** Six focused hermetic tests passed, including
+tampering, invalid compression evidence and active-text
+rejection. Ruff passed. Pyright encountered unresolved
+`pytest` imports in the current host environment and cannot
+be counted as passing. Production renderer/font/override
+parity remains untested.
+
+**Next:** Test end-to-end production
 override/font/renderer parity and full publication acceptance
 before retiring the in-tree symbol processing pipeline.
 
