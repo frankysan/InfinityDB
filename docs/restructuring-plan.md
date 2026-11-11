@@ -3021,6 +3021,43 @@ source artifact before retiring an in-repo downloader. No normal
 build/serve/Docker path may require cloning another repository.
 Third-party source redistribution remains separately restricted.
 
+#### P5.4 — Standalone Wiki/Human Sphere producer staging (2026-11-11)
+
+Prepare the source acquisition split without immediately changing the
+working in-repo downloader or requiring another repository for builds.
+`tools/export_wiki_acquisition.py` exports a self-contained, MIT
+licensed `infinity-wiki-acquisition` Python package from the current
+Wiki/Human Sphere downloader. It includes source path sanitization,
+deterministic ZIP creation, a version-3 snapshot provenance writer,
+CLI entrypoint and adapted offline tests for Wiki, Human Sphere and
+revision history. It uses only the Python standard library at runtime
+and does not import `infinity_db` or any application modules.
+
+`tests/test_export_wiki_acquisition.py` verifies isolated import in a
+subprocess without InfinityDB on the module search path, runs the
+exported acquisition tests, produces an external Wiki ZIP/manifest
+that InfinityDB accepts unchanged, tests copied-archive SHA/content
+identity, and compares reproducible source export ZIP bytes.
+The exported source and transfer archive are generated only when
+explicitly requested and remain in ignored `local/`.
+
+The preparatory command, from the InfinityDB repository root, is:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.export_wiki_acquisition --output local/wiki-acquisition-producer --archive local/infinity-wiki-acquisition-p5.4.zip
+```
+
+The intended new, dedicated Git repository is
+`InfinityDB-wiki-acquisition`, initially private, empty and without
+pre-generated README/license files because the export includes them.
+**Do not retire** `tools/download_wiki_snapshot.py` or its tests
+yet. After creation/import of the standalone repository, validate
+an independently installed package, failure-atomicity, output ZIP and
+manifest against the consumer's actual offline reader and build, then
+remove the duplicate downloader and one-time export helper in a
+separate committed cutover. No network acquisition or external
+source publishing is authorized by this preparation.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

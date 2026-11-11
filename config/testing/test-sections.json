@@ -206,6 +206,7 @@
         "test_download_human_sphere_snapshot",
         "test_download_wiki_history",
         "test_download_wiki_snapshot",
+        "test_export_wiki_acquisition",
         "test_merge",
         "test_metadata",
         "test_project_resources",
