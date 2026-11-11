@@ -217,11 +217,73 @@ def test_cli_fails_cleanly_without_creating_report(inputs, capsys):
     assert not inputs["output"].exists()
 
 
+def add_provenance(inputs):
+    """Minimal explicit renderer fixture; full archive attribution is tested separately."""
+    pins = {
+        "comparisonSha256": sha(inputs["comparison"].read_bytes()),
+        "currentManifestSha256": sha(inputs["current_manifest"].read_bytes()),
+        "candidateManifestSha256": sha(inputs["candidate_manifest"].read_bytes()),
+        "candidateEvidenceSha256": None,
+    }
+    report = {
+        "format": "InfinityDB symbol artwork provenance", "formatVersion": 1,
+        "publicationPins": pins, "comparedAssets": 1,
+        "summary": {**dict.fromkeys(review.CAUSES, 0), "override-newly-applied": 1},
+        "assets": [{
+            "path": "units/a.svg", "currentSha256": sha(SVG), "candidateSha256": sha(NEW),
+            "cause": "override-newly-applied", "reason": "Verified renderer fixture input change.",
+            "sources": [],
+        }],
+        "inputs": {}, "limits": ["Synthetic renderer fixture; no publication approval."],
+    }
+    path = inputs["comparison"].with_name("provenance.json")
+    write_json(path, report)
+    inputs["provenance"] = path
+    return report
+
+
+def test_provenance_is_embedded_and_changes_review_identity(inputs):
+    review.build_report(**inputs)
+    plain = payload(inputs["output"])
+    inputs["output"] = inputs["output"].with_name("classified.html")
+    report = add_provenance(inputs)
+    review.build_report(**inputs)
+    classified = payload(inputs["output"])
+    assert classified["provenance"] == report
+    assert classified["items"][0]["provenance"] == report["assets"][0]
+    assert classified["reviewId"] != plain["reviewId"]
+    assert classified["pins"]["provenanceSha256"] == sha(inputs["provenance"].read_bytes())
+
+
+@pytest.mark.parametrize("change", ["pins", "partial", "duplicates", "hash", "cause", "summary"])
+def test_rejects_stale_or_inconsistent_provenance_before_writing(inputs, change):
+    report = add_provenance(inputs)
+    if change == "pins":
+        report["publicationPins"]["candidateManifestSha256"] = "0" * 64
+    elif change == "partial":
+        report["assets"] = []
+    elif change == "duplicates":
+        report["assets"].append(report["assets"][0])
+    elif change == "hash":
+        report["assets"][0]["currentSha256"] = "0" * 64
+    elif change == "cause":
+        report["assets"][0]["cause"] = "guess"
+    else:
+        report["summary"]["processing-only"] = 999
+    write_json(inputs["provenance"], report)
+    with pytest.raises(ValueError):
+        review.build_report(**inputs)
+    assert not inputs["output"].exists()
+
+
 @pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("classified", (False, True))
 def test_browser_filters_overlay_and_exact_input_decision_roundtrip(
-    inputs, tmp_path, chromium_test_slot, width,
+    inputs, tmp_path, chromium_test_slot, width, classified,
 ):
     sync = pytest.importorskip("playwright.sync_api")
+    if classified:
+        add_provenance(inputs)
     review.build_report(**inputs)
     with sync.sync_playwright() as driver:
         try:
@@ -243,6 +305,11 @@ def test_browser_filters_overlay_and_exact_input_decision_roundtrip(
         assert page.locator("#empty").is_visible()
         page.locator("#search").fill("")
         page.locator("#category").select_option("units")
+        page.locator("#cause").select_option(
+            "override-newly-applied" if classified else "unclassified")
+        assert page.locator("article:visible").count() == 1
+        if classified:
+            assert "Newly applied override: 1" in page.locator("#provenance-summary").inner_text()
         page.locator("#mode").select_option("overlay")
         assert page.locator(".overlay").is_visible()
         page.locator("#opacity").fill("25")

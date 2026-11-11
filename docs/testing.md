@@ -1823,6 +1823,52 @@ Artwork/URL review, promotion, rebuilt SQLite mappings, actual browser/local/
 Docker checks and in-tree processor retirement remain open. The tracked SVGs,
 publication manifest and runtime databases were not changed.
 
+### P5.7 override provenance classification
+
+**2026-11-11, Windows development checkout based on `35a069d8`:**
+The offline audit `tools.classify_symbol_artwork_provenance` verified pinned
+historical/candidate manifests, effective archive members, original source
+identities, exact duplicate assignments, override donors/current files and
+publication output hashes. The [P5 runbook](symbol-pipeline-parity-runbook.md#override-provenance-classification)
+owns the input-selection schema, commands, findings and acceptance limits.
+
+Private selectors and output are
+`local/p5-symbol-provenance-inputs-with-notes-20261111.json` and
+`local/p5-symbol-provenance-final-20261111.json`.
+All **118 changed assets / 154 related source identities** are covered:
+**1 changed applied override**, **56 newly applied overrides**,
+**61 processing-only differences**, and **0 unresolved canonical causes**.
+Newly applied overrides do not establish historical file edits; present-day
+`overrides.txt` declarations are separately labelled contextual evidence.
+Related aliases retain their own methods/hashes and publication destinations.
+The removed Seed Soldier filename remains unresolved compatibility work.
+
+Focused regression command:
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --assets off --test-workers 0 tests/test_classify_symbol_artwork_provenance.py tests/test_build_symbol_artwork_review.py tests/test_test_sections.py
+```
+
+The cohort passed **84 tests, zero skips**, including six real-Chrome fixture
+cases at 1440/390/320 pixels, with and without provenance. Assertions cover
+direct/propagated overrides, unchanged overrides, alias remapping, ambiguous
+canonical selection, drift/disconnected evidence, note declarations, report
+coverage/hash consistency, local output integrity and atomic decision imports.
+Ruff and focused Pyright passed. The documentation stage also passed.
+
+The actual production page
+`local/p5-symbol-artwork-review-classified-20261111.html` rendered
+**118/118 pairs** in Chrome at **1440/390/320 x 900**. Cause filters returned
+**1/56/61** assets; combined category filters, declared-note search, overlay,
+JSON export/import after reload and stale-provenance rejection passed.
+There were no page/request/HTTP errors, external requests or horizontal overflow.
+Screenshots were visually inspected; the private browser receipt is
+`local/p5-symbol-provenance-browser-validation.json`. All artwork decisions
+remain unreviewed. These checks do not establish artwork approval, sole visual
+causality, compression-only equivalence, application publication or Docker/
+Linux/hosted-CI/release acceptance. Production SVGs, manifests, databases and
+parity thresholds were unchanged.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

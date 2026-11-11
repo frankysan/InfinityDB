@@ -41,9 +41,11 @@ pre{max-height:22rem;overflow:auto} .warning{color:#8b2500;font-weight:600}
 <p>Compare the current publication with the external candidate. Decisions and classifications
 are reviewer annotations, not publication approval. Export JSON before closing or reloading;
 import it to resume. Nothing is saved automatically or written to the repository.</p>
-<p>All hash changes start <strong>unclassified</strong>. Identical appearance, SVG hashes and
-matched-input processor parity do not establish compression-only differences or source changes.
-Use provenance evidence and record its identity in your notes before classifying.</p>
+<p>Verified provenance describes effective build inputs; it does not approve artwork or establish
+visual equivalence. A newly applied override does not prove an existing override file changed.
+Processing-only does not mean compression-only. Without a supplied provenance report, causes remain
+<strong>unclassified</strong>. Reviewer classifications and notes remain separate annotations.</p>
+<p id="provenance-summary"></p>
 <details><summary>Input identity and candidate provenance</summary><pre id="provenance"></pre></details>
 <section class="notice" aria-label="Compatibility requirements">
 <strong>Removed filenames — unresolved compatibility requirements</strong>
@@ -54,6 +56,7 @@ attribution, application browser/local/Docker checks and processor retirement re
 <div class="controls">
 <label>Search <input id="search" type="search" placeholder="Filename or source identity"></label>
 <label>Category <select id="category"><option value="">All</option></select></label>
+<label>Provenance cause <select id="cause"><option value="">All</option></select></label>
 <label>Decision <select id="filter"><option value="">All</option>
 <option value="unreviewed">Unreviewed</option><option value="accept">Accept</option>
 <option value="investigate">Investigate</option><option value="reject">Reject</option></select></label>
@@ -87,8 +90,23 @@ function textElement(tag,text){const element=document.createElement(tag);
 byId("provenance").textContent=JSON.stringify({
  reviewId:data.reviewId,...data.pins,currentSnapshot:data.currentSnapshot,
  candidateSnapshot:data.candidateSnapshot,candidateEvidence:data.candidateEvidence ??
- "Not supplied; publication manifests contain no per-asset source-byte change evidence."
+ "Not supplied; publication manifests contain no per-asset source-byte change evidence.",
+ provenance:data.provenance ? {inputs:data.provenance.inputs,limits:data.provenance.limits} : null
 },null,2);
+const causeLabels={...data.causeLabels,unclassified:"Unclassified"};
+const causeCounts={};
+for(const item of data.items){
+ const cause=item.provenance?.cause??"unclassified";
+ causeCounts[cause]=(causeCounts[cause]??0)+1;
+}
+for(const [cause,count] of Object.entries(causeCounts)){
+ const option=textElement("option",causeLabels[cause]+" ("+count+")");
+ option.value=cause;byId("cause").append(option);
+}
+byId("provenance-summary").textContent=data.provenance ?
+ "Verified canonical input causes: "+Object.entries(causeCounts).map(
+ ([cause,count])=>causeLabels[cause]+": "+count).join("; ")+". All artwork decisions remain yours." :
+ "No provenance report supplied; causes are unclassified.";
 for(const entry of data.removed){
  const block=document.createElement("details");
  block.append(textElement("summary",entry.path+" — "+entry.status),
@@ -135,7 +153,15 @@ for(const item of data.items){
   column.append(textElement("figcaption",label),preview);images.append(column);
  }
  card.append(images,overlayFigure(item));
- card.append(textElement("small","Category: "+item.category+" · Difference cause: unclassified"));
+ card.append(textElement("small","Category: "+item.category+" · Provenance: "+
+  causeLabels[item.provenance?.cause??"unclassified"]));
+ if(item.provenance){
+  const evidence=document.createElement("details");
+  evidence.append(textElement("summary","Verified input provenance"),
+   textElement("p",item.provenance.reason),
+   textElement("pre",JSON.stringify(item.provenance,null,2)));
+  card.append(evidence);
+ }
  const provenance=document.createElement("details");
  provenance.append(textElement("summary","Source identities and asset hashes"),
   textElement("pre",JSON.stringify({currentSha256:item.currentSha256,
@@ -155,15 +181,17 @@ for(const item of data.items){
  card.append(actions);byId("items").append(card);
  cards.set(item.path,{card,decision:decision.select,classification:classification.select,notes,
   search:(item.path+" "+JSON.stringify(item.currentSources)+" "+
-   JSON.stringify(item.candidateSources)).toLowerCase()});
+   JSON.stringify(item.candidateSources)+" "+JSON.stringify(item.provenance??{})).toLowerCase()});
 }
 function filter(){
  const q=byId("search").value.toLowerCase(),category=byId("category").value;
+ const cause=byId("cause").value;
  const state=byId("filter").value,counts=Object.fromEntries(states.map(x=>[x,0]));
  let visible=0;
  for(const item of data.items){
   const entry=cards.get(item.path),review=decisions[item.path];counts[review.decision]++;
   entry.card.hidden=Boolean((category&&item.category!==category)||
+   (cause&&(item.provenance?.cause??"unclassified")!==cause)||
    (state&&review.decision!==state)||(q&&!entry.search.includes(q)));
   if(!entry.card.hidden)visible++;
  }
@@ -171,7 +199,7 @@ function filter(){
   Object.entries(counts).map(([k,v])=>k+": "+v).join(", ");
  byId("empty").hidden=visible!==0;
 }
-for(const id of ["search","category","filter"])
+for(const id of ["search","category","cause","filter"])
  byId(id).addEventListener(id==="search"?"input":"change",filter);
 byId("mode").addEventListener("change",()=>{document.body.dataset.mode=byId("mode").value;});
 byId("opacity").addEventListener("input",()=>{
@@ -180,6 +208,7 @@ byId("opacity").addEventListener("input",()=>{
 byId("export").addEventListener("click",()=>{
  const result={format:"InfinityDB symbol artwork review",formatVersion:1,
   reviewId:data.reviewId,pins:data.pins,decisions,
+  provenanceSummary:data.provenance?.summary??null,
   unresolvedCompatibility:data.removed};
  const blob=new Blob([JSON.stringify(result,null,2)+"\n"],{type:"application/json"});
  const url=URL.createObjectURL(blob),a=document.createElement("a");

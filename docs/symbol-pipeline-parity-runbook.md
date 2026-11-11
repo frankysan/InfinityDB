@@ -216,7 +216,7 @@ optional candidate evidence; expand each card for both source/canonical mappings
 and asset hashes. Candidate preparation evidence is displayed as recorded; the
 review builder does not rerun its upstream receipt-chain verification.
 
-All differences begin **unclassified**. Neither changed hashes nor identical
+Without a provenance report, differences begin **unclassified**. Neither changed hashes nor identical
 appearance prove a source change or compression-only change. The publication
 manifests do not contain paired per-asset source-byte histories. Record supporting
 source/processing evidence identities in the notes when assigning a reviewer
@@ -255,6 +255,85 @@ Playwright/Chrome are installed):
 ```powershell
 .\.venv\Scripts\python.exe tools/run_checks.py --stage test --assets off --test-workers 0 tests/test_build_symbol_artwork_review.py tests/test_test_sections.py
 ```
+
+## Override provenance classification
+
+**Project domains:** Data processing, Project infrastructure
+
+Run the read-only audit with an explicit, SHA-pinned local input selection,
+then embed its result in a fresh review page:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.classify_symbol_artwork_provenance --inputs local/p5-symbol-provenance-inputs-with-notes-20261111.json --output local/p5-symbol-provenance-final-20261111.json
+.\.venv\Scripts\python.exe -m tools.build_symbol_artwork_review --candidate-evidence local/p5-external-symbol-publication-verified-20261111/candidate-evidence.json --provenance local/p5-symbol-provenance-final-20261111.json --output local/p5-symbol-artwork-review-classified-20261111.html
+```
+
+Those output files already contain the recorded run; use new filenames to repeat
+it. No production SVGs are regenerated. The input JSON has
+`format: "InfinityDB symbol provenance inputs"`, `formatVersion: 1`,
+`overrideRoot`, and `files`. Each file selector is
+`{"path": "relative/input/path", "sha256": "<exact SHA-256>"}`; relative paths
+resolve from the working directory. Required roles are:
+
+| Roles | Evidence |
+| --- | --- |
+| `comparison`, `current_manifest`, `candidate_manifest` | Publication inventory and source/canonical destinations |
+| `historical_build`, `historical_archive`, `historical_compression` | Historical applied bytes, methods, canonical assignments and compressed output hashes |
+| `baseline_audit`, `matched_inputs` | Pinned historical snapshot and corroborating matched-input evidence |
+| `candidate_evidence` | Candidate manifest and input-file hash bindings |
+| `effective_report`, `effective_archive`, `raw_archive` | Candidate applied and upstream bytes |
+| `duplicate_receipt`, `override_lookups`, `candidate_compressed` | Exact duplicate assignments, override donors and published output bytes |
+
+Optional `override_notes` and `legacy_tree_notes` selectors pin the present-day
+`overrides.txt` copies. The audit retains repeated declarations and line numbers;
+it joins candidate notes by the selected override path, including propagated
+donors. Notes describe declared origins/intent, not verified historical content,
+edit dates or visual equivalence. The two copies read on 2026-11-11 were
+byte-identical. Original historical override filenames/edit histories are absent;
+historical **applied override bytes** are recovered directly from the effective ZIP.
+Do not substitute current override files for historical evidence.
+
+Every selected artifact is hashed. The audit binds the historical build to the
+current publication, verifies both effective archives against every source row,
+checks current override files, raw hashes, exact duplicate groups, canonical
+publication lineage, historical compression hashes and candidate output members.
+The matched-input record is corroborated by identity; processor parity is not
+rerun. Missing/disconnected inputs fail generation; unsupported or ambiguous
+canonical attribution remains unresolved instead of being guessed.
+
+The 2026-11-11 result covers **118 changed published assets / 154 source
+identities**; 24 assets have multiple source identities:
+
+| Confirmed canonical input cause | Assets | Meaning |
+| --- | ---: | --- |
+| Changed applied override content | 1 | Morat used different verified override bytes in both builds |
+| Newly applied override | 56 | Historical upstream bytes were replaced by an override: 53 direct, 3 propagated canonical inputs |
+| Processing only | 61 | Canonical effective bytes are identical: 57 upstream inputs and 4 unchanged overrides |
+| Upstream source change | 0 | No changed publication attributed to changed upstream effective bytes |
+| Removed override | 0 | No changed publication attributed to override removal |
+| Unresolved canonical cause | 0 | All 118 canonical input comparisons are accounted for |
+
+The four unchanged historical overrides are Onyx, Peripheral, Impetuous and
+Lieutenant. The 56 newly applied overrides do **not** prove that those files
+were edited after publication: their historical file content/existence is not
+recorded because no override was applied. These are verified input transitions,
+not sole-cause claims about output appearance. Processing-only is broader than
+compression-only; conversion/configuration/toolchain effects are not waived.
+
+The review's **Provenance cause** filter separates these queues, while
+**Reviewer classification** remains an independent annotation. Expand
+**Verified input provenance** for each canonical and related source trace.
+The audit report's hash participates in review identity and JSON export/import,
+so a different provenance report requires a fresh decision file. No assets are
+automatically accepted. The Seed Soldier source membership change is retained
+alongside its canonical input cause; the old filename compatibility requirement
+remains open. Artwork approval, promotion, rebuilt mappings and application
+browser/local/Docker acceptance still require separate decisions.
+
+See [testing evidence](testing.md#p57-override-provenance-classification) for the
+focused regression and real-page browser results. Retain this audit while the
+P5 provenance/artwork obligation is open, then apply the
+[one-use tool lifecycle](README.md#one-use-tool-and-audit-lifecycle).
 
 ## Acceptance gates
 

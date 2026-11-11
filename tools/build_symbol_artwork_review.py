@@ -11,6 +11,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from tools.classify_symbol_artwork_provenance import CAUSES, load_classifications
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_ROOT = REPO_ROOT / "local"
 DEFAULT_COMPARISON = Path("local/p5-external-symbol-publication-comparison-20261111.json")
@@ -95,7 +97,8 @@ def _sources(manifest: dict[str, Any], path: str) -> dict[str, list[str]]:
 
 def build_report(comparison: Path, current: Path, candidate: Path, output: Path,
                  candidate_manifest: Path, current_manifest: Path,
-                 candidate_evidence: Path | None = None) -> int:
+                 candidate_evidence: Path | None = None,
+                 provenance: Path | None = None) -> int:
     """Validate inventory and hashes before exclusively creating a local review."""
     output = output.resolve()
     if not output.is_relative_to(LOCAL_ROOT.resolve()) or output.suffix != ".html":
@@ -154,11 +157,19 @@ def build_report(comparison: Path, current: Path, candidate: Path, output: Path,
                         "status": "unresolved compatibility requirement"})
     pins = {"comparisonSha256": comparison_sha, "currentManifestSha256": before_sha,
             "candidateManifestSha256": after_sha, "candidateEvidenceSha256": evidence_sha}
+    classification_report = None
+    if provenance is not None:
+        classification_report, provenance_sha = load_classifications(provenance, pins, items)
+        pins["provenanceSha256"] = provenance_sha
+        classifications = {row["path"]: row for row in classification_report["assets"]}
+        for item in items:
+            item["provenance"] = classifications[item["path"]]
     report = {
         "reviewId": _sha(json.dumps(pins, sort_keys=True).encode()), "pins": pins,
         "currentSnapshot": before.get("sourceSnapshot"),
         "candidateSnapshot": after.get("sourceSnapshot"),
         "candidateEvidence": evidence, "removed": removed, "added": expected["added"],
+        "provenance": classification_report, "causeLabels": CAUSES,
         "items": items,
     }
     payload = json.dumps(report, ensure_ascii=True).replace("<", "\\u003c")
@@ -183,10 +194,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--candidate-evidence", type=Path,
                         help="Optional candidate-evidence.json bound to the candidate manifest")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--provenance", type=Path,
+                        help="Optional exact-publication provenance classification report")
     args = parser.parse_args(argv)
     try:
         return build_report(args.comparison, args.current, args.candidate, args.output,
-                            args.manifest, args.current_manifest, args.candidate_evidence)
+                            args.manifest, args.current_manifest, args.candidate_evidence,
+                            args.provenance)
     except (OSError, ValueError, KeyError, TypeError) as error:
         parser.exit(1, f"Review generation failed: {error}\n")
 
