@@ -3090,6 +3090,55 @@ after that proof should `--fetch-snapshot` be removed or redirected
 and its obsolete in-tree acquisition tests retired. No cross-repo
 import or mandatory build dependency is introduced in this slice.
 
+#### P5.4 — Standalone Army JSON producer staging (2026-11-11)
+
+The consumer-side `tools/army_snapshot_source.py` separation above
+permits a producer with no application imports. The explicit, one-time
+`tools/export_army_acquisition.py` builds an isolated, Git-ready
+`infinity-army-acquisition` Python package and reproducible transfer
+ZIP under ignored `local/`. It copies only the source-facing
+document-shape decoder from `infinity_army_data.merge`, strict
+metadata decoder/validation (not `normalize_metadata`),
+source-version date interpretation, deterministic ZIP writer and v3
+snapshot provenance. There is no `infinity_db`, `infinity_army_data`
+or `tools` runtime import in its packaged Python sources, and it
+requires only the Python standard library for acquisition.
+
+`tests/test_export_army_acquisition.py` validates the isolated
+package/tests without InfinityDB on its module import path,
+checks decoder acceptance/rejection parity, verifies raw ZIP and
+manifest **byte equivalence** against the current downloader using
+the same mocked stable API responses and acquisition timestamp,
+verifies that InfinityDB's offline resolver accepts the result,
+and tests deterministic source transfer ZIP/reject-on-overwrite.
+The extracted test suite preserves two-pass response mismatch
+rejection, stable output, source provenance, archive hashing and
+revision-date validation. The checked-in InfinityDB-only snapshot
+notes fixture is intentionally not copied; the generic provenance
+tests remain.
+
+The preparation command from the InfinityDB repository root is:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.export_army_acquisition --output local/army-acquisition-producer --archive local/infinity-army-acquisition-p5.4.zip
+```
+
+**Next repository:** `InfinityDB-army-acquisition`, created as an empty
+repository by the owner. The exporter supplies Git configuration,
+package metadata, LICENSE, docs and a three-platform CI workflow.
+Do not commit acquired Army JSON or treat the new source-code license
+as permission to distribute third-party raw source. No remote
+repository is created by this preparation.
+
+**Not yet cut over:** keep `tools/download_army_json.py`, its existing
+tests, and the explicit `build_symbols --fetch-snapshot` option until
+the independent repository is published and its cross-platform tests
+pass. After that, remove the in-tree online downloader, the optional
+fetch path in the symbol build and the one-use export helper; keep
+`tools/army_snapshot_source.py`, pinned `--snapshot`/resume, and
+the maintained `infinity_army_data` importer. No normal
+checkout/CI/Docker build gains an external-repository dependency.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

@@ -204,6 +204,7 @@
         "test_army_snapshot_source",
         "test_deterministic_io",
         "test_download_army_json",
+        "test_export_army_acquisition",
         "test_merge",
         "test_metadata",
         "test_project_resources",
