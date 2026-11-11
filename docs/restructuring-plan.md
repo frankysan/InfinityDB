@@ -3582,16 +3582,23 @@ canonical assets, **294** redundant assets and **zero**
 render errors. Inkscape 1.4.4 text conversion passed:
 **107/107** canonical text-bearing SVGs converted.
 
-The old compressed work tree contains **808** SVGs,
-so the canonical path-set difference must be resolved
-rather than assumed equivalent. External balanced
-compression and final independent verification/parity
-remain required before cutover.
+External balanced compression passed, producing
+`COMPRESSED.zip`. The independent verifier passed:
+**807** compressed canonical assets covering **1,101**
+source identities. The path reconciliation found **zero**
+external-only paths and exactly one legacy-only path:
+`units/shasvastii-seed-soldiers-1-2.svg`. The new
+duplicate receipt maps that identity to
+`units/shasvastii-seed-soldiers-1-1.svg` as an **exact**
+duplicate. The old pipeline retained both. The
+path-count difference therefore does not indicate a
+missing upstream identity, but the semantic mapping and
+visual publication still require acceptance.
 
-**Next:** Complete external compression, independently
-verify its receipt and canonical members, reconcile the
-legacy path-set difference and run raster/browser
-publication acceptance.
+**Next:** Verify that the duplicate identity resolves to
+the canonical SVG in publication, run raster parity for
+the shared 807 paths and browser acceptance, then decide
+whether the in-tree pipeline can be retired.
 
 ### P6 — Consolidate, measure and establish the new baseline
 

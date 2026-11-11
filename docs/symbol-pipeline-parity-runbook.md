@@ -113,11 +113,17 @@ Copy-Item '..\InfinityDB-symbol-tools\local\p5-production-reports\EFFECTIVE-SYMB
 python -m tools.compare_symbol_canonical_paths --legacy-root 'data/work/symbols/SYMBOLS 20261004-184813--cda970bafe15/compressed' --duplicate-receipt 'local/p5-production-duplicate-state.json'
 ```
 
-Exit status 2 reports concrete external-only/legacy-only
-canonical paths. Investigate source or override differences,
-changed exact-duplicate grouping and historical processing
-behavior; do not fabricate or silently drop a canonical
-asset to force counts to match.
+The actual 2026-11-11 comparison passed independent
+artifact verification (**807** canonical assets, **1,101**
+source identities) and reported exactly one legacy-only
+path, `units/shasvastii-seed-soldiers-1-2.svg`. The new
+duplicate receipt maps it to
+`units/shasvastii-seed-soldiers-1-1.svg` as an exact
+duplicate. This explains the count difference but is
+**not** sufficient to pass raster or browser publication
+acceptance. Exit status 2 intentionally remains until
+a mapping-aware acceptance gate verifies that both
+semantic identities remain accessible.
 
 ## Verify and compare
 
