@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_document
+
 ROOT = Path(__file__).resolve().parents[1]
 SETUP_MANIFEST = ROOT / "config/validation/standard-game-reference-tables.json"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
