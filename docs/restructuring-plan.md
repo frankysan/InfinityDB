@@ -3455,12 +3455,35 @@ passed 94 tests on each of Ubuntu, Windows and macOS for
 backends; they do not establish full-snapshot parity with
 installed production fonts and Inkscape/usvg.
 
-**Next:** Implement render-validated compression of the
-canonical intermediate artifact with pinned renderer/SVGO
-versions, tolerances and output hashes, then the final
-processed-artifact verifier in InfinityDB. Production
+#### P5.5 — Canonical render-validated compression (2026-11-11)
+
+`InfinityDB-symbol-tools` now provides
+`infinity-symbol-canonical-compression` (commit `cac47f8f`).
+It verifies the passed text-conversion receipt and every
+canonical member hash before extracting to a temporary
+processing tree. It delegates to the existing display-aware
+compressor using an explicit resvg/Inkscape renderer and
+balanced or small raster-validated profile. The compressor's
+CSV and JSON reports, tool versions, requested CSS sizes,
+DPRs, pixel tolerances and all resulting SVG hashes are
+pinned in a separate `compression` v1 stage receipt.
+
+A successful stage produces an immutable canonical-only
+compressed ZIP, not a publication artifact. Missing or
+unexpected members, active text, unresolved compression
+errors, unknown tool versions, or altered inputs fail
+closed without publishing the ZIP. The original canonical
+input remains unchanged.
+
+**Validation:** Focused offline simulated-compressor tests
+were added. Cross-platform source-tools CI for `cac47f8f`
+was pending at the time this handoff was written; real
+renderer/SVGO production-source parity remains untested.
+
+**Next:** Build an independent InfinityDB-side final
+processed-artifact verifier. Test end-to-end production
 override/font/renderer parity and full publication acceptance
-remain prerequisites for retiring the in-tree pipeline.
+before retiring the in-tree symbol processing pipeline.
 
 ### P6 — Consolidate, measure and establish the new baseline
 
