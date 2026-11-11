@@ -3291,6 +3291,49 @@ text-bearing symbols and compressed variants, then run the full
 source/asset publication acceptance before retiring in-tree
 processors and override application.
 
+#### P5.4 — Versioned override-stage handoff (2026-11-11)
+
+`InfinityDB-symbol-tools` now accepts an additional **reviewed
+URL-to-override-lookup** plan rather than assuming that the raw
+archive path is the override path. `tools.export_symbol_override_lookups`
+in InfinityDB derives those lookup paths from current authoritative
+discovery and pins them to the exact v1 raw source-plan SHA-256;
+an outdated or edited source plan fails closed. This distinction is
+material for static symbols, whose raw archive paths begin with
+`static/` but whose reviewed SVG overrides do not.
+
+The standalone `infinity-symbol-overrides` step validates the Army
+artifact, every raw URL outcome, the original v3 ZIP/provenance,
+the raw acquisition report, and the reviewed lookup plan. It
+applies category-scoped upstream-byte-equivalent overrides through
+the new independent resolver and emits `EFFECTIVE-SYMBOLS ...zip`,
+v3 Army-bound provenance and an `effective-report.json` v1 contract.
+The report records the original source and raw artifact hashes,
+direct/propagated override decisions, selected override paths and
+SHA-256 hashes, effective member identities, raw 404s, any remaining
+missing effective files and unused override paths. It explicitly
+marks **only overrides completed**; font audit, deduplication,
+text conversion and compression remain pending.
+
+InfinityDB now has `tools.verify_effective_symbol_handoff`, a
+strict independent read-only verifier for that intermediate
+artifact and its complete raw evidence chain, with optional
+local override-file SHA-256 rechecks. Tests exercise corruption,
+missing members, illegal cross-category propagation, changed
+lookup plans, unreviewed override bytes and the pending-stage
+constraint. No source acquisition or generated artwork is added
+to InfinityDB's normal offline build, Docker or serving paths.
+
+**Cutover not yet allowed:** This is a verified *intermediate*
+stage, not a version-8 processed/publication-ready symbol
+contract. The remaining symbol-tools work is to migrate the
+font audit, deduplication, text-to-path and compression stage
+orchestrator, record exact renderer/converter versions and
+visual-validation thresholds, verify output parity including the
+29 legacy overridden assets using their **real** upstream source
+bytes, and only then update InfinityDB's consumer/publication
+path. In-tree processing and override application remain active.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

@@ -13,6 +13,12 @@ from infinity_db.snapshot_provenance import (
     SnapshotProvenanceError,
     write_snapshot_manifest,
 )
+from tools.export_symbol_override_lookups import (
+    FORMAT as OVERRIDE_FORMAT,
+)
+from tools.export_symbol_override_lookups import (
+    build_override_lookup_plan,
+)
 from tools.export_symbol_source_plan import (
     FORMAT,
     VERSION,
@@ -122,6 +128,50 @@ def test_symbol_source_plan_rejects_unknown_svg_fields(tmp_path: Path) -> None:
             archive, manifest, static_symbols_path=static, legacy_armies_path=None,
         )
 
+
+
+
+
+def test_override_lookup_plan_pins_source_and_preserves_static_category(
+    tmp_path: Path,
+) -> None:
+    archive, manifest, static = _inputs(tmp_path)
+    source = build_source_plan(
+        archive, manifest, static_symbols_path=static,
+        legacy_armies_path=None, project_root=tmp_path,
+    )
+    lookup = build_override_lookup_plan(
+        archive, manifest, source, static_symbols_path=static,
+        legacy_armies_path=None, project_root=tmp_path,
+    )
+    assert lookup["format"] == OVERRIDE_FORMAT
+    assert lookup["formatVersion"] == 1
+    assert len(lookup["sourcePlanSha256"]) == 64
+    assert lookup["lookups"] == [
+        {"url": STATIC, "overridePath": "characteristics/cube.svg"},
+        {"url": FACTION, "overridePath": "factions/faction.svg"},
+        {"url": UNIT, "overridePath": "units/unit.svg"},
+    ]
+    raw = tmp_path / "requests.json"
+    overrides = tmp_path / "override-lookups.json"
+    write_source_plan(raw, source)
+    write_source_plan(overrides, lookup)
+    assert write_source_plan(overrides, lookup) == overrides
+    assert json.loads(overrides.read_text(encoding="utf-8")) == lookup
+
+
+def test_override_lookup_plan_rejects_stale_source_decisions(tmp_path: Path) -> None:
+    archive, manifest, static = _inputs(tmp_path)
+    source = build_source_plan(
+        archive, manifest, static_symbols_path=static, legacy_armies_path=None,
+        project_root=tmp_path,
+    )
+    source["requests"][0]["archivePath"] = "static/characteristics/stale.svg"
+    with pytest.raises(ValueError, match="differs from current authoritative"):
+        build_override_lookup_plan(
+            archive, manifest, source, static_symbols_path=static,
+            legacy_armies_path=None, project_root=tmp_path,
+        )
 
 def test_symbol_source_plan_refuses_changed_army_archive(tmp_path: Path) -> None:
     archive, manifest, static = _inputs(tmp_path)

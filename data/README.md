@@ -427,6 +427,17 @@ The current producer contracts are:
   does not require installing the external Python package and does not
   change the default in-tree symbol acquisition, processing or asset
   publication workflows. Normal database builds do not acquire assets.
+  For separate override processing, `tools.export_symbol_override_lookups`
+  generates a SHA-pinned URL-to-override-path plan. The standalone
+  `infinity-symbol-overrides` command can then create an intermediate
+  `EFFECTIVE-SYMBOLS ...zip`, its v3 Army-bound provenance and a
+  version-1 effective report recording raw/upstream, override and
+  effective SVG identities. `tools.verify_effective_symbol_handoff`
+  checks that chain independently, optionally against local reviewed
+  override files. This artifact is **not publication-ready**:
+  font conversion, deduplication and compression are explicitly
+  pending and remain in the existing InfinityDB pipeline until
+  equivalent external processing and acceptance are complete.
 
 The *format* and verification contract stay owned by InfinityDB's
 snapshot-provenance module. An extracted producer must emit compatible
