@@ -142,7 +142,6 @@
     "web": {
       "description": "Web application, HTTP/API behavior, browser-facing runtime, and web metrics.",
       "modules": [
-        "test_api",
         "test_app_cli",
         "test_army_fireteam_publication",
         "test_benchmark_runtime",
@@ -203,8 +202,6 @@
         "test_database_set_builder",
         "test_army_snapshot_source",
         "test_deterministic_io",
-        "test_download_army_json",
-        "test_export_army_acquisition",
         "test_merge",
         "test_metadata",
         "test_project_resources",

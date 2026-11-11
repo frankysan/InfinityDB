@@ -91,9 +91,3 @@ def test_offline_army_reader_rejects_archive_mutation(tmp_path: Path) -> None:
         resolve_army_snapshot(archive, manifest_directory=manifest.parent)
 
 
-def test_downloader_preserves_offline_reader_imports() -> None:
-    from tools import download_army_json
-
-    assert download_army_json.resolve_army_snapshot is resolve_army_snapshot
-    assert download_army_json.snapshot_source_revision_counts is snapshot_source_revision_counts
-    assert download_army_json.ApiDownloadError is ApiDownloadError

@@ -381,55 +381,11 @@ def test_orchestrator_passes_pinned_snapshot_to_symbol_acquisition(
     assert seen["refresh_symbols"] is True
 
 
-def test_fetch_mode_pins_the_snapshot_returned_by_army_acquisition(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_symbol_build_rejects_in_tree_army_download(tmp_path: Path) -> None:
     module = load_module()
-    archive, manifest = army_snapshot(tmp_path)
-    data_root = tmp_path / "data"
-    discovery = SimpleNamespace(source_document_count=2)
-    seen: dict[str, Any] = {}
-    stub_post_acquisition(module, monkeypatch)
-
-    def fake_army(destination, manifest_directory, **kwargs):
-        seen["army_destination"] = destination
-        seen["manifest_directory"] = manifest_directory
-        seen["language"] = kwargs["language"]
-        return SimpleNamespace(archive=archive, manifest=manifest)
-
-    monkeypatch.setattr(module, "acquire_army_snapshot", fake_army)
-    monkeypatch.setattr(module, "discover_symbol_source", lambda *_args, **_kwargs: discovery)
-    monkeypatch.setattr(module, "print_discovery_summary", lambda _discovery: None)
-
-    def fake_symbols(source, *_args, **kwargs):
-        seen["symbol_source"] = source
-        seen["army_snapshot"] = kwargs["army_snapshot"]
-        return SimpleNamespace(
-            asset_count=0,
-            archive=tmp_path / "symbols.zip",
-            snapshot_manifest=tmp_path / "symbols.json",
-            build_manifest=tmp_path / "build.json",
-        )
-
-    monkeypatch.setattr(module, "acquire_symbol_snapshot", fake_symbols)
-
-    assert (
-        module.main(
-            [
-                "--fetch-snapshot",
-                "--data-root",
-                str(data_root),
-                "--delay",
-                "0",
-            ]
-        )
-        == 0
-    )
-
-    assert seen["language"] == "en"
-    assert seen["symbol_source"] == archive
-    assert seen["army_snapshot"].archive == archive
-    assert seen["army_snapshot"].language == "en"
+    with pytest.raises(SystemExit) as error:
+        module.main(["--fetch-snapshot", "--data-root", str(tmp_path / "data")])
+    assert error.value.code == 2
 
 
 def test_offline_mode_requires_snapshot_provenance(tmp_path: Path, capsys) -> None:

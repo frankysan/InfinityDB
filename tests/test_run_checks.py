@@ -206,12 +206,12 @@ def test_skip_summary_is_opt_in_for_test_and_isolated_preflight() -> None:
     ("stages", "targets", "sections", "choice", "expected"),
     (
         (("test",), [], (), None, True),
-        (("test",), ["tests/test_api.py"], (), None, False),
+        (("test",), ["tests/test_army_snapshot_source.py"], (), None, False),
         (("test",), [], ("browser",), None, False),
         (("preflight",), [], (), None, False),
         (("test", "preflight"), [], (), None, True),
         (("test",), [], (), False, False),
-        (("test",), ["tests/test_api.py"], (), True, True),
+        (("test",), ["tests/test_army_snapshot_source.py"], (), True, True),
     ),
 )
 def test_skip_summary_auto_enables_only_unfiltered_full_suite(

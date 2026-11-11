@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Orchestrate one symbol build from an explicitly pinned Infinity Army snapshot.
 
-The orchestrator never selects the newest available snapshot implicitly. Use
-``--snapshot`` for an existing immutable Army ZIP or ``--fetch-snapshot`` for an
-explicit network refresh. The same entrypoint can stop at verified checkpoints
+The orchestrator never selects or fetches an Army snapshot implicitly. Use
+``--snapshot`` for an existing immutable Army ZIP produced by the standalone
+Army acquisition tool. The same entrypoint can stop at verified checkpoints
 or resume an existing build without reacquiring immutable inputs. It pins Army
 provenance, resolves one immutable raw symbol snapshot, materializes verified work
 files, runs structural/font audits, performs exact-first visual deduplication,
@@ -23,7 +23,6 @@ from infinity_db.symbol_manifest import load_symbol_manifest
 
 try:
     from tools.army_snapshot_source import ArmySnapshotResult, resolve_army_snapshot
-    from tools.download_army_json import API_BASE_URL, acquire_army_snapshot
     from tools.download_army_symbols import (
         DEFAULT_OVERRIDE_ROOT,
         DEFAULT_STATIC_CONFIG,
@@ -44,7 +43,6 @@ try:
     )
 except ImportError:  # pragma: no cover - direct script execution fallback
     from army_snapshot_source import ArmySnapshotResult, resolve_army_snapshot
-    from download_army_json import API_BASE_URL, acquire_army_snapshot
     from download_army_symbols import (
         DEFAULT_OVERRIDE_ROOT,
         DEFAULT_STATIC_CONFIG,
@@ -291,19 +289,13 @@ def _existing_stage_status(document: dict[str, Any], key: str) -> str | None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    source_mode = parser.add_mutually_exclusive_group()
-    source_mode.add_argument(
+    parser.add_argument(
         "--snapshot",
         type=Path,
         help=(
             "Existing immutable Army JSON ZIP to pin for a new build, or the "
             "original external Army ZIP when --resume cannot resolve it from build state"
         ),
-    )
-    source_mode.add_argument(
-        "--fetch-snapshot",
-        action="store_true",
-        help="Explicitly download and pin a fresh Army snapshot before symbol acquisition",
     )
     parser.add_argument(
         "--resume",
@@ -326,7 +318,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--language",
-        help="Expected/fetched Army language (fetch default: en)",
+        help="Expected Army snapshot source language (optional)",
     )
     parser.add_argument(
         "--data-root",
@@ -417,18 +409,14 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--jobs must be at least 1")
     if args.duplicate_render_size < 1:
         parser.error("--duplicate-render-size must be at least 1")
-    if args.fetch_snapshot and args.snapshot_manifest is not None:
-        parser.error("--snapshot-manifest is only valid with --snapshot")
     if args.snapshot_manifest is not None and args.snapshot is None:
         parser.error("--snapshot-manifest requires --snapshot")
-    if args.resume and args.fetch_snapshot:
-        parser.error("--resume cannot be combined with --fetch-snapshot")
     if args.resume and args.refresh_symbols:
         parser.error("--resume cannot be combined with --refresh-symbols")
     if args.resume and args.snapshot_only:
         parser.error("--snapshot-only cannot be combined with --resume")
-    if not args.resume and args.snapshot is None and not args.fetch_snapshot:
-        parser.error("a new build requires --snapshot or --fetch-snapshot")
+    if not args.resume and args.snapshot is None:
+        parser.error("a new build requires --snapshot")
     if args.log is not None and args.log.exists():
         parser.error(f"--log path already exists: {args.log}")
 
@@ -489,36 +477,14 @@ def main(argv: list[str] | None = None) -> int:
                     console.checkpoint("acquisition")
                     return 0
             else:
-                console.stage_start(
-                    "snapshot",
-                    detail=(
-                        "fetching Army snapshot"
-                        if args.fetch_snapshot
-                        else "pinning Army snapshot"
-                    ),
+                console.stage_start("snapshot", detail="pinning Army snapshot")
+                assert args.snapshot is not None
+                pinned = resolve_army_snapshot(
+                    args.snapshot,
+                    manifest_directory=manifest_directory,
+                    manifest=args.snapshot_manifest,
+                    expected_language=args.language,
                 )
-                if args.fetch_snapshot:
-                    language = args.language or "en"
-                    acquired = acquire_army_snapshot(
-                        army_destination,
-                        manifest_directory,
-                        language=language,
-                        api_base_url=API_BASE_URL,
-                    )
-                    pinned = resolve_army_snapshot(
-                        acquired.archive,
-                        manifest_directory=manifest_directory,
-                        manifest=acquired.manifest,
-                        expected_language=language,
-                    )
-                else:
-                    assert args.snapshot is not None
-                    pinned = resolve_army_snapshot(
-                        args.snapshot,
-                        manifest_directory=manifest_directory,
-                        manifest=args.snapshot_manifest,
-                        expected_language=args.language,
-                    )
 
                 print_pinned_snapshot(pinned)
                 console.stage_success(
