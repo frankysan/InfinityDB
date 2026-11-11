@@ -11,6 +11,9 @@ from tools.audit_weapon_chart_profiles import (
     _identity as chart_weapon_identity,
 )
 from tools.audit_weapon_chart_profiles import (
+    _metadata as legacy_weapon_metadata,
+)
+from tools.audit_weapon_chart_profiles import (
     _mode_identity as chart_mode_identity,
 )
 from tools.audit_weapon_chart_profiles import (
@@ -29,10 +32,25 @@ from tools.audit_weapon_definition_gaps import (
 from tools.audit_weapon_definition_gaps import (
     _sha256 as gap_source_sha256,
 )
+from tools.weapon_chart_source import (
+    PDF_PAGES,
+    WeaponChartAuditError,
+    _chart_burst_anchors,
+)
+from tools.weapon_chart_source import (
+    rows_from_words as source_rows_from_words,
+)
 from tools.weapon_source_common import (
+    printed_name_and_mode,
     source_file_sha256,
     weapon_identity,
     weapon_mode_identity,
+)
+from tools.weapon_source_metadata import (
+    _army_options,
+    _metadata,
+    _profile_attributes,
+    _source_range_bands,
 )
 
 
@@ -63,6 +81,61 @@ def test_source_file_hash_preserves_exact_bytes(tmp_path: Path) -> None:
     assert chart_source_sha256(path) == gap_source_sha256(path) == expected
     path.write_bytes(content.replace(b"\r\n", b"\n"))
     assert source_file_sha256(path) != expected
+
+
+def test_shared_chart_source_exports_preserve_row_geometry_and_mode_names() -> None:
+    assert PDF_PAGES.start == 176 and PDF_PAGES.stop == 189
+    assert source_rows_from_words is rows_from_words
+    words = [
+        (25.0, 210.0, "TACTICAL"), (63.0, 210.0, "BOW"),
+        (275.0, 210.0, "8"), (301.0, 210.0, "1"),
+        (330.0, 210.0, "DA"), (380.0, 210.0, "ARM"),
+        (435.0, 210.0, "2"),
+    ]
+    assert _chart_burst_anchors(words) == [(210.0, "1")]
+    assert source_rows_from_words(words, 176) == [_pdf_row("TACTICAL BOW")]
+    for name, expected in (
+        ("Feuerbach (Blast Mode)", ("Feuerbach", "Blast Mode")),
+        ("E/M Mine", ("E/M Mine", "")),
+    ):
+        assert printed_name_and_mode(name) == _printed_name_and_mode(name) == expected
+
+
+def test_shared_army_metadata_lookup_stays_read_only_and_fail_closed(tmp_path: Path) -> None:
+    army_db = tmp_path / "army.db"
+    with sqlite3.connect(army_db) as connection:
+        connection.execute("CREATE TABLE metadata_ammunitions (id INTEGER, name TEXT)")
+        connection.execute(
+            "CREATE TABLE metadata_weapons (name TEXT, mode TEXT, ammunition INTEGER, "
+            "burst INTEGER, damage TEXT, saving TEXT, savingNum INTEGER, "
+            "distance TEXT, profile TEXT)"
+        )
+        connection.execute("INSERT INTO metadata_ammunitions VALUES (1, 'E/M')")
+        connection.execute(
+            "INSERT INTO metadata_weapons VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("E/M Mine", "", 1, 1, "8", "ARM", 1,
+             '{"short":{"max":20,"mod":"+6"}}', "ARM=1 BTS=0 STR=1 S=0"),
+        )
+    data, count = _metadata(army_db)
+    assert count == 1
+    assert (data, count) == legacy_weapon_metadata(army_db)
+    row = _army_options("E/M Mines", data)[0]
+    assert row["name"] == "E/M Mine"
+    assert row["ammunition"] == "E/M"
+    assert row["rangeBands"] == _source_range_bands(
+        '{"short":{"max":20,"mod":"+6"}}'
+    ) == ["+6", None, None, None, None, None, None]
+    assert _profile_attributes(row["profile"]) == {
+        "ARM": 1, "BTS": 0, "STR": 1, "S": 0,
+    }
+    assert _army_options("E/M Mine (AP Mode)", data) == []
+
+    with sqlite3.connect(army_db) as connection:
+        connection.execute(
+            "INSERT INTO metadata_weapons VALUES (X'ff', '', 1, 1, '8', 'ARM', 1, '', '')"
+        )
+    with pytest.raises(WeaponChartAuditError, match="invalid name"):
+        _metadata(army_db)
 
 
 def _pdf_row(name: str = "Tactical Bow") -> dict[str, object]:

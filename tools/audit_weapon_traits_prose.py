@@ -17,7 +17,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from tools.audit_weapon_chart_profiles import (
+from tools.weapon_chart_source import (
     PDF_PAGES,
     WeaponChartAuditError,
     _chart_burst_anchors,

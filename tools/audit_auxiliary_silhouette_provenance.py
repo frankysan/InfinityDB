@@ -16,8 +16,8 @@ from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
 
-from tools.audit_weapon_chart_profiles import (
-    WeaponChartAuditError,
+from tools.weapon_chart_source import WeaponChartAuditError
+from tools.weapon_source_metadata import (
     _army_options,
     _metadata,
     _profile_attributes,

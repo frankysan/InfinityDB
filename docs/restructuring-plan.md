@@ -2896,11 +2896,47 @@ their PDF row/trait extraction and independent-source review still
 have distinct research scope. In particular, the auxiliary
 Silhouette provenance audit has its own label normalizer with a
 different policy; do not silently unify it with Weapon-name identity.
-Next P5.2 slice should assess the remaining explicit
-`_metadata`, `_chart_burst_anchors`, `rows_from_words` and
-`_printed_name_and_mode` imports, and remove chart dependencies
-only if those extractors retain a genuine future source-intake use.
-The published Weapon profile provenance and source scopes are unchanged.
+The remaining chart geometry, name/mode and Army metadata imports
+are addressed in the following P5.2 slice. The published Weapon
+profile provenance and source scopes are unchanged.
+
+#### P5.2 — Separate Weapon chart extraction and Army metadata (2026-11-11)
+
+The fixed-layout N5.3 Weapon Chart reader used to double as the
+shared source for independently useful offline Weapon metadata,
+printed-mode identity and chart row geometry. The traits/prose
+source review needs exact Burst anchors and row names, the Wiki
+chart reconciliation needs Army metadata and printed-mode parsing,
+and the auxiliary Silhouette comparison needs Army metadata and
+profile fields. Importing the entire audit CLI to obtain those
+helpers obscured the dependencies.
+
+Extract the exact existing functions without changing interpretation:
+
+- `tools/weapon_chart_source.py` owns N5.3-specific word-coordinate
+  row extraction, page range, Burst anchors and source-layout errors.
+- `tools/weapon_source_metadata.py` owns read-only Army Weapon/
+  Ammunition metadata, the existing range-band expansion, the
+  explicitly bounded plural-Mines lookup and auxiliary attributes.
+- `tools/weapon_source_common.py` additionally owns explicit
+  printed-name/parenthesized-mode splitting.
+
+The chart audit re-exports the historical internal names for its
+existing callers and fixtures, while traits, Wiki and auxiliary
+provenance readers import their required shared functions directly.
+Checks include synthetic SQLite metadata, fail-closed invalid names,
+source row coordinates, mode splitting, exact range expansion and
+focused current Weapon publication/source coverage. Keep the actual
+fixed-PDF comparison CLI independent and optional: these extracted
+helpers are tools-only and create no build, runtime, or deployed-file
+dependency. No reviewed source manifests, Army/Rules/ITS databases
+or game semantics change.
+
+This consolidates reusable research functionality; it does not
+establish that the original N5.3 one-use audit CLI should be kept
+forever. Assess the still-needed source-revision intake workflow
+and redundant wrappers before later retirement, without allowing
+legacy tests alone to justify retention.
 
 ### P6 — Consolidate, measure and establish the new baseline
 

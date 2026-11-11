@@ -22,6 +22,14 @@ def weapon_mode_identity(mode: str) -> str:
     return weapon_identity(mode).replace("antimaterial", "antimateriel")
 
 
+def printed_name_and_mode(name: str) -> tuple[str, str]:
+    """Keep the printed identity separate from an explicit parenthesized mode."""
+    match = re.fullmatch(r"(.+?)\s*\(([^()]*)\s+Mode\)", name, re.IGNORECASE)
+    if match is None:
+        return name, ""
+    return match.group(1).strip(), match.group(2).strip() + " Mode"
+
+
 def source_file_sha256(path: Path) -> str:
     """Hash source bytes without normalizing archive or PDF contents."""
     digest = hashlib.sha256()
