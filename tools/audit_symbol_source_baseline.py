@@ -178,6 +178,7 @@ def main(argv: list[str] | None = None) -> int:
         output.write_text(
             json.dumps(result, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
             encoding="utf-8",
+            newline="\n",
         )
     except (OSError, ValueError, zipfile.BadZipFile) as exc:
         parser.exit(1, f"ERROR: {exc}\n")
