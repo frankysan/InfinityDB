@@ -2669,6 +2669,25 @@ from the section registry and historical command examples from documentation.
 The broader `audit_deployed_object_*_queue` family remains subject to its
 own P5.1 disposition, rather than implicit deletion.
 
+#### P5.1 — Retire completed N5.3 citation migration preflight (2026-11-11)
+
+The 14-citation deployed-object-adjacent N5.3 migration is complete:
+six non-catalog, five expanded and three source-domain citations are already
+present in the maintained curated source and `rules_n5.db`. The standalone
+`audit_deployed_object_citation_migrations` preflight was specifically for
+the pending/partial versus migrated transaction. It has no current build,
+release, CI or research consumer beyond its historical test module.
+
+Retire that preflight and its migration-state simulations. Preserve the
+accepted source-page set as a direct regression in
+`test_source_conflict_publication`, checking current curated citations,
+three reviewed manifests and the published database together. The non-catalog
+and expanded audit modules remain for now: their **89 reviewed decisions**
+and fail-closed source evidence checks have independent review value even
+though both lexical queues are currently closed. Reconsider consolidating
+their overlapping scanners/validators under P5.2; do not remove their
+review manifests or imply the reviewed keyword scope is exhaustive.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

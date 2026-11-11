@@ -8403,78 +8403,29 @@ game-object inventory and must not create Army carriers or delivery paths.
 `tests/test_core_scenario_object_boundary.py` exercises the fail-closed
 publication and provenance boundary.
 
-### N5.3 citation migration verification
+### Reviewed N5.3 citation publication parity
 
-The **14 independently verified N5.3 PDF citations** are now present in
-maintained rules and the regenerated `rules.db`: six non-catalog, five
-expanded, and three Weapon/Equipment source-domain citations. The review
-manifests no longer carry temporary PDF-only status/excerpt fields. Verify
-their coordinated post-migration state with:
+Fourteen previously verified N5.3 PDF citations are now **maintained source
+citations**, not pending migration inputs: six from non-catalog game-element
+reviews, five from expanded reviews and three from Weapon/Equipment source-domain
+reviews. They are published in `data/generated/rules_n5.db`. Their reviewed
+manifest decisions no longer carry temporary `citationStatus` or
+`pdfExcerpt` fields.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations
-.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations --json --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
-```
+The current acceptance test
+`tests/test_source_conflict_publication.py::test_reviewed_n53_citations_match_sources_and_rules_database`
+checks the exact 14 source pages in the review manifests, curated rule
+definitions and the published Rules database; it rejects duplicated or
+out-of-sync citations and reintroduction of temporary migration metadata.
+The separate non-catalog, expanded and source-domain review validators still
+check classification, wording and source-review boundaries. None of these
+reviews authorizes additional deployed objects, delivery edges or Unit carriers.
 
-The read-only preflight verifies all three manifests and all 14 exact
-`sourceId: n5-core-v5.3-pdf` citations. It reports **0 pending / 14
-migrated** and rejects partial, duplicate, or stale migrations. `--pdf`
-also verifies source excerpts against the local English N5.3 PDF and
-reports its SHA-256; this requires PyMuPDF. Normal CI validation does
-not require the ignored PDF. The curated citations specify verified
-pages without adding unverified section labels.
-
-The migration was originally built in an isolated staging directory
-from the pre-migration checkout, requiring all 14 citations to be
-pending. Its one-use `tools.stage_deployed_object_citation_migration`
-command was retired during P2.5 and remains available in Git history,
-**not as a current build instruction**.
-
-The original exclusive staging directory contained a citation-only edit
-to the maintained N5.3 curated JSON, three reviewed manifests with only
-temporary `citationStatus` and `pdfExcerpt` fields removed, and a freshly built
-`data/generated/rules.db`, the matching fingerprinted
-`data/generated/deployed-objects.json`, and `migration-report.json`.
-All 14 migrated records are validated through their post-migration
-review contracts before staging, and the object publication must retain
-17 reviewed identities. The source/manifest changes preserve existing
-formatting. The stage command refuses to overwrite an existing directory,
-write inside a source/generated input directory, or run on a partially
-migrated checkout. It uses the existing pinned Army database but does not
-rebuild it. Staging tests compare the original curated files, both tracked
-generated artifacts and all three manifests byte-for-byte before/after.
-
-The six staged files were subsequently promoted together. For an
-independent replay from a pre-migration checkout, inspect the staging
-report and copy all six paths in one review batch:
-
-```powershell
-$stage = "local/citation-migration-n53"
-$paths = @(
-    "data/curated/rules/n5-core-v5.3.json"
-    "config/validation/deployed-object-non-catalog-reviews.json"
-    "config/validation/deployed-object-expanded-reviews.json"
-    "config/validation/deployed-object-source-domain-clause-reviews.json"
-    "data/generated/rules.db"
-    "data/generated/deployed-objects.json"
-)
-foreach ($path in $paths) {
-    Copy-Item -LiteralPath (Join-Path $stage $path) -Destination $path
-}
-.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations --json
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
-```
-
-The promoted `rules.db` and deployed-object publication were checked
-against the staging report's exact SHA-256 fingerprints, and the focused
-audit and publication regressions passed. The audit exception maps
-remain as transition guards, but the maintained citations replace
-their PDF-only manifest metadata. Never publish the curated text alone
-without its matching `rules.db` and derived publication. The migration
-adds no object identities, delivery edges, or Unit carriers.
-`tests/test_deployed_object_citation_migrations.py` verifies pending and
-migrated states, source drift, optional PDF excerpts, and (when the local
-staging report exists) byte-for-byte equality of all six promoted files.
+The completed staging/promotion tools and migration preflight are retired.
+Their one-use commands, older `rules.db` / loose JSON artifacts and historical
+migration fingerprints remain in Git history, **not** in current build
+instructions. Use the maintained offline database-set build and validation
+workflow for any future curation/publication change.
 
 ### Deployed-object release publication
 

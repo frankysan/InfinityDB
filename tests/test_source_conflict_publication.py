@@ -156,3 +156,62 @@ def test_domination_350_point_language_conflict_stays_scenario_scoped(app: Any) 
     # Scoring and SWC remain a selected scenario configuration,
     # never a global Army-profile Attribute or default game value.
 
+
+
+def test_reviewed_n53_citations_match_sources_and_rules_database() -> None:
+    """Pin accepted source citations, not historical staging/promotion behavior."""
+    import sqlite3
+
+    expected_by_manifest = {
+        "deployed-object-non-catalog-reviews.json": {
+            "skill:frenzy": 93,
+            "state:possessed": 169,
+            "rule:command-token-strategic-use": 128,
+            "skill:counterintelligence": 90,
+            "skill:inspiring-leadership": 99,
+            "skill:transmutation": 117,
+        },
+        "deployed-object-expanded-reviews.json": {
+            "state:decoy": 159,
+            "trait:concealed": 175,
+            "skill:mnemonica": 103,
+            "skill:tactical-awareness": 115,
+            "skill:explode": 92,
+        },
+        "deployed-object-source-domain-clause-reviews.json": {
+            "equipment:escape-system": 117,
+            "equipment:holomask": 124,
+            "equipment:holoprojector": 124,
+        },
+    }
+    curated_path = ROOT / "data/curated/rules/n5-core-v5.3.json"
+    curated = json.loads(curated_path.read_text(encoding="utf-8"))
+    records = {record["id"]: record for record in curated["records"]}
+    assert len(records) == len(curated["records"])
+    expected_rows = []
+    for name, expected in expected_by_manifest.items():
+        path = ROOT / "config/validation" / name
+        reviews = json.loads(path.read_text(encoding="utf-8"))["reviews"]
+        indexed = {review["recordId"]: review for review in reviews}
+        assert len(indexed) == len(reviews)
+        assert set(expected) <= set(indexed)
+        for record_id, page in expected.items():
+            review = indexed[record_id]
+            assert review["sourcePages"] == [page], record_id
+            assert not {"citationStatus", "pdfExcerpt"} & review.keys(), record_id
+            citation = {"sourceId": "n5-core-v5.3-pdf", "page": page}
+            source_citations = records[record_id]["citations"]
+            assert source_citations.count(citation) == 1, record_id
+            expected_rows.append((record_id, "n5-core-v5.3-pdf", page))
+
+    assert len(expected_rows) == 14
+    ids = [row[0] for row in expected_rows]
+    placeholders = ", ".join("?" for _ in ids)
+    with sqlite3.connect(ROOT / "data/generated/rules_n5.db") as database:
+        actual = database.execute(
+            "SELECT record_id, source_id, page FROM record_citations "
+            f"WHERE source_id = ? AND record_id IN ({placeholders}) "
+            "ORDER BY record_id, page",
+            ("n5-core-v5.3-pdf", *ids),
+        ).fetchall()
+    assert actual == sorted(expected_rows)
