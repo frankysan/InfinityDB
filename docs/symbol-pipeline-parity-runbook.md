@@ -181,6 +181,81 @@ filename against the tracked publication; those artwork and URL differences
 remain subject to review. See the [candidate acceptance evidence](testing.md#p57-external-semantic-publication-candidate).
 Preparation does not promote assets or rebuild embedded SQLite mappings.
 
+## Local artwork review
+
+**Project domain:** Project infrastructure
+
+The application owns comparison of its current publication with a prepared
+candidate. Acquisition, overrides, font conversion and compression remain owned
+by InfinityDB-symbol-tools. The offline review builder does not run those stages,
+alter assets/manifests/databases, promote the candidate or change parity thresholds.
+Retain this tool while P5 artwork/URL acceptance remains open; reassess it under
+the [one-use tool lifecycle](README.md#one-use-tool-and-audit-lifecycle) when that
+work is complete.
+
+From the repository root, use the project virtual environment and a **fresh**
+output filename under ignored `local/`:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.build_symbol_artwork_review --candidate-evidence local/p5-external-symbol-publication-verified-20261111/candidate-evidence.json --output local/p5-symbol-artwork-review-20261111-v2.html
+```
+
+The other defaults select the dated comparison JSON, verified candidate's
+`static/` and manifest, and current tracked publication. Use `--help` for
+explicit input paths. The builder verifies both manifest hashes against the
+comparison, recomputes its complete changed/added/removed inventory, and checks
+every embedded SVG's bytes against the appropriate manifest. It rejects unsafe
+paths, malformed SVGs, mismatched evidence and existing output files.
+The default output without `--output` is `local/p5-symbol-artwork-review.html`.
+Reports embed the SVGs and need no server, network or adjacent assets.
+
+Open the HTML in a browser. Search filenames or source identities, filter by
+category/decision, and use side-by-side or adjustable-opacity overlay views.
+Expand input provenance for manifest/comparison hashes, snapshot identities and
+optional candidate evidence; expand each card for both source/canonical mappings
+and asset hashes. Candidate preparation evidence is displayed as recorded; the
+review builder does not rerun its upstream receipt-chain verification.
+
+All differences begin **unclassified**. Neither changed hashes nor identical
+appearance prove a source change or compression-only change. The publication
+manifests do not contain paired per-asset source-byte histories. Record supporting
+source/processing evidence identities in the notes when assigning a reviewer
+classification; annotations are not automatically confirmed findings.
+Matched-input processor parity does not classify historical publication changes.
+
+Choose **Accept**, **Investigate** or **Reject** and add classification/notes.
+Export JSON before closing or reloading: there is no automatic browser storage.
+Save exports under ignored `local/`, then import to resume. Imports are bound
+to the exact comparison/manifests/evidence fingerprint, validate every entry
+before applying any changes, and replace the decision set (omitted paths reset
+to unreviewed). Rejected imports preserve existing decisions. Keep exported
+decisions with the report and pinned inputs; exporting does not approve cutover.
+
+The validated production page is
+`local/p5-symbol-artwork-review-20261111-v2.html`: **118 pairs** (4 Army,
+1 characteristic, 2 Order, 11 Peripheral and 100 Unit assets).
+Chrome validation at **1440/390/320 × 900** rendered all pairs in both views,
+exercised search/category/decision filters, opacity, export/import after reload
+and stale-import rejection, with no page/request/HTTP errors, external requests
+or horizontal overflow. Private validation evidence is
+`local/p5-symbol-artwork-browser-validation.json`; its test exports are browser
+validation data, **not artwork approvals**. The generated report starts with all
+118 decisions unreviewed.
+
+The removed
+`units/combined-army/512-shasvastii-seed-soldiers--1-2.svg` remains an
+**unresolved compatibility requirement** in the page and exports. Its source
+identity's new destination does not establish compatibility for the old URL.
+Rendering this report establishes review-workflow behavior only; actual artwork
+approval, old-URL handling and application publication acceptance remain open.
+
+Focused regression checks (including an optional real-Chrome fixture test when
+Playwright/Chrome are installed):
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --assets off --test-workers 0 tests/test_build_symbol_artwork_review.py tests/test_test_sections.py
+```
+
 ## Acceptance gates
 
 1. The real-source inventory must account for every reviewed

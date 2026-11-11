@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>InfinityDB symbol artwork review</title>
+<style>
+:root{font:16px system-ui,sans-serif;color:#18212b;background:#f4f6f8}
+*{box-sizing:border-box} body{margin:0 auto;max-width:1500px;padding:1rem}
+h1{font-size:1.6rem} h2{font-size:1rem;overflow-wrap:anywhere}
+p{line-height:1.5} button,input,select,textarea{font:inherit;padding:.45rem;max-width:100%}
+button,select{min-height:44px} :focus-visible{outline:3px solid #1565c0;outline-offset:2px}
+select{min-width:0;width:100%}
+header,.notice{background:white;padding:1rem;border:1px solid #9aa7b4;border-radius:.4rem}
+.controls{display:flex;flex-wrap:wrap;gap:.8rem;align-items:end}
+.controls label{display:grid;gap:.3rem;min-width:0}
+.controls label{max-width:100%} input[type="file"]{width:100%}
+#counter,#status{display:block;margin-top:.7rem} #status{min-height:1.5em}
+#items{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,410px),1fr));gap:1rem}
+article{background:white;border:1px solid #9aa7b4;border-radius:.4rem;padding:1rem;min-width:0}
+.images{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+figure{margin:0;min-width:0} figcaption{font-weight:600;margin-bottom:.3rem}
+.preview{background:repeating-conic-gradient(#ddd 0% 25%,#fff 0% 50%) 50%/16px 16px;
+border:1px solid #888;aspect-ratio:1;position:relative}
+.preview img{position:absolute;inset:5%;width:90%;height:90%;object-fit:contain}
+.overlay{display:none} body[data-mode="overlay"] .images{display:none}
+body[data-mode="overlay"] .overlay{display:block}
+body[data-mode="overlay"] .candidate-layer{opacity:var(--opacity,.5)}
+.actions{display:grid;grid-template-columns:minmax(0,1fr);gap:.6rem;margin-top:.8rem}
+.actions label{display:grid;gap:.3rem;min-width:0} textarea{width:100%;resize:vertical}
+details{margin:.8rem 0} summary{cursor:pointer;min-height:32px}
+pre,small{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.8rem}
+pre{max-height:22rem;overflow:auto} .warning{color:#8b2500;font-weight:600}
+[hidden]{display:none!important}
+</style>
+</head>
+<body data-mode="side">
+<header>
+<h1>Symbol artwork review</h1>
+<p>Compare the current publication with the external candidate. Decisions and classifications
+are reviewer annotations, not publication approval. Export JSON before closing or reloading;
+import it to resume. Nothing is saved automatically or written to the repository.</p>
+<p>All hash changes start <strong>unclassified</strong>. Identical appearance, SVG hashes and
+matched-input processor parity do not establish compression-only differences or source changes.
+Use provenance evidence and record its identity in your notes before classifying.</p>
+<details><summary>Input identity and candidate provenance</summary><pre id="provenance"></pre></details>
+<section class="notice" aria-label="Compatibility requirements">
+<strong>Removed filenames — unresolved compatibility requirements</strong>
+<div id="removed"></div>
+<p>Artwork decisions cannot resolve these old URLs. Publication cutover, embedded mappings,
+attribution, application browser/local/Docker checks and processor retirement require separate acceptance.</p>
+</section>
+<div class="controls">
+<label>Search <input id="search" type="search" placeholder="Filename or source identity"></label>
+<label>Category <select id="category"><option value="">All</option></select></label>
+<label>Decision <select id="filter"><option value="">All</option>
+<option value="unreviewed">Unreviewed</option><option value="accept">Accept</option>
+<option value="investigate">Investigate</option><option value="reject">Reject</option></select></label>
+<label>View <select id="mode"><option value="side">Side by side</option>
+<option value="overlay">Overlay</option></select></label>
+<label>Candidate opacity <input id="opacity" type="range" min="0" max="100" value="50"></label>
+<button id="export" type="button">Export decisions</button>
+<label>Import decisions <input type="file" id="import" accept=".json,application/json"></label>
+</div>
+<output id="counter"></output>
+<div id="status" role="status" aria-live="polite"></div>
+</header>
+<p id="empty" hidden>No assets match these filters.</p>
+<main id="items" aria-label="Changed symbol pairs"></main>
+<script id="payload" type="application/json">__PAYLOAD__</script>
+<script>
+"use strict";
+const data=JSON.parse(document.getElementById("payload").textContent);
+const byId=id=>document.getElementById(id);
+const states=["unreviewed","accept","investigate","reject"];
+const classes=["unclassified","source-change","compression-only","other"];
+const classLabels=["Unclassified","Source change (evidence required)",
+ "Compression only (evidence required)","Other (explain in notes)"];
+const blank=()=>Object.fromEntries(data.items.map(x=>[x.path,
+ {decision:"unreviewed",classification:"unclassified",notes:""}]));
+let decisions=blank();
+const cards=new Map();
+function say(message){byId("status").textContent=message;}
+function textElement(tag,text){const element=document.createElement(tag);
+ element.textContent=text;return element;}
+byId("provenance").textContent=JSON.stringify({
+ reviewId:data.reviewId,...data.pins,currentSnapshot:data.currentSnapshot,
+ candidateSnapshot:data.candidateSnapshot,candidateEvidence:data.candidateEvidence ??
+ "Not supplied; publication manifests contain no per-asset source-byte change evidence."
+},null,2);
+for(const entry of data.removed){
+ const block=document.createElement("details");
+ block.append(textElement("summary",entry.path+" — "+entry.status),
+ textElement("pre",JSON.stringify(entry,null,2)));byId("removed").append(block);
+}
+if(!data.removed.length)byId("removed").textContent="No removed filenames in this comparison.";
+if(data.added.length)byId("removed").append(textElement("p",
+ "Added filenames outside this changed-pair review: "+data.added.join(", ")));
+for(const value of [...new Set(data.items.map(x=>x.category))].sort()){
+ const option=textElement("option",value);option.value=value;byId("category").append(option);
+}
+function image(uri,label,path){
+ const img=document.createElement("img");img.src=uri;img.alt=label+" "+path;
+ img.addEventListener("error",()=>{
+  say("SVG rendering failed: "+path+" ("+label+")");
+  img.closest("article").append(textElement("p","RENDER ERROR: "+label));
+ });return img;
+}
+function overlayFigure(item){
+ const figure=document.createElement("figure"),preview=document.createElement("div");
+ preview.className="preview";
+ figure.className="overlay";
+ figure.append(textElement("figcaption","Overlay: current below candidate"));
+ preview.append(image(item.current,"Current overlay",item.path));
+ const candidate=image(item.candidate,"Candidate overlay",item.path);
+ candidate.className="candidate-layer";preview.append(candidate);
+ figure.append(preview);return figure;
+}
+function selectControl(label,values,labels,onchange){
+ const wrapper=textElement("label",label);
+ const select=document.createElement("select");select.setAttribute("aria-label",label);
+ values.forEach((value,i)=>{const option=textElement("option",labels[i]);
+  option.value=value;select.append(option);});
+ select.addEventListener("change",()=>onchange(select.value));wrapper.append(select);
+ return {wrapper,select};
+}
+for(const item of data.items){
+ const card=document.createElement("article");card.dataset.path=item.path;
+ card.append(textElement("h2",item.path));
+ const images=document.createElement("div");images.className="images";
+ for(const [label,uri] of [["Current",item.current],["Candidate",item.candidate]]){
+  const column=document.createElement("figure"),preview=document.createElement("div");
+  preview.className="preview";preview.append(image(uri,label,item.path));
+  column.append(textElement("figcaption",label),preview);images.append(column);
+ }
+ card.append(images,overlayFigure(item));
+ card.append(textElement("small","Category: "+item.category+" · Difference cause: unclassified"));
+ const provenance=document.createElement("details");
+ provenance.append(textElement("summary","Source identities and asset hashes"),
+  textElement("pre",JSON.stringify({currentSha256:item.currentSha256,
+   candidateSha256:item.candidateSha256,currentSources:item.currentSources,
+   candidateSources:item.candidateSources},null,2)));
+ card.append(provenance);
+ const actions=document.createElement("div");actions.className="actions";
+ const decision=selectControl("Decision",states,["Unreviewed","Accept","Investigate","Reject"],
+  value=>{decisions[item.path].decision=value;filter();say("Decision changed; export to save.");});
+ const classification=selectControl("Reviewer classification",classes,classLabels,
+  value=>{decisions[item.path].classification=value;say("Classification changed; export to save.");});
+ const noteLabel=textElement("label","Evidence / review notes");
+ const notes=document.createElement("textarea");notes.rows=2;
+ notes.addEventListener("input",()=>{decisions[item.path].notes=notes.value;
+  say("Notes changed; export to save.");});
+ noteLabel.append(notes);actions.append(decision.wrapper,classification.wrapper,noteLabel);
+ card.append(actions);byId("items").append(card);
+ cards.set(item.path,{card,decision:decision.select,classification:classification.select,notes,
+  search:(item.path+" "+JSON.stringify(item.currentSources)+" "+
+   JSON.stringify(item.candidateSources)).toLowerCase()});
+}
+function filter(){
+ const q=byId("search").value.toLowerCase(),category=byId("category").value;
+ const state=byId("filter").value,counts=Object.fromEntries(states.map(x=>[x,0]));
+ let visible=0;
+ for(const item of data.items){
+  const entry=cards.get(item.path),review=decisions[item.path];counts[review.decision]++;
+  entry.card.hidden=Boolean((category&&item.category!==category)||
+   (state&&review.decision!==state)||(q&&!entry.search.includes(q)));
+  if(!entry.card.hidden)visible++;
+ }
+ byId("counter").textContent=visible+" shown / "+data.items.length+" total; "+
+  Object.entries(counts).map(([k,v])=>k+": "+v).join(", ");
+ byId("empty").hidden=visible!==0;
+}
+for(const id of ["search","category","filter"])
+ byId(id).addEventListener(id==="search"?"input":"change",filter);
+byId("mode").addEventListener("change",()=>{document.body.dataset.mode=byId("mode").value;});
+byId("opacity").addEventListener("input",()=>{
+ document.body.style.setProperty("--opacity",byId("opacity").value/100);
+});
+byId("export").addEventListener("click",()=>{
+ const result={format:"InfinityDB symbol artwork review",formatVersion:1,
+  reviewId:data.reviewId,pins:data.pins,decisions,
+  unresolvedCompatibility:data.removed};
+ const blob=new Blob([JSON.stringify(result,null,2)+"\n"],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="symbol-artwork-decisions.json";a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);say("Exported decisions for this exact input set.");
+});
+byId("import").addEventListener("change",async event=>{
+ const file=event.target.files[0];if(!file)return;
+ try{
+  const value=JSON.parse(await file.text()),object=x=>x!==null&&typeof x==="object"&&!Array.isArray(x);
+  if(!object(value)||value.format!=="InfinityDB symbol artwork review"||value.formatVersion!==1||
+   value.reviewId!==data.reviewId||!object(value.pins)||
+   Object.keys(data.pins).some(k=>value.pins[k]!==data.pins[k])||!object(value.decisions))
+   throw Error("Wrong review format or input identity; nothing imported.");
+  const next=blank();
+  for(const [path,review] of Object.entries(value.decisions)){
+   if(!Object.hasOwn(next,path)||!object(review)||!states.includes(review.decision)||
+    !classes.includes(review.classification)||typeof review.notes!=="string")
+    throw Error("Invalid review entry; nothing imported: "+path);
+   next[path]={decision:review.decision,classification:review.classification,notes:review.notes};
+  }
+  // Replace atomically; omitted paths reset to unreviewed rather than retaining stale decisions.
+  decisions=next;
+  for(const [path,entry] of cards){
+   entry.decision.value=decisions[path].decision;
+   entry.classification.value=decisions[path].classification;entry.notes.value=decisions[path].notes;
+  }
+  filter();say("Imported decisions for this exact input set. Removed URLs remain unresolved.");
+ }catch(error){say("Import failed: "+error.message);}
+ event.target.value="";
+});
+filter();
+</script>
+</body>
+</html>
