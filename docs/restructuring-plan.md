@@ -3128,6 +3128,32 @@ just because both currently reside in `download_army_symbols`.
 `InfinityDB-symbol-tools` exists for this work, but must not become
 a required build dependency without a verified offline handoff.
 
+#### P5.4 — Raw symbol source request boundary (2026-11-11)
+
+The new standalone `InfinityDB-symbol-tools` repository must not own
+application-level symbol discovery or publication merely because raw
+network requests and asset processing were previously combined.
+`tools/export_symbol_source_plan.py` now constructs an optional,
+read-only version-1 request plan from a **verified, pinned Army ZIP
+and manifest** using the existing authoritative symbol discovery
+(including checked static and legacy declarations). It exports only
+the Army basename/SHA-256, exact document count, and sorted
+authoritative URL-to-relative-archive-path pairs. Unknown SVG-bearing
+Army source fields and tampered Army ZIPs fail closed; existing plan
+files cannot be silently overwritten with different requests.
+
+`InfinityDB-symbol-tools` initially owns a strict, standalone
+read-only parser for this request contract, including host/path and
+case-insensitive archive-name collision checks. This is **not** a
+completed acquisition cutover. The new repository still needs a raw
+SVG downloader, cache and failure semantics, exact v3
+`SYMBOLS ...zip`/Army-bound provenance output, a source-result
+handback and parity with the current symbol build manifest.
+The live `download_army_symbols` acquisition and `build_symbols`
+publication pipeline therefore remain untouched. No normal build,
+serve or Docker path reads this optional request plan or imports
+the external repository.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

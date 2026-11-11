@@ -397,6 +397,16 @@ The current producer contracts are:
   raw SVG/source acquisition may eventually move; canonical symbol
   naming, conversion, publication, app mappings and
   `symbol-publication.json` remain InfinityDB responsibilities.
+  As preparation, `tools.export_symbol_source_plan` can explicitly
+  generate a **read-only** v1 request plan from a verified Army ZIP,
+  the pinned static declarations and legacy identity configuration.
+  It records only sorted approved URLs, selected archive paths and
+  the input Army file's name/SHA-256. The independent
+  [InfinityDB-symbol-tools](https://github.com/frankysan/InfinityDB-symbol-tools)
+  validator can check the plan and input bytes offline. The request
+  plan is **not** snapshot provenance, does not confer source
+  authority by itself, and is not used in normal builds. Raw symbol
+  acquisition has **not** moved yet.
 
 The *format* and verification contract stay owned by InfinityDB's
 snapshot-provenance module. An extracted producer must emit compatible
