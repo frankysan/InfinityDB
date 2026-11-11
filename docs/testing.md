@@ -7895,19 +7895,20 @@ conditions and 14 prohibited actions/eligibility choices. The read-only
 `config/validation/restrictions-source-chart.json` records each source
 subject, negative action, reference target and scope without materializing
 runtime relationships or assigning invented Troop Type identities.
-The audit cross-checks the relevant existing curated records and highlights
+The maintained validator cross-checks existing curated records and flags
 missing or insufficiently scoped typed relationships:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --json
-.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --json
 ```
 
-The optional PDF check requires PyMuPDF, verifies the pinned source SHA-256
-and matches all six ordered printed restrictions between the chart headings.
-The default runs offline from the maintained manifest and curated JSON.
-Regression tests are in `tests/test_game_mode_source_table.py` with the
-other independent N5.3 source-table audits.
+The current command runs offline from the reviewed manifest and curated JSON.
+The one-use p. 194 PDF text extractor was retired in P5.1: the 2026-10-30
+source review remains recorded below and the pinned source SHA-256 stays
+in the manifest and regression tests. For new revisions, perform new source
+intake rather than running a fixed-geometry historical parser.
+Current source, projection and rendering regression tests live in
+`tests/test_game_mode_source_table.py`.
 
 **Reviewed 2026-10-30:** all six source lines match, with 14 separately
 identified restrictions. TAG, VH and REM are source Troop Type selectors,
@@ -7930,8 +7931,8 @@ plain text. The JSON must match the deterministic source projection
 byte-for-byte:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --check-publication --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
-.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --output local/restrictions-reference-staged.json
+.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --check-publication --json
+.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --output local/restrictions-reference-staged.json
 ```
 
 The second command stages replacement bytes under the ignored `local/`

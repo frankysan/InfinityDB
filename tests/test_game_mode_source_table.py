@@ -20,9 +20,6 @@ from tools.audit_restrictions_source_chart import (
     MANIFEST as RESTRICTIONS_MANIFEST,
 )
 from tools.audit_restrictions_source_chart import (
-    PDF as RESTRICTIONS_PDF,
-)
-from tools.audit_restrictions_source_chart import (
     PUBLICATION as RESTRICTIONS_PUBLICATION,
 )
 from tools.audit_restrictions_source_chart import (
@@ -38,9 +35,6 @@ from tools.audit_restrictions_source_chart import (
 )
 from tools.audit_restrictions_source_chart import (
     publication_bytes as restrictions_publication_bytes,
-)
-from tools.audit_restrictions_source_chart import (
-    verify_pinned_pdf as verify_restrictions_pdf,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -378,6 +372,10 @@ def test_n53_restrictions_chart_six_subjects_and_fourteen_prohibitions() -> None
     }
     assert len(report["manifestSha256"]) == 64
     assert len(report["curatedSha256"]) == 64
+    manifest, _ = _restriction_inputs()
+    assert manifest["sourcePdfSha256"] == (
+        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+    )
 
 
 def test_n53_seven_non_graph_restrictions_keep_source_scoped_api_and_browser_coverage(
@@ -591,23 +589,6 @@ def test_n53_typed_restrictions_fail_closed_on_scope_selector_or_permission() ->
         compile_restriction_conditions(chart, altered_records)
 
 
-def test_n53_restrictions_optional_pinned_pdf_exact_six_lines() -> None:
-    pytest.importorskip("pymupdf")
-    if not RESTRICTIONS_PDF.is_file():
-        pytest.skip("Pinned N5.3 PDF unavailable")
-    report = audit_restrictions_files(pdf_path=RESTRICTIONS_PDF)
-    assert report["verifiedPdfSha256"] == (
-        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
-    )
-    chart, _ = _restriction_inputs()
-    edited = copy.deepcopy(chart)
-    edited["rows"][1]["sourceText"] = edited["rows"][1]["sourceText"].replace(
-        "an upwards Jump", "any Jump",
-    )
-    with pytest.raises(ValueError, match="printed line mismatch"):
-        verify_restrictions_pdf(RESTRICTIONS_PDF, edited)
-
-
 def test_n53_restrictions_chart_cli(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -616,6 +597,23 @@ def test_n53_restrictions_chart_cli(
     output = capsys.readouterr().out
     assert "6 rows, 14 negative conditions" in output
     assert "Source-only: no action-legality" in output
+
+
+def test_n53_restrictions_cli_checks_current_publication(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(
+        sys, "argv",
+        ["audit_restrictions_source_chart", "--check-publication", "--json"],
+    )
+    assert restrictions_main() == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["negativeConditionCount"] == report["typedConditionCount"] == 14
+    assert len(report["publishedReferenceSha256"]) == 64
+    manifest, records = _restriction_inputs()
+    assert report["publishedReferenceSha256"] == verify_published_restrictions(
+        manifest, records, RESTRICTIONS_PUBLICATION,
+    )
 
 
 def test_published_restrictions_reference_is_exact_source_projection() -> None:

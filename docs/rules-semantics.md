@@ -4796,8 +4796,10 @@ Unit Profile restrictions research question without creating a live legality eng
 
 **N5.3 p. 194 source audit (2026-10-30):**
 `config/validation/restrictions-source-chart.json` pins all **six** printed
-subject rows and **14** explicit negative conditions, independently checked
-against the pinned PDF by `tools.audit_restrictions_source_chart`. The
+subject rows and **14** explicit negative conditions. Their source wording
+was checked against the pinned PDF during the completed 2026-10-30 audit;
+the maintained validator now checks the accepted manifest, curated facts and
+published projection without retaining the one-use PDF parser. The
 source selectors for TAG, VH, and REM have no canonical Troop Type identity in
 the current rules registry. Existing `equipment:motorcycle`, `skill:aerial`,
 `training:irregular`, `skill:cautious-movement` and `skill:lieutenant`

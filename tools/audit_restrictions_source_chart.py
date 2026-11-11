@@ -21,7 +21,6 @@ from infinity_db.restriction_conditions import (
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "config/validation/restrictions-source-chart.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 SUBJECTS = ("TAG", "Motorcycle", "Aerial", "VH", "REM", "Irregular")
 COUNTS = (2, 5, 2, 2, 2, 1)
 CLASSIFICATION = {
@@ -196,40 +195,6 @@ def restrictions_audit(
     }
 
 
-def verify_pinned_pdf(path: Path, manifest: dict[str, Any]) -> str:
-    """Verify each complete line inside p. 194 chart bounds, in source order."""
-    try:
-        import pymupdf  # type: ignore[import-untyped]
-    except ImportError as exc:
-        raise ValueError("Restrictions Chart PDF check requires PyMuPDF") from exc
-    data = path.read_bytes()
-    digest = hashlib.sha256(data).hexdigest()
-    if digest != manifest["sourcePdfSha256"]:
-        raise ValueError("Restrictions Chart pinned PDF fingerprint mismatch")
-    with pymupdf.open(stream=data, filetype="pdf") as document:
-        text = document[193].get_text("text", sort=False)
-    if not isinstance(text, str):
-        raise ValueError("Restrictions Chart PDF text unavailable")
-    normalized = normalize(text)
-    if "RESTRICTIONS CHART" not in normalized or (
-        "RETREAT! AND LOSS OF LIEUTENANT SUMMARY CHART" not in normalized
-    ):
-        raise ValueError("Restrictions Chart PDF section boundary missing")
-    block = normalized.split("RESTRICTIONS CHART", 1)[1].split(
-        "RETREAT! AND LOSS OF LIEUTENANT SUMMARY CHART", 1
-    )[0]
-    cursor = 0
-    for row in manifest["rows"]:
-        text_value = normalize(row["sourceText"])
-        found = block.find(text_value, cursor)
-        if found < 0:
-            raise ValueError(f"Restrictions Chart printed line mismatch: {row['subject']}")
-        cursor = found + len(text_value)
-    return digest
-
-
-
-
 PUBLICATION = ROOT / "src/infinity_db/web/static/restrictions-reference.json"
 SOURCE_URL = "https://experience.corvusbelli.com/en/infinity/resources"
 ACTION_DISPLAY: dict[str, tuple[str, str | None]] = {
@@ -326,7 +291,6 @@ def verify_published_restrictions(
 def audit_source_files(
     manifest_path: Path = MANIFEST,
     curated_path: Path = CURATED,
-    pdf_path: Path | None = None,
     publication_path: Path | None = None,
 ) -> dict[str, Any]:
     manifest_raw = manifest_path.read_bytes()
@@ -339,7 +303,6 @@ def audit_source_files(
         **result,
         "manifestSha256": hashlib.sha256(manifest_raw).hexdigest(),
         "curatedSha256": hashlib.sha256(curated_raw).hexdigest(),
-        "verifiedPdfSha256": verify_pinned_pdf(pdf_path, manifest) if pdf_path else None,
         "publishedReferenceSha256": (
             verify_published_restrictions(manifest, records, publication_path)
             if publication_path is not None else None
@@ -351,7 +314,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=MANIFEST)
     parser.add_argument("--curated", type=Path, default=CURATED)
-    parser.add_argument("--pdf", type=Path)
     parser.add_argument("--check-publication", action="store_true")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--json", action="store_true")
@@ -369,7 +331,7 @@ def main() -> int:
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(data)
     report = audit_source_files(
-        args.manifest, args.curated, args.pdf,
+        args.manifest, args.curated,
         PUBLICATION if args.check_publication else None,
     )
     if args.json:

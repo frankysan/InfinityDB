@@ -2842,6 +2842,34 @@ Hacking Program statistics validator remains active for now because
 it compares twelve actual Army metadata profiles against independent
 N5.3 evidence, not just a retired publication procedure.
 
+#### P5.1 — Retire completed Restrictions Chart PDF check (2026-11-11)
+
+The N5.3 p.194 Restrictions Chart has two distinct responsibilities:
+the completed six-line printed-PDF investigation, and continuing
+negative-condition projection into the packaged browser reference.
+Retire only `audit_restrictions_source_chart.verify_pinned_pdf` and
+its `--pdf` CLI path, plus its PDF-specific test. The accepted source
+SHA-256 and review findings remain in the manifest and tests.
+
+Keep the chart audit/projection command: `--check-publication` verifies
+byte-exact output against the maintained six subjects and fourteen
+typed negative conditions, while `--output` stages reviewed reference
+bytes without overwriting the published asset. Add a CLI-level
+publication check to the existing tests. This current-purpose validator
+also preserves upward-only Motorcycle Jump, Lieutenant selection-only,
+and source-only Troop Type boundaries. Reassess naming and shared
+verification infrastructure under P5.2, not as a source-research
+retirement.
+
+The Weapon Chart audit is a separate dependency cluster:
+`audit_weapon_chart_profiles` supplies parsing/identity helpers to
+`audit_weapon_traits_prose`, `audit_wiki_weapon_chart_names` and
+`audit_weaponry_family_clauses`; `audit_weapon_trait_cross_sources`
+uses the traits review helper. Do not remove one wrapper until its
+current source-delta/reconciliation consumers and maintained review
+manifests have been assessed under P5.2. No published Weapon facts
+are changed by this slice.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
