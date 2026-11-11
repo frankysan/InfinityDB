@@ -2646,6 +2646,29 @@ closed. Preserve citations, source notes and genuine gameplay uncertainty.
   remaining `audit_*` and dated publication helpers based on independent
   purpose rather than filename alone.
 
+#### P5.1 — Retire completed deployed-object keyword and delivery queues (2026-11-11)
+
+The old `audit_deployed_object_detail_queue` and
+`audit_deployed_object_delivery_coverage` entrypoints and their dedicated
+historical-operation tests have no remaining independent publication, development
+or research decision to serve. The detailed keyword scan closed with Cube 2.0
+classified as automatic Equipment; the maintained
+`audit_deployed_object_inventory` source-domain scan now covers all 106 reviewed
+Weapon/Equipment definitions, including structured clauses and source review
+status. The delivery queue closed with 17 projected object identities and
+approved delivery paths, not a proof of completeness for all game objects.
+
+Preserve the validated review manifests, pinned factual conclusions, object
+identities and unresolved Mine Dispenser subtype. The current
+`test_audit_deployed_object_inventory` and
+`test_deployed_object_reference` checks retain the candidate boundary and
+require all 17 reviewed objects to have explicit delivery sources; storage
+tests retain the embedded publication contract. No new inferred Army carrier,
+source alias or game legality is authorized. Remove the retired test modules
+from the section registry and historical command examples from documentation.
+The broader `audit_deployed_object_*_queue` family remains subject to its
+own P5.1 disposition, rather than implicit deletion.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

@@ -7357,26 +7357,22 @@ State Token rather than an independently targetable Deployable. The current
 19 reviewed delivery-origin records count as covered candidates, not
 unreviewed objects.
 
-The current curated-summary scan finds 24 matching definitions; the 12
-candidate decisions and 19 delivery-origin records (which overlap) account
-for all 24, leaving no unreviewed candidate. A second read-only audit also
-searches structured **Requirements, Effects,
+The pinned curated-summary scan found 24 matching definitions; the 12
+candidate decisions and 19 delivery-origin records (which overlap) accounted
+for all 24, leaving no unreviewed candidate. The now-retired detailed-keyword
+investigation additionally searched structured **Requirements, Effects,
 Restrictions, Clarifications, and source notes** for Deployable/Token/Scenery
-Element mentions that may be absent from summaries:
+Element mentions absent from summaries.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_detail_queue
-.venv\Scripts\python.exe -m tools.audit_deployed_object_detail_queue --json
-```
-
-This scan found one previously unreviewed detail-only record, **Cube 2.0**
+It found one previously unreviewed detail-only record, **Cube 2.0**
 (N5.3 p. 121). Its Command Token recovery reroll concerns a spent game
 resource, not a separate deployed model. The decision is source-pinned in
 `config/validation/deployed-object-candidate-reviews.json` as automatic
 Equipment, with no manufactured object attributes. The full detailed-rule
-keyword queue now has no unreviewed Weapon/Equipment definition; its
-regression test fails if a new match lacks a reviewed decision or delivery
-origin. Neither scan is **an exhaustive N5.3 game-object inventory**:
+keyword queue had no unreviewed Weapon/Equipment definition at that source
+revision. The maintained source-domain clause inventory and candidate-review
+validation supersede the completed one-use discovery test. Neither scan is
+**an exhaustive N5.3 game-object inventory**:
 different wording, sources outside maintained Weapon/Equipment definitions,
 Army/Unit/loadout semantics, and edition changes still need reconciliation.
 
@@ -7430,13 +7426,11 @@ definitions; closed lexical queues cannot establish overall source-table,
 Army/Unit/loadout or gameplay completeness. No new identities, attributes
 or delivery links are inferred.
 
-The second remaining inventory question is *delivery coverage for the objects
-already identified*, independently of keyword discovery. Run:
-
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_delivery_coverage
-.venv\Scripts\python.exe -m tools.audit_deployed_object_delivery_coverage --json
-```
+The completed delivery-coverage audit examined the objects already
+identified, independently of keyword discovery. The continuing validation
+runs through `tools.audit_deployed_object_inventory`,
+`tests/test_deployed_object_reference.py` and
+`tests/test_deployed_object_storage.py` rather than the retired queue command.
 
 The pinned review has **17 reviewed object identities and 28 approved
 delivery paths**, with no uncovered origin for an object in that bounded
@@ -7445,11 +7439,11 @@ separate Place Deployable and WIP-based Intuitive Attack methods (N5.3 pp.
 49, 74, 82); FastPanda uses Perimeter placement (pp. 82, 186), and Armed
 Turret uses a reviewed-only curated Trooper profile rather than an invented
 Army four-stat profile (pp. 70, 74). Its S1/S2 conflict remains visible.
-The report provides exact source-ID-based catalog aliases only as
-**candidates to investigate**: a source alias does not prove delivery mechanics,
+The historical audit reported exact source-ID-based catalog aliases only as
+**candidates to investigate**: an alias does not prove delivery mechanics,
 mode or Unit/Army roster legality. Mine Dispenser's subtype remains separately
-unresolved. `tests/test_deployed_object_delivery_coverage.py` guards these
-boundaries and verifies that aliases cannot become inferred delivery edges.
+unresolved. Current source projection and embedded-database tests preserve
+reviewed delivery relationships without inventing source-alias ownership.
 
 The Weapon/Equipment candidate validator rejects mismatched profile shapes,
 exact Army profile selectors/attributes, lost source clauses/citations, and

@@ -301,6 +301,10 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         "ARM": "2", "BTS": "3", "STR": "1", "S": "2",
     }
     assert by_id["equipment:deactivator"]["profileShape"] == "none"
+    assert by_id["equipment:cube-2"]["classification"] == (
+        "automatic-equipment-not-deployed-object"
+    )
+    assert by_id["equipment:cube-2"]["profileShape"] == "none"
     assert by_id["weapon:symbiobomb"]["profileShape"] == "none"
     assert {
         candidate["recordId"] for candidate in result["remainingCuratedCandidateMentions"]

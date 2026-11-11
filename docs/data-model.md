@@ -214,27 +214,23 @@ same-context payloads and cycles are detected rather than silently accepted.
 Consequently no recursive relations are projected for this snapshot; any new
 matches require preserving the full Include path before publishing them.
 Unresolved Mine Dispenser subtypes remain unassigned. Objects lacking exact
-matches are not claimed to have zero possible users. The read-only
-`tools.audit_deployed_object_detail_queue` scan covers deployable, token and
-scenery mentions in maintained Weapon/Equipment definition detail fields,
-not just summaries. Its only initially unreviewed detail-only finding,
-Cube 2.0's Command Token recovery reroll, is source-backed and classified
-as automatic Equipment rather than a deployed object; the resulting
-review manifest remains distinct from new object/delivery publication.
-The separate read-only `tools.audit_deployed_object_delivery_coverage`
-compares the 17 published reviewed object identities against their *approved*
-delivery origins. All 17 currently have reviewed origins (28 approved delivery
-paths in the pinned review); this closes the bounded published-object delivery
-queue, **not** the inventory of all possible deployed objects. WildParrot
-distinguishes ordinary Place Deployable from Intuitive Attack with a WIP Roll.
-Armed Turret has no separate Army auxiliary-profile selector: its approved
-delivery path targets the exact reviewed curated object by `originRuleId`,
-retaining its S1/S2 Silhouette conflict. Mine Dispenser has neither an exact
-reviewed target profile nor a reviewed-only object and remains unresolved.
-The audit reports exact Army source-catalog aliases as investigation leads,
-**not** evidence of a delivery method, legal roster carrier or equivalence
-between distinct Weapon modes. Missing delivery edges are evidence gaps,
-not claims that an object cannot be deployed.
+matches are not claimed to have zero possible users. The completed detailed-keyword audit found Cube 2.0's Command Token recovery
+reroll (N5.3 p. 121), classified in
+`config/validation/deployed-object-candidate-reviews.json` as automatic
+Equipment, not a placed battlefield Token or an independent object.
+The maintained `tools.audit_deployed_object_inventory` checks candidate
+decisions and reviews additional clauses in all 106 curated Weapon/Equipment
+definitions. The projection and storage tests verify the 17 published
+reviewed object identities and their approved delivery origins. All 17 have
+reviewed origins (28 approved delivery paths in the pinned review); that
+closes the bounded published-object delivery queue, **not** an inventory
+of all possible deployed objects. WildParrot distinguishes Place Deployable
+from WIP-based Intuitive Attack; Armed Turret uses the reviewed curated
+object by `originRuleId` and retains the S1/S2 dispute. Mine Dispenser
+has no exact resolved subtype and remains an unresolved delivery.
+Source-catalog aliases alone cannot establish delivery methods, carrier
+legality or equivalence between Weapon modes. Missing evidence is not proof
+an object cannot be deployed.
 
 The source-schema review distinguishes direct source Unit ownership from
 catalog availability and reusable metadata. Army-local `profile_*` and

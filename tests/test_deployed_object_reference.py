@@ -37,6 +37,7 @@ def test_all_reviewed_source_objects_keep_stable_provenanced_attributes(
     assert len(result["objects"]) == 17  # 14 chart, Madtraps, Armed Turret, Cover
     objects = {row["id"]: row for row in result["objects"]}
     assert len(objects) == 17
+    assert all(obj["deliverySources"] for obj in objects.values())
     source_keys = [
         (row["sourceProfile"]["catalog"], row["sourceProfile"]["sourceId"],
          row["sourceProfile"]["mode"])
