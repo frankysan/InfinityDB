@@ -3566,10 +3566,32 @@ acquisition**. Acquisition was **not** claimed or performed;
 the legacy archive is not suitable as a substitute for
 the 29 overridden upstream source files.
 
-**Next:** Run the source acquisition handoff, retain its
-raw ZIP/provenance/report, then execute the external stages
-and real-source raster/browser parity before retiring the
-in-tree pipeline.
+#### P5.7 — Real-source processing execution (2026-11-11)
+
+Raw acquisition completed at
+`InfinityDB-symbol-tools/local/p5-production-raw/SYMBOLS 20261111-202545.zip`
+with its raw report and provenance manifest. The pinned
+lookup plan and reviewed overrides produced
+`EFFECTIVE-SYMBOLS 20261111-204139.zip`:
+**1,101** effective SVGs and **106** direct/propagated
+override applications. Structural preflight passed with
+**zero** parse errors. Font audit passed with **142**
+font-bearing assets available and **zero** missing.
+resvg 0.49.0 duplicate detection passed with **807**
+canonical assets, **294** redundant assets and **zero**
+render errors. Inkscape 1.4.4 text conversion passed:
+**107/107** canonical text-bearing SVGs converted.
+
+The old compressed work tree contains **808** SVGs,
+so the canonical path-set difference must be resolved
+rather than assumed equivalent. External balanced
+compression and final independent verification/parity
+remain required before cutover.
+
+**Next:** Complete external compression, independently
+verify its receipt and canonical members, reconcile the
+legacy path-set difference and run raster/browser
+publication acceptance.
 
 ### P6 — Consolidate, measure and establish the new baseline
 

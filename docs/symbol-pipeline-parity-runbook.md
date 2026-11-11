@@ -16,10 +16,12 @@ python -m tools.audit_symbol_parity_readiness --output "local/p5-symbol-parity-r
 ```
 
 The initial audit found 1,101 archived assets and 808 legacy
-compressed canonical SVGs. **29 legacy overridden assets lack
-verified original upstream bytes**, and no completed external
-conversion/compression artifacts exist at
-`local/p5-external-processing`. The command exits with status 2
+compressed canonical SVGs. **29 legacy overridden assets lacked
+verified original upstream bytes** in that historical ZIP. A new
+source-side acquisition was completed on 2026-11-11, producing
+`SYMBOLS 20261111-202545.zip` and its provenance/report in the
+symbol-tools checkout. The historical readiness audit still
+describes the original baseline, not the new acquisition. The command exits with status 2
 for this expected blocked state, and 1 for invalid input evidence.
 It does not download, reconstruct or silently substitute sources.
 
@@ -91,6 +93,31 @@ renderer, sizes, DPRs and visual tolerances for both pipelines.
 The new compressor receipt already pins these settings. This
 comparison is not a substitute for validating override choices or
 font resolution.
+
+## Reconcile canonical paths
+
+The new duplicate stage selected **807 canonical SVGs** from
+1,101 effective sources (294 exact duplicates, zero render
+errors). The historical in-tree work directory contains
+**808** compressed SVGs. This is an unresolved coverage
+difference; neither count establishes which identity
+should be published.
+
+Copy the external `duplicate-state.json` receipt into an
+ignored local location in the InfinityDB checkout and
+compare canonical paths before running expensive raster
+parity:
+
+```powershell
+Copy-Item '..\InfinityDB-symbol-tools\local\p5-production-reports\EFFECTIVE-SYMBOLS 20261111-204139\duplicate-state.json' 'local/p5-production-duplicate-state.json'
+python -m tools.compare_symbol_canonical_paths --legacy-root 'data/work/symbols/SYMBOLS 20261004-184813--cda970bafe15/compressed' --duplicate-receipt 'local/p5-production-duplicate-state.json'
+```
+
+Exit status 2 reports concrete external-only/legacy-only
+canonical paths. Investigate source or override differences,
+changed exact-duplicate grouping and historical processing
+behavior; do not fabricate or silently drop a canonical
+asset to force counts to match.
 
 ## Verify and compare
 
