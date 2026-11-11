@@ -8,7 +8,6 @@ import json
 import shutil
 import sqlite3
 import sys
-from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -23,8 +22,6 @@ from tools.audit_core_scenario_objects import (
     audit_source_files,
     main,
 )
-from tools.audit_terrain_scenery_source_gaps import audit_source_files as audit_terrain
-from tools.audit_terrain_scenery_source_gaps import main as terrain_main
 
 
 def _inputs() -> tuple[dict, dict]:
@@ -128,11 +125,8 @@ def test_core_scenario_object_audit_cli(
     assert "Unchanged reviewed Weapon/Equipment objects: 17" in output
 
 
-@pytest.mark.parametrize("audit,cli", (
-    (audit_source_files, main), (audit_terrain, terrain_main),
-), ids=("core-scenarios", "terrain-scenery"))
-def test_boundary_audits_use_explicit_databases_without_json(
-    audit: Callable[..., dict], cli: Callable[[], int], tmp_path: Path,
+def test_core_scenario_audit_uses_explicit_databases_without_json(
+    tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
 ) -> None:
     army = tmp_path / "army" / "selected.sqlite"
@@ -146,19 +140,18 @@ def test_boundary_audits_use_explicit_databases_without_json(
         (directory / "deployed-objects.json").write_text("invalid JSON", encoding="utf-8")
     before = {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
 
-    report = audit(army_database=army, rules_database=rules)
+    report = audit_source_files(army_database=army, rules_database=rules)
     assert report["armyDatabaseSha256"] == hashlib.sha256(before[army]).hexdigest()
     assert report["rulesDatabaseSha256"] == hashlib.sha256(before[rules]).hexdigest()
     monkeypatch.setattr(sys, "argv", [
-        cli.__module__, "--army-database", str(army), "--rules-database", str(rules), "--json",
+        "audit_core_scenario_objects", "--army-database", str(army),
+        "--rules-database", str(rules), "--json",
     ])
-    assert cli() == 0
+    assert main() == 0
     assert json.loads(capsys.readouterr().out) == report
     assert {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()} == before
 
 
-@pytest.mark.parametrize("audit", (audit_source_files, audit_terrain),
-                         ids=("core-scenarios", "terrain-scenery"))
 @pytest.mark.parametrize("case,error,match", (
     ("missing-army", FileNotFoundError, None),
     ("missing-rules", ValueError, "Rules database does not exist"),
@@ -167,8 +160,8 @@ def test_boundary_audits_use_explicit_databases_without_json(
     ("missing-model", ValueError, "Incomplete normalized deployed-object schema"),
     ("corrupt-rules", sqlite3.DatabaseError, "not a database"),
 ))
-def test_boundary_audits_reject_missing_or_mismatched_embedded_models(
-    audit: Callable[..., dict], case: str, error: type[Exception], match: str | None,
+def test_core_scenario_audit_rejects_missing_or_mismatched_embedded_models(
+    case: str, error: type[Exception], match: str | None,
     tmp_path: Path,
 ) -> None:
     army, rules = tmp_path / "army.db", tmp_path / "rules_n5.db"
@@ -191,5 +184,5 @@ def test_boundary_audits_reject_missing_or_mismatched_embedded_models(
     (tmp_path / "deployed-objects.json").write_text("{}", encoding="utf-8")
     before = {path: path.read_bytes() for path in tmp_path.iterdir()}
     with pytest.raises(error, match=match):
-        audit(army_database=army, rules_database=rules)
+        audit_source_files(army_database=army, rules_database=rules)
     assert {path: path.read_bytes() for path in tmp_path.iterdir()} == before

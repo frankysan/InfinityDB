@@ -8275,36 +8275,31 @@ from an Army loadout, evaluate game state or add deployed objects.
 The optional N5.3 terrain chapter (pp. 143–145) contains a separate source
 table and two physical access labels outside the Weapon Chart and scenario
 object inventories. Its suggested combinations are not new canonical terrain
-Types or deployed Weapon/Equipment profiles. Audit the source boundary with:
+Types or deployed Weapon/Equipment profiles. The original fixed-source
+PDF investigation is complete and its standalone CLI was retired in P5.1.
+Current-data regression coverage runs with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps
-.venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.\.venv\Scripts\python.exe -m pytest tests/test_terrain_scenery_source_gaps.py -q
 ```
 
-The audit pins **five Terrain Types** (Aquatic, Desert, Mountain, Jungle,
-Zero-G), **18 printed suggestion/example labels** (retaining the source's
-`Artic Plains` spelling), and **two Scenery Access Width Tokens** (`Narrow
-Gate` / `Wide Gate`). The `skill:terrain` reference exists;
-standalone Special Terrain and Access Width reference definitions are
-now **promoted** as N5.3 general rules. The subsequent maintained-text
-review and coordinated binary refresh are complete (see below).
-Gate Token labels do not have separate canonical definitions.
-The audit requires both accepted rules and rejects missing or unsupported
-definitions. Its optional `--pdf` mode verifies source headings, names and
-Narrow Gate eligibility against the local English N5.3 source. Without
-the ignored PDF, it still checks maintained and published domain boundaries;
-it does not claim to have re-extracted the PDF.
+Current tests pin **five Terrain Types** (Aquatic, Desert, Mountain, Jungle,
+Zero-G), **18 reviewed example labels** (retaining the printed `Artic
+Plains` spelling), and **two Access Width labels** (`Narrow Gate` /
+`Wide Gate`). The accepted `skill:terrain`, `rule:special-terrain` and
+`rule:access-width` definitions are maintained with N5.3 citations.
+Gate labels have no separate canonical identities. The tests check exact
+source ownership, selected nuanced example cells, schema fail-closure and
+current Rules database/API/search parity. PDF text-extraction findings are
+retained as dated review evidence, not an ongoing PDF parser requirement.
 
-The terrain/scenery and core-scenario boundary audits read deployed objects
-directly from validated Rules SQLite, bound to the selected Army bytes. Use
-`--army-database PATH --rules-database PATH` to select alternate files;
-their locations and names are independent. Both default to the tracked
-database pair. Reports include `armyDatabaseSha256` and
-`rulesDatabaseSha256`, replacing hashes of a synthesized JSON publication.
-The retired `--publication` option and loose JSON recovery path are gone.
-Missing, incompatible or mismatched embedded models fail closed without
-creating or modifying inputs; adjacent `deployed-objects.json` is ignored.
+The terrain tests and maintained core-scenario audit read deployed objects
+directly from validated Rules SQLite, bound to the selected Army bytes.
+The core-scenario audit still supports `--army-database PATH
+--rules-database PATH` for alternate files, independently of their
+locations or names. Its report includes `armyDatabaseSha256` and
+`rulesDatabaseSha256`. Tests reject missing, incompatible or mismatched
+embedded models, with no loose `deployed-objects.json` recovery path.
 
 Special Terrain zones are game-table/session configurations, with a Terrain
 Type and at least one other characteristic (Difficult Terrain, Saturation
@@ -8312,13 +8307,12 @@ or Visibility Conditions). The table's 18 example rows illustrate possible
 combinations, not 18 distinct terrain Types. Access Width is a scenery
 restriction; the Narrow/Wide Gate Tokens label access points rather than
 deployable devices, and the applicable Silhouette/Prone restrictions cannot
-be inferred from an Army loadout. The audit fails on unexpected promotion
-of these names into the 17-object Weapon/Equipment publication or new
-maintained source identities requiring re-review. The source-gap
-audit itself does not add attributes, source carriers or runtime records.
-The semantics are already reviewed in `docs/rules-semantics.md` and
-`docs/rules-research.md`. `tests/test_terrain_scenery_source_gaps.py`
-guards the boundary, including a local-only test of the pinned PDF.
+be inferred from an Army loadout. Current tests reject unexpected presence
+of these names in the 17-object Weapon/Equipment publication, absent
+accepted rule identities, wrong source ownership or invented gate terms.
+The source review did not add attributes, source carriers or object identities.
+Its findings remain in `docs/rules-semantics.md` and
+`docs/rules-research.md`; the retired PDF scanner remains in Git history.
 
 Two source-backed `basic-rule` definitions were promoted together with
 their generated artifacts: `rule:special-terrain` (p. 143) and
@@ -8328,9 +8322,8 @@ Silhouette X/Prone restriction, without creating extra object identities.
 The original one-time staging and three-file promotion are complete.
 The pre-promotion staging script, its tests and proposal JSON were retired
 in P2.5 at `7330c310`: their exact historical content is available in
-Git history, not as current instructions. The maintained terrain source
-audit now rejects the original fully unmodelled state and missing source
-citation pages. The accepted curated Rules definitions are authoritative.
+Git history, not as current instructions. Current terrain source and publication tests reject missing accepted
+definitions or citations. The curated Rules definitions are authoritative.
 
 The first post-promotion rules check revealed two missing interaction-review entries
 and reviewed maintained-text aliases. Those reviews are now recorded:

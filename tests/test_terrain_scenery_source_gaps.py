@@ -1,10 +1,8 @@
-"""Source-backed terrain/scenery discovery beyond deployable chart and scenarios."""
+"""Current-source terrain/scenery boundaries and published reference parity."""
 
 from __future__ import annotations
 
-import copy
 import json
-import sys
 from pathlib import Path
 from urllib.parse import urlencode
 from wsgiref.util import setup_testing_defaults
@@ -14,107 +12,76 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
-from tools.audit_terrain_scenery_source_gaps import (
-    ARMY,
-    CURATED,
-    EXAMPLE_LABELS,
-    GATE_MARKERS,
-    RULES,
-    SOURCE,
-    TERRAIN_TYPES,
-    audit_source_files,
-    audit_terrain_scenery_boundary,
-    main,
-    verify_example_values,
-    verify_pinned_pdf,
+
+ROOT = Path(__file__).resolve().parents[1]
+CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
+ARMY = ROOT / "data/generated/army.db"
+RULES = ROOT / "data/generated/rules_n5.db"
+
+# Previously reviewed from N5.3 pp.143–145. Examples and gate labels do not
+# acquire independent Terrain Type or deployed-object identities.
+TERRAIN_TYPES = ("Aquatic", "Desert", "Mountain", "Jungle", "Zero-G")
+EXAMPLE_LABELS = (
+    "Beach", "Open Sea", "Swamp", "Rocky Ground", "Sand Dunes",
+    "Low Mountain or Steep Hills", "Artic Plains", "Mid-Mountain",
+    "High Mountain", "Woods", "Jungle", "Dense Jungle",
+    "Primeval Forest", "Zero-G", "Storm", "Engine Room",
+    "Generator Room", "Energy Core Room",
 )
+GATE_MARKERS = ("Narrow Gate", "Wide Gate")
 
 
 def _inputs() -> tuple[dict, dict]:
-    publication = RulesDatabase(RULES).deployed_objects_payload(ARMY)
+    rules = RulesDatabase(RULES)
+    rules.validate()
+    publication = rules.deployed_objects_payload(ARMY)
     assert publication is not None
-    return (
-        load_curated_document(CURATED),
-        publication,
-    )
+    return load_curated_document(CURATED), publication
 
 
-def test_terrain_scenery_inventory_remains_outside_deployed_objects() -> None:
-    report = audit_source_files()
-    assert report["scope"] == "terrain-scene-context-not-army-deployed-object-inventory"
-    assert report["sourcePages"] == [143, 144, 145]
-    assert report["optionalGameTableRules"] is True
-    assert report["terrainTypes"] == list(TERRAIN_TYPES)
-    assert report["namedExampleCount"] == len(EXAMPLE_LABELS) == 18
-    assert [row["printedName"] for row in report["terrainExamples"]] == list(EXAMPLE_LABELS)
-    assert [row["printedName"] for row in report["sceneryGateTokens"]] == list(GATE_MARKERS)
-    assert report["reviewStatus"] == {
-        "terrainSkill": "maintained",
-        "specialTerrainRule": "maintained",
-        "accessWidthRule": "maintained",
-        "accessWidthTokens": "owner-aliases",
-        "exampleTable": "maintained-source-suggestions",
-    }
-    assert report["publishedDeployedObjectCount"] == 17
-    assert len(report["curatedSha256"]) == 64
-    assert len(report["armyDatabaseSha256"]) == 64
-    assert len(report["rulesDatabaseSha256"]) == 64
-    assert report["verifiedPdfSha256"] is None
-
-
-def test_pinned_english_pdf_terrain_and_scenery_source_inventory() -> None:
-    pytest.importorskip("pymupdf")
-    if not SOURCE.is_file():
-        pytest.skip("Pinned local English N5.3 PDF unavailable")
-    result = audit_source_files(pdf_path=SOURCE)
-    assert len(result["verifiedPdfSha256"]) == 64
-    assert result["verifiedPdfSha256"] == verify_pinned_pdf(SOURCE)
-
-
-def test_terrain_scenery_audit_fails_closed_on_domain_promotion() -> None:
+def test_terrain_and_scenery_remain_separate_from_deployed_objects() -> None:
     curated, publication = _inputs()
-    assert audit_terrain_scenery_boundary(curated, publication)["namedExampleCount"] == 18
+    records = {row["id"]: row for row in curated["records"]}
+    assert len(records) == len(curated["records"])
+    assert records["skill:terrain"]["kind"] == "skill"
 
-    for added in ("Narrow Gate", "Wide Gate", "Engine Room"):
-        mutated = copy.deepcopy(publication)
-        mutated["objects"].append({"name": added, "id": "invented-" + added})
-        with pytest.raises(ValueError, match="promoted"):
-            audit_terrain_scenery_boundary(curated, mutated)
+    for record_id, name, page in (
+        ("rule:special-terrain", "Special Terrain", 143),
+        ("rule:access-width", "Access Width", 145),
+    ):
+        record = records[record_id]
+        assert record["kind"] == "rule"
+        assert record["name"] == name
+        assert record["composition"] == {"role": "definition"}
+        assert record["scope"] == {"game": "N5", "seasons": ["current"]}
+        assert record["facts"]["category"] == "basic-rule"
+        assert record["facts"]["effects"]
+        assert record["facts"]["restrictions"]
+        assert any(
+            cite["sourceId"] == "n5-core-v5.3-pdf" and cite.get("page") == page
+            for cite in record["citations"]
+        )
 
-    missing_skill = copy.deepcopy(curated)
-    missing_skill["records"] = [
-        row for row in missing_skill["records"] if row["id"] != "skill:terrain"
-    ]
-    with pytest.raises(ValueError, match="Terrain Special Skill"):
-        audit_terrain_scenery_boundary(missing_skill, publication)
+    assert records["rule:access-width"]["aliases"] == list(GATE_MARKERS)
+    assert not {"term:narrow-gate", "term:wide-gate"}.intersection(records)
+    table = records["rule:special-terrain"]["facts"]["terrainExamples"]
+    assert table["scope"] == "optional-source-suggestions-not-terrain-types"
+    assert [row["name"] for row in table["rows"]] == list(EXAMPLE_LABELS)
+    assert len(table["rows"]) == 18
+    assert all(
+        set(row) == {
+            "name", "terrainType", "difficultTerrain", "visibility", "saturation",
+        }
+        for row in table["rows"]
+    )
+    assert len(TERRAIN_TYPES) == 5
+    assert len(GATE_MARKERS) == 2
 
-    for omitted in ({"rule:access-width"}, {"rule:special-terrain", "rule:access-width"}):
-        missing = copy.deepcopy(curated)
-        missing["records"] = [
-            row for row in missing["records"] if row["id"] not in omitted
-        ]
-        with pytest.raises(ValueError, match="Partial"):
-            audit_terrain_scenery_boundary(missing, publication)
-
-    incorrect_source = copy.deepcopy(curated)
-    next(
-        row for row in incorrect_source["records"] if row["id"] == "rule:access-width"
-    )["citations"][0]["page"] = 143
-    with pytest.raises(ValueError, match="Unreviewed terrain/access source definition"):
-        audit_terrain_scenery_boundary(incorrect_source, publication)
-
-
-def test_terrain_scenery_source_cli(
-    monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    monkeypatch.setattr(sys, "argv", ["audit_terrain_scenery_source_gaps"])
-    assert main() == 0
-    result = capsys.readouterr().out
-    assert "Current terrain Types: 5" in result
-    assert "Suggested terrain examples: 18" in result
-    assert "Scenery gate tokens: 2" in result
-    assert "Unchanged deployed objects: 17" in result
+    objects = publication["objects"]
+    assert len(objects) == 17
+    assert len({obj["id"] for obj in objects}) == 17
+    excluded = {name.casefold() for name in (*EXAMPLE_LABELS, *GATE_MARKERS)}
+    assert all(obj["name"].strip().casefold() not in excluded for obj in objects)
 
 
 def test_suggested_terrain_values_preserve_optional_and_unresolved_source_cells() -> None:
@@ -170,31 +137,6 @@ def test_suggested_terrain_schema_rejects_lossy_or_ambiguous_values(
     path.write_text(json.dumps(curated), encoding="utf-8")
     with pytest.raises(ValueError, match="terrainExamples"):
         load_curated_document(path)
-
-
-@pytest.mark.parametrize("name,field,replacement", (
-    ("Rocky Ground", "difficultTerrain", "Yes"),
-    ("Low Mountain or Steep Hills", "difficultTerrain", "No"),
-    ("Storm", "visibility", "Zero Visibility"),
-    ("Engine Room", "difficultTerrain", "Yes"),
-    ("Energy Core Room", "visibility", "White Noise"),
-))
-def test_pinned_terrain_source_comparison_detects_changed_cell_meaning(
-    name: str, field: str, replacement: str,
-) -> None:
-    pytest.importorskip("pymupdf")
-    if not SOURCE.is_file():
-        pytest.skip("Pinned local English N5.3 PDF unavailable")
-    curated, _publication = _inputs()
-    table = next(row for row in curated["records"] if row["id"] == "rule:special-terrain")
-    rows = table["facts"]["terrainExamples"]["rows"]
-    assert verify_pinned_pdf(SOURCE) == (
-        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
-    )
-    verify_example_values(SOURCE, rows)
-    next(row for row in rows if row["name"] == name)[field] = replacement
-    with pytest.raises(ValueError, match="differ from the pinned source table"):
-        verify_example_values(SOURCE, rows)
 
 
 def test_terrain_table_and_gate_aliases_reach_storage_api_search_and_glossary() -> None:

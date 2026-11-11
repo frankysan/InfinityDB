@@ -2798,6 +2798,30 @@ statistics audit remains in place; it is not an Equipment entitlement
 source. The printed chart verification from 2026-10-30 remains
 historical evidence, not a permanent parser requirement.
 
+#### P5.1 — Retire completed terrain/scenery PDF investigation (2026-11-11)
+
+The N5.3 pp.143–145 `audit_terrain_scenery_source_gaps` CLI
+reconciled the optional terrain example table and Scenery Access Width
+labels with the now-maintained `rule:special-terrain` and
+`rule:access-width` definitions. Its printed-text checks and reports
+served a bounded source investigation; no active application, build,
+deployment or workflow imports the audit. Retire the wrapper and its
+operation-only PDF/parser/CLI tests.
+
+Keep `test_terrain_scenery_source_gaps` as a current-data regression:
+it pins the 18 reviewed example names and unusual source values,
+the accepted rule identities/citations and optional table schema,
+the two gate aliases, and the absence of newly invented
+Weapon/Equipment object or gate-term identities. Its API, storage,
+search and glossary assertions compare the actual Rules database.
+`test_core_scenario_object_boundary` continues verifying explicit
+selected Army/Rules database identity and refusal of adjacent loose
+JSON through the independently maintained core-scenario audit;
+remove only its parameterized invocation of the retired terrain CLI.
+The 2026-11-03 source review and original PDF parser remain in
+`docs/testing.md`/Git history. Future source revisions require
+separate source-intake validation, not permanent legacy operation tests.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
