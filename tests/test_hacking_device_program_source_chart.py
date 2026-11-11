@@ -25,7 +25,7 @@ from tools.audit_hacking_program_statistics_chart import PDF as STATISTICS_PDF
 MANIFEST = ROOT / "config/validation/hacking-device-program-source-chart.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 PROGRAMS = ROOT / "data/curated/rules/n5-hacking-programs-v5.3.json"
-PROGRAM_LINKS = re.compile(r"\\[\\[hacking-program:([a-z0-9-]+)(?:\\|[^\\]]*)?\\]\\]")
+PROGRAM_LINKS = re.compile(r"\[\[hacking-program:([a-z0-9-]+)(?:\|[^\]]*)?\]\]")
 EXPECTED_DEVICES = (
     ("equipment:hacking-device", "Hacking Device",
      ("carbonite", "spotlight", "total-control", "oblivion")),
