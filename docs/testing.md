@@ -7652,33 +7652,27 @@ the four source rows, their printed Program-column order, and the
 fact that this is a device access matrix rather than Unit ownership,
 a deployed object, or an additional Program identity.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart
-.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
-```
-
 The four devices grant **4 / 6 / 2 / 4** Programs, respectively
 (Hacking Device, Hacking Device Plus, Killer Hacking Device, EVO
 Hacking Device), for **11 distinct Program definitions** in the
-union. The audit checks exact maintained Equipment access-link
-sets and matching canonical Hacking Program records. The optional
-`--pdf` mode verifies the printed device table's four Program
-assignments separately from the preceding Program statistics table.
-Missing, duplicated or incorrectly assigned Programs, changed source
-scope, and missing canonical records fail closed. CI does not require
-the ignored local PDF.
+union. The current-path regression test validates exact approved
+source rows, Equipment access-link sets, canonical Program records,
+four direct N5.3 p. 58 citations and the published `rules_n5.db`
+citations. Missing, duplicated or incorrectly assigned Programs and
+changed source scope fail closed:
 
-The four Equipment facts agree with the N5.3 chart. On 2026-10-30,
-the four p. 58 citations were staged, verified and **promoted together**
-with the matching `rules.db` and deployed-object publication. The checked-out
-source now retains both the existing wiki citations and direct N5.3 citations,
-without changing its 4/6/2/4 Program assignments. The checkout audit reports
-`missingMaintainedN53ChartCitations: []`.
-The audit's `missingMaintainedN53ChartCitations` report allows
-either all four missing or none missing and fails closed on partial
-migration, duplicate N5.3 source citations or incorrect page.
-`tests/test_hacking_device_program_source_chart.py` covers these
-boundaries and the four source-backed Program sets.
+```powershell
+.\\.venv\Scripts\python.exe -m pytest tests/test_hacking_device_program_source_chart.py -q
+```
+
+The independent Program statistics chart on the same page has its
+own Army-data verification. The old fixed-source Device-chart audit
+CLI and its optional PDF text parser were retired in P5.1 after the
+2026-10-30 source and publication review. Its migration-only
+allowance for all four citations being absent is no longer applicable:
+current tests require all four accepted citations. The original
+printed-chart inspection is preserved in this dated review and Git
+history; a future PDF change belongs to source-revision intake.
 
 #### Stage and promote the four N5.3 p. 58 Equipment citations
 

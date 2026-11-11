@@ -1,27 +1,16 @@
-"""N5.3 hacking device-to-Program source chart and maintained access sets."""
+"""Current Hacking Device access and independent N5.3 Program statistics checks."""
 
 from __future__ import annotations
 
 import copy
 import json
+import re
 import sqlite3
-import sys
 
 import pytest
 
 from infinity_db.curated import load_curated_document
 from infinity_db.database.repository import Database
-from tools.audit_hacking_device_program_source_chart import (
-    CURATED,
-    MANIFEST,
-    PDF,
-    PINNED,
-    PROGRAMS,
-    audit_device_program_chart,
-    audit_source_files,
-    main,
-    verify_pinned_pdf,
-)
 from tools.audit_hacking_program_statistics_chart import (
     ARMY_DB,
     ROOT,
@@ -33,6 +22,21 @@ from tools.audit_hacking_program_statistics_chart import (
 from tools.audit_hacking_program_statistics_chart import MANIFEST as STATISTICS
 from tools.audit_hacking_program_statistics_chart import PDF as STATISTICS_PDF
 
+MANIFEST = ROOT / "config/validation/hacking-device-program-source-chart.json"
+CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
+PROGRAMS = ROOT / "data/curated/rules/n5-hacking-programs-v5.3.json"
+PROGRAM_LINKS = re.compile(r"\\[\\[hacking-program:([a-z0-9-]+)(?:\\|[^\\]]*)?\\]\\]")
+EXPECTED_DEVICES = (
+    ("equipment:hacking-device", "Hacking Device",
+     ("carbonite", "spotlight", "total-control", "oblivion")),
+    ("equipment:hacking-device-plus", "Hacking Device Plus",
+     ("carbonite", "spotlight", "total-control", "oblivion", "white-noise", "cybermask")),
+    ("equipment:killer-hacking-device", "Killer Hacking Device",
+     ("trinity", "cybermask")),
+    ("equipment:evo-hacking-device", "EVO Hacking Device",
+     ("assisted-fire", "enhanced-reaction", "fairy-dust", "controlled-jump")),
+)
+
 
 def _inputs() -> tuple[dict, dict, dict]:
     return (
@@ -42,135 +46,124 @@ def _inputs() -> tuple[dict, dict, dict]:
     )
 
 
-def test_n53_device_chart_exactly_reconciles_maintained_program_sets() -> None:
-    report = audit_source_files()
-    assert report["scope"] == (
-        "equipment-granted-program-sets-not-individual-program-statistics"
-    )
-    assert report["sourcePage"] == 58
-    assert report["deviceCount"] == 4
-    assert report["distinctProgramCount"] == 11
-    assert report["programStatisticsIncluded"] is False
-    assert report["missingMaintainedN53ChartCitations"] == []
-    assert [
-        (row["deviceId"], row["name"],
-         tuple(program_id.removeprefix("hacking-program:") for program_id in row["programIds"]))
-        for row in report["deviceRows"]
-    ] == list(PINNED)
-    assert [len(row["programIds"]) for row in report["deviceRows"]] == [4, 6, 2, 4]
-    assert report["verifiedPdfSha256"] is None
-    assert all(
-        len(report[name]) == 64
-        for name in ("manifestSha256", "curatedSha256", "programsSha256")
-    )
+def _assert_current_device_source_parity(
+    manifest: dict, curated: dict, programs: dict,
+) -> None:
+    """Pin reviewed access sets against their actual current Rules definitions."""
+    assert set(manifest) == {
+        "formatVersion", "sourceId", "sourcePage", "reviewStatus",
+        "classification", "deviceRows",
+    }
+    assert type(manifest["formatVersion"]) is int and manifest["formatVersion"] == 1
+    assert manifest["sourceId"] == "n5-core-v5.3-pdf"
+    assert manifest["sourcePage"] == 58
+    assert manifest["reviewStatus"] == "source-reviewed-audit-only"
+    assert manifest["classification"] == {
+        "domain": "hacking-device-program-access",
+        "scope": "equipment-granted-program-sets-not-individual-program-statistics",
+        "relationship": "device-to-program-entitlement-not-army-carrier-or-target",
+        "order": "printed-chart-column-order",
+        "authority": "source-chart-versus-maintained-device-definitions",
+    }
+    expected_rows = [
+        {
+            "deviceId": device_id, "name": name,
+            "programIds": [f"hacking-program:{slug}" for slug in slugs],
+        }
+        for device_id, name, slugs in EXPECTED_DEVICES
+    ]
+    assert manifest["deviceRows"] == expected_rows
+    assert [len(row["programIds"]) for row in expected_rows] == [4, 6, 2, 4]
+    assert len({program_id for row in expected_rows for program_id in row["programIds"]}) == 11
+
+    records = {record["id"]: record for record in curated["records"]}
+    program_records = {record["id"]: record for record in programs["records"]}
+    assert len(records) == len(curated["records"])
+    assert len(program_records) == len(programs["records"])
+    for device_id, name, slugs in EXPECTED_DEVICES:
+        device = records[device_id]
+        assert device["kind"] == "equipment"
+        assert device["name"] == name
+        assert device["composition"]["role"] == "definition"
+        citations = [
+            citation for citation in device["citations"]
+            if citation["sourceId"] == "n5-core-v5.3-pdf"
+        ]
+        assert citations == [{"sourceId": "n5-core-v5.3-pdf", "page": 58}]
+        effects = device["facts"]["effects"]
+        assert len(effects) == 1 and isinstance(effects[0], str)
+        actual_slugs = PROGRAM_LINKS.findall(effects[0])
+        assert len(actual_slugs) == len(set(actual_slugs)) == len(slugs)
+        assert set(actual_slugs) == set(slugs)
+        for slug in slugs:
+            program = program_records[f"hacking-program:{slug}"]
+            assert program["kind"] == "hacking-program"
+            assert program["composition"]["role"] == "definition"
 
 
-def test_current_p58_device_citations_match_rules_database() -> None:
-    """All four accepted chart citations must also be in the built Rules DB."""
+def test_current_device_access_matches_reviewed_source() -> None:
     manifest, curated, programs = _inputs()
-    assert audit_device_program_chart(manifest, curated, programs)[
-        "missingMaintainedN53ChartCitations"
-    ] == []
-    expected = sorted(
-        (record_id, "n5-core-v5.3-pdf", 58)
-        for record_id, _name, _programs in PINNED
+    _assert_current_device_source_parity(manifest, curated, programs)
+
+
+def test_current_device_access_fails_closed_on_drift() -> None:
+    manifest, curated, programs = _inputs()
+
+    changed = copy.deepcopy(manifest)
+    changed["deviceRows"][1]["programIds"].remove("hacking-program:cybermask")
+    with pytest.raises(AssertionError):
+        _assert_current_device_source_parity(changed, curated, programs)
+
+    changed = copy.deepcopy(manifest)
+    changed["classification"]["scope"] = "program-statistics"
+    with pytest.raises(AssertionError):
+        _assert_current_device_source_parity(changed, curated, programs)
+
+    changed = copy.deepcopy(curated)
+    device = next(
+        item for item in changed["records"]
+        if item["id"] == "equipment:evo-hacking-device"
     )
-    path = CURATED.parents[2] / "generated/rules_n5.db"
-    with sqlite3.connect(path) as connection:
+    device["facts"]["effects"][0] = device["facts"]["effects"][0].replace(
+        "[[hacking-program:fairy-dust]]", "[[hacking-program:spotlight]]",
+    )
+    with pytest.raises(AssertionError):
+        _assert_current_device_source_parity(manifest, changed, programs)
+
+    changed = copy.deepcopy(curated)
+    device = next(
+        item for item in changed["records"]
+        if item["id"] == "equipment:hacking-device-plus"
+    )
+    device["citations"] = [
+        citation for citation in device["citations"]
+        if citation["sourceId"] != "n5-core-v5.3-pdf"
+    ]
+    with pytest.raises(AssertionError):
+        _assert_current_device_source_parity(manifest, changed, programs)
+
+    changed = copy.deepcopy(programs)
+    changed["records"] = [
+        item for item in changed["records"]
+        if item["id"] != "hacking-program:trinity"
+    ]
+    with pytest.raises((AssertionError, KeyError)):
+        _assert_current_device_source_parity(manifest, curated, changed)
+
+
+def test_published_p58_device_citations_match_current_rules_database() -> None:
+    manifest, curated, programs = _inputs()
+    _assert_current_device_source_parity(manifest, curated, programs)
+    device_ids = [item[0] for item in EXPECTED_DEVICES]
+    expected = sorted((record_id, "n5-core-v5.3-pdf", 58) for record_id in device_ids)
+    with sqlite3.connect(ROOT / "data/generated/rules_n5.db") as connection:
         actual = connection.execute(
             "SELECT record_id, source_id, page FROM record_citations "
             "WHERE record_id IN (?, ?, ?, ?) AND source_id = ? "
             "ORDER BY record_id, page",
-            (*[record_id for record_id, _name, _programs in PINNED],
-             "n5-core-v5.3-pdf"),
+            (*device_ids, "n5-core-v5.3-pdf"),
         ).fetchall()
     assert actual == expected
-
-
-def test_device_chart_rejects_unreviewed_changes_or_program_gaps() -> None:
-    manifest, curated, programs = _inputs()
-    assert audit_device_program_chart(manifest, curated, programs)["deviceCount"] == 4
-
-    mutation = copy.deepcopy(manifest)
-    mutation["deviceRows"][1]["programIds"].remove("hacking-program:cybermask")
-    with pytest.raises(ValueError, match="row drift"):
-        audit_device_program_chart(mutation, curated, programs)
-
-    mutation = copy.deepcopy(manifest)
-    mutation["classification"]["scope"] = "all-program-statistics"
-    with pytest.raises(ValueError, match="source/scope drift"):
-        audit_device_program_chart(mutation, curated, programs)
-
-    altered = copy.deepcopy(curated)
-    record = next(
-        row for row in altered["records"]
-        if row["id"] == "equipment:evo-hacking-device"
-    )
-    record["facts"]["effects"][0] = record["facts"]["effects"][0].replace(
-        "[[hacking-program:fairy-dust]]", "[[hacking-program:spotlight]]",
-    )
-    with pytest.raises(ValueError, match="Program access drift"):
-        audit_device_program_chart(manifest, altered, programs)
-
-    altered = copy.deepcopy(programs)
-    altered["records"] = [
-        row for row in altered["records"] if row["id"] != "hacking-program:trinity"
-    ]
-    with pytest.raises(ValueError, match="Missing canonical Program"):
-        audit_device_program_chart(manifest, curated, altered)
-
-
-def test_device_chart_rejects_partial_or_incorrect_citation_migration() -> None:
-    manifest, curated, programs = _inputs()
-    target = next(
-        record for record in curated["records"]
-        if record["id"] == "equipment:hacking-device-plus"
-    )
-    source_citation = {"sourceId": "n5-core-v5.3-pdf", "page": 58}
-    if not any(cite["sourceId"] == source_citation["sourceId"] for cite in target["citations"]):
-        target["citations"].append(source_citation)
-        with pytest.raises(ValueError, match="Partial Hacking Device"):
-            audit_device_program_chart(manifest, curated, programs)
-    target["citations"] = [
-        cite for cite in target["citations"] if cite["sourceId"] != source_citation["sourceId"]
-    ] + [{**source_citation, "page": 57}]
-    with pytest.raises(ValueError, match="Unreviewed N5.3"):
-        audit_device_program_chart(manifest, curated, programs)
-
-
-def test_device_chart_optional_pinned_pdf_evidence() -> None:
-    pytest.importorskip("pymupdf")
-    if not PDF.is_file():
-        pytest.skip("Local pinned English N5.3 PDF unavailable")
-    result = audit_source_files(pdf_path=PDF)
-    assert len(result["verifiedPdfSha256"]) == 64
-    manifest, _, _ = _inputs()
-    assert verify_pinned_pdf(PDF, manifest) == result["verifiedPdfSha256"]
-
-
-def test_device_chart_cli(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
-) -> None:
-    monkeypatch.setattr(sys, "argv", ["audit_hacking_device_program_source_chart"])
-    assert main() == 0
-    out = capsys.readouterr().out
-    assert "4 devices; 11 distinct Programs" in out
-    assert "Hacking Device Plus: 6 Programs" in out
-    assert "Killer Hacking Device: 2 Programs" in out
-    assert "no Program statistics or Unit carriers" in out
-
-
-def test_adjacent_statistics_cli_dispatch(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
-) -> None:
-    monkeypatch.setattr(
-        sys, "argv",
-        ["audit_hacking_device_program_source_chart", "--statistics-chart", "--json"],
-    )
-    assert main() == 0
-    report = json.loads(capsys.readouterr().out)
-    assert report["rowCount"] == 12
-    assert report["statisticsMismatches"] == []
 
 
 # The independent statistics chart shares N5.3 p. 58 with the device matrix,

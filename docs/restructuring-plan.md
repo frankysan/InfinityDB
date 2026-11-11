@@ -2777,6 +2777,27 @@ completed source-review operation; its 2026-11-03 findings remain in
 revisions should go through source-revision intake, not retain that
 one-off parser as a perpetual CI requirement.
 
+#### P5.1 — Retire completed Hacking Device source-chart audit (2026-11-11)
+
+The N5.3 p. 58 Hacking Device-to-Program source investigation and
+four-citation publication migration are complete. The separate
+`audit_hacking_device_program_source_chart` executable also
+forwarded `--statistics-chart` to another maintained command; neither
+the fixed PDF reader nor this dispatch has an independent ongoing
+operator/CI purpose. Retire that wrapper and its historical CLI,
+PDF-parser and partial-citation-migration tests.
+
+Keep `config/validation/hacking-device-program-source-chart.json`.
+The current `test_hacking_device_program_source_chart` compares its
+exact four source rows and access sets directly to maintained Equipment
+definitions and canonical Program records, enforces all four accepted
+N5.3 p.58 citations, and checks their presence in `rules_n5.db`.
+It rejects changed source scope, incorrect links, missing records
+and absent citations. The independent published Army Hacking Program
+statistics audit remains in place; it is not an Equipment entitlement
+source. The printed chart verification from 2026-10-30 remains
+historical evidence, not a permanent parser requirement.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
