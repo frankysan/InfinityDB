@@ -276,11 +276,16 @@ establishes current gameplay truth by itself.
 
 ## Snapshot provenance contract
 
-Army, wiki, and symbol downloaders write version-3 `InfinityDB snapshot
-provenance` documents under `manifests/snapshots/`. Version 3 retains the logical
-content and exact archive identities introduced in version 2 and adds
-`source.dataChangedOn` for Army snapshots. Version-1 and version-2 manifests remain
-valid historical provenance.
+Army and symbol downloaders in this repository, and the standalone
+[InfinityDB-wiki-acquisition](https://github.com/frankysan/InfinityDB-wiki-acquisition)
+producer for Wiki/Human Sphere snapshots, write version-3 `InfinityDB snapshot
+provenance` documents under `manifests/snapshots/` in the selected acquisition
+working directory. They hand off only immutable source ZIPs and matching manifests;
+InfinityDB does not install or run the external downloader for a normal build,
+serve or Docker deployment. Version 3 retains the logical content and exact
+archive identities introduced in version 2 and adds `source.dataChangedOn` for
+Army snapshots. Version-1 and version-2 manifests remain valid historical
+provenance.
 Wiki acquisition is fail-closed for required content: if any required eligible URL or required
 MediaWiki enumeration request cannot be fetched, the run reports the failed URLs, publishes no
 archive or snapshot provenance, and preserves the partial crawl under `work/wiki/`. Optional site

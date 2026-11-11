@@ -3021,54 +3021,36 @@ source artifact before retiring an in-repo downloader. No normal
 build/serve/Docker path may require cloning another repository.
 Third-party source redistribution remains separately restricted.
 
-#### P5.4 — Standalone Wiki/Human Sphere producer staging (2026-11-11)
+#### P5.4 — Wiki/Human Sphere acquisition extracted and cut over (2026-11-11)
 
-Prepare the source acquisition split without immediately changing the
-working in-repo downloader or requiring another repository for builds.
-`tools/export_wiki_acquisition.py` exports a self-contained, MIT
-licensed `infinity-wiki-acquisition` Python package from the current
-Wiki/Human Sphere downloader. It includes source path sanitization,
-deterministic ZIP creation, a version-3 snapshot provenance writer,
-CLI entrypoint and adapted offline tests for Wiki, Human Sphere and
-revision history. It uses only the Python standard library at runtime
-and does not import `infinity_db` or any application modules.
+**Standalone producer:** [InfinityDB-wiki-acquisition](https://github.com/frankysan/InfinityDB-wiki-acquisition)
+on `main`, verified commit `9e63f89a7cbba92c770e33696621fa88c58179a4`.
+The initial package and its offline Wiki, Human Sphere and MediaWiki
+revision-history tests passed installed-package GitHub Actions on Ubuntu,
+Windows and macOS (Python 3.11). It uses Python standard library
+dependencies at runtime and does not import `infinity_db`.
 
-`tests/test_export_wiki_acquisition.py` verifies isolated import in a
-subprocess without InfinityDB on the module search path, runs the
-exported acquisition tests, produces an external Wiki ZIP/manifest
-that InfinityDB accepts unchanged, tests copied-archive SHA/content
-identity, and compares reproducible source export ZIP bytes.
-The exported source and transfer archive are generated only when
-explicitly requested and remain in ignored `local/`.
+**Consumer contract:** only the immutable Wiki/Human Sphere ZIP and
+version-3 provenance JSON cross repository boundaries. InfinityDB's
+existing `snapshot_provenance` validation and handoff tests retain
+source hashes, relocated-archive validation and fail-closed tamper
+rejection. The producer retains crawler completion/required-page tests
+and archive generation. No downloaded third-party content was
+committed, and a normal Army/Rules/ITS build, serve or Docker image
+does not invoke the producer.
 
-The preparatory command, from the InfinityDB repository root, is:
+**Cutover:** remove the previously duplicated in-tree
+`tools/download_wiki_snapshot.py`, the one-time
+`tools/export_wiki_acquisition.py`, their four obsolete test modules
+and test-section registrations. The equivalent crawler tests now
+belong to the standalone producer. Do not retain retired tests merely
+to keep their imports working; retain the independently useful
+provenance and snapshot archive invariants in InfinityDB. Frozen
+historical references earlier in this plan remain historical evidence.
 
-```powershell
-.\.venv\Scripts\python.exe -m tools.export_wiki_acquisition --output local/wiki-acquisition-producer --archive local/infinity-wiki-acquisition-p5.4.zip
-```
-
-**Published standalone producer (2026-11-11):**
-[`InfinityDB-wiki-acquisition`](https://github.com/frankysan/InfinityDB-wiki-acquisition)
-`main` commit `ead8410843f13d6c6beae58b2b3bd58c8b35a87c`. The initial
-standalone package has no application imports; it includes Wiki,
-Human Sphere and revision-history tests. Installed-package GitHub
-Actions checks passed on Ubuntu, Windows and macOS (Python 3.11).
-The isolated export regression also produced a v3 ZIP/manifest pair
-that the InfinityDB consumer verified using exact hashes. This is
-a source-*research* archive, not an input to the ordinary Army/Rules/ITS
-build, so its acceptance contract is offline archive/provenance
-parity rather than rebuilding gameplay databases from Wiki HTML.
-No network acquisition or publication of third-party source assets
-was performed during this extraction.
-
-**P5.4 cutover still open:** `tools/download_wiki_snapshot.py` and the
-dedicated in-repo crawler tests remain until their active documentation,
-CLI invocation and test-section consumers are retired. No normal
-build, serve or Docker command may start depending on an external
-repository. After a focused consumer audit, delete the in-repo
-downloader, its historical tests and the one-time export helper;
-retain the independent current archive/provenance verification in
-InfinityDB and the complete crawler tests in the new repository.
+The extraction is complete. The remaining P5 work is evaluation of
+Army JSON and raw-symbol acquisition, plus P5.5 documentation/
+scaffolding cleanup before P6 integrated acceptance.
 
 ### P6 — Consolidate, measure and establish the new baseline
 
