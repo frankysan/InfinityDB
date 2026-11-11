@@ -2938,6 +2938,28 @@ forever. Assess the still-needed source-revision intake workflow
 and redundant wrappers before later retirement, without allowing
 legacy tests alone to justify retention.
 
+#### P5.2 — Retire obsolete 1.0 Weapon triage release gate (2026-11-11)
+
+The Weapon gap triage retains an independent optional research purpose:
+it reconciles Army enrichment, printed chart evidence, reviewed
+shared-effect decisions and current published definitions. Keep the
+`audit_weapon_definition_gaps` CLI, 64 reviewed source entries,
+and fail-closed mismatched Army/Rules/PDF identities. These remain
+useful for source revision intake and reviewing genuinely missing rules.
+
+Its optional `--assess-release 1.0.0` / `--require-release 1.0.0`
+paths and `assess_1_0_enrichment` judged the **completed v1.0.0
+release**, including a dated Commlink exception. Remove the gate and
+its dedicated test, while retaining reconciliation, historical-source
+dispositions, current profile fingerprints and negative drift checks.
+Do not create a v1.1 gate from v1.0 evidence.
+
+Fix the active Weapon Chart, Wiki and auxiliary Silhouette command
+examples to use `data/generated/army.db` instead of the retired
+`infinity.db`; leave frozen historical reports as evidence.
+The shared Weapon extraction and metadata modules introduced earlier
+in P5.2 remain independent and unchanged.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

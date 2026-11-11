@@ -7250,7 +7250,7 @@ offline audit additionally requires PyMuPDF (`python -m pip install pymupdf`);
 normal CI and tests do not need that optional dependency. Run from the repository root:
 
 ```powershell
-.venv\Scripts\python.exe tools/audit_weapon_chart_profiles.py --core-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --army-db data/generated/infinity.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
+.venv\Scripts\python.exe tools/audit_weapon_chart_profiles.py --core-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --army-db data/generated/army.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
 ```
 
 The output includes the source PDF SHA-256, raw compared fields, range-band
@@ -7283,7 +7283,7 @@ all input hashes. It requires the locally retained source archives, PyMuPDF,
 and the generated Army database (none are added to Git):
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/infinity.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
+.venv\Scripts\python.exe -m tools.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/army.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
 ```
 
 The output reports source values, **not** a gameplay ruling or permission to
@@ -8470,15 +8470,15 @@ unresolved identities independently from source-profile value differences.
 The pinned Wiki and Army files are private, not committed:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_wiki_weapon_chart_names --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --army-db data/generated/infinity.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
+.venv\Scripts\python.exe -m tools.audit_wiki_weapon_chart_names --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --army-db data/generated/army.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
 ```
 
 A name alias is not a new Weapon rule or corrected Weapon Chart profile.
 Different-valued alternative rows remain separately reviewable.
 
-To reconcile unresolved Weapon rule enrichment without inventing definitions,
-combine the existing enrichment and chart reports in a separate deterministic
-source-to-reference triage:
+To reconcile unresolved Weapon rule enrichment without inventing definitions
+during source revision research, combine the existing enrichment and chart
+reports in a deterministic source-to-reference triage. This is not a release gate:
 
 ```powershell
 .venv\Scripts\python.exe tools/audit_enrichment_coverage.py data/generated/army.db --rules data/generated/rules_n5.db --output local/audits/weapon-enrichment.json
@@ -8511,18 +8511,13 @@ metadata and profile/mode fingerprints. `tools.verify_deployment_assets`
 reuses the check before packaging. Source and browser regressions remain
 separate evidence.
 
-For the opt-in **1.0 enrichment source-triage assessment**, add
-`--assess-release 1.0.0` to the triage command. It cross-checks the same pinned
-Army/rules fingerprints and current enrichment gap identities with the source-
-reviewed Weapon results, preserving the historical policy's blocker count only as
-historical context. `releaseAssessment.pending` lists all remaining unreviewed
-catalog/link gaps; source-reviewed shared Weapon omissions and explicitly accepted
-historical citations do not become missing definitions. For a nonzero exit until
-this bounded assessment has no pending gaps, use `--require-release 1.0.0` instead.
-The October 31 source pair reports **one pending Skill (Commlink)** despite zero
-historical-policy blockers. The strict gate therefore intentionally exits 1. This
-assessment does not replace the separate 1.0 primary-interaction gate, annex
-source-applicability review, whole-source explanation review, or browser acceptance.
+The historical v1.0.0-specific `--assess-release` and
+`--require-release` branches were retired in P5.2: they judged the already
+completed 1.0 milestone, not ongoing Weapon source reconciliation. The dated
+result, including Commlink's then-pending status, remains in
+[v1.0 source coverage audit](v1.0-source-coverage-audit.md).
+The generic Weapon triage and current reviewed source/definition assertions
+remain available.
 
 The triage rejects mismatched Army database hashes, incomplete/deferred chart
 alignment, and invalid coverage or PDF report identities. It reports separate
@@ -8544,7 +8539,7 @@ local and Git-ignored.
 ## 1.0 Weapon Traits and special-weapon source inventory
 
 `tools/audit_weapon_traits_prose.py` uses the same optional N5 v5.3 PDF and
-generated Army database, plus `rules.db`, to compare positionally reconstructed
+generated Army database, plus `rules_n5.db`, to compare positionally reconstructed
 Traits against raw Army `metadata_weapons.properties`. The offline check keeps
 printed wording, mode identities, source page, and Army properties in each report.
 It also indexes 12 named special-weapon prose sections on pp. 68–74 against
