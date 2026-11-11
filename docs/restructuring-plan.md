@@ -3499,9 +3499,32 @@ rejection. Ruff passed. Pyright encountered unresolved
 be counted as passing. Production renderer/font/override
 parity remains untested.
 
-**Next:** Test end-to-end production
-override/font/renderer parity and full publication acceptance
-before retiring the in-tree symbol processing pipeline.
+#### P5.7 — Production raster-parity gate (2026-11-11)
+
+Added `tools.compare_symbol_pipeline_parity` as a read-only,
+opt-in comparison of a fully verified external compressed
+canonical ZIP against the current in-tree pipeline's
+canonical compressed SVG directory. It rejects path-set
+mismatches and unavailable renderer version evidence;
+rasterizes each matching asset with the explicitly selected
+renderer at configured CSS sizes and DPRs; compares on
+black and white backgrounds using the existing RMS and
+changed-pixel thresholds; and writes a JSON report
+containing both artifact hashes, per-asset SVG hashes,
+raster metrics and failures. The gate cannot publish assets.
+
+**Validation:** Three focused offline tests passed for
+passing/failing raster comparisons, path mismatch and
+unknown renderer versions. The `InfinityDB-symbol-tools`
+P5.5 cross-platform CI completed successfully. A
+production run using real source archives, reviewed
+overrides, installed fonts, converter and renderer binaries
+has **not** yet been performed.
+
+**Next:** Execute this parity gate against a pinned
+production-derived source set, record concrete differences,
+resolve any deviations, then test browser publication
+acceptance before retiring the in-tree pipeline.
 
 ### P6 — Consolidate, measure and establish the new baseline
 
