@@ -23,6 +23,50 @@ conversion/compression artifacts exist at
 for this expected blocked state, and 1 for invalid input evidence.
 It does not download, reconstruct or silently substitute sources.
 
+## Reacquire upstream bytes
+
+The pinned source plan already exists at
+`InfinityDB/local/p5-production-symbol-source-plan-20260929.json`.
+The authoritative override lookup plan was exported and verified
+against current Army discovery at
+`InfinityDB/local/p5-production-symbol-override-lookups-20261111.json`
+(1,101 URLs). The reviewed override tree already exists in the
+symbol-tools checkout at `local/image_overrides`.
+
+**Run these commands in PowerShell**, starting from the InfinityDB
+repository root. Adjust only the sibling repository path if needed:
+
+```powershell
+$symbols = (Resolve-Path ..\InfinityDB-symbol-tools).Path
+$handoff = Join-Path $symbols 'local/p5-production-input'
+New-Item -ItemType Directory -Force -Path $handoff | Out-Null
+Copy-Item 'data/raw/JSON 20260929-114335.zip' (Join-Path $handoff 'JSON 20260929-114335.zip')
+Copy-Item 'local/p5-production-symbol-source-plan-20260929.json' (Join-Path $handoff 'source-plan.json')
+Copy-Item 'local/p5-production-symbol-override-lookups-20261111.json' (Join-Path $handoff 'override-lookups.json')
+Set-Location $symbols
+if (-not (Test-Path '.venv/Scripts/python.exe')) { py -3 -m venv .venv }
+.\.venv\Scripts\python.exe -m pip install -e '.[test,processing]'
+.\.venv\Scripts\python.exe -m infinity_symbol_tools.cli --plan local/p5-production-input/source-plan.json --army 'local/p5-production-input/JSON 20260929-114335.zip'
+.\.venv\Scripts\python.exe -m infinity_symbol_tools.cli --plan local/p5-production-input/source-plan.json --army 'local/p5-production-input/JSON 20260929-114335.zip' --acquire --destination local/p5-production-raw --manifest-dir local/p5-production-raw
+```
+
+The last command performs **1,101 network requests** (default
+0.2-second delay between requests) and may take several minutes.
+It is an explicit, source-side operation; no application artifact is
+published. It may record HTTP 404 as unavailable, but unexpected
+HTTP errors or redirects fail closed. Retain the raw ZIP, provenance
+manifest and raw report together. Never substitute the old
+override-containing legacy ZIP for this acquisition.
+
+The current symbol-tools checkout has **no available project
+`.venv`** through the MCP runner. Therefore the acquisition
+command has not been executed by the automated workspace workflow.
+Once the acquisition succeeds, pass its actual generated filenames
+to `infinity-symbol-overrides` using the pinned lookup plan and
+`local/image_overrides`. Continue with the documented preflight,
+font audit, duplicate, conversion and compression stages. Preserve
+all receipts and reports.
+
 ## Required inputs
 
 Use the **same pinned Army snapshot and source URL plan** for both

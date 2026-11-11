@@ -3551,11 +3551,25 @@ returned **blocked**, rather than claiming production parity.
 The runbook now gives a repeatable readiness command and
 explains the required upstream reacquisition.
 
-**Next:** Reacquire the original upstream bytes for the
-pinned source plan, run the external stages using the
-reviewed overrides and installed font/rendering tools, then
-execute raster and browser-publication acceptance before
-retiring the in-tree pipeline.
+#### P5.7 — Source acquisition handoff (2026-11-11)
+
+Exported and verified the production override lookup plan
+(`local/p5-production-symbol-override-lookups-20261111.json`)
+against the pinned Army snapshot and all **1,101** source
+URLs. The source plan, Army ZIP and reviewed override tree
+are present, but the symbol-tools checkout does not yet
+have an available project Python environment through MCP.
+The parity runbook now includes copy-pasteable PowerShell
+commands to stage the immutable inputs, install the
+independent package and perform **explicit raw upstream
+acquisition**. Acquisition was **not** claimed or performed;
+the legacy archive is not suitable as a substitute for
+the 29 overridden upstream source files.
+
+**Next:** Run the source acquisition handoff, retain its
+raw ZIP/provenance/report, then execute the external stages
+and real-source raster/browser parity before retiring the
+in-tree pipeline.
 
 ### P6 — Consolidate, measure and establish the new baseline
 
