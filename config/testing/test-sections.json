@@ -124,7 +124,6 @@
         "test_army_profile_publication",
         "test_spec_ops_source_charts",
         "test_state_catalog",
-        "test_standard_game_reference_tables",
         "test_structured_skill_charts_publication",
         "test_terrain_scenery_source_gaps",
         "test_variant_usage",

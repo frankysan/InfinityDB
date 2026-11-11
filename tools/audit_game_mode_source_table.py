@@ -13,9 +13,8 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_document
-from tools.audit_standard_game_reference_tables import MANIFEST as SETUP_MANIFEST
-
 ROOT = Path(__file__).resolve().parents[1]
+SETUP_MANIFEST = ROOT / "config/validation/standard-game-reference-tables.json"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 MANIFEST = ROOT / "config/validation/game-mode-source-table.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"

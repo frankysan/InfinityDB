@@ -59,6 +59,68 @@ def _inputs() -> tuple[dict, dict]:
     )
 
 
+def test_independent_retreat_and_table_sizes_keep_source_boundaries() -> None:
+    """Pinned source rows remain advisory/session facts, not Unit or scenario rules."""
+    chart, setup = _inputs()
+    assert set(setup) == {
+        "formatVersion", "sourceId", "sourcePages", "reviewStatus",
+        "thresholdRule", "tableSizeRule", "rows",
+    }
+    assert type(setup["formatVersion"]) is int and setup["formatVersion"] == 1
+    assert setup["sourceId"] == chart["sourceId"] == "n5-core-v5.3-pdf"
+    assert setup["sourcePages"] == {"retreatThresholds": 146, "recommendedTables": 147}
+    assert setup["reviewStatus"] == "source-reviewed-audit-only"
+    assert setup["thresholdRule"] == {
+        "comparison": "current-victory-points-less-than-or-equal-to-threshold",
+        "basis": "army-points-available-for-building-list",
+        "percent": 25,
+        "checkPhase": "beginning-of-active-turn-tactical-phase",
+        "domain": "army-session-not-unit-or-trooper-attribute",
+    }
+    assert setup["tableSizeRule"] == {
+        "scope": "advisory-not-mandatory",
+        "domain": "generic-table-setup-not-scenario-override",
+        "units": "inches",
+    }
+    expected = (
+        (150, 38, (24, 32)),
+        (200, 50, (32, 48)),
+        (250, 63, (32, 48)),
+        (300, 75, (48, 48)),
+        (350, 88, (48, 48)),
+        (400, 100, (48, 48)),
+    )
+    assert len(setup["rows"]) == len(expected)
+    for row, (points, threshold, size) in zip(setup["rows"], expected, strict=True):
+        assert set(row) == {
+            "armyPoints", "retreatThresholdVictoryPoints", "recommendedTableInches",
+        }
+        assert type(row["armyPoints"]) is int
+        assert type(row["retreatThresholdVictoryPoints"]) is int
+        assert row == {
+            "armyPoints": points,
+            "retreatThresholdVictoryPoints": threshold,
+            "recommendedTableInches": list(size),
+        }
+        assert row["retreatThresholdVictoryPoints"] == (points + 3) // 4
+    assert audit_game_mode_source(chart, setup)["rowCount"] == 6
+
+    curated = load_curated_document(
+        MANIFEST.parents[2] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {record["id"]: record for record in curated["records"]}
+    assert len(records) == len(curated["records"])
+    for record_id, kind, page in (
+        ("state:retreat", "state", 170),
+        ("term:victory-points", "term", 173),
+    ):
+        record = records[record_id]
+        assert record["kind"] == kind
+        assert {"sourceId": "n5-core-v5.3-pdf", "page": page} in record["citations"]
+    assert "rule:retreat-threshold" not in records
+    assert "rule:recommended-table-size" not in records
+
+
 def test_game_mode_chart_corresponds_to_independent_setup_tables() -> None:
     result = audit_source_files()
     assert result["scope"] == "recommended-game-modes-not-mandatory-scenario-rules"

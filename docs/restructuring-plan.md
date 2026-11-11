@@ -2756,6 +2756,27 @@ delivery edges, roster legality, or scenario/ITS declarations.
 The original geometric PDF cell verification remains in Git history;
 future source revision intake is a separate research operation.
 
+#### P5.1 — Retire completed independent game-table source audit (2026-11-11)
+
+The standalone `audit_standard_game_reference_tables` was a fixed N5.3
+pp. 146–147 PDF-geometry/Retreat! table investigation. Its six reviewed
+threshold and advisory table-size rows are already consumed by the current
+`rule:game-modes` reference and checked against the independent source
+manifest by `audit_game_mode_source_table`. The original CLI, its
+operation-only tests and the test-section entry are retired; its source
+manifest and the published reference remain unchanged.
+
+`test_game_mode_source_table` now pins all six threshold rows, the 25%
+ceiling rule, source pages, session-vs-Unit and advisory-vs-scenario scope,
+the maintained Retreat!/Victory Points identities and citations, and the
+absence of invented standalone threshold/table-size records. Existing
+game-mode chart/curated projection tests continue to compare the shared
+rows and reject drift. The optional p.146–147 PDF positional check was a
+completed source-review operation; its 2026-11-03 findings remain in
+`docs/testing.md` and its parser in Git history. Future changed PDF
+revisions should go through source-revision intake, not retain that
+one-off parser as a perpetual CI requirement.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
@@ -2819,4 +2840,4 @@ At the final integrated milestone, verify:
 - Routine agent tasks require fewer mandatory process operations; focused tests run when relevant and full checks run at meaningful integration/release points.
 - Reduction in tool entrypoints and duplicated documentation is demonstrated from P1 baselines, with regressions and deliberate product changes called out separately.
 
-**Current status:** P0–P3 are implemented and locally/hosted-validated as described above. P4 remains active; P5 and P6 require implementation and acceptance. The three-file runtime database boundary is already the default, while the broader simplification goals are not yet complete.
+**Current status:** P0–P4 are complete. P5 retirement/consolidation and P6 integrated acceptance remain active; this historical plan is not the current runtime contract. The three-file runtime database boundary is already the default, while the broader simplification goals are not yet complete.

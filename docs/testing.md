@@ -8246,11 +8246,11 @@ N5.3 prints a **Retreat! threshold table** on p. 146 and separate
 **advisory table-size recommendations** on p. 147. The maintained
 Trooper `state:retreat` (p. 170) and `term:victory-points` (p. 173)
 do not themselves represent the army-wide threshold or generic table
-layout. Review the read-only inventory with:
+layout. The retired fixed-source audit's continuing invariants are checked
+with the current Game Modes source and publication tests:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_standard_game_reference_tables
-.venv\Scripts\python.exe -m tools.audit_standard_game_reference_tables --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.\.venv\Scripts\python.exe -m pytest tests/test_game_mode_source_table.py -q
 ```
 
 The audit pins six Army Points rows in
@@ -8268,17 +8268,13 @@ The source explicitly identifies table setup guidance as advisory, not
 mandatory. These dimensions must not override authoritative
 scenario-scoped geometry or deployment rules.
 
-The source audit fails closed on changed row values, threshold
-rounding, page provenance, scope, missing maintained Retreat!/VP
-identities, or newly introduced canonical reference records requiring
-review. With `--pdf`, it checks both pages in the locally pinned
-English N5.3 PDF, including positional alignment of Army Points and
-survivor thresholds across the printed two-column table. Without the
-ignored PDF, the manifest and maintained-boundary checks remain
-available in CI. It does not publish scenario data, infer surviving
-Troopers from an Army loadout, evaluate game state, or add any deployed
-object. `tests/test_standard_game_reference_tables.py` covers source
-rows, rounding, negative drift and the optional PDF extraction.
+The current Game Modes tests pin the independent source rows, threshold
+rounding, page provenance, scope, maintained Retreat!/VP identities and
+absence of invented canonical threshold/table-size records. The completed
+p. 146–147 positional PDF extraction is recorded in the 2026-11-03
+review above and preserved in Git history, not run in ongoing CI. These
+source fixtures do not publish scenario data, infer surviving Troopers
+from an Army loadout, evaluate game state or add deployed objects.
 
 ### Terrain and Scenery Structures source gaps
 
