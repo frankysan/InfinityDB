@@ -2732,6 +2732,30 @@ SVGs, new profile attributes, source variants or deployed objects.
 General source-revision research can revisit p.18 when the underlying
 official publication changes.
 
+#### P5.1 — Retire completed Orders/AROs source-chart investigation (2026-11-11)
+
+The dedicated `audit_orders_aro_object_adjacent_chart` verified the
+complete N5.3 p.191 printed declaration source against existing owners
+and Army Hacking metadata. The maintained `core_declaration_matrix`
+and `/api/orders-aros` now publish those 57 occurrences (42 owners)
+directly from reviewed Skills/Equipment and Army Hacking data. The
+current `test_hacking_program_publication` already compares every
+source row, declaration category, name, printed source type and owning
+link to the real published projection. It now additionally pins source
+scope, p.191 identity/hash, section counts, duplicate prevention, the
+19 Hacking occurrences and six object-adjacent declaration cells.
+
+Retire the one-use source audit wrapper and its four historical
+`test_audit_deployed_object_inventory` cases. Preserve the reviewed
+`config/validation/orders-aro-object-adjacent-source-review.json`
+manifest as a current test input, including its pinned source PDF
+checksum; a locally available PDF is hash-verified. The replacement
+tests run against the actual Army/Rules databases and HTTP route.
+The source chart does **not** authorize deployed-object identities,
+delivery edges, roster legality, or scenario/ITS declarations.
+The original geometric PDF cell verification remains in Git history;
+future source revision intake is a separate research operation.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
