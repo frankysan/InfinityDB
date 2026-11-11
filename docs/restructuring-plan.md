@@ -3423,6 +3423,45 @@ compression. The existing in-tree `symbol_work` stages remain
 supported until a final processed-symbol handoff and
 publication acceptance prove parity.
 
+#### P5.4 — Standalone canonical text conversion (2026-11-11)
+
+`InfinityDB-symbol-tools` now has
+`infinity-symbol-text-conversion` (commit `86f2bacd`).
+It consumes the unchanged, verified effective archive and
+requires a passed duplicate-stage receipt plus all three pinned
+duplicate CSV reports. Canonical choices are checked against the
+original source hashes, group rows and summary; the font-audit
+receipt must refer to the same source and unchanged reviewed
+alias policy. Where text must be converted, installed font
+resolutions and font-file SHA-256 hashes are checked again
+before invoking the existing text-conversion engine.
+
+Only **canonical text-bearing representatives** are converted.
+Canonical no-text members pass through unchanged, and duplicate
+source members remain associated through the canonical mapping
+instead of consuming a second conversion. The stage emits an
+immutable canonical-only intermediate ZIP, the two legacy
+conversion CSVs, and a separate `textConversion` v1 receipt
+pinning the source, font and duplicate evidence, converter name
+and exact reported version, output member hashes and reports.
+Failures or remaining active text produce a failed receipt and
+diagnostic CSVs, but no accepted output ZIP. The original
+effective ZIP and existing InfinityDB publication path are not
+changed.
+
+**Validation:** Standalone source-tools CI on Python 3.11
+passed 94 tests on each of Ubuntu, Windows and macOS for
+`86f2bacd`. These tests use simulated render/converter
+backends; they do not establish full-snapshot parity with
+installed production fonts and Inkscape/usvg.
+
+**Next:** Implement render-validated compression of the
+canonical intermediate artifact with pinned renderer/SVGO
+versions, tolerances and output hashes, then the final
+processed-artifact verifier in InfinityDB. Production
+override/font/renderer parity and full publication acceptance
+remain prerequisites for retiring the in-tree pipeline.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
