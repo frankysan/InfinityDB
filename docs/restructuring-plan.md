@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0–P3 are implemented and validated, including hosted P3 checks on `09f91f442f82abba4df76641ef7ad688402673d4`. The normal runtime builds and serves Army v31 (`army.db`), Rules v17 (`rules_n5.db`), and the reviewed ITS 18 publication (`its_18.db`) as one selected set for both checkout and Docker. P4 is in progress; P5–P6 remain open.
+**Status:** Active on `dev/v1.1.0`: P0–P4 are complete, including owner acceptance of P4.5 on 2026-11-11. The normal runtime builds and serves Army v31 (`army.db`), Rules v17 (`rules_n5.db`), and the reviewed ITS 18 publication (`its_18.db`) as one selected set for both checkout and Docker. P5–P6 remain open; matched-input symbol processor parity has passed, while publication acceptance and in-tree processor retirement remain open.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -3595,10 +3595,22 @@ path-count difference therefore does not indicate a
 missing upstream identity, but the semantic mapping and
 visual publication still require acceptance.
 
-**Next:** Verify that the duplicate identity resolves to
-the canonical SVG in publication, run raster parity for
-the shared 807 paths and browser acceptance, then decide
-whether the in-tree pipeline can be retired.
+#### P5.7 — Matched-input processor parity (2026-11-11)
+
+The first comparison against historical output failed on 73 assets; the runs
+used different effective override inputs and toolchains. An isolated
+offline in-tree rebuild from the external run's raw handoff and override tree
+now matches all 1,101 effective source identities and the full 807-canonical
+mapping. Strict raster comparison passed **807/807 with zero pixel differences**
+at 32/64 CSS pixels and DPR 1/2. No path exception or tolerance change was
+needed. See the [pinned local evidence and acceptance
+boundary](testing.md#p57-matched-input-symbol-processor-parity).
+
+**Next:** Review artwork differences against the tracked publication, consume
+the verified external artifact through semantic publication, verify that the
+duplicate identity remains accessible, and run actual browser/local/Docker
+acceptance. Retire the in-tree processors only after those checks. Matched
+processor parity alone does not approve a changed graphical publication.
 
 ### P6 — Consolidate, measure and establish the new baseline
 

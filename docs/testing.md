@@ -1725,6 +1725,65 @@ performed. P4 hosted Source checks, installed-wheel smoke and deployment
 smoke all passed on `d12aa0706723a62f147a7b7ff901cc68b0a905d1`.
 P4 is closed; P5 and P6 remain active.
 
+### P5.7 matched-input symbol processor parity
+
+**Project domains:** Acquisition, Data processing, Project infrastructure
+
+**2026-11-11, Windows development checkout, tools at
+`1db66f797fcd8b7ea21942ea2182ba5681ee45e7`:** The historical-output
+comparison recorded **73 failures / 807 canonical assets**. A byte/hash
+trace accounted for every failed asset: 52 had changed effective override
+inputs despite matching recorded upstream hashes; 21 had identical converted
+inputs but different compressed outputs. The historical compressor used
+resvg **0.48.1**, while the external run used **0.49.0**. This was not a
+matched-input/toolchain processor comparison. The failed report remains
+preserved; neither its thresholds nor its result were changed.
+
+Rebuilt the existing in-tree pipeline through **compression only**, using
+`tools.build_symbols` with isolated data root
+`local/p5-matched-legacy-20261111`, the explicit four-file raw-symbol handoff,
+the same pinned Army archive and the external run's override tree. No network
+acquisition or application publication occurred. Preflight passed **1,101 SVGs /
+zero parse errors**; font audit passed **142 available / zero missing**;
+duplicate detection passed **807 canonical / 294 redundant / zero render
+errors**; text conversion passed **107 converted / 700 carried forward**;
+balanced compression passed **807 assets**. Tools were Inkscape **1.4.4**,
+resvg **0.49.0** and SVGO **4.1.0**.
+
+Both builds have identical effective bytes for all **1,101** source identities,
+including **106** direct/propagated overrides, and exactly the same complete
+canonical mapping. The matched effective ZIP SHA-256 is
+`13474b43eb16e8c3be7bc54d378347a98266fca8745bc2a8e6323fdf79a52f23`.
+The external compressed ZIP SHA-256 is
+`18c761f5dbbcc800de365bb15c12569dbd05e29be1329f2e0d252d6100ce50a5`.
+Compressed bytes match for **806/807** assets. The sole byte difference is
+`Microgramma D` versus `Microgramma D Extended` in a leftover `font-family`
+attribute on path-only artwork for `units/knauf-outlaw-sniper-1-1.svg`.
+
+The **committed** `tools.compare_symbol_pipeline_parity` implementation at the
+revision above, with strict equal canonical path sets, passed **807/807, zero
+failures**. resvg rendered every asset at **32/64 CSS pixels, DPR 1/2**;
+black/white background comparisons reported **maximum RMS 0 and changed-pixel
+fraction 0**. Thresholds remained RMS **0.01**, changed fraction **0.01** and
+pixel delta **8**. The independent processed-artifact verifier also passed
+**807 canonical assets / 1,101 source identities**; hermetic raw/processed
+handoff tests passed **16/16, zero skips**.
+
+Private evidence is retained under `local/`: the historical input trace,
+isolated rebuild inputs/logs/reports, `p5-matched-production-inputs-20261111.json`
+and `p5-matched-production-raster-parity-20261111.json`. The final raster report
+SHA-256 is `c931b6870cf0ad1b1fc75563e8bf783408864e3bed3cd11e846f0a0834de780d`.
+These local files are dated evidence, not clean-checkout dependencies.
+
+**Acceptance boundary:** This passes processor equivalence on matched inputs.
+It does not accept artwork changes against the tracked release, semantic
+publication or actual browser/Docker behavior. The complete duplicate mapping
+resolves `units/shasvastii-seed-soldiers-1-2.svg` to
+`units/shasvastii-seed-soldiers-1-1.svg`; its application publication still
+needs verification. Keep those gates and in-tree retirement open under P5.
+Tracked SVGs, databases and publication manifest were unchanged. No full Linux,
+hosted-CI or release acceptance is implied.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

@@ -1,7 +1,9 @@
 # P5.7 — Symbol pipeline production parity runbook
 
-Status: **not executed**. This is an opt-in acceptance exercise, not a
-replacement for the current symbol publication path.
+Status: **matched-input processor parity passed (2026-11-11)**. Artwork
+review against the tracked release and semantic browser/local/Docker
+publication acceptance remain open. See the [dated evidence and acceptance
+boundary](testing.md#p57-matched-input-symbol-processor-parity).
 
 ## Readiness audit
 
@@ -60,14 +62,13 @@ HTTP errors or redirects fail closed. Retain the raw ZIP, provenance
 manifest and raw report together. Never substitute the old
 override-containing legacy ZIP for this acquisition.
 
-The current symbol-tools checkout has **no available project
-`.venv`** through the MCP runner. Therefore the acquisition
-command has not been executed by the automated workspace workflow.
-Once the acquisition succeeds, pass its actual generated filenames
-to `infinity-symbol-overrides` using the pinned lookup plan and
-`local/image_overrides`. Continue with the documented preflight,
-font audit, duplicate, conversion and compression stages. Preserve
-all receipts and reports.
+The explicit source-side acquisition and subsequent processing completed
+on 2026-11-11. For a new run, pass its actual generated filenames to
+`infinity-symbol-overrides` using the pinned lookup plan and
+`local/image_overrides`, then continue through preflight, font audit,
+duplicate detection, conversion and compression. Preserve all receipts
+and reports; the completed matched-input comparison requires no new
+acquisition.
 
 ## Required inputs
 
@@ -97,11 +98,11 @@ font resolution.
 ## Reconcile canonical paths
 
 The new duplicate stage selected **807 canonical SVGs** from
-1,101 effective sources (294 exact duplicates, zero render
-errors). The historical in-tree work directory contains
-**808** compressed SVGs. This is an unresolved coverage
-difference; neither count establishes which identity
-should be published.
+1,101 effective sources (294 exact duplicates, zero render errors).
+The historical in-tree work directory contains **808** compressed SVGs.
+The matched-input rebuild now produces the same 807-canonical mapping
+as the external run. Semantic publication of both source identities
+still needs verification; a canonical count alone does not establish it.
 
 Copy the external `duplicate-state.json` receipt into an
 ignored local location in the InfinityDB checkout and
@@ -120,10 +121,29 @@ path, `units/shasvastii-seed-soldiers-1-2.svg`. The new
 duplicate receipt maps it to
 `units/shasvastii-seed-soldiers-1-1.svg` as an exact
 duplicate. This explains the count difference but is
-**not** sufficient to pass raster or browser publication
-acceptance. Exit status 2 intentionally remains until
-a mapping-aware acceptance gate verifies that both
-semantic identities remain accessible.
+**not** sufficient to pass browser publication acceptance. The path
+comparison against that historical directory continues to report its
+count difference. For processor parity, use the isolated matched-input
+rebuild described below; preserve the separate semantic publication gate.
+
+## Matched-input reference build
+
+The initial historical-output raster comparison failed on 73 assets.
+Its effective override inputs and compression renderer differed from
+the external run. Preserve that failure rather than relaxing thresholds.
+Use `tools.build_symbols` with an isolated `--data-root`, the pinned
+Army archive/provenance, all four `--raw-symbol-*` handoff arguments
+and the same override tree as the external run. Stop after compression
+with `--stop-after compression`; keep the application publication unchanged.
+
+The completed reference is under `local/p5-matched-legacy-20261111`,
+with compressed SVGs at
+`work/symbols/SYMBOLS 20261111-210655--13474b43eb16/compressed`.
+Use that directory as `--legacy-root` below. Both effective byte inventories
+and complete canonical mappings were checked before comparing. The strict
+comparison passed all 807 assets without path exceptions. See
+[testing](testing.md#p57-matched-input-symbol-processor-parity) for the
+input hashes, tool versions, measurements and remaining acceptance.
 
 ## Verify and compare
 
@@ -162,6 +182,9 @@ reports must not be overwritten.
 5. Only after these checks should the in-tree pipeline be retired
    in a separate, reviewed change.
 
-**Current evidence:** hermetic verifier/parity tests and cross-platform
-symbol-tools CI only. No actual production snapshot parity or
-browser publication acceptance has been recorded.
+**Current evidence:** matched-input production processor raster parity
+passed, with zero pixel differences across all 807 canonical assets.
+The independent artifact verifier and 16 hermetic handoff tests also passed.
+Review against the tracked artwork, semantic browser/local/Docker
+publication acceptance and in-tree processor retirement remain open.
+The failed historical-output comparison remains preserved separately.
