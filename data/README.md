@@ -438,10 +438,18 @@ The current producer contracts are:
   `infinity-symbol-font-audit` commands now produce matching legacy
   audit report formats plus immutable, hash-pinned stage receipts.
   These audit steps do not modify the effective SVG ZIP or promote it
-  to publication-ready status. Duplicate detection, font
-  substitution/text conversion and render-validated compression
-  still need independent orchestration and accepted parity before
-  retiring the current InfinityDB processing stages.
+  to publication-ready status. The standalone
+  `infinity-symbol-duplicates` stage now consumes the passed font
+  audit and produces canonical SVG mappings, the three existing
+  exact/visual duplicate CSVs and a hash-pinned stage receipt
+  containing renderer/version/settings. Render failures remain
+  visible and fail the receipt instead of claiming visual coverage.
+  `tools.verify_symbol_duplicate_handoff` verifies its byte, path,
+  summary and receipt evidence independently, but cannot establish
+  visual equivalence without rerendering. Text-to-path conversion
+  and render-validated compression still need external
+  orchestration and accepted parity before retiring InfinityDB's
+  in-tree processing stages.
 
 The *format* and verification contract stay owned by InfinityDB's
 snapshot-provenance module. An extracted producer must emit compatible

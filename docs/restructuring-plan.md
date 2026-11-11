@@ -3378,6 +3378,51 @@ completes the `fontAudit`, `deduplication`,
 intermediate effective-symbol report; progress is recorded
 in separate immutable stage receipts.
 
+#### P5.4 — Standalone duplicate-stage handoff (2026-11-11)
+
+`InfinityDB-symbol-tools` now has
+`infinity-symbol-duplicates`, a standalone exact/visual
+canonicalization stage driven by the immutable effective SVG ZIP.
+It requires a **passed** font audit and a report/receipt pair
+bound to that exact effective artifact. All ZIP members and
+font-audit asset classifications are checked before renderer work.
+The stage invokes the existing `svg_processor.find_duplicate_svgs`
+algorithm unchanged in an isolated temporary workspace,
+preserving `duplicate-groups.csv`, `duplicate-render-errors.csv`
+and `duplicate-summary.csv`. Its new immutable version-1 receipt
+pins these three CSVs, canonical path map, summary metrics,
+renderer/executable version, render size, job count, source
+artifact and font-audit report/receipt hashes.
+
+Unlike the historical in-tree duplicate stage, **unresolved
+render errors mark the new stage failed** (and retain diagnostic
+CSV evidence). Byte-identical fallback observations are useful,
+but an incomplete visual comparison must not be accepted as
+full processing parity. Portable, hermetic tests exercise the
+real detection/canonical-selection algorithm using a simulated
+renderer, including exact/visual grouping, ranking and render
+failure handling. The installed-package CI checks the stage
+on Ubuntu, Windows and macOS; this does not yet establish
+production-renderer parity for a full symbol snapshot.
+
+InfinityDB has the independent, read-only
+`tools.verify_symbol_duplicate_handoff` consumer. It verifies
+effective ZIP bytes and v3 provenance, the passed font report
+and receipt, canonical mapping against source members,
+per-row CSV identities, reported size/count metrics, and the
+three CSV SHA-256 pins. Because pixel hashes originate from
+a renderer, this verification checks **reported evidence and
+consistency only**; final visual-equivalence acceptance still
+needs a representative run with pinned real renderer versions
+and source assets. Normal app builds do not import this
+standalone tool or invoke a renderer.
+
+The next phase in the extraction is text-to-path conversion
+using canonical representatives, then render-validated
+compression. The existing in-tree `symbol_work` stages remain
+supported until a final processed-symbol handoff and
+publication acceptance prove parity.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
