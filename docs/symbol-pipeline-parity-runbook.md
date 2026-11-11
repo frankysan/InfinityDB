@@ -3,6 +3,26 @@
 Status: **not executed**. This is an opt-in acceptance exercise, not a
 replacement for the current symbol publication path.
 
+## Readiness audit
+
+The pinned baseline is `local/p5-production-symbol-baseline-audit-20261111.json`.
+The legacy snapshot is `data/raw/symbols/SYMBOLS 20261004-184813.zip`
+and its current work directory is
+`data/work/symbols/SYMBOLS 20261004-184813--cda970bafe15`.
+Run the read-only readiness check before spending time on rendering:
+
+```powershell
+python -m tools.audit_symbol_parity_readiness --output "local/p5-symbol-parity-readiness.json"
+```
+
+The initial audit found 1,101 archived assets and 808 legacy
+compressed canonical SVGs. **29 legacy overridden assets lack
+verified original upstream bytes**, and no completed external
+conversion/compression artifacts exist at
+`local/p5-external-processing`. The command exits with status 2
+for this expected blocked state, and 1 for invalid input evidence.
+It does not download, reconstruct or silently substitute sources.
+
 ## Required inputs
 
 Use the **same pinned Army snapshot and source URL plan** for both

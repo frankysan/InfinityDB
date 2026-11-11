@@ -255,6 +255,7 @@
       "description": "Processed graphical assets, symbols, SVG tooling, fonts, and asset publication.",
       "modules": [
         "test_asset_validation",
+        "test_audit_symbol_parity_readiness",
         "test_build_full_asset_bundle",
         "test_build_symbols",
         "test_compare_symbol_pipeline_parity",

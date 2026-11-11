@@ -3536,8 +3536,25 @@ legacy canonical-compression tree, and installed
 converter/renderer/font dependencies. No real-source parity
 result or publication acceptance is claimed.
 
-**Next:** Execute the runbook on that source set, resolve
-deviations, then test browser publication acceptance before
+#### P5.7 — Production source readiness audit (2026-11-11)
+
+The read-only `tools.audit_symbol_parity_readiness` was run
+against the actual pinned legacy archive, production source
+plan, build manifest and existing compressed work directory.
+It verified **1,101** archived source identities and found
+**808** legacy canonical compressed SVGs. The recorded **29**
+override-sourced legacy SVGs are not verified original
+upstream bytes. No completed external text-conversion and
+compression artifacts were present at the designated
+`local/p5-external-processing` path. The audit correctly
+returned **blocked**, rather than claiming production parity.
+The runbook now gives a repeatable readiness command and
+explains the required upstream reacquisition.
+
+**Next:** Reacquire the original upstream bytes for the
+pinned source plan, run the external stages using the
+reviewed overrides and installed font/rendering tools, then
+execute raster and browser-publication acceptance before
 retiring the in-tree pipeline.
 
 ### P6 — Consolidate, measure and establish the new baseline
