@@ -653,8 +653,9 @@ def test_silhouette_source_geometry_matches_browser_renderer() -> None:
     by_id = {row["id"]: row for row in curated["records"]}
     assert len(by_id) == len(curated["records"])
     assert by_id["attribute:s"]["kind"] == "attribute"
-    assert {"sourceId": "n5-core-v5.3-pdf", "page": 9} in (
-        by_id["attribute:s"]["citations"]
+    assert any(
+        citation.get("sourceId") == "n5-core-v5.3-pdf" and citation.get("page") == 9
+        for citation in by_id["attribute:s"]["citations"]
     )
     assert by_id["state:prone"]["kind"] == "state"
 
