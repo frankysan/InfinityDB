@@ -120,7 +120,6 @@
         "test_unit_filter_storage",
         "test_army_reference_storage",
         "test_symbol_path_storage",
-        "test_silhouette_template_source_table",
         "test_ammunition_reference_storage",
         "test_army_profile_publication",
         "test_spec_ops_source_charts",

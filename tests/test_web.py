@@ -599,6 +599,66 @@ def test_silhouette_diagrams_use_shared_scale_and_player_surfaces(app: Callable)
     )
 
 
+def test_silhouette_source_geometry_matches_browser_renderer() -> None:
+    """Preserve the approved p.18 source geometry without the retired PDF audit."""
+    root = Path(__file__).resolve().parents[1]
+    manifest = json.loads(
+        (root / "config/validation/silhouette-template-source-table.json")
+        .read_text(encoding="utf-8")
+    )
+    assert manifest["formatVersion"] == 1
+    assert (manifest["sourceId"], manifest["sourcePage"]) == ("n5-core-v5.3-pdf", 18)
+    assert manifest["domain"] == "trooper-geometry-reference-not-deployed-object-profile"
+    assert manifest["reviewStatus"] == "source-reviewed-audit-only"
+    assert manifest["proneSilhouette"] == {
+        "template": "SX",
+        "heightMm": 3,
+        "baseWidthRule": "retain-trooper-original-silhouette-base-width",
+        "context": "prone-state",
+        "fixedBaseMm": None,
+    }
+    assert manifest["diagramPolicy"] == {
+        "diagrams": "S1-S8-only",
+        "withoutSvg": ["S0", "SX"],
+        "visualization": "source-proportional-uniform-scale",
+    }
+    rows = manifest["rows"]
+    assert [(row["id"], row["template"], row["baseMm"], row["heightMm"])
+            for row in rows] == [
+        ("X", "SX", None, 3), (0, "S0", 25, 3),
+        (1, "S1", 25, 25), (2, "S2", 25, 40),
+        (3, "S3", 40, 32), (4, "S4", 55, 32),
+        (5, "S5", 40, 45), (6, "S6", 40, 55),
+        (7, "S7", 55, 67), (8, "S8", 70, 70),
+    ]
+
+    renderer = (root / "src/infinity_db/web/static/silhouette-diagrams.js").read_text(
+        encoding="utf-8"
+    )
+    actual = re.findall(
+        r"\{\s*id:\s*([1-8]),\s*widthMm:\s*(\d+),\s*heightMm:\s*(\d+),"
+        r"\s*viewBoxWidth:\s*([\d.]+),\s*viewBoxHeight:\s*([\d.]+)\s*\}",
+        renderer,
+    )
+    assert [(int(sid), int(width), int(height))
+            for sid, width, height, _, _ in actual] == [
+        (row["id"], row["baseMm"], row["heightMm"]) for row in rows[2:]
+    ]
+    assert all(float(width) > 0 and float(height) > 0
+               for _, _, _, width, height in actual)
+
+    curated = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    by_id = {row["id"]: row for row in curated["records"]}
+    assert len(by_id) == len(curated["records"])
+    assert by_id["attribute:s"]["kind"] == "attribute"
+    assert {"sourceId": "n5-core-v5.3-pdf", "page": 9} in (
+        by_id["attribute:s"]["citations"]
+    )
+    assert by_id["state:prone"]["kind"] == "state"
+
+
 def test_legacy_app_static_url_serves_unit_explorer(app: Callable) -> None:
     status, headers, body = request(app, f"/static/app.js?v={STATIC_ASSET_VERSION}")
 

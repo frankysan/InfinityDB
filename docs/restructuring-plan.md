@@ -2713,6 +2713,25 @@ builder, source review manifests, deployed-object storage and runtime API
 are unchanged. Reexamine the source with revision-intake tooling if a
 new core publication supersedes pinned N5.3.
 
+#### P5.1 — Retire completed Silhouette source-table audit (2026-11-11)
+
+`audit_silhouette_template_source_table` was a one-use comparison of
+N5.3 p.18 printed geometry and Prone footnote against the eight
+Silhouette browser SVGs. The current UI and source manifest already
+contain the approved S1–S8 dimensions; S0 has a 25 mm base/3 mm height,
+and SX inherits its Prone Trooper's base width at 3 mm height.
+
+Remove that fixed-source PDF parsing CLI and its dedicated
+migration-style tests. Move the continued geometry and source-row
+invariants into `test_web`, alongside the existing browser asset,
+scaling, theme and S0/SX-copy assertions. Retain the pinned
+`silhouette-template-source-table.json` source evidence; check it
+against exact JS renderer dimensions in the current test, alongside
+`attribute:s` and Prone State source ownership. Do not invent S0/SX
+SVGs, new profile attributes, source variants or deployed objects.
+General source-revision research can revisit p.18 when the underlying
+official publication changes.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

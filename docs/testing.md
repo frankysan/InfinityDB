@@ -8121,39 +8121,32 @@ Normal tests never write to the tracked runtime database.
 ### N5.3 Silhouette Templates source and browser geometry
 
 The English N5.3 **Silhouette Templates** table (printed p. 18)
-defines ten representations: SX, S0 and S1–S8.
-`config/validation/silhouette-template-source-table.json` pins
-the base width and template height in millimetres for each source row.
-An independent read-only audit compares these source rows against the
-eight fixed dimensions in the browser's
-`src/infinity_db/web/static/silhouette-diagrams.js` and the canonical
-`attribute:s`/Prone State references:
+defines ten representations: SX, S0 and S1–S8. The retained
+`config/validation/silhouette-template-source-table.json` pins each
+source row's base width and height, the dynamic Prone/SX base-width
+rule, and the S1–S8-only diagram policy.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_silhouette_template_source_table
-.venv\Scripts\python.exe -m tools.audit_silhouette_template_source_table --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
-```
+The current-path acceptance in
+`tests/test_web.py::test_silhouette_source_geometry_matches_browser_renderer`
+checks these reviewed values against the actual S1–S8 browser
+dimensions, and also pins `attribute:s` and Prone State source ownership.
+`test_silhouette_diagrams_use_shared_scale_and_player_surfaces`
+independently checks shared scaling, S0/SX explanatory copy,
+reference/previews, SVG viewBoxes, delivery and theme behavior.
 
-**S0** has a fixed 25 mm base and 3 mm height. **SX** is the
-3 mm high representation for a Trooper in Prone State; the base
-width depends on the Trooper's original Silhouette Attribute and
-must not be flattened to a universal 25 mm base or another permanent
-Unit value. The existing UI displays S1–S8 at a shared scale with
-source-backed SVGs and provides explicit text for S0/SX, which have
-no supplied reference SVGs. Neither is an independently deployed
-Weapon/Equipment identity.
+**S0** has a fixed 25 mm base and 3 mm height. **SX** is 3 mm
+high for a Prone Trooper, with base width inherited from the Trooper's
+original Silhouette Attribute. It must not become a fixed 25 mm base or
+a permanent Unit/Profile attribute. There are eight supplied SVG diagrams,
+S1–S8. Neither S0 nor SX has its own source diagram, and neither
+defines a deployed Weapon/Equipment object.
 
-The source audit rejects changed table dimensions/order, an invented
-fixed SX base, missing/changed S1–S8 diagram sizes, absent SVGs,
-broken display-mode safeguards or missing maintained attribute
-references. Optional `--pdf` checks the exact printed table and
-Prone footnote using the local pinned English N5.3 PDF. The audit
-does not require the ignored PDF during CI and does not rewrite
-the application, publish profile attributes, or modify generated
-artifacts. The separate UI regression still verifies the existing
-diagram component and SVG delivery.
-`tests/test_silhouette_template_source_table.py` pins the source
-rows, browser geometry, negative drift cases, and local PDF evidence.
+The completed one-off `audit_silhouette_template_source_table`
+CLI and its PDF-parser-only tests were retired in P5.1. Its original
+pinned N5.3 p.18 extraction and negative-drift evidence remain in Git
+history. The current source manifest and maintained browser regressions
+enforce the released geometry without a separate historical
+source-investigation application.
 
 ### V1S-089 Silhouette manual visual acceptance preflight
 
