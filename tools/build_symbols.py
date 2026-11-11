@@ -27,6 +27,7 @@ try:
         DEFAULT_OVERRIDE_ROOT,
         DEFAULT_STATIC_CONFIG,
         acquire_symbol_snapshot,
+        archive_paths,
         discover_symbol_source,
         print_discovery_summary,
     )
@@ -41,12 +42,14 @@ try:
         load_materialized_symbol_work,
         materialize_symbol_archive,
     )
+    from tools.verify_raw_symbol_handoff import load_verified_raw_upstream
 except ImportError:  # pragma: no cover - direct script execution fallback
     from army_snapshot_source import ArmySnapshotResult, resolve_army_snapshot
     from download_army_symbols import (
         DEFAULT_OVERRIDE_ROOT,
         DEFAULT_STATIC_CONFIG,
         acquire_symbol_snapshot,
+        archive_paths,
         discover_symbol_source,
         print_discovery_summary,
     )
@@ -61,6 +64,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
         load_materialized_symbol_work,
         materialize_symbol_archive,
     )
+    from verify_raw_symbol_handoff import load_verified_raw_upstream
 
 
 def print_pinned_snapshot(snapshot: ArmySnapshotResult) -> None:
@@ -344,6 +348,22 @@ def main(argv: list[str] | None = None) -> int:
         help="Bypass the prior immutable symbol cache; local overrides still take precedence",
     )
     parser.add_argument(
+        "--raw-symbol-plan", type=Path,
+        help="Reviewed source request plan for an external raw symbol snapshot",
+    )
+    parser.add_argument(
+        "--raw-symbol-archive", type=Path,
+        help="Externally acquired raw SYMBOLS ZIP matching --raw-symbol-plan",
+    )
+    parser.add_argument(
+        "--raw-symbol-manifest", type=Path,
+        help="Version-3 provenance JSON for the external raw SYMBOLS ZIP",
+    )
+    parser.add_argument(
+        "--raw-symbol-report", type=Path,
+        help="Upstream source-result report from the standalone producer",
+    )
+    parser.add_argument(
         "--delay",
         type=float,
         default=0.2,
@@ -413,6 +433,20 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--snapshot-manifest requires --snapshot")
     if args.resume and args.refresh_symbols:
         parser.error("--resume cannot be combined with --refresh-symbols")
+    raw_paths = (
+        args.raw_symbol_plan,
+        args.raw_symbol_archive,
+        args.raw_symbol_manifest,
+        args.raw_symbol_report,
+    )
+    if any(path is not None for path in raw_paths) and not all(
+        path is not None for path in raw_paths
+    ):
+        parser.error("external raw symbol handoff requires all four --raw-symbol-* paths")
+    if args.resume and args.raw_symbol_plan is not None:
+        parser.error("--resume cannot be combined with external raw symbol acquisition")
+    if args.refresh_symbols and args.raw_symbol_plan is not None:
+        parser.error("--refresh-symbols is redundant with an external raw symbol handoff")
     if args.resume and args.snapshot_only:
         parser.error("--snapshot-only cannot be combined with --resume")
     if not args.resume and args.snapshot is None:
@@ -507,6 +541,25 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 print_discovery_summary(discovery)
 
+                raw_upstream = None
+                if args.raw_symbol_plan is not None:
+                    assert args.raw_symbol_archive is not None
+                    assert args.raw_symbol_manifest is not None
+                    assert args.raw_symbol_report is not None
+                    raw_upstream = load_verified_raw_upstream(
+                        args.raw_symbol_plan,
+                        pinned.archive,
+                        args.raw_symbol_archive,
+                        args.raw_symbol_manifest,
+                        args.raw_symbol_report,
+                        authoritative_paths=archive_paths(discovery),
+                        source_document_count=pinned.document_count,
+                    )
+                    print(
+                        "External raw symbol source -> "
+                        f"{len(raw_upstream)} verified URLs; no network acquisition"
+                    )
+
                 symbols = acquire_symbol_snapshot(
                     pinned.archive,
                     symbol_destination,
@@ -519,6 +572,7 @@ def main(argv: list[str] | None = None) -> int:
                     army_snapshot=pinned,
                     override_root=args.image_overrides,
                     refresh_symbols=args.refresh_symbols,
+                    raw_upstream=raw_upstream,
                 )
                 console.stage_success(f"{symbols.asset_count} assets | {symbols.archive.name}")
                 if _stop_after("acquisition", stop_after):

@@ -813,6 +813,7 @@ def acquire_symbol_snapshot(
     army_snapshot_manifest: Path | None = None,
     override_root: Path = DEFAULT_OVERRIDE_ROOT,
     refresh_symbols: bool = False,
+    raw_upstream: dict[str, bytes | None] | None = None,
 ) -> SymbolSnapshotResult:
     """Resolve and publish one complete raw symbol snapshot for a pinned Army source."""
     if delay < 0:
@@ -843,6 +844,11 @@ def acquire_symbol_snapshot(
             f"{discovery.source_document_count} != {army_snapshot.document_count}"
         )
 
+    if raw_upstream is not None and set(raw_upstream) != discovery.authoritative_urls:
+        raise ValueError(
+            "Verified raw source URLs do not match authoritative symbol discovery"
+        )
+
     resolution_plan = override_resolution_plan(discovery)
     overrides = _override_files(override_root)
     for candidate, urls in resolution_plan.collisions.items():
@@ -854,7 +860,7 @@ def acquire_symbol_snapshot(
             progress(f"  {url} -> {resolution_plan.override_paths[url]}")
 
     cache = None
-    if not refresh_symbols:
+    if not refresh_symbols and raw_upstream is None:
         cache = load_symbol_cache(
             build_manifest_path,
             destination=destination,
@@ -899,6 +905,8 @@ def acquire_symbol_snapshot(
                 )
 
             def network_upstream(url: str, index: int) -> bytes | None:
+                if raw_upstream is not None:
+                    raise ValueError("External raw symbol handoff must never download SVGs")
                 upstream_counts["network"] += 1
                 try:
                     with opener(url, timeout=30) as response:
@@ -917,6 +925,18 @@ def acquire_symbol_snapshot(
             upstream_by_url: dict[str, UpstreamResolution] = {}
             upstream_unavailable: set[str] = set()
             for index, url in enumerate(urls, start=1):
+                if raw_upstream is not None:
+                    upstream_counts["network"] += 1
+                    body = raw_upstream[url]
+                    if body is None:
+                        upstream_unavailable.add(url)
+                    else:
+                        validated = _svg_bytes(body, context=f"raw handoff {url}")
+                        upstream_by_url[url] = UpstreamResolution(
+                            hashlib.sha256(validated).hexdigest(), validated, "network"
+                        )
+                    continue
+
                 cached_resolution = None
                 if cache is not None:
                     assert isinstance(cache_archive, zipfile.ZipFile)

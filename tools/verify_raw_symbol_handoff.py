@@ -17,9 +17,9 @@ from urllib.parse import urlsplit
 from xml.etree import ElementTree
 
 from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
-from tools.export_symbol_source_plan import FORMAT as PLAN_FORMAT
-from tools.export_symbol_source_plan import VERSION as PLAN_VERSION
 
+PLAN_FORMAT = "InfinityDB raw symbol acquisition requests"
+PLAN_VERSION = 1
 REPORT_FORMAT = "InfinityDB raw symbol acquisition report"
 REPORT_VERSION = 1
 SYMBOL_SOURCE_URL = "https://assets.corvusbelli.net/army/img/"
@@ -94,8 +94,6 @@ def verify_raw_handoff(
             parsed.scheme != "https"
             or parsed.netloc != "assets.corvusbelli.net"
             or not parsed.path.startswith("/army/img/")
-            or parsed.query
-            or parsed.fragment
             or not isinstance(member, str)
             or _PORTABLE_SVG.fullmatch(member) is None
             or any(part in {"", ".", ".."} for part in member.split("/"))
@@ -215,6 +213,50 @@ def verify_raw_handoff(
         "acquired": len(assets),
         "unavailable": len(unavailable),
     }
+
+
+def load_verified_raw_upstream(
+    plan_path: Path,
+    army_archive: Path,
+    symbol_archive: Path,
+    snapshot_manifest: Path,
+    result_report: Path,
+    *,
+    authoritative_paths: dict[str, str],
+    source_document_count: int,
+) -> dict[str, bytes | None]:
+    """Return verified upstream bytes, including explicit missing-source entries.
+
+    The independently valid handoff must also exactly match the consumer's
+    *current* source discovery and archive-path decisions.
+    """
+    verify_raw_handoff(
+        plan_path, army_archive, symbol_archive, snapshot_manifest, result_report,
+    )
+    plan = _source_json(plan_path)
+    expected = [
+        {"url": url, "archivePath": authoritative_paths[url]}
+        for url in sorted(authoritative_paths)
+    ]
+    if (
+        plan["requests"] != expected
+        or plan["sourceDocumentCount"] != source_document_count
+    ):
+        raise RawHandoffError(
+            "Raw symbol source plan differs from current authoritative discovery"
+        )
+
+    report = _source_json(result_report)
+    upstream: dict[str, bytes | None] = {
+        row["url"]: None for row in report["unavailableAssets"]
+    }
+    with zipfile.ZipFile(symbol_archive) as archive:
+        for row in report["assets"]:
+            body = archive.read(row["archivePath"])
+            if hashlib.sha256(body).hexdigest() != row["sha256"]:
+                raise RawHandoffError("Raw SVG upstream changed after verification")
+            upstream[row["url"]] = body
+    return upstream
 
 
 def main(argv: list[str] | None = None) -> int:

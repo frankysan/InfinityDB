@@ -259,6 +259,7 @@
         "test_build_symbols",
         "test_download_army_symbols",
         "test_export_symbol_source_plan",
+        "test_external_raw_symbol_bridge",
         "test_prepare_web_fonts",
         "test_reorganize_symbols",
         "test_stage_full_asset_bundle",

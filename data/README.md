@@ -411,10 +411,18 @@ The current producer contracts are:
   snapshot provenance and does not confer source authority by itself.
   Use `tools.verify_raw_symbol_handoff` in InfinityDB to verify the
   complete external ZIP/manifest/report against the pinned Army ZIP
-  and source plan before research use. This does **not** yet replace
-  `army-symbol-build.json` or the in-tree symbol acquisition,
-  override, processing or publication pipeline. Normal builds do not
-  invoke external tools or access the network.
+  and source plan. For a new symbol build, `tools.build_symbols` also
+  accepts all four `--raw-symbol-plan`, `--raw-symbol-archive`,
+  `--raw-symbol-manifest` and `--raw-symbol-report` arguments alongside
+  the pinned `--snapshot` and its Army provenance. It rechecks the
+  handoff against current authoritative discovery, consumes raw upstream
+  bytes **without an HTTP request**, applies the existing local
+  override/identity logic and writes an ordinary version-2
+  `army-symbol-build.json` checkpoint. Subsequent `--resume` and
+  processing stages use that checkpoint normally. This optional path
+  does not require installing the external Python package and does not
+  change the default in-tree symbol acquisition, processing or asset
+  publication workflows. Normal database builds do not acquire assets.
 
 The *format* and verification contract stay owned by InfinityDB's
 snapshot-provenance module. An extracted producer must emit compatible

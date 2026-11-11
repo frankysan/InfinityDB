@@ -3197,6 +3197,44 @@ without a matching, reviewed build manifest. The next slice must
 establish that bridge and its end-to-end parity checks before any
 removal of the in-tree symbol acquisition code.
 
+#### P5.4 — Consume external upstream bytes through the existing build (2026-11-11)
+
+The previously verified raw ZIP/report now feeds the **existing**
+`download_army_symbols.acquire_symbol_snapshot` resolver as optional
+`raw_upstream` evidence. `tools.build_symbols` accepts all four
+explicit `--raw-symbol-plan`, `--raw-symbol-archive`,
+`--raw-symbol-manifest` and `--raw-symbol-report` paths for new
+Army-pinned symbol builds. The read-only handoff verifier checks
+content/provenance first, then requires the exact URL-to-archive-path
+mapping and source-document count from **current** InfinityDB
+discovery. Stale, unreviewed or mismatched source plans fail closed.
+
+With an external handoff, upstream bytes and 404 decisions come only
+from the verified raw archive/report; no symbol HTTP requests or old
+cache lookups are made. The existing category-specific override
+propagation, upstream SHA identity, source/missing audit, snapshot
+repackaging and version-2 `army-symbol-build.json` generation remain
+authoritative. The effective ZIP can differ from the external *raw*
+ZIP when a reviewed override is applied. Normal checkpoint
+`build_symbols --resume` then consumes the generated manifest,
+not the external raw report.
+
+Focused tests cover raw-archive byte parity without overrides,
+exact v2 assets/references/audit parity against simulated in-tree
+network acquisition **with** upstream-equivalent overrides, 404
+handling, query-qualified URLs, rejection of stale source-discovery
+decisions, a real `build_symbols --stop-after acquisition` invocation
+without network access, and a subsequent successful v2 resume.
+No external Python package is imported by InfinityDB.
+
+This enables a supported **optional** offline raw-source path, not
+automatic retirement of the existing symbol downloader. The prior
+in-tree network/override workflow remains supported until a
+complete representative production-source run and relevant
+publication/asset acceptance pass have demonstrated parity.
+A normal database build, serve or Docker deployment still does not
+download symbols or require an external repository.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
