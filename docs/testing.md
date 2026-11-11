@@ -8197,11 +8197,11 @@ recommended-play reference, not an authoritative scenario forces/setup
 contract. Its six named modes provide Army Points, baseline SWC,
 recommended table size, Deployment Zone dimensions, and nominal duration.
 The independent N5.3 Retreat! and advisory table-size sources remain on
-pp. 146–147. Audit the same Army Points keys across both source tables:
+pp. 146–147. Verify the same Army Points keys against the current Rules
+source and database with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_game_mode_source_table
-.venv\Scripts\python.exe -m tools.audit_game_mode_source_table --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.\.venv\Scripts\python.exe -m pytest tests/test_game_mode_source_table.py -q
 ```
 
 The read-only manifest
@@ -8217,17 +8217,16 @@ Source-review semantics preserve baseline SWC rather than conflating
 profile-specific bonuses, and the indicated game duration is in
 minutes, not a limit of Game Rounds.
 
-The audit rejects changed values, schemas, sources, row order,
-Army Points/SWC alignment, and divergence from the separate
-Retreat!/table-size manifest. Optional local-PDF verification checks
-the printed p. 6 headings and source words, uses positional cell
-alignment for Army Points/SWC/minutes and the table/Deployment
-dimensions, and reports its PDF SHA-256. The ignored PDF is not
-required by CI. The reviewed `rule:game-modes` definition now publishes
+The current tests reject changed values, schemas, sources, row order,
+Army Points/SWC alignment and divergence from the separate Retreat!/
+table-size manifest. The reviewed `rule:game-modes` definition publishes
 these six rows at `/rules/game-modes` and `/api/rules/game-modes`, using
 `facts.gameSetupTable.rows` as the structured normal-player source.
-The audit compares **every published value** to both pinned manifests
-and fails closed on changed data, source pages or advisory scope.
+Tests compare **every published value** against both reviewed manifests
+and the current `rules_n5.db`, failing on changed data, source pages or
+advisory scope. The one-use positional PDF extraction for p. 6 was
+retired in P5.1 after its source review; the evidence remains in this
+dated record and Git history. Revisions require new source intake.
 The browser uses the shared horizontally scrollable reference-table
 primitive. Normal player search reaches the same record. Scenarios,
 Army List legality, Unit attributes, and live session state remain

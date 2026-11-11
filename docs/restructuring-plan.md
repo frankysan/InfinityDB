@@ -2762,7 +2762,7 @@ The standalone `audit_standard_game_reference_tables` was a fixed N5.3
 pp. 146–147 PDF-geometry/Retreat! table investigation. Its six reviewed
 threshold and advisory table-size rows are already consumed by the current
 `rule:game-modes` reference and checked against the independent source
-manifest by `audit_game_mode_source_table`. The original CLI, its
+manifest in `test_game_mode_source_table`. The original CLI, its
 operation-only tests and the test-section entry are retired; its source
 manifest and the published reference remain unchanged.
 
@@ -2821,6 +2821,26 @@ remove only its parameterized invocation of the retired terrain CLI.
 The 2026-11-03 source review and original PDF parser remain in
 `docs/testing.md`/Git history. Future source revisions require
 separate source-intake validation, not permanent legacy operation tests.
+
+#### P5.1 — Retire completed Game Modes chart investigation (2026-11-11)
+
+The N5.3 p. 6 `audit_game_mode_source_table` CLI was a fixed-source
+investigation comparing six recommended Game Modes with the independent
+pp. 146–147 setup/Retreat! rows. Its optional positional PDF
+extraction and CLI reporting no longer serve an independent research,
+build or publication workflow. Retire the wrapper and operation-only
+tests; retain both reviewed manifests.
+
+The existing `test_game_mode_source_table` now owns the exact source
+row/scope checks, cross-manifest correspondence, the published
+`rule:game-modes` facts and citations, and direct `rules_n5.db`
+parity. Its mutation cases still reject data, schema and advisory
+scope drift, while schema validation guards malformed curated rows.
+The printed p. 6 geometry check is preserved as dated review evidence
+and in Git history, not as a permanent CI parser. The separate
+Hacking Program statistics validator remains active for now because
+it compares twelve actual Army metadata profiles against independent
+N5.3 evidence, not just a retired publication procedure.
 
 ### P6 — Consolidate, measure and establish the new baseline
 
