@@ -3334,6 +3334,50 @@ visual-validation thresholds, verify output parity including the
 bytes, and only then update InfinityDB's consumer/publication
 path. In-tree processing and override application remain active.
 
+#### P5.4 — Standalone SVG preflight and font-audit stages (2026-11-11)
+
+The independent `InfinityDB-symbol-tools` repository now owns
+versioned, **read-only** structural SVG preflight and installed-font
+audit stages for the intermediate `EFFECTIVE-SYMBOLS` artifact.
+
+`infinity-symbol-preflight` verifies the effective ZIP, v3
+provenance and override-stage report against exact member hashes,
+then writes the existing `InfinityDB SVG preflight audit` v1
+report shape (SVG parse state, active text, text runs and declared
+font references). A separate version-1 `symbol processing stage
+receipt` pins the artifact and report hashes and records
+`passed`/`failed`. Malformed inputs are rejected before
+publishing a report; genuine parse failures produce a failed receipt.
+
+`infinity-symbol-font-audit` requires a **passed, hash-pinned**
+preflight report/receipt and uses the ported `svg_processor`
+font reference scanner, reviewed alias policy and installed
+font index. It writes the existing `InfinityDB SVG font audit`
+v1 report fields and a second receipt. The receipt pins the
+preflight outputs, reviewed alias file, resolved font-file hashes,
+index counts, source artifact and audit report. No font binary
+or absolute installed-font path is published. Unresolved or
+ambiguous fonts fail the stage; the source ZIP is not modified.
+
+Both standalone modules are installed entrypoints with hermetic
+CI fixtures; Python 3.11 tests pass on Ubuntu, Windows and macOS
+(at `InfinityDB-symbol-tools` commits `cb80f12e` and
+`cf6e2301`). Python processing dependencies are optional and
+the actual installed-font environment is explicitly an input
+to any future reproducible conversion.
+
+**Still pending:** Move the duplicate/visual canonicalization,
+font substitution/text-to-path conversion and compression
+orchestrators. They require exact renderer/tool versions,
+bounded visual comparison settings and completed processed
+receipt chaining before InfinityDB can verify, map and publish
+the external result. The in-tree `symbol_work` state machine and
+SVG processors remain active. Neither standalone audit
+completes the `fontAudit`, `deduplication`,
+`textConversion` or `compression` keys in the original
+intermediate effective-symbol report; progress is recorded
+in separate immutable stage receipts.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

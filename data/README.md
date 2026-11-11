@@ -434,10 +434,14 @@ The current producer contracts are:
   version-1 effective report recording raw/upstream, override and
   effective SVG identities. `tools.verify_effective_symbol_handoff`
   checks that chain independently, optionally against local reviewed
-  override files. This artifact is **not publication-ready**:
-  font conversion, deduplication and compression are explicitly
-  pending and remain in the existing InfinityDB pipeline until
-  equivalent external processing and acceptance are complete.
+  override files. The standalone `infinity-symbol-preflight` and
+  `infinity-symbol-font-audit` commands now produce matching legacy
+  audit report formats plus immutable, hash-pinned stage receipts.
+  These audit steps do not modify the effective SVG ZIP or promote it
+  to publication-ready status. Duplicate detection, font
+  substitution/text conversion and render-validated compression
+  still need independent orchestration and accepted parity before
+  retiring the current InfinityDB processing stages.
 
 The *format* and verification contract stay owned by InfinityDB's
 snapshot-provenance module. An extracted producer must emit compatible
