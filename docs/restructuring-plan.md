@@ -3606,11 +3606,22 @@ at 32/64 CSS pixels and DPR 1/2. No path exception or tolerance change was
 needed. See the [pinned local evidence and acceptance
 boundary](testing.md#p57-matched-input-symbol-processor-parity).
 
-**Next:** Review artwork differences against the tracked publication, consume
-the verified external artifact through semantic publication, verify that the
-duplicate identity remains accessible, and run actual browser/local/Docker
-acceptance. Retire the in-tree processors only after those checks. Matched
-processor parity alone does not approve a changed graphical publication.
+#### P5.7 — External semantic publication candidate (2026-11-11)
+
+`tools.prepare_symbol_publication` now verifies the external source and stage
+chain, rederives authoritative Army discovery, and uses the existing semantic
+mapper to prepare a new candidate directory. It does not construct historical
+processing state or invoke graphical processors. The production-derived
+candidate preserves all source and browser mapping keys, including both Seed
+Soldier identities, with **807** published SVGs. See the
+[candidate lifecycle](../data/README.md#external-processed-symbol-publication-candidates)
+and [focused evidence](testing.md#p57-external-semantic-publication-candidate).
+
+**Next:** Review the candidate's artwork differences and removed asset URL
+against the tracked publication, promote an accepted candidate with rebuilt
+embedded mappings, and run actual browser/local/Docker acceptance. Retire the
+in-tree processors only after those checks. Processor and candidate mapping
+acceptance alone do not approve a changed graphical publication.
 
 ### P6 — Consolidate, measure and establish the new baseline
 

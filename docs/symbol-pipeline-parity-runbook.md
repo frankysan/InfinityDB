@@ -1,8 +1,8 @@
 # P5.7 — Symbol pipeline production parity runbook
 
-Status: **matched-input processor parity passed (2026-11-11)**. Artwork
-review against the tracked release and semantic browser/local/Docker
-publication acceptance remain open. See the [dated evidence and acceptance
+Status: **matched-input processor parity passed and semantic candidate
+prepared (2026-11-11)**. Artwork/URL review against the tracked release,
+promotion and actual browser/local/Docker acceptance remain open. See the [dated evidence and acceptance
 boundary](testing.md#p57-matched-input-symbol-processor-parity).
 
 ## Readiness audit
@@ -165,6 +165,22 @@ where possible, not counted as passing comparisons. A failed
 comparison exits nonzero. Use a fresh output path for every run;
 reports must not be overwritten.
 
+## Prepare and compare semantic publication
+
+Use the offline `tools.prepare_symbol_publication` consumer with the exact
+raw/effective ZIPs, producer font-alias bytes and stage/processed report
+directories. The [candidate lifecycle](../data/README.md#external-processed-symbol-publication-candidates)
+owns the full input and output contract. Always select a fresh output directory.
+No processing package or graphical tool installation is needed.
+
+The production-derived candidate under
+`local/p5-external-symbol-publication-verified-20261111` preserves every source
+and browser mapping key. Both Seed Soldier source identities resolve to one
+published SVG. The comparison records 118 changed SVG hashes and one removed
+filename against the tracked publication; those artwork and URL differences
+remain subject to review. See the [candidate acceptance evidence](testing.md#p57-external-semantic-publication-candidate).
+Preparation does not promote assets or rebuild embedded SQLite mappings.
+
 ## Acceptance gates
 
 1. The real-source inventory must account for every reviewed
@@ -185,6 +201,8 @@ reports must not be overwritten.
 **Current evidence:** matched-input production processor raster parity
 passed, with zero pixel differences across all 807 canonical assets.
 The independent artifact verifier and 16 hermetic handoff tests also passed.
-Review against the tracked artwork, semantic browser/local/Docker
-publication acceptance and in-tree processor retirement remain open.
+The external semantic publication candidate preserves every source/browser
+mapping key. Artwork/URL review, candidate promotion, rebuilt SQLite mappings,
+actual browser/local/Docker acceptance and in-tree processor retirement remain
+open.
 The failed historical-output comparison remains preserved separately.

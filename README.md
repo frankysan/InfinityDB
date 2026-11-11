@@ -257,6 +257,12 @@ python tools/build_symbols.py --fetch-snapshot
 Symbol processing requires the `symbols` Python extras. Compression additionally
 requires SVGO v4+ and `resvg`; text conversion normally requires Inkscape.
 
+An external processed-SVG handoff can also be prepared as an isolated semantic
+publication candidate using `python -m tools.prepare_symbol_publication`.
+That offline command verifies the source/stage evidence and needs no graphical
+processing tools. It leaves the tracked publication unchanged; see the
+[candidate inputs and review boundary](data/README.md#external-processed-symbol-publication-candidates).
+
 The symbol pipeline is resumable and records detailed local logs, reports,
 provenance, and publication state. Corvus Belli has granted explicit permission
 for InfinityDB to redistribute the processed graphical publication used by the

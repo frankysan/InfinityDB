@@ -1784,6 +1784,45 @@ needs verification. Keep those gates and in-tree retirement open under P5.
 Tracked SVGs, databases and publication manifest were unchanged. No full Linux,
 hosted-CI or release acceptance is implied.
 
+### P5.7 external semantic publication candidate
+
+**Project domains:** Data processing, Project infrastructure
+
+**2026-11-11, Windows development checkout based on `4891a1ef`:**
+`tools.prepare_symbol_publication` prepared the production external handoff
+under ignored `local/p5-external-symbol-publication-verified-20261111`.
+Raw/effective provenance and override decisions, current Army source/lookup
+approval, preflight/font/duplicate receipts and CSVs, conversion source hashes,
+conversion coverage and compressed member integrity all passed. The explicit
+producer font-alias file was required: the in-tree alias JSON has equivalent
+content but different bytes and was correctly rejected against the receipt.
+No renderer, converter, acquisition or tracked-artifact replacement ran.
+
+The candidate maps **1,101 source identities** to **807 published SVGs**.
+Comparison with the tracked publication found no missing or added keys among
+the source mapping and all five browser mappings: **60 Army**, **918 Unit**,
+**1,033 profile-logo**, **8 profile-identity** and **9 static-symbol** keys.
+Both Seed Soldier source identities resolve to
+`units/combined-army/512-shasvastii-seed-soldiers.svg`. This consolidation is the
+only changed source mapping and profile-logo mapping. Every candidate SVG hash
+was checked against its manifest. A repeat preparation produced byte-identical
+publication and evidence files; publication manifest SHA-256:
+`acb3a2384fc985db59df429ce45daba413452cf1956534a0b1c24d5daebc3948`.
+
+The focused candidate, existing semantic publisher, raw/effective/duplicate/
+processed handoff, source-plan and test-registry cohort passed **86/86, zero
+skips**. Candidate tests cover disconnected source/stage hashes, altered
+canonical assignments, exact alias-file binding, unapproved lookup plans,
+existing-output preservation, input mutation and installation rollback.
+
+Private comparison evidence is retained in
+`local/p5-external-symbol-publication-comparison-20261111.json`. The candidate
+has **118 changed SVG hashes**, **one removed filename**, and no added filenames
+against the tracked release. That inventory is not visual or old-URL acceptance.
+Artwork/URL review, promotion, rebuilt SQLite mappings, actual browser/local/
+Docker checks and in-tree processor retirement remain open. The tracked SVGs,
+publication manifest and runtime databases were not changed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

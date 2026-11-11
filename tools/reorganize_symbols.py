@@ -632,11 +632,35 @@ def _build_publication(
     compressed_root: Path,
     staging_static: Path,
 ) -> tuple[dict[str, Any], dict[str, int]]:
-    assets = manifest["assets"]
+    """Adapt the still-supported in-tree processing manifest to publication."""
+    return build_publication(
+        assets=manifest["assets"], references=manifest["references"],
+        canonical_by_source=manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"],
+        army_artifact=manifest["snapshot"]["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=snapshot_index, compressed_root=compressed_root,
+        staging_static=staging_static,
+    )
+
+
+def build_publication(
+    *,
+    assets: list[dict[str, Any]],
+    references: list[dict[str, Any]],
+    canonical_by_source: dict[str, str],
+    army_artifact: dict[str, Any],
+    unavailable_assets: list[dict[str, Any]],
+    snapshot_index: SnapshotIndex,
+    compressed_root: Path,
+    staging_static: Path,
+) -> tuple[dict[str, Any], dict[str, int]]:
+    """Build semantic paths from verified assets and authoritative Army references.
+
+    Processing-format adapters validate their own provenance before calling this
+    shared mapper. This function never installs the resulting publication.
+    """
     asset_by_url = {row["url"]: row["archivePath"] for row in assets}
-    unavailable_urls = {row["url"] for row in manifest.get("unavailableAssets", [])}
-    duplicate = manifest["processing"]["duplicateDetection"]
-    canonical_by_source = duplicate["canonicalByArchivePath"]
+    unavailable_urls = {row["url"] for row in unavailable_assets}
     canonical_paths = sorted(set(canonical_by_source.values()))
 
     actual_compressed = {
@@ -650,7 +674,7 @@ def _build_publication(
         )
 
     references_by_canonical: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for reference in manifest["references"]:
+    for reference in references:
         if not reference.get("authoritative"):
             continue
         asset_url = reference["assetUrl"]
@@ -670,8 +694,8 @@ def _build_publication(
 
     canonical_to_published: dict[str, str] = {}
     for canonical in canonical_paths:
-        references = references_by_canonical.get(canonical, [])
-        if not references:
+        canonical_references = references_by_canonical.get(canonical, [])
+        if not canonical_references:
             raise ValueError(f"Canonical asset has no authoritative references: {canonical}")
         ranked_candidates = sorted(
             (
@@ -682,7 +706,7 @@ def _build_publication(
                     ),
                     row,
                 )
-                for row in references
+                for row in canonical_references
             ),
             key=lambda item: (item[0], item[1]),
         )
@@ -711,7 +735,7 @@ def _build_publication(
         selected_reference = ranked_candidates[0][2]
         if _namespace(selected_candidate) == "peripherals":
             preferred = _prefer_non_reinforcement_peripheral_path(
-                selected_reference, references, snapshot_index
+                selected_reference, canonical_references, snapshot_index
             )
             if preferred is not None:
                 selected_candidate = preferred
@@ -744,7 +768,7 @@ def _build_publication(
     ] = defaultdict(list)
     unit_profile_references: list[dict[str, Any]] = []
     static_mapping: dict[str, str] = {}
-    for reference in manifest["references"]:
+    for reference in references:
         if not reference.get("authoritative"):
             continue
         asset_url = reference["assetUrl"]
@@ -892,7 +916,6 @@ def _build_publication(
         "staticMappingCount": len(static_mapping),
         "publishedBytes": published_bytes,
     }
-    army_artifact = manifest["snapshot"]["armyArtifact"]
     report = {
         "format": PUBLICATION_MAPPING_FORMAT,
         "formatVersion": PUBLICATION_MAPPING_VERSION,
@@ -917,7 +940,7 @@ def _build_publication(
             "browserReferencedAssetCount": len(browser_referenced_paths),
             "unreferencedPublishedAssetCount": len(unreferenced_published_paths),
         },
-        "unavailableSourceAssets": manifest.get("unavailableAssets", []),
+        "unavailableSourceAssets": unavailable_assets,
     }
     return report, summary
 

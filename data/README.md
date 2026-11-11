@@ -446,10 +446,12 @@ The current producer contracts are:
   visible and fail the receipt instead of claiming visual coverage.
   `tools.verify_symbol_duplicate_handoff` verifies its byte, path,
   summary and receipt evidence independently, but cannot establish
-  visual equivalence without rerendering. Text-to-path conversion
-  and render-validated compression still need external
-  orchestration and accepted parity before retiring InfinityDB's
-  in-tree processing stages.
+  visual equivalence without rerendering. External text-to-path conversion
+  and render-validated compression now provide immutable canonical ZIPs,
+  reports and receipts. The [matched-input processor comparison](../docs/testing.md#p57-matched-input-symbol-processor-parity)
+  passed; [candidate preparation](#external-processed-symbol-publication-candidates)
+  consumes that handoff without running graphical processors. Final artwork,
+  browser and hosting acceptance still precede in-tree processor retirement.
 
 The *format* and verification contract stay owned by InfinityDB's
 snapshot-provenance module. An extracted producer must emit compatible
@@ -466,6 +468,49 @@ This file owns the current acquisition/build-state and publication lifecycle for
 [`docs/data-model.md`](../docs/data-model.md) defines runtime identity/persistence semantics.
 Implementation details remain in the symbol tooling, and unfinished lifecycle work belongs in
 [`docs/TODO.md`](../docs/TODO.md).
+
+### External processed symbol publication candidates
+
+**Project domain:** Data processing
+
+`python -m tools.prepare_symbol_publication` prepares an offline candidate from
+the external producer's v1 processing handoff. It uses the same semantic mapper
+as the current publisher, rederiving authoritative Army references and approved
+source/override lookups from the selected Army snapshot and maintained inputs.
+It requires neither the external Python package nor installed renderers,
+converters or fonts.
+
+```powershell
+python -m tools.prepare_symbol_publication --source-plan SOURCE_PLAN.json --override-lookups LOOKUPS.json --army "JSON YYYYMMDD-HHMMSS.zip" --army-manifest ARMY_MANIFEST.json --raw-archive "SYMBOLS YYYYMMDD-HHMMSS.zip" --effective-archive "EFFECTIVE-SYMBOLS YYYYMMDD-HHMMSS.zip" --stage-reports STAGE_REPORTS --processed-root PROCESSED_OUTPUT --font-aliases font-aliases.json --output local/symbol-candidate
+```
+
+Select actual immutable paths. Each raw/effective ZIP's same-directory `.json`
+manifest and `.raw-report.json` or `.effective-report.json` companion must be
+present. `--stage-reports` selects the preflight/font/duplicate receipts and
+reports, with duplicate CSVs under `duplicates/`. `--processed-root` selects
+`CANONICAL.zip`, `COMPRESSED.zip`, both final stage receipts and their conversion
+and compression CSV/JSON reports. `--font-aliases` must select the exact bytes
+pinned by the producer, even when another JSON file has equivalent content.
+
+The consumer independently verifies raw/effective provenance and override
+decisions, passed preflight/font/duplicate evidence, source-to-canonical
+identity, conversion input hashes and successful CSV coverage, and compressed
+member hashes/structure. It joins each stage to the same immutable source and
+checks that all selected inputs remain unchanged during preparation.
+Canonical and publication paths use the existing Unit/Peripheral ownership,
+profile identity and collision rules; raw source IDs never invent a new owner.
+
+The destination must be new. It contains `static/`, the current v2
+`symbol-publication.json` and `candidate-evidence.json` with input hashes and
+the publication-manifest hash. Validation or mapping failure installs no
+candidate; a failed installation rolls back its new directory. Existing output
+is never replaced. Input archives, in-tree processing state, tracked static
+assets and runtime databases remain unchanged.
+
+A prepared candidate is available for artwork, URL/mapping, browser and hosting
+review. It does not approve graphical changes against the tracked publication,
+promote a release, rebuild embedded mappings or retire the current pipeline.
+The normal build/serve/Docker path continues using the tracked publication.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not covered by InfinityDB's MIT License. Corvus Belli

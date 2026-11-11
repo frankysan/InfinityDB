@@ -31,9 +31,10 @@ when all contained work shares the same owner.
   P0–P4 are complete; the release owner accepted P4.5 on 2026-11-11
   following focused browser/accessibility validation. P5 tooling retirement
   and P6 integrated closeout remain open. Matched-input symbol processor
-  parity passed; P5 still needs artwork review against the tracked release,
-  external-artifact semantic publication, browser/local/Docker acceptance
-  and in-tree processor retirement. See the
+  parity and external-artifact semantic candidate preparation passed. P5 still
+  needs artwork and removed-asset URL review against the tracked release,
+  candidate promotion with rebuilt embedded mappings, browser/local/Docker
+  acceptance and in-tree processor retirement. See the
   [processor acceptance boundary](testing.md#p57-matched-input-symbol-processor-parity).
   P3 hosted Source checks,
   installed-wheel smoke and deployment smoke passed on
