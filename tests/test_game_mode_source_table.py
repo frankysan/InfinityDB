@@ -43,7 +43,6 @@ from tools.audit_restrictions_source_chart import (
     verify_pinned_pdf as verify_restrictions_pdf,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SETUP_MANIFEST = ROOT / "config/validation/standard-game-reference-tables.json"
 MANIFEST = ROOT / "config/validation/game-mode-source-table.json"
