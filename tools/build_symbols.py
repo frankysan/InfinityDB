@@ -22,12 +22,8 @@ from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
 from infinity_db.symbol_manifest import load_symbol_manifest
 
 try:
-    from tools.download_army_json import (
-        API_BASE_URL,
-        ArmySnapshotResult,
-        acquire_army_snapshot,
-        resolve_army_snapshot,
-    )
+    from tools.army_snapshot_source import ArmySnapshotResult, resolve_army_snapshot
+    from tools.download_army_json import API_BASE_URL, acquire_army_snapshot
     from tools.download_army_symbols import (
         DEFAULT_OVERRIDE_ROOT,
         DEFAULT_STATIC_CONFIG,
@@ -47,12 +43,8 @@ try:
         materialize_symbol_archive,
     )
 except ImportError:  # pragma: no cover - direct script execution fallback
-    from download_army_json import (
-        API_BASE_URL,
-        ArmySnapshotResult,
-        acquire_army_snapshot,
-        resolve_army_snapshot,
-    )
+    from army_snapshot_source import ArmySnapshotResult, resolve_army_snapshot
+    from download_army_json import API_BASE_URL, acquire_army_snapshot
     from download_army_symbols import (
         DEFAULT_OVERRIDE_ROOT,
         DEFAULT_STATIC_CONFIG,

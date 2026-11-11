@@ -3052,6 +3052,44 @@ The extraction is complete. The remaining P5 work is evaluation of
 Army JSON and raw-symbol acquisition, plus P5.5 documentation/
 scaffolding cleanup before P6 integrated acceptance.
 
+#### P5.4 — Army acquisition/consumer boundary: offline resolver (2026-11-11)
+
+The Army downloader currently exposes two different responsibilities:
+network acquisition of a stable twice-fetched Army API snapshot, and
+*offline* verification of an existing ZIP plus version-3 manifest.
+The latter is required by the symbol build's pinned/resume flows and
+raw symbol acquisition; it is not an acquisition operation.
+
+Extract the original `ApiDownloadError`, `ArmySnapshotResult`,
+`snapshot_source_revision_counts`, and `resolve_army_snapshot`
+(without changing their validation semantics) to
+`tools/army_snapshot_source.py`. Both `build_symbols` and
+`download_army_symbols` import this read-only consumer directly
+instead of importing a network downloader to validate an archive.
+The old downloader retains compatible re-exports while it is in
+use; `--fetch-snapshot` is still an explicit, supported action,
+and the normal `--snapshot`/resume paths do not require the network.
+The importer remains owned by `infinity_army_data` in InfinityDB.
+
+Pin the consumer's fail-closed behavior in focused tests:
+v3 exact ZIP verification, source document count and revision/date
+consistency, required metadata, malformed version rejection, language
+validation, and tamper rejection. These tests exercise offline
+inputs only and do not run the Army API.
+
+**Not yet an extraction:** the producer still imports the shared
+`infinity_army_data` source decoders and date interpretation, and
+the symbol orchestrator still offers an optional explicit online
+fetch. Before moving the downloader to its own repository, export
+or port the *source-format acceptance* subset without an InfinityDB
+runtime dependency; compare against the current importer on
+accepted/rejected fixtures, confirm identical archive/provenance
+output and complete two-pass mismatch handling, then create a
+standalone producer repo and validate it across platforms. Only
+after that proof should `--fetch-snapshot` be removed or redirected
+and its obsolete in-tree acquisition tests retired. No cross-repo
+import or mandatory build dependency is introduced in this slice.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

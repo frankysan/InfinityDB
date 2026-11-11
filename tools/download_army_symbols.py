@@ -34,11 +34,11 @@ from infinity_db.symbol_manifest import (
 )
 
 try:
-    from tools.download_army_json import ArmySnapshotResult, resolve_army_snapshot
+    from tools.army_snapshot_source import ArmySnapshotResult, resolve_army_snapshot
     from tools.path_sanitization import sanitize_filename
     from tools.snapshot_archive import create_timestamped_archive
 except ImportError:  # pragma: no cover - direct script execution fallback
-    from download_army_json import ArmySnapshotResult, resolve_army_snapshot
+    from army_snapshot_source import ArmySnapshotResult, resolve_army_snapshot
     from path_sanitization import sanitize_filename
     from snapshot_archive import create_timestamped_archive
 
