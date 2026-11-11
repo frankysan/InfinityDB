@@ -3047,16 +3047,28 @@ The preparatory command, from the InfinityDB repository root, is:
 .\.venv\Scripts\python.exe -m tools.export_wiki_acquisition --output local/wiki-acquisition-producer --archive local/infinity-wiki-acquisition-p5.4.zip
 ```
 
-The intended new, dedicated Git repository is
-`InfinityDB-wiki-acquisition`, initially private, empty and without
-pre-generated README/license files because the export includes them.
-**Do not retire** `tools/download_wiki_snapshot.py` or its tests
-yet. After creation/import of the standalone repository, validate
-an independently installed package, failure-atomicity, output ZIP and
-manifest against the consumer's actual offline reader and build, then
-remove the duplicate downloader and one-time export helper in a
-separate committed cutover. No network acquisition or external
-source publishing is authorized by this preparation.
+**Published standalone producer (2026-11-11):**
+[`InfinityDB-wiki-acquisition`](https://github.com/frankysan/InfinityDB-wiki-acquisition)
+`main` commit `ead8410843f13d6c6beae58b2b3bd58c8b35a87c`. The initial
+standalone package has no application imports; it includes Wiki,
+Human Sphere and revision-history tests. Installed-package GitHub
+Actions checks passed on Ubuntu, Windows and macOS (Python 3.11).
+The isolated export regression also produced a v3 ZIP/manifest pair
+that the InfinityDB consumer verified using exact hashes. This is
+a source-*research* archive, not an input to the ordinary Army/Rules/ITS
+build, so its acceptance contract is offline archive/provenance
+parity rather than rebuilding gameplay databases from Wiki HTML.
+No network acquisition or publication of third-party source assets
+was performed during this extraction.
+
+**P5.4 cutover still open:** `tools/download_wiki_snapshot.py` and the
+dedicated in-repo crawler tests remain until their active documentation,
+CLI invocation and test-section consumers are retired. No normal
+build, serve or Docker command may start depending on an external
+repository. After a focused consumer audit, delete the in-repo
+downloader, its historical tests and the one-time export helper;
+retain the independent current archive/provenance verification in
+InfinityDB and the complete crawler tests in the new repository.
 
 ### P6 — Consolidate, measure and establish the new baseline
 
