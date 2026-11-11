@@ -8,10 +8,8 @@ is *profile evidence*, not a reviewed rules definition or browser-coverage claim
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
-import unicodedata
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -20,6 +18,12 @@ from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
 from infinity_db.weapon_profile_publication import profile_sha256
+from tools.weapon_source_common import (
+    source_file_sha256 as _sha256,
+)
+from tools.weapon_source_common import (
+    weapon_identity as _identity,
+)
 
 FORMAT = "InfinityDB 1.0 weapon definition gap triage"
 FORMAT_VERSION = 3
@@ -31,18 +35,6 @@ MAX_BATCH_SIZE = 8
 
 class WeaponGapTriageError(ValueError):
     """Incompatible or incomplete evidence prevents a reproducible comparison."""
-
-
-def _identity(value: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "", unicodedata.normalize("NFKC", value).casefold())
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _load(path: Path) -> dict[str, Any]:

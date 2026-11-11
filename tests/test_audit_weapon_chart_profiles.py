@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from pathlib import Path
@@ -7,12 +8,61 @@ from pathlib import Path
 import pytest
 
 from tools.audit_weapon_chart_profiles import (
+    _identity as chart_weapon_identity,
+)
+from tools.audit_weapon_chart_profiles import (
+    _mode_identity as chart_mode_identity,
+)
+from tools.audit_weapon_chart_profiles import (
     _printed_name_and_mode,
     _value,
     compare_rows,
     markdown_report,
     rows_from_words,
 )
+from tools.audit_weapon_chart_profiles import (
+    _sha256 as chart_source_sha256,
+)
+from tools.audit_weapon_definition_gaps import (
+    _identity as gap_weapon_identity,
+)
+from tools.audit_weapon_definition_gaps import (
+    _sha256 as gap_source_sha256,
+)
+from tools.weapon_source_common import (
+    source_file_sha256,
+    weapon_identity,
+    weapon_mode_identity,
+)
+
+
+def test_source_weapon_identity_shared_across_research_audits() -> None:
+    for value, expected in (
+        ("MULTI Rifle", "multirifle"),
+        ("ＭＵＬＴＩ　Ｒｉｆｌｅ", "multirifle"),
+        ("E/M Mines", "emmines"),
+        ("Tactical Bow", "tacticalbow"),
+    ):
+        assert weapon_identity(value) == expected
+        assert chart_weapon_identity(value) == expected
+        assert gap_weapon_identity(value) == expected
+
+    variants = ("Anti-Material Mode", "Anti-Materiel Mode", "Antimaterial Mode")
+    assert {weapon_mode_identity(value) for value in variants} == {"antimaterielmode"}
+    assert chart_mode_identity(variants[0]) == weapon_mode_identity(variants[1])
+    assert weapon_mode_identity("AP Mode") != weapon_mode_identity("DA Mode")
+    assert weapon_identity("Anti-Material Mode") != weapon_identity("Anti-Materiel Mode")
+
+
+def test_source_file_hash_preserves_exact_bytes(tmp_path: Path) -> None:
+    path = tmp_path / "source.pdf"
+    content = b"PDF\x00source\r\n"
+    path.write_bytes(content)
+    expected = hashlib.sha256(content).hexdigest()
+    assert source_file_sha256(path) == expected
+    assert chart_source_sha256(path) == gap_source_sha256(path) == expected
+    path.write_bytes(content.replace(b"\r\n", b"\n"))
+    assert source_file_sha256(path) != expected
 
 
 def _pdf_row(name: str = "Tactical Bow") -> dict[str, object]:

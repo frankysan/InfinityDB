@@ -9,7 +9,6 @@ Nothing in this tool modifies game data or treats a profile as a rule definition
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 import sqlite3
@@ -17,6 +16,16 @@ import unicodedata
 from collections import Counter
 from pathlib import Path
 from typing import Any
+
+from tools.weapon_source_common import (
+    source_file_sha256 as _sha256,
+)
+from tools.weapon_source_common import (
+    weapon_identity as _identity,
+)
+from tools.weapon_source_common import (
+    weapon_mode_identity as _mode_identity,
+)
 
 FORMAT = "InfinityDB N5 Weapon Chart profile evidence"
 FORMAT_VERSION = 3
@@ -28,11 +37,6 @@ _FIELDS = ("ps", "burst", "ammunition", "savingAttribute", "savingRolls")
 
 class WeaponChartAuditError(ValueError):
     """Chart structure or input prevents a reproducible comparison."""
-
-
-def _identity(value: str) -> str:
-    text = unicodedata.normalize("NFKC", value).casefold()
-    return re.sub(r"[^a-z0-9]+", "", text)
 
 
 def _value(value: object) -> str:
@@ -56,14 +60,6 @@ def _fields_equal(pdf: dict[str, str], army: dict[str, str], field: str) -> bool
     ):
         return True
     return _value(pdf[field]) == _value(army[field])
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _cell(
@@ -292,12 +288,6 @@ def _printed_name_and_mode(name: str) -> tuple[str, str]:
     if match is None:
         return name, ""
     return match.group(1).strip(), match.group(2).strip() + " Mode"
-
-
-def _mode_identity(mode: str) -> str:
-    # N5's Anti-Materiel and Army's Anti-Material/Antimaterial spellings
-    # designate the same named mode; do not collapse unrelated mode names.
-    return _identity(mode).replace("antimaterial", "antimateriel")
 
 
 def _army_options(

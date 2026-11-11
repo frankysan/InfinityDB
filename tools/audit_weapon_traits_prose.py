@@ -21,10 +21,16 @@ from tools.audit_weapon_chart_profiles import (
     PDF_PAGES,
     WeaponChartAuditError,
     _chart_burst_anchors,
-    _identity,
-    _mode_identity,
-    _sha256,
     rows_from_words,
+)
+from tools.weapon_source_common import (
+    source_file_sha256 as _sha256,
+)
+from tools.weapon_source_common import (
+    weapon_identity as _identity,
+)
+from tools.weapon_source_common import (
+    weapon_mode_identity as _mode_identity,
 )
 
 FORMAT = "InfinityDB N5 v5.3 Weapon Traits and prose evidence"

@@ -18,10 +18,14 @@ from zipfile import ZipFile
 
 from tools.audit_weapon_chart_profiles import (
     WeaponChartAuditError,
-    _identity,
     _metadata,
-    _mode_identity,
     _printed_name_and_mode,
+)
+from tools.weapon_source_common import (
+    weapon_identity as _identity,
+)
+from tools.weapon_source_common import (
+    weapon_mode_identity as _mode_identity,
 )
 
 CHART_MEMBER = "Weapon_Chart"

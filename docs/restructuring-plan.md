@@ -2870,6 +2870,38 @@ current source-delta/reconciliation consumers and maintained review
 manifests have been assessed under P5.2. No published Weapon facts
 are changed by this slice.
 
+#### P5.2 — Share Weapon source identity and digests (2026-11-11)
+
+The Weapon audit family reused three non-chart-specific helpers from
+`audit_weapon_chart_profiles`: NFKC/casefold Weapon-name identity,
+the narrowly reviewed Anti-Material/Anti-Materiel Mode spelling alias,
+and byte-exact streaming SHA-256. The independent
+`audit_weapon_definition_gaps` carried duplicate name/hash
+implementations. This unnecessarily coupled research on traits,
+Wiki names and Weaponry family clauses to the full fixed-layout PDF
+chart audit.
+
+Extract these policies into `tools/weapon_source_common.py` and use
+them directly from chart, gap, traits/prose, Wiki-name and Weaponry
+family tools. Preserve the original chart-audit private imports for
+any remaining legacy research consumers. Focused tests pin exact
+NFKC/mode identity semantics, intentional non-collapse of unrelated
+modes, and raw file SHA-256 equivalence across prior imports.
+This helper is tools-only: no runtime package, source manifests,
+Weapon facts or published database output changes.
+
+Retain `audit_weapon_chart_profiles` parsing functions,
+`audit_weapon_traits_prose` and its cross-source consumer for now:
+their PDF row/trait extraction and independent-source review still
+have distinct research scope. In particular, the auxiliary
+Silhouette provenance audit has its own label normalizer with a
+different policy; do not silently unify it with Weapon-name identity.
+Next P5.2 slice should assess the remaining explicit
+`_metadata`, `_chart_burst_anchors`, `rows_from_words` and
+`_printed_name_and_mode` imports, and remove chart dependencies
+only if those extractors retain a genuine future source-intake use.
+The published Weapon profile provenance and source scopes are unchanged.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
