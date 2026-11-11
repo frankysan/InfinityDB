@@ -64,6 +64,30 @@ def test_parity_pass_and_failure(tmp_path, monkeypatch):
     assert report["failedAssets"] == 1
 
 
+def test_renderer_failure_is_recorded_not_discarded(tmp_path, monkeypatch):
+    files = _inputs(tmp_path)
+    _mock(monkeypatch)
+
+    class FailingReference:
+        def __init__(self, **kwargs):
+            pass
+
+        def prepare_reference(self):
+            return False, "missing font"
+
+        def validate(self, candidate, name):
+            pytest.fail("Cannot validate without a reference raster")
+
+    monkeypatch.setattr(parity, "RasterValidator", FailingReference)
+    report = parity.compare_symbol_pipeline_parity(
+        *files, renderer="resvg", executable="resvg",
+    )
+    assert report["status"] == "failed"
+    assert report["failedAssets"] == 1
+    assert report["assets"][0]["worstRms"] is None
+    assert report["assets"][0]["error"] == "Legacy rendering failed: missing font"
+
+
 def test_path_mismatch_rejected(tmp_path, monkeypatch):
     files = _inputs(tmp_path)
     _mock(monkeypatch)

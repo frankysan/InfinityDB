@@ -80,16 +80,22 @@ def compare_symbol_pipeline_parity(
                     pixel_diff_threshold=pixel_diff_threshold,
                 )
                 ready, error = validator.prepare_reference()
-                if not ready:
-                    raise RuntimeError(f"Legacy rendering failed for {path}: {error}")
-                passed, metrics, error = validator.validate(candidate, "external")
+                if ready:
+                    passed, metrics, error = validator.validate(candidate, "external")
+                    worst_rms = metrics.worst_rms
+                    worst_changed = metrics.worst_changed_fraction
+                else:
+                    passed = False
+                    error = f"Legacy rendering failed: {error}"
+                    worst_rms = None
+                    worst_changed = None
                 rows.append({
                     "archivePath": path,
                     "legacySha256": hashlib.sha256(legacy.read_bytes()).hexdigest(),
                     "externalSha256": hashlib.sha256(candidate.read_bytes()).hexdigest(),
                     "passed": passed,
-                    "worstRms": metrics.worst_rms,
-                    "worstChangedFraction": metrics.worst_changed_fraction,
+                    "worstRms": worst_rms,
+                    "worstChangedFraction": worst_changed,
                     "error": error,
                 })
     failed = [row["archivePath"] for row in rows if not row["passed"]]

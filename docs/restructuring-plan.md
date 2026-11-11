@@ -3521,10 +3521,24 @@ production run using real source archives, reviewed
 overrides, installed fonts, converter and renderer binaries
 has **not** yet been performed.
 
-**Next:** Execute this parity gate against a pinned
-production-derived source set, record concrete differences,
-resolve any deviations, then test browser publication
-acceptance before retiring the in-tree pipeline.
+#### P5.7 — Production acceptance preparation (2026-11-11)
+
+The opt-in parity gate now records individual legacy-render
+failures as failed asset rows instead of aborting before a
+useful report can be produced. Added
+`docs/symbol-pipeline-parity-runbook.md` with the immutable
+inputs, exact verifier/comparison invocation, required
+production evidence, and explicit cutover criteria.
+
+**Execution remains blocked on actual external-stage output**
+from a pinned production-derived source run, the matching
+legacy canonical-compression tree, and installed
+converter/renderer/font dependencies. No real-source parity
+result or publication acceptance is claimed.
+
+**Next:** Execute the runbook on that source set, resolve
+deviations, then test browser publication acceptance before
+retiring the in-tree pipeline.
 
 ### P6 — Consolidate, measure and establish the new baseline
 
