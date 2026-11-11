@@ -2960,6 +2960,67 @@ examples to use `data/generated/army.db` instead of the retired
 The shared Weapon extraction and metadata modules introduced earlier
 in P5.2 remain independent and unchanged.
 
+#### P5.2 — Weapon audit entrypoint disposition (2026-11-11)
+
+The six remaining Weapon audit entrypoints retain independent optional
+research uses: `audit_weapon_chart_profiles` compares the pinned
+PDF's modes/ranges with Army metadata and supplies chart evidence to
+`audit_weapon_traits_prose` and `audit_weapon_definition_gaps`;
+`audit_weapon_traits_prose` and `audit_weapon_trait_cross_sources`
+compare reviewed traits and Wiki evidence; `audit_wiki_weapon_chart_names`
+identifies alternative rows and explicit aliases;
+`audit_weaponry_family_clauses` validates curated family relationships;
+and `audit_weapon_definition_gaps` reconciles source-pinned reviews
+with current missing-definition evidence. Their fixed-layout readers
+do not imply support for an unreviewed future PDF revision.
+
+None is required by the standard build, serving, Docker or deployment.
+The outdated v1.0.0 Weapon release gate was already removed.
+Keep these research tools optional and read-only while their source
+review purposes remain active; do not retain one solely because tests
+import it, and do not invent a replacement CLI just to reduce tool count.
+
+#### P5.3 — Acquisition repository boundary decision (2026-11-11)
+
+**Decision: Wiki/Human Sphere first, Army JSON second, symbols later.**
+The archive/provenance consumer contract is defined in
+`data/README.md` and a cross-checkout relocation/tamper test covers
+all three snapshot types. No extractor has been moved yet.
+
+1. **Wiki/Human Sphere:** `download_wiki_snapshot` is an independently
+   useful network crawler with explicit language/site scope, complete
+   ZIP output, optional history, resumable local work and fail-closed
+   required-page coverage. Its only InfinityDB-specific code dependency
+   is the v3 snapshot provenance writer, plus small local ZIP and path
+   helpers. Extract this producer first in P5.4; preserve site-specific
+   archive members, ignored-vs-required URL decisions and failure
+   atomicity. Source research continues to read the archive, not the
+   producer Python package.
+2. **Army JSON:** `download_army_json` emits the pinned `metadata.json`
+   and per-faction documents but imports `infinity_army_data` decoders
+   and source-revision logic. A later split must retain the same
+   input-acceptance tests and version-3 manifest fields without a
+   cross-repository runtime import. InfinityDB keeps the independent
+   offline Army normalization/build.
+3. **Symbols:** `download_army_symbols` also imports legacy-army
+   identities, `symbol_manifest` and Army snapshot resolution.
+   `build_symbols` uses both downloaders and publishes into app
+   static assets. A future split may produce only the raw
+   `SYMBOLS ...zip` and input-Army SHA-bound provenance; keep SVG
+   transformation, canonical naming, browser identity and publication
+   in InfinityDB until a separately tested raw-source handoff exists.
+
+The small `snapshot_archive` and `path_sanitization` utilities
+belong with the future producer, not in standalone repositories.
+A split producer must emit compatible ZIP bytes and version-3
+manifest fields without importing `infinity_db` at runtime;
+the consumer's schema/hash contract stays in InfinityDB.
+P5.4 must verify the producer's failure behavior, relocated
+archive/manifest, and an offline InfinityDB build from the resulting
+source artifact before retiring an in-repo downloader. No normal
+build/serve/Docker path may require cloning another repository.
+Third-party source redistribution remains separately restricted.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  

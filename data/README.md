@@ -353,6 +353,52 @@ InfinityDB snapshot versions. Their evidence-backed interpretation and the
 required distinction between source revision and snapshot acquisition date are
 documented in [`docs/data-model.md`](../docs/data-model.md#army-source-revision-interpretation).
 
+### Cross-repository acquisition handoff (P5.3)
+
+Optional acquisition may run from a different Git repository or machine.
+Its supported handoff to InfinityDB is **a complete immutable ZIP plus
+its version-3 snapshot provenance JSON**, not a Python module import
+or an on-disk crawler work tree. The receiving checkout supplies both
+paths explicitly and verifies the hashes with
+`infinity_db.snapshot_provenance.load_snapshot_manifest(path, archive=zip_path)`.
+The manifest's `archive.path` is an optional producer-relative locator,
+not an instruction to read from the producer's directory. The exact
+archive SHA-256 and logical `contentSha256` remain authoritative
+after copying or renaming the ZIP. Incomplete acquisitions are not
+handed off; changed bytes and missing or mismatched provenance fail
+closed. The portable copy/rejection contract is tested for Army, Wiki
+and symbol snapshot types in `tests/test_snapshot_provenance.py`.
+
+The current producer contracts are:
+
+- **Army:** `JSON YYYYMMDD-HHMMSS.zip` with one `metadata.json`
+  and validated per-faction `<id>-<slug>.json` documents. Manifest
+  type `army` includes source URL/language, acquired timestamp,
+  document count and `source.dataChangedOn` derived from the contained
+  source revisions. Two download passes must agree before publication.
+  The offline importer remains in InfinityDB; external acquisition
+  must not choose a rules interpretation or rebuild runtime databases.
+- **Infinity Wiki / Human Sphere:** `WIKI-<language> ...zip` or
+  `HUMAN-SPHERE ...zip` containing complete, portable relative
+  HTML/asset paths and optional `_history` revision data. Manifest
+  type `wiki` pins the source URL, language, acquired timestamp
+  and file count. Required-page failures must not publish an archive.
+  The archived pages remain research inputs, never an implicit
+  runtime/source-authority update.
+- **Symbols:** `SYMBOLS ...zip` plus type `symbols` provenance
+  bound to its input Army artifact by `inputArtifact.sha256`. The
+  raw SVG/source acquisition may eventually move; canonical symbol
+  naming, conversion, publication, app mappings and
+  `symbol-publication.json` remain InfinityDB responsibilities.
+
+The *format* and verification contract stay owned by InfinityDB's
+snapshot-provenance module. An extracted producer must emit compatible
+bytes/fields and pass consumer-side conformance tests without importing
+InfinityDB at runtime. No source downloader, network access or external
+Git checkout is required for `infinity-db build`, `serve` or Docker
+packaging. Raw third-party files remain untracked and separately
+licensed; this handoff does not grant redistribution permission.
+
 ## Symbol build lifecycle
 
 This file owns the current acquisition/build-state and publication lifecycle for symbol artifacts.
