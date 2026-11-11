@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0–P4 are complete, including owner acceptance of P4.5 on 2026-11-11. The normal runtime builds and serves Army v31 (`army.db`), Rules v17 (`rules_n5.db`), and the reviewed ITS 18 publication (`its_18.db`) as one selected set for both checkout and Docker. P5–P6 remain open; matched-input symbol parity and the accepted external publication cutover have passed. In-tree processor retirement and integrated/release acceptance remain open.
+**Status:** Active on `dev/v1.1.0`: P0–P4 are complete, including owner acceptance of P4.5 on 2026-11-11. The normal runtime builds and serves Army v31 (`army.db`), Rules v17 (`rules_n5.db`), and the reviewed ITS 18 publication (`its_18.db`) as one selected set for both checkout and Docker. The accepted external symbol publication supersedes the retired in-tree processor. P5.8 source-freshness acceptance remains blocked by the unchanged approved databases; see [VR-0148](validation-queue.md#pending-deferred-execution). Remaining P5 hygiene and P6 integrated/release acceptance remain open. Dated progress entries below describe their historical state, not supported commands.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -489,21 +489,14 @@ own baseline fixtures, final database placement and output layout.
   labels, notes, source link and no-legality-evaluator boundary when
   replacing this fetch; migrating the static file into a second
   database table uncritically would perpetuate duplicated semantics.
-- **`data/manifests/symbol-publication.json`:** produced by symbol
-  acquisition/build publication (`tools.build_symbols` /
-  `tools.reorganize_symbols`) with validated processed SVGs and
-  browser path mappings. `SymbolCatalog` reads this **tracked
-  manifest at API initialization** to enrich Army/Unit/profile SVG
-  references; `web/presentation._static_asset_revision` also hashes
-  its exact bytes for static cache identity. The source checkout uses
-  the tracked manifest; installed wheels use
-  `share/infinity-db/data/manifests/`. Docker does not copy it into
-  `/app/data/` because the wheel already contains it. Tests:
-  `test_symbol_catalog.py`, `test_asset_validation.py`,
-  `test_build_symbols.py` and `test_deployment_scripts.py`.
-  **Migration invariant:** preserve path/identity mapping and correct
-  browser cache invalidation, independently of keeping SVG files
-  outside SQLite.
+- **`data/manifests/symbol-publication.json`:** the P1 baseline used
+  the former in-tree publisher and loaded the manifest at runtime.
+  The current [external publication lifecycle](../data/README.md#symbol-build-lifecycle)
+  verifies producer handoffs and embeds the path mappings and asset
+  hashes in Army v31. Preserve path/identity mapping and browser cache
+  invalidation; current checks include `test_symbol_publication.py`,
+  `test_symbol_catalog.py`, `test_asset_validation.py` and
+  `test_deployment_scripts.py`.
 
 **Further runtime reads via wheel-packaged maintained JSON:**
 
@@ -1306,18 +1299,14 @@ one checker per historical migration:**
 
 **Acquisition and optional operations — keep independent of serving:**
 
-- `download_army_json`, `download_wiki_snapshot`, `download_army_symbols`,
-  `snapshot_archive`, `path_sanitization`: extraction candidates for P5.3
-  because they explicitly acquire immutable source archives or support safe
-  archive paths. First specify archive members, logical/byte identities,
-  provenance and versioning. `build_symbols` still imports both Army
-  downloaders; extraction must preserve offline use of an already pinned ZIP.
-- `build_symbols`, `symbol_work`, `svg_processor`, `svg_compress`,
-  `reorganize_symbols`, `pipeline_console`, `prepare_web_fonts`: maintain
-  source-asset processing/publication. Generic acquisition/conversion may
-  move after its contract is independent; Army-to-browser naming and source
-  binding remain app-owned. Do not turn extraction into a runtime dependency
-  or require cloning several repositories for a normal database build.
+- `download_army_json`, `download_wiki_snapshot`, `snapshot_archive` and
+  `path_sanitization`: retain their independent acquisition or archive-path
+  roles while evaluating the remaining P5.3 boundaries. Preserve offline use
+  of an already pinned ZIP.
+- Symbol source plans, handoff verifiers, semantic candidate preparation and
+  promotion remain in InfinityDB; the external producer owns symbol acquisition
+  and graphical processing. `prepare_web_fonts` remains separate browser-font
+  packaging. Normal database builds do not require the producer repository.
 - `build_full_asset_bundle`, `stage_full_asset_bundle`, `activate_synced_assets`:
   retain optional private asset transfer/integrity. `stage_full_asset_bundle`
   is used by Full-asset CI; its name does not make it a completed migration.
@@ -2634,9 +2623,9 @@ Keep gameplay citations, source notes and genuine uncertainty visible.
 
 - **Retired entrypoint:** `tools/migrate_symbol_publication_provenance.py`
   only promoted `sourceSnapshot.armyArtifact` from an ignored terminal symbol
-  build manifest into an already-published manifest. The current
-  `tools/reorganize_symbols.py` publisher writes that field directly.
-- **Current invariant:** `tests/test_reorganize_symbols.py` verifies the
+  build manifest into an already-published manifest. The then-current in-tree
+  publisher wrote that field directly; it was subsequently retired.
+- **Current invariant:** `tests/test_symbol_publication.py` verifies the
   emitted Army ZIP identity; `tests/test_verify_deployment_assets.py`
   verifies exact database/publication identity and rejects a publication
   without `sourceSnapshot`. Those checks supersede the old migration-only
@@ -3250,17 +3239,16 @@ publication into app static assets, and release/permission checks.
 The unrelated UI font preparation tool `prepare_web_fonts.py` remains
 with the web application; it is not SVG font substitution.
 
-The existing `svg_processor.py` (font processing, text conversion,
+At this extraction stage, `svg_processor.py` (font processing, text conversion,
 duplicate detection) and `svg_compress.py` (visual compression) have
 been seeded into the standalone repository together with the reviewed
 `font-aliases.json` policy and representative source-facing tests.
 They are packaged as optional processing commands, with a separate
 Python dependency extra and explicitly required external renderer/
 conversion binaries. No font files, downloaded SVGs or override
-artwork are committed to the producer. The in-tree copies remain
-active until a versioned *processed-symbol handoff* and independent
-parity tests support switching consumers; merely copying code does
-not establish an operational cutover.
+artwork are committed to the producer. At the time, the in-tree copies remained
+active until a versioned *processed-symbol handoff* and independent parity tests
+supported switching consumers; they have since been retired.
 
 **Measured offline production baseline.** On the pinned
 `JSON 20260929-114335.zip` (59 documents) and
@@ -3271,10 +3259,9 @@ unavailable URLs. Of these, 1,072 effective cache SVGs match their
 recorded upstream SHA-256; 29 are reviewed overrides whose effective
 bytes differ from their original upstream SHA-256. The latter
 **cannot** be treated as upstream data in a reconstructed raw ZIP.
-The reusable read-only
-`tools.audit_symbol_source_baseline` records the source-discovery
-and archive-hash audit under ignored `local/`; no network request
-or asset publication is involved.
+The now-retired `tools.audit_symbol_source_baseline` recorded the
+source-discovery and archive-hash audit under ignored `local/`; no network
+request or asset publication was involved.
 
 **Next cutover contract:** Preserve immutable raw upstream ZIP and
 Army binding, verified override input hashes and recorded decisions,
@@ -3503,7 +3490,7 @@ parity remains untested.
 
 Added `tools.compare_symbol_pipeline_parity` as a read-only,
 opt-in comparison of a fully verified external compressed
-canonical ZIP against the current in-tree pipeline's
+canonical ZIP against the then-current, now-retired in-tree pipeline's
 canonical compressed SVG directory. It rejects path-set
 mismatches and unavailable renderer version evidence;
 rasterizes each matching asset with the explicitly selected

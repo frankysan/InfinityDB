@@ -13,13 +13,13 @@ import json
 from pathlib import Path
 from typing import Any
 
-from tools.download_army_symbols import (
+from tools.export_symbol_source_plan import build_source_plan, write_source_plan
+from tools.symbol_source import (
     DEFAULT_LEGACY_ARMIES,
     DEFAULT_STATIC_CONFIG,
     discover_symbol_source,
     override_resolution_plan,
 )
-from tools.export_symbol_source_plan import build_source_plan, write_source_plan
 
 FORMAT = "InfinityDB symbol override lookup plan"
 VERSION = 1

@@ -38,6 +38,7 @@ def _canonical(document: dict) -> bytes:
 
 def _handoff(
     tmp_path: Path, *, unavailable: bool = False, unit_body: bytes = UNIT_SVG,
+    unit_url: str = UNIT,
 ) -> tuple[Path, Path, Path, Path, Path]:
     army = tmp_path / "JSON 20260917-120000.zip"
     with zipfile.ZipFile(army, "w") as output:
@@ -45,7 +46,7 @@ def _handoff(
         output.writestr("101-panoceania.json", '{"version":"7.26246.158","units":[]}')
     requests = [
         {"url": ICON, "archivePath": "static/characteristics/cube.svg"},
-        {"url": UNIT, "archivePath": "units/unit.svg"},
+        {"url": unit_url, "archivePath": "units/unit.svg"},
     ]
     plan = {
         "format": FORMAT,
@@ -86,7 +87,7 @@ def _handoff(
     ]
     if not unavailable:
         assets.append({
-            "url": UNIT, "archivePath": "units/unit.svg",
+            "url": unit_url, "archivePath": "units/unit.svg",
             "sha256": hashlib.sha256(unit_body).hexdigest(),
             "sourceMethod": "network",
         })
@@ -105,7 +106,7 @@ def _handoff(
         },
         "assets": assets,
         "unavailableAssets": (
-            [{"url": UNIT, "archivePath": "units/unit.svg", "httpStatus": 404}]
+            [{"url": unit_url, "archivePath": "units/unit.svg", "httpStatus": 404}]
             if unavailable else []
         ),
     }
@@ -136,6 +137,13 @@ def test_raw_handoff_accepts_pinned_svg_archive_and_report(
 def test_raw_handoff_accepts_recorded_http_404(tmp_path: Path) -> None:
     args = _handoff(tmp_path, unavailable=True)
     assert verify_raw_handoff(*args) == {"requested": 2, "acquired": 1, "unavailable": 1}
+
+
+def test_raw_handoff_preserves_query_qualified_source_identity(tmp_path: Path) -> None:
+    qualified = UNIT + "?variant=2"
+    args = _handoff(tmp_path, unit_url=qualified)
+    assert verify_raw_handoff(*args) == {"requested": 2, "acquired": 2, "unavailable": 0}
+    assert json.loads(args[0].read_text(encoding="utf-8"))["requests"][1]["url"] == qualified
 
 
 def test_raw_handoff_rejects_modified_input_army(tmp_path: Path) -> None:

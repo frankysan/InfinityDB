@@ -77,12 +77,26 @@ selectors or required evidence, missing prerequisite, execution trigger,
 and final outcome. Retire only after verification of the intended state.
 Failed, skipped or incomplete checks remain open.
 
-No pending execution entries.
+- [ ] VR-0148 (2026-11-12; blocked): Verify tracked runtime source freshness
+  after P5.8 symbol pipeline retirement.
+  Work: P5.8 retirement based on `976a88d0`; approved database build set
+  `0523e4b394247d0dafa03d91c2c391afb5c07d33c35665750aa728c67cb1b7d1`;
+  design: none.
+  Deferred: run `python -m tools.verify_deployment_assets` against the actual
+  tracked runtime set and require its source-freshness, embedded-data and SVG
+  checks to pass; the hosted Source gate remains separate.
+  Blocker: the approved database records the removed symbol-state module and
+  font policy plus the previous optional dependencies. The user required those
+  inputs removed without changing the approved database. The tracked
+  `--skip-svg` gate currently fails on the stale build inputs.
+  Trigger: separately authorize, build and review a complete refreshed runtime
+  set for the retirement revision, then rerun the full verifier on that set.
+  Outcome: blocked; an isolated current-input build is not tracked-release acceptance.
 
 ## Next unused IDs
 
 - Design: `VD-0118`; active obligations are listed above.
-- Execution: `VR-0148`; active obligations are listed above.
+- Execution: `VR-0149`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

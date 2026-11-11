@@ -8,8 +8,8 @@ provenance/state, and build outputs.
 ## Current paths and behavior
 
 - `raw/` — immutable downloaded Corvus Belli Army snapshot archives. Army
-  acquisition writes `JSON YYYYMMDD-HHMMSS.zip`; symbol acquisition uses the
-  `raw/symbols/` subtree for `SYMBOLS YYYYMMDD-HHMMSS.zip`. Ignored by Git.
+  acquisition writes `JSON YYYYMMDD-HHMMSS.zip`; historical symbol archives
+  may remain in `raw/symbols/`. Ignored by Git.
 - `wiki/` — local wiki research material. The downloader persists immutable
   `WIKI-<language> YYYYMMDD-HHMMSS.zip` Infinity Wiki snapshots here; English (`en`)
   is the default and Spanish (`es`) is an explicit alternative. Human Sphere uses the
@@ -20,18 +20,10 @@ provenance/state, and build outputs.
   work directory after publishing the immutable archive and provenance;
   incomplete/error runs preserve downloaded work here for inspection. Ignored
   by Git.
-- `work/symbols/` — rebuildable loose symbol work trees keyed to the immutable
-  `SYMBOLS ...zip` identity. The orchestrator verifies the raw archive and every
-  member hash before replacing this derived work tree. Ignored by Git.
-- `reports/symbols/` — generated, SHA-bound symbol-processing reports for
-  structural preflight, installed-font audit, duplicate detection, text
-  conversion, compression, and publication. Ignored by Git.
-- `logs/symbols/` — complete verbose transcripts from `tools/build_symbols.py`.
-  Interactive console output is intentionally compact; these timestamped logs
-  retain detailed per-stage and per-asset diagnostics. Ignored by Git.
-- `backups/symbols/` — timestamped backups of SVGs that existed in the previous
-  publication but not in the incoming one. Publication creates these only as
-  part of a successful replacement transaction. Ignored by Git.
+- `work/symbols/`, `reports/symbols/`, `logs/symbols/` and `backups/symbols/`
+  may contain ignored historical in-tree processing evidence. The retired
+  processor cannot resume it; accepted external promotions use a transaction
+  under `local/`.
 - `manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
   record is labeled from the archive filename, records both the logical snapshot
   content SHA-256 and exact archive SHA-256, and records the snapshot type,
@@ -44,10 +36,8 @@ provenance/state, and build outputs.
 - `manifests/symbol-publication.json` — tracked release manifest for the processed SVG
   publication. It owns the published path/SHA-256 inventory, browser mappings, summary,
   and compact Army source archive identity used to bind `army.db` during deployment.
-- `manifests/army-symbol-build.json` — generated current symbol-build state from
-  acquisition version 2 through terminal publication version 8. It binds the
-  pinned Army/SYMBOLS artifacts, stage reports/settings, canonical mapping, and
-  publication artifacts. Ignored by Git and not required for deployment.
+- `manifests/army-symbol-build.json` — ignored historical in-tree build evidence,
+  not a current pipeline, publication, or deployment input.
 - `curated/rules/` — source-controlled, human-reviewed rules-reference
   collections consumed by `infinity-db build-rules`.
 - `curated/identities/` — source-controlled, reviewed source-derived identity and
@@ -326,29 +316,13 @@ of rewriting the record. Reacquiring the same logical content under a different
 archive label may therefore produce another provenance record with the same
 `contentSha256`, even if the exact archive SHA-256 differs.
 
-Symbol snapshot provenance also records the hash of the Army source artifact
-used by symbol acquisition. `tools/build_symbols.py` verifies the corresponding
-Army snapshot provenance before discovery and keeps that exact archive pinned
-through the complete symbol build. Acquisition writes version-2
-`army-symbol-build.json`, persisting the Army archive identity together with
-source URL, language, acquisition timestamp, source-document count, and observed
-source revisions. Verified structural preflight promotes state to version 3;
-installed-font audit promotes passed preflight to version 4; exact-first visual
-deduplication promotes passed font-audit state to version 5; canonical text
-conversion promotes version 5 to version 6; balanced compression promotes passed
-version 6 to version 7; and final publication promotes passed version 7 to the
-terminal version-8 state.
-
-Each stage records the reports/settings needed by its successor. Version 7 binds
-every compressed canonical SVG through the SHA-bound compression report. Version
-8 binds the canonical `symbol-publication.json` plus the publication report and
-final byte/count accounting. The publication manifest owns every published SVG
-path/SHA-256 together with the runtime Army, Unit/profile, and static mappings plus the
-compact Army source archive name/SHA-256 used to bind the tracked runtime database during
-deployment. Stage promotion is
-forward-only. Failed-stage retry is explicit where supported; later passed states
-are not silently rolled back to rerun an earlier helper. Loaders still accept
-versions 2 through 8 as valid historical/intermediate state for compatibility.
+Symbol snapshot provenance also records the hash of the Army source artifact.
+The external producer records its stage inputs and outputs in SHA-bound receipts;
+InfinityDB verifies their chain before preparing a candidate. The tracked
+publication manifest owns each published SVG path/SHA-256, runtime Army,
+Unit/profile and static mappings, and the compact Army source archive identity
+used to bind the tracked database during deployment. Historical in-tree
+`army-symbol-build.json` states are evidence, not resumable processing inputs.
 
 The human annotation contract is documented in
 [`curated/snapshot-notes/README.md`](curated/snapshot-notes/README.md). Snapshot
@@ -394,8 +368,7 @@ The current producer contracts are:
   runtime/source-authority update.
 - **Symbols:** `SYMBOLS ...zip` plus type `symbols` provenance
   bound to its input Army artifact by `inputArtifact.sha256`.
-  `InfinityDB-symbol-tools` owns raw acquisition and is becoming
-  the owner of reviewed SVG overrides, font alias/substitution,
+  `InfinityDB-symbol-tools` owns raw acquisition, reviewed SVG overrides, font alias/substitution,
   text-to-path conversion, duplicate detection and compression.
   InfinityDB remains responsible for authoritative source selection,
   semantic/browser identity mappings, final static asset placement
@@ -415,18 +388,8 @@ The current producer contracts are:
   snapshot provenance and does not confer source authority by itself.
   Use `tools.verify_raw_symbol_handoff` in InfinityDB to verify the
   complete external ZIP/manifest/report against the pinned Army ZIP
-  and source plan. For a new symbol build, `tools.build_symbols` also
-  accepts all four `--raw-symbol-plan`, `--raw-symbol-archive`,
-  `--raw-symbol-manifest` and `--raw-symbol-report` arguments alongside
-  the pinned `--snapshot` and its Army provenance. It rechecks the
-  handoff against current authoritative discovery, consumes raw upstream
-  bytes **without an HTTP request**, applies the existing local
-  override/identity logic and writes an ordinary version-2
-  `army-symbol-build.json` checkpoint. Subsequent `--resume` and
-  processing stages use that checkpoint normally. This optional path
-  does not require installing the external Python package and does not
-  change the default in-tree symbol acquisition, processing or asset
-  publication workflows. Normal database builds do not acquire assets.
+  and source plan. The former in-tree acquisition, override and processing
+  commands have been retired. Normal database builds do not acquire assets.
   For separate override processing, `tools.export_symbol_override_lookups`
   generates a SHA-pinned URL-to-override-path plan. The standalone
   `infinity-symbol-overrides` command can then create an intermediate
@@ -450,8 +413,9 @@ The current producer contracts are:
   and render-validated compression now provide immutable canonical ZIPs,
   reports and receipts. The [matched-input processor comparison](../docs/testing.md#p57-matched-input-symbol-processor-parity)
   passed; [candidate preparation](#external-processed-symbol-publication-candidates)
-  consumes that handoff without running graphical processors. Final artwork,
-  browser and hosting acceptance still precede in-tree processor retirement.
+  consumes that handoff without running graphical processors. The
+  [accepted cutover](../docs/testing.md#p57-accepted-symbol-publication-cutover)
+  completed artwork, browser and hosting review.
 
 The *format* and verification contract stay owned by InfinityDB's
 snapshot-provenance module. An extracted producer must emit compatible
@@ -474,8 +438,8 @@ Implementation details remain in the symbol tooling, and unfinished lifecycle wo
 **Project domain:** Data processing
 
 `python -m tools.prepare_symbol_publication` prepares an offline candidate from
-the external producer's v1 processing handoff. It uses the same semantic mapper
-as the current publisher, rederiving authoritative Army references and approved
+the external producer's v1 processing handoff. It uses InfinityDB's semantic mapper,
+rederiving authoritative Army references and approved
 source/override lookups from the selected Army snapshot and maintained inputs.
 It requires neither the external Python package nor installed renderers,
 converters or fonts.
@@ -504,12 +468,12 @@ The destination must be new. It contains `static/`, the current v2
 `symbol-publication.json` and `candidate-evidence.json` with input hashes and
 the publication-manifest hash. Validation or mapping failure installs no
 candidate; a failed installation rolls back its new directory. Existing output
-is never replaced. Input archives, in-tree processing state, tracked static
-assets and runtime databases remain unchanged.
+is never replaced. Input archives, tracked static assets and runtime databases
+remain unchanged.
 
 A prepared candidate is available for artwork, URL/mapping, browser and hosting
 review. It does not approve graphical changes against the tracked publication,
-promote a release, rebuild embedded mappings or retire the current pipeline.
+promote a release or rebuild embedded mappings.
 The normal build/serve/Docker path continues using the tracked publication.
 
 ### Accepted external symbol publication promotion
@@ -560,8 +524,9 @@ and deployment assets, then resume serving. Do not patch only the Army SQLite
 rows or serve a mixed database/publication set. The
 [P5 runbook](../docs/symbol-pipeline-parity-runbook.md#accepted-publication-cutover)
 owns commands and dated acceptance; hosted/release gates remain separate.
-Acquisition, overrides, font conversion and compression remain producer-owned.
-The in-tree processors remain available until their separately scoped retirement.
+Acquisition, overrides, font conversion, duplicate detection and compression
+are producer-owned; InfinityDB retains source planning, independent handoff
+verification, semantic mapping and publication promotion.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not covered by InfinityDB's MIT License. Corvus Belli

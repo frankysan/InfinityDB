@@ -16,13 +16,9 @@ from typing import Any
 
 from infinity_db.identities import DEFAULT_IDENTITY_CONFIG
 from infinity_db.snapshot_provenance import sha256_file
-from tools.download_army_symbols import (
-    DEFAULT_LEGACY_ARMIES,
-    DEFAULT_STATIC_CONFIG,
-    discover_symbol_source,
-)
 from tools.export_symbol_override_lookups import build_override_lookup_plan
-from tools.reorganize_symbols import PUBLICATION_MANIFEST, _load_snapshot_index, build_publication
+from tools.symbol_publication import PUBLICATION_MANIFEST, build_publication, load_snapshot_index
+from tools.symbol_source import DEFAULT_LEGACY_ARMIES, DEFAULT_STATIC_CONFIG, discover_symbol_source
 from tools.verify_effective_symbol_handoff import _member, verify_effective_symbol_handoff
 from tools.verify_processed_symbol_handoff import (
     FORMAT,
@@ -223,7 +219,7 @@ def prepare_symbol_publication(
             canonical_by_source=conversion["canonicalByArchivePath"],
             army_artifact=source_plan["inputArtifact"],
             unavailable_assets=effective["unavailableAssets"],
-            snapshot_index=_load_snapshot_index(handoff.army),
+            snapshot_index=load_snapshot_index(handoff.army),
             compressed_root=compressed, staging_static=candidate / "static",
         )
         manifest = candidate / PUBLICATION_MANIFEST

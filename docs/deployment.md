@@ -105,6 +105,7 @@ Every deploy requires these release-controlled files to be present in the checko
 ```text
 data/generated/army.db
 data/generated/rules_n5.db
+data/generated/its_18.db
 data/manifests/symbol-publication.json
 src/infinity_db/web/static/{armies,characteristics,orders,peripherals,units}/...
 ```
@@ -113,8 +114,13 @@ src/infinity_db/web/static/{armies,characteristics,orders,peripherals,units}/...
 validates the strict complete set, recorded source/build-input freshness, embedded
 Weapon citations against maintained reviews, and the graphical publication's
 paths, hashes and Army source identity. Raw Army/PDF inputs are not needed on the
-server. The image copies the two databases directly into `/app/data/`; no
+server. The image copies the three databases directly into `/app/data/`; no
 `data/runtime/` copy or candidate promotion is required.
+
+The P5.8 development checkout is **not deployment-ready**: its unchanged
+approved databases still record retired build inputs, so the freshness gate
+fails. A separately authorized runtime-set refresh and verification are tracked
+in [VR-0148](validation-queue.md#pending-deferred-execution).
 
 The image uses `INFINITY_DB_DB_DIR=/app/data`. Missing, invalid or incompatible
 databases fail before activation. `scripts/verify-container-image.sh --published-assets`
@@ -138,20 +144,19 @@ remain separately authorized.
 ## Release-artifact generation
 
 The tracked runtime databases are generated during development/release preparation, not on the
-server. Raw archives and intermediate build products remain ignored. Rebuild the application
-database from the pinned Army snapshot and the rules database from tracked curated rules, run
-the normal validation gates, then commit the resulting `data/generated/army.db` and
-`data/generated/rules_n5.db` with the code/data changes that require them.
+server. Raw archives and intermediate build products remain ignored. Rebuild the complete
+Army/Rules/ITS set from the pinned Army snapshot and tracked curated inputs, run the normal
+validation gates, then commit all three `data/generated/` databases with the code/data
+changes that require them.
 
-The terminal `data/manifests/army-symbol-build.json` remains ignored local build provenance. It
-is useful for symbol processing/resume but is not part of the deployment contract. The tracked
-`symbol-publication.json` carries only the compact Army archive name/SHA-256 needed by deployment
+Historical `data/manifests/army-symbol-build.json` is not part of the deployment
+contract and cannot resume the retired in-tree processor. The tracked
+`symbol-publication.json` carries the compact Army archive name/SHA-256 needed by deployment
 plus the published SVG hashes/mappings. Current symbol publication writes that provenance
 automatically. A legacy publication without `sourceSnapshot.armyArtifact`
-is not a valid release input: republish symbols from the pinned Army archive
-rather than modifying an old publication manifest in place. The normal publisher
-creates the provenance and deployment validation compares its SHA-256 with
-`army.db`.
+is not a valid release input: prepare and promote a verified external handoff
+for the pinned Army archive rather than modifying the manifest in place.
+Deployment validation compares its SHA-256 with `army.db`.
 
 ## Isolated local deployment test
 

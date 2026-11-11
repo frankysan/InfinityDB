@@ -3,9 +3,10 @@
 Status: **accepted external publication promoted (2026-11-11)**. The user
 approved all 118 changed artworks. The old Seed Soldier URL is retained,
 embedded mappings are rebuilt, and checkout/browser/Docker acceptance passed.
-In-tree processor retirement remains a separate open P5 change. Earlier review
-sections describe the pre-approval evidence; the
-[accepted cutover](#accepted-publication-cutover) is the current acceptance boundary.
+The superseded in-tree processor has since been retired. Earlier sections are
+dated acceptance evidence, not instructions to rerun retired commands; the
+[data lifecycle](../data/README.md#external-processed-symbol-publication-candidates)
+owns the current workflow.
 
 ## Readiness audit
 
@@ -13,11 +14,7 @@ The pinned baseline is `local/p5-production-symbol-baseline-audit-20261111.json`
 The legacy snapshot is `data/raw/symbols/SYMBOLS 20261004-184813.zip`
 and its current work directory is
 `data/work/symbols/SYMBOLS 20261004-184813--cda970bafe15`.
-Run the read-only readiness check before spending time on rendering:
-
-```powershell
-python -m tools.audit_symbol_parity_readiness --output "local/p5-symbol-parity-readiness.json"
-```
+The now-retired read-only readiness audit was run before rendering.
 
 The initial audit found 1,101 archived assets and 808 legacy
 compressed canonical SVGs. **29 legacy overridden assets lacked
@@ -25,9 +22,8 @@ verified original upstream bytes** in that historical ZIP. A new
 source-side acquisition was completed on 2026-11-11, producing
 `SYMBOLS 20261111-202545.zip` and its provenance/report in the
 symbol-tools checkout. The historical readiness audit still
-describes the original baseline, not the new acquisition. The command exits with status 2
-for this expected blocked state, and 1 for invalid input evidence.
-It does not download, reconstruct or silently substitute sources.
+describes the original baseline, not the new acquisition. It did not download,
+reconstruct or silently substitute sources.
 
 ## Reacquire upstream bytes
 
@@ -85,11 +81,10 @@ font audit → duplicate detection → text-to-path conversion →
 canonical compression. Preserve the input ZIPs, stage receipts,
 reports, alias policy and resolved font-file hashes.
 
-Run the existing InfinityDB symbol pipeline against the same source
-snapshot and override set without modifying the deployed site.
-Retain its `work_root/compressed` directory as the legacy reference.
-Both outputs must have the same canonical path set; the comparison
-will reject missing or extra paths rather than silently filtering.
+The historical matched-input run used the former InfinityDB symbol pipeline
+against the same source snapshot and override set without modifying the deployed
+site. Its `work_root/compressed` directory is retained as legacy evidence.
+The in-tree processor is no longer available for new reference builds.
 
 Record the real converter, renderer and SVGO versions. Use the same
 renderer, sizes, DPRs and visual tolerances for both pipelines.
@@ -102,9 +97,9 @@ font resolution.
 The new duplicate stage selected **807 canonical SVGs** from
 1,101 effective sources (294 exact duplicates, zero render errors).
 The historical in-tree work directory contains **808** compressed SVGs.
-The matched-input rebuild now produces the same 807-canonical mapping
-as the external run. Semantic publication of both source identities
-still needs verification; a canonical count alone does not establish it.
+The matched-input rebuild produced the same 807-canonical mapping as the
+external run. The later accepted publication verified both source identities;
+a canonical count alone did not establish that result.
 
 Copy the external `duplicate-state.json` receipt into an
 ignored local location in the InfinityDB checkout and
@@ -132,11 +127,9 @@ rebuild described below; preserve the separate semantic publication gate.
 
 The initial historical-output raster comparison failed on 73 assets.
 Its effective override inputs and compression renderer differed from
-the external run. Preserve that failure rather than relaxing thresholds.
-Use `tools.build_symbols` with an isolated `--data-root`, the pinned
-Army archive/provenance, all four `--raw-symbol-*` handoff arguments
-and the same override tree as the external run. Stop after compression
-with `--stop-after compression`; keep the application publication unchanged.
+the external run. The historical matched-input rebuild used the now-retired
+`tools.build_symbols` through compression with the same pinned source and
+override tree, without changing application publication.
 
 The completed reference is under `local/p5-matched-legacy-20261111`,
 with compressed SVGs at
@@ -178,9 +171,10 @@ No processing package or graphical tool installation is needed.
 The production-derived candidate under
 `local/p5-external-symbol-publication-verified-20261111` preserves every source
 and browser mapping key. Both Seed Soldier source identities resolve to one
-published SVG. The comparison records 118 changed SVG hashes and one removed
-filename against the tracked publication; those artwork and URL differences
-remain subject to review. See the [candidate acceptance evidence](testing.md#p57-external-semantic-publication-candidate).
+published SVG. The comparison recorded 118 changed SVG hashes and one removed
+filename against the then-tracked publication. Those differences were later
+approved and the old URL preserved. See the
+[candidate acceptance evidence](testing.md#p57-external-semantic-publication-candidate).
 Preparation does not promote assets or rebuild embedded SQLite mappings.
 
 ## Local artwork review
@@ -191,9 +185,7 @@ The application owns comparison of its current publication with a prepared
 candidate. Acquisition, overrides, font conversion and compression remain owned
 by InfinityDB-symbol-tools. The offline review builder does not run those stages,
 alter assets/manifests/databases, promote the candidate or change parity thresholds.
-Retain this tool while P5 artwork/URL acceptance remains open; reassess it under
-the [one-use tool lifecycle](README.md#one-use-tool-and-audit-lifecycle) when that
-work is complete.
+It can also review a future candidate with explicitly selected evidence.
 
 From the repository root, use the project virtual environment and a **fresh**
 output filename under ignored `local/`:
@@ -244,12 +236,11 @@ or horizontal overflow. Private validation evidence is
 validation data, **not artwork approvals**. The generated report starts with all
 118 decisions unreviewed.
 
-The removed
+At the time of this review, the removed
 `units/combined-army/512-shasvastii-seed-soldiers--1-2.svg` remains an
 **unresolved compatibility requirement** in the page and exports. Its source
-identity's new destination does not establish compatibility for the old URL.
-Rendering this report establishes review-workflow behavior only; actual artwork
-approval, old-URL handling and application publication acceptance remain open.
+identity's new destination did not establish compatibility for the old URL.
+The later accepted cutover approved the artwork and preserved that URL.
 
 Focused regression checks (including an optional real-Chrome fixture test when
 Playwright/Chrome are installed):
@@ -328,14 +319,11 @@ The review's **Provenance cause** filter separates these queues, while
 The audit report's hash participates in review identity and JSON export/import,
 so a different provenance report requires a fresh decision file. No assets are
 automatically accepted. The Seed Soldier source membership change is retained
-alongside its canonical input cause; the old filename compatibility requirement
-remains open. Artwork approval, promotion, rebuilt mappings and application
-browser/local/Docker acceptance still require separate decisions.
+alongside its canonical input cause; the subsequent cutover resolved the old
+filename and accepted artwork, mappings and browser/local/Docker behavior.
 
 See [testing evidence](testing.md#p57-override-provenance-classification) for the
-focused regression and real-page browser results. Retain this audit while the
-P5 provenance/artwork obligation is open, then apply the
-[one-use tool lifecycle](README.md#one-use-tool-and-audit-lifecycle).
+focused regression and real-page browser results. The dated findings are historical evidence for that accepted cutover.
 
 ## Accepted publication cutover
 
@@ -409,11 +397,11 @@ the disposable container was stopped. No production deployment occurred.
 
 Private logs, browser receipts, screenshots, prior bytes and transaction state
 remain under ignored `local/p5-accepted-cutover-20261111/`. These local checks
-accept the publication cutover, not a release tag or hosted CI. In-tree processor
-retirement, remaining P5 tooling hygiene, and P6 integrated/release acceptance
-remain separate work.
+accept the publication cutover, not a release tag or hosted CI. The in-tree
+processor was subsequently retired; remaining P5 tooling hygiene and P6
+integrated/release acceptance remain separate work.
 
-## Acceptance gates
+## Original acceptance gates
 
 1. The real-source inventory must account for every reviewed
    override (29 in the recorded baseline), missing upstream
@@ -427,8 +415,7 @@ remain separate work.
 4. Compare the final semantic browser mapping and packaged assets
    against the current publication output. Confirm actual browser
    rendering, attribution and local/Docker build behavior.
-5. Only after these checks should the in-tree pipeline be retired
-   in a separate, reviewed change.
+5. These checks preceded retirement of the in-tree pipeline in a separate change.
 
 **Current evidence:** matched-input production processor raster parity
 passed, with zero pixel differences across all 807 canonical assets.
@@ -436,5 +423,5 @@ The independent artifact verifier and 16 hermetic handoff tests also passed.
 The accepted external publication preserves every source/browser mapping key
 and the removed URL as a compatibility alias. Artwork approval, candidate promotion,
 rebuilt SQLite mappings and checkout/browser/Docker checks are complete for this
-cutover. In-tree processor retirement and final integrated/release acceptance remain open.
+cutover. The in-tree processor is retired; final integrated/release acceptance remains open.
 The failed historical-output comparison remains preserved separately.

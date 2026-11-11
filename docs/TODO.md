@@ -34,8 +34,10 @@ when all contained work shares the same owner.
   parity and external-artifact semantic candidate preparation passed. The cutover
   has user approval for all 118 changed artworks, a promoted publication with
   the old Seed Soldier URL preserved, rebuilt embedded mappings and passed
-  checkout/browser/Docker acceptance. In-tree processor retirement and the
-  remaining P5 hygiene/P6 integrated acceptance are still open. See the
+  checkout/browser/Docker acceptance. P5.8 removes the superseded in-tree
+  processors, but its source-freshness gate remains blocked by the unchanged
+  approved databases; see [VR-0148](validation-queue.md#pending-deferred-execution).
+  Remaining P5 hygiene and P6 integrated acceptance are still open. See the
   [accepted publication cutover](testing.md#p57-accepted-symbol-publication-cutover) and
   [processor acceptance boundary](testing.md#p57-matched-input-symbol-processor-parity).
   P3 hosted Source checks,
@@ -286,50 +288,13 @@ when all contained work shares the same owner.
   the duplication on a controlled build, then decide whether post-export workflows need both
   or whether one should be documented as a regenerable/transient artifact.
 
-### Army snapshot and symbol-pipeline maintenance
+### Army snapshot maintenance
 
-Remaining pipeline work covers maintenance, selective refactoring, richer diagnostics/performance
-work, and external-tool portability. The implemented pipeline and artifact lifecycle
-are described in [data guidance](../data/README.md).
+The implemented artifact lifecycle is described in [data guidance](../data/README.md).
 
 - [ ] Let future snapshot-comparison tooling write structured generated diff
   data/reports under manifest/report paths while curated snapshot notes remain
   the human interpretation of those results.
-
-- [ ] Refactor legacy/standalone stage CLIs around the integrated pipeline only where doing so
-  removes duplicated contracts or platform handling.
-  - [ ] Resolve the standalone symbol-downloader input mismatch. The maintained integrated build
-    requires an immutable raw Army ZIP, while the downloader help still advertises discovery-only
-    directory/master inputs that are not supported consistently end to end. Either implement that
-    discovery-only contract deliberately or remove it from the CLI/documentation.
-  - [ ] Consolidate shared executable discovery, native/project-relative path conversion, atomic
-    writes, and subprocess invocation where conversion/compression/orchestration still duplicate
-    those rules.
-  - [ ] Split additional `snapshot`, `discovery`, `manifest`, `downloader`, `audit`, `deduplicate`,
-    `convert`, `compress`, or `publish` helpers only when the split reduces duplication rather than
-    adding ceremony.
-
-- [ ] Evaluate content-addressed incremental reuse only after measuring the current full rebuild.
-  If worthwhile, derive cache keys from the pinned snapshot/source SVG hashes plus processor/tool
-  versions, font-alias configuration, duplicate-render settings, conversion settings, and
-  compression profile/settings. Do not weaken the current manifest/hash validation or immutable
-  raw-symbol snapshot boundary to gain incremental speed.
-
-- [ ] Finish symbol-pipeline reporting for machine-to-machine comparison.
-  - [ ] Add one compact machine-readable build-summary artifact with per-stage and total runtime so
-    repeated builds can be compared without scraping the verbose log or individual reports.
-  - [ ] Add separate discovery/unknown-reference CSV outputs only if future audit tooling needs
-    row-oriented data beyond the build manifest and current JSON/CSV stage reports.
-
-- [ ] Extend the remaining regression and portability coverage for the integrated Army/symbol
-  pipeline.
-  - [ ] Add explicit fixtures for empty-text cleanup and a small set of troublesome real-world SVG
-    conversion cases that should remain stable across tool upgrades.
-  - [ ] **Acquisition:** Extend native external-tool integration coverage across Windows, Ubuntu/Linux, and macOS,
-    especially executable discovery (`.exe`/`.cmd`), subprocess arguments, and real
-    Inkscape/`resvg`/SVGO invocation. Hermetic source/pipeline coverage already runs across all three
-    operating systems in required CI; external-tool tests may remain conditional when those
-    executables are unavailable.
 
 ### ITS, scenarios, and game tools
 

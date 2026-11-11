@@ -16,7 +16,7 @@ from pathlib import Path
 from infinity_db.snapshot_provenance import sha256_file
 from tools.asset_validation import validate_asset_set
 from tools.prepare_symbol_publication import SymbolPublicationHandoff, prepare_symbol_publication
-from tools.reorganize_symbols import GENERATED_CATEGORIES, _portable_member
+from tools.symbol_publication import GENERATED_CATEGORIES, portable_svg_member
 
 MANIFEST = "data/manifests/symbol-publication.json"
 STATIC = "src/infinity_db/web/static"
@@ -46,7 +46,7 @@ def _tree(root: Path) -> dict[str, str]:
             raise ValueError(f"Symlinks are not publication inputs: {path}")
         if path.is_file():
             relative = path.relative_to(root).as_posix()
-            portable = _portable_member(relative)
+            portable = portable_svg_member(relative)
             if portable.parts[0] not in GENERATED_CATEGORIES or portable.suffix != ".svg":
                 raise ValueError(f"Unexpected publication file: {relative}")
             inventory[relative] = sha256_file(path)
@@ -99,7 +99,7 @@ def _aliases(policy: Path, report: dict, static: Path) -> None:
     hashes = report["publishedSha256ByPath"]
     for alias, target in aliases.items():
         for relative in (alias, target):
-            member = _portable_member(relative)
+            member = portable_svg_member(relative)
             if member.parts[0] not in GENERATED_CATEGORIES or member.suffix != ".svg":
                 raise ValueError("Invalid compatibility alias path")
         if alias in hashes or target not in hashes or target in aliases:

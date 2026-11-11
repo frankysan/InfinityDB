@@ -422,9 +422,8 @@ code consumes the persisted field and does not reload this curated file.
 remain useful for player-facing reference but have no current N5 Army list. These
 entries are not normalization aliases and are never promoted into selectable
 `application_armies`. The Army overview loads them as explicit non-playable legacy
-references, while symbol discovery uses their historical logo URLs so maintained
-`image_overrides/factions` assets pass through the normal symbol processing and
-publication pipeline.
+references, while the exported symbol source plan includes their historical logo
+URLs for the external producer and InfinityDB's verified publication.
 
 ## Curated rules reference data
 

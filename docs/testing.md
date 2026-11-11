@@ -1819,9 +1819,9 @@ Private comparison evidence is retained in
 `local/p5-external-symbol-publication-comparison-20261111.json`. The candidate
 has **118 changed SVG hashes**, **one removed filename**, and no added filenames
 against the tracked release. That inventory is not visual or old-URL acceptance.
-Artwork/URL review, promotion, rebuilt SQLite mappings, actual browser/local/
-Docker checks and in-tree processor retirement remain open. The tracked SVGs,
-publication manifest and runtime databases were not changed.
+At candidate preparation, artwork/URL review, promotion, rebuilt SQLite mappings,
+browser/local/Docker checks and in-tree processor retirement remained open.
+That preparation did not change tracked SVGs, the manifest or runtime databases.
 
 ### P5.7 override provenance classification
 
@@ -1935,8 +1935,69 @@ databases, and Gunicorn started with a read-only root filesystem, temporary
 passed before stopping the disposable container. Evidence/logs/screenshots and
 runtime recovery copies are under ignored `local/p5-accepted-cutover-20261111/`.
 No production deployment, release tag, full Linux suite or hosted acceptance
-is implied. In-tree processor retirement and P6 integrated/release acceptance
-remain separate open work.
+is implied. At this cutover, in-tree processor retirement and P6 integrated/release
+acceptance remained separate open work; the processor was subsequently retired.
+
+### P5.8 legacy symbol processor retirement
+
+**2026-11-12, Windows development checkout based on `976a88d0`:** The
+external candidate was independently prepared again from the accepted handoff.
+Its manifest, evidence and all **807 SVG hashes** matched the P5.7 candidate
+exactly; it retained **1,101 source mappings**. No artwork was promoted.
+
+An isolated source copy had the same **194 recorded build inputs**, no `tools`
+directory and no external producer checkout. With external network connections
+and symbol/tool imports blocked, the actual `infinity-db build --compact`
+completed from the pinned Army ZIP into a disposable database directory:
+lossless reconstruction and **73 checks** passed, with **116 warnings** matching
+the existing anomaly baseline. The new build-set ID was
+`80284497f5074d29ea3b32db582ee5225bd0112fa9b4f39b6b95be376297673c`.
+The full deployment verifier passed against this disposable set with
+**808/808 published SVGs and 807/807 browser references**. The actual isolated
+`infinity-db serve` returned a healthy response and the old Seed Soldier URL
+with its approved SVG hash; its process was stopped.
+
+The unchanged tracked database set passed `database-health`; the
+`verify_deployment_assets()` content check also passed all **808/808** assets.
+Those checks do **not** establish checkout source freshness. The tracked
+`python -m tools.verify_deployment_assets --skip-svg` exited **1** because the
+database records removed symbol inputs and the former `pyproject.toml`.
+The owner chose to remove those inputs without rebuilding the approved runtime
+set. Full tracked freshness remains blocked in
+[VR-0148](validation-queue.md#pending-deferred-execution).
+
+Focused publication, asset, database and packaging regression command:
+
+```powershell
+.\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --test-workers 0 `
+  tests\test_symbol_publication.py tests\test_symbol_source.py tests\test_symbol_raster_validation.py `
+  tests\test_export_symbol_source_plan.py tests\test_prepare_symbol_publication.py `
+  tests\test_promote_symbol_publication.py tests\test_verify_raw_symbol_handoff.py `
+  tests\test_verify_effective_symbol_handoff.py tests\test_verify_symbol_duplicate_handoff.py `
+  tests\test_verify_processed_symbol_handoff.py tests\test_compare_symbol_pipeline_parity.py `
+  tests\test_asset_validation.py tests\test_symbol_catalog.py tests\test_symbol_path_storage.py `
+  tests\test_verify_deployment_assets.py tests\test_database_set.py tests\test_database_set_builder.py `
+  tests\test_deployment_scripts.py tests\test_installed_wheel_smoke.py tests\test_project_resources.py `
+  tests\test_cli.py tests\test_app_cli.py tests\test_runtime_import_boundary.py tests\test_test_sections.py
+```
+
+This passed **302 tests, zero skips** with unrelated staged parity work present.
+After flattening the retained semantic test fixtures, the publication,
+test-section and development-status cohort passed **52 tests, zero skips**.
+The browser-font and packaging cohort then passed **46 tests, zero skips**;
+all nine browser font faces also completed a disposable TTF/WOFF2 round-trip.
+An isolated export of the retirement-only index, excluding the unrelated
+staged and unstaged parity changes, passed **196 tests, zero skips** across
+the retained publication, handoff, asset and packaging checks.
+The full Ruff, documentation and Pyright stages passed. A disposable Docker
+preview of the unchanged tracked set built and started without the external
+repository, then passed its health check and **41-route semantic baseline**;
+its owned container and image were removed.
+
+The complete protected inventory matched the pre-retirement baseline: **842**
+static SVGs, **108** override SVGs, the publication manifest and all three
+runtime databases, with no added, missing or changed hashes. No production
+deployment, hosted acceptance or refreshed tracked database is implied.
 
 ## Phased development and validation
 

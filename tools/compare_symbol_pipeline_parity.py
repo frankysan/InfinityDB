@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.snapshot_provenance import sha256_file
-from tools.svg_compress import (
+from tools.symbol_raster_validation import (
     RasterValidator,
     get_tool_version,
 )

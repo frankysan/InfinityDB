@@ -168,6 +168,9 @@ python -m pip install -e ".[dev,symbols]"
 ```
 
 Select `.venv` as the Python interpreter in VS Code.
+The `symbols` extra supplies Pillow for optional raster-parity review and
+FontTools/Brotli for separate browser-font regeneration. Normal builds, serving,
+and publication handoff verification do not require it.
 
 ## Quick start
 
@@ -246,30 +249,15 @@ InfinityDB-symbol-tools. InfinityDB verifies its processed handoff, prepares a c
 and promotes accepted artwork with compatibility aliases and recoverable backups. See the
 [publication lifecycle](data/README.md#accepted-external-symbol-publication-promotion).
 
-The legacy in-tree orchestrator remains available pending P5 retirement, with an existing pinned
-Army snapshot (replace the timestamp with the immutable local snapshot you intend to use):
-
-```powershell
-python tools/build_symbols.py --snapshot "data/raw/JSON YYYYMMDD-HHMMSS.zip"
-```
-
-Or intentionally fetch a fresh Army snapshot first:
-
-```powershell
-python tools/build_symbols.py --fetch-snapshot
-```
-
-Symbol processing requires the `symbols` Python extras. Compression additionally
-requires SVGO v4+ and `resvg`; text conversion normally requires Inkscape.
-
 An external processed-SVG handoff is prepared as an isolated semantic
 publication candidate using `python -m tools.prepare_symbol_publication`.
 That offline command verifies the source/stage evidence and needs no graphical
 processing tools. It leaves the tracked publication unchanged; see the
 [candidate inputs and review boundary](data/README.md#external-processed-symbol-publication-candidates).
 
-The symbol pipeline is resumable and records detailed local logs, reports,
-provenance, and publication state. Corvus Belli has granted explicit permission
+The external producer owns symbol acquisition and processing; its repository is
+not needed for normal database builds, serving, or Docker packaging.
+Corvus Belli has granted explicit permission
 for InfinityDB to redistribute the processed graphical publication used by the
 project, provided the project remains non-commercial and the assets stay clearly
 separate from the MIT-licensed code. Raw Army, wiki, PDF, and source-symbol
@@ -363,7 +351,7 @@ data/
   logs/                     # Verbose pipeline logs, ignored by Git
   backups/                  # Local retained processing/publication history, ignored by Git
   generated/                # Tracked runtime DBs plus ignored intermediate build artifacts
-image_overrides/            # Local authoritative symbol overrides, ignored by Git
+image_overrides/            # Optional local override evidence, ignored by Git
 ```
 
 ## Development checks

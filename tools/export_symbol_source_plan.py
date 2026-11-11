@@ -2,7 +2,7 @@
 
 InfinityDB owns which Army, static and legacy sources are authoritative.
 The standalone symbol producer may download only this reviewed URL/path set.
-The normal build and symbol pipeline do not depend on this optional export.
+The normal application build does not depend on this optional export.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from typing import Any
 
 from infinity_db.snapshot_provenance import sha256_file
 from tools.army_snapshot_source import resolve_army_snapshot
-from tools.download_army_symbols import (
+from tools.symbol_source import (
     DEFAULT_LEGACY_ARMIES,
     DEFAULT_STATIC_CONFIG,
     archive_paths,

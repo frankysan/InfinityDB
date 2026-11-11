@@ -4173,8 +4173,8 @@ remain part of [P2 integration](restructuring-plan.md).
 
 ## Snapshot provenance
 
-Army, wiki, and symbol acquisition uses generated snapshot provenance records described in
-`data/README.md`.
+Army, wiki, and externally produced symbol snapshots use generated provenance
+records described in `data/README.md`.
 
 The current provenance model distinguishes:
 
@@ -4186,7 +4186,7 @@ The current provenance model distinguishes:
 
 `data/README.md` owns the current provenance-format version and compatibility rules.
 
-Acquisition time answers when InfinityDB downloaded the snapshot. `source.dataChangedOn` answers when
+Acquisition time answers when the producer downloaded the snapshot. `source.dataChangedOn` answers when
 the contained Army source data most recently reports changing. Those dates must not be substituted
 for each other.
 

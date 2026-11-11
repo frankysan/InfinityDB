@@ -300,9 +300,9 @@ stable entry point; do not add a CSS build step or link the source parts directl
 - Army provenance records `source.dataChangedOn` separately from acquisition time. Player-facing
   freshness uses the source-data change date; acquisition time is provenance.
 - Snapshot archives normalize member metadata/order and are deterministic for identical inputs.
-- `tools/build_symbols.py` is the maintained symbol orchestration entry point. Local build state is
-  resumable/forward-only; final production publication is represented by the tracked publication
-  manifest, not by terminal local build state.
+- The external symbol producer owns acquisition, overrides and graphical processing.
+  InfinityDB exports source plans, verifies the handoff, maps semantic identities and
+  promotes accepted assets; the tracked publication manifest is the runtime build input.
 - Peripheral-only profile artwork publishes under
   `peripherals/<main-army>/<peripheral-name>.svg`; when one physical symbol proves that a profile
   name is used in both Peripheral and normal Unit contexts, that mixed-role name stays Unit-owned
@@ -311,10 +311,9 @@ stable entry point; do not add a CSS build step or link the source parts directl
 - `unitProfileLogoToPublishedPath` is occurrence evidence, not an override-only table: retain every
   authoritative Army profile-logo resolution so logical-Unit consolidation can still distinguish a
   genuine General-profile symbol from the Unit fallback.
-- Image overrides replace an upstream symbol identity within the same symbol category, not only
-  one URL occurrence. Exact upstream-equivalent assets inherit the same override; conflicting
-  non-identical overrides for one upstream identity fail acquisition. The build manifest retains
-  `upstreamSha256` separately from the effective asset SHA-256 so this equivalence survives caches.
+- The verified external override handoff preserves upstream and effective asset
+  hashes separately, including propagated same-category overrides and conflicts;
+  InfinityDB does not apply the override artwork itself.
 - The processed SVG publication is redistributable under Corvus Belli's explicit non-commercial
   permission but remains outside InfinityDB's MIT license.
 

@@ -7,8 +7,8 @@ from typing import Any
 
 import pytest
 
-from tools import reorganize_symbols
-from tools.reorganize_symbols import publish_symbols, slugify
+from tools import symbol_publication
+from tools.symbol_publication import slugify
 
 SVG = b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>'
 
@@ -110,20 +110,13 @@ def _manifest(snapshot: Path) -> dict[str, Any]:
         "static/characteristics/cube2.svg": "static/characteristics/cube2.svg",
     }
     return {
-        "formatVersion": 7,
-        "snapshot": {
-            "armyArtifact": {
-                "name": snapshot.name,
-                "sha256": reorganize_symbols.sha256_file(snapshot),
-            },
-            "symbolArtifact": {"name": "SYMBOLS test.zip", "sha256": "a" * 64},
+        "armyArtifact": {
+            "name": snapshot.name,
+            "sha256": symbol_publication.sha256_file(snapshot),
         },
         "assets": assets,
         "references": references,
-        "processing": {
-            "duplicateDetection": {"canonicalByArchivePath": canonical},
-            "compression": {"status": "passed"},
-        },
+        "canonicalByArchivePath": canonical,
     }
 
 
@@ -137,43 +130,6 @@ def _write_compressed(root: Path) -> None:
         path = root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(SVG)
-
-
-def _write_compression_report(
-    manifest: dict[str, Any],
-    *,
-    compressed_root: Path,
-    reports_base: Path,
-    project_root: Path,
-) -> Path:
-    symbol_artifact = manifest["snapshot"]["symbolArtifact"]
-    report_root = reports_base / (
-        f"{Path(symbol_artifact['name']).stem}--{symbol_artifact['sha256'][:12]}"
-    )
-    report_root.mkdir(parents=True, exist_ok=True)
-    report = report_root / "compression-report.csv"
-    canonical = sorted(
-        set(manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"].values())
-    )
-    rows = ["file,profile,output_sha256"]
-    for relative in canonical:
-        path = compressed_root / relative
-        rows.append(f"{relative},balanced,{reorganize_symbols.sha256_file(path)}")
-    report.write_text("\n".join(rows) + "\n", encoding="utf-8")
-    manifest["processing"]["compression"] = {
-        "status": "passed",
-        "summary": {
-            "outputBytes": sum(
-                (compressed_root / relative).stat().st_size for relative in canonical
-            )
-        },
-        "report": {
-            "name": report.name,
-            "path": report.relative_to(project_root).as_posix(),
-            "sha256": reorganize_symbols.sha256_file(report),
-        },
-    }
-    return report
 
 
 def test_slugify_matches_asset_sanitization() -> None:
@@ -227,7 +183,7 @@ def test_semantic_profile_mapping_promotes_cross_unit_majority_override() -> Non
         "other-spec-ops": "units/ariadna/other-spec-ops.svg",
     }
 
-    assert reorganize_symbols._semantic_profile_mapping(references, unit_mapping) == {
+    assert symbol_publication._semantic_profile_mapping(references, unit_mapping) == {
         "ancillary crabbot remote": "peripherals/panoceania/crabbot.svg"
     }
 
@@ -240,9 +196,13 @@ def test_build_publication_maps_many_references_to_canonical_assets(tmp_path: Pa
     _write_compressed(compressed)
     staging = tmp_path / "staging"
 
-    report, summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -314,11 +274,9 @@ def test_publication_prefers_standard_unit_identity_over_reinforcement(tmp_path:
     reinforcement_url = "https://example.invalid/reinf-wolfgang.svg"
     canonical = "units/wolfgang.svg"
     manifest = {
-        "snapshot": {
-            "armyArtifact": {
-                "name": snapshot.name,
-                "sha256": reorganize_symbols.sha256_file(snapshot),
-            }
+        "armyArtifact": {
+            "name": snapshot.name,
+            "sha256": symbol_publication.sha256_file(snapshot),
         },
         "assets": [
             {"url": standard_url, "archivePath": canonical},
@@ -344,13 +302,9 @@ def test_publication_prefers_standard_unit_identity_over_reinforcement(tmp_path:
                 "unitSlug": "reinf-wolfgang-amadeus-wolff",
             },
         ],
-        "processing": {
-            "duplicateDetection": {
-                "canonicalByArchivePath": {
-                    canonical: canonical,
-                    "units/reinf-wolfgang.svg": canonical,
-                }
-            }
+        "canonicalByArchivePath": {
+            canonical: canonical,
+            "units/reinf-wolfgang.svg": canonical,
         },
     }
     compressed = tmp_path / "compressed"
@@ -358,9 +312,13 @@ def test_publication_prefers_standard_unit_identity_over_reinforcement(tmp_path:
     (compressed / canonical).write_bytes(SVG)
     staging = tmp_path / "staging"
 
-    report, _summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, _summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -413,7 +371,7 @@ def test_publication_preserves_distinct_unit_profile_symbols(tmp_path: Path) -> 
             },
         ]
     )
-    canonical = manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"]
+    canonical = manifest["canonicalByArchivePath"]
     canonical["units/u1-duplicate.svg"] = "units/u1.svg"
     canonical["units/u1-alternate.svg"] = "units/u1-alternate.svg"
 
@@ -422,9 +380,13 @@ def test_publication_preserves_distinct_unit_profile_symbols(tmp_path: Path) -> 
     (compressed / "units" / "u1-alternate.svg").write_bytes(SVG)
     staging = tmp_path / "staging"
 
-    report, summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -479,7 +441,7 @@ def test_publication_names_embedded_peripheral_by_identity(tmp_path: Path) -> No
             "peripheralName": "CRABBOT",
         }
     )
-    manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"][
+    manifest["canonicalByArchivePath"][
         "units/crabbot.svg"
     ] = "units/crabbot.svg"
 
@@ -488,9 +450,13 @@ def test_publication_names_embedded_peripheral_by_identity(tmp_path: Path) -> No
     (compressed / "units" / "crabbot.svg").write_bytes(SVG)
     staging = tmp_path / "staging"
 
-    report, _summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, _summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -542,7 +508,7 @@ def test_mixed_role_profile_prefers_normal_unit_owner(tmp_path: Path) -> None:
             },
         ]
     )
-    canonical = manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"]
+    canonical = manifest["canonicalByArchivePath"]
     canonical["units/chakora-peripheral.svg"] = "units/chakora-profile.svg"
     canonical["units/chakora-profile.svg"] = "units/chakora-profile.svg"
 
@@ -551,9 +517,13 @@ def test_mixed_role_profile_prefers_normal_unit_owner(tmp_path: Path) -> None:
     (compressed / "units" / "chakora-profile.svg").write_bytes(SVG)
     staging = tmp_path / "staging"
 
-    report, summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -633,7 +603,7 @@ def test_evidenced_mixed_role_name_keeps_variant_art_unit_owned(tmp_path: Path) 
             },
         ]
     )
-    canonical = manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"]
+    canonical = manifest["canonicalByArchivePath"]
     canonical["units/chakora-shared-peripheral.svg"] = "units/chakora-normal.svg"
     canonical["units/chakora-normal.svg"] = "units/chakora-normal.svg"
     canonical["units/chakora-variant-peripheral.svg"] = (
@@ -648,9 +618,13 @@ def test_evidenced_mixed_role_name_keeps_variant_art_unit_owned(tmp_path: Path) 
     )
     staging = tmp_path / "staging"
 
-    report, summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -697,7 +671,7 @@ def test_primary_peripheral_unit_publishes_under_main_army(tmp_path: Path) -> No
             "peripheralName": "PALBOT",
         }
     )
-    manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"][
+    manifest["canonicalByArchivePath"][
         "units/palbot.svg"
     ] = "units/palbot.svg"
 
@@ -706,9 +680,13 @@ def test_primary_peripheral_unit_publishes_under_main_army(tmp_path: Path) -> No
     (compressed / "units" / "palbot.svg").write_bytes(SVG)
     staging = tmp_path / "staging"
 
-    report, _summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, _summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -745,9 +723,13 @@ def test_parent_unit_art_is_not_republished_as_peripheral(tmp_path: Path) -> Non
     compressed = tmp_path / "compressed"
     _write_compressed(compressed)
     staging = tmp_path / "staging"
-    report, _summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, _summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -777,12 +759,12 @@ def test_peripheral_public_path_omits_reinforcement_roster_prefix(
         "profileName": peripheral_name,
         "peripheralName": peripheral_name,
     }
-    index = reorganize_symbols.SnapshotIndex(
-        {799: reorganize_symbols.FactionInfo(799, "ank-program", 799)},
+    index = symbol_publication.SnapshotIndex(
+        {799: symbol_publication.FactionInfo(799, "ank-program", 799)},
         {("799-ank-program.json", 1732, "reinf-peripheral"): 799},
     )
 
-    assert reorganize_symbols._peripheral_public_path(reference, index) == (
+    assert symbol_publication._peripheral_public_path(reference, index) == (
         f"peripherals/ank-program/{expected_stem}.svg"
     )
 
@@ -842,7 +824,7 @@ def test_reinforcement_peripheral_alias_prefers_normal_name_and_main_army(
             },
         ]
     )
-    canonical = manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"]
+    canonical = manifest["canonicalByArchivePath"]
     canonical["units/yudbots.svg"] = "units/yudbots.svg"
     canonical["units/reinf-yudbots.svg"] = "units/yudbots.svg"
 
@@ -851,13 +833,13 @@ def test_reinforcement_peripheral_alias_prefers_normal_name_and_main_army(
     (compressed / "units" / "yudbots.svg").write_bytes(SVG)
     staging = tmp_path / "staging"
 
-    base_index = reorganize_symbols._load_snapshot_index(snapshot)
+    base_index = symbol_publication.load_snapshot_index(snapshot)
     factions = dict(base_index.factions)
     factions.update(
         {
-            701: reorganize_symbols.FactionInfo(701, "aleph", 701),
-            799: reorganize_symbols.FactionInfo(799, "ank-program", 799),
-            1001: reorganize_symbols.FactionInfo(1001, "o-12", 1001),
+            701: symbol_publication.FactionInfo(701, "aleph", 701),
+            799: symbol_publication.FactionInfo(799, "ank-program", 799),
+            1001: symbol_publication.FactionInfo(1001, "o-12", 1001),
         }
     )
     canonical_factions = dict(base_index.unit_canonical_faction_by_reference)
@@ -868,10 +850,14 @@ def test_reinforcement_peripheral_alias_prefers_normal_name_and_main_army(
             ("799-ank-program.json", 1732, "reinf-yudbots"): 799,
         }
     )
-    index = reorganize_symbols.SnapshotIndex(factions, canonical_factions)
+    index = symbol_publication.SnapshotIndex(factions, canonical_factions)
 
-    report, _summary = reorganize_symbols._build_publication(
-        manifest=manifest,
+    report, _summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
         snapshot_index=index,
         compressed_root=compressed,
         staging_static=staging,
@@ -933,7 +919,7 @@ def test_distinct_same_name_peripheral_art_keeps_context_variant(tmp_path: Path)
             },
         ]
     )
-    canonical = manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"]
+    canonical = manifest["canonicalByArchivePath"]
     canonical["units/staldron-a.svg"] = "units/staldron-a.svg"
     canonical["units/staldron-b.svg"] = "units/staldron-b.svg"
 
@@ -943,9 +929,13 @@ def test_distinct_same_name_peripheral_art_keeps_context_variant(tmp_path: Path)
     (compressed / "units" / "staldron-b.svg").write_bytes(SVG)
     staging = tmp_path / "staging"
 
-    report, _summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, _summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -984,7 +974,7 @@ def test_publication_preserves_army_specific_primary_variant(tmp_path: Path) -> 
             "unitSlug": "mech-engineer",
         }
     )
-    manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"][
+    manifest["canonicalByArchivePath"][
         "units/u1-sectorial.svg"
     ] = "units/u1-sectorial.svg"
 
@@ -993,9 +983,13 @@ def test_publication_preserves_army_specific_primary_variant(tmp_path: Path) -> 
     (compressed / "units" / "u1-sectorial.svg").write_bytes(SVG)
     staging = tmp_path / "staging"
 
-    report, _summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, _summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -1034,7 +1028,7 @@ def test_publication_still_rejects_same_profile_slot_collision(tmp_path: Path) -
             "unitSlug": "mech-engineer",
         }
     )
-    manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"][
+    manifest["canonicalByArchivePath"][
         "units/u1-conflict.svg"
     ] = "units/u1-conflict.svg"
 
@@ -1045,9 +1039,13 @@ def test_publication_still_rejects_same_profile_slot_collision(tmp_path: Path) -
     with pytest.raises(
         ValueError, match=r"Published symbol path collision: units/panoceania/1-mech-engineer\.svg"
     ):
-        reorganize_symbols._build_publication(
-            manifest=manifest,
-            snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+        symbol_publication.build_publication(
+            assets=manifest["assets"],
+            references=manifest["references"],
+            canonical_by_source=manifest["canonicalByArchivePath"],
+            army_artifact=manifest["armyArtifact"],
+            unavailable_assets=manifest.get("unavailableAssets", []),
+            snapshot_index=symbol_publication.load_snapshot_index(snapshot),
             compressed_root=compressed,
             staging_static=tmp_path / "staging",
         )
@@ -1068,10 +1066,10 @@ def test_publication_skips_recorded_unavailable_authoritative_reference(tmp_path
             "httpStatus": 404,
         }
     ]
-    manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"].pop(
+    manifest["canonicalByArchivePath"].pop(
         "units/u1.svg"
     )
-    manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"][
+    manifest["canonicalByArchivePath"][
         "units/u2.svg"
     ] = "units/u2.svg"
     compressed = tmp_path / "compressed"
@@ -1080,9 +1078,13 @@ def test_publication_skips_recorded_unavailable_authoritative_reference(tmp_path
     (compressed / "units" / "u2.svg").write_bytes(SVG)
     staging = tmp_path / "staging"
 
-    report, summary = reorganize_symbols._build_publication(
-        manifest=manifest,
-        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+    report, summary = symbol_publication.build_publication(
+        assets=manifest["assets"],
+        references=manifest["references"],
+        canonical_by_source=manifest["canonicalByArchivePath"],
+        army_artifact=manifest["armyArtifact"],
+        unavailable_assets=manifest.get("unavailableAssets", []),
+        snapshot_index=symbol_publication.load_snapshot_index(snapshot),
         compressed_root=compressed,
         staging_static=staging,
     )
@@ -1090,302 +1092,3 @@ def test_publication_skips_recorded_unavailable_authoritative_reference(tmp_path
     assert summary["sourceAssetCount"] == 5
     assert "mech-engineer" not in report["unitSlugToPublishedPath"]
     assert report["unavailableSourceAssets"][0]["url"] == missing_url
-
-def test_publication_rejects_version_8_before_staging(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    snapshot = tmp_path / "army.zip"
-    _write_snapshot(snapshot)
-    manifest = _manifest(snapshot)
-    manifest["formatVersion"] = 8
-    monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
-
-    with pytest.raises(ValueError, match="version-7 compression state"):
-        publish_symbols(
-            army_snapshot=snapshot,
-            build_manifest_path=tmp_path / "manifest.json",
-            work_root=tmp_path / "work",
-            reports_base=tmp_path / "reports",
-            static_root=tmp_path / "static",
-            project_root=tmp_path,
-        )
-    assert not (tmp_path / "static").exists()
-
-
-def test_publication_rejects_modified_compressed_asset(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    snapshot = tmp_path / "army.zip"
-    _write_snapshot(snapshot)
-    manifest = _manifest(snapshot)
-    compressed = tmp_path / "work" / "compressed"
-    _write_compressed(compressed)
-    _write_compression_report(
-        manifest,
-        compressed_root=compressed,
-        reports_base=tmp_path / "reports",
-        project_root=tmp_path,
-    )
-    (compressed / "units" / "u1.svg").write_bytes(
-        b'<svg xmlns="http://www.w3.org/2000/svg"><circle r="1"/></svg>'
-    )
-    monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
-
-    with pytest.raises(ValueError, match="SHA-256 does not match version-7 report"):
-        publish_symbols(
-            army_snapshot=snapshot,
-            build_manifest_path=tmp_path / "manifest.json",
-            work_root=tmp_path / "work",
-            reports_base=tmp_path / "reports",
-            static_root=tmp_path / "static",
-            project_root=tmp_path,
-        )
-    assert not (tmp_path / "static").exists()
-
-
-
-def test_publication_records_changes_and_backs_up_removed_symbols(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    snapshot = tmp_path / "army.zip"
-    _write_snapshot(snapshot)
-    manifest = _manifest(snapshot)
-    compressed = tmp_path / "work" / "compressed"
-    _write_compressed(compressed)
-    _write_compression_report(
-        manifest,
-        compressed_root=compressed,
-        reports_base=tmp_path / "reports",
-        project_root=tmp_path,
-    )
-
-    static = tmp_path / "static"
-    obsolete = static / "orders" / "obsolete.svg"
-    obsolete.parent.mkdir(parents=True, exist_ok=True)
-    obsolete.write_bytes(b"obsolete")
-    (static / "orders" / "regular.svg").write_bytes(b"old regular")
-    characteristic = static / "characteristics" / "cube-2.svg"
-    characteristic.parent.mkdir(parents=True, exist_ok=True)
-    characteristic.write_bytes(SVG)
-
-    monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
-    publication_kwargs: dict[str, object] = {}
-
-    def capture_publication(document: dict[str, object], **kwargs: object) -> dict[str, object]:
-        publication_kwargs.update(kwargs)
-        return {**document, "formatVersion": 8}
-
-    monkeypatch.setattr(reorganize_symbols, "add_publication", capture_publication)
-    monkeypatch.setattr(
-        reorganize_symbols,
-        "write_symbol_manifest",
-        lambda _document, path: path,
-    )
-
-    result = publish_symbols(
-        army_snapshot=snapshot,
-        build_manifest_path=tmp_path / "manifest.json",
-        work_root=tmp_path / "work",
-        reports_base=tmp_path / "reports",
-        static_root=static,
-        project_root=tmp_path,
-        backup_base=tmp_path / "backups",
-    )
-
-    assert result.changes == {
-        "addedAssetCount": 2,
-        "removedAssetCount": 1,
-        "changedAssetCount": 1,
-        "unchangedAssetCount": 1,
-    }
-    assert result.removed_backup is not None
-    backed_up_obsolete = result.removed_backup / "removed" / "orders" / "obsolete.svg"
-    assert backed_up_obsolete.read_bytes() == b"obsolete"
-    backup_manifest = json.loads(
-        (result.removed_backup / "backup-manifest.json").read_text(encoding="utf-8")
-    )
-    assert backup_manifest["summary"] == {"removedAssetCount": 1}
-    assert backup_manifest["removed"] == [
-        {
-            "path": "orders/obsolete.svg",
-            "sha256": reorganize_symbols.sha256_file(backed_up_obsolete),
-        }
-    ]
-
-    report = json.loads(result.mapping_report.read_text(encoding="utf-8"))
-    publication_manifest = tmp_path / "symbol-publication.json"
-    manifest_document = json.loads(publication_manifest.read_text(encoding="utf-8"))
-    assert manifest_document["publishedSha256ByPath"] == report["publishedSha256ByPath"]
-    assert manifest_document["sourceSnapshot"] == {
-        "armyArtifact": {
-            "name": manifest["snapshot"]["armyArtifact"]["name"],
-            "sha256": manifest["snapshot"]["armyArtifact"]["sha256"],
-        }
-    }
-    assert "previousPublicationComparison" not in manifest_document
-    assert publication_kwargs["publication_manifest"] == publication_manifest
-
-    assert result.publication_manifest == publication_manifest
-    assert manifest_document["summary"]["publishedAssetCount"] == result.summary[
-        "publishedAssetCount"
-    ]
-    assert manifest_document["summary"]["publishedBytes"] == result.summary["publishedBytes"]
-    comparison = report["previousPublicationComparison"]
-    assert comparison["summary"] == result.changes
-    assert [row["path"] for row in comparison["added"]] == [
-        "armies/panoceania/101-panoceania.svg",
-        "units/panoceania/1-mech-engineer.svg",
-    ]
-    assert [row["path"] for row in comparison["removed"]] == ["orders/obsolete.svg"]
-    assert [row["path"] for row in comparison["changed"]] == ["orders/regular.svg"]
-    assert comparison["removedBackup"]["manifest"] == "backup-manifest.json"
-
-
-def test_publication_failure_does_not_leave_removed_symbol_backup(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    snapshot = tmp_path / "army.zip"
-    _write_snapshot(snapshot)
-    manifest = _manifest(snapshot)
-    compressed = tmp_path / "work" / "compressed"
-    _write_compressed(compressed)
-    _write_compression_report(
-        manifest,
-        compressed_root=compressed,
-        reports_base=tmp_path / "reports",
-        project_root=tmp_path,
-    )
-
-    static = tmp_path / "static"
-    obsolete = static / "orders" / "obsolete.svg"
-    obsolete.parent.mkdir(parents=True, exist_ok=True)
-    obsolete.write_bytes(b"obsolete")
-    backup_base = tmp_path / "backups"
-
-    monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
-    monkeypatch.setattr(
-        reorganize_symbols,
-        "add_publication",
-        lambda *_args, **_kwargs: (_ for _ in ()).throw(ValueError("manifest failure")),
-    )
-
-    with pytest.raises(ValueError, match="manifest failure"):
-        publish_symbols(
-            army_snapshot=snapshot,
-            build_manifest_path=tmp_path / "manifest.json",
-            work_root=tmp_path / "work",
-            reports_base=tmp_path / "reports",
-            static_root=static,
-            project_root=tmp_path,
-            backup_base=backup_base,
-        )
-
-    assert obsolete.read_bytes() == b"obsolete"
-    assert not backup_base.exists() or not any(backup_base.iterdir())
-
-def test_publication_failure_restores_previous_generated_tree(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    snapshot = tmp_path / "army.zip"
-    _write_snapshot(snapshot)
-    manifest = _manifest(snapshot)
-    compressed = tmp_path / "work" / "compressed"
-    _write_compressed(compressed)
-    _write_compression_report(
-        manifest,
-        compressed_root=compressed,
-        reports_base=tmp_path / "reports",
-        project_root=tmp_path,
-    )
-
-    static = tmp_path / "static"
-    old_army = static / "armies" / "old.svg"
-    old_army.parent.mkdir(parents=True)
-    old_army.write_bytes(b"old army")
-    old_characteristics = static / "characteristics" / "old.svg"
-    old_characteristics.parent.mkdir(parents=True)
-    old_characteristics.write_bytes(b"old characteristic")
-    old_orders = static / "orders" / "old.svg"
-    old_orders.parent.mkdir(parents=True)
-    old_orders.write_bytes(b"old order")
-    old_units = static / "units" / "old.svg"
-    old_units.parent.mkdir(parents=True)
-    old_units.write_bytes(b"old unit")
-    publication_manifest = tmp_path / "symbol-publication.json"
-    publication_manifest.write_text("old publication manifest\n", encoding="utf-8")
-
-    report = tmp_path / "reports" / "SYMBOLS test--aaaaaaaaaaaa" / "publication-map.json"
-    report.parent.mkdir(parents=True, exist_ok=True)
-    report.write_text("old report\n", encoding="utf-8")
-
-    monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
-    monkeypatch.setattr(
-        reorganize_symbols,
-        "add_publication",
-        lambda *_args, **_kwargs: (_ for _ in ()).throw(ValueError("manifest failure")),
-    )
-
-    with pytest.raises(ValueError, match="manifest failure"):
-        publish_symbols(
-            army_snapshot=snapshot,
-            build_manifest_path=tmp_path / "manifest.json",
-            work_root=tmp_path / "work",
-            reports_base=tmp_path / "reports",
-            static_root=static,
-            project_root=tmp_path,
-        )
-
-    assert old_army.read_bytes() == b"old army"
-    assert old_characteristics.read_bytes() == b"old characteristic"
-    assert old_orders.read_bytes() == b"old order"
-    assert old_units.read_bytes() == b"old unit"
-    assert publication_manifest.read_text(encoding="utf-8") == "old publication manifest\n"
-    assert report.read_text(encoding="utf-8") == "old report\n"
-
-
-def test_publication_backup_failure_restores_already_moved_outputs(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    snapshot = tmp_path / "army.zip"
-    _write_snapshot(snapshot)
-    manifest = _manifest(snapshot)
-    compressed = tmp_path / "work" / "compressed"
-    _write_compressed(compressed)
-    _write_compression_report(
-        manifest,
-        compressed_root=compressed,
-        reports_base=tmp_path / "reports",
-        project_root=tmp_path,
-    )
-
-    static = tmp_path / "static"
-    for category in ("armies", "characteristics", "orders", "units"):
-        path = static / category / "old.svg"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(f"old {category}".encode())
-
-    monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
-    original_replace = Path.replace
-    failing_path = static / "orders"
-
-    def flaky_replace(self: Path, target: Path) -> Path:
-        if self == failing_path:
-            raise OSError("backup failure")
-        return original_replace(self, target)
-
-    monkeypatch.setattr(Path, "replace", flaky_replace)
-
-    with pytest.raises(OSError, match="backup failure"):
-        publish_symbols(
-            army_snapshot=snapshot,
-            build_manifest_path=tmp_path / "manifest.json",
-            work_root=tmp_path / "work",
-            reports_base=tmp_path / "reports",
-            static_root=static,
-            project_root=tmp_path,
-        )
-
-    assert (static / "armies" / "old.svg").read_bytes() == b"old armies"
-    assert (static / "characteristics" / "old.svg").read_bytes() == b"old characteristics"
-    assert (static / "orders" / "old.svg").read_bytes() == b"old orders"
-    assert (static / "units" / "old.svg").read_bytes() == b"old units"

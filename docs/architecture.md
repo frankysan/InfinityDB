@@ -359,7 +359,10 @@ Accepted external publications are promoted through a verified, recoverable appl
 operation. Maintained compatibility aliases copy approved canonical SVG bytes and remain in the
 published hash inventory; they do not create additional source or canonical identities.
 The [data lifecycle](../data/README.md#accepted-external-symbol-publication-promotion)
-owns promotion, alias policy and recovery.
+owns promotion, alias policy and recovery. The external producer owns acquisition,
+override application and graphical processing; InfinityDB owns source selection,
+handoff verification and semantic publication. Normal builds, serving and Docker
+packaging do not require the producer repository or its graphical tools.
 
 Complete builds embed the four serving mappings and published SVG hashes
 in Army v31. For that schema the manifest is a build/provenance input rather
@@ -373,9 +376,9 @@ omit SVGs and return 404 for them, as checked by installed-wheel acceptance.
 Present but incorrect SVG bytes still fail validation. Embedded v31
 publications require all declared SVGs at startup.
 
-Raw/source symbol archives, conversion work trees, detailed stage reports, and terminal build state
-remain local processing evidence. Production deployment requires the tracked publication, not the
-raw symbol pipeline.
+Raw/source symbol archives, conversion work trees and detailed stage reports
+remain local processing evidence. Production deployment requires the tracked
+publication, not the raw symbol pipeline.
 
 Corvus Belli has explicitly permitted InfinityDB to redistribute the processed graphical assets for
 this non-commercial project. They remain Corvus Belli property and outside the MIT license; see

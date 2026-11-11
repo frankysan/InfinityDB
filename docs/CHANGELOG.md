@@ -45,6 +45,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Acquisition + Data processing:** Symbol acquisition and graphical processing
+  now use the external producer. InfinityDB continues to verify and promote its
+  handoff; the retired in-tree processor can no longer resume old builds.
 - **Data processing + Web frontend:** Published the approved external symbol
   artwork and retained the former Seed Soldier filename as a byte-identical
   compatibility alias. Existing image links continue to work.

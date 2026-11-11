@@ -14,7 +14,7 @@ from test_verify_processed_symbol_handoff import _csv, _fixture, _pin
 from test_verify_symbol_duplicate_handoff import _evidence
 
 from tools import prepare_symbol_publication as candidate
-from tools.reorganize_symbols import FactionInfo, SnapshotIndex
+from tools.symbol_publication import FactionInfo, SnapshotIndex
 from tools.verify_processed_symbol_handoff import FORMAT
 
 
@@ -144,7 +144,7 @@ def _inputs(root: Path, monkeypatch):
               + suffix + ".svg"} for number, suffix in enumerate(("a", "b"), 1)]
     monkeypatch.setattr(candidate, "discover_symbol_source",
                         lambda *a, **kw: SimpleNamespace(references=refs))
-    monkeypatch.setattr(candidate, "_load_snapshot_index", lambda *a: SnapshotIndex(
+    monkeypatch.setattr(candidate, "load_snapshot_index", lambda *a: SnapshotIndex(
         {101: FactionInfo(101, "test", 101)},
         {("101-test.json", i, "unit-" + s): 101 for i, s in enumerate(("a", "b"), 1)},
     ))
