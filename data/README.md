@@ -512,6 +512,57 @@ review. It does not approve graphical changes against the tracked publication,
 promote a release, rebuild embedded mappings or retire the current pipeline.
 The normal build/serve/Docker path continues using the tracked publication.
 
+### Accepted external symbol publication promotion
+
+**Project domains:** Data processing, Project infrastructure
+
+`python -m tools.promote_symbol_publication` consumes an explicitly accepted
+candidate and the same `SymbolPublicationHandoff` file selections used to prepare
+it. The promotion input JSON uses
+`format: "InfinityDB symbol publication promotion inputs"`, `formatVersion: 1`,
+the eight handoff fields (`source_plan`, `override_lookups`, `army`,
+`army_manifest`, `raw_archive`, `effective_archive`, `stage_reports`,
+`processed_root`) and `font_aliases`, each holding a local path. Relative paths
+resolve from the working directory. Expected current and candidate manifest
+SHA-256 values pin the replacement base and approved input.
+
+The operation verifies the complete candidate asset inventory, reruns the existing
+raw/effective/processed receipt verification and semantic mapping without any
+graphical processors, and requires byte-identical candidate manifest/evidence.
+It then copies approved compressed artwork and applies
+`config/symbols/publication-compatibility-aliases.json`. Alias paths must be new,
+portable published SVG paths pointing directly to an existing canonical target.
+Aliases copy its exact bytes and hash; source/canonical/browser mapping keys are
+unchanged. The v2 manifest's `compatibilityAliases` records the alias-to-target
+map, and its published inventory/byte totals include those files. Startup's
+embedded asset inventory therefore verifies compatibility URLs too.
+
+The accepted P5 publication has **807 canonical SVGs / 808 published URLs**:
+807 are browser-referenced and one is the former Seed Soldier URL,
+`units/combined-army/512-shasvastii-seed-soldiers--1-2.svg`, backed by
+`units/combined-army/512-shasvastii-seed-soldiers.svg`. A compatibility URL is
+an additional physical publication file, not a new source identity.
+
+Stop checkout serving before promotion. The operation requires a fresh transaction
+directory under ignored `local/`. It retains verified previous bytes, the incoming
+publication and a persistent journal before replacing the generated category
+directories and manifest. Caught installation/validation failures, including
+keyboard interruption, restore the previous publication. For a killed process
+or interrupted rollback, use `--recover --transaction <same-directory>` before
+serving; recovery verifies backups and refuses unrelated destination drift.
+Retain the transaction until acceptance is complete. It is private operational
+evidence, not a runtime input. A completed transaction is not an implicit rollback
+request.
+
+Promotion replaces graphical publication only. Rebuild the **complete three-file**
+Army/Rules/ITS set using the accepted manifest, validate embedded hashes/mappings
+and deployment assets, then resume serving. Do not patch only the Army SQLite
+rows or serve a mixed database/publication set. The
+[P5 runbook](../docs/symbol-pipeline-parity-runbook.md#accepted-publication-cutover)
+owns commands and dated acceptance; hosted/release gates remain separate.
+Acquisition, overrides, font conversion and compression remain producer-owned.
+The in-tree processors remain available until their separately scoped retirement.
+
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not covered by InfinityDB's MIT License. Corvus Belli
 has explicitly permitted redistribution of the processed graphical publication used by this

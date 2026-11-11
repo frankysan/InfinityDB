@@ -1869,6 +1869,75 @@ causality, compression-only equivalence, application publication or Docker/
 Linux/hosted-CI/release acceptance. Production SVGs, manifests, databases and
 parity thresholds were unchanged.
 
+### P5.7 accepted symbol publication cutover
+
+**2026-11-11, Windows development checkout based on `e70195cd`:**
+The user approved all 118 changed artworks. No artwork review was repeated.
+The [P5 runbook](symbol-pipeline-parity-runbook.md#accepted-publication-cutover)
+owns the executed promotion/recovery commands and acceptance boundary.
+
+Promotion reverified the approved candidate's complete raw/effective/stage/
+processed receipt chain and reproduced its manifest/evidence byte-for-byte.
+It copied approved compressed SVG bytes and added the maintained exact-byte
+Seed Soldier compatibility alias, without acquisition, conversion or compression.
+The publication contains **807 canonical SVGs / 808 URLs** and **10,001,525 bytes**.
+All 1,101 source mapping keys and all browser mapping keys remain represented.
+The generated category directories and manifest have persistent verified backups
+under `local/p5-accepted-cutover-20261111/publication/`.
+
+| Artifact | SHA-256 |
+| --- | --- |
+| Promoted symbol manifest | `a88c7ead46cb2b68c67deece21af1e2f0a072a3c7a44a8b319ae32f64fc10d17` |
+| Seed Soldier alias and canonical SVG | `cdaca8ef8ee6494f7e1a539610d7ca1d8384e7b585d4e5d45a96935092961c74` |
+| `army.db` | `0bfe048c7224cfe5b4c62c3ff9a3e9999b1a7e7d6374b0c19917c7f976400b39` |
+| `rules_n5.db` | `a0aa4d7b46d561f840808bd526b4d4d9b6a66a9418d66d1dbb6b2c0b15989e76` |
+| `its_18.db` (unchanged) | `e88eb6e9934443f762d8f143efcfd8cdf300636424b3a55c78df569ea43d2b94` |
+
+The complete offline build from `JSON 20260929-114335.zip` retained mandatory
+lossless verification (**73 normalization checks passed; 116 existing source
+warnings matched their baseline**), then built/validated Army v31/compatibility 40,
+Rules v17 and ITS v2. Build-set ID:
+`0523e4b394247d0dafa03d91c2c391afb5c07d33c35665750aa728c67cb1b7d1`.
+Full three-file SQLite integrity and source/build pairing passed. Army embeds
+**2,019 mappings / 808 published hashes** with the promoted manifest digest.
+Deployment artifact verification passed **808/808 published / 807/807
+browser-referenced SVGs**, including the compatibility URL's hash.
+
+Focused regression command:
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --assets required --test-workers 0 tests/test_promote_symbol_publication.py tests/test_prepare_symbol_publication.py tests/test_asset_validation.py tests/test_symbol_catalog.py tests/test_symbol_path_storage.py tests/test_verify_deployment_assets.py tests/test_test_sections.py
+```
+
+This passed **97 tests, zero skips**. New assertions cover input drift,
+compatibility hash/chain rejection, preservation of unrelated files, failures
+at multiple directory/manifest replacement points, final validation/journal
+failure, keyboard interruption, persistent recovery and concurrent-writer refusal.
+Ruff, focused Pyright and the documentation stage passed.
+The release-note/metadata cohort also passed **32 tests, zero skips**.
+
+Actual checkout and isolated Docker HTTP/Chrome checks passed at **1440/390/320
+x 900**: normal Army and Seed Soldier pages, every published SVG rendered,
+all **808 HTTP body hashes**, and a **200 image/svg+xml** response at the old
+Seed Soldier URL with approved canonical bytes. The final image gallery used
+batches of 16, **zero retries**, and retained page/request/HTTP error and overflow
+assertions. An initial unbounded checkout probe had one failed HTTP transfer
+in its private Windows WSGI server; the failure is preserved under
+`local/p5-accepted-cutover-20261111/checkout-browser-failure.json` and does
+not count as passing. The bounded final collector had no such errors; it is
+rendering/integrity evidence, not a load-capacity measurement.
+
+Both checkout and Docker passed the existing **41-route semantic baseline**.
+Docker image construction passed; installed assets matched all 808 embedded
+hashes, the image ran as non-root with exactly the required three runtime
+databases, and Gunicorn started with a read-only root filesystem, temporary
+`/tmp` and `no-new-privileges`. Health, reference APIs and actual browser checks
+passed before stopping the disposable container. Evidence/logs/screenshots and
+runtime recovery copies are under ignored `local/p5-accepted-cutover-20261111/`.
+No production deployment, release tag, full Linux suite or hosted acceptance
+is implied. In-tree processor retirement and P6 integrated/release acceptance
+remain separate open work.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent

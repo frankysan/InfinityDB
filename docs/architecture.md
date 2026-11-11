@@ -355,8 +355,13 @@ bound by `data/manifests/symbol-publication.json`. The manifest owns published p
 mappings, and the compact Army source identity needed to prove that runtime Army data and symbols
 come from the intended source snapshot. Peripheral profile artwork has its own
 `peripherals/<main-army>/` publication namespace rather than inheriting parent-Unit filenames.
+Accepted external publications are promoted through a verified, recoverable application-owned
+operation. Maintained compatibility aliases copy approved canonical SVG bytes and remain in the
+published hash inventory; they do not create additional source or canonical identities.
+The [data lifecycle](../data/README.md#accepted-external-symbol-publication-promotion)
+owns promotion, alias policy and recovery.
 
-Opt-in complete builds embed the four serving mappings and published SVG hashes
+Complete builds embed the four serving mappings and published SVG hashes
 in Army v31. For that schema the manifest is a build/provenance input rather
 than a runtime lookup dependency; older Army schemas retain its validated
 adapter. Each application computes its static cache identity from the selected

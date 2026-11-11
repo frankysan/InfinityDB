@@ -1,0 +1,7 @@
+{
+  "format": "InfinityDB symbol publication compatibility aliases",
+  "formatVersion": 1,
+  "aliases": {
+    "units/combined-army/512-shasvastii-seed-soldiers--1-2.svg": "units/combined-army/512-shasvastii-seed-soldiers.svg"
+  }
+}

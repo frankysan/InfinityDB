@@ -267,6 +267,7 @@
         "test_external_raw_symbol_bridge",
         "test_prepare_web_fonts",
         "test_prepare_symbol_publication",
+        "test_promote_symbol_publication",
         "test_reorganize_symbols",
         "test_stage_full_asset_bundle",
         "test_svg_compress",

@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0–P4 are complete, including owner acceptance of P4.5 on 2026-11-11. The normal runtime builds and serves Army v31 (`army.db`), Rules v17 (`rules_n5.db`), and the reviewed ITS 18 publication (`its_18.db`) as one selected set for both checkout and Docker. P5–P6 remain open; matched-input symbol processor parity has passed, while publication acceptance and in-tree processor retirement remain open.
+**Status:** Active on `dev/v1.1.0`: P0–P4 are complete, including owner acceptance of P4.5 on 2026-11-11. The normal runtime builds and serves Army v31 (`army.db`), Rules v17 (`rules_n5.db`), and the reviewed ITS 18 publication (`its_18.db`) as one selected set for both checkout and Docker. P5–P6 remain open; matched-input symbol parity and the accepted external publication cutover have passed. In-tree processor retirement and integrated/release acceptance remain open.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -3617,11 +3617,13 @@ Soldier identities, with **807** published SVGs. See the
 [candidate lifecycle](../data/README.md#external-processed-symbol-publication-candidates)
 and [focused evidence](testing.md#p57-external-semantic-publication-candidate).
 
-**Next:** Review the candidate's artwork differences and removed asset URL
-against the tracked publication, promote an accepted candidate with rebuilt
-embedded mappings, and run actual browser/local/Docker acceptance. Retire the
-in-tree processors only after those checks. Processor and candidate mapping
-acceptance alone do not approve a changed graphical publication.
+**2026-11-11 accepted cutover:** The user approved all 118 changed artworks.
+The external publication is now tracked with an exact-byte Seed Soldier URL
+alias, rebuilt complete-runtime mappings and passed checkout/browser/Docker
+acceptance. The [runbook](symbol-pipeline-parity-runbook.md#accepted-publication-cutover)
+and [testing evidence](testing.md#p57-accepted-symbol-publication-cutover) own
+the operation and exact results. In-tree processor retirement remains a
+separate P5 change; no processors were retired during publication cutover.
 
 ### P6 — Consolidate, measure and establish the new baseline
 

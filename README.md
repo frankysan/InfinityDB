@@ -241,7 +241,12 @@ inputs. Human-reviewed rules collections live under `data/curated/rules/`.
 
 The processed graphical publication is already tracked in a normal checkout. Regeneration
 is optional for source development and requires separate raw inputs and external tools.
-Use the symbol orchestrator only when preparing a new publication, with an existing pinned
+Symbol acquisition, reviewed overrides, font conversion and compression are owned by
+InfinityDB-symbol-tools. InfinityDB verifies its processed handoff, prepares a candidate
+and promotes accepted artwork with compatibility aliases and recoverable backups. See the
+[publication lifecycle](data/README.md#accepted-external-symbol-publication-promotion).
+
+The legacy in-tree orchestrator remains available pending P5 retirement, with an existing pinned
 Army snapshot (replace the timestamp with the immutable local snapshot you intend to use):
 
 ```powershell
@@ -257,7 +262,7 @@ python tools/build_symbols.py --fetch-snapshot
 Symbol processing requires the `symbols` Python extras. Compression additionally
 requires SVGO v4+ and `resvg`; text conversion normally requires Inkscape.
 
-An external processed-SVG handoff can also be prepared as an isolated semantic
+An external processed-SVG handoff is prepared as an isolated semantic
 publication candidate using `python -m tools.prepare_symbol_publication`.
 That offline command verifies the source/stage evidence and needs no graphical
 processing tools. It leaves the tracked publication unchanged; see the

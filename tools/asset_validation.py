@@ -125,6 +125,17 @@ def _publication_manifest(
             )
         inventory[relative] = digest
 
+    aliases = document.get("compatibilityAliases", {})
+    if not isinstance(aliases, dict):
+        raise AssetValidationError("Compatibility aliases must be a mapping")
+    for alias, target in aliases.items():
+        if (not isinstance(alias, str) or not isinstance(target, str)
+                or alias not in inventory or target not in inventory or target in aliases
+                or alias == target or inventory[alias] != inventory[target]):
+            raise AssetValidationError(
+                "Compatibility aliases must match a direct published target hash"
+            )
+
     browser_paths: set[str] = set()
     for field in (
         "factionIdToPublishedPath",

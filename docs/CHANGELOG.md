@@ -15,6 +15,8 @@ are not retroactively relabeled.
 - ITS Season 18 scenario pages offer explicit tournament and optional Extra
   context selection. Event-only Spec-Ops restrictions no longer appear as
   default N5 Skill restrictions.
+- Refreshed Army, Unit, Peripheral, Order and Characteristic symbols while
+  preserving the existing Seed Soldier image URL.
 
 ### Added
 
@@ -43,6 +45,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Published the approved external symbol
+  artwork and retained the former Seed Soldier filename as a byte-identical
+  compatibility alias. Existing image links continue to work.
 - **Web backend + Data processing:** Preserved scenario-specific N5 FAQ
   applicability across seasons: a core mission's ruling cannot follow an
   independently published ITS mission merely because both share an ID.

@@ -1,9 +1,11 @@
 # P5.7 — Symbol pipeline production parity runbook
 
-Status: **matched-input processor parity passed and semantic candidate
-prepared (2026-11-11)**. Artwork/URL review against the tracked release,
-promotion and actual browser/local/Docker acceptance remain open. See the [dated evidence and acceptance
-boundary](testing.md#p57-matched-input-symbol-processor-parity).
+Status: **accepted external publication promoted (2026-11-11)**. The user
+approved all 118 changed artworks. The old Seed Soldier URL is retained,
+embedded mappings are rebuilt, and checkout/browser/Docker acceptance passed.
+In-tree processor retirement remains a separate open P5 change. Earlier review
+sections describe the pre-approval evidence; the
+[accepted cutover](#accepted-publication-cutover) is the current acceptance boundary.
 
 ## Readiness audit
 
@@ -335,6 +337,82 @@ focused regression and real-page browser results. Retain this audit while the
 P5 provenance/artwork obligation is open, then apply the
 [one-use tool lifecycle](README.md#one-use-tool-and-audit-lifecycle).
 
+## Accepted publication cutover
+
+**Project domains:** Data processing, Project infrastructure, Deployment
+
+**User decision, 2026-11-11:** all 118 changed artworks were approved. Artwork
+review was not repeated. Promotion started from `e70195cdf84d46d1a1b4853948aa480eb7524f35`
+and consumed `local/p5-external-symbol-publication-verified-20261111/`.
+The [data lifecycle](../data/README.md#accepted-external-symbol-publication-promotion)
+owns the operation and persistent recovery contract.
+
+The actual command pinned the prior and approved candidate manifests:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.promote_symbol_publication --candidate local/p5-external-symbol-publication-verified-20261111 --inputs local/p5-accepted-cutover-20261111/promotion-inputs.json --transaction local/p5-accepted-cutover-20261111/publication --expected-current-sha256 92a27c349c6ac23d81de138ee7bff5d196f0f83caa5846417ebd1d89427a3eb5 --expected-candidate-sha256 acb3a2384fc985db59df429ce45daba413452cf1956534a0b1c24d5daebc3948
+```
+
+The transaction directory now contains the successful journal, reverified
+candidate, and complete prior publication backup. For another accepted input,
+select its hashes and a fresh transaction. Recover an **interrupted** promotion
+before serving with:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.promote_symbol_publication --recover --transaction local/p5-accepted-cutover-20261111/publication
+```
+
+Recovery refuses a completed transaction and unrelated destination drift.
+Installation/validation failures and keyboard interruption roll back automatically;
+retained backups/journal permit recovery after process loss.
+
+Promotion reverified the entire pinned raw/effective/stage/processed receipt
+chain and reproduced the accepted candidate manifest/evidence byte-for-byte.
+No SVG acquisition, conversion or compression ran. The only additional file
+is the maintained compatibility alias:
+
+`units/combined-army/512-shasvastii-seed-soldiers--1-2.svg`
+copies `units/combined-army/512-shasvastii-seed-soldiers.svg`.
+Both have SHA-256
+`cdaca8ef8ee6494f7e1a539610d7ca1d8384e7b585d4e5d45a96935092961c74`.
+The promoted manifest SHA-256 is
+`a88c7ead46cb2b68c67deece21af1e2f0a072a3c7a44a8b319ae32f64fc10d17`.
+It inventories **807 canonical assets / 808 published URLs**, **10,001,525 bytes**,
+807 browser references and one compatibility-only URL. All candidate source and
+browser mapping keys are retained. The tracked SVG diff is 118 approved
+replacements plus the compatibility filename's replacement.
+
+The complete offline build used the same pinned Army archive:
+
+```powershell
+.\.venv\Scripts\python.exe -m infinity_db build "data/raw/JSON 20260929-114335.zip" --compact --db-dir local/p5-accepted-cutover-20261111/runtime
+.\.venv\Scripts\python.exe -m tools.verify_deployment_assets --database local/p5-accepted-cutover-20261111/runtime/army.db --rules-database local/p5-accepted-cutover-20261111/runtime/rules_n5.db
+```
+
+Only after full three-file integrity, source/build-pair and deployment
+validation were the runtime files copied into `data/generated/`, with prior
+bytes retained under `local/p5-accepted-cutover-20261111/previous-runtime/`.
+Army v31 contains **2,019 mappings / 808 asset hashes**, including the old URL.
+Rules v17 and ITS v2 remain required; the ITS bytes are unchanged.
+See [exact hashes and validation](testing.md#p57-accepted-symbol-publication-cutover).
+
+The focused cohort passed **97 tests, zero skips**. Actual checkout and Docker
+HTTP checks verified all 808 hashes and the old URL's 200/SVG response. Chrome
+rendered all 808 assets and normal Army/Seed Soldier pages at 1440/390/320 x 900
+without page/request/HTTP errors or horizontal overflow. The final collector
+used batches of 16 and no retries. An initial unbounded checkout-gallery probe
+had a failed HTTP transfer in the private Windows test server; its diagnostic
+is retained separately and is not counted as passing or as capacity evidence.
+Both environments also passed the existing **41-route semantic baseline**.
+Docker construction and non-root, read-only, three-database runtime checks passed;
+the disposable container was stopped. No production deployment occurred.
+
+Private logs, browser receipts, screenshots, prior bytes and transaction state
+remain under ignored `local/p5-accepted-cutover-20261111/`. These local checks
+accept the publication cutover, not a release tag or hosted CI. In-tree processor
+retirement, remaining P5 tooling hygiene, and P6 integrated/release acceptance
+remain separate work.
+
 ## Acceptance gates
 
 1. The real-source inventory must account for every reviewed
@@ -355,8 +433,8 @@ P5 provenance/artwork obligation is open, then apply the
 **Current evidence:** matched-input production processor raster parity
 passed, with zero pixel differences across all 807 canonical assets.
 The independent artifact verifier and 16 hermetic handoff tests also passed.
-The external semantic publication candidate preserves every source/browser
-mapping key. Artwork/URL review, candidate promotion, rebuilt SQLite mappings,
-actual browser/local/Docker acceptance and in-tree processor retirement remain
-open.
+The accepted external publication preserves every source/browser mapping key
+and the removed URL as a compatibility alias. Artwork approval, candidate promotion,
+rebuilt SQLite mappings and checkout/browser/Docker checks are complete for this
+cutover. In-tree processor retirement and final integrated/release acceptance remain open.
 The failed historical-output comparison remains preserved separately.
