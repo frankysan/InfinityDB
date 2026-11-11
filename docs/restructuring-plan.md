@@ -2591,8 +2591,8 @@ notice, About/privacy disclosures, and representative empty/error states.
   Chromium-lane coverage failures on Ubuntu Python 3.11 because the new
   reference-error browser test was in the section registry but omitted from
   2/3/4-lane scheduling. The new module is now assigned across all
-  lane maps, with focused scheduler checks passing locally. Independent
-  new-SHA hosted CI acceptance remains required.
+  lane maps, with focused scheduler checks passing locally. The repaired
+  P4 revision passed hosted CI on `d12aa0706723a62f147a7b7ff901cc68b0a905d1`.
 - **Unit choice-chart metadata:** Normal Spec-Ops/TEAM-OPS choices now show
   their source names without raw source Unit IDs and Army source-version
   diagnostics. Developer Mode retains both. The actual choices, linked
@@ -2602,14 +2602,19 @@ notice, About/privacy disclosures, and representative empty/error states.
   `db81adcc4bd3b379f765744e6c00147eb3399c33` failed in one Linux
   Python 3.11 test because the shared table verifier required an exact
   one-symbol import statement; the renderer now imports two named helpers.
-  Replace that brittle assertion with a shared-module import/usage check.
+  The assertion was replaced with a shared-module import/usage check.
   The other 4,436 tests passed (1,315 skipped); both smoke workflows and
-  all other Source jobs passed. New-SHA hosted acceptance is still required.
+  all other Source jobs passed. The corrected revision passed hosted Source,
+  wheel and deployment checks on `d12aa0706723a62f147a7b7ff901cc68b0a905d1`.
 
-P4.1–P4.4's bounded player-first copy and presentation improvements have
-focused local tests. P4.5 has automated browser/theme/viewport/keyboard
-coverage, but not a renewed manual screen-reader review. P4 is not yet
-closed. Preserve citations, source notes and genuine gameplay uncertainty.
+**P4 closed — 2026-11-11:** The release owner explicitly accepted P4.5,
+following the representative automated browser/theme/viewport/keyboard,
+source-citation, route/focus and saveable-map checks recorded in
+[testing](testing.md). This is an owner acceptance, not a claim that a new
+manual screen-reader session was executed by the assistant. P4.1–P4.4
+implementation and hosted Source/wheel/deployment acceptance at
+`d12aa0706723a62f147a7b7ff901cc68b0a905d1` are complete.
+Keep gameplay citations, source notes and genuine uncertainty visible.
 
 ### P5 — Retire, consolidate and selectively extract tools
 
@@ -2688,6 +2693,26 @@ though both lexical queues are currently closed. Reconsider consolidating
 their overlapping scanners/validators under P5.2; do not remove their
 review manifests or imply the reviewed keyword scope is exhaustive.
 
+#### P5.1 — Retire completed N5.3 p.74 profile audit (2026-11-11)
+
+`tools/audit_deployed_object_quick_profiles.py` was a fixed-source
+cross-check of the N5.3 p.74 Deployable Profiles quick-reference against
+already reviewed object identities. The completed source examination found
+13 printed rows, 10 distinct existing reviewed objects, two duplicate
+spellings/rows (FastPanda and Madtraps), and a plural `MINES` family
+rather than a new generic object. It confirmed Armed Turret's p.74 S1 versus
+reviewed S2 dispute and Dazer's distinct existing S0/S1 dispute.
+These results remain recorded in `docs/testing.md`.
+
+The one-use PDF parser/audit CLI and its operation-specific tests are
+retired. Its current-purpose guarantees remain in the reviewed-object
+projection tests: exact catalog/name/mode selectors for the nine p.74
+catalog objects, separate Armed Turret identity, no generic Mine object,
+and explicit provenance-preserving Silhouette disagreements. The normal
+builder, source review manifests, deployed-object storage and runtime API
+are unchanged. Reexamine the source with revision-intake tooling if a
+new core publication supersedes pinned N5.3.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
@@ -2726,7 +2751,7 @@ flowchart TD
     p5 --> p6
 ```
 
-**Execution status:** P0–P3 have completed implementation and applicable validation. The three-file Army/Rules/ITS 18 runtime contract is the default for both checkout and Docker. P4 player-first presentation work is underway; P5 retirement/extraction and P6 integrated closeout remain. Earlier P2 candidate/export notes are historical and do not describe current serving.
+**Execution status:** P0–P4 have completed implementation and applicable validation; P4.5 was explicitly accepted by the release owner on 2026-11-11. The three-file Army/Rules/ITS 18 runtime contract is the default for both checkout and Docker. P5 retirement/extraction and P6 integrated closeout remain. Earlier P2 candidate/export notes are historical and do not describe current serving.
 
 ## Questions to settle during discovery (not reasons to stop planning)
 

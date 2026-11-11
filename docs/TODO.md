@@ -26,12 +26,11 @@ when all contained work shares the same owner.
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-- [ ] Execute P4–P6 of the
+- [ ] Execute P5–P6 of the
   [phased restructuring plan](restructuring-plan.md).
-  P4's player-facing copy and shared-renderer updates are implemented
-  with focused local browser coverage; P4.5 still needs accessibility
-  closeout, including renewed manual screen-reader review. P5–P6 remain
-  open. P0–P3 are implemented and locally validated. P3 hosted Source checks,
+  P0–P4 are complete; the release owner accepted P4.5 on 2026-11-11
+  following focused browser/accessibility validation. P5 tooling retirement
+  and P6 integrated closeout remain open. P3 hosted Source checks,
   installed-wheel smoke and deployment smoke passed on
   `09f91f442f82abba4df76641ef7ad688402673d4`.
   P3.5 also exercised a synthetic second season with a duplicate

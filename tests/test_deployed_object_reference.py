@@ -56,6 +56,36 @@ def test_all_reviewed_source_objects_keep_stable_provenanced_attributes(
                 assert attr["value"] is not None and attr["provenance"]
 
 
+
+
+def test_p74_reviewed_source_selectors_keep_distinct_object_identities(
+    pinned_inventory: dict,
+) -> None:
+    """Preserve the p.74 review conclusions without the retired PDF-parser CLI."""
+    objects = project_deployed_references(pinned_inventory)["objects"]
+    selectors = {
+        (item["sourceProfile"]["catalog"], item["sourceProfile"]["name"],
+         item["sourceProfile"]["mode"]): item["id"]
+        for item in objects if item["sourceProfile"] is not None
+    }
+    p74_catalog_selectors = {
+        ("weapon", "Crazykoala", None),
+        ("weapon", "Cybermine", None),
+        ("equipment", "Dazer", None),
+        ("equipment", "Deployable Repeater", None),
+        ("weapon", "Disco Baller", "Disco Ball"),
+        ("weapon", "Drop Bears", "Deployable Mode"),
+        ("equipment", "FastPanda", None),
+        ("weapon", "Madtraps", None),
+        ("weapon", "WildParrot", None),
+    }
+    assert len(p74_catalog_selectors) == 9
+    assert p74_catalog_selectors <= selectors.keys()
+    assert len({selectors[key] for key in p74_catalog_selectors}) == 9
+    assert sum(item["originRuleId"] == "weapon:armed-turret" for item in objects) == 1
+    assert not any(item["name"] == "Mines" for item in objects)
+    assert len([item for item in objects if item["name"].endswith(" Mine")]) == 6
+
 def test_source_disputes_remain_explicit_without_conflating_marker_silhouette(
     pinned_inventory: dict,
 ) -> None:

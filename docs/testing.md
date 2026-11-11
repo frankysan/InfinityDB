@@ -1716,6 +1716,15 @@ now checks that `tableViewport` is imported from the shared module
 and used, independent of other imported names; a new hosted run is
 needed for acceptance.
 
+**2026-11-11 P4.5 acceptance:** The release owner explicitly accepted
+the P4.5 representative user-flow/accessibility checkpoint after the
+focused desktop/mobile, light/dark, keyboard/focus, citations, alerts and
+saveable SVG checks documented above. This is an owner acceptance; it
+does not assert that an additional manual screen-reader session was
+performed. P4 hosted Source checks, installed-wheel smoke and deployment
+smoke all passed on `d12aa0706723a62f147a7b7ff901cc68b0a905d1`.
+P4 is closed; P5 and P6 remain active.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
@@ -7286,7 +7295,7 @@ Before creating a distinct deployed-object/reverse-use model, generate the
 read-only source/profile and curated-rule *candidate* inventory:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_inventory --army-db data/generated/infinity.db --curated-source data/curated/rules/n5-core-v5.3.json --json-output local/audits/deployed-object-inventory.json
+.venv\Scripts\python.exe -m tools.audit_deployed_object_inventory --army-db data/generated/army.db --curated-source data/curated/rules/n5-core-v5.3.json --json-output local/audits/deployed-object-inventory.json
 ```
 
 The report matches the 14 pinned supplementary Weapon Chart profiles using
@@ -7297,14 +7306,9 @@ and p. 187 lists its attack profile, but it is not one of the 14 separate
 four-attribute auxiliary chart entries. Do not discard it or treat that
 exclusion as a missing source value.
 
-Independently cross-check the **N5.3 p. 74 Deployable Profiles quick-reference
-table**, which is outside the pp. 176–188 Weapon Chart extractor:
-
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_quick_profiles
-```
-
-The read-only PDF audit extracts **13 printed rows**, including two FastPanda
+A completed independent cross-check of the **N5.3 p. 74 Deployable
+Profiles quick-reference table** (outside the pp. 176–188 Weapon Chart
+extractor) confirmed **13 printed rows**, including two FastPanda
 spellings (`FAST PANDA` and `FASTPANDA`) and two Madtraps rows. Their
 source selectors resolve to **10 distinct reviewed object identities**.
 The `MINES` row is a shared family, **not** an eleventh generic Mine
@@ -7316,9 +7320,10 @@ edge. It visibly retains **Armed Turret's S1 quick-reference versus S2
 detailed-profile conflict**, and also exposes Dazer's existing S0/S1
 source dispute even though p. 74 agrees with S0. An unmatched row or
 unreviewed value fails closed. PyMuPDF and the pinned local English PDF
-are required; the synthetic parser tests do not require them.
-`tests/test_deployed_object_quick_profiles.py` additionally verifies the
-real table when both local PDF and Army database are present.
+were required for the completed PDF comparison. The one-use tool and
+parser tests are retired; `tests/test_deployed_object_reference.py` retains
+current reviewed selector, identity and explicit source-dispute assertions.
+The historical PDF extraction remains reproducible from Git history.
 
 `config/validation/deployed-object-delivery-reviews.json` pins **28
 audit-only delivery paths** across the 17 reviewed object identities. They

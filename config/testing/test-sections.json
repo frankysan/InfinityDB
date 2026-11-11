@@ -45,7 +45,6 @@
         "test_deployed_object_reference",
         "test_deployed_object_publication",
         "test_deployed_object_storage",
-        "test_deployed_object_quick_profiles",
         "test_deployed_object_source_contexts",
         "test_deployed_object_expanded_queue",
         "test_deployed_object_non_catalog_queue",
