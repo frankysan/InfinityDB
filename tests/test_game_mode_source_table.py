@@ -116,7 +116,10 @@ def test_independent_retreat_and_table_sizes_keep_source_boundaries() -> None:
     ):
         record = records[record_id]
         assert record["kind"] == kind
-        assert {"sourceId": "n5-core-v5.3-pdf", "page": page} in record["citations"]
+        assert any(
+            citation["sourceId"] == "n5-core-v5.3-pdf" and citation.get("page") == page
+            for citation in record["citations"]
+        )
     assert "rule:retreat-threshold" not in records
     assert "rule:recommended-table-size" not in records
 
