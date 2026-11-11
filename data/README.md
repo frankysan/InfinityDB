@@ -403,10 +403,18 @@ The current producer contracts are:
   It records only sorted approved URLs, selected archive paths and
   the input Army file's name/SHA-256. The independent
   [InfinityDB-symbol-tools](https://github.com/frankysan/InfinityDB-symbol-tools)
-  validator can check the plan and input bytes offline. The request
-  plan is **not** snapshot provenance, does not confer source
-  authority by itself, and is not used in normal builds. Raw symbol
-  acquisition has **not** moved yet.
+  validator can check the plan and input bytes offline. An explicit
+  `infinity-symbol-source --acquire` in the standalone repository now
+  produces a deterministic raw `SYMBOLS ...zip`, its Army-bound v3
+  snapshot provenance and a separate `.raw-report.json` of acquired
+  and HTTP-404-unavailable source URLs. The request plan is **not**
+  snapshot provenance and does not confer source authority by itself.
+  Use `tools.verify_raw_symbol_handoff` in InfinityDB to verify the
+  complete external ZIP/manifest/report against the pinned Army ZIP
+  and source plan before research use. This does **not** yet replace
+  `army-symbol-build.json` or the in-tree symbol acquisition,
+  override, processing or publication pipeline. Normal builds do not
+  invoke external tools or access the network.
 
 The *format* and verification contract stay owned by InfinityDB's
 snapshot-provenance module. An extracted producer must emit compatible

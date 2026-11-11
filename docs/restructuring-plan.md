@@ -3154,6 +3154,49 @@ publication pipeline therefore remain untouched. No normal build,
 serve or Docker path reads this optional request plan or imports
 the external repository.
 
+#### P5.4 — Raw symbol producer and consumer handoff (2026-11-11)
+
+`InfinityDB-symbol-tools` now has an **explicit** `--acquire`
+mode in addition to its read-only source-request validation.
+It consumes the pinned request plan and matching Army ZIP, fetches
+only reviewed source URLs, checks that each response is an SVG and
+preserves its exact bytes in the deterministic `SYMBOLS ...zip`
+format. It uses the exact archive writer and v3 snapshot provenance
+code from the current InfinityDB implementation, with the source
+Army ZIP bound by `inputArtifact` SHA-256. HTTP 404 is recorded as
+unavailable; other HTTP errors, unexpected redirects, invalid SVGs,
+all-unavailable inputs and mid-run Army mutation fail without
+publishing a new artifact. A separate `.raw-report.json`
+records individual URL/path/SHA-256 pairs and 404 outcomes.
+
+The independent
+[raw symbol producer](https://github.com/frankysan/InfinityDB-symbol-tools)
+has source-pinned offline tests on Windows, Ubuntu and macOS;
+no actual external asset acquisition was performed during this
+migration. The normal CLI remains network-free unless
+`--acquire` is supplied.
+
+InfinityDB keeps the authoritative
+`tools.export_symbol_source_plan` producer and now has a separate,
+read-only `tools.verify_raw_symbol_handoff` consumer. It checks
+the Army bytes, exported request plan, exact raw ZIP SHA-256,
+snapshot provenance, every requested and unavailable URL, all SVG
+member identities, report hashes and source/manifest binding.
+The handoff tests reject altered Army/ZIP inputs, incomplete
+reports, unexpected HTTP status, wrong per-member hashes,
+invalid SVGs and mismatched Army provenance. No external Python
+import is necessary to consume this source evidence.
+
+**Cutover is not yet complete.** The standalone raw report is not
+`army-symbol-build.json`; the maintained symbol pipeline still
+owns cache reuse of upstream identities, override propagation,
+source diagnostics, derived SVG transformation and public asset
+publication. Do not replace the existing `download_army_symbols`
+path or use `build_symbols --resume` on an external raw ZIP
+without a matching, reviewed build manifest. The next slice must
+establish that bridge and its end-to-end parity checks before any
+removal of the in-tree symbol acquisition code.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
