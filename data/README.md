@@ -393,10 +393,14 @@ The current producer contracts are:
   The archived pages remain research inputs, never an implicit
   runtime/source-authority update.
 - **Symbols:** `SYMBOLS ...zip` plus type `symbols` provenance
-  bound to its input Army artifact by `inputArtifact.sha256`. The
-  raw SVG/source acquisition may eventually move; canonical symbol
-  naming, conversion, publication, app mappings and
-  `symbol-publication.json` remain InfinityDB responsibilities.
+  bound to its input Army artifact by `inputArtifact.sha256`.
+  `InfinityDB-symbol-tools` owns raw acquisition and is becoming
+  the owner of reviewed SVG overrides, font alias/substitution,
+  text-to-path conversion, duplicate detection and compression.
+  InfinityDB remains responsible for authoritative source selection,
+  semantic/browser identity mappings, final static asset placement
+  and `symbol-publication.json`. Browser UI font packaging
+  (`prepare_web_fonts.py`) is separate from SVG font substitution.
   As preparation, `tools.export_symbol_source_plan` can explicitly
   generate a **read-only** v1 request plan from a verified Army ZIP,
   the pinned static declarations and legacy identity configuration.

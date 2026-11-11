@@ -3235,6 +3235,62 @@ publication/asset acceptance pass have demonstrated parity.
 A normal database build, serve or Docker deployment still does not
 download symbols or require an external repository.
 
+#### P5.4 — Symbol processing ownership revised (2026-11-11)
+
+The symbol boundary is **broader than acquisition**. The standalone
+`InfinityDB-symbol-tools` repository owns the entire *graphical asset
+preparation* lifecycle: pinned raw acquisition and caching, reviewed
+overrides (including upstream-identity-based propagation), SVG font
+resolution and substitution/text-to-path conversion, duplicate
+detection, render-validated compression, and resulting
+source/processed manifests. InfinityDB owns the **meaning** of the
+symbols: source URL/reference discovery and approval, Army identity
+linkage, browser-facing canonical paths and mappings, transactional
+publication into app static assets, and release/permission checks.
+The unrelated UI font preparation tool `prepare_web_fonts.py` remains
+with the web application; it is not SVG font substitution.
+
+The existing `svg_processor.py` (font processing, text conversion,
+duplicate detection) and `svg_compress.py` (visual compression) have
+been seeded into the standalone repository together with the reviewed
+`font-aliases.json` policy and representative source-facing tests.
+They are packaged as optional processing commands, with a separate
+Python dependency extra and explicitly required external renderer/
+conversion binaries. No font files, downloaded SVGs or override
+artwork are committed to the producer. The in-tree copies remain
+active until a versioned *processed-symbol handoff* and independent
+parity tests support switching consumers; merely copying code does
+not establish an operational cutover.
+
+**Measured offline production baseline.** On the pinned
+`JSON 20260929-114335.zip` (59 documents) and
+`SYMBOLS 20261004-184813.zip`, the authoritative source plan
+contains 1,101 URLs. The existing v2 build manifest and v3
+provenance cover exactly 1,101 effective ZIP members and no
+unavailable URLs. Of these, 1,072 effective cache SVGs match their
+recorded upstream SHA-256; 29 are reviewed overrides whose effective
+bytes differ from their original upstream SHA-256. The latter
+**cannot** be treated as upstream data in a reconstructed raw ZIP.
+The reusable read-only
+`tools.audit_symbol_source_baseline` records the source-discovery
+and archive-hash audit under ignored `local/`; no network request
+or asset publication is involved.
+
+**Next cutover contract:** Preserve immutable raw upstream ZIP and
+Army binding, verified override input hashes and recorded decisions,
+effective-file hashes, exact converter/compressor versions and
+rendering-tolerance policy in a versioned processed-result report.
+Restore original upstream identities for overridden files from real
+raw sources, not effective legacy outputs. Retain the current
+preflight/font/duplicate/text/compression stage statuses and
+reproducible reports during migration. InfinityDB should only verify
+the processed output and publish its semantic paths, not run a
+second conversion/compression pipeline. Validate a representative
+production-source subset including all 29 overrides, missing sources,
+text-bearing symbols and compressed variants, then run the full
+source/asset publication acceptance before retiring in-tree
+processors and override application.
+
 ### P6 — Consolidate, measure and establish the new baseline
 
 **Outcome:** The new architecture is the documented default and no old workflow is mandatory.  
