@@ -55,13 +55,13 @@ documentation when Mermaid can clearly express the content. Use this for
 architecture flows, dependency graphs and similar relationships instead of
 ASCII art, keeping labels readable in both source and rendered form.
 
-## Active strategic plans
+## Completed strategic migrations
 
-- [restructuring-plan.md](restructuring-plan.md) — active phased simplification of
-  developer workflow, SQLite runtime data, source-family databases, player-facing
-  presentation, tooling and repository structure. Implemented P0 policy is owned
-  by the live testing/CI/release documents; future phases remain planned.
-  The plan maps dependencies without duplicating `TODO.md`.
+- [restructuring-plan.md](restructuring-plan.md) — historical P0–P6
+  simplification and acceptance record, completed in development on
+  2026-11-12. It does not define current workflows or open work.
+  Consult the canonical owners above and [active backlog](TODO.md)
+  rather than following superseded historical commands.
 
 ## Maintained evidence and research
 

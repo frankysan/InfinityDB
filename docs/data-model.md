@@ -133,7 +133,7 @@ Weapon also retains its canonical slug/name and complete Army profile fingerprin
 The embedded reader validates source/page integrity, a deterministic content
 digest, exact profile fingerprints and complete modes against the selected Army.
 It does not read curation or the original JSON at runtime. The tracked
-complete v17 pair requires these embedded citations; the old loose
+complete v17 Rules publication requires these embedded citations; the old loose
 `weapon-profile-sources.json` is not a serving dependency. A mismatched
 embedded source is rejected. Explicit low-level historical fixtures can still
 report `profile_citations_available: false` for absent citations. Each Weapon profile has a
@@ -144,8 +144,8 @@ publication is missing. This is a locator for the corresponding chart
 entry, not a claim that Army and print values agree or an Ammunition rule.
 For normal complete-set serving, the API snapshot revision hashes a
 canonical, sorted inventory of active database filenames and their exact
-SHA-256 digests, with a domain separator. It therefore changes when either
-`army.db` or `rules_n5.db` changes. Explicit low-level historical fixtures
+SHA-256 digests, with a domain separator. It therefore changes whenever
+`army.db`, `rules_n5.db` or `its_18.db` changes. Explicit low-level historical fixtures
 may supply an independent publication hash; those do not establish another
 operator-facing runtime-set contract.
 
@@ -4125,11 +4125,21 @@ finalization. A SQLite connection context manager does not itself begin a transa
 DDL; the rules schema script starts its transaction internally because `executescript` commits any
 previously pending transaction.
 
+The complete Rules builder still constructs its initial v8 relational schema
+and adds the reviewed embedded projections through v9–v17 as build-time
+stages. These stages are used to produce the current v17 publication, not
+an invitation to serve a historical database in place of a complete set.
+Normal checkout/Docker serving requires the validated current Rules v17
+publication together with matched Army v31 and ITS 18 v2; separately
+selected non-complete databases are only for explicit inspection or
+targeted fixtures. The [runtime target contract](architecture.md#runtime-targets)
+owns operational selection.
+
 ### Shared runtime build-input provenance
 
 **Project domains:** Data processing, Project infrastructure
 
-The opt-in complete runtime builder records `database_set_build` in both Army
+The complete runtime builder records `database_set_build` in both Army
 metadata (including its build-only raw sibling) and Rules metadata. This is
 additive build provenance in the existing metadata tables, not new gameplay
 facts or a mandatory schema migration for older tracked sets.
@@ -4137,7 +4147,8 @@ facts or a mandatory schema migration for older tracked sets.
 The version-1 record contains `formatVersion`, `buildSetId`, `family` and
 `manifest`. Rules additionally requires `requiredArmyExportPairSha256` matching
 the selected Army's existing `export_pair_sha256`. Families are currently
-`army` and `rules-n5`; ITS 18 remains embedded in Rules during P2.
+`army` and `rules-n5`; ITS 18 is now published independently in
+`its_18.db` and checked against the selected Army/Rules set.
 
 `buildSetId` is SHA-256 of the domain prefix `InfinityDB database-set build v1`
 followed by a null byte and the canonical UTF-8 JSON input manifest (sorted
@@ -4167,11 +4178,12 @@ model binds the completed Army bytes in one direction. Neither database embeds
 its own final byte digest. The shared set validator rejects altered/unsupported
 records, different IDs, missing family provenance, wrong Army generations and
 archive/API-metadata identities that disagree with the selected Army metadata.
-Older sets with neither record remain identifiable as `not-recorded` during
-this transition. Runtime health does not compare the manifest with current
-working-tree files; the builder rechecks the declared inputs before publication.
-Final release/source freshness enforcement and mandatory metadata at cutover
-remain part of [P2 integration](restructuring-plan.md).
+Older standalone fixtures without a record may still be inspected as
+`not-recorded` in explicit non-complete validation; complete serving requires
+the current source-bound set. Runtime health does not compare the manifest with
+current working-tree files; the builder rechecks declared inputs before
+publication. Release/source-freshness validation runs in the
+[release process](releasing.md) and [deployment verifier](ci.md#deployment-smoke).
 
 ## Snapshot provenance
 

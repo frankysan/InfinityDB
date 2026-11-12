@@ -22,23 +22,6 @@ when all contained work shares the same owner.
 
 ## Active development
 
-### Major simplification and restructuring
-
-**Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
-
-- [ ] Complete remaining P5 hygiene and P6 of the
-  [phased restructuring plan](restructuring-plan.md).
-  P0–P4 are complete. The P5 external symbol publication was accepted
-  (all 118 changed artworks), promoted with the Seed Soldier URL preserved,
-  and its in-tree processing pipeline retired. Refreshed tracked databases
-  pass source freshness and publication checks. P6.1 has removed the legacy
-  Restrictions Chart API fallback and decoupled serving-only web code from
-  database build fingerprints. Complete P6.2 documentation alignment,
-  P6.3 integrated acceptance, P6.4 measurement and P6.5 plan retirement;
-  P5 documentation/tooling hygiene remains in scope as needed.
-  Historical evidence: [P5 cutover](testing.md#p57-accepted-symbol-publication-cutover)
-  and [three-database ownership](its-season-database.md).
-
 ### External source clarifications
 
 **Project domain:** Data processing

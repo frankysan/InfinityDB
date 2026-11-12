@@ -574,7 +574,7 @@ Release tags are self-contained for runtime deployment. A normal server update:
 1. resolves the target release tag;
 2. hands off to the installer shipped by that target release;
 3. checks out the tag;
-4. uses the tracked `army.db`, `rules_n5.db`, processed SVG publication, and publication manifest;
+4. uses the tracked `army.db`, `rules_n5.db`, `its_18.db`, processed SVG publication, and publication manifest;
 5. builds/verifies an immutable application image; and
 6. activates it while retaining configured rollback images.
 

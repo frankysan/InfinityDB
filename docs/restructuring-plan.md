@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0–P4 are complete, including owner acceptance of P4.5 on 2026-11-11. The normal runtime builds and serves Army v31 (`army.db`), Rules v17 (`rules_n5.db`), and the reviewed ITS 18 publication (`its_18.db`) as one selected set for checkout and Docker. The accepted external symbol publication supersedes the retired in-tree processor. The P5.8 tracked source-freshness blocker was resolved by refreshed databases and a passing full deployment-asset verifier. P6.1 has removed the legacy Restrictions Chart API fallback and excluded serving-only web Python from database build fingerprints. Remaining P5 hygiene, P6 documentation consolidation and integrated/release acceptance are open. Dated progress entries below describe historical states, not supported commands.
+**Status:** Completed restructuring development milestone on `dev/v1.1.0` (2026-11-12), accepted against the exact-SHA hosted Source, Installed wheel and Deployment smoke checks at `7108744f`. This is now a **historical planning and migration record**, not an active task list or an implementation contract. The current architecture, data schema, build/deployment instructions, testing/CI and release acceptance live in their [canonical owners](README.md#canonical-current-state-documents). The resulting runtime uses the complete Army v31, Rules v17 and ITS 18 three-database set. P5 symbol publication and processor retirement are complete. Development-phase acceptance does **not** authorize merge, release, tag or deployment.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -32,7 +32,7 @@ This is a **target architecture and execution sequence**, not a statement of cur
 - Preserve immutable upstream snapshots and genuinely unique research evidence where needed. Git history is the default record for superseded *code and process*, not a substitute for source files unavailable from Git.
 - Do not automatically refactor unrelated gameplay features while cleaning architecture. Keep changes in coherent slices so regressions can be attributed.
 
-## Target boundary (proposed, not yet implemented)
+## Target boundary (original proposal, subsequently implemented)
 
 ```mermaid
 flowchart TD
@@ -3626,16 +3626,15 @@ separate P5 change; no processors were retired during publication cutover.
 
 **Exit:** A newcomer or future agent can identify the main data path, rebuild databases, run the web app locally, and package a Docker image from a few concise, authoritative entrypoints.
 
-#### P6.4 — Interim structural counts (2026-11-12)
+#### P6.4 — Structural measurement closeout (2026-11-12)
 
 The P1.6 baseline at `e6d009f2` recorded **146** tracked Python
 modules under `tools/` (including `__init__.py`), **7** shell scripts,
-**5** GitHub workflows and **2** installed CLI entrypoints. The
-current `dev/v1.1.0` checkout has **123 tracked `tools/*.py` modules**,
-still **7** shell scripts, **5** workflows and **2** CLIs. The local
-directory additionally contains three untracked P5 one-off analysis
-scripts, excluded from the tracked comparison and still awaiting
-workspace deletion.
+**5** GitHub workflows and **2** installed CLI entrypoints. The final
+`dev/v1.1.0` checkout has **123 tracked `tools/*.py` modules**
+(**23 fewer**), still **7** shell scripts, **5** workflows and **2** CLIs.
+The three obsolete, untracked P5 analysis scripts were cleared from
+the local checkout and were never published.
 
 The normal serving contract changed from **4 required files**
 (two SQLite databases and two paired JSON sidecars at P1) to
@@ -3644,11 +3643,18 @@ The static Restrictions chart JSON remains a historical publicly served
 URL, not an input to the current Restrictions API. These are
 file/entrypoint counts, not proof of corresponding development-time or
 runtime performance gains. Recorded current-checkout timings include one
-complete pinned Army/Rules/ITS rebuild (**46.48 seconds**) and the
+complete pinned Army/Rules/ITS rebuild (**46.48 seconds**), the
 isolated Docker-image build/start/41-route/cleanup acceptance
-(**58.77 seconds**, Docker engine 29.9.2). These are individual observed
-durations, not benchmarks against the old architecture. Full P6.3
-source/hosted acceptance and final P6.4 developer-action measurement remain open.
+(**58.77 seconds**, Docker engine 29.9.2), and the full Windows test
+run (**1184.07 seconds**, initially four optional-local-data/test-scope
+failures fixed and focused-regression tested before hosted CI).
+There is no comparable controlled P1 timing baseline, so **no speedup
+is claimed**. Routine development no longer requires separate VD/VR
+design/execution phases or numeric queue thresholds (formerly VD 3,
+VR 5); the normal focused-change lifecycle is defined in
+[testing](testing.md#phased-development-and-validation). A reproducible
+before/after count of mandatory manual actions or duplicate-doc lines
+was not collected, so neither is assigned a speculative reduction.
 
 ## Dependency and delivery map
 
@@ -3674,7 +3680,7 @@ flowchart TD
     p5 --> p6
 ```
 
-**Execution status:** P0–P4 have completed implementation and applicable validation; P4.5 was explicitly accepted by the release owner on 2026-11-11. The three-file Army/Rules/ITS 18 runtime contract is the default for both checkout and Docker. P5 retirement/extraction and P6 integrated closeout remain. Earlier P2 candidate/export notes are historical and do not describe current serving.
+**Execution status:** P0–P6 completed as a development restructuring milestone on 2026-11-12; P4.5 artwork and P5 symbol cutover received explicit owner acceptance. The complete Army/Rules/ITS 18 contract is the default for checkout and Docker. P6.3 passed current-revision hosted checks. Release acceptance and deployment remain separate, explicitly authorized procedures. Earlier candidate/export notes are historical and do not describe current serving.
 
 ## Questions to settle during discovery (not reasons to stop planning)
 
@@ -3699,4 +3705,4 @@ At the final integrated milestone, verify:
 - Routine agent tasks require fewer mandatory process operations; focused tests run when relevant and full checks run at meaningful integration/release points.
 - Reduction in tool entrypoints and duplicated documentation is demonstrated from P1 baselines, with regressions and deliberate product changes called out separately.
 
-**Current status:** P0–P4 are complete. P5 retirement/consolidation and P6 integrated acceptance remain active; this historical plan is not the current runtime contract. The three-file runtime database boundary is already the default, while the broader simplification goals are not yet complete.
+**Closeout, 2026-11-12:** P0–P6 implementation and integrated development acceptance are complete. Source CI (including four platform/Python jobs and deterministic output comparison), Installed wheel smoke and Deployment smoke passed at `7108744f`; see the [pinned testing record](testing.md#p63--hosted-source-acceptance-and-restructuring-closeout-2026-11-12). The normal runtime requires the current complete database set; the legacy Restrictions Chart *API fallback* was removed, while the historical static URL remains deliberately available. Rules v8-to-v17 intermediate stages still have a **current build-time purpose** and are not merely old runtime fallbacks; legacy Army lists are supported domain data. The non-complete database inspection path remains distinct from the strict serving contract. No speculative rewrite of these current consumers is required for this closeout. Canonical documentation supersedes this plan; Git history retains prior decisions. No merge, tag, release or production deployment was performed.

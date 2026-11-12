@@ -2071,7 +2071,37 @@ I/O **4 passed**. Targeted Ruff and Git whitespace checks passed.
 Targeted Pyright on the pytest modules could not resolve `pytest` in
 the selected type-check environment; this is not reported as a passing
 type check. The full suite was **not rerun** on the correction.
-Hosted CI and final P6.3 acceptance remain pending.
+At the time of that focused correction, hosted CI and final P6.3 acceptance
+were still pending; the subsequent accepted result is recorded below.
+
+### P6.3 — Hosted Source acceptance and restructuring closeout (2026-11-12)
+
+For PR [#28](https://github.com/frankysan/InfinityDB/pull/28), the
+exact head `7108744f06d299a6346ca5fc82ec788eb0c1f356` passed all three
+required hosted workflows:
+
+- [Source checks run 43190382965](https://github.com/frankysan/InfinityDB/actions/runs/43190382965):
+  fast validation, complete Ubuntu/Python 3.11 source checks,
+  Ubuntu/Python 3.14, Windows/Python 3.11 and macOS/Python 3.11
+  cross-platform checks, plus deterministic output comparison — all PASS.
+- [Installed wheel run 43190382817](https://github.com/frankysan/InfinityDB/actions/runs/43190382817):
+  installed-package checks outside the checkout — PASS.
+- [Deployment smoke run 43190382959](https://github.com/frankysan/InfinityDB/actions/runs/43190382959):
+  verified tracked database/artwork publication, built the production
+  image and passed container startup — PASS.
+
+This supersedes the prior local Windows test failure as the integrated
+development acceptance decision, without changing that historical
+failed test receipt. The focused fixes and their separate green
+regressions are recorded immediately above. P6.4's file counts
+and observed individual timings are in the
+[historical restructuring record](restructuring-plan.md#p64--structural-measurement-closeout-2026-11-12).
+The developer-facing architectural and operational contracts are
+maintained in [architecture](architecture.md), [data model](data-model.md),
+[data lifecycle](../data/README.md), [CI](ci.md) and [release process](releasing.md).
+This is **development-phase** acceptance only: the PR remains draft,
+and merging, tagging, final release evidence, deployment and
+post-deployment checks require their own explicit approval.
 
 ## Phased development and validation
 
