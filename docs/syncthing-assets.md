@@ -18,10 +18,13 @@ Windows is the authoritative **Send Only** Syncthing device; `linux-dev` is
 | `data/wiki/` | `~/syncthing/infinitydb/wiki/` |
 | `data/pdf/` | `~/syncthing/infinitydb/pdf/` |
 | `data/manifests/snapshots/` | `~/syncthing/infinitydb/snapshots/` |
-| `image_overrides/` | `~/syncthing/infinitydb/image_overrides/` (optional) |
+| `image_overrides/` | `~/syncthing/infinitydb/image-overrides/` (optional) |
 
 The Syncthing folder IDs must match between the devices; their physical
-paths need not. Do **not** synchronize the whole repository, the
+paths need not. The optional Linux receiver uses `image-overrides/` (hyphen),
+while the repository destination remains `image_overrides/` (underscore). The
+explicit activation tool maps between them; do not rename either to match
+its counterpart. Do **not** synchronize the whole repository, the
 `data/generated/` directory (contains tracked release databases),
 `data/curated/`, `local/`, `data/work/`, `reports/`, environment
 files, virtualenvs, or caches. The Linux source staging directory is outside

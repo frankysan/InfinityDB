@@ -22,7 +22,7 @@ MAPPINGS = {
     "data/wiki": "wiki",
     "data/pdf": "pdf",
     "data/manifests/snapshots": "snapshots",
-    "image_overrides": "image_overrides",
+    "image_overrides": "image-overrides",
 }
 UNPINNED_PREFIXES = ("data/pdf", "image_overrides")
 SHA256_RE = re.compile(r"[a-f0-9]{64}\Z")

@@ -779,6 +779,77 @@ This is a bounded document retirement only; **L0/L1 and the parent cleanup
 remain open**. It does not adopt or reject future catalog-impact tooling,
 approve ignored-source deletion or grant path-policy approval.
 
+### Optional override staging-path correction and L0 risk triage — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`307cd827de5aba12cbcbb8be6d2126bf3433549e`.
+The inspected five-folder Syncthing configuration names the optional Linux
+receiver `image-overrides/`; the existing activation mapping instead looked
+under `image_overrides/`. Captured staging inventory found **113 synchronized
+override files** under the configured receiver, none under the old lookup
+sibling. The Windows source and checkout destination are still
+`image_overrides/`, deliberately distinct from the Linux physical name.
+
+**Correction:** Map repository-relative `image_overrides/` explicitly to the
+configured Linux `image-overrides/` source in
+`tools.activate_synced_assets`. Updated the maintained Syncthing runbook and
+added hermetic dry-run/apply, source-identity and missing-mapping regression
+tests. Activation remains explicitly selected, hash-measuring and
+non-destructive by default; there is no fallback to the incorrectly spelled
+sibling. **No actual Linux activation was performed**, and no Syncthing
+settings, private file, live checkout data or published asset was changed.
+This closes the *code/default-name mismatch*, not host runtime acceptance.
+
+**Focused validation:** The activation test module passed **15 tests, with 3
+platform-dependent symlink skips**; Ruff passed for changed Python files,
+repository-wide Pyright reported **zero errors/warnings**, and docs/link/backlog
+checks passed (Markdownlint: 47 files, zero issues). The Linux receiver and
+actual checkout activation remain untested at this exact candidate revision.
+
+**L0 exception and preservation triage (reviewed proposals, not L1 approval):**
+
+- **Allowed-location candidates:** `.venv/`, language package caches,
+  `node_modules/`, `build/`, `dist/`, editor/OS metadata and necessary
+  machine-local environment files remain conventional tool-controlled
+  locations. These are not general permission for arbitrary private sources
+  outside `local/`; secret files require separate access controls.
+- **Active migration candidates:** ignored `data/raw/`, `data/wiki/`,
+  `data/pdf/`, `data/manifests/snapshots/`, `data/work/`,
+  `data/generated/` extras, `image_overrides/`, `reports/`,
+  `docs/audits/` and nonpublished font source inputs. Their live producers,
+  consumers, privacy and Syncthing configuration must be reconciled before
+  moving bytes. The **three selected tracked runtime DBs** are exceptions
+  to moving `data/generated/`, not ignored output.
+- **Syncthing-owned controls:** the two captured `.stfolder` markers are
+  service state; the three captured `desktop.ini` files are OS metadata.
+  They were excluded from the **44-file** verified source/provenance move
+  proposal. Leave controls in place until separately reviewed reconfiguration;
+  never copy them as source evidence or delete them with archives.
+- **Source preservation:** 24 Windows archive/manifest pairs and their 24
+  Linux staging counterparts matched exactly at capture. This confirms
+  captured identity, not recoverable backup. Windows Send Only and Linux
+  Receive Only are *replicas*, not independent immutable backups; Linux's
+  five receiving folders reported no configured versioning.
+- **Access-blocked reports:** 19 Windows `reports/` directories failed
+  read-only enumeration/ACL inspection. Their contents and lifecycle cannot
+  be classified; preserve the directories, do not change ACLs automatically,
+  and require authorized inspection before any root-report relocation or
+  cleanup. Do not infer their contents are disposable test scratch.
+- **Cutover gates:** verify independent backup **and trial restore** of each
+  source family; resolve those 19 ACL gaps with authorized access; confirm
+  Windows live Syncthing state (earlier local GUI query failed); exercise
+  Linux dry-run override activation at an agreed exact worker Git revision;
+  rehash candidate inputs before migration; pin source selection rather than
+  depend on changed mtimes; update producer defaults and all consumers in
+  L2; approve L1 layout/exception decisions separately. No step authorizes
+  bulk removal from legacy paths.
+
+The private per-file inventories, exact source/staging hashes, Syncthing
+configuration observations and ACL probes remain in
+`local/research/project-infrastructure/tooling-workspace-cleanup/20261112-l0-handoffs/`.
+**L0 and L1 remain open**; the category list is a bounded reviewed proposal,
+not a permission to migrate/delete ignored assets.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

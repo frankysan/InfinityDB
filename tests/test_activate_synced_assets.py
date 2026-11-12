@@ -152,6 +152,37 @@ def test_symlink_mode_targets_staging_and_refuses_differing_link(
     assert target.resolve() == different
 
 
+def test_unpinned_override_uses_configured_receiver_path(
+    staging: tuple[Path, Path],
+) -> None:
+    staged, checkout = staging
+    (staged / "image-overrides").mkdir()
+    source = staged / "image-overrides" / "sample.svg"
+    source.write_bytes(b"<svg>configured receiver</svg>")
+    # A stale sibling must never be selected as an implicit fallback.
+    (staged / "image_overrides").mkdir()
+    (staged / "image_overrides" / "sample.svg").write_bytes(b"wrong sibling")
+
+    args = ["activate", "--file", "image_overrides/sample.svg"]
+    assert _run(args, staged, checkout) == 0
+    assert list(checkout.iterdir()) == []
+    assert _run([*args, "--apply"], staged, checkout) == 0
+    assert (checkout / "image_overrides/sample.svg").read_bytes() == source.read_bytes()
+
+
+def test_override_refuses_unconfigured_staging_sibling(
+    staging: tuple[Path, Path],
+) -> None:
+    staged, checkout = staging
+    (staged / "image_overrides").mkdir()
+    (staged / "image_overrides" / "sample.svg").write_bytes(b"wrong sibling")
+    assert _run(
+        ["activate", "--file", "image_overrides/sample.svg", "--apply"],
+        staged, checkout,
+    ) == 1
+    assert list(checkout.iterdir()) == []
+
+
 def test_unpinned_pdf_requires_explicit_path(staging: tuple[Path, Path]) -> None:
     staged, checkout = staging
     (staged / "pdf" / "rules").mkdir(parents=True)
