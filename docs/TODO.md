@@ -293,9 +293,12 @@ when all contained work shares the same owner.
   discards its temporary raw sibling; its three published databases do not
   depend on retaining one. Do not remove the temporary builder input while
   variant-usage projection and versioned Army publication still require it.
-  - [ ] Inventory and migrate raw-dependent source audits, variant projection,
+  - [ ] Inventory and migrate the remaining raw-dependent source audits,
     publication checks, deterministic-build evidence, `paired_audit_connection`,
-    and the source-row inspection CLI. Prefer pinned normalized source input or
+    and the source-row inspection CLI. The **variant-usage projection** now
+    uses in-memory normalized source tables with full export-generation
+    verification; retain the legacy raw-based API as a parity oracle until
+    separate consumers are migrated. Prefer pinned normalized source input or
     temporary verified materialization; preserve source-only row fidelity,
     absence-versus-null distinctions, exact occurrence/extra relationships,
     and fail-closed source/application provenance.

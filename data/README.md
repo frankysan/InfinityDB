@@ -63,7 +63,13 @@ the serving-only `INFINITY_DB_DB_DIR` setting. The old `--output-dir` form is
 retired from the integrated build. Lossless verification is mandatory.
 
 Disposable files under ignored `data/work/build/` hold normalization, the
-matched Army/raw pair, Rules and ITS construction. The builder validates all
+matched Army/raw pair, Rules and ITS construction. The variant-usage publication
+now takes its source-only relationships from `normalized.json`, reconstructs
+the necessary source tables in memory, and independently verifies the complete
+normalized model against the selected Army database's recorded export-generation
+fingerprint. Other Army overlay publishers still use the temporary raw sibling;
+this change does not retire the standalone export/inspection pair interface.
+The builder validates all
 three runtime databases, cross-domain references and source/build provenance,
 checks that its inputs remain unchanged, then replaces the selected set and
 discards intermediates.

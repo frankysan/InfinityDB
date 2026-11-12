@@ -39,7 +39,7 @@ from .skill_classification_storage import publish_skill_classifications
 from .symbol_path_storage import publish_symbol_paths
 from .trait_wiki_references import load_trait_wiki_references
 from .unit_filter_storage import publish_unit_filter_semantics
-from .variant_usage import build_variant_usage_projection
+from .variant_usage import build_variant_usage_from_normalized
 from .variant_usage_reference import publication_from_candidate
 from .weapon_ammunition_references import load_ammunition_reference_map
 from .weapon_combined_saving_rolls import load_combined_saving_roll_map
@@ -101,8 +101,8 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
     # The source projection uses the temporary v10 Rules model. The final export
     # embeds its resolved facts without storing its own completed byte hash.
     export_rules_database(documents, rules, **export_options)
-    variants = publication_from_candidate(build_variant_usage_projection(
-        army, stage / "army.raw.db", rules,
+    variants = publication_from_candidate(build_variant_usage_from_normalized(
+        army, stage / "normalized.json", rules,
     ))
     export_rules_database(documents, rules, variant_usage=variants, **export_options)
     weapons = build_publication(

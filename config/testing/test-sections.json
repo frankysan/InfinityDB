@@ -125,6 +125,7 @@
         "test_structured_skill_charts_publication",
         "test_terrain_scenery_source_gaps",
         "test_variant_usage",
+        "test_variant_usage_source",
         "test_variant_usage_storage",
         "test_verify_its_pilot_parity",
         "test_visibility_zone_whole_record",

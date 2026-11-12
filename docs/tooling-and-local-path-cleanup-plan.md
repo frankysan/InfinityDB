@@ -1227,6 +1227,66 @@ backup/trial-restore and explicit deletion approval still apply.
 **No code or private-file modification** is authorized by this L0 decision
 alone. The open implementation is tracked in [the backlog](TODO.md).
 
+### First raw-source build cutover — 2026-11-12
+
+**Implementation:** The complete build's Rule/Variant usage projection now
+reads `stage/normalized.json` rather than `stage/army.raw.db` as its source
+for Skills, Equipment, source occurrences, Include chains and Peripherals.
+`src/infinity_db/variant_usage_source.py` reconstructs normalized relations
+only in a transient, read-only in-memory SQLite connection (no duplicate
+lossless row-JSON storage). It verifies the **entire** normalized document
+against the original `export_pair_sha256` carried in `army.db`, reconstructing
+the base Army v26 publication fingerprint and compatibility revision from
+the versioned v26–v31 application schema. Missing, corrupted or different
+generations fail closed before source rows are projected.
+
+The common variant projection still supports the explicitly paired raw
+archive for existing external audit and parity consumers, but the complete
+builder now selects the verified normalized source. Exact source ownership,
+Extra signatures, context-only Include/Peripheral provenance, stable ordering
+and publication validation are not relaxed. The published variant source
+snapshot intentionally omits the transient raw-database byte digest, which
+the portable publication contract already excluded.
+
+**Focused verification:** A new regression test compares all normalized
+relational tables against the existing raw archive from the same fixture,
+verifies that the source adapter works without a raw file, rejects modified
+source rows and export metadata, and compares portable variant candidate
+publications from both input routes. Existing variant-usage tests continue
+exercising source-owner, Extra, Include, Peripheral, truncation and tamper
+failure paths.
+
+**Pinned full-build acceptance:** The maintained
+`tools.verify_complete_database_build` command rebuilt **twice** from
+`data/raw/JSON 20260929-114335.zip`, whose declared and checked SHA-256 is
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`.
+Both complete runtime sets passed source normalization/lossless validation,
+Army v31 / Rules v17 / ITS v2 health, **151** variant groups, **62**
+reviewed Weapons, **69** citations, **41** semantic API baseline routes,
+all embedded catalog/provenance assertions, and byte-identical repeatable
+SQLite output. Two-build SHA-256 identities were
+`army.db=b6e556bc3cd55a062dbebe29c912966783ccf9ec3cdb9abb88f638c305ff5716`,
+`rules_n5.db=7260dd1a193f93c8cd8c99d617070c9380d474ba76be1be0549996cd06b63fd5`,
+`its_18.db=e88eb6e9934443f762d8f143efcfd8cdf300636424b3a55c78df569ea43d2b94`.
+The new build-input code enters recorded builder provenance, so these are
+**post-change deterministic hashes**, not claims of equality with the old
+release image. The separate builder test suite passed **18/18**,
+the original variant usage suite **98 passed, 2 skipped** (pinned raw pair
+not available), the new normalized-source tests **5/5**, and the runtime
+variant storage suite **13/13**. The optional browser-publication suite
+skipped all **9** tests for unavailable pinned raw assets; no browser acceptance
+is claimed from those skips. Repository Ruff and Pyright passed; no tracked
+release binaries were replaced.
+
+**Remaining boundary:** This slice does not stop `export_database` from
+generating its temporary raw sibling; Army v27–v31 overlay publishers,
+other source audits and standalone `infinity-db export` still depend on
+that format. The `data/generated/army.raw.db` ignored file was neither
+opened for this cutover nor modified. Moving or deleting it still requires
+the reviewed local migration manifest, backup evidence and separate approval.
+The next implementation slice must replace the overlay publishers' raw-pair
+contract without weakening their checksums or atomic publication behavior.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
