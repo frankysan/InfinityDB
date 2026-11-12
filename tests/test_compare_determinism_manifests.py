@@ -103,6 +103,32 @@ def test_manifest_cli_selects_explicit_legacy_export(
     )
 
 
+def test_manifest_fixture_copy_normalizes_only_json_line_endings(
+    tmp_path: Path,
+) -> None:
+    first = tmp_path / "windows-fixture"
+    second = tmp_path / "linux-fixture"
+    for root, newline in ((first, b"\r\n"), (second, b"\n")):
+        root.mkdir()
+        (root / "101-test-army.json").write_bytes(
+            newline.join((b'{"version":"test",', b'"units":[]}')) + newline,
+        )
+        (root / "binary.dat").write_bytes(b"\x00\r\nkeep")
+    windows_copy = manifest_builder._canonical_fixture_copy(
+        first, tmp_path / "canonical-windows",
+    )
+    linux_copy = manifest_builder._canonical_fixture_copy(
+        second, tmp_path / "canonical-linux",
+    )
+    assert (windows_copy / "101-test-army.json").read_bytes() == (
+        linux_copy / "101-test-army.json"
+    ).read_bytes()
+    assert (windows_copy / "binary.dat").read_bytes() == b"\x00\r\nkeep"
+    assert (first / "101-test-army.json").read_bytes() != (
+        second / "101-test-army.json"
+    ).read_bytes()
+
+
 def test_compare_requires_multiple_manifests(tmp_path: Path) -> None:
     only = _write(tmp_path / "only.json", {"build/army.db": "a" * 64})
     with pytest.raises(ValueError, match="At least two"):

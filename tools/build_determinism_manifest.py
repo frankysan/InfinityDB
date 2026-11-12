@@ -11,9 +11,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import sqlite3
 import subprocess
 import sys
 import tempfile
+import zlib
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -49,10 +51,31 @@ def _run(project_root: Path, *args: str) -> None:
     )
 
 
+def _canonical_fixture_copy(source: Path, destination: Path) -> Path:
+    """Stabilize tracked JSON fixture newlines without touching the worktree.
+
+    Git's LF attribute is the intended repository format. Existing Windows
+    checkouts can nevertheless retain pre-attribute CRLF bytes; this disposable
+    fixture must not treat such checkout differences as new Army source revisions.
+    Real downloaded Army archives are not rewritten by this helper.
+    """
+    for path in sorted(source.rglob("*")):
+        if not path.is_file():
+            continue
+        target = destination / path.relative_to(source)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        raw = path.read_bytes()
+        if path.suffix.lower() == ".json":
+            raw = raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        target.write_bytes(raw)
+    return destination
+
+
 def build_manifest(project_root: Path, *, legacy_paired: bool = False) -> dict[str, Any]:
-    fixture = project_root / "tests" / "fixtures" / "deployment-smoke"
+    source_fixture = project_root / "tests" / "fixtures" / "deployment-smoke"
     with tempfile.TemporaryDirectory(prefix="infinitydb-determinism-") as temporary:
         root = Path(temporary)
+        fixture = _canonical_fixture_copy(source_fixture, root / "fixture")
         generated = root / "generated"
         generated.mkdir()
 
@@ -145,6 +168,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     project_root = Path(__file__).resolve().parents[1]
+    print(
+        f"Determinism environment: Python {sys.version_info.major}."
+        f"{sys.version_info.minor}.{sys.version_info.micro}, "
+        f"SQLite {sqlite3.sqlite_version}, zlib {zlib.ZLIB_VERSION} "
+        f"(runtime {zlib.ZLIB_RUNTIME_VERSION})"
+    )
     manifest = build_manifest(project_root, legacy_paired=args.legacy_paired)
     write_json_lf(args.output, manifest, sort_keys=True)
     print(f"Determinism manifest: {args.output}")
