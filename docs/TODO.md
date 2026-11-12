@@ -53,6 +53,27 @@ when all contained work shares the same owner.
   retains the separate, source-pinned statistics audit.
   Remaining lifecycle review, path policy and migrations remain open.
 
+### Backlog and development workflow simplification
+
+**Project domain:** Project infrastructure
+
+- [ ] **Reduce maintenance overhead in the existing Git-based task workflow,**
+  coordinated with the ongoing [tooling and documentation cleanup](tooling-and-local-path-cleanup-plan.md)
+  and [backlog retirement policy](README.md#backlog-completion-and-retirement):
+  - [ ] Improve `TODO.md` navigability: keep concise, prioritized, actionable
+    work items; link detailed plans rather than copying their contents; remove
+    stale or completed entries without losing open dependencies.
+  - [ ] Complete documentation consolidation first: retain one canonical owner
+    for current guidance, and retire, relabel or preserve completed plans,
+    reports and audits according to their actual remaining purpose.
+  - [ ] Improve existing backlog checks and agent closeout guidance to catch
+    duplicate task IDs, inconsistent parent/subtask status and unsupported
+    removal of unfinished tasks, without requiring routine manual bookkeeping.
+  **Decision:** Defer GitHub Issues/Projects adoption. Reconsider only if
+  cross-repository coordination, dependency tracking or agent task continuity
+  remains problematic after these improvements. Do not create a parallel task
+  registry or automated status synchronization in this phase.
+
 ### External source clarifications
 
 **Project domain:** Data processing
