@@ -246,7 +246,36 @@ archive, symbol and reviewed-citation artifacts as before. Explicit
 with an additional temporary `army.raw.db` hash. Each manifest version
 can be compared across machines, but the comparison tool intentionally
 rejects mixed v1/v2 inputs rather than silently dropping old evidence.
-Update all participating Windows/Linux/CI generators to v2 together.
+Use the **digest-pinned container runner** for byte-for-byte v2 checks
+between Windows and Linux developer hosts. The host-native Python/SQLite/zlib
+versions are not guaranteed to produce identical physical SQLite or ZIP bytes,
+even if their content is identical. The container runner selects one
+`linux/amd64` OCI image by immutable digest and uses the same Linux SQLite,
+zlib and Git toolchain on both hosts. Docker must be installed with a
+working Linux engine. From either checkout (the commands below work in
+PowerShell as well as Linux shells):
+
+```powershell
+python -m tools.run_pinned_determinism --probe
+python -m tools.run_pinned_determinism --output local/reports/determinism-v2-container.json
+```
+
+Use the selected project virtual environment on each host.
+The runner mounts the checkout read-only, disables container networking,
+runs with a temporary writable `/tmp`, and writes only the selected
+manifest under `local/`. The probe pulls and prints the exact pinned
+image digest and toolchain versions. Compare the Windows and Linux
+manifest files with:
+
+```powershell
+python -m tools.compare_determinism_manifests local/reports/determinism-v2-windows.json local/reports/determinism-v2-linux.json
+```
+
+A v2 comparison across the two development hosts at the same commit
+passed **10/10 exact SHA-256 checks** on 2026-11-12. The remaining CI
+matrix uses host-native toolchains and needs a separate design update;
+do not treat native cross-platform byte parity as proven by this
+container result or disable native platform build tests.
 
 The two legacy paired destination files cannot be replaced as one filesystem
 transaction, so explicit `--with-raw` export retains its established commit

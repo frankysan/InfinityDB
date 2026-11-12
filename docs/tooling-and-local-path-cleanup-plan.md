@@ -1944,6 +1944,56 @@ diagnostic implementation. Additional documentation checks and the exact
 resulting commit are recorded in the Git history. A full project suite or
 new pinned complete runtime build was not run for these diagnostics.
 
+### Digest-pinned Windows/Linux determinism runtime — 2026-11-12
+
+**Final result: PASS at exact Git revision
+`a164c4b84ba4ca8a0b71b064026bfce9a9052b39`.** The same
+`linux/amd64` OCI Python image was pulled, digest-verified and executed
+on the Windows Docker Desktop engine and the separate `linux-dev`
+Docker engine. The immutable image reference is
+`python:3.11.18-bookworm@sha256:726d304906fa5eb468e5531e366548d1903286352f5adb54ef508ac01fbd80c6`.
+Both hosts confirmed the same resolved image digest and identity,
+Python **3.11.18**, SQLite **3.40.1**, standard zlib **1.2.13** and
+Git **2.39.5**. Both Git checkouts were on the same commit.
+
+**Implementation:** `tools.run_pinned_determinism` adds a maintained,
+development-only Docker runner. `--probe` pulls and verifies the
+selected OCI image and prints its runtime versions. `--output
+local/reports/NAME.json` executes the existing strict v2 manifest
+generator inside that runtime. The repository checkout is mounted
+read-only, output is constrained to an existing or newly created
+`local/` directory, container networking is disabled, and temporary
+build files stay in disposable container storage. Linux jobs run under
+the worker UID/GID; Windows uses a nonroot container user. This does
+not alter the deployment Dockerfile, published runtime databases,
+downloaded source archives, local research assets or ignored raw archive.
+It does not remove the legacy paired export contract.
+
+**Acceptance:** Windows and Linux each completed the 73-check fixture
+normalization and generated all ten v2 artifact hashes. The Linux
+manifest was transferred back with transport SHA-256 verification.
+The maintained strict `tools.compare_determinism_manifests` comparator
+returned **exit 0**: `Cross-platform deterministic outputs verified
+across 2 manifests.` All **10/10** physical SHA-256 values match,
+including both compressed archives and Army/Rules/ITS SQLite. This is
+byte-identical output, not merely relational/content parity. Runner
+contract tests: **4 passed**, Ruff and Pyright **PASS**. The evidence
+lives only in ignored `local/reports/`. Full project tests and a
+complete release database-set rebuild were not run for this slice.
+
+**Compatibility and remaining boundary:** Native Windows/Linux toolchains
+still generate different physical SQLite and compressed ZIP bytes. The
+pinned runtime is the opt-in, strict reproducibility mechanism; regular
+host-native builds and platform-specific acceptance tests remain useful
+and are not made byte-identical by this change. GitHub Actions currently
+runs a host-native Windows/macOS/Linux deterministic-output matrix using
+Python 3.11.9; the hosted CI design is **not** migrated here. Follow up
+with a dedicated CI gate design that preserves native Windows/macOS build
+coverage, uses a genuinely identical toolchain for the strict byte
+comparison, and does not assume Linux Docker is present on hosted
+Windows/macOS runners. The raw archive deletion approval remains
+separate.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

@@ -350,11 +350,17 @@ when all contained work shares the same owner.
     writer-version/layout bytes, not demonstrated source-content drift.
     The disposable Army fixture's stale Windows CRLF bytes were separately
     normalized, restoring parity for all generated JSON artifacts.
-  - [ ] Achieve **byte-identical** v2 artifacts by pinning a shared
-    cross-platform build runtime (SQLite and zlib/deflate implementation,
-    with compatible Python versions), preferably in a reproducible
-    build image. Recheck all ten raw SHA-256 hashes on the same Git revision;
-    retain the strict gate, and do not mislabel semantic parity as byte parity.
+  - [x] Achieve **byte-identical v2 outputs on Windows and Linux** using
+    `tools.run_pinned_determinism` and the same digest-pinned linux/amd64
+    Python 3.11.18 OCI runtime (SQLite 3.40.1, zlib 1.2.13). At
+    `a164c4b8`, both workers generated all 10 matching SHA-256 hashes;
+    the unmodified strict comparator returned exit 0. The host-native
+    five-artifact mismatch remains expected with unpinned libraries.
+  - [ ] Integrate the pinned-container strategy into hosted CI without
+    dropping native Windows/macOS build coverage or weakening the strict
+    comparator. GitHub-hosted Windows/macOS workers cannot be assumed to
+    provide a Linux Docker daemon; design an explicit portable-build
+    matrix/canonical publication lane and verify its hosted gates.
   - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
     inspection and programmatic `include_raw=True` interfaces. Keep the
     independent source-identity/research semantics and their focused tests
