@@ -1695,6 +1695,55 @@ No ignored archive was moved, deleted or rewritten, and no selected runtime
 database was rebuilt. L0 inventory ownership and the independent
 backup/trial-restore decision for private bytes remain open.
 
+### Standalone export and health opt-in rawless cutover — 2026-11-12
+
+**Current independent contract:** `infinity-db export NORMALIZED.json ARMY.db`
+previously generated both standalone application and lossless raw SQLite
+databases, allowing exact, source-only audit queries. The importer has
+already supported `include_raw=False` with full untrusted-input and
+source-to-canonical staging validation, deterministic publication,
+`export_pair_sha256` provenance, and an explicit refusal to overwrite
+an application whose raw sibling still exists. It produces **byte-identical**
+application output with and without the raw sibling for matched inputs.
+Complete three-database builds already use this application-only mode.
+
+**CLI exposure, no breaking default change:** `infinity-db export --no-raw`
+now publishes the application database only to a destination **without a raw
+sibling**, without creating or removing any raw SQLite file. Standalone export
+**without** this flag continues to publish a validated, paired raw archive;
+standalone consumers and `build_determinism_manifest` remain compatible.
+An existing raw sibling blocks `--no-raw` before publication, preserving
+both files and preventing a stale private file from being silently associated
+with a newly written application database.
+
+`infinity-db database-health ARMY.db --normalized NORMALIZED.json` is an
+explicit, mutually exclusive alternative to `--require-raw`. It calls the
+shared full-document `verified_normalized_generation` verifier and reports
+source status, input bytes/path, validation time and exact generation
+SHA-256 under the opt-in `normalizedSource` JSON key. A missing, altered
+or export-mismatched source makes health **unhealthy**, without falling back
+to an available raw sibling. The original default and `--require-raw`
+machine-readable report structures remain unchanged. Neither source
+option is accepted for `--db-dir`, whose only concern is the selected
+published runtime set; the normal runtime health path is unaffected.
+
+**Scope/acceptance:** New CLI regression tests compare a paired export
+with application-only output byte-for-byte, exercise source verification
+in JSON and text modes without a raw sibling, and reject existing raw
+destinations, source edits, absent source, conflicting source selectors and
+`--db-dir` misuse. Existing tests still require pair validation under
+`--require-raw`; all three production databases and ignored user data
+remain untouched. Focused validation passed: `tests/test_app_cli.py`
+**25/25**, `tests/test_database_set.py` **23/23**,
+`tests/test_army_reference_storage.py` **26/26**,
+`tests/test_deployment_scripts.py` **46/46**, and the three
+application-only importer byte-parity/no-clobber cases **3/3**.
+Ruff, Pyright, Markdownlint, document links/backlog validation and
+`git diff --check` passed. The complete project test suite and complete
+runtime rebuild were not run. The opt-in interfaces establish a usable
+migration route, **not** approval to remove raw-format tests,
+change the paired export default, or delete any private archive.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

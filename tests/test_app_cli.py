@@ -165,6 +165,128 @@ def test_separate_merge_normalize_export_commands(
         assert raw_connection.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] > 0
 
 
+def test_standalone_cli_application_only_export_and_normalized_health(
+    source_directory: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    generated = tmp_path / "generated"
+    assert build_source_fixture([
+        "build", str(source_directory), "--output-dir", str(generated), "--compact",
+    ]) == 0
+    normalized = generated / "normalized.json"
+    paired = tmp_path / "paired" / "army.db"
+    application_only = tmp_path / "application-only" / "army.db"
+    assert main(["export", str(normalized), str(paired)]) == 0
+    assert main(["export", str(normalized), str(application_only), "--no-raw"]) == 0
+    assert application_only.read_bytes() == paired.read_bytes()
+    assert not raw_database_path(application_only).exists()
+
+    capsys.readouterr()
+    assert main([
+        "database-health", str(application_only), "--normalized", str(normalized), "--json",
+    ]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "healthy"
+    assert report["application"]["status"] == "valid"
+    assert report["rawArchive"]["status"] == "not-checked"
+    assert report["normalizedSource"]["required"] is True
+    assert report["normalizedSource"]["status"] == "valid"
+    assert report["normalizedSource"]["bytes"] == normalized.stat().st_size
+    generation = report["normalizedSource"]["pairSha256"]
+    assert len(generation) == 64
+
+    assert main([
+        "database-health", str(application_only), "--normalized", str(normalized),
+    ]) == 0
+    assert f"Export generation SHA-256: {generation}" in capsys.readouterr().out
+
+    assert main([
+        "database-health", str(application_only), "--require-raw", "--json",
+    ]) == 1
+    assert json.loads(capsys.readouterr().out)["rawArchive"]["status"] == "invalid"
+
+
+def test_standalone_cli_application_only_export_refuses_existing_raw(
+    source_directory: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    generated = tmp_path / "generated"
+    assert build_source_fixture([
+        "build", str(source_directory), "--output-dir", str(generated), "--compact",
+    ]) == 0
+    normalized = generated / "normalized.json"
+    destination = tmp_path / "army.db"
+    assert main(["export", str(normalized), str(destination)]) == 0
+    original = destination.read_bytes()
+    raw = raw_database_path(destination)
+    original_raw = raw.read_bytes()
+    capsys.readouterr()
+
+    assert main(["export", str(normalized), str(destination), "--no-raw"]) == 1
+    assert "existing raw sibling" in capsys.readouterr().err
+    assert destination.read_bytes() == original
+    assert raw.read_bytes() == original_raw
+
+
+def test_normalized_health_rejects_mismatch_and_never_falls_back(
+    source_directory: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    generated = tmp_path / "generated"
+    assert build_source_fixture([
+        "build", str(source_directory), "--output-dir", str(generated), "--compact",
+    ]) == 0
+    normalized = generated / "normalized.json"
+    destination = tmp_path / "army.db"
+    assert main(["export", str(normalized), str(destination)]) == 0
+    before = destination.read_bytes()
+    raw_before = raw_database_path(destination).read_bytes()
+
+    document = json.loads(normalized.read_text(encoding="utf-8"))
+    document["tables"]["units"][0]["name"] = "unreviewed revision"
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    capsys.readouterr()
+    assert main([
+        "database-health", str(destination), "--normalized", str(normalized), "--json",
+    ]) == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "unhealthy"
+    assert report["application"]["status"] == "valid"
+    assert report["rawArchive"]["status"] == "not-checked"
+    assert report["normalizedSource"]["status"] == "invalid"
+    assert "does not match" in report["normalizedSource"]["error"]
+    assert destination.read_bytes() == before
+    assert raw_database_path(destination).read_bytes() == raw_before
+
+    normalized.unlink()
+    assert main([
+        "database-health", str(destination), "--normalized", str(normalized), "--json",
+    ]) == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["normalizedSource"]["status"] == "invalid"
+
+
+def test_normalized_health_selection_is_explicit_and_local_to_army(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    parser = build_parser()
+    selected = parser.parse_args([
+        "database-health", "army.db", "--normalized", "normalized.json",
+    ])
+    assert selected.normalized == Path("normalized.json")
+    assert selected.require_raw is False
+    with pytest.raises(SystemExit) as exc:
+        parser.parse_args([
+            "database-health", "army.db", "--require-raw", "--normalized",
+            "normalized.json",
+        ])
+    assert exc.value.code == 2
+    capsys.readouterr()
+
+    assert main([
+        "database-health", "--db-dir", str(tmp_path), "--normalized",
+        str(tmp_path / "normalized.json"),
+    ]) == 1
+    assert "--normalized applies to an Army database" in capsys.readouterr().err
+
+
 def test_normalize_derives_mercenary_display_identity_from_curated_data(tmp_path: Path) -> None:
     curated = load_display_identity_curated()
     canonical_faction_id = 1
@@ -345,6 +467,7 @@ def test_database_health_command_reports_and_validates_pair(
     report = json.loads(capsys.readouterr().out)
     assert report["status"] == "healthy"
     assert report["application"]["status"] == "valid"
+    assert "normalizedSource" not in report  # Existing paired-health JSON is unchanged.
     assert report["application"]["schemaRevision"] == SCHEMA_VERSION
     assert (
         report["application"]["compatibilityRevision"]

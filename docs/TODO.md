@@ -334,8 +334,13 @@ when all contained work shares the same owner.
     exact occurrence/extra relationships and fail-closed provenance.
     Army v27–v31 overlays have also moved to verified normalized input in the
     complete builder; the legacy raw-pair publisher calls remain opt-in.
-  - [ ] Explicitly cut over standalone `infinity-db export` and related
-    pair-health/inspection interfaces, keeping full untrusted-input validation.
+  - [ ] Complete the **standalone default/format** cutover and retire
+    raw-only pair-health/inspection interfaces once independently useful
+    checks are covered. The existing `infinity-db export --no-raw` option
+    now exposes importer-level application-only publication, and
+    `database-health --normalized PATH` verifies the full source generation
+    without a raw SQLite sibling. Both are explicit opt-in alternatives;
+    paired export and `--require-raw` remain backwards-compatible defaults.
     Verify normal build, three-database output identities, independent
     source-audit coverage, regression tests and documented commands before
     removing raw-archive generation, pair APIs or compatibility tests.
