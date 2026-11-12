@@ -138,10 +138,10 @@ all apply this complete-set contract. The low-level validator can inspect
 transitional fixtures when explicitly requested by development code.
 
 `infinity_db.web.create_app_from_database_set(PATH)` validates and opens exactly
-the selected pair, without selecting environment paths or discovering another
-directory. The semantic-baseline tool's `--db-dir` exercises this factory.
+the selected three-database set, without selecting environment paths or discovering
+another directory. The semantic-baseline tool's `--db-dir` exercises this factory.
 
-The current two-file layout embeds Army v31 Equipment presentation
+The current three-file runtime layout embeds Army v31 Equipment presentation
 encodings, reviewed Skill source classifications, Unit filter semantics,
 Army overview text, legacy identities and symbol mappings/hashes,
 plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
@@ -175,8 +175,8 @@ database health checks validate the stored projection without opening assets.
 For a standalone raw-pair publication, the two siblings retain matching
 export metadata. In complete runtime builds, Army v27–v31 overlays instead
 recheck the complete normalized source model against the pinned base export
-generation; they do not update the disposable raw sibling. Each extended
-schema's checksum includes its published relational rows.
+generation; the complete builder does not create a raw SQLite sibling.
+Each extended schema's checksum includes its published relational rows.
 This alone does not verify working-tree curation/config freshness or graphical
 assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual
@@ -190,23 +190,29 @@ Raw inputs, generated acquisition/build provenance, and intermediate outputs sta
 source control so machine-local snapshot state does not obscure code changes.
 For the private Linux worker, [Syncthing-staged development assets](../docs/syncthing-assets.md)
 defines the separate source staging and explicit, verified checkout activation procedure.
-The tracked `army.db` and `rules_n5.db` are release artifacts: a tagged
-checkout includes exactly what production serves. Their embedded projections
-bind reviewed source relationships and common build provenance; runtime JSON
-sidecars are not release inputs. Rebuild the complete pair from pinned source
+The tracked `army.db`, `rules_n5.db` and `its_18.db` are release artifacts:
+a tagged checkout includes exactly what production serves. Their embedded
+projections bind reviewed source relationships and common build provenance;
+runtime JSON sidecars are not release inputs. Rebuild the complete set from pinned source
 inputs when maintained code or curation changes, then validate its source
 freshness and published symbols before commit or deployment. Never rebuild on
 the deployment host or rewrite binary artifacts during packaging. Ignored
 build/acquisition manifests remain local provenance records.
 
-Generated Army database data is replaceable. Builds create temporary application
-and raw-archive siblings, validate both before publication, and bind them with the
-same deterministic `export_pair_sha256` metadata. That fingerprint covers the full
-normalized source model plus the shared build metadata, including source-only rows
-that do not appear in the application database.
+Generated Army database data is replaceable. The complete runtime build
+validates the entire normalized source and its relational staging database,
+publishes only a temporary application database, and uses the deterministic
+`export_pair_sha256` generation fingerprint to bind source-only rows and
+shared metadata to its subsequent Army overlays and Rules publication.
+It creates no `army.raw.db`. Only the three selected runtime databases are
+installed into the target directory, after complete-set validation.
 
-The two destination files cannot be replaced as one filesystem transaction, so
-publication has an explicit commit order and recovery policy:
+The standalone `infinity-db export` command retains its lossless,
+queryable application/raw SQLite pair. Both siblings are checked before
+publication and carry the same deterministic generation fingerprint.
+The two standalone destination files cannot be replaced as one filesystem
+transaction, so paired export keeps its established commit order and
+recovery policy:
 
 1. replace `army.raw.db` first;
 2. replace `army.db` last; the application replacement is the commit point.

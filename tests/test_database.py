@@ -338,6 +338,47 @@ def test_export_database_finalization_is_default_and_can_be_skipped(
     assert calls == []
 
 
+@pytest.mark.parametrize("finalize", (False, True))
+def test_application_only_export_matches_paired_export_without_raw_sqlite(
+    tmp_path: Path, normalized: dict, finalize: bool,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    paired = tmp_path / "paired" / "army.db"
+    application_only = tmp_path / "application-only" / "army.db"
+    export_release_database(normalized, paired, finalize=finalize)
+    generation = validate_database_pair(paired)
+
+    def raw_is_forbidden(*_args: Any, **_kwargs: Any) -> None:
+        raise AssertionError("Application-only export attempted raw archive materialization")
+
+    monkeypatch.setattr(database_importer, "create_raw_archive", raw_is_forbidden)
+    export_release_database(
+        normalized, application_only, include_raw=False, finalize=finalize,
+    )
+    assert not raw_database_path(application_only).exists()
+    assert not list(application_only.parent.glob(".army.raw.db.*.tmp"))
+    assert application_only.read_bytes() == paired.read_bytes()
+    Database(application_only).validate()
+    with sqlite3.connect(application_only) as connection:
+        assert json.loads(connection.execute(
+            "SELECT value FROM __infinity_metadata WHERE key='export_pair_sha256'"
+        ).fetchone()[0]) == generation
+
+
+def test_application_only_export_rejects_existing_raw_without_changes(
+    tmp_path: Path, normalized: dict,
+) -> None:
+    destination = tmp_path / "army.db"
+    export_release_database(normalized, destination, finalize=False)
+    before = destination.read_bytes()
+    raw_path = raw_database_path(destination)
+    raw_before = raw_path.read_bytes()
+    with pytest.raises(ValueError, match="existing raw sibling"):
+        export_release_database(normalized, destination, include_raw=False, finalize=False)
+    assert destination.read_bytes() == before
+    assert raw_path.read_bytes() == raw_before
+
+
 def test_database_splits_lossless_source_from_published_application_data(
     tmp_path: Path, normalized: dict
 ) -> None:

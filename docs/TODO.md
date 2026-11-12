@@ -310,11 +310,10 @@ when all contained work shares the same owner.
 
 - [ ] **Retire `army.raw.db` as a supported retained artifact**, and remove the
   intermediate raw SQLite format once its independent source-audit and build
-  consumers have tested replacements. The complete runtime builder already
-  discards its temporary raw sibling; its three published databases do not
-  depend on retaining one. Variant usage and v27–v31 overlay publication
-  have moved to verified normalized source; raw creation remains in the base
-  exporter pending a separate format/consumer cutover.
+  consumers have tested replacements. The complete runtime builder now
+  skips raw-archive generation entirely; variant usage and Army v27–v31
+  overlays use fully verified normalized source. Standalone `infinity-db export`
+  still produces a lossless raw pair for independent audit/research consumers.
   - [ ] Inventory and migrate the remaining raw-dependent source audits,
     publication checks, deterministic-build evidence, `paired_audit_connection`,
     and the source-row inspection CLI. The **variant-usage projection** now
@@ -326,11 +325,6 @@ when all contained work shares the same owner.
     and fail-closed source/application provenance.
     Army v27–v31 overlays have also moved to verified normalized input in the
     complete builder; the legacy raw-pair publisher calls remain opt-in.
-  - [ ] Stop creating the temporary raw SQLite archive in the complete
-    build once remaining standalone/export audit requirements and source-only
-    integrity checks have been decoupled from its creation. The overlay and
-    variant publication stages no longer need its bytes, but the base Army
-    exporter still emits them.
   - [ ] Explicitly cut over standalone `infinity-db export` and related
     pair-health/inspection interfaces, keeping full untrusted-input validation.
     Verify normal build, three-database output identities, independent

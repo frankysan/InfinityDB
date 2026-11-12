@@ -60,7 +60,7 @@ def _validate_source_anomaly_baseline(source: Path) -> None:
     )
 
 
-def _export(source: Path, destination: Path) -> None:
+def _export(source: Path, destination: Path, *, include_raw: bool = True) -> None:
     with source.open(encoding="utf-8") as handle:
         normalized = json.load(handle)
     peripheral_identities = load_peripheral_identity_curated()
@@ -73,10 +73,12 @@ def _export(source: Path, destination: Path) -> None:
     if peripheral_identity_source_for_snapshot(peripheral_identities, snapshot_sha256) is None:
         peripheral_identities = None
     export_database(
-        normalized, destination, peripheral_identities=peripheral_identities
+        normalized, destination, peripheral_identities=peripheral_identities,
+        include_raw=include_raw,
     )
     print(f"Database ready: {destination}")
-    print(f"Raw archive ready: {raw_database_path(destination)}")
+    if include_raw:
+        print(f"Raw archive ready: {raw_database_path(destination)}")
 
 
 def cmd_normalize(args: argparse.Namespace) -> int:
@@ -122,9 +124,8 @@ def _build_army(
     normalized = args.output_dir / "normalized.json"
     _validate_source_anomaly_baseline(normalized)
     database = args.output_dir / "army.db"
-    _export(normalized, database)
+    _export(normalized, database, include_raw=False)
     print(f"Application database size: {database.stat().st_size:,} bytes")
-    print(f"Raw archive size: {raw_database_path(database).stat().st_size:,} bytes")
     return 0
 
 

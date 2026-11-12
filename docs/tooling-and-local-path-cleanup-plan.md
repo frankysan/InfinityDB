@@ -1338,6 +1338,61 @@ correctly rejected a developer's source-file edit while building
 unchanged-tree rerun completed successfully. No full project suite
 was run in this slice.
 
+### Complete-build raw SQLite generation retirement — 2026-11-12
+
+**Scope:** The complete runtime builder now invokes the base Army export with
+`include_raw=False`, after the maintained Army ZIP merge, normalization and
+source-anomaly baseline. The existing exporter still builds and validates the
+full relational staging database, including every source-only normalized
+table and source-to-canonical consistency constraint, *before* publishing
+the self-contained v26 Army application database. The complete normalized
+source and its deterministic `export_pair_sha256` remain available to the
+already-cut-over Army v27–v31 overlays and variant/Rules publishers. The complete
+build no longer writes the approximately 47.6 MB transient `army.raw.db`
+archive (nor its duplicate lossless row JSON) to its staging directory.
+
+**Compatibility and safety:** Standalone `infinity-db export` and the
+programmatic default `export_database(...)` continue to create and validate
+both siblings, including the raw-first/application-last recovery contract
+and all raw integrity checks. The application-only mode refuses an existing
+raw sibling rather than silently leaving a stale, invalid pair. The normal
+three-database runtime publication still occurs only after all three databases
+and build identities pass validation; no tracked release binary is replaced
+by these development changes. This cutover does not retire the lossless raw
+format for standalone research/audits, change source-only normalization
+semantics or authorize removal of any ignored `data/generated` file.
+
+**Next tasks:** Independent raw-dependent auditors, pair-health and source-row
+inspection interfaces, and standalone export retention require a separate
+consumer-by-consumer lifecycle decision. Keep the current full export API
+backward-compatible until those invariants have replacements. The separate
+combined-path double-validation optimization is not part of this change.
+
+**Acceptance:** The direct Army source/CLI suite passed **21/21**, the full
+database/export regression module **175/175**, and the complete-set builder
+suite **18/18** (214 tests, zero skips). The new unit tests prove
+byte-identical application SQLite output between raw-paired and rawless
+exports with and without finalization, no raw-archive creation, fail-closed
+refusal of an existing sibling, and continued default paired-export health
+and metadata-mismatch rejection. Ruff, Pyright, Markdownlint, documentation
+links/backlog validation, and Git whitespace checks passed.
+
+The maintained `tools.verify_complete_database_build` acceptance rebuilt
+**twice** from `data/raw/JSON 20260929-114335.zip`, SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`,
+in disposable output directories. The log reports only the 8,413,184-byte
+application export (no raw archive), and both builds passed the 73 normalized
+source checks, matched the reviewed 116-warning anomaly baseline, preserved
+**151** variant groups, **69** Weapon citations, **2019** symbol mappings,
+**808** verified SVGs and **41** semantic API routes. The complete outputs
+were byte-identical across runs:
+`army.db=9a1577aebd0214a30ccd174d32b58c8c5a257dc5e26d3ab248ce193e74926fad`,
+`rules_n5.db=fbbfb45a4e17edb180f30a56428c0faa48dc8d5976ebf0a291dd2d11ef7ff38f`,
+`its_18.db=e88eb6e9934443f762d8f143efcfd8cdf300636424b3a55c78df569ea43d2b94`.
+These are the **post-code-change** revision fingerprints; older build hashes
+need not match, while the source identity, published inventories and API
+behavior remain checked. The full project test suite was not run.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

@@ -93,12 +93,11 @@ def test_build_creates_verified_json_and_queryable_database(
         == 0
     )
     output = capsys.readouterr().out
-    for filename, label in (
-        ("army.db", "Application database size"),
-        ("army.raw.db", "Raw archive size"),
-    ):
-        size = (output_dir / filename).stat().st_size
-        assert f"{label}: {size:,} bytes" in output
+    size = (output_dir / "army.db").stat().st_size
+    assert f"Application database size: {size:,} bytes" in output
+    assert "Raw archive" not in output
+    assert not (output_dir / "army.raw.db").exists()
+    assert not list(output_dir.glob(".army.raw.db.*.tmp"))
 
     master = json.loads((output_dir / "master.json").read_text(encoding="utf-8"))
     normalized_text = (output_dir / "normalized.json").read_text(encoding="utf-8")
@@ -134,8 +133,10 @@ def test_build_creates_verified_json_and_queryable_database(
             is None
         )
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
-    with sqlite3.connect(output_dir / "army.raw.db") as raw_connection:
-        assert raw_connection.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 2
+    with sqlite3.connect(output_dir / "army.db") as connection:
+        assert connection.execute(
+            "SELECT value FROM __infinity_metadata WHERE key='export_pair_sha256'"
+        ).fetchone() is not None
 
 
 def test_separate_merge_normalize_export_commands(
@@ -154,10 +155,14 @@ def test_separate_merge_normalize_export_commands(
     assert main(["export", "data/generated/normalized.json", "data/generated/army.db"]) == 0
     default_database = tmp_path / "data/generated/army.db"
     assert default_database.is_file()
+    assert raw_database_path(default_database).is_file()
     custom_database = tmp_path / "custom.db"
     assert main(["export", "data/generated/normalized.json", str(custom_database)]) == 0
+    assert raw_database_path(custom_database).is_file()
     with sqlite3.connect(custom_database) as connection:
         assert connection.execute("SELECT COUNT(*) FROM units").fetchone()[0] == 1
+    with sqlite3.connect(raw_database_path(custom_database)) as raw_connection:
+        assert raw_connection.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] > 0
 
 
 def test_normalize_derives_mercenary_display_identity_from_curated_data(tmp_path: Path) -> None:
@@ -322,6 +327,20 @@ def test_database_health_command_reports_and_validates_pair(
     assert "Compatibility revision:" in output
     assert "Raw archive: not checked" in output
 
+    # Complete-build Army output is valid without a raw archive; requesting
+    # paired audit health must fail rather than silently fabricate a sibling.
+    assert main(["database-health", str(database), "--require-raw", "--json"]) == 1
+    missing_raw = json.loads(capsys.readouterr().out)
+    assert missing_raw["status"] == "unhealthy"
+    assert missing_raw["application"]["status"] == "valid"
+    assert missing_raw["rawArchive"]["status"] == "invalid"
+    assert "does not exist" in missing_raw["rawArchive"]["error"]
+
+    # Standalone export retains its independent queryable raw-pair contract.
+    paired = output_dir / "standalone" / "army.db"
+    assert main(["export", str(output_dir / "normalized.json"), str(paired)]) == 0
+    capsys.readouterr()
+    database = paired
     assert main(["database-health", str(database), "--require-raw", "--json"]) == 0
     report = json.loads(capsys.readouterr().out)
     assert report["status"] == "healthy"
