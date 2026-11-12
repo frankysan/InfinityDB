@@ -362,17 +362,18 @@ when all contained work shares the same owner.
     jobs using `tools.run_pinned_determinism`, and keep the existing
     strict SHA-256 comparator and required job identity unchanged.
     No Docker support is assumed on hosted Windows/macOS.
-  - [ ] Close out hosted GitHub Actions acceptance: the two independent
-    pinned Ubuntu 24.04/26.04 jobs on cleanup PR #29 both passed and
-    uploaded byte-identical manifest archives at `e40e7545`. Native
-    Ubuntu Python 3.11/3.14 checks independently fail because tracked
-    runtime databases were not rebuilt after
-    `src/infinity_db/army_reference_storage.py` changed. The required
-    comparator is being made runnable despite native failures while
-    **remaining red** unless the native source-checks succeed. Verify
-    its own exact-byte step, then resolve the separate tracked runtime
-    rebuild/verification blocker and confirm the whole hosted workflow
-    is green.
+  - [ ] Close out hosted GitHub Actions acceptance on cleanup PR #29:
+    both pinned Ubuntu 24.04/26.04 jobs pass, and at `e2ff5eb4`
+    the unchanged strict v2 byte-comparison step passed. The required
+    job correctly remained red because all four native source-check
+    legs rejected the stale tracked Army/Rules database provenance;
+    deployment smoke failed on the same check. At `e2ff5eb4`, the
+    pinned Army ZIP passed two complete repeatable builds; the tracked
+    `army.db` and `rules_n5.db` were rebuilt with identical hashes
+    and local deployment-provenance verification passed.
+    Commit and push the validated database set, then verify native
+    source checks, deployment smoke and the required comparator are
+    all green on the new exact hosted SHA.
   - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
     inspection and programmatic `include_raw=True` interfaces. Keep the
     independent source-identity/research semantics and their focused tests

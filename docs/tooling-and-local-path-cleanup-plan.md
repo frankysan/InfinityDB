@@ -2056,6 +2056,38 @@ yet been demonstrated in this checkpoint. A full project suite or
 production database rebuild was not triggered for this CI-only slice.
 No private source data or tracked runtime DB was modified.
 
+### Hosted strict comparison and tracked database rebuild — 2026-11-12
+
+At `e2ff5eb4904188f0dcbbcfa59249c4b8b9d5a9a6`, the two independent
+Ubuntu 24.04/26.04 pinned jobs passed and the hosted `Compare artifact hashes`
+step in `deterministic-outputs` **passed**. Its native-source-result gate
+correctly failed, as all four native source-check legs and deployment smoke
+rejected stale tracked input provenance after the
+`src/infinity_db/army_reference_storage.py` change. Do not weaken that gate.
+
+The pinned Army source `data/raw/JSON 20260929-114335.zip` was independently
+verified at SHA-256 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`.
+Two disposable complete builds at the same Git SHA passed 73 normalization
+checks, the reviewed 116-warning baseline, 151 variant groups, 62 Weapons,
+69 citations, 808 verified SVGs and 41 API baseline routes. All three SQLite
+artifacts were byte-identical between both builds. An explicit pinned-source
+rebuild of `data/generated/` then produced the same hashes:
+`army.db=8d30dbb8bd05afaea8f09f055123fbee5e8ce436c9610283e08aee1cc280529c`,
+`rules_n5.db=b7a29f4f6eb3f2e4f62ca6e10284ee4147eb91272c923694400fd7da5e3735d3`,
+`its_18.db=e88eb6e9934443f762d8f143efcfd8cdf300636424b3a55c78df569ea43d2b94`.
+The entire three-file hash verification passed and
+`tools.verify_deployment_assets --skip-svg` returned exit 0.
+Only the two tracked Army/Rules binary files changed; the ITS bytes remain
+unchanged, and no private source or old raw archive was deleted.
+Local acceptance also passed: deployment-script tests **47/47**,
+database-set tests **23/23**, the complete symbol/deployment gate (**808/808**
+published and **807/807** browser-referenced SVGs), Ruff, Pyright (0 errors),
+Markdownlint, links/backlog checks and `git diff --check`.
+The rebuilt set is ready for a reviewed commit and push. Fully green hosted
+native checks, required comparator and deployment smoke on the new exact SHA
+remain outstanding; this is **not** L1 approval or authorization for
+ignored-data deletion.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
