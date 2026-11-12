@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.database import raw_database_path
-from infinity_db.database.publication import EXPORT_PAIR_SHA256_KEY
+from infinity_db.database.publication import EXPORT_PAIR_SHA256_KEY, validate_database_pair
 from tests.test_audit_runtime_database_surface import _runtime_database
 from tools import audit_source_presentation as audit
 
@@ -67,6 +67,12 @@ def test_pinned_published_army_has_no_occupied_unrepresented_source_fields() -> 
     raw = raw_database_path(published)
     if not raw.is_file():
         pytest.skip("Ignored raw Army database is unavailable in clean CI")
+    try:
+        validate_database_pair(published, raw_path=raw)
+    except ValueError as exc:
+        if "different exports" not in str(exc):
+            raise
+        pytest.skip(f"Ignored raw Army database is stale relative to tracked Army: {exc}")
     report = audit.audit_database(published)
     evidence = report["rawEvidence"]
     assert evidence["status"] == "available"

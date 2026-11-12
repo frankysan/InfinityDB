@@ -1685,10 +1685,27 @@ def test_army_archive_rejects_invalid_or_duplicate_unit_ids(
             )
 
 
+def _require_release_matched_raw_army() -> None:
+    """Only opt into local source audits with the current Army export pair."""
+    from infinity_db.database import raw_database_path
+    from infinity_db.database.publication import validate_database_pair
+
+    raw = raw_database_path(ARMY_DB)
+    if not raw.is_file():
+        pytest.skip("Full Army raw archive is ignored and unavailable in clean CI")
+    try:
+        validate_database_pair(ARMY_DB, raw_path=raw)
+    except ValueError as exc:
+        if "different exports" not in str(exc):
+            raise
+        pytest.skip(f"Ignored raw Army database is stale relative to tracked Army: {exc}")
+
+
 def test_pinned_army_archive_nested_publication_when_available() -> None:
     archive = ROOT / "data/raw/JSON 20260929-114335.zip"
     if not archive.is_file():
         pytest.skip("Optional pinned Army source archive is not available")
+    _require_release_matched_raw_army()
     report = build_baseline(ARMY_DB, RULES_DB, army_archive=archive)
     evidence = report["armySnapshot"]["sourceIdentityEvidence"]
     assert evidence["matchedArmyListIds"] == 58
@@ -1962,11 +1979,9 @@ def test_pinned_army_derived_relationships_have_live_published_targets() -> None
 
 def test_pinned_army_derived_relationships_match_raw_source_when_available() -> None:
     """Source derivation requires the ignored, release-matched raw sibling."""
-    from infinity_db.database import raw_database_path
     from tools.audit_army_faction_semantics import audit_database as audit_factions
 
-    if not raw_database_path(ARMY_DB).is_file():
-        pytest.skip("Full Army raw archive is ignored and unavailable in clean CI")
+    _require_release_matched_raw_army()
     faction = audit_factions(ARMY_DB)
     assert faction["applicationModel"]["sourceDerivedIdentityEquivalent"] is True
     assert faction["applicationModel"]["runtimeIdentityEquivalent"] is True

@@ -57,20 +57,27 @@ def test_normalized_validation_is_stable_across_hash_seeds(tmp_path: Path) -> No
 
 def test_persistent_path_write_text_calls_declare_newline_policy() -> None:
     import ast
+    import subprocess
 
     root = Path(__file__).resolve().parents[1]
     missing: list[str] = []
-    for source_root in (root / "src", root / "tools"):
-        for path in source_root.rglob("*.py"):
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.Call):
-                    continue
-                if not isinstance(node.func, ast.Attribute) or node.func.attr != "write_text":
-                    continue
-                keywords = {keyword.arg for keyword in node.keywords if keyword.arg is not None}
-                if "newline" not in keywords:
-                    relative = path.relative_to(root).as_posix()
-                    missing.append(f"{relative}:{node.lineno}")
+    # Untracked one-off diagnostics are not part of the maintained source contract.
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "-z", "--", "src", "tools"], cwd=root,
+    ).decode("utf-8").split("\0")
+    for name in tracked:
+        if not name.endswith(".py"):
+            continue
+        path = root / name
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            if not isinstance(node.func, ast.Attribute) or node.func.attr != "write_text":
+                continue
+            keywords = {keyword.arg for keyword in node.keywords if keyword.arg is not None}
+            if "newline" not in keywords:
+                relative = path.relative_to(root).as_posix()
+                missing.append(f"{relative}:{node.lineno}")
 
     assert missing == []
