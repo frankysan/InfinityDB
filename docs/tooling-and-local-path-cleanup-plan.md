@@ -1005,6 +1005,66 @@ hosted acceptance for this documentation change.
 **L0 remains open.** This review grants no tool retirement, output
 migration, private-file deletion or L1 path-policy approval.
 
+### Linux worker activation acceptance and document triage — 2026-11-12
+
+**Host gate resolved:** The operator confirmed that the `mcpworker` Git checkout
+had the branch-specific fetch refspec
+`+refs/heads/dev/v1.0.0:refs/remotes/origin/dev/v1.0.0`.
+That branch no longer exists remotely. Replacing the worker's refspec with
+`+refs/heads/*:refs/remotes/origin/*` restored normal branch fetching.
+An explicit MCP Linux fetch completed with exit code 0, followed by a
+successful clean, detached checkout at the reviewed remote cleanup commit
+`ac8050c0c29c9546c935365fb4b31b3f7f6a32ab`; the worker subsequently
+reported that exact HEAD and a clean tree. The separate interactive Linux
+checkout was not synchronized by this operation. The Windows development
+checkout was clean at `b637df0fa5037696b1dabecbfd5aab796644eadf`
+(documentation-only follow-up to the remote revision).
+
+**Actual receiver dry-runs:** On the pinned Linux worker, the maintained
+`tools.activate_synced_assets activate --file` command returned exit code 0
+and `planned` for each of:
+
+- `image_overrides/characteristics/cube.svg`
+- `image_overrides/units/achilles-team-1-1.svg`
+
+These resolve to files beneath the actual hyphenated Syncthing receiver
+`image-overrides/` and plan copies to the matching underscore-named checkout
+destinations. The tool read both source files and measured SHA-256 internally,
+but did **not** emit the digests or verify immutable provenance pins; those
+stronger source-identity claims remain outside this acceptance. Neither command
+used `--apply`. No private file was activated, overwritten or deleted, and
+no Syncthing configuration or production deployment was changed.
+
+**L0 document dispositions (no removal):**
+
+- `docs/faq-v0.1-scope-inventory.md` is **retain-frozen-evidence**. Its
+  question/semantic inventory, bilingual source qualifications, reviewed
+  identity pins and deferred ITS applicability have independent ongoing
+  research value and are cited by source history, official clarifications and
+  source-coverage findings. The maintained FAQ model and regression manifest
+  own current published semantics; this report does not become a second
+  active task list.
+- `docs/v1.0-coverage-workflow-plan.md` is **retain-frozen-evidence pending
+  later consolidation**. The V1S-082 acceptance scope is superseded by the
+  current citation gate; the document's pilot methodology, measured limitations
+  and optional P2/P3 ideas are historical research, not required release steps.
+  The independently open optional comprehensive reconciliation is owned by
+  `docs/TODO.md`; the maintained disposition validator, tests and source audit
+  own implemented behavior/evidence. The historical source audit directly
+  links to this plan's P1 details, so do not delete it without preserving
+  that unique context and correcting the link.
+
+**Validation:** Linux focused activation regression suite **18 passed, zero skips**
+at the pinned worker commit. Windows documentation checks passed Markdownlint
+(47 files, zero issues), link validation (46 tracked files), backlog validation
+and `git diff --check`.
+
+The Linux mapping/runtime gate is now accepted. **L0 remains open** for the
+remaining ownership/disposition inventory, source backup-and-trial-restore
+evidence, nineteen inaccessible Windows report directories, and L1 decisions
+on exceptions and migration. This checkpoint approves no ignored-data moves,
+source deletion, automatic worker synchronization or L1 path policy.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
