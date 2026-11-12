@@ -1065,6 +1065,39 @@ evidence, nineteen inaccessible Windows report directories, and L1 decisions
 on exceptions and migration. This checkpoint approves no ignored-data moves,
 source deletion, automatic worker synchronization or L1 path policy.
 
+### Historical 1.0 source-input auditor disposition — 2026-11-12
+
+**Baseline:** Clean Windows `dev/tooling-workspace-cleanup` at
+`5348319e9eb5f2b786ee1114e9ad979fad737654`, read-only
+source/consumer review. `tools.audit_1_0_reference_inputs` is
+**retain-active pending scoped extraction review**, not eligible for
+whole-file retirement merely because its initial report is named 1.0.
+
+- The separate active `tools.audit_reinforcements_applicability` imports
+  `verify_reinforcements_inputs` and `SourceEvidenceError` to preserve the
+  fail-closed distinction between verified historical N4 PDFs and unverified
+  N5 procedural authority. This is a current source-integrity boundary, not a
+  historical test artifact. The application-rule regression tests also reuse
+  the reporter's `_WikiHeadings` parser; a test import alone is insufficient
+  justification for retaining the entire historical report.
+- The opt-in CLI retains an independent, documented offline source-evidence
+  workflow: exact supplied Wiki history/revision identities, curated Wiki
+  snapshot members and headings, source-pinned Core/FAQ PDFs, and independent
+  enrichment gaps. It accepts explicit inputs and does not acquire sources,
+  amend curated records or establish semantic completeness. Its source-report
+  scope is distinct from current build and release acceptance.
+- Its `--json-output` and `--markdown-output` paths currently create
+  parent directories and overwrite existing files without limiting
+  destinations to categorized `local/`. Review output lifetimes and safe
+  path handling with the broader L2/L6 writer policy before changing this
+  documented command. Extract only genuinely reusable source/parsing
+  interfaces if/when its historical composite report is retired.
+
+**Validation:** `tests/test_audit_1_0_reference_inputs.py` **50 passed**;
+`tests/test_audit_reinforcements_applicability.py` **16 passed**; zero
+skips in both. No sources, tests, private inputs, public artifacts or
+Git module paths were changed in this review. **L0 remains open**.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
