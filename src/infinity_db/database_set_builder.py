@@ -25,7 +25,7 @@ from .build_provenance import (
     file_sha256,
 )
 from .curated import load_curated_directory
-from .database.publication import validate_database_pair
+from .database.normalized_source import verified_normalized_generation
 from .database_set import (
     COMPLETE_RUNTIME_FILES,
     SEASON_DATABASE_SOURCES,
@@ -76,9 +76,7 @@ def collect_build_manifest(root: Path, source: Path, metadata: Path | None) -> d
 
 def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
     army, rules = stage / "army.db", stage / "rules_n5.db"
-    generation = validate_database_pair(army)
-    if generation is None:
-        raise ValueError("Complete builds require an Army export generation fingerprint")
+    generation = verified_normalized_generation(army, stage / "normalized.json")
     documents = load_curated_directory(root / "data/curated/rules")
     core = next(
         (path for path, doc in documents
@@ -165,30 +163,35 @@ def build_database_set(
         army_args.source, army_args.output_dir = source, stage
         if build_army(army_args, build_record(manifest, "army")) != 0:
             raise ValueError("Army build failed before runtime publication")
+        # Only the verified normalized model is needed by these overlays.
+        # The legacy raw-pair publisher APIs remain available for standalone use.
+        normalized = stage / "normalized.json"
         publish_equipment_encodings(
-            stage / "army.db",
-            stage / "army.raw.db",
+            stage / "army.db", None,
             root / "config/catalogs/equipment-presentation-encodings.json",
+            normalized=normalized,
         )
         publish_skill_classifications(
-            stage / "army.db",
-            stage / "army.raw.db",
+            stage / "army.db", None,
             root / "config/catalogs/skill-source-classifications.json",
+            normalized=normalized,
         )
         publish_unit_filter_semantics(
-            stage / "army.db",
-            stage / "army.raw.db",
+            stage / "army.db", None,
             root / "config/catalogs/unit-filter-semantics.json",
+            normalized=normalized,
         )
         publish_army_reference_data(
-            stage / "army.db", stage / "army.raw.db",
+            stage / "army.db", None,
             root / "data/curated/identities/army-overview.json",
             root / "data/curated/identities/legacy-armies.json",
+            normalized=normalized,
         )
         publish_symbol_paths(
-            stage / "army.db", stage / "army.raw.db",
+            stage / "army.db", None,
             root / "data/manifests/symbol-publication.json",
             root / "src/infinity_db/web/static",
+            normalized=normalized,
         )
         _build_rules_and_publications(stage, root, manifest)
         from .rules_database import RulesDatabase

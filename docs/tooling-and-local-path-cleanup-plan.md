@@ -1287,6 +1287,57 @@ the reviewed local migration manifest, backup evidence and separate approval.
 The next implementation slice must replace the overlay publishers' raw-pair
 contract without weakening their checksums or atomic publication behavior.
 
+### Army v27–v31 normalized provenance cutover — 2026-11-12
+
+The five complete-build Army overlay publishers now accept either an explicitly
+selected, paired raw SQLite source (legacy API) **or** a complete normalized
+source verified against the application's original export generation. Shared
+verification lives in `database/normalized_source.py`, not in the
+variant-usage domain module; its full-model validation, base-published-table
+fingerprint and compatibility restoration preserve the v26 export attestation
+through successive v27–v31 overlays. Supplying both sources or neither fails
+closed. Each publisher still validates the preceding schema/read model,
+authored source identity, foreign keys and the new full-table publication
+checksum. The complete builder explicitly passes `raw=None` and the generated
+`normalized.json` to all five, and re-verifies that source before Rules
+publication. No raw sibling metadata is mutated along that route.
+
+Standalone callers retain the existing positional raw-pair API and matching
+post-publication metadata updates; historical pair-health and raw-source audit
+semantics have **not** been retired. Synthetic database-set builder fixtures
+continue using the old pair API because their normalized placeholder is
+intentionally not a valid source document. Those fixtures verify the real
+builder selects the new explicit rawless route. Pinned ZIP acceptance is the
+source-integrity gate for actual complete builds.
+
+The base exporter still creates temporary `army.raw.db`; removing that
+duplicated serialization and addressing standalone `export` consumers are
+separate backlog work. The ignored private `data/generated/army.raw.db`
+was not deleted, overwritten, moved or accepted as a matched pair.
+Neither current production data nor tracked release databases were changed.
+
+**Validation:** Existing raw-pair publisher suites passed v27 **12/12**,
+v28 **15/15**, v29 **19/19**, v30 **26/26**, v31 **19/19** (91 total);
+new normalized source/selection tests **6/6** and synthetic
+database-set builder suite **18/18**. Ruff, Pyright, Markdownlint,
+document link/backlog checks and `git diff --check` passed.
+The pinned source ZIP `JSON 20260929-114335.zip`
+(`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+was rebuilt twice in disposable local directories with no tracked
+release file replacement. Both complete runtime sets were healthy,
+retained **151** variant groups, **62** reviewed Weapons, **69**
+citations, **2019** symbol mappings, **808** verified SVGs and **41**
+semantic API baseline routes, and had byte-identical SHA-256 values:
+`army.db=dd865af9ab47b14a8033b6dbb3dccac8e2d7709470ae31e376d6369ce2f3cbaf`,
+`rules_n5.db=51f882397c8804143293ed3b4f2c8fc37e5bc5ded35fb34b7aefbe8c85b47a59`,
+`its_18.db=e88eb6e9934443f762d8f143efcfd8cdf300636424b3a55c78df569ea43d2b94`.
+These hashes are for the new source-code provenance, **not** expected
+to equal previous commit hashes. One preliminary two-build attempt
+correctly rejected a developer's source-file edit while building
+(`Build inputs changed during generation`); the subsequent
+unchanged-tree rerun completed successfully. No full project suite
+was run in this slice.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

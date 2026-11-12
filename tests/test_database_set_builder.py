@@ -38,7 +38,9 @@ RELEASE = Path(__file__).resolve().parents[1] / "data/generated"
 
 
 @pytest.fixture
-def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
+def project(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> tuple[Path, argparse.Namespace]:
     root = tmp_path / "project"
     for name in (
         "pyproject.toml",
@@ -96,6 +98,24 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(RELEASE.parent.parent / "src/infinity_db/web/static" / relative, target)
     args = build_parser().parse_args(["build", str(source), "--db-dir", str(root / "output")])
+    # This synthetic builder fixture deliberately writes "build-only" instead
+    # of a real normalized document. Keep its existing raw-pair overlay path;
+    # real normalized-source acceptance is covered by the pinned ZIP rebuild.
+    for name in (
+        "publish_equipment_encodings", "publish_skill_classifications",
+        "publish_unit_filter_semantics", "publish_army_reference_data",
+        "publish_symbol_paths",
+    ):
+        publisher = getattr(builder, name)
+
+        def legacy_source(
+            army: Path, _raw: Path | None, *sources: Path,
+            normalized: Path | None = None, _publisher=publisher,
+        ) -> None:
+            assert _raw is None and normalized == army.with_name("normalized.json")
+            _publisher(army, army.with_name("army.raw.db"), *sources)
+
+        monkeypatch.setattr(builder, name, legacy_source)
     return root, args
 
 

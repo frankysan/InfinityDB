@@ -12,6 +12,10 @@ import pytest
 
 from infinity_db import variant_usage
 from infinity_db.database import export_database, raw_database_path
+from infinity_db.database.normalized_source import (
+    verified_army_export_generation,
+    verified_normalized_generation,
+)
 from infinity_db.database.schema import TABLES, quote
 from infinity_db.variant_usage import (
     build_variant_usage_from_normalized,
@@ -61,6 +65,24 @@ def test_normalized_source_matches_every_raw_relational_table(
         assert pinned == generation
         assert source.execute("SELECT COUNT(*) FROM units").fetchone()[0] > 0
     assert not raw_path.exists()
+
+
+def test_overlay_source_requires_exactly_one_verified_input(
+    source_pair: tuple[Path, Path, dict],
+) -> None:
+    army, normalized, _ = source_pair
+    with normalized_source_connection(army, normalized) as (_source, generation):
+        assert verified_normalized_generation(army, normalized) == generation
+        assert verified_army_export_generation(army, None, normalized) == generation
+        assert verified_army_export_generation(
+            army, raw_database_path(army), None,
+        ) == generation
+    for raw, source in (
+        (None, None),
+        (raw_database_path(army), normalized),
+    ):
+        with pytest.raises(ValueError, match="exactly one"):
+            verified_army_export_generation(army, raw, source)
 
 
 @pytest.mark.parametrize("mutation", ("source-row", "source-metadata", "export-generation"))

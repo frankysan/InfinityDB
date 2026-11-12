@@ -64,11 +64,12 @@ retired from the integrated build. Lossless verification is mandatory.
 
 Disposable files under ignored `data/work/build/` hold normalization, the
 matched Army/raw pair, Rules and ITS construction. The variant-usage publication
-now takes its source-only relationships from `normalized.json`, reconstructs
-the necessary source tables in memory, and independently verifies the complete
-normalized model against the selected Army database's recorded export-generation
-fingerprint. Other Army overlay publishers still use the temporary raw sibling;
-this change does not retire the standalone export/inspection pair interface.
+takes its source-only relationships from `normalized.json`, reconstructs
+the necessary source tables in memory, and verifies the complete normalized
+model against the selected Army database's export-generation fingerprint.
+Army v27–v31 overlays use the same verified normalized source without opening
+or updating the temporary raw SQLite sibling. The standalone export and
+raw-pair inspection interfaces remain supported.
 The builder validates all
 three runtime databases, cross-domain references and source/build provenance,
 checks that its inputs remain unchanged, then replaces the selected set and
@@ -171,9 +172,12 @@ v31 symbol lookups and cache identity use embedded maps/hashes plus actual
 packaged SVG/static bytes, without reading the publication manifest. The
 builder and application startup verify published SVG hashes; selected-set
 database health checks validate the stored projection without opening assets.
-The separate Army/raw pair remains source-identical through shared export metadata and
-each extended schema's checksum includes its relational rows.
-It does not verify working-tree curation/config freshness or graphical
+For a standalone raw-pair publication, the two siblings retain matching
+export metadata. In complete runtime builds, Army v27–v31 overlays instead
+recheck the complete normalized source model against the pinned base export
+generation; they do not update the disposable raw sibling. Each extended
+schema's checksum includes its published relational rows.
+This alone does not verify working-tree curation/config freshness or graphical
 assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual
 database argument or `--require-raw`. The existing individual Army/raw health
