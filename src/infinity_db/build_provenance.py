@@ -35,7 +35,14 @@ def build_input_fingerprints(root: Path) -> dict[str, str]:
             "data/curated",
         ) for path in (root / directory).rglob("*.json") if path.name != "example.json"
     ]
-    paths.extend((root / "src").rglob("*.py"))
+    # HTTP/browser serving code does not transform runtime database content.
+    # Keep the builder/model sources pinned without coupling every web edit
+    # to a rebuild of the tracked SQLite publications.
+    web_root = root / "src/infinity_db/web"
+    paths.extend(
+        path for path in (root / "src").rglob("*.py")
+        if not path.is_relative_to(web_root)
+    )
     paths.extend([
         root / "pyproject.toml", root / "data/manifests/symbol-publication.json",
         root / "src/infinity_db/web/static/restrictions-reference.json",

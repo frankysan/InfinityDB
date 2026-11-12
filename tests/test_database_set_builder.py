@@ -257,6 +257,10 @@ def test_maintained_text_inputs_ignore_checkout_line_endings(project) -> None:
 def test_builder_code_and_selected_metadata_are_inputs(project) -> None:
     root, args = project
     original = builder.collect_build_manifest(root, args.source, None)
+    web = root / "src/infinity_db/web"
+    web.mkdir(parents=True, exist_ok=True)
+    (web / "api_handler.py").write_text("# serving-only change\n", encoding="utf-8")
+    assert builder.collect_build_manifest(root, args.source, None) == original
     (root / "src/sample.py").write_text("# changed\n", encoding="utf-8")
     code_change = builder.collect_build_manifest(root, args.source, None)
     assert code_change["builderRevision"] != original["builderRevision"]

@@ -4153,8 +4153,10 @@ Army archive/API metadata and maintained-input file digests remain byte-exact.
 The current input envelope conservatively includes JSON under `config/catalogs`,
 `config/identity`, `config/validation`, `config/symbols` and `data/curated`
 (excluding the reserved `example.json` template), the symbol-publication manifest,
-static Restrictions chart, `pyproject.toml`, package Python sources and the three
-current Weapon publication/audit helpers. Declaring a file does not promote
+static Restrictions chart, `pyproject.toml`, and package Python sources outside
+`src/infinity_db/web/`. The web layer is excluded because it serves already-built
+data rather than contributing to database generation; build/model code remains
+source-pinned. Declaring a file does not promote
 unimplemented review knowledge into game semantics or make research PDFs/Wiki
 archives implicit inputs. Absolute host/output paths, temporary filenames, Git
 state, wall-clock timestamps and final database hashes are excluded.
