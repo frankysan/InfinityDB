@@ -117,10 +117,13 @@ paths, hashes and Army source identity. Raw Army/PDF inputs are not needed on th
 server. The image copies the three databases directly into `/app/data/`; no
 `data/runtime/` copy or candidate promotion is required.
 
-The P5.8 development checkout is **not deployment-ready**: its unchanged
-approved databases still record retired build inputs, so the freshness gate
-fails. A separately authorized runtime-set refresh and verification are tracked
-in [VR-0148](validation-queue.md#pending-deferred-execution).
+**2026-11-12 development verification:** The P5.8 source-freshness blocker
+(VR-0148) was resolved by refreshing the tracked runtime databases. After the
+P6.1 build-input boundary update, `tools.verify_deployment_assets` passed on
+the complete tracked three-database set, checking source freshness,
+embedded citations and all published SVGs. This is development acceptance,
+not permission to merge, tag, release or deploy; those gates remain in
+[releasing](releasing.md).
 
 The image uses `INFINITY_DB_DB_DIR=/app/data`. Missing, invalid or incompatible
 databases fail before activation. `scripts/verify-container-image.sh --published-assets`

@@ -26,28 +26,18 @@ when all contained work shares the same owner.
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-- [ ] Execute P5–P6 of the
+- [ ] Complete remaining P5 hygiene and P6 of the
   [phased restructuring plan](restructuring-plan.md).
-  P0–P4 are complete; the release owner accepted P4.5 on 2026-11-11
-  following focused browser/accessibility validation. P5 tooling retirement
-  and P6 integrated closeout remain open. Matched-input symbol processor
-  parity and external-artifact semantic candidate preparation passed. The cutover
-  has user approval for all 118 changed artworks, a promoted publication with
-  the old Seed Soldier URL preserved, rebuilt embedded mappings and passed
-  checkout/browser/Docker acceptance. P5.8 removes the superseded in-tree
-  processors, but its source-freshness gate remains blocked by the unchanged
-  approved databases; see [VR-0148](validation-queue.md#pending-deferred-execution).
-  Remaining P5 hygiene and P6 integrated acceptance are still open. See the
-  [accepted publication cutover](testing.md#p57-accepted-symbol-publication-cutover) and
-  [processor acceptance boundary](testing.md#p57-matched-input-symbol-processor-parity).
-  P3 hosted Source checks,
-  installed-wheel smoke and deployment smoke passed on
-  `09f91f442f82abba4df76641ef7ad688402673d4`.
-  P3.5 also exercised a synthetic second season with a duplicate
-  Battleground slug without adding actual Season 17 content or changing
-  the three-file production contract. See [ITS season database](its-season-database.md).
-  The plan owns ordering and decisions; acceptance evidence lives in
-  [testing](testing.md). Completed migration details stay out of this backlog.
+  P0–P4 are complete. The P5 external symbol publication was accepted
+  (all 118 changed artworks), promoted with the Seed Soldier URL preserved,
+  and its in-tree processing pipeline retired. Refreshed tracked databases
+  pass source freshness and publication checks. P6.1 has removed the legacy
+  Restrictions Chart API fallback and decoupled serving-only web code from
+  database build fingerprints. Complete P6.2 documentation alignment,
+  P6.3 integrated acceptance, P6.4 measurement and P6.5 plan retirement;
+  P5 documentation/tooling hygiene remains in scope as needed.
+  Historical evidence: [P5 cutover](testing.md#p57-accepted-symbol-publication-cutover)
+  and [three-database ownership](its-season-database.md).
 
 ### External source clarifications
 

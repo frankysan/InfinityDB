@@ -2,7 +2,7 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
 
-**Status:** Active on `dev/v1.1.0`: P0–P4 are complete, including owner acceptance of P4.5 on 2026-11-11. The normal runtime builds and serves Army v31 (`army.db`), Rules v17 (`rules_n5.db`), and the reviewed ITS 18 publication (`its_18.db`) as one selected set for both checkout and Docker. The accepted external symbol publication supersedes the retired in-tree processor. P5.8 source-freshness acceptance remains blocked by the unchanged approved databases; see [VR-0148](validation-queue.md#pending-deferred-execution). Remaining P5 hygiene and P6 integrated/release acceptance remain open. Dated progress entries below describe their historical state, not supported commands.
+**Status:** Active on `dev/v1.1.0`: P0–P4 are complete, including owner acceptance of P4.5 on 2026-11-11. The normal runtime builds and serves Army v31 (`army.db`), Rules v17 (`rules_n5.db`), and the reviewed ITS 18 publication (`its_18.db`) as one selected set for checkout and Docker. The accepted external symbol publication supersedes the retired in-tree processor. The P5.8 tracked source-freshness blocker was resolved by refreshed databases and a passing full deployment-asset verifier. P6.1 has removed the legacy Restrictions Chart API fallback and excluded serving-only web Python from database build fingerprints. Remaining P5 hygiene, P6 documentation consolidation and integrated/release acceptance are open. Dated progress entries below describe historical states, not supported commands.
 
 **Established:** 2026-11-08  
 **Planning baseline:** `dev/v1.0.1` at `2f84a282872d2aa701684f66bf4e7302cf802932` (clean checkout at initial inspection). This is evidence of the starting architecture, not a freeze on subsequent work.
@@ -3625,6 +3625,26 @@ separate P5 change; no processors were retired during publication cutover.
 5. **P6.5 — Retire the roadmap.** Transfer final architectural contracts to their canonical owners; keep only genuinely open scope in `TODO.md`. Git history preserves this plan once complete; do not keep it as a permanent competing guide.
 
 **Exit:** A newcomer or future agent can identify the main data path, rebuild databases, run the web app locally, and package a Docker image from a few concise, authoritative entrypoints.
+
+#### P6.4 — Interim structural counts (2026-11-12)
+
+The P1.6 baseline at `e6d009f2` recorded **146** tracked Python
+modules under `tools/` (including `__init__.py`), **7** shell scripts,
+**5** GitHub workflows and **2** installed CLI entrypoints. The
+current `dev/v1.1.0` checkout has **123 tracked `tools/*.py` modules**,
+still **7** shell scripts, **5** workflows and **2** CLIs. The local
+directory additionally contains three untracked P5 one-off analysis
+scripts, excluded from the tracked comparison and still awaiting
+workspace deletion.
+
+The normal serving contract changed from **4 required files**
+(two SQLite databases and two paired JSON sidecars at P1) to
+**3 SQLite databases** (`army.db`, `rules_n5.db`, `its_18.db`).
+The static Restrictions chart JSON remains a historical publicly served
+URL, not an input to the current Restrictions API. These are
+file/entrypoint counts, not proof of corresponding development-time or
+runtime performance gains. Final P6.4 measurements and full P6.3
+acceptance remain open.
 
 ## Dependency and delivery map
 

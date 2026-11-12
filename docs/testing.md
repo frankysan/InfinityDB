@@ -1999,6 +1999,37 @@ static SVGs, **108** override SVGs, the publication manifest and all three
 runtime databases, with no added, missing or changed hashes. No production
 deployment, hosted acceptance or refreshed tracked database is implied.
 
+### P5.8 source-freshness closeout and P6.1 provenance boundary
+
+**2026-11-12, `dev/v1.1.0`:** VR-0148 was resolved when the complete
+tracked runtime set was refreshed at `5edb6a97`; the full
+`tools.verify_deployment_assets` gate subsequently passed. The separate
+P6.1 Restrictions Chart API change (`5772efc9`) removed the fallback to
+packaged static JSON: without Rules SQLite the API now fails closed (503).
+The public historical static URL remains available pending separate review.
+The chart and game-mode cohorts passed **31 tests**; the full selected
+three-database semantic baseline and checkout-server acceptance each
+passed **41/41** pinned routes.
+
+The first P6 build-provenance refinement (`ab9c074b`) excludes
+`src/infinity_db/web/` Python sources from the database-generating input
+envelope while keeping build/model code and maintained inputs fingerprinted.
+One complete rebuild from `JSON 20260929-114335.zip` produced build-set ID
+`7e7065ed30b9d68a922bf52705410344ed497db354b894f51b78cd7caf66c09a`.
+Only `army.db` and `rules_n5.db` changed; `its_18.db` was unchanged.
+On this committed revision, full deployment-asset verification exited **0**:
+**808/808** published SVGs, **807/807** browser references, with source
+freshness, embedded data and reviewed citations source-matched. The
+**41-route** offline semantic baseline passed again.
+
+Focused P6 provenance tests passed **2/2**; database-set tests passed
+**23/23** and deployment verifier tests **13/13**. Ruff, targeted Pyright,
+documentation/link checks and `git diff --check` passed. A broader
+`test_database_set_builder.py` run was cancelled after approximately
+135 seconds to avoid duplicating expensive real builds; it is **not**
+counted as passed. Full source CI, hosted CI, release acceptance and
+production deployment are separate and remain unclaimed.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
