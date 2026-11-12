@@ -2018,28 +2018,43 @@ unneeded host Python dependencies, and tests identical binaries
 across two independently provisioned Linux hosts.
 
 **Strict acceptance and job compatibility:** Keep the existing required
-`deterministic-outputs` job ID and visible name. It now depends on
+`deterministic-outputs` job ID and visible name. It depends on
 `fast-validation`, all `source-checks` native legs, and both
 `determinism-container` legs. On a full validation, the download
 pattern selects **only** the two pinned-container manifests and runs
 the original fail-closed `tools.compare_determinism_manifests`.
 Any missing artifact, missing version, unexpected artifact name,
 or byte/hash difference still fails; no semantic equivalence fallback.
-The existing `fast-validation.outputs.full` reuse policy still avoids
-extra container builds on an eligible previously validated baseline.
+To expose independent determinism evidence when a native source-check
+leg fails, this job may still run the byte comparator if fast-validation
+and both pinned legs succeeded. Its final explicit native-result gate
+then **fails the required job** unless the native matrix was green.
+This retains the original release safety contract while preserving
+actionable output from the pinned checks. The existing
+`fast-validation.outputs.full` reuse policy avoids extra container
+builds on an eligible previously validated baseline.
 
-**Evidence / boundary:** Local structural tests were extended to assert
-the exact native matrix, container host releases, identical checkout
-selection, pinned runner/probe, independent artifact publication and
-unchanged strict comparison. The Windows/Linux developer-worker
-manifest v2 check previously passed 10/10 at commit `40a7df27`.
-Hosted GitHub Actions must still run against the new workflow revision;
-local regression tests and developer-worker parity do **not** constitute
-hosted acceptance. Do not mark the hosted acceptance item complete
-until both workflow artifacts and the strict comparator are green.
-A full project test suite or production database rebuild was not
-triggered for this workflow-only change. No local/private source assets
-or released databases were modified.
+**Evidence / boundary:** Local structural tests assert the unchanged
+native matrix, container host releases, exact checkout selection, pinned
+runner/probe, both artifacts, unchanged strict comparison and a fail-closed
+native result. The Windows/Linux developer-worker manifest v2 check
+passed 10/10 at `40a7df27`. In the first actual hosted PR #29 run at
+`e40e7545`, both pinned Ubuntu 24.04 and 26.04 jobs **passed**
+and uploaded v2 manifest artifacts; GitHub reported identical SHA-256
+for both artifact ZIPs. However, both completed native Ubuntu
+Python 3.11/3.14 jobs failed earlier on
+`tools.verify_deployment_assets --skip-svg` with:
+`Runtime databases require rebuilding after input change:
+src/infinity_db/army_reference_storage.py`.
+The original `deterministic-outputs` job was skipped by its native
+dependency; the follow-up job-condition fix lets the strict compare
+execute without falsely turning the overall gate green. This native
+tracked-release inconsistency is a **separate prerequisite** and must
+be resolved before accepting the complete hosted workflow. A successful
+hosted exact-byte comparison and fully green source checks have not
+yet been demonstrated in this checkpoint. A full project suite or
+production database rebuild was not triggered for this CI-only slice.
+No private source data or tracked runtime DB was modified.
 
 ### L0 — Full read-only inventory and ownership mapping
 

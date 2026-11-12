@@ -220,6 +220,9 @@ jobs:
     # upstream, while exact-byte parity is checked across two pinned x64 hosts.
     name: Cross-platform deterministic outputs
     needs: [fast-validation, source-checks, determinism-container]
+    # Run the exact-byte check even when unrelated native source checks fail;
+    # enforce their result below so this required status never turns green.
+    if: ${{ !cancelled() && needs.fast-validation.result == 'success' && needs.determinism-container.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Reuse validated deterministic baseline
@@ -248,3 +251,9 @@ jobs:
       - name: Compare artifact hashes
         if: needs.fast-validation.outputs.full == 'true'
         run: python tools/compare_determinism_manifests.py determinism-manifests
+
+      - name: Enforce native source-check result
+        if: ${{ always() && needs.source-checks.result != 'success' }}
+        run: |
+          echo "Native source-checks failed or did not complete; pinned byte parity is insufficient."
+          exit 1

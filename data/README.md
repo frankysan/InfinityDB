@@ -278,10 +278,13 @@ Windows and macOS build checks, while two independent Ubuntu 24.04
 and 26.04 hosts generate the pinned-container manifests. The original
 strict `deterministic-outputs` job downloads both manifests and
 compares their entire v2 artifact sets, failing on missing or
-different hashes. GitHub-hosted Windows/macOS runners are not required
-to provide Linux Docker. A successful hosted workflow run is still
-required to confirm the new CI wiring; native platform checks remain
-a separate compatibility gate.
+different hashes. The comparator also executes when the native source
+matrix fails independently, but its **required job status still fails**
+until those native checks succeed. GitHub-hosted Windows/macOS runners
+are not required to provide Linux Docker. Both pinned-container jobs
+passed in the first hosted pull-request run, while the native source
+matrix reported a separate stale tracked runtime-database input. A
+fully green hosted run remains a separate acceptance gate.
 
 The two legacy paired destination files cannot be replaced as one filesystem
 transaction, so explicit `--with-raw` export retains its established commit

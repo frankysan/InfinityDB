@@ -362,10 +362,17 @@ when all contained work shares the same owner.
     jobs using `tools.run_pinned_determinism`, and keep the existing
     strict SHA-256 comparator and required job identity unchanged.
     No Docker support is assumed on hosted Windows/macOS.
-  - [ ] Verify the new hosted GitHub Actions jobs and strict comparison
-    on the cleanup PR at the exact proposed commit, including both
-    uploaded v2 manifests; local workflow/regression checks alone do
-    not establish hosted success.
+  - [ ] Close out hosted GitHub Actions acceptance: the two independent
+    pinned Ubuntu 24.04/26.04 jobs on cleanup PR #29 both passed and
+    uploaded byte-identical manifest archives at `e40e7545`. Native
+    Ubuntu Python 3.11/3.14 checks independently fail because tracked
+    runtime databases were not rebuilt after
+    `src/infinity_db/army_reference_storage.py` changed. The required
+    comparator is being made runnable despite native failures while
+    **remaining red** unless the native source-checks succeed. Verify
+    its own exact-byte step, then resolve the separate tracked runtime
+    rebuild/verification blocker and confirm the whole hosted workflow
+    is green.
   - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
     inspection and programmatic `include_raw=True` interfaces. Keep the
     independent source-identity/research semantics and their focused tests

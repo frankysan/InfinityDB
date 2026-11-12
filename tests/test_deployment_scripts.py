@@ -688,6 +688,14 @@ def test_source_ci_separates_native_builds_from_pinned_determinism() -> None:
     # Keep the established required job and its fail-closed exact-hash
     # comparison. One missing manifest fails (at least two are required).
     assert "needs: [fast-validation, source-checks, determinism-container]" in strict
+    assert "needs.determinism-container.result == 'success'" in strict
+    assert "needs.fast-validation.result == 'success'" in strict
+    assert "needs.source-checks.result != 'success'" in strict
+    assert "always()" in strict
+    assert "exit 1" in strict
+    assert strict.index("Compare artifact hashes") < strict.index(
+        "Enforce native source-check result"
+    )
     assert "pattern: determinism-container-*" in strict
     assert "path: determinism-manifests" in strict
     assert "python tools/compare_determinism_manifests.py determinism-manifests" in strict
