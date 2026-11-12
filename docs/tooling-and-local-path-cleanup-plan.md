@@ -1878,6 +1878,72 @@ runtime builds. An eventual removal requires a separate API deprecation
 decision and independent audit/format acceptance; do not delete their
 tests solely because they cover legacy paths.
 
+### Cross-platform determinism v2 investigation — 2026-11-12
+
+**Exact Git identity and synchronization:** Windows Git HEAD and the detached
+`linux-dev` worker checkout were both verified at `288aa821`, and later
+at `c37344d0` and `73da5e48d7a19786bde19837c96ee0f3b5aaaa17`.
+The work branch was explicitly pushed, and Linux explicitly fetched and
+checked out the exact revisions before running the paired manifest jobs.
+Both runs completed successfully using `tools.build_determinism_manifest`.
+The maintained comparator, now supporting two explicit manifest filenames
+as well as its historical directory-discovery interface, **failed** on the
+five byte-different artifacts; it did not ignore or coerce any SHA mismatch.
+
+**Confirmed source-fixture normalization defect:** Some tracked JSON
+deployment fixtures retained pre-attribute CRLF bytes in the Windows
+checkout, despite the repository's LF checkout policy. A fixture file was
+802 bytes on Windows but 755 on Linux. The v2 generator now copies its
+small, tracked fixture into the temporary build root while canonicalizing
+JSON line endings to LF, without rewriting the checkout or normalizing
+real downloaded Army source archives. A hermetic regression covers both
+newline forms. This fixed the `master.json` and `normalized.json`
+differences and preserved identical normalized-validation bytes.
+
+**Strict v2 result at `73da5e48`:** **Five of ten artifact SHA-256s
+match**: merged master JSON, normalized JSON, normalized validation JSON,
+symbol-publication JSON and the reviewed Weapon citation publication.
+The remaining five physical artifacts differ: `army.db`,
+`rules_n5.db`, `its_18.db`, `snapshot.zip` and `work.zip`.
+The exact ITS JSON source file was independently transferred and SHA-256
+verified to have identical bytes on both machines.
+
+**Non-approving diagnostic evidence:** An opt-in
+`--diagnostics-output` sidecar reports SQLite writer headers, a
+writer-version-neutralized physical SHA, every relational table digest
+and every ZIP member's uncompressed SHA/CRC/size and compressed size.
+All **108 SQLite user tables** have matching canonical row-content
+digests (84 Army, 14 Rules, 10 ITS). All three DBs have identical page
+counts, but their physical SHA values differ. ITS differs **only in the
+SQLite writer-version header** (neutralizing bytes 96–99 makes its
+whole-file hash identical); Army and Rules retain additional
+non-row-content/layout differences after neutralizing that field.
+All **1,608 uncompressed ZIP member payloads** match (3 snapshot, 1,605
+work). The compressed sizes differ for **3/3** snapshot members and
+**1,555/1,605** work members; compressed ZIP SHA differs in both archives.
+Therefore, the current strict byte-determinism gate is still **red**,
+even though the tested logical content and archive payloads match.
+
+**Toolchain explanation and next requirement:** The Windows host used
+Python **3.14.10**, SQLite **3.50.4** and **zlib-ng 1.3.1**; the Linux
+worker used Python **3.14.4**, SQLite **3.46.1** and standard **zlib 1.3.1**.
+The SQLite header difference is directly confirmed, while the additional
+SQLite page-layout and ZIP compression drift is consistent with these
+different implementations. Do **not** weaken the exact-byte comparator,
+rewrite SQLite writer metadata to disguise an actual version difference,
+or switch archive compression merely to force a green check. Prefer
+a pinned, reproducible build toolchain/container shared by both platforms;
+then regenerate and compare the v2 manifest at an identical Git SHA.
+The optional diagnostics are kept separate from the versioned v2 artifact
+inventory, and all generated evidence stays under ignored `local/reports/`.
+No tracked runtime DB or private `army.raw.db` was modified or deleted.
+
+**Focused validation:** The determinism/compare test suite passed **15/15**
+after adding explicit-manifest arguments; Ruff and Pyright passed for the
+diagnostic implementation. Additional documentation checks and the exact
+resulting commit are recorded in the Git history. A full project suite or
+new pinned complete runtime build was not run for these diagnostics.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

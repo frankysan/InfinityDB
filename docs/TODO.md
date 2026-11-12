@@ -342,12 +342,19 @@ when all contained work shares the same owner.
   - [x] Make the direct Python `export_database()` default application-only
     as well; retained legacy tests and consumers explicitly select
     `include_raw=True` when asserting pair/archive semantics.
-  - [ ] Validate determinism manifest **v2 across Windows and Linux** at the
-    same exact Git revision; Linux remains at `ac8050c0`, while the v2
-    generator is in later unpushed commits. An older Linux manifest was
-    generated successfully but is v1, so it does not count as v2 parity.
-    After explicit branch publication and worker sync, regenerate v2 and
-    compare all artifact hashes.
+  - [x] Run and diagnose manifest **v2 on Windows and Linux at the same
+    commit**. After explicit branch push, Linux fetch and exact-SHA checkout,
+    the strict comparator failed on five physical artifacts at `73da5e48`.
+    All 108 SQLite user-table digests and all 1,608 ZIP member payloads
+    match; the remaining differences are ZIP deflate bytes and SQLite
+    writer-version/layout bytes, not demonstrated source-content drift.
+    The disposable Army fixture's stale Windows CRLF bytes were separately
+    normalized, restoring parity for all generated JSON artifacts.
+  - [ ] Achieve **byte-identical** v2 artifacts by pinning a shared
+    cross-platform build runtime (SQLite and zlib/deflate implementation,
+    with compatible Python versions), preferably in a reproducible
+    build image. Recheck all ten raw SHA-256 hashes on the same Git revision;
+    retain the strict gate, and do not mislabel semantic parity as byte parity.
   - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
     inspection and programmatic `include_raw=True` interfaces. Keep the
     independent source-identity/research semantics and their focused tests

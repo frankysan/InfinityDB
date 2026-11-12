@@ -55,10 +55,17 @@ def compare(paths: list[Path]) -> list[str]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("root", type=Path, help="Directory containing downloaded manifests")
+    parser.add_argument(
+        "paths", type=Path, nargs="+",
+        help="Two or more manifest JSON files, or one directory of determinism-manifest.json files",
+    )
     args = parser.parse_args(argv)
 
-    paths = sorted(args.root.rglob("determinism-manifest.json"))
+    paths = (
+        sorted(args.paths[0].rglob("determinism-manifest.json"))
+        if len(args.paths) == 1 and args.paths[0].is_dir()
+        else args.paths
+    )
     try:
         errors = compare(paths)
     except (OSError, ValueError, json.JSONDecodeError) as exc:

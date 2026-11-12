@@ -9,6 +9,7 @@ import pytest
 
 from tools import build_determinism_manifest as manifest_builder
 from tools.compare_determinism_manifests import compare
+from tools.compare_determinism_manifests import main as compare_main
 
 
 def _write(
@@ -171,6 +172,36 @@ def test_zip_diagnostics_separate_member_contents_from_deflate_bytes(
     assert first["sha256"] == second["sha256"]
     assert first["crc"] == second["crc"]
     assert first["compressSize"] != second["compressSize"]
+
+
+def test_comparator_cli_accepts_explicit_manifest_paths(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    windows = _write(
+        tmp_path / "windows.json", {"build/army.db": "a" * 64}, version=2,
+    )
+    linux = _write(
+        tmp_path / "linux.json", {"build/army.db": "b" * 64}, version=2,
+    )
+    assert compare_main([str(windows), str(linux)]) == 1
+    output = capsys.readouterr().out
+    assert "Cross-platform deterministic output mismatch" in output
+    assert "build/army.db" in output
+
+
+def test_comparator_cli_preserves_directory_discovery(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    _write(
+        tmp_path / "windows" / "determinism-manifest.json",
+        {"build/army.db": "a" * 64}, version=2,
+    )
+    _write(
+        tmp_path / "linux" / "determinism-manifest.json",
+        {"build/army.db": "a" * 64}, version=2,
+    )
+    assert compare_main([str(tmp_path)]) == 0
+    assert "verified across 2 manifests" in capsys.readouterr().out
 
 
 def test_compare_requires_multiple_manifests(tmp_path: Path) -> None:
