@@ -2050,6 +2050,29 @@ The source-freshness and static SVG release verifier separately passed
 at `ab9c074b`. No production deployment, hosted CI, full suite,
 release or tag is implied.
 
+### P6.3 — Full Windows test run and focused failure closeout (2026-11-12)
+
+At `fc138678`, the full Windows source test suite with available published
+assets completed in **1184.07 seconds**: **5604 passed, 4 failed,
+121 skipped**. Three failures came from optional source audits finding a
+stale ignored `data/generated/army.raw.db` alongside the refreshed tracked
+`army.db`; the fourth came from the deterministic-I/O scan inspecting an
+untracked retired P5 helper. The full run is recorded as **failed**, not
+accepted.
+
+The focused correction at `56c8629d` requires a matching Army/raw
+export generation before running optional local source audits. Missing or
+different-generation ignored source data causes a documented skip;
+malformed or invalid matched data still fails. The deterministic-I/O
+policy scans Git-tracked source files instead of untracked one-off
+diagnostics. Follow-up test modules passed: reference baseline **62 passed,
+2 skipped**; source presentation **11 passed, 1 skipped**; deterministic
+I/O **4 passed**. Targeted Ruff and Git whitespace checks passed.
+Targeted Pyright on the pytest modules could not resolve `pytest` in
+the selected type-check environment; this is not reported as a passing
+type check. The full suite was **not rerun** on the correction.
+Hosted CI and final P6.3 acceptance remain pending.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
