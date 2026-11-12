@@ -1,7 +1,8 @@
-"""Inspect a paired development-only Infinity Army raw archive, read-only.
+"""Inspect exact Infinity Army source rows from a verified development input.
 
-The raw database contains exact normalized source-row JSON and is not a
-runtime publication. Every command verifies the application/raw export pair.
+By default use the legacy lossless raw sibling, with its validated export
+pair. Explicit --normalized selects a complete normalized JSON document bound
+to the application export generation; neither route mutates its inputs.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
+from infinity_db.database.normalized_source import verified_normalized_document
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.database.schema import METADATA_TABLE, RAW_ROWS_TABLE, ROW_JSON, TABLES, quote
@@ -26,6 +28,7 @@ def inspect_raw_archive(
     application: Path,
     raw: Path | None = None,
     *,
+    normalized: Path | None = None,
     command: str = "tables",
     table: str | None = None,
     position: int = 0,
@@ -39,6 +42,45 @@ def inspect_raw_archive(
     if position < 0 or not 1 <= limit <= MAX_PAGE_SIZE:
         raise ValueError("Position must be nonnegative and page size must be 1..100")
     application = Path(application)
+    if normalized is not None:
+        if raw is not None:
+            raise ValueError("Select exactly one raw or normalized source input")
+        document, _columns, _metadata, generation = verified_normalized_document(
+            application, Path(normalized),
+        )
+        identity = {
+            "application": str(application),
+            "normalized": str(normalized),
+            "pairSha256": generation,
+            "pairStatus": "verified",
+        }
+        if command == "verify":
+            return identity
+        tables = document["tables"]
+        if command == "tables":
+            return {
+                **identity,
+                "tables": [
+                    {"name": name, "rawRows": len(rows)}
+                    for name, rows in sorted(tables.items())
+                ],
+            }
+        assert table is not None
+        if table not in tables:
+            raise ValueError(f"Source table not present in this export: {table}")
+        source_rows = tables[table]
+        if command == "row":
+            if position >= len(source_rows):
+                raise ValueError(f"Raw row absent: {table}[{position}]")
+            return {**identity, "table": table, "position": position,
+                    "row": source_rows[position]}
+        return {
+            **identity, "table": table, "start": position, "limit": limit,
+            "rows": [
+                {"position": index, "row": source_rows[index]}
+                for index in range(position, min(position + limit, len(source_rows)))
+            ],
+        }
     raw = Path(raw) if raw is not None else raw_database_path(application)
     pair_hash = validate_database_pair(application, raw_path=raw)
     identity = {
@@ -113,7 +155,12 @@ def main(argv: list[str] | None = None) -> int:
         "--application", type=Path, default=DEFAULT_APPLICATION,
         help="application army.db; its paired raw sibling is selected by default",
     )
-    parser.add_argument("--raw", type=Path, help="explicit paired raw archive")
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument("--raw", type=Path, help="explicit paired raw archive")
+    source.add_argument(
+        "--normalized", type=Path,
+        help="explicit normalized.json verified against the Army export generation",
+    )
     actions = parser.add_subparsers(dest="action", required=True)
     actions.add_parser("verify", help="validate shared raw/application metadata")
     actions.add_parser("tables", help="list normalized source tables with exact row counts")
@@ -127,13 +174,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         result = inspect_raw_archive(
-            args.application, args.raw, command=args.action,
+            args.application, args.raw, normalized=args.normalized, command=args.action,
             table=getattr(args, "table", None),
             position=getattr(args, "position", getattr(args, "start", 0)),
             limit=getattr(args, "limit", 20),
         )
     except (ValueError, OSError, sqlite3.Error, json.JSONDecodeError) as exc:
-        print(f"Raw archive inspection refused: {exc}", file=sys.stderr)
+        print(f"Source inspection refused: {exc}", file=sys.stderr)
         return 1
     print(json.dumps(result, indent=2, ensure_ascii=False))
     return 0

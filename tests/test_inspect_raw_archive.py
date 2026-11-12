@@ -8,7 +8,9 @@ from pathlib import Path
 
 import pytest
 
+from infinity_db.database import export_database, raw_database_path
 from infinity_db.database.schema import METADATA_TABLE, RAW_ROWS_TABLE, ROW_JSON, TABLES
+from tests.test_database import _normalized_fixture_data
 from tools.inspect_raw_archive import inspect_raw_archive, main
 
 
@@ -112,6 +114,78 @@ def test_raw_inspection_cli_read_only(
     assert row["row"] == {"source": "skills", "position": 0}
     assert main(["--application", str(app), "rows", "skills", "--limit", "101"]) == 1
     assert "page size" in capsys.readouterr().err
+
+
+@pytest.fixture
+def normalized_pair(tmp_path: Path) -> tuple[Path, Path]:
+    document = _normalized_fixture_data()
+    document["_meta"]["snapshotArchiveSha256"] = "a" * 64
+    application = tmp_path / "army.db"
+    normalized = tmp_path / "normalized.json"
+    export_database(document, application, finalize=False)
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    return application, normalized
+
+
+def test_verified_normalized_inspection_has_exact_raw_row_parity(
+    normalized_pair: tuple[Path, Path],
+) -> None:
+    application, normalized = normalized_pair
+    raw = raw_database_path(application)
+    verified = inspect_raw_archive(application, normalized=normalized, command="verify")
+    legacy = inspect_raw_archive(application, command="verify")
+    assert verified["pairSha256"] == legacy["pairSha256"]
+    assert verified["pairStatus"] == "verified"
+
+    raw_tables = inspect_raw_archive(application, command="tables")["tables"]
+    normalized_tables = inspect_raw_archive(
+        application, normalized=normalized, command="tables",
+    )["tables"]
+    assert normalized_tables == raw_tables
+    for name in ("units", "skills", "profiles", "army_lists", "option_includes"):
+        legacy_rows = inspect_raw_archive(application, command="rows", table=name, limit=100)
+        normalized_rows = inspect_raw_archive(
+            application, normalized=normalized, command="rows", table=name, limit=100,
+        )
+        assert normalized_rows["rows"] == legacy_rows["rows"]
+        if normalized_rows["rows"]:
+            selected = normalized_rows["rows"][0]
+            assert inspect_raw_archive(
+                application, normalized=normalized, command="row",
+                table=name, position=selected["position"],
+            )["row"] == selected["row"]
+
+    raw.unlink()
+    assert inspect_raw_archive(
+        application, normalized=normalized, command="tables",
+    )["tables"] == raw_tables
+    assert not raw.exists()
+
+
+def test_normalized_inspection_rejects_changed_source_and_conflicting_inputs(
+    normalized_pair: tuple[Path, Path],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    application, normalized = normalized_pair
+    with pytest.raises(ValueError, match="exactly one"):
+        inspect_raw_archive(
+            application, raw=raw_database_path(application), normalized=normalized,
+        )
+    assert main([
+        "--application", str(application), "--normalized", str(normalized),
+        "row", "units", "0",
+    ]) == 0
+    assert json.loads(capsys.readouterr().out)["pairStatus"] == "verified"
+
+    document = json.loads(normalized.read_text(encoding="utf-8"))
+    document["tables"]["units"][0]["name"] = "unreviewed name"
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match"):
+        inspect_raw_archive(application, normalized=normalized, command="verify")
+    assert main([
+        "--application", str(application), "--normalized", str(normalized), "tables",
+    ]) == 1
+    assert "does not match" in capsys.readouterr().err
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

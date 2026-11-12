@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from infinity_db.variant_usage import (
+    build_variant_usage_from_normalized,
     build_variant_usage_projection,
     validate_variant_usage_candidate,
 )
@@ -25,9 +26,14 @@ def main() -> None:
         "--check", type=Path,
         help="verify an existing candidate against the exact current inputs without writing",
     )
-    parser.add_argument(
-        "--raw-db", type=Path, required=True,
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument(
+        "--raw-db", type=Path,
         help="Explicit validated, paired Army raw archive for source-only inspection",
+    )
+    source.add_argument(
+        "--normalized", type=Path,
+        help="Explicit normalized.json bound to the selected Army export generation",
     )
     parser.add_argument(
         "--army-db", type=Path, default=ROOT / "data/generated/army.db",
@@ -36,8 +42,12 @@ def main() -> None:
         "--rules-db", type=Path, default=ROOT / "data/generated/rules_n5.db",
     )
     args = parser.parse_args()
-    result = build_variant_usage_projection(
-        args.army_db, args.raw_db, args.rules_db,
+    result = (
+        build_variant_usage_from_normalized(
+            args.army_db, args.normalized, args.rules_db,
+        )
+        if args.normalized is not None
+        else build_variant_usage_projection(args.army_db, args.raw_db, args.rules_db)
     )
     if args.check is not None:
         validate_variant_usage_candidate(ROOT / args.check, result)

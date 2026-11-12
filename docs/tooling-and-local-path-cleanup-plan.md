@@ -1393,6 +1393,88 @@ These are the **post-code-change** revision fingerprints; older build hashes
 need not match, while the source identity, published inventories and API
 behavior remain checked. The full project test suite was not run.
 
+### Standalone raw-audit consumer triage and first cutover — 2026-11-12
+
+**Scope:** Audited maintained `tools/` callers that require or optionally
+read `army.raw.db`, its generated `raw_database_path`, or the shared
+`paired_audit_connection` adapter. Call-site and test review distinguishes
+current independent invariants from the mere presence of historical tests.
+
+- **Migrated dual-source interfaces (retain-active):**
+  `tools.inspect_raw_archive` now supports an explicit
+  `--normalized PATH` route, using complete
+  `verified_normalized_document` source-to-application attestation. Exact
+  source rows, empty-table counts, stable positions, bounded pagination,
+  absent-versus-null fields and source-ID refusal semantics match the
+  paired raw archive. The old `--raw` and implicit sibling path remain
+  available, but are never silently substituted for missing normalized
+  input. A new source-path conflict is rejected. The tool remains read-only
+  and keeps its historical module name for compatibility.
+  `tools.build_variant_usage` now accepts either `--normalized` or
+  `--raw-db` as an explicitly selected, mutually exclusive source; the
+  production projection already uses normalized source. Its existing
+  candidate-only/no loose publication guards are unchanged.
+- **Retain-active, migrate next:** `paired_audit_connection` currently
+  attaches a validated raw sibling to expose source-only tables to
+  `audit_normalization_links`, `audit_peripheral_semantics` and
+  `audit_relationship_semantics`. These review normalization-vs-gameplay,
+  exact Peripheral attachment and Include relationship invariants. Plan
+  an explicit normalized-source adapter with equivalent relational queries,
+  application provenance and source-owner negative tests before removing
+  raw attachment. Keep the combined legacy schema route when intentionally
+  supplied; do not retain unused historical behavior solely because a test
+  still invokes it.
+- **Retain-active, migrate as independent source audits:**
+  `audit_army_faction_semantics` derives and compares application Army
+  identities against source factions and roster occurrences;
+  `audit_source_presentation` measures unrepresented source fields and
+  occupation; `report_reference_baseline` has a separate, independently
+  used citation/source gate and optional pinned archive verification.
+  The `audit_database_separation` tool already supports a missing raw
+  sibling and validates current published schemas. Source identity and
+  row/field evidence still need to be verified, not simply omitted when
+  a raw file is unavailable.
+- **Provenance hardening needed before cutover:**
+  `audit_source_variant_inputs.inventory_source_variants` currently opens
+  `application_path` and `raw_path` separately, without invoking
+  `validate_database_pair` in that function. It audits exact Skill/Equipment
+  owner and Extra semantics, so it cannot be retired wholesale. Require
+  explicit source-generation verification before a mixed source may be read;
+  test mismatched and missing files as failures, preserve strict occurrence
+  semantics, and migrate its read path to verified normalized input.
+  The optional `source_extra_owner_context` source-row lookup must share
+  the same provenance boundary.
+- **Retain as opt-in reproducibility evidence, not runtime input:**
+  `build_determinism_manifest` explicitly invokes standalone
+  `infinity-db export` and compares its paired raw artifact checksum.
+  This is still evidence about the standalone export format, not a reason
+  to reintroduce raw SQLite into complete runtime builds. Retire the
+  raw-specific measurement when the standalone format/consumer work
+  is complete; retain any distinct cross-platform runtime/JSON/archive
+  determinism checks that remain useful.
+
+**Acceptance:** `tests/test_inspect_raw_archive.py` **12 passed,
+1 skipped** (pinned raw fixture unavailable). New tests compare exact
+normalized and raw source rows/counts on an exported fixture, demonstrate
+inspection without a persisted raw sibling and reject tampered normalized
+source. `tests/test_variant_usage.py` **99 passed, 2 skipped** and
+`tests/test_variant_usage_source.py` **6 passed**, including explicit
+candidate CLI source selection and existing rawless publication parity.
+`tests/test_deployment_scripts.py` also passed **46/46**, covering
+existing deployment/packaging constraints. Ruff, Pyright, docs/link/backlog
+checks and `git diff --check` passed. The full project suite and full
+build acceptance were not rerun. The current cleanup does **not** delete or modify
+ignored raw archives, change standalone paired export, remove legacy
+source audit APIs, or change the runtime database schema. The complete
+release-build acceptance was already established in the preceding slice;
+it was not rerun for these source-inspection-only CLI changes.
+
+**Next dependency:** Migrate and validate the shared
+`paired_audit_connection` consumers first, then resolve
+`audit_source_variant_inputs` pair provenance and source-only joins.
+Defer irreversible raw-format and test retirement until independently
+accepted research/audit semantics are covered by their replacements.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

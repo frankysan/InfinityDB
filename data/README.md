@@ -233,24 +233,29 @@ fingerprint. `infinity-db database-health data/generated/army.db --require-raw` 
 operator-facing validation command for this pair contract; omitting `--require-raw` validates only
 the published application database.
 
-For local source inspection, the read-only `tools.inspect_raw_archive` CLI
-checks the application/raw sibling pairing *before* reading any lossless
-source rows. It uses the imported table inventory from the paired metadata;
-zero-row source tables remain visible, and table names are never accepted
-outside the normalized source schema. From the repository root:
+For local source inspection, `tools.inspect_raw_archive` supports either
+an explicit `--normalized` source JSON file verified against the application's
+complete `export_pair_sha256` generation or the legacy paired raw SQLite
+archive. Its historical name is retained for existing callers. It never
+combines unverified generations: if both sources are selected, or the selected
+source has changed, inspection is refused. Zero-row source tables remain
+visible, table names are constrained to the normalized schema, and returned
+rows preserve their exact source JSON (including absent versus null fields).
+From the repository root, for a matched local Army export:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.inspect_raw_archive verify
-.venv\Scripts\python.exe -m tools.inspect_raw_archive tables
-.venv\Scripts\python.exe -m tools.inspect_raw_archive row skills 0
-.venv\Scripts\python.exe -m tools.inspect_raw_archive rows skills --start 0 --limit 20
+.venv\Scripts\python.exe -m tools.inspect_raw_archive --application local/data/build/army.db --normalized local/data/build/normalized.json verify
+.venv\Scripts\python.exe -m tools.inspect_raw_archive --application local/data/build/army.db --normalized local/data/build/normalized.json rows skills --start 0 --limit 20
 ```
 
-The `--application` and `--raw` flags select explicit sibling paths when
-inspecting a different local build; a stale or mismatched pair fails closed.
-Rows are exact source JSON, not application identities. Bounded listings
-accept at most 100 entries per invocation. This tool does not change
-imported, curated or published data, and it is not part of the runtime API.
+The `local/data/build/` paths above are illustrative: select the actual
+verified outputs of the same source generation. The legacy command still
+accepts `--application` and `--raw`, and defaults to the sibling
+`army.raw.db` when `--normalized` is omitted; standalone export creates
+that pair, but complete runtime builds do not. A stale or mismatched pair
+fails closed. Bounded listings accept at most 100 entries. This tool is
+read-only, does not change imported, curated or published data, and is not
+part of the runtime API.
 
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;
