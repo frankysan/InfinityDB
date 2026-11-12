@@ -913,6 +913,98 @@ handoffs, resolve Linux worker fetch/access, then review and approve L1
 exceptions/path moves separately. No ignored data, Syncthing setting,
 published DB or graphics were modified by this checkpoint.
 
+### Linux Git diagnostic checkpoint — 2026-11-12
+
+**Candidate:** Windows `dev/tooling-workspace-cleanup` remained clean at
+`ac8050c0c29c9546c935365fb4b31b3f7f6a32ab`. An explicit Windows
+MCP fetch succeeded. GitHub confirms the remote cleanup branch points
+to the same SHA; Source checks, installed-wheel smoke and deployment
+smoke all completed successfully there. No further push was required.
+
+The updated MCP job interface now preserves bounded, client-safe Git
+failure details. Both Linux `sync_worker_repository(fetch)` and
+`git_worker_operation(fetch)` failed at Git `fetch` with
+`git_ref_unavailable` (category `reference`, Git exit 128).
+This is an actionable classification, **not** proof of the cause.
+The fetch request specifies no branch; GitHub no longer lists the
+worker's checked-out `dev/v1.0.0` branch. A stale branch-specific
+`remote.origin.fetch` refspec is a plausible explanation, but its
+actual value has not been read and credentials/remote configuration
+have not been independently checked. Do not label the failure fixed.
+
+A read-only Linux fast-forward preview confirmed the worker remains
+clean on `dev/v1.0.0` at
+`a47a573d2afd6376dcc46abe9539e04177c6ca98`; its cached
+`origin/dev/v1.0.0` target was `2c312edbc38d47663dfb053e57efc2724a4618e4`.
+A detached checkout dry-run for `ac8050c0` failed at `rev-parse`
+because that commit was not locally available. The worker checkout
+was **not** synchronized, checked out or changed.
+
+**Next host gate:** Have the operator inspect the worker service
+account's `remote.origin.fetch` configuration and remote branch
+visibility, without exposing credentials or changing Syncthing.
+Correct a stale refspec only if confirmed, then explicitly fetch and
+verify the expected commit, detached-checkout the clean worker to that
+SHA, and dry-run one actual staged `image-overrides/` file through
+the corrected `tools.activate_synced_assets` mapping. Record the
+selected file's expected destination, hash and dry-run result without
+activating or overwriting private files. This Linux acceptance is
+still blocked; Windows and GitHub CI passing do not substitute for it.
+
+### Reference-baseline reporter disposition — 2026-11-12
+
+**Baseline:** Windows `ac8050c0`, read-only lifecycle/consumer review.
+`tools.report_reference_baseline` is a 3,292-line multi-purpose
+reporter and is **retain-active pending a scoped extraction review**,
+not eligible for wholesale retirement:
+
+- The standalone current N5 citation-minimum audit serves the maintained
+  1.0 citation contract. A fresh read-only run returned **495/495**
+  current citations, zero missing; this checks declarations, not source
+  contents or semantic acceptance.
+- The two-database Army/Rules baseline, optional pinned Army archive
+  comparison and served-pair check are independent offline investigation
+  and historical publication evidence. They do not validate ITS or the
+  complete-set release-candidate browser gate.
+- The frozen 367-record explanation reconciliation and its declaration,
+  numeric replacement, conditional-declaration, visibility, pilot,
+  batching and reviewed-evidence branches are optional source-scoped
+  investigations. They must be evaluated branch by branch against the
+  preserved findings and open reconciliation work rather than retired
+  simply for being dated.
+- `tools.source_coverage_dispositions` imports the reporter's
+  `reconcile_explanation_inventory` and current-collection identity
+  contract. Extract or relocate those active interfaces only with that
+  consumer and its tests; CI has no direct reporter invocation.
+
+The read-only explanation reconciliation returned **367 frozen, 466
+current, 350 retained, 116 added, 17 retired** and **830 source locators
+pending clause review**. The current reporter and disposition test
+coverage is in `tests/test_report_reference_baseline.py` and related
+source-disposition tests. No private input or publication artifact
+was changed by these commands.
+
+**Output-path finding for L2/L6:** Generic `--json-output` and
+`--markdown-output` writers accept arbitrary paths and overwrite
+existing files; the specialized pilot and batch output paths are
+restricted to `local/`, but still overwrite. The current testing guide
+uses categorized `local/validation/` destinations for baseline
+evidence. Review all output branches and their retained consumers before
+changing defaults or adding fail-closed destination checks. Do not
+prematurely break supported research commands or treat generated review
+output as independently accepted evidence.
+
+**Validation:** The reporter suite passed **64 tests, 2 skips**;
+the independent disposition consumer passed **23/23 tests**. The two
+read-only reporter commands returned successfully without writing output.
+The documentation stage passed Markdownlint (47 files, zero issues),
+local links (46 files) and backlog structure; `git diff --check` passed.
+These are Windows checks, not Linux activation, source-authority or
+hosted acceptance for this documentation change.
+
+**L0 remains open.** This review grants no tool retirement, output
+migration, private-file deletion or L1 path-policy approval.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
