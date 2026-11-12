@@ -7,12 +7,14 @@ import argparse
 import json
 import sqlite3
 from collections.abc import Sequence
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.database.schema import METADATA_TABLE, TABLES, quote
+from infinity_db.variant_usage_source import normalized_source_connection
 
 FORMAT = "InfinityDB source-to-presentation completeness audit"
 FORMAT_VERSION = 2
@@ -484,7 +486,38 @@ def _potential_gap_batches(fields: Sequence[dict[str, Any]]) -> list[dict[str, A
     )
 
 
-def _raw_evidence(path: Path) -> dict[str, Any]:
+def _source_evidence(connection: sqlite3.Connection, source_path: Path) -> dict[str, Any]:
+    tables = _table_names(connection)
+    unrepresented = _unrepresented_field_occupancy(connection)
+    batches = _potential_gap_batches(unrepresented)
+    return {
+        "status": "available",
+        "unrepresentedFieldOccupancy": unrepresented,
+        "potentialGapBatches": batches,
+        "occupiedUnrepresentedFieldCount": sum(
+            item["occupiedCount"] > 0 for item in unrepresented
+        ),
+        "occupiedUnrepresentedTableCount": sum(
+            batch["occupiedFieldCount"] > 0 for batch in batches
+        ),
+        "path": str(source_path),
+        "fireteamCount": _count(connection, "fireteams"),
+        "fireteamMemberCount": _count(connection, "fireteam_members"),
+        "hackingProgramRowCount": _count(connection, "metadata_hacking_programs"),
+        "martialArtsRowCount": _count(connection, "metadata_martial_arts"),
+        "metachemistryRowCount": _count(connection, "metadata_metachemistry"),
+        "bootyRowCount": _count(connection, "metadata_booty"),
+        "normalizedTableCount": len(set(TABLES) & tables),
+    }
+
+
+def _raw_evidence(path: Path, *, normalized: Path | None = None) -> dict[str, Any]:
+    if normalized is not None:
+        try:
+            with normalized_source_connection(path, normalized) as (connection, _generation):
+                return _source_evidence(connection, normalized)
+        except (ValueError, OSError, sqlite3.Error) as exc:
+            raise SourcePresentationAuditError(str(exc)) from exc
     raw_path = raw_database_path(path)
     if not raw_path.is_file():
         return {"status": "not_available", "path": str(raw_path)}
@@ -492,35 +525,13 @@ def _raw_evidence(path: Path) -> dict[str, Any]:
         validate_database_pair(path, raw_path=raw_path)
     except ValueError as exc:
         raise SourcePresentationAuditError(str(exc)) from exc
-    connection = sqlite3.connect(raw_path.resolve().as_uri() + "?mode=ro", uri=True)
-    try:
-        tables = _table_names(connection)
-        unrepresented = _unrepresented_field_occupancy(connection)
-        batches = _potential_gap_batches(unrepresented)
-        return {
-            "status": "available",
-            "unrepresentedFieldOccupancy": unrepresented,
-            "potentialGapBatches": batches,
-            "occupiedUnrepresentedFieldCount": sum(
-                item["occupiedCount"] > 0 for item in unrepresented
-            ),
-            "occupiedUnrepresentedTableCount": sum(
-                batch["occupiedFieldCount"] > 0 for batch in batches
-            ),
-            "path": str(raw_path),
-            "fireteamCount": _count(connection, "fireteams"),
-            "fireteamMemberCount": _count(connection, "fireteam_members"),
-            "hackingProgramRowCount": _count(connection, "metadata_hacking_programs"),
-            "martialArtsRowCount": _count(connection, "metadata_martial_arts"),
-            "metachemistryRowCount": _count(connection, "metadata_metachemistry"),
-            "bootyRowCount": _count(connection, "metadata_booty"),
-            "normalizedTableCount": len(set(TABLES) & tables),
-        }
-    finally:
-        connection.close()
+    with closing(sqlite3.connect(
+        raw_path.resolve().as_uri() + "?mode=ro", uri=True,
+    )) as connection:
+        return _source_evidence(connection, raw_path)
 
 
-def audit_database(path: Path) -> dict[str, Any]:
+def audit_database(path: Path, *, normalized: Path | None = None) -> dict[str, Any]:
     _validate_policy()
     fields = _schema_fields()
     inventory: list[dict[str, Any]] = []
@@ -552,7 +563,7 @@ def audit_database(path: Path) -> dict[str, Any]:
     finally:
         connection.close()
 
-    raw_evidence = _raw_evidence(path)
+    raw_evidence = _raw_evidence(path, normalized=normalized)
     return {
         "format": FORMAT,
         "formatVersion": FORMAT_VERSION,
@@ -581,17 +592,27 @@ def audit_database(path: Path) -> dict[str, Any]:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=FORMAT)
     parser.add_argument("database", type=Path)
+    parser.add_argument(
+        "--normalized", type=Path,
+        help="Verified normalized Army source instead of the raw SQLite sibling",
+    )
     parser.add_argument("--output", type=Path)
     parser.add_argument(
         "--require-no-occupied-gaps",
         action="store_true",
         help=(
             "Fail if unrepresented source fields are populated "
-            "or raw evidence is missing."
+            "or verified source evidence is missing."
         ),
     )
     args = parser.parse_args(argv)
-    report = audit_database(args.database)
+    try:
+        report = (
+            audit_database(args.database, normalized=args.normalized)
+            if args.normalized is not None else audit_database(args.database)
+        )
+    except (SourcePresentationAuditError, OSError, sqlite3.Error) as exc:
+        parser.error(str(exc))
     if args.output:
         args.output.write_text(
             json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"

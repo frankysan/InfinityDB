@@ -1574,6 +1574,51 @@ rather than retaining or deleting APIs solely because historical tests use
 them. Do not delete or rewrite the ignored `data/generated/army.raw.db`
 without the separately approved backup/restore and private-file manifest.
 
+### Army/faction identity and source-presentation audit cutover — 2026-11-12
+
+**Source-invariant decisions:** Both `audit_army_faction_semantics` and
+`audit_source_presentation` remain active. The first independently re-derives
+Army application identities, aliases, reinforcement parents and faction
+memberships from source data and compares the result with the materialized
+application and runtime. The second detects occupied source fields that
+are not yet represented to players; an unavailable source must **not**
+pass its completeness gate. Neither purpose is superseded merely by the
+standalone raw archive's retirement.
+
+**Implementation:** Both maintained CLI/audit entrypoints accept explicit
+`--normalized PATH` alongside the existing implicit matched raw sibling.
+The new route reuses `normalized_source_connection` to verify the **entire**
+normalized source document against the Army application's pinned export
+generation, then creates read-only, in-memory source tables. Faction derivation
+continues to use `identity_config_from_connection`,
+`derive_application_armies` and the existing exact application/runtime
+comparisons. Source presentation still uses the maintained 70-table/441-field
+policy, the same SQLite occupancy semantics (including zero and false), and
+the same `--require-no-occupied-gaps` rule. The `rawEvidence` report key is
+retained for backward compatibility; its `path` identifies the selected
+raw database or normalized JSON input.
+
+**Acceptance:** On independent, normalized-source test fixtures,
+`tests/test_audit_army_faction_semantics.py` passed **8/8**. New tests
+verify complete report equality, successful repeat after removing the
+raw SQLite sibling, matched source identity, rejection of modified source
+rows, rejection of a mismatched raw pair, and CLI selection.
+`tests/test_audit_source_presentation.py` passed **14** tests and skipped
+**1** pinned-raw acceptance test (historical raw file absent/stale).
+New tests verify entire report parity except the selected evidence path,
+repeatability without a raw sibling, unchanged occupied-field counts,
+fail-closed populated-field gate, and rejection of missing/tampered
+normalized input. Ruff and Pyright passed. The selected runtime databases
+were not rebuilt or modified; the complete project suite was not run.
+
+**Remaining work:** Independent source/reference evidence and paired-export
+contract consumers, including `report_reference_baseline` and
+`build_determinism_manifest`, require separate review. Keep retained
+legacy raw interfaces while they have independently justified use.
+This migration does **not** authorize deleting ignored
+`data/generated/army.raw.db`, bypassing private-file backup/restore review,
+or removing source-integrity tests solely because they refer to raw SQLite.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

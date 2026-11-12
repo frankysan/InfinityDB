@@ -314,13 +314,14 @@ when all contained work shares the same owner.
   skips raw-archive generation entirely; variant usage and Army v27–v31
   overlays use fully verified normalized source. Standalone `infinity-db export`
   still produces a lossless raw pair for independent audit/research consumers.
-  - [ ] Migrate the remaining independent raw-dependent source audits,
-    publication checks and deterministic-build evidence. The three
-    `paired_audit_connection` semantic consumers and
-    `audit_source_variant_inputs` now support explicit, verified normalized
-    input. Source-row inspection and the standalone variant-usage candidate
-    CLI are also migrated; the variant-usage projection itself uses in-memory
-    normalized source with full export-generation verification.
+  - [ ] Migrate remaining raw-dependent source verification in
+    `report_reference_baseline`, standalone paired-export determinism
+    evidence, and explicit pair-health consumers. The Army/faction identity,
+    source-presentation completeness and Skill/Equipment source-variant audits
+    now support explicit verified normalized input, as do the three
+    `paired_audit_connection` semantic consumers, source-row inspection and
+    standalone variant candidate CLI. The complete-build variant projection
+    also uses in-memory normalized source with export-generation verification.
     `audit_source_variant_inputs` now rejects mismatched application/raw
     pairs, and its exact Extra-owner lookup accepts verified source when an
     application path is supplied. Retain legacy raw-based APIs as parity

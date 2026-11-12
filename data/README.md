@@ -293,6 +293,26 @@ the applicable Rules revision when interpreting the source rows. Raw and
 normalized inputs are mutually exclusive, and an explicit normalized source
 never falls back to an available raw archive.
 
+The read-only `tools.audit_army_faction_semantics` and
+`tools.audit_source_presentation` commands also support explicit
+`--normalized PATH` to audit a matched Army application database without
+retaining raw SQLite. The faction audit still re-derives application Army
+identities from independent source relationships and fails on disagreement.
+The presentation audit still measures occupancy of every potentially
+unrepresented source field and enforces `--require-no-occupied-gaps`
+without treating missing evidence as success. Its existing `rawEvidence`
+JSON key is retained for report compatibility even when that evidence
+originates from verified normalized JSON. For example:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_army_faction_semantics local/data/build/army.db --normalized local/data/build/normalized.json
+.venv\Scripts\python.exe -m tools.audit_source_presentation local/data/build/army.db --normalized local/data/build/normalized.json --require-no-occupied-gaps
+```
+
+As above, these are example paths for a matched source generation. Omitting
+`--normalized` retains the existing matched raw-sibling behavior; a
+supplied but mismatched normalized source is rejected rather than falling back.
+
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;
 `curated/README.md` owns the current format version and validation rules. PDF citations use

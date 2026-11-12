@@ -6,6 +6,8 @@ import argparse
 import json
 import sqlite3
 from collections import Counter, defaultdict
+from collections.abc import Iterator
+from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +15,7 @@ from infinity_db.database.application_armies import derive_application_armies
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.database.repository import Database, identity_config_from_connection
+from infinity_db.variant_usage_source import normalized_source_connection
 
 FORMAT = "InfinityDB army/faction semantic audit"
 FORMAT_VERSION = 2
@@ -205,19 +208,30 @@ def _rows(connection: sqlite3.Connection, table: str) -> list[dict[str, Any]]:
     return [dict(row) for row in connection.execute(f"SELECT * FROM {table} ORDER BY rowid")]
 
 
-def audit_database(path: Path) -> dict[str, Any]:
-    """Return a deterministic semantic report for the current Army/faction boundary."""
-    path = Path(path)
+@contextmanager
+def _source_connection(
+    path: Path, normalized: Path | None,
+) -> Iterator[sqlite3.Connection]:
+    if normalized is not None:
+        with normalized_source_connection(path, normalized) as (source, _generation):
+            yield source
+        return
     source_path = raw_database_path(path)
-    Database(path).validate()
     if not source_path.is_file():
         raise ArmyFactionAuditError(f"Raw source sibling does not exist: {source_path}")
     try:
         validate_database_pair(path, raw_path=source_path)
     except ValueError as exc:
         raise ArmyFactionAuditError(str(exc)) from exc
+    with closing(_connect(source_path)) as source:
+        yield source
 
-    with _connect(source_path) as source_connection:
+
+def audit_database(path: Path, *, normalized: Path | None = None) -> dict[str, Any]:
+    """Return a deterministic semantic report for a verified Army source."""
+    path = Path(path)
+    Database(path).validate()
+    with _source_connection(path, normalized) as source_connection:
         _check_schema(source_connection, SOURCE_REQUIRED_FIELDS)
         identity_config = identity_config_from_connection(source_connection)
         army_lists = {row["id"]: row for row in _rows(source_connection, "army_lists")}
@@ -491,9 +505,19 @@ def audit_database(path: Path) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("database", type=Path)
+    parser.add_argument(
+        "--normalized", type=Path,
+        help="Verified normalized Army source instead of the raw SQLite sibling",
+    )
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
-    report = audit_database(args.database)
+    try:
+        report = (
+            audit_database(args.database, normalized=args.normalized)
+            if args.normalized is not None else audit_database(args.database)
+        )
+    except (OSError, sqlite3.Error, ValueError) as exc:
+        parser.error(str(exc))
     # Windows consoles may use CP1252: keep stdout valid JSON without requiring
     # terminal Unicode support, while preserving Unicode in UTF-8 report files.
     payload = json.dumps(report, indent=2, sort_keys=True, ensure_ascii=args.output is None) + "\n"

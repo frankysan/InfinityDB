@@ -19,6 +19,50 @@ def _field(report: dict, table: str, field: str) -> dict:
     return next(item for item in table_item["fields"] if item["field"] == field)
 
 
+def test_source_presentation_normalized_parity_without_retained_raw(
+    tmp_path: Path,
+) -> None:
+    normalized = tmp_path / "normalized.json"
+    army = _runtime_database(tmp_path, normalized_output=normalized)
+    raw = raw_database_path(army)
+    expected = audit.audit_database(army)
+    candidate = audit.audit_database(army, normalized=normalized)
+    expected["rawEvidence"]["path"] = str(normalized)
+    assert candidate == expected
+    assert candidate["rawEvidence"]["status"] == "available"
+    assert candidate["rawEvidence"]["normalizedTableCount"] == 70
+    assert candidate["summary"]["occupiedUnrepresentedFieldCount"] == 24
+
+    raw.unlink()
+    assert audit.audit_database(army, normalized=normalized) == candidate
+    assert not raw.exists()
+
+
+def test_source_presentation_normalized_gate_and_source_drift(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    normalized = tmp_path / "normalized.json"
+    army = _runtime_database(tmp_path, normalized_output=normalized)
+    raw_database_path(army).unlink()
+    assert audit.main([
+        str(army), "--normalized", str(normalized), "--require-no-occupied-gaps",
+    ]) == 1
+    assert "24 occupied unrepresented fields" in capsys.readouterr().out
+    document = json.loads(normalized.read_text(encoding="utf-8"))
+    document["tables"]["units"][0]["name"] = "unverified"
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(audit.SourcePresentationAuditError, match="does not match"):
+        audit.audit_database(army, normalized=normalized)
+
+
+def test_source_presentation_explicit_missing_normalized_fails_closed(
+    tmp_path: Path,
+) -> None:
+    army = _runtime_database(tmp_path)
+    with pytest.raises(audit.SourcePresentationAuditError):
+        audit.audit_database(army, normalized=tmp_path / "unavailable.json")
+
+
 def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path) -> None:
     report = audit.audit_database(_runtime_database(tmp_path))
 
