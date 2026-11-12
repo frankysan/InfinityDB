@@ -191,6 +191,9 @@ def test_docker_context_excludes_nonlocal_private_font_inputs_and_scratch() -> N
         ".pytest-tmp/", ".cache/", ".tmp.drivedownload/", ".tmp.driveupload/",
     ):
         assert pattern in dockerignore
+    for extension in ("zip", "patch"):
+        assert f"*.{extension}" in gitignore.splitlines()
+        assert f"**/*.{extension}" in dockerignore
 
 
 def test_docker_packages_only_explicit_complete_databases() -> None:

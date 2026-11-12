@@ -850,6 +850,69 @@ configuration observations and ACL probes remain in
 **L0 and L1 remain open**; the category list is a bounded reviewed proposal,
 not a permission to migrate/delete ignored assets.
 
+### Development-tool retention and archive context boundary — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`a7361d345db65069859d5e66587dcfcdf254f832`.
+Reviewed the actual Docker image and deployment contract, active determinism
+and optional full-asset CI callers, archive helpers and Linux worker state.
+
+**Purpose-based L0 dispositions:**
+
+- `tools.activate_synced_assets` is **retain-active** for development and
+  source research. It verifies/copies explicitly selected private source
+  snapshots, PDFs and optional override inputs into a development checkout
+  only. The Linux *deployment* path instead consumes the three Git-tracked
+  runtime databases, symbol-publication manifest and published static assets;
+  release Docker construction does not invoke this activation tool. Its
+  retention is not a requirement to sync private files onto the server.
+- `tools.create_work_archive` and `tools.snapshot_archive` are
+  **retain-active**: the cross-platform determinism manifest builder consumes
+  both, and the snapshot helper also supports the maintained full-asset
+  bundler. `create_work_archive` uses an explicitly selected scratch
+  destination inside the determinism build; its optional CLI default creates
+  a transferable ZIP beside the checkout. Classify that default as a
+  specifically reviewed external-handoff case in L1/L2, not disposable
+  scratch or an excuse to remove the reproducibility implementation.
+- `tools.build_full_asset_bundle` and `tools.stage_full_asset_bundle`
+  are **retain-active**, with independent deterministic bundle creation and
+  optional full-asset CI transfer/validation. The builder's default
+  `reports/full-assets.zip` and the optional external transfer are output
+  placement/lifetime review candidates, **not** grounds to retire the tools
+  or silently change a CI command.
+- `tools.prepare_web_fonts` remains **retain-active**: it converts explicitly
+  selected upstream TTF downloads into tracked WOFF2/license publication.
+  Upstream TTFs currently ignored alongside web static assets are L2/L3
+  private-input relocation candidates. The supported explicit source-root
+  argument permits a future `local/` path without an implicit source
+  search or altering the published browser font tree.
+
+**Docker context containment:** `.gitignore` broadly excludes loose
+`*.zip` and `*.patch` files, which could include private handoffs outside
+`local/`. Added corresponding `**/*.zip` and `**/*.patch` patterns to
+`.dockerignore`. Neither Dockerfile copies these file types, and
+`reports/`, tracked runtime databases and the published symbol manifest
+retain their existing explicit treatment. The focused deployment-script
+tests passed **46/46**, Ruff passed and `git diff --check` was clean.
+These tests assert declared ignore patterns; no Docker engine or actual
+context archive was inspected here.
+
+**Linux verification still blocked:** The worker's last observed clean
+checkout was `dev/v1.0.0` at `a47a573d2afd6376dcc46abe9539e04177c6ca98`.
+An explicit remote fetch and a second Git-operation fetch both returned
+`git_command_failed`, with no actionable diagnostic; a checkout dry-run
+also refused. No Linux Git checkout was updated, and no revised
+`activate_synced_assets` code was exercised on the receiver. Diagnose
+remote Git access/ref visibility through the worker before claiming
+host-side acceptance; neither a change to local Windows Git nor a copied
+script is a substitute for validating the pinned worker revision.
+
+**L0 remains open:** Preserve the unreadable report folders and all private
+archives, verify independent source backups/restores and full producer
+handoffs, resolve Linux worker fetch/access, then review and approve L1
+exceptions/path moves separately. No ignored data, Syncthing setting,
+published DB or graphics were modified by this checkpoint.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

@@ -6,6 +6,9 @@ docs/audits/
 image_overrides/
 data/pdf/
 data/wiki/
+# Other Git-ignored loose handoff/source archives must not enter the build context.
+**/*.zip
+**/*.patch
 .infinity-db-deploy.env
 AGENTS.local.md
 .venv/
