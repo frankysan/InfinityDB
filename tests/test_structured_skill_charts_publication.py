@@ -27,8 +27,8 @@ from tools.verify_structured_skill_charts_browser import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_DB = ROOT / "data/generated/infinity.db"
-RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_DB = ROOT / "data/generated/army.db"
+RULES_DB = ROOT / "data/generated/rules_n5.db"
 
 
 def _get(app: Any, path: str) -> tuple[str, bytes]:

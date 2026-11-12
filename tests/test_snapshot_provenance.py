@@ -155,6 +155,54 @@ def test_manifest_archive_label_is_not_authoritative_identity(tmp_path: Path) ->
     assert document["snapshot"]["archive"]["sha256"] == sha256_file(renamed)
 
 
+@pytest.mark.parametrize(
+    ("snapshot_type", "source_url"),
+    [
+        ("army", "https://api.corvusbelli.com/army"),
+        ("wiki", "https://infinitythewiki.com/"),
+        ("symbols", "https://assets.corvusbelli.net/army/img/"),
+    ],
+)
+def test_snapshot_pair_survives_external_repository_handoff(
+    tmp_path: Path,
+    snapshot_type: str,
+    source_url: str,
+) -> None:
+    producer = tmp_path / "producer"
+    archive = producer / "snapshots" / "captured.zip"
+    _write_archive(archive, b"immutable external snapshot")
+    manifest = write_snapshot_manifest(
+        archive,
+        producer / "manifests",
+        snapshot_type=snapshot_type,
+        acquired_at=ACQUIRED_AT,
+        source_url=source_url,
+        document_count=1,
+        project_root=producer,
+        source_data_changed_on=(
+            date(2026, 9, 3) if snapshot_type == "army" else None
+        ),
+    )
+
+    consumer = tmp_path / "independent-checkout"
+    consumer.mkdir()
+    received_archive = consumer / "input.zip"
+    received_manifest = consumer / "source.json"
+    received_archive.write_bytes(archive.read_bytes())
+    received_manifest.write_bytes(manifest.read_bytes())
+
+    verified = load_snapshot_manifest(received_manifest, archive=received_archive)
+    assert verified["snapshot"]["archive"]["path"] == "snapshots/captured.zip"
+    assert verified["snapshot"]["archive"]["sha256"] == sha256_file(received_archive)
+    assert verified["snapshot"]["contentSha256"] == snapshot_content_sha256(
+        received_archive
+    )
+
+    _write_archive(received_archive, b"changed in transit")
+    with pytest.raises(SnapshotProvenanceError, match="SHA-256 mismatch"):
+        load_snapshot_manifest(received_manifest, archive=received_archive)
+
+
 def test_manifest_is_archive_labeled_and_not_rewritten_with_different_provenance(
     tmp_path: Path,
 ) -> None:

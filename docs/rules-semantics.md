@@ -4665,11 +4665,10 @@ Short, Long, and ARO while identifying whether the action comes from Common/
 Special Skills, Hacking, or Equipment. Declaration category and owning catalog
 domain are therefore independent axes.
 
-The N5 declaration-category reconciliation is complete. The independently pinned
-N5.3 p. 191 source audit now verifies all **57 printed rows** (3 Basic Short, 15 Long,
+The N5 declaration-category reconciliation is complete. The pinned N5.3
+p. 191 source review verifies all **57 printed rows** (3 Basic Short, 15 Long,
 23 Short, 16 ARO) against **42 existing canonical owners**, including all 19
-Hacking Program declaration occurrences independently checked against Army
-metadata. The PDF-backed source Type is not always the canonical owning kind:
+Hacking Program declaration occurrences cross-checked against Army metadata. The PDF-backed source Type is not always the canonical owning kind:
 the Equipment-labelled Activate Disco Ball is a Skill, and Look Out! shares the
 canonical Look Out identity. Neither case creates a new deployed object.
 
@@ -4688,9 +4687,12 @@ the rules DB fingerprint in the 17-object publication; reviewed deployed-object
 identities and delivery paths are unchanged. Promotion retains a recovery
 backup and checks the entire 57-row source projection after replacement.
 
-The complete source-table audit in
+The pinned source table in
 `config/validation/orders-aro-object-adjacent-source-review.json` remains
-an independent validation reference, not a second runtime chart. The matrix is
+the independent reference for the current declaration-matrix publication
+test, not a second runtime chart. The one-use PDF/audit command was retired
+in P5.1 after the accepted source-to-runtime parity checks moved into
+`tests/test_hacking_program_publication.py`. The matrix is
 scoped to unmodified N5 core declarations: it excludes scenario/season overlays,
 Reinforcements phase actions, automatic/passive categories, and Deployment-only
 categories. It does not calculate whether a declaration is currently legal.
@@ -4794,8 +4796,10 @@ Unit Profile restrictions research question without creating a live legality eng
 
 **N5.3 p. 194 source audit (2026-10-30):**
 `config/validation/restrictions-source-chart.json` pins all **six** printed
-subject rows and **14** explicit negative conditions, independently checked
-against the pinned PDF by `tools.audit_restrictions_source_chart`. The
+subject rows and **14** explicit negative conditions. Their source wording
+was checked against the pinned PDF during the completed 2026-10-30 audit;
+the maintained validator now checks the accepted manifest, curated facts and
+published projection without retaining the one-use PDF parser. The
 source selectors for TAG, VH, and REM have no canonical Troop Type identity in
 the current rules registry. Existing `equipment:motorcycle`, `skill:aerial`,
 `training:irregular`, `skill:cautious-movement` and `skill:lieutenant`

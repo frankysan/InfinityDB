@@ -59,7 +59,9 @@ current directory, after synchronized inputs show Up to Date.
   already matches the requested symlink); conflicting files are never
   overwritten. There is no bulk cleanup, delete or reverse synchronization.
 
-PDFs and local graphical overrides have no mandatory archive manifest pin.
+PDFs and optional local override evidence have no mandatory archive manifest pin.
+The external producer owns override application; syncing these files does not
+make them an InfinityDB build input.
 Activate an individual file explicitly; the command measures its SHA-256 but
 cannot independently establish original provenance:
 

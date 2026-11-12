@@ -29,8 +29,8 @@ class _QuietHandler(WSGIRequestHandler):
 def army_app() -> Any:
     root = Path(__file__).resolve().parents[1]
     return create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
 

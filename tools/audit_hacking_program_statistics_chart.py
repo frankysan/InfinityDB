@@ -18,7 +18,7 @@ from infinity_db.database.repository import Database
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "config/validation/hacking-program-statistics-source-chart.json"
-ARMY_DB = ROOT / "data/generated/infinity.db"
+ARMY_DB = ROOT / "data/generated/army.db"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 EXPECTED_NAMES = (
     "Assisted Fire", "Carbonite", "Controlled Jump", "Cybermask",

@@ -52,29 +52,28 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
         _run(
             project_root,
             "-m",
-            "infinity_db",
+            "infinity_army_data",
             "build",
             str(fixture),
             "--output-dir",
             str(generated),
             "--compact",
         )
-        _run(
-            project_root,
-            "-m",
-            "infinity_db",
-            "build-rules",
-            "--output",
-            str(generated / "rules.db"),
-        )
-        _run(
-            project_root,
-            "-m",
-            "tools.build_weapon_profile_publication",
-            "--output",
-            str(generated / "weapon-profile-sources.json"),
-        )
+        _run(project_root, "-m", "infinity_db", "export",
+             str(generated / "normalized.json"), str(generated / "army.db"))
+        from infinity_db.curated import load_curated_directory
+        from infinity_db.rules_database import export_rules_database
 
+        export_rules_database(
+            load_curated_directory(project_root / "data/curated/rules"),
+            generated / "rules_n5.db",
+        )
+        from infinity_db.its_season_database import build_its_database
+
+        build_its_database(
+            project_root / "data/curated/rules/n5-its-season-18-2026.09.01.json",
+            generated / "its_18.db",
+        )
         fixture_files = sorted(path for path in fixture.rglob("*") if path.is_file())
         snapshot = create_timestamped_archive(
             fixture_files,
@@ -88,12 +87,13 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
         artifacts = {
             f"build/{name}": sha256_file(generated / name)
             for name in (
-                "infinity.db",
-                "infinity.raw.db",
+                "army.db",
+                "army.raw.db",
                 "master.json",
                 "normalized-validation.json",
                 "normalized.json",
-                "rules.db",
+                "rules_n5.db",
+                "its_18.db",
             )
         }
         artifacts["archives/snapshot.zip"] = sha256_file(snapshot)
@@ -102,9 +102,19 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
         artifacts["publication/symbol-publication.json"] = sha256_file(
             project_root / "data" / "manifests" / "symbol-publication.json"
         )
-        artifacts["publication/weapon-profile-sources.json"] = sha256_file(
-            generated / "weapon-profile-sources.json"
+        # Hash reviewed, source-derived citation meaning without producing
+        # the retired loose JSON release artifact.
+        from infinity_db.build_provenance import canonical_bytes
+        from infinity_db.weapon_profile_builder import build_publication
+
+        reviewed = build_publication(
+            project_root / "data/generated/army.db",
+            project_root / "data/generated/rules_n5.db",
+            project_root / "data/curated/weapon-shared-effect-reviews.json",
         )
+        artifacts["reviewed/weapon-profile-citations"] = hashlib.sha256(
+            canonical_bytes(reviewed)
+        ).hexdigest()
 
         return {
             "format": FORMAT,

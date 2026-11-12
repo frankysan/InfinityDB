@@ -104,7 +104,7 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
     assert stages[4].command == (
         sys.executable,
         "-m",
-        "infinity_db",
+        "infinity_army_data",
         "build",
         str(Path("data/raw/example.zip")),
         "--output-dir",
@@ -206,12 +206,12 @@ def test_skip_summary_is_opt_in_for_test_and_isolated_preflight() -> None:
     ("stages", "targets", "sections", "choice", "expected"),
     (
         (("test",), [], (), None, True),
-        (("test",), ["tests/test_api.py"], (), None, False),
+        (("test",), ["tests/test_army_snapshot_source.py"], (), None, False),
         (("test",), [], ("browser",), None, False),
         (("preflight",), [], (), None, False),
         (("test", "preflight"), [], (), None, True),
         (("test",), [], (), False, False),
-        (("test",), ["tests/test_api.py"], (), True, True),
+        (("test",), ["tests/test_army_snapshot_source.py"], (), True, True),
     ),
 )
 def test_skip_summary_auto_enables_only_unfiltered_full_suite(
@@ -752,7 +752,7 @@ def test_opt_in_source_occupancy_gate_runs_before_rules_review_and_build(
     assert commands == [
         (
             sys.executable, "-m", "tools.audit_source_presentation",
-            "data/generated/infinity.db", "--require-no-occupied-gaps",
+            "data/generated/army.db", "--require-no-occupied-gaps",
         ),
         (
             sys.executable, "-m", "tools.audit_rules_interactions",
@@ -1228,7 +1228,7 @@ def test_isolated_preflight_checks_only_declared_environment_and_preserves_failu
     def run(command, *, cwd, env):
         assert cwd == tmp_path / "checkout"
         assert not {"PYTHONHOME", "GIT_INDEX_FILE", "PYTEST_ADDOPTS"} & env.keys()
-        if command[2] == "tools.build_deployed_object_publication":
+        if command[2] == "infinity_db":
             assert env["PYTHONPATH"] == str(tmp_path / "checkout/src")
         else:
             assert "PYTHONPATH" not in env
@@ -1243,15 +1243,14 @@ def test_isolated_preflight_checks_only_declared_environment_and_preserves_failu
     assert calls[1][1:] == ["-m", "pip", "install", "-e", ".[dev,symbols]"]
     assert calls[1][0] != sys.executable
     assert calls[2][1:] == [
-        "-m", "tools.build_deployed_object_publication", "--when-legacy",
+        "-m", "infinity_db", "database-health", "--db-dir", "data/generated",
     ]
-    assert calls[3][-2:] == ["--check", "--when-legacy"]
-    assert calls[4][1:] == ["-m", "tools.verify_deployment_assets"]
-    assert calls[5][1:] == ["-m", "tools.run_checks", "--stage", "lint"]
-    assert calls[6][1:] == [
+    assert calls[3][1:] == ["-m", "tools.verify_deployment_assets"]
+    assert calls[4][1:] == ["-m", "tools.run_checks", "--stage", "lint"]
+    assert calls[5][1:] == [
         "-m", "pytest", "-q", "-m", "full_assets or not full_assets", "-n", "2",
     ]
-    assert calls[7][1:] == ["-m", "pyright", "--pythonpath", calls[1][0]]
+    assert calls[6][1:] == ["-m", "pyright", "--pythonpath", calls[1][0]]
 
 
 @pytest.mark.parametrize("module,message", [
@@ -1271,8 +1270,8 @@ def test_indexed_artifact_and_lint_failures_propagate_even_with_svg_checks_off(
     assert ci_preflight.check_export(
         tmp_path, tmp_path / "venv", [], include_full_assets=False,
     ) == [message]
-    assert calls[4][-1] == "--skip-svg"
-    assert calls[6][-2:] == ["-m", "not full_assets"]
+    assert calls[3][-1] == "--skip-svg"
+    assert calls[5][-2:] == ["-m", "not full_assets"]
 
 
 @pytest.mark.parametrize("wheel_fails", [False, True])
@@ -1304,8 +1303,8 @@ def test_isolated_preflight_runs_built_wheel_smoke_only_after_successful_wheel_a
         assert "installed-wheel CLI/runtime smoke failed" in output
 
 
-@pytest.mark.parametrize("failed_step", ["venv", "pip", "tools.build_deployed_object_publication"])
-def test_isolated_preflight_stops_when_environment_or_publication_is_unusable(
+@pytest.mark.parametrize("failed_step", ["venv", "pip", "infinity_db"])
+def test_isolated_preflight_stops_when_environment_or_database_set_is_unusable(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failed_step: str,
 ) -> None:
     calls = []
@@ -1320,7 +1319,7 @@ def test_isolated_preflight_stops_when_environment_or_publication_is_unusable(
     assert all(command[2] not in {"pytest", "pyright"} for command in calls)
 
 
-def test_preflight_prepares_publication_before_using_current_environment(
+def test_preflight_validates_selected_set_before_using_current_environment(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = []
@@ -1328,10 +1327,7 @@ def test_preflight_prepares_publication_before_using_current_environment(
         calls.append(command) or SimpleNamespace(returncode=0)
     ))
     assert ci_preflight.check_export(tmp_path, None, ["--collect-only"]) == []
-    assert [command[2] for command in calls] == [
-        "tools.build_deployed_object_publication", "tools.build_deployed_object_publication",
-        "pytest",
-    ]
+    assert [command[2] for command in calls] == ["infinity_db", "pytest"]
     assert calls[-1][0] == sys.executable
 
 
@@ -1348,7 +1344,7 @@ def test_local_source_guard_skips_missing_but_not_present_invalid_bytes(
 def test_fixture_build_stage_never_replaces_runtime_database(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    runtime_database = tmp_path / "data" / "generated" / "infinity.db"
+    runtime_database = tmp_path / "data" / "generated" / "army.db"
     runtime_database.parent.mkdir(parents=True)
     runtime_database.write_bytes(b"real-production-database")
     fixture = Path(__file__).resolve().parent / "fixtures" / "deployment-smoke"

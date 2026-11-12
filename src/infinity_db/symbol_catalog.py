@@ -6,6 +6,7 @@ import json
 import re
 import unicodedata
 from copy import deepcopy
+from hashlib import sha256
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -39,22 +40,32 @@ def _published_path(value: object) -> str | None:
         or len(path.parts) < 2
         or path.parts[0] not in _PUBLISHED_CATEGORIES
         or path.suffix != ".svg"
+        or path.as_posix() != value
+        or any(char in value for char in ("\\", ":", "?", "#"))
     ):
         raise SymbolCatalogError(f"Invalid published symbol path: {value!r}")
     return value
 
 
 class SymbolCatalog:
-    """Read-only symbol lookup backed by ``symbol-publication.json``."""
+    """Read-only symbol lookup from SQLite or the older publication adapter."""
 
-    def __init__(self, path: Path | None = None) -> None:
-        self.path = path or maintained_manifest_path("symbol-publication.json")
-        try:
-            document = json.loads(self.path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            raise SymbolCatalogError(
-                f"Could not read symbol publication manifest {self.path}: {exc}"
-            ) from exc
+    def __init__(
+        self, path: Path | None = None, *, publication: dict[str, Any] | None = None,
+    ) -> None:
+        if path is not None and publication is not None:
+            raise SymbolCatalogError("Select a symbol manifest or an embedded publication")
+        if publication is None:
+            self.path = path or maintained_manifest_path("symbol-publication.json")
+            try:
+                document = json.loads(self.path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                raise SymbolCatalogError(
+                    f"Could not read symbol publication manifest {self.path}: {exc}"
+                ) from exc
+        else:
+            self.path = None
+            document = publication
         if not isinstance(document, dict):
             raise SymbolCatalogError("Symbol publication manifest must be a JSON object")
         if document.get("format") != PUBLICATION_FORMAT:
@@ -68,6 +79,21 @@ class SymbolCatalog:
         self.profile_identities = self._optional_mapping(
             document, "profileIdentityToPublishedPath"
         )
+        hashes = document.get("publishedSha256ByPath", {})
+        if not isinstance(hashes, dict):
+            raise SymbolCatalogError("Published symbol hashes must be an object")
+        self.asset_hashes: dict[str, str] = {}
+        for key, value in hashes.items():
+            if _published_path(key) is None or not isinstance(value, str) or not re.fullmatch(
+                r"[0-9a-f]{64}", value,
+            ):
+                raise SymbolCatalogError("Invalid published symbol asset hash")
+            self.asset_hashes[key] = value
+        self.revision = sha256(json.dumps(
+            [self.armies, self.units, self.profile_logos,
+             self.profile_identities, self.asset_hashes],
+            sort_keys=True, ensure_ascii=False, separators=(",", ":"),
+        ).encode("utf-8")).hexdigest()
 
     @staticmethod
     def _mapping(document: dict[str, Any], field: str) -> dict[str, str]:

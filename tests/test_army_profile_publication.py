@@ -17,7 +17,7 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data/raw/JSON 20260929-114335.zip"
-ARMY = ROOT / "data/generated/infinity.db"
+ARMY = ROOT / "data/generated/army.db"
 SOURCE_CONTEXTS = {
     1912: {101, 102, 104, 105, 106, 107},
     1926: {101, 102, 104, 105, 106, 107},
@@ -66,7 +66,7 @@ SOURCE_VERSION_OVERRIDES = {
 
 @pytest.fixture(scope="module")
 def profile_app() -> Callable[..., Any]:
-    return create_app(ARMY, rules_database_path=ROOT / "data/generated/rules.db")
+    return create_app(ARMY, rules_database_path=ROOT / "data/generated/rules_n5.db")
 
 
 @pytest.fixture(scope="module")

@@ -593,14 +593,50 @@ def export_rules_database(
     finalize: bool = True,
     restrictions_manifest: dict[str, Any] | None = None,
     deployed_objects: dict[str, Any] | None = None,
+    build_provenance: dict[str, Any] | None = None,
+    variant_usage: dict[str, Any] | None = None,
+    weapon_citations: dict[str, Any] | None = None,
+    restriction_chart: dict[str, Any] | None = None,
+    trait_wiki_links: dict[str, dict[str, str]] | None = None,
+    combined_saving_rolls: dict[tuple[int, str], dict[str, Any]] | None = None,
+    ammunition_references: dict[int, dict[str, Any]] | None = None,
+    weapon_properties: list[dict[str, Any]] | None = None,
+    army_database: Path | None = None,
 ) -> None:
     """Atomically replace a rules database from validated curated documents.
 
     ``finalize=False`` is intended for semantic tests that only need valid SQLite
     contents. Production/release builds keep the default byte-canonical finalization.
     """
+    # Curated ITS sources remain shared build inputs, but their scenario and
+    # event publications have their own season databases. Never duplicate them
+    # in the N5 Rules export, including standalone developer builds.
+    documents = [
+        (source, document) for source, document in documents
+        if document["collection"]["domain"] != "its"
+    ]
     if not documents:
-        raise ValueError("No curated documents supplied")
+        raise ValueError("No N5-owned curated documents supplied")
+    if variant_usage is not None and deployed_objects is None:
+        raise ValueError("Embedded variant usage requires the deployed-object baseline")
+    if weapon_citations is not None and variant_usage is None:
+        raise ValueError("Embedded Weapon citations require embedded variant usage")
+    if restriction_chart is not None and weapon_citations is None:
+        raise ValueError("Embedded Restrictions chart requires embedded Weapon citations")
+    if trait_wiki_links is not None and restriction_chart is None:
+        raise ValueError("Embedded Trait Wiki links require the Restrictions chart baseline")
+    if combined_saving_rolls is not None and trait_wiki_links is None:
+        raise ValueError("Embedded Combined Saving Rolls require Trait Wiki links")
+    if ammunition_references is not None and combined_saving_rolls is None:
+        raise ValueError("Embedded Ammunition references require Combined Saving Rolls")
+    if weapon_properties is not None and ammunition_references is None:
+        raise ValueError("Embedded Weapon Properties require Ammunition references")
+    if build_provenance is not None:
+        from .build_provenance import validate_build_record
+
+        validate_build_record(build_provenance, "rules-n5")
+        if deployed_objects is None:
+            raise ValueError("Database-set provenance requires current embedded deployed objects")
     if deployed_objects is not None and restrictions_manifest is None:
         raise ValueError("Normalized deployed objects require the v9 Restrictions baseline")
     _validate_documents(documents)
@@ -625,6 +661,10 @@ def export_rules_database(
                     "collectionCount": len(documents),
                     "databaseCompatibilityVersion": RULES_COMPATIBILITY_VERSION,
                 }
+                if build_provenance is not None:
+                    from .build_provenance import BUILD_PROVENANCE_KEY
+
+                    metadata[BUILD_PROVENANCE_KEY] = build_provenance
                 _insert_many(
                     connection,
                     f"INSERT INTO {RULES_METADATA_TABLE} (key, value) VALUES (?, ?)",
@@ -681,6 +721,129 @@ def export_rules_database(
                         (_json_text(DEPLOYED_OBJECT_COMPATIBILITY_VERSION),
                          "databaseCompatibilityVersion"),
                     )
+                if variant_usage is not None:
+                    from .variant_usage_storage import (
+                        VARIANT_USAGE_COMPATIBILITY_VERSION,
+                        VARIANT_USAGE_SCHEMA_VERSION,
+                        stage_variant_usage,
+                    )
+
+                    stage_variant_usage(connection, variant_usage)
+                    connection.execute(f"PRAGMA user_version = {VARIANT_USAGE_SCHEMA_VERSION}")
+                    for key, value in (
+                        ("formatVersion", VARIANT_USAGE_SCHEMA_VERSION),
+                        ("databaseCompatibilityVersion", VARIANT_USAGE_COMPATIBILITY_VERSION),
+                    ):
+                        connection.execute(
+                            f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
+                            (_json_text(value), key),
+                        )
+                if weapon_citations is not None:
+                    from .weapon_profile_storage import (
+                        WEAPON_CITATION_COMPATIBILITY_VERSION,
+                        WEAPON_CITATION_SCHEMA_VERSION,
+                        stage_weapon_profile_citations,
+                    )
+
+                    if army_database is None:
+                        raise ValueError("Embedded Weapon citations require selected Army database")
+                    stage_weapon_profile_citations(connection, weapon_citations, army_database)
+                    connection.execute(f"PRAGMA user_version = {WEAPON_CITATION_SCHEMA_VERSION}")
+                    for key, value in (
+                        ("formatVersion", WEAPON_CITATION_SCHEMA_VERSION),
+                        ("databaseCompatibilityVersion", WEAPON_CITATION_COMPATIBILITY_VERSION),
+                    ):
+                        connection.execute(
+                            f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
+                            (_json_text(value), key),
+                        )
+                if restriction_chart is not None:
+                    from .restriction_chart_storage import (
+                        CHART_COMPATIBILITY_VERSION,
+                        CHART_SCHEMA_VERSION,
+                        stage_restriction_chart,
+                    )
+
+                    stage_restriction_chart(connection, restriction_chart)
+                    connection.execute(f"PRAGMA user_version = {CHART_SCHEMA_VERSION}")
+                    for key, value in (
+                        ("formatVersion", CHART_SCHEMA_VERSION),
+                        ("databaseCompatibilityVersion", CHART_COMPATIBILITY_VERSION),
+                    ):
+                        connection.execute(
+                            f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
+                            (_json_text(value), key),
+                        )
+                if trait_wiki_links is not None:
+                    from .trait_wiki_storage import (
+                        TRAIT_LINK_COMPATIBILITY_VERSION,
+                        TRAIT_LINK_SCHEMA_VERSION,
+                        stage_trait_wiki_links,
+                    )
+
+                    stage_trait_wiki_links(connection, trait_wiki_links)
+                    connection.execute(f"PRAGMA user_version = {TRAIT_LINK_SCHEMA_VERSION}")
+                    for key, value in (
+                        ("formatVersion", TRAIT_LINK_SCHEMA_VERSION),
+                        ("databaseCompatibilityVersion", TRAIT_LINK_COMPATIBILITY_VERSION),
+                    ):
+                        connection.execute(
+                            f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
+                            (_json_text(value), key),
+                        )
+                if combined_saving_rolls is not None:
+                    from .combined_saving_roll_storage import (
+                        COMPATIBILITY_VERSION,
+                        SCHEMA_VERSION,
+                        stage_combined_saving_rolls,
+                    )
+
+                    if army_database is None:
+                        raise ValueError("Combined Saving Rolls require the selected Army database")
+                    stage_combined_saving_rolls(connection, combined_saving_rolls, army_database)
+                    connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
+                    for key, value in (
+                        ("formatVersion", SCHEMA_VERSION),
+                        ("databaseCompatibilityVersion", COMPATIBILITY_VERSION),
+                    ):
+                        connection.execute(
+                            f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
+                            (_json_text(value), key),
+                        )
+                if ammunition_references is not None:
+                    from . import ammunition_reference_storage as ammo_storage
+
+                    if army_database is None:
+                        raise ValueError("Ammunition references require selected Army database")
+                    ammo_storage.stage_ammunition_references(
+                        connection, ammunition_references, army_database,
+                    )
+                    connection.execute(f"PRAGMA user_version = {ammo_storage.SCHEMA_VERSION}")
+                    for key, value in (
+                        ("formatVersion", ammo_storage.SCHEMA_VERSION),
+                        ("databaseCompatibilityVersion", ammo_storage.COMPATIBILITY_VERSION),
+                    ):
+                        connection.execute(
+                            f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
+                            (_json_text(value), key),
+                        )
+                if weapon_properties is not None:
+                    from . import weapon_property_storage as property_storage
+
+                    if army_database is None:
+                        raise ValueError("Weapon Properties require the selected Army database")
+                    property_storage.stage_weapon_properties(
+                        connection, weapon_properties, army_database,
+                    )
+                    connection.execute(f"PRAGMA user_version = {property_storage.SCHEMA_VERSION}")
+                    for key, value in (
+                        ("formatVersion", property_storage.SCHEMA_VERSION),
+                        ("databaseCompatibilityVersion", property_storage.COMPATIBILITY_VERSION),
+                    ):
+                        connection.execute(
+                            f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
+                            (_json_text(value), key),
+                        )
                 connection.execute("ANALYZE")
             if finalize:
                 vacuum_deterministic_sqlite(connection)
@@ -829,27 +992,28 @@ class RulesDatabase:
             if connection.execute("PRAGMA application_id").fetchone()[0] != RULES_APPLICATION_ID:
                 raise ValueError("Unsupported rules database application ID")
             schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if schema_version not in {RULES_SCHEMA_VERSION, 9, 10}:
-                raise ValueError("Unsupported rules database schema; rebuild rules.db")
+            if schema_version not in {RULES_SCHEMA_VERSION, 9, 10, 11, 12, 13, 14, 15, 16, 17}:
+                raise ValueError("Unsupported rules database schema; rebuild rules_n5.db")
             metadata_rows = connection.execute(
                 f"SELECT key, value FROM {RULES_METADATA_TABLE} "
                 "WHERE key IN ('formatVersion', 'databaseCompatibilityVersion')"
             ).fetchall()
             metadata = {row["key"]: _decode_json(row["value"], None) for row in metadata_rows}
             expected_compatibility = {
-                8: RULES_COMPATIBILITY_VERSION, 9: 11, 10: 12,
+                8: RULES_COMPATIBILITY_VERSION, 9: 11, 10: 12, 11: 13,
+                12: 14, 13: 15, 14: 16, 15: 17, 16: 18, 17: 19,
             }[schema_version]
             if (
                 metadata.get("databaseCompatibilityVersion") != expected_compatibility
                 or (
-                    schema_version in {9, 10}
+                    schema_version in {9, 10, 11, 12, 13, 14, 15, 16, 17}
                     and metadata.get("formatVersion") != schema_version
                 )
             ):
                 raise ValueError(
                     "Rules database compatibility revision does not match this application"
                 )
-            if schema_version in {9, 10}:
+            if schema_version in {9, 10, 11, 12, 13, 14, 15, 16, 17}:
                 from infinity_db.restriction_storage import validate_restriction_snapshot
 
                 try:
@@ -858,7 +1022,7 @@ class RulesDatabase:
                     raise ValueError(
                         "Invalid Restrictions snapshot: missing or damaged table"
                     ) from exc
-            if schema_version == 10:
+            if schema_version in {10, 11, 12, 13, 14, 15, 16, 17}:
                 from infinity_db.deployed_object_storage import (
                     validate_deployed_object_snapshot,
                 )
@@ -867,6 +1031,55 @@ class RulesDatabase:
                     validate_deployed_object_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid v10 deployed-object snapshot") from exc
+            if schema_version in {11, 12, 13, 14, 15, 16, 17}:
+                from .variant_usage_storage import validate_variant_usage_snapshot
+
+                try:
+                    validate_variant_usage_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid embedded variant usage snapshot") from exc
+            if schema_version in {12, 13, 14, 15, 16, 17}:
+                from .weapon_profile_storage import validate_weapon_profile_snapshot
+
+                try:
+                    validate_weapon_profile_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid embedded Weapon citation snapshot") from exc
+            if schema_version in {13, 14, 15, 16, 17}:
+                from .restriction_chart_storage import validate_restriction_chart_snapshot
+
+                try:
+                    validate_restriction_chart_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid embedded Restrictions chart snapshot") from exc
+            if schema_version in {14, 15, 16, 17}:
+                from .trait_wiki_storage import validate_trait_wiki_snapshot
+
+                try:
+                    validate_trait_wiki_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid embedded Trait Wiki snapshot") from exc
+            if schema_version in {15, 16, 17}:
+                from .combined_saving_roll_storage import validate_combined_saving_roll_snapshot
+
+                try:
+                    validate_combined_saving_roll_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid embedded Combined Saving Rolls") from exc
+            if schema_version in {16, 17}:
+                from .ammunition_reference_storage import validate_ammunition_reference_snapshot
+
+                try:
+                    validate_ammunition_reference_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid embedded Ammunition references") from exc
+            if schema_version == 17:
+                from .weapon_property_storage import validate_weapon_property_snapshot
+
+                try:
+                    validate_weapon_property_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid embedded Weapon Properties") from exc
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Rules database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -877,9 +1090,86 @@ class RulesDatabase:
         from infinity_db.deployed_object_storage import read_deployed_objects
 
         with self._connect() as connection:
-            if connection.execute("PRAGMA user_version").fetchone()[0] != 10:
+            schema = connection.execute("PRAGMA user_version").fetchone()[0]
+            if schema not in {10, 11, 12, 13, 14, 15, 16, 17}:
                 return None
             return read_deployed_objects(connection, army_database)
+
+    def variant_usage_payload(self, army_database: Path) -> dict[str, Any] | None:
+        """Read embedded exact occurrences, binding final Rules bytes outside the database."""
+        from .build_provenance import file_sha256
+        from .variant_usage_storage import read_variant_usage
+
+        with self._connect() as connection:
+            schema = connection.execute("PRAGMA user_version").fetchone()[0]
+            if schema in {RULES_SCHEMA_VERSION, 9, 10}:
+                return None
+            if schema not in {11, 12, 13, 14, 15, 16, 17}:
+                raise ValueError("Unsupported Rules schema for exact variant usage")
+            publication = read_variant_usage(connection, army_database)
+        publication["sourceSnapshot"]["rulesDatabaseSha256"] = file_sha256(self.path)
+        return publication
+
+    def weapon_profile_citations_payload(self, army_database: Path) -> dict:
+        """Read v12 chart citations bound to the selected Army database."""
+        from .weapon_profile_storage import read_weapon_profile_citations
+
+        with self._connect() as connection:
+            schema = connection.execute("PRAGMA user_version").fetchone()[0]
+            if schema not in {12, 13, 14, 15, 16, 17}:
+                raise ValueError("Embedded Weapon citations require Rules v12 or newer")
+            return read_weapon_profile_citations(connection, army_database)
+
+    def weapon_properties_payload(
+        self, army_database: Path | None = None,
+    ) -> list[dict[str, Any]] | None:
+        """Read exact v17 authored properties from SQLite, never runtime JSON."""
+        from .weapon_property_storage import read_weapon_properties
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < 17:
+                return None
+            return read_weapon_properties(connection, army_database)
+
+    def ammunition_references_payload(
+        self, army_database: Path | None = None,
+    ) -> dict[int, dict[str, Any]] | None:
+        """Return v16 reviewed Ammunition links without consulting maintained JSON."""
+        from .ammunition_reference_storage import read_ammunition_references
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < 16:
+                return None
+            return read_ammunition_references(connection, army_database)
+
+    def combined_saving_rolls_payload(
+        self, army_database: Path | None = None,
+    ) -> dict[tuple[int, str], dict[str, Any]] | None:
+        """Read exact v15 saving-roll annotations from SQLite only."""
+        from .combined_saving_roll_storage import read_combined_saving_rolls
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < 15:
+                return None
+            return read_combined_saving_rolls(connection, army_database)
+
+    def trait_wiki_links_payload(self) -> dict[str, dict[str, str]] | None:
+        """Get v14 links from the database, without loading maintained JSON."""
+        from .trait_wiki_storage import read_trait_wiki_links
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < 14:
+                return None
+            return read_trait_wiki_links(connection)
+
+    def restriction_chart_payload(self) -> dict[str, Any] | None:
+        """Return the v13 source chart without accessing packaged JSON."""
+        from .restriction_chart_storage import read_restriction_chart
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < 13:
+                return None
+            return read_restriction_chart(connection)
 
     def restrictions_payload(
         self, *, subject: str | None = None, record_id: str | None = None,
@@ -902,7 +1192,7 @@ class RulesDatabase:
                     "items": [],
                     "evaluationSupported": False,
                 }
-            if schema not in {9, 10}:
+            if schema not in {9, 10, 11, 12, 13, 14, 15, 16, 17}:
                 raise ValueError("Unsupported rules database schema")
             payload = candidate_restrictions_payload(
                 connection, subject=subject, record_id=record_id,
@@ -1338,6 +1628,18 @@ class RulesDatabase:
                 self._attach_current_army_links(connection, records)
             return records
 
+    def current_core_scenario_revision(self) -> str:
+        """Return the one current core scenario revision, or fail on ambiguity."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT r.revision FROM scenario_collection_revisions AS r "
+                "JOIN collections AS c ON c.id = r.source_collection_id "
+                "WHERE r.collection_id='n5-core' AND c.status='current'"
+            ).fetchall()
+        if len(rows) != 1:
+            raise ValueError("Expected exactly one current N5 core scenario revision")
+        return str(rows[0]["revision"])
+
     def scenario_publications(self, reference: str) -> list[dict[str, Any]]:
         """Return indexed collection memberships/publications for one scenario identity."""
 
@@ -1449,7 +1751,7 @@ class RulesDatabase:
         return candidates[0]
 
     def scenario_reference(self, reference: str) -> dict[str, Any] | None:
-        """Return composed scenario Rules and standard Skill-detail records from rules.db."""
+        """Return composed scenario Rules and standard Skill-detail records from rules_n5.db."""
         identifier = scenario_typed_id(reference)
         scenario = self.composed_record(identifier)
         if scenario is None or scenario["kind"] != "scenario":

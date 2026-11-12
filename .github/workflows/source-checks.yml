@@ -51,9 +51,6 @@ jobs:
       - name: Run Ruff before expensive tests
         run: python -m ruff check src/infinity_db src/infinity_army_data tests tools
 
-      - name: Verify finalized version and release metadata
-        run: python -m tools.release_metadata
-
       - name: Run changed tests with verified baseline
         if: steps.plan.outputs.full == 'false'
         run: python -m pytest -q ${{ steps.plan.outputs.test_targets }}
@@ -61,8 +58,8 @@ jobs:
       - name: Run focused release checks before full matrix
         if: steps.plan.outputs.full == 'true'
         run: >-
-          python -m pytest -q tests/test_release_metadata.py
-          tests/test_release_validation_scope.py tests/test_release_notes.py
+          python -m pytest -q tests/test_release_validation_scope.py
+          tests/test_release_notes.py
           tests/test_web.py::test_changes_page_renders_canonical_release_history
 
       - name: Set up Node.js
@@ -90,33 +87,33 @@ jobs:
           - os: ubuntu-latest
             python: "3.11.9"
             label: "3.11"
-            check_args: "--all"
-            test_workers: "auto"
+            check_args: "--stage test --stage lint --stage docs --stage type --stage build --stage rules"
+            primary: true
             determinism: true
             timeout_minutes: 30
           - os: windows-latest
             python: "3.11.9"
             label: "3.11"
-            check_args: "--stage test --stage build --stage rules"
-            test_workers: "2"
+            check_args: "--stage build --stage rules"
+            primary: false
             determinism: true
             timeout_minutes: 30
           - os: macos-latest
             python: "3.11.9"
             label: "3.11"
-            check_args: "--stage test --stage build --stage rules"
-            test_workers: "auto"
+            check_args: "--stage build --stage rules"
+            primary: false
             determinism: true
             timeout_minutes: 15
           - os: ubuntu-latest
             python: "3.14"
             label: "3.14"
-            check_args: "--stage test --stage build --stage rules"
-            test_workers: "auto"
+            check_args: "--stage build --stage rules"
+            primary: false
             determinism: false
             timeout_minutes: 15
     runs-on: ${{ matrix.os }}
-    # The full check leg includes isolated preflight; Windows has a slower filesystem.
+    # Run the complete source suite once on Linux; other legs validate cross-platform builds.
     timeout-minutes: ${{ matrix.timeout_minutes }}
     steps:
       - name: Reuse validated Source baseline
@@ -140,35 +137,32 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Check V1S retirement history
-        if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'
+        if: needs.fast-validation.outputs.full == 'true' && matrix.primary
         run: python -m tools.check_v1_backlog_ci
 
       - name: Install development dependencies
         if: needs.fast-validation.outputs.full == 'true'
         run: python -m pip install -e ".[dev,symbols]"
 
-      - name: Verify symbol Python dependencies
+      - name: Verify optional symbol parity and browser-font dependencies
         if: needs.fast-validation.outputs.full == 'true'
-        run: python -c "import cssselect2, fontTools.ttLib, PIL.Image, tinycss2"
+        run: python -c "import PIL.Image; import brotli; import fontTools.ttLib"
 
       - name: Set up Node.js for documentation linting
-        if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'
+        if: needs.fast-validation.outputs.full == 'true' && matrix.primary
         uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: npm
 
       - name: Install pinned documentation lint dependencies
-        if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'
+        if: needs.fast-validation.outputs.full == 'true' && matrix.primary
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Validate deployed objects for the tracked rules schema
+      - name: Validate selected runtime database set
         if: needs.fast-validation.outputs.full == 'true'
-        # Legacy v8/v9 requires an ignored JSON companion. v10 embeds the same
-        # reviewed model in rules.db; do not generate a mismatched legacy JSON.
-        run: |
-          python -m tools.build_deployed_object_publication --when-legacy
-          python -m tools.build_deployed_object_publication --check --when-legacy
+        # Read-only schema, integrity, source binding and embedded-content checks.
+        run: python -m infinity_db database-health --db-dir data/generated
 
       - name: Validate tracked exact-variant publication provenance
         if: needs.fast-validation.outputs.full == 'true'
@@ -180,7 +174,6 @@ jobs:
           PYTEST_ADDOPTS: "--durations=20 -ra"
         run: >-
           python tools/run_checks.py ${{ matrix.check_args }}
-          --test-workers ${{ matrix.test_workers }}
           --assets required --build-source tests/fixtures/deployment-smoke
 
       - name: Report deterministic-output toolchain

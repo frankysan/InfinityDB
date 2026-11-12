@@ -26,8 +26,8 @@ ORIGIN = "http://infinitydb-reinforcements-browser.test"
 @pytest.fixture(scope="module")
 def app() -> Any:
     return create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
 
@@ -188,7 +188,7 @@ def _published_unit(app: Any, slug: str, *, query: str = "") -> dict[str, Any]:
 @pytest.fixture(scope="module")
 def shared_section_unit(app: Any) -> tuple[str, dict[str, Any], dict[str, Any]]:
     """Pick one pinned logical Unit with actual profiles in both list contexts."""
-    with sqlite3.connect(ROOT / "data/generated/infinity.db") as database:
+    with sqlite3.connect(ROOT / "data/generated/army.db") as database:
         rows = database.execute(
             "SELECT lu.slug FROM logical_units AS lu "
             "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
@@ -239,7 +239,7 @@ def test_real_shared_unit_keeps_profiles_in_their_source_sections(
     assert section["role"] == "reinforcement"
     assert any(parent["id"] == main["id"] for parent in section["parent_armies"])
 
-    with sqlite3.connect(ROOT / "data/generated/infinity.db") as database:
+    with sqlite3.connect(ROOT / "data/generated/army.db") as database:
         source_ids = [
             row[0] for row in database.execute(
                 "SELECT lus.source_unit_id FROM logical_unit_sources AS lus "
@@ -339,7 +339,7 @@ def test_real_shared_unit_opens_only_the_explicit_army_context(
 @pytest.fixture(scope="module")
 def commlink_variant_units(app: Any) -> dict[int, tuple[str, dict[str, Any]]]:
     """Locate one source-backed Unit/loadout for each exact Army Commlink extra."""
-    with sqlite3.connect(ROOT / "data/generated/infinity.db") as database:
+    with sqlite3.connect(ROOT / "data/generated/army.db") as database:
         candidates = database.execute(
             "SELECT DISTINCT lu.slug, e.extra_id "
             "FROM loadout_payload_skill_extras AS e "

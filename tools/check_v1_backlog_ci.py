@@ -16,7 +16,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from tools.check_v1_backlog import ROOT, _git, analyze_backlog, audit_retirements
+from tools.check_v1_backlog import (
+    ROOT,
+    _git,
+    _register_bounds,
+    analyze_backlog,
+    audit_retirements,
+)
 
 # First tested adoption commit for Git-aware retirement and selection checks.
 ADOPTION_BASE = "0bac336999d102fe94a3bcadbeec83eca1ae7788"
@@ -88,13 +94,16 @@ def choose_ci_range(
             raise ValueError("push target is not the checked-out commit")
         if before not in _first_parent(repository, target):
             raise ValueError("push before SHA is not in first-parent history")
-        base_backlog = analyze_backlog(_git(repository, "show", f"{before}:docs/TODO.md"))
-        legacy_base = (
-            len(base_backlog.diagnostics) == 1
-            and base_backlog.diagnostics[0].code == "V1B004"
-        )
-        if base_backlog.diagnostics and not legacy_base:
+        before_todo = _git(repository, "show", f"{before}:docs/TODO.md")
+        base_backlog = analyze_backlog(before_todo)
+        if base_backlog.diagnostics:
             raise ValueError("push before backlog contains invalid V1S declarations")
+        # Once the register is retired, its absence cannot identify a pre-adoption
+        # branch. Use Git ancestry to distinguish the original adoption boundary.
+        legacy_base = (
+            _register_bounds(before_todo.splitlines()) is None
+            and adoption_base not in _git(repository, "rev-list", before).splitlines()
+        )
 
         # For a direct PR merge that changes TODO, audit the commits on the
         # merged branch rather than attributing every retirement to GitHub's
@@ -102,7 +111,6 @@ def choose_ci_range(
         # to the reviewed branch tip. This also handles the first merge from
         # a legacy main that predates the V1S register.
         parents = _git(repository, "rev-list", "--parents", "-n", "1", target).split()
-        before_todo = _git(repository, "show", f"{before}:docs/TODO.md")
         target_todo = _git(repository, "show", f"{target}:docs/TODO.md")
         if len(parents) == 3 and parents[1] == before and target_todo != before_todo:
             merged_head = parents[2]
@@ -116,10 +124,12 @@ def choose_ci_range(
             shared_backlog = analyze_backlog(
                 _git(repository, "show", f"{shared}:docs/TODO.md")
             )
-            if shared_backlog.diagnostics:
-                if not legacy_base or adoption_base not in feature_lineage:
+            if legacy_base:
+                if adoption_base not in feature_lineage:
                     raise ValueError("merged branch lacks a valid V1S audit baseline")
                 shared = adoption_base
+            elif shared_backlog.diagnostics:
+                raise ValueError("merged branch lacks a valid V1S audit baseline")
             return AuditRange(shared, merged_head, "push-feature-merge",
                               True, target)
 

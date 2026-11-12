@@ -66,7 +66,7 @@ def _identity_config():
 
 
 def test_export_materializes_only_selector_free_relation_constraints(tmp_path: Path) -> None:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(_normalized_relations(), path, identity_config=_identity_config())
 
     Database(path).validate()
@@ -93,7 +93,7 @@ def test_export_materializes_only_selector_free_relation_constraints(tmp_path: P
 
 
 def test_unit_detail_exposes_canonical_selection_constraints(tmp_path: Path) -> None:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(_normalized_relations(), path, identity_config=_identity_config())
 
     alpha = Database(path).get_unit(1)
@@ -116,7 +116,7 @@ def test_unit_detail_exposes_canonical_selection_constraints(tmp_path: Path) -> 
 
 
 def test_database_validation_rejects_tampered_relation_constraint(tmp_path: Path) -> None:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(_normalized_relations(), path, identity_config=_identity_config())
 
     with sqlite3.connect(path) as connection:
@@ -198,7 +198,7 @@ def _normalized_selection_equivalent_profile_relation() -> dict:
 def test_export_materializes_selection_equivalent_profile_selector_constraint(
     tmp_path: Path,
 ) -> None:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(_normalized_selection_equivalent_profile_relation(), path)
 
     Database(path).validate()
@@ -216,7 +216,7 @@ def test_export_materializes_selection_equivalent_profile_selector_constraint(
 def test_profile_selector_constraint_requires_selection_equivalence(tmp_path: Path) -> None:
     normalized = _normalized_selection_equivalent_profile_relation()
     normalized["tables"]["profiles"][0]["ava"] = -1
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized, path)
 
     Database(path).validate()

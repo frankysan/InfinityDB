@@ -39,6 +39,92 @@
       "url": "https://experience.corvusbelli.com/en/infinity/its-rules"
     }
   ],
+  "seasonPolicies": [
+    {
+      "id": "its18-spec-ops-tournament",
+      "title": "ITS 18: Spec-Ops Tournament Restriction",
+      "target": {
+        "domain": "rules-n5",
+        "recordId": "skill:infinity-spec-ops"
+      },
+      "applicability": {
+        "seasonId": "its-18",
+        "revision": "2026.09.01",
+        "context": "official-tournament"
+      },
+      "effect": {
+        "kind": "prohibited",
+        "text": "ITS Season 18 does not permit ordinary Infinity Spec-Ops in official tournaments. The N5.3 Skill and Request SpecBall remain valid core rules outside that event restriction."
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 26,
+          "section": "Spec-Ops"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-10"
+      }
+    },
+    {
+      "id": "its18-team-ops-spec-ops",
+      "title": "ITS 18: TEAM-OPS Spec-Ops Restriction",
+      "target": {
+        "domain": "rules-n5",
+        "recordId": "skill:infinity-spec-ops"
+      },
+      "applicability": {
+        "seasonId": "its-18",
+        "revision": "2026.09.01",
+        "context": "team-ops-extra"
+      },
+      "effect": {
+        "kind": "prohibited",
+        "text": "TEAM-OPS is a separate optional ITS Season 18 Extra. It does not permit Infinity Spec-Ops, and Request Tacball does not replace the core Request SpecBall procedure."
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 28,
+          "section": "Team-Ops"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-10"
+      }
+    },
+    {
+      "id": "its18-reinforcements-availability",
+      "title": "ITS 18: Reinforcements Extra Availability",
+      "target": {
+        "domain": "rules-n5",
+        "recordId": "rule:reinforcements-extra"
+      },
+      "applicability": {
+        "seasonId": "its-18",
+        "revision": "2026.09.01",
+        "context": "reinforcements-extra"
+      },
+      "effect": {
+        "kind": "optional-availability",
+        "text": "ITS Season 18 offers Reinforcements as an optional Extra, not as a rule for all N5 games. Its availability here does not independently certify unchanged N4-origin Reinforcements procedures as newly published N5 mechanics."
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 27,
+          "section": "Reinforcements"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-10"
+      }
+    }
+  ],
   "records": [
     {
       "id": "scenario:battleground",

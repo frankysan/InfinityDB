@@ -17,14 +17,20 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from tools.audit_weapon_chart_profiles import (
+from tools.weapon_chart_source import (
     PDF_PAGES,
     WeaponChartAuditError,
     _chart_burst_anchors,
-    _identity,
-    _mode_identity,
-    _sha256,
     rows_from_words,
+)
+from tools.weapon_source_common import (
+    source_file_sha256 as _sha256,
+)
+from tools.weapon_source_common import (
+    weapon_identity as _identity,
+)
+from tools.weapon_source_common import (
+    weapon_mode_identity as _mode_identity,
 )
 
 FORMAT = "InfinityDB N5 v5.3 Weapon Traits and prose evidence"
@@ -448,8 +454,8 @@ def markdown_report(report: dict[str, Any]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--core-pdf", required=True, type=Path)
-    parser.add_argument("--army-db", type=Path, default=Path("data/generated/infinity.db"))
-    parser.add_argument("--rules-db", type=Path, default=Path("data/generated/rules.db"))
+    parser.add_argument("--army-db", type=Path, default=Path("data/generated/army.db"))
+    parser.add_argument("--rules-db", type=Path, default=Path("data/generated/rules_n5.db"))
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     parser.add_argument("--trait-review", type=Path, default=DEFAULT_REVIEW)

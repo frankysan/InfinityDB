@@ -1340,18 +1340,12 @@ h1>span {
   margin: 0;
 }
 
-/* Provenance is named in text, not inferred from color or publication age. */
-.rules-card-provenance,
+/* Keep authored explanations and source notes distinct from gameplay rules. */
 .rules-provenance-caption {
   margin: 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
   line-height: 1.5;
-}
-
-.rules-card-provenance {
-  font-weight: 600;
-  letter-spacing: .01em;
 }
 
 .rules-provenance-label {

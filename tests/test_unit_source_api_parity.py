@@ -21,8 +21,8 @@ from infinity_db.skill_config import load_skill_source_config
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_DB = ROOT / "data/generated/infinity.db"
-RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_DB = ROOT / "data/generated/army.db"
+RULES_DB = ROOT / "data/generated/rules_n5.db"
 
 REFERENCE_FIELDS = (
     ("skills", "skill_extras"),

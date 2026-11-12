@@ -9,7 +9,6 @@ Nothing in this tool modifies game data or treats a profile as a rule definition
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 import sqlite3
@@ -18,21 +17,37 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from tools.weapon_chart_source import (
+    PDF_PAGES,
+    WeaponChartAuditError,
+    _chart_burst_anchors,
+    rows_from_words,
+)
+from tools.weapon_source_common import (
+    printed_name_and_mode as _printed_name_and_mode,
+)
+from tools.weapon_source_common import (
+    source_file_sha256 as _sha256,
+)
+from tools.weapon_source_common import (
+    weapon_identity as _identity,
+)
+from tools.weapon_source_common import (
+    weapon_mode_identity as _mode_identity,
+)
+from tools.weapon_source_metadata import (
+    _army_options,
+    _metadata,
+    _profile_attributes,
+)
+from tools.weapon_source_metadata import (
+    _source_range_bands as _source_range_bands,
+)
+
 FORMAT = "InfinityDB N5 Weapon Chart profile evidence"
 FORMAT_VERSION = 3
-_RANGE_EDGES_CM = (20, 40, 60, 80, 100, 120, 240)
 _RANGE_EDGES_X = (87.736, 113.663, 139.303, 164.268, 190.195, 216.122, 241.066, 266.993)
-PDF_PAGES = range(176, 189)
 _FIELDS = ("ps", "burst", "ammunition", "savingAttribute", "savingRolls")
-
-
-class WeaponChartAuditError(ValueError):
-    """Chart structure or input prevents a reproducible comparison."""
-
-
-def _identity(value: str) -> str:
-    text = unicodedata.normalize("NFKC", value).casefold()
-    return re.sub(r"[^a-z0-9]+", "", text)
 
 
 def _value(value: object) -> str:
@@ -56,77 +71,6 @@ def _fields_equal(pdf: dict[str, str], army: dict[str, str], field: str) -> bool
     ):
         return True
     return _value(pdf[field]) == _value(army[field])
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def _cell(
-    words: list[tuple[float, float, str]], y: float, left: float,
-    right: float, *, wrapped: bool = False,
-) -> str:
-    """Read a chart cell, including the two baselines of combined saves."""
-    tolerance = 5.2 if wrapped else 3.2
-    relevant = [
-        (x, wy, word) for x, wy, word in words
-        if left <= x < right and abs(wy - y) < tolerance
-    ]
-    return " ".join(
-        word for x, wy, word in sorted(relevant, key=lambda item: (round(item[1] / 3), item[0]))
-    ).strip()
-
-
-def _chart_burst_anchors(words: list[tuple[float, float, str]]) -> list[tuple[float, str]]:
-    """Locate chart rows, including the early rows on N5.3 page 188."""
-    return sorted(
-        (y, word) for x, y, word in words
-        if 294 <= x <= 310 and 100 < y < 800
-        and re.fullmatch(r"(?:[1-9]|10|--)", word)
-    )
-
-
-def rows_from_words(words: list[tuple[float, float, str]], page_number: int
-                    ) -> list[dict[str, Any]]:
-    """Reassemble rows of the *specific* N5 v5.3 Weapon Chart layout.
-
-    Burst values anchor table rows. Name text may span up to four baselines;
-    midpoints between Burst anchors stop adjacent names from merging. Limit
-    the name window to the printed name column and 14.9 vertical points.
-    Unreadable cells are left blank, never reconstructed by guessing.
-    """
-    anchors = _chart_burst_anchors(words)
-    result: list[dict[str, Any]] = []
-    for index, (y, _) in enumerate(anchors):
-        low = max(y - 14.9, (anchors[index - 1][0] + y) / 2) if index else y - 14.9
-        high = (
-            min(y + 14.9, (anchors[index + 1][0] + y) / 2)
-            if index + 1 < len(anchors) else y + 14.9
-        )
-        name_words = [
-            (wy, x, word) for x, wy, word in words
-            if 12 <= x < 90 and low < wy < high and word != "NAME"
-        ]
-        name = " ".join(
-            word for _, _, word in sorted(
-                name_words, key=lambda entry: (round(entry[0] / 4.8), entry[1])
-            )
-        )
-        result.append({
-            "page": page_number,
-            "name": name,
-            "ps": _cell(words, y, 263, 293),
-            "burst": _cell(words, y, 293, 314),
-            "ammunition": _cell(words, y, 315, 367),
-            "savingAttribute": _cell(words, y, 367, 418, wrapped=True),
-            "savingRolls": _cell(words, y, 418, 462),
-        })
-    return result
-
 
 
 def _printed_range_bands(
@@ -184,27 +128,6 @@ def _printed_range_bands(
     return result
 
 
-def _source_range_bands(distance: str) -> list[str | None] | None:
-    """Expand canonical Army breakpoints (2.5 cm per inch) into chart cells."""
-    result: list[str | None] = [None] * 7
-    if not distance:
-        return result
-    parsed = json.loads(distance)
-    boundaries = sorted(
-        (int(value["max"]), str(value["mod"]))
-        for value in parsed.values() if isinstance(value, dict)
-    )
-    previous = 0
-    for maximum, modifier in boundaries:
-        if maximum not in _RANGE_EDGES_CM or maximum <= previous:
-            return None
-        for index, edge in enumerate(_RANGE_EDGES_CM):
-            if previous < edge <= maximum:
-                result[index] = modifier
-        previous = maximum
-    return result
-
-
 def _printed_auxiliary_profiles(
     words: list[tuple[float, float, str]], page: int
 ) -> list[dict[str, str | int]]:
@@ -227,12 +150,6 @@ def _printed_auxiliary_profiles(
         if all(f"{key}=" in fields for key in ("ARM", "BTS", "STR", "S")):
             rows.append({"page": page, "name": name, "profile": fields})
     return rows
-
-
-def _profile_attributes(value: str) -> dict[str, int]:
-    return {key: int(number) for key, number in re.findall(
-        r"\b(ARM|BTS|STR|S)\s*=\s*(\d+)\b", value
-    )}
 
 
 def compare_auxiliary_profiles(
@@ -284,58 +201,6 @@ def compare_auxiliary_profiles(
         })
     return result
 
-
-
-def _printed_name_and_mode(name: str) -> tuple[str, str]:
-    """Keep the printed identity separate from an explicit parenthesized mode."""
-    match = re.fullmatch(r"(.+?)\s*\(([^()]*)\s+Mode\)", name, re.IGNORECASE)
-    if match is None:
-        return name, ""
-    return match.group(1).strip(), match.group(2).strip() + " Mode"
-
-
-def _mode_identity(mode: str) -> str:
-    # N5's Anti-Materiel and Army's Anti-Material/Antimaterial spellings
-    # designate the same named mode; do not collapse unrelated mode names.
-    return _identity(mode).replace("antimaterial", "antimateriel")
-
-
-def _army_options(
-    name: str, metadata: dict[str, list[dict[str, Any]]]
-) -> list[dict[str, Any]]:
-    key = _identity(name)
-    options = metadata.get(key, []) if key else []
-    # The chart labels tokenized Mines in the plural; Army models the type
-    # as a singular weapon. Limit this alias to a trailing "Mines" word.
-    if not options and key.endswith("mines"):
-        options = metadata.get(key[:-1], [])
-    return options
-
-
-def _metadata(db: Path) -> tuple[dict[str, list[dict[str, Any]]], int]:
-    with sqlite3.connect(f"file:{db.resolve().as_posix()}?mode=ro", uri=True) as conn:
-        ammunition = dict(conn.execute("SELECT id, name FROM metadata_ammunitions"))
-        rows = conn.execute(
-            "SELECT name, mode, ammunition, burst, damage, saving, savingNum, "
-            "distance, profile FROM metadata_weapons"
-        ).fetchall()
-    indexed: dict[str, list[dict[str, Any]]] = {}
-    for name, mode, ammo_id, burst, damage, saving, rolls, distance, profile in rows:
-        if not isinstance(name, str):
-            raise WeaponChartAuditError("Weapon metadata contains an invalid name")
-        item = {
-            "name": name,
-            "mode": str(mode or ""),
-            "ps": str(damage or ""),
-            "burst": str(burst or ""),
-            "ammunition": str(ammunition.get(ammo_id, "")),
-            "savingAttribute": str(saving or ""),
-            "savingRolls": str(rolls or ""),
-            "rangeBands": _source_range_bands(str(distance or "")),
-            "profile": str(profile or ""),
-        }
-        indexed.setdefault(_identity(name), []).append(item)
-    return indexed, len(rows)
 
 
 def compare_rows(chart_rows: list[dict[str, Any]], metadata: dict[str, list[dict[str, Any]]]
@@ -590,7 +455,7 @@ def markdown_report(report: dict[str, Any]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--core-pdf", type=Path, required=True)
-    parser.add_argument("--army-db", type=Path, default=Path("data/generated/infinity.db"))
+    parser.add_argument("--army-db", type=Path, default=Path("data/generated/army.db"))
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     args = parser.parse_args()

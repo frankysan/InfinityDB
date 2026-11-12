@@ -16,13 +16,17 @@ from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
 
-from tools.audit_weapon_chart_profiles import (
-    WeaponChartAuditError,
-    _identity,
-    _metadata,
-    _mode_identity,
-    _printed_name_and_mode,
+from tools.weapon_chart_source import WeaponChartAuditError
+from tools.weapon_source_common import (
+    printed_name_and_mode as _printed_name_and_mode,
 )
+from tools.weapon_source_common import (
+    weapon_identity as _identity,
+)
+from tools.weapon_source_common import (
+    weapon_mode_identity as _mode_identity,
+)
+from tools.weapon_source_metadata import _metadata
 
 CHART_MEMBER = "Weapon_Chart"
 # Explicit source spellings, not a blanket singularization rule.

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import sqlite3
 from collections.abc import Iterator
@@ -23,12 +22,23 @@ from infinity_db.variant_usage import (
 )
 from infinity_db.variant_usage_includes import build_include_provenance
 from infinity_db.variant_usage_peripherals import build_peripheral_provenance
-from infinity_db.variant_usage_reference import (
-    load_variant_usage_publication,
-    publication_from_candidate,
-)
+from infinity_db.variant_usage_reference import publication_from_candidate
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.mark.parametrize("retired_flag", ("--publish", "--check-publication"))
+def test_variant_usage_tool_has_no_loose_json_publication_mode(
+    monkeypatch: pytest.MonkeyPatch, retired_flag: str,
+) -> None:
+    from tools.build_variant_usage import main
+
+    monkeypatch.setattr(
+        "sys.argv", ["build_variant_usage", "--raw-db", "local/army.raw.db", retired_flag],
+    )
+    with pytest.raises(SystemExit) as error:
+        main()
+    assert error.value.code == 2
 
 
 def _variant_usage_candidate(
@@ -83,52 +93,51 @@ def _variant_usage_candidate(
     }
 
 
-def _write_variant_usage_artifacts(
-    tmp_path: Path, *, duplicate: bool = False,
-) -> tuple[Path, Path, Path, Path]:
-    army = tmp_path / "infinity.db"
-    rules = tmp_path / "rules.db"
-    objects = tmp_path / "deployed-objects.json"
-    publication = tmp_path / "variant-usage.json"
-    army.write_bytes(b"army")
-    rules.write_bytes(b"rules")
-    objects.write_bytes(b"deployed objects")
+def test_variant_publication_projection_excludes_candidate_diagnostics() -> None:
     snapshot = {
         "armyArchiveSha256": "a" * 64,
-        "armyDatabaseSha256": hashlib.sha256(army.read_bytes()).hexdigest(),
-        "rawDatabaseSha256": "b" * 64,
-        "rulesDatabaseSha256": hashlib.sha256(rules.read_bytes()).hexdigest(),
-        "exportPairSha256": "c" * 64,
-        "deployedObjectPublicationSha256": hashlib.sha256(objects.read_bytes()).hexdigest(),
+        "armyDatabaseSha256": "b" * 64,
+        "rawDatabaseSha256": "c" * 64,
+        "rulesDatabaseSha256": "d" * 64,
+        "exportPairSha256": "e" * 64,
     }
-    candidate = _variant_usage_candidate(snapshot, duplicate=duplicate)
-    if duplicate:
-        document = {
-            "format": "infinitydb-rule-variant-usage",
-            "formatVersion": 1,
-            "scope": "exact-reviewed-source-variants",
-            "sourceSnapshot": snapshot,
-            "variants": candidate["variants"],
-        }
-    else:
-        document = publication_from_candidate(candidate)
-    publication.write_text(json.dumps(document), encoding="utf-8")
-    return army, rules, objects, publication
-
-
-def test_variant_usage_publication_exposes_only_exact_source_variants(
-    tmp_path: Path,
-) -> None:
-    army, rules, objects, publication = _write_variant_usage_artifacts(tmp_path)
-
-    result = load_variant_usage_publication(publication, army, rules, objects)
-
-    assert result is not None
+    result = publication_from_candidate(_variant_usage_candidate(snapshot))
+    assert result["formatVersion"] == 2
     assert result["scope"] == "exact-reviewed-source-variants"
     assert len(result["variants"]) == 1
     assert "diagnosticCounts" not in result
     assert "unresolvedSourceRows" not in result
     assert "rawDatabaseSha256" not in result["sourceSnapshot"]
+
+
+@pytest.mark.parametrize("legacy_version", [True, False])
+def test_variant_publication_validation_rejects_retired_contract(
+    legacy_version: bool,
+) -> None:
+    from infinity_db.variant_usage_reference import _validate_publication
+
+    snapshot = {
+        "armyArchiveSha256": "a" * 64,
+        "armyDatabaseSha256": "b" * 64,
+        "rulesDatabaseSha256": "d" * 64,
+        "exportPairSha256": "e" * 64,
+    }
+    publication = publication_from_candidate(_variant_usage_candidate(snapshot))
+    publication["sourceSnapshot"]["deployedObjectPublicationSha256"] = "f" * 64
+    if legacy_version:
+        publication["formatVersion"] = 1
+    with pytest.raises(
+        ValueError, match="Unsupported variant" if legacy_version else "must not depend"
+    ):
+        _validate_publication(publication)
+
+
+def test_candidate_conversion_rejects_retired_deployed_object_fingerprint() -> None:
+    candidate = _variant_usage_candidate({
+        "deployedObjectPublicationSha256": "f" * 64,
+    })
+    with pytest.raises(ValueError, match="must not depend"):
+        publication_from_candidate(candidate)
 
 
 def test_variant_usage_publication_ignores_raw_sqlite_byte_layout() -> None:
@@ -138,7 +147,6 @@ def test_variant_usage_publication_ignores_raw_sqlite_byte_layout() -> None:
         "rawDatabaseSha256": "c" * 64,
         "rulesDatabaseSha256": "d" * 64,
         "exportPairSha256": "e" * 64,
-        "deployedObjectPublicationSha256": "f" * 64,
     }
     original = publication_from_candidate(_variant_usage_candidate(snapshot))
     changed = {**snapshot, "rawDatabaseSha256": "0" * 64}
@@ -147,27 +155,15 @@ def test_variant_usage_publication_ignores_raw_sqlite_byte_layout() -> None:
     assert "rawDatabaseSha256" not in original["sourceSnapshot"]
 
 
-def test_variant_usage_publication_rejects_duplicate_source_rows(
-    tmp_path: Path,
-) -> None:
-    army, rules, objects, publication = _write_variant_usage_artifacts(
-        tmp_path, duplicate=True,
-    )
-
+def test_variant_usage_publication_rejects_duplicate_source_rows() -> None:
+    snapshot = {
+        "armyArchiveSha256": "a" * 64,
+        "armyDatabaseSha256": "b" * 64,
+        "rulesDatabaseSha256": "d" * 64,
+        "exportPairSha256": "e" * 64,
+    }
     with pytest.raises(ValueError, match="duplicate variant usage source identity"):
-        load_variant_usage_publication(publication, army, rules, objects)
-
-
-@pytest.mark.parametrize("artifact", ["army", "rules", "objects"])
-def test_variant_usage_publication_rejects_stale_release_artifacts(
-    tmp_path: Path, artifact: str,
-) -> None:
-    army, rules, objects, publication = _write_variant_usage_artifacts(tmp_path)
-    stale = {"army": army, "rules": rules, "objects": objects}[artifact]
-    stale.write_bytes(f"changed {artifact}".encode())
-
-    with pytest.raises(ValueError, match="does not match release artifacts"):
-        load_variant_usage_publication(publication, army, rules, objects)
+        publication_from_candidate(_variant_usage_candidate(snapshot, duplicate=True))
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: Any) -> None:
@@ -415,6 +411,28 @@ def test_variant_usage_ambiguous_catalog_mapping_is_excluded(
             assert mapping["applicationItemId"] is None
 
 
+def test_variant_usage_requires_embedded_objects_even_with_legacy_json(
+    usage_databases: tuple[sqlite3.Connection, sqlite3.Connection],
+    tmp_path: Path,
+) -> None:
+    application, raw = usage_databases
+    paths = [tmp_path / name for name in ("army.db", "army.raw.db")]
+    for source, path in zip((application, raw), paths, strict=True):
+        source.commit()
+        with sqlite3.connect(path) as destination:
+            source.backup(destination)
+    rules = tmp_path / "rules_n5.db"
+    with sqlite3.connect(rules) as connection:
+        connection.execute("PRAGMA user_version = 9")
+    legacy = tmp_path / "deployed-objects.json"
+    legacy.write_text('{"objects": [{}]}', encoding="utf-8")
+    unchanged = legacy.read_bytes()
+
+    with pytest.raises(ValueError, match="requires source-matched embedded deployed objects"):
+        build_variant_usage_projection(paths[0], paths[1], rules)
+    assert legacy.read_bytes() == unchanged
+
+
 def test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts(
     usage_databases: tuple[sqlite3.Connection, sqlite3.Connection],
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
@@ -427,16 +445,17 @@ def test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts(
     for army, occurrence in ((701, 3), (702, 4)):
         _add_direct(application, raw, "skills", "profile", army=army,
                     occurrence=occurrence, position=2)
-    paths = [tmp_path / name for name in ("application.db", "raw.db", "rules.db")]
+    paths = [tmp_path / name for name in ("application.db", "raw.db", "rules_n5.db")]
     for source, path in zip((application, raw), paths, strict=False):
         source.commit()
         with sqlite3.connect(path) as destination:
             source.backup(destination)
     with sqlite3.connect(paths[2]) as rules:
         rules.execute("CREATE TABLE marker (id)")
-    publication = tmp_path / "publication.json"
-    publication.write_text("{}", encoding="utf-8")
-    monkeypatch.setattr(variant_usage, "load_deployed_object_publication", lambda *_args: {})
+    monkeypatch.setattr(
+        variant_usage.RulesDatabase, "deployed_objects_payload",
+        lambda _self, _army: {"objects": [{"id": "test:object"}]},
+    )
     monkeypatch.setattr(variant_usage, "_source_mapping", lambda *_args: {
         ("skills", 47): {"applicationItemId": 47, "rules": {
             "recordId": "skill:example-l1", "collectionId": "core",
@@ -444,7 +463,7 @@ def test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts(
         }},
     })
     projection = build_variant_usage_projection(
-        paths[0], paths[1], paths[2], publication,
+        paths[0], paths[1], paths[2],
     )
     group, = projection["variants"]
     assert (group["uniqueUnits"], group["uniqueArmyUnits"], group["distinctContexts"],
@@ -638,20 +657,18 @@ def test_variant_usage_mismatched_raw_snapshot_fails_closed(
     monkeypatch.setattr(variant_usage, "_snapshot", lambda _db: next(values))
     with pytest.raises(ValueError, match="raw archive does not match"):
         build_variant_usage_projection(
-            ROOT / "data/generated/infinity.db",
-            ROOT / "data/generated/infinity.raw.db",
-            ROOT / "data/generated/rules.db",
-            ROOT / "data/generated/deployed-objects.json",
+            ROOT / "data/generated/army.db",
+            ROOT / "data/work/build/army.raw.db",
+            ROOT / "data/generated/rules_n5.db",
         )
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_variant_usage_pinned_pair_has_source_ownership_not_inferred_includes() -> None:
     projection = build_variant_usage_projection(
-        ROOT / "data/generated/infinity.db",
-        ROOT / "data/generated/infinity.raw.db",
-        ROOT / "data/generated/rules.db",
-        ROOT / "data/generated/deployed-objects.json",
+        ROOT / "data/generated/army.db",
+        ROOT / "data/work/build/army.raw.db",
+        ROOT / "data/generated/rules_n5.db",
     )
     assert projection["scope"] == "read-only-candidate-not-published"
     assert projection["formatVersion"] == 2
@@ -813,10 +830,9 @@ def test_variant_usage_mismatched_export_generation_fails_before_reading_rows(
         connection.commit()
         with sqlite3.connect(path) as destination:
             connection.backup(destination)
-    monkeypatch.setattr(variant_usage, "load_deployed_object_publication", lambda *_args: {})
     with pytest.raises(ValueError, match="different exports"):
         build_variant_usage_projection(
-            paths[0], paths[1], tmp_path / "rules.db", tmp_path / "pub.json",
+            paths[0], paths[1], tmp_path / "rules_n5.db",
         )
 
 
@@ -871,7 +887,10 @@ def test_variant_usage_cli_check_never_writes_candidate(
     original = json.dumps(result).encode("utf-8")
     candidate.write_bytes(original)
     monkeypatch.setattr(cli, "build_variant_usage_projection", lambda *_args: result)
-    monkeypatch.setattr("sys.argv", ["build_variant_usage", "--check", str(candidate)])
+    monkeypatch.setattr(
+        "sys.argv", ["build_variant_usage", "--raw-db", str(tmp_path / "raw.db"),
+                     "--check", str(candidate)],
+    )
     cli.main()
     assert candidate.read_bytes() == original
     result["scope"] = "changed"

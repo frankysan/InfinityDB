@@ -28,8 +28,9 @@ Use these documents when deciding how the project works now:
 - [multi-agent-workspaces.md](multi-agent-workspaces.md) — optional coordination, enabled only
   by explicit user request; its checkout roles, claims and serialized integration apply within
   that requested scope, rather than to ordinary development by default.
-- `validation-queue.md` — canonical VD/VR scheduling and active deferred-validation
-  register (design/execution thresholds, dependencies, drain and retirement); not an implementation backlog.
+- `validation-queue.md` — active register for genuinely deferred test design
+  or execution (owner, prerequisites, resumption trigger and outcome); no
+  mandatory per-edit entries or numeric thresholds.
 - `ci.md` — hosted CI workflows and repository-level validation policy.
 - `deployment.md` — production install/update/rollback/operations contract.
 - `server-migration.md` — moving released or development environments between hosts.
@@ -47,13 +48,28 @@ domain-specific actions, not second copies of operational thresholds or rules.
 `AGENTS.local.md` is private, machine/user-specific guidance and must not
 override tracked project policy.
 
-## Active strategic plans
+## Diagram notation
 
-- [restructuring-plan.md](restructuring-plan.md) — proposed phased simplification of
-  developer workflow, SQLite runtime data, source-family databases, player-facing
-  presentation, tooling and repository structure. It maps dependencies and
-  acceptance criteria but does not override current behavior or duplicate the
-  live implementation backlog in `TODO.md`.
+Prefer fenced `mermaid` blocks for charts, graphs and diagrams in Markdown
+documentation when Mermaid can clearly express the content. Use this for
+architecture flows, dependency graphs and similar relationships instead of
+ASCII art, keeping labels readable in both source and rendered form.
+
+## Active cleanup plans
+
+- [tooling-and-local-path-cleanup-plan.md](tooling-and-local-path-cleanup-plan.md) —
+  proposed post-v1.1.0 audit and migration of maintained `tools/` modules,
+  Git-ignored data into `local/`, categorized private output paths,
+  and bounded one-use tool retirement. Implementation is not started;
+  the [backlog](TODO.md) owns the active task.
+
+## Completed strategic migrations
+
+- [restructuring-plan.md](restructuring-plan.md) — historical P0–P6
+  simplification and acceptance record, completed in development on
+  2026-11-12. It does not define current workflows or open work.
+  Consult the canonical owners above and [active backlog](TODO.md)
+  rather than following superseded historical commands.
 
 ## Maintained evidence and research
 
@@ -73,7 +89,7 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   acceptance records. It preserves the reviewed 1.0 input scope without implying
   exhaustive whole-source coverage. Historical snapshots in this file are not
   current task status; `releasing.md` owns release handoff and `TODO.md`
-  owns post-1.0 development.
+  owns active development.
 - [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — dated
   source/interaction assessment with implementation follow-ups and remaining
   source conflicts. Its linked inventory, N5.3 reconciliation and source manifest
@@ -111,39 +127,49 @@ tool over accumulating a new wrapper when the operation is expected to recur.
 **Review at bounded task closeout**, after successful publication/acceptance of the intended
 artifact, or during a deliberate repository-hygiene pass. Use this order:
 
-1. **Establish completion and provenance.** Identify the last purpose and exact input/output
-   revisions or source hashes where material; verify the corresponding acceptance, rollback or
-   release obligation is closed. An older successful stage does not retire a tool still needed
-   for an open migration, reproducible source comparison or release-matched publication.
-2. **Check consumers, not just direct imports.** Search the tracked tree for imports, module
-   invocations and command strings, tests/fixtures, CI workflows, scripts, package entry points,
-   generated-file recipes, agent skills, TODO items, source audits and documentation links.
-   Check indirect/shared helpers and externally documented operator procedures. If a dependency
-   or intended future invocation remains, retain or replace it before retiring the file.
+1. **Establish completion and provenance.** Identify the original research, development
+   or presentation purpose and its exact input/output revisions or source hashes where material.
+   Determine whether that purpose has been fulfilled, superseded or remains independently
+   necessary for an open migration, a specific reproducible source investigation or a current
+   release requirement. Historical reproducibility by itself is not a mandate to retain
+   executable build and serving paths; Git history preserves their implementation.
+2. **Audit consumers to plan the change, not to justify retention by circular reference.**
+   Search imports, module invocations, tests/fixtures, CI, scripts, package entry points,
+   generated-file recipes, agent skills, TODO items, source audits and operator procedures.
+   For each consumer, identify its **independent current purpose** in research, development
+   or presentation. A test that exists only to verify a historical command, an obsolete
+   staging path or compatibility already superseded by the current format is not evidence
+   that the command must remain. Remove or replace that test and its fixture together with
+   the retired implementation. Keep or migrate tests that enforce **still-valid invariants**
+   such as source provenance, semantic parity, deterministic rebuilding and fail-closed
+   selection. Do not retain old code merely to keep its tests green.
 3. **Preserve lasting knowledge.** Transfer accepted semantics, source discrepancies, unresolved
    decisions, reproducibility requirements and current procedures to their canonical owners.
    Keep stable finding IDs and source-version/hash evidence that an open reconciliation relies on.
    A large frozen baseline can remain tracked while it is needed for acceptance, but it must be
    labeled historical rather than maintained current state.
-4. **Choose the smallest safe disposition:**
-   - **Retain** if the command/audit is active, a reusable validator, an imported helper, the
-     canonical generator, or necessary to satisfy an open release/validation/source gate.
+4. **Choose the smallest useful disposition based on purpose, not dependency count:**
+   - **Retain** only when there is a concrete, unsuperseded research, development or
+     presentation need, a current supported builder/runtime or reusable verification contract,
+     or a genuinely open source/release obligation. Mere imports, historical test coverage,
+     age, speculative future reuse or the ability to reproduce an old tool are insufficient.
    - **Extract and replace** if a one-use entry point contains reusable logic: move that logic to
      a maintained module, update its consumers/tests and then retire only the obsolete wrapper.
-   - **Move evidence to `local/provenance/`** if unique raw findings, private inputs, recovery
-     material or replay instructions justify a local copy. Record source revision, purpose and
-     limits of the evidence. Since `local/` is ignored, such copies are **not shared Git
-     provenance** and cannot be required by a clean checkout.
+   - **Retain evidence under a categorized ignored `local/` path** (currently
+     `local/provenance/` where appropriate) if unique raw findings, private inputs,
+     recovery material or replay instructions justify a local copy. Record source
+     revision, purpose and limits. Since `local/` is ignored, such copies are
+     **not shared Git provenance** and cannot be required by a clean checkout.
    - **Delete from the tracked tree** if the work is complete, references are cleared and
      its content is already recoverable from Git history or canonical records. Do not copy
      every obsolete script into `local/` by default; that would create a second archive.
-5. **Close out atomically.** Remove or replace stale command examples, links and imports in
-   the same change. State the retired paths, disposition, acceptance/replacement evidence and
-   any local-only archive location in the commit message or canonical closeout. Run relevant
-   dependency tests and the `docs` stage (including link checks), inspect the full diff and
-   confirm the intended release/CI path does not depend on ignored material. Respect the
-   [VD/VR queue](validation-queue.md) for deferred test work; never equate retirement with
-   acceptance of an unrelated pending gate.
+5. **Close out atomically.** Remove or replace historical-only tests/fixtures, stale
+   commands, links and imports in the same change, while moving relevant invariant checks
+   onto the replacement contract. State the retired paths, their fulfilled/superseded
+   purpose, preserved evidence and remaining independent consumers. Run focused tests for
+   current behavior and the `docs` stage (including links), inspect the diff, and verify
+   current CI/release paths no longer depend on retired material. Use the
+   [VD/VR queue](validation-queue.md) only for genuinely deferred checks.
 
 A one-use audit **report** follows the same procedure: first reconcile its actionable findings
 with `TODO.md`, `official-source-clarifications.md` or other appropriate owners; then delete the
@@ -151,6 +177,87 @@ superseded narrative or preserve only genuinely unique evidence. Audit findings 
 merely because a newer report exists. Do not rewrite or discard immutable upstream snapshots,
 license/provenance obligations, or reviewed historical evidence required by the
 [data lifecycle](../data/README.md). Prefer explicit retention with a reason over uncertain loss.
+
+## Disposition and naming of completed files
+
+**Project domain:** Project infrastructure
+
+Apply the same lifecycle decision to **tools, plans, reports, audits, temporary
+scripts and their generated evidence**. At creation, identify the domain, owner,
+purpose, scope and retirement trigger, using the path and name where possible.
+A recurring maintained tool has no artificial expiry; a bounded investigation
+should have an explicit completion condition. A date or version in a filename
+describes the scope of evidence, **not** a reason by itself to delete it.
+
+At task closeout or during a deliberate audit, classify the item:
+
+- **Active:** Still owns a current contract, reusable operation, open research
+  question or release obligation. Keep it in its canonical location and update
+  stale naming, implementation or docs as needed.
+- **Bounded/open:** Needed for an unfinished specific task or unresolved
+  dependency. Keep with a named owner and review it when that dependency closes;
+  do not invent a time-based deletion deadline.
+- **Frozen evidence:** Unique, verified source/provenance, accepted release
+  evidence, unresolved research findings or legally required material. Retain
+  immutably in its appropriate tracked owner or an approved, protected ignored
+  location. Record why it is needed and what would permit retirement.
+- **Superseded/completed:** No independent active consumer or unique evidence
+  remains. Remove the tracked file with its historical-only tests, references
+  and commands. Git history normally provides the archive; do not create a
+  permanent copy solely to preserve old code or a finished narrative.
+
+Choose one disposition, with the reason recorded in the relevant change:
+
+1. **Remove** redundant tracked implementations, completed plans, duplicate
+   reports and obsolete audits once lasting conclusions, current instructions,
+   open findings and supported consumers have been reconciled. Prefer deletion
+   to an automatic `archive/` or `old/` directory. A historical test that only
+   exercises the retired implementation does not establish a live need.
+2. **Archive evidence** only when it has a concrete retention purpose: for
+   example a source hash/revision needed for a still-open clarification, a
+   signed/reviewed acceptance record, unique research findings or recovery
+   material. Shared, independently required evidence belongs with its
+   maintained tracked source; machine-specific or nonpublishable evidence
+   belongs in a categorized ignored `local/` directory with appropriate
+   backup/permissions. An ignored local copy cannot substitute for required
+   clean-checkout evidence. Record source identity, scope, status, owner,
+   integrity hash where material, and the trigger for the next review.
+3. **Rename or relocate** an *otherwise still useful* item when its current
+   path incorrectly implies that it is active, generic, or owned by another
+   subsystem. Prefer a descriptive domain/scope/version/date in its new
+   location; mark a retained completed plan as historical at its top. Migrate
+   consumers and links in the same change. Do not rename immutable upstream
+   originals, published asset URLs or source-referenced artifacts without an
+   explicitly verified provenance/compatibility migration. Renaming alone
+   does not justify retaining a superseded file.
+4. **Extract and replace** when one-use code contains a genuinely reusable
+   validator/parser, or when an obsolete document mixes still-current policy
+   with historical commentary. Move current logic or policy to its canonical
+   owner, preserve relevant invariant tests, then retire the old wrapper or
+   narrative.
+
+Apply the decision by file type: completed **plans** leave `TODO.md` and
+either retire to Git history or remain visibly labeled historical if their
+unique decisions still matter; completed **audits** first transfer unresolved
+findings and accepted interpretations to their authoritative registers;
+**reports** retain only needed acceptance/provenance evidence rather than
+every intermediate rendering; **tools** lose obsolete commands, imports and
+historical-only tests together. Do not delete a source archive or backup
+merely because its producing tool has been retired.
+
+For each retirement batch, review live imports, invocations, test purpose,
+CI, packaging, generated-output recipes, links, agent instructions, upstream
+handoffs and actual data ownership. Verify any migrated file's identity,
+validate affected behavior, and review the final diff. Record what was retired,
+the fulfilled purpose, where surviving knowledge/evidence lives and any
+outstanding obligation in the commit or canonical closeout. **Uncertain,
+unique or ignored private data is never bulk-deleted on the basis of naming
+or age; such removal requires its own verified review and authorization.**
+Avoid maintaining a permanent second archive or completed-task register.
+
+The next [tooling and local-path cleanup project](tooling-and-local-path-cleanup-plan.md)
+will audit current files against this policy and establish the detailed
+directory/naming rules; it does not retroactively authorize mass deletions.
 
 ## Planning and history
 
@@ -208,9 +315,10 @@ Complete the handoff at the same time as the work:
    obligations in the validation queue, source evidence in its maintained owner,
    and run logs, hashes and intermediate counts out of TODO.
 
-Apply this to subtasks at every depth during each change's closeout, not only at
-release preparation. Git history retains retired details; do not create another
-completed-task archive or append new status reports to completed entries.
+When a change modifies a tracked backlog task, reconcile the affected subtree
+at closeout rather than postponing it to release preparation. Unrelated edits
+do not require full-backlog or historical-V1S review. Git history retains
+retired details; do not create a second completed-task archive.
 
 **Make retirement auditable:** when removing numbered `V1S-*` entries, include
 *every retired ID* in the same Git commit's subject or body (for example,
@@ -222,13 +330,12 @@ Do not retire an open implementation or ruling requirement just because its
 bounded source review or related focused test passed; explicitly retain and
 re-scope the remainder under its existing task or correct independent owner.
 
-Before beginning the next task, reconcile the just-worked task and any touched
-parent against `TODO.md`, the [VD/VR queue](validation-queue.md), current
-documentation and the inspected diff. Retire fully finished work **in that
-closeout commit**; leave partial/blocked work unchecked with a concrete
-remaining action or dependency. For autonomous work selection, follow the
-[V1S checkpoint](TODO.md#v1s-work-selection-and-handoff); numeric gaps alone
-are not evidence of skipped or completed work.
+For a completed backlog item, reconcile its affected parent with the actual
+diff, required acceptance and any concrete [deferred checks](validation-queue.md).
+Retire finished work in that commit; leave incomplete work open with a specific
+remaining dependency. Invoke the [V1S checkpoint](testing.md#v1s-backlog-checks)
+only for reopened numbered V1S work. Do not turn routine unrelated development
+into an administrative full-backlog or queue review.
 
 ## Private local workspace
 

@@ -178,7 +178,7 @@ def _summary_line(label: str, result: dict[str, Any]) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("database", type=Path, help="Published infinity.db to audit")
+    parser.add_argument("database", type=Path, help="Published army.db to audit")
     parser.add_argument("--output", type=Path, help="Optional deterministic JSON report path")
     parser.add_argument(
         "--details",

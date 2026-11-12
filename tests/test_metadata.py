@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import sqlite3
@@ -10,8 +11,20 @@ import pytest
 
 from infinity_army_data.metadata import MetadataError, decode_metadata
 from infinity_army_data.normalize import normalize_master, validate_normalized
-from infinity_db.cli import main
+from infinity_db.cli import _build_army
 from infinity_db.database import Database, export_database, raw_database_path
+
+
+def _build_army_fixture(source: Path, output_dir: Path) -> int:
+    """Test the Army ingestion stage, not the retired standalone build CLI.
+
+    Production's complete-set builder invokes this stage with required Army
+    metadata before assembling the independently published Rules/ITS databases.
+    """
+    return _build_army(argparse.Namespace(
+        source=source, output_dir=output_dir, metadata=None,
+        compact=False, no_verify=False, require_metadata_for_build=True,
+    ))
 
 
 def metadata_source() -> dict:
@@ -139,7 +152,7 @@ def test_deployable_repeater_profile_is_shown_with_its_equipment(tmp_path: Path)
     }
 
     normalized = normalize_master(document)
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized, path)
 
     database = Database(path)
@@ -179,7 +192,7 @@ def test_normalization_uses_metadata_parent_for_main_army_identity() -> None:
 def test_metadata_rows_are_stored_but_do_not_create_armies(tmp_path: Path) -> None:
     envelope = decode_metadata(json.dumps(metadata_source()).encode(), "metadata.json")
     normalized = normalize_master(master(envelope))
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized, path)
     assert Database(path).list_armies() == [
         {
@@ -259,7 +272,7 @@ def test_army_roles_use_metadata_hierarchy_and_reinforcement_links(tmp_path: Pat
     document["units"]["1"]["byArmy"].update({"102": {}, "198": {}, "901": {}, "902": {}})
 
     normalized = normalize_master(document)
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized, path)
     armies = {army["id"]: army for army in Database(path).list_armies()}
     with sqlite3.connect(path) as connection:
@@ -377,7 +390,7 @@ def test_grouping_role_is_derived_from_metadata_without_known_group_id(tmp_path:
     document["units"]["1"]["byArmy"].update({"7700": {}, "7701": {}})
 
     normalized = normalize_master(document)
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized, path)
     database = Database(path)
     armies = {army["id"]: army for army in database.list_armies()}
@@ -412,7 +425,7 @@ def test_unit_details_use_application_army_identity_for_faction_group(tmp_path: 
     document["units"]["1"]["byArmy"]["777"] = {}
 
     normalized = normalize_master(document)
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized, path)
 
     details = Database(path).get_unit(1)
@@ -454,11 +467,11 @@ def test_build_discovers_required_sidecar_metadata(
     )
     (source / "metadata.json").write_text(json.dumps(metadata_source()), encoding="utf-8")
     output = tmp_path / "generated"
-    assert main(["build", str(source), "--output-dir", str(output)]) == 0
+    assert _build_army_fixture(source, output) == 0
     assert "Skipped non-Army JSON files: metadata.json" not in capsys.readouterr().err
-    with sqlite3.connect(output / "infinity.db") as connection:
+    with sqlite3.connect(output / "army.db") as connection:
         assert connection.execute("SELECT name FROM army_lists").fetchone()[0] == "Official First"
-    with sqlite3.connect(output / "infinity.raw.db") as raw_connection:
+    with sqlite3.connect(output / "army.raw.db") as raw_connection:
         assert raw_connection.execute("SELECT COUNT(*) FROM metadata_factions").fetchone()[0] == 2
 
 
@@ -470,8 +483,9 @@ def test_build_rejects_a_source_without_metadata(tmp_path: Path) -> None:
     )
 
     output = tmp_path / "generated"
-    assert main(["build", str(source), "--output-dir", str(output)]) == 1
-    assert not (output / "infinity.db").exists()
+    with pytest.raises(MetadataError, match="No metadata.json found"):
+        _build_army_fixture(source, output)
+    assert not (output / "army.db").exists()
 
 
 def test_database_import_rejects_normalized_data_without_metadata(
@@ -485,7 +499,7 @@ def test_database_import_rejects_normalized_data_without_metadata(
         }
     )
     with pytest.raises(ValueError, match="required Army metadata"):
-        export_database(data, tmp_path / "infinity.db")
+        export_database(data, tmp_path / "army.db")
 
 
 def test_build_discovers_unique_metadata_inside_zip(tmp_path: Path) -> None:
@@ -494,6 +508,6 @@ def test_build_discovers_unique_metadata_inside_zip(tmp_path: Path) -> None:
         output.writestr("army/101-first.json", json.dumps({"version": "test", "units": []}))
         output.writestr("army/metadata.json", json.dumps(metadata_source()))
     output_dir = tmp_path / "generated"
-    assert main(["build", str(archive), "--output-dir", str(output_dir)]) == 0
+    assert _build_army_fixture(archive, output_dir) == 0
     normalized = json.loads((output_dir / "normalized.json").read_text(encoding="utf-8"))
     assert normalized["armyMetadata"]["sourceFile"] == "metadata.json"

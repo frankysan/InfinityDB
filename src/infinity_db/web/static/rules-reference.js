@@ -595,10 +595,7 @@ export function rulesReferenceArticle(
   const badgeRow = ruleBadgeRow(rule);
   if (badgeRow) header.append(badgeRow);
   header.append(...headerContent);
-  const provenance = document.createElement("p");
-  provenance.className = "rules-card-provenance";
-  provenance.textContent = "InfinityDB-maintained reference · consult citations for source wording";
-  article.append(header, ...leadingContent, provenance);
+  article.append(header, ...leadingContent);
   appendRuleDetails(article, rule, {
     includeBadges: false,
     includeApplicability,

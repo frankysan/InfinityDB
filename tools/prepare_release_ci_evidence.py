@@ -7,13 +7,18 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
+import tomllib
 import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
+
+from tools.release_metadata import ROOT as RELEASE_ROOT
+from tools.release_metadata import check_repository
 
 GITHUB_API_BASE = "https://api.github.com"
 GITHUB_API_VERSION = "2026-03-10"
@@ -82,12 +87,13 @@ def validate_repository(value: str) -> str:
 
 
 def requires_cross_browser(tag: str) -> bool:
-    """Cross-browser evidence is mandatory from the first 1.0 release onward."""
+    """Preserve the v1.0.x release contract; later releases opt in by risk."""
     valid = validate_tag(tag)
-    match = re.match(r"^v([0-9]+)", valid)
+    match = re.match(r"^v([0-9]+)(?:\.([0-9]+))?", valid)
     if match is None:
         raise ReleaseEvidenceError("Invalid release tag version")
-    return int(match.group(1)) >= 1
+    major, minor = match.groups()
+    return int(major) == 1 and (minor is None or int(minor) == 0)
 
 
 def validate_commit_sha(value: str) -> str:
@@ -102,6 +108,34 @@ def validate_tag(value: str) -> str:
     if not _TAG_RE.fullmatch(tag):
         raise ReleaseEvidenceError("Release tag must use the v<version> form")
     return tag
+
+
+def verify_release_metadata_for_tag(tag: str, commit_sha: str) -> None:
+    """Final-tag guard for the exact checkout, not routine PR validation."""
+    tag = validate_tag(tag)
+    commit_sha = validate_commit_sha(commit_sha)
+    try:
+        head = subprocess.run(
+            ("git", "rev-parse", "HEAD"), cwd=RELEASE_ROOT,
+            capture_output=True, text=True, check=False, timeout=8,
+        )
+        if head.returncode or head.stdout.strip().lower() != commit_sha:
+            raise ReleaseEvidenceError(
+                "Release checkout HEAD does not match the verified release SHA"
+            )
+        problems = check_repository()
+        if problems:
+            raise ReleaseEvidenceError(
+                "Release metadata is not finalized: " + "; ".join(problems)
+            )
+        with (RELEASE_ROOT / "pyproject.toml").open("rb") as handle:
+            version = tomllib.load(handle)["project"]["version"]
+    except (OSError, ValueError, KeyError, subprocess.TimeoutExpired) as exc:
+        raise ReleaseEvidenceError(f"Could not verify local release metadata: {exc}") from exc
+    if tag != f"v{version}":
+        raise ReleaseEvidenceError(
+            f"Release tag {tag} does not match packaged version {version}"
+        )
 
 
 def _request_json(url: str, *, token: str | None) -> dict[str, Any]:
@@ -341,7 +375,7 @@ def collect_release_evidence(
             commit_sha=commit_sha,
         )
         entry = asdict(evidence)
-        if requirement == REQUIRED_WORKFLOWS[0] and include_cross_browser:
+        if requirement == REQUIRED_WORKFLOWS[0]:
             source_jobs = _request_json(
                 cross_browser_jobs_url(repository, evidence.run_id), token=token,
             )
@@ -383,7 +417,7 @@ def render_tag_message(tag: str, evidence: dict[str, Any]) -> str:
         raise ReleaseEvidenceError(
             "Release evidence is missing required workflows: " + ", ".join(missing)
         )
-    if require_browser:
+    if require_browser or CROSS_BROWSER_WORKFLOW.name in names:
         browser = next(
             item for item in workflows
             if isinstance(item, dict) and item.get("workflow") == CROSS_BROWSER_WORKFLOW.name
@@ -459,6 +493,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="also require a successful Full-asset checks run for the release commit",
     )
+    parser.add_argument(
+        "--include-cross-browser",
+        action="store_true",
+        help="also require all four browser-matrix jobs (optional from v1.1)",
+    )
     return parser
 
 
@@ -476,9 +515,10 @@ def main(argv: list[str] | None = None) -> int:
             args.commit,
             token=os.environ.get("GITHUB_TOKEN"),
             include_full_assets=args.include_full_assets,
-            include_cross_browser=requires_cross_browser(tag),
+            include_cross_browser=requires_cross_browser(tag) or args.include_cross_browser,
         )
         tag_message = render_tag_message(tag, evidence)
+        verify_release_metadata_for_tag(tag, args.commit)
     except ReleaseEvidenceError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

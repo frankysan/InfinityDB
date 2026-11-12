@@ -69,7 +69,7 @@ def _payload_sha(values: dict[str, object]) -> str:
 
 
 def _fixture_database(tmp_path: Path) -> Path:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     connection = sqlite3.connect(path)
     try:
         for table, columns in EXPECTED_COLUMNS.items():

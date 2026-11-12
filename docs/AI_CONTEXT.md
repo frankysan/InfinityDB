@@ -12,10 +12,9 @@ architecture mirror, release diary, or backlog. Before substantial work, use the
 - curated schemas/review policy: `data/curated/README.md`;
 - data/provenance lifecycle: `data/README.md`;
 - checks/CI: `docs/testing.md`, `docs/ci.md`;
-- deferred test design/execution and asynchronous Linux dispatch:
-  `docs/validation-queue.md` (strict VD-to-zero then VR-to-zero drain
-  under its current thresholds; VD never runs tests; parallel Windows work permitted
-  only while an independent Linux full suite is running);
+- deferred test obligations: `docs/validation-queue.md` (only concrete
+  unrun checks, no numeric drain; focused tests may run during implementation;
+  independent Windows work is allowed during isolated focused/full Linux runs);
 - unfinished implementation work: `docs/TODO.md`;
 - upstream rules/Army/Wiki/FAQ inconsistencies and publisher ruling questions:
   `docs/official-source-clarifications.md` (stable SRC IDs);
@@ -78,7 +77,7 @@ release/audit narrative belongs in the changelog and Git history.
   shared geometry; a full ITS map library and interactive editor remain
   post-1.0 and are not part of the mandatory Core-scenario gate.
 - Scenario authoring composes exact shared Rules/Skills and typed components
-  into self-contained `rules.db` output. Scoped records do not leak into
+  into self-contained `rules_n5.db` output. Scoped records do not leak into
   core rules or acquire Army links. Browser and API use the selected
   versioned scenario identity; backend detail requires explicit Army
   Points, while an unshared browser visit defaults to 300 via the common
@@ -147,26 +146,21 @@ release/audit narrative belongs in the changelog and Git history.
 
 ## Runtime artifacts
 
-- `data/generated/infinity.db`: tracked Army-derived application runtime database.
-- `data/generated/rules.db`: tracked curated-rules runtime database.
-- `data/generated/variant-usage.json`: tracked, release-matched exact-variant
-  Skill/Equipment usage publication; built from pinned raw Army inputs during
-  development and validated without those inputs on the release host.
-- `data/generated/weapon-profile-sources.json`: tracked, reviewed Weapon-profile
-  source locator publication.
-- Current v10 Rules embed reviewed deployed objects. The ignored
-  `data/generated/deployed-objects.json` publication is generated only for
-  legacy v8/v9 deployment; see [the artifact lifecycle](../data/README.md).
-- `data/generated/infinity.raw.db`: development/audit archive of normalized
-  source structures, not a production dependency.
-- `data/manifests/symbol-publication.json`: tracked processed-SVG publication
-  contract and Army source binding.
-- Raw Army/wiki/PDF/source-symbol archives plus detailed symbol-build state remain local inputs and
-  provenance, not deployment requirements.
+- `data/generated/army.db`: tracked Army-derived application runtime database.
+- `data/generated/rules_n5.db`: tracked curated-rules runtime database.
+- Army v31 and Rules v17 embed exact variants, reviewed Weapon citations,
+  deployed objects, maintained reference facts and symbol mappings/hashes.
+- Build-only raw Army exports and intermediate JSON belong in ignored
+  `data/work/build/`. Research tools take explicit raw paths.
+- `data/manifests/symbol-publication.json`: tracked processed-SVG build/release
+  contract and Army source binding; normal serving uses embedded mappings/hashes.
+- Raw Army/wiki/PDF/source-symbol archives and detailed build state remain local.
 
-A release must deploy its tracked databases, JSON read models and processed SVG
-publication as one matched, validated set. Production must not regenerate
-tracked publications or substitute a server-side database rebuild.
+One complete offline `infinity-db build --compact` produces both tracked files.
+`serve --db-dir` selects an alternate set; `INFINITY_DB_DB_DIR` precedes the
+default working-directory-relative `data/generated/`. WSGI requires that
+environment setting. Docker copies the same pair directly. See
+[data lifecycle](../data/README.md) for the canonical contract.
 
 ## Army/application identity invariants
 
@@ -222,7 +216,7 @@ because the source does not attach them to a profile group.
 
 ## Rules/reference invariants
 
-- Curated rules data is independent from Army data and builds into `rules.db`.
+- Curated rules data is independent from Army data and builds into `rules_n5.db`.
 - General Rules is a **published** fallback domain for reviewed `rule:*` categories without a clearer
   owner. Fireteam general rules remain owned by Fireteams; profile notation help remains contextual.
 - Ammunition and Labels are published top-level reference domains.
@@ -306,9 +300,9 @@ stable entry point; do not add a CSS build step or link the source parts directl
 - Army provenance records `source.dataChangedOn` separately from acquisition time. Player-facing
   freshness uses the source-data change date; acquisition time is provenance.
 - Snapshot archives normalize member metadata/order and are deterministic for identical inputs.
-- `tools/build_symbols.py` is the maintained symbol orchestration entry point. Local build state is
-  resumable/forward-only; final production publication is represented by the tracked publication
-  manifest, not by terminal local build state.
+- The external symbol producer owns acquisition, overrides and graphical processing.
+  InfinityDB exports source plans, verifies the handoff, maps semantic identities and
+  promotes accepted assets; the tracked publication manifest is the runtime build input.
 - Peripheral-only profile artwork publishes under
   `peripherals/<main-army>/<peripheral-name>.svg`; when one physical symbol proves that a profile
   name is used in both Peripheral and normal Unit contexts, that mixed-role name stays Unit-owned
@@ -317,10 +311,9 @@ stable entry point; do not add a CSS build step or link the source parts directl
 - `unitProfileLogoToPublishedPath` is occurrence evidence, not an override-only table: retain every
   authoritative Army profile-logo resolution so logical-Unit consolidation can still distinguish a
   genuine General-profile symbol from the Unit fallback.
-- Image overrides replace an upstream symbol identity within the same symbol category, not only
-  one URL occurrence. Exact upstream-equivalent assets inherit the same override; conflicting
-  non-identical overrides for one upstream identity fail acquisition. The build manifest retains
-  `upstreamSha256` separately from the effective asset SHA-256 so this equivalence survives caches.
+- The verified external override handoff preserves upstream and effective asset
+  hashes separately, including propagated same-category overrides and conflicts;
+  InfinityDB does not apply the override artwork itself.
 - The processed SVG publication is redistributable under Corvus Belli's explicit non-commercial
   permission but remains outside InfinityDB's MIT license.
 
@@ -330,15 +323,16 @@ stable entry point; do not add a CSS build step or link the source parts directl
 - Database exporters explicitly begin schema/data write transactions after deterministic connection
   configuration. A SQLite connection context manager alone does not group schema DDL; rules-schema
   `executescript` must begin inside its script. Preserve validation, finalization and atomic publication.
-- `tools/run_checks.py` is the canonical local orchestrator. Test design and
-  execution follow the [active VD/VR queue](validation-queue.md#queue-rules);
-  focused tests are immediate only for an explicitly justified safety-critical
-  exception or when VR is due. Mandatory CI and release gates remain separate.
+- `tools/run_checks.py` is the canonical local orchestrator. Focused tests
+  may run during implementation; [VD/VR](validation-queue.md#queue-rules) records
+  only genuinely deferred work. Mandatory CI and release checks have separate
+  owners.
 - Required hosted CI covers source/build checks, cross-platform deterministic outputs, installed
   wheel behavior, and deployment smoke. See `docs/ci.md` for current workflow/ruleset details.
-- A release requires a project-wide documentation audit, release-matched runtime artifacts, hosted
-  checks green for the exact release commit, an immutable version tag, and post-deployment smoke
-  verification where deployed.
+- A release requires documentation review proportionate to changed behavior,
+  release-matched runtime artifacts, required hosted checks on the exact release
+  commit, an immutable version tag, and relevant post-deployment smoke where deployed.
+  Four-browser matrices are optional from v1.1 onward; v1.0.x retains its historical gate.
 - Hosted release evidence is retained without mutating the validated release commit: prepare the
   exact-commit workflow evidence after CI is green, then create an annotated `v<version>` tag whose
   message records the required GitHub Actions run identities/URLs. Lightweight release tags do not

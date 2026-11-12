@@ -7,14 +7,17 @@ import json
 import sqlite3
 import sys
 from pathlib import Path
+from typing import Any
 
 from infinity_army_data.cli import add_data_commands
 from infinity_army_data.cli import cmd_build as build_dataset
 from infinity_army_data.cli import cmd_normalize as normalize_dataset
 
 from . import __version__
+from .build_provenance import BUILD_PROVENANCE_KEY
 from .curated import load_curated_directory, load_curated_document
 from .database import database_health_report, export_database, raw_database_path
+from .database_set import DEFAULT_DATABASE_DIRECTORY, database_set_health_report
 from .display_identities import display_identity_metadata, load_display_identity_curated
 from .identities import identity_metadata, load_identity_config
 from .peripheral_identities import (
@@ -35,9 +38,9 @@ from .source_anomalies import (
     validate_normalized_source_anomalies,
 )
 
-DEFAULT_DATABASE = Path("data/generated/infinity.db")
-DEFAULT_RULES_DATABASE = Path("data/generated/rules.db")
-DEFAULT_STANDALONE_RULES_DATABASE = Path("local/rules-standalone.db")
+DEFAULT_DATABASE = Path("data/generated/army.db")
+DEFAULT_RULES_DATABASE = Path("data/generated/rules_n5.db")
+DEFAULT_STANDALONE_RULES_DATABASE = Path("data/work/build/rules-standalone.db")
 DEFAULT_CURATED_RULES = Path("data/curated/rules")
 DEFAULT_PERIPHERAL_IDENTITIES = Path("data/curated/peripherals/army-identities.json")
 
@@ -93,6 +96,17 @@ def cmd_normalize(args: argparse.Namespace) -> int:
 
 
 def cmd_build(args: argparse.Namespace) -> int:
+    from .database_set_builder import build_database_set
+
+    result = build_database_set(args, _build_army)
+    print(f"Runtime database set ready: {args.db_dir.resolve()}")
+    print(f"Build set: {result['buildProvenance']['buildSetId']}")
+    return 0
+
+
+def _build_army(
+    args: argparse.Namespace, build_provenance: dict[str, Any] | None = None,
+) -> int:
     config = load_identity_config()
     display_identities = load_display_identity_curated()
     build_dataset(
@@ -102,11 +116,12 @@ def cmd_build(args: argparse.Namespace) -> int:
         normalized_metadata={
             **identity_metadata(config),
             **display_identity_metadata(display_identities),
+            **({BUILD_PROVENANCE_KEY: build_provenance} if build_provenance is not None else {}),
         },
     )
     normalized = args.output_dir / "normalized.json"
     _validate_source_anomaly_baseline(normalized)
-    database = args.output_dir / "infinity.db"
+    database = args.output_dir / "army.db"
     _export(normalized, database)
     print(f"Application database size: {database.stat().st_size:,} bytes")
     print(f"Raw archive size: {raw_database_path(database).stat().st_size:,} bytes")
@@ -120,6 +135,26 @@ def cmd_export(args: argparse.Namespace) -> int:
 
 
 def cmd_database_health(args: argparse.Namespace) -> int:
+    if args.database is None:
+        if args.require_raw:
+            raise ValueError("--require-raw applies to an Army database, not --db-dir")
+        report = database_set_health_report(args.db_dir or DEFAULT_DATABASE_DIRECTORY)
+        if args.json:
+            print(json.dumps(report, indent=2, sort_keys=True))
+        else:
+            print(f"Database-set health: {report['status']}")
+            print(f"Database directory: {report['directory']}")
+            if error := report.get("error"):
+                print(f"Database-set error: {error}")
+            else:
+                print(f"Layout: {report['layout']}; integrity: {report['integrityCheck']}")
+                provenance = report["buildProvenance"]
+                print(f"Build provenance: {provenance.get('buildSetId', provenance['status'])}")
+                for name, digest in report["sha256"].items():
+                    print(f"{name}: {digest}")
+            print("Source-policy freshness and graphical assets: not checked")
+        return 0 if report["status"] == "healthy" else 1
+
     report = database_health_report(args.database, require_raw=args.require_raw)
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
@@ -167,7 +202,7 @@ def cmd_database_health(args: argparse.Namespace) -> int:
 def cmd_serve(args: argparse.Namespace) -> int:
     from .web.server import serve
 
-    serve(args.database, host=args.host, port=args.port)
+    serve(args.db_dir, host=args.host, port=args.port)
     return 0
 
 
@@ -190,54 +225,38 @@ def cmd_build_rules(args: argparse.Namespace) -> int:
     output = args.output if args.output is not None else DEFAULT_STANDALONE_RULES_DATABASE
     if output.resolve() == DEFAULT_RULES_DATABASE.resolve():
         raise ValueError(
-            "build-rules cannot write the tracked release rules.db directly; "
-            "stage outside data/generated/ and use guarded release publication"
+            "build-rules cannot write the tracked release rules_n5.db directly; "
+            "build outside data/generated/ and review the complete matched set"
         )
-    if args.legacy_v8 and args.restrictions_manifest is not None:
-        raise ValueError("--legacy-v8 cannot be combined with --restrictions-manifest")
-
     documents = load_curated_directory(args.input)
-    manifest = None
-    deployed_objects = None
-    if not args.legacy_v8:
-        source = (
-            args.restrictions_manifest
-            if args.restrictions_manifest is not None
-            else Path("config/validation/restrictions-source-chart.json")
-        )
-        manifest = json.loads(source.read_text(encoding="utf-8"))
-        if not args.legacy_v9:
-            from infinity_db.deployed_object_builder import build_deployed_objects
+    source = (
+        args.restrictions_manifest
+        if args.restrictions_manifest is not None
+        else Path("config/validation/restrictions-source-chart.json")
+    )
+    manifest = json.loads(source.read_text(encoding="utf-8"))
+    from infinity_db.deployed_object_builder import build_deployed_objects
 
-            curated_source = next(
-                (
-                    path for path, document in documents
-                    if document["collection"]["id"] == "n5-core-v5.3"
-                    and document["collection"]["status"] == "current"
-                ),
-                None,
-            )
-            if curated_source is None:
-                raise ValueError("Current N5.3 core source required for deployed objects")
-            deployed_objects = build_deployed_objects(
-                args.army_db, curated_source, args.delivery_reviews,
-                args.candidate_reviews,
-            )
+    curated_source = next(
+        (
+            path for path, document in documents
+            if document["collection"]["id"] == "n5-core-v5.3"
+            and document["collection"]["status"] == "current"
+        ),
+        None,
+    )
+    if curated_source is None:
+        raise ValueError("Current N5.3 core source required for deployed objects")
+    deployed_objects = build_deployed_objects(
+        args.army_db, curated_source, args.delivery_reviews,
+        args.candidate_reviews,
+    )
     export_rules_database(
         documents, output, restrictions_manifest=manifest,
         deployed_objects=deployed_objects,
     )
-    version = 8 if args.legacy_v8 else 9 if args.legacy_v9 else 10
-    print(f"Rules database ready: {output} (schema v{version})")
+    print(f"Rules database ready: {output} (schema v10)")
     print(f"Collections: {len(documents)}")
-    if args.output is None and not (args.legacy_v8 or args.legacy_v9):
-        # A checkout has two supported targets: this ignored, complete runtime
-        # for local/LAN hosting, and the separately promoted tracked Docker data.
-        # Do not publish a mismatched variant/Weapon view during development.
-        from tools.build_v10_runtime_candidate import publish_checkout_runtime
-
-        publish_checkout_runtime(output)
-        print("Checkout runtime ready: local/checkout-runtime")
     return 0
 
 
@@ -349,18 +368,24 @@ def build_parser() -> argparse.ArgumentParser:
         build_handler=cmd_build,
         normalize_handler=cmd_normalize,
         require_metadata_for_build=True,
+        database_set_build=True,
     )
 
     p_export = sub.add_parser("export", help="Import validated normalized JSON into SQLite")
     p_export.add_argument("input", type=Path, help="normalized.json input")
-    p_export.add_argument("output", nargs="?", type=Path, default=DEFAULT_DATABASE)
+    p_export.add_argument("output", type=Path, help="Explicit development output SQLite file")
     p_export.set_defaults(func=cmd_export)
 
     p_health = sub.add_parser(
         "database-health",
-        help="Validate a published application database and report revision metadata",
+        help="Validate an Army database or an explicitly selected runtime directory",
     )
-    p_health.add_argument("database", nargs="?", type=Path, default=DEFAULT_DATABASE)
+    health_selection = p_health.add_mutually_exclusive_group()
+    health_selection.add_argument("database", nargs="?", type=Path)
+    health_selection.add_argument(
+        "--db-dir", type=Path,
+        help="Validate one complete runtime directory without fallback",
+    )
     p_health.add_argument(
         "--require-raw",
         action="store_true",
@@ -375,8 +400,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_serve = sub.add_parser("serve", help="Start the local unit browser and read-only API")
     p_serve.add_argument(
-        "--database", type=Path,
-        help="Explicit Army database (disables automatic checkout runtime selection)",
+        "--db-dir", type=Path,
+        help="Complete database directory (then INFINITY_DB_DB_DIR, then data/generated)",
     )
     p_serve.add_argument(
         "--host",
@@ -399,18 +424,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_rules.add_argument(
         "--output", type=Path,
         help=(
-            "Standalone output (default: local/rules-standalone.db); without --output "
-            "also prepares the ignored complete checkout runtime; never writes tracked rules.db"
+            "Standalone output (default: ignored data/work/build/rules-standalone.db); "
+            "not a complete serving set"
         ),
-    )
-    legacy = p_rules.add_mutually_exclusive_group()
-    legacy.add_argument(
-        "--legacy-v8", action="store_true",
-        help="Export obsolete v8 format explicitly for compatibility tests",
-    )
-    legacy.add_argument(
-        "--legacy-v9", action="store_true",
-        help="Export pre-deployed-object v9 format explicitly for compatibility tests",
     )
     p_rules.add_argument(
         "--restrictions-manifest", type=Path,

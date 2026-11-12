@@ -99,14 +99,17 @@ def test_rules_database_projects_curated_summaries_labels_and_relation_semantics
 ) -> None:
     root = Path(__file__).resolve().parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
     database = RulesDatabase(output)
 
     definitions = {
         record["id"]: record
         for _, document in documents
-        if document["collection"]["status"] == "current"
+        if (
+            document["collection"]["status"] == "current"
+            and document["collection"]["domain"] != "its"
+        )
         for record in document["records"]
         if record["composition"]["role"] == "definition" and not record["scope"].get("scenarios")
     }
@@ -143,7 +146,7 @@ def test_two_source_scoped_legacy_edges_are_qualified_in_both_directions(
 ) -> None:
     """Legacy relation IDs survive; only ambiguous display labels are tightened."""
     root = Path(__file__).resolve().parents[1]
-    old_path = tmp_path / "v8-rules.db"
+    old_path = tmp_path / "v8-rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), old_path)
 
     cases = (
@@ -158,7 +161,7 @@ def test_two_source_scoped_legacy_edges_are_qualified_in_both_directions(
             "Lieutenant selection excludes",
         ),
     )
-    for db_path in (old_path, root / "data/generated/rules.db"):
+    for db_path in (old_path, root / "data/generated/rules_n5.db"):
         database = RulesDatabase(db_path)
         database.validate()
         records = {

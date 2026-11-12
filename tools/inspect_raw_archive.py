@@ -18,7 +18,7 @@ from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.database.schema import METADATA_TABLE, RAW_ROWS_TABLE, ROW_JSON, TABLES, quote
 
-DEFAULT_APPLICATION = Path("data/generated/infinity.db")
+DEFAULT_APPLICATION = Path("data/generated/army.db")
 MAX_PAGE_SIZE = 100
 
 
@@ -111,7 +111,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--application", type=Path, default=DEFAULT_APPLICATION,
-        help="application infinity.db; its paired raw sibling is selected by default",
+        help="application army.db; its paired raw sibling is selected by default",
     )
     parser.add_argument("--raw", type=Path, help="explicit paired raw archive")
     actions = parser.add_subparsers(dest="action", required=True)

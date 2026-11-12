@@ -93,7 +93,9 @@ its application metrics.
   and Skills, source-verification notes and deterministic maps all derive
   from maintained scenario definitions. Maps can be saved as standalone SVGs
   using the browser's image context menu, with the selected theme and units.
-  The wider ITS library remains
+  On the v1.1 development branch, ITS missions also expose an optional
+  event/Extra context selector; season-only restrictions are displayed only
+  when that context is explicitly chosen. The wider ITS library remains
   outside the 1.0 completeness requirement.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.
@@ -147,12 +149,16 @@ InfinityDB **1.0.0** is the N5.3 current-reference release, following the
 0.6–0.10 series. It includes current-source rules citations, four core
 scenarios, reviewed FAQ and deployed objects, and exact-variant usage
 references. See the [changelog](docs/CHANGELOG.md) for the complete version
-history and the [post-1.0 backlog](docs/TODO.md#post-10--maintenance-and-product-expansion)
-for work outside this baseline.
+history and the [active backlog](docs/TODO.md#active-development)
+for unfinished development work.
 
-Version **1.0.1** is being prepared with improved scenario maps, reference-page
-spacing, version-specific release notes and safer local-build/deployment workflows.
+Version **1.0.1** delivered improved scenario maps, reference-page spacing,
+version-specific release notes and safer local-build/deployment workflows.
 Its Rules database embeds reviewed deployed objects while retaining the reference baseline.
+The 1.1.0 restructuring development milestone is complete; the
+[backlog](docs/TODO.md) tracks other unfinished work and the
+[historical restructuring record](docs/restructuring-plan.md) retains
+migration evidence. Version **1.1.0** has not been released.
 
 ## Requirements and setup
 
@@ -166,6 +172,9 @@ python -m pip install -e ".[dev,symbols]"
 ```
 
 Select `.venv` as the Python interpreter in VS Code.
+The `symbols` extra supplies Pillow for optional raster-parity review and
+FontTools/Brotli for separate browser-font regeneration. Normal builds, serving,
+and publication handoff verification do not require it.
 
 ## Quick start
 
@@ -175,72 +184,59 @@ Docker deployment** for internet serving. See
 [architecture](docs/architecture.md#runtime-targets) and
 [deployment](docs/deployment.md) for the separate contracts.
 
-A clean checkout includes tracked runtime databases and processed graphics. Without
-a local rebuild, the development server uses the tracked database pair:
+A clean checkout includes the three tracked runtime databases and processed graphics.
+Without a local rebuild, the development server uses the complete SQLite set:
 
 ```powershell
 infinity-db serve
 ```
 
-To use the latest Army and curated Rules changes, the original development
-workflow remains supported:
+To rebuild from the latest local Army archive and maintained Rules inputs:
 
 ```powershell
 infinity-db build --compact
-infinity-db build-rules
 infinity-db serve
 ```
 
-The Rules build publishes a complete, ignored `local/checkout-runtime/` with
-co-located Army and v10 Rules databases, exact-variant usage and reviewed Weapon
-citations. `serve` automatically selects that **verified local build** over
-the tracked release pair; a stale/mismatched local build fails with instructions
-to rebuild instead of silently falling back. Explicit `serve --database PATH`
-bypasses automatic selection. Docker never reads this directory.
+The offline build validates and replaces the complete tracked set in
+`data/generated/`: `army.db`, `rules_n5.db` and `its_18.db`. Stop a server
+before rebuilding its selected directory and restart after success. A failed
+build before replacement preserves the previous set; rerun an interrupted replacement.
+
+`serve --db-dir PATH` selects another complete directory. Otherwise serving
+uses `INFINITY_DB_DB_DIR`, then `data/generated/` relative to the working
+directory. Missing or incompatible files fail startup. Production WSGI requires
+`INFINITY_DB_DB_DIR` explicitly. Both hosting targets use the same three
+databases; Docker copies them directly into its immutable image.
 
 Open <http://127.0.0.1:8000> on the development machine. The development server
 listens on local network interfaces by default; use the machine's LAN address
 from another device, or bind only to localhost with
 `infinity-db serve --host 127.0.0.1`. Stop with `Ctrl+C`.
 
-### Download a fresh Army snapshot
+### Acquire a fresh Army snapshot
 
-Acquisition is explicit and separate from normal builds:
-
-```powershell
-python tools/download_army_json.py data/raw
-infinity-db build --compact
-infinity-db build-rules
-infinity-db serve
-```
-
-The downloader publishes an immutable timestamped ZIP only after validating a
-coherent source acquisition. Generated snapshot provenance is kept separately
-from the source archive. See [data storage and provenance](data/README.md) for
-the detailed snapshot contract.
+Army acquisition runs explicitly in the standalone
+[InfinityDB-army-acquisition](https://github.com/frankysan/InfinityDB-army-acquisition)
+repository, not through an in-tree downloader. Its output is an immutable
+`JSON YYYYMMDD-HHMMSS.zip` with matching snapshot provenance JSON.
+Place the verified handoff under `data/raw/` and
+`data/manifests/snapshots/` respectively, then run
+`infinity-db build --compact` and `infinity-db serve` in InfinityDB.
+The normal offline build never fetches data. See the
+[snapshot provenance and handoff contract](data/README.md#cross-repository-acquisition-handoff-p53).
 
 ### Build the rules reference
 
-The current rules build combines curated rule definitions with reviewed Army-derived
-deployed-object evidence, while keeping its complete reference model in rules.db:
+The normal `infinity-db build --compact` includes curated Rules, reviewed
+deployed objects, exact variants, Weapon citations and maintained reference facts
+in the complete SQLite set. ITS Season 18 is published separately in
+`its_18.db`. No JSON sidecar is required to serve the built set.
 
-```powershell
-infinity-db build-rules
-```
-
-The default command writes v10 Rules to `local/rules-standalone.db`
-and assembles the matching `local/checkout-runtime/` for checkout-based
-serving. It requires the paired raw Army database produced by
-`infinity-db build --compact` to publish reviewed exact-variant usage.
-Use `--output` for a **standalone Rules-only** build with no checkout
-publication, or `--legacy-v8`/`--legacy-v9` for compatibility work.
-For an independently staged, source-matched v10 candidate, run
-`python -m tools.build_v10_runtime_candidate` and repeat with `--check`.
-Use `--promote-release` to explicitly verify v9→v10 semantic parity and
-promote the three matched v10 tracked files (Rules, variant usage and Weapon
-citations). The development branch now contains this promoted v10 set;
-the previous tagged production release remains v9 until separate acceptance
-and deployment.
+For independent Rules-export development, `infinity-db build-rules` writes a
+standalone v10 database under ignored `data/work/build/rules-standalone.db`.
+An explicit `--output` selects its destination. This narrow command does not
+produce a complete serving set or change which directory `serve` opens.
 
 Reference PDFs and wiki snapshots are research inputs rather than direct runtime
 inputs. Human-reviewed rules collections live under `data/curated/rules/`.
@@ -249,24 +245,20 @@ inputs. Human-reviewed rules collections live under `data/curated/rules/`.
 
 The processed graphical publication is already tracked in a normal checkout. Regeneration
 is optional for source development and requires separate raw inputs and external tools.
-Use the symbol orchestrator only when preparing a new publication, with an existing pinned
-Army snapshot (replace the timestamp with the immutable local snapshot you intend to use):
+Symbol acquisition, reviewed overrides, font conversion and compression are owned by
+InfinityDB-symbol-tools. InfinityDB verifies its processed handoff, prepares a candidate
+and promotes accepted artwork with compatibility aliases and recoverable backups. See the
+[publication lifecycle](data/README.md#accepted-external-symbol-publication-promotion).
 
-```powershell
-python tools/build_symbols.py --snapshot "data/raw/JSON YYYYMMDD-HHMMSS.zip"
-```
+An external processed-SVG handoff is prepared as an isolated semantic
+publication candidate using `python -m tools.prepare_symbol_publication`.
+That offline command verifies the source/stage evidence and needs no graphical
+processing tools. It leaves the tracked publication unchanged; see the
+[candidate inputs and review boundary](data/README.md#external-processed-symbol-publication-candidates).
 
-Or intentionally fetch a fresh Army snapshot first:
-
-```powershell
-python tools/build_symbols.py --fetch-snapshot
-```
-
-Symbol processing requires the `symbols` Python extras. Compression additionally
-requires SVGO v4+ and `resvg`; text conversion normally requires Inkscape.
-
-The symbol pipeline is resumable and records detailed local logs, reports,
-provenance, and publication state. Corvus Belli has granted explicit permission
+The external producer owns symbol acquisition and processing; its repository is
+not needed for normal database builds, serving, or Docker packaging.
+Corvus Belli has granted explicit permission
 for InfinityDB to redistribute the processed graphical publication used by the
 project, provided the project remains non-commercial and the assets stay clearly
 separate from the MIT-licensed code. Raw Army, wiki, PDF, and source-symbol
@@ -275,21 +267,14 @@ committed merely because the processed graphical output may be distributed. See
 [third-party notices](THIRD_PARTY_NOTICES.md), [architecture](docs/architecture.md),
 and [data storage and provenance](data/README.md) for the full contract.
 
-The wiki snapshot downloader is also available independently:
-
-```powershell
-python tools/download_wiki_snapshot.py
-python tools/download_wiki_snapshot.py --language es
-python tools/download_wiki_snapshot.py --site human-sphere
-python tools/download_wiki_snapshot.py --site human-sphere --include-history
-```
-
-The default site remains the official Infinity Wiki. Human Sphere acquisition is English-only,
-uses a distinct `HUMAN-SPHERE ...zip` archive identity, and enumerates MediaWiki content pages
-before following rendered links so unlinked main-namespace pages are not silently omitted. That
-enumerated main-namespace inventory defines required Human Sphere content; stale discovered 404s,
-Talk pages, and site-service endpoints are recorded as ignored rather than making a healthy mirror
-unpublishable. Both sources keep incomplete work for inspection and publish only complete snapshots.
+Wiki and Human Sphere acquisition likewise belongs to the standalone
+[InfinityDB-wiki-acquisition](https://github.com/frankysan/InfinityDB-wiki-acquisition)
+repository. It publishes complete, immutable `WIKI-<language> ...zip` or
+`HUMAN-SPHERE ...zip` archives with matching provenance; incomplete
+crawls remain with the producer. Its output is research evidence, not an
+implicit normal-build dependency. See the
+[wiki acquisition contract](data/README.md#snapshot-provenance-contract)
+for languages, failure rules and handoff requirements.
 
 ## Common commands
 
@@ -297,49 +282,30 @@ The snapshot filename below is a pattern; replace the timestamp with the local
 immutable Army ZIP you intend to process.
 
 ```powershell
-# Run individual Army-data stages
-infinity-db merge "data/raw/JSON YYYYMMDD-HHMMSS.zip" data/generated/master.json --compact
-infinity-db normalize data/generated/master.json data/generated/normalized.json --compact
-infinity-db export data/generated/normalized.json data/generated/infinity.db
+# Run individual source-development stages into ignored work files
+infinity-db merge "data/raw/JSON YYYYMMDD-HHMMSS.zip" data/work/build/master.json --compact
+infinity-db normalize data/work/build/master.json data/work/build/normalized.json --compact
+infinity-db export data/work/build/normalized.json data/work/build/army.db
 
-# Use an alternate output directory or database/server port
-infinity-db build --output-dir other-output --compact
-infinity-db serve --database other-output/infinity.db --port 8001
+# Build and serve a complete alternate set
+infinity-db build --db-dir local/alternate-dbs --compact
+infinity-db serve --db-dir local/alternate-dbs --port 8001
 
-# Validate a published Army database and its development raw sibling
-infinity-db database-health data/generated/infinity.db --require-raw
+# Validate the complete serving set without raw inputs
+infinity-db database-health --db-dir data/generated --json
+
+# Inspect a development Army export and its raw sibling
+infinity-db database-health data/work/build/army.db --require-raw
 
 # Validate a curated rules file
 infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
-
-# Build the complete v10 rules-reference candidate
-infinity-db build-rules
 ```
 
-`build-rules` reads `data/curated/rules/` and the reviewed Army-source
-inputs, writing a v10 candidate to `local/rules-standalone.db` by default.
-The Restrictions chart and deployed-object reviews are applied automatically.
-Use `--legacy-v8` or `--legacy-v9` for older standalone formats.
-Direct writes to the tracked release `rules.db` are disallowed.
-
-The prepared 1.0.1 release uses v10 with deployed objects embedded in `rules.db`;
-the tagged 1.0.0 release used v9 with `deployed-objects.json`. See the
-[versioned storage contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted)
-and its release work in [TODO](docs/TODO.md#performance-storage-and-build-tooling).
-A tagged immutable Docker image must receive a validated matching set of
-artifacts rather than rebuilding data at container startup.
-
-`infinity-army` and `python -m infinity_army_data` remain available for the
-JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)
-adds SQLite export and web-server commands.
-
-A normal Army build writes generated artifacts under `data/generated/`,
-including the application database `infinity.db`, the lossless development
-archive `infinity.raw.db`, and intermediate normalized JSON.
-
-Database replacement is fail-safe: a failed import leaves the previous database
-available. On Windows, stop the server before rebuilding if an active reader
-prevents replacement.
+`infinity-army` and `python -m infinity_army_data` retain the JSON source
+pipeline with explicit `--output-dir` support; their default is ignored
+`data/work/build/`. `infinity-db export` requires an explicit output path for
+narrow Army development. Normal complete builds discard their intermediate
+JSON and raw archive after validation. Source archives remain untouched.
 
 ## Linux deployment
 
@@ -366,7 +332,7 @@ src/
   infinity_army_data/       # Army merge, normalization, metadata, and validation
   infinity_db/              # SQLite storage, application services, API, and browser
 tests/                      # Pipeline, database, API, web, and tool regression tests
-tools/                      # Acquisition, processing, auditing, and check utilities
+tools/                      # Offline handoff verification, publication, auditing, and checks
 scripts/                    # Linux deployment and maintenance scripts
 data/
   raw/                      # Immutable Army/source snapshots, ignored by Git
@@ -379,7 +345,6 @@ data/
   logs/                     # Verbose pipeline logs, ignored by Git
   backups/                  # Local retained processing/publication history, ignored by Git
   generated/                # Tracked runtime DBs plus ignored intermediate build artifacts
-image_overrides/            # Local authoritative symbol overrides, ignored by Git
 ```
 
 ## Development checks

@@ -16,7 +16,6 @@ from infinity_db.army_overview import (
     army_overview_group,
     army_overview_out_of_catalog,
 )
-from infinity_db.army_overview_copy import load_army_overview_copy
 from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
@@ -29,17 +28,17 @@ from infinity_db.domain_references import (
     enrich_rule_relation_references,
     rule_record_public_reference,
 )
-from infinity_db.domain_slugs import require_domain_slug
+from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
 from infinity_db.glossary_catalog import GlossaryCatalog
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
-from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.maintained_text_references import (
     enrich_maintained_text_references,
     maintained_text_tokens,
     maintained_text_tokens_batch,
 )
+from infinity_db.publication_registry import PublicationReference, PublicationRegistry
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.scenario_catalog import ScenarioCatalog
@@ -479,10 +478,12 @@ class ApiHandler:
         *,
         static_revision: str,
         snapshot_revision: str,
+        symbol_catalog: SymbolCatalog,
         deployed_objects: dict[str, Any] | None = None,
         variant_usage: dict[str, Any] | None = None,
         variant_usage_revision: str | None = None,
         weapon_profile_citations: ProfileCitations | None = None,
+        publication_registry: PublicationRegistry | None = None,
     ) -> None:
         self.database = database
         self.rules_database = rules_database
@@ -504,10 +505,10 @@ class ApiHandler:
         self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
         self.label_catalog = LabelCatalog(rules_database)
         self.general_rules_catalog = RulesRecordCatalog(rules_database, "rules")
-        self.scenario_catalog = ScenarioCatalog(rules_database)
+        self.scenario_catalog = ScenarioCatalog(rules_database, publication_registry)
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
         self._glossary_items_cache: list[dict[str, Any]] | None = None
-        self.legacy_armies = load_legacy_armies()
+        self.army_overview_summaries, self.legacy_armies = database.army_reference_data()
         self.search_catalog = SearchCatalog(
             database,
             self.skill_catalog,
@@ -522,8 +523,7 @@ class ApiHandler:
             self.legacy_armies,
         )
         self.catalog_rules = CatalogRules(rules_database, database=database)
-        self.symbol_catalog = SymbolCatalog()
-        self.army_overview_summaries = load_army_overview_copy()
+        self.symbol_catalog = symbol_catalog
         self.fireteam_rules_reference = fireteam_reference(rules_database)
         if self.fireteam_rules_reference is not None:
             self.fireteam_rules_reference = enrich_maintained_text_references(
@@ -579,6 +579,25 @@ class ApiHandler:
                 LOGGER.exception("Could not project scoped Orders/AROs")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The Orders/AROs reference is unavailable."}
+        elif path == "/api/restrictions/chart":
+            cache_control = API_CACHE_CONTROL
+            try:
+                _validated_query_params(query_string, {"cache_bust"})
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                if self.rules_database is None:
+                    raise ValueError("Restrictions chart requires a Rules database")
+                payload = self.rules_database.restriction_chart_payload()
+                if payload is None:
+                    raise ValueError("Restrictions chart is unavailable in selected Rules data")
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Restrictions chart")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "Restrictions chart is unavailable."}
         elif path == "/api/restrictions":
             cache_control = API_CACHE_CONTROL
             try:
@@ -610,6 +629,72 @@ class ApiHandler:
                 LOGGER.exception("Could not read Restrictions reference")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "Restrictions reference is unavailable. Please try again."}
+        elif path == "/api/season-policies":
+            cache_control = API_CACHE_CONTROL
+            try:
+                params = _validated_query_params(
+                    query_string,
+                    {"season_id", "season_revision", "context", "target_id", "cache_bust"},
+                )
+                for key in ("season_id", "season_revision"):
+                    if key not in params or not params[key][0]:
+                        raise ValueError(f"Provide {key} exactly once")
+                season_id, revision = params["season_id"][0], params["season_revision"][0]
+                require_domain_slug(season_id, context="ITS policy season")
+                if revision.strip() != revision:
+                    raise ValueError("ITS policy selection requires an exact season revision")
+                context = params.get("context", [None])[0]
+                if context is not None:
+                    require_domain_slug(context, context="ITS play context")
+                target_id = params.get("target_id", [None])[0]
+                if target_id is not None:
+                    if context is None:
+                        raise ValueError("Provide context when filtering by target_id")
+                    kind = target_id.partition(":")[0]
+                    if kind not in {"skill", "rule"}:
+                        raise ValueError("ITS policy target must be a Skill or Rule identity")
+                    validate_typed_domain_id(
+                        target_id, expected_domain=kind, context="ITS policy target",
+                    )
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                registry = self.scenario_catalog.publication_registry
+                contexts = (
+                    registry.season_contexts(season_id=season_id, revision=revision)
+                    if registry is not None else []
+                )
+                resolved = (
+                    registry.season_policies(
+                        season_id=season_id, revision=revision,
+                        context=context, target_id=target_id,
+                    )
+                    if registry is not None and context is not None else []
+                )
+                payload = {
+                    "selection": {
+                        "season_id": season_id, "season_revision": revision,
+                        "context": context, "target_id": target_id,
+                    },
+                    "contexts": contexts,
+                    "items": [
+                        {
+                            **entry["policy"],
+                            "target": {
+                                **entry["policy"]["target"],
+                                "name": entry["target"]["name"],
+                            },
+                        }
+                        for entry in resolved
+                    ],
+                }
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read ITS season policies")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "ITS season policies are unavailable. Please try again."}
         elif path == "/api/faq-rulings":
             cache_control = API_CACHE_CONTROL
             try:
@@ -643,16 +728,33 @@ class ApiHandler:
                     cache_control=cache_control,
                 )
             try:
+                registry = self.scenario_catalog.publication_registry
+                selected_season = context.get("season_id")
+                selected_revision = context.get("season_revision")
+                selected_scenario = context.get("scenario_id")
+                valid_selection = (
+                    selected_season is None
+                    or (
+                        registry is not None
+                        and registry.has_season(selected_season, selected_revision or "")
+                        and (
+                            selected_scenario is None
+                            or registry.resolve(PublicationReference(
+                                selected_season, selected_scenario, selected_revision,
+                            )) is not None
+                        )
+                    )
+                )
                 items = (
                     self.rules_database.faq_rulings_for_topic(
                         context["topic_id"],
                         rules_revision=context["rules_revision"],
                         as_of=context["as_of"],
-                        season_id=context.get("season_id"),
-                        season_revision=context.get("season_revision"),
-                        scenario_id=context.get("scenario_id"),
+                        season_id=selected_season,
+                        season_revision=selected_revision,
+                        scenario_id=selected_scenario,
                     )
-                    if self.rules_database is not None else []
+                    if self.rules_database is not None and valid_selection else []
                 )
                 payload = {"context": context, "items": items}
             except (OSError, ValueError, sqlite3.Error):
@@ -1323,7 +1425,8 @@ class ApiHandler:
             cache_control = API_CACHE_CONTROL
             try:
                 payload = enrich_unit_filter_presentation(
-                    self.database.list_unit_filter_values()
+                    self.database.list_unit_filter_values(),
+                    filter_semantics=self.database.unit_filter_semantics(),
                 )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit filter values")
@@ -1401,6 +1504,7 @@ class ApiHandler:
                         payload,
                         optional_filters=optional_filters,
                         requested_army=requested_army,
+                        source_skill_classifications=self.database.skill_source_classifications(),
                     )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND

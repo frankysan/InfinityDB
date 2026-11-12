@@ -271,6 +271,7 @@ def add_data_commands(
     build_handler=cmd_build,
     normalize_handler=cmd_normalize,
     require_metadata_for_build: bool = False,
+    database_set_build: bool = False,
 ) -> None:
     """Register ingestion commands for both the standalone tools and application CLI."""
     p_merge = sub.add_parser("merge", help="Merge raw Army JSON files into lossless master.json")
@@ -304,7 +305,13 @@ def add_data_commands(
         default=None,
         help="Source directory or ZIP archive (default: newest ZIP in data/raw)",
     )
-    p_build.add_argument("--output-dir", type=Path, default=Path("data/generated"))
+    if database_set_build:
+        p_build.add_argument(
+            "--db-dir", type=Path, default=Path("data/generated"),
+            help="Build the complete runtime set from a local Army ZIP (default: data/generated)",
+        )
+    else:
+        p_build.add_argument("--output-dir", type=Path, default=Path("data/work/build"))
     p_build.add_argument("--compact", action="store_true", help="Minify generated data files")
     p_build.add_argument(
         "--no-verify", action="store_true", help="Skip lossless reconstruction verification"

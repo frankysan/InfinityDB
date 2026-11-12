@@ -16,7 +16,7 @@ from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
-RULES = ROOT / "data/generated/rules.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 SOURCE = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 SOURCE_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 
@@ -138,7 +138,7 @@ def test_general_command_token_uses_are_published_with_exact_scope() -> None:
         ("n5-core-v5.3-pdf", 128), ("n5-core-v5.3-pdf", 129),
     }
 
-    app = create_app(ROOT / "data/generated/infinity.db", rules_database_path=RULES)
+    app = create_app(ROOT / "data/generated/army.db", rules_database_path=RULES)
     for route in ("/rules", "/rules/command-tokens"):
         status, body = _get(app, route)
         assert status == "200 OK", route

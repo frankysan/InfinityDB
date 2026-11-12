@@ -87,7 +87,7 @@ def _page_error(errors: list[str], error: Any) -> None:
 
 
 def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
-    database = Database(ROOT / "data/generated/infinity.db")
+    database = Database(ROOT / "data/generated/army.db")
     expected = source_charts(database)
     if set(expected) != set(CHARTS) or any(not value["rows"] for value in expected.values()):
         raise ValueError("Cannot verify incomplete published structured Skill charts")

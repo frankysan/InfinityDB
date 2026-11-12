@@ -17,13 +17,13 @@ from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_DB = ROOT / "data/generated/infinity.db"
+ARMY_DB = ROOT / "data/generated/army.db"
 WIDTHS = (1440, 390, 320)
 
 
 def source_programs(root: Path = ROOT) -> dict[str, dict[str, Any]]:
     """Derive program identities and structured fields from the published Army DB."""
-    rows = Database(root / "data/generated/infinity.db").list_hacking_programs()
+    rows = Database(root / "data/generated/army.db").list_hacking_programs()
     slugs = assign_domain_slugs(
         ((int(row["position"]), row["name"]) for row in rows),
         domain="hacking-programs",
@@ -166,7 +166,7 @@ def verify_local(*, headed: bool = False) -> dict[str, Any]:
     """Run the complete Program navigation acceptance against a local pinned WSGI app."""
     app = create_app(
         ARMY_DB,
-        rules_database_path=ROOT / "data/generated/rules.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):

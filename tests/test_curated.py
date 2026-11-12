@@ -4801,16 +4801,17 @@ def test_request_specball_is_a_bilingual_source_cited_separate_core_procedure() 
         specball["facts"]["effects"]
     )
     assert "two 55 mm Speedball Tokens" in speedball["facts"]["effects"][0]
+    assert len(specball["facts"]["sourceNotes"]) == 1
     assert "English printing discrepancy" in specball["facts"]["sourceNotes"][0]
-    assert "TEAM-OPS" in specball["facts"]["sourceNotes"][1]
     cited = {(ref["sourceId"], ref["page"]) for ref in specball["citations"]}
-    assert {
+    assert cited == {
         ("n5-core-v5.3-pdf", 98),
         ("n5-core-v5.3-es-pdf", 98),
-        ("its-season-18-en-pdf", 26),
-        ("its-season-18-en-pdf", 28),
-    } == cited
-    assert any(source["id"] == "its-season-18-en-pdf" for source in document["sources"])
+    }
+    assert not any(source["id"] == "its-season-18-en-pdf" for source in document["sources"])
+    assert records["skill:infinity-spec-ops"]["facts"]["restrictions"] == [
+        "An Army List cannot include more than one Trooper with Infinity Spec-Ops."
+    ]
 
 
 def test_checked_in_n5_collection_models_final_semantic_link_cleanup() -> None:

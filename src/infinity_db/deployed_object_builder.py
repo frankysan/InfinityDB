@@ -1,7 +1,7 @@
 """Build the reviewed deployed-object model from pinned Army and curated inputs.
 
-This build-time projection belongs in the packaged data layer. The legacy
-standalone JSON publication is only an output adapter, not a canonical source.
+This build-time projection belongs in the packaged data layer. Rules SQLite
+stores the reviewed model; runtime reads do not require loose JSON files.
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ def build_deployed_objects(
     delivery_reviews: Path,
     candidate_reviews: Path,
 ) -> dict[str, Any]:
-    """Produce a reviewed model pinned to Army and source evidence, not rules.db bytes."""
+    """Produce a reviewed model pinned to Army and source evidence, not rules_n5.db bytes."""
     report = audit_inventory(
         army_db, curated_source, delivery_reviews, candidate_reviews,
     )

@@ -351,7 +351,7 @@ def audit_database(path: Path) -> dict[str, Any]:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("database", type=Path, help="Frontend infinity.db to audit")
+    parser.add_argument("database", type=Path, help="Frontend army.db to audit")
     parser.add_argument("--output", type=Path, help="Optional deterministic JSON report path")
     return parser
 

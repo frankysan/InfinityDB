@@ -748,8 +748,8 @@ def test_pinned_catalog_scope_drift_identifies_three_reviewed_primary_omissions(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     root = Path(__file__).resolve().parents[1]
-    database = root / "data/generated/infinity.db"
-    rules_database = root / "data/generated/rules.db"
+    database = root / "data/generated/army.db"
+    rules_database = root / "data/generated/rules_n5.db"
     if not database.is_file() or not rules_database.is_file():
         pytest.skip("Paired generated catalog databases unavailable")
     original = DEFAULT_CATALOG_SCOPE_PATH.read_bytes()
@@ -849,8 +849,8 @@ def test_1_0_primary_candidate_matches_pinned_public_database_pair(
 ) -> None:
     candidate = DEFAULT_CATALOG_SCOPE_PATH.with_name("catalog-scope-1.0.0.json")
     root = Path(__file__).resolve().parents[1]
-    database = root / "data/generated/infinity.db"
-    rules_database = root / "data/generated/rules.db"
+    database = root / "data/generated/army.db"
+    rules_database = root / "data/generated/rules_n5.db"
     if not database.is_file() or not rules_database.is_file():
         pytest.skip("Paired generated catalog databases unavailable")
     assert main([

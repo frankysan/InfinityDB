@@ -28,8 +28,8 @@ def _review() -> dict[str, Any]:
 @pytest.fixture(scope="module")
 def weaponry_app() -> Callable:
     return create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
 
@@ -51,7 +51,7 @@ def test_mine_source_profile_and_effect_owners_remain_distinct(
     assert ("weapon:para-mine" in rules) == (entry["slug"] == "para-mine")
     assert "weapon:chest-mine" not in rules
 
-    with sqlite3.connect(ROOT / "data/generated/rules.db") as database:
+    with sqlite3.connect(ROOT / "data/generated/rules_n5.db") as database:
         available = {
             row[0]
             for row in database.execute("SELECT id FROM records")
@@ -104,7 +104,7 @@ def test_non_lethal_does_not_erase_mine_saving_rolls(weaponry_app: Callable) -> 
         assert profile["saving_num"] == expected_count
         assert profile["saving"] not in ("", "-", None)
 
-    with sqlite3.connect(ROOT / "data/generated/rules.db") as database:
+    with sqlite3.connect(ROOT / "data/generated/rules_n5.db") as database:
         summary = database.execute(
             "SELECT summary FROM records WHERE id = ?", ("trait:non-lethal",)
         ).fetchone()[0]

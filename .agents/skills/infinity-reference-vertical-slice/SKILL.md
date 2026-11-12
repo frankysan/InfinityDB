@@ -20,10 +20,10 @@ change, use [Army data pipeline](../infinity-army-data-pipeline/SKILL.md).
 
 ## Procedure
 
-1. For autonomous task selection, first apply the
-   [V1S selection checkpoint](../../../docs/TODO.md#v1s-work-selection-and-handoff),
-   not just the most recently active workstream. Disclose earlier open IDs and
-   their blockers or justified priority exceptions. Then read
+1. Select autonomous tasks from the [active backlog](../../../docs/TODO.md).
+   Apply the [historical V1S selection checkpoint](../../../docs/testing.md#v1s-backlog-checks)
+   only when a numbered V1S task is reopened; report earlier open IDs and any
+   documented priority exceptions. Then read
    [architecture](../../../docs/architecture.md),
    [data model](../../../docs/data-model.md), [application domains](../../../docs/application-domains.md),
    and [project domains](../../../docs/project-domains.md). Name the owning application domain and

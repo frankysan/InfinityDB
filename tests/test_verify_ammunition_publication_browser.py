@@ -36,8 +36,8 @@ SAMPLES = (
 @pytest.fixture(scope="module")
 def app() -> Any:
     return create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
 
@@ -165,10 +165,10 @@ BASE_SOURCE_IDS = (2, 3, 6, 8, 9, 14, 18, 21, 22, 29, 37)
 @pytest.fixture(scope="module")
 def base_samples(app: Any) -> dict[int, tuple[str, dict[str, Any]]]:
     """Select one unambiguous real Weapon profile for every reviewed base ID."""
-    database = Database(ROOT / "data/generated/infinity.db")
+    database = Database(ROOT / "data/generated/army.db")
     mapping = load_ammunition_reference_map()
     assert all("components" not in mapping[source_id] for source_id in BASE_SOURCE_IDS)
-    with sqlite3.connect(ROOT / "data/generated/infinity.db") as connection:
+    with sqlite3.connect(ROOT / "data/generated/army.db") as connection:
         candidates = {
             source_id: [
                 row[0] for row in connection.execute(
@@ -328,7 +328,7 @@ def test_every_base_weapon_link_has_cited_player_ammunition_detail(
         assert article.locator(".rules-source-citations a").count() == len(
             rule["citations"]
         )
-        assert "InfinityDB-maintained reference" in article.inner_text()
+        assert article.locator(".rules-card-provenance").count() == 0
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         )

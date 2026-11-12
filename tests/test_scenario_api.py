@@ -15,14 +15,12 @@ from wsgiref.util import setup_testing_defaults
 
 import pytest
 
-from infinity_db.curated import load_curated_directory
-from infinity_db.rules_database import export_rules_database
 from infinity_db.specialist_filter import (
     _non_specialist_chain_variant,
     _qualifying_skills,
     candidate_unit_ids,
 )
-from infinity_db.web.app import Application, create_app
+from infinity_db.web.app import Application, create_app_from_database_set
 
 
 def request(
@@ -61,11 +59,9 @@ def request(
 
 
 @pytest.fixture(scope="module")
-def scenario_app(tmp_path_factory: pytest.TempPathFactory) -> Application:
+def scenario_app() -> Application:
     root = Path(__file__).parents[1]
-    rules_path = tmp_path_factory.mktemp("scenario-api") / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
-    return create_app(root / "data" / "generated" / "infinity.db", rules_path)
+    return create_app_from_database_set(root / "data/generated")
 
 
 def test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills() -> None:
@@ -109,7 +105,7 @@ def test_pinned_chain_of_command_non_specialist_owners_do_not_qualify_alone(
 
     root = Path(__file__).parents[1]
     owners = source_extra_owner_context(
-        root / "data/generated/infinity.raw.db",
+        root / "data/work/build/army.raw.db",
         catalog="skills", source_id=26, extra_id=375,
     )
     assert len(owners) == 11
@@ -887,6 +883,32 @@ def test_scenario_selection_ignores_stale_requests() -> None:
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
     assert "scenario selection race: passed" in completed.stdout
+
+
+def test_scenario_its_context_opt_in_never_applies_on_default_or_stale_selection() -> None:
+    node = shutil.which("node")
+    if node is not None:
+        command = [node]
+    else:
+        try:
+            importlib.import_module("nodejs_wheel")
+        except ImportError:
+            pytest.skip("Node.js is unavailable for scenario ITS context regression")
+        command = [sys.executable, "-m", "nodejs_wheel"]
+    root = Path(__file__).parents[1]
+    completed = subprocess.run(
+        [
+            *command,
+            str(root / "tests" / "scenario_policy_harness.cjs"),
+            str(root / "src" / "infinity_db" / "web" / "static" / "scenario.js"),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert "scenario ITS context selection: passed" in completed.stdout
 
 
 def test_scenario_grid_can_shrink_to_narrow_viewports(scenario_app: Application) -> None:

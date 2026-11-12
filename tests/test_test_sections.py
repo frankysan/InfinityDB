@@ -68,7 +68,7 @@ def test_test_section_markers_are_stable_and_named_from_sections() -> None:
     assert sections["web"].marker == "section_web"
     assert section_for_module("test_database", sections) == sections["model"]
     assert section_for_module("test_web", sections) == sections["web"]
-    assert section_for_module("test_symbol_manifest", sections) == sections["assets"]
+    assert section_for_module("test_symbol_publication", sections) == sections["assets"]
 
 
 def test_xdist_startup_timing_tracks_ready_collection_and_first_test() -> None:

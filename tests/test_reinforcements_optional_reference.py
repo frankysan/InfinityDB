@@ -5,221 +5,17 @@ These assertions cover the source boundary, not verified N5 adoption of N4 proce
 
 from __future__ import annotations
 
-import hashlib
-import json
-import shutil
 import sqlite3
-import subprocess
-from contextlib import closing
 from pathlib import Path
-
-import pytest
 
 from infinity_db.curated import load_curated_directory, load_curated_document
 from infinity_db.database.repository import Database
-from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.reference_catalog import RulesRecordCatalog
-from infinity_db.rules_database import RulesDatabase
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
-from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.release_rules_export import export_release_rules, release_deployed_object_bytes
-from tools.restrictions_v9_release import _check_variant_semantics_delta
-from tools.stage_commlink_v9_candidate import (
-    promote_commlink_candidate,
-    stage_commlink_candidate,
-)
 
 ROOT = Path(__file__).resolve().parents[1]
 ANNEX = ROOT / "data/curated/rules/reinforcements-extra-n4-reference.json"
-
-
-def test_commlink_candidate_stages_matched_pair_without_promoting(tmp_path: Path) -> None:
-    """Make an inspectable v9 candidate, leaving the active release byte-for-byte intact."""
-    root = _disposable_commlink_release(tmp_path)
-    baseline = root / "data/generated/rules.db"
-    publication = root / "data/generated/deployed-objects.json"
-    old_rules = hashlib.sha256(baseline.read_bytes()).hexdigest()
-    old_publication = hashlib.sha256(publication.read_bytes()).hexdigest()
-    destination = root / "local/unpromoted"
-    manifest = stage_commlink_candidate(destination, root=root)
-    assert manifest["kind"] == "staged-commlink-v9-pair-not-promoted"
-    assert manifest["record"] == "skill:commlink"
-    assert manifest["deployedObjectCount"] == 17
-    assert set(path.name for path in destination.iterdir()) == {
-        "rules.db", "deployed-objects.json", "manifest.json",
-    }
-    assert manifest["previousSha256"] == {
-        "rules.db": old_rules, "deployed-objects.json": old_publication,
-    }
-    assert RulesDatabase(destination / "rules.db").skill_reviewed_extra_semantics()[
-        "commlink"
-    ]["extra_values"][0]["effect"]["count"] == 1
-    assert load_deployed_object_publication(
-        destination / "deployed-objects.json",
-        root / "data/generated/infinity.db",
-        destination / "rules.db",
-    ) is not None
-    assert hashlib.sha256(baseline.read_bytes()).hexdigest() == old_rules
-    assert hashlib.sha256(publication.read_bytes()).hexdigest() == old_publication
-    with pytest.raises(ValueError, match="already exists"):
-        stage_commlink_candidate(destination, root=root)
-
-
-def test_commlink_candidate_rejects_unrelated_curated_drift(tmp_path: Path) -> None:
-    root = _disposable_commlink_release(tmp_path)
-    source = root / "data/curated/rules/n5-core-v5.3.json"
-    document = json.loads(source.read_text(encoding="utf-8"))
-    doctor = next(record for record in document["records"] if record["id"] == "skill:doctor")
-    doctor["summary"] += " Unexpected unrelated staging change."
-    source.write_text(json.dumps(document, ensure_ascii=False) + "\n",
-                      encoding="utf-8", newline="\n")
-    originals = {
-        name: (root / "data/generated" / name).read_bytes()
-        for name in ("rules.db", "deployed-objects.json")
-    }
-    with pytest.raises(
-        ValueError,
-        match="Variant refresh changed unrelated rows: (records|deployed_object_metadata)",
-    ):
-        stage_commlink_candidate(root / "local/rejected", root=root)
-    assert not (root / "local/rejected").exists()
-    assert all((root / "data/generated" / name).read_bytes() == content
-               for name, content in originals.items())
-
-
-def _disposable_commlink_release(tmp_path: Path) -> Path:
-    """Copy only required release inputs into a disposable Git-backed checkout."""
-    root = tmp_path / "release"
-    (root / "local").mkdir(parents=True)
-    shutil.copytree(ROOT / "data/curated/rules", root / "data/curated/rules")
-    files = (
-        "data/generated/infinity.db",
-        "data/generated/rules.db",
-        "data/generated/deployed-objects.json",
-        "config/validation/deployed-object-delivery-reviews.json",
-        "config/validation/deployed-object-candidate-reviews.json",
-    )
-    for relative in files:
-        target = root / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        if relative == "data/generated/deployed-objects.json":
-            target.write_bytes(release_deployed_object_bytes(ROOT / relative))
-        else:
-            shutil.copy2(ROOT / relative, target)
-    # Exercise one-time promotion even after the real tracked release is promoted:
-    # reconstruct the exact prior family-only row in a disposable v9 database.
-    rules = root / "data/generated/rules.db"
-    # A one-record staging test needs a source-consistent baseline. The tracked
-    # release may intentionally await other reviewed curation (V1S-084); do not
-    # make those unrelated changes part of this disposable Commlink migration.
-    current = root / "local/current-rules.db"
-    export_release_rules(load_curated_directory(root / "data/curated/rules"),
-                         current, baseline=rules)
-    current.replace(rules)
-    if "commlink" in RulesDatabase(rules).skill_reviewed_extra_semantics():
-        with closing(sqlite3.connect(rules)) as database:
-            row = database.execute(
-                "SELECT variant_json FROM records "
-                "WHERE collection_id = ? AND id = ?",
-                ("reinforcements-extra-n4-reference", "skill:commlink"),
-            ).fetchone()
-            assert row is not None
-            variant = json.loads(row[0])
-            assert variant["inheritance"] == "family"
-            assert len(variant["occurrenceParameters"]) == 1
-            database.execute(
-                "UPDATE records SET variant_json = ? "
-                "WHERE collection_id = ? AND id = ?",
-                ('{"inheritance":"family"}',
-                 "reinforcements-extra-n4-reference", "skill:commlink"),
-            )
-            database.commit()
-        source_paths = (
-            root / "data/curated/rules/n5-core-v5.3.json",
-            root / "config/validation/deployed-object-delivery-reviews.json",
-            root / "config/validation/deployed-object-candidate-reviews.json",
-        )
-        previous = build_publication(root / "data/generated/infinity.db", rules, *source_paths)
-        (root / "data/generated/deployed-objects.json").write_bytes(
-            publication_bytes(previous)
-        )
-    subprocess.run(["git", "init", "-q"], cwd=root, check=True)
-    subprocess.run(
-        ["git", "add", "data/generated/rules.db", "data/generated/deployed-objects.json"],
-        cwd=root, check=True,
-    )
-    subprocess.run(
-        ["git", "-c", "user.name=Local Test", "-c", "user.email=test@example.invalid",
-         "commit", "-qm", "baseline"], cwd=root, check=True,
-    )
-    return root
-
-
-def test_commlink_candidate_promotion_restores_recovery_and_matches_staging(
-    tmp_path: Path,
-) -> None:
-    """Promote both binaries in a disposable checkout, never the tracked project."""
-    root = _disposable_commlink_release(tmp_path)
-    destination = root / "local/staged"
-    manifest = stage_commlink_candidate(destination, root=root)
-    originals = {
-        name: (root / "data/generated" / name).read_bytes()
-        for name in ("rules.db", "deployed-objects.json")
-    }
-    recovery = promote_commlink_candidate(destination, root=root)
-    assert recovery.parent == root / "local"
-    for name, previous in originals.items():
-        assert (recovery / "data/generated" / name).read_bytes() == previous
-        assert hashlib.sha256((root / "data/generated" / name).read_bytes()).hexdigest() == (
-            manifest["candidateSha256"][name]
-        )
-    assert load_deployed_object_publication(
-        root / "data/generated/deployed-objects.json",
-        root / "data/generated/infinity.db",
-        root / "data/generated/rules.db",
-    ) is not None
-    assert destination.is_dir()
-
-
-def test_commlink_candidate_promotion_refuses_changed_stage(tmp_path: Path) -> None:
-    root = _disposable_commlink_release(tmp_path)
-    destination = root / "local/staged"
-    stage_commlink_candidate(destination, root=root)
-    original = (root / "data/generated/rules.db").read_bytes()
-    (destination / "rules.db").write_bytes((destination / "rules.db").read_bytes() + b"x")
-    with pytest.raises(ValueError, match="Staged Commlink artifact changed"):
-        promote_commlink_candidate(destination, root=root)
-    assert (root / "data/generated/rules.db").read_bytes() == original
-
-
-def test_commlink_candidate_promotion_rolls_back_on_post_validation_failure(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    root = _disposable_commlink_release(tmp_path)
-    destination = root / "local/staged"
-    stage_commlink_candidate(destination, root=root)
-    originals = {
-        name: (root / "data/generated" / name).read_bytes()
-        for name in ("rules.db", "deployed-objects.json")
-    }
-    import infinity_db.web
-
-    def fail_post_validation(*_args: object, **_kwargs: object) -> None:
-        raise ValueError("injected post-promotion failure")
-
-    monkeypatch.setattr(infinity_db.web, "create_app", fail_post_validation)
-    with pytest.raises(RuntimeError, match="promotion rolled back"):
-        promote_commlink_candidate(destination, root=root)
-    assert all(
-        (root / "data/generated" / name).read_bytes() == previous
-        for name, previous in originals.items()
-    )
-    recovery = list((root / "local").glob("commlink-v9-recovery-*"))
-    assert len(recovery) == 1
-    assert all(
-        (recovery[0] / "data/generated" / name).read_bytes() == previous
-        for name, previous in originals.items()
-    )
 
 
 def test_annex_current_optional_reference_discloses_n4_source_boundary() -> None:
@@ -279,67 +75,27 @@ def test_annex_current_optional_reference_discloses_n4_source_boundary() -> None
 
 
 def test_annex_read_model_is_discoverable_and_separate_from_core_matrix(tmp_path: Path) -> None:
-    baseline_root = _disposable_commlink_release(tmp_path)
     documents = load_curated_directory(ROOT / "data/curated/rules")
-    output = tmp_path / "rules.db"
-    export_release_rules(documents, output)
+    output = tmp_path / "rules_n5.db"
+    export_rules_database(documents, output)
     rules = RulesDatabase(output)
     rules.validate()
-    # The disposable baseline reconstructs pre-promotion Commlink on otherwise
-    # current sources. Preserve the full-database one-record delta guard.
-    commlink = next(
-        record
-        for _, document in documents
-        for record in document["records"]
-        if record["id"] == "skill:commlink"
-    )
-    baseline = baseline_root / "data/generated/rules.db"
-    with sqlite3.connect(baseline) as old, sqlite3.connect(output) as new:
-        old_rows = {
-            (row[0], row[1]): row
-            for row in old.execute("SELECT * FROM records ORDER BY collection_id, id")
-        }
-        new_rows = {
-            (row[0], row[1]): row
-            for row in new.execute("SELECT * FROM records ORDER BY collection_id, id")
-        }
-    differing = [
-        key for key in sorted(set(old_rows) | set(new_rows))
-        if old_rows.get(key) != new_rows.get(key)
-    ]
-    key = ("reinforcements-extra-n4-reference", "skill:commlink")
-    published = "commlink" in RulesDatabase(baseline).skill_reviewed_extra_semantics()
-    assert differing == ([] if published else [key]), (
-        f"Unexpected v9 rules-record drift: {differing[:25]}"
-    )
-    if not published:
-        _check_variant_semantics_delta(
-            baseline, output,
-            {key: json.dumps(commlink["variantSemantics"], ensure_ascii=False,
-                             separators=(",", ":"))},
-        )
 
-    # A prospective publication may only re-pin the rules DB hash.
-    # All 17 object definitions, reviewed Unit uses and other source
-    # fingerprints must remain byte-equivalent in their JSON values.
-    army_path = ROOT / "data/generated/infinity.db"
-    sources = (
-        ROOT / "data/curated/rules/n5-core-v5.3.json",
-        ROOT / "config/validation/deployed-object-delivery-reviews.json",
-        ROOT / "config/validation/deployed-object-candidate-reviews.json",
+    # The optional annex must survive a fresh current-format Rules export,
+    # not only a historical v9 paired-publication promotion.
+    published = RulesDatabase(ROOT / "data/generated/rules_n5.db")
+    assert rules.skill_reviewed_extra_semantics()["commlink"] == (
+        published.skill_reviewed_extra_semantics()["commlink"]
     )
-    previous = build_publication(army_path, baseline, *sources)
-    staged = build_publication(army_path, output, *sources)
-    expected = json.loads(json.dumps(previous))
-    expected["sourceSnapshot"]["rulesDatabaseSha256"] = hashlib.sha256(
-        output.read_bytes()
-    ).hexdigest()
-    assert len(staged["objects"]) == 17
-    assert staged == expected
-    proposed_path = tmp_path / "deployed-objects.json"
-    proposed_path.write_bytes(publication_bytes(staged))
-    assert load_deployed_object_publication(proposed_path, army_path, output) == staged
-    army = Database(army_path)
+    for identity in ("rule:reinforcements-extra", "skill:commlink",
+                     "skill:request-reinforcements"):
+        fresh_record = rules.composed_record(identity)
+        active_record = published.composed_record(identity)
+        assert fresh_record is not None and active_record is not None
+        assert fresh_record["summary"] == active_record["summary"]
+        assert fresh_record["facts"] == active_record["facts"]
+
+    army = Database(ROOT / "data/generated/army.db")
 
     general = RulesRecordCatalog(rules, "rules")
     assert any(item["slug"] == "reinforcements-extra" for item in general.list_items())
@@ -371,7 +127,7 @@ def test_every_published_reinforcement_profile_and_loadout_keeps_source_army() -
     """Canonical Units must retain each Section's exact source profile/loadout rows."""
     from collections import defaultdict
 
-    path = ROOT / "data/generated/infinity.db"
+    path = ROOT / "data/generated/army.db"
     profiles: dict[int, dict[int, set[tuple[int, str]]]] = defaultdict(
         lambda: defaultdict(set)
     )
@@ -443,7 +199,7 @@ def test_commlink_source_extras_remain_on_their_exact_army_loadouts() -> None:
     """Source Commlink (+X) signatures must not leak across canonical Unit/Army rows."""
     from collections import Counter, defaultdict
 
-    path = ROOT / "data/generated/infinity.db"
+    path = ROOT / "data/generated/army.db"
     # Include unqualified Commlink and preserve all extras belonging to each
     # source Skill occurrence. Source IDs are not inferred from display names.
     occurrences: dict[tuple[int, int, int, int, int], list[tuple[int, str]]] = defaultdict(

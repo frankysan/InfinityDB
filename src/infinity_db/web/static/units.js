@@ -5,7 +5,7 @@ import {
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 import { readShareState, writeShareState } from "./share-state.js";
-import { createPanelSwitcher } from "./view-components.js";
+import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const PAGE_SIZE = 50;
 const number = new Intl.NumberFormat();
@@ -628,7 +628,8 @@ async function load() {
     if (signal.aborted || currentRequest !== requestNumber) return;
     elements.errorMessage.textContent = error instanceof TypeError
       ? "Could not reach InfinityDB. Check your connection and try again."
-      : error.message || "Something went wrong. Please try again.";
+      : collectionLoadMessage(error, "units");
+    console.error("Could not load Unit explorer", error);
     elements.summary.textContent = "Unable to load units";
     showPanel(elements.error);
   }

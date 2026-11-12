@@ -15,17 +15,33 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
-from tools import promote_geometry_reference
-from tools.promote_geometry_reference import CITATIONS, NEW_IDS, verify_candidate
 
 ROOT = Path(__file__).resolve().parents[1]
-RULES = ROOT / "data/generated/rules.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+NEW_IDS = {
+    "rule:line-of-fire", "rule:zone-of-control", "rule:zones-and-contact",
+    "rule:coherency", "rule:distances-and-measurements",
+    "rule:replacing-game-elements",
+}
+CITATIONS = {
+    "rule:line-of-fire": {18, 19},
+    "rule:zone-of-control": {20},
+    "rule:zones-and-contact": {20, 21},
+    "rule:coherency": {21},
+    "rule:distances-and-measurements": {21, 22},
+    "rule:replacing-game-elements": {22},
+    "attribute:s": {9, 18},
+    "rule:general-movement": {29, 30},
+}
 
 
 def _records() -> dict[str, Any]:
     document = load_curated_document(ROOT / "data/curated/rules/n5-core-v5.3.json")
-    return {r["id"]: r for r in document["records"]}
+    records = document["records"]
+    assert all(sum(row["id"] == identity for row in records) == 1
+               for identity in CITATIONS)
+    return {r["id"]: r for r in records}
 
 
 def _get(app: Any, path: str, query: str = "") -> tuple[str, bytes]:
@@ -146,11 +162,16 @@ def test_coherency_measurement_and_replacement_keep_scoped_conditions() -> None:
 
 
 def test_geometry_storage_api_search_and_separate_trait_owner() -> None:
-    app = create_app(ROOT / "data/generated/infinity.db", rules_database_path=RULES)
+    app = create_app(ROOT / "data/generated/army.db", rules_database_path=RULES)
     db = RulesDatabase(RULES)
     source = _records()
     for identity, pages in CITATIONS.items():
         record = source[identity]
+        assert record["kind"] == identity.partition(":")[0]
+        assert record["scope"] == {"game": "N5", "seasons": ["current"]}
+        assert record["composition"] == {"role": "definition"}
+        assert {c["page"] for c in record["citations"]
+                if c["sourceId"] == "n5-core-v5.3-pdf"} == pages
         published = db.composed_record(identity)
         assert published is not None
         assert published["summary"] == record["summary"]
@@ -175,24 +196,3 @@ def test_geometry_storage_api_search_and_separate_trait_owner() -> None:
     entries = {item["id"]: item for item in json.loads(body)["items"]}
     assert entries["attribute:s"]["description"] == source["attribute:s"]["summary"]
     assert entries["attribute:s"]["href"] == "/glossary#attribute-s"
-
-
-def test_geometry_pair_is_deterministic_and_refuses_repeat_or_mismatch(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    if not PDF.is_file() or not (ROOT / "local").is_dir():
-        pytest.skip("Pinned source and local staging unavailable")
-    objects = ROOT / "data/generated/deployed-objects.json"
-    original = (RULES.read_bytes(), objects.read_bytes() if objects.is_file() else None)
-    result = verify_candidate()
-    assert result["alreadyPublished"] and result["deterministic"] and result["matchedPublication"]
-    assert result["logicallyEquivalentWithPublished"]
-    assert result["candidateRecords"] >= 495
-    assert result["publishedRulesSha256"] == hashlib.sha256(RULES.read_bytes()).hexdigest()
-    with pytest.raises(ValueError, match="repeated geometry promotion"):
-        verify_candidate(promote=True)
-    monkeypatch.setattr(promote_geometry_reference, "load_release_deployed_objects",
-                        lambda *_args: None)
-    with pytest.raises(ValueError, match="publication does not match"):
-        verify_candidate()
-    assert (RULES.read_bytes(), objects.read_bytes() if objects.is_file() else None) == original

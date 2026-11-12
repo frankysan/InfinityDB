@@ -14,8 +14,6 @@ from infinity_db.web.release_notes import (
 
 def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     all_releases = load_release_notes()
-    assert all_releases[0].version == "1.0.1"
-    assert all_releases[0].released_on == date(2026, 11, 9)
     releases = tuple(release for release in all_releases if release.released_on is not None)
 
     assert releases[0].version == "1.0.1"

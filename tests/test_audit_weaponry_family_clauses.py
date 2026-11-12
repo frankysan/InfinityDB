@@ -163,7 +163,7 @@ def test_curated_boost_rules_are_published_with_source_provenance(
         assert phrase in summary
     assert {'sourceId': 'n5-core-v5.3-pdf', 'page': 69,
             'section': 'Perimeter Weapons and the Boost Trait'} in boost['citations']
-    generated = tmp_path / "current_rules.db"
+    generated = tmp_path / "current_rules_n5.db"
     export_rules_database(load_curated_directory(root / "data/curated"), generated)
     with sqlite3.connect(generated) as db:
         assert db.execute(
@@ -203,13 +203,13 @@ def test_mine_family_rules_apply_to_correct_army_weapon_profiles() -> None:
         assert {'sourceId': 'n5-core-v5.3-pdf', 'page': 72,
                 'section': section} in record['citations']
 
-    with sqlite3.connect(root / 'data/generated/infinity.db') as db:
+    with sqlite3.connect(root / 'data/generated/army.db') as db:
         slugs = {row[0] for row in db.execute(
             "SELECT slug FROM application_domain_slugs WHERE domain = 'weapons' "
             "AND status = 'resolved'")}
     assert mine_slugs | {'chest-mine'} <= slugs
 
-    composed = CatalogRules(RulesDatabase(root / 'data/generated/rules.db'))
+    composed = CatalogRules(RulesDatabase(root / 'data/generated/rules_n5.db'))
     for slug in sorted(mine_slugs | {'chest-mine', 'mine-dispenser', 'drop-bears'}):
         payload = composed.enrich_catalog_item(
             'weapons', {'id': slug, 'slug': slug, 'variants': []})

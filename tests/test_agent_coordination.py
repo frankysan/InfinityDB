@@ -130,7 +130,7 @@ def test_overlapping_paths_and_protected_files_refused(tmp_path: Path) -> None:
     claim(a, "agent-a", "task-a", ["src/"])
     with pytest.raises(CoordinationError, match="overlaps"):
         claim(b, "agent-b", "task-b", ["src/a.py"])
-    for protected in ("docs/TODO.md", "docs/", "data/generated/rules.db"):
+    for protected in ("docs/TODO.md", "docs/", "data/generated/rules_n5.db"):
         with pytest.raises(CoordinationError, match="integration-owned"):
             claim(b, "agent-b", "task-b", [protected])
     with pytest.raises(CoordinationError, match="Invalid scope"):

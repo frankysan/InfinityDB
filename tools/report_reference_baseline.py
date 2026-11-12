@@ -27,7 +27,7 @@ from infinity_army_data.merge import SourceDocument, load_sources, merge_sources
 from infinity_db.application_domains import application_domain, semantic_record_domain
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
-from infinity_db.snapshot_revision import runtime_snapshot_revision
+from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -734,9 +734,9 @@ def _verify_army_archive_sources(
         "matchedUnitMembershipOccurrences": len(expected_memberships),
         "matchedNestedSourceRows": nested_counts,
         "nestedStorage": {
-            "profile_groups": "published-infinity.db",
-            "profiles": "paired-infinity.raw.db",
-            "loadout_options": "paired-infinity.raw.db",
+            "profile_groups": "published-army.db",
+            "profiles": "paired-army.raw.db",
+            "loadout_options": "paired-army.raw.db",
         },
     }
 
@@ -995,7 +995,7 @@ def build_baseline(
                 evidence_rows.append(_row(
                     f"army:{category}", "Infinity Army snapshot", table,
                     "pinned Army snapshot + reviewed identity configuration",
-                    f"infinity.db::{table}", count,
+                    f"army.db::{table}", count,
                 ))
             catalogs = army.execute(
                 "SELECT catalog, COUNT(*) AS count FROM application_catalog_items "
@@ -1006,7 +1006,7 @@ def build_baseline(
                     f"army:catalog:{catalog['catalog']}", "Infinity Army snapshot",
                     f"application catalog {catalog['catalog']}",
                     "pinned Army snapshot + reviewed catalog configuration",
-                    "infinity.db::application_catalog_items", catalog["count"],
+                    "army.db::application_catalog_items", catalog["count"],
                 ))
             records = rules.execute(
                 "SELECT r.kind AS kind, COUNT(*) AS count, "
@@ -1019,7 +1019,7 @@ def build_baseline(
                 evidence_rows.append(_row(
                     f"rules:{item['kind']}", "Curated N5 rules and wiki evidence",
                     f"rules record kind {item['kind']}", "data/curated/rules/",
-                    "rules.db::records", item["count"], citations=item["cited"],
+                    "rules_n5.db::records", item["count"], citations=item["cited"],
                 ))
             scenario_memberships = [
                 {
@@ -1047,9 +1047,11 @@ def build_baseline(
         )
     except (OSError, sqlite3.Error, ValueError) as exc:
         raise ReferenceBaselineError(
-            f"Cannot verify runtime Weapon-profile publication: {exc}"
+            f"Cannot verify embedded Weapon citations: {exc}"
         ) from exc
-    runtime_revision = runtime_snapshot_revision(army_sha, rules_sha, weapon_profile_sha)
+    runtime_revision = database_set_snapshot_revision({
+        army_database.name: army_sha, rules_database.name: rules_sha,
+    })
     return {
         "format": REPORT_FORMAT,
         "formatVersion": REPORT_VERSION,
@@ -1169,11 +1171,11 @@ def render_markdown(report: dict[str, Any]) -> str:
         *(
             [f"- Nested Army source row parity: "
              f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['profile_groups']} "
-             "profile groups in published infinity.db; "
+             "profile groups in published army.db; "
              f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['profiles']} "
              "profiles and "
              f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['loadout_options']} "
-             "loadouts in export-paired infinity.raw.db. "
+             "loadouts in export-paired army.raw.db. "
              "Derived runtime payloads and browser presentation remain unverified."]
             if (snapshot.get("sourceIdentityEvidence") or {}).get("matchedNestedSourceRows")
             else []
@@ -1271,8 +1273,8 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"`{item['id']}` ({item['status']})"
             for item in report["rulesPublication"]["collections"]
         ) + ".",
-        f"- Published scenario collection memberships: {report['scenarioMembershipCount']} "
-        "(all collections; not just core missions).",
+        f"- N5 Rules scenario memberships: {report['scenarioMembershipCount']} "
+        "(this is not an inventory of separate ITS season databases).",
         "- Source evidence statuses: " + ", ".join(
             f"{count} {status}"
             for status, count in report["sourceVerificationCounts"].items()
@@ -1280,9 +1282,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         "## Published scenario memberships by collection",
         "",
-        "These are source-scoped membership facts, **not a core-only scenario count "
-        "or a browser-completeness verdict**. ITS memberships remain separate "
-        "from the N5 core mission scope.",
+        "These are source-scoped memberships in the selected N5 Rules database, "
+        "not a browser-completeness verdict. ITS publications are stored separately "
+        "in season databases and are not included in this Rules-only report.",
         "",
         "| Collection | Revision | Position | Scenario ID | Source collection |",
         "| --- | --- | ---: | --- | --- |",
@@ -1380,8 +1382,14 @@ FROZEN_DECLARATION_SOURCE_SHA256 = (
     "9fed4f072387882f80d18f1e0dfb6c4db4827ab8233001f5ad21c96e809fa10f"
 )
 DECLARATION_REVIEW = PROJECT_ROOT / "config/validation/declaration-inventory-migration-v1.json"
-FROZEN_EXPLANATION_INVENTORY_SHA256 = (
+# The declaration review is bound to the original 2026-10-31 frozen file.
+# A later documentation-only TODO anchor correction did not modify its
+# 367 record rows, but did change the current Markdown file bytes.
+HISTORICAL_EXPLANATION_INVENTORY_SHA256 = (
     "3f6b21bc6ba7e508e63cfaa74b1bdb3fdefe3ab3968418d813be18a36275675e"
+)
+FROZEN_EXPLANATION_INVENTORY_SHA256 = (
+    "624e0406c1159a9131a876128e70639a2ee9374981a640b11e9dc11dfc69fc00"
 )
 SELECTED_EXPLANATION_BROWSER_TESTS = {
     "rule:initiative-roll": "test_initiative_roll_normal_reference_navigation",
@@ -2106,7 +2114,7 @@ def verify_declaration_review(
     if manifest.get("formatVersion") != 1 or manifest.get("historicalCommit") != (
         crosswalk["historicalCommit"]
     ) or manifest.get("historicalInventorySha256") != (
-        FROZEN_EXPLANATION_INVENTORY_SHA256
+        HISTORICAL_EXPLANATION_INVENTORY_SHA256
     ):
         raise ReferenceBaselineError("Declaration review has mismatched historical scope")
     retired = manifest.get("retiredTransitions")
@@ -3086,8 +3094,10 @@ def audit_current_rule_citation_minimum(
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=REPORT_FORMAT)
-    parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/infinity.db")
-    parser.add_argument("--rules-db", type=Path, default=PROJECT_ROOT / "data/generated/rules.db")
+    parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/army.db")
+    parser.add_argument(
+        "--rules-db", type=Path, default=PROJECT_ROOT / "data/generated/rules_n5.db",
+    )
     parser.add_argument("--army-archive", type=Path, help="Verify exact ZIP bytes against Army pin")
     parser.add_argument(
         "--verify-server", metavar="BASE_URL",

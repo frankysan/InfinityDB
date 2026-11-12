@@ -59,7 +59,7 @@ class CatalogRules:
         ] = {}
         self._rule_reference_cache: dict[str, dict[str, Any]] = {}
         self._combined_saving_rolls = (
-            WeaponCombinedSavingRolls() if rules_database is not None else None
+            WeaponCombinedSavingRolls(rules_database) if rules_database is not None else None
         )
         self._weapon_properties = (
             WeaponProperties(rules_database, database=database)

@@ -18,11 +18,10 @@ hand those parts to the appropriate workflow after the source semantics are clea
 
 ## Procedure
 
-1. For autonomous "next task" work, apply the
-   [V1S selection checkpoint](../../../docs/TODO.md#v1s-work-selection-and-handoff)
-   before choosing a convenient source family: check earlier open tasks,
-   record justified blockers/priority exceptions and report what was bypassed.
-   Then identify the exact question, game edition, source scope and affected
+1. Select autonomous work from the [active backlog](../../../docs/TODO.md).
+   Only when a numbered V1S task is reopened, apply the
+   [historical selection checkpoint](../../../docs/testing.md#v1s-backlog-checks)
+   and record justified blockers or priority exceptions. Then identify the exact question, game edition, source scope and affected
    InfinityDB identity. Distinguish an Army profile/mode from a parent weapon
    or similarly named record.
 2. Establish the applicable pinned sources before interpreting them. Keep source version,

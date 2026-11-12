@@ -17,7 +17,7 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_ZIP = ROOT / "data/raw/JSON 20260929-114335.zip"
-ARMY_DB = ROOT / "data/generated/infinity.db"
+ARMY_DB = ROOT / "data/generated/army.db"
 
 
 @pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
@@ -35,7 +35,7 @@ def test_named_chart_annotations_preserve_exact_local_profile_context() -> None:
         (899, "899-deras-kaar.json", "7.26246.159",
          {(1, member) for member in range(1, 5)} | {(3, 1)}),
     )
-    application = create_app(ARMY_DB, rules_database_path=ROOT / "data/generated/rules.db")
+    application = create_app(ARMY_DB, rules_database_path=ROOT / "data/generated/rules_n5.db")
     database = Database(ARMY_DB)
     reviewed_rows = 0
     with zipfile.ZipFile(ARMY_ZIP) as archive:
@@ -112,7 +112,7 @@ def test_army_01_all_pinned_chart_constraints_reach_public_api() -> None:
         "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75"
     )
     database = Database(ARMY_DB)
-    application = create_app(ARMY_DB, rules_database_path=ROOT / "data/generated/rules.db")
+    application = create_app(ARMY_DB, rules_database_path=ROOT / "data/generated/rules_n5.db")
     chart_count = team_count = member_count = 0
     with zipfile.ZipFile(ARMY_ZIP) as archive:
         # Cover raw contexts too: a publication-only inventory would miss dropped
@@ -237,7 +237,7 @@ def test_pinned_member_reference_gaps_are_disclosed_without_replacement() -> Non
 
 def test_reinforcement_parent_chart_limits_remain_independent() -> None:
     database = Database(ARMY_DB)
-    app = create_app(ARMY_DB, rules_database_path=ROOT / "data/generated/rules.db")
+    app = create_app(ARMY_DB, rules_database_path=ROOT / "data/generated/rules_n5.db")
     sections = edges = unavailable_core = blocked_section_core = selectable = 0
     selectable_ids = {army["id"] for army in database.list_fireteam_armies()}
     for army in database.list_fireteam_armies():

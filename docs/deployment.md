@@ -3,11 +3,11 @@
 **Project domain:** Deployment
 
 For public internet serving, InfinityDB deploys an immutable Docker image
-containing the web application, processed graphical assets, release-matched
-`infinity.db` and `rules.db`, and tracked exact-variant
-`variant-usage.json` and Weapon-profile `weapon-profile-sources.json` publications.
-Legacy v8/v9 images additionally include generated `deployed-objects.json`;
-the prepared 1.0.1 v10 image embeds these records directly in `rules.db`.
+containing the application, processed graphical assets and the complete tracked
+`army.db` / `rules_n5.db` pair. Structured runtime facts are embedded; no JSON
+publication or raw source archive is required at startup. Rollback uses a matching
+retained image for the older release's data format.
+
 Caddy listens on HTTP and proxies traffic to the application, which is not exposed
 directly on the host. Put Caddy behind an external TLS reverse proxy for public HTTPS.
 
@@ -15,7 +15,7 @@ Corvus Belli has explicitly permitted InfinityDB to use and redistribute the gra
 assets used by this non-commercial community project. By project policy, the generated runtime
 databases are likewise distributed only as part of the non-commercial InfinityDB
 application/release and remain outside the MIT License. Raw Army/wiki/PDF/source-symbol archives
-stay outside the public repository; the processed SVG publication and two runtime databases are
+stay outside the public repository; the processed SVG publication and three runtime databases are
 tracked release artifacts. See
 [third-party notices](../THIRD_PARTY_NOTICES.md).
 
@@ -23,9 +23,11 @@ tracked release artifacts. See
 supported direct-checkout runtime is described below. Database and symbol
 generation happen in a development/release checkout. A tagged Docker server
 checkout consumes the exact tracked databases and
-symbols and exact-variant publication reviewed for that release, and deterministically
-produces the matching deployed-object publication from tracked curated reviews;
-it does not acquire raw data, rebuild databases or regenerate variant usage.
+symbols reviewed for that release. It verifies recorded build-input freshness
+and published graphics before image creation, without acquiring raw data or
+rebuilding the databases. Runtime validates the built set independently of those
+source files.
+
 For moving an installation to a new host, see the
 [server migration guide](server-migration.md).
 
@@ -37,25 +39,20 @@ Army snapshot and installing the project:
 
 ```sh
 infinity-db build --compact
-infinity-db build-rules
 infinity-db serve
 ```
 
-The second command assembles `local/checkout-runtime/` (ignored by Git) from
-the just-built Army database, current curated v10 Rules and their matching
-variant/Weapon publications. `serve` chooses that bundle automatically,
-rejecting stale or incomplete results. On a checkout without a local build,
-`serve` instead uses the tracked release pair.
+The build validates and replaces `data/generated/army.db` and `rules_n5.db`.
+Stop the service before rebuilding its selected directory. `serve --db-dir PATH`
+selects another complete set; otherwise `INFINITY_DB_DB_DIR` precedes the default
+`data/generated/` relative to the working directory. Invalid sets fail startup.
 
-For a longer-lived Linux checkout service, install the optional `server`
-dependencies and configure the service working directory to the checkout.
-Set `INFINITY_DB_DATABASE` to the absolute path of
-`local/checkout-runtime/infinity.db` and `INFINITY_DB_RULES_DATABASE` to
-the adjacent `rules.db` before starting
-`gunicorn --bind 127.0.0.1:8000 infinity_db.web.wsgi:app`. Explicit WSGI
-paths are required because they avoid environment-dependent auto-selection.
-A local rebuild does not publish a Docker release or overwrite tracked
-release Rules/JSON.
+For a longer-lived checkout service, install the optional `server` dependencies,
+set the service working directory and `INFINITY_DB_DB_DIR` to the absolute
+complete-set directory, then start
+`gunicorn --bind 127.0.0.1:8000 infinity_db.web.wsgi:app`.
+WSGI requires the setting. The individual database variables are retired.
+Local builds do not publish a Docker release.
 
 ## Prerequisites
 
@@ -106,101 +103,63 @@ local edits are present.
 Every deploy requires these release-controlled files to be present in the checkout:
 
 ```text
-data/generated/infinity.db
-data/generated/rules.db
-data/generated/variant-usage.json
-data/generated/weapon-profile-sources.json
+data/generated/army.db
+data/generated/rules_n5.db
+data/generated/its_18.db
 data/manifests/symbol-publication.json
 src/infinity_db/web/static/{armies,characteristics,orders,peripherals,units}/...
 ```
 
-`deploy.sh` runs `tools/verify_deployment_assets.py` before Docker is allowed to build. The
-guard validates both SQLite databases, verifies the complete symbol publication by path and
-SHA-256, and compares `infinity.db`'s embedded `snapshotArchiveSha256` with
-`symbol-publication.json`'s `sourceSnapshot.armyArtifact.sha256`. This binds the runtime Army
-data and graphical publication to the same exact source ZIP without requiring that raw archive
-or the terminal `army-symbol-build.json` on the server.
+`deploy.sh` runs `tools/verify_deployment_assets.py` before Docker builds. This
+validates the strict complete set, recorded source/build-input freshness, embedded
+Weapon citations against maintained reviews, and the graphical publication's
+paths, hashes and Army source identity. Raw Army/PDF inputs are not needed on the
+server. The image copies the three databases directly into `/app/data/`; no
+`data/runtime/` copy or candidate promotion is required.
 
-For v8/v9 releases, `deploy.sh` deterministically generates and checks the
-ignored `data/generated/deployed-objects.json` publication before packaging.
-For the tracked v10 development pair, deployed objects are embedded in
-`rules.db` and validated against the exact Army database hash; no legacy
-JSON is generated or shipped. No raw snapshots or database rebuilds are
-needed on the Docker host. Before a direct Docker build, run
-`python -m tools.prepare_runtime_bundle` after verifying the tracked
-publications. It creates ignored `data/runtime/` with exactly the validated
-schema-specific four- or five-file image contents.
+**2026-11-12 development verification:** The P5.8 source-freshness blocker
+(VR-0148) was resolved by refreshing the tracked runtime databases. After the
+P6.1 build-input boundary update, `tools.verify_deployment_assets` passed on
+the complete tracked three-database set, checking source freshness,
+embedded citations and all published SVGs. This is development acceptance,
+not permission to merge, tag, release or deploy; those gates remain in
+[releasing](releasing.md).
 
-The exact-variant publication is a **tracked release file**, source-verified
-from the pinned raw Army archive during development. v9 uses the legacy JSON
-fingerprint; v10 uses the embedded deployed-object model and format v2.
-Docker deployment and clean CI validate the paired, committed publication
-against the tracked databases without regenerating it. Changes to either
-database require promoting and committing the matching variant and Weapon JSON
-together.
+The image uses `INFINITY_DB_DB_DIR=/app/data`. Missing, invalid or incompatible
+databases fail before activation. `scripts/verify-container-image.sh --published-assets`
+checks embedded provenance, static bytes, package contents, representative API
+citations and production startup. Compose starts with `--no-build` after image
+verification. The immutable container never regenerates databases.
 
-The tracked `weapon-profile-sources.json` is generated from the same
-database pair and reviewed Weapon decisions with
-`python -m tools.build_weapon_profile_publication`; `--check` compares the
-exact bytes and source pins. Deployment verification runs this check without
-the PDF or raw Army archive. Rebuild and commit the matched file whenever
-either database or its reviewed inputs change. The image verifies and
-serves it independently of the curated files.
-
-The v10 candidate builder embeds reviewed deployed objects directly in
-`rules.db` and prepares v2 variant usage plus matching Weapon citations.
-It stages exactly four files under ignored `local/v10-candidate/` by default,
-without `deployed-objects.json`. After `--check`, the explicit
-`--promote-release` command verifies preserved v9 semantics plus the
-Battleground map additions and promotes the three changed tracked release
-artifacts together. `infinity.db` remains byte-identical. For example:
+For an isolated image build and all pinned semantic-baseline probes, run:
 
 ```sh
-python -m tools.build_v10_runtime_candidate --output-dir local/v10-candidate --check
-python -m tools.build_v10_runtime_candidate --output-dir local/v10-candidate --promote-release
-python -m tools.verify_deployment_assets --skip-svg
+python -m tools.preview_runtime_image
+# Or select an already-built complete alternate set:
+python -m tools.preview_runtime_image --source-dir local/alternate-dbs
 ```
 
-Use `python -m tools.preview_runtime_image --tracked-release` for a
-disposable image build/startup and API smoke test against the **actual tracked
-release pair**. It cleans up the preview container/image and restores
-`data/runtime/` to the tracked bundle. Requires an active Docker Linux engine.
-Normal `deploy.sh` always reconstructs the bundle from tracked
-`data/generated/` and never selects ignored local candidates. The
-development branch has promoted v10; the prior tagged production release
-remains v9 until release acceptance. See the
-[open v10 release gate](TODO.md#performance-storage-and-build-tooling).
-The immutable container never regenerates or replaces databases at runtime.
-
-The Docker image explicitly configures both runtime database paths. Missing, invalid, or
-incompatible tracked databases or reference publications fail before activation. After building the image,
-`scripts/verify-container-image.sh --published-assets` revalidates the installed publication,
-the embedded database/publication provenance, package contents, representative symbol routes,
-and production startup. Compose is started with `--no-build` only after that exact image has
-passed verification.
+The preview creates a private build context, runs a disposable read-only container
+without published ports and removes its owned container/image. It preserves the
+selected files and requires an active Docker Linux engine. Deployment and release
+remain separately authorized.
 
 ## Release-artifact generation
 
 The tracked runtime databases are generated during development/release preparation, not on the
-server. Raw archives and intermediate build products remain ignored. Rebuild the application
-database from the pinned Army snapshot and the rules database from tracked curated rules, run
-the normal validation gates, then commit the resulting `data/generated/infinity.db` and
-`data/generated/rules.db` with the code/data changes that require them.
+server. Raw archives and intermediate build products remain ignored. Rebuild the complete
+Army/Rules/ITS set from the pinned Army snapshot and tracked curated inputs, run the normal
+validation gates, then commit all three `data/generated/` databases with the code/data
+changes that require them.
 
-The terminal `data/manifests/army-symbol-build.json` remains ignored local build provenance. It
-is useful for symbol processing/resume but is not part of the deployment contract. The tracked
-`symbol-publication.json` carries only the compact Army archive name/SHA-256 needed by deployment
+Historical `data/manifests/army-symbol-build.json` is not part of the deployment
+contract and cannot resume the retired in-tree processor. The tracked
+`symbol-publication.json` carries the compact Army archive name/SHA-256 needed by deployment
 plus the published SVG hashes/mappings. Current symbol publication writes that provenance
-automatically. Only when preparing a legacy publication created before this provenance
-field was tracked, run the one-time migration in the development checkout:
-
-```powershell
-python tools/migrate_symbol_publication_provenance.py
-```
-
-That command copies the Army archive identity from the local terminal build manifest into the
-tracked publication manifest and refreshes the ignored local binding. It does not rebuild or
-modify any SVG.
+automatically. A legacy publication without `sourceSnapshot.armyArtifact`
+is not a valid release input: prepare and promote a verified external handoff
+for the pinned Army archive rather than modifying the manifest in place.
+Deployment validation compares its SHA-256 with `army.db`.
 
 ## Isolated local deployment test
 
@@ -253,7 +212,7 @@ from the tracked runtime databases and processed publication in the checkout. It
 publication/database snapshot mismatch, packaging omission, corrupted SQLite file, symbol hash
 mismatch, or startup failure is caught against the same artifact model used in production.
 
-The verifier requires `/app/data/` to contain exactly `infinity.db` and `rules.db`, checks the
+The verifier requires `/app/data/` to contain exactly `army.db`, `rules_n5.db` and `its_18.db`, checks the
 configured runtime paths and non-root image user, and starts Gunicorn with a read-only root
 filesystem, `/tmp` tmpfs, and `no-new-privileges`. It waits for the image health check and then
 exercises Army, rules-enriched Skill, and version API endpoints.
@@ -286,12 +245,11 @@ either SQLite file inside a running container. Before publication, the developme
 checked explicitly with:
 
 ```powershell
-infinity-db database-health data/generated/infinity.db --require-raw
+infinity-db database-health --db-dir data/generated
 ```
 
-For a tracked/deployed application database where the development-only raw sibling is intentionally
-absent, omit `--require-raw`. The command reports actual/expected schema and compatibility revisions
-and fails if the application database is not valid for the running InfinityDB code.
+The directory check validates both databases, embedded source pairing and full
+SQLite integrity. Raw build archives are outside the serving contract.
 
 ### Privacy and observability
 

@@ -14,6 +14,7 @@ import pytest
 
 from infinity_army_data.merge import load_sources
 from infinity_db.curated import load_curated_document
+from infinity_db.snapshot_revision import database_set_snapshot_revision
 from tools.report_reference_baseline import (
     _NESTED_SOURCE_FIELDS,
     CURRENT_CITATION_COLLECTIONS,
@@ -50,8 +51,8 @@ from tools.report_reference_baseline import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_DB = ROOT / "data/generated/infinity.db"
-RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_DB = ROOT / "data/generated/army.db"
+RULES_DB = ROOT / "data/generated/rules_n5.db"
 
 
 @pytest.mark.parametrize(
@@ -382,9 +383,10 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
         "selectedBrowserTestAnchors": 36,
         "currentIdentitiesWithLaterEvidence": 56,
         "wholeRecordApprovals": 0,
-        # V1S-083 adds the Engineer omission and two FAQ-scope citations;
-        # none becomes a whole-record or clause approval.
-        "pendingSourceSections": 832,
+        # P3 moves ITS Battleground source ownership to its_18.db; the
+        # N5 Rules source-section inventory loses those two non-core entries.
+        # Neither that migration nor V1S-083 grants whole-record approval.
+        "pendingSourceSections": 830,
     }
     historical = {row["id"]: row for row in evidence["historicalRecords"]}
     current = {row["id"]: row for row in evidence["currentRecords"]}
@@ -1007,28 +1009,18 @@ def test_baseline_reports_pinned_publication_without_claiming_completeness() -> 
     assert report["armySnapshot"]["archiveVerification"] == "not-supplied"
     assert len(report["armySnapshot"]["archiveSha256"]) == 64
     assert len(report["rulesPublication"]["publishedDatabaseSha256"]) == 64
-    profile_sha = hashlib.sha256(
-        ARMY_DB.with_name("weapon-profile-sources.json").read_bytes()
-    ).hexdigest()
-    assert report["weaponProfilePublicationSha256"] == profile_sha
-    combined = (
-        report["armySnapshot"]["publishedDatabaseSha256"] + ":"
-        + report["rulesPublication"]["publishedDatabaseSha256"] + ":" + profile_sha
+    # The historical report field now identifies the Rules bytes containing
+    # embedded Weapon citations; no loose JSON publication is required.
+    assert report["weaponProfilePublicationSha256"] == (
+        report["rulesPublication"]["publishedDatabaseSha256"]
     )
-    assert report["runtimeSnapshotRevision"] == hashlib.sha256(
-        combined.encode()
-    ).hexdigest()
-    # The published rules database includes four core missions and one
-    # separately scoped ITS Season 18 Battleground pilot.
-    assert report["scenarioMembershipCount"] == 5
+    assert report["runtimeSnapshotRevision"] == database_set_snapshot_revision({
+        "army.db": report["armySnapshot"]["publishedDatabaseSha256"],
+        "rules_n5.db": report["rulesPublication"]["publishedDatabaseSha256"],
+    })
+    # The published Rules database owns core missions only; ITS lives in its_18.db.
+    assert report["scenarioMembershipCount"] == 4
     assert report["scenarioMemberships"] == [
-        {
-            "collectionId": "its-18",
-            "collectionRevision": "2026.09.01",
-            "position": 0,
-            "scenarioId": "scenario:battleground",
-            "publicationCollectionId": "its-season-18-2026.09.01",
-        },
         *[
             {
                 "collectionId": "n5-core",
@@ -1046,7 +1038,7 @@ def test_baseline_reports_pinned_publication_without_claiming_completeness() -> 
         assert db.execute(
             "SELECT collection_id, COUNT(*) FROM scenario_memberships "
             "GROUP BY collection_id ORDER BY collection_id"
-        ).fetchall() == [("its-18", 1), ("n5-core", 4)]
+        ).fetchall() == [("n5-core", 4)]
     assert "rules:scenario" in {item["id"] for item in report["inventory"]}
     assert "army:profiles" in {item["id"] for item in report["inventory"]}
     assert all(item["scopeDecision"] == "pending" for item in report["inventory"])
@@ -1091,6 +1083,7 @@ def test_route_hints_reuse_published_surfaces_without_claiming_coverage() -> Non
         source_data_changed_on=None,
         snapshot_downloaded_on=None,
         snapshot_revision="audit-test",
+        static_revision="audit-test",
     )
     for entry in entries.values():
         hint = entry["routeHint"]
@@ -1596,9 +1589,9 @@ def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path)
                 "profile_groups": 1, "profiles": 1, "loadout_options": 1,
             },
             "nestedStorage": {
-                "profile_groups": "published-infinity.db",
-                "profiles": "paired-infinity.raw.db",
-                "loadout_options": "paired-infinity.raw.db",
+                "profile_groups": "published-army.db",
+                "profiles": "paired-army.raw.db",
+                "loadout_options": "paired-army.raw.db",
             },
         }
         raw_db.execute("UPDATE profiles SET cc = 99 WHERE army_id = 101")
@@ -1692,10 +1685,27 @@ def test_army_archive_rejects_invalid_or_duplicate_unit_ids(
             )
 
 
+def _require_release_matched_raw_army() -> None:
+    """Only opt into local source audits with the current Army export pair."""
+    from infinity_db.database import raw_database_path
+    from infinity_db.database.publication import validate_database_pair
+
+    raw = raw_database_path(ARMY_DB)
+    if not raw.is_file():
+        pytest.skip("Full Army raw archive is ignored and unavailable in clean CI")
+    try:
+        validate_database_pair(ARMY_DB, raw_path=raw)
+    except ValueError as exc:
+        if "different exports" not in str(exc):
+            raise
+        pytest.skip(f"Ignored raw Army database is stale relative to tracked Army: {exc}")
+
+
 def test_pinned_army_archive_nested_publication_when_available() -> None:
     archive = ROOT / "data/raw/JSON 20260929-114335.zip"
     if not archive.is_file():
         pytest.skip("Optional pinned Army source archive is not available")
+    _require_release_matched_raw_army()
     report = build_baseline(ARMY_DB, RULES_DB, army_archive=archive)
     evidence = report["armySnapshot"]["sourceIdentityEvidence"]
     assert evidence["matchedArmyListIds"] == 58
@@ -1772,9 +1782,9 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
     assert "58 matched published Army-list IDs" in markdown
     assert "58 matched per-file provenance records" in markdown
     assert "12345 ordered Unit membership occurrences" in markdown
-    assert "4748 profile groups in published infinity.db" in markdown
+    assert "4748 profile groups in published army.db" in markdown
     assert "5020 profiles and 9000 loadouts" in markdown
-    assert "export-paired infinity.raw.db" in markdown
+    assert "export-paired army.raw.db" in markdown
     assert "loadout.weapons=30, profile.skills=20" in markdown
     assert "loadout.weapons=17, profile.skills=12" in markdown
     assert "loadout.characteristics=37, loadout.orders=26" in markdown
@@ -1833,7 +1843,7 @@ def test_served_revision_rejects_stale_and_invalid_runtime() -> None:
         with pytest.raises(ReferenceBaselineError, match="does not match"):
             verify_served_revision(report, "http://localhost:8000/")
     for base in (
-        "file:///data/generated/infinity.db",
+        "file:///data/generated/army.db",
         "http://user:pass@localhost:8000",
         "http://localhost:8000/api",
         "http://localhost:8000?skip=1",
@@ -1969,11 +1979,9 @@ def test_pinned_army_derived_relationships_have_live_published_targets() -> None
 
 def test_pinned_army_derived_relationships_match_raw_source_when_available() -> None:
     """Source derivation requires the ignored, release-matched raw sibling."""
-    from infinity_db.database import raw_database_path
     from tools.audit_army_faction_semantics import audit_database as audit_factions
 
-    if not raw_database_path(ARMY_DB).is_file():
-        pytest.skip("Full Army raw archive is ignored and unavailable in clean CI")
+    _require_release_matched_raw_army()
     faction = audit_factions(ARMY_DB)
     assert faction["applicationModel"]["sourceDerivedIdentityEquivalent"] is True
     assert faction["applicationModel"]["runtimeIdentityEquivalent"] is True
@@ -2011,12 +2019,12 @@ def test_baseline_cli_writes_stable_local_reports(tmp_path: Path) -> None:
     assert json_output.read_bytes() == first
     saved = json.loads(first)
     assert saved["formatVersion"] == 2
-    assert len(saved["scenarioMemberships"]) == saved["scenarioMembershipCount"] == 5
+    assert len(saved["scenarioMemberships"]) == saved["scenarioMembershipCount"] == 4
     markdown = markdown_output.read_text(encoding="utf-8")
     assert "## Published scenario memberships by collection" in markdown
-    assert "| `its-18` | `2026.09.01` | 0 | `scenario:battleground` |" in markdown
+    assert "| `its-18` |" not in markdown
     assert "| `n5-core` | `5.3` | 0 | `scenario:annihilation` |" in markdown
-    assert "not a core-only scenario count" in markdown
+    assert "ITS publications are stored separately" in markdown
     assert "Candidate browser / API" in markdown
     assert "pending source/API/browser review" in markdown
     assert "## Outstanding 1.0 evidence" in markdown

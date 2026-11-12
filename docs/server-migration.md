@@ -3,10 +3,10 @@
 **Project domain:** Deployment
 
 A released InfinityDB checkout is self-contained for runtime deployment. The tracked Git
-revision supplies the application, `infinity.db`, `rules.db`, exact-variant
+revision supplies the application, `army.db`, `rules_n5.db`, exact-variant
 `variant-usage.json`, Weapon-profile `weapon-profile-sources.json`, processed SVGs
 and `symbol-publication.json`. Current v10 Rules embed deployed objects in
-`rules.db`; legacy v8/v9 deployment generates matching ignored
+`rules_n5.db`; legacy v8/v9 deployment generates matching ignored
 `deployed-objects.json` from tracked release inputs. Deployment prepares the
 schema-specific image bundle as described in [deployment](deployment.md).
 Raw Army/wiki/PDF/source-symbol
@@ -68,13 +68,13 @@ intended, not when preserving the recorded version. For an upgrade from 0.8.0, f
 bootstrap in [Linux deployment](deployment.md).
 
 The deployment guard validates the tracked databases and complete processed symbol publication and
-proves that `infinity.db` and `symbol-publication.json` name the same Army source ZIP SHA-256 before
+proves that `army.db` and `symbol-publication.json` name the same Army source ZIP SHA-256 before
 building/activating the image.
 
 ## Reproducible development/build migration
 
 A development workstation needs additional ignored source/provenance state only when it must
-rebuild data or continue symbol processing.
+rebuild data or review a symbol handoff.
 
 For an Army database rebuild, preserve the exact immutable Army snapshot and its generated snapshot
 manifest:
@@ -84,38 +84,21 @@ data/raw/JSON YYYYMMDD-HHMMSS.zip
 data/manifests/snapshots/JSON YYYYMMDD-HHMMSS.json
 ```
 
-For symbol-source rebuild/cache continuity, also preserve:
+For symbol regeneration, preserve the external producer's selected raw/effective
+archives, receipts, reports and exact font-alias inputs, together with the
+InfinityDB source plans and any needed promotion transaction. Follow the
+[publication lifecycle](../data/README.md#external-processed-symbol-publication-candidates).
+Historical `army-symbol-build.json`, work trees and logs cannot resume the
+retired in-tree processor; keep them only when their evidence is needed.
 
-```text
-data/raw/symbols/SYMBOLS YYYYMMDD-HHMMSS.zip
-data/manifests/snapshots/SYMBOLS YYYYMMDD-HHMMSS.json
-data/manifests/army-symbol-build.json
-image_overrides/
-```
-
-`army-symbol-build.json` remains local terminal/intermediate processing provenance. It binds pinned
-Army/SYMBOLS artifacts, processing reports/settings, cache identities, and publication state, but
-it is no longer needed to deploy an already released checkout.
-
-For an interrupted symbol build, preserve the manifest-bound derived state as well:
-
-```text
-data/work/symbols/
-data/reports/symbols/
-```
-
-Later-stage resume validates that work and its SHA-bound reports instead of silently regenerating
-it. `data/logs/symbols/` is diagnostic history and `data/backups/symbols/` is optional removed-symbol
-history; preserve either only when that history matters.
-
-The current `rules.db` is reproducible from tracked curated data under `data/curated/rules/`.
+The current `rules_n5.db` is reproducible from tracked curated data under `data/curated/rules/`.
 Local PDF/wiki research collections are not runtime build inputs.
 
 ## Processing environment for regenerated symbols
 
 Cross-machine symbol regeneration can vary when external rendering/conversion tools or fonts differ.
-When rebuilding rather than consuming a tracked publication, recreate the prior processing
-environment as closely as practical, including:
+When using the external producer rather than consuming a tracked publication, preserve its
+selected processing environment and receipts, including:
 
 - installed fonts used by font audit/text conversion;
 - Inkscape version/backend;

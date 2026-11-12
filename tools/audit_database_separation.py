@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit the boundary between infinity.db and the lossless infinity.raw.db archive."""
+"""Audit the boundary between army.db and the lossless army.raw.db archive."""
 
 from __future__ import annotations
 
@@ -496,20 +496,20 @@ def audit_database(
         },
         "inventory": inventory,
         "conclusion": (
-            "The physical split is complete: published infinity.db contains only application "
+            "The physical split is complete: published army.db contains only application "
             "tables, has no foreign-key or runtime-validation dependency on raw-only tables, "
-            "and normal serving never reads infinity.raw.db. The raw sibling retains queryable "
+            "and normal serving never reads army.raw.db. The raw sibling retains queryable "
             "normalized source tables plus exact lossless row JSON for audit and reconstruction."
         ),
     }
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("database", type=Path, help="Frontend infinity.db to audit")
+    parser.add_argument("database", type=Path, help="Frontend army.db to audit")
     parser.add_argument(
         "--raw-database",
         type=Path,
-        help="Optional raw sibling path; defaults to the infinity.raw.db sibling when present",
+        help="Optional raw sibling path; defaults to the army.raw.db sibling when present",
     )
     parser.add_argument(
         "--project-root",

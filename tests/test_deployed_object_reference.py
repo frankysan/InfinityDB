@@ -14,10 +14,10 @@ from tools.audit_deployed_object_inventory import audit_inventory
 @pytest.fixture(scope="module")
 def pinned_inventory() -> dict:
     root = Path(__file__).resolve().parents[1]
-    if not (root / "data/generated/infinity.db").is_file():
+    if not (root / "data/generated/army.db").is_file():
         pytest.skip("Generated Army snapshot unavailable")
     return audit_inventory(
-        root / "data/generated/infinity.db",
+        root / "data/generated/army.db",
         root / "data/curated/rules/n5-core-v5.3.json",
         root / "config/validation/deployed-object-delivery-reviews.json",
         root / "config/validation/deployed-object-candidate-reviews.json",
@@ -37,6 +37,7 @@ def test_all_reviewed_source_objects_keep_stable_provenanced_attributes(
     assert len(result["objects"]) == 17  # 14 chart, Madtraps, Armed Turret, Cover
     objects = {row["id"]: row for row in result["objects"]}
     assert len(objects) == 17
+    assert all(obj["deliverySources"] for obj in objects.values())
     source_keys = [
         (row["sourceProfile"]["catalog"], row["sourceProfile"]["sourceId"],
          row["sourceProfile"]["mode"])
@@ -54,6 +55,36 @@ def test_all_reviewed_source_objects_keep_stable_provenanced_attributes(
             else:
                 assert attr["value"] is not None and attr["provenance"]
 
+
+
+
+def test_p74_reviewed_source_selectors_keep_distinct_object_identities(
+    pinned_inventory: dict,
+) -> None:
+    """Preserve the p.74 review conclusions without the retired PDF-parser CLI."""
+    objects = project_deployed_references(pinned_inventory)["objects"]
+    selectors = {
+        (item["sourceProfile"]["catalog"], item["sourceProfile"]["name"],
+         item["sourceProfile"]["mode"]): item["id"]
+        for item in objects if item["sourceProfile"] is not None
+    }
+    p74_catalog_selectors = {
+        ("weapon", "Crazykoala", None),
+        ("weapon", "Cybermine", None),
+        ("equipment", "Dazer", None),
+        ("equipment", "Deployable Repeater", None),
+        ("weapon", "Disco Baller", "Disco Ball"),
+        ("weapon", "Drop Bears", "Deployable Mode"),
+        ("equipment", "FastPanda", None),
+        ("weapon", "Madtraps", None),
+        ("weapon", "WildParrot", None),
+    }
+    assert len(p74_catalog_selectors) == 9
+    assert p74_catalog_selectors <= selectors.keys()
+    assert len({selectors[key] for key in p74_catalog_selectors}) == 9
+    assert sum(item["originRuleId"] == "weapon:armed-turret" for item in objects) == 1
+    assert not any(item["name"] == "Mines" for item in objects)
+    assert len([item for item in objects if item["name"].endswith(" Mine")]) == 6
 
 def test_source_disputes_remain_explicit_without_conflating_marker_silhouette(
     pinned_inventory: dict,

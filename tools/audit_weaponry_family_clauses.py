@@ -14,11 +14,16 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from tools.audit_weapon_chart_profiles import _identity, _sha256
+from tools.weapon_source_common import (
+    source_file_sha256 as _sha256,
+)
+from tools.weapon_source_common import (
+    weapon_identity as _identity,
+)
 
 DEFAULT_REVIEW = Path('config/validation/weaponry-family-clauses.json')
-DEFAULT_ARMY = Path('data/generated/infinity.db')
-DEFAULT_RULES = Path('data/generated/rules.db')
+DEFAULT_ARMY = Path('data/generated/army.db')
+DEFAULT_RULES = Path('data/generated/rules_n5.db')
 
 
 class WeaponryFamilyAuditError(ValueError):

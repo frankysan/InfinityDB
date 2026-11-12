@@ -7,12 +7,14 @@ import argparse
 import sqlite3
 from pathlib import Path
 
+from infinity_db.build_provenance import validate_build_input_freshness
+from infinity_db.database_set import SEASON_DATABASE_SOURCES, validate_database_set
 from infinity_db.deployment_provenance import (
     DeploymentProvenanceError,
     validate_database_symbol_provenance,
 )
+from infinity_db.its_season_database import inspect_its_database
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.variant_usage_reference import load_variant_usage_publication
 
 try:
     from tools.asset_validation import (
@@ -20,7 +22,7 @@ try:
         AssetValidationError,
         validate_asset_set,
     )
-    from tools.build_weapon_profile_publication import DEFAULT_REVIEWS, check_publication
+    from tools.build_weapon_profile_publication import DEFAULT_REVIEWS, check_embedded_profiles
 except ImportError:  # pragma: no cover - direct script execution fallback
     from asset_validation import (  # type: ignore[no-redef]
         AssetSetValidation,
@@ -29,13 +31,13 @@ except ImportError:  # pragma: no cover - direct script execution fallback
     )
     from build_weapon_profile_publication import (  # type: ignore[no-redef]
         DEFAULT_REVIEWS,
-        check_publication,
+        check_embedded_profiles,
     )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STATIC_ROOT = PROJECT_ROOT / "src" / "infinity_db" / "web" / "static"
-DEFAULT_DATABASE = PROJECT_ROOT / "data" / "generated" / "infinity.db"
-DEFAULT_RULES_DATABASE = PROJECT_ROOT / "data" / "generated" / "rules.db"
+DEFAULT_DATABASE = PROJECT_ROOT / "data" / "generated" / "army.db"
+DEFAULT_RULES_DATABASE = PROJECT_ROOT / "data" / "generated" / "rules_n5.db"
 DEFAULT_PUBLICATION_MANIFEST = PROJECT_ROOT / "data" / "manifests" / "symbol-publication.json"
 
 
@@ -95,26 +97,17 @@ def verify_runtime_artifacts(
 def verify_variant_release_publication(
     database_path: Path, rules_database_path: Path,
 ) -> None:
-    """Require the tracked, release-paired exact-variant publication before packaging."""
-    directory = database_path.parent
-    publication = load_variant_usage_publication(
-        directory / "variant-usage.json",
-        database_path,
-        rules_database_path,
-        directory / "deployed-objects.json",
-    )
+    """Require embedded, source-paired exact-variant data before packaging."""
+    publication = RulesDatabase(rules_database_path).variant_usage_payload(database_path)
     if publication is None or not publication["variants"]:
-        raise DeploymentAssetError("Release-matched variant-usage.json is missing or empty")
+        raise DeploymentAssetError("Embedded exact variant usage is missing or empty")
 
 
 def verify_weapon_profile_release_publication(
     database_path: Path, rules_database_path: Path,
 ) -> None:
-    """Require the exact reviewed Weapon Chart publication before packaging."""
-    check_publication(
-        database_path, rules_database_path, DEFAULT_REVIEWS,
-        database_path.with_name("weapon-profile-sources.json"),
-    )
+    """Reject missing, outdated or divergent embedded reviewed Chart citations."""
+    check_embedded_profiles(database_path, rules_database_path, DEFAULT_REVIEWS)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -130,13 +123,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Published browser static root (default: repository web/static directory)",
     )
     parser.add_argument(
-        "--database", type=Path, default=DEFAULT_DATABASE, help="Tracked runtime infinity.db"
+        "--database", type=Path, default=DEFAULT_DATABASE, help="Tracked runtime army.db"
     )
     parser.add_argument(
         "--rules-database",
         type=Path,
         default=DEFAULT_RULES_DATABASE,
-        help="Tracked runtime rules.db",
+        help="Tracked runtime rules_n5.db",
     )
     parser.add_argument(
         "--publication-manifest",
@@ -150,6 +143,20 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        directory = args.database.resolve().parent
+        if (args.rules_database.resolve() != directory / "rules_n5.db"
+                or args.database.name != "army.db"):
+            raise DeploymentAssetError("Select the complete Army/Rules/ITS runtime directory")
+        report = validate_database_set(directory, require_complete=True)
+        validate_build_input_freshness(args.database, PROJECT_ROOT)
+        for season, (filename, source) in SEASON_DATABASE_SOURCES.items():
+            inspected = inspect_its_database(
+                directory / filename, source=PROJECT_ROOT / source,
+                core_revision=report["seasons"][season]["requiredCoreRulesRevision"],
+                require_current_builder=True,
+            )
+            if inspected["sha256"] != report["sha256"][filename]:
+                raise DeploymentAssetError(f"ITS publication {season} changed after validation")
         if args.skip_svg:
             verify_runtime_artifacts(
                 args.database, args.rules_database, args.publication_manifest,
@@ -178,7 +185,7 @@ def main(argv: list[str] | None = None) -> int:
         "Deployment release artifacts verified: "
         f"{validation.present_count}/{validation.expected_count} published SVGs; "
         f"{validation.browser_present_count}/{validation.browser_expected_count} "
-        "browser-referenced; runtime databases and reference publications source-matched"
+        "browser-referenced; embedded runtime data and reviewed citations source-matched"
     )
     return 0
 

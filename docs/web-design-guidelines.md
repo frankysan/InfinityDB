@@ -104,11 +104,11 @@ references, with theme tokens and a second cue beyond color:
   merely because its values differ from a maintained summary. Display a
   specific authoritative revision/change only when a verified publication
   record identifies it.
-- **InfinityDB-maintained reference:** the shared Rule card labels curated
-  summaries, requirements and effects as an **InfinityDB-maintained reference**,
-  explicitly pointing to citations for source wording. This label identifies
-  editorial ownership, **not** a claim that the rules are unofficial or
-  mechanically different.
+- **InfinityDB-maintained reference:** shared Rule cards present curated
+  summaries, requirements and effects alongside a concise **Sources** line.
+  The project-wide accuracy/independence notice explains editorial ownership;
+  do not repeat a maintenance disclaimer on every card or suggest that its
+  gameplay meaning differs from cited official rules.
 - **Explanations, examples and reviewed interpretations:** keep gameplay
   requirements/effects at body size. Distinguish explanations under
   **Clarifications and examples**, with an explicit InfinityDB-reviewed
@@ -132,9 +132,9 @@ references, with theme tokens and a second cue beyond color:
   visible uncertainty labels. Do not silently select a winner or hide
   material gameplay ambiguity in Developer Mode.
 
-The shared renderer owns the first four presentation roles, and the
-source-reviewed FAQ renderer owns the last two. This is a provenance
-**presentation contract**; it does not authorize invented source
+The shared Rule renderer owns curated explanations, source context and rule
+citations; the FAQ renderer owns source-dated rulings and conflict warnings.
+This **provenance presentation contract** does not authorize invented source
 classifications or complete an audit of every Army statline, scenario
 discrepancy, or possible historical update. Maintain the source-model
 boundaries in [data-model.md](data-model.md) and test both light/dark,
@@ -209,6 +209,24 @@ When a layout problem appears, first look for unnecessary width, spacing, wrappe
 
 An exception should exist because the information has different requirements, not because the current cascade makes the common structure inconvenient to reuse.
 
+### Readable reference loading failures
+
+For Skill, Equipment, Hacking Program, General Rule and Unit detail pages,
+distinguish a missing reference (HTTP 404) from a temporary loading failure.
+Catalogs, Army overview, Unit Explorer, Fireteams, search, skill modifiers,
+Orders/AROs and scenarios use shared collection-loading feedback. Neither
+route may display raw server errors, schema diagnostics or storage messages;
+log technical details to the developer console instead.
+
+Preserve specific player decisions separately: unsupported Army or scenario
+selection, unavailable publication/revision, and unsupported Army Points
+are not interchangeable with a network failure. Do not claim a game size is
+unsupported solely because an API request returned HTTP 400. Use the actual
+selected scenario's supported values when validating sizes. Error panels use
+an accessible alert role; existing detail/Orders status regions retain their
+polite status role. Do not hide material source disagreements under generic
+load-failure copy.
+
 ### Standalone source charts and contextual links
 
 Full source tables, such as the N5.3 Restrictions chart, belong on their
@@ -222,6 +240,18 @@ Exact reviewed source occurrences on Skill/Equipment detail pages are
 also Developer Mode only; ordinary rules, variants and their citations
 stay visible. The chart is
 a finite source reference, not a general action-legality evaluator.
+
+### Spec-Ops source choices and technical identity
+
+The Unit detail page lists source-defined Spec-Ops/TEAM-OPS and SpecBall
+choices without implying that an option has already been selected or is
+legal for every Army List. The chart's player label is its source name.
+Show raw source Unit IDs and Army source-version diagnostics in Developer
+Mode only, retaining them in the API. Keep source chart entries,
+compound choices, Skill links, and literal `q` source notation visible:
+`q` must not be rewritten as an unverified stat modifier or final value.
+Keep a clear warning that the chart is a choice inventory, not a
+configured Army List.
 
 ### Specialist Troops filtering is contextual
 

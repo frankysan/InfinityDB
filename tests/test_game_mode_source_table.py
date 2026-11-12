@@ -5,30 +5,19 @@ from __future__ import annotations
 import copy
 import json
 import sys
+from pathlib import Path
+from typing import Any
 
 import pytest
 
 from infinity_db.curated import load_curated_document
 from infinity_db.restriction_conditions import compile_restriction_conditions
-from tools.audit_game_mode_source_table import (
-    MANIFEST,
-    PDF,
-    PINNED,
-    SETUP_MANIFEST,
-    audit_game_mode_source,
-    audit_published_game_setup,
-    audit_source_files,
-    main,
-    verify_pinned_pdf,
-)
+from infinity_db.rules_database import RulesDatabase
 from tools.audit_restrictions_source_chart import (
     CURATED as RESTRICTIONS_CURATED,
 )
 from tools.audit_restrictions_source_chart import (
     MANIFEST as RESTRICTIONS_MANIFEST,
-)
-from tools.audit_restrictions_source_chart import (
-    PDF as RESTRICTIONS_PDF,
 )
 from tools.audit_restrictions_source_chart import (
     PUBLICATION as RESTRICTIONS_PUBLICATION,
@@ -47,9 +36,130 @@ from tools.audit_restrictions_source_chart import (
 from tools.audit_restrictions_source_chart import (
     publication_bytes as restrictions_publication_bytes,
 )
-from tools.audit_restrictions_source_chart import (
-    verify_pinned_pdf as verify_restrictions_pdf,
+
+ROOT = Path(__file__).resolve().parents[1]
+SETUP_MANIFEST = ROOT / "config/validation/standard-game-reference-tables.json"
+MANIFEST = ROOT / "config/validation/game-mode-source-table.json"
+CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
+
+PINNED = (
+    ("Beginner Games", 150, 3, (24, 32), (8, 24), 40),
+    ("Raid Games", 200, 4, (32, 48), (8, 32), 50),
+    ("Intermediate Games", 250, 5, (32, 48), (8, 32), 60),
+    ("Standard Games", 300, 6, (48, 48), (12, 48), 90),
+    ("Magnum Games, and Games with Reinforcements", 350, 7, (48, 48), (12, 48), 100),
+    ("Large-Scale Games", 400, 8, (48, 48), (12, 48), 120),
 )
+CLASSIFICATION = {
+    "scope": "recommended-game-modes-not-mandatory-scenario-rules",
+    "deploymentZone": "two-dimensional-per-player-inches",
+    "gameDuration": "recommended-minutes-not-round-count",
+    "swc": "base-allowance-excludes-unit-specific-bonuses",
+}
+
+
+def audit_game_mode_source(
+    manifest: dict[str, Any], setup: dict[str, Any],
+) -> dict[str, Any]:
+    """Fail closed on changed chart values or incorrect cross-domain scope."""
+    if set(manifest) != {
+        "formatVersion", "sourceId", "sourcePage", "reviewStatus",
+        "classification", "rows",
+    }:
+        raise ValueError("Unexpected N5.3 Game Modes manifest fields")
+    if (
+        type(manifest["formatVersion"]) is not int
+        or manifest["formatVersion"] != 1
+        or manifest["sourceId"] != "n5-core-v5.3-pdf"
+        or manifest["sourcePage"] != 6
+        or manifest["reviewStatus"] != "source-reviewed-audit-only"
+        or manifest["classification"] != CLASSIFICATION
+    ):
+        raise ValueError("Game Modes source attribution/scope drift")
+    rows = manifest["rows"]
+    if not isinstance(rows, list) or len(rows) != len(PINNED):
+        raise ValueError("Expected exactly six recommended Game Mode rows")
+    if setup.get("sourceId") != manifest["sourceId"] or setup.get("sourcePages") != {
+        "retreatThresholds": 146, "recommendedTables": 147,
+    }:
+        raise ValueError("Independent standard-game table provenance drift")
+    setup_rows = setup.get("rows")
+    if not isinstance(setup_rows, list) or len(setup_rows) != len(PINNED):
+        raise ValueError("Independent standard-game table row count drift")
+    for index, (row, expected, common) in enumerate(
+        zip(rows, PINNED, setup_rows, strict=True),
+    ):
+        if not isinstance(row, dict) or set(row) != {
+            "name", "armyPoints", "swc", "tableInches",
+            "deploymentZoneInches", "durationMinutes",
+        }:
+            raise ValueError(f"Game Mode row schema drift: {index}")
+        name, points, swc, table, zone, minutes = expected
+        if (
+            row["name"] != name
+            or type(row["armyPoints"]) is not int
+            or type(row["swc"]) is not int
+            or type(row["durationMinutes"]) is not int
+            or row["armyPoints"] != points
+            or row["swc"] != swc
+            or row["tableInches"] != list(table)
+            or row["deploymentZoneInches"] != list(zone)
+            or row["durationMinutes"] != minutes
+            or row["swc"] * 50 != points
+        ):
+            raise ValueError(f"N5.3 Game Modes chart drift: row {index}")
+        if not isinstance(common, dict) or (
+            common.get("armyPoints") != points
+            or common.get("recommendedTableInches") != list(table)
+            or common.get("retreatThresholdVictoryPoints") != (points + 3) // 4
+        ):
+            raise ValueError(f"Independent table-size / Retreat! cross-check failed: {points}")
+    return {
+        "scope": CLASSIFICATION["scope"],
+        "sourcePage": 6,
+        "corroboratingSourcePages": [146, 147],
+        "rowCount": len(rows),
+        "deploymentZoneScope": CLASSIFICATION["deploymentZone"],
+        "durationScope": CLASSIFICATION["gameDuration"],
+        "swcScope": CLASSIFICATION["swc"],
+        "rows": rows,
+    }
+
+
+def audit_published_game_setup(
+    chart: dict[str, Any], setup: dict[str, Any], curated: dict[str, Any],
+) -> dict[str, Any]:
+    """Verify the public Game Modes reference exactly matches two source inventories."""
+    items = [r for r in curated["records"] if r["id"] == "rule:game-modes"]
+    if len(items) != 1:
+        raise ValueError("Exactly one reviewed public Game Modes reference is required")
+    record = items[0]
+    if (record["kind"] != "rule"
+            or record["review"]["status"] != "reviewed"
+            or {(c["sourceId"], c.get("page")) for c in record["citations"]} != {
+                ("n5-core-v5.3-pdf", 6),
+                ("n5-core-v5.3-pdf", 146),
+                ("n5-core-v5.3-pdf", 147),
+            }):
+        raise ValueError("Published Game Modes source scope or citations drift")
+    facts = record["facts"]
+    table = facts["gameSetupTable"]
+    if table["scope"] != "recommended-general-setup-with-independent-retreat-thresholds":
+        raise ValueError("Published Game Modes advisory scope drift")
+    expected = [
+        {
+            "name": mode["name"], "armyPoints": mode["armyPoints"],
+            "baseSwc": mode["swc"], "tableInches": mode["tableInches"],
+            "deploymentZoneInches": mode["deploymentZoneInches"],
+            "durationMinutes": mode["durationMinutes"],
+            "retreatThresholdVictoryPoints": independent["retreatThresholdVictoryPoints"],
+        }
+        for mode, independent in zip(chart["rows"], setup["rows"], strict=True)
+    ]
+    if table["rows"] != expected:
+        raise ValueError("Published Game Modes rows diverge from source manifests")
+    return {"publicRuleId": record["id"], "publishedRowCount": len(expected)}
+
 
 
 def _inputs() -> tuple[dict, dict]:
@@ -59,8 +169,77 @@ def _inputs() -> tuple[dict, dict]:
     )
 
 
+def test_independent_retreat_and_table_sizes_keep_source_boundaries() -> None:
+    """Pinned source rows remain advisory/session facts, not Unit or scenario rules."""
+    chart, setup = _inputs()
+    assert set(setup) == {
+        "formatVersion", "sourceId", "sourcePages", "reviewStatus",
+        "thresholdRule", "tableSizeRule", "rows",
+    }
+    assert type(setup["formatVersion"]) is int and setup["formatVersion"] == 1
+    assert setup["sourceId"] == chart["sourceId"] == "n5-core-v5.3-pdf"
+    assert setup["sourcePages"] == {"retreatThresholds": 146, "recommendedTables": 147}
+    assert setup["reviewStatus"] == "source-reviewed-audit-only"
+    assert setup["thresholdRule"] == {
+        "comparison": "current-victory-points-less-than-or-equal-to-threshold",
+        "basis": "army-points-available-for-building-list",
+        "percent": 25,
+        "checkPhase": "beginning-of-active-turn-tactical-phase",
+        "domain": "army-session-not-unit-or-trooper-attribute",
+    }
+    assert setup["tableSizeRule"] == {
+        "scope": "advisory-not-mandatory",
+        "domain": "generic-table-setup-not-scenario-override",
+        "units": "inches",
+    }
+    expected = (
+        (150, 38, (24, 32)),
+        (200, 50, (32, 48)),
+        (250, 63, (32, 48)),
+        (300, 75, (48, 48)),
+        (350, 88, (48, 48)),
+        (400, 100, (48, 48)),
+    )
+    assert len(setup["rows"]) == len(expected)
+    for row, (points, threshold, size) in zip(setup["rows"], expected, strict=True):
+        assert set(row) == {
+            "armyPoints", "retreatThresholdVictoryPoints", "recommendedTableInches",
+        }
+        assert type(row["armyPoints"]) is int
+        assert type(row["retreatThresholdVictoryPoints"]) is int
+        assert row == {
+            "armyPoints": points,
+            "retreatThresholdVictoryPoints": threshold,
+            "recommendedTableInches": list(size),
+        }
+        assert row["retreatThresholdVictoryPoints"] == (points + 3) // 4
+    assert audit_game_mode_source(chart, setup)["rowCount"] == 6
+
+    curated = load_curated_document(
+        MANIFEST.parents[2] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {record["id"]: record for record in curated["records"]}
+    assert len(records) == len(curated["records"])
+    for record_id, kind, page in (
+        ("state:retreat", "state", 170),
+        ("term:victory-points", "term", 173),
+    ):
+        record = records[record_id]
+        assert record["kind"] == kind
+        assert any(
+            citation["sourceId"] == "n5-core-v5.3-pdf" and citation.get("page") == page
+            for citation in record["citations"]
+        )
+    assert "rule:retreat-threshold" not in records
+    assert "rule:recommended-table-size" not in records
+
+
 def test_game_mode_chart_corresponds_to_independent_setup_tables() -> None:
-    result = audit_source_files()
+    chart, setup = _inputs()
+    result = {
+        **audit_game_mode_source(chart, setup),
+        **audit_published_game_setup(chart, setup, load_curated_document(CURATED)),
+    }
     assert result["scope"] == "recommended-game-modes-not-mandatory-scenario-rules"
     assert result["sourcePage"] == 6
     assert result["corroboratingSourcePages"] == [146, 147]
@@ -77,8 +256,7 @@ def test_game_mode_chart_corresponds_to_independent_setup_tables() -> None:
         )
         for r in result["rows"]
     ] == list(PINNED)
-    assert len(result["gameModesSha256"]) == 64
-    assert len(result["independentSetupSha256"]) == 64
+    assert len(chart["rows"]) == len(setup["rows"]) == 6
 
 
 def test_game_mode_chart_rejects_drift_or_scenario_overrides() -> None:
@@ -114,6 +292,11 @@ def test_public_game_setup_rows_match_both_manifests_and_fail_closed() -> None:
     assert audit_published_game_setup(chart, setup, curated) == {
         "publicRuleId": "rule:game-modes", "publishedRowCount": 6,
     }
+    built = RulesDatabase(ROOT / "data/generated/rules_n5.db")
+    record = built.composed_record("rule:game-modes")
+    assert record is not None
+    source_record = next(item for item in curated["records"] if item["id"] == "rule:game-modes")
+    assert record["facts"]["gameSetupTable"] == source_record["facts"]["gameSetupTable"]
     for index, field, value in (
         (0, "baseSwc", 4),
         (2, "deploymentZoneInches", [12, 32]),
@@ -158,37 +341,6 @@ def test_curated_game_setup_table_rejects_malformed_rows(tmp_path) -> None:
             load_curated_document(target)
 
 
-def test_optional_pdf_check_verifies_game_mode_rows() -> None:
-    pytest.importorskip("pymupdf")
-    if not PDF.is_file():
-        pytest.skip("Pinned local N5.3 PDF not available")
-    report = audit_source_files(pdf_path=PDF)
-    assert len(report["verifiedPdfSha256"]) == 64
-    chart, _ = _inputs()
-    assert verify_pinned_pdf(PDF, chart) == report["verifiedPdfSha256"]
-    changed = copy.deepcopy(chart)
-    changed["rows"][0]["durationMinutes"] = 70
-    with pytest.raises(ValueError, match="source row mismatch"):
-        verify_pinned_pdf(PDF, changed)
-    changed = copy.deepcopy(chart)
-    changed["rows"][0]["deploymentZoneInches"] = [12, 24]
-    with pytest.raises(ValueError, match="source dimensions mismatch"):
-        verify_pinned_pdf(PDF, changed)
-
-
-def test_game_mode_chart_cli(
-    monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    monkeypatch.setattr(sys, "argv", ["audit_game_mode_source_table"])
-    assert main() == 0
-    output = capsys.readouterr().out
-    assert "Game Modes source rows: 6" in output
-    assert "150 pts: Beginner Games; SWC 3; 40 minutes" in output
-    assert "400 pts: Large-Scale Games; SWC 8; 120 minutes" in output
-    assert "scenario-specific setup and forces take precedence" in output
-
-
 def _restriction_inputs() -> tuple[dict, dict]:
     manifest = json.loads(RESTRICTIONS_MANIFEST.read_text(encoding="utf-8"))
     curated = json.loads(RESTRICTIONS_CURATED.read_text(encoding="utf-8"))
@@ -220,6 +372,10 @@ def test_n53_restrictions_chart_six_subjects_and_fourteen_prohibitions() -> None
     }
     assert len(report["manifestSha256"]) == 64
     assert len(report["curatedSha256"]) == 64
+    manifest, _ = _restriction_inputs()
+    assert manifest["sourcePdfSha256"] == (
+        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+    )
 
 
 def test_n53_seven_non_graph_restrictions_keep_source_scoped_api_and_browser_coverage(
@@ -433,23 +589,6 @@ def test_n53_typed_restrictions_fail_closed_on_scope_selector_or_permission() ->
         compile_restriction_conditions(chart, altered_records)
 
 
-def test_n53_restrictions_optional_pinned_pdf_exact_six_lines() -> None:
-    pytest.importorskip("pymupdf")
-    if not RESTRICTIONS_PDF.is_file():
-        pytest.skip("Pinned N5.3 PDF unavailable")
-    report = audit_restrictions_files(pdf_path=RESTRICTIONS_PDF)
-    assert report["verifiedPdfSha256"] == (
-        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
-    )
-    chart, _ = _restriction_inputs()
-    edited = copy.deepcopy(chart)
-    edited["rows"][1]["sourceText"] = edited["rows"][1]["sourceText"].replace(
-        "an upwards Jump", "any Jump",
-    )
-    with pytest.raises(ValueError, match="printed line mismatch"):
-        verify_restrictions_pdf(RESTRICTIONS_PDF, edited)
-
-
 def test_n53_restrictions_chart_cli(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -458,6 +597,23 @@ def test_n53_restrictions_chart_cli(
     output = capsys.readouterr().out
     assert "6 rows, 14 negative conditions" in output
     assert "Source-only: no action-legality" in output
+
+
+def test_n53_restrictions_cli_checks_current_publication(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(
+        sys, "argv",
+        ["audit_restrictions_source_chart", "--check-publication", "--json"],
+    )
+    assert restrictions_main() == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["negativeConditionCount"] == report["typedConditionCount"] == 14
+    assert len(report["publishedReferenceSha256"]) == 64
+    manifest, records = _restriction_inputs()
+    assert report["publishedReferenceSha256"] == verify_published_restrictions(
+        manifest, records, RESTRICTIONS_PUBLICATION,
+    )
 
 
 def test_published_restrictions_reference_is_exact_source_projection() -> None:
@@ -522,8 +678,8 @@ def test_restrictions_reference_has_standalone_rules_page() -> None:
     from tools.audit_restrictions_source_chart import ROOT
 
     app = create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
     def get(path: str) -> tuple[int, dict[str, str], bytes]:
@@ -586,8 +742,8 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
     from tools.audit_restrictions_source_chart import ROOT
 
     app = create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -775,7 +931,7 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                     assert page.locator(".restrictions-context").count() == 0
                     if width == 320:
                         page.route(
-                            "**/static/restrictions-reference.json",
+                            "**/api/restrictions/chart",
                             lambda route: route.fulfill(
                                 status=503, content_type="application/json",
                                 body='{"error":"Controlled source failure"}',

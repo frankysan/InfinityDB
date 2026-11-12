@@ -1,8 +1,8 @@
-"""Normalized, source-pinned deployed-object snapshot for a future rules schema.
+"""Normalized, source-pinned deployed-object storage and build/read validation.
 
-The release v9 database and its JSON publication remain unchanged. This module
-stages an additive snapshot in a *new* database; cross-database Army references
-are tied to the exact Army database fingerprint, never inferred at runtime.
+Cross-database Army references are tied to the exact Army database fingerprint,
+never inferred at runtime. The shared model guard validates source identity,
+attribute evidence, reviewed delivery edges and exact Unit/Include ownership.
 """
 from __future__ import annotations
 
@@ -94,23 +94,151 @@ def _encode(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
+def _validate_model(document: dict[str, Any]) -> None:
+    """Validate the shared build/read model without a loose-file publication."""
+    snapshot = document.get("sourceSnapshot")
+    if (
+        document.get("formatVersion") != 1
+        or document.get("scope") != "reviewed-projection-not-complete-unit-usage"
+        or not isinstance(document.get("objects"), list)
+        or not isinstance(document.get("unresolvedDeliveries"), list)
+        or not isinstance(snapshot, dict)
+        or "rulesDatabaseSha256" in snapshot
+        or any(not isinstance(snapshot.get(key), str) or len(snapshot[key]) != 64
+               for key in ("armyDatabaseSha256", "curatedSourceSha256",
+                           "deliveryReviewSha256", "candidateReviewSha256"))
+    ):
+        raise ValueError("Invalid deployed-object model or source provenance")
+    identifiers: set[str] = set()
+    source_keys: set[tuple[str, int, str | None]] = set()
+    for entry in document["objects"]:
+        if not isinstance(entry, dict):
+            raise ValueError("Invalid deployed-object entry")
+        identifier = entry.get("id")
+        if (
+            not isinstance(identifier, str) or not identifier
+            or identifier in identifiers
+            or not isinstance(entry.get("name"), str)
+            or not isinstance(entry.get("deliverySources"), list)
+        ):
+            raise ValueError("Invalid/duplicate deployed-object identity")
+        identifiers.add(identifier)
+        source = entry.get("sourceProfile")
+        if source is not None:
+            if (
+                not isinstance(source, dict)
+                or source.get("catalog") not in {"weapon", "equipment"}
+                or type(source.get("sourceId")) is not int
+                or source["sourceId"] <= 0
+                or (source.get("mode") is not None and not isinstance(source["mode"], str))
+            ):
+                raise ValueError("Invalid deployed-object Army source selector")
+            key = (source["catalog"], source["sourceId"], source["mode"])
+            if key in source_keys:
+                raise ValueError("Duplicate deployed-object Army source selector")
+            source_keys.add(key)
+        attrs = entry.get("attributes")
+        if not isinstance(attrs, dict) or set(attrs) != {"ARM", "BTS", "STR", "S"}:
+            raise ValueError("Incomplete deployed-object attribute contract")
+        for attribute in attrs.values():
+            if not isinstance(attribute, dict):
+                raise ValueError("Invalid deployed-object attribute")
+            status = attribute.get("status")
+            value = attribute.get("value")
+            evidence = attribute.get("provenance")
+            if (
+                status not in {"known", "unreported", "disputed"}
+                or not isinstance(evidence, list)
+            ):
+                raise ValueError("Invalid deployed-object attribute status")
+            if status == "unreported":
+                if value is not None or evidence:
+                    raise ValueError("Unreported attribute cannot invent a value")
+            elif (
+                not isinstance(value, str)
+                or len(evidence) != (2 if status == "disputed" else 1)
+                or any(not isinstance(row, dict) or not row.get("source") for row in evidence)
+            ):
+                raise ValueError("Deployed-object attribute missing source provenance")
+        reviewed_edges: set[tuple[str, str]] = set()
+        for delivery in entry["deliverySources"]:
+            if (
+                not isinstance(delivery, dict)
+                or not isinstance(delivery.get("recordId"), str)
+                or not isinstance(delivery.get("method"), str)
+                or not isinstance(delivery.get("sourcePages"), list)
+            ):
+                raise ValueError("Invalid reviewed delivery edge")
+            reviewed_edges.add((delivery["recordId"], delivery["method"]))
+        uses = entry.get("unitUses")
+        if not isinstance(uses, list):
+            raise ValueError("Missing or invalid deployed-object Unit usage collection")
+        for use in uses:
+            if (
+                not isinstance(use, dict)
+                or (use.get("originRecordId"), use.get("method")) not in reviewed_edges
+                or use.get("kind") not in {
+                    "profile", "loadout", "unit-option",
+                    "profile-include", "loadout-include", "unit-option-include",
+                }
+                or any(type(use.get(key)) is not int for key in (
+                    "unitId", "sourceItemId", "sourcePosition"
+                ))
+                or any(not isinstance(use.get(key), str) or not use[key]
+                       for key in ("unitName", "unitSlug", "contextName"))
+            ):
+                raise ValueError("Invalid or unreviewed deployed-object Unit usage")
+            if use["kind"] in {"unit-option", "unit-option-include"}:
+                if (
+                    use.get("armyId") is not None or use.get("armyName") is not None
+                    or use.get("groupId") is not None
+                    or use.get("profileId") is not None
+                    or type(use.get("optionId")) is not int
+                ):
+                    raise ValueError("Unit-wide option cannot invent Army or group ownership")
+                if use["kind"] == "unit-option-include" and (
+                    type(use.get("includePosition")) is not int
+                    or type(use.get("targetArmyId")) is not int
+                    or not isinstance(use.get("targetArmyName"), str)
+                    or not use["targetArmyName"]
+                    or type(use.get("targetLoadoutPayloadId")) is not int
+                    or not isinstance(use.get("targetName"), str)
+                    or not use["targetName"]
+                ):
+                    raise ValueError("Invalid Unit-option Include target provenance")
+            else:
+                kind = use["kind"].removesuffix("-include")
+                identity_key = "profileId" if kind == "profile" else "optionId"
+                other_key = "optionId" if kind == "profile" else "profileId"
+                if (
+                    type(use.get("armyId")) is not int
+                    or type(use.get("groupId")) is not int
+                    or not isinstance(use.get("armyName"), str)
+                    or not use["armyName"]
+                    or type(use.get(identity_key)) is not int
+                    or use.get(other_key) is not None
+                ):
+                    raise ValueError("Invalid deployed-object profile/loadout usage context")
+                if use["kind"].endswith("-include") and (
+                    type(use.get("includePosition")) is not int
+                    or type(use.get("targetLoadoutPayloadId")) is not int
+                    or not isinstance(use.get("targetName"), str)
+                    or not use["targetName"]
+                ):
+                    raise ValueError("Invalid deployed-object Include provenance")
+
+
 def stage_deployed_objects(connection: sqlite3.Connection, document: dict[str, Any]) -> None:
     """Insert the reviewed read model as relational rows in an open build transaction."""
-    snapshot = document.get("sourceSnapshot", {})
-    if (document.get("formatVersion") != 1
-        or document.get("scope") != "reviewed-projection-not-complete-unit-usage"
-        or not isinstance(snapshot.get("armyDatabaseSha256"), str)
-        or len(snapshot["armyDatabaseSha256"]) != 64):
-        raise ValueError("Invalid deployed-object staging source")
+    _validate_model(document)
+    snapshot = document["sourceSnapshot"]
     for statement in _SCHEMA:
         connection.execute(statement)
 
-    # Never embed rulesDatabaseSha256 inside the database it describes.
     metadata = {
         "formatVersion": 1,
         "scope": document["scope"],
-        **{key: value for key, value in snapshot.items()
-           if key != "rulesDatabaseSha256"},
+        **snapshot,
     }
     connection.executemany(
         "INSERT INTO deployed_object_metadata (key, value) VALUES (?, ?)",
@@ -302,10 +430,12 @@ def read_deployed_objects(
         key: value for key, value in metadata.items()
         if key not in ("scope", "formatVersion")
     }
-    return {
+    document = {
         "formatVersion": metadata["formatVersion"],
         "scope": metadata["scope"],
         "sourceSnapshot": snapshot,
         "objects": objects,
         "unresolvedDeliveries": unresolved,
     }
+    _validate_model(document)
+    return document

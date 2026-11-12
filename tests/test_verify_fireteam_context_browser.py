@@ -21,8 +21,8 @@ VIEWPORTS = ((1440, "light"), (390, "dark"), (320, "light"))
 @pytest.fixture(scope="module")
 def app() -> Any:
     return create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
 
@@ -216,7 +216,7 @@ def test_pinned_uncertainty_and_original_annotations_are_visible(
 
 
 def _reinforcement_slugs() -> list[str]:
-    database = Database(ROOT / "data/generated/infinity.db")
+    database = Database(ROOT / "data/generated/army.db")
     return [army["slug"] for army in database.list_fireteam_armies()
             if army["role"] == "reinforcement"]
 

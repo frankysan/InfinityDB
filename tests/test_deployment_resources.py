@@ -105,7 +105,7 @@ def test_container_configuration_retains_only_capacity_relevant_runtime_settings
                 ],
                 "Env": [
                     "SECRET_TOKEN=do-not-retain",
-                    "INFINITY_DB_DATABASE=/app/data/infinity.db",
+                    "INFINITY_DB_DATABASE=/app/data/army.db",
                 ],
             },
             "HostConfig": {

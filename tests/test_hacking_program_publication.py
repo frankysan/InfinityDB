@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from pathlib import Path
@@ -20,8 +21,8 @@ from infinity_db.web import create_app
 from tools.verify_hacking_programs_browser import WIDTHS, source_programs
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_DB = ROOT / "data/generated/infinity.db"
-RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_DB = ROOT / "data/generated/army.db"
+RULES_DB = ROOT / "data/generated/rules_n5.db"
 
 
 def _get(app: Any, path: str) -> tuple[str, bytes]:
@@ -185,6 +186,57 @@ def test_generated_core_orders_aros_matrix_matches_pinned_source_and_routes() ->
         (ROOT / "config/validation/orders-aro-object-adjacent-source-review.json")
         .read_text(encoding="utf-8")
     )
+    # This reviewed source matrix is a current input to the player-facing
+    # projection, not a separate runtime chart or deployed-object inventory.
+    assert source["formatVersion"] == 1
+    assert source["scope"] == (
+        "complete-pinned-core-source-chart-not-published-declaration-matrix"
+    )
+    assert source["reviewStatus"] == "source-reviewed-audit-only"
+    assert source["sourceChartIsObjectInventory"] is False
+    assert (source["sourceId"], source["sourcePage"]) == ("n5-core-v5.3-pdf", 191)
+    assert source["sourcePdfSha256"] == (
+        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+    )
+    pinned_pdf = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+    if pinned_pdf.is_file():
+        assert hashlib.sha256(pinned_pdf.read_bytes()).hexdigest() == (
+            source["sourcePdfSha256"]
+        )
+    source_rows = source["rows"]
+    assert len(source_rows) == 57
+    assert len({row["recordId"] for row in source_rows}) == 42
+    assert len({
+        (row["section"], row["name"].casefold()) for row in source_rows
+    }) == len(source_rows)
+    assert {
+        section: sum(row["section"] == section for row in source_rows)
+        for section in ("basic", "long", "short", "aro")
+    } == {"basic": 3, "long": 15, "short": 23, "aro": 16}
+    assert all(
+        set(row) == {"section", "name", "sourceType", "sourcePage", "recordId"}
+        and row["sourceType"] in {"COMMON", "SPECIAL", "EQUIPMENT", "HACKING"}
+        and type(row["sourcePage"]) is int
+        and 1 <= row["sourcePage"] < 191
+        for row in source_rows
+    )
+    assert sum(row["sourceType"] == "HACKING" for row in source_rows) == 19
+    assert any(
+        row["recordId"] == "hacking-program:controlled-jump"
+        and row["section"] == "aro" for row in source_rows
+    )
+    assert {
+        (row["section"], row["name"].casefold())
+        for row in source_rows
+        if row["name"].casefold() in {
+            "place deployable", "reload", "activate disco ball", "deactivator"
+        }
+    } == {
+        ("short", "place deployable"), ("aro", "place deployable"),
+        ("short", "reload"), ("aro", "reload"),
+        ("short", "activate disco ball"), ("short", "deactivator"),
+    }
+
     section_ids = {
         "basic": "basic-short-skill",
         "long": "long-skill",
@@ -216,7 +268,7 @@ def test_generated_core_orders_aros_matrix_matches_pinned_source_and_routes() ->
             if section != "short-skill"
         )
         # The Equipment Short Skill type is now authored in the current
-        # curated definition and carried by rules.db, not a runtime ID list.
+        # curated definition and carried by rules_n5.db, not a runtime ID list.
         record = rules.composed_record(action)
         assert record is not None
         assert record["facts"]["typeIds"] == ["short-skill"]

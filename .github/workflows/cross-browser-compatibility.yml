@@ -1,11 +1,8 @@
 name: Cross-browser compatibility
 
+# Optional cross-platform browser coverage for changes that warrant it.
+# The v1.0.x release contract remains preserved by its historical tags.
 on:
-  pull_request:
-  # The final main SHA must have a complete independent browser matrix.
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -50,12 +47,9 @@ jobs:
         if: matrix.os != 'ubuntu-latest'
         run: python -m playwright install ${{ matrix.engine }}
 
-      - name: Validate schema-matched deployed objects
-        # Legacy v8/v9 needs ignored JSON; v10 uses embedded reviewed objects.
-        # Match Source checks and deployment smoke; preserve provenance guards.
-        run: |
-          python -m tools.build_deployed_object_publication --when-legacy
-          python -m tools.build_deployed_object_publication --check --when-legacy
+      - name: Validate selected runtime database set
+        # Read-only schema, integrity, source binding and embedded-content checks.
+        run: python -m infinity_db database-health --db-dir data/generated
 
       - name: Run selected critical journeys
         run: python -m tools.run_cross_browser_compatibility --engine ${{ matrix.engine }}

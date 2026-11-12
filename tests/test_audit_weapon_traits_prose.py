@@ -49,7 +49,7 @@ def test_pinned_pdf_keeps_early_profile_and_trait_rows_aligned() -> None:
         pytest.skip("Ignored N5.3 PDF unavailable")
     pytest.importorskip("fitz")
     report = audit_traits_and_prose(
-        pdf, root / "data/generated/infinity.db", root / "data/generated/rules.db"
+        pdf, root / "data/generated/army.db", root / "data/generated/rules_n5.db"
     )
     assert report["corePdfSha256"] == (
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
@@ -143,7 +143,7 @@ def test_prose_inventory_tracks_source_and_named_curated_definition(tmp_path) ->
 
     from tools.audit_weapon_traits_prose import SPECIAL_SECTIONS, prose_inventory
 
-    database = tmp_path / "rules.db"
+    database = tmp_path / "rules_n5.db"
     with sqlite3.connect(database) as connection:
         connection.execute("CREATE TABLE records (kind TEXT, name TEXT)")
         connection.execute(
@@ -176,7 +176,7 @@ def test_prose_reference_coverage_does_not_infer_family_links(tmp_path) -> None:
     from tools.audit_weapon_traits_prose import prose_reference_coverage
 
     army = tmp_path / "army.db"
-    rules = tmp_path / "rules.db"
+    rules = tmp_path / "rules_n5.db"
     with sqlite3.connect(army) as connection:
         connection.execute("CREATE TABLE metadata_weapons(name TEXT, mode TEXT)")
         connection.executemany(

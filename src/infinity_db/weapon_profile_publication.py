@@ -9,8 +9,6 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from infinity_db.database.repository import Database
-
 PROFILE_CITATION_SCOPE = "reviewed-weapon-profile-chart"
 ProfileKey = tuple[int, int, str | None]
 ProfileCitations = dict[ProfileKey, dict[str, Any]]
@@ -65,125 +63,16 @@ def current_pdf_source(
     return source
 
 
-def load_weapon_profile_publication(
-    path: Path, army_database: Path, rules_database: Path | None,
-) -> ProfileCitations | None:
-    """Load an exact release-pair publication, or None for a legacy installation."""
-    if not path.is_file():
-        return None
-    if rules_database is None:
-        raise ValueError("Weapon profile publication requires a rules database")
-    try:
-        document = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise ValueError("Invalid Weapon profile publication JSON") from exc
-    if (
-        not isinstance(document, dict)
-        or type(document.get("formatVersion")) is not int
-        or document["formatVersion"] != 1
-        or document.get("scope") != PROFILE_CITATION_SCOPE
-        or not isinstance(document.get("weapons"), list)
-    ):
-        raise ValueError("Unsupported Weapon profile publication")
-
-    snapshot = document.get("sourceSnapshot")
-    if not isinstance(snapshot, dict) or (
-        snapshot.get("armyDatabaseSha256") != file_sha256(army_database)
-        or snapshot.get("rulesDatabaseSha256") != file_sha256(rules_database)
-    ):
-        raise ValueError("Weapon profile publication does not match release databases")
-    review_sha = snapshot.get("reviewsSha256")
-    if not isinstance(review_sha, str) or re.fullmatch(r"[0-9a-f]{64}", review_sha) is None:
-        raise ValueError("Weapon profile publication lacks review provenance")
-
-    source = document.get("source")
-    if (
-        not isinstance(source, dict)
-        or not isinstance(source.get("collectionId"), str)
-        or not isinstance(source.get("id"), str)
-        or source != current_pdf_source(
-            rules_database, source["collectionId"], source["id"],
-        )
-    ):
-        raise ValueError("Weapon profile publication source does not match current rules")
-    page_range = document.get("chartPageRange")
-    if (
-        not isinstance(page_range, list)
-        or len(page_range) != 2
-        or any(type(page) is not int for page in page_range)
-        or not 1 <= page_range[0] <= page_range[1] <= source["pageCount"]
-    ):
-        raise ValueError("Invalid Weapon Chart page range")
-
-    database = Database(army_database)
-    citations: ProfileCitations = {}
-    seen_weapons: set[int] = set()
-    for weapon in document["weapons"]:
-        if not isinstance(weapon, dict):
-            raise ValueError("Invalid reviewed Weapon identity")
-        weapon_id, slug, name = weapon.get("id"), weapon.get("slug"), weapon.get("name")
-        digest, profiles = weapon.get("profileSha256"), weapon.get("profiles")
-        if (
-            type(weapon_id) is not int or weapon_id <= 0 or weapon_id in seen_weapons
-            or not isinstance(slug, str) or not slug
-            or not isinstance(name, str) or not name
-            or not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None
-            or not isinstance(profiles, list) or not profiles
-        ):
-            raise ValueError("Invalid or duplicate reviewed Weapon identity")
-        seen_weapons.add(weapon_id)
-        details = database.get_catalog_item("weapons", weapon_id)
-        if (
-            details is None
-            or details["name"] != name
-            or database.application_slug("weapons", weapon_id) != slug
-            or profile_sha256(details["profiles"]) != digest
-        ):
-            raise ValueError(f"Reviewed Weapon profile identity changed: {slug}")
-        expected = {(profile["id"], profile.get("mode")) for profile in details["profiles"]}
-        if len(expected) != len(details["profiles"]):
-            raise ValueError(f"Ambiguous Weapon profile identities: {slug}")
-        actual: set[tuple[int, str | None]] = set()
-        for profile in profiles:
-            if not isinstance(profile, dict):
-                raise ValueError(f"Invalid reviewed Weapon profile: {slug}")
-            profile_id, mode, page = (
-                profile.get("sourceId"), profile.get("mode"), profile.get("page"),
-            )
-            if (
-                type(profile_id) is not int or profile_id <= 0
-                or (mode is not None and (not isinstance(mode, str) or not mode))
-                or type(page) is not int or not page_range[0] <= page <= page_range[1]
-                or (profile_id, mode) in actual
-            ):
-                raise ValueError(f"Invalid or duplicate reviewed Weapon mode: {slug}")
-            actual.add((profile_id, mode))
-            citations[(weapon_id, profile_id, mode)] = {
-                "source_id": source["id"],
-                "source_title": source["title"],
-                "source_version": source["version"],
-                "source_url": source["url"],
-                "source_sha256": source["sha256"],
-                "source_collection_id": source["collectionId"],
-                "page": page,
-            }
-        if actual != expected:
-            raise ValueError(f"Reviewed Weapon modes do not match the database: {slug}")
-    return citations
-
-
 def load_runtime_weapon_profile_publication(
     army_database: Path, rules_database: Path | None,
 ) -> tuple[ProfileCitations | None, str | None]:
-    """Load and fingerprint only the publication attached to this runtime pair."""
-    if (
-        rules_database is not None
-        and rules_database.resolve().parent != army_database.resolve().parent
-    ):
+    """Read only embedded Rules citations; never load loose JSON sidecars."""
+    if rules_database is None:
         return None, None
-    path = army_database.with_name("weapon-profile-sources.json")
-    citations = load_weapon_profile_publication(path, army_database, rules_database)
-    return citations, file_sha256(path) if citations is not None else None
+    from .rules_database import RulesDatabase
+
+    citations = RulesDatabase(rules_database).weapon_profile_citations_payload(army_database)
+    return citations, file_sha256(rules_database) if citations is not None else None
 
 
 def attach_weapon_profile_citations(

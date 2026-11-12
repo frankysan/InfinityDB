@@ -19,9 +19,9 @@ import pytest
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY = ROOT / "data/generated/infinity.db"
+ARMY = ROOT / "data/generated/army.db"
 SOURCE = ROOT / "data/raw/JSON 20260929-114335.zip"
-RULES = ROOT / "data/generated/rules.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 SPEC_OPS_IDS = {1908, *range(1912, 1926)}
 TEAM_OPS_IDS = {1909, *range(1926, 1940)}
 

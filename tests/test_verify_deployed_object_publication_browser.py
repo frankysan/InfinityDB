@@ -16,7 +16,6 @@ import pytest
 
 from infinity_db.web import create_app
 from tools.browser_wsgi_transport import route_browser_page
-from tools.build_deployed_object_publication import build_publication, publication_bytes
 
 
 class _ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -32,21 +31,11 @@ class _QuietHandler(WSGIRequestHandler):
 def published_app(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[Callable, str]]:
     root = Path(__file__).resolve().parents[1]
     tmp = tmp_path_factory.mktemp("deployed-pub")
-    inputs = (
-        root / "data/generated/infinity.db",
-        root / "data/generated/rules.db",
-        root / "data/curated/rules/n5-core-v5.3.json",
-        root / "config/validation/deployed-object-delivery-reviews.json",
-        root / "config/validation/deployed-object-candidate-reviews.json",
-    )
-    if not all(path.is_file() for path in inputs):
-        pytest.skip("Pinned source databases unavailable")
-    army = tmp / "infinity.db"
-    rules = tmp / "rules.db"
-    shutil.copyfile(inputs[0], army)
-    shutil.copyfile(inputs[1], rules)
-    publication = build_publication(*inputs)
-    (tmp / "deployed-objects.json").write_bytes(publication_bytes(publication))
+    army = tmp / "army.db"
+    rules = tmp / "rules_n5.db"
+    shutil.copyfile(root / "data/generated/army.db", army)
+    shutil.copyfile(root / "data/generated/rules_n5.db", rules)
+    assert not (tmp / "deployed-objects.json").exists()
     app = create_app(army, rules_database_path=rules)
     server = make_server(
         "127.0.0.1", 0, app, server_class=_ThreadedServer, handler_class=_QuietHandler
@@ -229,7 +218,8 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     page.locator("#deployed-list").wait_for(state="visible", timeout=60000)
                     cards = page.locator(".deployed-object-entry")
                     assert cards.count() == 17
-                    assert "17 reviewed" in page.locator("#deployed-count").inner_text()
+                    assert page.locator("#deployed-count").inner_text() == "17 profiles"
+                    assert page.get_by_role("heading", name="Object profiles").count() == 1
                     assert not page.locator(".deployed-objects-reference").evaluate(
                         "(node) => node.classList.contains('surface')"
                     )
@@ -335,8 +325,20 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     first = usage.first
                     first.locator("summary").click()
                     first.locator("li").first.wait_for(state="visible", timeout=10000)
+                    assert first.locator("summary").inner_text().startswith("Unit uses (")
                     assert first.locator("li").count() > 0
                     assert first.locator('a[href^="/units/"]').count() > 0
+                    source_id = first.locator(".deployed-use-source-id").first
+                    assert source_id.is_hidden()
+                    page.evaluate(
+                        "() => document.documentElement.setAttribute('data-developer-mode', 'true')"
+                    )
+                    assert source_id.is_visible()
+                    assert "Source ID:" in source_id.inner_text()
+                    page.evaluate(
+                        "() => document.documentElement.removeAttribute('data-developer-mode')"
+                    )
+                    assert source_id.is_hidden()
                     included = page.locator(
                         f'.deployed-object-entry[id="{include_object["id"]}"]'
                     ).locator(".deployed-object-unit-uses")
@@ -373,15 +375,13 @@ def test_unpublished_legacy_database_does_not_infer_object_catalog(
     from infinity_db.rules_database import export_rules_database
 
     root = Path(__file__).resolve().parents[1]
-    army = tmp_path / "infinity.db"
-    rules = tmp_path / "rules.db"
-    shutil.copyfile(root / "data/generated/infinity.db", army)
+    army = tmp_path / "army.db"
+    rules = tmp_path / "rules_n5.db"
+    shutil.copyfile(root / "data/generated/army.db", army)
     export_rules_database(load_curated_directory(root / "data/curated/rules"), rules)
-    app = create_app(army, rules_database_path=rules)
-    for path in ("/api/deployed-objects", "/api/deployed-objects/army-weapon-199"):
-        status, content = _request(app, path)
-        assert status == 503
-        assert b"not published" in content
-    status, _ = _request(app, "/deployed-objects")
-    assert status == 200
+    # Standalone Rules v8 is a research export, not a complete served set.
+    # Reject it at startup rather than resurrecting historical 503 routes
+    # or inferring a deployed-object catalog from adjacent artifacts.
+    with pytest.raises(ValueError, match="Embedded Weapon citations"):
+        create_app(army, rules_database_path=rules)
 

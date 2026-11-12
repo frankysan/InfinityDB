@@ -35,8 +35,8 @@ class _QuietHandler(WSGIRequestHandler):
 def weapon_app() -> Any:
     root = Path(__file__).resolve().parents[1]
     return create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
 
@@ -247,8 +247,8 @@ def test_unroutable_weapon_property_example_shows_source_section_in_browser(
 ) -> None:
     root = Path(__file__).resolve().parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
     rules = app.rules_database
     assert rules is not None
@@ -847,7 +847,7 @@ def test_published_weapon_profiles_preserve_source_metadata(
     root = Path(__file__).resolve().parents[1]
     source_rows: dict[tuple[int, str | None], list[dict[str, Any]]] = defaultdict(list)
     with sqlite3.connect(
-        f"{(root / 'data/generated/infinity.db').resolve().as_uri()}?mode=ro",
+        f"{(root / 'data/generated/army.db').resolve().as_uri()}?mode=ro",
         uri=True,
     ) as connection:
         connection.row_factory = sqlite3.Row

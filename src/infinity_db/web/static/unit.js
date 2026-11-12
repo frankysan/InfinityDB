@@ -7,6 +7,7 @@ import { staticSymbolPath } from "./unit-symbols.js";
 import { formatMovement } from "./unit-presentation.js";
 import { formatSkillDistanceExtra } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
+import { referenceLoadMessage } from "./view-components.js";
 
 const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
@@ -719,10 +720,14 @@ function renderSourceChoices(unit) {
     disclosure.className = "surface content-frame source-choice-chart";
     disclosure.open = index === 0;
     const summary = document.createElement("summary");
-    summary.textContent = source.source_name + ` · Source Unit #${source.source_unit_id}`;
+    summary.append(source.source_name);
+    const sourceId = document.createElement("span");
+    sourceId.className = "developer-only";
+    sourceId.textContent = ` · Source Unit #${source.source_unit_id}`;
+    summary.append(sourceId);
     disclosure.append(summary);
     const provenance = document.createElement("p");
-    provenance.className = "army-relationship-intro";
+    provenance.className = "army-relationship-intro developer-only";
     const versions = [...new Set((source.source_versions || [])
       .map((item) => item.version).filter(Boolean))];
     provenance.textContent = `Army source version: ${versions.join(", ") || "unspecified"}`;
@@ -1517,6 +1522,7 @@ if (!unitIdentifier) {
   }).catch((error) => {
     if (error.name === "AbortError") return;
     name.textContent = "Unit unavailable";
-    status.textContent = error.message || "Could not load this unit.";
+    status.textContent = referenceLoadMessage(error, "Unit");
+    console.error("Could not load Unit detail", error);
   });
 }

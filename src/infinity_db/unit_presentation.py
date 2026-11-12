@@ -7,8 +7,8 @@ from copy import deepcopy
 from typing import Any
 from urllib.parse import quote
 
-from infinity_db.skill_config import load_skill_source_config
-from infinity_db.unit_filter_config import load_unit_filter_config
+from infinity_db.skill_config import SkillSourceClassification, load_skill_source_config
+from infinity_db.unit_filter_config import UnitFilterConfig, load_unit_filter_config
 
 OPTIONAL_AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
 
@@ -466,11 +466,13 @@ def _annotate_composite_option_presentations(armies: Iterable[dict[str, Any]]) -
             option["order_presentations"] = presentations
 
 
-def enrich_unit_filter_presentation(payload: dict[str, Any]) -> dict[str, Any]:
+def enrich_unit_filter_presentation(
+    payload: dict[str, Any], *, filter_semantics: UnitFilterConfig | None = None,
+) -> dict[str, Any]:
     """Attach player-facing Unit-filter labels and reviewed vocabulary overlays."""
 
     result = deepcopy(payload)
-    config = load_unit_filter_config()
+    config = filter_semantics if filter_semantics is not None else load_unit_filter_config()
     for item in result.get("troop_types", ()):
         item["display_name"] = troop_type_label(item.get("name"))
     result["characteristics"] = [
@@ -572,6 +574,7 @@ def enrich_unit_presentation(
     *,
     optional_filters: dict[str, bool] | None = None,
     requested_army: str | None = None,
+    source_skill_classifications: tuple[SkillSourceClassification, ...] | None = None,
 ) -> dict[str, Any]:
     """Compose General-profile and Unit-detail presentation semantics in the backend.
 
@@ -585,7 +588,10 @@ def enrich_unit_presentation(
     } | (optional_filters or {})
     source_classifications = {
         str(item.skill_ref): item.classification
-        for item in load_skill_source_config()
+        for item in (
+            source_skill_classifications
+            if source_skill_classifications is not None else load_skill_source_config()
+        )
     }
     armies = [army for army in unit.get("armies", ()) if isinstance(army, dict)]
     unit["peripheral_types"] = [

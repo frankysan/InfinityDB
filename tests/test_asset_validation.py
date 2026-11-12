@@ -239,7 +239,7 @@ def test_required_mode_requires_complete_published_and_browser_sets(
     assert "1 published not yet browser-referenced" in selection.description()
 
 
-def test_tracked_symbol_publication_is_fully_browser_addressable() -> None:
+def test_tracked_publication_accounts_for_browser_assets_and_compatibility_urls() -> None:
     static = Path("src/infinity_db/web/static")
     publication_manifest = Path("data/manifests/symbol-publication.json")
 
@@ -248,6 +248,38 @@ def test_tracked_symbol_publication_is_fully_browser_addressable() -> None:
     )
 
     assert validation.complete
-    assert validation.browser_expected_count == validation.expected_count
+    document = json.loads(publication_manifest.read_bytes())
+    aliases = document.get("compatibilityAliases", {})
+    policy = json.loads(Path("config/symbols/publication-compatibility-aliases.json").read_bytes())
+    assert aliases == policy["aliases"]
+    assert validation.browser_expected_count + len(aliases) == validation.expected_count
     assert validation.expected_count > 0
-    assert validation.unreferenced_published_count == 0
+    assert validation.unreferenced_published_count == len(aliases)
+    for alias, target in aliases.items():
+        assert (static / alias).read_bytes() == (static / target).read_bytes()
+
+
+@pytest.mark.parametrize("kind", ["valid", "hash", "chain", "missing", "self"])
+def test_compatibility_alias_inventory_and_target_hash(tmp_path, kind):
+    static = tmp_path / "static"
+    alias = "units/panoceania/old-url.svg"
+    target = BROWSER_PATHS[1]
+    paths = [*BROWSER_PATHS, alias]
+    for path in paths:
+        _write_svg(static, path)
+    manifest = _write_manifest(tmp_path / "manifest.json", paths, browser_paths=BROWSER_PATHS)
+    document = json.loads(manifest.read_bytes())
+    document["compatibilityAliases"] = {alias: target}
+    if kind == "hash":
+        document["publishedSha256ByPath"][alias] = "0" * 64
+    elif kind == "chain":
+        document["compatibilityAliases"][target] = BROWSER_PATHS[0]
+    elif kind == "missing":
+        document["compatibilityAliases"][alias] = "units/missing.svg"
+    elif kind == "self":
+        document["compatibilityAliases"][alias] = alias
+    manifest.write_text(json.dumps(document))
+    result = validate_asset_set(static, publication_manifest=manifest)
+    assert result.complete == (kind == "valid")
+    if kind != "valid":
+        assert any("Compatibility aliases" in reason for reason in result.invalid)

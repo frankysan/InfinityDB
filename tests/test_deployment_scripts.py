@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import fnmatch
 import io
 import json
@@ -17,74 +18,65 @@ def _read(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
-def test_v10_preview_requires_linux_engine_before_staging(
+def test_preview_rejects_unavailable_engine_before_staging(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import subprocess
+
+    from tools import preview_runtime_image as preview
+
+    monkeypatch.setattr(preview.shutil, "which", lambda _name: "docker")
+    monkeypatch.setattr(preview, "validate_database_set", lambda *a, **kw: {"sha256": {}})
+    def fail(*a, **kw):
+        raise subprocess.CalledProcessError(1, "docker info")
+    monkeypatch.setattr(preview.subprocess, "run", fail)
+    monkeypatch.setattr(preview, "_copy_build_context", lambda *a: pytest.fail("No staging"))
+    with pytest.raises(subprocess.CalledProcessError):
+        preview.preview_image(tmp_path, "infinity-db:preview-test")
+
+
+def test_preview_waits_for_health_and_cleans_only_owned_resources(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from types import SimpleNamespace
 
-    from tools import preview_runtime_image
+    from tools import preview_runtime_image as preview
 
-    stage = tmp_path / "candidate"
-    stage.mkdir()
-    monkeypatch.setattr(preview_runtime_image.shutil, "which", lambda _name: "docker")
-    monkeypatch.setattr(
-        preview_runtime_image.subprocess, "run",
-        lambda *_args, **_kwargs: SimpleNamespace(returncode=1),
-    )
-    monkeypatch.setattr(
-        preview_runtime_image, "prepare_bundle",
-        lambda *_args: pytest.fail("Must not change image bundle without Docker"),
-    )
-    with pytest.raises(ValueError, match="Docker Desktop Linux engine is unavailable"):
-        preview_runtime_image.preview_image(stage, "infinity-db:v10-preview-test")
-
-
-def test_v10_preview_waits_for_health_then_checks_http_without_published_ports(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    from types import SimpleNamespace
-
-    from tools import preview_runtime_image
-
-    stage = tmp_path / "candidate"
-    stage.mkdir()
-    calls: list[tuple[str, ...]] = []
-    bundles: list[tuple[Path, Path]] = []
+    calls = []
     probes = 0
-
-    def fake_run(
-        args: list[str] | tuple[str, ...], **_kwargs: object,
-    ) -> SimpleNamespace:
+    def run(args, **kwargs):
         nonlocal probes
-        command = tuple(args)
-        calls.append(command)
-        if command[:3] == ("docker", "exec", "infinitydb-v10-preview-check"):
-            if command[-1] == preview_runtime_image._HEALTH_PROBE:
-                probes += 1
-                return SimpleNamespace(returncode=1 if probes == 1 else 0)
+        calls.append(tuple(args))
+        if args[:3] == ["docker", "image", "inspect"]:
+            return SimpleNamespace(returncode=1)
+        if args[:2] == ["docker", "exec"]:
+            probes += 1
+            if "collection=its-18" in args[-1]:
+                payload = {
+                    "publication": {"collection_id": "its-18"},
+                    "selected_army_points": 300,
+                }
+                body = base64.b64encode(json.dumps(payload).encode("utf-8")).decode("ascii")
+                return SimpleNamespace(returncode=0, stdout=json.dumps([200, [], body]))
+            return SimpleNamespace(returncode=1 if probes == 1 else 0, stdout='[200, [], ""]')
         return SimpleNamespace(returncode=0)
-
-    monkeypatch.setattr(preview_runtime_image.shutil, "which", lambda _name: "docker")
-    monkeypatch.setattr(preview_runtime_image.subprocess, "run", fake_run)
-    monkeypatch.setattr(preview_runtime_image.time, "sleep", lambda _seconds: None)
-    monkeypatch.setattr(
-        preview_runtime_image, "prepare_bundle",
-        lambda source, output: bundles.append((source, output)),
-    )
-    preview_runtime_image.preview_image(stage, "infinity-db:v10-preview-test")
-
-    run = next(call for call in calls if call[:3] == ("docker", "run", "-d"))
-    assert "--network" not in run
-    assert "-p" not in run and "--publish" not in run
-    assert "--read-only" in run
-    assert probes == 2
-    assert sum(call[-1] == preview_runtime_image._HTTP_VERIFY for call in calls) == 1
+    monkeypatch.setattr(preview.shutil, "which", lambda _: "docker")
+    monkeypatch.setattr(preview, "ROOT", tmp_path)
+    monkeypatch.setattr(preview, "validate_database_set", lambda *a, **kw: {"sha256": {}})
+    monkeypatch.setattr(preview, "_copy_build_context", lambda *a: None)
+    monkeypatch.setattr(preview.subprocess, "run", run)
+    monkeypatch.setattr(preview.time, "sleep", lambda _: None)
+    monkeypatch.setattr(preview, "capture", lambda *a, **kw: {})
+    monkeypatch.setattr(preview, "check", lambda *a: 41)
+    preview.preview_image(tmp_path, "infinity-db:preview-test")
+    start = next(c for c in calls if c[:3] == ("docker", "run", "-d"))
+    assert "--read-only" in start
+    assert "-p" not in start and "--publish" not in start
+    assert probes == 3
     assert calls[-2][:2] == ("docker", "stop")
-    assert calls[-1][:3] == ("docker", "image", "rm")
-    assert bundles == [
-        (stage, preview_runtime_image.DEFAULT_OUTPUT),
-        (preview_runtime_image.DEFAULT_SOURCE, preview_runtime_image.DEFAULT_OUTPUT),
-    ]
+    assert calls[-2][2].startswith("infinitydb-preview-")
+    assert calls[-1] == ("docker", "image", "rm", "infinity-db:preview-test")
+    assert not list((tmp_path / "local").iterdir())
 
 
 def test_compose_supports_explicit_bind_address_and_host_port() -> None:
@@ -179,26 +171,26 @@ def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     gitignore = _read(".gitignore")
     attributes = _read(".gitattributes")
 
-    assert "!data/generated/infinity.db" in gitignore
-    assert "!data/generated/rules.db" in gitignore
-    assert "data/generated/infinity.db binary" in attributes
-    assert "data/generated/rules.db binary" in attributes
+    assert "!data/generated/army.db" in gitignore
+    assert "!data/generated/rules_n5.db" in gitignore
+    assert "data/generated/army.db binary" in attributes
+    assert "data/generated/rules_n5.db binary" in attributes
 
 
-def test_checkout_builds_never_enter_immutable_docker_release_context() -> None:
-    dockerignore = _read(".dockerignore")
+def test_docker_packages_only_explicit_complete_databases() -> None:
     dockerfile = _read("Dockerfile")
-    prepare = _read("tools/prepare_runtime_bundle.py")
-    deploy = _read("scripts/deploy.sh")
-
+    dockerignore = _read(".dockerignore")
     assert "local/" in dockerignore
-    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
-    assert 'DEFAULT_SOURCE = ROOT / "data/generated"' in prepare
-    assert '"$python" -m tools.prepare_runtime_bundle' in deploy
-    assert "checkout-runtime" not in deploy
+    assert "data/runtime/" in dockerignore
+    for name in ("army.db", "rules_n5.db"):
+        assert f"data/generated/{name} /app/data/{name}" in dockerfile
+        assert f"!data/generated/{name}" in dockerignore
+    assert "tools.prepare_runtime_bundle" not in _read("scripts/deploy.sh")
+    assert "INFINITY_DB_DB_DIR=/app/data" in dockerfile
+    assert "INFINITY_DB_DATABASE=" not in dockerfile
 
 
-def test_deployed_object_publication_is_generated_and_verified_for_each_release_image() -> None:
+def test_release_images_require_embedded_deployed_objects() -> None:
     dockerfile = _read("Dockerfile")
     dockerignore = _read(".dockerignore")
     gitignore = _read(".gitignore")
@@ -209,18 +201,19 @@ def test_deployed_object_publication_is_generated_and_verified_for_each_release_
     assert "data/generated/*" in gitignore
     assert "!data/generated/deployed-objects.json" not in gitignore
     assert "!data/generated/deployed-objects.json" not in dockerignore
-    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
-    assert "tools.prepare_runtime_bundle" in deploy
-    assert deploy.index("tools.prepare_runtime_bundle") < deploy.index("docker compose build")
-    assert "tools.build_deployed_object_publication --check" in workflow
-    assert workflow.index("tools.prepare_runtime_bundle") < workflow.index("docker build")
-    assert 'expected_files.add("deployed-objects.json")' in smoke
-    assert "load_deployed_object_publication(" in smoke
+    assert "data/generated/rules_n5.db /app/data/rules_n5.db" in dockerfile
+    assert "tools.prepare_runtime_bundle" not in deploy
+    assert "tools.build_deployed_object_publication" not in workflow
+    assert "tools.build_deployed_object_publication" not in deploy
+    assert "validate_database_set" in workflow
+    assert "validate_database_set(data_dir, require_complete=True)" in smoke
+    assert "load_deployed_object_publication(" not in smoke
+    assert 'rules.deployed_objects_payload(data_dir / "army.db")' in smoke
     assert '/api/deployed-objects' in smoke
     assert 'http://127.0.0.1:8000/deployed-objects' in smoke
 
 
-def test_variant_usage_publication_is_byte_exact_and_packaged_for_v9_release() -> None:
+def test_variant_usage_publication_is_byte_exact_and_packaged_for_tracked_release() -> None:
     gitignore = _read(".gitignore")
     attributes = _read(".gitattributes")
     dockerignore = _read(".dockerignore")
@@ -230,20 +223,19 @@ def test_variant_usage_publication_is_byte_exact_and_packaged_for_v9_release() -
     workflow = _read(".github/workflows/deployment-smoke.yml")
     source_workflow = _read(".github/workflows/source-checks.yml")
 
-    assert "!data/generated/variant-usage.json" in gitignore
-    assert "data/generated/variant-usage.json binary" in attributes
+    assert "!data/generated/variant-usage.json" not in gitignore
+    assert "data/generated/variant-usage.json binary" not in attributes
     assert "data/generated/*" in dockerignore
-    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
-    assert (ROOT / "data/generated/variant-usage.json").is_file()
+    assert "data/generated/rules_n5.db /app/data/rules_n5.db" in dockerfile
     assert "tools.build_variant_usage --publish" not in deploy
-    assert "tools.build_deployed_object_publication --check" in deploy
-    assert 'expected_files.add("variant-usage.json")' in smoke
-    assert "load_variant_usage_publication(" in smoke
+    assert "tools.build_deployed_object_publication" not in deploy
+    assert 'expected_files = set(report["sha256"])' in smoke
+    assert "load_runtime_variant_usage(" in smoke
     assert "/api/variant-usage?record_id=" in smoke
     assert "tools.verify_deployment_assets --skip-svg" in source_workflow
     assert "tools.verify_deployment_assets --skip-svg" in workflow
     assert workflow.index("Validate pinned exact-variant release publication") < workflow.index(
-        "Build application image from tracked databases"
+        "Build application image from verified tracked databases"
     )
 
 
@@ -256,39 +248,26 @@ def test_weapon_profile_citations_are_release_paired_and_packaged() -> None:
     workflow = _read(".github/workflows/deployment-smoke.yml")
     determinism = _read("tools/build_determinism_manifest.py")
 
-    assert "!data/generated/weapon-profile-sources.json" in gitignore
-    assert "data/generated/weapon-profile-sources.json binary" in attributes
+    assert "!data/generated/weapon-profile-sources.json" not in gitignore
+    assert "data/generated/weapon-profile-sources.json binary" not in attributes
     assert "data/generated/*" in dockerignore
-    assert "COPY --chown=appuser:appuser data/runtime/ /app/data/" in dockerfile
-    assert (ROOT / "data/generated/weapon-profile-sources.json").is_file()
-    assert 'expected_files.add("weapon-profile-sources.json")' in smoke
-    assert "load_weapon_profile_publication(" in smoke
+    assert "data/generated/rules_n5.db /app/data/rules_n5.db" in dockerfile
+    assert 'expected_files = set(report["sha256"])' in smoke
+    assert "load_runtime_weapon_profile_publication(" in smoke
     assert "/api/weapons/rifle" in smoke
-    assert "RUN rm /app/data/weapon-profile-sources.json" in workflow
-    assert "tools.build_weapon_profile_publication" in determinism
-    assert "publication/weapon-profile-sources.json" in determinism
-
-
-def test_variant_usage_legacy_image_removes_v9_publication_before_smoke() -> None:
-    workflow = _read(".github/workflows/deployment-smoke.yml")
-    smoke = _read("scripts/verify-container-image.sh")
-
-    assert "RUN rm /app/data/variant-usage.json" in workflow
-    assert workflow.index("RUN rm /app/data/variant-usage.json") < workflow.index(
-        "Validate v8 rollback image and production startup"
-    )
-    assert 'if restrictions["available"]:' in smoke
-    assert 'expected_files.add("variant-usage.json")' in smoke
-    assert 'if not restrictions["available"] and usage is not None:' in smoke
-    assert "Legacy compatibility image unexpectedly published variant usage" in smoke
+    assert "RUN rm /app/data/weapon-profile-sources.json" not in workflow
+    assert "Prepare immutable runtime bundle" not in workflow
+    assert "tools.build_weapon_profile_publication" not in determinism
+    assert "publication/weapon-profile-sources.json" not in determinism
+    assert "reviewed/weapon-profile-citations" in determinism
 
 
 def test_release_installer_deploys_tracked_runtime_databases_without_rebuilding() -> None:
     script = _read("scripts/install-or-update.sh")
     assert "infinity-db build" not in script
     assert "build-rules" not in script
-    assert "data/generated/infinity.db" in script
-    assert "data/generated/rules.db" in script
+    assert "data/generated/army.db" in script
+    assert "data/generated/rules_n5.db" in script
     assert 'git cat-file -e "$release_tag:$path"' in script
     assert "Removing legacy untracked" in script
     assert "sh ./scripts/deploy.sh" in script
@@ -407,13 +386,11 @@ def test_container_build_packages_canonical_changelog() -> None:
     "heading", ["## Unreleased", "## [1.0.1] - Unreleased", "## [0.10.0] - 2026-10-07"],
 )
 @pytest.mark.parametrize("matching_content", [True, False])
-@pytest.mark.parametrize("restrictions_version", [8, 9])
-def test_container_smoke_validates_canonical_notes_in_both_release_states(
+def test_container_smoke_validates_canonical_release_notes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     heading: str,
     matching_content: bool,
-    restrictions_version: int,
 ) -> None:
     changelog = tmp_path / "CHANGELOG.md"
     changelog.write_text(
@@ -427,50 +404,42 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
     if not matching_content:
         page = page.replace("New player highlight.", "Outdated player highlight.")
     page = f'<section aria-label="InfinityDB release notes">{page}</section>'
-    if restrictions_version == 9:
-        restrictions = {
-            "available": True, "evaluationSupported": False,
-            "items": [
-                *[
-                    {
-                        "subject": "TAG", "action": "enter-prone",
-                        "scope": "all", "operation": {
-                            "kind": "state-entry", "qualifier": {},
-                        },
-                    }
-                    for _ in range(11)
-                ],
+    restrictions = {
+        "available": True, "evaluationSupported": False,
+        "items": [
+            *[
                 {
-                    "subject": "Motorcycle", "action": "upward-jump",
-                    "scope": "while-mounted-upwards-only",
-                    "operation": {
-                        "kind": "directional-skill-movement",
-                        "qualifier": {"direction": "upward"},
+                    "subject": "TAG", "action": "enter-prone",
+                    "scope": "all", "operation": {
+                        "kind": "state-entry", "qualifier": {},
                     },
-                },
-                *[
-                    {
-                        "subject": subject, "action": "lieutenant-selection",
-                        "scope": "army-selection-only",
-                        "operation": {
-                            "kind": "army-role-selection",
-                            "qualifier": {"role": "lieutenant"},
-                        },
-                    }
-                    for subject in ("REM", "Irregular")
-                ],
+                }
+                for _ in range(11)
             ],
-        }
-    else:
-        restrictions = {
-            "available": False, "evaluationSupported": False, "items": [],
-        }
-    profile_citations = (
-        [{"source_id": "n5-core-v5.3-pdf", "page": 183}]
-        if restrictions_version == 9 else []
-    )
+            {
+                "subject": "Motorcycle", "action": "upward-jump",
+                "scope": "while-mounted-upwards-only",
+                "operation": {
+                    "kind": "directional-skill-movement",
+                    "qualifier": {"direction": "upward"},
+                },
+            },
+            *[
+                {
+                    "subject": subject, "action": "lieutenant-selection",
+                    "scope": "army-selection-only",
+                    "operation": {
+                        "kind": "army-role-selection",
+                        "qualifier": {"role": "lieutenant"},
+                    },
+                }
+                for subject in ("REM", "Irregular")
+            ],
+        ],
+    }
+    profile_citations = [{"source_id": "n5-core-v5.3-pdf", "page": 183}]
     rifle = {
-        "profile_citations_available": restrictions_version == 9,
+        "profile_citations_available": True,
         "profiles": [{"profile_citations": profile_citations}],
     }
     payloads = {
@@ -487,6 +456,10 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
             "unresolved_deliveries": [{}],
         },
         "/api/weapons/rifle": rifle,
+        "/api/scenarios/battleground?army_points=300&collection=its-18&revision=2026.09.01": {
+            "publication": {"collection_id": "its-18"},
+            "selected_army_points": 300,
+        },
         "/api/version": {"version": "0.10.0", "snapshot_revision": "fixture"},
     }
 
@@ -506,25 +479,36 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
     code = compile(runtime_probe, "verify-container-image.sh", "exec")
     if matching_content:
         exec(code, {})
-        rifle["profile_citations_available"] = restrictions_version != 9
+        rifle["profile_citations_available"] = False
         with pytest.raises(SystemExit, match="wrong Weapon Chart publication status"):
             exec(code, {})
-        rifle["profile_citations_available"] = restrictions_version == 9
-        if restrictions_version == 9:
-            for citation in (
-                {"source_id": "n5-core-v5.3-pdf", "page": 184},
-                {"source_id": "incorrect-source", "page": 183},
-            ):
-                profile_citations[:] = [citation]
-                with pytest.raises(SystemExit, match="lost its reviewed Weapon Chart citation"):
-                    exec(code, {})
-        else:
-            profile_citations.append({"source_id": "n5-core-v5.3-pdf", "page": 183})
-            with pytest.raises(SystemExit, match="incorrectly retained a v9 citation"):
+        rifle["profile_citations_available"] = True
+        for citation in (
+            {"source_id": "n5-core-v5.3-pdf", "page": 184},
+            {"source_id": "incorrect-source", "page": 183},
+        ):
+            profile_citations[:] = [citation]
+            with pytest.raises(SystemExit, match="lost its reviewed Weapon Chart citation"):
                 exec(code, {})
     else:
         with pytest.raises(SystemExit, match="canonical changelog"):
             exec(code, {})
+
+
+def test_container_symbol_route_smoke_uses_embedded_database_publication() -> None:
+    script = _read("scripts/verify-container-image.sh")
+    route_probe = script.split('if [ "$packaged_assets" -eq 1 ]; then', 1)[1]
+    assert 'Database(Path("/app/data/army.db")).symbol_publication()' in route_probe
+    assert "maintained_manifest_path" not in route_probe
+
+
+def test_install_and_docker_require_the_complete_three_database_set() -> None:
+    install = _read("scripts/install-or-update.sh")
+    docker = _read("Dockerfile")
+    for name in ("army.db", "rules_n5.db", "its_18.db"):
+        assert f"prepare_tracked_release_file data/generated/{name}" in install
+        assert f"[ -f data/generated/{name} ] || fail" in install
+        assert f"data/generated/{name} /app/data/{name}" in docker
 
 
 def test_installed_wheel_smoke_runs_database_health_check() -> None:
@@ -532,7 +516,7 @@ def test_installed_wheel_smoke_runs_database_health_check() -> None:
 
     assert "python tools/installed_wheel_smoke.py" in workflow
     smoke = _read("tools/installed_wheel_smoke.py")
-    assert '[main_cli, "database-health", "generated/infinity.db", "--require-raw"]' in smoke
+    assert '[main_cli, "database-health", "generated/army.db", "--require-raw"]' in smoke
 
 
 def test_full_asset_checks_can_run_against_candidate_branch() -> None:
@@ -553,39 +537,38 @@ def test_wheel_packages_runtime_unit_filter_semantics() -> None:
     assert "config/catalogs/unit-filter-semantics.json" in catalog_data
 
 
-def test_deployment_smoke_builds_and_exercises_v8_rollback_image() -> None:
-    """Rehearse v8 with the same installed application, never overwrite v9."""
+def test_deployment_smoke_validates_current_image_without_rollback_rehearsal() -> None:
+    """One immutable current image and startup check replace the v8 rollback rehearsal."""
     workflow = _read(".github/workflows/deployment-smoke.yml")
     expected_order = (
-        "sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets",
-        "python -m infinity_db build-rules --legacy-v8 --output local/restrictions-v8-ci/rules.db",
-        (
-            "python -m tools.build_deployed_object_publication "
-            "--rules-db local/restrictions-v8-ci/rules.db "
-            "--output local/restrictions-v8-ci/deployed-objects.json"
-        ),
-        "--output local/restrictions-v8-ci/deployed-objects.json --check",
-        'if old.execute("PRAGMA user_version").fetchone()[0] != 8:',
-        "FROM ${BASE_IMAGE}",
-        "COPY --chown=appuser:appuser rules.db /app/data/rules.db",
-        "COPY --chown=appuser:appuser deployed-objects.json /app/data/deployed-objects.json",
-        (
-            "docker build --build-arg BASE_IMAGE=infinity-db:deployment-smoke "
-            "--tag infinity-db:rollback-v8 local/restrictions-v8-ci"
-        ),
-        "sh scripts/verify-container-image.sh infinity-db:rollback-v8 --published-assets",
-        "Verify v9 image remains valid after rollback rehearsal",
+        "Validate pinned exact-variant release publication",
+        "Build application image from verified tracked databases",
+        "Validate image and production startup",
     )
     positions = [workflow.index(fragment) for fragment in expected_order]
     assert positions == sorted(positions)
-    assert 'if expected != current_publication:' in workflow
-    assert "Rollback modified the canonical legacy relationship graph" in workflow
-    assert 'assert r.restrictions_payload()["available"] is False' in workflow
-    assert "data/generated/rules.db /app/data/rules.db" not in workflow
+    assert (
+        "sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets"
+        in workflow
+    )
+    assert "rollback" not in workflow.lower()
+    assert "--legacy-v8" not in workflow
+    assert "data/generated/rules_n5.db /app/data/rules_n5.db" not in workflow
     assert "data/generated/deployed-objects.json /app/data/deployed-objects.json" not in workflow
 
 
-def test_source_and_cross_browser_ci_prepare_only_legacy_deployed_json() -> None:
+def test_release_metadata_and_browser_matrix_are_not_default_pr_gates() -> None:
+    source = _read(".github/workflows/source-checks.yml")
+    browser = _read(".github/workflows/cross-browser-compatibility.yml")
+
+    assert "python -m tools.release_metadata" not in source
+    assert "tests/test_release_metadata.py" not in source
+    assert "workflow_dispatch:" in browser
+    assert "  pull_request:" not in browser
+    assert "  push:" not in browser
+
+
+def test_source_and_cross_browser_ci_validate_selected_database_set() -> None:
     source = _read(".github/workflows/source-checks.yml")
     browser = _read(".github/workflows/cross-browser-compatibility.yml")
     source_checkout = source.split("- name: Check out source", 1)[1].split(
@@ -593,25 +576,20 @@ def test_source_and_cross_browser_ci_prepare_only_legacy_deployed_json() -> None
     )[0]
     # Frozen reference-evidence tests use git show against pinned older commits.
     assert "fetch-depth: 0" in source_checkout
+    command = "python -m infinity_db database-health --db-dir data/generated"
     for workflow in (source, browser):
-        assert "python -m tools.build_deployed_object_publication --when-legacy" in workflow
-        assert (
-            "python -m tools.build_deployed_object_publication --check --when-legacy"
-            in workflow
-        )
-    generate = source.index("python -m tools.build_deployed_object_publication --when-legacy")
-    verify = source.index(
-        "python -m tools.build_deployed_object_publication --check --when-legacy"
-    )
-    assert generate < verify < source.index("- name: Run source checks")
+        assert workflow.count(command) == 1
+        assert "tools.build_deployed_object_publication" not in workflow
+    assert source.index(command) < source.index("- name: Run source checks")
+    assert browser.index(command) < browser.index("- name: Run selected critical journeys")
     assert "python tools/run_checks.py" in source
 
 
-def test_source_ci_matrix_time_budgets_include_isolated_preflight() -> None:
+def test_source_ci_runs_one_full_suite_and_cross_platform_build_checks() -> None:
     workflow = _read(".github/workflows/source-checks.yml")
     job = workflow.split("  source-checks:", 1)[1].split("    steps:", 1)[0]
     matrix = job.split("      matrix:", 1)[1].split("    runs-on:", 1)[0]
-    legs: dict[tuple[str, str], tuple[str, int]] = {}
+    legs: dict[tuple[str, str], tuple[str, bool, int]] = {}
     for block in matrix.split("          - os: ")[1:]:
         os_name, *lines = block.splitlines()
         fields: dict[str, str] = {}
@@ -624,20 +602,32 @@ def test_source_ci_matrix_time_budgets_include_isolated_preflight() -> None:
             fields[key] = value.strip().strip('"')
         identity = (os_name.strip(), fields["label"])
         assert identity not in legs
-        legs[identity] = (fields["check_args"], int(fields["timeout_minutes"]))
+        legs[identity] = (
+            fields["check_args"], fields["primary"] == "true",
+            int(fields["timeout_minutes"]),
+        )
 
-    standard_checks = "--stage test --stage build --stage rules"
+    primary_checks = (
+        "--stage test --stage lint --stage docs "
+        "--stage type --stage build --stage rules"
+    )
+    portable_checks = "--stage build --stage rules"
     assert legs == {
-        ("ubuntu-latest", "3.11"): ("--all", 30),
-        ("windows-latest", "3.11"): (standard_checks, 30),
-        ("macos-latest", "3.11"): (standard_checks, 15),
-        ("ubuntu-latest", "3.14"): (standard_checks, 15),
+        ("ubuntu-latest", "3.11"): (primary_checks, True, 30),
+        ("windows-latest", "3.11"): (portable_checks, False, 30),
+        ("macos-latest", "3.11"): (portable_checks, False, 15),
+        ("ubuntu-latest", "3.14"): (portable_checks, False, 15),
     }
+    assert "matrix.check_args == '--all'" not in workflow
+    assert "&& matrix.primary" in workflow
     assert "timeout-minutes: ${{ matrix.timeout_minutes }}" in job
     source_checks = workflow.split("- name: Run source checks", 1)[1].split(
         "- name: Report deterministic-output toolchain", 1
     )[0]
     assert "python tools/run_checks.py ${{ matrix.check_args }}" in source_checks
+    assert "--test-workers" not in source_checks
+    assert "matrix.test_workers" not in workflow
+    assert "--assets required --build-source tests/fixtures/deployment-smoke" in source_checks
 
 
 def test_wheel_packages_all_registered_static_assets() -> None:
@@ -703,9 +693,8 @@ def test_container_verifier_uses_installed_tracked_publication_provenance() -> N
 
     assert "--packaged-assets|--published-assets" in verifier
     assert 'if [ "$packaged_assets" -eq 1 ]; then' in verifier
-    assert 'if [ "$published_assets" -eq 1 ]; then' in verifier
-    assert "validate_database_symbol_provenance" in verifier
-    assert 'maintained_manifest_path("symbol-publication.json")' in verifier
+    assert "symbol_publication()" in verifier
+    assert "publishedSha256ByPath" in verifier
     assert "army-symbol-build.json" not in verifier
     assert '-v "$(pwd)/data/manifests' not in verifier
 

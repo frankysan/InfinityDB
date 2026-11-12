@@ -39,9 +39,10 @@ a local deferral or a green worker run is not a CI exemption.
 ## Risk-based Source validation
 
 The required **fast-validation** job runs before the expensive Source matrix.
-It validates release metadata (including the finalized README/changelog date),
-runs Ruff, focused release-note tests, Markdownlint, document links and backlog
-structure. This fails quickly on stale release headings or formatting errors.
+It runs Ruff, focused release-note tests, Markdownlint, document links and
+backlog integrity. Finalized version/changelog/README metadata is **release-only**:
+run `python -m tools.release_metadata` before the approved release merge,
+not for every development PR with a legitimate `Unreleased` heading.
 
 `tools.release_validation_scope` compares the exact PR/push candidate with
 its preceding branch SHA, requiring Git ancestry and an unambiguous path diff.
@@ -52,39 +53,38 @@ CI/tooling, Python/JS/CSS/runtime source, generated databases, deployment
 files or unknown paths **require the full Source matrix**.
 
 A narrow diff is not sufficient: a candidate may reuse Source validation only
-when the baseline SHA has already passed **all four hosted release workflows**:
-Source checks (including determinism), Installed wheel smoke, Deployment smoke
-and all four cross-browser jobs. Missing API access, incomplete/failed
-evidence or uncertain ancestry falls back to full validation. The exact new SHA
-still receives the fast Source job, including focused affected tests.
+when the baseline SHA has passed the **three core hosted workflows**:
+Source checks (including verified job-level determinism), Installed wheel
+smoke and Deployment smoke. Cross-browser checks are not a baseline
+prerequisite for v1.1+; they are chosen by browser risk. Missing API access,
+failed/incomplete evidence or uncertain ancestry falls back to full validation.
+The exact new SHA still receives fast checks and focused affected tests.
 
-This optimization currently applies to **Source checks only**. The release
-evidence collector inspects individual Source jobs: it accepts either the
-completed full matrix plus deterministic-output job, or a passed fast job with
-successful changed-test execution and explicit reuse steps in each matrix job
-(instead of running the expensive test/build commands).
-The generated tag annotation identifies focused Source reuse, while retained
-CI logs show the baseline verification. Partial, mixed or missing Source jobs
-block tagging. The separate wheel, deployment and four-browser workflows remain
-mandatory; further per-gate reuse requires its own proof contract.
+This optimization applies to **Source checks only**. The release evidence
+collector verifies the individual Source jobs: either the complete full matrix
+plus deterministic-output job, or a passed fast job with affected tests and
+explicit, successful baseline-reuse steps. The tag annotation records scoped
+reuse. Partial, mixed or missing Source jobs block release evidence **even
+when the optional cross-browser workflow is not requested**. Installed-wheel
+and deployment smoke remain independent mandatory workflows.
 
 ## Cross-browser release compatibility gate
 
 The [Cross-browser compatibility workflow](../.github/workflows/cross-browser-compatibility.yml)
-is an independent, **mandatory v1.0 release gate**. It runs on pull
-requests, pushes to `main`, and manual dispatch once registered on the
-default branch. The four required jobs are Ubuntu/Chromium, Ubuntu/Firefox,
-macOS/WebKit and Windows/Microsoft Edge; all must complete successfully
-for the **same exact candidate SHA**. No job uses `continue-on-error`.
-Ordinary development pushes without a pull request do not launch this
-matrix by default. Configure repository branch protection/rulesets
-separately if these checks are to block PR merging; the release-evidence
-collector independently fails closed before tagging v1.0 or later.
+is an **opt-in, manually dispatched** four-platform diagnostic for v1.1+
+releases. Dispatch it for significant navigation, layout, accessibility,
+browser-API or compatibility risks; it is not automatically multiplied
+across ordinary PRs or `main` pushes. The four jobs cover
+Ubuntu/Chromium, Ubuntu/Firefox, macOS/WebKit and Windows/Microsoft Edge.
+If selected, all four must succeed on the same exact candidate SHA.
+The historical **v1.0.x** release-evidence contract still requires all four.
+External branch-protection/rulesets may need adjustment if they previously
+required this workflow on every PR.
 
 Each job installs Python 3.11.9, **Playwright 1.64.1** and its selected browser,
-checks the embedded v10 deployed objects or generates and checks the legacy
-v8/v9 publication matched to the tracked rules/Army/variant artifacts, and serves the frozen database
-pair using an ephemeral WSGI server. One shared portable cohort runs
+checks the embedded deployed objects matched to the tracked
+Army/Rules/ITS database set and serves that complete set
+using an ephemeral WSGI server. One shared portable cohort runs
 **14 critical journeys** (seven at 1440 and 390 px) covering soft navigation,
 source citations, Weapon fragments, Unit detail, Core scenario selection,
 FAQ entry points and notice keyboard/touch behavior. Tests fail on missing
@@ -95,17 +95,14 @@ is logged. Playwright is pinned; branded Edge and rolling hosted images must
 still be identified by their recorded actual versions, not treated as frozen
 browser binaries. No external Army/PDF acquisition is needed.
 
-For **v1.0 and later**, `tools.prepare_release_ci_evidence` requires the
-Cross-browser compatibility workflow in addition to Source checks,
-Installed wheel smoke and Deployment smoke. It validates each of the
-**four exact job identities and successful terminal conclusions** from
-the latest GitHub Actions attempt. Missing, skipped, failed, incomplete or
-duplicated jobs and green aggregate workflow runs with failed matrix legs
-are **not accepted**. The annotated tag evidence includes the verified
-workflow run; structured JSON records all four jobs. This does not replace
-the comprehensive Chromium and 81-page Unit matrices, exact hosted
-candidate checks or human Safari/iOS/touch acceptance. macOS WebKit is
-not a real-device Safari/iOS test.
+For **v1.0.x**, `tools.prepare_release_ci_evidence` still requires the
+Cross-browser workflow. For **v1.1+**, use its `--include-cross-browser`
+option when broad browser coverage was deliberately selected. Whenever
+browser evidence is included, the collector validates all four exact job
+identities and successful terminal conclusions; missing, skipped, failed
+or duplicated jobs are never accepted. This optional suite does not
+substitute for source correctness, Docker smoke, or real-device manual
+testing when genuinely necessary. macOS WebKit is not an iOS Safari test.
 
 **V1S-097 acceptance baseline:** the reporting-only four-platform pilot
 at `6892e7e6094288b6c7eb1cc51abe0b3fb6b6ac84` passed **56/56**
@@ -188,17 +185,23 @@ fixes unless those capabilities are actually connected and verified.
 ## Source checks
 
 `.github/workflows/source-checks.yml` runs on pull requests, pushes to `main`, and manual dispatch.
-When full validation is required, its matrix is:
+When full Source validation is required, its matrix is:
 
-- Ubuntu / Python 3.11 — `tools/run_checks.py --all`;
-- Windows / Python 3.11 — test + Army build + rules build, with two fixed pytest workers;
-- macOS / Python 3.11 — test + Army build + rules build;
-- Ubuntu / Python 3.14 — test + Army build + rules build.
+- Ubuntu / Python 3.11 — **one** pytest suite plus Ruff, Markdownlint,
+  Pyright, Army build and Rules build;
+- Windows / Python 3.11 — Army/Rules build and deterministic-output checks;
+- macOS / Python 3.11 — Army/Rules build and deterministic-output checks;
+- Ubuntu / Python 3.14 — Army/Rules build for interpreter portability.
 
-The full Ubuntu 3.11 leg and filesystem-heavy Windows leg each have a
-30-minute job limit. The other legs have 15-minute limits. The full leg needs
-time for both the ordinary checks and the isolated preflight's additional
-pytest run; its time limit does not omit or relax either pass.
+The Windows/macOS/Python 3.14 legs do not repeat the complete pytest
+suite. The Ubuntu primary job no longer runs `--all` with an additional
+isolated preflight that reruns pytest: source tests execute **once** on
+Linux, while independent [installed-wheel](../.github/workflows/installed-wheel.yml)
+and [Docker smoke](../.github/workflows/deployment-smoke.yml) cover
+package/install and production-image behavior. The isolated preflight is
+still available on demand for an identified packaging/index risk. Four
+platforms and deterministic-output comparisons remain part of the full
+Source gate, but no longer multiply the full source suite.
 
 **2026-11-07 timeout repair:** In
 [Source run 42315535265](https://github.com/frankysan/InfinityDB/actions/runs/42315535265)
@@ -413,19 +416,20 @@ and cross-platform determinism remain unchanged.
 
 Source-check logs include the twenty slowest pytest durations and skipped-test reasons so
 hosted performance problems can be traced to individual tests or fixture setup.
-Before the test matrix runs, each source-check leg verifies the deployed-object
-model against the tracked Army and rules databases. Current v10 Rules embed
-that model; legacy v8/v9 instead deterministically generate and verify the
-**Git-ignored** `data/generated/deployed-objects.json`. Tests must not depend
-on an existing local JSON publication: a fresh checkout does not contain it,
-and v10 does not require it. This stage does not modify either tracked database.
+Before the test matrix runs, each source-check leg runs the shared read-only
+database-set health check against the selected tracked runtime directory. It
+verifies SQLite integrity, source binding, and the embedded deployed-object,
+variant and reviewed Weapon-citation models without generating legacy JSON.
+Cross-browser CI and clean-export preflight use the same selected-set check.
+These checks do not establish source-curation freshness or replace the
+separate asset/source acceptance gates, and do not modify tracked databases.
 
 The manually dispatched `Full-asset checks` workflow also runs `--all`, so it performs the same
 pinned npm installation and both documentation checks. The installed-wheel and deployment-smoke jobs
 do not require Markdown tooling or ship Node.js dependencies. The deployment-smoke
 job verifies the schema-owned deployed-object model and prepares the immutable
-runtime bundle before Docker build. Legacy v8/v9 builds generate the matching
-JSON publication. The container verifier checks source-pair fingerprints and reviewed
+runtime bundle before Docker build. Legacy v8/v9 inputs are rejected rather
+than assembled with JSON. The container verifier checks source-pair fingerprints and reviewed
 object count, then exercises `/api/deployed-objects` and `/deployed-objects` on
 the actual production process; a green source-check matrix alone is not that gate.
 
@@ -439,9 +443,11 @@ checksum-bound publication metadata. The matrix pins the same CPython patch line
 cross-platform comparison. **This does not itself pin the SQLite library**: CPython's Windows
 build and Linux system packages may provide different SQLite versions, which can encode
 identical rows in different B-tree layouts. The manifest's exact-byte comparison remains
-mandatory. If it fails, inspect the host SQLite versions and run the strict logical
-comparison (`tools.audit_rules_rebuild_equivalence`) before deciding whether to align
-the SQLite toolchain or revise the documented byte-reproducibility contract. Neither
+mandatory. If it fails, inspect the host SQLite versions and compare the two existing
+files with `infinity_db.sqlite_comparison.same_logical_rules_contents` before
+deciding whether to align the SQLite toolchain or revise the documented
+byte-reproducibility contract. This read-only comparison checks schema, identity
+and all row multisets without rebuilding or changing either file. Neither
 logical parity nor the installed tracked database alone replaces that hosted check.
 
 Generators remain responsible for canonical bytes; `.gitattributes` only prevents tracked
@@ -460,7 +466,8 @@ and reject application imports outside that environment.
 The job verifies:
 
 - `infinity-db` and `infinity-army` entry points;
-- installed Army build and rules build/validation;
+- installed Army builds, Rules CLI help/curated validation, and canonical
+  reference export through the installed Python API;
 - packaged maintained configuration resolution;
 - runtime `Database` / `RulesDatabase` validation;
 - application startup against generated test databases; and
@@ -470,56 +477,33 @@ The job verifies:
 
 This is deliberately different from source-tree tests: installed build commands may use packaged
 shared configuration, while runtime opening of already-built databases must remain independent of
-repository-relative normalization policy. The asset-free subcheck mutates only the disposable wheel
+repository-relative normalization policy. The small Rules fixture exercises the installed
+exporter and runtime without preserving an obsolete CLI build mode. Current full
+Army/source-bound Rules builds are validated in the source checkout. The asset-free subcheck mutates only the disposable wheel
 virtual environment after the normal installed-package contract has already passed; production
 images still require the complete tracked publication through deployment-smoke validation.
 
 ## Deployment smoke
 
 `.github/workflows/deployment-smoke.yml` builds the production container directly from the tracked
-release `infinity.db`, `rules.db`, byte-exact tracked `variant-usage.json`,
-byte-exact tracked `weapon-profile-sources.json` and processed SVG publication,
-with embedded v10 deployed objects or the generated legacy v8/v9 JSON, then runs
-`scripts/verify-container-image.sh` with published-asset validation.
+`army.db`, `rules_n5.db` and `its_18.db` set plus processed SVG assets, then runs
+`scripts/verify-container-image.sh` with published-asset validation. The
+source/release gate requires the strict current schemas, shared provenance and
+recorded build-input freshness. Exact variants and reviewed Weapon citations are
+validated from embedded tables and exercised through the API. The container
+verifies symbol bytes against embedded hashes without installed source manifests.
+The separate source matrix validates the same tracked database set without raw archives.
 
-Deployment smoke validates the variant publication's schema-specific Army/rules
-fingerprints, image presence and representative exact-variant API response.
-Legacy format v1 additionally pins deployed-object JSON bytes; current format
-v2 uses the embedded model. The separate source matrix checks the same tracked
-publication without requiring an ignored raw archive in CI.
-Both checks also compare the Weapon-profile publication with its reviewed
-inputs and validate exact source-pair binding; the container smoke checks a
-representative Weapon citation through the API. Cross-platform determinism
-rebuilds and compares the Weapon-profile JSON bytes on each supported OS.
-
-Deployment smoke first tests the exact tracked release set (v10 for the prepared
-1.0.1 release; tagged 1.0.0 used v9).
 It does not rebuild the tracked release databases and is not a substitute for the source or
 installed-wheel checks. The `/changes` probe compares the served release-note content with
 the installed canonical changelog. It accepts version-specific pending notes
 (for example, `[1.0.1] - Unreleased`), legacy generic `Unreleased` headings and
 dated release sections, and rejects stale or missing release-note content.
 
-**Rollback-image rehearsal (original v9 baseline passed at commit `663a345`, 2026-10-30):** the workflow also rebuilds
-a **disposable v8/compatibility-10** `rules.db` from current reviewed curated sources under
-ignored `local/` and generates its matching deployed-object publication. It validates both
-databases and publication fingerprints, requires the complete reviewed object content
-and canonical legacy relationship graph to remain unchanged, and confirms that the v8 API
-reports Restrictions as unavailable rather than inventing permissions. A Docker image
-derived from the already validated current release image replaces **only** `rules.db` and
-`deployed-objects.json`, leaving the installed application, Army database, symbols,
-and runtime configuration unchanged. The v8 image explicitly removes the forward-paired
-exact-variant publication; it must not expose stale usage against the substituted
-rules database. It also removes the forward-paired Weapon-profile publication and
-requires the corresponding API status to be unavailable. The full
-production-startup/image verifier runs against that v8 overlay image,
-followed by another check of the original current-release image.
-
-This tests application compatibility with a reconstructed source-equivalent v8 pair;
-it does **not** claim byte identity with retained historical v8 recovery files,
-test a host-level deployment, or swap live containers. The single-operator 1.0
-release requires retaining the documented recovery path and prior artifacts,
-not a live-host rollback/forward rehearsal.
+The historical v8 rollback-image rehearsal passed at `663a345` on 2026-10-30.
+It is not a current workflow or release gate. Recovery across older data formats
+uses the matching retained released image and artifacts, not a rebuilt legacy
+overlay served by the current application.
 
 ## Release evidence retention
 

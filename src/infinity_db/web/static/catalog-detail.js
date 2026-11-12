@@ -5,7 +5,7 @@ import { appendMaintainedText } from "./maintained-text.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
-import { tableViewport } from "./view-components.js";
+import { referenceLoadMessage, tableViewport } from "./view-components.js";
 import { exactVariantRuleIds, exactVariantUsageSection } from "./variant-usage.js";
 import {
   gameplayVariantRules,
@@ -749,7 +749,8 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
 }).catch((error) => {
   if (error.name === "AbortError") return;
   name.firstChild.textContent = "Item unavailable";
-  status.textContent = error.message || "Could not load this item.";
+  status.textContent = referenceLoadMessage(error, "item");
+  console.error("Could not load catalog detail", error);
 });
 window.addEventListener("optionalunitschange", () => {
   if (!currentItem) return;

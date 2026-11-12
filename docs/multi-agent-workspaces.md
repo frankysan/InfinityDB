@@ -6,9 +6,9 @@ This is the canonical contract for InfinityDB's **optional, explicitly enabled**
 coordination system for ChatGPT/MCP, VS Code Copilot, terminal agents and human
 developers. It is independent of the interface used to edit files. When enabled,
 this protocol supplements Git and the
-[phased validation workflow](testing.md#phased-development-and-validation);
-it does not change the [VD/VR queue's](validation-queue.md#queue-rules)
-thresholds or the release gate.
+[development validation workflow](testing.md#phased-development-and-validation);
+it does not change [deferred-check ownership](validation-queue.md#queue-rules)
+or the release gate.
 
 ## Activation and default workflow
 
@@ -313,7 +313,7 @@ use the CLI without the MCP gateway.
 
 Before work begins, an integration coordinator assigns a distinct agent,
 task ID, workspace, base revision and expected path scope. Check
-[TODO](TODO.md#v1s-work-selection-and-handoff) and
+[TODO](TODO.md) and
 [validation queue](validation-queue.md#queue-rules) before assigning a numbered
 slice. Avoid two agents implementing the same acceptance target without an
 explicit split or agreed dependency. Overlapping expected paths are a

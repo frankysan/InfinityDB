@@ -16,7 +16,7 @@ from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data/curated/rules/n5-core-v5.3.json"
-RULES = ROOT / "data/generated/rules.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 
@@ -54,7 +54,7 @@ def test_pinned_rules_require_rolled_crossing_lof_and_separate_visor_scope(
 
 @pytest.fixture(scope="module")
 def app() -> Any:
-    return create_app(ROOT / "data/generated/infinity.db", rules_database_path=RULES)
+    return create_app(ROOT / "data/generated/army.db", rules_database_path=RULES)
 
 
 @pytest.mark.parametrize("slug", ["smoke", "eclipse"])

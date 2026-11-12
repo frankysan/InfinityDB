@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from pathlib import Path
+from subprocess import CompletedProcess
 
 import pytest
 
@@ -40,9 +41,20 @@ def _run(
 
 @pytest.mark.parametrize(
     ("tag", "required"),
-    [("v0.10.1", False), ("v1.0.0", True), ("v1.0.0-rc.1", True), ("v1rc1", True)],
+    [
+        ("v0.10.1", False),
+        ("v1.0.0", True),
+        ("v1.0.1", True),
+        ("v1.0.0-rc.1", True),
+        ("v1rc1", True),
+        ("v1.1.0", False),
+        ("v1.2.0", False),
+        ("v2.0.0", False),
+    ],
 )
-def test_browser_matrix_is_required_for_v1_or_later_tags(tag: str, required: bool) -> None:
+def test_browser_matrix_is_mandatory_only_for_historical_v1_0_tags(
+    tag: str, required: bool,
+) -> None:
     assert release_ci.requires_cross_browser(tag) is required
 
 
@@ -113,6 +125,9 @@ def test_collect_release_evidence_requires_every_configured_workflow(monkeypatch
     def fake_request(url: str, *, token: str | None) -> dict[str, object]:
         requested.append(url)
         assert token == "token"
+        if "/jobs?" in url:
+            jobs = _source_jobs()
+            return {"jobs": jobs, "total_count": len(jobs)}
         requirement = next(
             item for item in release_ci.REQUIRED_WORKFLOWS if item.filename in url
         )
@@ -132,7 +147,8 @@ def test_collect_release_evidence_requires_every_configured_workflow(monkeypatch
         "Installed wheel smoke",
         "Deployment smoke test",
     ]
-    assert len(requested) == 3
+    assert len(requested) == 4
+    assert evidence["workflows"][0]["source_validation"] == {"mode": "full"}
 
 
 def test_collect_release_evidence_can_require_optional_full_asset_run(monkeypatch) -> None:
@@ -140,6 +156,9 @@ def test_collect_release_evidence_can_require_optional_full_asset_run(monkeypatc
 
     def fake_request(url: str, *, token: str | None) -> dict[str, object]:
         requested.append(url)
+        if "/jobs?" in url:
+            jobs = _source_jobs()
+            return {"jobs": jobs, "total_count": len(jobs)}
         requirements = release_ci.REQUIRED_WORKFLOWS + (release_ci.OPTIONAL_FULL_ASSET_WORKFLOW,)
         requirement = next(item for item in requirements if item.filename in url)
         return {"workflow_runs": [_run(requirement, run_id=100 + len(requested))]}
@@ -160,7 +179,7 @@ def test_collect_release_evidence_can_require_optional_full_asset_run(monkeypatc
         "Deployment smoke test",
         "Full-asset checks",
     ]
-    assert len(requested) == 4
+    assert len(requested) == 5
 
 
 def _browser_jobs(run_id: int = 200) -> list[dict[str, object]]:
@@ -303,6 +322,7 @@ def test_v1_tag_message_requires_browser_matrix_evidence() -> None:
             "url": f"https://github.com/{REPOSITORY}/actions/runs/{index + 1}",
         })
     evidence = {"repository": REPOSITORY, "commit_sha": COMMIT, "workflows": workflows}
+    assert "InfinityDB v1.1.0" in release_ci.render_tag_message("v1.1.0", evidence)
     with pytest.raises(release_ci.ReleaseEvidenceError, match="Cross-browser compatibility"):
         release_ci.render_tag_message("v1.0.0", evidence)
 
@@ -321,9 +341,14 @@ def test_v1_tag_message_requires_browser_matrix_evidence() -> None:
     assert "- Cross-browser compatibility: success" in release_ci.render_tag_message(
         "v1.0.0", evidence
     )
+    assert "- Cross-browser compatibility: success" in release_ci.render_tag_message(
+        "v1.1.0", evidence
+    )
     browser["jobs"] = browser["jobs"][:-1]
     with pytest.raises(release_ci.ReleaseEvidenceError):
         release_ci.render_tag_message("v1.0.0", evidence)
+    with pytest.raises(release_ci.ReleaseEvidenceError):
+        release_ci.render_tag_message("v1.1.0", evidence)
 
 
 def test_render_tag_message_records_run_identity_and_urls() -> None:
@@ -391,6 +416,7 @@ def test_main_writes_json_and_annotated_tag_message(
         "workflows": workflows,
     }
     monkeypatch.setattr(release_ci, "collect_release_evidence", lambda *args, **kwargs: evidence)
+    monkeypatch.setattr(release_ci, "verify_release_metadata_for_tag", lambda tag, sha: None)
     json_output = tmp_path / "evidence.json"
     tag_output = tmp_path / "tag.txt"
 
@@ -429,6 +455,47 @@ def test_v1_cli_automatically_requires_cross_browser(monkeypatch, tmp_path: Path
     assert result == 1
     assert "Cross-browser compatibility" in capsys.readouterr().err
     assert not (tmp_path / "evidence.json").exists()
+
+
+def test_release_evidence_guard_checks_sha_metadata_and_tag_version(monkeypatch) -> None:
+    monkeypatch.setattr(
+        release_ci.subprocess, "run",
+        lambda *args, **kwargs: CompletedProcess(args[0], 0, stdout=COMMIT + "\n"),
+    )
+    monkeypatch.setattr(
+        release_ci, "check_repository", lambda: ["latest release is still Unreleased"]
+    )
+    with pytest.raises(release_ci.ReleaseEvidenceError, match="not finalized"):
+        release_ci.verify_release_metadata_for_tag("v1.1.0", COMMIT)
+
+    monkeypatch.setattr(release_ci, "check_repository", lambda: [])
+    monkeypatch.setattr(
+        release_ci.tomllib, "load",
+        lambda stream: {"project": {"version": "1.1.0"}},
+    )
+    release_ci.verify_release_metadata_for_tag("v1.1.0", COMMIT)
+    with pytest.raises(release_ci.ReleaseEvidenceError, match="does not match"):
+        release_ci.verify_release_metadata_for_tag("v1.1.1", COMMIT)
+    with pytest.raises(release_ci.ReleaseEvidenceError, match="HEAD does not match"):
+        release_ci.verify_release_metadata_for_tag("v1.1.0", "f" * 40)
+
+
+def test_v1_1_cli_browser_matrix_is_opt_in(monkeypatch, tmp_path: Path) -> None:
+    requested: list[bool] = []
+
+    def fake_collect(*args, **kwargs):
+        requested.append(kwargs["include_cross_browser"])
+        raise release_ci.ReleaseEvidenceError("sentinel")
+
+    monkeypatch.setattr(release_ci, "collect_release_evidence", fake_collect)
+    base_args = [
+        "--repository", REPOSITORY, "--commit", COMMIT, "--tag", "v1.1.0",
+        "--json-output", str(tmp_path / "evidence.json"),
+        "--tag-message-output", str(tmp_path / "tag.txt"),
+    ]
+    assert release_ci.main(base_args) == 1
+    assert release_ci.main([*base_args, "--include-cross-browser"]) == 1
+    assert requested == [False, True]
 
 
 def test_main_rejects_invalid_release_commit_without_traceback(capsys) -> None:

@@ -362,8 +362,8 @@ def verify_local(*, headed: bool = False) -> dict[str, Any]:
     """Verify the pinned published databases using an ephemeral local app."""
     root = Path(__file__).resolve().parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):

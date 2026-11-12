@@ -339,8 +339,8 @@ def test_published_traits_reconcile_curated_rules_army_usage_and_public_api() ->
     """Audit all canonical Traits without misclassifying raw Army properties."""
 
     root = Path(__file__).resolve().parents[1]
-    army_db = root / "data/generated/infinity.db"
-    rules_db = root / "data/generated/rules.db"
+    army_db = root / "data/generated/army.db"
+    rules_db = root / "data/generated/rules_n5.db"
     curated = {
         record["id"]: (document["collection"]["id"], record)
         for _, document in load_curated_directory(root / "data/curated")
@@ -462,6 +462,7 @@ def test_current_trait_routes_are_served_by_presentation_handler() -> None:
         source_data_changed_on=None,
         snapshot_downloaded_on=None,
         snapshot_revision="test",
+        static_revision="test",
     )
     for trait_id in load_trait_wiki_references():
         slug = trait_id.removeprefix("trait:")

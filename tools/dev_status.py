@@ -115,16 +115,6 @@ def backlog(markdown: str) -> dict:
 
 def queue(markdown: str, *, today: date | None = None) -> dict:
     today = today or date.today()
-    rules = markdown.split("## Pending test design", 1)[0]
-    thresholds = {}
-    for name, pattern in (
-        ("VD", r"\*\*(\d+)-requirement design threshold\*\*"),
-        ("VR", r"\*\*(\d+)-change execution threshold\*\*"),
-    ):
-        match = re.search(pattern, rules)
-        if match is None:
-            raise ValueError(f"Cannot establish {name} threshold from queue rules")
-        thresholds[name] = int(match.group(1))
     entries: dict[str, list[dict]] = {"VD": [], "VR": []}
     valid_statuses = {
         "VD": {"needs-design", "blocked"},
@@ -163,18 +153,10 @@ def queue(markdown: str, *, today: date | None = None) -> dict:
             max(items, key=lambda item: (item["age_days"], -int(item["id"][3:])))
             if items else None
         )
-        eligible = (
-            sum(item["status"] == "needs-design" for item in items)
-            if kind == "VD" else len(items)
-        )
         result[kind] = {
-            "count": len(items), "threshold": thresholds[kind],
-            "threshold_count": eligible,
-            "threshold_due": eligible >= thresholds[kind],
-            "oldest": oldest, "blocked": [
-                item["id"] for item in items if item["status"] == "blocked"
-            ],
-            "age_due": [item["id"] for item in items if item["age_days"] >= 7],
+            "count": len(items),
+            "oldest": oldest,
+            "blocked": [item["id"] for item in items if item["status"] == "blocked"],
             "entries": items,
         }
     return result
@@ -291,10 +273,8 @@ def format_text(data: dict) -> str:
         details = data["validation"][kind]
         oldest = details["oldest"]
         lines.append(
-            f"{kind}: {details['count']}/{details['threshold']} threshold"
-            + (" DUE" if details["threshold_due"] else "")
+            f"{kind}: {details['count']} deferred"
             + (f"; oldest {oldest['id']} ({oldest['age_days']}d)" if oldest else "")
-            + (f"; age-due {', '.join(details['age_due'])}" if details["age_due"] else "")
             + (f"; blocked {', '.join(details['blocked'])}" if details["blocked"] else "")
         )
     jobs = data["jobs"]

@@ -21,8 +21,6 @@ BACKLOG = """# Backlog
 """
 
 QUEUE = """# Queue
-Rules use the **3-requirement design threshold** and **5-change execution threshold**.
-
 ## Pending test design
 - [ ] VD-0001 (2026-10-28; needs-design): Older design.
 - [ ] VD-0002 (2026-11-05; blocked): Blocked design.
@@ -57,15 +55,16 @@ def test_backlog_reports_invalid_input_without_recommending_work() -> None:
     assert result["next_actionable"] is None
 
 
-def test_queue_excludes_blocked_designs_from_threshold_and_reports_aging() -> None:
+def test_queue_reports_deferred_work_without_deadlines_or_thresholds() -> None:
     result = dev_status.queue(QUEUE, today=date(2026, 11, 6))
 
     assert result["VD"]["count"] == 2
-    assert result["VD"]["threshold_count"] == 1
-    assert not result["VD"]["threshold_due"]
     assert result["VD"]["blocked"] == ["VD-0002"]
-    assert result["VD"]["age_due"] == ["VD-0001"]
-    assert result["VR"]["age_due"] == ["VR-0001"]
+    assert result["VD"]["oldest"]["id"] == "VD-0001"
+    assert result["VD"]["oldest"]["age_days"] == 9
+    assert result["VR"]["oldest"]["id"] == "VR-0001"
+    assert "threshold_due" not in result["VD"]
+    assert "age_due" not in result["VR"]
 
 
 @pytest.mark.parametrize(
@@ -87,7 +86,7 @@ def test_queue_rejects_duplicate_ids_and_invalid_statuses(
         dev_status.queue(invalid, today=date(2026, 11, 6))
 
 
-def test_queue_reports_threshold_when_unblocked_designs_reach_limit() -> None:
+def test_queue_does_not_make_extra_deferred_items_due_by_count() -> None:
     queue_text = QUEUE.replace(
         "- [ ] VD-0002 (2026-11-05; blocked): Blocked design.",
         "- [ ] VD-0002 (2026-11-05; needs-design): Second.\n"
@@ -97,8 +96,25 @@ def test_queue_reports_threshold_when_unblocked_designs_reach_limit() -> None:
     result = dev_status.queue(queue_text, today=date(2026, 11, 6))
 
     assert result["VD"]["count"] == 3
-    assert result["VD"]["threshold_count"] == 3
-    assert result["VD"]["threshold_due"]
+    assert len(result["VD"]["entries"]) == 3
+    assert "threshold" not in result["VD"]
+    assert result["VD"]["blocked"] == []
+
+
+def test_status_text_reports_deferred_items_without_thresholds() -> None:
+    result = dev_status.format_text({
+        "generated_utc": "2026-11-09T10:00:00+00:00",
+        "checkout": {"branch": "dev/v1.1.0", "head": "a" * 40, "dirty": False},
+        "backlog": {"open_count": 1, "next_actionable": None},
+        "validation": dev_status.queue(QUEUE, today=date(2026, 11, 6)),
+        "jobs": {"status": "not_checked"},
+        "ci": {"status": "not_checked"},
+    })
+
+    assert "VD: 2 deferred; oldest VD-0001 (9d); blocked VD-0002" in result
+    assert "VR: 2 deferred; oldest VR-0001 (9d)" in result
+    assert "threshold" not in result
+    assert "age-due" not in result
 
 
 @pytest.mark.parametrize(

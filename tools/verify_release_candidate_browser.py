@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Fail-closed hosted Unit browser acceptance for an exact InfinityDB release candidate.
 
-Runs no deployment actions. The server must match the local candidate's
-immutable Army/rules database bytes, applicable Weapon-profile publication,
-static asset fingerprint, and explicit release version before and after the
-browser checks.
+Runs no deployment actions. The server must match the selected immutable
+Army/Rules databases, embedded citations, static fingerprint and explicit
+release version before and after the browser checks.
 """
 
 from __future__ import annotations
@@ -17,9 +16,11 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
-from infinity_db.snapshot_revision import runtime_snapshot_revision
+from infinity_db.database.repository import Database
+from infinity_db.snapshot_revision import database_set_snapshot_revision
+from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
-from infinity_db.web.presentation import STATIC_ASSET_REVISION
+from infinity_db.web.presentation import static_asset_revision
 from tools.report_reference_baseline import (
     PROJECT_ROOT,
     ReferenceBaselineError,
@@ -37,18 +38,27 @@ class ReleaseCandidateError(ValueError):
     """The served release candidate cannot be accepted."""
 
 
+def local_static_revision(army_db: Path) -> str:
+    """Resolve the candidate's selected mapping revision and actual package assets."""
+    return static_asset_revision(SymbolCatalog(publication=Database(army_db).symbol_publication()))
+
+
 def local_revision(army_db: Path, rules_db: Path) -> str:
     """Use the same artifact revision and attachment rules as the runtime."""
     for database in (army_db, rules_db):
         if not database.is_file():
             raise ReleaseCandidateError(f"Missing release database: {database}")
     try:
-        _, weapon_profile_sha = load_runtime_weapon_profile_publication(army_db, rules_db)
+        citations, _ = load_runtime_weapon_profile_publication(army_db, rules_db)
+        if not citations:
+            raise ReleaseCandidateError("Embedded Weapon citations are missing")
     except (OSError, sqlite3.Error, ValueError) as exc:
         raise ReleaseCandidateError(
-            f"Cannot verify runtime Weapon-profile publication: {exc}"
+            f"Cannot verify embedded Weapon citations: {exc}"
         ) from exc
-    return runtime_snapshot_revision(_sha256(army_db), _sha256(rules_db), weapon_profile_sha)
+    return database_set_snapshot_revision({
+        army_db.name: _sha256(army_db), rules_db.name: _sha256(rules_db),
+    })
 
 
 def _check_served(
@@ -90,8 +100,9 @@ def verify_release_candidate(
     if not widths or any(width < 240 or width > 3840 for width in widths):
         raise ReleaseCandidateError("Browser widths must be between 240 and 3840 px")
     revision = local_revision(army_db, rules_db)
+    static_revision = local_static_revision(army_db)
     before = _check_served(
-        origin, revision, expected_version, STATIC_ASSET_REVISION
+        origin, revision, expected_version, static_revision
     )
     browser = browser_check(
         origin, slugs=slugs, widths=widths, channel=channel
@@ -112,7 +123,7 @@ def verify_release_candidate(
             f"failures={failed[:12]!r}"
         )
     after = _check_served(
-        origin, revision, expected_version, STATIC_ASSET_REVISION
+        origin, revision, expected_version, static_revision
     )
     if (before["snapshotRevision"], before["appVersion"], before["staticRevision"]) != (
         after["snapshotRevision"], after["appVersion"], after["staticRevision"]
@@ -124,7 +135,7 @@ def verify_release_candidate(
         "origin": origin.rstrip("/"),
         "expectedVersion": expected_version,
         "snapshotRevision": revision,
-        "staticRevision": STATIC_ASSET_REVISION,
+        "staticRevision": static_revision,
         "servedVersion": before,
         "browser": browser,
         "postflightVersion": after,
@@ -135,8 +146,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", required=True, help="Hosted candidate HTTP(S) origin")
     parser.add_argument("--expected-version", required=True, help="Exact deployed release version")
-    parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/infinity.db")
-    parser.add_argument("--rules-db", type=Path, default=PROJECT_ROOT / "data/generated/rules.db")
+    parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/army.db")
+    parser.add_argument(
+        "--rules-db", type=Path, default=PROJECT_ROOT / "data/generated/rules_n5.db",
+    )
     parser.add_argument("--channel", help="Playwright browser channel, e.g. chrome")
     parser.add_argument("--slug", action="append", dest="slugs")
     parser.add_argument("--width", action="append", type=int, dest="widths")

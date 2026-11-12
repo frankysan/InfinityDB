@@ -14,13 +14,13 @@ from infinity_db.weapon_ammunition_references import (
     WeaponAmmunitionReferences,
     load_ammunition_reference_map,
 )
-from infinity_db.web import create_app
+from infinity_db.web import create_app, create_app_from_database_set
 
 
 def _rules_database(tmp_path: Path) -> RulesDatabase:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    output = tmp_path / "rules.db"
+    output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
     return RulesDatabase(output)
 
@@ -321,7 +321,7 @@ def test_catalog_rules_keep_source_specific_rules_on_matching_variant(
             },
         ]
     )
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(
         [(root / "curated.json", document), hacking_programs], rules_path
     )
@@ -423,7 +423,7 @@ def test_weapon_source_mode_rules_do_not_leak_between_same_id_profiles(
         },
         ]
     )
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     export_rules_database(
         [(core_path, test_core), *(entry for entry in documents if entry[0] != core_path)],
         path,
@@ -464,9 +464,10 @@ def test_weapon_source_mode_rules_do_not_leak_between_same_id_profiles(
 
     # Confirm the HTTP API uses the same exact-mode enrichment without changing
     # the imported Army profiles or contaminating the other mode.
-    app = create_app(
-        root / "data/generated/infinity.db", rules_database_path=path
-    )
+    # Keep the synthetic Rules-v10 corpus for exact-mode enrichment only;
+    # the HTTP application must boot from the current validated publication set.
+    app = create_app_from_database_set(root / "data/generated")
+    app.api.catalog_rules = CatalogRules(rules, database=app.database)
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)
     environ.update(PATH_INFO="/api/weapons/kobra-pistol", REQUEST_METHOD="GET")
@@ -685,7 +686,7 @@ def test_combined_ammunition_components_are_not_inferred_from_roll_notation(
 
 def test_reviewed_ammunition_source_names_match_published_army_snapshot() -> None:
     root = Path(__file__).resolve().parents[1]
-    with sqlite3.connect(root / "data/generated/infinity.db") as connection:
+    with sqlite3.connect(root / "data/generated/army.db") as connection:
         published = dict(connection.execute("SELECT id, name FROM metadata_ammunitions"))
         source_count = connection.execute("SELECT COUNT(*) FROM metadata_weapons").fetchone()[0]
         reviewed_ids = tuple(load_ammunition_reference_map())
@@ -752,7 +753,7 @@ def test_ammunition_resolution_pilot_preserves_separate_source_operations(
     assert rules_db.composed_record("state:immobilized-a") is not None
 
     root = Path(__file__).parents[1]
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
+    app = create_app_from_database_set(root / "data/generated")
 
     def detail(path: str) -> dict[str, Any]:
         environ: dict[str, Any] = {}
@@ -815,7 +816,7 @@ def test_remaining_base_ammunition_facts_are_source_cited_and_published(
     assert ("visibilityZone" in facts) != ("ammunitionResolution" in facts)
 
     root = Path(__file__).parents[1]
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
+    app = create_app_from_database_set(root / "data/generated")
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)
     environ["REQUEST_METHOD"] = "GET"
@@ -861,7 +862,7 @@ def test_combined_saving_roll_review_covers_exact_six_plasma_modes() -> None:
     )
 
     root = Path(__file__).parents[1]
-    database = Database(root / "data/generated/infinity.db")
+    database = Database(root / "data/generated/army.db")
     resolver = WeaponCombinedSavingRolls()
     mapping = load_combined_saving_roll_map()
     assert set(mapping) == {
@@ -906,8 +907,8 @@ def test_combined_saving_roll_review_is_published_without_ammunition_composition
     from infinity_db.database.repository import Database
 
     root = Path(__file__).parents[1]
-    database = Database(root / "data/generated/infinity.db")
-    rules = CatalogRules(RulesDatabase(root / "data/generated/rules.db"))
+    database = Database(root / "data/generated/army.db")
+    rules = CatalogRules(RulesDatabase(root / "data/generated/rules_n5.db"))
     plasma = database.get_catalog_item("weapons", "plasma-carbine")
     assert plasma is not None
     enriched = rules.enrich_catalog_item("weapons", plasma)
@@ -956,8 +957,8 @@ def test_combined_saving_roll_map_rejects_unsupported_or_ambiguous_inputs(
 def test_plasma_combined_saving_roll_critical_reaches_weapon_api() -> None:
     root = Path(__file__).parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     def detail(slug: str) -> dict[str, Any]:
@@ -1133,9 +1134,8 @@ def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
 ) -> None:
     """Player instructions and pinned sources survive curated publication."""
     rules_db = _rules_database(tmp_path)
-    app = create_app(
-        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
-        rules_database_path=rules_db.path,
+    app = create_app_from_database_set(
+        Path(__file__).resolve().parents[1] / "data/generated",
     )
     expected = {
         "ap": {
@@ -1247,9 +1247,8 @@ def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
 def test_exp_t2_reviewed_rolls_and_source_discrepancy_reach_api(tmp_path: Path) -> None:
     """Retain EXP/T2 Critical distinctions and T2's N5.3 wording conflict."""
     rules_db = _rules_database(tmp_path)
-    app = create_app(
-        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
-        rules_database_path=rules_db.path,
+    app = create_app_from_database_set(
+        Path(__file__).resolve().parents[1] / "data/generated",
     )
     for slug in ("exp", "t2"):
         record = rules_db.composed_record(f"ammunition:{slug}")
@@ -1315,9 +1314,8 @@ def test_reviewed_para_shock_stun_conditions_reach_rules_and_api(
 ) -> None:
     """N5.3 source conditions stay distinct from unconditional graph relations."""
     rules_db = _rules_database(tmp_path)
-    app = create_app(
-        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
-        rules_database_path=rules_db.path,
+    app = create_app_from_database_set(
+        Path(__file__).resolve().parents[1] / "data/generated",
     )
     pages = {
         "para": (65, 66),
@@ -1412,9 +1410,8 @@ def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
     tmp_path: Path,
 ) -> None:
     rules_db = _rules_database(tmp_path)
-    app = create_app(
-        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
-        rules_database_path=rules_db.path,
+    app = create_app_from_database_set(
+        Path(__file__).resolve().parents[1] / "data/generated",
     )
 
     for slug, expected_msv in (("smoke", "can-draw-lof"), ("eclipse", "blocked")):
@@ -1546,9 +1543,7 @@ def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
     } == {99}
 
     root = Path(__file__).resolve().parents[1]
-    app = create_app(
-        root / "data/generated/infinity.db", rules_database_path=rules_db.path
-    )
+    app = create_app_from_database_set(root / "data/generated")
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)
     environ.update(PATH_INFO="/api/skills/immunity", REQUEST_METHOD="GET")
@@ -1623,7 +1618,7 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
     assert "explicitly exempts" in immunity["facts"]["restrictions"][1]
 
     root = Path(__file__).resolve().parents[1]
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
+    app = create_app_from_database_set(root / "data/generated")
 
     def request(path: str) -> tuple[str, bytes]:
         environ: dict[str, Any] = {}
@@ -1696,11 +1691,10 @@ def test_vulnerability_example_is_explicit_and_not_a_component_rule(
         assert "reviewedVulnerabilityCases" not in load_ammunition_reference_map()[source_id]
 
 
-def test_n53_specball_core_procedure_reaches_public_skill_routes(tmp_path: Path) -> None:
-    """N53-02: public Skills expose the reviewed core procedure, not ITS-only rules."""
-    rules_db = _rules_database(tmp_path)
+def test_n53_specball_core_procedure_reaches_public_skill_routes() -> None:
+    """N53-02: the complete runtime serves core SpecBall without ITS restrictions."""
     root = Path(__file__).resolve().parents[1]
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
+    app = create_app_from_database_set(root / "data/generated")
 
     def request(path: str) -> tuple[str, bytes]:
         environ: dict[str, Any] = {}
@@ -1748,8 +1742,12 @@ def test_n53_specball_core_procedure_reaches_public_skill_routes(tmp_path: Path)
     )
     assert "once per game" in " ".join(facts["restrictions"])
     assert "At the end of the collecting Order" in " ".join(facts["effects"])
+    assert len(facts["sourceNotes"]) == 1
     assert "English printing discrepancy" in facts["sourceNotes"][0]
-    assert "ITS applicability" in facts["sourceNotes"][1]
+    assert not any("ITS Season 18" in note for note in facts["sourceNotes"])
+    assert {citation["source_id"] for citation in request_rule[0]["citations"]} == {
+        "n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf",
+    }
     assert ("uses-effects-of", "outbound", "Combat Jump") in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in request_rule[0]["display_relations"]
@@ -1762,10 +1760,9 @@ def test_n53_specball_core_procedure_reaches_public_skill_routes(tmp_path: Path)
     ]
 
 
-def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
-    rules_db = _rules_database(tmp_path)
+def test_immunity_interaction_is_cited_on_skill_api() -> None:
     root = Path(__file__).resolve().parents[1]
-    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
+    app = create_app_from_database_set(root / "data/generated")
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)
     environ["PATH_INFO"] = "/api/skills/immunity"
@@ -1871,9 +1868,8 @@ def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
             if cite["source_id"] == "n5-core-v5.3-es-pdf"
         } >= spanish_pages
 
-    app = create_app(
-        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
-        rules_database_path=rules_db.path,
+    app = create_app_from_database_set(
+        Path(__file__).resolve().parents[1] / "data/generated",
     )
     for slug, target, count in (
         ("dodge", "state:engaged", 4),
@@ -1976,9 +1972,8 @@ def test_state_cancellation_clarifications_are_scoped_and_published(
         details = " ".join(rule["facts"]["clarifications"])
         assert all(fragment in details for fragment in expected), identity
 
-    app = create_app(
-        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
-        rules_database_path=database.path,
+    app = create_app_from_database_set(
+        Path(__file__).resolve().parents[1] / "data/generated",
     )
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)

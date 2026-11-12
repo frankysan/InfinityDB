@@ -327,9 +327,9 @@ def select_source_variants(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--application", type=Path, default=Path("data/generated/infinity.db"))
-    parser.add_argument("--raw", type=Path, default=Path("data/generated/infinity.raw.db"))
-    parser.add_argument("--rules", type=Path, default=Path("data/generated/rules.db"))
+    parser.add_argument("--application", type=Path, default=Path("data/generated/army.db"))
+    parser.add_argument("--raw", type=Path, default=Path("data/work/build/army.raw.db"))
+    parser.add_argument("--rules", type=Path, default=Path("data/generated/rules_n5.db"))
     parser.add_argument("--catalog", choices=CATEGORIES, help="limit output to one source catalog")
     parser.add_argument(
         "--unresolved-only", action="store_true",

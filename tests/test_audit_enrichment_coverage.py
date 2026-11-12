@@ -164,13 +164,13 @@ def _fixture_database(tmp_path: Path) -> Path:
         "sourceSha256": "test-metadata",
         "data": {"factions": []},
     }
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized, path)
     return path
 
 
 def _fixture_rules(tmp_path: Path) -> Path:
-    path = tmp_path / "rules.db"
+    path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(Path("data/curated")), path)
     return path
 
@@ -487,7 +487,7 @@ def test_repeater_current_citation_and_cube_public_equipment_resolution(
         for cite in repeater["citations"]
     )
 
-    database_path = Path(__file__).resolve().parents[1] / "data/generated/infinity.db"
+    database_path = Path(__file__).resolve().parents[1] / "data/generated/army.db"
     report = audit_coverage(database_path, rules_path, include_complete=True)
     assert report["summary"]["unresolvedRelatedItemLinkCount"] == 0
     assert report["summary"]["releaseBlockerCount"] == 0

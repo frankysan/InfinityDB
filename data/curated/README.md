@@ -17,6 +17,11 @@ provenance under `data/manifests/`.
   `army-overview.json` contains short editorial gameplay summaries keyed by public Army slug;
   the copy is synthesized from current Army/rules data with external faction background used only
   as secondary context, and is kept separate from source-derived identity semantics.
+  Opt-in complete builds embed these summaries and the explicitly authored
+  `legacy-armies.json` identities in Army v30; serving reads the selected
+  SQLite projection. Earlier schemas and source-only tools retain the JSON
+  adapters. The [data model](../../docs/data-model.md#army-overview-and-historical-identities-in-army-v30-p24-opt-in)
+  owns identity, parentage and provenance safeguards.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
   endpoints that cannot be resolved from the current Army snapshot alone.
@@ -263,14 +268,14 @@ rules-only relation targets that already support an exposed item are classified 
 `catalogGapCodes` records reviewed release-scope decisions that apply to one gap kind across a
 whole catalog. More-specific item or relation `overrides` record reviewed exceptions with a
 reason and take precedence over catalog-level decisions. Item/relation overrides must match a gap
-in the selected `infinity.db` + `rules.db` pair; stale or mistyped overrides fail the audit instead
+in the selected `army.db` + `rules_n5.db` pair; stale or mistyped overrides fail the audit instead
 of silently surviving after the underlying data changes.
 
 The published 0.10.0 scope classified missing Weapon rule definitions as `later-product-work`
 and deferred Commlink to its separately scoped Reinforcements Extra work. These retained
 classifications describe that release's reviewed scope; they do not waive the 1.0 completeness
-gate. Reassess them against the pinned 1.0 inputs as tracked in
-[the backlog](../../docs/TODO.md#source-inventory-and-gap-batches).
+gate. The bounded review against the pinned 1.0 inputs is preserved in
+[the source-coverage audit](../../docs/v1.0-source-coverage-audit.md).
 Other defects in those catalogs, including stale citations, ambiguous mappings, unresolved links,
 or unreviewed rules, retain their normal conservative classification and can still block the
 release under review. The policy is release-planning metadata only; it must not be consumed as rules
@@ -320,8 +325,8 @@ When the Army/application catalog snapshot changes, validate or refresh the main
 scope against the generated databases:
 
 ```powershell
-python tools/audit_rules_interactions.py --database data/generated/infinity.db --rules-database data/generated/rules.db
-python tools/audit_rules_interactions.py --database data/generated/infinity.db --rules-database data/generated/rules.db --refresh-catalog-scope --output docs/rules-interaction-checklist.md
+python tools/audit_rules_interactions.py --database data/generated/army.db --rules-database data/generated/rules_n5.db
+python tools/audit_rules_interactions.py --database data/generated/army.db --rules-database data/generated/rules_n5.db --refresh-catalog-scope --output docs/rules-interaction-checklist.md
 ```
 
 A release gate may be inspected explicitly with `--require-release <version>`. Pending
@@ -370,7 +375,7 @@ During mapping review, validate it against the exact generated Army snapshot and
 deterministic coverage/review queue with:
 
 ```powershell
-infinity-db validate-peripheral-identities --database data/generated/infinity.db --output "reports/PERIPHERAL IDENTITY COVERAGE.json"
+infinity-db validate-peripheral-identities --database data/generated/army.db --output "reports/PERIPHERAL IDENTITY COVERAGE.json"
 ```
 
 The snapshot-bound pass requires the database SHA-256 provenance to match exactly one
@@ -417,9 +422,8 @@ code consumes the persisted field and does not reload this curated file.
 remain useful for player-facing reference but have no current N5 Army list. These
 entries are not normalization aliases and are never promoted into selectable
 `application_armies`. The Army overview loads them as explicit non-playable legacy
-references, while symbol discovery uses their historical logo URLs so maintained
-`image_overrides/factions` assets pass through the normal symbol processing and
-publication pipeline.
+references, while the exported symbol source plan includes their historical logo
+URLs for the external producer and InfinityDB's verified publication.
 
 ## Curated rules reference data
 
@@ -491,7 +495,7 @@ Every record declares `composition.role` as `definition` or `supplement`. Across
 current collections, each semantic record ID has exactly one definition; supplements
 retain their own scope, facts, citations, relations, and publication provenance rather
 than being field-merged by load order. Related concepts use typed one-way `relations`;
-reverse navigation is derived by `rules.db`.
+reverse navigation is derived by `rules_n5.db`.
 
 ### Dated FAQ ruling authoring contract (published subset)
 
@@ -667,9 +671,9 @@ checks that the source identity, chart page, profile fingerprint, absence of sou
 and full reviewed ammunition-link coverage still match. Any drift reopens
 review rather than silently preserving acceptance. These approvals concern
 Weapon-specific explanation needs, **not** gameplay resolution or release-wide
-browser acceptance. `tools.build_weapon_profile_publication` separately
-materializes the profile-only chart locators for the matched release pair;
-the browser does not read this curation file.
+browser acceptance. The complete Rules database build embeds the reviewed
+profile-only chart locators. Source verification compares those citations
+with this file; the browser does not read the curation input.
 
 Ammunition definitions may additionally publish reviewed, **non-executable**
 `facts.ammunitionResolution` operations. This is a bounded typed-effects pilot; the
@@ -859,8 +863,12 @@ Shared prose participates in the full semantic maintained-text syntax, target, a
 audits, including objective/ending payloads in the component library. No plain-reference exception
 is broadened for the new model. The rules builder consumes curated format v23.
 Its base schema/compatibility is 8/10. The normal CLI builds v10/12 with
-Restrictions and embedded deployed objects; explicit compatibility builds retain
-v8/10 and v9/11. The prepared 1.0.1 tracked release uses v10/12, while the
+Restrictions and embedded deployed objects; obsolete v8/v9 CLI modes are retired.
+Low-level base reference exports remain useful for controlled semantic fixtures,
+not complete runtime publication. Complete `build --db-dir` exports v11/13 with relational exact
+variant usage linked to the existing reviewed definitions; it does not change
+curated format v23. The [data model](../../docs/data-model.md#rule-variant-usage-api)
+owns that projection and its source safeguards. The prepared 1.0.1 tracked release uses v10/12, while the
 tagged 1.0.0 release used v9/11. Verify the matched tracked artifact rather
 than assuming a fresh base export has identical release bytes.
 
@@ -873,7 +881,7 @@ Weapon records may use `facts.specialProfile` for rulebook-defined deployable
 profiles that are not fully represented by Army weapon metadata. The special
 profile stores ordered stat name/value pairs, equipment, skills, and a CC weapon;
 the application composes it into the existing weapon-reference API only when a
-validated `rules.db` is available.
+validated `rules_n5.db` is available.
 
 Full Skill definitions own their declaration/action categories directly through an
 ordered, non-empty `facts.typeIds` array referencing the canonical `skillTypes`

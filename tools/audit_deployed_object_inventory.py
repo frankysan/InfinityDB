@@ -21,7 +21,7 @@ validate_source_domain_clause_reviews = _inventory.validate_source_domain_clause
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--army-db", type=Path, default=Path("data/generated/infinity.db"))
+    parser.add_argument("--army-db", type=Path, default=Path("data/generated/army.db"))
     parser.add_argument(
         "--curated-source", type=Path,
         default=Path("data/curated/rules/n5-core-v5.3.json"),

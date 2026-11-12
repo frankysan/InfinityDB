@@ -107,7 +107,7 @@ Sources: [N5.3 release notice](https://infinityuniverse.com/en/news/infinity-rul
 
 **Scope:** Katyusha MRL range bands, N5 v5.3 core PDF (printed p. 187,
 SHA-256 `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`),
-September 2026 Army snapshot (`data/generated/infinity.db`, weapon source ID 49),
+September 2026 Army snapshot (`data/generated/army.db`, weapon source ID 49),
 and N5.3 Wiki `Weapon_Chart` (reviewed revision 4083; pinned content hash in
 `config/validation/weapon-trait-wiki-review.json`).
 
@@ -136,7 +136,7 @@ source-provenance or 1.0 completeness review.
 
 ### RR-WPN-FAMILY-001 — Mines and Perimeter Weapons are distinct rules families
 
-**Scope:** source review of N5 core Weaponry pp. 69 and 72; `rules.db` and
+**Scope:** source review of N5 core Weaponry pp. 69 and 72; `rules_n5.db` and
 Army snapshot from `InfinityDB-work-021d3921c61f.zip` (with reviewed Boost
 curation). This entry retains **historical, hash-pinned family-clause evidence**
 and a record of subsequent consumers; it is not an unimplemented family
@@ -228,7 +228,7 @@ summary matches do not establish browser acceptance.
 Sources: N5 v5.3 PDF, printed pp. 69 (Perimeter Weapons/Boost), 72 (Mines,
 Cybermines, Chest Mines), PDF SHA-256
 `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`;
-`data/generated/infinity.db` and `data/generated/rules.db`, with their exact
+`data/generated/army.db` and `data/generated/rules_n5.db`, with their exact
 hashes emitted by the audit. PDF and generated databases are external audit
 inputs, not redistributed artifacts.
 

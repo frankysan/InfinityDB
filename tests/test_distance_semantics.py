@@ -8,7 +8,7 @@ from pathlib import Path
 from infinity_db.maintained_text import DISTANCE_CENTIMETERS_PER_INCH
 
 ROOT = Path(__file__).resolve().parents[1]
-RUNTIME_DATABASE = ROOT / "data" / "generated" / "infinity.db"
+RUNTIME_DATABASE = ROOT / "data" / "generated" / "army.db"
 UNIT_PRESENTATION_SCRIPT = (
     ROOT / "src" / "infinity_db" / "web" / "static" / "unit-presentation.js"
 )

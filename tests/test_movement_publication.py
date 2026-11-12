@@ -1,4 +1,4 @@
-"""V1S-033A source, identity and matched-publication regressions."""
+"""Accepted movement source, identity, Rules and API regressions."""
 
 from __future__ import annotations
 
@@ -14,17 +14,23 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
-from tools import promote_movement_reference
-from tools.promote_movement_reference import CITATIONS, verify_candidate
 
 ROOT = Path(__file__).resolve().parents[1]
-RULES = ROOT / "data/generated/rules.db"
+RULES = ROOT / "data/generated/rules_n5.db"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+CITATIONS = {
+    "rule:moving-and-measuring": {27, 28},
+    "rule:general-movement": {29, 30},
+    "skill:move": {28, 29},
+}
 
 
 def _records() -> dict[str, Any]:
     document = load_curated_document(ROOT / "data/curated/rules/n5-core-v5.3.json")
-    return {r["id"]: r for r in document["records"]}
+    records = document["records"]
+    assert all(sum(row["id"] == identity for row in records) == 1
+               for identity in CITATIONS)
+    return {r["id"]: r for r in records}
 
 
 def _get(app: Any, path: str, query: str = "") -> tuple[str, bytes]:
@@ -99,13 +105,16 @@ def test_move_and_shared_rules_preserve_conditional_boundaries() -> None:
         assert phrase in text, phrase
     for identity, pages in CITATIONS.items():
         record = records[identity]
+        assert record["kind"] == identity.partition(":")[0]
+        assert record["scope"] == {"game": "N5", "seasons": ["current"]}
+        assert record["composition"] == {"role": "definition"}
         assert {c["page"] for c in record["citations"]
                 if c["sourceId"] == "n5-core-v5.3-pdf"} == pages
         assert not record.get("relations")  # No unconditional State/Skill grants.
 
 
 def test_published_movement_source_api_search_and_routes() -> None:
-    app = create_app(ROOT / "data/generated/infinity.db", rules_database_path=RULES)
+    app = create_app(ROOT / "data/generated/army.db", rules_database_path=RULES)
     db = RulesDatabase(RULES)
     records = _records()
     for identity in CITATIONS:
@@ -127,30 +136,3 @@ def test_published_movement_source_api_search_and_routes() -> None:
         assert status == "200 OK"
         assert any(item.get("href") == f"/{domain}/{slug}"
                    for item in json.loads(body)["items"])
-
-
-def test_guarded_movement_rebuild_matches_current_release() -> None:
-    if not PDF.is_file() or not (ROOT / "local").is_dir():
-        pytest.skip("Pinned source and local staging unavailable")
-    result = verify_candidate()
-    assert result["alreadyPublished"]
-    assert result["deterministic"] and result["matchedPublication"]
-    assert result["logicallyEquivalentWithPublished"]
-    assert result["candidateRecords"] >= 489
-    assert result["publishedRulesSha256"] == hashlib.sha256(RULES.read_bytes()).hexdigest()
-
-
-def test_movement_guard_refuses_repeat_and_mismatch_without_writes(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    if not PDF.is_file() or not (ROOT / "local").is_dir():
-        pytest.skip("Pinned source and local staging unavailable")
-    objects = ROOT / "data/generated/deployed-objects.json"
-    original = (RULES.read_bytes(), objects.read_bytes() if objects.is_file() else None)
-    with pytest.raises(ValueError, match="repeated movement promotion"):
-        verify_candidate(promote=True)
-    monkeypatch.setattr(promote_movement_reference, "load_release_deployed_objects",
-                        lambda *_args: None)
-    with pytest.raises(ValueError, match="publication does not match"):
-        verify_candidate()
-    assert (RULES.read_bytes(), objects.read_bytes() if objects.is_file() else None) == original

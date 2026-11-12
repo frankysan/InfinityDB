@@ -155,18 +155,15 @@ def check_export(
         if result.returncode:
             return ["isolated CI dependency installation failed"]
 
-    for arguments in (
-        ["-m", "tools.build_deployed_object_publication", "--when-legacy"],
-        ["-m", "tools.build_deployed_object_publication", "--check", "--when-legacy"],
-    ):
-        # The ordinary mode may have an editable install of the working tree.
-        # Publication preparation must import the indexed application instead.
-        result = subprocess.run(
-            [str(python), *arguments], cwd=export,
-            env={**env, "PYTHONPATH": str(export / "src")},
-        )
-        if result.returncode:
-            return ["clean-export deployed-object publication preparation failed"]
+    # Verify the indexed selected set without producing any obsolete JSON.
+    # An existing editable install must not replace the exported application.
+    result = subprocess.run(
+        [str(python), "-m", "infinity_db", "database-health",
+         "--db-dir", "data/generated"],
+        cwd=export, env={**env, "PYTHONPATH": str(export / "src")},
+    )
+    if result.returncode:
+        return ["clean-export runtime database-set verification failed"]
 
     problems = []
     if environment is not None:

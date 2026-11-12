@@ -164,8 +164,8 @@ def test_source_gate_fails_closed_on_missing_or_changed_evidence(
 
 
 def test_optional_n4_annex_remains_separate_from_current_core_declarations() -> None:
-    rules = RulesDatabase(ROOT / "data/generated/rules.db")
-    army = Database(ROOT / "data/generated/infinity.db")
+    rules = RulesDatabase(ROOT / "data/generated/rules_n5.db")
+    army = Database(ROOT / "data/generated/army.db")
     for identity in ("skill:commlink", "skill:request-reinforcements"):
         record = rules.composed_record(identity)
         assert record is not None

@@ -5,8 +5,7 @@ ARG INFINITY_DB_DISPLAY_VERSION=""
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    INFINITY_DB_DATABASE=/app/data/infinity.db \
-    INFINITY_DB_RULES_DATABASE=/app/data/rules.db \
+    INFINITY_DB_DB_DIR=/app/data \
     INFINITY_DB_DISPLAY_VERSION=${INFINITY_DB_DISPLAY_VERSION}
 
 WORKDIR /app
@@ -26,12 +25,14 @@ COPY data/curated/peripherals /app/data/curated/peripherals
 COPY data/manifests/symbol-publication.json /app/data/manifests/symbol-publication.json
 RUN pip install --no-cache-dir ".[server]" \
     && rm -rf /app/config /app/data/curated /app/docs /app/data/manifests \
+    && python -c "import shutil,sys; from pathlib import Path; p=Path(sys.prefix)/'share/infinity-db'; shutil.rmtree(p/'config',ignore_errors=True); shutil.rmtree(p/'data',ignore_errors=True)" \
     && useradd --create-home --uid 10001 appuser \
     && chown -R appuser:appuser /app
 
-# Prepared before Docker build: v9 includes deployed-objects.json;
-# v10 embeds those records in rules.db and packages no such JSON file.
-COPY --chown=appuser:appuser data/runtime/ /app/data/
+# Package exactly the committed complete runtime set; no assembly directory.
+COPY --chown=appuser:appuser data/generated/army.db /app/data/army.db
+COPY --chown=appuser:appuser data/generated/rules_n5.db /app/data/rules_n5.db
+COPY --chown=appuser:appuser data/generated/its_18.db /app/data/its_18.db
 
 USER appuser
 EXPOSE 8000

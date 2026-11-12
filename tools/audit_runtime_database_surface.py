@@ -118,6 +118,24 @@ _register(
     ),
 )
 _register(
+    [
+        "skill_source_classification_metadata", "skill_source_classifications",
+        "unit_filter_metadata", "hidden_unit_characteristics",
+        "source_classification_memberships", "source_classification_matches",
+        "army_reference_metadata", "army_overview_text",
+        "symbol_path_metadata", "published_symbol_assets", "published_symbol_paths",
+    ],
+    CANONICAL,
+    reason="Source-bound reviewed application classifications, filter overlays or editorial copy.",
+)
+_register(
+    ["legacy_army_identities"],
+    CONTEXTUAL,
+    reason=(
+        "Explicit historical Army identities and authored parentage outside the playable catalog."
+    ),
+)
+_register(
     ["application_fireteams"],
     CANONICAL,
     reason="Army-scoped Fireteam application identities used by chart browsing.",
@@ -367,6 +385,8 @@ TABLE_POLICY["units"] = _policy(
 # helpers. validate() is intentionally excluded from the audited serving surface.
 EXCLUDED_DIRECT_METHODS = {"validate"}
 PROBED_DIRECT_METHODS = {
+    "symbol_publication",
+    "army_reference_data",
     "application_catalog_id",
     "application_domain_id",
     "application_slug",
@@ -383,11 +403,13 @@ PROBED_DIRECT_METHODS = {
     "list_catalog_items",
     "get_catalog_item",
     "skill_source_ids",
+    "skill_source_classifications",
     "get_skill",
     "trait_usage_index",
     "list_traits",
     "get_trait",
     "list_unit_filter_values",
+    "unit_filter_semantics",
     "list_units",
     "visible_unit_ids",
     "get_unit",
@@ -512,6 +534,10 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
         ("snapshot-metadata", lambda db: db.snapshot_downloaded_on()),
         ("source-data-date", lambda db: db.source_data_changed_on()),
         ("armies", lambda db: db.list_armies()),
+        ("army-reference-data", lambda db: db.army_reference_data()),
+        ("symbol-publication", lambda db: db.symbol_publication()),
+        ("skill-source-classifications", lambda db: db.skill_source_classifications()),
+        ("unit-filter-semantics", lambda db: db.unit_filter_semantics()),
         ("fireteam-armies", lambda db: db.list_fireteam_armies()),
         (
             "fireteam-chart",

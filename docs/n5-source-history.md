@@ -157,7 +157,7 @@ facts; do not invent an effective date for each clause. The currently
 published **Battleground pilot** still deliberately pins
 `its-18@2026.09.01`. No updated source declarations, citations, scenarios,
 runtime interpretations or database artifacts were promoted in this audit.
-The [post-1.0 ITS library backlog](TODO.md#its-scenarios-and-game-tools)
+The [ITS library backlog](TODO.md#its-scenarios-and-game-tools)
 owns bilingual .11 adoption, version-specific published scenario/citation
 reconciliation and any full-season review.
 
@@ -779,8 +779,8 @@ historical Army delta, Unit-use count or complete variant-index acceptance.
 
 **Availability check, 2026-10-21:** The local files below are present and readable,
 but their covers explicitly identify **N4**, not N5. Both contain five file pages.
-Their presence does not supply an edition-verified current N5 annex or close the
-Reinforcements task in [TODO](TODO.md#rules-and-reference-completeness).
+Their presence does not supply an edition-verified current N5 annex or
+establish N5-era applicability for these N4 documents.
 
 | Local research file | Exact SHA-256 | Reviewed identity |
 | --- | --- | --- |

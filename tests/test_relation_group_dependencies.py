@@ -76,7 +76,7 @@ def _normalized_group_dependency() -> dict:
 
 
 def test_export_materializes_same_logical_profile_group_dependency(tmp_path: Path) -> None:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(_normalized_group_dependency(), path)
 
     Database(path).validate()
@@ -100,7 +100,7 @@ def test_export_materializes_same_logical_profile_group_dependency(tmp_path: Pat
 
 
 def test_unit_detail_exposes_profile_group_dependency(tmp_path: Path) -> None:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(_normalized_group_dependency(), path)
 
     unit = Database(path).get_unit(1)
@@ -139,7 +139,7 @@ def test_group_dependency_requires_profile_group_coordinates(tmp_path: Path) -> 
     normalized = _normalized_group_dependency()
     dependency = normalized["tables"]["relation_dependencies"][0]
     dependency["profile_id"] = 99
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(normalized, path)
 
     Database(path).validate()
@@ -150,7 +150,7 @@ def test_group_dependency_requires_profile_group_coordinates(tmp_path: Path) -> 
 
 
 def test_database_validation_rejects_tampered_group_dependency(tmp_path: Path) -> None:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     export_database(_normalized_group_dependency(), path)
 
     with sqlite3.connect(path) as connection:
