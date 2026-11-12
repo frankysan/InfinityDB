@@ -190,6 +190,51 @@ Historical-only tests can retire with completed tools; preserve independent
 semantic checks. New tools should declare domain, role, expected output
 path/lifetime and retirement condition in their module docstring or help.
 
+## Lifecycle/disposition audit (existing policy, L0–L1 implementation)
+
+The canonical [completed-file policy](README.md#disposition-and-naming-of-completed-files)
+governs removal, evidence archival, renaming and reusable-logic extraction.
+The cleanup project must make those decisions **per artifact**, not use an
+automated age cutoff or relocate every old file to an archive.
+
+Inventory both tracked and ignored **plans, reports and audits**, not just
+Python tools and source archives. For each item, capture its owner/domain,
+purpose, source revision or task scope, current versus historical status,
+producing command, consumers, open findings, retention reason, evidence
+integrity/backup, and proposed retirement trigger. The review must answer:
+
+- **Plans:** Is implementation still open in `TODO.md`? Have durable
+  architectural decisions moved to canonical docs? Does the completed plan
+  contain unique rationale worth a visibly labeled historical record?
+- **Audits:** Are any unresolved findings still assigned to a maintained
+  register? Is source identity independently reproducible? Is a newer audit
+  a replacement of the evidence or only an additional observation?
+- **Reports:** Are results required for a current release, legal/provenance
+  obligation, ongoing diagnosis or reproducible comparison? Can raw
+  intermediates be discarded while preserving the accepted summary?
+- **Tools:** Is the command still used for repeatable research, a current
+  validation/build contract or a supported operator action? Can useful
+  helpers be extracted before an obsolete wrapper is retired?
+- **Ignored/private files:** Is the material immutable source, active
+  scratch, accepted evidence, recovery data or an unrecognized file?
+  Treat unknown ownership as `needs-decision`, never `safe-to-delete`.
+
+The approved disposition manifest should distinguish `retain-active`,
+`retain-frozen-evidence`, `rename-or-move`, `extract-and-retire`,
+`retire-to-git-history`, `delete-reproducible-local-output` and
+`needs-decision`. Record a concise reason, exact old/new path, impacted
+consumers, validation method and (where needed) retention/review trigger.
+A renamed historical file must not continue posing as a maintained command
+or active plan. Only unique shared evidence belongs in a tracked historical
+location; private evidence stays in categorized `local/`.
+
+Do **not** create a general tracked `archive/` tree, a permanent duplicate
+catalog of retired files or placeholder wrappers for old commands. Git
+history is the default archive for superseded tracked code and narrative.
+Prevent ambiguous references to archived materials by updating links,
+indexes, scripts and instructions with each approved retirement batch.
+Old private source/backup deletion remains separately authorized.
+
 ## Execution phases
 
 ### L0 — Full read-only inventory and ownership mapping
@@ -199,12 +244,12 @@ path/lifetime and retirement condition in their module docstring or help.
    Capture path, byte size, kind, tracked/ignored status, Git rule, timestamps
    where trustworthy, and SHA-256 for candidate migrations; do not include
    private content or credentials in published reports.
-2. For each tool, record purpose, inputs/outputs, owner, calls/imports from
-   source/tests/tools/CI/scripts/docs/agent skills, optional local-only
-   consumers, publication side effects, and lifetime. Classify:
-   `retain`, `move`, `extract-and-replace`, `archive-evidence`,
-   `retire`, or `needs-decision`. A historical test alone is not a reason
-   to retain its obsolete implementation.
+2. For each tool, plan, audit and report, record purpose, inputs/outputs,
+   owner, calls/imports and links from source/tests/tools/CI/scripts/docs/
+   agent skills, optional local-only consumers, publication side effects,
+   open findings, lifetime and retention trigger. Apply the explicit
+   dispositions in the [lifecycle audit](#lifecycledisposition-audit-existing-policy-l0l1-implementation).
+   A historical test alone is not a reason to retain its obsolete implementation.
 3. For ignored files, distinguish immutable upstream originals,
    re-creatable diagnostics, accepted evidence, active Syncthing inputs,
    recoverable backups and unrecognized material. Never infer that an
@@ -219,8 +264,10 @@ proposal. Unresolved ownership or unique evidence is explicitly marked.
 
 ### L1 — Approve and publish the new path policy
 
-1. Confirm the categories above, any scoped exceptions, naming examples,
-   lifecycle/retention rules and who may prune each class.
+1. Review the [canonical disposition policy](README.md#disposition-and-naming-of-completed-files),
+   categories above, scoped exceptions, naming examples, lifecycle/retention
+   rules and who may prune each class. Approve the plan/report/audit dispositions
+   separately from executable-tool retirement and private-data deletion.
 2. Select the canonical tracked owner for the adopted policy
    (`docs/architecture.md` and `data/README.md`, with short references in
    `AGENTS.md` and `docs/README.md`). Keep the detailed migration
@@ -312,10 +359,18 @@ and passing focused tests.
    only if duplication is demonstrated. Do not retire current release
    gates, reproducible source investigations or useful optional
    diagnostics solely because they are not called in ordinary CI.
+4. Reconcile completed plans, reports and audits against their original
+   purpose and open findings. Remove superseded narratives, keep only
+   genuinely unique frozen evidence, and rename retained historical
+   material only when that improves its scope/status clarity. Update
+   indexes, citations, documentation links and any associated generators
+   in the same change.
 
-**Exit:** Every deletion has an explicit fulfilled purpose, an audited
-consumer graph and preserved current behavior/evidence. The removed code
-remains recoverable through Git history.
+**Exit:** Every deletion or rename has an explicit fulfilled purpose, an
+audited consumer/link graph and preserved current behavior/evidence.
+Superseded tracked code and narrative remain recoverable through Git
+history; exceptional retained evidence has a documented owner and
+retirement/review trigger.
 
 ### L6 — Add proportional enforcement and output hygiene
 

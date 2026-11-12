@@ -29,7 +29,9 @@ when all contained work shares the same owner.
 - [ ] **Audit and implement the next tooling/path cleanup project** according
   to the [phased plan](tooling-and-local-path-cleanup-plan.md). Inventory
   every maintained `tools/` module, its consumers and retirement purpose;
-  classify ignored files and allowed location exceptions; migrate private
+  classify completed plans, reports and audits for removal, evidence
+  retention or historical renaming; classify ignored files and allowed
+  location exceptions; migrate private
   `data/` and other non-exempt ignored artifacts to structured `local/`
   destinations; organize retained tools by responsibility; retire completed
   investigations; and enforce output naming/lifetime conventions.
