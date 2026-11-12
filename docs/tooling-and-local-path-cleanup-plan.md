@@ -2127,6 +2127,85 @@ source-provenance handling. This demonstrates the startup repair locally;
 hosted deployment smoke, source matrix and required comparator on the
 next pushed SHA remain outstanding.
 
+### Performance and testing tooling L0 disposition — 2026-11-12
+
+**Scope:** Read-only review at clean `dev/tooling-workspace-cleanup`
+`102af862` of **13 retained root Python modules**: six optional performance
+commands and seven test-infrastructure helpers. Compared the current module
+entry points, inputs, write behavior, direct imports, focused test consumers
+and documented procedures. The initial 124-file private inventory and its
+provisional destinations remain intake evidence, not migration authority.
+This review does **not** approve the proposed `tools/performance/` or
+`tools/testing/` layout.
+
+**Performance: all six retain-active, with distinct purposes.**
+
+- `analyze_chromium_timeline` remains the read-only, namespace-aware
+  Chromium lock/queue timeline analyzer. It reads timestamped
+  `slot-*.jsonl` and prints statistics, without constructing a synthetic
+  timeline from legacy duration-only records. The browser-capacity tests
+  import its reusable parsing and summarization functions.
+- `sample_test_host_resources` writes bounded CPU/memory samples to a
+  **new** `.jsonl` file beneath `local/benchmarks/` (exclusive create).
+  `analyze_test_host_resources` independently verifies finished captures,
+  exact test-window coverage and overlap-weighted metrics, reading the same
+  restricted directory and printing JSON. The pair supports cross-host
+  worker-capacity research; preserve their common path contract together.
+- `benchmark_runtime` measures cold/warm SQLite repository read paths,
+  emitting text or JSON to stdout. `compare_runtime_benchmarks` checks
+  the separate before/after report format and comparable case identities.
+  Neither writes a report file on its own; both remain opt-in measurement
+  utilities, not release-performance gates.
+- `benchmark_test_workers` executes repeated real tests through the
+  canonical check runner, preserving worker/section/asset/scheduling
+  inputs and run results. It has independent benchmark and regression
+  consumers. **Confirmed L2/L6 writer issue:** its default is the ignored
+  root `reports/TEST-WORKERS <timestamp>.json`, and `write_report`
+  creates directories and overwrites an existing chosen path. Review
+  output destination, collision policy and documented direct-script launch
+  before moving it; do not silently change historical report locations.
+
+**Testing: all seven retain-active; they are not disposable benchmarks.**
+
+- `browser_test_capacity` owns the pytest-xdist Chromium lane registry,
+  cross-process slot locks and optional slot metrics. It is called by
+  `tests/conftest.py` and browser timing utilities; its lock files are
+  per-run pytest temporary state.
+- `browser_test_host_profile` is the explicit, Linux-only local profile
+  reader/enable/disable command used by `run_checks`. It writes/removes
+  only the reviewed `local/browser-test-profile.json` state. Host-specific
+  capacity defaults must remain opt-in.
+- `browser_test_metrics` provides the optional timing hooks and
+  capacity-owned browser pool used by live browser tests. It and
+  `browser_test_capacity` append JSONL files when
+  `INFINITYDB_BROWSER_METRICS_DIRECTORY` is set. **L2/L6 review:** that
+  environment-selected directory is not itself restricted to the proposed
+  `local/performance/` tree; preserve legitimate pytest temporary
+  directories while clarifying ownership, lifetime and output policy.
+- `browser_wsgi_transport` supplies live test and runtime semantic
+  baseline WSGI request helpers; it has numerous independent current
+  consumers and is not release-candidate scratch code.
+- `pytest_startup_profile` is loaded by `tests/conftest.py` as a pytest
+  plugin; it validates loadgroup compatibility, reports timings/waits and
+  checks Chromium lane assignment without a persistent report file.
+  `resource_waits` supplies its context-local counters and the browser
+  slot recorder, not a standalone CLI.
+- `test_sections` validates the tracked
+  `config/testing/test-sections.json` registry for both
+  `run_checks` and pytest collection. It is active test configuration,
+  not an old diagnostic.
+
+**Cutover guardrails:** The 13 modules remain at their current import
+paths and preserve the existing tests and entry points. A future L4 move
+must update `tests/conftest.py`, `run_checks`, direct-script invocation,
+import graphs and `benchmark_test_workers`'s explicit runner script path
+in one coherent slice. For L2/L6, prioritize output provenance/overwrite
+safety and benchmark/pytest-temp exceptions, without deleting current
+captures. No private data was opened for migration, moved or deleted in
+this review, and no runtime/test code was edited. L0 remains open for the
+other tool/document dispositions, private recovery/ACL decisions and
+L1 policy approval.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
