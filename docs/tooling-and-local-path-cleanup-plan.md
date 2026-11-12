@@ -673,6 +673,38 @@ was changed, and no private evidence was accessed or moved in this review.
 **L0 remains open.** This bounded retention decision does not approve the
 proposed tools directory layout, path policy or private-data migration.
 
+### Hacking Program statistics audit disposition — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`28a8f50a3ab6707c39b0df639154a18b1b212aa4`. Reviewed the distinction between
+the retired one-use Hacking Device entitlement chart wrapper and
+`audit_hacking_program_statistics_chart`, which independently checks the
+twelve individual Program profiles against Army metadata and printed N5.3 p.58
+evidence. Retain the latter as an optional, read-only, source-pinned audit:
+Program rows appear in different orders in the chart and Army data, so it
+reconciles by explicit Program identity and preserves the printed dash, target,
+Skill Type and reviewed Special-clause meanings. It does not derive device
+entitlements, Units, or deployed-object identities and is not part of standard
+build, serving, or release acceptance.
+
+On the current Windows checkout, the manifest-only command reported **12 rows,
+zero mismatches**, and the expected source-order difference. The explicit
+archive/PDF comparison also reported **12 rows, zero mismatches** and matched
+the pinned Army archive SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`
+and English N5.3 PDF SHA-256
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`.
+The focused Hacking Device/Program source tests passed **7/7, zero skips**.
+The retained tool serves repeatable verification of these pinned independent
+source inputs; this does not assert completeness beyond the twelve reviewed
+Programs or authorize changes to their source data.
+
+No tool, manifest, source, database, or private input was changed. The
+corresponding source procedures remain documented in
+[`testing.md`](testing.md#n53-hacking-programs-statistics-source-chart).
+**L0 remains open.** This disposition does not approve a tools-directory
+reorganization, path policy, or private-data migration.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

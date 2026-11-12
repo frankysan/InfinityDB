@@ -49,6 +49,8 @@ when all contained work shares the same owner.
   separates shared runtime verification while preserving active source checks.
   The [deployed-object checkpoint](tooling-and-local-path-cleanup-plan.md#deployed-object-discovery-retirement--2026-11-12)
   retires completed discovery commands while preserving their reviewed evidence.
+  The [Hacking Program checkpoint](tooling-and-local-path-cleanup-plan.md#hacking-program-statistics-audit-disposition--2026-11-12)
+  retains the separate, source-pinned statistics audit.
   Remaining lifecycle review, path policy and migrations remain open.
 
 ### External source clarifications
