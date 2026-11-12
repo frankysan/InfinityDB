@@ -142,23 +142,29 @@ input hashes, tool versions, measurements and remaining acceptance.
 
 ## Verify and compare
 
-From the InfinityDB repository root, substitute the actual immutable
-paths below. The `--legacy-root` directory must contain the
-in-tree pipeline's canonical compressed SVGs, not browser-published
-renamed assets.
+The completed P5 comparison is historical evidence, not a current
+development command. The retired `tools.compare_symbol_pipeline_parity`
+compared the former in-tree compressed output with the verified external
+pipeline; its test was retired with it. The matched-input comparison
+passed all 807 canonical assets, as documented in
+[testing](testing.md#p57-matched-input-symbol-processor-parity).
+The separately recorded production comparison verified the duplicate
+receipt against the effective archive and hash-pinned duplicate-groups
+CSV. It allowed the legacy-only Seed Soldier path only as an exact
+visual duplicate of the canonical published representative. These
+checks do not replace semantic publication or browser acceptance.
+
+For **current** external handoffs, use the maintained offline
+`tools.verify_processed_symbol_handoff` verifier. With the actual
+immutable producer paths, its command is:
 
 ```powershell
 python -m tools.verify_processed_symbol_handoff --canonical-archive "PATH_TO_CANONICAL.zip" --conversion-receipt "PATH_TO_TEXT_CONVERSION_STATE.json" --compressed-archive "PATH_TO_COMPRESSED.zip" --compression-receipt "PATH_TO_COMPRESSION_STATE.json" --compression-report "PATH_TO_COMPRESSION_REPORT.csv" --candidates-report "PATH_TO_CANDIDATES_REPORT.csv" --run-report "PATH_TO_COMPRESSION_RUN.json"
-python -m tools.compare_symbol_pipeline_parity --canonical-archive "PATH_TO_CANONICAL.zip" --conversion-receipt "PATH_TO_TEXT_CONVERSION_STATE.json" --compressed-archive "PATH_TO_COMPRESSED.zip" --compression-receipt "PATH_TO_COMPRESSION_STATE.json" --compression-report "PATH_TO_COMPRESSION_REPORT.csv" --candidates-report "PATH_TO_CANDIDATES_REPORT.csv" --run-report "PATH_TO_COMPRESSION_RUN.json" --legacy-root "PATH_TO_LEGACY_COMPRESSED_DIRECTORY" --renderer resvg --executable "PATH_TO_RESVG_EXECUTABLE" --target-sizes 32,64 --dprs 1,2 --max-rms 0.01 --max-changed 0.01 --pixel-diff-threshold 8 --output "local/p5-symbol-parity.json"
 ```
 
-The comparison verifies the external receipt chain before rendering.
-It writes one report with both artifact hashes, each canonical
-asset's legacy/external SVG hash, the worst raster metrics, and
-per-asset errors. Renderer failures are recorded as failed assets
-where possible, not counted as passing comparisons. A failed
-comparison exits nonzero. Use a fresh output path for every run;
-reports must not be overwritten.
+Use `tools.prepare_symbol_publication` and the current publication
+validation for a proposed new release, not the retired in-tree
+processor comparison. Preserve earlier local reports as dated evidence.
 
 ## Prepare and compare semantic publication
 

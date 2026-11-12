@@ -1974,7 +1974,7 @@ Focused publication, asset, database and packaging regression command:
   tests\test_export_symbol_source_plan.py tests\test_prepare_symbol_publication.py `
   tests\test_promote_symbol_publication.py tests\test_verify_raw_symbol_handoff.py `
   tests\test_verify_effective_symbol_handoff.py tests\test_verify_symbol_duplicate_handoff.py `
-  tests\test_verify_processed_symbol_handoff.py tests\test_compare_symbol_pipeline_parity.py `
+  tests\test_verify_processed_symbol_handoff.py `
   tests\test_asset_validation.py tests\test_symbol_catalog.py tests\test_symbol_path_storage.py `
   tests\test_verify_deployment_assets.py tests\test_database_set.py tests\test_database_set_builder.py `
   tests\test_deployment_scripts.py tests\test_installed_wheel_smoke.py tests\test_project_resources.py `

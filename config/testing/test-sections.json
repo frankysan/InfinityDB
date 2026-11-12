@@ -258,7 +258,6 @@
         "test_build_symbol_artwork_review",
         "test_classify_symbol_artwork_provenance",
         "test_compare_symbol_canonical_paths",
-        "test_compare_symbol_pipeline_parity",
         "test_export_symbol_source_plan",
         "test_prepare_web_fonts",
         "test_prepare_symbol_publication",
