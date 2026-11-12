@@ -1744,6 +1744,75 @@ runtime rebuild were not run. The opt-in interfaces establish a usable
 migration route, **not** approval to remove raw-format tests,
 change the paired export default, or delete any private archive.
 
+### Standalone rawless-default and determinism-manifest v2 cutover — 2026-11-12
+
+**Decision and implementation:** The user-approved standalone format cutoff
+makes `infinity-db export NORMALIZED.json ARMY.db` application-only by
+default, matching the already-rawless complete database-set builder.
+`--with-raw` is now the explicit legacy paired-export option. The former
+`--no-raw` flag remains accepted as a deprecated no-op compatibility alias
+and is mutually exclusive with `--with-raw`; the programmatic
+`export_database(...)` default remains paired **for existing direct API
+consumers/tests**, pending a separately reviewed library API cutoff.
+Regardless of CLI mode, full untrusted-input, source-to-canonical staging,
+published SQLite integrity, deterministic finalization and export-generation
+verification stay in force. Default rawless export refuses an existing
+`army.raw.db` sibling; it does not remove or rewrite private evidence.
+Opt-in `database-health --require-raw` still validates paired output,
+and `database-health --normalized` verifies source identity without it.
+
+**Cross-platform determinism format change:** The default
+`tools.build_determinism_manifest` output is now **format v2** and
+hashes application-only `army.db`; the artifact set retains every other v1
+entry (normalized JSON/validation, merged source, Rules, ITS, snapshot/work
+ZIP, symbol publication and reviewed Weapon citations). A deliberately
+explicit `--legacy-paired` mode recreates **v1** with the additional
+disposable raw SQLite checksum. This preserves historical audit
+reproducibility without making raw output the active default.
+`compare_determinism_manifests` accepts both historical v1 and current v2
+manifests, compares every artifact in a same-version pair, and rejects
+mixed versions with a clear regeneration instruction. It never implicitly
+drops `build/army.raw.db` to paper over a version mismatch. The
+`tools/run_checks` build-stage smoke now exercises the default rawless
+export, and the installed-wheel smoke verifies the result using the
+matched `--normalized` source instead of demanding an absent raw archive.
+
+**Actual generator acceptance on Windows:** Both manifest modes completed
+successfully from the tracked portable Army fixture, each including all
+**73** normalization checks. The default v2 output had **no**
+`build/army.raw.db` entry; explicit v1 emitted
+`02fdb8f3621bd27f2e3eb4c31cec7b9ddd21c2b3ce7b891431b5a57e87b3d8a3`
+for its transient raw archive. All ten shared artifact hashes matched
+exactly across the independent v1/v2 jobs. In particular,
+`build/army.db=7d2e1caa365b6d454e185a3006ae427391c8b7cd13e3383a71a8171a1643c910`,
+`build/rules_n5.db=28c85673b51c0c4774d3fadd0ba79005c8d1092d7c786897849d4348fac2fa6a`,
+and `build/its_18.db=e88eb6e9934443f762d8f143efcfd8cdf300636424b3a55c78df569ea43d2b94`.
+The generated manifests were written only under ignored `local/reports/`.
+This proves same-machine v1/v2 shared-artifact parity, **not** a
+cross-platform equivalence claim; Linux/CI must generate v2 independently
+before a cross-platform result can be declared.
+
+**Focused regression acceptance:** CLI **25/25**, manifest
+generator/comparator **10/10**, installed-wheel/deployment scripts
+**46/46**, and test/check runner **111 passed, 1 skipped**. Ruff,
+Pyright (0 errors), Markdownlint, documentation links, backlog validation
+and `git diff --check` passed. The maintained `build` check also passed
+against the 58-source Army snapshot: lossless merge verification,
+**73** normalized checks, Mercenary mapping **49/49**, the reviewed
+116-warning source anomaly set, and default application-only SQLite
+export in an isolated temporary directory. The full project test suite,
+complete three-database release build and Linux-side manifest comparison
+were not run in this slice.
+
+**Safety boundary:** The old ignored, mismatched
+`data/generated/army.raw.db` has not been moved or deleted, and the
+tracked three-database runtime release set remains unmodified. The
+retirement of standalone paired-export, `--require-raw`, historical
+raw-only research APIs, and direct Python importer defaults remains a
+distinct decision requiring relevant consumer closeout. Existing
+legacy-archive source tests are not removed solely because they exercise
+a deprecated format.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

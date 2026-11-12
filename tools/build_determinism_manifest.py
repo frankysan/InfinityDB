@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Build representative artifacts and record their SHA-256 identities.
 
-The raw SQLite hash deliberately measures the *standalone paired export*
-contract, using a disposable temporary directory. It is not a retained
-development input or an artifact produced by complete runtime builds.
+The default v2 format measures application-only export, matching complete
+runtime builds. Explicit --legacy-paired preserves the v1 artifact inventory
+and hashes a disposable raw SQLite sibling for historical comparisons.
+Neither format requires retaining development archives.
 """
 
 from __future__ import annotations
@@ -27,7 +28,8 @@ except ImportError:  # pragma: no cover - direct script execution fallback
     from snapshot_archive import create_timestamped_archive
 
 FORMAT = "InfinityDB cross-platform determinism manifest"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
+LEGACY_FORMAT_VERSION = 1
 FIXED_ARCHIVE_TIME = datetime(2000, 1, 1, tzinfo=UTC)
 
 
@@ -47,7 +49,7 @@ def _run(project_root: Path, *args: str) -> None:
     )
 
 
-def build_manifest(project_root: Path) -> dict[str, Any]:
+def build_manifest(project_root: Path, *, legacy_paired: bool = False) -> dict[str, Any]:
     fixture = project_root / "tests" / "fixtures" / "deployment-smoke"
     with tempfile.TemporaryDirectory(prefix="infinitydb-determinism-") as temporary:
         root = Path(temporary)
@@ -64,8 +66,11 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
             str(generated),
             "--compact",
         )
-        _run(project_root, "-m", "infinity_db", "export",
-             str(generated / "normalized.json"), str(generated / "army.db"))
+        _run(
+            project_root, "-m", "infinity_db", "export",
+            str(generated / "normalized.json"), str(generated / "army.db"),
+            *(("--with-raw",) if legacy_paired else ()),
+        )
         from infinity_db.curated import load_curated_directory
         from infinity_db.rules_database import export_rules_database
 
@@ -93,7 +98,7 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
             f"build/{name}": sha256_file(generated / name)
             for name in (
                 "army.db",
-                "army.raw.db",
+                *(("army.raw.db",) if legacy_paired else ()),
                 "master.json",
                 "normalized-validation.json",
                 "normalized.json",
@@ -123,7 +128,9 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
 
         return {
             "format": FORMAT,
-            "formatVersion": FORMAT_VERSION,
+            "formatVersion": (
+                LEGACY_FORMAT_VERSION if legacy_paired else FORMAT_VERSION
+            ),
             "artifacts": dict(sorted(artifacts.items())),
         }
 
@@ -131,10 +138,14 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--legacy-paired", action="store_true",
+        help="Generate the original v1 manifest, including a disposable raw archive",
+    )
     args = parser.parse_args(argv)
 
     project_root = Path(__file__).resolve().parents[1]
-    manifest = build_manifest(project_root)
+    manifest = build_manifest(project_root, legacy_paired=args.legacy_paired)
     write_json_lf(args.output, manifest, sort_keys=True)
     print(f"Determinism manifest: {args.output}")
     for name, digest in manifest["artifacts"].items():

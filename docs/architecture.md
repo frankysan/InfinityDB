@@ -321,9 +321,10 @@ InfinityDB serves three tracked runtime databases:
 - `data/generated/rules_n5.db` — curated N5 rules/reference semantics;
 - `data/generated/its_18.db` — ITS Season 18 scenario publications and scoped policies.
 
-`army.raw.db` is a development/audit archive of normalized source structures and is not a
-production runtime dependency. Runtime repositories query application tables and materialized
-provenance; they do not fall back to raw normalized tables for convenience.
+`army.raw.db` remains an optional **legacy paired-export** research format,
+available only on explicit request. Neither complete runtime builds nor the
+default standalone export creates it. Runtime repositories query application
+tables and materialized provenance; they never fall back to raw source tables.
 
 The complete serving contract requires Army v31, Rules v17 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.

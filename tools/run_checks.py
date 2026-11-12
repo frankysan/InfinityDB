@@ -487,7 +487,8 @@ def run_stage(
     commands.append(stage.command)
     if stage.name == "build":
         # The small portable fixture need not match the full symbol publication.
-        # Still exercise the application/raw exporter after the source pipeline.
+        # Exercise the application-only exporter after the source pipeline.
+        # Paired raw export remains an explicit legacy compatibility test.
         output = Path(stage.command[stage.command.index("--output-dir") + 1])
         commands.append((
             sys.executable, "-m", "infinity_db", "export",

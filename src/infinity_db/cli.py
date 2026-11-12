@@ -60,7 +60,7 @@ def _validate_source_anomaly_baseline(source: Path) -> None:
     )
 
 
-def _export(source: Path, destination: Path, *, include_raw: bool = True) -> None:
+def _export(source: Path, destination: Path, *, include_raw: bool = False) -> None:
     with source.open(encoding="utf-8") as handle:
         normalized = json.load(handle)
     peripheral_identities = load_peripheral_identity_curated()
@@ -130,7 +130,7 @@ def _build_army(
 
 
 def cmd_export(args: argparse.Namespace) -> int:
-    _export(args.input, args.output, include_raw=not args.no_raw)
+    _export(args.input, args.output, include_raw=args.with_raw)
     return 0
 
 
@@ -391,9 +391,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_export = sub.add_parser("export", help="Import validated normalized JSON into SQLite")
     p_export.add_argument("input", type=Path, help="normalized.json input")
     p_export.add_argument("output", type=Path, help="Explicit development output SQLite file")
-    p_export.add_argument(
+    export_mode = p_export.add_mutually_exclusive_group()
+    export_mode.add_argument(
+        "--with-raw", action="store_true",
+        help="Legacy paired export: also publish and validate the lossless raw SQLite sibling",
+    )
+    export_mode.add_argument(
         "--no-raw", action="store_true",
-        help="Publish only the Army application database; refuses an existing raw sibling",
+        help="Deprecated compatibility alias; application-only export is now the default",
     )
     p_export.set_defaults(func=cmd_export)
 

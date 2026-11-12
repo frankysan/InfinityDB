@@ -155,9 +155,11 @@ def test_separate_merge_normalize_export_commands(
     assert main(["export", "data/generated/normalized.json", "data/generated/army.db"]) == 0
     default_database = tmp_path / "data/generated/army.db"
     assert default_database.is_file()
-    assert raw_database_path(default_database).is_file()
+    assert not raw_database_path(default_database).exists()
     custom_database = tmp_path / "custom.db"
-    assert main(["export", "data/generated/normalized.json", str(custom_database)]) == 0
+    assert main([
+        "export", "data/generated/normalized.json", str(custom_database), "--with-raw",
+    ]) == 0
     assert raw_database_path(custom_database).is_file()
     with sqlite3.connect(custom_database) as connection:
         assert connection.execute("SELECT COUNT(*) FROM units").fetchone()[0] == 1
@@ -175,8 +177,12 @@ def test_standalone_cli_application_only_export_and_normalized_health(
     normalized = generated / "normalized.json"
     paired = tmp_path / "paired" / "army.db"
     application_only = tmp_path / "application-only" / "army.db"
-    assert main(["export", str(normalized), str(paired)]) == 0
-    assert main(["export", str(normalized), str(application_only), "--no-raw"]) == 0
+    assert main(["export", str(normalized), str(paired), "--with-raw"]) == 0
+    assert main(["export", str(normalized), str(application_only)]) == 0
+    alias_destination = tmp_path / "no-raw-alias" / "army.db"
+    assert main(["export", str(normalized), str(alias_destination), "--no-raw"]) == 0
+    assert not raw_database_path(alias_destination).exists()
+    assert application_only.read_bytes() == alias_destination.read_bytes()
     assert application_only.read_bytes() == paired.read_bytes()
     assert not raw_database_path(application_only).exists()
 
@@ -214,13 +220,13 @@ def test_standalone_cli_application_only_export_refuses_existing_raw(
     ]) == 0
     normalized = generated / "normalized.json"
     destination = tmp_path / "army.db"
-    assert main(["export", str(normalized), str(destination)]) == 0
+    assert main(["export", str(normalized), str(destination), "--with-raw"]) == 0
     original = destination.read_bytes()
     raw = raw_database_path(destination)
     original_raw = raw.read_bytes()
     capsys.readouterr()
 
-    assert main(["export", str(normalized), str(destination), "--no-raw"]) == 1
+    assert main(["export", str(normalized), str(destination)]) == 1
     assert "existing raw sibling" in capsys.readouterr().err
     assert destination.read_bytes() == original
     assert raw.read_bytes() == original_raw
@@ -235,7 +241,7 @@ def test_normalized_health_rejects_mismatch_and_never_falls_back(
     ]) == 0
     normalized = generated / "normalized.json"
     destination = tmp_path / "army.db"
-    assert main(["export", str(normalized), str(destination)]) == 0
+    assert main(["export", str(normalized), str(destination), "--with-raw"]) == 0
     before = destination.read_bytes()
     raw_before = raw_database_path(destination).read_bytes()
 
@@ -272,6 +278,11 @@ def test_normalized_health_selection_is_explicit_and_local_to_army(
     ])
     assert selected.normalized == Path("normalized.json")
     assert selected.require_raw is False
+    with pytest.raises(SystemExit) as exc:
+        parser.parse_args([
+            "export", "normalized.json", "army.db", "--with-raw", "--no-raw",
+        ])
+    assert exc.value.code == 2
     with pytest.raises(SystemExit) as exc:
         parser.parse_args([
             "database-health", "army.db", "--require-raw", "--normalized",
@@ -460,7 +471,9 @@ def test_database_health_command_reports_and_validates_pair(
 
     # Standalone export retains its independent queryable raw-pair contract.
     paired = output_dir / "standalone" / "army.db"
-    assert main(["export", str(output_dir / "normalized.json"), str(paired)]) == 0
+    assert main([
+        "export", str(output_dir / "normalized.json"), str(paired), "--with-raw",
+    ]) == 0
     capsys.readouterr()
     database = paired
     assert main(["database-health", str(database), "--require-raw", "--json"]) == 0

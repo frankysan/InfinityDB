@@ -207,37 +207,47 @@ shared metadata to its subsequent Army overlays and Rules publication.
 It creates no `army.raw.db`. Only the three selected runtime databases are
 installed into the target directory, after complete-set validation.
 
-The standalone `infinity-db export` command defaults to its lossless,
-queryable application/raw SQLite pair. Both siblings are checked before
-publication and carry the same deterministic generation fingerprint.
-For a fresh, isolated development destination, `--no-raw` instead publishes
-**only** the application database, retaining full normalized input checks,
-source-to-canonical staging validation, deterministic finalization and the
-complete `export_pair_sha256` source-generation fingerprint. It produces
-the same application-database bytes as paired export of the same input.
-It deliberately **refuses** a destination with an existing raw sibling,
-rather than silently deleting or leaving stale private source evidence.
+The standalone `infinity-db export` command now defaults to **application-only**
+SQLite output, matching the complete-build pipeline. The export retains full
+normalized input checks, source-to-canonical staging validation, deterministic
+finalization and the complete `export_pair_sha256` source-generation fingerprint.
+Use `--with-raw` only when a standalone research or compatibility consumer
+explicitly needs the lossless, queryable `army.raw.db` sibling. Paired output
+still validates both siblings and produces byte-identical `army.db` output
+from the same source. The former `--no-raw` switch remains accepted as a
+deprecated alias for the default mode.
 
-To verify a matched application-only export without creating a raw sibling:
+Application-only export **refuses** a destination with an existing raw
+sibling, rather than silently deleting or leaving stale private source
+evidence. Select an isolated destination instead. For example:
 
 ```powershell
-.venv\Scripts\python.exe -m infinity_db export local/data/build/normalized.json local/data/build/standalone/army.db --no-raw
+.venv\Scripts\python.exe -m infinity_db export local/data/build/normalized.json local/data/build/standalone/army.db
 .venv\Scripts\python.exe -m infinity_db database-health local/data/build/standalone/army.db --normalized local/data/build/normalized.json --json
 ```
 
-The example paths must identify a fresh destination and the **exact same
-normalized source generation**. `--normalized` is mutually exclusive with
-`--require-raw` and unavailable for `database-health --db-dir`, which
-continues to validate only the published runtime set. Explicit normalized
-health verifies all source rows and metadata against the selected application's
+The example paths must identify a destination without a raw sibling and the
+**exact same normalized source generation**. `--normalized` is mutually
+exclusive with `--require-raw` and unavailable for `database-health --db-dir`,
+which validates only the published runtime set. Explicit normalized health
+verifies all source rows and metadata against the selected application's
 export-generation fingerprint; it fails on changed/missing source data even
 when a valid raw sibling happens to exist. Default health JSON and raw-pair
 health reports remain unchanged; an explicit normalized check adds
 `normalizedSource` evidence with status, generation SHA-256 and input path.
 
-The two standalone destination files cannot be replaced as one filesystem
-transaction, so the default paired export keeps its established commit order
-and recovery policy:
+The cross-platform determinism manifest now defaults to **format v2**:
+it hashes the application-only export plus the same normalized, Rules/ITS,
+archive, symbol and reviewed-citation artifacts as before. Explicit
+`tools.build_determinism_manifest --legacy-paired` recreates **format v1**
+with an additional temporary `army.raw.db` hash. Each manifest version
+can be compared across machines, but the comparison tool intentionally
+rejects mixed v1/v2 inputs rather than silently dropping old evidence.
+Update all participating Windows/Linux/CI generators to v2 together.
+
+The two legacy paired destination files cannot be replaced as one filesystem
+transaction, so explicit `--with-raw` export retains its established commit
+order and recovery policy:
 
 1. replace `army.raw.db` first;
 2. replace `army.db` last; the application replacement is the commit point.

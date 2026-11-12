@@ -535,7 +535,8 @@ def test_installed_wheel_smoke_runs_database_health_check() -> None:
 
     assert "python tools/installed_wheel_smoke.py" in workflow
     smoke = _read("tools/installed_wheel_smoke.py")
-    assert '[main_cli, "database-health", "generated/army.db", "--require-raw"]' in smoke
+    assert '[main_cli, "database-health", "generated/army.db", "--normalized",' in smoke
+    assert '"generated/normalized.json"]' in smoke
 
 
 def test_full_asset_checks_can_run_against_candidate_branch() -> None:

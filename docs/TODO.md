@@ -313,7 +313,8 @@ when all contained work shares the same owner.
   consumers have tested replacements. The complete runtime builder now
   skips raw-archive generation entirely; variant usage and Army v27–v31
   overlays use fully verified normalized source. Standalone `infinity-db export`
-  still produces a lossless raw pair for independent audit/research consumers.
+  also defaults to application-only output; explicit `--with-raw` retains a
+  lossless paired export for independent audit/research consumers.
   - [ ] Review remaining standalone raw-format contracts: paired export,
     explicit pair-health consumers, and historical raw-only research. The
     pinned source ZIP verification in `report_reference_baseline` now accepts
@@ -321,11 +322,11 @@ when all contained work shares the same owner.
     source-presentation completeness, Skill/Equipment source-variant, and
     three semantic relationship audits also use verified normalized input;
     source-row inspection and standalone variant candidates are migrated too.
-    `build_determinism_manifest` intentionally measures a **disposable
-    standalone paired-export** raw hash, not runtime or persistent raw input;
-    retain it while standalone paired export is supported and retire that
-    measurement with the format contract rather than treating its mere
-    existence as a reason to preserve ignored `army.raw.db` files.
+    `build_determinism_manifest` now defaults to **v2 rawless**
+    application-output determinism. Explicit `--legacy-paired` retains the
+    original v1 raw hash in a disposable export; existing v1 manifests remain
+    comparable with v1, but cannot be silently compared with v2. Neither
+    format requires a persistent ignored `army.raw.db`.
     `audit_source_variant_inputs` now rejects mismatched application/raw
     pairs, and its exact Extra-owner lookup accepts verified source when an
     application path is supplied. Retain legacy raw-based APIs as parity
@@ -334,16 +335,16 @@ when all contained work shares the same owner.
     exact occurrence/extra relationships and fail-closed provenance.
     Army v27–v31 overlays have also moved to verified normalized input in the
     complete builder; the legacy raw-pair publisher calls remain opt-in.
-  - [ ] Complete the **standalone default/format** cutover and retire
-    raw-only pair-health/inspection interfaces once independently useful
-    checks are covered. The existing `infinity-db export --no-raw` option
-    now exposes importer-level application-only publication, and
-    `database-health --normalized PATH` verifies the full source generation
-    without a raw SQLite sibling. Both are explicit opt-in alternatives;
-    paired export and `--require-raw` remain backwards-compatible defaults.
-    Verify normal build, three-database output identities, independent
-    source-audit coverage, regression tests and documented commands before
-    removing raw-archive generation, pair APIs or compatibility tests.
+  - [x] Make standalone `infinity-db export` application-only by default;
+    retain explicit legacy `--with-raw` (and the `--no-raw` alias), verified
+    `database-health --normalized PATH`, and a versioned v2 rawless
+    determinism manifest with explicit v1 legacy generation.
+  - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
+    inspection and programmatic export interfaces. Retain source-identity
+    checks and any independent research semantics until replacements are
+    accepted. Verify normal build, three-database output identities, focused
+    and full regression tests, and documented commands before removing pair
+    APIs or compatibility tests.
   - [ ] Classify the existing ignored `data/generated/army.raw.db` as
     retirement-candidate local evidence, not a valid current pair. Preserve its
     bytes pending the cleanup manifest's independent backup/restore and

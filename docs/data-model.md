@@ -32,13 +32,13 @@ flowchart TD
     normalized["Validated normalized source model"]
     export["SQLite export"]
     runtime["army.db<br/>Canonical application/runtime data"]
-    archive["army.raw.db<br/>Lossless normalized source/audit archive"]
+    archive["Optional legacy army.raw.db<br/>Lossless audit export"]
 
     snapshot --> master
     master --> normalized
     normalized --> export
     export --> runtime
-    export --> archive
+    export -.->|explicit --with-raw| archive
 ```
 
 Curated rules data follows a separate path:
