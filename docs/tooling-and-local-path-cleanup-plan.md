@@ -2,13 +2,16 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Deployment
 
-**Status:** Proposed for the next cleanup project. **Planning only:** no paths, files,
-commands, or tool interfaces have been migrated or retired by this document.
+**Status:** Started 2026-11-12; L0 inventory and ownership review in progress.
+The path contract and dispositions below remain proposals. No existing inputs,
+tools or commands have been moved or retired, and no private files deleted.
 
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
-Select a fresh implementation branch and exact baseline at kickoff; the v1.1.0
-merge/release/deployment process remains a separate decision.
+**Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user
+authorization from clean `dev/v1.1.0` at
+`a08651d894a045940e8e3c6217b23532da550c9a` on 2026-11-12.
+The v1.1.0 merge/release/deployment process remains a separate decision.
 
 ## Outcome and governing principles
 
@@ -50,7 +53,8 @@ The canonical current-state owners are
 [architecture](architecture.md), [data lifecycle](../data/README.md),
 [testing](testing.md), [CI](ci.md), [Syncthing](syncthing-assets.md) and
 [one-use tool policy](README.md#one-use-tool-and-audit-lifecycle).
-This document is a *proposed work plan*, not a competing operational manual.
+This document owns the cleanup execution record and *proposed migrations*,
+not a competing operational manual.
 The [backlog](TODO.md) owns the open implementation item; only approved,
 implemented rules move into those canonical owners.
 
@@ -236,6 +240,99 @@ indexes, scripts and instructions with each approved retirement batch.
 Old private source/backup deletion remains separately authorized.
 
 ## Execution phases
+
+### Kickoff checkpoint — 2026-11-12
+
+**Completed intake:** Enumerated all **124 tracked tool files** (123 Python
+modules plus the artwork-review template) and all **48 tracked Markdown
+documents** at the implementation baseline. Captured sizes and SHA-256 values,
+module purposes, AST imports and literal paths, tracked reference matches and
+bounded private-script reference matches. Supplemented the graph with
+`from tools import NAME` imports and the template's actual builder reference;
+reference counts alone do not establish an independent current consumer.
+
+The private tool proposal covers every enumerated tool, including tentative
+responsibility/destination, ownership, review state and validation/rollback
+requirements. Categories are **provisional**, not an adopted path policy:
+
+| Proposed category | Files |
+| --- | ---: |
+| Minimal root surface | 2 |
+| Data | 5 |
+| Research | 41 |
+| Symbols, including template | 17 |
+| Browser | 15 |
+| Testing | 7 |
+| CI | 16 |
+| Operations | 6 |
+| Performance | 6 |
+| Development | 6 |
+| Shared helpers | 3 |
+
+The Windows metadata walk observed **65,465 pre-existing private files**
+(13,046,584,300 bytes), excluding this audit's own output and the contents of
+184 collapsed conventional cache/build/package directories. Recorded relative
+paths, sizes, modification timestamps, file kind and matching Git ignore rule;
+no untracked nonignored files were found in that enumerated scope. This is a
+lower bound: **19 report directories could not be traversed** due to access
+denials. Directory links are not followed. Cache exception candidates still
+require review; collapsing their contents does not approve them as policy.
+
+Prepared a **proposed, unapproved 49-file raw-source/snapshot-manifest move
+manifest** (142,288,710 bytes) preserving relative names under `local/data/`.
+Each original was SHA-256 hashed with stable size/mtime during hashing; this
+does not verify archive/manifest agreement, backup, Syncthing state or producer
+authority. No copy, activation or deletion was performed. Other private files
+and documents remain `needs-decision` until their individual ownership,
+findings and retention purpose are reviewed.
+
+The independent Linux interactive checkout was inventoried read-only at its
+own older revision: 135 tracked Python tools, 43 Markdown documents and 27,681
+private files, excluding 11 collapsed directories; one large tracked JSON was
+outside the consumer scan's size limit. The dedicated Linux worker was separately
+confirmed clean at another older revision using an offline status job. Neither
+checkout was synchronized or changed. The worker's private files and the external
+Syncthing staging area still need inventory; this is **not cross-host migration
+acceptance**. The three acquisition/symbol producer checkouts were inspected
+read-only and were clean; their output/configuration consumers remain to review.
+
+**Reviewed priorities:**
+
+- `verify_release_candidate_browser.local_revision` still hashes only Army
+  and Rules. Keep the already identified three-database identity correction
+  first among executable changes; do not use this legacy gate as v1.1+
+  complete-set acceptance before that correction is tested.
+- The P5 comparison pair is proposed for retirement to Git history. Its
+  dedicated test and the historical command still present in the parity
+  runbook must be reconciled together with accepted P5 evidence. Keep the
+  maintained processed-handoff verifier and published Seed Soldier compatibility.
+- Keep the artwork-review HTML template with its builder. Do not infer zero
+  consumers from a Python-module-only reference search.
+
+**Private evidence:** The completed Windows intake, tool proposals, candidate
+move manifest and hash receipts are under
+`local/research/project-infrastructure/tooling-workspace-cleanup/20261112-l0-windows-v2/`.
+The sibling `20261112-l0-windows/` retains the Linux interactive capture and
+partial first Windows attempt. That attempt was stopped after a slow reference
+scan and replaced with a single-pass scan; its partial metadata is not an
+accepted receipt. One-use capture/review scripts remain task-scoped under
+`local/work/project-infrastructure/tooling-workspace-cleanup-l0/` and retire
+after this project's accepted closeout. Per-file private metadata stays ignored.
+
+**Validation:** The inventory integrity check passed exact Git/tool coverage,
+all 124 unchanged tool hashes, all 49 original candidate hashes and both receipt
+sets. The canonical `tools/run_checks.py --stage docs` passed Markdownlint
+(49 files, zero issues), local links (48 tracked Markdown files) and backlog
+structure. These checks validate this intake/documentation batch, not runtime
+behavior, backup recovery or migration acceptance.
+
+**Resume L0:** Resolve the unreadable report directories without changing ACLs
+or deleting evidence implicitly; inventory worker/staging and producer handoff
+dependencies; review each tool/document's independent purpose, side effects,
+open findings and retention; then complete per-artifact dispositions and the
+exception/backup decisions needed for L1 review. L0's exit is **not met**;
+the parent backlog item remains open. No new location policy, executable
+retirement or ignored-source removal is approved by this checkpoint.
 
 ### L0 — Full read-only inventory and ownership mapping
 

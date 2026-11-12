@@ -58,9 +58,9 @@ ASCII art, keeping labels readable in both source and rendered form.
 ## Active cleanup plans
 
 - [tooling-and-local-path-cleanup-plan.md](tooling-and-local-path-cleanup-plan.md) —
-  proposed post-v1.1.0 audit and migration of maintained `tools/` modules,
+  active post-v1.1.0 audit and proposed migration of maintained `tools/` modules,
   Git-ignored data into `local/`, categorized private output paths,
-  and bounded one-use tool retirement. Implementation is not started;
+  and bounded one-use tool retirement. L0 inventory/review has started;
   the [backlog](TODO.md) owns the active task.
 
 ## Completed strategic migrations
