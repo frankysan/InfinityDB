@@ -501,8 +501,9 @@ requires explicit current/candidate paths and a fresh output for review.
 Both steps fail on mismatched inputs or existing outputs. Existing P5
 comparison records remain accepted when explicitly selected; their review
 fingerprints and decisions are not silently transferred to a new comparison.
-The classifier still requires legacy P5 evidence and remains a separate L5
-lifecycle decision, not a general future-publication classifier.
+At this checkpoint the classifier required legacy P5 evidence; the later
+[provenance retirement](#p5-provenance-classifier-retirement--2026-11-12)
+resolves its lifecycle, not a general future-publication classifier.
 
 **Validation:** The affected review, classifier and test-registry cohort
 passed **99 tests, zero skips**, including six real-Chrome cases. Targeted
@@ -555,6 +556,40 @@ release acceptance.
 
 No ignored source, private evidence, generated database or service was changed.
 **L0 and the parent cleanup remain open.**
+
+### P5 provenance-classifier retirement — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`151cc6307282be13ea18a555eb92433c21a280bc`. The classifier's independent
+purpose was the completed P5 legacy-to-external attribution, not an ongoing
+external-to-external classifier. Its accepted findings remain in the
+[P5 evidence](testing.md#p57-override-provenance-classification); the
+one-use generator and its dedicated tests are retired to Git history.
+The artwork reviewer retains its version-1 report loader, cause labels and
+fail-closed pin, coverage, pair-hash and summary checks. Loading a report does
+not independently verify its attribution chain. Current raw/effective/processed
+handoff validators remain separate.
+
+The original selector's current-manifest path now contains the later promoted
+manifest. For a read-only replay, the exact old manifest bytes were recovered
+from the pinned Git revision into temporary session files, selected explicitly,
+and removed afterward. The replay matched the retained report in every field
+except the necessarily changed selection fingerprint: **118 assets, 154 source
+identities and 25 multi-source assets**. The previously documented count of 24
+was corrected. The original selector, report, overrides and all other private
+inputs remain unchanged; no publication, acquisition or approval was performed.
+
+**Validation:** The Windows artwork-review, raw/effective/duplicate/processed
+handoff, candidate and test-registry cohort passed **121 tests, zero skips**,
+including six real-Chrome cases. The retained loader also accepted the saved
+118-pair report using pins and pair hashes independently derived from the
+selected comparison and manifests. Targeted Ruff, repository-wide Pyright,
+documentation checks and `git diff --check` passed. This does not constitute
+Linux, hosted CI or release acceptance.
+
+**L0 and the parent cleanup remain open.** This retirement does not approve
+the proposed path policy, private-source deletion or a future general
+provenance-classifier contract.
 
 ### L0 — Full read-only inventory and ownership mapping
 
@@ -672,8 +707,8 @@ and passing focused tests.
    retired the superseded runbook after extracting current guidance and evidence.
    Preserve the accepted symbol-cutover evidence and maintained handoff/
    publication checks during subsequent cleanup.
-2. Then review bounded deployed-object, Weapon-chart, historical 1.0,
-   symbol provenance and other one-use research clusters. Preserve open
+2. Then review other bounded deployed-object, Weapon-chart, historical 1.0,
+   symbol provenance and one-use research clusters. Preserve open
    source questions, stable finding IDs and immutable source hashes in
    canonical research records. Extract current reusable parsers/validators
    before retiring a wrapper.

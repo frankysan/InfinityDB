@@ -353,7 +353,7 @@ def test_cli_rejects_comparison_only_pins_in_review_mode(inputs, capsys):
 
 
 def add_provenance(inputs):
-    """Minimal explicit renderer fixture; full archive attribution is tested separately."""
+    """Minimal renderer fixture; it does not establish source attribution."""
     pins = {
         "comparisonSha256": sha(inputs["comparison"].read_bytes()),
         "currentManifestSha256": sha(inputs["current_manifest"].read_bytes()),
@@ -390,10 +390,20 @@ def test_provenance_is_embedded_and_changes_review_identity(inputs):
     assert classified["pins"]["provenanceSha256"] == sha(inputs["provenance"].read_bytes())
 
 
-@pytest.mark.parametrize("change", ["pins", "partial", "duplicates", "hash", "cause", "summary"])
+@pytest.mark.parametrize(
+    "change",
+    [
+        "format", "version", "pins", "partial", "duplicates", "hash",
+        "candidate-hash", "cause", "summary", "count",
+    ],
+)
 def test_rejects_stale_or_inconsistent_provenance_before_writing(inputs, change):
     report = add_provenance(inputs)
-    if change == "pins":
+    if change == "format":
+        report["format"] = "unexpected"
+    elif change == "version":
+        report["formatVersion"] = 2
+    elif change == "pins":
         report["publicationPins"]["candidateManifestSha256"] = "0" * 64
     elif change == "partial":
         report["assets"] = []
@@ -401,10 +411,14 @@ def test_rejects_stale_or_inconsistent_provenance_before_writing(inputs, change)
         report["assets"].append(report["assets"][0])
     elif change == "hash":
         report["assets"][0]["currentSha256"] = "0" * 64
+    elif change == "candidate-hash":
+        report["assets"][0]["candidateSha256"] = "0" * 64
     elif change == "cause":
         report["assets"][0]["cause"] = "guess"
-    else:
+    elif change == "summary":
         report["summary"]["processing-only"] = 999
+    else:
+        report["comparedAssets"] = 0
     write_json(inputs["provenance"], report)
     with pytest.raises(ValueError):
         review.build_report(**inputs)

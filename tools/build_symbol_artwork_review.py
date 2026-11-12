@@ -11,12 +11,19 @@ import xml.etree.ElementTree as ET
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from tools.classify_symbol_artwork_provenance import CAUSES, load_classifications
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_ROOT = REPO_ROOT / "local"
 COMPARISON_FORMAT = "InfinityDB external symbol candidate publication comparison"
+PROVENANCE_FORMAT = "InfinityDB symbol artwork provenance"
 TEMPLATE = Path(__file__).with_name("templates") / "symbol_artwork_review.html"
+CAUSES = {
+    "override-content-changed": "Changed applied override content",
+    "override-newly-applied": "Newly applied override",
+    "override-removed": "Removed override",
+    "upstream-source-changed": "Changed upstream source",
+    "processing-only": "Processing only (same effective input)",
+    "unresolved": "Unresolved",
+}
 
 
 def _sha(content: bytes) -> str:
@@ -29,6 +36,42 @@ def _json(path: Path) -> tuple[dict[str, Any], str]:
     if not isinstance(value, dict):
         raise ValueError(f"Expected JSON object: {path.name}")
     return value, _sha(content)
+
+
+def _equal(actual: Any, expected: Any, label: str) -> None:
+    if actual != expected:
+        raise ValueError(f"Disconnected evidence: {label}")
+
+
+def load_classifications(
+    path: Path, pins: dict[str, Any], pairs: list[dict[str, Any]],
+) -> tuple[dict[str, Any], str]:
+    """Reject stale or partial classification reports before embedding them."""
+    report, digest = _json(path)
+    _equal(
+        (report.get("format"), report.get("formatVersion")),
+        (PROVENANCE_FORMAT, 1),
+        "provenance format",
+    )
+    _equal(report["publicationPins"], pins, "provenance publication inputs")
+    assets = report["assets"]
+    if not isinstance(assets, list) or len({a["path"] for a in assets}) != len(assets):
+        raise ValueError("Duplicate or invalid provenance assets")
+    indexed = {a["path"]: a for a in assets}
+    _equal(set(indexed), {pair["path"] for pair in pairs}, "provenance coverage")
+    for pair in pairs:
+        asset = indexed[pair["path"]]
+        for key in ("currentSha256", "candidateSha256"):
+            _equal(asset[key], pair[key], f"provenance pair {key}")
+        if asset["cause"] not in CAUSES:
+            raise ValueError("Unknown provenance cause")
+    _equal(
+        report["summary"],
+        {cause: sum(asset["cause"] == cause for asset in assets) for cause in CAUSES},
+        "provenance summary",
+    )
+    _equal(report["comparedAssets"], len(pairs), "provenance count")
+    return report, digest
 
 
 def _asset_path(value: str) -> str:

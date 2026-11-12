@@ -522,14 +522,18 @@ unsafe paths, malformed SVGs, drift or existing output files. The optional
 candidate evidence must bind to the selected candidate manifest; its recorded
 input details are displayed, but the review does not rerun the handoff receipt
 chain. `--provenance` may select a matching classification report; its pins
-must include the same comparison, manifests and candidate evidence.
+must include the same comparison, manifests and candidate evidence. The review
+checks report format, coverage, asset hashes, cause values and summary; it does
+not reopen or authenticate the attribution inputs. Establish the report's
+provenance independently. The retired P5-specific audit is not a general
+classifier for future external-only publications.
 
 The self-contained page provides side-by-side/overlay views and filters for
 changed artwork. Added paths are listed, not visually reviewed. Removed URLs
 remain unresolved compatibility requirements even if their source identities
 map elsewhere. Export decisions before closing: browser storage is not
 automatic. Imports require the exact input fingerprint and replace the
-decision set. Without a verified provenance report, classifications are
+decision set. Without independently verified provenance, classifications are
 reviewer annotations, not established causes. The review does not accept
 artwork, verify all unchanged/added asset bytes or approve semantic mappings;
 use the candidate, compatibility and publication checks separately.

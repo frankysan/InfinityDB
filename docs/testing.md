@@ -1869,17 +1869,17 @@ That preparation did not change tracked SVGs, the manifest or runtime databases.
 ### P5.7 override provenance classification
 
 **2026-11-11, Windows development checkout based on `35a069d8`:**
-The offline audit `tools.classify_symbol_artwork_provenance` verified pinned
+The now-retired P5-specific offline audit verified pinned
 historical/candidate manifests, effective archive members, original source
 identities, exact duplicate assignments, override donors/current files and
 publication output hashes. This audit requires the retired in-tree build and
 matched-input evidence; it is not a general classifier for future external-only
 publications.
 
-The selection JSON uses `format: "InfinityDB symbol provenance inputs"`,
+The historical selection JSON uses `format: "InfinityDB symbol provenance inputs"`,
 `formatVersion: 1`, an `overrideRoot` and a `files` mapping of role to
 `{"path": "...", "sha256": "..."}`. Relative paths resolve from the working
-directory. Required roles are:
+directory. Its required roles were:
 
 - `comparison`, `current_manifest`, `candidate_manifest`, `candidate_evidence`;
 - `historical_build`, `historical_archive`, `historical_compression`,
@@ -1887,23 +1887,20 @@ directory. Required roles are:
 - `effective_report`, `effective_archive`, `raw_archive`, `duplicate_receipt`,
   `override_lookups`, `candidate_compressed`.
 
-Optional `override_notes` and `legacy_tree_notes` pin the present-day notes
-files. The audit retains repeated override declarations and their line numbers;
-they describe intent, not verified historical edits. The audit hashes the
-selected files, checks their connections and effective bytes, and leaves
-unsupported attribution unresolved; matched-input parity is corroborated by
-identity, not rerun. With the retained historical inputs, a repeat uses an
-explicit selection and a fresh ignored output:
-
-```powershell
-.\.venv\Scripts\python.exe -m tools.classify_symbol_artwork_provenance `
-  --inputs PINNED-P5-INPUTS.json --output local\validation\symbols\publication\RUN-ID\provenance.json
-```
+Optional `override_notes` and `legacy_tree_notes` pinned the then-current notes
+files. The audit retained repeated override declarations and their line numbers;
+they describe intent, not verified historical edits. The audit hashed the
+selected files, checked their connections and effective bytes, and left
+unsupported attribution unresolved; matched-input parity was corroborated by
+identity, not rerun. The saved selector's current-manifest path now contains the
+promoted manifest. Its original bytes are in Git at
+`35a069d8:data/manifests/symbol-publication.json`; a replay must explicitly
+select those hash-matched bytes and will have a different selection fingerprint.
 
 Private selectors and output are
 `local/p5-symbol-provenance-inputs-with-notes-20261111.json` and
 `local/p5-symbol-provenance-final-20261111.json`.
-All **118 changed assets / 154 related source identities** are covered; 24
+All **118 changed assets / 154 related source identities** are covered; 25
 assets have multiple source identities. The verified canonical causes are
 **1 changed applied override** (Morat), **56 newly applied overrides** (53
 direct, 3 propagated), **61 processing-only differences** (57 upstream inputs,
@@ -1921,18 +1918,14 @@ checks at 1440/390/320 widths. Its private receipt is
 `local/p5-symbol-artwork-browser-validation.json`; browser test exports were
 not artwork approvals.
 
-Focused regression command:
-
-```powershell
-.\.venv\Scripts\python.exe tools/run_checks.py --stage test --assets off --test-workers 0 tests/test_classify_symbol_artwork_provenance.py tests/test_build_symbol_artwork_review.py tests/test_test_sections.py
-```
-
-The cohort passed **84 tests, zero skips**, including six real-Chrome fixture
-cases at 1440/390/320 pixels, with and without provenance. Assertions cover
-direct/propagated overrides, unchanged overrides, alias remapping, ambiguous
+The then-focused cohort passed **84 tests, zero skips**, including six
+real-Chrome fixture cases at 1440/390/320 pixels, with and without provenance.
+Assertions covered direct/propagated overrides, unchanged overrides, alias remapping, ambiguous
 canonical selection, drift/disconnected evidence, note declarations, report
 coverage/hash consistency, local output integrity and atomic decision imports.
-Ruff and focused Pyright passed. The documentation stage also passed.
+Ruff and focused Pyright passed. The documentation stage also passed. The
+classifier-specific tests were retired with the historical generator; current
+artwork-review and symbol-handoff tests retain their separate contracts.
 
 The actual production page
 `local/p5-symbol-artwork-review-classified-20261111.html` rendered
