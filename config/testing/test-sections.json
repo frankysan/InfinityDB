@@ -243,6 +243,7 @@
         "test_release_validation_scope",
         "test_report_metrics",
         "test_run_checks",
+        "test_run_pinned_determinism",
         "test_sample_test_host_resources",
         "test_snapshot_archive",
         "test_test_sections",
