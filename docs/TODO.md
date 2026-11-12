@@ -287,10 +287,29 @@ when all contained work shares the same owner.
   or an in-memory hand-off that skips only the duplicate build-path pass; the
   standalone `export` command must retain full untrusted-input validation.
 
-- [ ] Evaluate artifact-level deduplication for development builds. `normalized.json` and
-  `infinity.raw.db` intentionally retain overlapping lossless source structure today; measure
-  the duplication on a controlled build, then decide whether post-export workflows need both
-  or whether one should be documented as a regenerable/transient artifact.
+- [ ] **Retire `army.raw.db` as a supported retained artifact**, and remove the
+  intermediate raw SQLite format once its independent source-audit and build
+  consumers have tested replacements. The complete runtime builder already
+  discards its temporary raw sibling; its three published databases do not
+  depend on retaining one. Do not remove the temporary builder input while
+  variant-usage projection and versioned Army publication still require it.
+  - [ ] Inventory and migrate raw-dependent source audits, variant projection,
+    publication checks, deterministic-build evidence, `paired_audit_connection`,
+    and the source-row inspection CLI. Prefer pinned normalized source input or
+    temporary verified materialization; preserve source-only row fidelity,
+    absence-versus-null distinctions, exact occurrence/extra relationships,
+    and fail-closed source/application provenance.
+  - [ ] Explicitly cut over standalone `infinity-db export` and related
+    pair-health/inspection interfaces, keeping full untrusted-input validation.
+    Verify normal build, three-database output identities, independent
+    source-audit coverage, regression tests and documented commands before
+    removing raw-archive generation, pair APIs or compatibility tests.
+  - [ ] Classify the existing ignored `data/generated/army.raw.db` as
+    retirement-candidate local evidence, not a valid current pair. Preserve its
+    bytes pending the cleanup manifest's independent backup/restore and
+    deletion approval; never delete or accept a mismatched pair implicitly.
+  The [L0 retirement decision](tooling-and-local-path-cleanup-plan.md#raw-archive-retirement-decision--2026-11-12)
+  records the current consumer and safety boundaries.
 
 ### Army snapshot maintenance
 

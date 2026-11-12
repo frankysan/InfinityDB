@@ -1164,6 +1164,69 @@ published database, normal serving or deployment was modified.
 private-file migration/deletion, a current raw-source reconstruction, or
 retirement of these maintained checks.
 
+### Raw archive retirement decision — 2026-11-12
+
+**Disposition:** Retire `army.raw.db` as a retained development artifact,
+then retire its intermediate SQLite format when the remaining independent
+consumers have safe replacements. This resolves the earlier open
+artifact-deduplication decision; it is **not** permission to delete private
+bytes or to drop source-integrity tests simply because they mention the archive.
+
+**Verified boundaries and affected consumers:**
+
+- The selected complete runtime set contains only `army.db`,
+  `rules_n5.db` and `its_18.db`. `validate_database_set`, normal
+  serving and Docker deployment neither require nor read `army.raw.db`.
+  The complete builder already creates and discards raw SQLite inside its
+  temporary staging directory rather than installing it in the selected
+  output directory.
+- The base `export_database` operation still generates a paired raw archive
+  to preserve exact normalized source rows, including absent versus null
+  distinctions. The standalone `infinity-db export` CLI publishes that
+  pair, and `database-health --require-raw` and
+  `tools.inspect_raw_archive` expose explicit audit contracts.
+- Complete-build publication stages v27–v31 currently require a validated
+  Army/raw pair. The source-bound variant-usage projection reads raw-only
+  profile/loadout occurrences, extras, include and Peripheral relationships
+  while comparing them with the application and Rules output.
+- Retained optional source audits include
+  `audit_army_faction_semantics`, `audit_source_presentation`,
+  `audit_source_variant_inputs`, `report_reference_baseline`,
+  `audit_database_separation` and clients of
+  `paired_audit_connection`. `build_determinism_manifest` fingerprints
+  the raw artifact as reproducible build evidence. Their purposes must be
+  reconsidered independently; tests alone do not justify retaining the
+  archive, but live source/provenance checks cannot be silently discarded.
+- The current ignored `data/generated/army.raw.db` already fails the
+  application/raw pair-metadata check against tracked `army.db`. It is
+  **not** accepted as a usable audit input or current release dependency;
+  preserve it pending byte/ownership/recovery classification instead of
+  silently replacing or deleting it.
+
+**Implementation sequence:** First define source-equivalent reads from the
+pinned Army ZIP and normalized model (or deterministic, job-local SQLite
+materialization) with exact source-identity verification. Move independent
+source audits and variant/publication transformations onto that contract,
+preserving source-only coverage and negative tests for missing, reordered,
+duplicated and mismatched occurrences. Then update standalone export and
+pair-health/inspection contracts, and stop emitting raw SQLite once no
+accepted build/research consumer needs it. Independently compare the three
+published database hashes and semantic/citation fixtures from identical
+pinned source inputs before cutover. Remove raw-only fixtures and tests
+**only** when their independent invariant is superseded, not merely to
+make the suite pass.
+
+The separate general build-path redundant-serialization task remains open
+until an implementation proves that all required untrusted-input validation
+and source integrity survive without double work. Do not alter the current
+canonical [data lifecycle](../data/README.md) to describe a not-yet-applied
+contract. Changes to CLI compatibility or persistent ignored files require
+their own bounded acceptance; the current cleanup manifest's independent
+backup/trial-restore and explicit deletion approval still apply.
+
+**No code or private-file modification** is authorized by this L0 decision
+alone. The open implementation is tracked in [the backlog](TODO.md).
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
