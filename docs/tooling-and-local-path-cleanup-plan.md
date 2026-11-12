@@ -1619,6 +1619,82 @@ This migration does **not** authorize deleting ignored
 `data/generated/army.raw.db`, bypassing private-file backup/restore review,
 or removing source-integrity tests solely because they refer to raw SQLite.
 
+### Reference baseline and determinism consumer disposition — 2026-11-12
+
+**Retain independent source coverage; remove raw-file retention as a
+prerequisite.** The maintained `tools.report_reference_baseline` verifies
+the pinned Army source ZIP against the published Army metadata, rechecks
+each source document's identities, versions, provenance, membership order,
+and nested Profile/Loadout facts, then compares published reference, Extra,
+Characteristic, order, Peripheral, Include and Unit-option relationships.
+Its previous optional `--army-archive` route additionally required a
+matching ignored raw SQLite sibling solely to read those nested source
+rows. An explicit `--normalized PATH` route now instead validates the
+**complete normalized source model** against the application's
+`export_pair_sha256`, materializes a transient in-memory source connection
+and runs the same independent parity checks. The pinned ZIP hash still must
+match the Army publication; neither matching metadata alone nor a
+standalone raw sibling bypasses the cross-source evidence checks.
+
+Existing `--army-archive` usage without `--normalized` preserves its
+strict validated raw-pair behavior. Supplying normalized source without a
+pinned ZIP is refused. The JSON `sourceIdentityEvidence.nestedStorage`
+reports whether Profiles/Loadouts were checked against
+`paired-army.raw.db` or `verified-normalized.json`, and the Markdown
+statement reflects that provenance. This change does not assert reference
+completeness, alter the runtime database schemas or relax citation gates.
+
+**Separate disposition: `build_determinism_manifest` — retain-active,
+not a persistent raw consumer.** Its disposable staging directory invokes
+the standalone `infinity-db export` command, explicitly measuring hashes
+of both the application and raw database together with normalized JSON,
+Rules, ITS and archive artifacts. `compare_determinism_manifests`
+compares exact artifact sets across machines. The `army.raw.db` entry
+measures *standalone paired-export determinism*, which is still a useful
+independent format contract; it does not require the ignored raw database
+in the development checkout, nor does it authorize complete builds to
+reintroduce raw creation. Retire or version this manifest field at the
+later **standalone format** cutoff, and retain its distinct normalized,
+runtime/Rules/ITS, source ZIP and symbol/citation reproducibility checks.
+Changing manifest keys/format prematurely would break comparison of
+existing v1 manifests without removing any persistent raw-file dependency.
+
+**Tests:** A hermetic miniature Army ZIP is merged, normalized and exported
+to a matched application/raw pair in the test's temporary directory.
+The archive verifier's source and nested evidence is compared byte-for-byte
+between the verified in-memory normalized route and the paired raw path,
+apart from the explicitly reported `nestedStorage` provenance. Removing
+the fixture's raw sibling does not change the normalized result; mutated
+normalized data is rejected before any source lookup. The end-to-end
+baseline/CLI test still runs the same archive and published occurrence checks
+against the fixture without raw SQLite (its unrelated released Rules Weapon
+citation check is mocked because the tiny synthetic Army intentionally
+does not match the current released Rules generation). Existing
+`test_report_reference_baseline.py` coverage remains in place for the
+release database, source/citation checks and legacy raw route.
+
+**Validation:** `tests/test_report_reference_baseline.py` passed
+**69 tests, 2 skipped** (historical pinned raw/source-dependent cases).
+New hermetic fixtures run the actual Army ZIP merger/normalizer/exporter,
+compare nested raw versus verified normalized audit evidence, and run the
+baseline CLI after deleting the temporary raw sibling. Negative tests
+reject modified normalized source even if a valid raw sibling exists, and
+refuse `--normalized` without `--army-archive`. The release Rules/Weapon
+citation check is mocked **only** in the tiny fixture's integration test
+because its Army identity is intentionally different from the tracked
+release; independent actual-release citation tests remain in the module.
+`tests/test_deployment_scripts.py` passed **46/46**. Ruff, Pyright,
+Markdownlint, document links/backlog validation and Git whitespace checks
+passed. Neither the full project suite nor the standalone determinism
+manifest generation was run for this tools-only slice.
+
+**Remaining:** Explicit `database-health --require-raw`, standalone paired
+export, dedicated raw-only inspection research and historical paired-archive
+tests remain opt-in until their original purpose is retired or superseded.
+No ignored archive was moved, deleted or rewritten, and no selected runtime
+database was rebuilt. L0 inventory ownership and the independent
+backup/trial-restore decision for private bytes remain open.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

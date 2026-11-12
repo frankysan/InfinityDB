@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Build representative artifacts and record their SHA-256 identities."""
+"""Build representative artifacts and record their SHA-256 identities.
+
+The raw SQLite hash deliberately measures the *standalone paired export*
+contract, using a disposable temporary directory. It is not a retained
+development input or an artifact produced by complete runtime builds.
+"""
 
 from __future__ import annotations
 

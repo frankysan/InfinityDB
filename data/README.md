@@ -313,6 +313,31 @@ As above, these are example paths for a matched source generation. Omitting
 `--normalized` retains the existing matched raw-sibling behavior; a
 supplied but mismatched normalized source is rejected rather than falling back.
 
+The read-only `tools.report_reference_baseline` source-ZIP audit can
+verify a pinned Army archive with either a matching standalone
+`army.raw.db` sibling (legacy default), or an explicit `--normalized PATH`
+file. The normalized route requires `--army-archive` and a matching Army
+application database. It validates the archived ZIP SHA-256 and the full
+normalized export-generation fingerprint, then compares source Army IDs,
+file provenance, membership positions, nested profile/loadout rows and
+published occurrence, Extra, Characteristics, order, Peripheral and Include
+relationships. It will not silently fall back to a raw sibling. For example,
+using **the same source generation** for all inputs:
+
+```powershell
+.venv\Scripts\python.exe -m tools.report_reference_baseline --army-db local/data/build/army.db --rules-db local/data/build/rules_n5.db --army-archive local/data/snapshots/army-source.zip --normalized local/data/build/normalized.json --json-output local/reports/reference-baseline.json
+```
+
+These paths are illustrative, not implicit build inputs. The selected Rules
+database must itself match the reviewed Army publication for the independent
+Weapon citation check; source verification is not a substitute for that gate.
+
+`tools.build_determinism_manifest` separately hashes a **temporary**
+`army.raw.db` produced by the standalone paired-export command. That entry
+tests cross-platform determinism of the standalone format; it neither makes
+a raw database a runtime artifact nor requires retaining any previously
+generated raw sibling in `data/generated/`.
+
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;
 `curated/README.md` owns the current format version and validation rules. PDF citations use

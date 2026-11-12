@@ -7,6 +7,7 @@ import sqlite3
 import subprocess
 import sys
 import zipfile
+from contextlib import closing
 from io import BytesIO
 from pathlib import Path
 from typing import Any
@@ -14,9 +15,12 @@ from unittest.mock import patch
 
 import pytest
 
+from infinity_army_data.cli import main as army_data_main
 from infinity_army_data.merge import load_sources
 from infinity_db.curated import load_curated_document
+from infinity_db.database import export_database, raw_database_path
 from infinity_db.snapshot_revision import database_set_snapshot_revision
+from infinity_db.variant_usage_source import normalized_source_connection
 from tools.report_reference_baseline import (
     _NESTED_SOURCE_FIELDS,
     CURRENT_CITATION_COLLECTIONS,
@@ -1150,6 +1154,129 @@ def test_url_pin_is_not_offline_content_verification(tmp_path: Path) -> None:
     assert pinned["declaredHashMatches"] is None
     assert _artifact_evidence(tmp_path, None, "https://example.org", set())[
         "verificationStatus"] == "url-without-revision-pin"
+
+
+def _verified_smoke_army_export(tmp_path: Path) -> tuple[Path, Path, Path]:
+    """Build a real, tiny ZIP-pinned export for source-archive parity acceptance."""
+    fixture = ROOT / "tests/fixtures/deployment-smoke"
+    archive = tmp_path / "JSON 20261112-000000.zip"
+    with zipfile.ZipFile(archive, "w") as destination:
+        for source in sorted(fixture.glob("*.json")):
+            destination.write(source, arcname=source.name)
+    generated = tmp_path / "generated"
+    assert army_data_main([
+        "build", str(archive), "--output-dir", str(generated), "--compact",
+    ]) == 0
+    normalized = generated / "normalized.json"
+    published = generated / "army.db"
+    export_database(json.loads(normalized.read_text(encoding="utf-8")),
+                    published, finalize=False)
+    return archive, published, normalized
+
+
+def test_normalized_archive_source_parity_without_raw_sibling(tmp_path: Path) -> None:
+    archive, published, normalized = _verified_smoke_army_export(tmp_path)
+    from tools.report_reference_baseline import _metadata
+
+    with closing(sqlite3.connect(published)) as army, closing(sqlite3.connect(
+        raw_database_path(published)
+    )) as raw:
+        army.row_factory = sqlite3.Row
+        evidence_meta = _metadata(army, "__infinity_metadata")["_meta"]
+        raw_evidence = _verify_army_archive_sources(
+            archive, evidence_meta, army, raw,
+        )
+        with normalized_source_connection(published, normalized) as (source, _generation):
+            json_evidence = _verify_army_archive_sources(
+                archive, evidence_meta, army, source,
+                source_storage="verified-normalized.json",
+            )
+        expected = dict(raw_evidence)
+        expected["nestedStorage"] = {
+            **raw_evidence["nestedStorage"],
+            "profiles": "verified-normalized.json",
+            "loadout_options": "verified-normalized.json",
+        }
+        assert json_evidence == expected
+    raw_database_path(published).unlink()
+    with closing(sqlite3.connect(published)) as army:
+        with normalized_source_connection(published, normalized) as (source, _generation):
+            assert _verify_army_archive_sources(
+                archive, evidence_meta, army, source,
+                source_storage="verified-normalized.json",
+            ) == json_evidence
+
+
+def test_archive_baseline_with_verified_normalized_source_and_no_raw(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive, published, normalized = _verified_smoke_army_export(tmp_path)
+    # This tiny fixture uses the tracked full Rules DB, whose reviewed Weapon
+    # citations are deliberately bound to a different, released Army generation.
+    monkeypatch.setattr(
+        "tools.report_reference_baseline.load_runtime_weapon_profile_publication",
+        lambda *_: (None, None),
+    )
+    with pytest.raises(ReferenceBaselineError, match="requires --army-archive"):
+        build_baseline(published, RULES_DB, normalized=normalized)
+    raw_database_path(published).unlink()
+    report = build_baseline(
+        published, RULES_DB, army_archive=archive, normalized=normalized,
+    )
+    assert report["armySnapshot"]["archiveVerification"] == (
+        "hash-verified-source-identities"
+    )
+    evidence = report["armySnapshot"]["sourceIdentityEvidence"]
+    assert evidence["matchedArmyListIds"] == 2
+    assert evidence["nestedStorage"]["profiles"] == "verified-normalized.json"
+    assert "verified normalized.json" in render_markdown(report)
+    output = tmp_path / "baseline.json"
+    assert main([
+        "--army-db", str(published), "--rules-db", str(RULES_DB),
+        "--army-archive", str(archive), "--normalized", str(normalized),
+        "--json-output", str(output),
+    ]) == 0
+    saved = json.loads(output.read_text(encoding="utf-8"))
+    assert saved["armySnapshot"]["sourceIdentityEvidence"]["nestedStorage"] == (
+        evidence["nestedStorage"]
+    )
+    assert not raw_database_path(published).exists()
+
+
+def test_baseline_refuses_unverified_normalized_source_without_raw_fallback(
+    tmp_path: Path,
+) -> None:
+    archive, published, normalized = _verified_smoke_army_export(tmp_path)
+    # Keep the valid legacy raw sibling present to demonstrate that an
+    # explicitly selected but changed normalized source never falls back.
+    document = json.loads(normalized.read_text(encoding="utf-8"))
+    document["tables"]["units"][0]["name"] = "unverified change"
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ReferenceBaselineError, match="Verified normalized Army source"):
+        build_baseline(
+            published, RULES_DB, army_archive=archive, normalized=normalized,
+        )
+    assert raw_database_path(published).exists()
+
+
+def test_baseline_cli_refuses_normalized_without_pinned_archive(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit) as exc:
+        main(["--normalized", str(tmp_path / "normalized.json")])
+    assert exc.value.code == 2
+    assert "--normalized requires --army-archive" in capsys.readouterr().err
+
+
+def test_normalized_archive_source_rejects_provenance_drift(tmp_path: Path) -> None:
+    archive, published, normalized = _verified_smoke_army_export(tmp_path)
+    raw_database_path(published).unlink()
+    document = json.loads(normalized.read_text(encoding="utf-8"))
+    document["tables"]["units"][0]["name"] = "unsourced revision"
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match"):
+        with normalized_source_connection(published, normalized):
+            pytest.fail("Tampered normalized source was accepted")
 
 
 def _synthetic_army_archive(tmp_path: Path) -> Path:

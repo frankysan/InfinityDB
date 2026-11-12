@@ -314,14 +314,18 @@ when all contained work shares the same owner.
   skips raw-archive generation entirely; variant usage and Army v27–v31
   overlays use fully verified normalized source. Standalone `infinity-db export`
   still produces a lossless raw pair for independent audit/research consumers.
-  - [ ] Migrate remaining raw-dependent source verification in
-    `report_reference_baseline`, standalone paired-export determinism
-    evidence, and explicit pair-health consumers. The Army/faction identity,
-    source-presentation completeness and Skill/Equipment source-variant audits
-    now support explicit verified normalized input, as do the three
-    `paired_audit_connection` semantic consumers, source-row inspection and
-    standalone variant candidate CLI. The complete-build variant projection
-    also uses in-memory normalized source with export-generation verification.
+  - [ ] Review remaining standalone raw-format contracts: paired export,
+    explicit pair-health consumers, and historical raw-only research. The
+    pinned source ZIP verification in `report_reference_baseline` now accepts
+    verified normalized input without a raw sibling. The Army/faction identity,
+    source-presentation completeness, Skill/Equipment source-variant, and
+    three semantic relationship audits also use verified normalized input;
+    source-row inspection and standalone variant candidates are migrated too.
+    `build_determinism_manifest` intentionally measures a **disposable
+    standalone paired-export** raw hash, not runtime or persistent raw input;
+    retain it while standalone paired export is supported and retire that
+    measurement with the format contract rather than treating its mere
+    existence as a reason to preserve ignored `army.raw.db` files.
     `audit_source_variant_inputs` now rejects mismatched application/raw
     pairs, and its exact Extra-owner lookup accepts verified source when an
     application path is supplied. Retain legacy raw-based APIs as parity

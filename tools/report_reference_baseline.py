@@ -16,7 +16,7 @@ import subprocess
 import sys
 from collections import Counter
 from collections.abc import Sequence
-from contextlib import closing
+from contextlib import ExitStack, closing
 from pathlib import Path, PureWindowsPath
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
@@ -26,6 +26,7 @@ from infinity_db.application_domains import application_domain, semantic_record_
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.snapshot_revision import database_set_snapshot_revision
+from infinity_db.variant_usage_source import normalized_source_connection
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 
 if __package__:
@@ -581,6 +582,8 @@ def _verify_published_unit_options(
 def _verify_army_archive_sources(
     archive: Path, metadata: dict[str, Any], army: sqlite3.Connection,
     raw_army: sqlite3.Connection | None = None,
+    *,
+    source_storage: str = "paired-army.raw.db",
 ) -> dict[str, Any]:
     """Match individual raw Army source identities to the published list rows.
 
@@ -738,8 +741,8 @@ def _verify_army_archive_sources(
         "matchedNestedSourceRows": nested_counts,
         "nestedStorage": {
             "profile_groups": "published-army.db",
-            "profiles": "paired-army.raw.db",
-            "loadout_options": "paired-army.raw.db",
+            "profiles": source_storage,
+            "loadout_options": source_storage,
         },
     }
 
@@ -858,8 +861,13 @@ def build_baseline(
     *,
     root: Path = PROJECT_ROOT,
     army_archive: Path | None = None,
+    normalized: Path | None = None,
 ) -> dict[str, Any]:
     """Inventory published identities; intentionally make no completeness claims."""
+    if normalized is not None and army_archive is None:
+        raise ReferenceBaselineError(
+            "Verified normalized source requires --army-archive for source parity"
+        )
     with (
         closing(_connect(army_database)) as army,
         closing(_connect(rules_database)) as rules,
@@ -880,16 +888,30 @@ def build_baseline(
                 raise ReferenceBaselineError(f"Army archive is unavailable: {army_archive}")
             if _sha256(army_archive) != archive_sha:
                 raise ReferenceBaselineError("Army archive SHA-256 differs from published metadata")
-            raw_path = raw_database_path(army_database)
-            try:
-                validate_database_pair(army_database, raw_path=raw_path)
-            except ValueError as exc:
-                raise ReferenceBaselineError(
-                    f"Published Army/raw source database pair is invalid: {exc}"
-                ) from exc
-            with closing(_connect(raw_path)) as raw_connection:
+            with ExitStack() as source_stack:
+                if normalized is None:
+                    raw_path = raw_database_path(army_database)
+                    try:
+                        validate_database_pair(army_database, raw_path=raw_path)
+                    except ValueError as exc:
+                        raise ReferenceBaselineError(
+                            f"Published Army/raw source database pair is invalid: {exc}"
+                        ) from exc
+                    source = source_stack.enter_context(closing(_connect(raw_path)))
+                    source_storage = "paired-army.raw.db"
+                else:
+                    try:
+                        source, _generation = source_stack.enter_context(
+                            normalized_source_connection(army_database, normalized)
+                        )
+                    except (OSError, ValueError, sqlite3.Error) as exc:
+                        raise ReferenceBaselineError(
+                            f"Verified normalized Army source is invalid: {exc}"
+                        ) from exc
+                    source_storage = "verified-normalized.json"
                 archive_evidence = _verify_army_archive_sources(
-                    army_archive, raw_army, army, raw_connection,
+                    army_archive, raw_army, army, source,
+                    source_storage=source_storage,
                 )
                 sources, _ = load_sources(army_archive)
                 archive_evidence["matchedPublishedReferences"] = (
@@ -1142,8 +1164,14 @@ def render_markdown(report: dict[str, Any]) -> str:
              f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['profiles']} "
              "profiles and "
              f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['loadout_options']} "
-             "loadouts in export-paired army.raw.db. "
-             "Derived runtime payloads and browser presentation remain unverified."]
+             + (
+                 "loadouts in verified normalized.json. "
+                 if snapshot['sourceIdentityEvidence'].get('nestedStorage', {}).get(
+                     'profiles'
+                 ) == "verified-normalized.json"
+                 else "loadouts in export-paired army.raw.db. "
+              )
+             + "Derived runtime payloads and browser presentation remain unverified."]
             if (snapshot.get("sourceIdentityEvidence") or {}).get("matchedNestedSourceRows")
             else []
         ),
@@ -3067,6 +3095,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--army-archive", type=Path, help="Verify exact ZIP bytes against Army pin")
     parser.add_argument(
+        "--normalized", type=Path,
+        help="Attested normalized.json for --army-archive, without a raw sibling",
+    )
+    parser.add_argument(
         "--verify-server", metavar="BASE_URL",
         help="Check that the server uses this exact Army/rules database pair",
     )
@@ -3267,8 +3299,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             or args.audit_visibility_zones or args.verify_visibility_pdfs
             or args.join_reviewed_evidence):
         parser.error("reconciliation flags require --reconcile-explanation-inventory")
+    if args.normalized is not None and args.army_archive is None:
+        parser.error("--normalized requires --army-archive")
     report = build_baseline(
         args.army_db, args.rules_db, army_archive=args.army_archive,
+        normalized=args.normalized,
     )
     if args.verify_server:
         try:
