@@ -272,10 +272,16 @@ python -m tools.compare_determinism_manifests local/reports/determinism-v2-windo
 ```
 
 A v2 comparison across the two development hosts at the same commit
-passed **10/10 exact SHA-256 checks** on 2026-11-12. The remaining CI
-matrix uses host-native toolchains and needs a separate design update;
-do not treat native cross-platform byte parity as proven by this
-container result or disable native platform build tests.
+passed **10/10 exact SHA-256 checks** on 2026-11-12. In hosted CI,
+`.github/workflows/source-checks.yml` retains the native Ubuntu,
+Windows and macOS build checks, while two independent Ubuntu 24.04
+and 26.04 hosts generate the pinned-container manifests. The original
+strict `deterministic-outputs` job downloads both manifests and
+compares their entire v2 artifact sets, failing on missing or
+different hashes. GitHub-hosted Windows/macOS runners are not required
+to provide Linux Docker. A successful hosted workflow run is still
+required to confirm the new CI wiring; native platform checks remain
+a separate compatibility gate.
 
 The two legacy paired destination files cannot be replaced as one filesystem
 transaction, so explicit `--with-raw` export retains its established commit

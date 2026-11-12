@@ -89,28 +89,24 @@ jobs:
             label: "3.11"
             check_args: "--stage test --stage lint --stage docs --stage type --stage build --stage rules"
             primary: true
-            determinism: true
             timeout_minutes: 30
           - os: windows-latest
             python: "3.11.9"
             label: "3.11"
             check_args: "--stage build --stage rules"
             primary: false
-            determinism: true
             timeout_minutes: 30
           - os: macos-latest
             python: "3.11.9"
             label: "3.11"
             check_args: "--stage build --stage rules"
             primary: false
-            determinism: true
             timeout_minutes: 15
           - os: ubuntu-latest
             python: "3.14"
             label: "3.14"
             check_args: "--stage build --stage rules"
             primary: false
-            determinism: false
             timeout_minutes: 15
     runs-on: ${{ matrix.os }}
     # Run the complete source suite once on Linux; other legs validate cross-platform builds.
@@ -176,28 +172,54 @@ jobs:
           python tools/run_checks.py ${{ matrix.check_args }}
           --assets required --build-source tests/fixtures/deployment-smoke
 
-      - name: Report deterministic-output toolchain
-        if: needs.fast-validation.outputs.full == 'true' && matrix.determinism
+  # Native Windows, macOS, and Linux coverage remains above. Exact-byte
+  # determinism is separately checked with a single digest-pinned toolchain.
+  determinism-container:
+    needs: fast-validation
+    name: Pinned determinism / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-26.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - name: Reuse validated determinism baseline
+        if: needs.fast-validation.outputs.full == 'false'
+        run: echo "Reused deterministic outputs from the hosted-green baseline"
+
+      - name: Check out exact candidate for canonical builds
+        if: needs.fast-validation.outputs.full == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      # Host Python only launches Docker; no host dependencies are installed.
+      # All generated artifacts come from the immutable container toolchain.
+      - name: Verify pinned OCI image and SQLite/zlib toolchain
+        if: needs.fast-validation.outputs.full == 'true'
+        run: python3 -m tools.run_pinned_determinism --probe
+
+      - name: Build canonical deterministic-output manifest
+        if: needs.fast-validation.outputs.full == 'true'
         run: >-
-          python -c "import sqlite3, sys, zlib;
-          print('Python', sys.version.split()[0], 'SQLite', sqlite3.sqlite_version,
-          'zlib', zlib.ZLIB_RUNTIME_VERSION)"
+          python3 -m tools.run_pinned_determinism
+          --output local/reports/determinism-manifest.json
 
-      - name: Build deterministic-output manifest
-        if: needs.fast-validation.outputs.full == 'true' && matrix.determinism
-        run: python tools/build_determinism_manifest.py --output reports/determinism-manifest.json
-
-      - name: Upload deterministic-output manifest
-        if: needs.fast-validation.outputs.full == 'true' && matrix.determinism
+      - name: Upload canonical deterministic-output manifest
+        if: needs.fast-validation.outputs.full == 'true'
         uses: actions/upload-artifact@v7
         with:
-          name: determinism-${{ runner.os }}
-          path: reports/determinism-manifest.json
+          name: determinism-container-${{ matrix.os }}
+          path: local/reports/determinism-manifest.json
           if-no-files-found: error
 
   deterministic-outputs:
+    # Preserve the required job name; native cross-platform validation is
+    # upstream, while exact-byte parity is checked across two pinned x64 hosts.
     name: Cross-platform deterministic outputs
-    needs: [fast-validation, source-checks]
+    needs: [fast-validation, source-checks, determinism-container]
     runs-on: ubuntu-latest
     steps:
       - name: Reuse validated deterministic baseline
@@ -216,11 +238,11 @@ jobs:
         with:
           python-version: "3.11.9"
 
-      - name: Download platform manifests
+      - name: Download pinned-container manifests
         if: needs.fast-validation.outputs.full == 'true'
         uses: actions/download-artifact@v8
         with:
-          pattern: determinism-*
+          pattern: determinism-container-*
           path: determinism-manifests
 
       - name: Compare artifact hashes

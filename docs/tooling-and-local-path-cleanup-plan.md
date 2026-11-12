@@ -1994,6 +1994,53 @@ comparison, and does not assume Linux Docker is present on hosted
 Windows/macOS runners. The raw archive deletion approval remains
 separate.
 
+### Hosted CI determinism separation — 2026-11-12
+
+**Decision and implemented workflow:** Keep the existing
+`.github/workflows/source-checks.yml` native build/test matrix on
+Ubuntu, Windows and macOS unchanged (plus the separate Ubuntu Python 3.14
+build leg). Do **not** compare their independently generated ZIP/SQLite
+bytes: different SQLite/zlib implementations caused proven physical drift
+despite equivalent source data. The three host platforms still validate
+their selected runtime sets, curated source publication and portable
+build/rules stages.
+
+The new `determinism-container` matrix uses two **independent x64
+GitHub-hosted Ubuntu environments**, `ubuntu-24.04` and `ubuntu-26.04`.
+Both check out the same exact PR candidate SHA with full Git history,
+use the host's preinstalled `python3` **only to invoke the existing**
+`tools.run_pinned_determinism` runner, probe/pull the same immutable
+OCI image, and generate the unmodified v2 manifest from the read-only
+checkout with container networking disabled. Each uploads its manifest
+as `determinism-container-${{ matrix.os }}`. This avoids assuming
+Linux Docker support on hosted Windows/macOS, avoids installing
+unneeded host Python dependencies, and tests identical binaries
+across two independently provisioned Linux hosts.
+
+**Strict acceptance and job compatibility:** Keep the existing required
+`deterministic-outputs` job ID and visible name. It now depends on
+`fast-validation`, all `source-checks` native legs, and both
+`determinism-container` legs. On a full validation, the download
+pattern selects **only** the two pinned-container manifests and runs
+the original fail-closed `tools.compare_determinism_manifests`.
+Any missing artifact, missing version, unexpected artifact name,
+or byte/hash difference still fails; no semantic equivalence fallback.
+The existing `fast-validation.outputs.full` reuse policy still avoids
+extra container builds on an eligible previously validated baseline.
+
+**Evidence / boundary:** Local structural tests were extended to assert
+the exact native matrix, container host releases, identical checkout
+selection, pinned runner/probe, independent artifact publication and
+unchanged strict comparison. The Windows/Linux developer-worker
+manifest v2 check previously passed 10/10 at commit `40a7df27`.
+Hosted GitHub Actions must still run against the new workflow revision;
+local regression tests and developer-worker parity do **not** constitute
+hosted acceptance. Do not mark the hosted acceptance item complete
+until both workflow artifacts and the strict comparator are green.
+A full project test suite or production database rebuild was not
+triggered for this workflow-only change. No local/private source assets
+or released databases were modified.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

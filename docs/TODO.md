@@ -356,11 +356,16 @@ when all contained work shares the same owner.
     `a164c4b8`, both workers generated all 10 matching SHA-256 hashes;
     the unmodified strict comparator returned exit 0. The host-native
     five-artifact mismatch remains expected with unpinned libraries.
-  - [ ] Integrate the pinned-container strategy into hosted CI without
-    dropping native Windows/macOS build coverage or weakening the strict
-    comparator. GitHub-hosted Windows/macOS workers cannot be assumed to
-    provide a Linux Docker daemon; design an explicit portable-build
-    matrix/canonical publication lane and verify its hosted gates.
+  - [x] Separate GitHub Actions native platform checks from strict
+    digest-pinned determinism: retain the existing Windows/macOS/Linux
+    source-checks matrix, add Ubuntu 24.04/26.04 independent container
+    jobs using `tools.run_pinned_determinism`, and keep the existing
+    strict SHA-256 comparator and required job identity unchanged.
+    No Docker support is assumed on hosted Windows/macOS.
+  - [ ] Verify the new hosted GitHub Actions jobs and strict comparison
+    on the cleanup PR at the exact proposed commit, including both
+    uploaded v2 manifests; local workflow/regression checks alone do
+    not establish hosted success.
   - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
     inspection and programmatic `include_raw=True` interfaces. Keep the
     independent source-identity/research semantics and their focused tests
