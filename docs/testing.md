@@ -17,6 +17,40 @@ The type-check stage explicitly passes the runner's interpreter to Pyright for d
 resolution, so invoking the virtual-environment Python works without first activating that
 environment in the shell.
 
+## Complete-set release-candidate browser verifier
+
+`tools.verify_release_candidate_browser` compares an explicit release version,
+the static fingerprint and the **complete Army/Rules/ITS database identity**
+against the selected server before and after representative Unit-detail browser
+cases. It validates the selected directory through the same complete-set
+validator as serving, including embedded publications, schemas, integrity and
+matched build/source provenance. A missing or invalid ITS database blocks the
+gate before network/browser work. Changes to the local selected set or static
+fingerprint during the check also block acceptance.
+
+Use one `--db-dir` containing the three runtime databases; its default is the
+checkout's `data/generated/`. The former individual `--army-db`/`--rules-db`
+selectors and two-path Python API are retired for this gate. Other research
+tools and explicit low-level fixture APIs retain their independently documented
+contracts. An alternate directory never falls back to the checkout's databases.
+
+For an already-running candidate, replace the version, origin and `RUN_ID`
+with its pinned values:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_release_candidate_browser --db-dir data/generated --base-url http://127.0.0.1:8000 --expected-version VERSION --channel chrome --json-output local/validation/project-infrastructure/release-candidate/RUN_ID/acceptance.json
+```
+
+The optional JSON receipt is written only on success. Retain it with the pinned
+candidate evidence while acceptance is open. This command starts no server,
+build, acquisition or deployment. Complete-set identity plus selected Unit
+cases does not establish whole-reference completeness, all browser surfaces or
+post-deployment acceptance.
+
+Focused regressions live in `tests/test_verify_release_candidate_browser.py`,
+including missing/invalid/mismatched ITS inputs, ITS-only byte changes, local
+drift and real loopback Chromium preflight/DOM/postflight acceptance.
+
 ## 1.0.1 release preparation
 
 **Project domains:** Web frontend, Data processing, Project infrastructure

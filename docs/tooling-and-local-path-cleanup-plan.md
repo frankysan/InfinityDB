@@ -299,10 +299,9 @@ read-only and were clean; their output/configuration consumers remain to review.
 
 **Reviewed priorities:**
 
-- `verify_release_candidate_browser.local_revision` still hashes only Army
-  and Rules. Keep the already identified three-database identity correction
-  first among executable changes; do not use this legacy gate as v1.1+
-  complete-set acceptance before that correction is tested.
+- At kickoff, `verify_release_candidate_browser.local_revision` hashed only
+  Army and Rules. The independent correctness correction below resolves that
+  finding before the gate is used for v1.1+ complete-set acceptance.
 - The P5 comparison pair is proposed for retirement to Git history. Its
   dedicated test and the historical command still present in the parity
   runbook must be reconciled together with accepted P5 evidence. Keep the
@@ -403,6 +402,42 @@ side effects, findings, lifetime and disposition review, plus exception and
 recovery decisions before L1. No path policy, moves, source deletion or service
 configuration change is approved by this checkpoint.
 
+### Release-tool lifecycle and correctness checkpoint — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`ea34259301d7bcc80364f6221756b252f33c6472`; its Source checks, installed-wheel
+and deployment-smoke workflows completed successfully. Reviewed the release
+acceptance cluster's independent current purposes, inputs/outputs, side effects
+and retirement triggers. The browser verifier, Unit browser harness, checkout
+server verifier, complete-build verifier, semantic baseline helper and root
+check runner support current repeatable acceptance and are retained as active
+tooling. Their eventual directory proposals remain subject to L1/L4 review.
+The large historical reference-baseline reporter still needs a separate
+extraction/disposition review; its reused served-version helper is not evidence
+that every historical reporting branch must remain. The 1.0 source-coverage
+and explanation audits retain their frozen source/finding evidence under the
+existing documentation-map contract.
+
+Implemented the separately prioritized browser-verifier correction without
+moving tools or private inputs. It now selects **one complete `--db-dir`** and
+uses the shared serving validator for Army/Rules/ITS integrity, schema,
+publication and matched provenance checks. All three filenames/hashes determine
+the expected served identity. The old two-path API and individual-database CLI
+flags are retired for this tool; unrelated research/fixture APIs are unchanged.
+The gate also rejects local selected-set/static drift during browser acceptance.
+The [testing guide](testing.md#complete-set-release-candidate-browser-verifier)
+owns the current command and its representative-browser acceptance limits.
+
+**Validation:** Windows focused regressions passed **24 tests, zero skips**,
+including real loopback Chrome at 390 px, missing complete-set members,
+corrupt/incompatible/mismatched ITS, ITS-only identity changes and local drift.
+Ruff passed for both changed Python files; repository-wide Pyright passed with
+zero errors/warnings. This is local development evidence, not hosted-candidate,
+Linux or final-release acceptance. Private lifecycle decisions and receipts are
+under `local/research/project-infrastructure/tooling-workspace-cleanup/20261112-l0-release-tools/`.
+**L0 remains open** for the other tool/document dispositions and L1 preservation
+decisions. No path migration or private-source deletion is approved here.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
@@ -499,9 +534,10 @@ required.
 2. Replace imports and command invocations atomically; update CLI help,
    docs, tests, CI, module packaging and MCP allowlists. Do not leave
    duplicate implementations in the old flat layout.
-3. Repair `verify_release_candidate_browser` to validate the **complete
-   Army/Rules/ITS three-database identity** before treating it as a
-   v1.1+ release gate. This is a correctness task, not a rename.
+3. The [independent correctness slice](#release-tool-lifecycle-and-correctness-checkpoint--2026-11-12)
+   corrected `verify_release_candidate_browser` to validate the **complete
+   Army/Rules/ITS three-database identity**. Preserve that gate when relocating
+   the tool; its implementation does not complete the broader L4 reorganization.
 4. Address dated defaults such as the November 11 symbol-artwork review
    inputs by requiring explicit, pinned current/candidate selections for
    future runs.
@@ -588,9 +624,8 @@ exceptions are documented.
 
 ## Priority and decision checkpoints
 
-- **First safety issue:** the release-browser verifier's legacy two-file
-  identity must be corrected before relying on it for a three-database
-  release, independently of broad tool relayout.
+- **First safety issue resolved:** the release-browser verifier now checks
+  the complete three-database set; preserve that correction during tool relayout.
 - **First low-risk tool removal candidate:** historical P5 path/process
   comparison pair, after clearing its dedicated tests/docs.
 - **First high-impact data migration:** `data/raw/` and
