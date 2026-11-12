@@ -22,6 +22,22 @@ when all contained work shares the same owner.
 
 ## Active development
 
+### Tooling and local workspace cleanup
+
+**Project domains:** Project infrastructure, Data processing, Acquisition
+
+- [ ] **Audit and implement the next tooling/path cleanup project** according
+  to the [phased plan](tooling-and-local-path-cleanup-plan.md). Inventory
+  every maintained `tools/` module, its consumers and retirement purpose;
+  classify ignored files and allowed location exceptions; migrate private
+  `data/` and other non-exempt ignored artifacts to structured `local/`
+  destinations; organize retained tools by responsibility; retire completed
+  investigations; and enforce output naming/lifetime conventions.
+  Approve the migration manifest before deleting ignored source/evidence,
+  preserve three-database serving and published asset compatibility, and
+  validate Windows/Linux producer handoffs separately. This project follows
+  v1.1.0 restructuring development and is not part of its release gate.
+
 ### External source clarifications
 
 **Project domain:** Data processing

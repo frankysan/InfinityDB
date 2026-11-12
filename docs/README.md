@@ -55,6 +55,14 @@ documentation when Mermaid can clearly express the content. Use this for
 architecture flows, dependency graphs and similar relationships instead of
 ASCII art, keeping labels readable in both source and rendered form.
 
+## Active cleanup plans
+
+- [tooling-and-local-path-cleanup-plan.md](tooling-and-local-path-cleanup-plan.md) —
+  proposed post-v1.1.0 audit and migration of maintained `tools/` modules,
+  Git-ignored data into `local/`, categorized private output paths,
+  and bounded one-use tool retirement. Implementation is not started;
+  the [backlog](TODO.md) owns the active task.
+
 ## Completed strategic migrations
 
 - [restructuring-plan.md](restructuring-plan.md) — historical P0–P6
