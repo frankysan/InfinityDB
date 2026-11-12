@@ -83,8 +83,8 @@ required this workflow on every PR.
 
 Each job installs Python 3.11.9, **Playwright 1.64.1** and its selected browser,
 checks the embedded deployed objects matched to the tracked
-rules/Army/variant artifacts, and serves the frozen database
-pair using an ephemeral WSGI server. One shared portable cohort runs
+Army/Rules/ITS database set and serves that complete set
+using an ephemeral WSGI server. One shared portable cohort runs
 **14 critical journeys** (seven at 1440 and 390 px) covering soft navigation,
 source citations, Weapon fragments, Unit detail, Core scenario selection,
 FAQ entry points and notice keyboard/touch behavior. Tests fail on missing
@@ -486,13 +486,13 @@ images still require the complete tracked publication through deployment-smoke v
 ## Deployment smoke
 
 `.github/workflows/deployment-smoke.yml` builds the production container directly from the tracked
-release `army.db` and `rules_n5.db` plus processed SVG assets, then runs
+`army.db`, `rules_n5.db` and `its_18.db` set plus processed SVG assets, then runs
 `scripts/verify-container-image.sh` with published-asset validation. The
 source/release gate requires the strict current schemas, shared provenance and
 recorded build-input freshness. Exact variants and reviewed Weapon citations are
 validated from embedded tables and exercised through the API. The container
 verifies symbol bytes against embedded hashes without installed source manifests.
-The separate source matrix validates the same tracked pair without raw archives.
+The separate source matrix validates the same tracked database set without raw archives.
 
 It does not rebuild the tracked release databases and is not a substitute for the source or
 installed-wheel checks. The `/changes` probe compares the served release-note content with

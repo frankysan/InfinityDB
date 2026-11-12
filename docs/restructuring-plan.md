@@ -3643,8 +3643,12 @@ The normal serving contract changed from **4 required files**
 The static Restrictions chart JSON remains a historical publicly served
 URL, not an input to the current Restrictions API. These are
 file/entrypoint counts, not proof of corresponding development-time or
-runtime performance gains. Final P6.4 measurements and full P6.3
-acceptance remain open.
+runtime performance gains. Recorded current-checkout timings include one
+complete pinned Army/Rules/ITS rebuild (**46.48 seconds**) and the
+isolated Docker-image build/start/41-route/cleanup acceptance
+(**58.77 seconds**, Docker engine 29.9.2). These are individual observed
+durations, not benchmarks against the old architecture. Full P6.3
+source/hosted acceptance and final P6.4 developer-action measurement remain open.
 
 ## Dependency and delivery map
 

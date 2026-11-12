@@ -2030,6 +2030,26 @@ documentation/link checks and `git diff --check` passed. A broader
 counted as passed. Full source CI, hosted CI, release acceptance and
 production deployment are separate and remain unclaimed.
 
+### P6.3 — Current three-database Docker preview acceptance (2026-11-12)
+
+At `75e8e08ce48a71d567a2de6c3a91c3e9cebfd0fc`, the tracked
+`tools.preview_runtime_image` built and started an isolated image
+using Docker Desktop Linux engine **29.9.2** and the exact
+`data/generated/` set. The image contained exactly `army.db`,
+`rules_n5.db` and `its_18.db`. Its immutable-artifact checks
+passed (17 deployed objects, 151 variant groups, 69 Weapon citation
+records); the read-only container became healthy, selected ITS 18
+Battleground at 300 Army Points, and passed **41/41** pinned semantic
+HTTP probes. The preview's container and image were removed and its
+selected database hashes remained unchanged.
+
+The preview job completed with exit code **0** in **58.77 seconds**,
+including image build, install, startup, probes and cleanup. This
+measures this one local run, not a before/after speed improvement.
+The source-freshness and static SVG release verifier separately passed
+at `ab9c074b`. No production deployment, hosted CI, full suite,
+release or tag is implied.
+
 ## Phased development and validation
 
 **Normal workflow:** orient to the task and checkout, implement one coherent
