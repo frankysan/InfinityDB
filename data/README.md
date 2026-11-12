@@ -274,6 +274,25 @@ path never silently falls back to a sibling archive. For example:
 The example paths identify a matched local source generation, not a
 persistent runtime artifact.
 
+The read-only `tools.audit_source_variant_inputs` CLI likewise accepts an
+explicit `--normalized PATH` bound to the selected Army application database.
+It inventories exact Skill and Equipment source occurrences, ordered Extra
+signatures and the optional `--owner-extra-id` context without a raw SQLite
+archive. Its legacy `--raw` route now verifies the application/raw pair
+before reading any cross-source rows; a mismatched generation is rejected.
+Direct raw-only Extra-owner inspection remains available for historical
+single-source research, without claiming it matches an application database.
+For a matched local generation:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_source_variant_inputs --application local/data/build/army.db --normalized local/data/build/normalized.json --rules data/generated/rules_n5.db --catalog skills --source-id 11
+```
+
+The selected Rules database supplies reviewed semantics independently; choose
+the applicable Rules revision when interpreting the source rows. Raw and
+normalized inputs are mutually exclusive, and an explicit normalized source
+never falls back to an available raw archive.
+
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;
 `curated/README.md` owns the current format version and validation rules. PDF citations use

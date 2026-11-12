@@ -10,13 +10,67 @@ import argparse
 import json
 import sqlite3
 from collections import Counter
+from collections.abc import Iterator
+from contextlib import ExitStack, closing, contextmanager
 from pathlib import Path
 from typing import Any
 
+from infinity_db.database.publication import validate_database_pair
 from infinity_db.rules_database import RulesDatabase
+from tools.paired_audit_connection import open_paired_audit_connection
 
 CATEGORIES = ("skills", "equipment")
 OWNERS = ("profile", "option", "unit_option")
+
+# Exact Skill/Equipment occurrence and Extra queries use only these source
+# tables. The application-side catalog mappings are read from the same
+# verified connection when normalized source is selected.
+VARIANT_SOURCE_TABLES = tuple(sorted(
+    {"skills", "equipment", "extras"} |
+    {
+        f"{owner}_{catalog}"
+        for owner in OWNERS for catalog in CATEGORIES
+    } |
+    {
+        f"{owner}_{'skill' if catalog == 'skills' else 'equipment'}_extras"
+        for owner in OWNERS for catalog in CATEGORIES
+    }
+))
+OWNER_SOURCE_TABLES = tuple(
+    {*VARIANT_SOURCE_TABLES, "units", "army_lists", "profiles",
+     "loadout_options", "unit_options"}
+)
+
+
+@contextmanager
+def _verified_connections(
+    application_path: Path,
+    raw_path: Path | None,
+    *,
+    normalized: Path | None = None,
+    required_tables: tuple[str, ...] = VARIANT_SOURCE_TABLES,
+) -> Iterator[tuple[sqlite3.Connection, sqlite3.Connection]]:
+    """Select one complete, attested Army source before reading any rows."""
+    if normalized is not None:
+        if raw_path is not None:
+            raise ValueError("Select exactly one raw or normalized Army source")
+        with closing(open_paired_audit_connection(
+            application_path, required_tables, normalized=normalized,
+        )) as connection:
+            yield connection, connection
+        return
+    if raw_path is None:
+        raise ValueError("A raw or normalized Army source is required")
+    # Never cross-join source rows from a different Army export generation.
+    validate_database_pair(application_path, raw_path=raw_path)
+    with ExitStack() as stack:
+        application = stack.enter_context(closing(sqlite3.connect(
+            application_path.resolve().as_uri() + "?mode=ro", uri=True,
+        )))
+        raw = stack.enter_context(closing(sqlite3.connect(
+            raw_path.resolve().as_uri() + "?mode=ro", uri=True,
+        )))
+        yield application, raw
 
 
 def reviewed_extra_signature(
@@ -40,7 +94,8 @@ def reviewed_extra_signature(
 
 
 def inventory_source_variants(
-    application_path: Path, raw_path: Path, rules_path: Path
+    application_path: Path, raw_path: Path | None, rules_path: Path,
+    *, normalized: Path | None = None,
 ) -> dict[str, Any]:
     """Inventory pinned direct source occurrences and their review boundaries."""
     rules = RulesDatabase(rules_path)
@@ -67,12 +122,9 @@ def inventory_source_variants(
     }
     report: dict[str, Any] = {"catalogs": {}}
 
-    application_uri = application_path.resolve().as_uri() + "?mode=ro"
-    raw_uri = raw_path.resolve().as_uri() + "?mode=ro"
-    with (
-        sqlite3.connect(application_uri, uri=True) as application,
-        sqlite3.connect(raw_uri, uri=True) as raw,
-    ):
+    with _verified_connections(
+        application_path, raw_path, normalized=normalized,
+    ) as (application, raw):
         for catalog in CATEGORIES:
             sources = {
                 int(source_id): {
@@ -243,17 +295,44 @@ def inventory_source_variants(
     return report
 
 
+@contextmanager
+def _owner_source_connection(
+    raw_path: Path | None,
+    *,
+    application_path: Path | None,
+    normalized: Path | None,
+) -> Iterator[sqlite3.Connection]:
+    if application_path is not None:
+        with _verified_connections(
+            application_path, raw_path, normalized=normalized,
+            required_tables=OWNER_SOURCE_TABLES,
+        ) as (_application, source):
+            source.row_factory = sqlite3.Row
+            yield source
+    else:
+        # Historical raw-only inspection does not combine two generations.
+        # Callers comparing against an application must explicitly supply it.
+        if normalized is not None or raw_path is None:
+            raise ValueError("Normalized owner lookup requires an application database")
+        with closing(sqlite3.connect(
+            raw_path.resolve().as_uri() + "?mode=ro", uri=True,
+        )) as source:
+            source.row_factory = sqlite3.Row
+            yield source
+
+
 def source_extra_owner_context(
-    raw_path: Path, *, catalog: str, source_id: int, extra_id: int
+    raw_path: Path | None, *, catalog: str, source_id: int, extra_id: int,
+    application_path: Path | None = None, normalized: Path | None = None,
 ) -> list[dict[str, Any]]:
-    """Find exact direct source owners; do not infer logical or cross-Army Unit use."""
+    """Find exact source owners; optional application attestation is fail-closed."""
     if catalog not in CATEGORIES or source_id <= 0 or extra_id <= 0:
         raise ValueError("Owner lookup requires a valid source catalog and positive IDs")
     suffix = "skill" if catalog == "skills" else "equipment"
     results: list[dict[str, Any]] = []
-    uri = raw_path.resolve().as_uri() + "?mode=ro"
-    with sqlite3.connect(uri, uri=True) as raw:
-        raw.row_factory = sqlite3.Row
+    with _owner_source_connection(
+        raw_path, application_path=application_path, normalized=normalized,
+    ) as raw:
         for owner in OWNERS:
             parent_table = {
                 "profile": "profiles",
@@ -328,7 +407,12 @@ def select_source_variants(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--application", type=Path, default=Path("data/generated/army.db"))
-    parser.add_argument("--raw", type=Path, default=Path("data/work/build/army.raw.db"))
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument("--raw", type=Path, help="Explicit paired raw SQLite archive")
+    source.add_argument(
+        "--normalized", type=Path,
+        help="Complete normalized.json verified against this Army export generation",
+    )
     parser.add_argument("--rules", type=Path, default=Path("data/generated/rules_n5.db"))
     parser.add_argument("--catalog", choices=CATEGORIES, help="limit output to one source catalog")
     parser.add_argument(
@@ -356,7 +440,18 @@ def main() -> None:
         parser.error("--owner-extra-id requires one --source-id, --catalog and positive ID")
     if args.unresolved_only and not args.catalog:
         parser.error("--unresolved-only requires --catalog")
-    report = inventory_source_variants(args.application, args.raw, args.rules)
+    raw = args.raw if args.raw is not None else (
+        None if args.normalized is not None else Path("data/work/build/army.raw.db")
+    )
+    try:
+        if args.normalized is not None:
+            report = inventory_source_variants(
+                args.application, None, args.rules, normalized=args.normalized,
+            )
+        else:
+            report = inventory_source_variants(args.application, raw, args.rules)
+    except (OSError, sqlite3.Error, ValueError) as exc:
+        parser.error(str(exc))
     if args.catalog:
         try:
             report = select_source_variants(report, args.catalog, args.source_id)
@@ -376,10 +471,14 @@ def main() -> None:
             "rawValueDistinctCount": item["rawValueDistinctCount"],
         } for item in report["items"]]
     if args.owner_extra_id is not None:
-        report["occurrenceOwners"] = source_extra_owner_context(
-            args.raw, catalog=args.catalog,
-            source_id=args.source_id[0], extra_id=args.owner_extra_id,
-        )
+        try:
+            report["occurrenceOwners"] = source_extra_owner_context(
+                raw, catalog=args.catalog,
+                source_id=args.source_id[0], extra_id=args.owner_extra_id,
+                application_path=args.application, normalized=args.normalized,
+            )
+        except (OSError, sqlite3.Error, ValueError) as exc:
+            parser.error(str(exc))
     print(json.dumps(report, indent=2))
 
 

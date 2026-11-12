@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -20,7 +21,9 @@ from infinity_db.curated import (
     _validate_variant_semantics,
     load_curated_directory,
 )
+from infinity_db.database import raw_database_path
 from infinity_db.rules_database import RulesDatabase, export_rules_database
+from tests.test_audit_runtime_database_surface import _runtime_database
 from tools.audit_source_variant_inputs import (
     inventory_source_variants,
     reviewed_extra_signature,
@@ -29,6 +32,152 @@ from tools.audit_source_variant_inputs import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture
+def matched_source_inputs(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
+    normalized = tmp_path / "normalized.json"
+    application = _runtime_database(tmp_path, normalized_output=normalized)
+    return (
+        application, raw_database_path(application), normalized,
+        ROOT / "data/generated/rules_n5.db",
+    )
+
+
+def test_inventory_verified_normalized_matches_raw_and_needs_no_archive(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+) -> None:
+    application, raw, normalized, rules = matched_source_inputs
+    legacy = inventory_source_variants(application, raw, rules)
+    verified = inventory_source_variants(
+        application, None, rules, normalized=normalized,
+    )
+    assert verified == legacy
+    assert verified["catalogs"]["skills"]["summary"]["sourceIdsWithDirectRows"] > 0
+    assert verified["catalogs"]["equipment"]["summary"]["sourceIdsWithDirectRows"] > 0
+    raw.unlink()
+    assert inventory_source_variants(
+        application, None, rules, normalized=normalized,
+    ) == legacy
+    assert not raw.exists()
+
+
+def test_owner_extra_lookup_verified_normalized_matches_raw(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+) -> None:
+    application, raw, normalized, _rules = matched_source_inputs
+    expected = source_extra_owner_context(
+        raw, catalog="skills", source_id=11, extra_id=41,
+        application_path=application,
+    )
+    assert expected
+    raw.unlink()
+    actual = source_extra_owner_context(
+        None, catalog="skills", source_id=11, extra_id=41,
+        application_path=application, normalized=normalized,
+    )
+    assert actual == expected
+    assert not raw.exists()
+
+
+def test_inventory_and_owner_lookup_reject_mismatched_raw_pair(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+) -> None:
+    application, raw, _normalized, rules = matched_source_inputs
+    with sqlite3.connect(raw) as connection:
+        connection.execute(
+            "UPDATE __infinity_metadata SET value = ? WHERE key = 'warnings'",
+            (json.dumps("stale generation"),),
+        )
+    with pytest.raises(ValueError, match="metadata differ"):
+        inventory_source_variants(application, raw, rules)
+    with pytest.raises(ValueError, match="metadata differ"):
+        source_extra_owner_context(
+            raw, catalog="skills", source_id=11, extra_id=41,
+            application_path=application,
+        )
+
+
+def test_inventory_and_owner_lookup_fail_closed_on_normalized_drift(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+) -> None:
+    application, raw, normalized, rules = matched_source_inputs
+    document = json.loads(normalized.read_text(encoding="utf-8"))
+    document["tables"]["units"][0]["name"] = "unverified alteration"
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match"):
+        inventory_source_variants(application, None, rules, normalized=normalized)
+    with pytest.raises(ValueError, match="does not match"):
+        source_extra_owner_context(
+            None, catalog="skills", source_id=11, extra_id=41,
+            application_path=application, normalized=normalized,
+        )
+    # A still-valid raw archive is never used as implicit fallback.
+    assert raw.exists()
+
+
+def test_source_variant_cli_selects_verified_normalized_with_owner_evidence(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    from tools.audit_source_variant_inputs import main
+
+    application, raw, normalized, rules = matched_source_inputs
+    raw.unlink()
+    monkeypatch.setattr("sys.argv", [
+        "audit_source_variant_inputs",
+        "--application", str(application), "--rules", str(rules),
+        "--normalized", str(normalized), "--catalog", "skills",
+        "--source-id", "11", "--owner-extra-id", "41",
+    ])
+    main()
+    selected = json.loads(capsys.readouterr().out)
+    assert selected["selectedSourceIds"] == [11]
+    assert selected["occurrenceOwners"]
+    assert not raw.exists()
+
+
+def test_source_variant_source_selection_rejects_conflict_and_missing_file(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+) -> None:
+    application, raw, normalized, rules = matched_source_inputs
+    with pytest.raises(ValueError, match="exactly one"):
+        inventory_source_variants(
+            application, raw, rules, normalized=normalized,
+        )
+    with pytest.raises(ValueError, match="exactly one"):
+        source_extra_owner_context(
+            raw, catalog="skills", source_id=11, extra_id=41,
+            application_path=application, normalized=normalized,
+        )
+    with pytest.raises(FileNotFoundError):
+        inventory_source_variants(
+            application, None, rules,
+            normalized=normalized.with_name("unavailable.json"),
+        )
+
+
+def test_source_variant_cli_rejects_mismatched_raw_generation(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    from tools.audit_source_variant_inputs import main
+
+    application, raw, _normalized, rules = matched_source_inputs
+    with sqlite3.connect(raw) as connection:
+        connection.execute(
+            "UPDATE __infinity_metadata SET value = ? WHERE key = 'warnings'",
+            (json.dumps("another generation"),),
+        )
+    monkeypatch.setattr("sys.argv", [
+        "audit_source_variant_inputs",
+        "--application", str(application), "--rules", str(rules),
+        "--raw", str(raw), "--catalog", "skills",
+    ])
+    with pytest.raises(SystemExit) as exc:
+        main()
+    assert exc.value.code == 2
+    assert "metadata differ" in capsys.readouterr().err
 
 
 def test_source_variant_selection_preserves_full_summary_and_exact_ids() -> None:

@@ -316,12 +316,15 @@ when all contained work shares the same owner.
   still produces a lossless raw pair for independent audit/research consumers.
   - [ ] Migrate the remaining independent raw-dependent source audits,
     publication checks and deterministic-build evidence. The three
-    `paired_audit_connection` semantic consumers now support explicit, verified
-    normalized input with temporary in-memory source views; source-row inspection
-    and the standalone variant-usage candidate CLI are migrated too. The
-    **variant-usage projection** also uses in-memory normalized source
-    tables with full export-generation verification. Retain legacy raw-based
-    APIs as parity oracles while independent consumers remain.
+    `paired_audit_connection` semantic consumers and
+    `audit_source_variant_inputs` now support explicit, verified normalized
+    input. Source-row inspection and the standalone variant-usage candidate
+    CLI are also migrated; the variant-usage projection itself uses in-memory
+    normalized source with full export-generation verification.
+    `audit_source_variant_inputs` now rejects mismatched application/raw
+    pairs, and its exact Extra-owner lookup accepts verified source when an
+    application path is supplied. Retain legacy raw-based APIs as parity
+    oracles while independent consumers remain.
     Preserve source-only row fidelity, absence-versus-null distinctions,
     exact occurrence/extra relationships and fail-closed provenance.
     Army v27–v31 overlays have also moved to verified normalized input in the

@@ -1519,6 +1519,61 @@ generation validation on its raw read path. Standalone paired export,
 APIs remain supported. This cutover does not justify deleting
 `data/generated/army.raw.db` or replacing any published runtime artifact.
 
+### Skill/Equipment source-variant audit provenance cutover — 2026-11-12
+
+**Cause and correction:** `tools.audit_source_variant_inputs` previously opened
+the Army application and raw SQLite paths independently, without checking
+the matched export generation. That could combine obsolete or unrelated
+source occurrences with newer application catalog mappings. The inventory
+now calls `validate_database_pair(application, raw)` **before reading any
+cross-source rows**, rejecting missing or mismatched archives instead of
+silently auditing a mixed generation.
+
+**Explicit normalized source alternative:** The inventory now accepts
+`normalized=PATH` instead of a raw SQLite path. It uses the existing
+`paired_audit_connection` normalized-source adapter, which verifies the
+**entire normalized document** against the selected Army application's
+`export_pair_sha256` generation before constructing read-only in-memory
+source table views. These views preserve exact direct Skill/Equipment
+occurrence IDs, ordered Extras, raw field strings and zero-row table schemas;
+published catalog mappings are read from the same selected application.
+Raw and normalized source selection is mutually exclusive, with no implicit
+fallback. The CLI exposes `--normalized` and now validates the default or
+explicit `--raw` path as well.
+
+The optional exact Extra-owner CLI lookup passes the selected application
+and its verified source to the same adapter, including the original source
+Unit, Army, parent and Extra relationships. The pre-existing Python helper
+remains callable with **only** an explicit raw path for historical
+single-source inspection; that mode makes **no claim** about matching an
+application export. When an application is supplied, it enforces the pair
+generation or the explicit normalized generation; no cross-source owner
+lookup bypasses that verification. The selected Rules database supplies
+independently curated semantic interpretations, not source identity.
+
+**Focused acceptance:** A hermetic Army fixture compared the **complete**
+Skill/Equipment inventory reports and exact Extra-owner rows between the
+matched raw pair and normalized source. Both continued to work after deleting
+the fixture's raw sibling. Negative tests reject changed raw metadata,
+modified normalized source, ambiguous raw+normalized selection, unavailable
+normalized input and a mismatched raw pair through the CLI. The revised
+`tests/test_audit_source_variant_inputs.py` suite passed **45 tests**;
+**61 historical pinned-raw tests skipped** because their source archive
+was not available. `tests/test_scenario_api.py` passed **96**, skipped **4**
+pinned-source cases. The existing normalized/paired adapter suite passed
+**10/10**. Ruff, Pyright, documentation/link/backlog checks and Git whitespace
+checks passed. This tools-only cutover did not rebuild the three runtime
+databases or run the full project test suite.
+
+**Remaining retirement boundaries:** Raw-dependent independent research
+still includes `audit_army_faction_semantics`, `audit_source_presentation`,
+`report_reference_baseline` source verification, standalone
+`build_determinism_manifest` and explicit paired-export health. Preserve
+those checks until their underlying source/identity invariants are covered,
+rather than retaining or deleting APIs solely because historical tests use
+them. Do not delete or rewrite the ignored `data/generated/army.raw.db`
+without the separately approved backup/restore and private-file manifest.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
