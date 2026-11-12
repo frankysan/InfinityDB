@@ -636,6 +636,43 @@ passed. No source, private input or generated database was changed. This is not
 Linux, hosted CI or release acceptance.
 **L0 and the parent cleanup remain open.**
 
+### Weapon-source research-tool disposition review — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`aa6ef436195a389bd1ab36a4fbde74b83cca2c11`. Reviewed the remaining
+Weapon Chart research cluster against its current source-research procedures,
+maintained review configuration, tests and open source questions. The following
+optional, read-only tools remain **bounded/open**, not standard build or release
+dependencies:
+
+- `audit_weapon_chart_profiles` retains the pinned PDF-to-Army profile and range
+  comparison, including the open Kobra/Suppressive Fire/Katyusha discrepancies
+  and seven auxiliary Silhouette conflicts. Its shared chart reader and output
+  are consumed by other optional source reviews and publication regressions.
+- `audit_wiki_weapon_chart_names` retains exact alias and repeated alternative-row
+  handling for the pinned Wiki/Army pair. The current 174-identity inventory is
+  resolved, but broader source-revision research remains open; its identity result
+  does not settle the separate value conflicts or imply gameplay equivalence.
+- `audit_weapon_traits_prose` and `audit_weapon_trait_cross_sources` preserve
+  distinct PDF/Army trait and named-section review scopes; source-layout
+  candidates remain review evidence, not confirmed defects.
+- `audit_weaponry_family_clauses` checks its selected, source-pinned clauses and
+  typed curated relationships without claiming complete prose or relationship
+  coverage. `audit_weapon_definition_gaps` separately reconciles pinned profile
+  and enrichment evidence without turning a chart match into a rules definition.
+
+These are not kept merely because tests import them: their source scopes,
+review manifests, explicit discrepancies and optional research procedures remain
+independently useful while the source-research TODO and clarification work is
+open. Outputs and private upstream inputs remain local; no new normal-build,
+CI, serving or release dependency is introduced. Reassess the tools individually
+when their named research scope closes or a superseding source revision is
+selected. No command was retired, no source interpretation or maintained data
+was changed, and no private evidence was accessed or moved in this review.
+
+**L0 remains open.** This bounded retention decision does not approve the
+proposed tools directory layout, path policy or private-data migration.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
