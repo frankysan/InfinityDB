@@ -45,7 +45,9 @@ The optional JSON receipt is written only on success. Retain it with the pinned
 candidate evidence while acceptance is open. This command starts no server,
 build, acquisition or deployment. Complete-set identity plus selected Unit
 cases does not establish whole-reference completeness, all browser surfaces or
-post-deployment acceptance.
+post-deployment acceptance. The nested preflight and postflight `status` values
+are `exact-runtime-revision-match-not-source-completeness`; they describe the
+selected complete runtime revision, not a two-database pair.
 
 Focused regressions live in `tests/test_verify_release_candidate_browser.py`,
 including missing/invalid/mismatched ITS inputs, ITS-only byte changes, local
@@ -6836,10 +6838,10 @@ malformed/duplicate historical rows, fingerprint drift and report output.
 The offline `tools/report_reference_baseline.py` command inventories the published Army
 source snapshot identity, rules collections and source citations, and row counts by
 canonical family. Scenario membership evidence is separated by source collection,
-revision and publication identity: the current published rules database has
-four N5 core scenarios and a distinct ITS Season 18 Battleground pilot.
-The aggregate five memberships must **not** be described as five core missions
-or counted as evidence of 1.0 scenario browser completeness.
+revision and publication identity: the current Rules database has four N5 core
+scenario memberships. The ITS Season 18 Battleground pilot is in the separate
+ITS database, outside this two-database report. Neither count establishes
+scenario browser completeness.
 
 Each category now also includes an optional `routeHint` (browser/API discovery
 surfaces and presentation mode) derived from the published application-domain
@@ -6849,36 +6851,31 @@ points*, not mappings of every source record or verified player-facing evidence;
 `apiReadPath`, `browserEntryPoint`, and all fact/relationship/presentation
 review fields remain pending. Where domain ownership or publication is ambiguous,
 the route hint is null rather than a guessed destination.
-Generate ignored review artifacts from the repository root:
+Generate ignored review artifacts from the repository root, replacing `RUN_ID`:
 
 ```powershell
-python tools/report_reference_baseline.py --json-output reports/1.0-baseline.json --markdown-output docs/audits/1.0-baseline.md
+.\.venv\Scripts\python.exe -m tools.report_reference_baseline --json-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.json --markdown-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.md
 ```
 
-To ensure the **running development/release server** uses the exact Army and
-rules database bytes and applicable Weapon-profile publication inventoried
-from this checkout, add
+For a server using exactly the inventoried Army and Rules databases, add
 `--verify-server http://127.0.0.1:8000` (substitute the actual server origin).
-The check queries the served `/api/version` response and requires its
-`snapshot_revision` to equal the SHA-256 of
-`"<Army database SHA-256>:<rules database SHA-256>:<Weapon-profile publication SHA-256 or none>"`,
-the runtime's snapshot identity. The baseline validates a co-located
-publication against the database pair before fingerprinting it; a missing
-or independently located publication contributes `none`. On mismatch it
-exits nonzero **before writing
-baseline outputs**; a successful run records `servedSnapshot` in JSON.
-The server option is opt-in and never starts, deploys, or modifies a server.
-It checks runtime identity, not static assets, processed symbols, PDF/Wiki
-bytes, browser correctness or full source completeness; these require
-independent checks. Rerun against the final candidate and deployment, not
-only a local development server.
+The check compares `/api/version` with the runtime snapshot identity computed
+from the two selected database filenames and SHA-256 hashes. The reporter also
+validates Weapon citations embedded in the Rules database. On mismatch it exits
+nonzero **before writing baseline outputs**; success records `servedSnapshot`
+in JSON. The opt-in check never starts, deploys or modifies a server. It does
+not verify static assets, PDF/Wiki bytes, browser correctness or source
+completeness. A server using the complete Army/Rules/ITS set has a different
+identity and cannot pass this two-database check; use the
+[complete-set release verifier](#complete-set-release-candidate-browser-verifier)
+for that candidate.
 
 Optionally pass `--army-archive <path>` to verify the exact Army ZIP SHA-256 against
-the one embedded in `infinity.db`. With the pinned source ZIP available, the
+the one embedded in `army.db`. With the pinned source ZIP available, the
 baseline checks each source faction/list ID, filename, source-file SHA-256,
 version and Army/reinforcement kind against the published `army_lists` rows.
 It also checks every source Unit occurrence and its original list position
-against `infinity.db::army_units`, matches the source-version counts,
+against `army.db::army_units`, matches the source-version counts,
 and rejects unexpected JSON documents, duplicate Unit IDs or source-file
 count mismatches. The September 29 archive has **59 JSON documents**:
 58 Army-list source files plus one `metadata.json` document; these counts
@@ -6887,11 +6884,11 @@ including the source-provenance and Unit-occurrence counts. It fails closed
 on source identity, provenance or Unit-membership mismatches. It also
 requires the validated application/raw database export pair and verifies
 all source profile-group identities, positions, categories and text fields
-against published `infinity.db::profile_groups`. Every nested source
+against published `army.db::profile_groups`. Every nested source
 profile's identity, position and core attribute fields, and each loadout's
 identity, position, name, Points, SWC, miniature count and disabled flag,
-are compared with `infinity.raw.db::profiles` and
-`infinity.raw.db::loadout_options` respectively. These two tables
+are compared with `army.raw.db::profiles` and
+`army.raw.db::loadout_options` respectively. These two tables
 are intentionally **not** in the published application database.
 The optional audit also compares every source profile/loadout Skill,
 Equipment and Weapon occurrence against the corresponding reusable

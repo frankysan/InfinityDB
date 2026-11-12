@@ -21,16 +21,14 @@ from infinity_db.database_set import ARMY_DATABASE_FILENAME, validate_database_s
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web.presentation import static_asset_revision
-from tools.report_reference_baseline import (
-    PROJECT_ROOT,
-    ReferenceBaselineError,
-    verify_served_revision,
-)
+from tools.served_runtime import ServedRuntimeError, verify_served_runtime
 from tools.verify_unit_skill_presentation_browser import (
     DEFAULT_SLUGS,
     WIDTHS,
     verify,
 )
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class ReleaseCandidateError(ValueError):
@@ -58,10 +56,8 @@ def _check_served(
     expected_static_revision: str,
 ) -> dict[str, str]:
     try:
-        observed = verify_served_revision(
-            {"runtimeSnapshotRevision": expected_revision}, origin
-        )
-    except ReferenceBaselineError as exc:
+        observed = verify_served_runtime(expected_revision, origin)
+    except ServedRuntimeError as exc:
         raise ReleaseCandidateError(f"Deployed snapshot preflight failed: {exc}") from exc
     if observed["appVersion"] != expected_version:
         raise ReleaseCandidateError(

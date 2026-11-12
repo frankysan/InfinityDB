@@ -519,6 +519,43 @@ preservation pins matched; the 21 other pinned files still match, while
 No source acquisition, asset promotion, private evidence removal or path
 policy approval occurred. **L0 and the parent cleanup remain open.**
 
+### Reference reporter dependency checkpoint — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`4b70bb9157d2e46924a88096c27993684f332ac4`. The historical reference reporter
+cannot be retired wholesale: its current-citation minimum supports the
+[1.0 citation gate](releasing.md#version-10-data-completeness-gate), and its
+explanation inventory supplies the retained clause-disposition validator.
+Those source-review dispositions remain scoped evidence, not a requirement for
+exhaustive source review or a release approval. Other reporting and investigation
+branches still require individual lifecycle decisions.
+
+The shared served-runtime identity check is now independent of the reporter.
+The baseline keeps its existing two-database status and error interface; the
+complete-set browser verifier reports a runtime-revision match rather than
+incorrectly labeling its Army/Rules/ITS receipt a database-pair match. Both
+retain explicit-origin validation and fail-closed snapshot comparison. The
+[testing guide](testing.md#complete-set-release-candidate-browser-verifier)
+owns the current acceptance scope; its baseline guidance now distinguishes the
+two-database inventory from a complete-set release candidate. The narrow shared
+helper is retained for these two consumers in the existing flat layout, without
+approving the proposed L1/L4 path policy or retiring the reporter.
+
+**Validation:** The Windows reporter, disposition and release-verifier cohort
+passed **121 tests**, including real loopback Chrome; two optional Army archive
+tests skipped because the ignored raw database is stale against the tracked
+Army database. After tightening the receipt-shape assertion and adding the
+postflight network-failure check, both targeted selectors passed. Targeted
+Ruff, repository-wide Pyright, documentation checks and `git diff --check`
+passed. The read-only current-citation CLI reported **495/495** declarations;
+the disposition CLI validated four scoped reviews and no browser approvals.
+These checks do not establish source semantics or full coverage. They also do
+not validate the stale private raw database, a hosted candidate, Linux or
+release acceptance.
+
+No ignored source, private evidence, generated database or service was changed.
+**L0 and the parent cleanup remain open.**
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

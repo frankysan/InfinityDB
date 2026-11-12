@@ -6,11 +6,14 @@ import hashlib
 import json
 import shutil
 import sqlite3
+import subprocess
+import sys
 from io import BytesIO
 from pathlib import Path
 from socketserver import ThreadingMixIn
 from threading import Thread
 from unittest.mock import Mock, patch
+from urllib.error import URLError
 from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
 import pytest
@@ -19,7 +22,7 @@ from infinity_db import __version__
 from infinity_db.database_set import COMPLETE_RUNTIME_FILES
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.web import create_app, create_app_from_database_set
-from tools.report_reference_baseline import ReferenceBaselineError
+from tools.served_runtime import ServedRuntimeError
 from tools.verify_release_candidate_browser import (
     ReleaseCandidateError,
     local_revision,
@@ -82,6 +85,22 @@ class _VersionResponse(BytesIO):
     status = 200
 
 
+class _UnavailableVersionResponse(BytesIO):
+    status = 503
+
+
+def test_release_verifier_import_does_not_load_reference_reporter() -> None:
+    result = subprocess.run(
+        [
+            sys.executable, "-c",
+            "import sys; import tools.verify_release_candidate_browser; "
+            "assert 'tools.report_reference_baseline' not in sys.modules",
+        ],
+        cwd=ROOT, capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+
 @pytest.mark.parametrize("changed_file", ("rules_n5.db", "its_18.db"))
 def test_release_preflight_rejects_changed_database_bytes(
     tmp_path: Path, changed_file: str,
@@ -103,7 +122,7 @@ def test_release_preflight_rejects_changed_database_bytes(
     }
     browser = Mock()
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(json.dumps(payload).encode()),
     ):
         with pytest.raises(ReleaseCandidateError, match="snapshot preflight failed"):
@@ -136,7 +155,7 @@ def test_release_gate_rejects_incomplete_set_before_network_or_browser(
     directory = _copy_runtime_set(tmp_path)
     (directory / missing).unlink()
     browser = Mock()
-    with patch("tools.verify_release_candidate_browser.verify_served_revision") as served:
+    with patch("tools.verify_release_candidate_browser.verify_served_runtime") as served:
         with pytest.raises(ReleaseCandidateError, match=missing):
             verify_release_candidate(
                 "https://example.org", expected_version=__version__,
@@ -171,7 +190,7 @@ def test_release_gate_rejects_invalid_its_before_network_or_browser(
                     (json.dumps("0" * 64),),
                 )
     browser = Mock()
-    with patch("tools.verify_release_candidate_browser.verify_served_revision") as served:
+    with patch("tools.verify_release_candidate_browser.verify_served_runtime") as served:
         with pytest.raises(ReleaseCandidateError, match="complete release database set"):
             verify_release_candidate(
                 "https://example.org", expected_version=__version__,
@@ -196,7 +215,7 @@ def test_release_gate_rejects_local_its_drift_during_browser(tmp_path: Path) -> 
         return _browser_ok(origin, slugs=("dragoes",), widths=(390,), channel=None)
 
     with patch(
-        "tools.verify_release_candidate_browser.verify_served_revision", return_value=observed,
+        "tools.verify_release_candidate_browser.verify_served_runtime", return_value=observed,
     ) as served:
         with pytest.raises(ReleaseCandidateError, match="Local candidate changed"):
             verify_release_candidate(
@@ -220,11 +239,12 @@ def test_release_gate_accepts_exact_local_runtime_before_and_after_browser() -> 
         "127.0.0.1", 0, app, server_class=ThreadedServer,
         handler_class=QuietHandler,
     )
+    origin = f"http://127.0.0.1:{server.server_port}"
     thread = Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
         result = verify_release_candidate(
-            f"http://127.0.0.1:{server.server_port}",
+            origin,
             expected_version=__version__,
             db_dir=DB_DIR,
             slugs=("dragoes",), widths=(390, 768),
@@ -238,7 +258,86 @@ def test_release_gate_accepts_exact_local_runtime_before_and_after_browser() -> 
     assert result["snapshotRevision"] == app.snapshot_revision
     assert result["staticRevision"] == STATIC_ASSET_REVISION
     assert result["servedVersion"] == result["postflightVersion"]
+    assert result["servedVersion"] == {
+        "versionUrl": f"{origin}/api/version",
+        "snapshotRevision": app.snapshot_revision,
+        "appVersion": __version__,
+        "staticRevision": STATIC_ASSET_REVISION,
+        "status": "exact-runtime-revision-match-not-source-completeness",
+    }
     assert result["browser"]["passed"] == result["browser"]["total"] == 2
+
+
+@pytest.mark.parametrize(
+    "origin",
+    (
+        "file:///data/generated/army.db",
+        "http://user:pass@localhost:8000",
+        "http://localhost:8000/api",
+        "http://localhost:8000?skip=1",
+        "http://localhost:8000#fragment",
+    ),
+)
+def test_release_gate_rejects_invalid_server_origin_before_network(origin: str) -> None:
+    browser = Mock()
+    with patch("tools.served_runtime.urlopen") as opened:
+        with pytest.raises(ReleaseCandidateError, match="Server base URL"):
+            verify_release_candidate(
+                origin, expected_version=__version__, db_dir=DB_DIR, browser_check=browser,
+            )
+    opened.assert_not_called()
+    browser.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ("response", "error"),
+    (
+        (_UnavailableVersionResponse(b""), "HTTP 503"),
+        (_VersionResponse(b"{"), "Could not verify runtime version"),
+        (_VersionResponse(b"[]"), "did not return an object"),
+    ),
+)
+def test_release_gate_rejects_invalid_version_response(
+    response: BytesIO, error: str,
+) -> None:
+    browser = Mock()
+    with patch("tools.served_runtime.urlopen", return_value=response):
+        with pytest.raises(ReleaseCandidateError, match=error):
+            verify_release_candidate(
+                "https://example.org", expected_version=__version__,
+                db_dir=DB_DIR, browser_check=browser,
+            )
+    browser.assert_not_called()
+
+
+def test_release_gate_reports_version_network_failure() -> None:
+    browser = Mock()
+    with patch("tools.served_runtime.urlopen", side_effect=URLError("unavailable")):
+        with pytest.raises(ReleaseCandidateError, match="Could not verify runtime version"):
+            verify_release_candidate(
+                "https://example.org", expected_version=__version__,
+                db_dir=DB_DIR, browser_check=browser,
+            )
+    browser.assert_not_called()
+
+
+def test_release_gate_rejects_version_network_failure_after_browser() -> None:
+    payload = {
+        "snapshot_revision": local_revision(DB_DIR),
+        "version": __version__,
+        "static_revision": STATIC_ASSET_REVISION,
+    }
+    browser = Mock(side_effect=_browser_ok)
+    with patch(
+        "tools.served_runtime.urlopen",
+        side_effect=[_VersionResponse(json.dumps(payload).encode()), URLError("unavailable")],
+    ):
+        with pytest.raises(ReleaseCandidateError, match="Could not verify runtime version"):
+            verify_release_candidate(
+                "https://example.org", expected_version=__version__, db_dir=DB_DIR,
+                slugs=("dragoes",), widths=(390,), browser_check=browser,
+            )
+    browser.assert_called_once()
 
 
 def test_release_gate_runs_real_local_chromium_when_available(
@@ -285,8 +384,8 @@ def test_release_gate_runs_real_local_chromium_when_available(
 def test_release_gate_rejects_wrong_snapshot_before_browser() -> None:
     browser = Mock()
     with patch(
-        "tools.verify_release_candidate_browser.verify_served_revision",
-        side_effect=ReferenceBaselineError("source pair differs"),
+        "tools.verify_release_candidate_browser.verify_served_runtime",
+        side_effect=ServedRuntimeError("runtime snapshot differs"),
     ):
         with pytest.raises(ReleaseCandidateError, match="snapshot preflight failed"):
             verify_release_candidate(
@@ -311,7 +410,7 @@ def test_release_gate_rejects_wrong_version_or_assets_before_browser(
         observed["staticRevision"] = "stale"
     browser = Mock()
     with patch(
-        "tools.verify_release_candidate_browser.verify_served_revision",
+        "tools.verify_release_candidate_browser.verify_served_runtime",
         return_value=observed,
     ):
         with pytest.raises(ReleaseCandidateError, match="mismatch"):
@@ -333,7 +432,7 @@ def test_release_gate_rejects_failed_browser_acceptance() -> None:
                      "status": "failed", "error": "missing skill"}],
     })
     with patch(
-        "tools.verify_release_candidate_browser.verify_served_revision",
+        "tools.verify_release_candidate_browser.verify_served_runtime",
         return_value=observed,
     ) as served:
         with pytest.raises(ReleaseCandidateError, match="missing skill"):

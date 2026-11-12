@@ -19,9 +19,7 @@ from collections.abc import Sequence
 from contextlib import closing
 from pathlib import Path, PureWindowsPath
 from typing import Any
-from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlsplit
-from urllib.request import Request, urlopen
 
 from infinity_army_data.merge import SourceDocument, load_sources, merge_sources
 from infinity_db.application_domains import application_domain, semantic_record_domain
@@ -29,6 +27,11 @@ from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
+
+if __package__:
+    from .served_runtime import ServedRuntimeError, verify_served_runtime
+else:
+    from served_runtime import ServedRuntimeError, verify_served_runtime
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPORT_FORMAT = "InfinityDB 1.0 reference evidence baseline"
@@ -1096,49 +1099,13 @@ def verify_served_revision(report: dict[str, Any], base_url: str) -> dict[str, s
     This does not verify external source artifacts, rules semantics, or browser
     rendering.
     """
-    parsed = urlsplit(base_url)
-    if (
-        parsed.scheme not in {"http", "https"}
-        or not parsed.netloc
-        or parsed.username is not None
-        or parsed.password is not None
-        or parsed.path not in {"", "/"}
-        or parsed.query
-        or parsed.fragment
-    ):
-        raise ReferenceBaselineError(
-            "Server base URL must be an HTTP(S) origin without credentials, path or query"
-        )
-    version_url = base_url.rstrip("/") + "/api/version"
     try:
-        request = Request(
-            version_url,
-            headers={"Accept": "application/json", "User-Agent": "Mozilla/5.0"},
+        observed = verify_served_runtime(
+            report["runtimeSnapshotRevision"], base_url,
         )
-        with urlopen(request, timeout=10) as response:
-            if response.status != 200:
-                raise ReferenceBaselineError(
-                    f"Runtime version endpoint returned HTTP {response.status}"
-                )
-            payload = json.load(response)
-    except (HTTPError, URLError, TimeoutError, OSError, ValueError) as exc:
-        raise ReferenceBaselineError(f"Could not verify runtime version: {exc}") from exc
-    if not isinstance(payload, dict):
-        raise ReferenceBaselineError("Runtime version endpoint did not return an object")
-    actual = payload.get("snapshot_revision")
-    expected = report["runtimeSnapshotRevision"]
-    if not isinstance(actual, str) or actual != expected:
-        raise ReferenceBaselineError(
-            f"Runtime snapshot revision does not match inventoried runtime artifacts: "
-            f"expected {expected}, received {actual!r}"
-        )
-    return {
-        "versionUrl": version_url,
-        "snapshotRevision": actual,
-        "appVersion": str(payload.get("version", "")),
-        "staticRevision": str(payload.get("static_revision", "")),
-        "status": "exact-database-pair-match-not-source-completeness",
-    }
+    except ServedRuntimeError as exc:
+        raise ReferenceBaselineError(str(exc)) from exc
+    return {**observed, "status": "exact-database-pair-match-not-source-completeness"}
 
 
 def render_markdown(report: dict[str, Any]) -> str:

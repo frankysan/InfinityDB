@@ -42,8 +42,10 @@ when all contained work shares the same owner.
   The [P5 retirement checkpoint](tooling-and-local-path-cleanup-plan.md#completed-p5-comparison-tool-retirement--2026-11-12)
   records the first completed-tool removal; the
   [artwork-review checkpoint](tooling-and-local-path-cleanup-plan.md#p5-artwork-review-workflow-and-runbook-checkpoint--2026-11-12)
-  records the runbook disposition and explicit review inputs. Remaining
-  lifecycle review, path policy and migrations remain open.
+  records the runbook disposition and explicit review inputs. The
+  [reporter checkpoint](tooling-and-local-path-cleanup-plan.md#reference-reporter-dependency-checkpoint--2026-11-12)
+  separates shared runtime verification while preserving active source checks.
+  Remaining lifecycle review, path policy and migrations remain open.
 
 ### External source clarifications
 

@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 import subprocess
+import sys
 import zipfile
 from io import BytesIO
 from pathlib import Path
@@ -1809,6 +1811,23 @@ class _VersionResponse(BytesIO):
     status = 200
 
 
+@pytest.mark.parametrize(
+    "command",
+    (
+        (str(Path("tools") / "report_reference_baseline.py"),),
+        ("-m", "tools.report_reference_baseline"),
+    ),
+)
+def test_baseline_cli_runs_with_no_pythonpath(command: tuple[str, ...]) -> None:
+    environment = os.environ.copy()
+    environment.pop("PYTHONPATH", None)
+    result = subprocess.run(
+        [sys.executable, *command, "--help"], cwd=ROOT, env=environment,
+        capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+
 def test_served_revision_matches_exact_inventoried_database_pair() -> None:
     from infinity_db.web import create_app
 
@@ -1822,7 +1841,7 @@ def test_served_revision_matches_exact_inventoried_database_pair() -> None:
         "static_revision": "abc",
     }
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(json.dumps(payload).encode()),
     ) as opened:
         observed = verify_served_revision(report, "http://127.0.0.1:8000")
@@ -1837,7 +1856,7 @@ def test_served_revision_rejects_stale_and_invalid_runtime() -> None:
     report = {"runtimeSnapshotRevision": "a" * 64}
     stale = {"snapshot_revision": "b" * 64}
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(json.dumps(stale).encode()),
     ):
         with pytest.raises(ReferenceBaselineError, match="does not match"):
@@ -1851,7 +1870,7 @@ def test_served_revision_rejects_stale_and_invalid_runtime() -> None:
         with pytest.raises(ReferenceBaselineError, match="Server base URL"):
             verify_served_revision(report, base)
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(b"[]"),
     ):
         with pytest.raises(ReferenceBaselineError, match="did not return an object"):
@@ -1864,7 +1883,7 @@ def test_baseline_cli_rejects_stale_server_before_writing_outputs(
     path = tmp_path / "baseline.json"
     payload = {"snapshot_revision": "0" * 64}
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(json.dumps(payload).encode()),
     ):
         assert main([
@@ -1884,7 +1903,7 @@ def test_baseline_cli_records_served_pair_in_json_and_markdown(tmp_path: Path) -
     json_path = tmp_path / "baseline.json"
     markdown_path = tmp_path / "baseline.md"
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(json.dumps(payload).encode()),
     ):
         assert main([
