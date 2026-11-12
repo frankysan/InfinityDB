@@ -267,11 +267,11 @@ establishes current gameplay truth by itself.
 ## Snapshot provenance contract
 
 The standalone
-[InfinityDB-army-acquisition](https://github.com/frankysan/InfinityDB-army-acquisition)
-and [InfinityDB-wiki-acquisition](https://github.com/frankysan/InfinityDB-wiki-acquisition)
-producers, together with the in-repository raw symbol acquisition workflow,
-write version-3 `InfinityDB snapshot provenance` documents under the selected
-working directory's `manifests/snapshots/`. Producers hand off only immutable
+[InfinityDB-army-acquisition](https://github.com/frankysan/InfinityDB-army-acquisition),
+[InfinityDB-wiki-acquisition](https://github.com/frankysan/InfinityDB-wiki-acquisition)
+and [InfinityDB-symbol-tools](https://github.com/frankysan/InfinityDB-symbol-tools)
+producers write version-3 `InfinityDB snapshot provenance` documents under the
+selected working directory's `manifests/snapshots/`. Producers hand off only immutable
 source ZIPs and their matching manifests. InfinityDB's offline
 `tools.army_snapshot_source` verifies acquired Army ZIPs; the normal build,
 serve and Docker workflows never install or run the external producers. Version 3 retains the logical content and exact

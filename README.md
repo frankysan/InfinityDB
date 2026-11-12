@@ -152,9 +152,11 @@ references. See the [changelog](docs/CHANGELOG.md) for the complete version
 history and the [active backlog](docs/TODO.md#active-development)
 for unfinished development work.
 
-Version **1.0.1** is being prepared with improved scenario maps, reference-page
-spacing, version-specific release notes and safer local-build/deployment workflows.
+Version **1.0.1** delivered improved scenario maps, reference-page spacing,
+version-specific release notes and safer local-build/deployment workflows.
 Its Rules database embeds reviewed deployed objects while retaining the reference baseline.
+Current development toward **1.1.0** is tracked in the [backlog](docs/TODO.md)
+and [restructuring plan](docs/restructuring-plan.md); it is not yet released.
 
 ## Requirements and setup
 
@@ -180,8 +182,8 @@ Docker deployment** for internet serving. See
 [architecture](docs/architecture.md#runtime-targets) and
 [deployment](docs/deployment.md) for the separate contracts.
 
-A clean checkout includes tracked runtime databases and processed graphics. Without
-a local rebuild, the development server uses the tracked database pair:
+A clean checkout includes the three tracked runtime databases and processed graphics.
+Without a local rebuild, the development server uses the complete SQLite set:
 
 ```powershell
 infinity-db serve
@@ -194,43 +196,40 @@ infinity-db build --compact
 infinity-db serve
 ```
 
-The offline build validates and replaces the complete tracked pair in
-`data/generated/`: `army.db` and `rules_n5.db`. Stop a server before rebuilding
-its selected directory and restart after success. A failed build before
-replacement preserves the previous pair; rerun an interrupted replacement.
+The offline build validates and replaces the complete tracked set in
+`data/generated/`: `army.db`, `rules_n5.db` and `its_18.db`. Stop a server
+before rebuilding its selected directory and restart after success. A failed
+build before replacement preserves the previous set; rerun an interrupted replacement.
 
 `serve --db-dir PATH` selects another complete directory. Otherwise serving
 uses `INFINITY_DB_DB_DIR`, then `data/generated/` relative to the working
 directory. Missing or incompatible files fail startup. Production WSGI requires
-`INFINITY_DB_DB_DIR` explicitly. Both hosting targets use the same two databases;
-Docker copies them directly into its immutable image.
+`INFINITY_DB_DB_DIR` explicitly. Both hosting targets use the same three
+databases; Docker copies them directly into its immutable image.
 
 Open <http://127.0.0.1:8000> on the development machine. The development server
 listens on local network interfaces by default; use the machine's LAN address
 from another device, or bind only to localhost with
 `infinity-db serve --host 127.0.0.1`. Stop with `Ctrl+C`.
 
-### Download a fresh Army snapshot
+### Acquire a fresh Army snapshot
 
-Acquisition is explicit and separate from normal builds:
-
-```powershell
-python tools/download_army_json.py data/raw
-infinity-db build --compact
-infinity-db serve
-```
-
-The downloader publishes an immutable timestamped ZIP only after validating a
-coherent source acquisition. Generated snapshot provenance is kept separately
-from the source archive. See [data storage and provenance](data/README.md) for
-the detailed snapshot contract.
+Army acquisition runs explicitly in the standalone
+[InfinityDB-army-acquisition](https://github.com/frankysan/InfinityDB-army-acquisition)
+repository, not through an in-tree downloader. Its output is an immutable
+`JSON YYYYMMDD-HHMMSS.zip` with matching snapshot provenance JSON.
+Place the verified handoff under `data/raw/` and
+`data/manifests/snapshots/` respectively, then run
+`infinity-db build --compact` and `infinity-db serve` in InfinityDB.
+The normal offline build never fetches data. See the
+[snapshot provenance and handoff contract](data/README.md#cross-repository-acquisition-handoff-p53).
 
 ### Build the rules reference
 
 The normal `infinity-db build --compact` includes curated Rules, reviewed
 deployed objects, exact variants, Weapon citations and maintained reference facts
-in the complete SQLite pair. ITS Season 18 remains embedded in Rules until its
-planned extraction. No JSON sidecar is required to serve the built set.
+in the complete SQLite set. ITS Season 18 is published separately in
+`its_18.db`. No JSON sidecar is required to serve the built set.
 
 For independent Rules-export development, `infinity-db build-rules` writes a
 standalone v10 database under ignored `data/work/build/rules-standalone.db`.
@@ -266,21 +265,14 @@ committed merely because the processed graphical output may be distributed. See
 [third-party notices](THIRD_PARTY_NOTICES.md), [architecture](docs/architecture.md),
 and [data storage and provenance](data/README.md) for the full contract.
 
-The wiki snapshot downloader is also available independently:
-
-```powershell
-python tools/download_wiki_snapshot.py
-python tools/download_wiki_snapshot.py --language es
-python tools/download_wiki_snapshot.py --site human-sphere
-python tools/download_wiki_snapshot.py --site human-sphere --include-history
-```
-
-The default site remains the official Infinity Wiki. Human Sphere acquisition is English-only,
-uses a distinct `HUMAN-SPHERE ...zip` archive identity, and enumerates MediaWiki content pages
-before following rendered links so unlinked main-namespace pages are not silently omitted. That
-enumerated main-namespace inventory defines required Human Sphere content; stale discovered 404s,
-Talk pages, and site-service endpoints are recorded as ignored rather than making a healthy mirror
-unpublishable. Both sources keep incomplete work for inspection and publish only complete snapshots.
+Wiki and Human Sphere acquisition likewise belongs to the standalone
+[InfinityDB-wiki-acquisition](https://github.com/frankysan/InfinityDB-wiki-acquisition)
+repository. It publishes complete, immutable `WIKI-<language> ...zip` or
+`HUMAN-SPHERE ...zip` archives with matching provenance; incomplete
+crawls remain with the producer. Its output is research evidence, not an
+implicit normal-build dependency. See the
+[wiki acquisition contract](data/README.md#snapshot-provenance-contract)
+for languages, failure rules and handoff requirements.
 
 ## Common commands
 
@@ -338,7 +330,7 @@ src/
   infinity_army_data/       # Army merge, normalization, metadata, and validation
   infinity_db/              # SQLite storage, application services, API, and browser
 tests/                      # Pipeline, database, API, web, and tool regression tests
-tools/                      # Acquisition, processing, auditing, and check utilities
+tools/                      # Offline handoff verification, publication, auditing, and checks
 scripts/                    # Linux deployment and maintenance scripts
 data/
   raw/                      # Immutable Army/source snapshots, ignored by Git
@@ -351,7 +343,6 @@ data/
   logs/                     # Verbose pipeline logs, ignored by Git
   backups/                  # Local retained processing/publication history, ignored by Git
   generated/                # Tracked runtime DBs plus ignored intermediate build artifacts
-image_overrides/            # Optional local override evidence, ignored by Git
 ```
 
 ## Development checks
