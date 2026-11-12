@@ -177,6 +177,22 @@ def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     assert "data/generated/rules_n5.db binary" in attributes
 
 
+def test_docker_context_excludes_nonlocal_private_font_inputs_and_scratch() -> None:
+    """Git-ignored local inputs must not silently enter Docker's build context."""
+    dockerignore = set(_read(".dockerignore").splitlines())
+    gitignore = _read(".gitignore")
+    for pattern in (
+        "src/infinity_db/web/static/fonts/**/*.ttf",
+        "src/infinity_db/web/static/fonts/**/README.txt",
+    ):
+        assert pattern in gitignore
+        assert pattern in dockerignore
+    for pattern in (
+        ".pytest-tmp/", ".cache/", ".tmp.drivedownload/", ".tmp.driveupload/",
+    ):
+        assert pattern in dockerignore
+
+
 def test_docker_packages_only_explicit_complete_databases() -> None:
     dockerfile = _read("Dockerfile")
     dockerignore = _read(".dockerignore")

@@ -11,6 +11,12 @@ AGENTS.local.md
 .venv/
 .pytest_cache/
 .ruff_cache/
+# Git-ignored local tool caches and transfer scratch outside local/.
+.pytest-tmp/
+.cache/
+.tmp.drivedownload/
+.tmp.driveupload/
+
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -30,3 +36,6 @@ data/work/
 data/reports/
 data/logs/
 data/backups/
+# Temporary upstream font inputs, not published WOFF2/OFL assets.
+src/infinity_db/web/static/fonts/**/*.ttf
+src/infinity_db/web/static/fonts/**/README.txt

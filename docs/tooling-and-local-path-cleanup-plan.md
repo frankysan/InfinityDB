@@ -705,6 +705,52 @@ corresponding source procedures remain documented in
 **L0 remains open.** This disposition does not approve a tools-directory
 reorganization, path policy, or private-data migration.
 
+### Docker build-context containment and exception triage — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`ef1ffd3199a0f1b84de9d2439b8c8b3479dc1d8c`. Compared the actual
+`.gitignore`, `.dockerignore`, deployment contract and font-source producer.
+The Git ignore rules excluded temporary Google Drive transfer directories,
+test caches and upstream font TTF/README inputs that were not all explicitly
+excluded from Docker's build context. Added narrowly corresponding Docker
+exclusions, leaving published WOFF2/OFL files, the three tracked runtime
+databases and the symbol manifest untouched. This protects the context
+boundary; it does **not** establish that those files entered a previous image.
+
+**Focused validation:** `tests/test_deployment_scripts.py` passed **46/46**;
+Ruff passed for that file. The regression tests the declared exclusion
+patterns; no actual Docker engine/context inspection, installed-wheel build,
+Linux run or hosted workflow was performed at this checkpoint.
+
+**Proposed L1 exception classification (not yet approved):**
+
+- Conventional tool locations can retain narrowly owned exceptions:
+  `.venv/`, `node_modules/`, interpreter/linter/pytest caches,
+  `*.egg-info/`, `build/`, `dist/`, OS metadata, editor preferences
+  and the machine-local `AGENTS.local.md`. Review tool-owned transfer
+  scratch paths individually before calling them permanent exceptions.
+- The host-specific deployment environment file must stay excluded from
+  publication; secrets require independent access controls and must not be
+  exposed by a path audit or moved automatically.
+- `reports/`, `docs/audits/`, ignored `data/` families, loose
+  `data/generated/` outputs, `image_overrides/` and downloaded font
+  sources are **migration candidates**, not general exceptions. Update their
+  writers and independent consumers before relocation.
+- Broad ignored `*.zip`/`*.patch` patterns may hide loose research or
+  handoff artifacts outside `local/`; preserve existing files and decide
+  placement from ownership and provenance rather than extending blanket
+  exclusions. Review Docker context exposure of these other file classes
+  separately.
+- The dated `workflow-improvement-review-2026-11-04.md` is historical,
+  but still holds a proposed catalog change-impact preflight not in the
+  current backlog. Mark its retirement `needs-decision` until that
+  recommendation is deliberately accepted, deferred or declined; do not
+  silently promote all its dated recommendations into current policy.
+
+**L0 and L1 remain open.** This isolated containment fix does not approve
+the path taxonomy, a tracked-document retirement, a source move, deletion or
+Syncthing reconfiguration.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
