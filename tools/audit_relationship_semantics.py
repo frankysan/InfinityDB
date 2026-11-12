@@ -1437,6 +1437,7 @@ def audit_database(
     include_details: bool = False,
     historical_relation_endpoints_path: Path = DEFAULT_HISTORICAL_RELATION_ENDPOINTS,
     current_only: bool = False,
+    normalized: Path | None = None,
 ) -> dict[str, Any]:
     if not path.is_file():
         raise RelationshipSemanticsAuditError(f"Database does not exist: {path}")
@@ -1448,7 +1449,9 @@ def audit_database(
         if current_only
         else _load_historical_relation_endpoints(historical_relation_endpoints_path)
     )
-    connection = open_paired_audit_connection(path, REQUIRED_COLUMNS)
+    connection = open_paired_audit_connection(
+        path, REQUIRED_COLUMNS, normalized=normalized,
+    )
     try:
         _validate_schema(connection)
         targets = _payload_targets(connection)
@@ -1535,6 +1538,10 @@ def build_parser() -> argparse.ArgumentParser:
         )
     )
     parser.add_argument("database", type=Path, help="Path to army.db")
+    parser.add_argument(
+        "--normalized", type=Path,
+        help="Verified normalized.json input instead of the default raw sibling",
+    )
     parser.add_argument("--details", action="store_true", help="Include row-level evidence")
     parser.add_argument("--output", type=Path, help="Write the JSON report to this path")
     parser.add_argument(
@@ -1561,8 +1568,9 @@ def main(argv: list[str] | None = None) -> int:
             include_details=args.details,
             historical_relation_endpoints_path=args.historical_relation_endpoints,
             current_only=args.current_only,
+            normalized=args.normalized,
         )
-    except RelationshipSemanticsAuditError as exc:
+    except (RelationshipSemanticsAuditError, ValueError, OSError, sqlite3.Error) as exc:
         raise SystemExit(str(exc)) from exc
     payload = json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
     if args.output:

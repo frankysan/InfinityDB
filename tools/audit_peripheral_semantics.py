@@ -414,10 +414,14 @@ def _audit_normalization_gaps(metadata: dict[str, Any], *, include_details: bool
     return result
 
 
-def audit_database(path: Path, *, include_details: bool = False) -> dict[str, Any]:
+def audit_database(
+    path: Path, *, include_details: bool = False, normalized: Path | None = None,
+) -> dict[str, Any]:
     if not path.is_file():
         raise PeripheralSemanticsAuditError(f"Database does not exist: {path}")
-    connection = open_paired_audit_connection(path, REQUIRED_COLUMNS)
+    connection = open_paired_audit_connection(
+        path, REQUIRED_COLUMNS, normalized=normalized,
+    )
     try:
         _validate_schema(connection)
         metadata = _metadata_rows(connection)
@@ -502,6 +506,10 @@ def build_parser() -> argparse.ArgumentParser:
         description="Audit peripheral identity, availability, and attachment semantics."
     )
     parser.add_argument("database", type=Path, help="Path to army.db")
+    parser.add_argument(
+        "--normalized", type=Path,
+        help="Verified normalized.json input instead of the default raw sibling",
+    )
     parser.add_argument("--details", action="store_true", help="Include row-level evidence")
     parser.add_argument("--output", type=Path, help="Write the JSON report to this path")
     return parser
@@ -510,8 +518,10 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        report = audit_database(args.database, include_details=args.details)
-    except PeripheralSemanticsAuditError as exc:
+        report = audit_database(
+            args.database, include_details=args.details, normalized=args.normalized,
+        )
+    except (PeripheralSemanticsAuditError, ValueError, OSError, sqlite3.Error) as exc:
         raise SystemExit(str(exc)) from exc
     payload = json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
     if args.output:

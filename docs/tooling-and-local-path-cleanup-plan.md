@@ -1475,6 +1475,50 @@ it was not rerun for these source-inspection-only CLI changes.
 Defer irreversible raw-format and test retirement until independently
 accepted research/audit semantics are covered by their replacements.
 
+### Shared semantic-audit normalized-source cutover — 2026-11-12
+
+**Implementation:** The maintained `tools.paired_audit_connection` interface
+now accepts an explicit `normalized=PATH` option. It checks the complete
+normalized document against the selected Army application's existing
+`export_pair_sha256` generation using the shared verifier, then attaches an
+in-memory SQLite database and exposes only requested missing source tables as
+temporary views. It uses the same normalized column schema and SQLite value
+encoding as the legacy raw export, including all schema-defined **zero-row
+tables** omitted from the compact JSON document. The main application database
+is opened read-only, both sources remain unchanged, and the resulting audit
+connection enables `PRAGMA query_only`. If normalized source is explicitly
+selected but is missing or mismatched, it fails closed even when a valid raw
+sibling exists, or when no requested table is missing.
+
+`audit_normalization_links`, `audit_peripheral_semantics` and
+`audit_relationship_semantics` now pass through explicit `--normalized`
+options; their public report structures, detailed evidence and established
+default raw-sibling/legacy combined SQLite behavior remain compatible.
+CLI errors from invalid normalized input are bounded and reported instead of
+silently using a different source. Existing callers do not need any changes.
+
+**Regression coverage:** New tests compare exact relational rows and all
+three independent semantic audit reports—including detailed Peripheral and
+Include evidence—between the matched raw pair and the normalized route after
+the raw sibling is deleted. They test temporary-view read-only enforcement,
+CLI input selection, zero-row schema fidelity, missing JSON, changed source
+rows, tampered export generation, and verification even when the application
+already contains every requested table. The first run exposed empty-source
+table omission in the adapter (two failures); materializing schema-defined
+zero-row tables fixed both. No raw file was created or modified by the new
+route. The final adapter suite passed **10/10**, normalization-link suite
+**3/3**, Peripheral suite **6/6**, relationship suite **7/7** and runtime
+fixture suite **3/3**, all without skips. Ruff and Pyright passed.
+
+**Remaining:** `audit_army_faction_semantics`,
+`audit_source_presentation`, `report_reference_baseline` archive
+verification and `audit_source_variant_inputs` still need independent
+source/provenance review. In particular, the latter still lacks pair
+generation validation on its raw read path. Standalone paired export,
+`database-health --require-raw`, and the retained historical raw-audit
+APIs remain supported. This cutover does not justify deleting
+`data/generated/army.raw.db` or replacing any published runtime artifact.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

@@ -309,7 +309,9 @@ def _canonicalization_links(connection: sqlite3.Connection) -> dict[str, Any]:
     }
 
 
-def audit_database(path: Path) -> dict[str, Any]:
+def audit_database(
+    path: Path, *, normalized: Path | None = None,
+) -> dict[str, Any]:
     """Return deterministic evidence for normalization-only relational links."""
     path = path.resolve()
     if not path.is_file():
@@ -321,7 +323,9 @@ def audit_database(path: Path) -> dict[str, Any]:
         *(catalog for _table, catalog in FILTER_CATALOG_LINKS.values()),
         *(item["table"] for item in CANONICALIZATION_LINKS),
     }
-    connection = open_paired_audit_connection(path, required_tables)
+    connection = open_paired_audit_connection(
+        path, required_tables, normalized=normalized,
+    )
     try:
         _validate_policy(connection)
         metadata = _metadata(connection)
@@ -352,6 +356,10 @@ def audit_database(path: Path) -> dict[str, Any]:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("database", type=Path, help="Frontend army.db to audit")
+    parser.add_argument(
+        "--normalized", type=Path,
+        help="Verified normalized.json input when no matched raw sibling is retained",
+    )
     parser.add_argument("--output", type=Path, help="Optional deterministic JSON report path")
     return parser
 
@@ -359,8 +367,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        report = audit_database(args.database)
-    except (OSError, sqlite3.Error, NormalizationLinkAuditError) as exc:
+        report = audit_database(args.database, normalized=args.normalized)
+    except (OSError, sqlite3.Error, NormalizationLinkAuditError, ValueError) as exc:
         print(f"ERROR: {exc}")
         return 1
 

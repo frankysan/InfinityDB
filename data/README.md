@@ -257,6 +257,23 @@ fails closed. Bounded listings accept at most 100 entries. This tool is
 read-only, does not change imported, curated or published data, and is not
 part of the runtime API.
 
+The optional `tools.audit_normalization_links`,
+`tools.audit_peripheral_semantics` and `tools.audit_relationship_semantics`
+commands also accept `--normalized PATH` with the selected application
+database. They verify the complete normalized document against the Army
+export-generation fingerprint, then materialize only the required missing
+source tables as read-only temporary views backed by in-memory SQLite.
+Empty tables are preserved. Their existing legacy combined-database and
+validated raw-sibling behavior remains the default; an explicit normalized
+path never silently falls back to a sibling archive. For example:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_relationship_semantics local/data/build/army.db --normalized local/data/build/normalized.json --current-only
+```
+
+The example paths identify a matched local source generation, not a
+persistent runtime artifact.
+
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;
 `curated/README.md` owns the current format version and validation rules. PDF citations use

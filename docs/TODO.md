@@ -315,11 +315,11 @@ when all contained work shares the same owner.
   overlays use fully verified normalized source. Standalone `infinity-db export`
   still produces a lossless raw pair for independent audit/research consumers.
   - [ ] Migrate the remaining independent raw-dependent source audits,
-    publication checks, deterministic-build evidence and
-    `paired_audit_connection` consumers. Source-row inspection and the
-    standalone variant-usage candidate CLI now support explicit, fully verified
-    normalized input; the former reproduces exact raw JSON row semantics.
-    The **variant-usage projection** also uses in-memory normalized source
+    publication checks and deterministic-build evidence. The three
+    `paired_audit_connection` semantic consumers now support explicit, verified
+    normalized input with temporary in-memory source views; source-row inspection
+    and the standalone variant-usage candidate CLI are migrated too. The
+    **variant-usage projection** also uses in-memory normalized source
     tables with full export-generation verification. Retain legacy raw-based
     APIs as parity oracles while independent consumers remain.
     Preserve source-only row fidelity, absence-versus-null distinctions,
