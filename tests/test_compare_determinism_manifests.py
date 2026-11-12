@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import sqlite3
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -83,7 +85,11 @@ def test_manifest_cli_selects_explicit_legacy_export(
 ) -> None:
     calls: list[bool] = []
 
-    def build(_root: Path, *, legacy_paired: bool = False) -> dict[str, object]:
+    def build(
+        _root: Path, *, legacy_paired: bool = False,
+        diagnostics_output: Path | None = None,
+    ) -> dict[str, object]:
+        assert diagnostics_output is None
         calls.append(legacy_paired)
         return {
             "format": manifest_builder.FORMAT,
@@ -127,6 +133,44 @@ def test_manifest_fixture_copy_normalizes_only_json_line_endings(
     assert (first / "101-test-army.json").read_bytes() != (
         second / "101-test-army.json"
     ).read_bytes()
+
+
+def test_sqlite_diagnostics_separate_writer_header_from_relational_content(
+    tmp_path: Path,
+) -> None:
+    database_path = tmp_path / "data.db"
+    with sqlite3.connect(database_path) as connection:
+        connection.execute("CREATE TABLE records (id INTEGER PRIMARY KEY, name TEXT)")
+        connection.executemany(
+            "INSERT INTO records (id, name) VALUES (?, ?)",
+            [(1, "first"), (2, "second")],
+        )
+    reference = manifest_builder._sqlite_diagnostics(database_path)
+    changed = tmp_path / "writer-version.db"
+    original = database_path.read_bytes()
+    changed.write_bytes(original[:96] + (3099999).to_bytes(4, "big") + original[100:])
+    diagnostic = manifest_builder._sqlite_diagnostics(changed)
+    assert reference["tableDigests"] == diagnostic["tableDigests"]
+    assert reference["headerNeutralizedSha256"] == (
+        diagnostic["headerNeutralizedSha256"]
+    )
+    assert reference["headerWriterVersion"] != diagnostic["headerWriterVersion"]
+
+
+def test_zip_diagnostics_separate_member_contents_from_deflate_bytes(
+    tmp_path: Path,
+) -> None:
+    plain, compressed = tmp_path / "stored.zip", tmp_path / "compressed.zip"
+    for path, method in (
+        (plain, zipfile.ZIP_STORED), (compressed, zipfile.ZIP_DEFLATED),
+    ):
+        with zipfile.ZipFile(path, "w", compression=method) as archive:
+            archive.writestr("member.txt", b"Same source bytes! " * 50)
+    first = manifest_builder._zip_diagnostics(plain)["members"]["member.txt"]
+    second = manifest_builder._zip_diagnostics(compressed)["members"]["member.txt"]
+    assert first["sha256"] == second["sha256"]
+    assert first["crc"] == second["crc"]
+    assert first["compressSize"] != second["compressSize"]
 
 
 def test_compare_requires_multiple_manifests(tmp_path: Path) -> None:

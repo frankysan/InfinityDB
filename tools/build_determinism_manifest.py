@@ -11,11 +11,14 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import sqlite3
 import subprocess
 import sys
 import tempfile
+import zipfile
 import zlib
+from contextlib import closing
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -71,7 +74,71 @@ def _canonical_fixture_copy(source: Path, destination: Path) -> Path:
     return destination
 
 
-def build_manifest(project_root: Path, *, legacy_paired: bool = False) -> dict[str, Any]:
+def _sqlite_diagnostics(path: Path) -> dict[str, Any]:
+    """Record on-disk header and canonical relational content independently."""
+    data = path.read_bytes()
+    if not data.startswith(b"SQLite format 3\x00"):
+        raise ValueError(f"Invalid SQLite diagnostic input: {path}")
+    neutral_header = data[:96] + b"\x00" * 4 + data[100:]
+    with closing(
+        sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
+    ) as database:
+        tables = [
+            str(row[0])
+            for row in database.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' "
+                "AND name NOT LIKE 'sqlite_%' ORDER BY name"
+            )
+        ]
+        fingerprints: dict[str, str] = {}
+        for name in tables:
+            escaped = name.replace('"', '""')
+            serialized = []
+            for row in database.execute(f'SELECT * FROM "{escaped}"'):
+                fields = [
+                    {"blob": value.hex()} if isinstance(value, bytes) else value
+                    for value in row
+                ]
+                serialized.append(json.dumps(
+                    fields, ensure_ascii=False, sort_keys=True,
+                    separators=(",", ":"), allow_nan=False,
+                ))
+            serialized.sort()
+            fingerprints[name] = hashlib.sha256(
+                ("\n".join(serialized)).encode("utf-8")
+            ).hexdigest()
+    return {
+        "sqliteVersion": sqlite3.sqlite_version,
+        "headerWriterVersion": int.from_bytes(data[96:100], "big"),
+        "headerPageCount": int.from_bytes(data[28:32], "big"),
+        "headerNeutralizedSha256": hashlib.sha256(neutral_header).hexdigest(),
+        "tableDigests": fingerprints,
+    }
+
+
+def _zip_diagnostics(path: Path) -> dict[str, Any]:
+    """Distinguish changed archive members from changed compressed bytes."""
+    with zipfile.ZipFile(path) as archive:
+        fingerprints = {}
+        for item in archive.infolist():
+            digest = hashlib.sha256()
+            with archive.open(item) as source:
+                for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                    digest.update(chunk)
+            fingerprints[item.filename] = {
+                "sha256": digest.hexdigest(),
+                "size": item.file_size,
+                "crc": item.CRC,
+                "compressSize": item.compress_size,
+                "compression": item.compress_type,
+            }
+    return {"members": dict(sorted(fingerprints.items()))}
+
+
+def build_manifest(
+    project_root: Path, *, legacy_paired: bool = False,
+    diagnostics_output: Path | None = None,
+) -> dict[str, Any]:
     source_fixture = project_root / "tests" / "fixtures" / "deployment-smoke"
     with tempfile.TemporaryDirectory(prefix="infinitydb-determinism-") as temporary:
         root = Path(temporary)
@@ -149,6 +216,19 @@ def build_manifest(project_root: Path, *, legacy_paired: bool = False) -> dict[s
             canonical_bytes(reviewed)
         ).hexdigest()
 
+        if diagnostics_output is not None:
+            diagnostics = {
+                "sqlite": {
+                    name: _sqlite_diagnostics(generated / name)
+                    for name in ("army.db", "rules_n5.db", "its_18.db")
+                },
+                "archives": {
+                    "snapshot.zip": _zip_diagnostics(snapshot),
+                    "work.zip": _zip_diagnostics(work_archive),
+                },
+            }
+            write_json_lf(diagnostics_output, diagnostics, sort_keys=True)
+
         return {
             "format": FORMAT,
             "formatVersion": (
@@ -165,6 +245,10 @@ def main(argv: list[str] | None = None) -> int:
         "--legacy-paired", action="store_true",
         help="Generate the original v1 manifest, including a disposable raw archive",
     )
+    parser.add_argument(
+        "--diagnostics-output", type=Path,
+        help="Optional SQLite table/header and ZIP member diagnostics in local/",
+    )
     args = parser.parse_args(argv)
 
     project_root = Path(__file__).resolve().parents[1]
@@ -174,7 +258,10 @@ def main(argv: list[str] | None = None) -> int:
         f"SQLite {sqlite3.sqlite_version}, zlib {zlib.ZLIB_VERSION} "
         f"(runtime {zlib.ZLIB_RUNTIME_VERSION})"
     )
-    manifest = build_manifest(project_root, legacy_paired=args.legacy_paired)
+    manifest = build_manifest(
+        project_root, legacy_paired=args.legacy_paired,
+        diagnostics_output=args.diagnostics_output,
+    )
     write_json_lf(args.output, manifest, sort_keys=True)
     print(f"Determinism manifest: {args.output}")
     for name, digest in manifest["artifacts"].items():
