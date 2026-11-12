@@ -32,7 +32,7 @@ def source_pair(tmp_path: Path) -> tuple[Path, Path, dict]:
     document["_meta"]["snapshotArchiveSha256"] = "a" * 64
     army = tmp_path / "army.db"
     normalized = tmp_path / "normalized.json"
-    export_database(document, army, finalize=False)
+    export_database(document, army, finalize=False, include_raw=True)
     normalized.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
     return army, normalized, document
 

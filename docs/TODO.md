@@ -363,17 +363,19 @@ when all contained work shares the same owner.
     strict SHA-256 comparator and required job identity unchanged.
     No Docker support is assumed on hosted Windows/macOS.
   - [ ] Close out hosted GitHub Actions acceptance on cleanup PR #29:
-    both pinned Ubuntu 24.04/26.04 jobs pass, and at `e2ff5eb4`
-    the unchanged strict v2 byte-comparison step passed. The required
-    job correctly remained red because all four native source-check
-    legs rejected the stale tracked Army/Rules database provenance;
-    deployment smoke failed on the same check. At `e2ff5eb4`, the
-    pinned Army ZIP passed two complete repeatable builds; the tracked
-    `army.db` and `rules_n5.db` were rebuilt with identical hashes
-    and local deployment-provenance verification passed.
-    Commit and push the validated database set, then verify native
-    source checks, deployment smoke and the required comparator are
-    all green on the new exact hosted SHA.
+    at `e2ff5eb4`, the two pinned Ubuntu determinism jobs and strict
+    byte comparison passed, but native source checks rejected stale
+    tracked database provenance. Regenerated databases in `6e796e4c`
+    resolved that check; installed wheel and three completed native
+    source-check legs passed, but deployment smoke exposed an eager build-only
+    normalization import during production startup.
+    The startup import is now deferred until an explicit source-audit
+    invocation. The existing runtime-import regression passed, raw-pair
+    parity tests use explicit `include_raw=True`, and a fresh repeatable
+    three-database rebuild plus disposable Docker preview passed locally
+    (41/41 semantic paths). Verify **all** native source checks,
+    deployment smoke and the required exact-byte comparison are green
+    on the same pushed repair SHA before closing this gate.
   - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
     inspection and programmatic `include_raw=True` interfaces. Keep the
     independent source-identity/research semantics and their focused tests

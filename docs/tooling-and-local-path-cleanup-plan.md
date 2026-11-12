@@ -2088,6 +2088,45 @@ native checks, required comparator and deployment smoke on the new exact SHA
 remain outstanding; this is **not** L1 approval or authorization for
 ignored-data deletion.
 
+### Production startup import boundary — 2026-11-12
+
+Hosted deployment smoke at `6e796e4c` passed the previously failing
+tracked-database provenance gate and built the Docker image, but failed its
+runtime startup verification: importing `infinity_db.database.health`
+eagerly imported `database.normalized_source`, which imported the
+build-only `database.importer` and source normalizer. This attempted
+to load `weapon-categories.json` from the removed build-time configuration
+path `/usr/local/share/infinity-db/config/catalogs/`.
+The production image must **not** restore these inputs to run.
+
+The existing isolated subprocess regression
+`tests/test_runtime_import_boundary.py` reproduced the failure before the
+fix, enumerating all five imported build-only modules. The normalized-source
+verifier now imports `validate_input` only while explicitly validating a
+normalized source document, not when importing database/serving modules.
+The runtime import regression passed **1/1** after this change.
+The normalized/raw parity fixture in `tests/test_variant_usage_source.py`
+also now selects explicit `include_raw=True`, in accordance with the
+standalone Python export's rawless default. Its tests passed **6/6**
+after the fixture correction. Neither change weakens source attestation.
+Because `normalized_source.py` is a tracked database-build input,
+the Army/Rules set was regenerated again. Two independent complete builds
+passed 73 normalization checks and their **three physical SQLite SHA-256s
+matched exactly**. The tracked rebuild passed exact hash verification:
+`army.db=31e412bfeee453086b32a595e86b0554f94a36ae2b9c325fa543715d9f2c6382`,
+`rules_n5.db=8ca2960bb4768dbbaf3568d29a00e9d2e6be42cb5c18e7dc671f98ec4484b911`,
+`its_18.db=e88eb6e9934443f762d8f143efcfd8cdf300636424b3a55c78df569ea43d2b94`.
+The full deployed-asset gate passed (808/808 published and 807/807
+browser-referenced SVGs). The disposable Docker preview built the clean
+installed image **without** the removed build configuration, passed
+immutable-image verification and semantic parity for **41/41 pinned API paths**,
+then stopped its test container and removed the preview image.
+The complete-set builder regression suite passed **18/18**, including
+repeatable publication, interrupted-replacement recovery and fail-closed
+source-provenance handling. This demonstrates the startup repair locally;
+hosted deployment smoke, source matrix and required comparator on the
+next pushed SHA remain outstanding.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

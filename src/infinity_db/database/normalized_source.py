@@ -14,7 +14,6 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
-from .importer import validate_input
 from .publication import (
     EXPORT_PAIR_SHA256_KEY,
     PUBLISHED_CONTENT_SHA256_KEY,
@@ -36,6 +35,9 @@ def verified_normalized_document(
     """Return the validated source, its columns, metadata and pinned generation."""
     with normalized_path.open(encoding="utf-8") as handle:
         document = json.load(handle)
+    # Keep build-time normalization imports out of runtime database/web startup.
+    from .importer import validate_input
+
     table_columns = validate_input(document)
 
     with closing(sqlite3.connect(
