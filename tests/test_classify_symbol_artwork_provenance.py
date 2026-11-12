@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pytest
 
+from tools import build_symbol_artwork_review as review
 from tools import classify_symbol_artwork_provenance as provenance
 
 
@@ -232,6 +233,25 @@ def fixture_inputs(tmp_path, *, split_alias=False, canonical_change=False):
     selected = tmp_path / "inputs.json"
     selected.write_text(json.dumps(selection), encoding="utf-8")
     return selected, selection
+
+
+def test_classifies_comparison_generated_by_review_tool(tmp_path, monkeypatch):
+    selected, selection = fixture_inputs(tmp_path, split_alias=True)
+    monkeypatch.setattr(review, "LOCAL_ROOT", tmp_path / "local")
+    files = selection["files"]
+    comparison = tmp_path / "local" / "comparison.json"
+    assert review.write_comparison(
+        Path(files["current_manifest"]["path"]), Path(files["candidate_manifest"]["path"]),
+        comparison, expected_current_sha256=files["current_manifest"]["sha256"],
+        expected_candidate_sha256=files["candidate_manifest"]["sha256"],
+    ) == 0
+    files["comparison"] = {"path": str(comparison), "sha256": provenance.digest(
+        comparison.read_bytes())}
+    selected.write_text(json.dumps(selection), encoding="utf-8")
+    report = provenance.classify(selected)
+    assert report["comparedAssets"] == 3
+    assert report["publicationPins"]["comparisonSha256"] == files["comparison"]["sha256"]
+    assert report["unresolvedCompatibility"] == ["units/alias.svg"]
 
 
 def test_classifies_verified_bytes_without_guessing_file_history(tmp_path):

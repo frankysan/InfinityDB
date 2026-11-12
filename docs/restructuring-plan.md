@@ -3512,10 +3512,10 @@ has **not** yet been performed.
 
 The opt-in parity gate now records individual legacy-render
 failures as failed asset rows instead of aborting before a
-useful report can be produced. Added
-`docs/symbol-pipeline-parity-runbook.md` with the immutable
-inputs, exact verifier/comparison invocation, required
-production evidence, and explicit cutover criteria.
+useful report can be produced. The then-current parity runbook
+recorded the immutable inputs, verifier/comparison invocation,
+production evidence and cutover criteria. It has since been retired;
+the surviving acceptance evidence is in [testing](testing.md#p57-matched-input-symbol-processor-parity).
 
 **Execution remains blocked on actual external-stage output**
 from a pinned production-derived source run, the matching
@@ -3535,8 +3535,8 @@ upstream bytes. No completed external text-conversion and
 compression artifacts were present at the designated
 `local/p5-external-processing` path. The audit correctly
 returned **blocked**, rather than claiming production parity.
-The runbook now gives a repeatable readiness command and
-explains the required upstream reacquisition.
+The then-current runbook documented the readiness command and
+required upstream reacquisition; the command was later retired.
 
 #### P5.7 — Source acquisition handoff (2026-11-11)
 
@@ -3546,12 +3546,11 @@ against the pinned Army snapshot and all **1,101** source
 URLs. The source plan, Army ZIP and reviewed override tree
 are present, but the symbol-tools checkout does not yet
 have an available project Python environment through MCP.
-The parity runbook now includes copy-pasteable PowerShell
-commands to stage the immutable inputs, install the
-independent package and perform **explicit raw upstream
-acquisition**. Acquisition was **not** claimed or performed;
-the legacy archive is not suitable as a substitute for
-the 29 overridden upstream source files.
+The then-current runbook documented staging the immutable inputs,
+installing the independent package and performing **explicit raw
+upstream acquisition**. Acquisition was **not** claimed or performed
+at this point; the legacy archive was not a substitute for the 29
+overridden upstream source files.
 
 #### P5.7 — Real-source processing execution (2026-11-11)
 
@@ -3607,9 +3606,9 @@ and [focused evidence](testing.md#p57-external-semantic-publication-candidate).
 **2026-11-11 accepted cutover:** The user approved all 118 changed artworks.
 The external publication is now tracked with an exact-byte Seed Soldier URL
 alias, rebuilt complete-runtime mappings and passed checkout/browser/Docker
-acceptance. The [runbook](symbol-pipeline-parity-runbook.md#accepted-publication-cutover)
+acceptance. The [publication lifecycle](../data/README.md#accepted-external-symbol-publication-promotion)
 and [testing evidence](testing.md#p57-accepted-symbol-publication-cutover) own
-the operation and exact results. In-tree processor retirement remains a
+the current operation and exact results. In-tree processor retirement remains a
 separate P5 change; no processors were retired during publication cutover.
 
 ### P6 — Consolidate, measure and establish the new baseline

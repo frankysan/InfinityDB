@@ -1773,6 +1773,12 @@ resvg **0.48.1**, while the external run used **0.49.0**. This was not a
 matched-input/toolchain processor comparison. The failed report remains
 preserved; neither its thresholds nor its result were changed.
 
+The earlier readiness audit found **1,101** legacy archive identities and
+**808** canonical SVGs; **29** override-sourced assets lacked verified
+original upstream bytes in that archive. The external producer subsequently
+acquired a new raw snapshot with its own provenance rather than treating those
+overridden bytes as upstream originals.
+
 Rebuilt the existing in-tree pipeline through **compression only**, using
 `tools.build_symbols` with isolated data root
 `local/p5-matched-legacy-20261111`, the explicit four-file raw-symbol handoff,
@@ -1814,9 +1820,10 @@ It does not accept artwork changes against the tracked release, semantic
 publication or actual browser/Docker behavior. The complete duplicate mapping
 resolves `units/shasvastii-seed-soldiers-1-2.svg` to
 `units/shasvastii-seed-soldiers-1-1.svg`; its application publication still
-needs verification. Keep those gates and in-tree retirement open under P5.
-Tracked SVGs, databases and publication manifest were unchanged. No full Linux,
-hosted-CI or release acceptance is implied.
+needed verification at this checkpoint. The later cutover and processor
+retirement are recorded below. Tracked SVGs, databases and publication
+manifest were unchanged by this comparison. No full Linux, hosted-CI or
+release acceptance is implied.
 
 ### P5.7 external semantic publication candidate
 
@@ -1863,19 +1870,54 @@ That preparation did not change tracked SVGs, the manifest or runtime databases.
 The offline audit `tools.classify_symbol_artwork_provenance` verified pinned
 historical/candidate manifests, effective archive members, original source
 identities, exact duplicate assignments, override donors/current files and
-publication output hashes. The [P5 runbook](symbol-pipeline-parity-runbook.md#override-provenance-classification)
-owns the input-selection schema, commands, findings and acceptance limits.
+publication output hashes. This audit requires the retired in-tree build and
+matched-input evidence; it is not a general classifier for future external-only
+publications.
+
+The selection JSON uses `format: "InfinityDB symbol provenance inputs"`,
+`formatVersion: 1`, an `overrideRoot` and a `files` mapping of role to
+`{"path": "...", "sha256": "..."}`. Relative paths resolve from the working
+directory. Required roles are:
+
+- `comparison`, `current_manifest`, `candidate_manifest`, `candidate_evidence`;
+- `historical_build`, `historical_archive`, `historical_compression`,
+  `baseline_audit`, `matched_inputs`;
+- `effective_report`, `effective_archive`, `raw_archive`, `duplicate_receipt`,
+  `override_lookups`, `candidate_compressed`.
+
+Optional `override_notes` and `legacy_tree_notes` pin the present-day notes
+files. The audit retains repeated override declarations and their line numbers;
+they describe intent, not verified historical edits. The audit hashes the
+selected files, checks their connections and effective bytes, and leaves
+unsupported attribution unresolved; matched-input parity is corroborated by
+identity, not rerun. With the retained historical inputs, a repeat uses an
+explicit selection and a fresh ignored output:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.classify_symbol_artwork_provenance `
+  --inputs PINNED-P5-INPUTS.json --output local\validation\symbols\publication\RUN-ID\provenance.json
+```
 
 Private selectors and output are
 `local/p5-symbol-provenance-inputs-with-notes-20261111.json` and
 `local/p5-symbol-provenance-final-20261111.json`.
-All **118 changed assets / 154 related source identities** are covered:
-**1 changed applied override**, **56 newly applied overrides**,
-**61 processing-only differences**, and **0 unresolved canonical causes**.
-Newly applied overrides do not establish historical file edits; present-day
-`overrides.txt` declarations are separately labelled contextual evidence.
-Related aliases retain their own methods/hashes and publication destinations.
-The removed Seed Soldier filename remains unresolved compatibility work.
+All **118 changed assets / 154 related source identities** are covered; 24
+assets have multiple source identities. The verified canonical causes are
+**1 changed applied override** (Morat), **56 newly applied overrides** (53
+direct, 3 propagated), **61 processing-only differences** (57 upstream inputs,
+4 unchanged overrides), and **0 upstream changes, removed overrides or
+unresolved causes**. The unchanged historical overrides are Onyx, Peripheral,
+Impetuous and Lieutenant. Newly applied overrides do not establish historical
+file edits, and processing-only does not mean compression-only or visual
+equivalence. Related aliases retain their own methods/hashes and destinations.
+The removed Seed Soldier filename was still unresolved compatibility work at
+this audit; the later cutover preserved it.
+
+The earlier unclassified review displayed **118 pairs** (4 Army,
+1 Characteristic, 2 Order, 11 Peripheral and 100 Unit) and passed Chrome
+checks at 1440/390/320 widths. Its private receipt is
+`local/p5-symbol-artwork-browser-validation.json`; browser test exports were
+not artwork approvals.
 
 Focused regression command:
 
@@ -1897,18 +1939,20 @@ The actual production page
 JSON export/import after reload and stale-provenance rejection passed.
 There were no page/request/HTTP errors, external requests or horizontal overflow.
 Screenshots were visually inspected; the private browser receipt is
-`local/p5-symbol-provenance-browser-validation.json`. All artwork decisions
-remain unreviewed. These checks do not establish artwork approval, sole visual
-causality, compression-only equivalence, application publication or Docker/
-Linux/hosted-CI/release acceptance. Production SVGs, manifests, databases and
-parity thresholds were unchanged.
+`local/p5-symbol-provenance-browser-validation.json`. At this audit, all
+artwork decisions remained unreviewed. These checks did not establish artwork
+approval, sole visual causality, compression-only equivalence, application
+publication or Docker/Linux/hosted-CI/release acceptance. Production SVGs,
+manifests, databases and parity thresholds were unchanged.
 
 ### P5.7 accepted symbol publication cutover
 
 **2026-11-11, Windows development checkout based on `e70195cd`:**
 The user approved all 118 changed artworks. No artwork review was repeated.
-The [P5 runbook](symbol-pipeline-parity-runbook.md#accepted-publication-cutover)
-owns the executed promotion/recovery commands and acceptance boundary.
+Promotion selected `local/p5-accepted-cutover-20261111/promotion-inputs.json`
+and a fresh transaction under the same directory. The
+[current promotion lifecycle](../data/README.md#accepted-external-symbol-publication-promotion)
+owns the operation and interrupted-transaction recovery.
 
 Promotion reverified the approved candidate's complete raw/effective/stage/
 processed receipt chain and reproduced its manifest/evidence byte-for-byte.
@@ -1921,6 +1965,8 @@ under `local/p5-accepted-cutover-20261111/publication/`.
 
 | Artifact | SHA-256 |
 | --- | --- |
+| Previous symbol manifest | `92a27c349c6ac23d81de138ee7bff5d196f0f83caa5846417ebd1d89427a3eb5` |
+| Approved candidate manifest | `acb3a2384fc985db59df429ce45daba413452cf1956534a0b1c24d5daebc3948` |
 | Promoted symbol manifest | `a88c7ead46cb2b68c67deece21af1e2f0a072a3c7a44a8b319ae32f64fc10d17` |
 | Seed Soldier alias and canonical SVG | `cdaca8ef8ee6494f7e1a539610d7ca1d8384e7b585d4e5d45a96935092961c74` |
 | `army.db` | `0bfe048c7224cfe5b4c62c3ff9a3e9999b1a7e7d6374b0c19917c7f976400b39` |

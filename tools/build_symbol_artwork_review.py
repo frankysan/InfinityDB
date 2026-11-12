@@ -1,4 +1,4 @@
-"""Build an offline artwork review; never publish or process symbol assets."""
+"""Prepare pinned comparisons and offline reviews without publishing symbol assets."""
 
 from __future__ import annotations
 
@@ -15,10 +15,7 @@ from tools.classify_symbol_artwork_provenance import CAUSES, load_classification
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_ROOT = REPO_ROOT / "local"
-DEFAULT_COMPARISON = Path("local/p5-external-symbol-publication-comparison-20261111.json")
-DEFAULT_CANDIDATE = Path("local/p5-external-symbol-publication-verified-20261111/static")
-DEFAULT_CURRENT = Path("src/infinity_db/web/static")
-DEFAULT_OUTPUT = Path("local/p5-symbol-artwork-review.html")
+COMPARISON_FORMAT = "InfinityDB external symbol candidate publication comparison"
 TEMPLATE = Path(__file__).with_name("templates") / "symbol_artwork_review.html"
 
 
@@ -95,6 +92,46 @@ def _sources(manifest: dict[str, Any], path: str) -> dict[str, list[str]]:
     }
 
 
+def _comparison_inventory(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
+    old, new = before["publishedSha256ByPath"], after["publishedSha256ByPath"]
+    return {
+        "before": len(old),
+        "after": len(new),
+        "changed": sorted(p for p in old.keys() & new.keys() if old[p] != new[p]),
+        "missing": sorted(old.keys() - new.keys()),
+        "added": sorted(new.keys() - old.keys()),
+    }
+
+
+def write_comparison(current_manifest: Path, candidate_manifest: Path, output: Path, *,
+                     expected_current_sha256: str, expected_candidate_sha256: str) -> int:
+    """Exclusively create a comparison from two explicitly pinned manifests."""
+    output = output.resolve()
+    if not output.is_relative_to(LOCAL_ROOT.resolve()) or output.suffix != ".json":
+        raise ValueError("Comparison output must be a JSON file under ignored local/")
+    if output.exists():
+        raise FileExistsError(f"Refusing to overwrite existing comparison: {output}")
+    for label, digest in (("current", expected_current_sha256),
+                          ("candidate", expected_candidate_sha256)):
+        if not re.fullmatch(r"[0-9a-f]{64}", digest):
+            raise ValueError(f"Invalid expected {label} manifest SHA-256")
+    before, before_sha = _manifest(current_manifest, expected_current_sha256)
+    after, after_sha = _manifest(candidate_manifest, expected_candidate_sha256)
+    record = {
+        "format": COMPARISON_FORMAT,
+        "formatVersion": 1,
+        "baselineManifestSha256": before_sha,
+        "candidateManifestSha256": after_sha,
+        "assetComparison": _comparison_inventory(before, after),
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("x", encoding="utf-8", newline="\n") as stream:
+        json.dump(record, stream, indent=2, sort_keys=True)
+        stream.write("\n")
+    print(f"Created {output} from the selected publication manifests")
+    return 0
+
+
 def build_report(comparison: Path, current: Path, candidate: Path, output: Path,
                  candidate_manifest: Path, current_manifest: Path,
                  candidate_evidence: Path | None = None,
@@ -106,25 +143,21 @@ def build_report(comparison: Path, current: Path, candidate: Path, output: Path,
     if output.exists():
         raise FileExistsError(f"Refusing to overwrite existing review: {output}")
     record, comparison_sha = _json(comparison)
-    if (record.get("format") != "InfinityDB external symbol candidate publication comparison"
+    if (record.get("format") != COMPARISON_FORMAT
             or record.get("formatVersion") != 1):
         raise ValueError("Unsupported comparison format")
     before, before_sha = _manifest(current_manifest, record.get("baselineManifestSha256"))
     after, after_sha = _manifest(candidate_manifest, record.get("candidateManifestSha256"))
     old, new = before["publishedSha256ByPath"], after["publishedSha256ByPath"]
-    expected = {
-        "changed": sorted(p for p in old.keys() & new.keys() if old[p] != new[p]),
-        "missing": sorted(old.keys() - new.keys()),
-        "added": sorted(new.keys() - old.keys()),
-    }
+    expected = _comparison_inventory(before, after)
     inventory = record.get("assetComparison", {})
     if not isinstance(inventory, dict):
         raise ValueError("Comparison asset inventory must be an object")
-    for key, paths in expected.items():
+    for key in ("changed", "missing", "added"):
         supplied = inventory.get(key)
-        if not isinstance(supplied, list) or supplied != paths:
+        if not isinstance(supplied, list) or supplied != expected[key]:
             raise ValueError(f"Comparison {key} inventory does not match manifests")
-    if inventory.get("before") != len(old) or inventory.get("after") != len(new):
+    if inventory.get("before") != expected["before"] or inventory.get("after") != expected["after"]:
         raise ValueError("Comparison asset counts do not match manifests")
     evidence = None
     evidence_sha = None
@@ -184,25 +217,56 @@ def build_report(comparison: Path, current: Path, candidate: Path, output: Path,
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--comparison", type=Path, default=DEFAULT_COMPARISON)
-    parser.add_argument("--current", type=Path, default=DEFAULT_CURRENT)
-    parser.add_argument("--candidate", type=Path, default=DEFAULT_CANDIDATE)
-    parser.add_argument("--manifest", type=Path,
-                        default=DEFAULT_CANDIDATE.parent / "symbol-publication.json")
-    parser.add_argument("--current-manifest", type=Path,
-                        default=Path("data/manifests/symbol-publication.json"))
+    parser.add_argument("--write-comparison", action="store_true",
+                        help="Create the comparison instead of rendering a review")
+    parser.add_argument("--comparison", required=True, type=Path,
+                        help="Comparison input, or new local JSON output with --write-comparison")
+    parser.add_argument("--current", type=Path, help="Current publication static directory")
+    parser.add_argument("--candidate", type=Path, help="Candidate publication static directory")
+    parser.add_argument("--manifest", required=True, type=Path,
+                        help="Candidate publication manifest")
+    parser.add_argument("--current-manifest", required=True, type=Path,
+                        help="Current publication manifest")
+    parser.add_argument("--expected-current-sha256",
+                        help="Selected current manifest SHA-256 when writing a comparison")
+    parser.add_argument("--expected-candidate-sha256",
+                        help="Selected candidate manifest SHA-256 when writing a comparison")
     parser.add_argument("--candidate-evidence", type=Path,
                         help="Optional candidate-evidence.json bound to the candidate manifest")
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--output", type=Path, help="New local HTML output for a review")
     parser.add_argument("--provenance", type=Path,
                         help="Optional exact-publication provenance classification report")
     args = parser.parse_args(argv)
+    if args.write_comparison:
+        required = {"--expected-current-sha256": args.expected_current_sha256,
+                    "--expected-candidate-sha256": args.expected_candidate_sha256}
+        incompatible = {"--current": args.current, "--candidate": args.candidate,
+                        "--output": args.output, "--candidate-evidence": args.candidate_evidence,
+                        "--provenance": args.provenance}
+    else:
+        required = {"--current": args.current, "--candidate": args.candidate,
+                    "--output": args.output}
+        incompatible = {"--expected-current-sha256": args.expected_current_sha256,
+                        "--expected-candidate-sha256": args.expected_candidate_sha256}
+    missing = [flag for flag, value in required.items() if value is None]
+    if missing:
+        parser.error(f"Required for this mode: {', '.join(missing)}")
+    unexpected = [flag for flag, value in incompatible.items() if value is not None]
+    if unexpected:
+        parser.error(f"Not supported in this mode: {', '.join(unexpected)}")
     try:
+        if args.write_comparison:
+            return write_comparison(
+                args.current_manifest, args.manifest, args.comparison,
+                expected_current_sha256=args.expected_current_sha256,
+                expected_candidate_sha256=args.expected_candidate_sha256,
+            )
         return build_report(args.comparison, args.current, args.candidate, args.output,
                             args.manifest, args.current_manifest, args.candidate_evidence,
                             args.provenance)
     except (OSError, ValueError, KeyError, TypeError) as error:
-        parser.exit(1, f"Review generation failed: {error}\n")
+        kind = "Comparison" if args.write_comparison else "Review"
+        parser.exit(1, f"{kind} generation failed: {error}\n")
 
 
 if __name__ == "__main__":

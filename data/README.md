@@ -456,6 +456,19 @@ reports, with duplicate CSVs under `duplicates/`. `--processed-root` selects
 and compression CSV/JSON reports. `--font-aliases` must select the exact bytes
 pinned by the producer, even when another JSON file has equivalent content.
 
+For a standalone check of the processed handoff, select its seven actual files:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_processed_symbol_handoff `
+  --canonical-archive CANONICAL.zip --conversion-receipt CONVERSION-STATE.json `
+  --compressed-archive COMPRESSED.zip --compression-receipt COMPRESSION-STATE.json `
+  --compression-report COMPRESSION-REPORT.csv --candidates-report CANDIDATES.csv `
+  --run-report COMPRESSION-RUN.json
+```
+
+This check does not rerender artwork or approve a publication. Candidate
+preparation invokes it alongside the other source and stage checks.
+
 The consumer independently verifies raw/effective provenance and override
 decisions, passed preflight/font/duplicate evidence, source-to-canonical
 identity, conversion input hashes and successful CSV coverage, and compressed
@@ -475,6 +488,54 @@ A prepared candidate is available for artwork, URL/mapping, browser and hosting
 review. It does not approve graphical changes against the tracked publication,
 promote a release or rebuild embedded mappings.
 The normal build/serve/Docker path continues using the tracked publication.
+
+### Offline publication artwork review
+
+**Project domains:** Data processing, Project infrastructure
+
+`tools.build_symbol_artwork_review` compares explicitly selected current and
+candidate publications without processing or promoting assets. First record
+the expected SHA-256 values of the two selected v2 manifests from trusted
+evidence. Computing a hash alone does not establish approval or provenance.
+Replace the placeholders below with the selected paths and hashes; use a fresh
+run directory under ignored `local/`:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.build_symbol_artwork_review --write-comparison `
+  --comparison local\validation\symbols\publication\RUN-ID\comparison.json `
+  --current-manifest CURRENT-MANIFEST.json --manifest CANDIDATE-MANIFEST.json `
+  --expected-current-sha256 CURRENT_SHA256 --expected-candidate-sha256 CANDIDATE_SHA256
+
+.\.venv\Scripts\python.exe -m tools.build_symbol_artwork_review `
+  --comparison local\validation\symbols\publication\RUN-ID\comparison.json `
+  --current CURRENT-STATIC --current-manifest CURRENT-MANIFEST.json `
+  --candidate CANDIDATE-STATIC --manifest CANDIDATE-MANIFEST.json `
+  --candidate-evidence CANDIDATE-EVIDENCE.json `
+  --output local\validation\symbols\publication\RUN-ID\review.html
+```
+
+Comparison generation verifies both manifest formats and expected hashes and
+writes a deterministic inventory of changed, added and removed paths. Review
+generation checks that inventory against the same manifests, verifies each
+embedded changed SVG and each removed SVG against its manifest, and rejects
+unsafe paths, malformed SVGs, drift or existing output files. The optional
+candidate evidence must bind to the selected candidate manifest; its recorded
+input details are displayed, but the review does not rerun the handoff receipt
+chain. `--provenance` may select a matching classification report; its pins
+must include the same comparison, manifests and candidate evidence.
+
+The self-contained page provides side-by-side/overlay views and filters for
+changed artwork. Added paths are listed, not visually reviewed. Removed URLs
+remain unresolved compatibility requirements even if their source identities
+map elsewhere. Export decisions before closing: browser storage is not
+automatic. Imports require the exact input fingerprint and replace the
+decision set. Without a verified provenance report, classifications are
+reviewer annotations, not established causes. The review does not accept
+artwork, verify all unchanged/added asset bytes or approve semantic mappings;
+use the candidate, compatibility and publication checks separately.
+Retain the comparison, page, decision export and selected evidence for the
+review's lifetime. The [P5 classification evidence](../docs/testing.md#p57-override-provenance-classification)
+describes the older, legacy-input-specific audit and its limitations.
 
 ### Accepted external symbol publication promotion
 
@@ -518,12 +579,19 @@ Retain the transaction until acceptance is complete. It is private operational
 evidence, not a runtime input. A completed transaction is not an implicit rollback
 request.
 
+```powershell
+.\.venv\Scripts\python.exe -m tools.promote_symbol_publication `
+  --candidate CANDIDATE-DIRECTORY --inputs PROMOTION-INPUTS.json `
+  --transaction local\operations\symbols\RUN-ID `
+  --expected-current-sha256 CURRENT_SHA256 --expected-candidate-sha256 CANDIDATE_SHA256
+```
+
 Promotion replaces graphical publication only. Rebuild the **complete three-file**
 Army/Rules/ITS set using the accepted manifest, validate embedded hashes/mappings
 and deployment assets, then resume serving. Do not patch only the Army SQLite
 rows or serve a mixed database/publication set. The
-[P5 runbook](../docs/symbol-pipeline-parity-runbook.md#accepted-publication-cutover)
-owns commands and dated acceptance; hosted/release gates remain separate.
+[P5 cutover evidence](../docs/testing.md#p57-accepted-symbol-publication-cutover)
+records the dated acceptance; hosted/release gates remain separate.
 Acquisition, overrides, font conversion, duplicate detection and compression
 are producer-owned; InfinityDB retains source planning, independent handoff
 verification, semantic mapping and publication promotion.

@@ -40,8 +40,10 @@ when all contained work shares the same owner.
   validate Windows/Linux producer handoffs separately. This project follows
   v1.1.0 restructuring development and is not part of its release gate.
   The [P5 retirement checkpoint](tooling-and-local-path-cleanup-plan.md#completed-p5-comparison-tool-retirement--2026-11-12)
-  records the first completed-tool removal and continuing lifecycle review;
-  the path policy and migrations remain unapproved.
+  records the first completed-tool removal; the
+  [artwork-review checkpoint](tooling-and-local-path-cleanup-plan.md#p5-artwork-review-workflow-and-runbook-checkpoint--2026-11-12)
+  records the runbook disposition and explicit review inputs. Remaining
+  lifecycle review, path policy and migrations remain open.
 
 ### External source clarifications
 

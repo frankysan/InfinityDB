@@ -3,8 +3,8 @@
 **Project domains:** Project infrastructure, Data processing, Acquisition, Deployment
 
 **Status:** Started 2026-11-12; L0 inventory and ownership review in progress.
-The path contract and dispositions below remain proposals. No existing inputs,
-tools or commands have been moved or retired, and no private files deleted.
+The path contract and remaining dispositions below remain proposals. Bounded
+P5 retirements are recorded below; no private inputs have been moved or deleted.
 
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
@@ -473,10 +473,51 @@ also passed. Private disposition, consumer and preservation
 receipts are under
 `local/research/project-infrastructure/tooling-workspace-cleanup/20261112-l0-p5-retirement/`;
 the focused run report is categorized under `local/validation/`.
-The larger runbook still mixes current review/provenance guidance and historical
-evidence, so its full-document disposition remains open. Continue L0 for the
+At this checkpoint the larger runbook still mixed current guidance and historical
+evidence. The following checkpoint resolves its disposition. Continue L0 for the
 remaining tool/document lifecycles and L1 preservation decisions; this bounded
 retirement does not complete L5 or authorize ignored-source removal.
+
+### P5 artwork-review workflow and runbook checkpoint — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`86263d74adeea01fef9ac7fabedb2e3efdc53586`. The completed P5 parity runbook
+mixed dated commands and unique acceptance details with current artwork-review
+and promotion guidance. Its disposition is **extract-and-retire**: current
+procedures now belong to the [symbol lifecycle](../data/README.md#offline-publication-artwork-review),
+while the [pinned P5 results](testing.md#p57-override-provenance-classification)
+retain the audit scope, input-selection roles, findings, original/candidate
+manifest identities and acceptance limits. The superseded narrative is in Git
+history; no duplicate private archive was created. Its tracked links and
+historical references were reconciled. The three producer checkouts and MCP
+checkout had no tracked consumers of the retired runbook or review commands;
+ignored historical snapshots were left unchanged.
+
+The audit exposed a current workflow gap: artwork review defaulted to the
+already promoted November candidate, while no tracked tool produced its
+required comparison format. `tools.build_symbol_artwork_review` now writes a
+deterministic comparison from explicitly selected, hash-pinned manifests and
+requires explicit current/candidate paths and a fresh output for review.
+Both steps fail on mismatched inputs or existing outputs. Existing P5
+comparison records remain accepted when explicitly selected; their review
+fingerprints and decisions are not silently transferred to a new comparison.
+The classifier still requires legacy P5 evidence and remains a separate L5
+lifecycle decision, not a general future-publication classifier.
+
+**Validation:** The affected review, classifier and test-registry cohort
+passed **99 tests, zero skips**, including six real-Chrome cases. Targeted
+Ruff and repository-wide Pyright passed. The documentation stage passed
+Markdownlint, local links and backlog structure. Against the actual pinned P5
+manifests and preserved artwork, the new comparison exactly matched the
+historical changed/added/removed inventory; all **118** review pairs and
+their hashes matched the historical page, with the old URL still flagged
+as unresolved at that comparison stage. Both new outputs are run evidence
+under `local/validation/symbols/publication/20261112-l0-review-cli-86263d74/`,
+not artwork approvals. Before transferring the documentation, all 22 prior
+preservation pins matched; the 21 other pinned files still match, while
+`testing.md` is intentionally updated here.
+No source acquisition, asset promotion, private evidence removal or path
+policy approval occurred. **L0 and the parent cleanup remain open.**
 
 ### L0 — Full read-only inventory and ownership mapping
 
@@ -578,9 +619,9 @@ required.
    corrected `verify_release_candidate_browser` to validate the **complete
    Army/Rules/ITS three-database identity**. Preserve that gate when relocating
    the tool; its implementation does not complete the broader L4 reorganization.
-4. Address dated defaults such as the November 11 symbol-artwork review
-   inputs by requiring explicit, pinned current/candidate selections for
-   future runs.
+4. Preserve the explicit pinned artwork-review selections from the
+   [P5 review checkpoint](#p5-artwork-review-workflow-and-runbook-checkpoint--2026-11-12)
+   when moving that tool, and review other dated defaults before their cutover.
 
 **Exit:** The root tool directory contains only reviewed public command
 exceptions and package structure; all moved tool modules have live consumers
@@ -590,8 +631,10 @@ and passing focused tests.
 
 1. The [P5 comparison retirement](#completed-p5-comparison-tool-retirement--2026-11-12)
    completed the first bounded historical-tool removal, including its test and
-   stale command. Preserve the accepted symbol-cutover evidence and maintained
-   handoff/publication checks during subsequent cleanup.
+   stale command. The [P5 review checkpoint](#p5-artwork-review-workflow-and-runbook-checkpoint--2026-11-12)
+   retired the superseded runbook after extracting current guidance and evidence.
+   Preserve the accepted symbol-cutover evidence and maintained handoff/
+   publication checks during subsequent cleanup.
 2. Then review bounded deployed-object, Weapon-chart, historical 1.0,
    symbol provenance and other one-use research clusters. Preserve open
    source questions, stable finding IDs and immutable source hashes in
