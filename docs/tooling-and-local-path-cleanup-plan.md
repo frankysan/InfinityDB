@@ -1098,6 +1098,72 @@ whole-file retirement merely because its initial report is named 1.0.
 skips in both. No sources, tests, private inputs, public artifacts or
 Git module paths were changed in this review. **L0 remains open**.
 
+### Database audit lifecycle and version-alignment correction — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`e68c829216fc87024c45745a21c74e8f88ba6016` before this change.
+Reviewed `tools.audit_database_separation`,
+`tools.audit_runtime_database_surface` and
+`tools.audit_semantic_deduplication` against their maintained data-model
+contract, CLI entrypoints, actual runtime consumers, tests and current published
+Army database. All three are **retain-active**:
+
+- The application/raw separation audit still proves that raw-only source
+  tables are excluded from the published database and checks metadata,
+  foreign-key and runtime-validation boundaries. It composes the separate
+  runtime-surface probe; retiring either would remove a current invariant.
+- The runtime-surface audit discovers normal repository method reads and
+  classifies table/field usage independently of the raw-archive inspection.
+  Its maintained synthetic fixture is reused by other source/presentation
+  tests, but that reuse is not the sole reason for retention.
+- The semantic deduplication audit independently measures published logical
+  Unit payload reuse. A read-only run on the tracked Army database reported
+  **5,020 profile occurrences** (1,108 distinct logical-Unit payloads) and
+  **12,993 loadout occurrences** (3,448 distinct logical-Unit payloads).
+  This is a reproducible measurement, not an unfinished migration or a
+  publication requirement.
+
+**Confirmed correctness gap and bounded fix:** Before this change,
+`audit_database_separation data/generated/army.db` failed on **14
+unexpected tables**. Those tables are maintained Army v27–v31 publication
+overlays; `Database.validate()` already recognizes them, whereas the
+separation audit assumed the base v26 table list for every version. The audit
+now uses the existing versioned publication table registries, explicitly
+classifies approved overlay tables, rejects unknown extensions, and inspects
+foreign keys across the selected full publication schema. The v26
+application/raw fixture and its strict source-only checks remain unchanged.
+A focused end-to-end regression against the actual tracked v31 database
+prevents the same false failure from recurring.
+
+**Separate private raw-sibling issue:** The default audit still refuses the
+locally ignored `data/generated/army.raw.db` because its metadata differs
+from the tracked application database. This is an accurate fail-closed
+response to mismatched input generations, **not** an exception to remove or
+silently ignore. Running with an explicitly selected absent raw sibling
+returned exit code 0: **35 canonical, 63 contextual and 46
+source/provenance-only logical tables**, no foreign-key or
+validation-source-table blockers, with `rawArchive: not_available`.
+This does not validate a current lossless raw sibling or authorize replacing
+one. Rebuild or select a matched pair only in a separate approved input
+maintenance task.
+
+**Output-path follow-up (L2/L6):** Each of these retained audit CLIs
+accepts an optional `--output` path, creates parent directories and overwrites
+existing output; none enforces the proposed categorized `local/` retention
+policy. Review its callers, run-ID conventions and compatibility before a
+later output-policy change.
+
+**Validation:** Windows tests for separation **12 passed**, runtime surface
+**3 passed** and semantic deduplication **3 passed** (all zero skips).
+Focused Ruff passed for the modified auditor and its test; repository Pyright
+passed with **zero errors/warnings**; docs/link/backlog checks passed.
+The supplied tracked database was only read; no private raw archive,
+published database, normal serving or deployment was modified.
+
+**L0 remains open.** This correctness fix does not approve L1 taxonomy,
+private-file migration/deletion, a current raw-source reconstruction, or
+retirement of these maintained checks.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

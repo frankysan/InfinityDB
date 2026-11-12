@@ -12,6 +12,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
+from infinity_db.army_reference_storage import ARMY_SCHEMA_VERSION as REFERENCE_SCHEMA_VERSION
+from infinity_db.army_reference_storage import ARMY_V30_PUBLISHED_TABLES
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.repository import Database, unit_sort_key
 from infinity_db.database.schema import (
@@ -19,10 +21,21 @@ from infinity_db.database.schema import (
     METADATA_TABLE,
     PUBLISHED_DATABASE_TABLES,
     RAW_ROWS_TABLE,
+    SCHEMA_VERSION,
     SOURCE_ONLY_TABLES,
     TABLES,
     quote,
 )
+from infinity_db.equipment_presentation_storage import (
+    ARMY_SCHEMA_VERSION as EQUIPMENT_SCHEMA_VERSION,
+)
+from infinity_db.equipment_presentation_storage import ARMY_V27_PUBLISHED_TABLES
+from infinity_db.skill_classification_storage import ARMY_SCHEMA_VERSION as SKILL_SCHEMA_VERSION
+from infinity_db.skill_classification_storage import ARMY_V28_PUBLISHED_TABLES
+from infinity_db.symbol_path_storage import ARMY_SCHEMA_VERSION as SYMBOL_SCHEMA_VERSION
+from infinity_db.symbol_path_storage import ARMY_V31_PUBLISHED_TABLES
+from infinity_db.unit_filter_storage import ARMY_SCHEMA_VERSION as FILTER_SCHEMA_VERSION
+from infinity_db.unit_filter_storage import ARMY_V29_PUBLISHED_TABLES
 
 if __package__:
     from tools.audit_runtime_database_surface import audit_database as audit_runtime_surface
@@ -72,6 +85,37 @@ SOURCE_CONTEXTUAL_TABLES = {
     "weapons",
 }
 
+# Keep the audit aligned with the same versioned publication schemas accepted
+# by Database.validate(). The core published_tables metadata describes the
+# original base export, not the later, separately published overlays.
+PUBLISHED_TABLES_BY_VERSION = {
+    SCHEMA_VERSION: PUBLISHED_DATABASE_TABLES,
+    EQUIPMENT_SCHEMA_VERSION: ARMY_V27_PUBLISHED_TABLES,
+    SKILL_SCHEMA_VERSION: ARMY_V28_PUBLISHED_TABLES,
+    FILTER_SCHEMA_VERSION: ARMY_V29_PUBLISHED_TABLES,
+    REFERENCE_SCHEMA_VERSION: ARMY_V30_PUBLISHED_TABLES,
+    SYMBOL_SCHEMA_VERSION: ARMY_V31_PUBLISHED_TABLES,
+}
+
+EXTENSION_CANONICAL_TABLES = {
+    "equipment_presentation_metadata",
+    "skill_source_classification_metadata",
+    "unit_filter_metadata",
+    "army_reference_metadata",
+    "symbol_path_metadata",
+    "published_symbol_assets",
+}
+EXTENSION_CONTEXTUAL_TABLES = {
+    "equipment_presentation_encodings",
+    "skill_source_classifications",
+    "hidden_unit_characteristics",
+    "source_classification_memberships",
+    "source_classification_matches",
+    "legacy_army_identities",
+    "army_overview_text",
+    "published_symbol_paths",
+}
+
 DERIVED_CANONICAL_TABLES = {
     "application_armies",
     "application_catalog_items",
@@ -104,11 +148,20 @@ class DatabaseSeparationAuditError(ValueError):
     """Raised when the maintained application/raw split policy is stale or invalid."""
 
 
-def _table_classification() -> dict[str, str]:
+def _table_classification(published_tables: Mapping[str, Any]) -> dict[str, str]:
     overlap = SOURCE_CANONICAL_TABLES & SOURCE_CONTEXTUAL_TABLES
     unknown_source_policy = (SOURCE_CANONICAL_TABLES | SOURCE_CONTEXTUAL_TABLES) - set(TABLES)
     unknown_derived_policy = DERIVED_CANONICAL_TABLES - set(DERIVED_TABLES)
-    if overlap or unknown_source_policy or unknown_derived_policy:
+    extensions = set(published_tables) - set(PUBLISHED_DATABASE_TABLES)
+    extension_policy = EXTENSION_CANONICAL_TABLES | EXTENSION_CONTEXTUAL_TABLES
+    if (
+        overlap
+        or unknown_source_policy
+        or unknown_derived_policy
+        or (EXTENSION_CANONICAL_TABLES & EXTENSION_CONTEXTUAL_TABLES)
+        or extensions - extension_policy
+        or extension_policy != set(ARMY_V31_PUBLISHED_TABLES) - set(PUBLISHED_DATABASE_TABLES)
+    ):
         raise DatabaseSeparationAuditError("Maintained database-separation policy is invalid")
 
     result = {METADATA_TABLE: CANONICAL}
@@ -121,6 +174,8 @@ def _table_classification() -> dict[str, str]:
             result[table] = SOURCE_ONLY
     for table in DERIVED_TABLES:
         result[table] = CANONICAL if table in DERIVED_CANONICAL_TABLES else CONTEXTUAL
+    for table in extensions:
+        result[table] = CANONICAL if table in EXTENSION_CANONICAL_TABLES else CONTEXTUAL
     return result
 
 
@@ -221,11 +276,12 @@ def _validation_reads(path: Path) -> dict[str, list[str]]:
 def _foreign_key_blockers(
     connection: sqlite3.Connection,
     classification: Mapping[str, str],
+    published_tables: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
     """Return published foreign keys that still target raw-only tables."""
 
     blockers: list[dict[str, Any]] = []
-    for table in sorted(PUBLISHED_DATABASE_TABLES):
+    for table in sorted(published_tables):
         grouped: defaultdict[int, list[sqlite3.Row]] = defaultdict(list)
         for row in connection.execute(f"PRAGMA foreign_key_list({quote(table)})"):
             grouped[int(row[0])].append(row)
@@ -351,20 +407,26 @@ def audit_database(
 
     Database(path).validate()
     runtime = audit_runtime_surface(path, project_root=project_root)
-    classification = _table_classification()
-    logical_tables = set(classification)
-    expected_application_tables = {METADATA_TABLE, *PUBLISHED_DATABASE_TABLES}
-    source_only_tables = {
-        table for table, role in classification.items() if role == SOURCE_ONLY
-    }
-    if source_only_tables != set(SOURCE_ONLY_TABLES):
-        raise DatabaseSeparationAuditError(
-            "Maintained source-only classification differs from the published schema policy"
-        )
 
     connection = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
     connection.row_factory = sqlite3.Row
     try:
+        schema_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
+        published_tables = PUBLISHED_TABLES_BY_VERSION.get(schema_version)
+        if published_tables is None:
+            raise DatabaseSeparationAuditError(
+                f"Unsupported published Army schema version: {schema_version}"
+            )
+        classification = _table_classification(published_tables)
+        logical_tables = set(classification)
+        expected_application_tables = {METADATA_TABLE, *published_tables}
+        source_only_tables = {
+            table for table, role in classification.items() if role == SOURCE_ONLY
+        }
+        if source_only_tables != set(SOURCE_ONLY_TABLES):
+            raise DatabaseSeparationAuditError(
+                "Maintained source-only classification differs from the published schema policy"
+            )
         actual_tables = _table_names(connection)
         missing = sorted(expected_application_tables - actual_tables)
         unexpected = sorted(actual_tables - expected_application_tables)
@@ -382,7 +444,7 @@ def audit_database(
         application_counts = _row_counts(connection, sorted(actual_tables))
         application_storage = _table_storage_bytes(connection)
         metadata = _metadata_rows(connection)
-        fk_blockers = _foreign_key_blockers(connection, classification)
+        fk_blockers = _foreign_key_blockers(connection, classification, published_tables)
     finally:
         connection.close()
 
