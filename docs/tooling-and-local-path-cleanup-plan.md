@@ -302,10 +302,10 @@ read-only and were clean; their output/configuration consumers remain to review.
 - At kickoff, `verify_release_candidate_browser.local_revision` hashed only
   Army and Rules. The independent correctness correction below resolves that
   finding before the gate is used for v1.1+ complete-set acceptance.
-- The P5 comparison pair is proposed for retirement to Git history. Its
-  dedicated test and the historical command still present in the parity
-  runbook must be reconciled together with accepted P5 evidence. Keep the
-  maintained processed-handoff verifier and published Seed Soldier compatibility.
+- At kickoff, the P5 comparison pair was proposed for retirement to Git
+  history. The bounded retirement checkpoint below records removal of its
+  dedicated test/command while preserving accepted evidence, the maintained
+  processed-handoff verifier and published Seed Soldier compatibility.
 - Keep the artwork-review HTML template with its builder. Do not infer zero
   consumers from a Python-module-only reference search.
 
@@ -438,6 +438,46 @@ under `local/research/project-infrastructure/tooling-workspace-cleanup/20261112-
 **L0 remains open** for the other tool/document dispositions and L1 preservation
 decisions. No path migration or private-source deletion is approved here.
 
+### Completed P5 comparison-tool retirement — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`ba51e6d33afeccc315fb47794c7a61f0144b7d4a`. Applied the existing completed-file
+policy to the plan's first low-risk tracked-tool removal, independently of new
+directory-policy approval or private-data relocation.
+
+Retired `tools/compare_symbol_canonical_paths.py` and
+`tools/verify_production_symbol_processing.py` to Git history: their dated
+legacy/external comparison purpose was fulfilled by the accepted P5 matched-input
+parity and publication. The wrapper only composed the retained processed-handoff
+verifier with that obsolete comparison; no reusable current logic needed extraction.
+Removed the dedicated `tests/test_compare_symbol_canonical_paths.py`, its test-section
+entry and the stale runbook command together. Four private references were frozen
+intermediate runbook snapshots, not maintained operations; they remain unchanged.
+No tracked consumers remain in application, CI, skills, scripts or producer/MCP
+repositories. Historical descriptions remain explicitly historical.
+
+Current processed/duplicate handoff checks, semantic publication preparation,
+compatibility-alias validation and promotion recovery stay maintained. The
+accepted matched-input raster report still matches its documented SHA-256;
+all **22 pinned evidence, compatibility-policy, publication-manifest and runtime
+database files** were preserved byte-for-byte. No private evidence, sources,
+SVGs or runtime artifacts were moved or deleted; no new archive or wrapper was added.
+The flat tool inventory is now **121 Python modules plus one template**, down
+from 123 Python modules plus one template at kickoff.
+
+**Validation:** The surviving handoff/preparation/promotion/test-registry cohort
+passed **56 tests, zero skips**. Deployment-artifact verification passed all
+**808 published SVGs / 807 browser references**, with embedded runtime data and
+reviewed citations source-matched. Full Ruff, Pyright and documentation checks
+also passed. Private disposition, consumer and preservation
+receipts are under
+`local/research/project-infrastructure/tooling-workspace-cleanup/20261112-l0-p5-retirement/`;
+the focused run report is categorized under `local/validation/`.
+The larger runbook still mixes current review/provenance guidance and historical
+evidence, so its full-document disposition remains open. Continue L0 for the
+remaining tool/document lifecycles and L1 preservation decisions; this bounded
+retirement does not complete L5 or authorize ignored-source removal.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
@@ -548,10 +588,10 @@ and passing focused tests.
 
 ### L5 — Retire completed investigations and consolidate reusable checks
 
-1. First review the P5 historical comparison pair
-   `compare_symbol_canonical_paths` /
-   `verify_production_symbol_processing`, its tests and old commands.
-   Preserve the accepted symbol-cutover evidence.
+1. The [P5 comparison retirement](#completed-p5-comparison-tool-retirement--2026-11-12)
+   completed the first bounded historical-tool removal, including its test and
+   stale command. Preserve the accepted symbol-cutover evidence and maintained
+   handoff/publication checks during subsequent cleanup.
 2. Then review bounded deployed-object, Weapon-chart, historical 1.0,
    symbol provenance and other one-use research clusters. Preserve open
    source questions, stable finding IDs and immutable source hashes in
@@ -626,8 +666,8 @@ exceptions are documented.
 
 - **First safety issue resolved:** the release-browser verifier now checks
   the complete three-database set; preserve that correction during tool relayout.
-- **First low-risk tool removal candidate:** historical P5 path/process
-  comparison pair, after clearing its dedicated tests/docs.
+- **First low-risk tool removal completed:** historical P5 path/process
+  comparison pair, with its dedicated test/command reconciled and evidence preserved.
 - **First high-impact data migration:** `data/raw/` and
   `data/manifests/snapshots/` together, but *only after* source builders,
   explicit archive selectors and cross-host Syncthing activation have

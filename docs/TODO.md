@@ -39,8 +39,8 @@ when all contained work shares the same owner.
   preserve three-database serving and published asset compatibility, and
   validate Windows/Linux producer handoffs separately. This project follows
   v1.1.0 restructuring development and is not part of its release gate.
-  The [release-tool checkpoint](tooling-and-local-path-cleanup-plan.md#release-tool-lifecycle-and-correctness-checkpoint--2026-11-12)
-  records the complete-set verifier correction and continuing lifecycle review;
+  The [P5 retirement checkpoint](tooling-and-local-path-cleanup-plan.md#completed-p5-comparison-tool-retirement--2026-11-12)
+  records the first completed-tool removal and continuing lifecycle review;
   the path policy and migrations remain unapproved.
 
 ### External source clarifications

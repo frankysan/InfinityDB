@@ -101,15 +101,13 @@ The matched-input rebuild produced the same 807-canonical mapping as the
 external run. The later accepted publication verified both source identities;
 a canonical count alone did not establish that result.
 
-Copy the external `duplicate-state.json` receipt into an
-ignored local location in the InfinityDB checkout and
-compare canonical paths before running expensive raster
-parity:
-
-```powershell
-Copy-Item '..\InfinityDB-symbol-tools\local\p5-production-reports\EFFECTIVE-SYMBOLS 20261111-204139\duplicate-state.json' 'local/p5-production-duplicate-state.json'
-python -m tools.compare_symbol_canonical_paths --legacy-root 'data/work/symbols/SYMBOLS 20261004-184813--cda970bafe15/compressed' --duplicate-receipt 'local/p5-production-duplicate-state.json'
-```
+**Historical result:** The completed comparison used the external
+`duplicate-state.json` receipt and the retained historical compressed tree.
+The legacy path-comparison helper and dated production-comparison wrapper
+have been retired to Git history with their dedicated test. They are not
+current acceptance commands; use the maintained handoff/publication checks
+below for a new candidate. Original receipts and accepted comparison evidence
+remain unchanged.
 
 The actual 2026-11-11 comparison passed independent
 artifact verification (**807** canonical assets, **1,101**
@@ -119,9 +117,9 @@ duplicate receipt maps it to
 `units/shasvastii-seed-soldiers-1-1.svg` as an exact
 duplicate. This explains the count difference but is
 **not** sufficient to pass browser publication acceptance. The path
-comparison against that historical directory continues to report its
-count difference. For processor parity, use the isolated matched-input
-rebuild described below; preserve the separate semantic publication gate.
+comparison against that historical directory recorded its count difference.
+The isolated matched-input rebuild below established processor parity;
+semantic publication and browser acceptance were checked separately.
 
 ## Matched-input reference build
 
@@ -134,8 +132,8 @@ override tree, without changing application publication.
 The completed reference is under `local/p5-matched-legacy-20261111`,
 with compressed SVGs at
 `work/symbols/SYMBOLS 20261111-210655--13474b43eb16/compressed`.
-Use that directory as `--legacy-root` below. Both effective byte inventories
-and complete canonical mappings were checked before comparing. The strict
+That directory was the historical comparison input. Both effective byte
+inventories and complete canonical mappings were checked before comparing. The strict
 comparison passed all 807 assets without path exceptions. See
 [testing](testing.md#p57-matched-input-symbol-processor-parity) for the
 input hashes, tool versions, measurements and remaining acceptance.
