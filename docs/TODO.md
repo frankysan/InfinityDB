@@ -39,8 +39,8 @@ when all contained work shares the same owner.
   preserve three-database serving and published asset compatibility, and
   validate Windows/Linux producer handoffs separately. This project follows
   v1.1.0 restructuring development and is not part of its release gate.
-  The [kickoff checkpoint](tooling-and-local-path-cleanup-plan.md#kickoff-checkpoint--2026-11-12)
-  records the initial inventory, proposed dispositions and remaining L0 gaps;
+  The [host/source checkpoint](tooling-and-local-path-cleanup-plan.md#host-and-source-handoff-checkpoint--2026-11-12)
+  records verified snapshot pairs, refined proposals and remaining L0 gaps;
   the path policy and migrations remain unapproved.
 
 ### External source clarifications

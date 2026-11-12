@@ -278,11 +278,12 @@ lower bound: **19 report directories could not be traversed** due to access
 denials. Directory links are not followed. Cache exception candidates still
 require review; collapsing their contents does not approve them as policy.
 
-Prepared a **proposed, unapproved 49-file raw-source/snapshot-manifest move
-manifest** (142,288,710 bytes) preserving relative names under `local/data/`.
+Prepared an **initial, unapproved 49-file raw/snapshot-tree move manifest**
+(142,288,710 bytes) preserving relative names under `local/data/`.
 Each original was SHA-256 hashed with stable size/mtime during hashing; this
-does not verify archive/manifest agreement, backup, Syncthing state or producer
-authority. No copy, activation or deletion was performed. Other private files
+did not establish archive/manifest agreement, backup, Syncthing state or producer
+authority at kickoff. The next checkpoint refines this proposal to exclude
+control/OS metadata. No copy, activation or deletion was performed. Other private files
 and documents remain `needs-decision` until their individual ownership,
 findings and retention purpose are reviewed.
 
@@ -326,13 +327,81 @@ sets. The canonical `tools/run_checks.py --stage docs` passed Markdownlint
 structure. These checks validate this intake/documentation batch, not runtime
 behavior, backup recovery or migration acceptance.
 
-**Resume L0:** Resolve the unreadable report directories without changing ACLs
+**L0 handoff at kickoff:** Resolve the unreadable report directories without changing ACLs
 or deleting evidence implicitly; inventory worker/staging and producer handoff
 dependencies; review each tool/document's independent purpose, side effects,
 open findings and retention; then complete per-artifact dispositions and the
 exception/backup decisions needed for L1 review. L0's exit is **not met**;
 the parent backlog item remains open. No new location policy, executable
 retirement or ignored-source removal is approved by this checkpoint.
+
+### Host and source handoff checkpoint — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`4a00127b630a10907259165b8c26d4ac1e3eb63e`. Continued L0 read-only review;
+neither Linux checkout nor producer repositories were synchronized or changed.
+
+Completed the dedicated worker metadata intake at its separately pinned older
+revision: **140 tracked Python tools**, 43 tracked Markdown files and **92
+private files**, with eight conventional toolchain directories collapsed and
+no enumeration errors. One large tracked JSON remains outside the bounded
+consumer scan. Inventoried the actual source-staging families as the worker:
+**27,560 files**, including control/OS metadata, with no traversal errors.
+Inspected root access controls read-only. These measurements do not validate
+the older worker's runtime artifacts against the current Windows revision.
+
+Verified **24 Windows snapshot archive/manifest pairs** using the maintained
+`snapshot_provenance` validator: manifest schema, exact archive bytes and
+logical-content SHA-256 where declared. Ran the exact current activation
+verifier from stdin as the worker, without installing code or activating files;
+all **24 staged pairs** passed its path/archive-hash checks. The staged archive
+and manifest hashes match the Windows pairs exactly. This establishes the
+captured source identities, not source authority, backup recovery or cutover
+acceptance.
+
+The initial 49-file proposal included **two Syncthing control markers and
+three OS directory-metadata files**. Its original receipt remains intact;
+the refined proposal contains **44 source/provenance files**. The five excluded
+files have separate ownership decisions and remain untouched. A Syncthing
+marker is service-owned folder state, not an immutable source artifact to copy
+blindly into a new location. L1 must account for that lifecycle separately.
+
+Reviewed these producer/consumer boundaries for the future cutover:
+
+| Owner | Current inputs/outputs and affected consumer |
+| --- | --- |
+| Army acquisition | Default `data/raw/` ZIPs and `data/manifests/snapshots/` provenance; explicit offline Army snapshot resolver and symbol-plan exporters consume the pair. |
+| Wiki/Human Sphere acquisition | Default `data/wiki/`, resumable `data/work/wiki/` and snapshot provenance; research and activation consume pinned archives. |
+| Symbol producer | Default raw-symbol destination and manifest directory; override/derived stages require explicit outputs. Consumer plan exporters and handoff/publication verifiers retain their separate responsibilities. |
+| Complete runtime builder | Uses `latest_snapshot` or explicit source ZIP, API metadata and maintained inputs; hashes its build inputs independently of research provenance-manifest lookup. |
+| Syncthing activation | Uses explicit staging mappings and recorded archive paths; relocate readers/destinations with producers and preserve byte identities. |
+
+`latest_snapshot` orders candidates by **mtime, then case-folded filename**,
+not the acquisition date in the name. Record an explicit selected source or
+preserve timestamps and prove selection identity during relocation. Snapshot
+provenance paths are producer-relative evidence: the general validator accepts
+an explicitly selected archive, while activation currently uses the recorded
+path as a lookup/destination. L2 must resolve that distinction without rewriting
+immutable manifests or silently selecting between old/new copies.
+
+**Preservation findings:** Source removals still lack verified recovery/restore
+evidence. All five live receiver folders reported no pending files/bytes or pull
+errors at capture; Windows GUI live status was unavailable. Configuration and
+actual physical staging mappings require reconciliation before optional override
+activation can be accepted. Exact configuration, permission diagnostics and
+recovery gaps remain private. All 19 denied report directories remain unreadable
+after a metadata/ACL-only review; none is approved for deletion.
+
+**Evidence and resumption:** Private captures, producer contracts, refined
+proposals, access reviews and receipts are under
+`local/research/project-infrastructure/tooling-workspace-cleanup/20261112-l0-handoffs/`.
+The first staging capture covered the default override path; the second also
+inventoried the configured physical path. A wrong helper name in the one-use
+verification harness was corrected; the failed receipt is retained alongside
+the completed verification. **L0 remains open** for per-tool/document purpose,
+side effects, findings, lifetime and disposition review, plus exception and
+recovery decisions before L1. No path policy, moves, source deletion or service
+configuration change is approved by this checkpoint.
 
 ### L0 — Full read-only inventory and ownership mapping
 
