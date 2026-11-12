@@ -591,6 +591,51 @@ Linux, hosted CI or release acceptance.
 the proposed path policy, private-source deletion or a future general
 provenance-classifier contract.
 
+### Deployed-object discovery retirement — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`bf01666c822cd2afc7d52d84d6c8613c02051918`. The two non-catalog
+keyword-discovery commands were bounded investigations, not the maintained
+object builder or a complete source inventory. Their final read-only runs
+reported **61/61** and **28/28** reviewed definitions, respectively, with
+zero unreviewed candidates or missing maintained N5.3 citations. Retired both
+commands and their discovery-only tests after moving the lasting checks to
+`tests/test_source_conflict_publication.py`.
+
+The two review manifests remain tracked, including all 89 source-scoped
+decisions and caveats. The replacement regression pins their exact
+identity/classification pairs, verifies current cited pages and summary/detail
+anchors, checks summary-only and non-object boundaries, and preserves the
+14 promoted source/database citation checks. It does **not** parse the source
+PDF or discover new keyword matches. The review used the pinned English N5.3
+source identified in the [historical source audit](v1.0-source-coverage-audit.md#deployed-object-source-discovery-v1s-073-2026-11-05);
+the current curated source SHA-256 is
+`ca6364073ea48854bf51fe1efc31f2c9cf22fb444283a75c3f595ef54463b57a`.
+The non-catalog and expanded review-manifest SHA-256 values are
+`0ea16bc6efd44617ad4f2d88ee572af8322609c2a912a2affe578a4f61b0f376`
+and `4a603409d799a4d928a861bf58081555cf9ea07a36fdf074954a8107daec6080`.
+Each hash matched both the baseline Git bytes and the working tree. Current
+positive-object inventory, builder, storage, delivery and Unit-use checks remain
+separate; unresolved source discrepancies were not changed.
+
+The bounded private consumer inventory identified two snapshot-specific
+promotion scripts already depending on other retired modules and several
+historical snapshots. They were left untouched. The three producer checkouts
+had no tracked reference to either retired command; this is not a claim about
+unscanned private consumers.
+
+**Validation:** Windows focused source, publication, storage, Include and
+test-registry checks passed **62 tests, zero skips**, with **808/808** published
+SVGs and **807/807** browser-referenced SVGs. In-memory mutation checks
+confirmed that the retained regression rejects eleven forms of review/source
+drift while accepting unchanged and reformatted inputs. Two separate raw-source
+parity nodes were excluded because the ignored raw Army database is stale;
+they were not needed to validate this retirement and were not claimed as passed.
+Targeted Ruff, canonical Pyright, documentation checks and `git diff --check`
+passed. No source, private input or generated database was changed. This is not
+Linux, hosted CI or release acceptance.
+**L0 and the parent cleanup remain open.**
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

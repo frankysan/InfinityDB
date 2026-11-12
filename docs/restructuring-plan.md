@@ -2681,6 +2681,8 @@ and fail-closed source evidence checks have independent review value even
 though both lexical queues are currently closed. Reconsider consolidating
 their overlapping scanners/validators under P5.2; do not remove their
 review manifests or imply the reviewed keyword scope is exhaustive.
+The later [cleanup checkpoint](tooling-and-local-path-cleanup-plan.md#deployed-object-discovery-retirement--2026-11-12)
+retires those completed scanners while retaining the decisions and source checks.
 
 #### P5.1 — Retire completed N5.3 p.74 profile audit (2026-11-11)
 

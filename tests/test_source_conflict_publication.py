@@ -1,4 +1,4 @@
-"""Ensure unresolved N5.3 source conflicts reach public reference surfaces.
+"""Protect N5.3 source disclosures and reviewed deployed-object boundaries.
 
 The underlying rule semantics are separately source-reviewed. These regressions
 protect disclosure, official-source attribution, and normal route availability
@@ -7,6 +7,7 @@ in the *tracked* published application/rules databases.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,29 @@ import pytest
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
+
+PROMOTED_CITATIONS = {
+    "deployed-object-non-catalog-reviews.json": {
+        "skill:frenzy": 93,
+        "state:possessed": 169,
+        "rule:command-token-strategic-use": 128,
+        "skill:counterintelligence": 90,
+        "skill:inspiring-leadership": 99,
+        "skill:transmutation": 117,
+    },
+    "deployed-object-expanded-reviews.json": {
+        "state:decoy": 159,
+        "trait:concealed": 175,
+        "skill:mnemonica": 103,
+        "skill:tactical-awareness": 115,
+        "skill:explode": 92,
+    },
+    "deployed-object-source-domain-clause-reviews.json": {
+        "equipment:escape-system": 117,
+        "equipment:holomask": 124,
+        "equipment:holoprojector": 124,
+    },
+}
 
 
 @pytest.fixture(scope="module")
@@ -158,38 +182,88 @@ def test_domination_350_point_language_conflict_stays_scenario_scoped(app: Any) 
 
 
 
+def test_deployed_object_discovery_reviews_remain_source_scoped() -> None:
+    """Keep the completed reviews distinct from object and carrier claims."""
+    classification_pins = {
+        "deployed-object-non-catalog-reviews.json": (
+            "47aa0c3712da132a48d0e7a6a863904c2a8070edb6c84443934d834247063c35"
+        ),
+        "deployed-object-expanded-reviews.json": (
+            "49d76afe9dab55fa3133b06664253eae916e5e0d30b8c68413d151740df629e9"
+        ),
+    }
+    curated = json.loads(
+        (ROOT / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    records = {record["id"]: record for record in curated["records"]}
+    assert len(records) == len(curated["records"])
+    reviewed_ids: set[str] = set()
+    fields = ("requirements", "effects", "restrictions", "clarifications", "sourceNotes")
+    caveat_pins = {
+        "skill:request-speedball": ("State Tokens",),
+        "rule:access-width": ("Unit carriers", "Prone Trooper"),
+        "state:decoy": ("Line of Fire",),
+        "state:holoecho": ("trigger Mines or CrazyKoalas",),
+    }
+    for name, expected_pin in classification_pins.items():
+        manifest = json.loads((ROOT / "config/validation" / name).read_text(encoding="utf-8"))
+        assert manifest["formatVersion"] == 1
+        assert manifest["scope"].startswith("audit-only;")
+        reviews = manifest["reviews"]
+        ids = [review["recordId"] for review in reviews]
+        assert len(ids) == len(set(ids)), name
+        assert reviewed_ids.isdisjoint(ids), name
+        reviewed_ids.update(ids)
+
+        # Pin the reviewed identity/classification pairs, not JSON formatting or source anchors.
+        decisions = sorted((review["recordId"], review["classification"]) for review in reviews)
+        encoded = json.dumps(decisions, ensure_ascii=True, separators=(",", ":")).encode("utf-8")
+        assert hashlib.sha256(encoded).hexdigest() == expected_pin, (
+            f"{name}: reviewed identity/classification pairs changed"
+        )
+        for review in reviews:
+            record_id = review["recordId"]
+            record = records[record_id]
+            assert record["kind"] in {"skill", "rule", "trait", "term", "state"}, record_id
+            assert record["kind"] == record_id.split(":", 1)[0], record_id
+            assert record["composition"]["role"] == "definition", record_id
+            assert review["caveat"] and review.get("objectProfile") is None, record_id
+            assert all(
+                text in review["caveat"] for text in caveat_pins.get(record_id, ())
+            ), record_id
+            assert not {"citationStatus", "pdfExcerpt"} & review.keys(), record_id
+            assert (
+                review["summaryEvidence"] and review["summaryEvidence"] in record["summary"]
+            ), record_id
+            facts = record.get("facts") or {}
+            details = "\n".join(
+                text for field in fields for text in facts.get(field, []) if isinstance(text, str)
+            )
+            evidence = review["factsEvidence"]
+            assert isinstance(evidence, list), record_id
+            assert evidence or not details.strip(), record_id
+            assert all(
+                isinstance(text, str) and text and text in details for text in evidence
+            ), record_id
+            pages = {
+                cite.get("page") for cite in record.get("citations", [])
+                if cite.get("sourceId") == "n5-core-v5.3-pdf"
+            }
+            assert review["sourcePages"] and set(review["sourcePages"]) <= pages, record_id
+            if record_id in PROMOTED_CITATIONS[name]:
+                assert pages == {PROMOTED_CITATIONS[name][record_id]}, record_id
+
+
 def test_reviewed_n53_citations_match_sources_and_rules_database() -> None:
     """Pin accepted source citations, not historical staging/promotion behavior."""
     import sqlite3
 
-    expected_by_manifest = {
-        "deployed-object-non-catalog-reviews.json": {
-            "skill:frenzy": 93,
-            "state:possessed": 169,
-            "rule:command-token-strategic-use": 128,
-            "skill:counterintelligence": 90,
-            "skill:inspiring-leadership": 99,
-            "skill:transmutation": 117,
-        },
-        "deployed-object-expanded-reviews.json": {
-            "state:decoy": 159,
-            "trait:concealed": 175,
-            "skill:mnemonica": 103,
-            "skill:tactical-awareness": 115,
-            "skill:explode": 92,
-        },
-        "deployed-object-source-domain-clause-reviews.json": {
-            "equipment:escape-system": 117,
-            "equipment:holomask": 124,
-            "equipment:holoprojector": 124,
-        },
-    }
     curated_path = ROOT / "data/curated/rules/n5-core-v5.3.json"
     curated = json.loads(curated_path.read_text(encoding="utf-8"))
     records = {record["id"]: record for record in curated["records"]}
     assert len(records) == len(curated["records"])
     expected_rows = []
-    for name, expected in expected_by_manifest.items():
+    for name, expected in PROMOTED_CITATIONS.items():
         path = ROOT / "config/validation" / name
         reviews = json.loads(path.read_text(encoding="utf-8"))["reviews"]
         indexed = {review["recordId"]: review for review in reviews}

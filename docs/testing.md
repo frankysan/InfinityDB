@@ -2524,7 +2524,7 @@ requiring exactly one source note, the Deployable review date and baseline
 locator counts. The immediate CI/publication-integrity repair passed **117
 tests** in the reviewed Windows worktree based on that SHA. The seven exact
 targets were `tests/test_deployed_object_citation_migrations.py`,
-`tests/test_deployed_object_non_catalog_queue.py`,
+the then-existing `tests/test_deployed_object_non_catalog_queue.py` (now retired),
 `tests/test_rules_database.py::test_rea038_direct_recovery_contact_does_not_inherit_allied_gate`,
 `tests/test_silent_immunity_source_scope.py`,
 `tests/test_source_coverage_dispositions.py`,
@@ -7903,28 +7903,25 @@ exact Army profile selectors/attributes, lost source clauses/citations, and
 invented missing-attribute values. Source text and alternative Silhouette
 values remain unchanged; no canonical object or carrier IDs are created.
 
-### Non-catalog game-element discovery
+### Non-catalog game-element review evidence
 
 Weapon/Equipment definition scans do not examine Skills, generic rules,
-Traits, terminology or States. Audit their own definition summaries and
-structured detail fields without turning keyword mentions into object IDs:
-
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_non_catalog_queue
-.venv\Scripts\python.exe -m tools.audit_deployed_object_non_catalog_queue --json
-```
+Traits, terminology or States. A completed keyword review examined their
+definition summaries and structured details without turning mentions into
+object IDs. Its one-use discovery command is retired; it is not an ongoing
+source-completeness gate.
 
 The separate `config/validation/deployed-object-non-catalog-reviews.json`
 manifest pins **61 source-reviewed definitions** in this bounded keyword scan,
-with no unreviewed candidates. Access Width gate Tokens label scenery
-openings (p. 145); Army Retreat Tokens indicate existing Trooper conditions
+which had no unreviewed candidates at completion. Access Width gate Tokens
+label scenery openings (p. 145); Army Retreat Tokens indicate existing Trooper conditions
 (p. 146); Combat Group affiliation identifies the group of an existing
 deployed Weapon or Equipment Marker (p. 10). None creates an additional
 deployed-object profile or delivery permission.
 Six earlier decisions initially had PDF-only evidence recorded in the
 audit manifest. Their verified N5.3 citations have since been migrated to
 maintained rules records and synchronized with the rules database/publication;
-the audit now reports no missing maintained N5.3 citations.
+all 61 had a maintained N5.3 citation at command retirement.
 The original three Skill decisions distinguish `skill:place-deployable`
 (delivery action, p. 82), `skill:minelayer` (deployment method, p. 102)
 and `skill:request-speedball` (support State Tokens, p. 84). Additional
@@ -8001,34 +7998,30 @@ These six definitions now have **maintained N5.3 PDF citations** in the
 curated rules and regenerated `rules.db`. Their former
 `citationStatus: pdf-verified-manifest-only` and `pdfExcerpt` fields
 were retired as part of the coordinated promotion, which also refreshed
-the deployed-object publication fingerprint. The audit continues to
-verify exact source pages and summary/detail evidence. Its
-`reviewedPdfOnly` and `missingMaintainedN5Citation` reports are now empty.
+the deployed-object publication fingerprint. The retained regression continues
+to verify exact source pages and summary/detail evidence.
 
 The decisions were manually compared with pinned English N5.3 pages.
-The audit validator pins source citations already in maintained definitions
-or explicit transitional PDF-only review evidence, plus curated summary
-and detail evidence; it does **not** parse the PDF in CI. No new ARM/BTS/STR/S
-value, Army carrier, delivery edge or runtime object is inferred.
+The regression checks source citations in maintained definitions and curated
+summary and detail evidence; it does **not** parse the PDF in CI. It pins the
+reviewed identity/classification pairs independently of JSON formatting;
+rebaseline those pins only after a source review of the changed decisions.
+No new ARM/BTS/STR/S value, Army carrier, delivery edge or runtime object is inferred.
 Summary-only glossary/trait reviews remain valid only while they lack
-detailed source fields. All 61 keyword-matching definitions are classified,
-but the scan covers neither unmentioned terms nor other source domains and
-is **not** a complete N5.3 object inventory.
-`tests/test_deployed_object_non_catalog_queue.py` checks these boundaries.
+detailed source fields. The 61 reviewed definitions remain classified,
+but the historical scan covered neither unmentioned terms nor other source
+domains and is **not** a complete N5.3 object inventory.
+`tests/test_source_conflict_publication.py` checks the retained review boundaries.
 
-### Expanded non-catalog battlefield-element discovery
+### Expanded non-catalog battlefield-element review evidence
 
-The current 61-definition queue excludes other relevant wording, including
-Consoles, Supply Boxes, Disco Balls, and Marker/decoy representations. Run a
-separate, read-only pass over Skill/Rule/Trait/Term/State definitions:
+The original review excluded other relevant wording, including Consoles,
+Supply Boxes, Disco Balls, and Marker/decoy representations. A separate
+completed pass reviewed Skill/Rule/Trait/Term/State definitions; its one-use
+discovery command is also retired.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_expanded_queue
-.venv\Scripts\python.exe -m tools.audit_deployed_object_expanded_queue --json
-```
-
-The expanded audit excludes all 61 candidates from the original scan rather
-than recounting them. It identifies **28 additional definitions, all
+The expanded audit excluded all 61 candidates from the original scan rather
+than recounting them. It identified **28 additional definitions, all
 classified** in `config/validation/deployed-object-expanded-reviews.json`,
 with no PDF-only decisions or missing maintained N5.3 citations. N5.3 pp. 151
 and 153 establish that Domination's four Consoles and Supplies' three Supply
@@ -8076,18 +8069,17 @@ The five previously PDF-only records—`state:decoy`,
 and `skill:explode`—now have their verified N5.3 source pages
 in the maintained curated definitions and regenerated `rules.db`.
 Temporary `pdfExcerpt` and `citationStatus` metadata has been
-retired. The expanded audit's `reviewedPdfOnly` and
-`missingMaintainedN5Citation` reports are now empty. CI still
-validates the curated citations, not the ignored source PDF.
+retired. The retained regression validates the curated citations, not the
+ignored source PDF.
 
-This expanded scan is deliberately bounded to named objectives/devices
+This expanded scan was deliberately bounded to named objectives/devices
 and Marker/decoy wording, not all N5.3 prose, source tables, or possible
-game elements. The manifest and validator reject unsupported IDs,
-lost detail clauses, stale citations or inferred object profiles. No
+game elements. The retained manifest and regression reject changed reviewed
+identity/classification pairs, lost evidence, stale citations or inferred object
+profiles; they do not discover new keyword matches. No
 production database, published object count, Unit ownership or approved
 delivery path is changed.
-`tests/test_deployed_object_expanded_queue.py` checks the discovery and
-fail-closed review boundaries.
+`tests/test_source_conflict_publication.py` checks these review boundaries.
 
 ### N5.3 Hacking Device Programs source chart
 
