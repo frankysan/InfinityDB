@@ -255,14 +255,13 @@ unique or ignored private data is never bulk-deleted on the basis of naming
 or age; such removal requires its own verified review and authorization.**
 Avoid maintaining a permanent second archive or completed-task register.
 
-The next [tooling and local-path cleanup project](tooling-and-local-path-cleanup-plan.md)
-will audit current files against this policy and establish the detailed
+The active [tooling and local-path cleanup project](tooling-and-local-path-cleanup-plan.md)
+audits existing files against this policy and proposes detailed
 directory/naming rules; it does not retroactively authorize mass deletions.
 
 ## Planning and history
 
 - `TODO.md` — only work that is still unimplemented or intentionally deferred.
-- [workflow-improvement-review-2026-11-04.md](workflow-improvement-review-2026-11-04.md) — dated review of task, validation, CI and tooling workflow improvements; recommendations, not an active task ledger.
 - `CHANGELOG.md` — concise release outcomes and upgrade consequences.
 - `AI_CONTEXT.md` — compact agent-oriented index of non-obvious current invariants and pointers to
   canonical documentation. It is not a second architecture or data-model specification.

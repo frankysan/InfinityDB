@@ -751,6 +751,34 @@ Linux run or hosted workflow was performed at this checkpoint.
 the path taxonomy, a tracked-document retirement, a source move, deletion or
 Syncthing reconfiguration.
 
+### Dated workflow-improvement report retirement — 2026-11-12
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`943a80774ecca1cae52a5e3c706b679462014442`. Reviewed the dated
+`docs/workflow-improvement-review-2026-11-04.md` against the current backlog,
+documentation ownership, Git/CI workflow, test-section and development-status
+implementations. Its November 4 observations were explicitly historical and
+were not an approved task ledger. Current backlog, testing, CI, coordination
+and agent contracts live in their canonical owners, so its earlier proposals
+are not additional binding rules. The optional catalog change-impact preflight
+and PR CI cancellation/root-cause diagnostics were **recommendations**, not
+approved development commitments; any future adoption needs a new independently
+scoped backlog decision, not preservation of an obsolete report.
+
+**Disposition:** `retire-to-git-history` for the report, including its dated
+100-commit sample, failed-CI observations and suggestions. Removed its sole
+maintained index link; the only other tracked mention was the earlier
+`needs-decision` note in this cleanup plan, now resolved here. Searches of
+`src/`, `tools/`, `tests/`, `scripts/`, `config/`, `.agents/` and
+`.github/` found no consumers. No unique open source finding, required
+acceptance receipt or private file is being deleted. Git history preserves
+the original evidence without keeping a frozen recommendation sheet in the
+current documentation tree.
+
+This is a bounded document retirement only; **L0/L1 and the parent cleanup
+remain open**. It does not adopt or reject future catalog-impact tooling,
+approve ignored-source deletion or grant path-policy approval.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including
