@@ -215,7 +215,10 @@ Use `--with-raw` only when a standalone research or compatibility consumer
 explicitly needs the lossless, queryable `army.raw.db` sibling. Paired output
 still validates both siblings and produces byte-identical `army.db` output
 from the same source. The former `--no-raw` switch remains accepted as a
-deprecated alias for the default mode.
+deprecated alias for the default mode. The Python
+`infinity_db.database.export_database(...)` API also defaults to
+application-only output. Direct research callers requiring legacy paired
+SQLite evidence must select `include_raw=True` explicitly.
 
 Application-only export **refuses** a destination with an existing raw
 sibling, rather than silently deleting or leaving stale private source

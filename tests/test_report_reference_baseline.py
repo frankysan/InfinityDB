@@ -1170,7 +1170,7 @@ def _verified_smoke_army_export(tmp_path: Path) -> tuple[Path, Path, Path]:
     normalized = generated / "normalized.json"
     published = generated / "army.db"
     export_database(json.loads(normalized.read_text(encoding="utf-8")),
-                    published, finalize=False)
+                    published, finalize=False, include_raw=True)
     return archive, published, normalized
 
 

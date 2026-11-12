@@ -339,12 +339,21 @@ when all contained work shares the same owner.
     retain explicit legacy `--with-raw` (and the `--no-raw` alias), verified
     `database-health --normalized PATH`, and a versioned v2 rawless
     determinism manifest with explicit v1 legacy generation.
+  - [x] Make the direct Python `export_database()` default application-only
+    as well; retained legacy tests and consumers explicitly select
+    `include_raw=True` when asserting pair/archive semantics.
+  - [ ] Validate determinism manifest **v2 across Windows and Linux** at the
+    same exact Git revision; Linux remains at `ac8050c0`, while the v2
+    generator is in later unpushed commits. An older Linux manifest was
+    generated successfully but is v1, so it does not count as v2 parity.
+    After explicit branch publication and worker sync, regenerate v2 and
+    compare all artifact hashes.
   - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
-    inspection and programmatic export interfaces. Retain source-identity
-    checks and any independent research semantics until replacements are
-    accepted. Verify normal build, three-database output identities, focused
-    and full regression tests, and documented commands before removing pair
-    APIs or compatibility tests.
+    inspection and programmatic `include_raw=True` interfaces. Keep the
+    independent source-identity/research semantics and their focused tests
+    until replacements are accepted. Verify a complete three-database build,
+    full regression gate and documented commands before removing pair APIs
+    or compatibility tests.
   - [ ] Classify the existing ignored `data/generated/army.raw.db` as
     retirement-candidate local evidence, not a valid current pair. Preserve its
     bytes pending the cleanup manifest's independent backup/restore and

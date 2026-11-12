@@ -122,7 +122,7 @@ def normalized_pair(tmp_path: Path) -> tuple[Path, Path]:
     document["_meta"]["snapshotArchiveSha256"] = "a" * 64
     application = tmp_path / "army.db"
     normalized = tmp_path / "normalized.json"
-    export_database(document, application, finalize=False)
+    export_database(document, application, finalize=False, include_raw=True)
     normalized.write_text(json.dumps(document), encoding="utf-8")
     return application, normalized
 

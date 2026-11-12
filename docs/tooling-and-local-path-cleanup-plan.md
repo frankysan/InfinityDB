@@ -1813,6 +1813,71 @@ distinct decision requiring relevant consumer closeout. Existing
 legacy-archive source tests are not removed solely because they exercise
 a deprecated format.
 
+### Direct Python exporter default and Linux validation gate — 2026-11-12
+
+**Library-level disposition:** Production code has only one direct caller
+of `database.importer.export_database`, the CLI, which already passes
+`include_raw` explicitly. Historical tests that exercised raw-only
+source-row evidence, pair metadata parity, interruption recovery or
+foreign-key/source integrity had relied on the old implicit
+`include_raw=True` default. The direct Python API now defaults to
+**`include_raw=False`**, matching the complete builder, standalone CLI and
+determinism manifest v2. Retained paired-export tests and other fixture
+consumers explicitly request `include_raw=True`; no checks were removed
+merely to enable the change. The legacy raw path still verifies both
+SQLite files, preserves lossless row JSON and absent-versus-null fields,
+and retains the raw-first/application-last recovery contract.
+
+**Source integrity:** The application-only path still validates every
+untrusted normalized table against the complete relational staging
+database, writes the same deterministic application SQLite bytes and
+export-generation fingerprint as paired mode, and refuses any destination
+with an existing raw sibling. Normal Army builds must no longer materialize
+`army.raw.db`; tests of the normal `_build_army` metadata path now
+inspect `normalized.json` directly, while an explicit paired-export
+test retains independent raw metadata checks. The normal
+`database-health --normalized` route remains the operator's generation
+integrity check.
+
+**Linux cross-platform gate currently blocked, not failed:** On the Linux
+worker (`linux-dev`) the checkout is at `ac8050c0` while the Windows
+rawless-default commit is `1eb3ae12`. A read-only checkout dry-run
+reported `git_ref_unavailable` for the Windows SHA. The pinned-revision
+script launch was refused (`worker_request_invalid`), and an unpinned
+manifest build at `ac8050c0` completed successfully but produced **v1**
+with a raw database hash, despite its output filename ending in
+`v2-linux.json`. It is **not a valid v2 comparison**. The Windows
+branch was not pushed, the Linux Git checkout was not changed, and no
+cross-platform hash parity is claimed. After an explicitly authorized
+branch push and Linux fetch/checkout, rerun the v2 generator on the exact
+same commit and compare the actual manifests.
+
+**Focused Windows validation:** Full `tests/test_database.py`
+**175/175**, database-set builder **18/18** (including repeatability,
+failure-before-publication and generation mismatch), CLI **25/25**,
+source/pair audit adapter **10/10**, source inspector **12 passed,
+1 skipped** (unavailable pinned raw archive), database separation
+**12/12**, metadata **17/17**, identity metadata **8/8**,
+Army/faction **8/8**, presentation **14 passed, 1 skipped**,
+runtime-surface **3/3**, source-variant **45 passed, 61 skipped**
+(unavailable historical pinned raw fixtures), and reference baseline
+**69 passed, 2 skipped**. Ruff, Pyright (0 errors), Markdownlint,
+documentation links/backlog validation and `git diff --check`
+passed. Legacy tests explicitly request paired output where they
+verify lossless source rows or pair publication/recovery. This slice
+did not rerun the full project suite or a pinned complete
+three-database release build on the new exact commit.
+
+**Legacy API decision:** Retain `create_raw_archive`,
+`validate_database_pair`, `raw_database_path`,
+`database-health --require-raw`, standalone `--with-raw`, v1 manifest
+generation and legacy raw audit/publisher entrypoints as **explicit
+compatibility/research interfaces** for now. They do not justify the
+continued retention of an ignored generated archive or raw SQLite in
+runtime builds. An eventual removal requires a separate API deprecation
+decision and independent audit/format acceptance; do not delete their
+tests solely because they cover legacy paths.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

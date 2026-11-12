@@ -90,6 +90,9 @@ FINALIZE_TEST_DATABASES = os.environ.get("INFINITYDB_TEST_FINALIZE_SQLITE") == "
 def export_database(*args, **kwargs) -> None:
     """Build semantic test fixtures without canonical SQLite finalization by default."""
     kwargs.setdefault("finalize", FINALIZE_TEST_DATABASES)
+    # Most historical database fixtures intentionally exercise the legacy
+    # source archive. Request it explicitly instead of relying on API defaults.
+    kwargs.setdefault("include_raw", True)
     export_release_database(*args, **kwargs)
 
 
@@ -311,7 +314,7 @@ def test_export_database_creates_schema_inside_transactions(
     assert schema_transactions
     assert all(schema_transactions)
     Database(path).validate()
-    validate_database_pair(path)
+    assert not raw_database_path(path).exists()
 
 
 def test_export_database_finalization_is_default_and_can_be_skipped(
@@ -331,6 +334,11 @@ def test_export_database_finalization_is_default_and_can_be_skipped(
     )
 
     export_release_database(normalized, tmp_path / "canonical.sqlite3")
+    assert calls == ["vacuum", "header"]
+    calls.clear()
+    export_release_database(
+        normalized, tmp_path / "paired.sqlite3", include_raw=True,
+    )
     assert calls == ["vacuum", "header", "vacuum", "header"]
 
     calls.clear()
@@ -345,7 +353,7 @@ def test_application_only_export_matches_paired_export_without_raw_sqlite(
 ) -> None:
     paired = tmp_path / "paired" / "army.db"
     application_only = tmp_path / "application-only" / "army.db"
-    export_release_database(normalized, paired, finalize=finalize)
+    export_release_database(normalized, paired, include_raw=True, finalize=finalize)
     generation = validate_database_pair(paired)
 
     def raw_is_forbidden(*_args: Any, **_kwargs: Any) -> None:
@@ -369,7 +377,9 @@ def test_application_only_export_rejects_existing_raw_without_changes(
     tmp_path: Path, normalized: dict,
 ) -> None:
     destination = tmp_path / "army.db"
-    export_release_database(normalized, destination, finalize=False)
+    export_release_database(
+        normalized, destination, include_raw=True, finalize=False,
+    )
     before = destination.read_bytes()
     raw_path = raw_database_path(destination)
     raw_before = raw_path.read_bytes()

@@ -401,15 +401,16 @@ def export_database(
     identity_config: IdentityConfig | None = None,
     peripheral_identities: PeripheralIdentityCurated | None = None,
     finalize: bool = True,
-    include_raw: bool = True,
+    include_raw: bool = False,
 ) -> None:
     """Validate source and publish an application database, optionally with raw sibling.
 
     Full source-to-canonical consistency is validated against a complete staging
-    database before publication. Standalone export defaults to the paired lossless
-    archive, including absent-versus-null source fields. Complete runtime builds
-    may omit that redundant archive in a new output directory, retaining all
-    source validation and the deterministic export-generation fingerprint.
+    database before publication. Application-only export is the default;
+    it retains full source validation and the deterministic generation
+    fingerprint. Explicit ``include_raw=True`` additionally writes a paired
+    lossless source archive, including absent-versus-null source fields, for
+    legacy research or compatibility consumers.
 
     ``finalize=False`` is intended for semantic tests that only need valid SQLite
     contents. Production/release builds keep deterministic finalization.

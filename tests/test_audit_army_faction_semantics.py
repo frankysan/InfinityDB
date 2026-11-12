@@ -70,7 +70,7 @@ def _army_database(
     normalized = normalize_master(master)
     validate_normalized(normalized)
     path = tmp_path / "army.db"
-    export_database(normalized, path)
+    export_database(normalized, path, include_raw=True)
     if normalized_output is not None:
         normalized_output.write_text(
             json.dumps(normalized, ensure_ascii=False), encoding="utf-8",
