@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import json
 import logging
 import re
 import sqlite3
 from http import HTTPStatus
-from importlib.resources import files
 from typing import Any, Literal
 from urllib.parse import parse_qs
 
@@ -591,20 +589,11 @@ class ApiHandler:
                     cache_control=cache_control,
                 )
             try:
-                if self.rules_database is not None:
-                    embedded_chart = self.rules_database.restriction_chart_payload()
-                else:
-                    embedded_chart = None
-                if embedded_chart is not None:
-                    payload = embedded_chart
-                else:
-                    # Only pre-v13 releases still use their packaged static
-                    # chart; v13 reads exclusively from Rules SQLite.
-                    payload = json.loads(
-                        files("infinity_db.web").joinpath(
-                            "static", "restrictions-reference.json",
-                        ).read_text(encoding="utf-8")
-                    )
+                if self.rules_database is None:
+                    raise ValueError("Restrictions chart requires a Rules database")
+                payload = self.rules_database.restriction_chart_payload()
+                if payload is None:
+                    raise ValueError("Restrictions chart is unavailable in selected Rules data")
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Restrictions chart")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

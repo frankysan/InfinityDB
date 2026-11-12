@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import sqlite3
 from copy import deepcopy
 from pathlib import Path
@@ -76,15 +77,8 @@ def test_chart_round_trips_all_six_rows_and_14_conditions(published) -> None:
         ).fetchone()[0] == 14
 
 
-def test_v13_api_ignores_old_static_json_path(published, monkeypatch) -> None:
-    import infinity_db.web.api_handler as api_handler
-
+def test_chart_api_reads_embedded_rules(published) -> None:
     rules, chart = published
-
-    def never_read_packaged_json(*_args, **_kwargs):
-        raise AssertionError("v13 API must not consult the packaged chart JSON")
-
-    monkeypatch.setattr(api_handler, "files", never_read_packaged_json)
     app = create_app(ARMY, rules_database_path=rules)
     status, headers, body = wsgi_response(app, "http://chart.test/api/restrictions/chart")
     assert status == 200
@@ -103,6 +97,17 @@ def test_tracked_chart_api_retains_original_payload() -> None:
     assert RulesDatabase(RELEASE / "rules_n5.db").restriction_chart_payload() == json.loads(
         CHART.read_text(encoding="utf-8"),
     )
+
+
+def test_chart_api_without_rules_database_fails_closed(tmp_path: Path) -> None:
+    army = tmp_path / "army.db"
+    shutil.copy2(ARMY, army)
+    app = create_app(army)
+    assert app.rules_database is None
+
+    status, _, body = wsgi_response(app, "http://chart.test/api/restrictions/chart")
+    assert status == 503
+    assert json.loads(body) == {"error": "Restrictions chart is unavailable."}
 
 
 @pytest.mark.parametrize("mutation", ("source", "row", "action", "scope", "qualifier", "missing"))
