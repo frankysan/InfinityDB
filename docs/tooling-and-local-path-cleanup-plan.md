@@ -2229,7 +2229,21 @@ classification policy.
 **107 passed, two skipped, zero failed** across all four focused suites.
 All real pinned source checks ran with supplied legacy bytes. Ruff, Pyright
 (zero errors/warnings), documentation lint/links/backlog and Git whitespace
-checks passed. Linux exact-commit evidence is recorded separately below.
+checks passed.
+
+**Linux exact-SHA validation (2026-11-13):** The registered `linux-dev`
+worker explicitly fetched from origin and temporarily detached to
+`53b066bbaba7ef52ee900aac712b5ba41b0abb2e`. The full weapon-chart
+module passed **27**, trait-prose module **15**, and Mine variant module
+**25** (all actual legacy pinned-source checks executed). The shared PDF
+path-policy suite passed **42** including Linux symlink cases:
+**109 passed, zero skipped, zero failed** across the four focused suites.
+The worker was explicitly restored to its previous detached HEAD
+`8de09b277e579bd8cb942c6aba242bfe4f71ceca`. At evidence capture,
+the exact code-SHA GitHub Source checks, installed-wheel smoke and
+deployment smoke workflows were **in progress**, not yet green. This
+demonstrates no physical `local/data/pdf/` source availability and does
+not approve migration or publication.
 
 **Next:** Review the remaining bilingual/multi-revision and
 immunity/deployable source-test families by their actual current purpose and
