@@ -16,6 +16,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+try:
+    from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
+except ModuleNotFoundError:  # Direct execution as tools/deployment_diagnostics.py.
+    from operations.receipt_output import (  # type: ignore[reportMissingImports]
+        require_new_receipt,
+        write_new_json_receipt,
+    )
+
 FORMAT = "InfinityDB deployment diagnostics"
 FORMAT_VERSION = 1
 DEFAULT_SINCE = "1h"
@@ -386,6 +394,11 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("--tail must be greater than zero")
     if args.max_groups <= 0:
         raise SystemExit("--max-groups must be greater than zero")
+    try:
+        require_new_receipt(args.output)
+    except OSError as exc:
+        print(f"Diagnostics report failed: {exc}", file=sys.stderr)
+        return 2
     since = args.since
     until: str | None = None
     if args.resource_report is not None:
@@ -411,12 +424,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Diagnostics capture failed: {exc}", file=sys.stderr)
         return 2
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(report, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    try:
+        write_new_json_receipt(args.output, report)
+    except OSError as exc:
+        print(f"Diagnostics report failed: {exc}", file=sys.stderr)
+        return 2
     print(f"Deployment diagnostics report: {args.output}")
     return 0
 

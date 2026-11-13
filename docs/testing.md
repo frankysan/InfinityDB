@@ -6354,8 +6354,20 @@ operational policy there rather than maintaining a second copy in this test refe
 
 `deployment_alerts.py` evaluates a fresh resource report together with bounded aggregate metrics and
 health samples, producing monitoring-friendly OK/warning/critical/unknown exit codes without retaining
-endpoint URLs or user/request identity data. Generated benchmark/capacity/resource/alert reports belong
-in ignored report/audit storage unless a specific result is needed as release evidence.
+endpoint URLs or user/request identity data. Four operational report commands
+(`capacity_test`, `deployment_resources`, `deployment_diagnostics`,
+`deployment_alerts`) share the maintained
+`tools.operations.receipt_output` new-file-only JSON contract. Give
+each `--output` a fresh `local/performance/http-capacity/` or
+`local/operations/deployment/` run-specific path; occupied paths,
+including symlinks, fail before collection, and exclusive file
+creation protects an already-completed report during a race.
+Successful and failed measurements still retain their original JSON
+and exit statuses. Source resource receipts must never be reused
+as output paths. For matching commands, outputs and exception codes,
+see [deployment guidance](deployment.md#repeatable-http-capacity-scenario).
+An interrupted new receipt may be partial; no historical report
+is renamed, removed or auto-overwritten.
 
 Live-metrics tests pin the generation timing contract before retained history exists: one shared
 generation-start timestamp is created with the preloaded request registry, only completed instrumented

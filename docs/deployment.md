@@ -424,10 +424,16 @@ retention before enabling it. Error logs and host/container health data remain a
 when they do not embed request-identifying values.
 
 For routine retained diagnostics, do not archive raw Docker logs. Instead collect a bounded,
-sanitized warning/error report from the existing Caddy/Gunicorn streams:
+sanitized warning/error report from the existing Caddy/Gunicorn streams. For each
+example below, replace `RUN_ID` with a **new** UTC run timestamp plus short
+checkout SHA (and keep the same run ID for paired evidence). All four operational
+report commands reject an existing output file *before* reading logs, gathering
+resources, sending load-test traffic or starting alert sampling, and use
+exclusive creation to guard against later collisions. Old explicit paths still
+work if unoccupied; do not reuse a previous report filename.
 
 ```sh
-.venv/bin/python tools/deployment_diagnostics.py --output reports/deployment-diagnostics.json
+.venv/bin/python tools/deployment_diagnostics.py --output local/operations/deployment/diagnostics/RUN_ID/diagnostics.json
 ```
 
 The extractor ignores routine informational lines, discards Caddy structured request fields,
@@ -437,7 +443,7 @@ does not enable Caddy or Gunicorn access logging. To align diagnostics exactly w
 run, reuse the resource report's capture window:
 
 ```sh
-.venv/bin/python tools/deployment_diagnostics.py --resource-report reports/capacity-resources.json --output reports/capacity-diagnostics.json
+.venv/bin/python tools/deployment_diagnostics.py --resource-report local/performance/http-capacity/RUN_ID/resources.json --output local/operations/deployment/diagnostics/RUN_ID/capacity-diagnostics.json
 ```
 
 Treat the generated JSON as short-lived operational evidence. If a concrete incident requires the
@@ -452,7 +458,7 @@ exercises Unit browsing, global search, Unit/catalog details, and matching JSON 
 it does not benchmark only the health endpoint. For example, after starting the loopback test stack:
 
 ```powershell
-python tools\capacity_test.py http://localhost:8080 --output reports\capacity-local.json
+python tools\capacity_test.py http://localhost:8080 --output local/performance/http-capacity/RUN_ID/capacity.json
 ```
 
 The defaults run a 60-second steady phase at concurrency 8 followed by a 10-second burst at
@@ -465,7 +471,7 @@ The HTTP report is only one half of a capacity result. On the Linux deployment h
 capacity command with the resource sampler so both ignored JSON reports cover the same interval:
 
 ```bash
-COMPOSE_PROJECT_NAME=infinitydb-test .venv/bin/python tools/deployment_resources.py --output reports/capacity-resources.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output reports/capacity.json
+COMPOSE_PROJECT_NAME=infinitydb-test .venv/bin/python tools/deployment_resources.py --output local/performance/http-capacity/RUN_ID/resources.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output local/performance/http-capacity/RUN_ID/capacity.json
 ```
 
 The resource report records host CPU, memory/swap, filesystem space/inodes, aggregate network rates,
@@ -501,7 +507,7 @@ COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml sh scripts/deploy-local-
 ```
 
 ```bash
-COMPOSE_PROJECT_NAME=infinitydb-test COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml .venv/bin/python tools/deployment_resources.py --output reports/capacity-resources-2x4-4cpu-4g.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output reports/capacity-2x4-4cpu-4g.json
+COMPOSE_PROJECT_NAME=infinitydb-test COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml .venv/bin/python tools/deployment_resources.py --output local/performance/http-capacity/RUN_ID-2x4/resources.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output local/performance/http-capacity/RUN_ID-2x4/capacity.json
 ```
 
 Then deploy and measure the **4x4 experiment** with the same resource cap:
@@ -511,7 +517,7 @@ COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml:compose.capacity-4x4.yam
 ```
 
 ```bash
-COMPOSE_PROJECT_NAME=infinitydb-test COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml:compose.capacity-4x4.yaml .venv/bin/python tools/deployment_resources.py --output reports/capacity-resources-4x4-4cpu-4g.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output reports/capacity-4x4-4cpu-4g.json
+COMPOSE_PROJECT_NAME=infinitydb-test COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml:compose.capacity-4x4.yaml .venv/bin/python tools/deployment_resources.py --output local/performance/http-capacity/RUN_ID-4x4/resources.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output local/performance/http-capacity/RUN_ID-4x4/capacity.json
 ```
 
 Both valid reports must record `cpuLimitCores: 4.0` and `memoryLimitBytes: 4294967296`. The control
@@ -600,8 +606,17 @@ After collecting a fresh resource report, evaluate the deployment alert policy a
 and a bounded aggregate-metrics/health sampling interval:
 
 ```bash
-.venv/bin/python tools/deployment_alerts.py --resource-report reports/capacity-resources.json --output reports/deployment-alerts.json
+.venv/bin/python tools/deployment_alerts.py --resource-report local/performance/http-capacity/RUN_ID/resources.json --output local/operations/deployment/alerts/RUN_ID/alerts.json
 ```
+
+When evaluating a matched 2x4 or 4x4 capacity experiment, select its
+corresponding `RUN_ID-2x4` or `RUN_ID-4x4` resource report instead.
+Keep the alert receipt separate from the input resource file. Alert
+statuses remain OK=0, warning=1, critical=2, unknown=3;
+report-file errors return **3 (unknown)**, never a synthetic critical
+status. Resource/diagnostic report failures return 2; capacity-report
+errors return 2, distinct from ordinary load-phase failure (1).
+Do not interpret an output error as a completed diagnostic.
 
 By default the evaluator samples metrics for 60 seconds and checks `/health` at both ends of that
 interval. `INFINITYDB_METRICS_URL` can select the trusted metrics listener; unless

@@ -18,8 +18,25 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from tools.deployment_resources import FORMAT as RESOURCE_FORMAT
-from tools.report_metrics import DEFAULT_METRICS_URL, MetricsReport, fetch_metrics, parse_prometheus
+try:
+    from tools.deployment_resources import FORMAT as RESOURCE_FORMAT
+    from tools.report_metrics import (
+        DEFAULT_METRICS_URL,
+        MetricsReport,
+        fetch_metrics,
+        parse_prometheus,
+    )
+except ModuleNotFoundError:  # Direct execution as tools/deployment_alerts.py.
+    from deployment_resources import FORMAT as RESOURCE_FORMAT
+    from report_metrics import DEFAULT_METRICS_URL, MetricsReport, fetch_metrics, parse_prometheus
+
+try:
+    from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
+except ModuleNotFoundError:  # Direct execution as tools/deployment_alerts.py.
+    from operations.receipt_output import (  # type: ignore[reportMissingImports]
+        require_new_receipt,
+        write_new_json_receipt,
+    )
 
 FORMAT = "InfinityDB deployment alert evaluation"
 FORMAT_VERSION = 1
@@ -577,6 +594,11 @@ def main(
     if thresholds.server_error_warning_count < 1 or thresholds.server_error_critical_count < 1:
         raise SystemExit("5xx count thresholds must be positive integers")
     _validate_thresholds(thresholds)
+    try:
+        require_new_receipt(args.output)
+    except OSError as exc:
+        print(f"Alert report failed: {exc}", file=sys.stderr)
+        return 3
 
     try:
         resource_report = load_resource_report(args.resource_report)
@@ -622,8 +644,11 @@ def main(
 
     payload = json.dumps(report, indent=2, sort_keys=True) + "\n"
     if args.output is not None:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(payload, encoding="utf-8", newline="\n")
+        try:
+            write_new_json_receipt(args.output, report)
+        except OSError as exc:
+            print(f"Alert report failed: {exc}", file=sys.stderr)
+            return 3
         print(f"Deployment alert report: {args.output}")
     else:
         print(payload, end="")

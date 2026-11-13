@@ -17,6 +17,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+try:
+    from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
+except ModuleNotFoundError:  # Direct execution as tools/deployment_resources.py.
+    from operations.receipt_output import (  # type: ignore[reportMissingImports]
+        require_new_receipt,
+        write_new_json_receipt,
+    )
+
 FORMAT = "InfinityDB deployment resource capture"
 FORMAT_VERSION = 1
 DEFAULT_DURATION_SECONDS = 60.0
@@ -770,6 +778,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command and not command:
         raise SystemExit("wrapped command cannot be empty")
     services = tuple(args.services or DEFAULT_SERVICES)
+    try:
+        require_new_receipt(args.output)
+    except OSError as exc:
+        print(f"Resource report failed: {exc}", file=sys.stderr)
+        return 2
     repo_root = Path(__file__).resolve().parents[1]
     try:
         report, command_exit_code = capture_resources(
@@ -783,12 +796,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Resource capture failed: {exc}", file=sys.stderr)
         return 2
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(report, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    try:
+        write_new_json_receipt(args.output, report)
+    except OSError as exc:
+        print(f"Resource report failed: {exc}", file=sys.stderr)
+        return 2
     print(f"Deployment resource report: {args.output}")
     return command_exit_code
 

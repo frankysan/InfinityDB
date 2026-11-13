@@ -717,6 +717,81 @@ files), local links (46 files), backlog validation and
 hosted CI, Linux worker run, complete test suite, or legacy report
 migration was performed.
 
+### Twelfth bounded L2 output-contract update — operational receipt family (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`19163372ba066159279818ec04ada0c84415dbd1`. The previous
+eleventh slice protected worker-benchmark receipts; the next four
+retained operational commands still overwrote an arbitrary
+`--output` path after potentially expensive or stateful collection.
+The four naturally form one **larger, coherent L2 batch** because
+they share run-receipt JSON formatting and independent but related
+resource/capacity/diagnostics/alerts consumers.
+
+**Implementation:** Added `tools/operations/receipt_output.py`
+for new optional/required operational JSON evidence. Its
+`require_new_receipt` refuses existing files and dangling symlinks
+*before* network measurement, wrapped commands, Docker or host
+sampling, log collection, input report loading or alert evaluation.
+The new `write_new_json_receipt` uses exclusive `open("x")` at
+publication to defeat late collisions and preserves the existing
+sorted, indented, UTF-8/LF JSON format. New parent directories are
+created only at write time. The four consumers are
+`capacity_test`, `deployment_resources`,
+`deployment_diagnostics` and `deployment_alerts`.
+
+**Compatibility and distinct statuses:** Existing direct-script
+and module invocations remain available. The cleanup also corrected
+the pre-existing direct-script import failure in
+`deployment_alerts`, with a focused `--help` subprocess guard.
+No HTTP workload, resource sample, Docker log sanitization,
+threshold, metrics/health interval, warning/critical classification,
+source schema or CLI flag changed. Existing measured outcomes keep
+the same statuses: capacity load errors return 1; wrapped resource
+commands forward their own exit codes; diagnostics succeeds with 0;
+alerts return OK=0, warning=1, critical=2, unknown=3.
+**Output-path errors** return capacity=2, resources=2,
+diagnostics=2 and alerts=3. In particular, an alert receipt
+collision never creates a false critical alert (2).
+For diagnostics and alerts, a selected input resource report may
+not also be the output file; it is never overwritten.
+
+The [deployment guide](deployment.md#repeatable-http-capacity-scenario)
+and [testing guide](testing.md#benchmark-tooling) now recommend
+fresh `local/performance/http-capacity/<run-id>/` and
+`local/operations/deployment/<domain>/<run-id>/` run evidence,
+using matching run identifiers when correlating observations.
+This changes prospective examples, **not** accepted CLI defaults
+or the location of any prior ignored `reports/` material.
+A newly created receipt is not crash-atomic; an interruption
+can leave partial new evidence requiring inspection.
+
+**L2 remains open:** remaining independent audit-report writers
+(`--output`, `--json-output`, `--markdown-output`) and their
+consumer/fixture contracts need larger family-based inspection;
+do not apply receipt guards to persistent metrics/history SQLite,
+tracked published assets, build scratch or append-only streams.
+No live host/Docker, network load, production, private-source
+migration (M), tracked retirement (T), broad tool moves (L4)
+or root report cleanup was performed. Hosted exact-SHA CI, full
+test suite and Linux parity remain separate acceptance gates.
+
+**Validation:** Windows focused suites passed **30/30** new operational
+receipt tests, **6/6** HTTP capacity tests, **9/9** resource
+capture tests, **8/8** diagnostics tests and **8/8** alert
+evaluation tests, together **61 passed**. Test-section registration
+passed **15/15** more: **76 total, no skips/failures**. The new
+tests cover early/late report collisions, exclusive creation,
+dangling symlinks, impossible parent paths, source/output aliasing,
+exact canonical JSON bytes, alert exit states 0–3, wrapped command
+exit passthrough, stdout-only operation and direct-script `--help`
+for all four commands. Targeted Ruff passed for all six Python
+implementation and regression files, repository Pyright reported
+zero errors/warnings, docs lint/links/backlog passed, and
+`git diff --check` passed. No actual load test, Docker resource
+capture, live incident diagnostics, hosted CI, Linux parity
+or full suite was run for this slice.
+
 ## Observed starting condition
 
 The initial root-level inspection found:
@@ -2928,14 +3003,18 @@ proposed L4 destination.
   history requires independently verified backup/restore before any
   service data migration or pruning beyond existing bounded retention.
 
-**Confirmed L2/L6 issues:** The maintained `docs/deployment.md` examples
-still direct capacity, resource, diagnostics, alert and manually collected
-history files to ignored root `reports/`. Several CLIs accept arbitrary
-destinations and overwrite files rather than safely creating a unique
-run-identified output. Review their direct-script invocation, existing
-operator workflows, tests and evidence retention together before replacing
-these defaults/examples with categorized `local/validation/`,
-`local/performance/` or `local/operations/` paths. Preserve explicit
+**L0 output-path finding (subsequently partly resolved by the
+[twelfth bounded L2 operational receipt slice](#twelfth-bounded-l2-output-contract-update--operational-receipt-family-2026-11-13)):**
+At this inventory baseline, `docs/deployment.md` examples directed
+capacity, resource, diagnostic, alert and manually collected history
+files to ignored root `reports/`, and the four JSON receipt CLIs
+overwrote existing files. The four commands now refuse collisions,
+their example destinations are categorized under `local/`, and
+their direct-script contract is covered. The separate, persistent
+`metrics_history` state and any legacy material in root `reports/`
+have **not** been relocated, deleted or reclassified.
+Later path-default changes still require separately reviewed
+operators, existing consumers and retention compatibility. Preserve explicit
 cross-host destinations where justified, and treat persistent Compose volumes
 as service-owned state outside the default checkout `local/` rule.
 

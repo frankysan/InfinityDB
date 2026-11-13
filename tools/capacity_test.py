@@ -23,6 +23,14 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
+try:
+    from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
+except ModuleNotFoundError:  # Direct execution as tools/capacity_test.py.
+    from operations.receipt_output import (  # type: ignore[reportMissingImports]
+        require_new_receipt,
+        write_new_json_receipt,
+    )
+
 FORMAT = "InfinityDB HTTP capacity test"
 FORMAT_VERSION = 1
 DEFAULT_TIMEOUT_SECONDS = 10.0
@@ -490,6 +498,11 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     _validate_args(args)
     try:
+        require_new_receipt(args.output)
+    except OSError as exc:
+        print(f"Capacity report failed: {exc}", file=sys.stderr)
+        return 2
+    try:
         report = capacity_test(
             args.base_url,
             timeout=args.timeout,
@@ -505,8 +518,11 @@ def main(argv: list[str] | None = None) -> int:
 
     rendered = json.dumps(report, indent=2, sort_keys=True) + "\n"
     if args.output is not None:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(rendered, encoding="utf-8", newline="\n")
+        try:
+            write_new_json_receipt(args.output, report)
+        except OSError as exc:
+            print(f"Capacity report failed: {exc}", file=sys.stderr)
+            return 2
     if args.json:
         print(rendered, end="")
     else:
