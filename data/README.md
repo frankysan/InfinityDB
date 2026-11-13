@@ -5,6 +5,47 @@
 InfinityDB separates external inputs, human-reviewed material, generated
 provenance/state, and build outputs.
 
+## Accepted ignored-artifact policy (prospective)
+
+For **newly designed** project-owned ignored outputs, use a categorized
+`local/` destination: `local/data/` for acquisition and processing artifacts,
+`local/research/` for source-pinned investigations,
+`local/validation/` for checks and run evidence,
+`local/performance/` for benchmarks, `local/operations/` for operational
+diagnostics, `local/work/` for temporary work and `local/handoffs/`
+for verified producer transfers. Include domain, purpose, scope and
+source revision/candidate in the path. For repeatable evidence prefer
+a UTC run identifier plus short Git or source SHA as the directory name;
+record source/artifact SHA-256 in accepted receipts. Retain immutable
+upstream basenames and identities instead of renaming source archives.
+Do not create empty category trees, loose `local/` files or `misc/`.
+
+**New run-evidence writers must refuse an existing destination** instead
+of overwriting or truncating earlier evidence. A reviewed, explicit
+tracked-publication command may replace only its designated published
+artifact; this is not permission to overwrite generic run evidence.
+Scratch may be pruned following verified successful completion, open
+diagnostics after closeout, and immutable source, recovery and release
+evidence only after their independent provenance, consumer, backup/restore
+and retention obligations are satisfied. Do not use an automatic age-based
+deletion rule. Standard language caches, virtual environments, OS/editor
+state, host secrets, selected test scratch, external producer staging and
+the production SQLite service volume are owner-specific exceptions, not
+alternative report roots. No blanket exception is granted for ignored
+`data/`, root `reports/`, `docs/audits/`, `image_overrides/` or loose
+web-font downloads.
+
+The three published `data/generated/` databases, tracked curated
+inputs, the symbol publication manifest, reviewed generated checklists
+and immutable tracked acceptance/source records **remain tracked**.
+Normal serve, Docker and installed-wheel builds do not require `local/`
+research artifacts. The following **current** paths, readers and writers
+remain supported until each explicitly validated cutover; acceptance
+of this policy **does not move or delete existing private files**, retire
+tools, change CLI defaults, alter producer staging/Syncthing or approve
+a migration. See the [cleanup execution plan](../docs/tooling-and-local-path-cleanup-plan.md)
+for independently gated work.
+
 ## Current paths and behavior
 
 - `raw/` — immutable downloaded Corvus Belli Army snapshot archives. Army

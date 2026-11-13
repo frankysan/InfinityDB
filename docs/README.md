@@ -59,10 +59,14 @@ ASCII art, keeping labels readable in both source and rendered form.
 
 - [tooling-and-local-path-cleanup-plan.md](tooling-and-local-path-cleanup-plan.md) —
   active post-v1.1.0 tool/path cleanup. Its
-  [L1 decision package](tooling-and-local-path-cleanup-plan.md#l1-decision-package--proposed-not-approved-2026-11-13)
-  separates prospective naming policy, tracked retirements and blocked
-  private-data migration. All current root tools are named in the L0 record;
-  recovery/host evidence and approvals remain open. The
+  [L1 decision package](tooling-and-local-path-cleanup-plan.md#l1-decision-package--p-accepted-t-and-m-pending-2026-11-13)
+  records **P accepted** for new path and lifecycle conventions, while
+  tracked retirements (T) and private-data relocation/deletion (M) remain
+  separately gated. The accepted policy is owned by
+  [architecture](architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
+  and [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective);
+  existing paths and commands are not migrated by that approval. All current
+  root tools are named in the L0 record; recovery/host evidence remains open. The
   [backlog](TODO.md) owns the implementation task.
 
 ## Completed strategic migrations

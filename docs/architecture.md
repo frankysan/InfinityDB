@@ -56,6 +56,35 @@ Unless a section is explicitly marked **Design direction**, it describes current
 10. **Determinism and portability are artifact contracts.** Given the same inputs and declared
     toolchain, persistent generated artifacts must be byte-identical across supported platforms.
 
+## Accepted workspace conventions (prospective, not a path migration)
+
+New project-owned Git-ignored source material, research, run evidence and
+intermediates should be organized under `local/` by domain, purpose, scope
+and lifetime. The intended families are `local/data/`, `local/research/`,
+`local/validation/`, `local/performance/`, `local/operations/`,
+`local/work/` and `local/handoffs/`. Create categories when needed, not
+empty trees or a `misc/` catch-all. Preserve exact upstream source names
+and identities for immutable acquisitions.
+
+New maintained developer/operator modules should be grouped by responsibility
+beneath `tools/data/`, `research/`, `symbols/`, `browser/`, `testing/`,
+`ci/`, `operations/`, `performance/`, `dev/` or `_shared/`, with
+`tools/run_checks.py` and package `__init__.py` as the initial minimal
+root exceptions. Existing modules and their imports/entrypoints are **not**
+renamed by this policy; each requires a validated, atomic cutover.
+
+The prospective conventions do not alter the currently implemented paths
+below. Standard language/OS/editor caches, virtual environments, host secrets,
+explicit test scratch, externally owned staging and the production
+`metrics_history` volume retain separately justified ownership. Normal
+checkout/installed-wheel serving, deterministic builds and Docker images
+must never depend on accidentally present private `local/` contents.
+Published databases, maintained configuration, reviewed curation, accepted
+source/review records and symbol publication remain tracked. See the
+[artifact lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective)
+for naming and retention. The [active cleanup plan](tooling-and-local-path-cleanup-plan.md)
+tracks legacy paths, producer changes and separately gated migrations.
+
 ## System boundaries
 
 InfinityDB has six engineering domains:

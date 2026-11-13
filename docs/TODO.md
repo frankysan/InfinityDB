@@ -51,9 +51,11 @@ when all contained work shares the same owner.
   retires completed discovery commands while preserving their reviewed evidence.
   The [Hacking Program checkpoint](tooling-and-local-path-cleanup-plan.md#hacking-program-statistics-audit-disposition--2026-11-12)
   retains the separate, source-pinned statistics audit.
-  The [L1 decision package](tooling-and-local-path-cleanup-plan.md#l1-decision-package--proposed-not-approved-2026-11-13)
-  now separates proposed prospective policy, bounded tracked retirements
-  and blocked private-data migration. L1 approval and recovery evidence remain open.
+  The [L1 decision package](tooling-and-local-path-cleanup-plan.md#l1-decision-package--p-accepted-t-and-m-pending-2026-11-13)
+  records accepted prospective path/lifecycle policy (P), while tracked
+  retirements (T) and private-data migration (M) still require separate
+  decisions and recovery evidence. Implement non-destructive L2 writer/output
+  changes first, preserving legacy readers and published outputs.
 
 ### Backlog and development workflow simplification
 

@@ -3,8 +3,10 @@
 **Project domains:** Project infrastructure, Data processing, Acquisition, Deployment
 
 **Status:** Started 2026-11-12; L0 inventory and ownership review in progress.
-The path contract and remaining dispositions below remain proposals. Bounded
-P5 retirements are recorded below; no private inputs have been moved or deleted.
+**Prospective P1–P5 conventions accepted 2026-11-13** for new work; the
+tracked-code retirement (T), existing private-data migration (M), and
+individual legacy-path cutovers remain unapproved. Bounded P5 retirements
+are recorded below; no private inputs have been moved or deleted.
 
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
@@ -58,9 +60,13 @@ not a competing operational manual.
 The [backlog](TODO.md) owns the open implementation item; only approved,
 implemented rules move into those canonical owners.
 
-## L1 decision package — proposed, not approved (2026-11-13)
+## L1 decision package — P accepted, T and M pending (2026-11-13)
 
-**Decision status:** All **120 current root Python modules** and the
+**Decision status:** The user accepted the **P prospective conventions**
+on 2026-11-13, limited to publishing policy and implementing new
+non-destructive output contracts. This is not an L0 exit or approval
+of tracked retirements, existing paths, producer changes or private-data
+migration. All **120 current root Python modules** and the
 artwork-review template have named L0 dispositions; this is filename
 and code-ownership coverage, **not complete L0 exit**. A tracked-doc
 lifecycle pass and Army/Wiki/Symbol producer interface checks are
@@ -72,10 +78,10 @@ and Syncthing/backup status remain **unapproved and unverified**.
 
 ### P — Prospective project conventions (one non-destructive policy decision)
 
-**Recommended for approval as a single prospective policy only**, with
-no immediate changes to existing file paths, CLI defaults, ignore
-rules, databases, service volumes, producer repositories or private
-bytes:
+**Accepted by the user on 2026-11-13 as one prospective policy only.**
+There is no immediate authorization to change existing file paths, CLI
+defaults, ignore rules, databases, service volumes, producer repositories
+or private bytes:
 
 - **P1 — Ignored output home:** New, project-owned, ignored
   sources and run artifacts should be created beneath `local/`.
@@ -124,14 +130,16 @@ bytes:
   normal serve and deterministic build must remain independent of
   `local/` contents.
 
-**Effect of approving P:** Authorize a future update to the canonical
-policy owners (`docs/architecture.md`, `data/README.md` and the
-documentation/agent navigation links), plus prospective, narrowly
-scoped output-contract implementation. **Approval of P is not
-permission to execute L2 migrations, relocate existing tools,
-retire tracked code, mutate ignored originals, alter Syncthing, or
-delete anything.** Legacy writer/reader paths must continue to work
-until an individually reviewed compatibility cutover.
+**Effect of accepted P:** The prospective policy is published in the
+canonical [architecture](architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
+and [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective)
+owners, with short navigation pointers. It authorizes narrowly
+scoped **new**, non-destructive output-contract implementation.
+**P is not permission to execute existing-data L2/L3 migrations,
+relocate existing tools, retire tracked code, mutate ignored
+originals, alter Syncthing, or delete anything.** Legacy
+writer/reader paths must continue to work until an individually
+reviewed compatibility cutover.
 
 ### T — Tracked-code/document retirement (separate per-batch decisions)
 
@@ -193,10 +201,12 @@ promote `army.raw.db` retirement without its own consumer check.
 
 ### Implementation and approval handoff
 
-1. **Review P on its own.** If accepted, publish the policy in
-   canonical owners. Begin L2 with non-destructive output/CLI changes
-   (collision refusal, report classification and producer options),
-   using focused tests and no implicit local-data discovery.
+1. **P accepted 2026-11-13.** Publish its policy in canonical owners
+   (completed in this documentation batch), then begin bounded L2
+   non-destructive output-contract changes (collision refusal, report
+   classification and producer options). Keep existing defaults and
+   legacy readers until an independently validated cutover, using
+   focused tests and no implicit local-data discovery.
 2. **Review T1/T2 individually** after their listed checks; process
    any accepted tracked retirement as a separate tested commit.
    The producer and MCP execution contracts remain independent of
@@ -206,10 +216,11 @@ promote `army.raw.db` retirement without its own consumer check.
    demonstrably ready. Only then propose exact family-by-family
    migration and later deletion requests.
 
-**Current recommendation:** Accept the *prospective* P conventions
-when ready; continue T acceptance preparation and L0 recovery
-investigation independently. Neither recommendation nor continued
-cleanup work constitutes an approval.
+**Current recommendation:** Implement new non-destructive output
+contracts under the accepted P conventions; continue T acceptance
+preparation and L0 recovery investigation independently. Only the
+prospective P decision is approved; continued cleanup work is not
+approval of T, M, or a legacy-path cutover.
 
 The [detailed L0 disposition and cross-repository evidence](#execution-phases)
 remains the audit trail. The [L1 prerequisites](#l1-approval-prerequisites--consolidated-outstanding-decision-register)
@@ -3171,9 +3182,9 @@ receiver activation on the approved source family. No producer,
 application, MCP, ignored asset or service files were changed.
 **L0 physical-data recovery blockers and L1 approvals remain open.**
 
-### L1 candidate policy decisions — proposal only
+### L1 candidate policy decisions — P accepted for new work
 
-**Eligible for user review, not yet approved:** Adopt the stated
+**Accepted 2026-11-13 for new work only:** Adopt the stated
 `local/data/`, `local/research/`, `local/validation/`,
 `local/performance/`, `local/operations/`, `local/work/` and
 `local/handoffs/` intent as the **default for newly produced ignored
@@ -3185,7 +3196,7 @@ files where they are. Keep `tools/run_checks.py` and package
 `tools/` moves until per-module L0 and complete consumer updates are
 accepted.
 
-**Proposed narrow ignored-path exceptions:** Python/Node build caches and
+**Accepted narrow ignored-path exceptions (prospective):** Python/Node build caches and
 virtual environments, OS/editor state, explicitly selected pytest
 temporary directories, GitHub-managed step output, machine-local
 environment/secrets, producer-owned *external* staging and the
@@ -3204,10 +3215,9 @@ unreviewed module moves. These require completed L0 consumer/owner
 classification, successful independent backup and trial restore,
 authorized inspection of the 19 inaccessible report directories,
 current sender/receiver state and per-batch hash/rollback evidence.
-A later explicit user approval must identify whether it covers
-(a) prospective *non-destructive* naming defaults,
-(b) tracked-code/document replacements, or
-(c) each private-data migration and deletion. These are separate decisions.
+Prospective *non-destructive* naming defaults (P) are accepted;
+tracked-code/document replacements (T) and each private-data
+migration/deletion (M) still require specific future approvals.
 Until then the existing documented paths keep working.
 
 ### L1 approval prerequisites — consolidated outstanding decision register
@@ -3255,17 +3265,17 @@ service-owned volumes and destructive retirement.
    finish low-usage helper disposition, producer/MCP import and
    invocation checks, lifetime/retention triggers and actual source
    rollback evidence before L4/L5 retirement decisions.
-7. **Policy/retirement approvals — pending:** Agree the canonical
-   `local/` categories, justified cache/host exceptions, intentionally
+7. **Policy accepted; retirement approvals pending:** Prospective
+   `local/` categories, scoped cache/host exceptions, intentionally
    tracked generated-review outputs (including the interaction checklist
-   and curated catalog-scope files), and filename/run-ID rules.
-   Separately authorize safe
+   and curated catalog-scope files), and filename/run-ID rules were
+   accepted on 2026-11-13 for **new work only**. Separately authorize safe
    tracked-code/document retirements and each irreversible ignored-source
    deletion. After L2 writers/readers and source selections are accepted,
    apply L3 only in individually hash-checked, reversible batches.
 
-**Gate:** L0 exit and an approved L1 mapping/exception registry are required
-before bulk path movement. A green hosted CI run proves build and
+**Gate:** Prospective P is accepted. L0 exit and an approved, specific
+L1 mapping/exception registry are still required before bulk path movement. A green hosted CI run proves build and
 publication compatibility, **not** backup recoverability or private-data
 retirement eligibility.
 
