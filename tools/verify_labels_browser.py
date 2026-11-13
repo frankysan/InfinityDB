@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
 from infinity_db.curated import load_curated_directory
+from tools.browser.report_output import require_new_browser_report, write_browser_report
 from tools.verify_ammunition_browser import ROOT, verify
 
 
@@ -31,18 +31,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--headed", action="store_true")
     args = parser.parse_args(argv)
+    require_new_browser_report(parser, args.output)
     report = verify(
         args.base_url,
         headed=args.headed,
         catalog="labels",
         expected_names=source_names(),
     )
-    if args.output is not None:
-        args.output.write_text(
-            json.dumps(report, sort_keys=True, indent=2) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
+    write_browser_report(parser, args.output, report)
     print(f"Labels browser navigation: {report['passed']}/{report['total']} passed")
     for item in report["results"]:
         if item["status"] == "failed":

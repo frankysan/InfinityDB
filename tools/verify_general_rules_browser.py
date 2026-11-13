@@ -4,12 +4,12 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
 from infinity_db.application_domains import application_domain, record_matches_domain
 from infinity_db.curated import load_curated_directory
 from infinity_db.domain_slugs import route_slug_from_qualified_typed_domain_id
+from tools.browser.report_output import require_new_browser_report, write_browser_report
 from tools.verify_ammunition_browser import ROOT, verify
 
 
@@ -39,6 +39,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--headed", action="store_true")
     args = parser.parse_args(argv)
+    require_new_browser_report(parser, args.output)
     rules = source_rules()
     report = verify(
         args.base_url,
@@ -47,12 +48,7 @@ def main(argv: list[str] | None = None) -> int:
         expected_names={slug: name for slug, (_, name) in rules.items()},
         expected_record_ids={slug: record_id for slug, (record_id, _) in rules.items()},
     )
-    if args.output is not None:
-        args.output.write_text(
-            json.dumps(report, sort_keys=True, indent=2) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
+    write_browser_report(parser, args.output, report)
     print(f"General Rules browser navigation: {report['passed']}/{report['total']} passed")
     for item in report["results"]:
         if item["status"] == "failed":

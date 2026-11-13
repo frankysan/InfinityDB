@@ -2233,6 +2233,37 @@ address cross-layer consumers, and make a single meaningful validation and
 commit where appropriate. Do not use batching to postpone a known critical
 correctness check or to hide outstanding acceptance.
 
+### Optional catalog-navigation browser report evidence
+
+Five independent optional browser commands—`verify_ammunition_browser`,
+`verify_general_rules_browser`, `verify_labels_browser`,
+`verify_states_browser` and `verify_traits_catalog_browser`—use a
+common non-overwriting report helper under `tools/browser/`. Each continues
+to check its own curated catalog identities and returns nonzero when
+a browser observation fails; stdout-only runs remain available.
+
+For example, give the selected command a **new** run-specific
+`--output` destination:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/catalog-navigation/RUN_ID/labels.json
+```
+
+Replace `RUN_ID` with a UTC run identifier and short checkout revision.
+The filename may not already exist, even on a repeated manual invocation:
+it is checked before source discovery or Playwright launch, and JSON is
+written with exclusive creation after verification. Existing explicit
+legacy output locations are supported as paths but never overwritten.
+The helper retains each original report's sorted, indented UTF-8/LF
+format, including a report of failed browser observations; it never
+turns a failed check into acceptance. Parent directories are created
+only when the selected new report is ready to be written. An interrupted
+write may leave **new partial evidence** requiring inspection; report
+creation is not a multi-file transaction. These optional catalog checks
+are not substitutes for the complete-set release-candidate browser gate.
+The other specialized browser commands retain independent report
+contracts pending their own L2 acceptance and test coverage.
+
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 
 **Project domains:** Web frontend, Project infrastructure

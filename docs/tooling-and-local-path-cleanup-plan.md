@@ -444,6 +444,58 @@ Targeted Ruff, repository Pyright (zero errors/warnings), Markdown lint,
 documentation links/backlog and `git diff --check` all passed. The
 full suite and hosted exact-SHA CI checks were not run for this update.
 
+### Seventh bounded L2 output-contract update — catalog browser receipts (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`9334588c2e058525fef193696e1735ca08e260a7`, after
+`report_reference_baseline` collision protection. The eleven
+optional browser verifiers share a need for JSON run evidence but
+retain distinct source and browser semantics. Five catalog-navigation
+entrypoints—Ammunition, General Rules, Labels, States and canonical
+Traits—share one `verify_ammunition_browser.verify` implementation
+and identical direct JSON receipt-writing conventions.
+
+Added a new maintained `tools/browser/report_output.py` helper and
+migrated only these five catalog entrypoints to it. With `--output`,
+they reject existing destinations (including dangling symlinks)
+**before** source discovery or Playwright startup, and use exclusive
+creation to prevent later collisions while preserving sorted,
+indented UTF-8/LF JSON. Parent directories are created only when
+writing a fresh report. No `--output` runs still print their normal
+summary; failed browser observations still result in nonzero exit
+and, when selected, a report preserving those failures. Existing
+explicit output filenames remain supported but cannot be overwritten.
+
+The [testing guide](testing.md#optional-catalog-navigation-browser-report-evidence)
+recommends fresh
+`local/validation/browser/catalog-navigation/<UTC-run-id>-<short-SHA>/`
+run destinations. No browser engine, selector, source URL, source
+membership, optional/hosted gate or CLI argument changed. The remaining
+six specialized verifiers (`verify_hacking_programs_browser`,
+`verify_non_skill_army_browser`,
+`verify_unit_skill_presentation_browser`,
+`verify_rule_fragment_browser`,
+`verify_structured_skill_charts_browser`,
+`verify_trait_wiki_browser`) still require a separate, focused
+writer-and-consumer cutover; this batch does not touch their reports
+or third-party saved Wiki HTML inputs.
+
+**Limitations:** Each output is exclusively created but not an atomic
+crash-safe write; interrupted fresh reports need separate inspection.
+The helper is only for optional browser-run JSON, not a new public
+release acceptance gate or permission to migrate existing evidence.
+No T retirement or M private-source action is implied.
+
+**Validation:** Windows focused checks passed **24/24** new hermetic
+report-contract tests, **55/55** General Rules/source-catalog tests,
+**22/22** Trait Wiki source-contract tests and **15/15** test-section
+registry tests: **116 passed**, no skips/failures. Targeted Ruff for
+the six added/edited Python implementations and the test module,
+repository Pyright (zero errors/warnings), documentation lint/links/
+backlog, and `git diff --check` passed. No direct hosted matrix,
+complete-suite run or new live multi-catalog Playwright acceptance
+was performed; those remain separately pinned validation gates.
+
 ## Observed starting condition
 
 The initial root-level inspection found:
@@ -3154,10 +3206,13 @@ checks or silently promote optional commands into default hosted gates.
   fixture and explicit artifact-key normalization are part of the
   test contract.
 
-**Confirmed L2/L6 report issue:** All eleven browser commands offer
-`--output` with direct `Path.write_text` semantics and no
-exclusive-create guard. Some make parent directories; others require
-them to exist, so the same option has inconsistent error behavior.
+**Confirmed L2/L6 report issue at the L0 baseline:** All eleven browser
+commands offered `--output` with direct `Path.write_text` semantics
+and no exclusive-create guard. Some created parent directories while
+others required them. The later
+[seventh bounded L2 slice](#seventh-bounded-l2-output-contract-update--catalog-browser-receipts-2026-11-13)
+now covers five catalog entrypoints; six specialized entrypoints remain
+unmigrated and require separate review.
 Treat optional JSON as per-candidate, per-browser and per-run
 validation evidence under an approved `local/validation/` path.
 Keep stdout-only invocation useful, preserve nonzero exit on failed

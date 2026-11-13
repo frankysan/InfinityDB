@@ -4,12 +4,12 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.trait_wiki_references import load_trait_wiki_references
+from tools.browser.report_output import require_new_browser_report, write_browser_report
 from tools.verify_ammunition_browser import ROOT, verify
 
 
@@ -38,6 +38,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--headed", action="store_true")
     args = parser.parse_args(argv)
+    require_new_browser_report(parser, args.output)
     traits = source_traits()
     wiki = load_trait_wiki_references()
     urls = {identity.removeprefix("trait:"): ref["url"] for identity, ref in wiki.items()}
@@ -52,12 +53,7 @@ def main(argv: list[str] | None = None) -> int:
         expected_wiki_urls=urls,
         allowed_raw_trait_slugs={row["slug"] for row in raw},
     )
-    if args.output is not None:
-        args.output.write_text(
-            json.dumps(report, sort_keys=True, indent=2) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
+    write_browser_report(parser, args.output, report)
     print(f"Traits catalog browser navigation: {report['passed']}/{report['total']} passed")
     for item in report["results"]:
         if item["status"] == "failed":
