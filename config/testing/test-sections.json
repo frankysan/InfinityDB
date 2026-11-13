@@ -216,6 +216,7 @@
       "modules": [
         "test_activate_synced_assets",
         "test_audit_syncthing_receiver",
+        "test_audit_syncthing_health",
         "test_research_source_paths",
         "test_agent_coordination",
         "test_agent_global_coordination",
