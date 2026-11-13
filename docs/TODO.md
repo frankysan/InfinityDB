@@ -91,8 +91,10 @@ when all contained work shares the same owner.
   multi-revision Application Rule, Silent/Immunity and Reinforcements
   applicability tests also select their independently pinned English,
   Spanish, historical and ITS PDFs without mixing source authority.
-  **Next:** review remaining single-Core immunity/deployable and larger
-  curated-rule source tests; then receiver ACL/backup evidence (R4/R5).
+  The 16 single-Core immunity evidence modules now also select the pinned
+  PDF explicitly without changing any example/critical/BTS rule conclusions.
+  **Next:** review remaining deployable, geometry and larger curated-rule
+  source tests; then receiver ACL/backup evidence (R4/R5).
   Source relocation and private-data migration still require separate
   approval and backup/restore evidence. L2/R4 remain open, and hosted/release
   acceptance remains independent of fixture validation.

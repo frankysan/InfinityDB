@@ -6461,6 +6461,16 @@ identity checks are unchanged. Hermetic multi-source cases in
 `test_research_source_paths.py` validate hash mismatch before missing-source
 skips, both physical layouts and no alternative-layout fallback.
 
+The 16 `test_immunity_*.py` modules with a source-only N5.3 English Core
+PDF prerequisite now use `pinned_n53_core_pdf`. Their individual SHA-256
+assertions and rule-page checks for AP/DA/T2 criticals, BTS and E/M
+exceptions, combined saving rolls, printed Missile/Monofilament/Plasma/
+Flash Pulse examples, and Oblivion are unchanged. These checks remain
+separate from curated/API validation, and a missing selected PDF skips
+only the source-only case. No unresolved immunity interaction has been
+turned into an inferred ruling, and no weapon/profile source identities
+have been changed.
+
 The global `require_source_files` fixture retains its previous meaning for
 other suites. Further tests still bound to `data/pdf/` keep their original
 skip semantics until reviewed individually; no global path redirection or

@@ -20,7 +20,6 @@ from infinity_db.weapon_combined_saving_rolls import WeaponCombinedSavingRolls
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 ARMY = ROOT / "data/generated/army.db"
 RULES = ROOT / "data/generated/rules_n5.db"
@@ -45,10 +44,11 @@ EXPECTED = {
 }
 
 
-def test_pinned_critical_sources_support_plasma_attribute_distinction(require_source_files) -> None:
-    require_source_files(PDF)
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
-    with pymupdf.open(PDF) as pdf:
+def test_pinned_critical_sources_support_plasma_attribute_distinction(
+    pinned_n53_core_pdf: Path,
+) -> None:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PIN
+    with pymupdf.open(pinned_n53_core_pdf) as pdf:
         pages: dict[int, str] = {}
         for number in (67, 95, 96):
             raw = pdf[number - 1].get_text("text")

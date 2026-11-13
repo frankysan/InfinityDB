@@ -2328,6 +2328,49 @@ backup/restore and R6 physical migration are **not** authorized. This
 checkpoint moves no ignored PDF/Wiki content, SVG overrides, Syncthing
 folders or generated databases.
 
+### Thirty-first bounded L2 checkpoint — R4 immunity Core PDF source tests (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`307bed14c7461ec2dafc170fe7e634793adc0cf9`. An inventory found
+16 current `tests/test_immunity_*.py` modules whose source-only tests
+all opened the same fixed `data/pdf/rules/n5-rules-v5.3-en.pdf` and
+independently asserted the identical official N5.3 English Core
+SHA-256. They cover active rules/publication acceptance (critical-hit
+and combined-ammunition cases, AP/T2, BTS E/M and component immunity,
+Comms exceptions, and printed weapon/saving-roll examples); none was
+retired merely because its evidence input is an ignored file.
+
+For each of the 16 modules, **only** the source-only test's input path
+was changed to the existing, test-only `pinned_n53_core_pdf` fixture.
+The redundant fixed physical `PDF` constant was removed. Each
+test retains its own full SHA-256 check, original page text and clause
+assertions, special-case/discrepancy expectations, and unchanged
+curated/Army/API tests. Default remains explicitly selected `legacy`;
+`--reference-pdf-layout local` reads only `local/data/pdf/`, never
+falling back to legacy. Missing selected source skips source-dependent
+checks; present wrong bytes, unsafe inputs and links fail closed before
+PDF parsing. The production data/build/audit inputs remain unchanged.
+
+**Scope held out:** Deployable trigger, movement/geometry, hacking
+publication, the much larger `test_curated.py`, and other indirect
+source readers require separate evidence/provenance review; none is
+bulk redirected. No N4/N5 authority, bilingual source identity, FAQ
+revision, ignored private PDF or runtime database was changed.
+
+**Windows focused validation:** The 16 complete immunity modules
+passed **138 tests**, zero skipped/failed, including all their real
+legacy pinned-source checks and maintained API/curated assertions.
+Ruff passed after wrapping five over-length function signatures;
+Pyright returned zero errors/warnings. Shared source-path tests,
+documentation and exact-commit Linux evidence are recorded separately
+below.
+
+**Next R4:** Review deployable, geometry and movement source acceptance
+as a distinct shared-source group, then curate the remaining larger
+source-test inventory by purpose. R5 receiver ACL, independent
+backup/restore and R6 actual private source migration remain
+separately gated and unapproved.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

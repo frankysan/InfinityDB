@@ -543,8 +543,11 @@ Silent/Immunity acceptance cases, plus the Reinforcements N4/N5/ITS
 applicability source test, select their own independently pinned PDF
 labels via `pinned_pdf_sources`. This does not blend editions or FAQ
 revisions or grant historical N4 rules N5 authority; mismatched sources
-fail even if another required source is missing. Other direct readers
-and test prerequisites retain their individual path contracts.
+fail even if another required source is missing. The 16 immunity evidence
+modules with fixed N5.3 Core prerequisites now use `pinned_n53_core_pdf`,
+keeping their independent hash/page assertions and curated/API outcomes.
+Other direct readers and test prerequisites retain their individual path
+contracts.
 Normal rules builds still do not open research PDFs. Override lookup paths
 belong to the external symbol producer and are independent of these PDF labels.
 
