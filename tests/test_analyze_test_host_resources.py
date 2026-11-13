@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.analyze_test_host_resources import (
+from tools.performance.analyze_test_host_resources import (
     _timestamp,
     read_capture,
     summarize_test_window,

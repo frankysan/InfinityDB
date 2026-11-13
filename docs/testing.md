@@ -4581,13 +4581,13 @@ on the same host within the same run**, not across hosts or reboots.
 This instrumentation does not change slot admission, test isolation or
 scheduling and does not require running a permanent monitor.
 
-The tracked offline analyzer `tools.analyze_chromium_timeline` reconstructs
+The tracked offline analyzer `tools.performance.analyze_chromium_timeline` reconstructs
 concurrent admission requests and held slots from completed, timestamped
 JSONL records. Run it after an instrumented benchmark, e.g. from the
 repository root on `devbox`:
 
 ```bash
-./.venv/bin/python -m tools.analyze_chromium_timeline local/benchmarks/chromium-RUN --slots 4
+./.venv/bin/python -m tools.performance.analyze_chromium_timeline local/benchmarks/chromium-RUN --slots 4
 ```
 
 Use the actual `local/benchmarks/chromium-*/` path printed by the runner.
@@ -5268,7 +5268,7 @@ earlier full-load failure and does not justify promoting
 four Chromium slots as the default.
 
 **2026-11-03 bounded CPU/RAM sampling for Chromium benchmarks (VR-0024):**
-A new `tools.sample_test_host_resources` module runs **alongside**,
+A new `tools.performance.sample_test_host_resources` module runs **alongside**,
 but never launches or modifies, independently scheduled test jobs.
 It records one JSONL metadata header, timestamped host CPU-busy
 and physical-memory-usage samples, and a final summary in a new
@@ -5282,11 +5282,11 @@ from other workloads as well as the test run. Use a unique filename
 and start the sampler just before a comparable test job:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.sample_test_host_resources --output local/benchmarks/host-load-windows-2slot.jsonl --duration-seconds 780 --interval-seconds 5
+.\.venv\Scripts\python.exe -m tools.performance.sample_test_host_resources --output local/benchmarks/host-load-windows-2slot.jsonl --duration-seconds 780 --interval-seconds 5
 ```
 
 On Linux, use
-`./.venv/bin/python -m tools.sample_test_host_resources --output local/benchmarks/host-load-linux-2slot.jsonl --duration-seconds 780 --interval-seconds 5`.
+`./.venv/bin/python -m tools.performance.sample_test_host_resources --output local/benchmarks/host-load-linux-2slot.jsonl --duration-seconds 780 --interval-seconds 5`.
 The module refuses absolute/escaping paths, overwrites and
 unbounded sampling configurations; the source/test schema is
 portable, while native measurements support Windows and Linux.
@@ -5398,12 +5398,12 @@ Linux CPU **35.58%/100%**, RAM **21.07%/25.66%**.
 Whole-capture means still include post-test time.
 
 To align captures with the real test duration, the new read-only
-`tools.analyze_test_host_resources` calculates overlap-weighted
+`tools.performance.analyze_test_host_resources` calculates overlap-weighted
 CPU/RAM percentages using sample intervals and refuses incomplete
 or malformed captures. For example on Windows:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.analyze_test_host_resources --input local/benchmarks/host-load-full-windows-20261103-fixed.jsonl --test-start 2026-11-03T08:55:33+01:00 --duration-seconds 538.37
+.\.venv\Scripts\python.exe -m tools.performance.analyze_test_host_resources --input local/benchmarks/host-load-full-windows-20261103-fixed.jsonl --test-start 2026-11-03T08:55:33+01:00 --duration-seconds 538.37
 ```
 
 Windows test-window coverage was **100%** across 109 intervals;
@@ -6671,8 +6671,8 @@ tools below for representative query-performance comparisons.
 Available benchmark and capacity tools include:
 
 ```powershell
-python tools\benchmark_runtime.py --help
-python tools\compare_runtime_benchmarks.py --help
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_runtime --help
+.\.venv\Scripts\python.exe -m tools.performance.compare_runtime_benchmarks --help
 python tools\benchmark_test_workers.py --help
 python tools\capacity_test.py --help
 python tools\deployment_resources.py --help

@@ -1,6 +1,6 @@
 """Summarize host CPU/RAM samples over a bounded, exact test window.
 
-Read an ignored JSONL capture created by tools.sample_test_host_resources.
+Read an ignored JSONL capture created by tools.performance.sample_test_host_resources.
 CPU percentages apply to the *preceding* sample interval. Report overlap-
 weighted means and reject incomplete test-window coverage.
 """
@@ -14,7 +14,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from tools.sample_test_host_resources import ROOT, resolve_output
+from tools.performance.sample_test_host_resources import ROOT, resolve_output
 
 
 def _timestamp(value: str) -> datetime:

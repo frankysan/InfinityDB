@@ -9,15 +9,18 @@ from pathlib import Path
 
 import pytest
 
-from tools.analyze_chromium_timeline import load_slot_records, summarize_timeline
-from tools.analyze_chromium_timeline import (
-    main as timeline_main,
-)
 from tools.browser_test_capacity import (
     CHROMIUM_SCHEDULING_LANES,
     browser_lane_groups,
     browser_slot,
     scenario_faq_split_lane,
+)
+from tools.performance.analyze_chromium_timeline import (
+    load_slot_records,
+    summarize_timeline,
+)
+from tools.performance.analyze_chromium_timeline import (
+    main as timeline_main,
 )
 from tools.pytest_startup_profile import (
     XdistStartupProfile,

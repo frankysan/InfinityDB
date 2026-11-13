@@ -15,6 +15,12 @@ consumers together; check important copied inputs and retain unique
 originals until the replacement is verified. Public tracked artifacts,
 private-source publication, and deployment changes remain separately scoped.
 
+**L4 implementation:** The first maintained-tool batch groups five
+Chromium/host-resource and runtime benchmark utilities under
+`tools/performance/`, updating their test imports and documented invocations.
+Existing benchmark output paths remain unchanged; the test-worker runner
+remains at the tools root pending its separate direct-execution cutover.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

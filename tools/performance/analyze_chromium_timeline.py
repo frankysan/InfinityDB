@@ -1,6 +1,6 @@
 """Reconstruct Chromium admission and wait occupancy from timestamped JSONL records.
 
-Usage: python -m tools.analyze_chromium_timeline local/benchmarks/chromium-RUN --slots 4
+Usage: python -m tools.performance.analyze_chromium_timeline local/benchmarks/chromium-RUN --slots 4
 Only complete, timestamped slot records are supported; no timeline is inferred
 from legacy duration-only files.
 """
