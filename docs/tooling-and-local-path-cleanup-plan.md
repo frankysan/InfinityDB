@@ -2681,6 +2681,116 @@ migration, and outputs must distinguish immutable research evidence,
 temporary parity work and stdout diagnostics. No retirement or
 physical relocation is approved.
 
+### Browser-acceptance and shared-helper ownership review — 2026-11-13
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`5772f5b9a1b4236b1f384489fbaf5fa18f03176a`. Reviewed 11 optional
+catalog/detail/Unit browser entrypoints and four shared project helpers
+against current source/test/CLI consumers and report-writing behavior.
+The earlier verified complete-set release-candidate browser gate remains
+its **own** acceptance contract; do not replace it with these spot/scope
+checks or silently promote optional commands into default hosted gates.
+
+**Retain independently scoped browser acceptance:**
+
+- **Catalog navigation family:** `verify_ammunition_browser` owns the
+  shared Chromium catalog-to-detail implementation, which is imported by
+  `verify_general_rules_browser`, `verify_labels_browser`,
+  `verify_states_browser` and `verify_traits_catalog_browser`.
+  The four thin entrypoints still select **different authoritative
+  identities** (qualified General Rules, source Labels/States, canonical
+  Traits with exact Wiki URLs and raw Trait labels); these are
+  independently valuable acceptance scopes, not four obsolete copies
+  of the browser loop. An L4 layout change must update all four
+  imports and direct commands together. Preserve pinned catalog
+  minima and fail-closed route/name/URL reconciliation; do not invent
+  one merged generic public release gate.
+- **Army/profile specializations:** `verify_hacking_programs_browser`
+  checks the published 12-program structured presentation and offers
+  explicit `--self-host`. `verify_non_skill_army_browser` checks
+  source-derived Equipment, Training, Marker and attribute-override
+  placement for seven pinned Unit cases; those `CASES` and `WIDTHS`
+  are imported by `verify_unit_skill_presentation_browser`. The latter
+  additionally checks shared/specific Unit rows, optional availability
+  flags, exact link targets, distance rendering and narrow viewports,
+  reusing `browser_wsgi_transport.route_browser_page`. Preserve
+  its externally used case identity and the optional filter/viewport
+  controls on relocation.
+- **Interaction/special layout checks:** `verify_rule_fragment_browser`
+  discovers actual Weapon/Glossary rule-fragment hrefs and follows
+  rendered links, with an opt-in loopback `--self-host`. It
+  participates in Chromium lane/slot tests; keep its test isolation.
+  `verify_structured_skill_charts_browser` tests data-driven Martial
+  Arts/Booty/MetaChemistry rows instead of assuming text screenshots
+  provide source-table parity.
+- **Trait external-link boundary:** `verify_trait_wiki_browser`
+  exercises actual popup/hash scrolling using a **supplied saved**
+  Wiki HTML snapshot, which it does not fetch from the network.
+  `verify_traits_catalog_browser` separately checks local catalog
+  rendering against curated Wiki destinations. Keep the offline
+  `audit_trait_wiki_anchors` source check, the local catalog browser
+  check and the snapshot-backed popup browser check distinct: none
+  establishes current third-party uptime.
+
+**Shared helper ownership and L4 import cutovers:**
+
+- `path_sanitization` has two currently observed direct `tools/`
+  consumers: `symbol_source` and `symbol_publication`.
+  Prefer colocating with the symbols tools unless an independent
+  cross-domain consumer is demonstrated; its Windows/macOS/Linux
+  filename normalization contract is **not** a generic path traversal
+  permission. Preserve unit tests and case/Unicode handling.
+- `asset_validation` owns selected symbol-manifest/static SVG hash
+  and alias validation for `run_checks`, `build_full_asset_bundle`,
+  `stage_full_asset_bundle`, `promote_symbol_publication` and
+  `verify_deployment_assets`. It belongs at the shared
+  symbols/testing/CI boundary, rather than retiring merely because
+  the external symbol processor now owns rendering. Preserve
+  off/auto/required and browser-referenced asset semantics.
+- `served_runtime` returns a strict in-memory
+  `/api/version` identity assertion, shared by
+  `report_reference_baseline` and
+  `verify_release_candidate_browser`. Keep fail-closed origin
+  validation and exact snapshot comparison, without creating a
+  duplicate version verifier under separate categories.
+- `runtime_semantic_baseline` independently pins the selected
+  database set's HTTP/HTML/SVG semantic surface, consumed by
+  `verify_complete_database_build`, `verify_checkout_server`,
+  `preview_runtime_image` and its own tests. Retain it as the
+  offline/loopback parity reference, distinct from actual Playwright
+  user interaction and hosted release verification. Its tracked
+  fixture and explicit artifact-key normalization are part of the
+  test contract.
+
+**Confirmed L2/L6 report issue:** All eleven browser commands offer
+`--output` with direct `Path.write_text` semantics and no
+exclusive-create guard. Some make parent directories; others require
+them to exist, so the same option has inconsistent error behavior.
+Treat optional JSON as per-candidate, per-browser and per-run
+validation evidence under an approved `local/validation/` path.
+Keep stdout-only invocation useful, preserve nonzero exit on failed
+cases, and avoid overwriting accepted release/baseline receipts.
+`verify_trait_wiki_browser` also takes an explicit private saved
+HTML input; never silently fetch or publish that source while
+migrating its output. Browser suite invocation and reference
+baseline fixture semantics need separate migration tests.
+
+**Focused validation at the pinned SHA:** Browser fragment
+`tests/test_verify_rule_fragment_browser.py` **12/12**;
+Unit presentation `tests/test_verify_unit_skill_presentation_browser.py`
+**34/34**, including local live-Chromium optional-filter, distance,
+contextual relationship and Spec-Ops cases;
+`tests/test_path_sanitization.py` **2/2**;
+`tests/test_asset_validation.py` **12/12**; and
+`tests/test_runtime_semantic_baseline.py` **10/10**. Total
+**70 passed, zero skipped or failed**. This is focused coverage
+for the reviewed dependency interfaces, **not** a complete
+all-engines/hosted release/browser-acceptance run. No private source,
+retained browser report, static publication, tool import, GitHub
+workflow or production runtime was modified.
+All proposed L4 moves remain **pending L1 decision and atomic
+consumer cutover**.
+
 ### L1 candidate policy decisions — proposal only
 
 **Eligible for user review, not yet approved:** Adopt the stated
