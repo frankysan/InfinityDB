@@ -17,7 +17,6 @@ from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
 RULES = ROOT / "data/generated/rules_n5.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 CITATIONS = {
     "rule:moving-and-measuring": {27, 28},
     "rule:general-movement": {29, 30},
@@ -48,11 +47,11 @@ def _get(app: Any, path: str, query: str = "") -> tuple[str, bytes]:
     return statuses[0], body
 
 
-def test_movement_source_pages_and_archived_move_requirements() -> None:
-    if not PDF.is_file():
-        pytest.skip("Pinned English N5.3 PDF unavailable")
+def test_movement_source_pages_and_archived_move_requirements(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pymupdf = pytest.importorskip("pymupdf")
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == (
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == (
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
     )
     excerpts = {
@@ -64,7 +63,7 @@ def test_movement_source_pages_and_archived_move_requirements() -> None:
              "they perform an Idle instead", "even if they enter a Null or Immobilized"),
         30: ("on both sides", "combined height is higher", "between each of those levels"),
     }
-    with pymupdf.open(PDF) as pdf:
+    with pymupdf.open(pinned_n53_core_pdf) as pdf:
         for page, phrases in excerpts.items():
             text = " ".join(pdf[page - 1].get_text().split()).casefold()
             for phrase in phrases:

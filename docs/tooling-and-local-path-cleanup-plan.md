@@ -2387,6 +2387,58 @@ source-test inventory by purpose. R5 receiver ACL, independent
 backup/restore and R6 actual private source migration remain
 separately gated and unapproved.
 
+### Thirty-second bounded L2 checkpoint — R4 deployable, spatial, terrain and phase PDF source tests (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`06f43de5a126591550055ce54800803da12f9a05`. This bounded
+source-only acceptance migration covers six maintained test modules, not
+production source paths or publication semantics:
+
+- `tests/test_deployable_trigger_cross_rules.py` selects the pinned
+  English N5.3 Core PDF for all ten source-only test groups and the
+  **separately pinned FAQ v0.1 English** source for fired-deployable
+  delivery. Original excerpt, page and SHA-256 assertions remain.
+- `tests/test_geometry_publication.py`,
+  `tests/test_movement_publication.py` and
+  `tests/test_terrain_condition_publication.py` use the shared
+  `pinned_n53_core_pdf` selector for their single-source page acceptance;
+  maintained curated, Rules database and HTTP/API checks are unchanged.
+  The two tests' optional **Wiki ZIP** evidence retains its existing
+  legacy path and independent hash; R3 Wiki archive cutover is a separate
+  decision.
+- `tests/test_phase_source_review.py` uses the single Core fixture
+  for its English clauses and `pinned_pdf_sources` for the independent
+  English/Spanish Lieutenant discrepancy. No bilingual interpretation,
+  official clarification status or source authority was normalized.
+- `tests/test_turn_sequence_publication.py` selects its English and
+  Spanish Core pins **individually**, retaining their separate parametric
+  source checks and curated/publication assertions.
+
+Selection is explicit via `--reference-pdf-layout legacy|local` (default
+`legacy`), with **no** cross-layout fallback. Missing selected source-only
+PDFs skip only the dependent tests; present incorrect, unsafe or
+unapproved bytes fail closed before parsing. The shared selector and
+its missing-sibling/hash-drift guarantees are not modified.
+
+**Windows focused validation:** Complete six modules passed
+**137 tests**, zero skipped/failed, against the actual legacy pinned
+Core/FAQ English and Spanish PDFs. Shared
+`tests/test_research_source_paths.py` passed **42, two skipped**:
+**179 passed, two skipped, zero failed** for this batch. Ruff and the
+canonical `run_checks(type)` stage passed (Pyright: zero errors/warnings).
+A direct standalone Pyright invocation without the checkout's explicit
+Python interpreter reported unresolved environment dependencies; the
+canonical typed stage supplied its configured `--pythonpath` and passed.
+Documentation lint, links, backlog checks and Git whitespace checks
+also passed. Linux exact-SHA verification remains a separate follow-up gate.
+
+**Next R4:** Partition remaining direct source readers, particularly
+`test_curated.py` and the other fixed-path source families, by current
+acceptance purpose before redirecting anything. R5 real receiver ACL,
+independent backup/restore and R6 private-data migration remain
+unapproved; no ignored PDF, Wiki archive, override, Syncthing asset or
+runtime database was moved or deleted here.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

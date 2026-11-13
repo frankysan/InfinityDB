@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 from wsgiref.util import setup_testing_defaults
@@ -61,10 +62,10 @@ def _records() -> dict[str, dict[str, Any]]:
 
 @pytest.mark.parametrize("relative,digest", SOURCE_PINS)
 def test_turn_sequence_reviewed_source_pins(
-    relative: str, digest: str, require_source_files: Any,
+    relative: str, digest: str,
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
 ) -> None:
-    source = ROOT / relative
-    require_source_files(source)
+    source = pinned_pdf_sources({relative: digest})[relative]
     assert hashlib.sha256(source.read_bytes()).hexdigest() == digest
 
 
