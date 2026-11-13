@@ -1291,6 +1291,157 @@ full-suite or hosted exact-SHA CI, Linux parity,
 live acquisition, live Docker/full-assets handoff
 or source/backup restoration validation.
 
+### Eighteenth bounded L2 checkpoint — reader/producer path-cutover decision package (2026-11-13)
+
+**Status:** **Read-only planning completed; no path migration approved or
+executed.** Baseline: clean `dev/tooling-workspace-cleanup` at
+`df65f6b1e2a75d21d50975392f5eeb1d544699e4`. The preceding
+[writer closeout](#seventeenth-bounded-l2-writer-classification-and-remaining-output-safety-closeout-2026-11-13)
+covers no-clobber evidence, but *not* read-side path changes. This
+checkpoint traced actual CLI defaults, source-plan and manifest
+interfaces, source-audit pins and Syncthing activation across four
+repositories; it does not claim a complete private-file inventory.
+
+**Independent source checkouts inspected without editing:**
+`InfinityDB-army-acquisition` `main` at
+`7926c0f3968ae60915f48a443f8327718e9787ec`;
+`InfinityDB-wiki-acquisition` `main` at
+`2fd89373afc1c3bd5dab3c74ee96da114412b168`;
+`InfinityDB-symbol-tools` `main` at
+`54700b78a7650b6299bd0d87bbb05da6c8f52815`. All three were clean.
+`InfinityDB-products` contains separate ongoing product and
+miniature changes; **exclude it from this source-path cutover**.
+These revisions describe the inspected code, not current hosted CI
+or an approved multi-repository commit set.
+
+#### Exact current and *proposed* path mapping
+
+Paths are repository-relative unless an external staging root is
+shown. Proposed destinations describe a potential future family
+cutover only; no new default, prefix match or fallback is active.
+
+| Family / owner | Current production or development contract | Proposed destination, not yet activated | Consumers and required adaptation |
+| --- | --- | --- | --- |
+| **A1 Army original ZIP** — `InfinityDB-army-acquisition` | `infinity-army-snapshot [data/raw] --manifest-dir data/manifests/snapshots`; immutable `JSON YYYYMMDD-HHMMSS[-N].zip` | `local/data/raw/army/<original ZIP basename>` | `src/infinity_army_data/cli.py:DEFAULT_RAW_DIRECTORY` and `latest_snapshot`; `tools.army_snapshot_source.resolve_army_snapshot`; symbol source/override plan exports; Syncthing `raw/` sender/receiver |
+| **A2 provenance pair** — three acquisition packages | `data/manifests/snapshots/<archive stem>.json` | `local/data/manifests/snapshots/<archive stem>.json` | `tools.activate_synced_assets` assumes the current staged `snapshots/` directory and `snapshot.archive.path` can be mapped to `data/raw/` or `data/wiki/`; `load_snapshot_manifest(archive=...)` independently validates both hashes |
+| **W1 Wiki / Human Sphere ZIPs** — `InfinityDB-wiki-acquisition` | `--root data/wiki --work-root data/work/wiki --manifest-dir data/manifests/snapshots`; `WIKI-en`, `WIKI-es` and `HUMAN-SPHERE` archive stems | `local/data/wiki/<original ZIP basename>` and `local/data/work/wiki/<run-specific crawl>` | Preserve distinct site/language identities and incomplete-crawl work; explicit `--root`, `--work-root`, `--resume-work` consumers; staged `wiki/` folder and snapshot-manifest mapping |
+| **P1 PDF originals** — manually sourced official material | `data/pdf/rules/`, `data/pdf/faq/`, `data/pdf/its/`, `data/pdf/legacy/` | Same relative subtrees under `local/data/pdf/` | Tracked `data/curated/rules/*.json` `localPath` values and `config/validation/*.json` hash pins, `audit_1_0_reference_inputs`, `audit_pdf_revision_deltas` and other PDF readers; Syncthing `pdf/` and `--file data/pdf/...` |
+| **S1 reviewed symbol overrides** — external `InfinityDB-symbol-tools` | Main checkout `image_overrides/`, Syncthing receiver `image-overrides/`; symbol-tools examples use explicit `--overrides local/image_overrides` in the *producer checkout* | Main `local/data/symbols/overrides/` (exact member basenames retained) | `activate_synced_assets` has fixed `image_overrides` prefix; producer override lookups contain relative override paths, not raw ZIP paths; explicit `--overrides` selection and source hashes need separate producer contract acceptance |
+| **S2 raw/effective symbol handoff** | Producer defaults `data/raw/symbols/`, `data/manifests/snapshots/`; separate `.raw-report.json`; effective ZIP and processing receipts are producer-managed | For accepted consumer imports, `local/handoffs/symbol-tools/<source-SHA-or-run-id>/` and, only if needed, `local/data/raw/symbols/` | InfinityDB `export_symbol_source_plan`, `export_symbol_override_lookups`, `verify_raw_symbol_handoff` and later processed-publication verifiers all require explicit, hash-pinned selected files. Do **not** infer a complete `army-symbol-build.json` or browser publication from the raw ZIP |
+| **B1 ignored build work** — InfinityDB | `data/work/build/`, `data/work/its/` and other explicitly selected scratch | `local/data/work/build/` or source-specific `local/work/` only after builder/fixture review | Complete Army/Rules/ITS build, temporary raw sibling, source normalization, standalone `build-rules`, and tests; keep current defaults until a complete-set build on both platforms proves parity |
+| **E1 output evidence** — multiple tools | Root `reports/`, `data/reports/`, `data/logs/`, historical `docs/audits/` | New reports in domain-scoped `local/validation/`, `local/research/`, `local/performance/` and `local/operations/` | New receipts already recommend `local/`; existing archives, recovery logs and 19 inaccessible directories need separate retention, ownership and ACL decisions; **not part of a source ZIP migration** |
+| **X1 tracked serving/publication** — InfinityDB | `data/generated/{army.db,rules_n5.db,its_18.db}`, `data/curated/`, `data/manifests/symbol-publication.json` | **No move** | Three-file build and serving, Docker, cached revision, source-reviewed rules, processed SVG publication and exact-SHA release acceptance |
+
+The conceptual `local/data/` destinations follow the accepted P
+conventions. Do **not** impose InfinityDB's target layout as an
+automatic change to each standalone producer repository's own
+`data/` and `local/` conventions. Its selected *handoff artifacts*
+must be validated before importing them; no private folders are
+implicitly shared, mounted or synchronized between repositories.
+
+#### Critical reader/provenance compatibility findings
+
+1. **Archive location is not a portable activation authority.**
+   The immutable v3 snapshot contract stores
+   `snapshot.archive.{name,sha256}` and
+   `snapshot.contentSha256`. The generic verifier checks those
+   hashes against an *explicitly provided* archive, treating a
+   producer-relative `archive.path` as informational. In contrast,
+   `tools/activate_synced_assets.py:_snapshot` requires
+   `archive["path"]`, only accepts `data/raw/` or
+   `data/wiki/`, and uses it to choose a fixed `raw/` or
+   `wiki/` receiver mapping. A producer run outside the selected
+   project root may omit the optional path entirely. Merely changing
+   the producer destination to `local/data/` therefore **breaks
+   activation**. Proposed fix for a separately reviewed change:
+   select an explicit *source layout* and map the validated archive
+   basename/type to a configured staging family, retaining the
+   original manifest bytes and both hashes. Accept old/new declared
+   path forms only under explicit layout selection; never derive
+   absolute host paths from untrusted manifest text.
+2. **Latest-archive discovery is not migration-safe.**
+   `infinity_army_data.cli.latest_snapshot` currently searches
+   `data/raw/*.zip` and chooses by filesystem mtime (then name).
+   Copies may alter mtimes; when legacy and local roots both contain
+   ZIPs, a silent newest-file search across both can select the
+   wrong source. Pilot all new-layout operations with a **selected
+   exact archive and manifest**. The eventual default cutover
+   must reject ambiguous dual-root discovery and verify source
+   revision, metadata, ZIP SHA-256 and manifest identity.
+3. **Source-pinned PDF `localPath` is tracked evidence, not a
+   disposable link.** Multiple `data/curated/rules/` and
+   `config/validation/` records refer to exact `data/pdf/`
+   relative paths and SHA-256 values; some auditors enforce a
+   `data/pdf/rules/` prefix. Relocating a PDF without a reviewed
+   path-binding change may mark genuine evidence missing, or break
+   source validation. Preserve original PDFs and hash records.
+   Updating tracked path labels requires an independent schema,
+   source identity, direct-reader and reference-report review.
+4. **Provenance code has multiple owners after extraction.**
+   InfinityDB's `src/infinity_db/snapshot_provenance.py` now
+   publishes manifest files with an exclusive stage plus
+   non-replacing hard link. As inspected here, the standalone
+   Army/Wiki/Symbol repositories still use a fixed `.json.tmp`
+   followed by `Path.replace`. Their v3 *data format* is compatible,
+   but their concurrent-writer safety behavior is not yet aligned.
+   Plan an explicit, independently tested change in each producer
+   (rather than importing InfinityDB runtime code), including
+   Windows/Linux hard-link support and identical-versus-different
+   output races; preserve the original archive's basename and
+   manifest bytes. No external repository was edited in this pass.
+5. **Source copies are not a Syncthing or backup cutover.**
+   Current Windows Send Only and Linux Receive Only configuration
+   uses five legacy folders: `data/raw`→`raw/`,
+   `data/wiki`→`wiki/`, `data/pdf`→`pdf/`,
+   `data/manifests/snapshots`→`snapshots/`,
+   `image_overrides`→`image-overrides/`.
+   `INFINITYDB_SYNC_STAGING_ROOT` controls the Linux worker's
+   external staging root; activation defaults to a dry run and
+   requires `--apply` for checkout writes. Its real ACL,
+   synchronization state, backup versioning and source snapshots
+   **have not been checked now**. Do not rename Syncthing folders,
+   make the worker a writer or change a sender root as part of a
+   reader-only patch. Syncthing is not an independent backup.
+
+#### Dependency order and narrowly bounded future acceptance
+
+| Gate | Next operation | Acceptance before advancing |
+| --- | --- | --- |
+| **R1 — read-only Army selection** | Add *explicit*, independently hash-verified new-root input selection to consumer code; legacy default remains unchanged. This is the first recommended implementation slice | Test identical source at both roots, mismatched SHA-256, missing/ambiguous metadata, selected vs newest semantics, no-network normal build, three-database identity from an explicitly selected archive, Windows and Linux fixture parity |
+| **R2 — provenance contract** | Align standalone Army/Wiki/Symbol manifest publication with no-replace/idempotent semantics; define schema-neutral path handling for an explicit consumer-selected archive | Producer mock acquisitions on pinned revisions; manifest byte/hash comparison with InfinityDB; successful same/different collision tests on each host; no fallback and no deletion of other producer's output |
+| **R3 — reader/activation selection** | Design and test a separately configured legacy/local source-layout mapping, leaving the current five staged folders and destinations working | Hermetic staged-pair tests for both layouts, malformed/outside-root paths, duplicate names, symlinks, hash conflicts, inaccessible staging, no writes in verify/preview; explicit `--apply` only against a disposable test checkout |
+| **R4 — PDFs / overrides** | Inventory each pinned source and owner, then prepare a per-family path-binding patch; keep source labels and validation hashes stable until accepted | Review curated `localPath` semantics and fixed-prefix audits; compare PDF/override hashes; preserve read-only source checks, reviewed lookups and the symbol processing/publication distinction |
+| **R5 — operations and source synchronization** | Refresh exact Windows sender/Linux receiver/ACL facts and prepare one reversible M-copy proposal *after* reader changes | Independent backups and **tested restore**; source/manifest SHA inventory, source-selection conflict scan, paused/verified Syncthing during any root change, Linux worker read-only ACL and dry-run activation, rollback plan |
+| **R6 — physical cutover / cleanup** | Only with separate family-specific approval, copy and verify the eligible ignored originals; later decide deletion/retirement independently | Identical hashes/manifest contents, all named consumers switched, Windows/Linux checks, Syncthing and backup recovery accepted; do not alter the tracked three-file serving contract |
+
+**No gate above is authorized merely by this decision package.**
+R1 can begin separately as a reversible code-and-test slice because
+it does not require physical file moves or producer modifications.
+R2–R5 should not be bundled as an unreviewed path rewrite.
+An M-copy decision needs *exact* per-file old/new paths, hashes,
+matched source/provenance, access and verified recovery. M-delete
+is a later decision with independent sign-off. L4 tool relocation
+and tracked T retirements remain separately gated.
+
+**Focused current-contract verification:** Windows hermetic tests
+`tests/test_activate_synced_assets.py` **15 passed / 3 skipped**,
+`tests/test_cli.py` **7 passed**,
+`tests/test_army_snapshot_source.py` **6 passed** and
+`tests/test_export_symbol_source_plan.py` **6 passed**:
+**34 passed, 3 skipped; no failures**. These prove only the
+legacy/explicit interfaces exercised by those fixtures; they
+are **not** a completed new-layout cutover, producer-network
+test, external Syncthing snapshot, Linux parity or full CI.
+No current output default, producer package, tracked source
+record, ignored source byte, repository linkage or Git branch
+was changed by the inventory itself.
+
+**L2 state: OPEN.** The writer-safety sub-scope has closed.
+This checkpoint supplies the non-destructive consumer/producer
+decision basis for future R1–R6 acceptance and is *not*
+the L2 exit described under
+[execution phases](#l2--migrate-writers-readers-and-cross-repository-handoffs).
+
 ## Observed starting condition
 
 The initial root-level inspection found:

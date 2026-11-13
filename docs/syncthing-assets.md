@@ -20,6 +20,16 @@ Windows is the authoritative **Send Only** Syncthing device; `linux-dev` is
 | `data/manifests/snapshots/` | `~/syncthing/infinitydb/snapshots/` |
 | `image_overrides/` | `~/syncthing/infinitydb/image-overrides/` (optional) |
 
+**L2 path-cutover boundary:** The
+[reader/producer decision package](tooling-and-local-path-cleanup-plan.md#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13)
+proposes `local/data/` source destinations but does **not** activate
+them. The current activation tool interprets snapshot
+`archive.path` using the legacy `data/raw/` and `data/wiki/`
+prefixes; changing sender roots or producer manifest paths first
+would break verification/activation. Keep the five current folders,
+their IDs and the receiver permissions unchanged until a reviewed,
+explicit dual-layout mapping and cross-host acceptance exist.
+
 The Syncthing folder IDs must match between the devices; their physical
 paths need not. The optional Linux receiver uses `image-overrides/` (hyphen),
 while the repository destination remains `image_overrides/` (underscore). The

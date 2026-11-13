@@ -56,10 +56,16 @@ when all contained work shares the same owner.
   retirements (T) and private-data migration (M) still require separate
   decisions and recovery evidence. The
   [L2 writer-safety closeout](tooling-and-local-path-cleanup-plan.md#seventeenth-bounded-l2-writer-classification-and-remaining-output-safety-closeout-2026-11-13)
-  covers the non-destructive output contracts; L2 is **still open** for
-  verified source-reader paths, cross-repository producer/Syncthing handoffs,
-  and independently approved, reversible path cutovers. Do not equate
-  writer-safety completion with L2 exit, L3 migration or L4 retirement.
+  covers the non-destructive output contracts. The
+  [L2 reader/producer cutover decision package](tooling-and-local-path-cleanup-plan.md#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13)
+  maps current Army/Wiki/Symbol/PDF paths and their consumers to candidate
+  `local/` destinations, including the embedded-provenance and Syncthing
+  blockers. **Next bounded implementation: R1, explicit hash-verified Army
+  source selection without changing the legacy default or moving sources.**
+  Follow with separately verified producer provenance and staged activation
+  contracts (R2/R3); pinned PDFs/overrides and any private-data migration
+  require distinct approval. L2 remains open: writer-safety closeout is not
+  L2 exit, L3 migration or L4 retirement.
 
 ### Backlog and development workflow simplification
 

@@ -66,7 +66,10 @@ ASCII art, keeping labels readable in both source and rendered form.
   [architecture](architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
   and [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective);
   existing paths and commands are not migrated by that approval. All current
-  root tools are named in the L0 record; recovery/host evidence remains open. The
+  root tools are named in the L0 record; recovery/host evidence remains open.
+  The [L2 reader/producer decision package](tooling-and-local-path-cleanup-plan.md#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13)
+  maps candidate paths and the non-destructive R1–R6 acceptance order;
+  it is not permission to change live paths or Syncthing. The
   [backlog](TODO.md) owns the implementation task.
 
 ## Completed strategic migrations
