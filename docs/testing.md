@@ -6362,9 +6362,12 @@ results do not turn local fixture checks into current hosted/release acceptance.
 staged-asset layouts in disposable directories: legacy/local pair parity,
 read-only verification/preview, explicit apply, historical provenance,
 path/schema/hash rejection, duplicate selection, symlinks, inaccessible inputs
-and destination conflicts. It also verifies that local snapshot selection
-does not relocate PDFs or overrides. Real source synchronization, receiver ACLs
-and backup/restore acceptance are separate from these hermetic fixtures; see
+and destination conflicts. It also verifies explicit local-file destinations
+for PDFs and overrides under `local/data/`, while preserving the legacy
+default and current Syncthing staging folders. Mixed-layout file requests,
+receiver-path confusion and conflicting destination bytes fail closed.
+Real source synchronization, receiver ACLs and backup/restore acceptance
+are separate from these hermetic fixtures; see
 the [activation runbook](syncthing-assets.md#explicit-snapshot-layouts).
 
 `tests/test_research_source_paths.py` covers explicit physical PDF selection

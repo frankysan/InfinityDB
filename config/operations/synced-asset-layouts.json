@@ -22,8 +22,8 @@
         "symbols": {"staging": "raw/symbols", "destination": "local/data/raw/symbols"}
       },
       "files": {
-        "data/pdf": "pdf",
-        "image_overrides": "image-overrides"
+        "local/data/pdf": "pdf",
+        "local/data/symbols/overrides": "image-overrides"
       }
     }
   }

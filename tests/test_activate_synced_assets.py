@@ -497,27 +497,60 @@ def test_default_layout_never_implicitly_selects_local_paths(staging):
     assert list(checkout.iterdir()) == []
 
 
-@pytest.mark.parametrize("relative,folder", [
-    ("data/pdf/rules/n5.pdf", "pdf/rules"),
-    ("image_overrides/sample.svg", "image-overrides"),
+@pytest.mark.parametrize("legacy,local,folder", [
+    ("data/pdf/rules/n5.pdf", "local/data/pdf/rules/n5.pdf", "pdf/rules"),
+    (
+        "image_overrides/Unit/example.svg",
+        "local/data/symbols/overrides/Unit/example.svg",
+        "image-overrides/Unit",
+    ),
 ])
-def test_local_snapshot_layout_preserves_legacy_pdf_and_override_destinations(
-    staging, relative, folder,
+def test_local_file_layout_selects_explicit_destination_without_fallback(
+    staging, legacy, local, folder,
 ):
     staged, checkout = staging
-    source = staged / folder / Path(relative).name
+    source = staged / folder / Path(legacy).name
     source.parent.mkdir(parents=True, exist_ok=True)
     source.write_bytes(b"explicit unpinned test evidence")
-    args = ["activate", "--layout", "local", "--file", relative]
+    # A selected layout never accepts the other layout's requested path.
+    for layout, wrong in (("legacy", local), ("local", legacy)):
+        assert _run([
+            "activate", "--layout", layout, "--file", wrong, "--apply",
+        ], staged, checkout) == 1
+    assert list(checkout.iterdir()) == []
+    args = ["activate", "--layout", "local", "--file", local]
     assert _run(args, staged, checkout) == 0
     assert list(checkout.iterdir()) == []
     assert _run([*args, "--apply"], staged, checkout) == 0
-    assert (checkout / relative).read_bytes() == source.read_bytes()
-    assert not (checkout / "local").exists()
+    assert (checkout / local).read_bytes() == source.read_bytes()
+    assert not (checkout / legacy).exists()
+    assert _run([*args, "--apply"], staged, checkout) == 0
+
+
+def test_local_file_layout_refuses_other_staging_siblings_and_conflicts(staging):
+    staged, checkout = staging
+    (staged / "image_overrides/Unit").mkdir(parents=True)
+    (staged / "image_overrides/Unit/sample.svg").write_bytes(b"wrong receiver name")
+    relative = "local/data/symbols/overrides/Unit/sample.svg"
+    args = ["activate", "--layout", "local", "--file", relative, "--apply"]
+    assert _run(args, staged, checkout) == 1
+    assert list(checkout.iterdir()) == []
+    (staged / "image-overrides/Unit").mkdir(parents=True)
+    source = staged / "image-overrides/Unit/sample.svg"
+    source.write_bytes(b"correct receiver name")
+    dest = checkout / relative
+    dest.parent.mkdir(parents=True)
+    dest.write_bytes(b"operator-owned override")
+    assert _run(args, staged, checkout) == 1
+    assert dest.read_bytes() == b"operator-owned override"
+    assert source.read_bytes() == b"correct receiver name"
 
 
 @pytest.mark.parametrize(
-    "failure", ["version", "unknown-layout", "pdf-relocation", "duplicate-key"],
+    "failure", [
+        "version", "unknown-layout", "pdf-relocation", "override-relocation",
+        "mixed-layout", "duplicate-key",
+    ],
 )
 def test_invalid_layout_policy_is_rejected_without_fallback(staging, failure):
     staged, checkout = staging
@@ -528,7 +561,11 @@ def test_invalid_layout_policy_is_rejected_without_fallback(staging, failure):
     elif failure == "unknown-layout":
         document["layouts"]["automatic"] = document["layouts"]["local"]
     elif failure == "pdf-relocation":
-        document["layouts"]["local"]["files"] = {"local/data/pdf": "pdf"}
+        document["layouts"]["local"]["files"]["data/pdf"] = "pdf"
+    elif failure == "override-relocation":
+        document["layouts"]["local"]["files"]["image_overrides"] = "image-overrides"
+    elif failure == "mixed-layout":
+        document["layouts"]["legacy"]["files"] = document["layouts"]["local"]["files"]
     payload = json.dumps(document)
     if failure == "duplicate-key":
         payload = payload.replace('"format":', '"format": "shadow", "format":', 1)

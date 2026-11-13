@@ -109,11 +109,11 @@ Preview a selected pair on Linux without changing the checkout:
 ./.venv/bin/python -m tools.activate_synced_assets activate --layout local --snapshot 'JSON 20260929-114335'
 ```
 
-Under the R3 reader-only acceptance, apply the new layout **only to disposable
-test checkouts**, with explicit `--apply`; the examples above deliberately
-preview. Source migration approval is separate. PDF and override activation
-retains its existing `data/pdf/` and `image_overrides/` destinations in both
-layouts; new pinned PDF/override locations remain R4 work.
+The R3 snapshot and R4 individual-file mappings permit `--layout local`
+**only as a selected, non-destructive capability**. Real source migration
+remains unapproved. Use `--apply` with the local layout only in disposable
+test checkouts until an independently reviewed source-family copy decision.
+None of these commands changes the five Syncthing staging folders.
 
 Snapshot and manifest basenames must agree. Duplicate selections, case-colliding
 manifest names and non-lowercase `.json` suffixes fail closed. Full-pair
@@ -126,22 +126,35 @@ selection; prior conflicting bytes are never overwritten or deleted.
 
 ### Individual PDFs and overrides
 
-PDFs and optional local override evidence have no mandatory archive manifest pin.
-The external producer owns override application; syncing these files does not
-make them an InfinityDB build input.
-Activate an individual file explicitly; the command measures its SHA-256 but
-cannot independently establish original provenance:
+PDFs and optional override evidence have no mandatory snapshot manifest pin.
+The external symbol producer owns override lookup/application; activating these
+files does **not** approve new artwork or make it an InfinityDB build input.
+The command measures a SHA-256 of its selected staged file but cannot establish
+original provenance. These are the two **explicit** file layouts:
+
+| Selection | Staged source | Checkout destination |
+| --- | --- | --- |
+| Default `--layout legacy` | `pdf/<relative>.pdf` | `data/pdf/<relative>.pdf` |
+| Default `--layout legacy` | `image-overrides/<relative>.svg` | `image_overrides/<relative>.svg` |
+| Explicit `--layout local` | `pdf/<relative>.pdf` | `local/data/pdf/<relative>.pdf` |
+| Explicit `--layout local` | `image-overrides/<relative>.svg` | `local/data/symbols/overrides/<relative>.svg` |
 
 ```bash
 ./.venv/bin/python -m tools.activate_synced_assets activate --file 'data/pdf/rules/n5-rules-v5.3-en.pdf'
-./.venv/bin/python -m tools.activate_synced_assets activate --file 'data/pdf/rules/n5-rules-v5.3-en.pdf' --mode symlink --apply
+./.venv/bin/python -m tools.activate_synced_assets activate --layout local --file 'local/data/pdf/rules/n5-rules-v5.3-en.pdf'
+./.venv/bin/python -m tools.activate_synced_assets activate --layout local --file 'local/data/symbols/overrides/Unit/example.svg'
 ```
 
-Paths in `--file` must be relative to the repository and restricted to
-`data/pdf/` and `image_overrides/`. Raw/wiki snapshot ZIPs must go
-through `--snapshot` to ensure their hashes are verified first.
-The tool refuses symlinks within the staging source and destination conflicts.
-Existing tracked files are outside its permitted destination paths.
+These commands are previews. In the local layout, `--apply` remains restricted
+to disposable test checkouts until a family-specific M-copy approval. Both
+layouts reject a path belonging to the other layout and never search an
+alternate checkout/staging root. Nested relative basenames are preserved;
+receiver `image-overrides` (hyphen) is **not** renamed. Raw/wiki snapshot ZIPs
+must use `--snapshot` and its independent provenance verification. The tool
+refuses staged symlinks and differing existing destination bytes, and cannot
+replace a tracked published artifact. Independently hash-check selected PDFs
+against the reviewed source pins **before any research or publication use**;
+read-only activation does not make unpinned staged bytes authoritative.
 
 ## MCP worker policy
 

@@ -72,13 +72,16 @@ when all contained work shares the same owner.
   adds explicit configured legacy/local snapshot selection and
   Windows/Linux fixture parity, retaining the current staging folders.
   The [first R4 checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-second-bounded-l2-checkpoint--r4-inventory-and-first-pdf-binding-2026-11-13)
-  inventories PDFs/overrides and adds an explicit read-only PDF binding
-  for the Reinforcements evidence reader without changing provenance.
-  **Next:** extend PDF binding to the reference reporter and review
-  revision-delta/direct-reader and staged PDF/override contracts (R4).
+  inventories PDFs/overrides and adds the Reinforcements PDF binding.
+  [R4 research readers](tooling-and-local-path-cleanup-plan.md#twenty-third-bounded-l2-checkpoint--r4-read-only-reference-and-revision-delta-pdf-consumers-2026-11-13)
+  now include the reference reporter and revision-delta audit; the
+  [R4 activation checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-fourth-bounded-l2-checkpoint--r4-explicit-staged-pdf-and-override-destinations-2026-11-13)
+  provides explicit local PDF/override destinations in disposable checkouts.
+  **Next:** audit remaining direct PDF readers and test-source prerequisites,
+  then validate cross-host source and override selection (R4/R5).
   Source relocation and private-data migration still require separate
-  approval; hosted/release acceptance remains independent. L2 and R4
-  remain open; reader implementation is not physical migration acceptance.
+  approval and backup/restore evidence. L2/R4 remain open, and hosted/release
+  acceptance remains independent of fixture validation.
 
 ### Backlog and development workflow simplification
 

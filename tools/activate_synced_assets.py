@@ -110,14 +110,22 @@ def _layouts(path: Path) -> dict[str, Layout]:
             record["manifest"], source="snapshots",
             destinations=("data/manifests/snapshots", "local/data/manifests/snapshots"),
         )
-        files = _object(record["files"], {"data/pdf", "image_overrides"})
+        # Direct-file activation is a separate, explicitly selected layout contract.
+        # Staging roots stay on the existing receiver folders; no sender cutover.
+        file_families = (
+            {"data/pdf": "pdf", "image_overrides": "image-overrides"}
+            if name == "legacy" else {
+                "local/data/pdf": "pdf",
+                "local/data/symbols/overrides": "image-overrides",
+            }
+        )
+        files = _object(record["files"], set(file_families))
         for destination, staged in files.items():
             if not isinstance(staged, str):
                 raise ActivationError("Layout paths must be strings")
             _route(
                 {"staging": staged, "destination": destination},
-                source="pdf" if destination == "data/pdf" else "image-overrides",
-                destinations=(destination,),
+                source=file_families[destination], destinations=(destination,),
             )
         layouts[name] = Layout(
             manifest,
@@ -317,7 +325,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     choice.add_argument(
         "--file",
-        help="Repository-relative path under data/pdf/ or image_overrides/ (unpinned).",
+        help="Explicit PDF/override path in the selected layout (unpinned).",
     )
     activate.add_argument("--mode", choices=("copy", "symlink"), default="copy")
     activate.add_argument("--apply", action="store_true", help="Perform checkout writes.")
@@ -360,13 +368,8 @@ def main(
         if args.snapshot:
             items = _snapshot(args.snapshot, staging_root, layout, legacy=args.layout == "legacy")
         else:
-            rel = _relative(args.file)
-            is_pdf = rel.parts[:2] == ("data", "pdf") and len(rel.parts) > 2
-            is_override = len(rel.parts) > 1 and rel.parts[0] == "image_overrides"
-            if not (is_pdf or is_override):
-                raise ActivationError(
-                    "Direct file activation is limited to PDFs and image overrides"
-                )
+            # The reviewed policy permits only the two file families of this
+            # exact layout; never infer a sibling destination or search both roots.
             source = _file_without_links(
                 _source_for(staging_root, args.file, layout.files), staging_root
             )

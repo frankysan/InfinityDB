@@ -1871,6 +1871,48 @@ hash-authority assumptions; separately review staged PDF/override mappings,
 including current published source labels and producer lookup provenance.
 Do not treat this code-only selection as private-source migration approval.
 
+### Twenty-fourth bounded L2 checkpoint — R4 explicit staged PDF and override destinations (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`e22cd031d39118f122de6c558d373ddc08f00a33`. Previously,
+`tools.activate_synced_assets activate --layout local --file` still copied
+individual PDFs and overrides to `data/pdf/` and `image_overrides/`, even
+though snapshot pairs supported the explicit `local/data/` layout. This
+was a reader/activation mapping inconsistency, not approval to migrate
+private sources.
+
+The reviewed version-1 staged-asset policy now maps **only explicitly
+selected** `--layout local --file` requests to
+`local/data/pdf/<relative>` and
+`local/data/symbols/overrides/<relative>`, retaining the current
+`pdf/` and hyphenated `image-overrides/` receiver folders. The unchanged
+`legacy` default still maps to `data/pdf/` and `image_overrides/`.
+Each layout permits exactly its own two destination prefixes; mixed
+roots, invalid policy keys, nonexistent staged paths, unsafe names,
+symlinks and conflicting destination bytes are rejected without fallback.
+An explicit dry run creates no checkout files. The existing `--apply`
+mechanism was exercised **only against disposable fixture checkouts**.
+Snapshot pair mappings and their v1/v2/v3 provenance validation are
+unchanged. This does not reconfigure Syncthing, update producer lookup
+identities, validate artwork or make measured-only unpinned files an
+authoritative published source.
+
+The [staging runbook](syncthing-assets.md#individual-pdfs-and-overrides)
+now specifies both layouts and insists on independent source-pin checks
+before research/publication use. **Windows focused validation:**
+`tests/test_activate_synced_assets.py` **103 passed, four skipped**,
+`test_snapshot_provenance.py` **23 passed**, and
+`test_research_source_paths.py` **40 passed, two skipped**:
+**166 passed, six skipped, zero failures**. The skips are optional
+filesystem/symlink evidence cases on Windows. Repository lint, Pyright
+(zero errors/warnings), documentation lint/links/backlog and whitespace
+checks passed. Hosted exact-SHA CI, Linux parity and real receiver
+activation are separate acceptance gates.
+R4 continues with direct fixed-path PDF auditors and source-dependent
+test setup; R5 private backup/restore and R6 physical moves/deletions
+remain unapproved and blocked. No ignored source or published artifact
+was moved, altered or deleted.
+
 ## Observed starting condition
 
 The initial root-level inspection found:
