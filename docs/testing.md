@@ -6877,6 +6877,18 @@ Generate ignored review artifacts from the repository root, replacing `RUN_ID`:
 .\.venv\Scripts\python.exe -m tools.report_reference_baseline --json-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.json --markdown-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.md
 ```
 
+Use a new, run-specific directory for every attempt. All selected report
+outputs—baseline JSON, Markdown, current citation minimum JSON, explanation
+reconciliation, review batch plans and review pilots—must be new files.
+The command checks every selected destination for existing files or symlinks
+and rejects duplicate resolved paths before collecting evidence. Each writer
+uses exclusive file creation, protecting earlier reports if a collision
+appears during the audit. The individual writes are not an atomic multi-file
+transaction: an interrupted attempt can leave new partial evidence for
+inspection; do not delete accepted earlier reports to reuse names. Historical
+explicit `local/audits/` destinations remain supported as paths, but
+pre-existing artifacts at those destinations are never overwritten.
+
 For a server using exactly the inventoried Army and Rules databases, add
 `--verify-server http://127.0.0.1:8000` (substitute the actual server origin).
 The check compares `/api/version` with the runtime snapshot identity computed

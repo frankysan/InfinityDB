@@ -403,6 +403,47 @@ Pyright (zero errors/warnings), documentation lint/links/backlog and
 cross-platform byte parity and exact-SHA CI acceptance were not run.
 T retirements and M private-source actions remain unapproved.
 
+### Sixth bounded L2 output-contract update — reference-baseline reports (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`8865a50ef7f0231e057d1293bd172c5df216eeaf`, after the
+generic determinism manifest guard. The multi-purpose
+`tools.report_reference_baseline` CLI previously used unconditional
+`Path.write_text` for its JSON and Markdown reports, current citation
+minimum, explanation reconciliation, review batches and review pilot.
+Repeated explicit paths could silently replace accepted source/audit
+evidence.
+
+The CLI now preflights **all four selected output arguments** before
+running a source inventory or audit, rejecting previously existing
+files, dangling symlinks, and two filenames resolving to the same
+destination. All report branches use a shared exclusive-create writer,
+preserving UTF-8, LF and existing JSON/Markdown serialization; later
+collisions cannot truncate earlier reports. The prior output switches,
+reconciliation flags, source verification, comparison semantics and
+stdout-only invocation remain intact. The
+[testing guide](testing.md) describes fresh
+`local/validation/` run directories, without changing old
+`local/audits/` input/output paths or producer defaults.
+
+**Known limitation:** Output writing is **not atomic across multiple
+files**. A late collision or interruption may leave one *new* report
+while another fails, and partially created new files require inspection.
+Existing report bytes are never deliberately replaced. This is
+a prospective, non-destructive L2 output-contract guard, not migration
+authorization. T retirements and M private-source actions remain pending.
+
+**Validation:** The Windows reference-baseline suite passed **79 tests
+with 2 skips**, including original real-data baseline/reconciliation
+coverage, occupied JSON/Markdown/review paths, citation-minimum preflight,
+duplicate normalized output selection, dangling symlink refusal, late
+collisions, exclusive-create byte preservation, and independent
+fresh-output reproducibility checks. The dependent source-coverage
+disposition suite passed **23/23** (total **102 passed, 2 skipped**).
+Targeted Ruff, repository Pyright (zero errors/warnings), Markdown lint,
+documentation links/backlog and `git diff --check` all passed. The
+full suite and hosted exact-SHA CI checks were not run for this update.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

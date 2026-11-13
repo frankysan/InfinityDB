@@ -43,6 +43,39 @@ class ReferenceBaselineError(ValueError):
     """The supplied published data cannot provide a trustworthy baseline."""
 
 
+def _require_new_report_outputs(*paths: Path | None) -> None:
+    """Preflight every selected report before costly source/audit work."""
+    seen: set[Path] = set()
+    for path in paths:
+        if path is None:
+            continue
+        if path.exists() or path.is_symlink():
+            raise FileExistsError(f"Reference baseline output already exists: {path}")
+        resolved = path.resolve()
+        if resolved in seen:
+            raise ReferenceBaselineError(
+                "Reference baseline report outputs must be different files"
+            )
+        seen.add(resolved)
+
+
+def _write_new_report(path: Path, content: str) -> None:
+    """Write UTF-8/LF evidence without replacing a previous accepted report."""
+    _require_new_report_outputs(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("x", encoding="utf-8", newline="\n") as handle:
+        handle.write(content)
+
+
+def _write_report_or_exit(
+    parser: argparse.ArgumentParser, path: Path, content: str,
+) -> None:
+    try:
+        _write_new_report(path, content)
+    except (OSError, ValueError) as exc:
+        parser.exit(1, f"Reference baseline output: {exc}\n")
+
+
 def _connect(path: Path) -> sqlite3.Connection:
     if not path.is_file():
         raise ReferenceBaselineError(f"Published database is unavailable: {path}")
@@ -3153,6 +3186,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Verify exact pinned English and Spanish Visibility Zone clauses",
     )
     args = parser.parse_args(argv)
+    try:
+        _require_new_report_outputs(
+            args.json_output, args.markdown_output,
+            args.review_batches_output, args.review_pilot_output,
+        )
+    except (OSError, ValueError) as exc:
+        parser.exit(1, f"Reference baseline output: {exc}\n")
     if args.audit_current_citation_minimum:
         if (
             args.reconcile_explanation_inventory
@@ -3173,10 +3213,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             parser.error("Current citation minimum is a standalone read-only audit")
         minimum = audit_current_rule_citation_minimum()
         if args.json_output is not None:
-            args.json_output.parent.mkdir(parents=True, exist_ok=True)
-            args.json_output.write_text(
+            _write_report_or_exit(
+                parser, args.json_output,
                 json.dumps(minimum, indent=2, sort_keys=True) + "\n",
-                encoding="utf-8", newline="\n",
             )
         print(
             f"Current N5 citation minimum: {minimum['withCurrentCitation']}/"
@@ -3204,14 +3243,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         report = reconcile_explanation_inventory()
         if args.review_pilot_output is not None:
-            target = args.review_pilot_output.resolve()
-            if not target.is_relative_to((PROJECT_ROOT / "local").resolve()):
+            target = args.review_pilot_output
+            if not target.resolve().is_relative_to((PROJECT_ROOT / "local").resolve()):
                 parser.error("--review-pilot-output must be under ignored local/")
             pilot = build_explanation_review_pilot(report)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(
-                json.dumps(pilot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8",
-                newline="\n",
+            _write_report_or_exit(
+                parser, target, json.dumps(pilot, indent=2, ensure_ascii=False) + "\n",
             )
             summary = pilot["summary"]
             if summary["sourcePageIdentityComplete"]:
@@ -3235,14 +3272,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 f"{summary['sourceFirstProbes']} source-first probes; zero approvals"
             )
         if args.review_batches_output is not None:
-            target = args.review_batches_output.resolve()
-            if not target.is_relative_to((PROJECT_ROOT / "local").resolve()):
+            target = args.review_batches_output
+            if not target.resolve().is_relative_to((PROJECT_ROOT / "local").resolve()):
                 parser.error("--review-batches-output must be under ignored local/")
             plan = plan_explanation_review_batches(report)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(
-                json.dumps(plan, indent=2, ensure_ascii=False) + "\n",
-                encoding="utf-8", newline="\n",
+            _write_report_or_exit(
+                parser, target, json.dumps(plan, indent=2, ensure_ascii=False) + "\n",
             )
             summary = plan["summary"]
             print(
@@ -3282,8 +3317,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             (args.markdown_output, render_explanation_reconciliation(report)),
         ):
             if path is not None:
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(content, encoding="utf-8", newline="\n")
+                _write_report_or_exit(parser, path, content)
         print(
             f"Explanation inventory: {report['frozenCount']} frozen, "
             f"{report['currentCount']} current, {report['retainedCount']} retained, "
@@ -3316,8 +3350,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         (args.markdown_output, render_markdown(report)),
     ):
         if path is not None:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(content, encoding="utf-8", newline="\n")
+            _write_report_or_exit(parser, path, content)
     print(f"{REPORT_FORMAT}: {len(report['inventory'])} category rows, "
           f"{len(report['sourceGroups'])} source groups; all require review")
     return 0

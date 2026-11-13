@@ -21,6 +21,7 @@ from infinity_db.curated import load_curated_document
 from infinity_db.database import export_database, raw_database_path
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.variant_usage_source import normalized_source_connection
+from tools import report_reference_baseline as baseline_cli
 from tools.report_reference_baseline import (
     _NESTED_SOURCE_FIELDS,
     CURRENT_CITATION_COLLECTIONS,
@@ -509,7 +510,16 @@ def test_reviewed_explanation_join_cli_is_deterministic_and_non_approving(
     ]
     assert main(args) == 0
     first = output.read_bytes()
-    assert main(args) == 0 and output.read_bytes() == first
+    first_markdown = markdown.read_bytes()
+    fresh = [
+        *args[:-4],
+        "--json-output", str(tmp_path / "joined-second.json"),
+        "--markdown-output", str(tmp_path / "joined-second.md"),
+    ]
+    assert main(fresh) == 0
+    assert (tmp_path / "joined-second.json").read_bytes() == first
+    assert (tmp_path / "joined-second.md").read_bytes() == first_markdown
+    assert output.read_bytes() == first
     saved = json.loads(first)
     joined = saved["reviewedEvidenceJoin"]
     assert len(joined["historicalRecords"]) == 367
@@ -1006,6 +1016,160 @@ def test_explanation_reconciliation_cli_writes_ignored_style_reports(
     assert "not a v1.0 release gate pass" in markdown
     assert "declaration-category:aro:p40" in markdown
     assert "rule:game-modes" in markdown
+
+
+@pytest.mark.parametrize("occupied", ("json", "markdown"))
+def test_report_cli_refuses_existing_output_before_audit(
+    tmp_path: Path, occupied: str, capsys: pytest.CaptureFixture[str],
+) -> None:
+    json_output, md_output = tmp_path / "baseline.json", tmp_path / "baseline.md"
+    selected = json_output if occupied == "json" else md_output
+    original = b"accepted previous report\n"
+    selected.write_bytes(original)
+    with patch(
+        "tools.report_reference_baseline.build_baseline",
+        side_effect=AssertionError("A collision must block work before the audit"),
+    ) as build:
+        with pytest.raises(SystemExit) as exit_info:
+            main([
+                "--json-output", str(json_output),
+                "--markdown-output", str(md_output),
+            ])
+    assert exit_info.value.code == 1
+    assert "already exists" in capsys.readouterr().err
+    build.assert_not_called()
+    assert selected.read_bytes() == original
+    other = md_output if occupied == "json" else json_output
+    assert not other.exists()
+
+
+def test_report_cli_refuses_duplicate_normalized_destinations(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "baseline.json"
+    with patch(
+        "tools.report_reference_baseline.build_baseline",
+        side_effect=AssertionError("Repeated destination must fail before audit"),
+    ) as build:
+        with pytest.raises(SystemExit) as exit_info:
+            main([
+                "--json-output", str(output),
+                "--markdown-output", str(tmp_path / "nested" / ".." / "baseline.json"),
+            ])
+    assert exit_info.value.code == 1
+    assert "different files" in capsys.readouterr().err
+    build.assert_not_called()
+    assert not output.exists()
+
+
+def test_report_cli_refuses_dangling_symlink_before_audit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output = tmp_path / "baseline.json"
+    # Windows may require privileges for filesystem symlink creation.
+    monkeypatch.setattr(type(output), "is_symlink", lambda path: path == output)
+    with patch(
+        "tools.report_reference_baseline.build_baseline",
+        side_effect=AssertionError("Symlink must block work"),
+    ) as build:
+        with pytest.raises(SystemExit) as exit_info:
+            main(["--json-output", str(output)])
+    assert exit_info.value.code == 1
+    build.assert_not_called()
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("option", ("--review-batches-output", "--review-pilot-output"))
+def test_report_cli_refuses_existing_review_evidence_before_reconciliation(
+    tmp_path: Path, option: str,
+) -> None:
+    output = tmp_path / "local" / "validation" / "previous.json"
+    output.parent.mkdir(parents=True)
+    original = b"review evidence to preserve\n"
+    output.write_bytes(original)
+    with patch(
+        "tools.report_reference_baseline.reconcile_explanation_inventory",
+        side_effect=AssertionError("Review output collision must block work"),
+    ) as reconcile:
+        with pytest.raises(SystemExit) as exit_info:
+            main(["--reconcile-explanation-inventory", option, str(output)])
+    assert exit_info.value.code == 1
+    reconcile.assert_not_called()
+    assert output.read_bytes() == original
+
+
+def test_citation_minimum_cli_refuses_existing_json_before_audit(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "minimum.json"
+    output.write_bytes(b"previous citation audit\n")
+    with patch(
+        "tools.report_reference_baseline.audit_current_rule_citation_minimum",
+        side_effect=AssertionError("Existing receipt must block work"),
+    ) as audit:
+        with pytest.raises(SystemExit) as exit_info:
+            main(["--audit-current-citation-minimum", "--json-output", str(output)])
+    assert exit_info.value.code == 1
+    audit.assert_not_called()
+    assert output.read_bytes() == b"previous citation audit\n"
+
+
+def test_report_cli_refuses_output_appearing_during_audit(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "baseline.json"
+    original = b"another process published its report\n"
+
+    def build(*args: object, **kwargs: object) -> dict[str, Any]:
+        output.write_bytes(original)
+        return {"inventory": [], "sourceGroups": []}
+
+    with (
+        patch("tools.report_reference_baseline.build_baseline", side_effect=build),
+        patch("tools.report_reference_baseline.render_markdown", return_value="# report\n"),
+    ):
+        with pytest.raises(SystemExit) as exit_info:
+            main(["--json-output", str(output)])
+    assert exit_info.value.code == 1
+    captured = capsys.readouterr()
+    assert "already exists" in captured.err
+    assert "category rows" not in captured.out
+    assert output.read_bytes() == original
+
+
+def test_report_writer_preserves_utf8_lf_and_uses_exclusive_creation(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "nested" / "baseline.md"
+    text = "ÅÄÖ\nsource line\n"
+    baseline_cli._write_new_report(output, text)
+    original = text.encode("utf-8")
+    assert output.read_bytes() == original
+    with pytest.raises(FileExistsError, match="already exists"):
+        baseline_cli._write_new_report(output, "replacement")
+    assert output.read_bytes() == original
+
+
+def test_report_cli_preserves_json_markdown_format_and_stdout_only(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    json_output = tmp_path / "baseline.json"
+    md_output = tmp_path / "baseline.md"
+    report = {"inventory": [{"id": "example"}], "sourceGroups": [{"id": "source"}]}
+    with (
+        patch("tools.report_reference_baseline.build_baseline", return_value=report),
+        patch("tools.report_reference_baseline.render_markdown", return_value="# Report\n"),
+    ):
+        assert main([
+            "--json-output", str(json_output),
+            "--markdown-output", str(md_output),
+        ]) == 0
+        assert main([]) == 0
+    assert json_output.read_bytes() == (
+        json.dumps(report, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+    assert md_output.read_bytes() == b"# Report\n"
+    assert capsys.readouterr().out.count("category rows") == 2
 
 
 def test_baseline_reports_pinned_publication_without_claiming_completeness() -> None:
@@ -2161,7 +2325,15 @@ def test_baseline_cli_writes_stable_local_reports(tmp_path: Path) -> None:
     ]
     assert main(args) == 0
     first = json_output.read_bytes()
-    assert main(args) == 0
+    first_markdown = markdown_output.read_bytes()
+    next_args = [
+        *args[:-4],
+        "--json-output", str(tmp_path / "baseline-second.json"),
+        "--markdown-output", str(tmp_path / "baseline-second.md"),
+    ]
+    assert main(next_args) == 0
+    assert (tmp_path / "baseline-second.json").read_bytes() == first
+    assert (tmp_path / "baseline-second.md").read_bytes() == first_markdown
     assert json_output.read_bytes() == first
     saved = json.loads(first)
     assert saved["formatVersion"] == 2
