@@ -2232,10 +2232,26 @@ also supported. Install `playwright==1.64.1` and that engine using
 `python -m playwright install <engine>` first (on Linux CI the matching OS
 libraries are installed with `--with-deps`). The helper runs the dedicated
 `tests/test_cross_browser_compatibility.py` cohort with one engine, exits
-nonzero on failed/missing browser setup and writes JUnit and failure traces
-under ignored `local/cross-browser-compatibility/`. The ordinary source
-suite does not require Playwright and skips this opt-in module without an
-engine. The hosted matrix is [optional for v1.1+, mandatory for v1.0.x](ci.md#cross-browser-release-compatibility-gate).
+nonzero on failed/missing browser setup and stores its JUnit report and
+failure screenshot/Playwright trace files together under a fresh
+`local/validation/project-infrastructure/cross-browser/<UTC-run-id>-<short-SHA>/<engine>/`
+directory. The output directory is created exclusively before pytest starts;
+an existing directory fails without modifying previous evidence. Use
+`--output-dir local/validation/project-infrastructure/cross-browser/<RUN_ID>/<engine>`
+to select another fresh directory under `local/validation/`. The runner
+requires a resolvable checkout Git HEAD SHA for its automatic directory
+and passes the same output directory to its test module. The HEAD label does
+not certify that a local worktree is clean; only separately verified
+exact-SHA acceptance can do that. Run the module via this runner rather
+than setting only the browser engine environment variable.
+Hosted CI uploads the `local/validation/project-infrastructure/cross-browser/`
+tree, preserving the same JUnit and failure traces on both successful and
+failed runs. Previously retained `local/cross-browser-compatibility/`
+artifacts remain unchanged and are not treated as current run output.
+
+The ordinary source suite does not require Playwright and skips this
+opt-in module without an engine. The hosted matrix is
+[optional for v1.1+, mandatory for v1.0.x](ci.md#cross-browser-release-compatibility-gate).
 A successful local cohort cannot replace any selected hosted gate, and the
 81-page Unit matrix is not multiplied across browser engines.
 

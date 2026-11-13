@@ -287,6 +287,43 @@ inventory and CI/release acceptance at a separately selected exact SHA.
 This change does not approve any tracked retirement (T) or private-data
 migration (M).
 
+### Third bounded L2 output-contract update — cross-browser evidence (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`9e5301638f30ec8537dcf1661e7d2a5b10e26918`, after the
+release-evidence collision guard. The active opt-in cross-browser runner
+and its browser failure handler previously reused
+`local/cross-browser-compatibility/`: JUnit, screenshot and trace
+filenames from a later run could replace earlier failure evidence.
+
+The runner now reserves a **fresh** directory under
+`local/validation/project-infrastructure/cross-browser/<UTC-run-id>-<short-SHA>/<engine>/`,
+refusing existing directories and paths outside `local/validation/`.
+The automatic directory labels the current Git HEAD (not uncommitted
+worktree bytes), and `--output-dir` permits an explicitly selected fresh
+local validation directory. Hosted exact-SHA acceptance remains separate. The same relative directory is handed to the browser test
+module in `INFINITYDB_CROSS_BROWSER_ARTIFACT_DIR`, so JUnit and all
+failure screenshot/trace files share one run boundary. A selected engine
+without that directory fails closed instead of silently falling back to
+the old fixed path. The hosted workflow's artifact upload root was
+updated to the new `local/validation/` tree, retaining `if: always()`,
+the same named matrix jobs, and failure semantics. Existing private
+`local/cross-browser-compatibility/` evidence is untouched.
+
+**Validation:** The Windows hermetic runner contract passed **9/9**,
+including fresh revision-specific paths, consistent pytest/environment
+routing, explicit paths, preserved failures, duplicate-run refusal,
+out-of-scope paths, invalid revision refusal and hosted artifact-path
+wiring. The test-section registry passed **15/15**, deployment-script
+regressions **47/47**, and release-evidence regressions **29/29**.
+The existing browser-cohort module had **14 expected skips** without an
+explicitly selected engine. Targeted Ruff, repository Pyright (zero
+errors/warnings), documentation checks and `git diff --check` passed.
+The actual multi-engine browser matrix, hosted CI, Linux/Windows source
+parity and release acceptance remain separate validations; no real
+Playwright journey, source migration or deployment was performed. No T
+or M approval is implied.
+
 ## Observed starting condition
 
 The initial root-level inspection found:
@@ -2771,10 +2808,12 @@ It does not restate the previously accepted browser-verifier correction.
   requests and creates directories for two user-selected output files.
 - `run_cross_browser_compatibility`: active opt-in multi-engine test runner
   used by the cross-browser GitHub workflow, with an explicit browser rather
-  than silently skipped missing engines. Its **fixed**
-  `local/cross-browser-compatibility/junit.xml` path overwrites evidence on
-  repeated local runs; propose a per-engine/per-run directory in L2/L6
-  without weakening its required test/failure semantics.
+  than silently skipped missing engines. At this L0 baseline, its **fixed**
+  `local/cross-browser-compatibility/junit.xml` could overwrite previous
+  evidence; the subsequent
+  [third L2 output update](#third-bounded-l2-output-contract-update--cross-browser-evidence-2026-11-13)
+  now uses fresh, revision-pinned per-engine directories and a matched
+  browser failure-artifact destination without weakening CI failure gates.
 - `verify_release_candidate_browser`: explicit-version hosted Unit/browser
   acceptance, bound to the complete three-database snapshot and static
   revision; retains JSON-only success evidence through optional
