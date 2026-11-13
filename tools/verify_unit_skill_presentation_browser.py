@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlencode
 
+from tools.browser.report_output import require_new_browser_report, write_browser_report
 from tools.browser_wsgi_transport import route_browser_page
 from tools.verify_non_skill_army_browser import CASES, WIDTHS
 
@@ -565,6 +566,7 @@ def main(argv: list[str] | None = None) -> int:
         help="Viewport width in px; repeat for multiple widths",
     )
     args = parser.parse_args(argv)
+    require_new_browser_report(parser, args.output)
     report = verify(
         args.base_url, slugs=tuple(args.slugs) if args.slugs else DEFAULT_SLUGS,
         headed=args.headed, channel=args.channel,
@@ -572,12 +574,7 @@ def main(argv: list[str] | None = None) -> int:
         distance_unit=args.distance_unit,
         widths=tuple(args.width) if args.width else WIDTHS,
     )
-    if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(
-            json.dumps(report, sort_keys=True, indent=2) + "\n",
-            encoding="utf-8", newline="\n",
-        )
+    write_browser_report(parser, args.output, report)
     print(f"Unit Skill browser acceptance: {report['passed']}/{report['total']} passed")
     for entry in report["results"]:
         if entry["status"] != "passed":

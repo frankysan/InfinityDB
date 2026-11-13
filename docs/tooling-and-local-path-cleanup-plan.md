@@ -543,6 +543,54 @@ documentation lint/links/backlog and `git diff --check` results were
 verified separately. No fresh live Playwright matrix, hosted exact-SHA
 CI, full-suite execution or Linux validation was performed.
 
+### Ninth bounded L2 output-contract update — Unit Skill and rule-fragment browser reports (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`e796f271fbeeb3f0cb218f18945fca19c10f6284`. Seven of the
+eleven optional browser commands already used the shared new-file-only
+`tools.browser.report_output` JSON writer. The Unit Skill
+presentation and Weapon/Glossary rule-fragment verifiers still used
+unconditional `Path.write_text`, allowing historical evidence to
+be truncated and repeated invocations to overwrite earlier reports.
+
+Only these two CLI writers were cut over: optional `--output` is
+preflighted before Chromium or optional WSGI startup and is written
+with exclusive file creation, preserving sorted indented UTF-8/LF
+bytes, error observations, CLI summaries and existing nonzero status
+on failed checks. Parent directories are created only for fresh
+reports; existing files and symlinks are refused, and a race between
+preflight and publication cannot overwrite a prior report.
+
+Unit Skill retains explicit slugs, widths, optional availability
+filters, distance units, browser channel and headed mode; the
+Rule Fragment verifier retains the `--self-host` versus
+non-default `--base-url` exclusion and its link/fragment assertions.
+The underlying `verify(...)` APIs and browser/WSGI navigation
+remain unchanged, as do output-free CLI invocations. This does
+not modify source data, private evidence, hosted workflows or
+published build assets. The [testing guide](testing.md#optional-unit-skill-and-rule-fragment-browser-receipts)
+names new domain/run-scoped `local/validation/browser/` destinations
+without migrating existing reports.
+
+**Boundary:** The remaining two specialized L2 writer reviews are
+`verify_structured_skill_charts_browser` and
+`verify_trait_wiki_browser` (the latter takes private saved Wiki
+HTML and must preserve that source boundary). A fresh exclusive
+receipt is not crash-atomic and an interrupted write can leave a
+new partial file requiring inspection. T retirements and M
+private-source moves/deletions remain unapproved.
+
+**Validation:** Windows focused checks passed **55/55** shared browser
+receipt regressions, **34/34** Unit Skill Presentation tests
+(including live local Chromium for optional flags, complex profiles,
+distance formatting, contextual relations and Spec-Ops), and
+**12/12** Rule Fragment tests (including the ephemeral WSGI host):
+**101 passed**, no skips/failures. Targeted Ruff for both verifiers
+and the test module, repository Pyright (zero errors/warnings),
+documentation lint/links/backlog and `git diff --check` all passed.
+The complete test suite, all-browser matrix, hosted exact-SHA CI and
+Linux worker acceptance were not run for this slice.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

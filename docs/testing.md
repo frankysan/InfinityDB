@@ -2292,6 +2292,37 @@ review, or a live multi-engine browser matrix. Existing evidence and
 historical explicit paths are not migrated or overwritten, and a new
 receipt interrupted during writing requires inspection before reuse.
 
+### Optional Unit Skill and rule-fragment browser receipts
+
+`verify_unit_skill_presentation_browser` and
+`verify_rule_fragment_browser` also use the shared new-file-only
+`--output` contract. For each browser run, select a fresh
+`local/validation/browser/` directory scoped to the command and
+candidate revision, for example:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/unit-skill-presentation/RUN_ID/unit-skill.json
+.\.venv\Scripts\python.exe -m tools.verify_rule_fragment_browser --self-host --output local/validation/browser/rule-fragments/RUN_ID/fragments.json
+```
+
+Replace `RUN_ID` with a new UTC timestamp plus short checkout SHA.
+Both commands now reject an occupied or symlink output before any
+browser activity and exclusively create canonical sorted, indented
+UTF-8/LF JSON after verification. Historical explicit paths remain
+valid names, but cannot be overwritten. Failures in individual
+observations still produce an optional failed report and nonzero exit;
+without `--output`, summary-only operation remains unchanged.
+
+Unit Skill Presentation retains repeatable `--slug`, `--width`
+and `--exclude-optional` selections, `--distance-unit`, `--headed`
+and `--channel`. Rule Fragment retains `--self-host` on a temporary
+loopback WSGI app, mutually exclusive with non-default `--base-url`,
+and its actual Weapon/Glossary deep-link checks. An interrupted new
+file may be partially written, so receipts must be inspected before
+acceptance. Neither command replaces complete release/browser gates,
+and this report change does not alter browser selectors or source
+fixtures.
+
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 
 **Project domains:** Web frontend, Project infrastructure
