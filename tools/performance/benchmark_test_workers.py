@@ -17,10 +17,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-try:
-    from tools.run_checks import REPO_ROOT, TEST_SECTION_NAMES, git_value
-except ModuleNotFoundError:  # Direct execution as tools/benchmark_test_workers.py.
-    from run_checks import REPO_ROOT, TEST_SECTION_NAMES, git_value  # type: ignore[no-redef]
+from tools.run_checks import REPO_ROOT, TEST_SECTION_NAMES, git_value
 
 DEFAULT_WORKERS = ("0", "4", "6", "8", "auto")
 REPORT_DIRECTORY = REPO_ROOT / "reports"

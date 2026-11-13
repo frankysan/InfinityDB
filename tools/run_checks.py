@@ -23,7 +23,7 @@ try:
         AssetModeSelection,
         select_asset_mode,
     )
-    from tools.browser_test_host_profile import linux_four_slots_enabled
+    from tools.performance.browser_test_host_profile import linux_four_slots_enabled
     from tools.test_sections import load_test_sections
 except ModuleNotFoundError:  # Direct execution as tools/run_checks.py.
     from asset_validation import (  # type: ignore[no-redef]
@@ -31,7 +31,9 @@ except ModuleNotFoundError:  # Direct execution as tools/run_checks.py.
         AssetModeSelection,
         select_asset_mode,
     )
-    from browser_test_host_profile import linux_four_slots_enabled  # type: ignore[no-redef]
+    from performance.browser_test_host_profile import (
+        linux_four_slots_enabled,  # type: ignore[no-redef]
+    )
     from test_sections import load_test_sections  # type: ignore[no-redef]
 
 STAGE_ORDER = ("test", "lint", "docs", "type", "build", "rules", "preflight")

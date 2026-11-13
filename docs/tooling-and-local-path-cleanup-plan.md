@@ -18,8 +18,10 @@ private-source publication, and deployment changes remain separately scoped.
 **L4 implementation:** The first maintained-tool batch groups five
 Chromium/host-resource and runtime benchmark utilities under
 `tools/performance/`, updating their test imports and documented invocations.
-Existing benchmark output paths remain unchanged; the test-worker runner
-remains at the tools root pending its separate direct-execution cutover.
+Existing benchmark output paths remain unchanged. The next L4 batch moves the
+test-worker runner, Linux browser-host profile and Docker host probe to the
+same package. Entrypoints use `python -m tools.performance.*` while retaining
+existing test runner behavior and the host-local profile path.
 
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.

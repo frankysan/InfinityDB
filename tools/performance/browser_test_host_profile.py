@@ -13,7 +13,7 @@ from pathlib import Path
 
 PROFILE_NAME = "linux-four-browser-slots"
 PROFILE_FILENAME = "local/browser-test-profile.json"
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def profile_path(root: Path = ROOT) -> Path:

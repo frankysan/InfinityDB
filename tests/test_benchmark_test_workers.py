@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import benchmark_test_workers
+from tools.performance import benchmark_test_workers
 
 
 def _run(workers: str, repetition: int, duration: float, *, status: str = "PASS"):

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.browser_test_host_profile import (
+from tools.performance.browser_test_host_profile import (
     PROFILE_NAME,
     linux_four_slots_enabled,
     profile_path,

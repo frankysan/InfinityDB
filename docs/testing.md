@@ -5503,7 +5503,7 @@ The existing two-slot Windows limit remains appropriate.
 **Host-specific capacity decision (2026-11-03):** The dedicated Linux
 MCP worker may opt into the *validated* four-slot, four-lane, eight-worker
 Scenario FAQ A/D split profile, while Windows retains two slots.
-`tools.browser_test_host_profile` stores a strict, ignored
+`tools.performance.browser_test_host_profile` stores a strict, ignored
 `local/browser-test-profile.json` marker on the Linux worker only.
 The maintained `tools.run_checks --stage test` adopts that profile
 when no worker, distribution, slot, lane, split or browser-reuse
@@ -5514,9 +5514,9 @@ profile does **not** change clean CI, Windows, standalone direct
 a Git change. Enable/check/disable on Linux with:
 
 ```bash
-python -m tools.browser_test_host_profile enable
-python -m tools.browser_test_host_profile status
-python -m tools.browser_test_host_profile disable
+python -m tools.performance.browser_test_host_profile enable
+python -m tools.performance.browser_test_host_profile status
+python -m tools.performance.browser_test_host_profile disable
 ```
 
 **Host-profile acceptance (VR-0049 retired):** At pinned
@@ -5589,7 +5589,7 @@ four-slot and Windows two-slot limits remain unchanged; no
 production browser or CI configuration changes.
 
 **Docker host readiness:** the fixed, read-only
-`python -m tools.probe_docker_test_host` probe found the Docker CLI and
+`python -m tools.performance.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version
 and engine-info queries failed (exit 1, unclassified by the probe).
 The Linux container engine is **not yet verified as usable** from the
@@ -6673,18 +6673,18 @@ Available benchmark and capacity tools include:
 ```powershell
 .\.venv\Scripts\python.exe -m tools.performance.benchmark_runtime --help
 .\.venv\Scripts\python.exe -m tools.performance.compare_runtime_benchmarks --help
-python tools\benchmark_test_workers.py --help
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_test_workers --help
 python tools\capacity_test.py --help
 python tools\deployment_resources.py --help
 python tools\deployment_alerts.py --help
 ```
 
-**Test-worker benchmark report contract.** `benchmark_test_workers.py`
+**Test-worker benchmark report contract.** `tools.performance.benchmark_test_workers`
 runs real test jobs and always writes one JSON measurement receipt.
 For new runs, supply a unique, domain-scoped ignored destination:
 
 ```powershell
-.\.venv\Scripts\python.exe tools\benchmark_test_workers.py --workers 0 4 --repeat 2 --report local/performance/test-workers/RUN_ID/worker-comparison.json
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_test_workers --workers 0 4 --repeat 2 --report local/performance/test-workers/RUN_ID/worker-comparison.json
 ```
 
 Replace `RUN_ID` with a UTC timestamp plus short checkout SHA.
