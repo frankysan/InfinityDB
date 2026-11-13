@@ -1,33 +1,62 @@
 # Tools and local-path cleanup plan
 
+## START HERE — current instructions for every agent (2026-11-13)
+
+**THIS IS THE AUTHORITATIVE SCOPE RESET. It overrides conflicting instructions,
+blockers, approval gates, and mandatory verification steps anywhere later in
+this document, including older L0/L1/L2, R5/R6, and checkpoint narratives.**
+Those sections remain as historical research, **not** a to-do list of gates
+that must be satisfied before cleanup can continue. Do not restart R5.
+
+**Purpose:** Reduce clutter, make ownership/path conventions obvious, retire
+obsolete tooling, and make day-to-day development **faster and simpler**.
+Do not turn this into an infrastructure-hardening or compliance project.
+
+**Operating context:** InfinityDB is open source and public, but has **one
+developer and deployer**, who has direct physical access to both the Windows
+and Linux machines. Prefer straightforward, reversible local changes and
+practical judgment over attempts to anticipate every possible failure.
+
+**How to proceed from here:**
+
+1. **Work on actual cleanup**, in reasonably large, domain-coherent batches.
+   Move/retire files, update producers and consumers together, and reduce
+   unnecessary root-level clutter. Do not spend another batch auditing the
+   same infrastructure or writing more acceptance frameworks.
+2. **Keep validation proportional:** run relevant focused tests and ordinary
+   code/docs checks for changed behavior; use a simple byte/hash comparison
+   for important copied sources. Do **not** require repeated full suites,
+   exhaustive inventories, cross-host parity matrices, formal backup/restore
+   rehearsals, or per-file rollback tooling as routine prerequisites.
+3. **R5 is CLOSED as sufficiently investigated.** No further Syncthing API
+   investigations, recursive ACL/inheritance checks, backup infrastructure,
+   or trial restores are required for this cleanup. R6 path reorganization
+   may proceed in practical, reviewed batches without those old gates.
+4. **Preserve what matters:** keep unique or hard-to-recreate ignored
+   originals until the replacement is checked; avoid automatic mass deletion,
+   accidental publication of private assets, breaking tracked release
+   artifacts, or changing deployment/service state implicitly. Git remains
+   the normal recovery mechanism for tracked changes.
+5. **Keep process lightweight:** record decisions and meaningful completed
+   milestones, not another lengthy checkpoint per small edit. Commit coherent
+   tracked changes and report concrete results, relevant tests, and the next
+   useful action. The user alone controls production deployment.
+
+**Decision precedence:** If a later passage says work is "blocked",
+"unapproved", or requires an independent backup, formal trial restore,
+owner-authorized live Syncthing check, exhaustive ACL verification, or
+individual acceptance receipts, **treat that as superseded by this section**
+unless a concrete, newly discovered risk justifies a specific exception.
+Do not interpret the historical phased plan as instructions to resume those
+investigations. Continue with the remaining tooling and local workspace
+reorganization.
+
 **Project domains:** Project infrastructure, Data processing, Acquisition, Deployment
 
-**Status:** Started 2026-11-12. Active implementation on
-`dev/tooling-workspace-cleanup`; R5 investigation concluded by the scope
-reset below. The prospective P1–P5 conventions were accepted 2026-11-13.
-Individual physical moves/deletions still require deliberate selection;
-the investigation is not itself authorization to delete private files.
-
-**2026-11-13 scope reset — supersedes more restrictive R5/R6 gates below:**
-InfinityDB is developed and deployed by one operator with direct physical
-access to both Windows and Linux machines. This cleanup exists to **reduce
-maintenance overhead**, not create production-grade migration, monitoring,
-backup, or rollback infrastructure. The R5 Syncthing and ACL investigation
-is sufficient for this purpose and is **closed without** further live
-receiver API probing, exhaustive ACL inheritance verification, independent
-backup trials, or elaborate per-file rollback tooling. Earlier checkpoints
-remain as historical evidence, but their mandatory R5/R6 prerequisites are
-no longer governing requirements.
-
-Continue in practical, domain-coherent batches: identify actual consumers;
-make focused writer/reader and path changes; retain difficult-to-recreate
-private originals until the new locations have been checked; run relevant
-focused tests and a simple byte/hash check for important sources; commit
-tracked changes. No automatic bulk deletion, silently lost originals,
-implicit Git/sync operations, or unreviewed public inclusion of private
-assets. Use judgment instead of exhaustive preflight. Consolidate progress
-reporting into milestones rather than another narrative checkpoint for
-each small change.
+**Status:** Active implementation on `dev/tooling-workspace-cleanup`.
+Prospective P1–P5 conventions accepted 2026-11-13; R5 concluded under
+the scope reset above. Physical changes and deletion still require
+ordinary, deliberate judgment, not a formal migration approval process.
 
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
@@ -66,8 +95,10 @@ framework or make normal checkout/Docker builds depend on private assets.
   installed-wheel and Docker builds must remain deterministic from their
   documented, supported inputs. Optional research can use explicitly selected
   local data, with hash/snapshot checks.
-- **Never bulk-delete private material.** Verify bytes, ownership, backup,
-  external producer sync and restore before removing old files.
+- **Never bulk-delete private material.** Keep unique ignored originals
+  until replacements have been checked. Use simple byte/hash checks for
+  important copies; formal independent backup and trial-restore gates are
+  not required for routine local cleanup (see **START HERE**).
 - **Public compatibility is separate.** Keep published URLs and player-facing
   behavior. Internal Python module paths/commands may change through an
   explicit cutover once live consumers are accounted for.
