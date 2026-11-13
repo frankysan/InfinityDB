@@ -81,8 +81,9 @@ when all contained work shares the same owner.
   now binds Visibility Zone evidence to the exact selected PDF layout and
   distinguishes already-explicit readers from legacy-bound test fixtures;
   Windows/Linux fixture parity covers the staged PDF/override mappings.
-  **Next:** migrate coherent test-source prerequisite families one at a time,
-  then review real receiver ACL and backup/restore evidence (R4/R5).
+  **Next:** extend the explicit PDF prerequisite to other source-only test
+  families, using the shared reference-acceptance group as the first bounded
+  example; then review real receiver ACL/backup evidence (R4/R5).
   Source relocation and private-data migration still require separate
   approval and backup/restore evidence. L2/R4 remain open, and hosted/release
   acceptance remains independent of fixture validation.

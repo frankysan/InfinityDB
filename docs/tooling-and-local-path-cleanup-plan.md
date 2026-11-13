@@ -1989,6 +1989,50 @@ real receiver ACLs and backup/restore separately in R5 before any real
 activation. Keep the staged override producer's reviewed basenames/hash
 bindings separate from the receiver's physical destination mapping.
 
+### Twenty-sixth bounded L2 checkpoint — R4 shared reference-acceptance PDF prerequisites (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`4cc478cdd0caa5e7dbec45a66009b439083b410f`. This is a bounded
+consumer/test prerequisite change, not a source or release-data migration.
+
+The shared `tests/reference_acceptance_support.py` source helper now selects
+Core N5.3 and FAQ v0.1 PDFs through the already validated, hash-pinned
+`pinned_pdf_path` resolver. The three owning source-only tests
+(`test_combat_attack_reference.py`, `test_hacking_source_followup.py`,
+`test_template_reference.py`) accept a **test-only** explicit
+`--reference-pdf-layout legacy|local` pytest option, with `legacy`
+as the unchanged default. Only their pinned PDF prerequisites and physical
+page extraction change. The preserved source labels remain
+`data/pdf/rules/n5-rules-v5.3-en.pdf` and
+`data/pdf/faq/n5-faq-v0.1-en.pdf`; Core/FAQ hashes, text assertions, page
+numbers and Wiki revision pins are unchanged. Non-PDF Wiki ZIPs stay in
+`data/wiki/`; published runtime/database tests and browser assertions do
+not consult this option. This does **not** replace the global
+`require_source_files` policy for unrelated source tests.
+
+A missing selected Core/FAQ PDF retains a source-only **skip**, with no
+fallback to another layout. A present but altered, linked, unreadable or
+unsafe selected PDF fails before page extraction; the page helper also
+rechecks its selected PDF hash immediately before opening. Nested source
+paths remain label-derived, not discovered or rewritten. Hermetic tests
+exercise both physical layouts, hash refusal, missing-local while legacy
+exists, unsupported-layout refusal and a real synthetic PDF page extraction.
+The source-selection option is not a source-completeness or publication gate.
+
+**Windows validation:** All three complete acceptance modules, including
+their original API and Chromium browser checks, passed **17 tests, zero
+skipped, zero failures**; the three source-only cases verified supplied
+legacy PDF/Wiki bytes. Ruff passed after correcting import ordering, and
+Pyright reported **zero errors, zero warnings**. Cross-host/source-layout
+acceptance and documentation/CI results are tracked separately below.
+
+**Next R4 step:** Select the next coherent fixed-path PDF test family
+(Hacking Program chart evidence or another existing source acceptance
+module), preserving its original skip/hash/authority boundary. R5/R6
+private source migration remains gated on independent ACL and tested
+backup/restore evidence; this checkpoint does not authorize copying or
+deleting any private PDF or SVG override.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

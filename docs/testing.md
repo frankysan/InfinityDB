@@ -6393,8 +6393,26 @@ no fallback, source-pinning failure and unchanged report serialization.
 The reference-baseline suite additionally exercises explicit legacy/local
 binding for the five bilingual Visibility Zone term clauses, preserving their
 existing review disposition and failing before PDF parsing on a bad hash.
-Source tests that currently require `data/pdf/` through a fixed path or an
-explicit `require_source_files` prerequisite retain their legacy skip semantics
+The three shared Basic Attack, Hacking follow-up and Template reference
+source-acceptance tests support the explicit test-only
+`--reference-pdf-layout legacy|local` selector (default: `legacy`). It
+selects only canonical Core/FAQ `data/pdf/...` source labels through the
+common pinned SHA-256 resolver. The selected physical files can reside under
+`data/pdf/` or `local/data/pdf/` without changing citation or test semantics.
+Missing selected PDFs still skip their source-only checks; present mismatched,
+linked, unreadable or unsafe selected inputs fail rather than falling back to
+another layout. The pinned Wiki ZIP and runtime/API/browser assertions are
+unchanged. For example, with the venv active, run the bounded source check:
+
+```powershell
+python -m pytest tests/test_template_reference.py::test_template_conditions_match_pinned_pdf_wiki_and_faq -q --reference-pdf-layout local
+```
+
+Hermetic regression cases in `test_combat_attack_reference.py` cover both
+physical selections, hash changes, missing-local-with-legacy-present, invalid
+layouts and page extraction from a synthetic PDF. The global `require_source_files`
+fixture retains its previous meaning for all other suites. Other source tests
+that still require `data/pdf/` through fixed paths retain legacy skip semantics
 until separately migrated; do not globally redirect test data or silently
 turn a skipped source test into unpinned evidence.
 
