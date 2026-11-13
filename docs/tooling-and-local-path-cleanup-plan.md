@@ -866,6 +866,80 @@ temporary build state remain explicitly excluded from a blanket
 receipt rule. T tracked retirements and M private-file migration
 or deletion are not approved.
 
+### Fourteenth bounded L2 output-contract update — fourteen single-output semantic/source/runtime audits (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`f4d4ed17f25e889d784ca4b0bf02092bf503e390` after the
+eight-command JSON/Markdown source-audit batch. A further
+**fourteen** maintained single-output `audit_*` commands accepted
+optional `--output` JSON receipts but still overwrote the
+selected destination, sometimes after expensive database
+validation or reading private Wiki HTML.
+
+**Scope:** `audit_army_faction_semantics`,
+`audit_database_separation`, `audit_enrichment_coverage`,
+`audit_fireteam_semantics`, `audit_loadout_semantics`,
+`audit_normalization_links`, `audit_peripheral_semantics`,
+`audit_profile_semantics`, `audit_relationship_semantics`,
+`audit_runtime_database_surface`,
+`audit_semantic_deduplication`,
+`audit_source_presentation`, `audit_trait_wiki_anchors`,
+and `audit_unit_semantics`. These are report-only commands
+and do not rewrite published databases or curated policies.
+
+All fourteen now preflight their optional report destination
+with the existing `tools.research.report_output` guard **before**
+calling `audit_database`, `audit_coverage` or the saved Traits
+HTML parser. The report is created with exclusive `open("x")`
+after its original serialization, which preserves sorted/indented
+UTF-8/LF JSON and each command's choice of `ensure_ascii`.
+Occupied files, symlinks, input-file aliases and late collisions
+cannot overwrite earlier evidence. `--output` remains optional:
+JSON stdout or human-oriented audit summary behaviors, saved-source
+UTF-8 BOM parsing, source checks, success/failure gates, prior
+CLI argument validation and existing public tool APIs are
+unchanged. Report collision exits 1, before any audit work.
+
+**Separate lifecycle contract:** `audit_rules_interactions` also
+contains an intentional `--refresh-catalog-scope` mode that can
+update maintained source data. It is **excluded** from this
+single-output receipt batch and requires an explicit joint
+output/check/refresh consumer review; no rewrite mode was
+implicitly repurposed. Other special audit tools and standalone
+writers remain subject to L2 inventory. This pass does not
+authorize archived report deletion, a global path-default change,
+tracked history retirement (T) or private source migration (M).
+
+The [testing guide](testing.md#single-output-semantic-and-runtime-audit-json-receipts)
+documents run-scoped ignored paths under
+`local/validation/data-model/` and
+`local/research/trait-wiki-audits/`. A newly created report is
+not crash-atomic; an interrupted write requires inspection.
+No source file, SQLite database, rule definition, publisher,
+browser, Syncthing configuration or deployment was changed.
+
+**Validation:** The new hermetic single-output regression suite
+passed **74/74** tests, exercising all fourteen CLI families:
+occupied prior receipts, input/output aliases, exact JSON
+serialization, no-output summaries, late collisions and original
+failure statuses for semantic, source-presentation and Trait Wiki
+checks. The fourteen existing audit/source-reference suites
+passed **113 tests with 1 skipped fixture case**, and the
+registered test-section suite passed **15/15**. The previous
+shared source-audit report regression suite also passed
+**57/57**, yielding **259 passed, 1 skipped, zero failures**.
+Targeted Ruff passed for all fourteen modified tools and the
+new suite, Pyright returned zero errors and warnings,
+documentation lint/links/backlog and `git diff --check` passed.
+Hosted exact-SHA CI, full-suite,
+Linux worker parity, actual live source collection and deployment
+were not run in this bounded slice.
+
+**L2 status:** Open for review of special producers and explicit
+rewrite/check modes. Subsequent L4 tool organization should
+happen only after import/entrypoint and generated-output consumer
+boundaries are audited. The reserved T/M phases remain gated.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

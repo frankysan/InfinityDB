@@ -17,6 +17,17 @@ from infinity_db.database.publication import validate_database_pair
 from infinity_db.database.repository import Database, identity_config_from_connection
 from infinity_db.variant_usage_source import normalized_source_connection
 
+if __package__:
+    from tools.research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+else:  # Support direct execution from the tools/ directory.
+    from research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+
 FORMAT = "InfinityDB army/faction semantic audit"
 FORMAT_VERSION = 2
 
@@ -511,6 +522,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
+    require_new_audit_outputs(parser, args.output)
     try:
         report = (
             audit_database(args.database, normalized=args.normalized)
@@ -522,8 +534,7 @@ def main(argv: list[str] | None = None) -> int:
     # terminal Unicode support, while preserving Unicode in UTF-8 report files.
     payload = json.dumps(report, indent=2, sort_keys=True, ensure_ascii=args.output is None) + "\n"
     if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(payload, encoding="utf-8", newline="\n")
+        write_audit_text_or_exit(parser, args.output, payload)
     else:
         print(payload, end="")
     return 0

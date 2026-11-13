@@ -34,6 +34,17 @@ else:
         variation_count,
     )
 
+if __package__:
+    from tools.research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+else:  # Support direct execution from the tools/ directory.
+    from research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+
 REPORT_FORMAT = "InfinityDB profile semantics audit"
 REPORT_FORMAT_VERSION = 3
 PAYLOAD_FORMAT = "InfinityDB canonical profile payload"
@@ -316,7 +327,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    require_new_audit_outputs(parser, args.output)
     try:
         report = audit_database(args.database)
     except (OSError, sqlite3.Error, ProfileSemanticsAuditError) as exc:
@@ -337,11 +350,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     print(f"Status: {summary['status'].upper()}")
     if args.output is not None:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(
+        write_audit_text_or_exit(
+            parser, args.output,
             json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-            newline="\n",
         )
         print(f"Report: {args.output}")
     return 0 if summary["status"] == "pass" else 1

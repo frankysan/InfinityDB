@@ -17,6 +17,17 @@ from urllib.parse import unquote, urlsplit
 
 from infinity_db.trait_wiki_references import load_trait_wiki_references
 
+if __package__:
+    from tools.research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+else:  # Support direct execution from the tools/ directory.
+    from research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+
 _VOID_ELEMENTS = frozenset({
     "area", "base", "br", "col", "embed", "hr", "img", "input", "link",
     "meta", "param", "source", "track", "wbr",
@@ -133,6 +144,7 @@ def main(argv: list[str] | None = None) -> int:
         help="List exact source heading IDs for unmapped canonical Traits; never add URLs.",
     )
     args = parser.parse_args(argv)
+    require_new_audit_outputs(parser, args.output)
     canonical_traits = None
     if args.inventory_unmapped:
         from infinity_db.curated import load_curated_directory
@@ -150,8 +162,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     report["sourceSha256"] = hashlib.sha256(raw).hexdigest()
     if args.output:
-        args.output.write_text(
-            json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
+        write_audit_text_or_exit(
+            parser, args.output, json.dumps(report, indent=2, sort_keys=True) + "\n",
         )
     print(
         f"Trait Wiki anchors: {report['matchedCount']}/{report['mappingCount']} "

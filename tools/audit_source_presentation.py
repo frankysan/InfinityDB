@@ -16,6 +16,17 @@ from infinity_db.database.publication import validate_database_pair
 from infinity_db.database.schema import METADATA_TABLE, TABLES, quote
 from infinity_db.variant_usage_source import normalized_source_connection
 
+if __package__:
+    from tools.research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+else:  # Support direct execution from the tools/ directory.
+    from research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+
 FORMAT = "InfinityDB source-to-presentation completeness audit"
 FORMAT_VERSION = 2
 
@@ -606,6 +617,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     args = parser.parse_args(argv)
+    require_new_audit_outputs(parser, args.output)
     try:
         report = (
             audit_database(args.database, normalized=args.normalized)
@@ -614,8 +626,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (SourcePresentationAuditError, OSError, sqlite3.Error) as exc:
         parser.error(str(exc))
     if args.output:
-        args.output.write_text(
-            json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
+        write_audit_text_or_exit(
+            parser, args.output, json.dumps(report, indent=2, sort_keys=True) + "\n",
         )
     print(FORMAT)
     print(

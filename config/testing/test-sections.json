@@ -248,6 +248,7 @@
         "test_run_cross_browser_compatibility",
         "test_run_pinned_determinism",
         "test_sample_test_host_resources",
+        "test_single_audit_report_output",
         "test_snapshot_archive",
         "test_source_audit_report_output",
         "test_test_sections",

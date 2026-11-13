@@ -14,6 +14,17 @@ from typing import Any
 
 from infinity_db.database.repository import Database, unit_sort_key
 
+if __package__:
+    from tools.research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+else:  # Support direct execution from the tools/ directory.
+    from research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+
 FORMAT = "InfinityDB runtime database surface audit"
 FORMAT_VERSION = 1
 
@@ -788,7 +799,9 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = _parser().parse_args(argv)
+    parser = _parser()
+    args = parser.parse_args(argv)
+    require_new_audit_outputs(parser, args.output)
     try:
         report = audit_database(args.database, project_root=args.project_root)
     except (OSError, sqlite3.Error, RuntimeSurfaceAuditError, ValueError) as exc:
@@ -796,8 +809,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
     document = json.dumps(report, indent=2, sort_keys=True) + "\n"
     if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(document, encoding="utf-8", newline="\n")
+        write_audit_text_or_exit(parser, args.output, document)
     else:
         print(document, end="")
     summary = report["summary"]

@@ -20,6 +20,17 @@ from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.trait_catalog import TraitCatalog
 
+if __package__:
+    from tools.research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+else:  # Support direct execution from the tools/ directory.
+    from research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+
 REPORT_FORMAT = "InfinityDB rules enrichment coverage audit"
 REPORT_FORMAT_VERSION = 3
 CATALOGS = ("skills", "equipment", "weapons", "traits", "states")
@@ -781,7 +792,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    require_new_audit_outputs(parser, args.output)
     try:
         report = audit_coverage(
             args.database,
@@ -793,8 +806,7 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit(str(exc)) from exc
     payload = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(payload, encoding="utf-8", newline="\n")
+        write_audit_text_or_exit(parser, args.output, payload)
         print(f"Enrichment coverage audit written: {args.output}")
     else:
         print(payload, end="")

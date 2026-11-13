@@ -2394,6 +2394,44 @@ explicit output paths remain supported only when unoccupied.
 Neither source authority, original audit semantics nor hosted
 release acceptance is changed by this report-writing safeguard.
 
+### Single-output semantic and runtime audit JSON receipts
+
+Fourteen maintained `audit_*` commands that accept an optional
+`--output` JSON path also use
+`tools.research.report_output` to preserve existing evidence.
+They cover Army/faction, physical database separation, enrichment
+coverage, Fireteam, loadout, normalization links, peripheral,
+profile, relationship, runtime database surface, semantic
+deduplication, source presentation, Trait Wiki anchors and logical
+Unit semantics. Unlike the multi-output Weapon audits, each of
+these commands accepts only one report destination.
+
+Use a unique run-specific path under `local/validation/` for
+application/database investigations, and `local/research/` when
+auditing retained third-party sources, for example:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.audit_unit_semantics data/generated/army.db --output local/validation/data-model/unit-semantics/RUN_ID/unit-semantics.json
+.\.venv\Scripts\python.exe -m tools.audit_trait_wiki_anchors SAVED_TRAITS_HTML --output local/research/trait-wiki-audits/RUN_ID/anchors.json
+```
+
+Replace `RUN_ID` with a fresh UTC timestamp and short revision
+identifier; replace `SAVED_TRAITS_HTML` with the actual saved
+official HTML path. All chosen report files are checked before
+reading the respective database or Wiki input, including existing
+files and dangling symlinks. The writer exclusively creates UTF-8/LF
+JSON, preserving each command's own serialization, summary, stdout
+fallback and audit failure codes. It does not alter or publish the
+input database, archived Wiki HTML or curated review bytes.
+
+A fresh report from a failing semantic gate is still evidence, not
+an accepted result. A crash may leave a partial *new* receipt.
+Existing ignored report locations remain valid explicit names
+only if unoccupied; no historical report is moved or deleted.
+The separate `audit_rules_interactions` CLI has a deliberate
+`--refresh-catalog-scope` source-maintenance mode and must be
+reviewed independently before its output paths are changed.
+
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 
 **Project domains:** Web frontend, Project infrastructure
