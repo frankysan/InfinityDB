@@ -2791,6 +2791,144 @@ workflow or production runtime was modified.
 All proposed L4 moves remain **pending L1 decision and atomic
 consumer cutover**.
 
+### Exact root-tool reconciliation and remaining L0 gaps — 2026-11-13
+
+**Inventory boundary:** At clean `dev/tooling-workspace-cleanup`
+`c05c9bd035a0f8aaa4981e6475ecea78a23e1f60`,
+`tools/` has **120 Python files plus one HTML template directory**.
+A literal filename-stem comparison against the entire 3,095-line L0
+cleanup plan found **97** modules already named and **23** not
+individually named. A mention is only a *coverage signal*, not proof
+that every import, consumer or ignored output has been reviewed.
+The 23 omitted names are reconciled below without inferring retention
+from tests alone. The template is explicitly owned by
+`build_symbol_artwork_review` and must move with that generator.
+
+**Reconciled root modules and disposition, with current purpose:**
+
+- **Optional agent workspace tooling — retain available, not
+  mandatory:** `agent_workspaces` creates scoped clean-checkout
+  worktrees and enforces a marker/branch guard;
+  `agent_coordination` provides per-Git-common-dir cooperative claims,
+  and `agent_global_coordination` provides optional fast-forward-only
+  cross-host Git-ref claims. They are cross-dependent, documented under
+  `docs/multi-agent-workspaces.md`, and test-backed. Neither active
+  claims nor these installed tools automatically enable the optional
+  protocol for ordinary development. **L4 portability issue:**
+  `agent_workspaces.create` still defaults to
+  `dev/v1.0.0`; do not change to a guessed current branch without
+  preserving explicitly pinned alternate-branch call sites/tests.
+- **Source provenance and publication validation — retain active:**
+  `army_snapshot_source` verifies immutable Army ZIP/manifests in the
+  offline consumer; `audit_restrictions_source_chart` verifies
+  exact N5.3 Chart scope, 14 source-only negative conditions and the
+  tracked public projection; `build_weapon_profile_publication` is
+  now a **read-only embedded Weapon citation verifier**, despite the
+  historical builder-like name; `build_its_season` is an opt-in
+  standalone isolated ITS database builder and checker, **not** a
+  replacement for `infinity-db build`. L2 must move its default
+  ignored `data/work/its/its_18.db` output to a reviewed
+  `local/work/` destination while retaining its refusal to replace
+  tracked `data/generated/` publications. L4 may rename the
+  misleading Weapon verifier after direct-module consumers and
+  maintained commands are updated.
+- **Current documentation/CI/backlog infrastructure — retain
+  with bounded future generalization:** `check_doc_links`
+  is active in both Docs stage and hosted Source CI;
+  `check_v1_backlog` still owns strict historical V1S validation
+  for the Docs stage and is imported by `dev_status` and
+  `check_v1_backlog_ci`. The latter remains an **active hosted
+  Source CI** first-parent-aware retirement gate, even when the
+  current backlog has zero V1S declarations. `dev_status` is a
+  useful read-only snapshot of checkout, queues, MCP and exact-SHA
+  workflow summaries. A future generic backlog implementation
+  must preserve the historical closeout/merge behavior, not
+  simply remove all three modules because 1.0 has shipped.
+- **Separate symbol producer handoff — retain the independent
+  verifier chain:** `export_symbol_source_plan` derives
+  authoritative, pinned raw-SVG URL/path requests; its
+  `export_symbol_override_lookups` consumer separately pins
+  approved override lookup paths. Both use idempotent immutable
+  output with differing bytes refused. `verify_raw_symbol_handoff`
+  checks downloaded ZIP/source reports; `verify_effective_symbol_handoff`
+  checks override-stage provenance;
+  `verify_symbol_duplicate_handoff` validates the duplicate and
+  font-audit receipts; `verify_processed_symbol_handoff` verifies
+  the compressed/canonical artifact. `prepare_symbol_publication`
+  verifies all required external receipts and creates a **new,
+  exclusive candidate directory** without publishing into the
+  tracked runtime. These seven tools/steps cannot be replaced by
+  success from the external `InfinityDB-symbol-tools` producer
+  alone: the consumer must independently verify source/handoff hashes,
+  transformations, missing assets and typed publication identities.
+  Their input path literals and companion files are part of L2
+  cross-repository handoff negotiation.
+- **Weapon audit shared helpers — retain with the auditors:**
+  `weapon_chart_source` extracts rows from the *specific*
+  N5.3 chart page layout; `weapon_source_common` provides
+  constrained name/mode identities and source hashes; and
+  `weapon_source_metadata` reads published Army Weapon metadata
+  without mutating it. These have active Weapon/source-audit imports;
+  they are not standalone build entrypoints and should move as one
+  compatible `tools/research/` slice, if that layout is approved.
+- **Low-usage tools — two explicit L5 decision candidates:**
+  `probe_docker_test_host` is an optional, bounded, read-only
+  Docker availability diagnostic, documented for Windows test-host
+  triage, with no other current `tools/` importer.
+  Retain provisionally until an independent operator/MCP diagnostic
+  replacement is demonstrated; its tests alone do not determine
+  the disposition. `symbol_raster_validation` contains optional
+  Python/Pillow and external-renderer visual-comparison helpers, but
+  no current `tools/` import and no standalone CLI; only its
+  focused test consumer was found. It is the **stronger tracked
+  retirement/extraction candidate**, subject to verifying that
+  `InfinityDB-symbol-tools` independently owns the needed
+  raster/source-parity workflow and that current publication checks
+  do not require these helpers. Do not delete it or its tests merely
+  because it is unreferenced by another Python module.
+
+**New acceptance at the reviewed SHA:** Independent read-only
+`audit_restrictions_source_chart --check-publication` returned
+**6 rows, 14 negative conditions, 7 unmodeled typed edges and
+2 conditional relation warnings** (not gameplay-legality approval).
+`build_weapon_profile_publication` verified **69 embedded profile
+citations**. Six focused test modules passed **52/52**, no skips:
+`test_export_symbol_source_plan.py` **6**;
+`test_check_v1_backlog_ci.py` **12**;
+`test_prepare_symbol_publication.py` **10**;
+`test_symbol_raster_validation.py` **2**;
+`test_agent_workspaces.py` **7**; and
+`test_game_mode_source_table.py` **15**, including live Chromium
+Restrictions coverage. Neither the separate symbol producer nor
+private input archives were accessed for this acceptance.
+
+**Residual gaps ranked for subsequent review:**
+
+1. **L1 blockers outside code:** backup/restore proof, classification
+   of 19 inaccessible `reports/` directories, live Windows Syncthing
+   sender state, and receiver/source-path rollback evidence remain
+   unverified; no private-data move or deletion is authorized.
+2. **L2 output/reader contract:** address the explicit ITS
+   `data/work/` default, source PDF/normalized/raw selectors,
+   source-plan/producer boundaries and per-run nonoverwrite policy
+   before any physical migration. The independently validated
+   source ZIP/published SQLite bytes must remain stable.
+3. **L4/L5 bounded design:** decide root CLI exceptions and exact
+   atomic imports/CI/docs updates, then confirm whether the two
+   low-usage diagnostic/raster helpers and the historical V1S
+   wrapper can safely consolidate. A test-only reference does not
+   by itself justify indefinite retention or immediate deletion.
+
+**Result:** Every currently enumerated root module is now **named**
+in this plan, with the 23 prior omissions explicitly classified.
+The full per-file private inventory remains the source for byte
+hashes, owner-specific recovery and L3 migration decisions.
+This is **not** L0 exit: standalone/external consumers, unknown
+private directory contents and independent backup/restore proofs
+remain pending. No files, runtime behavior, generated sources,
+remote workspaces, installed plugins or service state changed
+during this review.
+
 ### L1 candidate policy decisions — proposal only
 
 **Eligible for user review, not yet approved:** Adopt the stated
@@ -2866,13 +3004,15 @@ service-owned volumes and destructive retirement.
    the mismatched `army.raw.db`) as recoverable evidence until their own
    backup, consumer and deletion decisions. Keep persistent
    `metrics_history` Docker volume outside checkout relocation.
-6. **Tool/document lifecycle — incomplete:** The private intake listed
-   124 original tool artifacts and 48 tracked Markdown documents, with
-   provisional ownership only. Several bounded clusters now have
-   purpose-based decisions, including the six operations modules and
-   thirteen performance/testing helpers. Complete the remaining independent
-   consumers, open findings, write side effects and retention triggers
-   before approving the L4 root-category layout or L5 retirements.
+6. **Tool/document lifecycle — still partly open:** The initial
+   private intake listed 124 tool artifacts and 48 tracked Markdown
+   documents on an earlier revision; the current checkout enumerates
+   **120 Python modules and one template directory** and has reconciled
+   all module names against bounded ownership/disposition reviews.
+   That is **not** proof of complete standalone/external consumer coverage:
+   finish low-usage helper disposition, producer/MCP import and
+   invocation checks, lifetime/retention triggers and actual source
+   rollback evidence before L4/L5 retirement decisions.
 7. **Policy/retirement approvals — pending:** Agree the canonical
    `local/` categories, justified cache/host exceptions, intentionally
    tracked generated-review outputs (including the interaction checklist
