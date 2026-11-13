@@ -7,6 +7,7 @@ import sqlite3
 import subprocess
 import sys
 import zipfile
+from collections.abc import Callable, Mapping
 from contextlib import closing
 from io import BytesIO
 from pathlib import Path
@@ -56,6 +57,7 @@ from tools.report_reference_baseline import (
     verify_declaration_review,
     verify_served_revision,
 )
+from tools.research.source_paths import pinned_pdf_path
 
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_DB = ROOT / "data/generated/army.db"
@@ -578,11 +580,11 @@ def test_post_inventory_equipment_distinguishes_source_variants_from_public_fire
                for item in added_equipment)
 
 
-def test_post_inventory_ecm_and_firewall_clauses_match_pinned_n5_3_pdf() -> None:
+def test_post_inventory_ecm_and_firewall_clauses_match_pinned_n5_3_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     """Selected source clauses only, not full Equipment review or gameplay resolution."""
-    pdf = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not pdf.is_file():
-        pytest.skip("Pinned N5.3 English PDF unavailable")
+    pdf = pinned_n53_core_pdf
     pymupdf = pytest.importorskip("pymupdf")
     pins = json.loads((
         ROOT / "config/validation/restrictions-source-chart.json"
@@ -608,7 +610,9 @@ def test_post_inventory_ecm_and_firewall_clauses_match_pinned_n5_3_pdf() -> None
                 assert " ".join(phrase.split()).casefold() in source, (page, phrase)
 
 
-def test_declaration_migration_review_matches_historical_owners_and_current_pdf() -> None:
+def test_declaration_migration_review_matches_historical_owners_and_current_pdf(
+    reference_pdf_layout: str,
+) -> None:
     report = reconcile_explanation_inventory()
     try:
         crosswalk = reconcile_declaration_owners(report)
@@ -618,19 +622,23 @@ def test_declaration_migration_review_matches_historical_owners_and_current_pdf(
         raise
     assert crosswalk["retiredCount"] == 17
     assert crosswalk["addedCount"] == 20
-    source = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if source.is_file():
-        pytest.importorskip("pymupdf")
-    verified = verify_declaration_review(
-        crosswalk, pdf_path=source if source.is_file() else None,
+    pins = json.loads((
+        ROOT / "config/validation/restrictions-source-chart.json"
+    ).read_text(encoding="utf-8"))
+    source = pinned_pdf_path(
+        ROOT, "data/pdf/rules/n5-rules-v5.3-en.pdf",
+        pins["sourcePdfSha256"], layout=reference_pdf_layout, missing_ok=True,
     )
+    if source is not None:
+        pytest.importorskip("pymupdf")
+    verified = verify_declaration_review(crosswalk, pdf_path=source)
     assert verified["retiredReviewed"] == 17
     assert verified["newHeadingsReviewed"] == 20
     assert verified["kindCorrections"] == 3
     assert verified["multiOwnerSplits"] == 1
     assert verified["retiredCategoryAliasesCreated"] == 0
     assert verified["fullRecordApprovalsIssued"] == 0
-    if source.is_file():
+    if source is not None:
         assert verified["status"] == "pinned-n5.3-pdf-headings-verified"
 
 
@@ -801,15 +809,18 @@ def test_visibility_pdf_layout_cli_flag_is_forwarded(
     assert selected == [(True, "local")]
 
 
-def test_five_visibility_zone_terms_match_bilingual_pinned_pdfs() -> None:
-    for relative in (
-        "data/pdf/rules/n5-rules-v5.3-en.pdf",
-        "data/pdf/rules/n5-rules-v5.3-es.pdf",
-    ):
-        if not (ROOT / relative).is_file():
-            pytest.skip(f"Pinned source unavailable: {relative}")
+def test_five_visibility_zone_terms_match_bilingual_pinned_pdfs(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+    reference_pdf_layout: str,
+) -> None:
+    manifest = json.loads((
+        ROOT / "config/validation/visibility-zone-terms-v1.json"
+    ).read_text(encoding="utf-8"))
+    pinned_pdf_sources(manifest["sourcePins"])
     pytest.importorskip("pymupdf")
-    evidence = audit_visibility_zone_evidence(verify_pdfs=True)
+    evidence = audit_visibility_zone_evidence(
+        verify_pdfs=True, source_layout=reference_pdf_layout,
+    )
     assert evidence["verifiedPdfLanguages"] == ["english", "spanish"]
     assert evidence["reviewedTermCount"] == 5
 
@@ -896,12 +907,11 @@ def test_conditional_declaration_crosswalk_validates_selected_source_evidence() 
                for row in result["cases"])
 
 
-def test_conditional_declaration_crosswalk_checks_pinned_pdf_when_present() -> None:
-    source = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.is_file():
-        pytest.skip("Pinned N5.3 source PDF is unavailable")
+def test_conditional_declaration_crosswalk_checks_pinned_pdf_when_present(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pytest.importorskip("pymupdf")
-    result = audit_conditional_declaration_evidence(pdf_path=source)
+    result = audit_conditional_declaration_evidence(pdf_path=pinned_n53_core_pdf)
     assert result["status"] == "pinned-source-clause-and-curated-evidence-verified"
     assert result["selectedCaseCount"] == 10
 

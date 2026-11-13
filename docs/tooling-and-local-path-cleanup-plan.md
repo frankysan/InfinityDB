@@ -2499,6 +2499,52 @@ backup/restore and R6 physical private-data migration remain unapproved.
 No ignored PDF, Wiki archive, override or generated database was moved
 or removed in this checkpoint.
 
+### Thirty-fourth bounded L2 checkpoint — R4 mixed-source publication and export readers (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`627b66a3077b576e691911463d354e385847c65b`. This is a
+test-only source-selection change, not source relocation or approval
+to change published provenance.
+
+- `tests/test_weaponry_catalog_api.py`: the Pheroware and page-75
+  source-only checks now use the selected pinned N5.3 English Core PDF;
+  the ESX-04 AP+T2 CC bilingual chart test uses separately pinned English
+  and Spanish sources. The page-75 config path is rooted in the repository
+  rather than derived from the PDF's physical parent, so `local`
+  selection does not change where the tracked manifest is read.
+- `tests/test_report_reference_baseline.py`: ECM/Firewall and
+  conditional-declaration source-only checks use the pinned Core fixture.
+  The bilingual Visibility Zone check selects both manifest-declared
+  PDF pins before passing the explicit layout into the existing auditor.
+  The optional declaration-migration PDF check retains its mandatory
+  owner/crosswalk assertions when a source is absent and validates a
+  present PDF against the tracked restriction-chart hash first.
+- `tests/test_restriction_storage_candidate.py`: both the English Core
+  optional pin check and each of the 13 declared PDF-source occurrences
+  resolve the physical path through the selected layout, with their
+  original source IDs, declared `localPath` labels, SHA-256s and SQL
+  export comparisons unchanged. The export assertions run even when
+  an optional physical PDF is unavailable.
+
+The explicit `--reference-pdf-layout legacy|local` policy remains
+`legacy` by default. Missing selected source-only PDFs skip their own
+tests; present mismatched or unsafe sources fail closed without
+cross-layout fallback. Optional checks inside mandatory publication
+or export tests do not skip those tests. No PDF, Wiki archive, runtime
+database, or generated asset was moved or deleted.
+
+**Windows validation:** the complete weaponry catalog, reference
+baseline and restriction-storage modules passed **196 + 84 + 14 = 294
+tests, two skipped**. The shared source-path suite passed **42 tests,
+two skipped**: **336 passed, four skipped, zero failed** total. Ruff,
+canonical Pyright (zero errors/warnings), docs lint/links/backlog and
+Git whitespace checks passed. Linux exact-SHA checks remain a distinct gate.
+
+**Next R4:** Inventory any other direct private PDF readers not yet
+converted, then confirm the source-reader phase is sufficiently bounded
+to close R4. Do not promote R5 receiver ACL/independent backup-restore
+or R6 private-data relocation without their separate approval.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

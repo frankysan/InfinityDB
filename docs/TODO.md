@@ -99,8 +99,11 @@ when all contained work shares the same owner.
   The [curated and mixed-source checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-third-bounded-l2-checkpoint--r4-curated-and-mixed-source-acceptance-2026-11-13)
   now binds 21 remaining curated source-only tests, Weapon profiles, bilingual
   auxiliary Silhouette evidence and the optional Hacking Program chart check to
-  explicit PDF layouts. **Next:** audit the remaining mixed source readers and
-  reference baselines, then receiver ACL/backup evidence (R4/R5).
+  explicit PDF layouts. The [mixed-source checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-fourth-bounded-l2-checkpoint--r4-mixed-source-publication-and-export-readers-2026-11-13)
+  also binds the remaining Weaponry catalog PDF evidence, reference-baseline
+  source-only/optional checks and restrictions export pin checks without
+  changing publication behavior. **Next:** inventory remaining direct
+  PDF readers, then receiver ACL/backup evidence (R4/R5).
   Source relocation and private-data migration still require separate
   approval and backup/restore evidence. L2/R4 remain open, and hosted/release
   acceptance remains independent of fixture validation.
