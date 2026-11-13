@@ -6410,11 +6410,20 @@ python -m pytest tests/test_template_reference.py::test_template_conditions_matc
 
 Hermetic regression cases in `test_combat_attack_reference.py` cover both
 physical selections, hash changes, missing-local-with-legacy-present, invalid
-layouts and page extraction from a synthetic PDF. The global `require_source_files`
-fixture retains its previous meaning for all other suites. Other source tests
-that still require `data/pdf/` through fixed paths retain legacy skip semantics
-until separately migrated; do not globally redirect test data or silently
-turn a skipped source test into unpinned evidence.
+layouts and page extraction from a synthetic PDF. The Hacking Program
+statistics source tests also use `--reference-pdf-layout` for their exact
+Core N5.3 PDF via the pinned resolver directly, without loading optional
+PyMuPDF at test collection time. Their independently pinned Army archive
+remains at its existing source path, and
+`tools.audit_hacking_program_statistics_chart` retains its caller-supplied
+`--pdf` input. Their additional hermetic
+regression rejects altered selected bytes, missing local sources despite an
+available legacy PDF, unsupported layouts and drift in the statistics manifest
+pin. On either layout a supplied wrong PDF fails rather than becoming a skip.
+The global `require_source_files` fixture retains its previous meaning for
+other suites. Further tests still bound to `data/pdf/` keep their original
+skip semantics until reviewed individually; no global path redirection or
+source-only skip can establish publication approval.
 
 ## Maintained snapshot-note validation
 

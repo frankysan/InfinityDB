@@ -2046,6 +2046,50 @@ private source migration remains gated on independent ACL and tested
 backup/restore evidence; this checkpoint does not authorize copying or
 deleting any private PDF or SVG override.
 
+### Twenty-seventh bounded L2 checkpoint — R4 Hacking Program chart test PDF selection (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`b871d1e093b5d3ab0af63dd9348eeb8d908ba9b9`. The Hacking Program
+statistics tool already accepted a **caller-selected** `--pdf` and checked
+its manifest hash; the remaining defect was confined to two independent,
+source-dependent tests using the tool's fixed legacy `PDF` constant.
+
+The tests in `tests/test_hacking_device_program_source_chart.py` now accept
+the existing pytest `--reference-pdf-layout legacy|local` selector for
+their N5.3 Core PDF prerequisite. Default `legacy` behavior, printed
+p. 57–61 clause assertions, detailed p. 58 chart-column checks, twelve
+Hacking Program identities, published Army comparison, the separate pinned
+Army ZIP prerequisite and all citation/source-authority boundaries remain
+unchanged. The test-only resolver binds the **canonical** source label
+`data/pdf/rules/n5-rules-v5.3-en.pdf` using the existing immutable N5.3
+SHA-256, and independently asserts that the statistics manifest still uses
+that same canonical pin. A selected but absent PDF continues to skip just
+the relevant source-only test; supplied wrong bytes, changed manifest pins,
+unsafe/symlinked inputs and unsupported layouts fail closed. A local selection
+never searches or falls back to an available legacy PDF. The auditor's
+public `audit_files(pdf_path=...)` and CLI `--pdf` interfaces do **not**
+change; no implicit lookup is introduced to the tool.
+
+A synthetic no-fallback fixture now covers the selected legacy/local path,
+altered local source bytes, missing-local-with-legacy-present, mismatched
+manifest pin and invalid layout. The test module calls
+`tools.research.source_paths.pinned_pdf_path` directly rather than importing
+the browser-centric reference-acceptance helper, so optional PyMuPDF remains
+**optional at collection time**. Existing real-PDF checks use
+`pytest.importorskip` only at their original source-validation boundary.
+
+**Windows validation:** All **eight** Hacking Program statistics source tests
+passed (zero skipped, zero failures), including both independently pinned
+real source checks and the new synthetic layout case. Ruff passed. Type,
+documentation, Linux exact-SHA and hosted CI evidence are tracked separately;
+no source-migration acceptance follows from the test-only change.
+
+**Next R4 work:** Inventory other directly fixed-path source-only test
+families, then adapt only meaningful active readers without weakening the
+individual source/pin contract. Real receiver ACL/backup/restore and the R5/R6
+physical migration remain separately gated. No private PDF or SVG override
+was copied, relabeled, deleted or rewritten by this checkpoint.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

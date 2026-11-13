@@ -526,11 +526,14 @@ uses the same explicit selector and pinned source labels. Its other optional
 caller-selected paths with independent SHA-256 checks, not implicit lookups.
 The Hacking Program statistics auditor also accepts an explicit `--pdf`
 source path and verifies its manifest pin; no automatic path selection was
-added to that caller-owned input. The Basic Attack, Hacking follow-up and Template source-acceptance tests now
-accept explicit test-only `--reference-pdf-layout legacy|local` selection for
-their pinned Core/FAQ PDFs. This does not relocate the test Wiki ZIP, turn
-source-only skips into approvals, or alter browser/runtime validation. Other
-direct readers and test prerequisites retain their individual path contracts.
+added to that caller-owned input. The Basic Attack, Hacking follow-up,
+Template and Hacking Program statistics source-acceptance tests accept the
+explicit test-only `--reference-pdf-layout legacy|local` selection for pinned
+Core/FAQ PDFs. The statistics suite additionally checks the unchanged
+canonical Core hash before resolving its PDF. This does not relocate the
+pinned Army archive or test Wiki ZIP, turn source-only skips into approvals,
+or alter browser/runtime validation. Other direct readers and test
+prerequisites retain their individual path contracts.
 Normal rules builds still do not open research PDFs. Override lookup paths
 belong to the external symbol producer and are independent of these PDF labels.
 

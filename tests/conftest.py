@@ -24,7 +24,7 @@ pytest_plugins = ("tools.pytest_startup_profile",)
 def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption(
         "--reference-pdf-layout", choices=("legacy", "local"), default="legacy",
-        help="Explicit PDF layout for selected source-acceptance tests; never search a fallback.",
+        help="Explicit PDF layout for selected pinned source tests; never search a fallback.",
     )
     parser.addoption(
         "--browser-lanes",
@@ -153,7 +153,7 @@ def pooled_chromium_browser(
 
 @pytest.fixture(scope="module")
 def reference_pdf_layout(request: pytest.FixtureRequest) -> str:
-    """Opt-in physical PDF selection for three reference-acceptance source tests."""
+    """Opt-in physical PDF selection for bounded pinned source test families."""
     return str(request.config.getoption("--reference-pdf-layout"))
 
 
