@@ -2,11 +2,32 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Deployment
 
-**Status:** Started 2026-11-12; L0 inventory and ownership review in progress.
-**Prospective P1–P5 conventions accepted 2026-11-13** for new work; the
-tracked-code retirement (T), existing private-data migration (M), and
-individual legacy-path cutovers remain unapproved. Bounded P5 retirements
-are recorded below; no private inputs have been moved or deleted.
+**Status:** Started 2026-11-12. Active implementation on
+`dev/tooling-workspace-cleanup`; R5 investigation concluded by the scope
+reset below. The prospective P1–P5 conventions were accepted 2026-11-13.
+Individual physical moves/deletions still require deliberate selection;
+the investigation is not itself authorization to delete private files.
+
+**2026-11-13 scope reset — supersedes more restrictive R5/R6 gates below:**
+InfinityDB is developed and deployed by one operator with direct physical
+access to both Windows and Linux machines. This cleanup exists to **reduce
+maintenance overhead**, not create production-grade migration, monitoring,
+backup, or rollback infrastructure. The R5 Syncthing and ACL investigation
+is sufficient for this purpose and is **closed without** further live
+receiver API probing, exhaustive ACL inheritance verification, independent
+backup trials, or elaborate per-file rollback tooling. Earlier checkpoints
+remain as historical evidence, but their mandatory R5/R6 prerequisites are
+no longer governing requirements.
+
+Continue in practical, domain-coherent batches: identify actual consumers;
+make focused writer/reader and path changes; retain difficult-to-recreate
+private originals until the new locations have been checked; run relevant
+focused tests and a simple byte/hash check for important sources; commit
+tracked changes. No automatic bulk deletion, silently lost originals,
+implicit Git/sync operations, or unreviewed public inclusion of private
+assets. Use judgment instead of exhaustive preflight. Consolidate progress
+reporting into milestones rather than another narrative checkpoint for
+each small change.
 
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.

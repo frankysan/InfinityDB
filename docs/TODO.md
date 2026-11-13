@@ -116,13 +116,15 @@ when all contained work shares the same owner.
   [R5 sender/recursive checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-eighth-bounded-l2-checkpoint--r5-sender-health-and-recursive-receiver-access-2026-11-13)
   now verifies the live Windows Send Only service and all five folders'
   zero-pending/idle status, plus a complete 35,833-entry read-only
-  effective-access census on Linux. Direct live receiver status still needs
-  an owner-authorized query; inherited ACLs and independent backup/trial
-  restore remain open. **Next:** complete these R5 proofs and a per-family
-  rollback package before requesting any R6 copy approval.
-  Source relocation and private-data migration still require separate
-  approval and backup/restore evidence. L2/R5 remain open; hosted/release
-  acceptance is independent of fixture validation.
+  effective-access census on Linux. **Scope reset (2026-11-13):**
+  R5 is closed as sufficient for this single-operator project; further
+  receiver-status, ACL-inheritance, formal backup/restore, and exhaustive
+  rollback-tooling gates are no longer prerequisites. **Next:** resume
+  practical L2/R6 cleanup in larger, coherent batches with focused
+  consumer tests and simple checks of important private source copies.
+  Preserve hard-to-recreate originals until reviewed; do not bulk-delete
+  private data or publish it accidentally. Hosted/release acceptance
+  remains independent of fixture validation.
 
 ### Backlog and development workflow simplification
 
