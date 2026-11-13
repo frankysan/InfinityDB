@@ -77,8 +77,12 @@ when all contained work shares the same owner.
   now include the reference reporter and revision-delta audit; the
   [R4 activation checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-fourth-bounded-l2-checkpoint--r4-explicit-staged-pdf-and-override-destinations-2026-11-13)
   provides explicit local PDF/override destinations in disposable checkouts.
-  **Next:** audit remaining direct PDF readers and test-source prerequisites,
-  then validate cross-host source and override selection (R4/R5).
+  The [remaining-reader checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-fifth-bounded-l2-checkpoint--r4-remaining-direct-pdf-reader-disposition-2026-11-13)
+  now binds Visibility Zone evidence to the exact selected PDF layout and
+  distinguishes already-explicit readers from legacy-bound test fixtures;
+  Windows/Linux fixture parity covers the staged PDF/override mappings.
+  **Next:** migrate coherent test-source prerequisite families one at a time,
+  then review real receiver ACL and backup/restore evidence (R4/R5).
   Source relocation and private-data migration still require separate
   approval and backup/restore evidence. L2/R4 remain open, and hosted/release
   acceptance remains independent of fixture validation.

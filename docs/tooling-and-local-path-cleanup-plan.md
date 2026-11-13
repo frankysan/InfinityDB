@@ -1958,14 +1958,36 @@ or warnings), documentation lint/links/backlog and Git whitespace checks passed.
 The real Visibility Zone PDF test ran where the pinned source was available;
 source-dependent skips on clean checkouts remain explicit. No live private
 PDF relocation, Syncthing reconfiguration, public source publication or
-R5/R6 approval follows from these changes; Linux parity and hosted CI
-require their own evidence.
+R5/R6 approval follows from these changes. Linux parity is recorded below;
+hosted exact-SHA CI remains an independent release/development gate.
+
+**Linux exact-SHA fixture acceptance (2026-11-13):** After explicit
+`origin` fetch, the `linux-dev` MCP checkout temporarily detached to
+`323bfc05c96a2420653988cf2ccc5b457d53fbfa`. Its reference-baseline
+suite passed **84, two skipped**; the Hacking Program source suite passed
+**7**; and the shared research path suite passed **42** (including Linux
+symlink cases): **133 passed, two skipped** for the current R4 slice.
+The preceding R4 staged-file activation mapping also passed on this exact
+SHA: **107 passed, zero skipped** in
+`tests/test_activate_synced_assets.py`, compared to **103 passed, four
+skipped** in the earlier Windows run. The cross-host fixture evidence is
+thus **240 Linux tests passed, two skipped, no failures**, across the four
+selected suites. Both real pinned PDF audit suites ran with available
+legacy source bytes on both hosts; hermetic local-layout tests established
+selection behavior, **not** migration/availability of real private PDFs in
+the new layout. No source or override was activated outside disposable tests.
+After testing, the Linux worker's original detached HEAD
+`8de09b277e579bd8cb942c6aba242bfe4f71ceca` was explicitly restored.
+The Windows cleanup branch remains independently checked out. Exact-SHA
+GitHub smoke jobs passed for the code commit; Source checks were still in
+progress at the time of this note, not accepted as green.
 
 **Next R4 step:** Choose and adapt a coherent source-dependent acceptance
 fixture family with explicit opt-in selection and reproducible hash checks;
-validate the source-only tests on both hosts with supplied pins. Keep the
-staged override producer's reviewed basenames/hash bindings separate from the
-receiver's physical destination mapping.
+validate its source-only tests on both hosts with supplied pins. Review
+real receiver ACLs and backup/restore separately in R5 before any real
+activation. Keep the staged override producer's reviewed basenames/hash
+bindings separate from the receiver's physical destination mapping.
 
 ## Observed starting condition
 
