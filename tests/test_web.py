@@ -6244,14 +6244,14 @@ def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
     ):
         assert fragment in base, fragment
 
-def test_visibility_zone_five_term_explanations_match_pinned_n5_3_source() -> None:
+def test_visibility_zone_five_term_explanations_match_pinned_n5_3_source(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned English N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     review = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text(
             encoding="utf-8"

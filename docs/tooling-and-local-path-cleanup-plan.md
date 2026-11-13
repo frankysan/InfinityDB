@@ -2545,6 +2545,75 @@ converted, then confirm the source-reader phase is sufficiently bounded
 to close R4. Do not promote R5 receiver ACL/independent backup-restore
 or R6 private-data relocation without their separate approval.
 
+### Thirty-fifth bounded L2 checkpoint — R4 final direct-PDF-reader inventory (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`4332f5b4e4ad0cb31542580b2be751768065f388`.
+A fresh whole-`tests/` and `tools/` search separated actual physical
+PDF reads from source labels, synthetic migration fixtures and
+backward-compatible defaults. The following five maintained test modules
+now use explicit `--reference-pdf-layout legacy|local` source selection:
+
+- `tests/test_faq_ruling_references.py` keeps the three independently
+  reviewed FAQ v0.0/v0.1 English/Spanish identities and per-source
+  inventory, curated metadata, page count and SHA-256 assertions. The
+  physical byte reader now uses `pinned_pdf_sources`; no FAQ version
+  fallback or source reinterpretation was added.
+- `tests/test_audit_1_0_reference_inputs.py` uses independently
+  declared historical N4 Reinforcements pins before the existing
+  `verify_reinforcements_inputs(..., source_layout=...)` report. This
+  remains **historical evidence, not current N5 authority**; synthetic
+  negative-path tests retain their deliberately isolated fixture paths.
+- `tests/test_visibility_zone_whole_record.py` binds both English and
+  Spanish N5.3 PDFs through the shared pinned selector. The exact
+  operative clauses, page numbers, five-term record acceptance and
+  manifest's language-specific pins remain independent and unchanged.
+- `tests/test_conditional_reactive_followup.py` binds the single N5.3
+  English PDF before its twelve reviewed-page excerpts. Curated/API
+  evidence and heading-only versus full-clause limitations are untouched.
+- `tests/test_web.py` binds the isolated five-term Visibility Zone
+  English page source check; the entire surrounding web acceptance
+  module and pinned content checks remain unchanged.
+
+**Intentional residual references, not hidden physical-layout readers:**
+`tests/reference_acceptance_support.py` retains the legacy `PDF`
+constant and default `pdf_pages` parameter for compatibility, but the
+maintained source-acceptance callers already pass an explicitly selected
+`pdf_path`. `tools/audit_hacking_program_statistics_chart.py`
+retains its legacy `PDF` constant for compatibility; `audit_files`
+only reads a PDF passed as `pdf_path` and the CLI requires an explicit
+`--pdf` argument for PDF verification. Fixed paths in
+`tests/test_activate_synced_assets.py` and
+`tests/test_audit_reinforcements_applicability.py` are synthetic,
+disposable staging fixtures; `localPath` strings in manifests, curated
+sources and reports are **provenance labels**, not physical layout
+selection. Existing PDF auditors that already accept explicit
+`source_layout` or `--pdf` are not retargeted behind their callers'
+backs.
+
+The default layout remains `legacy` without fallback. Missing
+source-dependent private inputs skip only the relevant source tests;
+supplied unsafe or mismatched inputs fail closed. No private PDFs,
+Wiki ZIPs, source overrides or runtime databases were moved, renamed,
+published or deleted.
+
+**Windows validation:** All five affected modules and the shared
+source-path suite passed **502 tests, three skipped, zero failed**.
+The complete `tests/test_web.py` module contributes **323 passed,
+11 deselected** under the normal `not full_assets` profile.
+The other modules passed 80 FAQ (one skipped), 50 historical-source,
+four conditional-reactive, three whole-record Visibility Zone and
+42 source-layout tests (two skipped). Ruff, canonical Pyright
+(**0 errors, 0 warnings**), docs lint/links/backlog and Git whitespace
+checks passed. Linux exact-SHA verification remains a separate gate.
+Neither set substitutes for real-source local-layout parity or
+private-asset migration acceptance.
+
+**Next:** Close out any remaining R4 operational evidence gaps
+through explicit staging/parity tests only; R5 receiver ACL and
+independent backup/restore evidence and R6 physical private-data
+migration remain separately gated and unapproved.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

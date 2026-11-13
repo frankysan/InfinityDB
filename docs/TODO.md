@@ -102,8 +102,13 @@ when all contained work shares the same owner.
   explicit PDF layouts. The [mixed-source checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-fourth-bounded-l2-checkpoint--r4-mixed-source-publication-and-export-readers-2026-11-13)
   also binds the remaining Weaponry catalog PDF evidence, reference-baseline
   source-only/optional checks and restrictions export pin checks without
-  changing publication behavior. **Next:** inventory remaining direct
-  PDF readers, then receiver ACL/backup evidence (R4/R5).
+  changing publication behavior. The
+  [final reader inventory](tooling-and-local-path-cleanup-plan.md#thirty-fifth-bounded-l2-checkpoint--r4-final-direct-pdf-reader-inventory-2026-11-13)
+  covers FAQ source pins, historical Reinforcements inputs, Visibility
+  Zone whole-record and web evidence, and conditional reactive source
+  pages; the two remaining compatibility defaults are intentionally retained.
+  **Next:** finish R4 staged/parity evidence, then receiver ACL/backup
+  evidence (R5) before any physical migration (R6).
   Source relocation and private-data migration still require separate
   approval and backup/restore evidence. L2/R4 remain open, and hosted/release
   acceptance remains independent of fixture validation.
