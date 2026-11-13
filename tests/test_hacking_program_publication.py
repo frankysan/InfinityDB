@@ -18,6 +18,7 @@ from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.hacking_program_catalog import hacking_program_declaration_categories
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
+from tools.research.source_paths import pinned_pdf_path
 from tools.verify_hacking_programs_browser import WIDTHS, source_programs
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -171,7 +172,9 @@ def test_all_published_hacking_programs_match_army_and_curated_rules() -> None:
     assert "content.hidden = false;" in javascript
 
 
-def test_generated_core_orders_aros_matrix_matches_pinned_source_and_routes() -> None:
+def test_generated_core_orders_aros_matrix_matches_pinned_source_and_routes(
+    reference_pdf_layout: str,
+) -> None:
     """The browser matrix projects domain metadata, not a second literal chart."""
     from infinity_db.declaration_matrix import core_declaration_matrix
 
@@ -198,8 +201,11 @@ def test_generated_core_orders_aros_matrix_matches_pinned_source_and_routes() ->
     assert source["sourcePdfSha256"] == (
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
     )
-    pinned_pdf = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if pinned_pdf.is_file():
+    pinned_pdf = pinned_pdf_path(
+        ROOT, "data/pdf/rules/n5-rules-v5.3-en.pdf",
+        source["sourcePdfSha256"], layout=reference_pdf_layout, missing_ok=True,
+    )
+    if pinned_pdf is not None:
         assert hashlib.sha256(pinned_pdf.read_bytes()).hexdigest() == (
             source["sourcePdfSha256"]
         )

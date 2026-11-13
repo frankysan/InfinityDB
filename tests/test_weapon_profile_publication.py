@@ -93,14 +93,10 @@ def test_weapon_profile_diagnostic_does_not_publish_json() -> None:
 
 
 def test_pinned_pdf_contains_every_published_weapon_profile_mode_and_page(
-    publication: dict[str, Any],
+    publication: dict[str, Any], pinned_n53_core_pdf: Path,
 ) -> None:
-    root = Path(__file__).resolve().parents[1]
-    pdf = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not pdf.is_file():
-        pytest.skip("Ignored N5.3 PDF unavailable")
     pytest.importorskip("fitz")
-    report = audit_chart(pdf, DEFAULT_ARMY)
+    report = audit_chart(pinned_n53_core_pdf, DEFAULT_ARMY)
     assert report["corePdfSha256"] == PDF_SHA256
     rows = report["comparison"]["compared"]
     for weapon in publication["weapons"]:

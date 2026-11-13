@@ -96,8 +96,11 @@ when all contained work shares the same owner.
   The deployable/FAQ, geometry, movement, terrain, bilingual phase and turn
   sequence source tests now select independently pinned PDFs explicitly;
   optional Wiki ZIP evidence remains on its separate legacy path.
-  **Next:** partition the remaining larger curated-rule and other fixed-path
-  source readers, then receiver ACL/backup evidence (R4/R5).
+  The [curated and mixed-source checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-third-bounded-l2-checkpoint--r4-curated-and-mixed-source-acceptance-2026-11-13)
+  now binds 21 remaining curated source-only tests, Weapon profiles, bilingual
+  auxiliary Silhouette evidence and the optional Hacking Program chart check to
+  explicit PDF layouts. **Next:** audit the remaining mixed source readers and
+  reference baselines, then receiver ACL/backup evidence (R4/R5).
   Source relocation and private-data migration still require separate
   approval and backup/restore evidence. L2/R4 remain open, and hosted/release
   acceptance remains independent of fixture validation.

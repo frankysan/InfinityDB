@@ -2439,6 +2439,66 @@ independent backup/restore and R6 private-data migration remain
 unapproved; no ignored PDF, Wiki archive, override, Syncthing asset or
 runtime database was moved or deleted here.
 
+### Thirty-third bounded L2 checkpoint — R4 curated and mixed-source acceptance (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`6e873e9f40f324243ccda83875eacec4c9be8818`. The remaining
+source-only PDF checks in `tests/test_curated.py` were partitioned into
+**18 single English N5.3 Core** and **three independently versioned
+English/Spanish/historical** comparisons. All 21 now select an exact
+physical layout through the existing test-only pinned-source fixtures;
+source record IDs, page/text assertions, source-specific semantics and
+curated/published output remain unchanged.
+
+- The 18 English N5.3 tests use `pinned_n53_core_pdf`; each retains its
+  existing independent `weaponry-family-clauses.json` hash assertion.
+  Their local `source` variable now aliases the validated selected path.
+- The N5.2/N5.3 Jet Propulsion (ESX-02), bilingual Stealth (ESX-01) and
+  MSV3 (ESX-03) comparisons select independently reviewed SHA-256 pins
+  with `pinned_pdf_sources`, including the historical N5.2 English PDF.
+  This strengthens fail-closed version binding without resolving or
+  erasing any multilingual or edition-specific discrepancy.
+- `tests/test_weapon_profile_publication.py` now supplies its reviewed
+  chart auditor with the pinned English Core path. Publication identity,
+  chart modes, pages and embedded-profile integrity checks are unchanged.
+- `tests/test_audit_auxiliary_silhouette_provenance.py` independently
+  pins both English and Spanish N5.3 PDFs before the existing mixed
+  PDF/Wiki/Army comparison. The two legacy Wiki ZIP paths, Army database
+  and known S0/S1 disagreement remain untouched.
+- `tests/test_hacking_program_publication.py` preserves its **optional**
+  PDF hash cross-check within a mandatory API/publication test:
+  `pinned_pdf_path(..., missing_ok=True)` validates a present source
+  against the explicitly selected layout, but missing private PDFs
+  cannot skip the publication assertions.
+
+`--reference-pdf-layout legacy|local` still defaults to `legacy` and
+never searches the other layout. Missing selected PDFs skip only
+source-dependent checks; present incorrect/unsafe inputs fail closed.
+The mixed Hacking Program test instead retains its optional check while
+running publication assertions regardless of PDF availability. No
+publisher labels, `localPath` fields, provenance identities, runtime
+database contents or producer paths were rewritten.
+
+**Windows focused validation:** Complete `test_curated.py`,
+`test_weapon_profile_publication.py`,
+`test_audit_auxiliary_silhouette_provenance.py` and
+`test_hacking_program_publication.py` passed **671 + 14 + 4 + 10 = 699**
+tests with no skips/failures. Shared
+`test_research_source_paths.py` passed **42, two skipped**:
+**741 passed, two skipped, zero failed**. All evidence tests
+used actual legacy private PDF inputs. Ruff, canonical Pyright (zero
+errors/warnings), documentation lint/links/backlog and Git whitespace
+checks passed. Linux exact-code-SHA validation remains a follow-up gate.
+
+**Next R4:** Review remaining mixed source consumers by purpose, notably
+`test_weaponry_catalog_api.py`, `test_report_reference_baseline.py`,
+`test_restriction_storage_candidate.py` and other direct/indirect readers.
+Retain published `localPath` labels unless a separately approved source
+migration specifically changes that contract. R5 receiver ACL, independent
+backup/restore and R6 physical private-data migration remain unapproved.
+No ignored PDF, Wiki archive, override or generated database was moved
+or removed in this checkpoint.
+
 ## Observed starting condition
 
 The initial root-level inspection found:
