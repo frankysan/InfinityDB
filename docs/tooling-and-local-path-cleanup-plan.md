@@ -2023,8 +2023,21 @@ The source-selection option is not a source-completeness or publication gate.
 their original API and Chromium browser checks, passed **17 tests, zero
 skipped, zero failures**; the three source-only cases verified supplied
 legacy PDF/Wiki bytes. Ruff passed after correcting import ordering, and
-Pyright reported **zero errors, zero warnings**. Cross-host/source-layout
-acceptance and documentation/CI results are tracked separately below.
+Pyright reported **zero errors, zero warnings**. Documentation lint, local
+link/backlog checks and Git whitespace checks passed.
+
+**Linux exact-SHA source acceptance:** After an explicit Git fetch and
+temporary detached checkout at
+`ea347cde51f795d5264a6e416dfa9cac647ceac6`, the selected source-only
+Basic Attack, Hacking follow-up and Template tests each **passed** against
+the supplied unchanged legacy PDFs/Wiki. Both hermetic layout, SHA and
+synthetic-page regressions also **passed**: **five passed, zero skipped**.
+The Linux checkout was restored to its original detached
+`8de09b277e579bd8cb942c6aba242bfe4f71ceca` after these tests.
+This validates explicit selection behavior on both hosts and source-only
+legacy evidence on Linux; it does **not** demonstrate real local-layout
+PDF availability, real migration, or full Linux browser acceptance.
+Hosted exact-SHA CI remains a separate gate.
 
 **Next R4 step:** Select the next coherent fixed-path PDF test family
 (Hacking Program chart evidence or another existing source acceptance
