@@ -2509,6 +2509,129 @@ documentation correction. It does not authorize deletion of the old
 V1S-082 plan, wholesale shortening of audit evidence, ignored-data
 migration, L1 policy approval or any deployment.
 
+### CI, release and browser entrypoint L0 follow-up — 2026-11-13
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`684217c3edea1396888c9337d9c79ae0e8d92264`. The current root
+`tools/` contains **120 Python files and one `templates/` directory**
+(exact current listing; earlier intake counts describe earlier revisions).
+This bounded supplement reviews ten release/CI entrypoints not all
+individually covered by the [earlier release-tool checkpoint](#release-tool-lifecycle-and-correctness-checkpoint--2026-11-12).
+It does not restate the previously accepted browser-verifier correction.
+
+**Retain with explicit category/consumer ownership:**
+
+- `ci_preflight`: optional clean-index export, packaging and isolated-wheel
+  preflight; exports the indexed bytes into an automatically removed temporary
+  directory and may install/download packages in the explicitly requested
+  isolated mode. Its direct script path appears in `testing.md` and in
+  `tests/test_run_checks.py`; do not move it without updating those users.
+- `release_metadata`: finalized *release-only* version/date/changelog
+  consistency gate, intentionally not a routine unreleased-branch PR check.
+  `prepare_release_ci_evidence` imports its verifier and
+  `releasing.md` calls it before the release handoff.
+- `release_validation_scope`: fail-closed change-aware Source CI classifier.
+  The hosted workflow invokes it directly, and it requires verified
+  exact-base hosted evidence through `prepare_release_ci_evidence` before
+  reusing a narrower documentation/test-only scope. Unknown paths, missing
+  evidence and source changes retain the full check matrix.
+- `prepare_release_ci_evidence`: checks exact-SHA required GitHub workflow
+  conclusions, release metadata and optional full-asset/cross-browser
+  requirements; its evidence JSON and annotated-tag text are **release
+  records**, not disposable benchmark logs. It makes explicit GitHub API
+  requests and creates directories for two user-selected output files.
+- `run_cross_browser_compatibility`: active opt-in multi-engine test runner
+  used by the cross-browser GitHub workflow, with an explicit browser rather
+  than silently skipped missing engines. Its **fixed**
+  `local/cross-browser-compatibility/junit.xml` path overwrites evidence on
+  repeated local runs; propose a per-engine/per-run directory in L2/L6
+  without weakening its required test/failure semantics.
+- `verify_release_candidate_browser`: explicit-version hosted Unit/browser
+  acceptance, bound to the complete three-database snapshot and static
+  revision; retains JSON-only success evidence through optional
+  `--json-output`, which currently overwrites a caller-selected file.
+  Keep the release-only operator check distinct from ordinary unit tests.
+- `installed_wheel_smoke`: installed-package runtime and CLI validation,
+  called from hosted `installed-wheel.yml` and isolated `ci_preflight`.
+  Its temporary fresh wheel environment and controlled removal of
+  **installed test-environment** build assets are not private-source
+  deletion. Preserve the direct-script and isolated-interpreter contract.
+- `verify_checkout_server`: ephemeral loopback checkout server and
+  pinned 41-route semantic baseline; a selected database directory must
+  remain complete. Temporary server logs are not retained by default.
+- `preview_runtime_image`: isolated Docker build from explicitly selected
+  complete databases with immutable-image and HTTP semantic checks.
+  Creates/removes its own `local/` temporary context, disposable image
+  and test container; never treat this as deploy authorization.
+- `run_pinned_determinism`: shared digest-pinned Linux/amd64 reproducibility
+  runner used by `source-checks.yml`. Its manifest may only be written
+  beneath `local/`; the caller still chooses a potentially colliding
+  filename, so enforce run identity/nonoverwrite in a later L2/L6 slice.
+  A `--probe` may pull the pinned Docker image, but the actual comparison
+  container has no network access or checkout-write mount.
+
+**Writer and cutover findings:** The release runbook still selects
+`reports/release-ci-v<version>.json` and
+`reports/release-tag-v<version>.txt`; those are compatibility-era
+examples to migrate to `local/validation/` after L1, with exact release
+tag/SHA provenance and collision refusal. The cross-browser JUnit filename
+and optional release-candidate JSON have separate collision risks.
+`release_validation_scope` writes to GitHub's workflow-controlled
+output file in append mode; that provider-owned step contract is a
+narrow **external output exception**, not a general ignored path.
+Future L4 renames must update module imports, `-m` commands, direct
+script invocations in YAML and tests, and GitHub workflow consumers
+atomically. Preserve verified exact-SHA validation and all failure gates;
+historical tests alone are not the reason to retain any tool.
+
+**Focused acceptance:** At this pinned SHA the hermetic suites passed
+`test_release_ci_evidence.py` **23/23**,
+`test_release_validation_scope.py` **4/4**,
+`test_run_pinned_determinism.py` **4/4**, and
+`test_release_metadata.py` **3/3**: **34 passed, zero skips/failures**.
+No Docker build, hosted browser check, release-tag generation or network
+release-evidence collection was executed in this L0 review. No private
+source, runtime publication or CLI implementation changed.
+
+### L1 candidate policy decisions — proposal only
+
+**Eligible for user review, not yet approved:** Adopt the stated
+`local/data/`, `local/research/`, `local/validation/`,
+`local/performance/`, `local/operations/`, `local/work/` and
+`local/handoffs/` intent as the **default for newly produced ignored
+project artifacts**, with domain/purpose/scope/run-ID paths and
+nonoverwriting outputs. Keep tracked curated inputs, source-review
+manifests, reproducible publication receipts and three runtime SQLite
+files where they are. Keep `tools/run_checks.py` and package
+`__init__.py` as proposed minimal root exceptions; defer all actual
+`tools/` moves until per-module L0 and complete consumer updates are
+accepted.
+
+**Proposed narrow ignored-path exceptions:** Python/Node build caches and
+virtual environments, OS/editor state, explicitly selected pytest
+temporary directories, GitHub-managed step output, machine-local
+environment/secrets, producer-owned *external* staging and the
+production `metrics_history` Docker volume. These are owner-based
+exceptions with distinct retention requirements, not permission to
+accumulate ignored `reports/`, `data/` or `image_overrides/`
+indefinitely. Tracked generated rules checklists, curated catalog scope
+and reviewed evidence remain **tracked publication/review artifacts**,
+not local scratch.
+
+**Not yet eligible for approval or execution:** Source/snapshot, Wiki,
+PDF, override, ignored raw/diagnostic and inaccessible root-report
+relocations; retirements dependent on unverified backups; automatic
+Syncthing cutover; blanket deletion of any private evidence; and
+unreviewed module moves. These require completed L0 consumer/owner
+classification, successful independent backup and trial restore,
+authorized inspection of the 19 inaccessible report directories,
+current sender/receiver state and per-batch hash/rollback evidence.
+A later explicit user approval must identify whether it covers
+(a) prospective *non-destructive* naming defaults,
+(b) tracked-code/document replacements, or
+(c) each private-data migration and deletion. These are separate decisions.
+Until then the existing documented paths keep working.
+
 ### L1 approval prerequisites — consolidated outstanding decision register
 
 This is a **review checklist**, not permission to perform L2/L3. The private
