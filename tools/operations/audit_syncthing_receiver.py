@@ -87,7 +87,68 @@ def _acl_evidence(path: Path, user: str) -> dict[str, str | None]:
     }
 
 
-def inspect_receiver(root: Path, *, user: str | None = None) -> dict[str, Any]:
+def _recursive_access(root: Path, *, max_entries: int = 100_000) -> dict[str, Any]:
+    """Census effective access without reading contents or following links."""
+    counts = {
+        "directories": 0, "files": 0, "links": 0, "other": 0,
+        "unreadable": 0, "unreadable_directories": 0,
+        "writable": 0, "metadata_errors": 0,
+        "scan_errors": 0, "entries_inspected": 0,
+    }
+    pending = [root]
+    while pending and counts["entries_inspected"] < max_entries:
+        path = pending.pop()
+        counts["entries_inspected"] += 1
+        try:
+            info = path.lstat()
+        except OSError:
+            counts["metadata_errors"] += 1
+            continue
+        if stat.S_ISLNK(info.st_mode) or (
+            getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT
+        ):
+            counts["links"] += 1
+            continue
+        if stat.S_ISDIR(info.st_mode):
+            counts["directories"] += 1
+            readable = os.access(path, os.R_OK | os.X_OK)
+            if not readable:
+                counts["unreadable"] += 1
+                counts["unreadable_directories"] += 1
+            if os.access(path, os.W_OK):
+                counts["writable"] += 1
+            if readable:
+                try:
+                    with os.scandir(path) as entries:
+                        pending.extend(Path(item.path) for item in entries)
+                except OSError:
+                    counts["scan_errors"] += 1
+        elif stat.S_ISREG(info.st_mode):
+            counts["files"] += 1
+            if not os.access(path, os.R_OK):
+                counts["unreadable"] += 1
+            if os.access(path, os.W_OK):
+                counts["writable"] += 1
+        else:
+            counts["other"] += 1
+    complete = (
+        not pending and not counts["metadata_errors"] and not counts["scan_errors"]
+        and not counts["unreadable_directories"]
+    )
+    return {
+        **counts,
+        "complete": bool(complete),
+        "entry_limit_reached": bool(pending),
+        "effective_readonly": bool(
+            complete and not counts["unreadable"] and not counts["writable"]
+            and not counts["links"] and not counts["other"]
+        ),
+    }
+
+
+def inspect_receiver(
+    root: Path, *, user: str | None = None, recursive: bool = False,
+) -> dict[str, Any]:
     """Inspect the configured receiver, without reading payloads or writing."""
     if not root.is_absolute():
         raise ReceiverAuditError("Receiver root must be absolute")
@@ -104,7 +165,7 @@ def inspect_receiver(root: Path, *, user: str | None = None) -> dict[str, Any]:
         if status["status"] == "present":
             status["named_acl"] = _acl_evidence(root / relative, inspector)
         folders[relative] = status
-    return {
+    report = {
         "scope": "read-only-receiver-access-not-backup-or-sync-certification",
         "inspector": inspector,
         "folders": folders,
@@ -116,17 +177,29 @@ def inspect_receiver(root: Path, *, user: str | None = None) -> dict[str, Any]:
         "syncthing_live_status_verified": False,
         "independent_backup_restore_verified": False,
     }
+    if recursive:
+        report["recursive_access"] = {
+            family: _recursive_access(root / family)
+            if folders[family]["status"] == "present"
+            else {"complete": False, "reason": "family-unavailable"}
+            for family in FOLDERS
+        }
+    return report
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.parse_args(argv)
+    parser.add_argument(
+        "--recursive", action="store_true",
+        help="Census effective read/write access for all selected family entries.",
+    )
+    args = parser.parse_args(argv)
     root = os.environ.get("INFINITYDB_SYNC_STAGING_ROOT")
     if not root:
         print(json.dumps({"status": "unavailable", "reason": "staging-root-not-configured"}))
         return 2
     try:
-        result = inspect_receiver(Path(root))
+        result = inspect_receiver(Path(root), recursive=args.recursive)
     except ReceiverAuditError as exc:
         print(json.dumps({"status": "unavailable", "reason": str(exc)}))
         return 2

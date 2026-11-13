@@ -92,6 +92,98 @@ def test_root_link_refused(tmp_path: Path) -> None:
         audit.inspect_receiver(link)
 
 
+def test_recursive_access_census_is_bounded_redacted_and_read_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _receiver(tmp_path / "receiver")
+    before = {
+        str(path.relative_to(root)): path.read_bytes()
+        for path in root.rglob("*") if path.is_file()
+    }
+    monkeypatch.setattr(audit.os, "access", lambda _path, mode: mode != audit.os.W_OK)
+    monkeypatch.setattr(audit, "_acl_evidence", lambda _path, _user: {
+        "status": "available", "access": "r-x", "default": "r-x",
+    })
+    report = audit.inspect_receiver(root, user="mcpworker", recursive=True)
+    assert report["recursive_acl_verified"] is False
+    assert set(report["recursive_access"]) == set(audit.FOLDERS)
+    assert all(row["complete"] for row in report["recursive_access"].values())
+    assert all(row["effective_readonly"] for row in report["recursive_access"].values())
+    assert report["recursive_access"]["raw"]["files"] == 1
+    assert report["recursive_access"]["pdf"]["files"] == 1
+    assert "JSON 20260929" not in json.dumps(report)
+    assert "n5-rules-v5.3-en.pdf" not in json.dumps(report)
+    assert {
+        str(path.relative_to(root)): path.read_bytes()
+        for path in root.rglob("*") if path.is_file()
+    } == before
+
+
+def test_recursive_census_reports_writable_and_unreadable_without_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _receiver(tmp_path / "receiver")
+    selected = root / "raw/JSON 20260929-114335.zip"
+
+    def access(path: Path, mode: int) -> bool:
+        if mode == audit.os.W_OK:
+            return path == selected
+        if mode == audit.os.R_OK and path == selected:
+            return False
+        return True
+
+    monkeypatch.setattr(audit.os, "access", access)
+    result = audit._recursive_access(root / "raw")
+    assert result["complete"] is True
+    assert result["files"] == 1
+    assert result["writable"] == 1
+    assert result["unreadable"] == 1
+    assert result["effective_readonly"] is False
+    assert "JSON 20260929" not in json.dumps(result)
+
+
+def test_recursive_census_does_not_claim_complete_when_directory_unreadable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _receiver(tmp_path / "receiver")
+    unreadable = root / "pdf/rules"
+
+    def access(path: Path, mode: int) -> bool:
+        if mode == audit.os.W_OK:
+            return False
+        return path != unreadable
+
+    monkeypatch.setattr(audit.os, "access", access)
+    result = audit._recursive_access(root / "pdf")
+    assert result["complete"] is False
+    assert result["unreadable_directories"] == 1
+    assert result["effective_readonly"] is False
+
+
+def test_recursive_census_reports_entry_cap_without_claiming_success(tmp_path: Path) -> None:
+    root = _receiver(tmp_path / "receiver")
+    result = audit._recursive_access(root, max_entries=2)
+    assert result["complete"] is False
+    assert result["entry_limit_reached"] is True
+    assert result["effective_readonly"] is False
+
+
+def test_recursive_census_never_follows_file_symlink(tmp_path: Path) -> None:
+    root = _receiver(tmp_path / "receiver")
+    outside = tmp_path / "outside.txt"
+    outside.write_text("private data outside receiver", encoding="utf-8")
+    linked = root / "raw/linked.txt"
+    try:
+        linked.symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"Symlink unavailable: {exc}")
+    result = audit._recursive_access(root / "raw")
+    assert result["links"] == 1
+    assert result["effective_readonly"] is False
+    assert "linked.txt" not in json.dumps(result)
+    assert outside.read_text(encoding="utf-8") == "private data outside receiver"
+
+
 def test_getfacl_reports_only_inspector_entries(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
