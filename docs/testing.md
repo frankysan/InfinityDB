@@ -6367,6 +6367,16 @@ does not relocate PDFs or overrides. Real source synchronization, receiver ACLs
 and backup/restore acceptance are separate from these hermetic fixtures; see
 the [activation runbook](syncthing-assets.md#explicit-snapshot-layouts).
 
+`tests/test_research_source_paths.py` covers explicit physical PDF selection
+with unchanged provenance labels: exact hash checks, missing selected inputs
+without fallback, path/policy rejection, symlink/reparse-point refusal and
+unreadable sources. The source-evidence and Reinforcements applicability suites
+also compare complete historical source reports and current/historical authority
+outcomes across layouts using synthetic PDFs. Real pinned-source tests retain
+their explicit missing-source skips on clean checkouts. These fixtures do not
+authorize copying private PDFs or changing their recorded paths; see the
+[research binding contract](../data/curated/README.md#explicit-physical-pdf-bindings-for-research).
+
 ## Maintained snapshot-note validation
 
 The routine pytest suite recursively validates every maintained JSON snapshot note under

@@ -74,15 +74,22 @@ def _load(path: Path) -> dict[str, Any]:
     return data
 
 
-def _read_source_text(root: Path, relative: str, digest: str, page: int) -> str:
+def _read_source_text(
+    root: Path, relative: str, digest: str, page: int, *, source_layout: str = "legacy",
+) -> str:
     from fitz import open as open_pdf
 
-    path = (root / relative).resolve()
-    if not path.is_relative_to(root.resolve()) or not path.is_file():
-        raise SourceEvidenceError(f"Source unavailable or escapes root: {relative}")
-    if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
-        raise SourceEvidenceError(f"Source hash mismatch: {relative}")
-    with open_pdf(path) as pdf:
+    from tools.research.source_paths import SourcePathError, pinned_pdf_path
+
+    try:
+        path = pinned_pdf_path(root, relative, digest, layout=source_layout)
+    except SourcePathError as exc:
+        raise SourceEvidenceError(str(exc)) from exc
+    assert path is not None
+    payload = path.read_bytes()
+    if hashlib.sha256(payload).hexdigest() != digest:
+        raise SourceEvidenceError(f"Source changed before PDF inspection: {relative}")
+    with open_pdf(stream=payload, filetype="pdf") as pdf:
         if not 1 <= page <= len(pdf):
             raise SourceEvidenceError(f"Invalid PDF page {page}: {relative}")
         page_text = pdf[page - 1].get_text("text")
@@ -112,6 +119,7 @@ def _contains(text: str, required: object, *, context: str) -> None:
 def audit_applicability(
     manifest_path: Path = MANIFEST,
     source_root: Path = ROOT,
+    *, source_layout: str = "legacy",
 ) -> dict[str, Any]:
     """Verify official references and historical provenance; grant no N5 authority."""
     manifest = _load(manifest_path)
@@ -136,6 +144,7 @@ def audit_applicability(
         raise SourceEvidenceError("N5 Reinforcements publication cannot be authorized")
     legacy = verify_reinforcements_inputs(
         source_root / manifest["historicalInventory"], source_root,
+        source_layout=source_layout,
     )
     if legacy["verifiedCount"] != 2 or legacy["n5AuthorityVerified"] is not False:
         raise SourceEvidenceError("Pinned N4 Reinforcements sources not fully verified")
@@ -170,7 +179,9 @@ def audit_applicability(
             not isinstance(item, str) for item in row["requiredText"]
         ) or set(row["requiredText"]) != EXPECTED_SOURCE_TEXT[source_id]:
             raise SourceEvidenceError(f"Current source review excerpt drift: {source_id}")
-        text = _read_source_text(source_root, relative, row["sha256"], page)
+        text = _read_source_text(
+            source_root, relative, row["sha256"], page, source_layout=source_layout,
+        )
         _contains(text, row["requiredText"], context=source_id)
         found.add(source_id)
     if found != set(EXPECTED_REFERENCES):
@@ -182,6 +193,7 @@ def audit_applicability(
     seen_actions: set[str] = set()
     historic_text = _read_source_text(
         source_root, english["localPath"], english["sha256"], 3,
+        source_layout=source_layout,
     )
     for row in actions:
         if not isinstance(row, dict) or set(row) != {
@@ -218,8 +230,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=MANIFEST)
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--source-layout", choices=("legacy", "local"), default="legacy")
     args = parser.parse_args()
-    report = audit_applicability(args.manifest)
+    report = audit_applicability(args.manifest, source_layout=args.source_layout)
     if args.json:
         print(json.dumps(report, indent=2))
     else:

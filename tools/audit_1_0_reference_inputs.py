@@ -21,9 +21,11 @@ from urllib.parse import parse_qs, urlsplit
 try:
     from tools.audit_enrichment_coverage import audit_coverage
     from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from tools.research.source_paths import SourcePathError, pinned_pdf_path
 except ModuleNotFoundError:  # Executing this file directly from the tools directory.
     from audit_enrichment_coverage import audit_coverage
     from research.report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from research.source_paths import SourcePathError, pinned_pdf_path
 
 FORMAT = "InfinityDB 1.0 reference source evidence"
 VERSION = 4
@@ -79,7 +81,7 @@ def _sha256(path: Path) -> str:
 
 
 def verify_reinforcements_inputs(
-    inventory_path: Path, source_root: Path = ROOT,
+    inventory_path: Path, source_root: Path = ROOT, *, source_layout: str = "legacy",
 ) -> dict[str, Any]:
     """Verify reviewed historical bytes without granting current N5 authority.
 
@@ -133,19 +135,13 @@ def verify_reinforcements_inputs(
         if (not isinstance(url, str) or urlsplit(url).scheme != "https"
                 or urlsplit(url).netloc != "downloads.corvusbelli.com"):
             raise SourceEvidenceError("Expected an official Reinforcements source URL")
-        path = (source_root / relative).resolve()
-        if not path.is_relative_to(source_root.resolve()):
-            raise SourceEvidenceError("Reinforcements source escapes the research root")
-        actual = None
-        if path.exists():
-            try:
-                actual = _sha256(path)
-            except OSError as exc:
-                raise SourceEvidenceError(
-                    f"Cannot read Reinforcements source: {source_id}"
-                ) from exc
-            if actual != digest:
-                raise SourceEvidenceError(f"Reinforcements source hash mismatch: {source_id}")
+        try:
+            path = pinned_pdf_path(
+                source_root, relative, digest, layout=source_layout, missing_ok=True,
+            )
+        except SourcePathError as exc:
+            raise SourceEvidenceError(str(exc)) from exc
+        actual = digest if path is not None else None
         items.append({
             **source,
             "actualSha256": actual,

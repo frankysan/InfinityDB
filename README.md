@@ -230,6 +230,8 @@ Development workers can verify or preview staged snapshots with an explicit
 `local` layout while the default remains `legacy`. See the
 [staged asset runbook](docs/syncthing-assets.md#explicit-snapshot-layouts)
 for the mapping and separately approved source-migration boundary.
+The [research PDF binding contract](data/curated/README.md#explicit-physical-pdf-bindings-for-research)
+lists the source auditors that also support an explicit physical PDF layout.
 
 ### Build the rules reference
 

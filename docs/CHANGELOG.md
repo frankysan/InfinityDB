@@ -20,6 +20,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Project infrastructure + Data processing:** Added explicit PDF-layout
+  selection to the Reinforcements evidence auditor, preserving original source
+  labels, byte pins and applicability findings. Legacy paths remain the default;
+  changing the selected layout does not migrate files or change published rules.
 - **Project infrastructure + Acquisition:** Added an explicit local-workspace
   layout for verifying and previewing staged Army, Wiki and raw-symbol snapshot
   pairs. Legacy activation remains the default; neither selection changes

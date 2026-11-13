@@ -71,11 +71,14 @@ when all contained work shares the same owner.
   The [R3 activation checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-first-bounded-l2-checkpoint--r3-explicit-staged-snapshot-layouts-2026-11-13)
   adds explicit configured legacy/local snapshot selection and
   Windows/Linux fixture parity, retaining the current staging folders.
-  **Next:** inventory pinned PDF/override families and prepare their
-  reviewed path-binding changes (R4). Source relocation and private-data
-  migration still require separate approval; hosted/release acceptance
-  remains independent. L2 remains open: R1–R3 completion is not L2 exit,
-  L3 migration or L4 retirement.
+  The [first R4 checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-second-bounded-l2-checkpoint--r4-inventory-and-first-pdf-binding-2026-11-13)
+  inventories PDFs/overrides and adds an explicit read-only PDF binding
+  for the Reinforcements evidence reader without changing provenance.
+  **Next:** extend PDF binding to the reference reporter and review
+  revision-delta/direct-reader and staged PDF/override contracts (R4).
+  Source relocation and private-data migration still require separate
+  approval; hosted/release acceptance remains independent. L2 and R4
+  remain open; reader implementation is not physical migration acceptance.
 
 ### Backlog and development workflow simplification
 

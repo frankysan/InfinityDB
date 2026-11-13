@@ -215,6 +215,7 @@
       "description": "Development checks, deployment, archive/report tooling, and operational helpers.",
       "modules": [
         "test_activate_synced_assets",
+        "test_research_source_paths",
         "test_agent_coordination",
         "test_agent_global_coordination",
         "test_agent_workspaces",

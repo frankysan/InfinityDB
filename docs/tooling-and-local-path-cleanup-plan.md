@@ -1701,7 +1701,12 @@ ITS remained byte-identical. The full deployment-artifact verifier, including
 and the hash-verified isolated Linux copy. This repairs the stale development
 publication. The database-set, deployment-artifact and semantic-baseline suites
 also passed **46/46 on each host, with no skips**. Hosted checks of the
-replacement commit and final release acceptance remain separate.
+replacement commit `39a1eb8fb4eb15183a4f05e59e2bec42070f38ee` subsequently
+passed: [Source checks](https://github.com/frankysan/InfinityDB/actions/runs/43429270312)
+(all eight jobs, including native matrices and deterministic outputs),
+[Installed wheel smoke](https://github.com/frankysan/InfinityDB/actions/runs/43429270332)
+and [Deployment smoke](https://github.com/frankysan/InfinityDB/actions/runs/43429270418).
+Final release acceptance remains separate.
 
 **L2 state: OPEN.** R1–R3 reader/producer contracts are implemented and have
 Windows/Linux fixture acceptance. R4 now owns the next bounded inventory and
@@ -1709,6 +1714,116 @@ per-family path-binding review for pinned PDFs/overrides. R5 operational
 evidence and R6 physical copying/cleanup still need their separate approvals.
 There was no live source activation, source move, Syncthing reconfiguration,
 backup/restore claim, production publication or deployment in R3.
+
+### Twenty-second bounded L2 checkpoint — R4 inventory and first PDF binding (2026-11-13)
+
+**R4 state: OPEN. Inventory and the first read-only PDF-reader binding are
+implemented; other consumers and physical migration are not accepted.**
+Starting baseline: clean `dev/tooling-workspace-cleanup` at
+`39a1eb8fb4eb15183a4f05e59e2bec42070f38ee`, with the three exact-SHA hosted
+workflows above successful. No private PDF/SVG, source declaration,
+published source row, symbol lookup or runtime database was changed here.
+
+**Measured Windows inventory:** A read-only scan found **75 PDFs** and
+**108 SVG overrides**, plus **13 auxiliary files**. The 75 PDFs comprise
+12 under `rules/`, four under `faq/`, three under `its/` and 56 under
+`legacy/`. The `scenarios/` directory has no files in this inventory.
+The override families contain four characteristic, nine faction, five Order,
+25 Peripheral and 65 Unit SVGs. The two Syncthing marker files, nine desktop
+metadata files and two operator indexes (`sources.txt`, `overrides.txt`)
+are separately inventoried and excluded from the PDF/SVG proposal; none
+is presumed disposable or eligible to copy with a source family.
+
+Maintained JSON pins **eight distinct PDF paths**. The published Rules
+`sources` table contains **12 PDF rows covering six of those paths**;
+the other two are the separately inventoried N4 annexes. Every supplied
+pin matches the current bytes, without conflicting declarations:
+
+| Recorded PDF label under `data/pdf/` | Maintained pin/source owner |
+| --- | --- |
+| `rules/n5-rules-v5.3-en.pdf` | Core/Hacking curation and conditional-declaration evidence |
+| `rules/n5-rules-v5.3-es.pdf` | Core/Hacking curation |
+| `faq/n5-faq-v0.0-en.pdf` | Core historical FAQ source |
+| `faq/n5-faq-v0.1-en.pdf` | FAQ curation and question inventory |
+| `faq/n5-faq-v0.1-es.pdf` | FAQ curation and question inventory |
+| `its/its-18-rules-v2026.09.01-en.pdf` | ITS curation and Reinforcements applicability review |
+| `rules/reinforcement-rules-en.pdf` | Historical Reinforcements source inventory |
+| `rules/reinforcement-rules-es.pdf` | Historical Reinforcements source inventory |
+
+The two N4 annex PDFs physically remain under `rules/`; that location does
+not confer N5 authority. Other local PDFs include research/history with no
+pin in those executable owners, some with separate historical hashes in
+the [source-history inventory](n5-source-history.md#local-pdf-revision-inventory-2026-11-06).
+Neither naming nor absence from the current pin set authorizes replacement,
+renaming or deletion. No PDF content or artwork was republished by this scan.
+
+The private inventory records exact per-file bytes, SHA-256, candidate path,
+JSON-pointer/SQLite owner and candidate-destination status. Its SHA-256 is
+`95d94a8d8c6b359deb507552926e7ec7ba2da936e4d626a68685ff4daacab14b`.
+All proposed destinations were absent. A separate **proposal-only** review
+lists the 183 PDFs/SVGs with exact old/new paths and hashes, excludes the
+13 auxiliary files, and marks every copy/delete decision unapproved. It is
+not an M-copy manifest approval or a backup/restore record. The bounded
+inventory script and private receipts can be retired after their R4 review
+and recovery purpose ends; clean-checkout tools never depend on them.
+
+**First PDF reader:** The [curated-data owner](../data/curated/README.md#explicit-physical-pdf-bindings-for-research)
+defines the implemented binding contract. The new research-only helper
+`tools.research.source_paths.pinned_pdf_path` reads validated
+`config/operations/research-source-layouts.json`. It retains canonical
+`data/pdf/...` provenance while explicitly selecting either the unchanged
+legacy location or `local/data/pdf/...`. It verifies the existing SHA-256,
+rejects links/reparse points and unreadable/unsafe paths, and never searches
+another root or writes a file. Historical absence remains not supplied.
+
+`verify_reinforcements_inputs` accepts an optional `source_layout` API
+keyword. `audit_reinforcements_applicability` exposes `--source-layout`,
+applying it to both historical and current Core/ITS PDF evidence. Default
+selection remains `legacy`. Synthetic old/new-layout audits retain identical
+historical source records, labels, byte pins, current-reference counts and
+authority outcomes. A PDF is hashed again before interpreting its in-memory
+bytes. All eight real declared PDFs verify in the default layout; selecting
+the currently absent local copies never falls back. The existing live
+applicability audit verifies two current and two historical PDFs while
+preserving its existing authority findings. This work introduces no new
+rules interpretation or publication decision.
+
+**Override boundary:** At producer revision
+`542faba40872221f4b5e78049912c50a95c136b4`, the external
+`InfinityDB-symbol-tools` enumerator recognized exactly the same **108 relative
+SVG paths and hashes** as this inventory. Its existing explicit `--overrides`
+root is separate from reviewed relative lookup paths and raw ZIP member paths.
+No producer code or lookup was edited. This establishes file/interface identity,
+not artwork approval, processing receipt validity or a new publication.
+
+| Consumer family | Current disposition and remaining R4 work |
+| --- | --- |
+| Reinforcements historical/current evidence | First explicit PDF binding implemented; source labels and pins unchanged |
+| `report_reference_baseline` | Still joins physical paths to the report root; add explicit PDF binding without changing runtime-database selection or emitted source identity |
+| `audit_pdf_revision_deltas` | Review its fixed `SOURCE` root and ignored revision inventory; retain relative pair labels, hashes and chronology |
+| Direct PDF auditors and source-dependent tests | Inventory fixed defaults versus existing explicit PDF arguments; adapt only required implicit readers and prerequisite selection |
+| Override producer | Existing root argument is portable; retain exact member basenames and hash-bound relative lookups |
+| Staged PDF/override activation | R3 still retains legacy file destinations in both layouts; review per-family mapping separately before changing this contract |
+
+**Validation:** The PDF-binding/source-evidence/applicability batch passed
+**108 tests, two skips on Windows** (real symlink privilege unavailable) and
+**108 tests, two skips on isolated Linux** (ignored official PDFs absent).
+Linux exercised the real symlink cases; both hosts exercised portable link,
+reparse-point, hash, missing-layout, policy and provenance guards. Actual
+private PDF hashes and page checks were verified on Windows, not inferred
+from Linux skips. The fixture export contained no private PDF/SVG originals;
+its SHA-256 was
+`f55b0c5a1527221bebba14d6e4688fa70f6c1d0a338d6fb3199b3ba245190b05`.
+The standalone override module passed **seven tests, one filesystem skip**
+on Windows. Targeted Ruff, Pyright, docs and 44 release-note/section tests
+passed. All 196 original source/auxiliary file hashes and the existing
+runtime build envelope were rechecked unchanged.
+
+**Next R4 slice:** Extend the explicit PDF binding to the reference reporter
+and review the revision-delta/direct-reader contracts above. Keep R4 open
+until the affected per-family consumers and validation are accepted. R5
+operational evidence and R6 copying/deletion retain their separate gates;
+no source-label rewrite or physical relocation is authorized by this checkpoint.
 
 ## Observed starting condition
 
