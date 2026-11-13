@@ -1632,8 +1632,9 @@ Starting baseline was clean `dev/tooling-workspace-cleanup` at
 [staged-asset runbook](syncthing-assets.md#explicit-snapshot-layouts) owns
 the current CLI and mapping contract; version-1
 [layout policy](../config/operations/synced-asset-layouts.json) owns the
-reviewed family paths. No default, sender folder, receiver permission,
-producer input or tracked runtime database was changed.
+reviewed family paths. The layout implementation changed no default, sender
+folder, receiver permission, producer input or tracked runtime database.
+The subsequent same-source CI freshness repair is recorded below.
 
 The new explicit `--layout local` selects Army, Wiki/Human Sphere and raw
 Symbol archives by configured staged family plus original basename, and
@@ -1674,6 +1675,33 @@ not real source synchronization, tested restore, live ACL acceptance or
 hosted/exact-release validation. Private receipts and the bounded parity
 probe may be retired after their acceptance/recovery purpose ends; normal
 tests do not depend on them.
+
+**Post-push CI freshness repair:** Hosted Deployment smoke at the R3 layout
+commit `4e88bfb4ed3622f29d208ab1bb37a91a08082f7d` failed its existing
+build-input freshness gate; Source matrix jobs reported the same cause.
+The tracked runtime envelope predated five source files changed by R1/R2,
+starting with `src/infinity_army_data/cli.py`. R3 changes no `src/` inputs.
+Installed wheel smoke passed on that revision. The freshness gate was retained.
+
+The complete three-database set was rebuilt twice through the integrated
+builder from the unchanged, v3-verified `JSON 20260929-114335.zip`, SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`.
+The candidate and refreshed tracked output were byte-identical. All gameplay
+table schemas and rows remained unchanged; differences were confined to
+build provenance and generation/hash bindings in metadata. All **41 current
+semantic API/browser-contract routes** matched the previous tracked set.
+The new build-set identity is
+`14fffd275775263ac8950a86f42fa9db6e16d91e4c927eff58d4f9b64ea41ee4`.
+Army SHA-256 is
+`98cc82dae13449efa814b3aa3d166db123c075662d224dcfe887048cfd9eb7f3`;
+Rules SHA-256 is
+`c1b8ee3078f7fcf9ef692fd7e73526c46f3bface7d32b541a05672c6d3b21908`.
+ITS remained byte-identical. The full deployment-artifact verifier, including
+**808/808 published SVGs and 807/807 browser references**, passed on Windows
+and the hash-verified isolated Linux copy. This repairs the stale development
+publication. The database-set, deployment-artifact and semantic-baseline suites
+also passed **46/46 on each host, with no skips**. Hosted checks of the
+replacement commit and final release acceptance remain separate.
 
 **L2 state: OPEN.** R1–R3 reader/producer contracts are implemented and have
 Windows/Linux fixture acceptance. R4 now owns the next bounded inventory and
