@@ -2104,6 +2104,72 @@ individual source/pin contract. Real receiver ACL/backup/restore and the R5/R6
 physical migration remain separately gated. No private PDF or SVG override
 was copied, relabeled, deleted or rewritten by this checkpoint.
 
+### Twenty-eighth bounded L2 checkpoint — R4 N5.3 Core source-only fixture family (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`d79555bb24329520f50920866e1a086ba14be001`. Source-test inventory
+identified a coherent group of five N5.3 English Core PDF readers that
+already pinned the same complete SHA-256 and kept publication/API assertions
+separate. These remain active acceptance evidence, not legacy tools whose only
+reason to retain them is that the tests exist.
+
+- `tests/test_ammunition_publication_parity.py`: printed combined-ammunition
+  examples and maintained Army-to-catalog identity
+- `tests/test_ammunition_visibility_opposition.py`: Smoke/Eclipse LoF,
+  opposition and visor-source clauses
+- `tests/test_cover_publication.py`: Cover/vertical movement PDF clauses and
+  independently pinned Wiki evidence when its archive is available
+- `tests/test_aro_deployment_publication.py`: ARO/Deployment page 13–16
+  accepted source and publication parity
+- `tests/test_command_token_source_review.py`: Command Token modes and
+  restrictions on pages 128–129
+
+Their **source-only** tests now inject the shared test fixture
+`pinned_n53_core_pdf`, which uses the same explicit
+`--reference-pdf-layout legacy|local` selection and verified
+`pinned_pdf_path`. Default remains `legacy`. The fixture skips an absent
+selected PDF, never searches the other layout, and fails on supplied wrong
+bytes, links, unsafe paths or invalid layout. Each source test retains its
+independent hard-coded N5.3 SHA-256 assertion, exact PDF page/phrase checks,
+and its existing import/optional-PDF behavior. Other tests in those modules
+still validate runtime/API/publication data independently. The Wiki path and
+revision checks were **not** redirected. No new published facts or data were
+generated.
+
+**Remaining path-contract inventory — review by purpose, not mechanical
+replacement:**
+
+- `test_application_rule_references.py`, `test_silent_immunity_source_scope.py`
+  and several `test_curated.py` evidence cases span older N5.2, bilingual
+  N5.3, FAQ and/or manifest-defined source sets. They need per-revision pin
+  validation, not an English-Core-only fixture.
+- `test_audit_weapon_chart_profiles.py`, `test_audit_weapon_traits_prose.py`,
+  `test_audit_mine_variant_effects.py` and related specialized audits are
+  source-dependent **research/profile reconciliation** with distinct derived
+  statuses. Review their accepted purpose and archive/file input contracts
+  before migrating, retiring or replacing them.
+- `test_deployable_trigger_cross_rules.py`, `test_immunity_*.py`,
+  `test_geometry_publication.py`, `test_hacking_program_publication.py`
+  and `test_curated.py` contain more direct Core/FAQ evidence prerequisites.
+  Partition by source identity, test responsibility and publication gate before
+  further updates; preserve review and skip semantics.
+- Metadata labels and disposable test fixture strings containing
+  `data/pdf/...` are **not** themselves readers and must not be bulk-rewritten.
+  The search inventory is a bounded source-test sample, **not** an exhaustive
+  filesystem census of ignored private inputs.
+
+**Windows validation:** The five entire modules passed **43 tests, zero
+skipped**, including all five real source validations and their independent
+API/publication assertions (Ammunition parity 8, visibility opposition 24,
+Cover 4, ARO/Deployment 4, Command Tokens 3). Ruff passed. Host-specific
+exact-commit and static gate results are recorded separately below.
+
+**Next:** Resolve the remaining active multi-source and specialized test
+families separately, then assess R5 ACL and tested backup/restore before any
+approved R6 private source move. No source path labels, ignored PDF or
+Wiki bytes, SVG overrides, Syncthing layout or generated databases were
+changed as part of this bounded test migration.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

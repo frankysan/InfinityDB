@@ -6420,6 +6420,16 @@ remains at its existing source path, and
 regression rejects altered selected bytes, missing local sources despite an
 available legacy PDF, unsupported layouts and drift in the statistics manifest
 pin. On either layout a supplied wrong PDF fails rather than becoming a skip.
+The five Core N5.3 source-only tests for Ammunition identity,
+Smoke/Eclipse visibility opposition, Cover/vertical movement, ARO/Deployment,
+and Command Tokens use the shared `pinned_n53_core_pdf` fixture. This fixture
+uses the same `--reference-pdf-layout legacy|local` selection and the pinned
+resolver, skips only absent selected PDFs, and fails closed on wrong hashes,
+unsafe paths or links. Each owning test retains its own exact N5.3 SHA-256
+assertion, source clause/page checks and separate runtime/API assertions; the
+Cover test still checks the pinned Wiki archive when available. It does not
+load optional PDF readers at test collection time or redirect other tests.
+
 The global `require_source_files` fixture retains its previous meaning for
 other suites. Further tests still bound to `data/pdf/` keep their original
 skip semantics until reviewed individually; no global path redirection or

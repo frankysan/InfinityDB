@@ -17,7 +17,6 @@ from infinity_db.web import create_app
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RULES = ROOT / "data/generated/rules_n5.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 
 
@@ -33,11 +32,10 @@ def expected(slug: str) -> dict[str, Any]:
 
 
 def test_pinned_rules_require_rolled_crossing_lof_and_separate_visor_scope(
-    require_source_files,
+    pinned_n53_core_pdf: Path,
 ) -> None:
-    require_source_files(PDF)
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
-    with pymupdf.open(PDF) as pdf:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PIN
+    with pymupdf.open(pinned_n53_core_pdf) as pdf:
         smoke = " ".join(str(pdf[65].get_text("text")).casefold().split())
         eclipse = " ".join(str(pdf[63].get_text("text")).casefold().split())
     assert "attacks that require a roll and lof" in smoke

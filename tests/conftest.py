@@ -158,6 +158,22 @@ def reference_pdf_layout(request: pytest.FixtureRequest) -> str:
 
 
 @pytest.fixture(scope="module")
+def pinned_n53_core_pdf(reference_pdf_layout: str) -> Path:
+    """Select exactly one pinned N5.3 Core PDF for source-only acceptance tests."""
+    from tools.research.source_paths import pinned_pdf_path
+
+    label = "data/pdf/rules/n5-rules-v5.3-en.pdf"
+    sha256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+    path = pinned_pdf_path(
+        Path(__file__).resolve().parents[1], label, sha256,
+        layout=reference_pdf_layout, missing_ok=True,
+    )
+    if path is None:
+        pytest.skip(f"Pinned N5.3 Core PDF unavailable in {reference_pdf_layout} layout")
+    return path
+
+
+@pytest.fixture(scope="module")
 def require_source_files() -> Callable[..., None]:
     """Skip only absent local evidence; present bytes must still pass their audit."""
     def require(*paths: Path) -> None:

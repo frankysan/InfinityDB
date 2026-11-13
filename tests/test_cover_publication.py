@@ -18,7 +18,6 @@ from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
 RULES = ROOT / "data/generated/rules_n5.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 CITATIONS = {
     "rule:cover": {41, 42},
     "skill:climb": {32, 33},
@@ -57,11 +56,11 @@ def _get(app: Any, path: str, query: str = "") -> tuple[str, bytes]:
     return statuses[0], body
 
 
-def test_cover_vertical_source_clauses_match_pinned_pdf_and_archive() -> None:
-    if not PDF.is_file():
-        pytest.skip("Pinned English N5.3 PDF unavailable")
+def test_cover_vertical_source_clauses_match_pinned_pdf_and_archive(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pymupdf = pytest.importorskip("pymupdf")
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == (
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == (
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
     )
     excerpts = {
@@ -77,7 +76,7 @@ def test_cover_vertical_source_clauses_match_pinned_pdf_and_archive() -> None:
         42: ("In both situations the Blue Trooper has Cover",),
         88: ("first Basic Short Skill", "once per Order", "while they are on a vertical surface"),
     }
-    with pymupdf.open(PDF) as pdf:
+    with pymupdf.open(pinned_n53_core_pdf) as pdf:
         for page, phrases in excerpts.items():
             source = " ".join(pdf[page - 1].get_text().split()).casefold()
             for phrase in phrases:

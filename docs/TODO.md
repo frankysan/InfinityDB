@@ -83,9 +83,12 @@ when all contained work shares the same owner.
   Windows/Linux fixture parity covers the staged PDF/override mappings.
   The follow-up Hacking Program statistics source tests now also use
   explicit PDF layout selection without changing the auditor's `--pdf` API,
-  Army archive path or source pin. **Next:** inventory remaining fixed-path
-  PDF tests and integrate appropriate source-only families, then review real
-  receiver ACL/backup evidence (R4/R5).
+  Army archive path or source pin. The next bounded Core source-only group
+  consolidates Ammunition, visibility opposition, Cover, ARO/Deployment and
+  Command Token PDF selection without changing their assertions.
+  **Next:** review the remaining multi-revision, weapon-chart and larger
+  curated-rule source test families individually, then receiver ACL/backup
+  evidence (R4/R5).
   Source relocation and private-data migration still require separate
   approval and backup/restore evidence. L2/R4 remain open, and hosted/release
   acceptance remains independent of fixture validation.

@@ -532,8 +532,11 @@ explicit test-only `--reference-pdf-layout legacy|local` selection for pinned
 Core/FAQ PDFs. The statistics suite additionally checks the unchanged
 canonical Core hash before resolving its PDF. This does not relocate the
 pinned Army archive or test Wiki ZIP, turn source-only skips into approvals,
-or alter browser/runtime validation. Other direct readers and test
-prerequisites retain their individual path contracts.
+or alter browser/runtime validation. The five separate Core N5.3 source-only
+tests for Ammunition, visibility opposition, Cover, ARO/Deployment and Command
+Tokens now use the shared `pinned_n53_core_pdf` fixture with that same
+explicit physical layout selector and original hash/clauses. Other direct
+readers and test prerequisites retain their individual path contracts.
 Normal rules builds still do not open research PDFs. Override lookup paths
 belong to the external symbol producer and are independent of these PDF labels.
 
