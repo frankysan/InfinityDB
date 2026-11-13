@@ -2206,6 +2206,139 @@ this review, and no runtime/test code was edited. L0 remains open for the
 other tool/document dispositions, private recovery/ACL decisions and
 L1 policy approval.
 
+### Hosted acceptance and operations tooling L0 disposition — 2026-11-13
+
+**Hosted CI gate closed:** On exact pushed
+`28a8e52ba1129315c1e7a359a121438f4ef34a9d`, GitHub Actions
+[Source checks](https://github.com/frankysan/InfinityDB/actions/runs/43315597970),
+[deployment smoke](https://github.com/frankysan/InfinityDB/actions/runs/43315597957)
+and [installed-wheel smoke](https://github.com/frankysan/InfinityDB/actions/runs/43315597977)
+all completed **successfully**. Source checks includes Windows/macOS Python
+3.11, Ubuntu Python 3.11/3.14, both pinned Ubuntu 24.04/26.04 determinism
+jobs and the required `Cross-platform deterministic outputs` comparison.
+This closes the CI acceptance item in `TODO.md`; it does not approve L1,
+relocation, ignored-source deletion, merge, release or deployment.
+
+**Operations scope:** Read-only lifecycle/consumer/side-effect review at clean
+`28a8e52b` of the **six** proposed `tools/operations/` root modules.
+Compared command entry points, tests, documentation, source imports, operational
+packaging and write paths. All six are **retain-active**, but their operational
+state and output lifetimes differ; the initial category grouping is only a
+proposed L4 destination.
+
+- `capacity_test` runs a deliberately selected HTTP load against a deployed
+  target, recording bounded aggregate latencies, statuses and synthetic
+  requests rather than visitor histories. Its optional `--output` creates
+  directories and **overwrites** an arbitrary JSON path; otherwise it prints
+  a summary or full JSON. It is an opt-in performance/capacity operation,
+  not a source or release gate. Keep the ability to couple it to a resource
+  sample; later consider `tools/performance/` ownership instead of
+  automatically treating the old proposed `operations/` category as final.
+- `deployment_resources` collects bounded Linux host and Docker container
+  measurements and can wrap an **explicit operator command**, recording its
+  exit status rather than the wrapped command line. It requires
+  `--output`, whose destination is unrestricted and overwritten.
+  `deployment_diagnostics` independently parses existing Docker/Caddy/
+  Gunicorn logs into capped, sanitized events, optionally using that
+  resource report's exact time window. It also requires an unrestricted,
+  overwriting output path. **Do not replace sanitized reports with raw-log
+  archiving** or run these host-dependent commands during an L0 audit.
+- `report_metrics` reads a selected trusted aggregate metrics endpoint
+  and prints a current-generation operator report; its optional `--raw`
+  writes only to stdout. The structured parser/aggregates are also consumed
+  by `deployment_alerts`. That separate tool combines a recent
+  `deployment_resources` report, two endpoint samples, health probes and
+  explicit thresholds; it outputs JSON to stdout or a caller-chosen
+  **overwriting** file. Its sampled evaluation is not itself a background
+  monitor or complete observability service.
+- `metrics_history` is an **active deployed service contract**, not a
+  scratch database or another gameplay reference database. The dedicated
+  `metrics-history` container continuously writes bounded,
+  privacy-reviewed weekly aggregates into the persistent named Compose
+  volume `metrics_history`, mounted at `/var/lib/infinitydb-metrics`.
+  Its fail-closed normalized-route allowlist, retention limit, SQLite
+  migrations and separate rollback semantics must survive any L4 change.
+  The checkout CLI's **manual-only fallback** is
+  `reports/metrics-history.db`, but the deployed service selects its
+  own database with `INFINITYDB_METRICS_HISTORY_DATABASE`. Treat the
+  default local report path as an L2/L6 writer-policy candidate, **not**
+  authorization to relocate/remove the production volume. Retained
+  history requires independently verified backup/restore before any
+  service data migration or pruning beyond existing bounded retention.
+
+**Confirmed L2/L6 issues:** The maintained `docs/deployment.md` examples
+still direct capacity, resource, diagnostics, alert and manually collected
+history files to ignored root `reports/`. Several CLIs accept arbitrary
+destinations and overwrite files rather than safely creating a unique
+run-identified output. Review their direct-script invocation, existing
+operator workflows, tests and evidence retention together before replacing
+these defaults/examples with categorized `local/validation/`,
+`local/performance/` or `local/operations/` paths. Preserve explicit
+cross-host destinations where justified, and treat persistent Compose volumes
+as service-owned state outside the default checkout `local/` rule.
+
+**Retirement/approval boundary:** The six commands have independent
+current operating/research purposes and focused regression tests;
+no retirement, module move, source input activation, Docker operation or
+history volume mutation was performed. This was a read-only code/contract
+review followed only by tracked documentation changes. L0 remains open for
+the unreviewed tool/document classes and source backup/recovery exceptions.
+
+### L1 approval prerequisites — consolidated outstanding decision register
+
+This is a **review checklist**, not permission to perform L2/L3. The private
+per-file hashes, host-specific paths and detailed ACL/receiver observations
+remain under ignored `local/research/project-infrastructure/tooling-workspace-cleanup/`.
+Keep approvals separate for tracked module changes, ignored bytes,
+service-owned volumes and destructive retirement.
+
+1. **Recovery protection — blocked:** Establish an independent backup and
+   *successful trial restore* for every source family before deleting old
+   ignored source paths. The 24 Windows/receiver archive+manifest pairs
+   proved identical at capture, but Syncthing replicas are not backups;
+   receiver versioning was disabled at the inspected checkpoint.
+2. **Unreadable root reports — blocked:** The 19 access-denied Windows
+   `reports/` directories have unknown contents. Require authorized
+   enumeration and lifecycle classification; do not elevate access, alter
+   ACLs, move or delete them silently. Standard toolchain cache exceptions
+   must be reviewed separately from these operator reports.
+3. **Cross-host synchronization — partial:** Linux worker fetch and pinned
+   optional-override *dry-run* activation were subsequently validated.
+   Windows live send-only GUI status was unavailable at capture; recheck
+   both ends and prove the selected source family has reached a stable
+   state before any physical migration or receiver reconfiguration.
+4. **Producer/path contract — partial:** The refined **44-file**
+   source/provenance candidate manifest excludes two Syncthing markers
+   and three OS metadata files. Freeze selected archive/manifests, retain
+   source SHA-256s, handle the Linux hyphenated override receiver with
+   explicit mapping, and prove destination/source selection independent
+   of new file mtimes. Do not rewrite historical immutable manifest paths
+   or prefer one of two ambiguous matching sources.
+5. **Tracked versus ignored data — decision required:** Preserve all
+   three tracked runtime databases, published manifests and static
+   artifacts. Classify ignored `data/generated/` extras (especially
+   the mismatched `army.raw.db`) as recoverable evidence until their own
+   backup, consumer and deletion decisions. Keep persistent
+   `metrics_history` Docker volume outside checkout relocation.
+6. **Tool/document lifecycle — incomplete:** The private intake listed
+   124 original tool artifacts and 48 tracked Markdown documents, with
+   provisional ownership only. Several bounded clusters now have
+   purpose-based decisions, including the six operations modules and
+   thirteen performance/testing helpers. Complete the remaining independent
+   consumers, open findings, write side effects and retention triggers
+   before approving the L4 root-category layout or L5 retirements.
+7. **Policy/retirement approvals — pending:** Agree the canonical
+   `local/` categories, justified cache/host exceptions and
+   filename/run-ID rules. Separately authorize safe
+   tracked-code/document retirements and each irreversible ignored-source
+   deletion. After L2 writers/readers and source selections are accepted,
+   apply L3 only in individually hash-checked, reversible batches.
+
+**Gate:** L0 exit and an approved L1 mapping/exception registry are required
+before bulk path movement. A green hosted CI run proves build and
+publication compatibility, **not** backup recoverability or private-data
+retirement eligibility.
+
 ### L0 — Full read-only inventory and ownership mapping
 
 1. Capture branch/SHA and status. Enumerate **all** tracked tools (including

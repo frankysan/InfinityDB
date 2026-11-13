@@ -362,20 +362,18 @@ when all contained work shares the same owner.
     jobs using `tools.run_pinned_determinism`, and keep the existing
     strict SHA-256 comparator and required job identity unchanged.
     No Docker support is assumed on hosted Windows/macOS.
-  - [ ] Close out hosted GitHub Actions acceptance on cleanup PR #29:
-    at `e2ff5eb4`, the two pinned Ubuntu determinism jobs and strict
-    byte comparison passed, but native source checks rejected stale
-    tracked database provenance. Regenerated databases in `6e796e4c`
-    resolved that check; installed wheel and three completed native
-    source-check legs passed, but deployment smoke exposed an eager build-only
-    normalization import during production startup.
-    The startup import is now deferred until an explicit source-audit
-    invocation. The existing runtime-import regression passed, raw-pair
-    parity tests use explicit `include_raw=True`, and a fresh repeatable
-    three-database rebuild plus disposable Docker preview passed locally
-    (41/41 semantic paths). Verify **all** native source checks,
-    deployment smoke and the required exact-byte comparison are green
-    on the same pushed repair SHA before closing this gate.
+  - [x] Close out hosted GitHub Actions acceptance on cleanup PR #29:
+    the pinned Ubuntu 24.04/26.04 determinism jobs and strict byte
+    comparison passed. A tracked Army/Rules database rebuild resolved
+    stale provenance; deferring a build-only normalization import then
+    restored immutable-container startup without adding private inputs.
+    At exact pushed SHA `28a8e52b`, Source checks, deployment smoke and
+    installed-wheel smoke all completed successfully. Source checks
+    includes Windows/macOS Python 3.11, Ubuntu Python 3.11/3.14 and the
+    required `Cross-platform deterministic outputs` job. Local repeatable
+    three-database builds and Docker preview (41/41 semantic routes)
+    passed. This closes the hosted acceptance gate, **not** L1 policy
+    approval, release/deployment authorization or private-data deletion.
   - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
     inspection and programmatic `include_raw=True` interfaces. Keep the
     independent source-identity/research semantics and their focused tests
