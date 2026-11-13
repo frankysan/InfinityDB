@@ -2671,6 +2671,99 @@ backup/restore capability and a per-family hash/rollback decision package.
 No physical move, ACL modification, Syncthing reconfiguration or private
 asset deletion is authorized by this R4 checkpoint.
 
+### Thirty-seventh bounded L2 checkpoint — R5 live receiver access evidence (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`4cf9f414c2ba7232e0d7a41c1670ee8ec2035e20`. R4's bounded
+staged-file and pinned-source parity acceptance is complete. R5 now
+requires a separate *operational* read-only evidence sequence; this
+checkpoint does **not** authorize a private-source cutover.
+
+**Previously retained private baseline (2026-11-12):** The audited
+Syncthing configuration contained five Windows Send Only and Linux
+Receive Only folder pairs with matching folder IDs. All five Linux
+receiver status snapshots showed idle state, equal local/global file
+and byte counts, zero pending files/deletions and no pull errors.
+The Windows sender's live GUI/status query failed, and the inspected
+receiver had no proven versioning. A separate audit matched all
+**24 paired snapshot archives and manifests** by exact bytes, but
+Syncthing is not an independent backup and no trial restore was
+performed. The 19 access-denied Windows `reports/` directories still
+lack authorized content classification. These are historical captures,
+**not** proof of the current Windows sender state or current sync
+consistency.
+
+**Fresh Linux evidence (2026-11-13, worker `linux-dev`):**
+
+1. On the exact pushed R4 SHA
+   `4cf9f414c2ba7232e0d7a41c1670ee8ec2035e20`, the existing
+   read-only `activate_synced_assets list --layout local` returned
+   **24 staged manifests**. A selected Army snapshot
+   `JSON 20260929-114335` verified as the pinned
+   SHA-256 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`.
+   The English N5.3 PDF `--layout local --file ...` activation preview
+   returned **planned copy**, without `--apply` or checkout writes.
+2. A new bounded, read-only module,
+   `tools.operations.audit_syncthing_receiver`, and its `ops`
+   test module were committed as
+   `7994bf0bb69d462e40c3fe09c6347cae8dc8ef91`.
+   The probe reads only directory/file metadata and named POSIX ACLs,
+   under the explicitly configured `INFINITYDB_SYNC_STAGING_ROOT`.
+   It refuses linked receiver roots and linked selected source paths,
+   omits private payload names/content from its output, and never
+   writes or invokes synchronization.
+3. On that exact SHA, running as **`mcpworker`**, all five folder
+   roots (`raw`, `wiki`, `pdf`, `snapshots`,
+   `image-overrides`) reported existing directories,
+   readable **true**, writable **false**, and
+   `getfacl` entries `user:mcpworker:r-x` plus
+   `default:user:mcpworker:r-x`. The three selected paths
+   (Army ZIP, Army manifest, English N5.3 PDF) reported readable
+   **true**, writable **false**, and were not owned by
+   `mcpworker`. No write test was attempted.
+4. The new probe's six hermetic tests passed on Linux, with no
+   skips/failures; on Windows **four passed, two skipped** because
+   creating real symlinks required unavailable privileges.
+   `tests/test_test_sections.py` passed **15/15**,
+   Ruff and canonical Pyright passed with zero errors/warnings.
+   The Linux worker was returned to its prior detached
+   `8de09b277e579bd8cb942c6aba242bfe4f71ceca` after
+   inspection.
+
+**Interpretation:** Linux receiver roots and the named samples have
+confirmed read-only access *for this worker identity at inspection time*.
+This is not a full recursive ACL inspection, a current Syncthing API
+check, a proof of future inherited permissions, a live Windows sender
+check, a backup inventory or a tested restore. It cannot certify
+R5 readiness or justify an R6 migration.
+
+**Remaining R5 acceptance gates, in required order:**
+
+1. Recheck **both** Syncthing services from live read-only status,
+   verifying folder IDs, Send/Receive Only flags, sync state,
+   per-family local/global/need counts, errors and versioning. Never
+   persist Syncthing API keys or tokens in tracked reports.
+2. Inventory effective worker read-only ACLs **recursively or with a
+   complete deterministic per-family file/dir census**, including
+   newly received files and default ACL masks; verify the Windows
+   sender's current source roots and accessible private path owners.
+   Do not grant extra permissions simply to make the audit pass.
+3. Identify an **independent, offline-or-separately-versioned backup**
+   covering all selected source families and immutable provenance.
+   Record exact archive/manifest/source hashes and run a **trial
+   restore into a detached disposable destination**; compare exact
+   bytes. A second Syncthing copy is not acceptable backup evidence.
+4. Freeze an individually reviewed per-family source/target/hash,
+   consumer and rollback manifest. Only then seek separate approval
+   for an R6 non-destructive copy. Old-source retirement/deletion
+   needs a later independent decision.
+
+**State: R5 OPEN; R6 blocked.** All operations in this checkpoint were
+metadata-only, source-byte verification or dry-run inspection.
+No private source was moved, deleted or republished; no ACL,
+Syncthing configuration, Windows sender path, backup, Docker volume
+or runtime database was modified.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

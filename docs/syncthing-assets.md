@@ -183,6 +183,33 @@ restrictive source permission bits to new files, recheck effective ACL masks
 with `getfacl` and repeat the access test after synchronization. Do not give
 the worker write permission to the receive-only staging source.
 
+### Read-only receiver access audit (R5)
+
+Run the maintained metadata-only probe as `mcpworker` with the service's
+`INFINITYDB_SYNC_STAGING_ROOT` environment already configured:
+
+```bash
+./.venv/bin/python -m tools.operations.audit_syncthing_receiver
+```
+
+It reports only the five known folder categories, a fixed selection of
+three source-path access probes, whether the executing identity can read or
+write their current paths, and named/default POSIX ACL entries when
+`getfacl` is installed. It never reads file contents, prints a private
+source inventory, changes ACLs or tests access by writing. A missing
+configured root is reported as unavailable rather than silently choosing
+another home directory. The live Linux check on 2026-11-13 found all five
+folder roots readable and nonwritable by `mcpworker`, with
+`user:mcpworker:r-x` and `default:user:mcpworker:r-x` entries, and all
+three selected files readable and nonwritable.
+
+This is **bounded access evidence only**: a directory-level check and three
+files cannot prove recursive effective ACLs, future Syncthing-created file
+permissions, Windows sender status, current Syncthing synchronization,
+receiver versioning or independent backup and trial restore. Those are
+separate R5 gates. Never interpret the probe's successful exit as approval
+to move, delete or republish source bytes.
+
 The activation tool uses `~/syncthing/infinitydb` by default. Configure the
 worker's **actual** staging root via a systemd drop-in, avoiding changes to
 `HOME` and avoiding symlinks (which the activation safety check rejects):

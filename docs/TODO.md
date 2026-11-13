@@ -110,10 +110,15 @@ when all contained work shares the same owner.
   The [staged-to-reader parity checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-sixth-bounded-l2-checkpoint--r4-staged-activation-to-pinned-reader-parity-2026-11-13)
   completes R4's hermetic activation/reader contract across PDF and SVG
   override layouts, including no fallback, conflict refusal and idempotence.
-  **Next:** read-only R5 receiver ACL and independent backup/restore
-  evidence; R6 physical migration remains separately gated and unapproved.
+  The [R5 receiver access checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-seventh-bounded-l2-checkpoint--r5-live-receiver-access-evidence-2026-11-13)
+  confirms the worker's read-only access to five Linux Syncthing receiver
+  roots and three pinned source samples with a tracked, non-writing
+  ACL/metadata probe. Its tests passed on Windows and Linux; current
+  Windows live sender status, recursive ACLs and independent backup/restore
+  remain unverified. **Next:** complete those R5 operational proofs and a
+  per-family rollback package before requesting any R6 copy approval.
   Source relocation and private-data migration still require separate
-  approval and backup/restore evidence. L2 remains open; hosted/release
+  approval and backup/restore evidence. L2/R5 remain open; hosted/release
   acceptance is independent of fixture validation.
 
 ### Backlog and development workflow simplification
