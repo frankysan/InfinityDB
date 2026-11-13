@@ -203,12 +203,63 @@ folder roots readable and nonwritable by `mcpworker`, with
 `user:mcpworker:r-x` and `default:user:mcpworker:r-x` entries, and all
 three selected files readable and nonwritable.
 
-This is **bounded access evidence only**: a directory-level check and three
-files cannot prove recursive effective ACLs, future Syncthing-created file
-permissions, Windows sender status, current Syncthing synchronization,
-receiver versioning or independent backup and trial restore. Those are
-separate R5 gates. Never interpret the probe's successful exit as approval
-to move, delete or republish source bytes.
+The optional `--recursive` flag performs an effective-access census of
+each configured receiver family, traversing **without following symlinks**.
+It checks every encountered entry for the worker's read/write access and
+reports only aggregate file/directory counts, inaccessible or writable
+entries, links, scan errors and a hard entry limit. It reads no payload
+bytes, prints no private file paths and writes nothing. A partial scan
+cannot pass. On 2026-11-13, the `linux-dev` probe completed **35,833
+entries (27,560 files and 8,273 directories)** across all five families,
+with zero unreadable, writable, linked or uninspectable entries:
+
+```bash
+./.venv/bin/python -m tools.operations.audit_syncthing_receiver --recursive
+```
+
+This proves **effective read-only access to the observed entries at
+inspection time**, not every nested default ACL/mask or how future files
+inherit permissions. The probe intentionally keeps
+`recursive_acl_verified: false`. Do not treat successful access testing
+as backup, synchronization, artwork or migration approval.
+
+### Read-only Syncthing service health (R5)
+
+The credential-redacted status probe reads only the executing identity's
+standard Syncthing configuration (or an explicitly configured
+`INFINITYDB_SYNCTHING_CONFIG` path), matches the five expected source
+folders, then uses **loopback GET only** to query current folder state.
+It bypasses proxies and refuses redirects; API keys remain in memory and
+are never included in reports. No service configuration, synchronization
+or folder content is changed.
+
+On Windows, from the InfinityDB repository root:
+
+```powershell
+.\\.venv\\Scripts\\python.exe -m tools.operations.audit_syncthing_health --role sender
+```
+
+On the Linux receiver, only from an identity with authorized access to
+the Syncthing service configuration:
+
+```bash
+./.venv/bin/python -m tools.operations.audit_syncthing_health --role receiver
+```
+
+On 2026-11-13, Windows returned **five live, idle Send Only folders**:
+the configured IDs and roots matched, local/global counts matched,
+pending files/bytes/deletions and pull errors were all zero, and
+versioning was unconfigured. The Linux `mcpworker` execution reported
+`config-not-readable` under its current configuration discovery;
+**receiver live API state remains unverified**. Do not move or expose
+the owner's Syncthing API credentials to the worker to bypass this
+boundary. A separate owner-authorized check is needed. Matching earlier
+receiver snapshots or today's sender global counts cannot substitute
+for a fresh receiver API query.
+
+Neither Syncthing replication nor Syncthing versioning is an independent
+backup. An offline or separately versioned source backup and verified
+trial restore remain mandatory before any R6 copy proposal.
 
 The activation tool uses `~/syncthing/infinitydb` by default. Configure the
 worker's **actual** staging root via a systemd drop-in, avoiding changes to

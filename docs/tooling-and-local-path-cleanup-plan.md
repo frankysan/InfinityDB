@@ -2764,6 +2764,98 @@ No private source was moved, deleted or republished; no ACL,
 Syncthing configuration, Windows sender path, backup, Docker volume
 or runtime database was modified.
 
+### Thirty-eighth bounded L2 checkpoint — R5 sender health and recursive receiver access (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`bb779666cc1c635f7dfbd77cd8c4ca822f117bea`. This phase adds
+read-only Syncthing **service** status and recursive effective access
+coverage, not a private-data migration or backup implementation.
+
+**Live Windows sender verified:** The credential-redacted
+`tools.operations.audit_syncthing_health --role sender` probe,
+committed as `bb0a3433dea5406ff4f7a6825c5e84fefba40401`,
+successfully read the current Syncthing configuration and queried the
+**local loopback REST API** for all five selected folders. Every folder
+had the expected source root, configured ID and `sendonly` mode,
+was unpaused and idle, and reported matching local/global file and byte
+counts, zero pending files/bytes/deletions, zero pull errors and no
+versioning. The observed counts were:
+
+- Army/raw: **23 files; 142,272,280 bytes**.
+- Snapshot manifests: **25 files; 16,186 bytes**.
+- Wiki: **27,313 files; 5,086,349,340 bytes**.
+- PDF: **81 files; 1,035,875,348 bytes**.
+- Reviewed override receiver family: **113 files; 875,572 bytes**.
+
+Folder IDs and these counts also match the **historical** Linux
+receiver-status capture from 2026-11-12. This supports stable,
+consistent source metadata across those observations but does **not**
+prove the Linux receiver is currently synchronized or connected.
+
+The probe accepts only local configured GUI addresses, forces
+loopback GET requests with proxy bypass and redirects disabled, and
+never prints API keys, private config paths or unexpected API response
+fields. Its **11 hermetic tests passed on both Windows and Linux**;
+`tests/test_test_sections.py` passed **15/15**. Ruff, canonical Pyright
+(zero errors/warnings) and docs checks passed.
+
+**Direct Linux live status still blocked:** The same tracked probe,
+running as `mcpworker` with `--role receiver` at exact SHA
+`bb0a3433dea5406ff4f7a6825c5e84fefba40401`, returned
+`config-not-readable`. The default configuration discovery runs under
+the worker's identity, not the Syncthing owner's identity; this
+result alone cannot distinguish absent worker-local config from an
+owner-file ACL restriction. No alternate credential source, service
+impersonation, ACL changes or privileged helper was attempted.
+An **owner-authorized read-only receiver API** check is required to
+close the live-sync evidence gap.
+
+**Recursive Linux receiver access verified:** A bounded
+`--recursive` extension to `tools.operations.audit_syncthing_receiver`,
+committed as `00cb83871802fb6886ab2b028f6238798442e813`,
+checks effective worker access through every encountered family entry,
+without following symlinks, opening file contents or printing private
+names. The exact-SHA `linux-dev` run completed **35,833 entries**,
+consisting of **27,560 files and 8,273 directories**, as follows:
+
+- Raw: **24 files, 3 directories**.
+- Snapshots: **26 files, 2 directories**.
+- PDF: **82 files, 8 directories**.
+- Override family: **114 files, 7 directories**.
+- Wiki: **27,314 files, 8,253 directories**.
+
+Every family reported `complete: true`,
+`effective_readonly: true`, **zero writable, unreadable, linked,
+nonregular or uninspectable entries**, and no entry-limit hits.
+The counts include Syncthing's own marker metadata, so they need not
+equal the application-file counts reported by its REST API. Root-level
+named/default `mcpworker:r-x` ACL entries were independently confirmed
+in the preceding checkpoint. The recursive scan validates effective
+access for present entries; it does **not** inspect every inherited
+default ACL or prove future file permissions. It deliberately retains
+`recursive_acl_verified: false`.
+
+**Focused validation for the recursive extension:** Windows
+**8 passed, 3 skipped** (unavailable real-symlink privileges); Linux
+exact-SHA **11 passed, no skips**. Ruff, canonical Pyright (zero
+errors/warnings) and whitespace checks passed. After each Linux phase,
+the worker was returned to its previous detached
+`8de09b277e579bd8cb942c6aba242bfe4f71ceca`.
+
+**R5 state: OPEN; R6 BLOCKED.** Remaining independent requirements:
+(1) an owner-authorized direct live Linux receiver status and
+configuration/versioning check, including any error and peer state;
+(2) nested/default ACL inheritance or mask evidence for future received
+files where needed; (3) independently protected backup coverage and a
+successful hash-verified **trial restore** for each selected private
+source family; and (4) a per-family exact-source/hash/consumer/rollback
+approval package. Do not use successful replication, a synced receiver
+or Git history as substitute backup evidence.
+
+No private file, Syncthing configuration, credential, ACL, sender or
+receiver root, service state, tracked runtime database or symbol
+publication was moved, copied, changed or deleted in these checks.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

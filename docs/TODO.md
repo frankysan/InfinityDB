@@ -112,11 +112,14 @@ when all contained work shares the same owner.
   override layouts, including no fallback, conflict refusal and idempotence.
   The [R5 receiver access checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-seventh-bounded-l2-checkpoint--r5-live-receiver-access-evidence-2026-11-13)
   confirms the worker's read-only access to five Linux Syncthing receiver
-  roots and three pinned source samples with a tracked, non-writing
-  ACL/metadata probe. Its tests passed on Windows and Linux; current
-  Windows live sender status, recursive ACLs and independent backup/restore
-  remain unverified. **Next:** complete those R5 operational proofs and a
-  per-family rollback package before requesting any R6 copy approval.
+  roots and three pinned source samples. The
+  [R5 sender/recursive checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-eighth-bounded-l2-checkpoint--r5-sender-health-and-recursive-receiver-access-2026-11-13)
+  now verifies the live Windows Send Only service and all five folders'
+  zero-pending/idle status, plus a complete 35,833-entry read-only
+  effective-access census on Linux. Direct live receiver status still needs
+  an owner-authorized query; inherited ACLs and independent backup/trial
+  restore remain open. **Next:** complete these R5 proofs and a per-family
+  rollback package before requesting any R6 copy approval.
   Source relocation and private-data migration still require separate
   approval and backup/restore evidence. L2/R5 remain open; hosted/release
   acceptance is independent of fixture validation.
