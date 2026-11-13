@@ -2360,10 +2360,26 @@ revision, ignored private PDF or runtime database was changed.
 **Windows focused validation:** The 16 complete immunity modules
 passed **138 tests**, zero skipped/failed, including all their real
 legacy pinned-source checks and maintained API/curated assertions.
+The shared research-source path suite passed **42, two skipped**:
+**180 passed, two skipped, zero failed** across the bounded selection.
 Ruff passed after wrapping five over-length function signatures;
-Pyright returned zero errors/warnings. Shared source-path tests,
-documentation and exact-commit Linux evidence are recorded separately
-below.
+Pyright returned zero errors/warnings. Documentation lint/links/backlog
+and Git whitespace checks passed.
+
+**Linux exact-SHA verification (2026-11-13):** The registered
+`linux-dev` worker explicitly fetched origin and temporarily detached
+to code commit `0f150eb78b085a5cda620af5a7798b2632344a38`.
+All **16** complete immunity modules passed **138** tests, including
+the real legacy source checks and all maintained API/curated assertions.
+The shared source-path policy passed **44** (including Linux link
+guards): **182 passed, zero skipped, zero failed**. The worker was
+explicitly restored to its original detached HEAD
+`8de09b277e579bd8cb942c6aba242bfe4f71ceca`.
+Exact-code-SHA GitHub installed-wheel and deployment smoke tests
+**passed**; Source checks remained **in progress** when evidence was
+recorded. These validations exercise actual legacy PDF inputs and
+hermetic layout bindings only: no real `local/data/pdf` source was
+installed, and no private migration or publication approval follows.
 
 **Next R4:** Review deployable, geometry and movement source acceptance
 as a distinct shared-source group, then curate the remaining larger
