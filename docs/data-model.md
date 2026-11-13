@@ -4231,15 +4231,16 @@ Current build validation rejects normalized Army data without valid required met
 ## Application query model
 
 Runtime repositories query canonical/materialized application structures and compose contextual
-source detail as needed. They must not infer semantics from raw IDs or reach into `infinity.raw.db`.
+source detail as needed. They must not infer semantics from raw IDs or reach into the optional
+legacy `army.raw.db` source archive.
 
 Examples:
 
 - Unit lists operate on logical Unit identity and materialized Army availability.
 - Unit detail returns one logical Unit with source/Army/profile/loadout context preserved.
 - catalog filters resolve canonical application identity and match all materialized source members.
-- rules-backed States and other rules-only concepts are read from `rules.db`; their presence does
-  not imply mutable in-game state in `infinity.db`.
+- rules-backed States and other rules-only concepts are read from `rules_n5.db`; their presence does
+  not imply mutable in-game state in `army.db`.
 - search and Glossary project canonical domain identities rather than creating another identity
   namespace.
 

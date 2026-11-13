@@ -2284,6 +2284,84 @@ history volume mutation was performed. This was a read-only code/contract
 review followed only by tracked documentation changes. L0 remains open for
 the unreviewed tool/document classes and source backup/recovery exceptions.
 
+### Published Army semantic-audit lifecycle review — 2026-11-13
+
+**Scope:** Read-only L0 review at clean `dev/tooling-workspace-cleanup`
+`f43f9ebb` of **seven** currently distinct published-application audit
+commands and two shared helpers: `audit_fireteam_semantics`,
+`audit_unit_semantics`, `audit_profile_semantics`,
+`audit_loadout_semantics`, `audit_peripheral_semantics`,
+`audit_relationship_semantics`, `audit_normalization_links`,
+`payload_audit_common` and `paired_audit_connection`. Compared
+module/schema ownership, tests, CLI behavior and current data-model
+guidance. The earlier lifecycle decisions for `audit_army_faction_semantics`
+and `audit_semantic_deduplication` remain valid and are not repeated here.
+
+**Disposition: retain current independent semantics, not one tool per
+historical migration.**
+
+- `audit_unit_semantics` protects representative logical-Unit identity
+  and source-context variations; `audit_fireteam_semantics` independently
+  checks chart shapes, member resolution, FTO choices, Wildcards and
+  Reinforcement-parent Fireteam type limits. These cannot be replaced by
+  payload-deduplication counts or by a single generic schema validator.
+- `audit_profile_semantics` and `audit_loadout_semantics` enforce
+  canonical payload hash/occurrence/group consistency while preserving
+  *contextual* AVA/logo and points/SWC differences. They share bounded
+  `payload_audit_common` validation and identity helpers; keep those
+  helpers with their consumers on any later module relocation.
+- `audit_peripheral_semantics` checks definition, attachment and
+  availability mechanisms without inventing controller eligibility;
+  `audit_relationship_semantics` preserves Include target resolution,
+  source-relative relationships, historical-endpoint scope and
+  Reinforcement context. `audit_normalization_links` separately
+  classifies source-filter joins, option-Weapon indirection and
+  canonicalization/provenance mappings **without** treating player-facing
+  relationships as disposable normalization.
+- The last three commands depend on `paired_audit_connection`. Its
+  reviewed, read-only `--normalized` route verifies application/source
+  generation and reconstructs required tables in memory. Keep explicit
+  input selection, zero-row/source-table fidelity, and fail-closed
+  mismatched-source checks; **do not** call the known stale loose
+  `data/generated/army.raw.db` a valid current audit input. Preserve
+  separately justified legacy pair support until its retirement gate
+  is approved.
+
+**Actual current tracked-database probes (no writes):**
+`audit_fireteam_semantics data/generated/army.db` returned exit 0 with
+57 source charts, 268 teams and 1,249 members; its diagnostic report
+contains **2 FTO source anomalies** and 12 non-local/unresolved member
+resolutions, which must not be reclassified as audit execution failures.
+`audit_unit_semantics` returned exit 0, finding 920 source / 737 logical
+Units, 167 multi-source logical Units, four non-representative note-delta
+groups and no invalid representatives. `audit_profile_semantics`
+returned **PASS** for 5,020 occurrences / 1,108 canonical payloads;
+`audit_loadout_semantics` returned **PASS** for 12,993 occurrences /
+3,448 canonical payloads. These probes confirm maintained diagnostic
+behavior; they do not replace pinned source verification or a full suite.
+The three source-attached auditors were not run without a matching
+explicit normalized input.
+
+**Output/policy finding:** All seven optional `--output` writers use
+caller-selected report paths with directory creation and nonexclusive
+`write_text`, permitting overwrite of previous evidence. A plain
+audit invocation does not require a persistent output file. L2/L6
+should provide or document unique, classified `local/` evidence paths
+and retain stdout/CLI compatibility. Keep source-attached diagnostics
+under the source-research lifecycle and pure application audits under
+model-validation evidence. Future consolidation must preserve each
+semantic invariant and a current consumer; historical tests alone
+are insufficient justification for keeping a completed wrapper.
+
+**Documentation alignment:** The active `docs/data-model.md`
+application-query summary still called the old `infinity.db`,
+`rules.db` and `infinity.raw.db` filenames current. This checkpoint
+changes only that live summary to the current `army.db`,
+`rules_n5.db` and optional legacy `army.raw.db` boundary; frozen
+historical research descriptions remain untouched. No audit source,
+schema, runtime data, ignored file or output was modified in this
+review. L0 and L1 remain open.
+
 ### L1 approval prerequisites — consolidated outstanding decision register
 
 This is a **review checklist**, not permission to perform L2/L3. The private
