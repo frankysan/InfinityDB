@@ -1547,91 +1547,82 @@ a producer-path or physical-data migration.
 
 ### Twentieth bounded L2 checkpoint — R2 snapshot producer publication alignment (2026-11-13)
 
-**R2 first producer implementation: delivered; transactional caller
-acceptance still open.** The three independently maintained snapshot
-provenance writers now use the same no-clobber publication contract as
-the InfinityDB verifier at
-`8de09b277e579bd8cb942c6aba242bfe4f71ceca`.
-All three producer checkouts began clean on their respective
-`main` branches. The exact producer commits pushed to origin are:
+**R2 implementation and Windows/Linux fixture acceptance: complete.**
+The standalone Army, Wiki and Symbol writers and InfinityDB now share
+byte-exact, non-replacing v3 manifest publication. The first producer
+publication commits are superseded by these reviewed transaction fixes:
 
-| Producer owner | Before | Published R2 first-slice SHA |
+| Producer owner | R2 first-slice SHA | Accepted transaction SHA |
 | --- | --- | --- |
-| Army API acquisition | `7926c0f3968ae60915f48a443f8327718e9787ec` | `95bfb2de8ed14849062d9f607d8ef81c8284da17` |
-| Infinity Wiki / Human Sphere acquisition | `2fd89373afc1c3bd5dab3c74ee96da114412b168` | `f82f809e255031fc091d85d82ac88042570c411f` |
-| Symbol acquisition and processing | `54700b78a7650b6299bd0d87bbb05da6c8f52815` | `f03ebd2a3983386fc7e663d9b2d8fbcac9019efc` |
+| Army API acquisition | `95bfb2de8ed14849062d9f607d8ef81c8284da17` | `6d6789859e945d26a7a3fe3da275615103a22490` |
+| Infinity Wiki / Human Sphere acquisition | `f82f809e255031fc091d85d82ac88042570c411f` | `7338317bdc450d8b9d641063e4e49e7ec9d4fa70` |
+| Symbol acquisition and processing | `f03ebd2a3983386fc7e663d9b2d8fbcac9019efc` | `542faba40872221f4b5e78049912c50a95c136b4` |
 
-**Publication change:** Each source package still generates
-`InfinityDB snapshot provenance` format **v3** with exactly
-the same JSON fields, UTF-8/LF canonical serialization,
-archive SHA-256, logical-content SHA-256 and optional producer-relative
-path. The destination remains
-`data/manifests/snapshots/<ZIP stem>.json` unless explicitly
-selected otherwise; no producer CLI default changed.
-The writer now rejects symlink targets, exclusively opens the
-fixed sibling `.json.tmp`, stages complete JSON before publication,
-and calls `os.link` to create the final file without replacement.
-An identical existing manifest is idempotent, but a different
-manifest cannot be overwritten even if it appears concurrently.
-Only staging created by this invocation is removed; a stale stage
-is not assumed disposable. Unsupported hard-link filesystems
-fail closed rather than falling back to overwrite. The exact
-ZIP bytes, site/language identity, source plan and processing
-stage distinction are unchanged.
+**Current contract:** The [data lifecycle owner](../data/README.md#snapshot-provenance-contract)
+defines canonical UTF-8/LF bytes, exclusive sibling staging, non-replacing
+hard-link publication and the distinction between idempotent direct writes
+and newly owned transaction outputs. The optional `require_new=True`
+writer argument is used by Army acquisition, Wiki acquisition, raw Symbol
+acquisition and effective Symbol processing. A competing identical manifest
+is reusable by a direct writer but rejected by these rollback-capable
+transactions. CRLF is not byte-identical to LF. Source ZIP creation remains
+exclusive. The four provenance implementations have identical source bytes,
+SHA-256 `92c55b7a5b021382060ea8948c71ebb425627c12c355c8c44c4ba351a14ed66c`.
 
-**Focused verification:** All three repositories gained their
-own independent, standard-library `unittest.TestCase`
-manifest-publication suite. Each passed **8/8** tests on the
-Windows-side MCP runner (**24/24 total**): current-v3 canonical
-bytes for Army/Wiki/Symbol variants, replay identity, conflicting
-prior publication, competing identical/different producer,
-symlink/stale-stage refusal, hard-link failure and portable
-external-handoff path handling. Git whitespace checks passed
-for each commit. The normal producer pytest dependencies and
-Ruff were absent from the MCP virtual environments, and the
-MCP's pytest execution path is restricted to the main
-InfinityDB repository. Thus full producer pytest suites,
-hosted Windows/Linux/macOS CI, producer real-archive
-acquisition and cross-repository live handoff acceptance are
-**unverified**. The producer changes do not touch the
-InfinityDB serving/database contract.
+**Path compatibility:** No schema or CLI default changed. The receiver
+explicitly selects an archive and manifest; an embedded producer-relative
+path remains informational and is never used to discover a different
+input. The same immutable pair can be verified at a different local
+layout without rewriting its JSON. Pinned Army build selection retains
+its stronger original-basename, Army/en and source-revision checks.
 
-**Newly observed transactional boundary:** Immediately after
-the three safe pushes, another work process had placed
-*additional uncommitted changes* in all four checkouts.
-These changes are **not included in the three SHAs above**
-and were preserved untouched. They address a material
-second-order risk: an acquisition transaction that is
-prepared to roll back its own ZIP must distinguish a
-*newly claimed manifest* from an identical manifest
-published by a concurrent producer. The pending implementation
-adds `require_new=True` at Army/Wiki raw acquisition and
-Symbol raw/effective processing call sites, switches byte
-comparison to `read_bytes()`, and adds competing-writer
-rollback tests. The main InfinityDB checkout also had
-concurrent uncommitted provenance tests/code, which were
-not staged or edited for this checkpoint.
+**Windows/Linux acceptance:** Each full producer suite used offline mock
+acquisition and temporary artifacts. Army passed **56/56** on each host;
+Wiki passed **66/66**; Symbol passed **116 with one filesystem case-collision
+skip on Windows**, and **117/117 on Linux**. Each producer run also passed
+seven subtests. Caller race tests cover both identical and conflicting
+manifest winners, plus a source ZIP that appears during exclusive
+publication. Rollback preserves the winner's bytes, removes only the
+loser's newly owned outputs and preserves incomplete Wiki crawl evidence.
+Missing hard-link support has no overwrite fallback. Dependency and Git
+whitespace checks passed in every producer.
 
-**R2 completion condition:** Review and independently test
-that caller-level ownership/rollback change on the exact
-four repository revisions, ensure it does not remove
-the winner's manifest or source ZIP, then deliver the
-concurrent changes through their own reviewed commits.
-Only afterward run each producer's entire offline pytest
-suite and available hosted CI; check a portable, hash-verified
-ZIP/manifest pair against the pinned InfinityDB consumer.
-In particular, an idempotent **read-only verifier**
-and a **transactional acquisition writer** have
-different ownership requirements. Do not silently collapse
-them into a single overwrite policy.
+InfinityDB's four focused suites (`test_snapshot_manifest_publication`,
+`test_snapshot_provenance`, `test_army_snapshot_source`,
+`test_database_set_builder`) passed **77/77 plus seven subtests on each
+host**, including two complete three-database builds from equivalent
+explicit source layouts. Targeted Ruff, full Pyright and docs checks passed.
+Linux used isolated, hash-inventoried exports, not a moved interactive or
+worker checkout. The final producer export SHA-256 was
+`072afa38a20b324263c16499b8e0daa7393ce2581b63e306dc4dbd90ac984861`;
+its source/test bytes were verified unchanged against the delivered commits.
+Consumer source/test bytes were unchanged from their Windows/Linux runs.
 
-**L2 state: OPEN.** R1 code and Linux fixture parity have passed;
-the R2 first implementation was pushed but its acquisition
-transaction acceptance is pending. R3 staged activation,
-R4 pinned PDF/override migration and R5–R6 private data,
-Syncthing and backup cutover remain separately gated.
-No ignored archive, snapshot JSON, private override,
-Syncthing sender/receiver or tracked runtime database was moved.
+**Cross-repository handoff:** A deterministic synthetic ZIP produced
+byte-identical manifests in all four implementations on Windows and Linux
+for Army, EN Wiki, ES Wiki, Human Sphere and Symbols. Every pair was
+verified by the pinned InfinityDB consumer after copying to a different
+local layout, without changing producer-relative provenance, and altered
+ZIP copies were rejected. The fixture ZIP SHA-256 was
+`066236db8f4f9cda823bb882d2f41063696125ea396b6e6db0c3b2b47fb9a934`;
+the Army manifest SHA-256 was
+`5d45c403ebc093e90f74eb7c25b8498f6f7fd73a0545306b803e8b25a88c5212`.
+This is hermetic format/path conformance, not a live source acquisition,
+physical migration or production graphical-fidelity certification.
+
+**Hosted acceptance:** The exact producer pushes started Army run
+[43424252433](https://github.com/frankysan/InfinityDB-army-acquisition/actions/runs/43424252433),
+Wiki run [43424260083](https://github.com/frankysan/InfinityDB-wiki-acquisition/actions/runs/43424260083)
+and Symbol run [43424267587](https://github.com/frankysan/InfinityDB-symbol-tools/actions/runs/43424267587).
+All three runs completed successfully on their exact producer SHAs:
+**nine successful jobs**, covering Windows, Ubuntu and macOS with Python 3.11.
+InfinityDB development-branch CI and final release acceptance are independent.
+
+**L2 state: OPEN.** R2's producer/consumer contract work is complete;
+R3 staged activation, R4 pinned PDF/override migration and R5–R6 private-data,
+Syncthing and backup cutover remain separately gated. No ignored source,
+manifest, private override, Syncthing configuration or tracked runtime
+database was moved or republished.
 
 ## Observed starting condition
 

@@ -6336,6 +6336,28 @@ The original responsive/browser investigation remains dated evidence;
 the final 1.0 gate still requires validation against the final source
 pair, served revision and normal player-visible pages.
 
+## Snapshot provenance publication
+
+The [snapshot provenance contract](../data/README.md#snapshot-provenance-contract)
+is exercised offline by `tests/test_snapshot_manifest_publication.py` and
+`tests/test_snapshot_provenance.py`. The former covers byte-exact replay,
+CRLF conflicts, exclusive staging, competing manifest publication,
+transaction ownership, symlink refusal and unsupported hard links. The
+latter also covers historical formats, content hashes and portable
+producer/consumer copies. No external producer package or live acquisition
+is required by InfinityDB's normal test suite.
+
+`tests/test_army_snapshot_source.py` adds the stricter explicitly selected
+Army ZIP/manifest identity checks. `tests/test_database_set_builder.py`
+checks equivalent legacy/local input layouts through complete set generation
+and rejects source/manifest drift before publication. Run these four modules
+as a focused acquisition/build batch when changing that handoff.
+
+Each standalone producer owns its acquisition-level rollback tests and full
+offline suite. The [R2 acceptance record](tooling-and-local-path-cleanup-plan.md#twentieth-bounded-l2-checkpoint--r2-snapshot-producer-publication-alignment-2026-11-13)
+pins producer revisions and Windows/Linux byte-conformance evidence; those
+results do not turn local fixture checks into current hosted/release acceptance.
+
 ## Maintained snapshot-note validation
 
 The routine pytest suite recursively validates every maintained JSON snapshot note under

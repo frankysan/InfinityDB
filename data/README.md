@@ -568,8 +568,16 @@ Generated JSON serialization is deterministic.
 Persistent paths are stored only when the file is inside the project root, and
 then use portable project-relative POSIX form. Machine-specific absolute paths
 are never written. A repeated attempt to write identical provenance for the same
-manifest label is idempotent; conflicting provenance for that label fails instead
-of rewriting the record. Reacquiring the same logical content under a different
+manifest label is idempotent only when its complete UTF-8/LF bytes match;
+different line endings also count as a conflict. New manifests use exclusive
+sibling `.json.tmp` staging followed by a non-replacing hard link. Symlink
+destinations, occupied staging and filesystems without hard-link support fail
+closed; there is no overwriting fallback. Only this invocation's staging is
+cleaned up. Acquisition transactions use `write_snapshot_manifest(require_new=True)`
+and reject even an identical pre-existing or concurrently published manifest:
+rollback must never delete another run's output. The default writer API retains
+idempotent reuse for callers that do not claim transactional ownership.
+Reacquiring the same logical content under a different
 archive label may therefore produce another provenance record with the same
 `contentSha256`, even if the exact archive SHA-256 differs.
 
@@ -606,6 +614,14 @@ after copying or renaming the ZIP. Incomplete acquisitions are not
 handed off; changed bytes and missing or mismatched provenance fail
 closed. The portable copy/rejection contract is tested for Army, Wiki
 and symbol snapshot types in `tests/test_snapshot_provenance.py`.
+
+An explicitly selected archive may therefore live under a different local
+layout while its unchanged manifest still names the original producer-relative
+path. Do not rewrite the manifest to match the receiver or search other roots
+using its path field. The pinned Army build selector additionally requires
+the original archive and matching manifest basenames, Army/en identity and
+source-revision metadata; the generic provenance reader's hash checks do not
+replace that stronger build-input contract.
 
 The current producer contracts are:
 

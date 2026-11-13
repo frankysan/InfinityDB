@@ -205,6 +205,7 @@
         "test_metadata",
         "test_project_resources",
         "test_snapshot_provenance",
+        "test_snapshot_manifest_publication",
         "test_source_anomalies",
         "test_source_version",
         "test_sqlite_determinism"

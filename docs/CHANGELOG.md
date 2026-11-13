@@ -66,6 +66,10 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Acquisition + Data processing:** Kept snapshot provenance byte-exact across
+  standalone producers and the offline consumer. Manifest collisions fail
+  without replacing prior evidence, and acquisition rollback preserves a
+  competing producer's manifest even when its bytes are identical.
 - **Deployment + Web backend:** Added the ITS season-policy API route to the
   bounded metrics-history allowlist, preserving request history for that route
   without accepting arbitrary metric labels.

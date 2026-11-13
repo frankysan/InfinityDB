@@ -64,18 +64,15 @@ when all contained work shares the same owner.
   [R1 Army selection checkpoint](tooling-and-local-path-cleanup-plan.md#nineteenth-bounded-l2-checkpoint--r1-explicit-army-source-selection-2026-11-13)
   implements explicit ZIP/manifest validation and legacy/new-layout
   byte parity without migrating sources or changing the default.
-  R1's six focused suites have now passed **109/109 on both
-  Windows and Linux** at the exact delivered SHA. The
+  R1 has Windows/Linux fixture acceptance. The
   [R2 producer checkpoint](tooling-and-local-path-cleanup-plan.md#twentieth-bounded-l2-checkpoint--r2-snapshot-producer-publication-alignment-2026-11-13)
-  records three pushed, no-clobber v3 provenance-writer commits.
-  **Next:** reconcile the separately uncommitted acquisition
-  transaction/rollback changes in all producer checkouts, run
-  their offline suites and exact consumer handoff, then address
-  staged activation contracts (R3). Pinned PDFs/overrides,
-  private-data migration and hosted cross-platform CI still
-  require separate acceptance. L2 remains open; neither R1
-  nor the R2 first publication slice constitutes L2 exit,
-  L3 migration or L4 retirement.
+  records completed byte-exact publication and transactional rollback
+  protection, with Windows/Linux producer suites and consumer handoff parity.
+  **Next:** design and verify staged activation contracts (R3).
+  Pinned PDFs/overrides and private-data migration still require
+  separate approval; hosted/release acceptance remains independent.
+  L2 remains open: R1/R2 completion is not L2 exit, L3 migration
+  or L4 retirement.
 
 ### Backlog and development workflow simplification
 
