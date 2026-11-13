@@ -1,0 +1,30 @@
+{
+  "format": "InfinityDB staged asset layouts",
+  "formatVersion": 1,
+  "layouts": {
+    "legacy": {
+      "manifest": {"staging": "snapshots", "destination": "data/manifests/snapshots"},
+      "archives": {
+        "army": {"staging": "raw", "destination": "data/raw"},
+        "wiki": {"staging": "wiki", "destination": "data/wiki"},
+        "symbols": {"staging": "raw", "destination": "data/raw"}
+      },
+      "files": {
+        "data/pdf": "pdf",
+        "image_overrides": "image-overrides"
+      }
+    },
+    "local": {
+      "manifest": {"staging": "snapshots", "destination": "local/data/manifests/snapshots"},
+      "archives": {
+        "army": {"staging": "raw", "destination": "local/data/raw/army"},
+        "wiki": {"staging": "wiki", "destination": "local/data/wiki"},
+        "symbols": {"staging": "raw/symbols", "destination": "local/data/raw/symbols"}
+      },
+      "files": {
+        "data/pdf": "pdf",
+        "image_overrides": "image-overrides"
+      }
+    }
+  }
+}

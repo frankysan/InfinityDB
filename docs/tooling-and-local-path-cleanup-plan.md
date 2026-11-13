@@ -1624,6 +1624,64 @@ Syncthing and backup cutover remain separately gated. No ignored source,
 manifest, private override, Syncthing configuration or tracked runtime
 database was moved or republished.
 
+### Twenty-first bounded L2 checkpoint — R3 explicit staged snapshot layouts (2026-11-13)
+
+**R3 implementation and Windows/Linux fixture acceptance: complete.**
+Starting baseline was clean `dev/tooling-workspace-cleanup` at
+`45c5308d5852912aab80ae23922db4c0caede0b7`. The maintained
+[staged-asset runbook](syncthing-assets.md#explicit-snapshot-layouts) owns
+the current CLI and mapping contract; version-1
+[layout policy](../config/operations/synced-asset-layouts.json) owns the
+reviewed family paths. No default, sender folder, receiver permission,
+producer input or tracked runtime database was changed.
+
+The new explicit `--layout local` selects Army, Wiki/Human Sphere and raw
+Symbol archives by configured staged family plus original basename, and
+plans their matching JSON under `local/data/manifests/snapshots/`.
+Producer-relative paths remain informational in this mode. The default
+`legacy` mode retains its allowed legacy path-label translation, including
+nested raw-symbol paths; there is no automatic dual-root search. Both modes
+validate complete supported provenance (v1/v2/v3), applicable archive/content
+hashes and matching archive/manifest names. Duplicate selections, malformed
+or duplicate-key policy, unsafe/outside-family paths, symlinks, unreadable
+staging, stale source bytes and destination conflicts fail closed. Copy
+publication remains non-replacing; multi-file activation is not a transaction.
+PDF and override destinations remain unchanged in both layouts for R4 review.
+
+**Focused acceptance:** Windows passed **146 tests, four skips** across
+`test_activate_synced_assets`, `test_snapshot_provenance`,
+`test_army_snapshot_source` and `test_export_symbol_source_plan`. The skips
+were three real-symlink fixtures unavailable without Windows privileges and
+one case-colliding filename fixture unsupported by that filesystem. Linux
+passed the same **150/150 tests with no skips**, including those real
+filesystem cases. Within that batch, activation alone accounts for
+**100 passed / four skipped on Windows** and **104/104 on Linux**.
+Source guards were also exercised with portable mocked symlink refusals on
+both hosts. Targeted Ruff, full Pyright, documentation and whitespace checks
+passed. All apply operations used disposable fixture checkouts.
+
+A separate deterministic fixture receipt compared legacy/local applied
+archive and manifest bytes for Army, Wiki and raw Symbols. All three pairs
+matched across Windows and Linux, retaining exact producer JSON bytes and
+leaving source files unchanged. The shared fixture ZIP SHA-256 was
+`989e780a897a6806cbab95ee2dceebafbd9eaaf370d55ad9325e886c7054c600`;
+the Army manifest SHA-256 was
+`6849e9b8b3178391fcd41c2b50c60672f68f10d2e6c18bdc1a9ccfb17f705b0c`.
+Linux used an isolated, hash-inventoried export with archive SHA-256
+`cafbce5a32a647252248acd9255fc96c913160dc74312f1895b9de4b53f13d42`,
+not a moved worker/interactive checkout. This establishes fixture portability,
+not real source synchronization, tested restore, live ACL acceptance or
+hosted/exact-release validation. Private receipts and the bounded parity
+probe may be retired after their acceptance/recovery purpose ends; normal
+tests do not depend on them.
+
+**L2 state: OPEN.** R1–R3 reader/producer contracts are implemented and have
+Windows/Linux fixture acceptance. R4 now owns the next bounded inventory and
+per-family path-binding review for pinned PDFs/overrides. R5 operational
+evidence and R6 physical copying/cleanup still need their separate approvals.
+There was no live source activation, source move, Syncthing reconfiguration,
+backup/restore claim, production publication or deployment in R3.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

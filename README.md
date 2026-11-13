@@ -226,6 +226,11 @@ Place the verified handoff under `data/raw/` and
 The normal offline build never fetches data. See the
 [snapshot provenance and handoff contract](data/README.md#cross-repository-acquisition-handoff-p53).
 
+Development workers can verify or preview staged snapshots with an explicit
+`local` layout while the default remains `legacy`. See the
+[staged asset runbook](docs/syncthing-assets.md#explicit-snapshot-layouts)
+for the mapping and separately approved source-migration boundary.
+
 ### Build the rules reference
 
 The normal `infinity-db build --compact` includes curated Rules, reviewed

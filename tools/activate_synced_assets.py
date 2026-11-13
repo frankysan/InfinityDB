@@ -10,26 +10,38 @@ import argparse
 import hashlib
 import json
 import os
-import re
 import shutil
 import tempfile
+import zipfile
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
+from typing import Any
+
+from infinity_db.snapshot_provenance import (
+    SnapshotProvenanceError,
+    validate_snapshot_manifest,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STAGING_ROOT = Path.home() / "syncthing" / "infinitydb"
-MAPPINGS = {
-    "data/raw": "raw",
-    "data/wiki": "wiki",
-    "data/pdf": "pdf",
-    "data/manifests/snapshots": "snapshots",
-    "image_overrides": "image-overrides",
-}
-UNPINNED_PREFIXES = ("data/pdf", "image_overrides")
-SHA256_RE = re.compile(r"[a-f0-9]{64}\Z")
+LAYOUT_CONFIG = REPO_ROOT / "config/operations/synced-asset-layouts.json"
 
 
 class ActivationError(ValueError):
     """Unsafe input, missing asset, hash mismatch, or destination conflict."""
+
+
+@dataclass(frozen=True)
+class Route:
+    staging: PurePosixPath
+    destination: PurePosixPath
+
+
+@dataclass(frozen=True)
+class Layout:
+    manifest: Route
+    archives: dict[str, Route]
+    files: dict[str, str]
 
 
 def _relative(value: str) -> PurePosixPath:
@@ -47,16 +59,88 @@ def _relative(value: str) -> PurePosixPath:
     return PurePosixPath(*parts)
 
 
-def _source_for(root: Path, relative: str) -> Path:
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ActivationError(f"Duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
+def _object(value: Any, keys: set[str]) -> dict[str, Any]:
+    if not isinstance(value, dict) or set(value) != keys:
+        raise ActivationError(f"Expected configuration object with keys: {sorted(keys)}")
+    return value
+
+
+def _under(path: PurePosixPath, prefix: PurePosixPath) -> bool:
+    return path.parts[:len(prefix.parts)] == prefix.parts
+
+
+def _route(value: Any, *, source: str, destinations: tuple[str, ...]) -> Route:
+    record = _object(value, {"staging", "destination"})
+    if not all(isinstance(record[key], str) for key in record):
+        raise ActivationError("Layout paths must be strings")
+    staged, destination = _relative(record["staging"]), _relative(record["destination"])
+    if not _under(staged, PurePosixPath(source)) or not any(
+        _under(destination, PurePosixPath(prefix)) for prefix in destinations
+    ):
+        raise ActivationError("Layout route is outside its permitted source/destination family")
+    return Route(staged, destination)
+
+
+def _layouts(path: Path) -> dict[str, Layout]:
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=_unique_object)
+    except (OSError, ValueError) as exc:
+        raise ActivationError(f"Cannot load asset layouts: {exc}") from exc
+    root = _object(document, {"format", "formatVersion", "layouts"})
+    if (
+        root["format"] != "InfinityDB staged asset layouts"
+        or type(root["formatVersion"]) is not int or root["formatVersion"] != 1
+    ):
+        raise ActivationError("Unsupported asset layout format/version")
+    definitions = _object(root["layouts"], {"legacy", "local"})
+    layouts = {}
+    for name, value in definitions.items():
+        record = _object(value, {"manifest", "archives", "files"})
+        archives = _object(record["archives"], {"army", "wiki", "symbols"})
+        manifest = _route(
+            record["manifest"], source="snapshots",
+            destinations=("data/manifests/snapshots", "local/data/manifests/snapshots"),
+        )
+        files = _object(record["files"], {"data/pdf", "image_overrides"})
+        for destination, staged in files.items():
+            if not isinstance(staged, str):
+                raise ActivationError("Layout paths must be strings")
+            _route(
+                {"staging": staged, "destination": destination},
+                source="pdf" if destination == "data/pdf" else "image-overrides",
+                destinations=(destination,),
+            )
+        layouts[name] = Layout(
+            manifest,
+            {kind: _route(
+                route, source="wiki" if kind == "wiki" else "raw",
+                destinations=("data/wiki", "local/data/wiki") if kind == "wiki"
+                else ("data/raw", "local/data/raw"),
+            ) for kind, route in archives.items()},
+            files,
+        )
+    return layouts
+
+
+def _source_for(root: Path, relative: str, mappings: dict[str, str]) -> Path:
     rel = _relative(relative)
-    for destination_prefix, staging_prefix in MAPPINGS.items():
+    for destination_prefix, staging_prefix in mappings.items():
         base = PurePosixPath(destination_prefix)
         if rel.parts[: len(base.parts)] == base.parts and len(rel.parts) > len(base.parts):
             return root / staging_prefix / Path(*rel.parts[len(base.parts) :])
     raise ActivationError(f"Not a supported synchronized path: {relative}")
 
 
-def _file_without_links(path: Path, root: Path) -> Path:
+def _without_links(path: Path, root: Path) -> Path:
     """Reject symlinks anywhere between the staging root and selected file."""
     if root.is_symlink() or not root.is_dir():
         raise ActivationError(f"Staging root missing or a symlink: {root}")
@@ -69,6 +153,11 @@ def _file_without_links(path: Path, root: Path) -> Path:
         current /= part
         if current.is_symlink():
             raise ActivationError(f"Staged symlink not permitted: {current}")
+    return path
+
+
+def _file_without_links(path: Path, root: Path) -> Path:
+    _without_links(path, root)
     if not path.is_file():
         raise ActivationError(f"Staged file missing: {path}")
     return path
@@ -82,44 +171,70 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _snapshot(
-    name: str, staging_root: Path
-) -> list[tuple[str, Path, str]]:
+def _snapshot_name(name: str) -> str:
     if name.endswith(".json"):
         name = name[:-5]
-    if not name or "/" in name or "\\" in name:
+    if len(_relative(name).parts) != 1:
         raise ActivationError("Snapshot name must be a manifest basename")
-    manifest_rel = f"data/manifests/snapshots/{name}.json"
+    return name
+
+
+def _snapshot_names(names: list[str]) -> list[str]:
+    normalized = [_snapshot_name(name) for name in names]
+    if len({name.casefold() for name in normalized}) != len(normalized):
+        raise ActivationError("Duplicate or case-colliding snapshot names")
+    return normalized
+
+
+def _available(staging_root: Path, layout: Layout) -> list[str]:
+    folder = _without_links(staging_root / layout.manifest.staging, staging_root)
+    if not folder.is_dir():
+        raise ActivationError(f"Snapshot staging directory missing: {folder}")
+    paths = sorted(path for path in folder.iterdir() if path.suffix.casefold() == ".json")
+    if any(path.suffix != ".json" for path in paths):
+        raise ActivationError("Snapshot manifests must use the lowercase .json suffix")
+    for path in paths:
+        _file_without_links(path, staging_root)
+    return _snapshot_names([path.stem for path in paths])
+
+
+def _snapshot(
+    name: str, staging_root: Path, layout: Layout, *, legacy: bool,
+) -> list[tuple[str, Path, str]]:
+    name = _snapshot_name(name)
+    manifest_rel = (layout.manifest.destination / f"{name}.json").as_posix()
     manifest_file = _file_without_links(
-        _source_for(staging_root, manifest_rel), staging_root
+        staging_root / layout.manifest.staging / f"{name}.json", staging_root
     )
     raw = manifest_file.read_bytes()
     try:
-        manifest = json.loads(raw)
+        manifest = json.loads(raw, object_pairs_hook=_unique_object)
+        validate_snapshot_manifest(manifest)
         archive = manifest["snapshot"]["archive"]
-        archive_rel = archive["path"]
-        digest = archive["sha256"]
+        route = layout.archives[manifest["snapshot"]["type"]]
     except (KeyError, TypeError, ValueError, UnicodeDecodeError) as exc:
         raise ActivationError(f"Invalid snapshot manifest: {name}") from exc
-    if manifest.get("format") != "InfinityDB snapshot provenance":
-        raise ActivationError(f"Unrecognized snapshot provenance: {name}")
-    if not isinstance(archive_rel, str) or not isinstance(digest, str):
-        raise ActivationError(f"Invalid archive identity: {name}")
-    archive_path = _relative(archive_rel)
-    if archive_path.parts[0:2] not in (("data", "raw"), ("data", "wiki")):
-        raise ActivationError(f"Unexpected archive location: {archive_rel}")
-    if archive_path.suffix != ".zip" or archive.get("name") != archive_path.name:
-        raise ActivationError(f"Invalid archive filename: {archive_rel}")
-    if SHA256_RE.fullmatch(digest) is None:
-        raise ActivationError(f"Invalid archive SHA-256: {name}")
+    basename = _relative(archive["name"])
+    if len(basename.parts) != 1 or basename.suffix != ".zip" or basename.stem != name:
+        raise ActivationError(f"Invalid archive filename: {archive['name']}")
+    if legacy:
+        archive_path = _relative(archive.get("path", ""))
+        if not _under(archive_path, route.destination) or archive_path.name != basename.name:
+            raise ActivationError(f"Unexpected legacy archive location: {archive_path}")
+        tail = archive_path.relative_to(route.destination)
+    else:
+        # Producer-relative paths are informational in the explicitly selected layout.
+        if "path" in archive:
+            _relative(archive["path"])
+        tail = basename
+    archive_rel = (route.destination / tail).as_posix()
     staged_archive = _file_without_links(
-        _source_for(staging_root, archive_rel), staging_root
+        staging_root / route.staging / tail, staging_root
     )
-    actual = _sha256(staged_archive)
-    if actual != digest:
-        raise ActivationError(
-            f"Archive hash mismatch: {archive_rel} (expected {digest}, got {actual})"
-        )
+    validate_snapshot_manifest(manifest, archive=staged_archive)
+    if manifest_file.read_bytes() != raw:
+        raise ActivationError(f"Snapshot manifest changed during verification: {name}")
+    digest = archive["sha256"]
     return [
         (archive_rel, staged_archive, digest),
         (manifest_rel, manifest_file, hashlib.sha256(raw).hexdigest()),
@@ -127,6 +242,8 @@ def _snapshot(
 
 
 def _destination(repo_root: Path, relative: str, *, apply: bool) -> Path:
+    if repo_root.is_symlink() or not repo_root.is_dir():
+        raise ActivationError(f"Checkout root missing or a symlink: {repo_root}")
     dest = repo_root
     for segment in _relative(relative).parts[:-1]:
         dest /= segment
@@ -143,9 +260,13 @@ def _activate_one(
     source: Path,
     digest: str,
     *,
+    staging_root: Path,
     mode: str,
     apply: bool,
 ) -> str:
+    _file_without_links(source, staging_root)
+    if _sha256(source) != digest:
+        raise ActivationError(f"Source changed before activation: {relative}")
     dest = _destination(repo_root, relative, apply=apply)
     if dest.is_symlink():
         # Windows may expose a stored absolute target with a different path spelling
@@ -200,6 +321,11 @@ def _parser() -> argparse.ArgumentParser:
     )
     activate.add_argument("--mode", choices=("copy", "symlink"), default="copy")
     activate.add_argument("--apply", action="store_true", help="Perform checkout writes.")
+    for subparser in subs.choices.values():
+        subparser.add_argument(
+            "--layout", choices=("legacy", "local"), default="legacy",
+            help="Explicit snapshot layout; legacy remains the default.",
+        )
     return parser
 
 
@@ -208,36 +334,31 @@ def main(
     *,
     staging_root: Path | None = None,
     repo_root: Path = REPO_ROOT,
+    layout_config: Path = LAYOUT_CONFIG,
 ) -> int:
     args = _parser().parse_args(argv)
     if staging_root is None:
         configured_root = os.environ.get("INFINITYDB_SYNC_STAGING_ROOT")
         staging_root = Path(configured_root) if configured_root else STAGING_ROOT
     try:
+        layout = _layouts(layout_config)[args.layout]
         if args.action == "list":
-            folder = staging_root / "snapshots"
-            if folder.is_symlink() or not folder.is_dir():
-                raise ActivationError(f"Snapshot staging directory missing: {folder}")
-            for path in sorted(folder.glob("*.json")):
-                _file_without_links(path, staging_root)
-                print(path.stem)
+            for name in _available(staging_root, layout):
+                print(name)
             return 0
         if args.action == "verify":
-            folder = staging_root / "snapshots"
             if args.snapshot:
-                names = args.snapshot
+                names = _snapshot_names(args.snapshot)
             else:
-                if not folder.is_dir() or folder.is_symlink():
-                    raise ActivationError(f"Snapshot staging directory missing: {folder}")
-                names = [file.stem for file in sorted(folder.glob("*.json"))]
+                names = _available(staging_root, layout)
             if not names:
                 raise ActivationError("No snapshot manifests available")
             for name in names:
-                items = _snapshot(name, staging_root)
+                items = _snapshot(name, staging_root, layout, legacy=args.layout == "legacy")
                 print(f"verified {items[0][0]} SHA-256={items[0][2]}")
             return 0
         if args.snapshot:
-            items = _snapshot(args.snapshot, staging_root)
+            items = _snapshot(args.snapshot, staging_root, layout, legacy=args.layout == "legacy")
         else:
             rel = _relative(args.file)
             is_pdf = rel.parts[:2] == ("data", "pdf") and len(rel.parts) > 2
@@ -246,19 +367,25 @@ def main(
                 raise ActivationError(
                     "Direct file activation is limited to PDFs and image overrides"
                 )
-            source = _file_without_links(_source_for(staging_root, args.file), staging_root)
+            source = _file_without_links(
+                _source_for(staging_root, args.file, layout.files), staging_root
+            )
             items = [(args.file, source, _sha256(source))]
             print("Note: this file has no snapshot provenance pin; SHA-256 measured only.")
         # Preflight the entire selection before modifying the checkout.
         for relative, source, digest in items:
-            _activate_one(repo_root, relative, source, digest, mode=args.mode, apply=False)
+            _activate_one(
+                repo_root, relative, source, digest, staging_root=staging_root,
+                mode=args.mode, apply=False,
+            )
         for relative, source, digest in items:
             status = _activate_one(
-                repo_root, relative, source, digest, mode=args.mode, apply=args.apply
+                repo_root, relative, source, digest, staging_root=staging_root,
+                mode=args.mode, apply=args.apply,
             )
             print(f"{status}: {relative} ({args.mode})")
         return 0
-    except (ActivationError, OSError) as exc:
+    except (ActivationError, OSError, SnapshotProvenanceError, zipfile.BadZipFile) as exc:
         print(f"Activation refused: {exc}")
         return 1
 

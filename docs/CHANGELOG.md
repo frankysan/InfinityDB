@@ -20,6 +20,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Project infrastructure + Acquisition:** Added an explicit local-workspace
+  layout for verifying and previewing staged Army, Wiki and raw-symbol snapshot
+  pairs. Legacy activation remains the default; neither selection changes
+  Syncthing folders or migrates existing sources, PDFs or overrides.
 - **Data processing + Web backend:** Added deterministic multi-season ITS
   publication validation and synthetic duplicate-slug acceptance, preserving
   explicit source ownership and independent season/revision selection.

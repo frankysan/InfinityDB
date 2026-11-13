@@ -6358,6 +6358,15 @@ offline suite. The [R2 acceptance record](tooling-and-local-path-cleanup-plan.md
 pins producer revisions and Windows/Linux byte-conformance evidence; those
 results do not turn local fixture checks into current hosted/release acceptance.
 
+`tests/test_activate_synced_assets.py` independently exercises the configured
+staged-asset layouts in disposable directories: legacy/local pair parity,
+read-only verification/preview, explicit apply, historical provenance,
+path/schema/hash rejection, duplicate selection, symlinks, inaccessible inputs
+and destination conflicts. It also verifies that local snapshot selection
+does not relocate PDFs or overrides. Real source synchronization, receiver ACLs
+and backup/restore acceptance are separate from these hermetic fixtures; see
+the [activation runbook](syncthing-assets.md#explicit-snapshot-layouts).
+
 ## Maintained snapshot-note validation
 
 The routine pytest suite recursively validates every maintained JSON snapshot note under

@@ -68,11 +68,14 @@ when all contained work shares the same owner.
   [R2 producer checkpoint](tooling-and-local-path-cleanup-plan.md#twentieth-bounded-l2-checkpoint--r2-snapshot-producer-publication-alignment-2026-11-13)
   records completed byte-exact publication and transactional rollback
   protection, with Windows/Linux producer suites and consumer handoff parity.
-  **Next:** design and verify staged activation contracts (R3).
-  Pinned PDFs/overrides and private-data migration still require
-  separate approval; hosted/release acceptance remains independent.
-  L2 remains open: R1/R2 completion is not L2 exit, L3 migration
-  or L4 retirement.
+  The [R3 activation checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-first-bounded-l2-checkpoint--r3-explicit-staged-snapshot-layouts-2026-11-13)
+  adds explicit configured legacy/local snapshot selection and
+  Windows/Linux fixture parity, retaining the current staging folders.
+  **Next:** inventory pinned PDF/override families and prepare their
+  reviewed path-binding changes (R4). Source relocation and private-data
+  migration still require separate approval; hosted/release acceptance
+  remains independent. L2 remains open: R1–R3 completion is not L2 exit,
+  L3 migration or L4 retirement.
 
 ### Backlog and development workflow simplification
 

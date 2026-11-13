@@ -22,13 +22,12 @@ Windows is the authoritative **Send Only** Syncthing device; `linux-dev` is
 
 **L2 path-cutover boundary:** The
 [reader/producer decision package](tooling-and-local-path-cleanup-plan.md#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13)
-proposes `local/data/` source destinations but does **not** activate
-them. The current activation tool interprets snapshot
-`archive.path` using the legacy `data/raw/` and `data/wiki/`
-prefixes; changing sender roots or producer manifest paths first
-would break verification/activation. Keep the five current folders,
-their IDs and the receiver permissions unchanged until a reviewed,
-explicit dual-layout mapping and cross-host acceptance exist.
+proposes `local/data/` source destinations but does **not** migrate
+them. The activation tool now supports explicit `--layout local`
+verification and preview alongside the default `legacy` layout, as
+described below. This reader capability does not change the five current
+folders, their IDs, sender roots, receiver permissions or backup policy.
+Physical source/Syncthing cutover still needs its own family-specific approval.
 
 The Syncthing folder IDs must match between the devices; their physical
 paths need not. The optional Linux receiver uses `image-overrides/` (hyphen),
@@ -59,8 +58,10 @@ current directory, after synchronized inputs show Up to Date.
 ```
 
 - `list` enumerates staged snapshot manifest names.
-- `verify` compares each selected archive's SHA-256 against its staged
-  snapshot manifest. Omit `--snapshot` to validate all staged manifests,
+- `verify` validates each selected manifest with the shared provenance
+  validator, including exact archive SHA-256 and logical-content SHA-256
+  where its version provides one. Supported historical v1/v2 and current v3
+  provenance remain readable. Omit `--snapshot` to validate all staged manifests,
   which may require reading large archives.
 - `activate --snapshot` verifies the archive, then plans both the archive
   and its matching provenance JSON in the checkout. **It is a dry run unless
@@ -71,6 +72,59 @@ current directory, after synchronized inputs show Up to Date.
 - An existing destination is reused only if it has identical bytes (or
   already matches the requested symlink); conflicting files are never
   overwritten. There is no bulk cleanup, delete or reverse synchronization.
+
+### Explicit snapshot layouts
+
+[The maintained layout policy](../config/operations/synced-asset-layouts.json)
+defines version-1 `legacy` and `local` mappings. Every command accepts
+`--layout`; omitting it always selects `legacy`. No environment variable,
+embedded producer path or newest-file search selects a different layout.
+`INFINITYDB_SYNC_STAGING_ROOT` still selects only the external staging root.
+The policy is validated before reading selected inputs or creating destinations;
+unknown fields/versions, duplicate JSON keys, unsafe paths and routes outside
+their permitted source/destination families are rejected without fallback.
+
+| Snapshot family | Staged source in `local` mode | `local` checkout destination |
+| --- | --- | --- |
+| Army | `raw/<original basename>.zip` | `local/data/raw/army/<original basename>.zip` |
+| Wiki / Human Sphere | `wiki/<original basename>.zip` | `local/data/wiki/<original basename>.zip` |
+| Raw symbols | `raw/symbols/<original basename>.zip` | `local/data/raw/symbols/<original basename>.zip` |
+| Matching provenance | `snapshots/<original stem>.json` | `local/data/manifests/snapshots/<original stem>.json` |
+
+The `legacy` layout continues to translate the manifest's `data/raw/` or
+`data/wiki/` label into the corresponding staged folder, preserving nested
+relative paths such as `raw/symbols/`. It rejects a new-layout path instead of
+silently switching layouts. The explicitly selected `local` mode selects one
+configured family directory plus the original archive basename. Its optional
+producer-relative `archive.path` is validated as portable text but is not
+followed, even if it names another existing file. Old, new or absent producer
+path labels therefore work without modifying provenance. Alternate staged
+locations need a reviewed policy change; the tool does not search siblings.
+Derived symbol archives are not implicitly selected from other processing roots.
+
+Preview a selected pair on Linux without changing the checkout:
+
+```bash
+./.venv/bin/python -m tools.activate_synced_assets verify --layout local --snapshot 'JSON 20260929-114335'
+./.venv/bin/python -m tools.activate_synced_assets activate --layout local --snapshot 'JSON 20260929-114335'
+```
+
+Under the R3 reader-only acceptance, apply the new layout **only to disposable
+test checkouts**, with explicit `--apply`; the examples above deliberately
+preview. Source migration approval is separate. PDF and override activation
+retains its existing `data/pdf/` and `image_overrides/` destinations in both
+layouts; new pinned PDF/override locations remain R4 work.
+
+Snapshot and manifest basenames must agree. Duplicate selections, case-colliding
+manifest names and non-lowercase `.json` suffixes fail closed. Full-pair
+preflight checks destination conflicts before any activation writes; source
+hashes and symlink guards are checked again before each file is activated.
+Copy publication never replaces a destination. A late I/O error or source
+change may leave an earlier **newly activated file** from that explicit apply:
+the pair is not a multi-file transaction. Inspect and retry the same verified
+selection; prior conflicting bytes are never overwritten or deleted.
+
+### Individual PDFs and overrides
 
 PDFs and optional local override evidence have no mandatory archive manifest pin.
 The external producer owns override application; syncing these files does not
