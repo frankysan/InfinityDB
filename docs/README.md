@@ -58,10 +58,12 @@ ASCII art, keeping labels readable in both source and rendered form.
 ## Active cleanup plans
 
 - [tooling-and-local-path-cleanup-plan.md](tooling-and-local-path-cleanup-plan.md) —
-  active post-v1.1.0 audit and proposed migration of maintained `tools/` modules,
-  Git-ignored data into `local/`, categorized private output paths,
-  and bounded one-use tool retirement. L0 inventory/review has started;
-  the [backlog](TODO.md) owns the active task.
+  active post-v1.1.0 tool/path cleanup. Its
+  [L1 decision package](tooling-and-local-path-cleanup-plan.md#l1-decision-package--proposed-not-approved-2026-11-13)
+  separates prospective naming policy, tracked retirements and blocked
+  private-data migration. All current root tools are named in the L0 record;
+  recovery/host evidence and approvals remain open. The
+  [backlog](TODO.md) owns the implementation task.
 
 ## Completed strategic migrations
 

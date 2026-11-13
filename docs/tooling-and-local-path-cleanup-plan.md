@@ -58,6 +58,163 @@ not a competing operational manual.
 The [backlog](TODO.md) owns the open implementation item; only approved,
 implemented rules move into those canonical owners.
 
+## L1 decision package — proposed, not approved (2026-11-13)
+
+**Decision status:** All **120 current root Python modules** and the
+artwork-review template have named L0 dispositions; this is filename
+and code-ownership coverage, **not complete L0 exit**. A tracked-doc
+lifecycle pass and Army/Wiki/Symbol producer interface checks are
+recorded below. The previous exact InfinityDB revision
+`eb272cd2eb3347211a14b04e9b72d3b002af10dd` passed all three
+hosted workflows; CI on the newer review revision must be evaluated
+separately. The private 44-file move candidate, inaccessible reports
+and Syncthing/backup status remain **unapproved and unverified**.
+
+### P — Prospective project conventions (one non-destructive policy decision)
+
+**Recommended for approval as a single prospective policy only**, with
+no immediate changes to existing file paths, CLI defaults, ignore
+rules, databases, service volumes, producer repositories or private
+bytes:
+
+- **P1 — Ignored output home:** New, project-owned, ignored
+  sources and run artifacts should be created beneath `local/`.
+  The intended categories are `local/data/`, `local/research/`,
+  `local/validation/`, `local/performance/`,
+  `local/operations/`, `local/work/` and `local/handoffs/`.
+  Preserve exact immutable upstream basenames and source identities.
+  Do not create empty category trees or a catch-all `misc/`.
+- **P2 — Name and lifecycle:** Paths identify domain, purpose, source
+  revision or candidate, and lifetime. For repeatable reports,
+  prefer `<UTC-run-id>-<short-commit-or-source-sha>/`, followed by a
+  concise role-based filename. Accepted inputs/receipts include
+  source/artifact SHA-256. New run-evidence writers must reject
+  collisions instead of truncating a previous run; a documented
+  *explicit publication* workflow is separately allowed to replace
+  its reviewed tracked output. No automatic age-based deletion:
+  scratch is prunable after successful verified completion; open
+  diagnostics last until closeout; source/recovery/release evidence
+  lasts until its independent provenance, consumer and retention
+  obligations are discharged.
+- **P3 — New maintained tools:** Use `tools/data/`,
+  `research/`, `symbols/`, `browser/`, `testing/`,
+  `ci/`, `operations/`, `performance/`, `dev/` or
+  `_shared/` by responsibility and consumer. The initial minimal
+  root exceptions are `tools/run_checks.py` and package
+  `__init__.py`. This does **not** move or rename an existing
+  module; L4 uses separately validated atomic import, test, CI,
+  MCP and direct-command cutovers.
+- **P4 — Narrow documented exceptions:** Keep conventional
+  `.venv/`, `node_modules/`, `__pycache__/`, `.pytest_cache/`,
+  `.ruff_cache/`, package/build caches, OS/editor state,
+  host-specific secrets, and selected pytest scratch locations
+  with their owners. GitHub's step-output file, external producer
+  staging and the production `metrics_history` Docker volume
+  are **not** project-generated `local/` reports. No blanket
+  exception is granted for checkout-root `reports/`,
+  `docs/audits/`, ignored `data/`, `image_overrides/`, or
+  loose downloaded web-font inputs; assess those separately.
+- **P5 — Tracked publication boundaries:** Preserve
+  `data/generated/army.db`, `rules_n5.db`, `its_18.db`,
+  curated source inputs, `symbol-publication.json`, generated
+  *reviewed* checklist/catalog-scope documents, and any immutable
+  tracked source/acceptance records. Do not classify these as
+  disposable ignored evidence or move the production SQLite
+  volume into the checkout. Installed wheels, production images,
+  normal serve and deterministic build must remain independent of
+  `local/` contents.
+
+**Effect of approving P:** Authorize a future update to the canonical
+policy owners (`docs/architecture.md`, `data/README.md` and the
+documentation/agent navigation links), plus prospective, narrowly
+scoped output-contract implementation. **Approval of P is not
+permission to execute L2 migrations, relocate existing tools,
+retire tracked code, mutate ignored originals, alter Syncthing, or
+delete anything.** Legacy writer/reader paths must continue to work
+until an individually reviewed compatibility cutover.
+
+### T — Tracked-code/document retirement (separate per-batch decisions)
+
+- **T1 — Candidate:** Retire
+  `tools/symbol_raster_validation.py` and the two
+  historical-only tests in `tests/test_symbol_raster_validation.py`.
+  `InfinityDB-symbol-tools` owns the identical visual-comparison
+  implementation inside canonical compression; the InfinityDB
+  duplicate has no other tracked tool imports. **Not yet approved:**
+  finish the independent caller/packaging scan and obtain current
+  producer regression acceptance (the MCP attempt returned
+  `validation_unknown`). Keep receipt/ZIP verification and
+  source-to-publication acceptance intact; do not claim producer
+  raster evidence is a separate consumer visual parity check.
+- **T2 — Candidate:** Retire the completed
+  `docs/v1.0-coverage-workflow-plan.md` only after confirming
+  its pilot selection, constraints, benchmark findings and
+  independent acceptance evidence remain in
+  `config/validation/`, `v1.0-source-coverage-audit.md`
+  and the active backlog. Clear any remaining references atomically;
+  retain unique source-pinned findings instead of making another
+  archival document.
+- **T3 — Not ready:** `probe_docker_test_host.py`, historical
+  V1S wrappers and broad `tools/` moves need a demonstrated
+  replacement or an explicit consumer/CI cutover first. Merely
+  finding only a historical test is not a retention argument.
+
+**Effect of approving a specific T batch:** Permit only that named
+tracked-code/document removal *after* its stated preconditions, with
+relevant focused/full validation and an independently reviewed Git
+diff. It grants no right to delete private source, reports or
+backups. Git history is the default archive.
+
+### M — Existing private-source relocation or deletion (blocked)
+
+**No approval requested yet.** The 44-file refined source/provenance
+move list is a *candidate*, not a migration manifest approved for
+execution. Each family must first have exact old/new paths,
+producers/readers, hashes, source-selection ambiguity checks,
+independent backup **and successful trial restore**, synchronized
+sender/receiver snapshot and reversible cutover evidence.
+
+The **19 inaccessible Windows `reports/` directories** have unknown
+contents. They require authorized, read-only enumeration and
+retention classification. Do not elevate access, change ACLs,
+move or delete them by inference. The Windows send-only Syncthing
+state also needs a fresh verification; replica agreement is not an
+independent backup. Linux `image-overrides/` receiver naming,
+MCP source paths and the production `metrics_history` volume
+remain separately protected.
+
+A later **M-copy** decision may authorize one specifically identified
+reversible family after L2 has updated writers/readers; a subsequent
+**M-delete** decision would require independent restore,
+post-copy hash/source verification, confirmed consumers switched,
+retention sign-off and rollback documentation. Do not bundle these
+approvals, assume that a successful CI run proves recovery, or
+promote `army.raw.db` retirement without its own consumer check.
+
+### Implementation and approval handoff
+
+1. **Review P on its own.** If accepted, publish the policy in
+   canonical owners. Begin L2 with non-destructive output/CLI changes
+   (collision refusal, report classification and producer options),
+   using focused tests and no implicit local-data discovery.
+2. **Review T1/T2 individually** after their listed checks; process
+   any accepted tracked retirement as a separate tested commit.
+   The producer and MCP execution contracts remain independent of
+   InfinityDB's repo layout.
+3. **Keep M closed** until backup/restore, report ACL classification,
+   producer/Syncthing state and hash-preserving source selection are
+   demonstrably ready. Only then propose exact family-by-family
+   migration and later deletion requests.
+
+**Current recommendation:** Accept the *prospective* P conventions
+when ready; continue T acceptance preparation and L0 recovery
+investigation independently. Neither recommendation nor continued
+cleanup work constitutes an approval.
+
+The [detailed L0 disposition and cross-repository evidence](#execution-phases)
+remains the audit trail. The [L1 prerequisites](#l1-approval-prerequisites--consolidated-outstanding-decision-register)
+remain binding for any physical migration.
+
 ## Observed starting condition
 
 The initial root-level inspection found:
