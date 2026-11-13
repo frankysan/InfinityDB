@@ -1444,8 +1444,9 @@ the L2 exit described under
 
 ### Nineteenth bounded L2 checkpoint — R1 explicit Army source selection (2026-11-13)
 
-**R1 implementation: completed on Windows; Linux and hosted acceptance still
-separate.** Starting baseline: clean `dev/tooling-workspace-cleanup` at
+**R1 implementation completed; Windows and Linux fixture acceptance
+verified at the same SHA. Hosted CI and real-source transfer are separate.**
+Starting baseline: clean `dev/tooling-workspace-cleanup` at
 `67df86067578c4d065011a6dbd08c561beba062c`. This change
 implemented the first **non-destructive** gate from the
 [eighteenth L2 path decision](#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13).
@@ -1527,17 +1528,110 @@ targeted Ruff and repository docs/diff checks passed.
 The symbol source-plan and application CLI consumers passed
 their focused Windows suites.
 
-**Remaining R1 acceptance:** Hermetic Linux fixture parity
-and hosted exact-SHA checks are independent; real
-source-provenance selection and cross-host manifest/path
-transfer are not certified by a synthetic SQLite fixture.
-R2 remains open for standalone Army/Wiki/Symbol provenance
-writer alignment, R3 for explicit staged reader/activation
-mapping, and R4–R6 for private-path and source cutover.
-Neither T nor M has been approved.
+**Linux exact-SHA fixture acceptance (2026-11-13):**
+The detached `linux-dev` validation checkout explicitly fetched
+and selected `8de09b277e579bd8cb942c6aba242bfe4f71ceca`
+without changing a named branch. On this exact SHA, Linux passed
+the same six suites as Windows: **17+26+7+6+30+23 =
+109/109 tests**, including two complete three-database builds
+from identical legacy and proposed `local/data/` source bytes,
+with matching build identities/output hashes. The checkout was
+not synchronized with ignored source folders. Hosted exact-SHA
+CI, real source-provenance selection and cross-host
+manifest/path transfer are **not certified** by synthetic
+SQLite fixtures. R2–R6 and separately approved T/M remain
+independent gates.
 
 **L2 state: OPEN.** R1 is an opt-in reader capability, not
 a producer-path or physical-data migration.
+
+### Twentieth bounded L2 checkpoint — R2 snapshot producer publication alignment (2026-11-13)
+
+**R2 first producer implementation: delivered; transactional caller
+acceptance still open.** The three independently maintained snapshot
+provenance writers now use the same no-clobber publication contract as
+the InfinityDB verifier at
+`8de09b277e579bd8cb942c6aba242bfe4f71ceca`.
+All three producer checkouts began clean on their respective
+`main` branches. The exact producer commits pushed to origin are:
+
+| Producer owner | Before | Published R2 first-slice SHA |
+| --- | --- | --- |
+| Army API acquisition | `7926c0f3968ae60915f48a443f8327718e9787ec` | `95bfb2de8ed14849062d9f607d8ef81c8284da17` |
+| Infinity Wiki / Human Sphere acquisition | `2fd89373afc1c3bd5dab3c74ee96da114412b168` | `f82f809e255031fc091d85d82ac88042570c411f` |
+| Symbol acquisition and processing | `54700b78a7650b6299bd0d87bbb05da6c8f52815` | `f03ebd2a3983386fc7e663d9b2d8fbcac9019efc` |
+
+**Publication change:** Each source package still generates
+`InfinityDB snapshot provenance` format **v3** with exactly
+the same JSON fields, UTF-8/LF canonical serialization,
+archive SHA-256, logical-content SHA-256 and optional producer-relative
+path. The destination remains
+`data/manifests/snapshots/<ZIP stem>.json` unless explicitly
+selected otherwise; no producer CLI default changed.
+The writer now rejects symlink targets, exclusively opens the
+fixed sibling `.json.tmp`, stages complete JSON before publication,
+and calls `os.link` to create the final file without replacement.
+An identical existing manifest is idempotent, but a different
+manifest cannot be overwritten even if it appears concurrently.
+Only staging created by this invocation is removed; a stale stage
+is not assumed disposable. Unsupported hard-link filesystems
+fail closed rather than falling back to overwrite. The exact
+ZIP bytes, site/language identity, source plan and processing
+stage distinction are unchanged.
+
+**Focused verification:** All three repositories gained their
+own independent, standard-library `unittest.TestCase`
+manifest-publication suite. Each passed **8/8** tests on the
+Windows-side MCP runner (**24/24 total**): current-v3 canonical
+bytes for Army/Wiki/Symbol variants, replay identity, conflicting
+prior publication, competing identical/different producer,
+symlink/stale-stage refusal, hard-link failure and portable
+external-handoff path handling. Git whitespace checks passed
+for each commit. The normal producer pytest dependencies and
+Ruff were absent from the MCP virtual environments, and the
+MCP's pytest execution path is restricted to the main
+InfinityDB repository. Thus full producer pytest suites,
+hosted Windows/Linux/macOS CI, producer real-archive
+acquisition and cross-repository live handoff acceptance are
+**unverified**. The producer changes do not touch the
+InfinityDB serving/database contract.
+
+**Newly observed transactional boundary:** Immediately after
+the three safe pushes, another work process had placed
+*additional uncommitted changes* in all four checkouts.
+These changes are **not included in the three SHAs above**
+and were preserved untouched. They address a material
+second-order risk: an acquisition transaction that is
+prepared to roll back its own ZIP must distinguish a
+*newly claimed manifest* from an identical manifest
+published by a concurrent producer. The pending implementation
+adds `require_new=True` at Army/Wiki raw acquisition and
+Symbol raw/effective processing call sites, switches byte
+comparison to `read_bytes()`, and adds competing-writer
+rollback tests. The main InfinityDB checkout also had
+concurrent uncommitted provenance tests/code, which were
+not staged or edited for this checkpoint.
+
+**R2 completion condition:** Review and independently test
+that caller-level ownership/rollback change on the exact
+four repository revisions, ensure it does not remove
+the winner's manifest or source ZIP, then deliver the
+concurrent changes through their own reviewed commits.
+Only afterward run each producer's entire offline pytest
+suite and available hosted CI; check a portable, hash-verified
+ZIP/manifest pair against the pinned InfinityDB consumer.
+In particular, an idempotent **read-only verifier**
+and a **transactional acquisition writer** have
+different ownership requirements. Do not silently collapse
+them into a single overwrite policy.
+
+**L2 state: OPEN.** R1 code and Linux fixture parity have passed;
+the R2 first implementation was pushed but its acquisition
+transaction acceptance is pending. R3 staged activation,
+R4 pinned PDF/override migration and R5–R6 private data,
+Syncthing and backup cutover remain separately gated.
+No ignored archive, snapshot JSON, private override,
+Syncthing sender/receiver or tracked runtime database was moved.
 
 ## Observed starting condition
 
