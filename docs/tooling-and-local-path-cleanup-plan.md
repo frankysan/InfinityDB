@@ -2362,6 +2362,93 @@ historical research descriptions remain untouched. No audit source,
 schema, runtime data, ignored file or output was modified in this
 review. L0 and L1 remain open.
 
+### Rules-curation and reference-validation L0 review — 2026-11-13
+
+**Scope:** Read-only review at clean `dev/tooling-workspace-cleanup`
+`221f4d2a` of six maintained entrypoints:
+`audit_enrichment_coverage`, `audit_rules_interactions`,
+`audit_maintained_text_links`, `source_coverage_dispositions`,
+`audit_core_scenario_objects` and `audit_deployed_object_inventory`.
+Compared current CLI paths, source/config owners, tests and consumers.
+The separately documented `report_reference_baseline` disposition remains
+**retain-active pending scoped extraction**; avoid repeating its already
+reviewed historical inventories.
+
+**Retain distinct current contracts:**
+
+- `audit_enrichment_coverage` checks exposed Skill, Equipment, Weapon,
+  Trait and State coverage against the paired Army/Rules databases and
+  reviewed gap classifications. It remains an optional source/curation
+  diagnostic, used also by the independent `audit_1_0_reference_inputs`
+  and Weapon reviews; it does not grant semantic acceptance on its own.
+- `audit_rules_interactions` is the **maintained generator and checker**
+  of the tracked `docs/rules-interaction-checklist.md`, with explicit
+  release-catalog scope, review-policy and database-drift contracts.
+  `tools.run_checks --stage rules` invokes its read-only checklist
+  check and existing review-release gate. Preserve `--check-output`
+  and the separately **explicit, potentially writing**
+  `--output`/`--refresh-catalog-scope` workflows, including the
+  tracked generated checklist and reviewed catalog-scope config. Those
+  accepted tracked outputs are **exceptions** to the general ignored
+  `local/` report policy; do not relocate them as scratch evidence.
+- `audit_maintained_text_links` is a small stdout-only diagnostic
+  around `infinity_db.maintained_text_policy`; the production policy
+  and `tests/test_maintained_text.py` protect the live text/semantic-link
+  contract independently. Retain the useful direct owner/residual/marker
+  report for now; review CLI consolidation only if its diagnostic
+  capability stays discoverable and callable.
+- `source_coverage_dispositions` validates four fingerprinted,
+  clause-scoped review records from the tracked disposition manifest.
+  It uses the reporter's maintained explanation inventory rather than
+  repeating source parsing. **Fingerprint validity is not source-wide
+  completeness, browser approval or a new v1.1 release gate.**
+  Keep until a replacement preserves exact-source identity, dependency
+  and sign-off refusal semantics; do not retire it solely because V1S-082
+  belongs to a finished release.
+- `audit_core_scenario_objects` protects the **four N5.3 core-scenario**
+  objective/Marker domain boundary against the embedded deployed-object
+  publication. It is not the ITS Season 18 scenario pipeline and must
+  not infer Weapon/Equipment profiles from Consoles or Supply Boxes.
+  It prints to stdout only; retain for pinned source/domain revisions.
+- `audit_deployed_object_inventory` is a **thin developer CLI and
+  compatibility import surface**, with the maintained logic in
+  `infinity_db.deployed_object_inventory`. The explicit Army/curated/
+  delivery/candidate/source-clause review inputs are still useful.
+  At L4, simplify or retire the wrapper only after replacing its
+  independent developer command, two test consumers and documented
+  source-review workflow. Do not retain duplicate algorithms or invent
+  new object identities.
+
+**Read-only acceptance at the reviewed SHA:** The interaction
+`--check-output` returned 0, confirming the historical **0.7.0**
+checklist's 182/182 primary and 225/225 supporting reviews; this is
+not an assertion about the separate explicit 1.0 primary scope.
+Maintained-text inspection returned **0** unlinked candidates and
+**0** reviewed-batch residuals, with one intentionally explicit
+`trait:silent-x` `scope-unclear` marker. The dispositions CLI
+validated **4** scoped reviews and issued **0** whole-record/browser
+approvals. The core-object audit confirmed **4** scenarios,
+**4** Domination Consoles, **3** Supplies Supply Boxes and **17**
+independently reviewed deployed objects.
+
+Focused regression suites passed **111/111**, no skips:
+enrichment **17**, interactions **15**, maintained text **39**,
+source dispositions **23**, core scenario objects **10** and
+deployed-object inventory **7**. No CLI was invoked with a writing
+flag, and no pinned private source was altered.
+
+**L2/L6 output distinction:** Optional enrichment `--output` and
+deployed-object `--json-output` use nonexclusive `write_text` on a
+caller-chosen destination and can overwrite prior generated evidence;
+the latter does not create its parent directories. Leave these
+interfaces compatible until L1 approves unique, domain-scoped
+`local/` output destinations and retention/overwrite rules.
+Source dispositions, maintained-text and core-object CLIs are
+stdout-only. The tracked checklist generator and review-policy
+refresh are separately authorized maintainer operations, not ignored
+run reports. No tool, curated fact, generated checklist, private
+source, database or publication changed; **L0/L1 remain open**.
+
 ### L1 approval prerequisites — consolidated outstanding decision register
 
 This is a **review checklist**, not permission to perform L2/L3. The private
@@ -2406,8 +2493,10 @@ service-owned volumes and destructive retirement.
    consumers, open findings, write side effects and retention triggers
    before approving the L4 root-category layout or L5 retirements.
 7. **Policy/retirement approvals — pending:** Agree the canonical
-   `local/` categories, justified cache/host exceptions and
-   filename/run-ID rules. Separately authorize safe
+   `local/` categories, justified cache/host exceptions, intentionally
+   tracked generated-review outputs (including the interaction checklist
+   and curated catalog-scope files), and filename/run-ID rules.
+   Separately authorize safe
    tracked-code/document retirements and each irreversible ignored-source
    deletion. After L2 writers/readers and source selections are accepted,
    apply L3 only in individually hash-checked, reversible batches.
