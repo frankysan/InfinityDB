@@ -2301,9 +2301,25 @@ in this checkpoint and require separate review by active test purpose.
 `test_audit_reinforcements_applicability.py` **18 passed**;
 `test_research_source_paths.py` **42 passed, two skipped**:
 **130 passed, two skipped, zero failed**. Legacy supplied source
-bytes were actually checked on Windows. Ruff and Pyright passed (zero
-errors/warnings). Windows documentation/whitespace and Linux exact-SHA
-results are recorded separately after completion.
+bytes were actually checked on Windows. Ruff, Pyright (zero
+errors/warnings), documentation lint/links/backlog and Git whitespace
+checks all passed.
+
+**Linux exact-SHA verification (2026-11-13):** The registered
+`linux-dev` worker explicitly fetched origin and temporarily detached
+to `58aacd829a1cee2f58d7be8cbbb3c1a6bae8edba`. Full modules
+passed **55** Application Rule, **15** Silent/Immunity and **18**
+Reinforcements applicability; the shared research-source path suite
+passed **44** including Linux link-safety cases: **132 passed, zero
+skipped, zero failed**. The same N5.2, N5.3 bilingual, FAQ, historical
+N4 and ITS18 pinned sources were verified as legacy inputs, while the
+hermetic cases exercised both physical layouts. Linux was explicitly
+restored to its previous detached
+`8de09b277e579bd8cb942c6aba242bfe4f71ceca` after the tests.
+At evidence capture the code-SHA GitHub installed-wheel and deployment
+smoke workflows had **succeeded**, while Source checks were **queued**.
+These local tests are not approval of real local PDF availability,
+production publication or private source migration.
 
 **Next R4:** Partition remaining current-source immunity/deployable/
 geometry modules from the much larger historical and curated-rule evidence
