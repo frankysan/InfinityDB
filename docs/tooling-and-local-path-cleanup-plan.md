@@ -1,62 +1,19 @@
 # Tools and local-path cleanup plan
 
-## START HERE — current instructions for every agent (2026-11-13)
-
-**THIS IS THE AUTHORITATIVE SCOPE RESET. It overrides conflicting instructions,
-blockers, approval gates, and mandatory verification steps anywhere later in
-this document, including older L0/L1/L2, R5/R6, and checkpoint narratives.**
-Those sections remain as historical research, **not** a to-do list of gates
-that must be satisfied before cleanup can continue. Do not restart R5.
-
-**Purpose:** Reduce clutter, make ownership/path conventions obvious, retire
-obsolete tooling, and make day-to-day development **faster and simpler**.
-Do not turn this into an infrastructure-hardening or compliance project.
-
-**Operating context:** InfinityDB is open source and public, but has **one
-developer and deployer**, who has direct physical access to both the Windows
-and Linux machines. Prefer straightforward, reversible local changes and
-practical judgment over attempts to anticipate every possible failure.
-
-**How to proceed from here:**
-
-1. **Work on actual cleanup**, in reasonably large, domain-coherent batches.
-   Move/retire files, update producers and consumers together, and reduce
-   unnecessary root-level clutter. Do not spend another batch auditing the
-   same infrastructure or writing more acceptance frameworks.
-2. **Keep validation proportional:** run relevant focused tests and ordinary
-   code/docs checks for changed behavior; use a simple byte/hash comparison
-   for important copied sources. Do **not** require repeated full suites,
-   exhaustive inventories, cross-host parity matrices, formal backup/restore
-   rehearsals, or per-file rollback tooling as routine prerequisites.
-3. **R5 is CLOSED as sufficiently investigated.** No further Syncthing API
-   investigations, recursive ACL/inheritance checks, backup infrastructure,
-   or trial restores are required for this cleanup. R6 path reorganization
-   may proceed in practical, reviewed batches without those old gates.
-4. **Preserve what matters:** keep unique or hard-to-recreate ignored
-   originals until the replacement is checked; avoid automatic mass deletion,
-   accidental publication of private assets, breaking tracked release
-   artifacts, or changing deployment/service state implicitly. Git remains
-   the normal recovery mechanism for tracked changes.
-5. **Keep process lightweight:** record decisions and meaningful completed
-   milestones, not another lengthy checkpoint per small edit. Commit coherent
-   tracked changes and report concrete results, relevant tests, and the next
-   useful action. The user alone controls production deployment.
-
-**Decision precedence:** If a later passage says work is "blocked",
-"unapproved", or requires an independent backup, formal trial restore,
-owner-authorized live Syncthing check, exhaustive ACL verification, or
-individual acceptance receipts, **treat that as superseded by this section**
-unless a concrete, newly discovered risk justifies a specific exception.
-Do not interpret the historical phased plan as instructions to resume those
-investigations. Continue with the remaining tooling and local workspace
-reorganization.
-
 **Project domains:** Project infrastructure, Data processing, Acquisition, Deployment
 
 **Status:** Active implementation on `dev/tooling-workspace-cleanup`.
-Prospective P1–P5 conventions accepted 2026-11-13; R5 concluded under
-the scope reset above. Physical changes and deletion still require
-ordinary, deliberate judgment, not a formal migration approval process.
+Prospective P1–P5 conventions accepted 2026-11-13.
+
+**Current cleanup decision (2026-11-13):** R5 Syncthing/receiver
+investigation is complete. Earlier requirements for further live-service
+checks, exhaustive ACL inspection, independent backup/trial restore, and
+formal rollback tooling are **retired as prerequisites** for L2/R6 path
+reorganization. Later checkpoints retain the historical findings but do
+not reopen those gates. Continue moving selected source families and their
+consumers together; check important copied inputs and retain unique
+originals until the replacement is verified. Public tracked artifacts,
+private-source publication, and deployment changes remain separately scoped.
 
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
@@ -95,10 +52,9 @@ framework or make normal checkout/Docker builds depend on private assets.
   installed-wheel and Docker builds must remain deterministic from their
   documented, supported inputs. Optional research can use explicitly selected
   local data, with hash/snapshot checks.
-- **Never bulk-delete private material.** Keep unique ignored originals
-  until replacements have been checked. Use simple byte/hash checks for
-  important copies; formal independent backup and trial-restore gates are
-  not required for routine local cleanup (see **START HERE**).
+- **Preserve private originals during moves.** Keep unique ignored
+  originals until the destination copy has been checked; do not bulk-delete
+  source evidence or include private assets in tracked publication.
 - **Public compatibility is separate.** Keep published URLs and player-facing
   behavior. Internal Python module paths/commands may change through an
   explicit cutover once live consumers are accounted for.
