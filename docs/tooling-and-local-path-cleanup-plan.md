@@ -2593,6 +2593,94 @@ No Docker build, hosted browser check, release-tag generation or network
 release-evidence collection was executed in this L0 review. No private
 source, runtime publication or CLI implementation changed.
 
+### Source-provenance and ITS pilot tool L0 review — 2026-11-13
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`779e36e31c5d5ca37f15e119cf5e050bbc2977e4`.
+This review covers **five** additional root commands absent from the
+individual L0 dispositions. Their private source requirements, exact
+consumers and writer behavior matter more than historical tool age.
+
+- **`audit_auxiliary_silhouette_provenance` — retain as active,
+  source-pinned discrepancy reproduction.** This is a seven-object N5.3
+  Silhouette comparison across English/Spanish printed PDF rows, separate
+  Wiki chart/dedicated pages and matching Army metadata. It deliberately
+  refuses to infer gameplay precedence. The source discrepancy remains
+  relevant to reviewed research; retiring the independent reproduction
+  would lose provenance checks. Explicit `--pdf-en`, `--pdf-es`,
+  `--wiki-en`, `--wiki-es` and `--army-db` inputs are required.
+  Both required JSON/Markdown output paths currently create parent
+  directories and **overwrite** existing files. Preserve source hashes,
+  language/revision scope, per-context values and open clarifications
+  before any future consolidation.
+- **`audit_pdf_revision_deltas` — retain as optional source-history
+  triage, not a semantic equivalence test.** It compares 11 declared PDF
+  revision pairs (N5, FAQ, ITS) using text-token windows, checking each
+  ignored PDF's exact SHA-256 against
+  `local/pdf-revision-inventory.json`. It defaults to historical
+  `data/pdf/` input and a **fixed, overwriting**
+  `local/audits/pdf-deltas-2026-11-06.json` report. These locations need
+  explicit L2 reader/writer migration without silently selecting another
+  revision by filename or mtime. Current candidate findings are owned by
+  `docs/n5-source-history.md`; the tool remains useful for subsequent
+  revisions but cannot approve gameplay changes. **Gap:** no dedicated
+  `tests/test_audit_pdf_revision_deltas.py` exists. Before changing its
+  path handling, add bounded synthetic extraction/CLI tests; rerun any
+  private source-dependent check only with authorized exact inputs.
+- **`audit_source_variant_inputs` — retain for unresolved
+  Skill/Equipment occurrence and Extra-owner research.** Its
+  `--normalized` path uses the verified normalized-generation adapter,
+  while explicit `--raw` uses the strict same-generation database-pair
+  check; never accept a mismatched legacy `army.raw.db`. It defaults
+  the application and Rules to tracked `army.db` and `rules_n5.db`,
+  but without `--normalized` it still selects the legacy
+  `data/work/build/army.raw.db` raw source. **L2:** replace this implicit
+  legacy default with a deliberate, fail-closed source-selection contract
+  in coordination with the standalone raw-format retirement. Do not
+  choose ignored normalized data automatically or remove the raw path
+  while independent paired-export research requires it. The CLI prints
+  JSON to stdout only; no report file is created.
+- **`audit_trait_wiki_anchors` — retain as offline source-link review.**
+  It compares curated exact Trait fragment IDs to a user-supplied saved
+  `/Traits` HTML page and fingerprints that input; its optional
+  `--inventory-unmapped` yields review candidates, never writes new
+  destination URLs. Optional `--output` currently **overwrites** an
+  existing path and requires its parent to preexist. Keep this separate
+  from normal live-Wiki availability and browser rendering tests; a
+  previous saved page is not proof about the current website. Migrate
+  examples in `docs/testing.md` to run-identified `local/research/`
+  after L1, without downloading sources implicitly during tests.
+- **`verify_its_pilot_parity` — retain as an independent isolated ITS 18
+  parity gate.** It builds a temporary `its_18.db` beneath
+  `local/`, selects the tracked season/revision and tests all six
+  Battleground API-JSON variants and 24 source-rendered SVG byte
+  combinations against the complete selected Army/Rules/ITS runtime.
+  It removes its own scratch directory on completion; output is stdout
+  JSON, not a persistent report. It does not create another serving
+  authority, change the tracked ITS file or authorize deployment.
+  Preserve this source-versus-published independence even when the
+  earlier P3 milestone narrative is retired.
+
+**Focused acceptance at the pinned SHA:** The hermetic and selected
+source-dependent regressions passed:
+`test_audit_auxiliary_silhouette_provenance.py` **4/4**,
+`test_audit_source_variant_inputs.py` **45 passed / 61 skipped**,
+`test_trait_wiki_references.py` **22/22**, and
+`test_verify_its_pilot_parity.py` **2/2**. Total **73 passed,
+61 skipped**, no failures. The auxiliary silhouette suite also
+exercised its available pinned source fixtures, whereas skipped
+source-variant cases are **not** acceptance evidence. The PDF-delta
+command was intentionally **not** rerun on private PDFs or its
+fixed historical output path. No private bytes, generated publications,
+source manifests or CLI implementations changed in this review.
+
+**L1 implication:** The five tools do not justify a general
+`tools/research/` rename yet. Their explicit source identities and
+optional raw-format dependency must be mapped alongside L2 path
+migration, and outputs must distinguish immutable research evidence,
+temporary parity work and stdout diagnostics. No retirement or
+physical relocation is approved.
+
 ### L1 candidate policy decisions — proposal only
 
 **Eligible for user review, not yet approved:** Adopt the stated
