@@ -2161,8 +2161,25 @@ replacement:**
 **Windows validation:** The five entire modules passed **43 tests, zero
 skipped**, including all five real source validations and their independent
 API/publication assertions (Ammunition parity 8, visibility opposition 24,
-Cover 4, ARO/Deployment 4, Command Tokens 3). Ruff passed. Host-specific
-exact-commit and static gate results are recorded separately below.
+Cover 4, ARO/Deployment 4, Command Tokens 3). The shared PDF resolver suite
+passed **40, two skipped**: **83 passed, two skipped, zero failed** in the
+selected suites. Ruff, Pyright (zero errors/warnings), documentation
+lint/links/backlog and Git whitespace checks passed.
+
+**Linux exact-SHA verification (2026-11-13):** The registered `linux-dev`
+worker explicitly fetched from origin and detached to commit
+`90734e88a4119cf3b4168a7fadf632f0e8da361f`. All five complete Core
+source-acceptance modules passed **43 tests** on Linux (same distribution as
+Windows), including their real pinned PDF clauses, Wiki-if-present evidence,
+and API/publication assertions. The shared PDF resolver suite passed **42**,
+including its Linux-specific symlink cases: **85 passed, zero skipped, zero
+failed** in the selected suites. After testing, the worker's original
+detached HEAD `8de09b277e579bd8cb942c6aba242bfe4f71ceca` was restored.
+Exact-code-SHA installed-wheel and deployment smoke workflows completed
+successfully; Source checks were **queued** at evidence capture, not accepted
+as green. These tests establish the old-layout source and hermetic path
+contract on both hosts; they do **not** demonstrate actual private PDFs under
+`local/data/pdf/` or authorize source migration.
 
 **Next:** Resolve the remaining active multi-source and specialized test
 families separately, then assess R5 ACL and tested backup/restore before any
