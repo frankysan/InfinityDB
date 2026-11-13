@@ -89,7 +89,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--report",
         type=Path,
-        help="Optional JSON report path. Defaults to reports/TEST-WORKERS <timestamp>.json.",
+        help=(
+            "Optional fresh JSON report path (existing files are never replaced). "
+            "Defaults to reports/TEST-WORKERS <timestamp>.json."
+        ),
     )
     parser.add_argument(
         "targets",
@@ -275,13 +278,18 @@ def report_document(
     }
 
 
+def require_new_report(path: Path) -> None:
+    """Refuse an occupied benchmark receipt before expensive test runs."""
+    if path.exists() or path.is_symlink():
+        raise FileExistsError(f"Benchmark report already exists: {path}")
+
+
 def write_report(path: Path, document: dict[str, Any]) -> None:
+    """Create exactly one new receipt; never truncate a previous benchmark."""
+    require_new_report(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(document, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    with path.open("x", encoding="utf-8", newline="\n") as output:
+        output.write(json.dumps(document, indent=2, sort_keys=True) + "\n")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -302,6 +310,13 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_USAGE_ERROR
 
     started_at = datetime.now().astimezone()
+    report_path = report_path_for(started_at, args.report)
+    try:
+        require_new_report(report_path)
+    except OSError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return EXIT_USAGE_ERROR
+
     runs: list[BenchmarkRun] = []
     failure_output: list[tuple[BenchmarkRun, str]] = []
     total = len(schedule)
@@ -355,7 +370,6 @@ def main(argv: list[str] | None = None) -> int:
             f"({fastest.median_seconds:.2f} s median)"
         )
 
-    report_path = report_path_for(started_at, args.report)
     document = report_document(
         started_at=started_at,
         workers=workers,

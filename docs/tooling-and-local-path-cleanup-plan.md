@@ -646,6 +646,77 @@ No new live third-party-snapshot Playwright run, hosted exact-SHA
 matrix, complete suite or Linux worker acceptance was executed
 for this L2 slice.
 
+### Eleventh bounded L2 output-contract update — test-worker benchmark receipts (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`3e06a20001652704a481ce11510e538ebb8e39d9`. After the
+eleven optional browser-verifier reports were protected, a
+read-only scan of retained root `tools/` writers found additional
+L2 concerns. The scan included direct `.write_text(` and
+`.write_bytes(` uses, but is **not** exhaustive for `open`,
+SQLite, external programs or dynamically constructed paths.
+
+**Remaining output families and distinctions:**
+
+- **Run evidence still at risk:** retained audit/reconciliation
+  commands with optional `--output`, `--json-output` and
+  `--markdown-output` writes, such as
+  `audit_1_0_reference_inputs`, weapon-trait audits,
+  `audit_database_separation` and
+  `audit_runtime_database_surface`; operational/capacity JSON
+  from `capacity_test`, `deployment_resources`,
+  `deployment_diagnostics` and `deployment_alerts`.
+  They need individually reviewed caller/output/exit contracts
+  and non-overwrite tests before L2 can close.
+- **Distinct state contracts:** tracked generated databases and
+  curated publication outputs have deliberate, validated replacement
+  paths; the deployed `metrics_history` volume is persistent
+  state; build scratch/intermediates, pytest temporary files,
+  append-only metrics, browser slot locks and explicit host-profile
+  toggles need their own owner/lifetime policy. Do not apply a
+  one-size-fits-all receipt guard to those categories.
+- **Already protected:** prior release evidence, reference baseline,
+  generic determinism, and the eleven optional browser verifiers.
+  This update protects the separate test-worker benchmark
+  measurement receipt, **not** every remaining writer.
+
+**Implemented bounded batch:** `benchmark_test_workers` now
+resolves its original default or explicit `--report` destination
+immediately after parsing/validating benchmark options and before
+running `tools/run_checks.py` even once. Occupied files and
+symlinks fail with existing usage-error status 2 and leave old
+bytes untouched. `write_report` preserves the canonical sorted,
+indented UTF-8/LF JSON but uses exclusive `open("x")` to reject
+late collisions. The original default `reports/TEST-WORKERS
+<timestamp>.json`, explicit path support, normal check-runner
+command, schedule, failure recording and exit statuses are
+unchanged; no legacy report is moved.
+
+The [testing guide](testing.md#benchmark-tooling) recommends
+fresh `local/performance/test-workers/<run-id>-<sha>/` destinations
+without making the old default invalid. Fresh report writing is
+not crash-atomic: an interruption may leave incomplete new
+evidence requiring inspection. No T/M action, cleanup of root
+`reports/`, package move or hosted deployment is authorized.
+
+**L2 state:** **Open.** Next work should prioritize a bounded
+operations-report pair or coherent audit-report family with
+independent consumer tests. L4 tool categorization remains separate
+from L2 path/writer migration and requires import/entrypoint
+review. The full test suite, hosted exact-SHA CI and Linux worker
+parity are independent validation gates.
+
+**Validation:** Windows focused `tests/test_benchmark_test_workers.py`
+passed **15/15** tests, covering preserved JSON, stale/symlink
+collisions, exclusive-write races, default and explicit output
+preflight, successful and failed check-run reports and late
+collisions. Ruff passed for the implementation and regression tests;
+repository Pyright returned **0 errors/0 warnings**; docs lint (47
+files), local links (46 files), backlog validation and
+`git diff --check` passed. No actual benchmark subprocess,
+hosted CI, Linux worker run, complete test suite, or legacy report
+migration was performed.
+
 ## Observed starting condition
 
 The initial root-level inspection found:
@@ -2747,11 +2818,14 @@ This review does **not** approve the proposed `tools/performance/` or
 - `benchmark_test_workers` executes repeated real tests through the
   canonical check runner, preserving worker/section/asset/scheduling
   inputs and run results. It has independent benchmark and regression
-  consumers. **Confirmed L2/L6 writer issue:** its default is the ignored
-  root `reports/TEST-WORKERS <timestamp>.json`, and `write_report`
-  creates directories and overwrites an existing chosen path. Review
-  output destination, collision policy and documented direct-script launch
-  before moving it; do not silently change historical report locations.
+  consumers. **L0 output-path finding (since addressed by the
+  [eleventh L2 slice](#eleventh-bounded-l2-output-contract-update--test-worker-benchmark-receipts-2026-11-13)):**
+  its default is the ignored root `reports/TEST-WORKERS
+  <timestamp>.json`; it formerly overwrote existing report files.
+  The output collision contract now refuses old paths while preserving
+  the default location and direct-script invocation. Any later path
+  default cutover needs independent review; do not silently change
+  historical report locations.
 
 **Testing: all seven retain-active; they are not disposable benchmarks.**
 

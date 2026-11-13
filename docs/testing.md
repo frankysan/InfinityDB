@@ -6307,6 +6307,27 @@ python tools\deployment_resources.py --help
 python tools\deployment_alerts.py --help
 ```
 
+**Test-worker benchmark report contract.** `benchmark_test_workers.py`
+runs real test jobs and always writes one JSON measurement receipt.
+For new runs, supply a unique, domain-scoped ignored destination:
+
+```powershell
+.\.venv\Scripts\python.exe tools\benchmark_test_workers.py --workers 0 4 --repeat 2 --report local/performance/test-workers/RUN_ID/worker-comparison.json
+```
+
+Replace `RUN_ID` with a UTC timestamp plus short checkout SHA.
+The selected `--report` path is checked **before** any test subprocess
+starts, and the receipt is created exclusively even if another process
+claims the path while the benchmark runs. Existing files or symlinks
+fail without starting expensive repetitions; select another run ID
+instead of overwriting accepted measurements. The legacy default
+`reports/TEST-WORKERS <timestamp>.json` remains supported for callers
+without `--report`, but now also refuses collisions. Success or
+failed test repetitions still produce the original UTF-8/LF JSON
+report and preserve the existing benchmark success/failure exit code.
+An interrupted new report may be partial and should be inspected;
+no old reports are moved, deleted, or silently republished.
+
 Use runtime benchmarks for repository/query performance and the worker benchmark for deciding whether
 a different local pytest worker setting is warranted. `capacity_test.py` is deliberately HTTP-level:
 it discovers representative public Unit/Skill/Equipment/Weapon identities from the target deployment,
