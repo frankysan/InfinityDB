@@ -60,12 +60,16 @@ when all contained work shares the same owner.
   [L2 reader/producer cutover decision package](tooling-and-local-path-cleanup-plan.md#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13)
   maps current Army/Wiki/Symbol/PDF paths and their consumers to candidate
   `local/` destinations, including the embedded-provenance and Syncthing
-  blockers. **Next bounded implementation: R1, explicit hash-verified Army
-  source selection without changing the legacy default or moving sources.**
-  Follow with separately verified producer provenance and staged activation
-  contracts (R2/R3); pinned PDFs/overrides and any private-data migration
-  require distinct approval. L2 remains open: writer-safety closeout is not
-  L2 exit, L3 migration or L4 retirement.
+  blockers. The
+  [R1 Army selection checkpoint](tooling-and-local-path-cleanup-plan.md#nineteenth-bounded-l2-checkpoint--r1-explicit-army-source-selection-2026-11-13)
+  implements explicit ZIP/manifest validation and legacy/new-layout
+  byte parity without migrating sources or changing the default.
+  **Next:** obtain Linux parity for R1 and separately align producer
+  provenance writers (R2), then design/verify staged activation
+  contracts (R3). Pinned PDFs/overrides and private-data migration
+  still require distinct approval. L2 remains open: neither R1
+  implementation nor writer-safety closeout is L2 exit, L3
+  migration or L4 retirement.
 
 ### Backlog and development workflow simplification
 

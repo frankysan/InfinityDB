@@ -1442,6 +1442,103 @@ decision basis for future R1–R6 acceptance and is *not*
 the L2 exit described under
 [execution phases](#l2--migrate-writers-readers-and-cross-repository-handoffs).
 
+### Nineteenth bounded L2 checkpoint — R1 explicit Army source selection (2026-11-13)
+
+**R1 implementation: completed on Windows; Linux and hosted acceptance still
+separate.** Starting baseline: clean `dev/tooling-workspace-cleanup` at
+`67df86067578c4d065011a6dbd08c561beba062c`. This change
+implemented the first **non-destructive** gate from the
+[eighteenth L2 path decision](#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13).
+No ignored source archive, snapshot manifest, tracked runtime SQLite
+publication, producer checkout, Syncthing directory, service or default
+was relocated.
+
+**Explicit application CLI:** The installed `infinity-db build`
+now accepts `--snapshot-manifest PATH` **only together with an explicit
+Army ZIP positional `source`**. The existing default
+`infinity-db build --compact` still chooses the newest
+`data/raw/*.zip` by current mtime ordering. The standalone
+`infinity-army build` interface and legacy `--metadata` behavior
+remain unchanged. The pinned mode rejects `--metadata` instead of
+silently switching source authority. `--db-dir` continues to select
+the *complete* three-file destination independently from serving.
+
+**Single verifier, no runtime dependency on `tools/`:**
+`src/infinity_db/army_snapshot_source.py` now owns the offline
+Army source resolver shared by application builds and development
+tools. The old `tools.army_snapshot_source` path remains a
+backward-compatible import facade for symbol source-plan export
+and existing callers. Pinned mode requires version-3 provenance,
+exact selected ZIP and manifest basenames, `army` source type,
+`en` language, both archive and logical-content SHA-256, valid
+ZIP/metadata member, encoded Army source-revision date,
+manifest `dataChangedOn` and document count. The
+`snapshot.archive.path` field remains **informational** and is
+never used to resolve a different source location; it may still
+name the producer's legacy layout when the exact same archive is
+explicitly selected under `local/data/raw/army/`.
+
+**Metadata/source ambiguity:** The ZIP's own `metadata.json`
+is authoritative in the pinned mode. A sidecar with identical
+bytes remains compatible with the existing ingestion routine;
+a conflicting, non-file or symlinked sidecar fails *before*
+database work. An explicitly selected external `--metadata`
+cannot accompany `--snapshot-manifest`. Source/hash/manifest
+checks execute before creating build work or touching outputs;
+they repeat after generating the complete set and before
+replacement. The manifest's own SHA-256 is compared across
+the run in addition to the normal maintained-input envelope,
+so an altered source URL/manifest cannot silently pass if the
+ZIP hash has not changed. Earlier accepted database files
+are preserved on prepublication failure.
+
+**Read-only sample invocation:**
+
+```powershell
+infinity-db build "local/data/raw/army/JSON EXAMPLE.zip" --snapshot-manifest "local/data/manifests/snapshots/JSON EXAMPLE.json" --db-dir "local/work/data/army-selection/RUN_ID" --compact
+```
+
+This is a **future-layout example**; the files are not
+automatically present there. Run it only with an actually
+verified ZIP/manifest pair and a disposable `--db-dir`.
+Current release symbol-publication input pins, reviewed data
+sources, offline normalization and the exact three-database
+publish boundary remain mandatory. No extra search across
+both source roots or implicit conversion of legacy manifests
+to v3 was added.
+
+**Windows focused validation:** `test_army_snapshot_source`
+**17/17**, `test_cli` **7/7**, and
+`test_database_set_builder` **26/26**,
+`test_export_symbol_source_plan` **6/6**,
+`test_app_cli` **30/30**, and
+`test_snapshot_provenance` **23/23** passed:
+**109 tests passed, zero failed/skipped**. The complete
+builder fixture tested **two actual three-file set builds** from
+byte-identical legacy and `local/data` ZIP/provenance paths:
+all three resulting SHA-256 values and recorded build-set
+identity matched. It also tested manifest mutation after
+generation, archive tampering, version-2 provenance exclusion,
+non-English identity rejection, sidecar disagreement,
+explicit-metadata conflict, missing positional source,
+no implicit latest-file discovery, and unchanged legacy
+parser defaults. Pyright reported zero errors/warnings;
+targeted Ruff and repository docs/diff checks passed.
+The symbol source-plan and application CLI consumers passed
+their focused Windows suites.
+
+**Remaining R1 acceptance:** Hermetic Linux fixture parity
+and hosted exact-SHA checks are independent; real
+source-provenance selection and cross-host manifest/path
+transfer are not certified by a synthetic SQLite fixture.
+R2 remains open for standalone Army/Wiki/Symbol provenance
+writer alignment, R3 for explicit staged reader/activation
+mapping, and R4–R6 for private-path and source cutover.
+Neither T nor M has been approved.
+
+**L2 state: OPEN.** R1 is an opt-in reader capability, not
+a producer-path or physical-data migration.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

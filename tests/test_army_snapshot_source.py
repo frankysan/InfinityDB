@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import json
+import shutil
 import zipfile
 from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pytest
 
+from infinity_db.army_snapshot_source import verify_pinned_army_build_source
 from infinity_db.snapshot_provenance import SnapshotProvenanceError, write_snapshot_manifest
 from tools.army_snapshot_source import (
     ApiDownloadError,
@@ -46,6 +48,114 @@ def _snapshot(
     )
     return archive, manifest
 
+
+@pytest.mark.parametrize("destination", ("data/raw", "local/data/raw/army"))
+def test_explicit_pinned_source_accepts_both_layouts_without_manifest_rewrite(
+    tmp_path: Path, destination: str,
+) -> None:
+    archive, manifest = _snapshot(tmp_path)
+    selected = tmp_path / destination / archive.name
+    selected.parent.mkdir(parents=True)
+    shutil.copyfile(archive, selected)
+    assert verify_pinned_army_build_source(selected, manifest).archive == selected
+    assert not list((tmp_path / destination).glob("metadata.json"))
+
+
+def test_explicit_pinned_source_accepts_identical_metadata_sidecar(
+    tmp_path: Path,
+) -> None:
+    archive, manifest = _snapshot(tmp_path)
+    with zipfile.ZipFile(archive) as source:
+        archive.with_name("metadata.json").write_bytes(source.read("metadata.json"))
+    assert verify_pinned_army_build_source(archive, manifest).manifest == manifest
+
+
+def test_explicit_pinned_source_rejects_divergent_metadata_sidecar(
+    tmp_path: Path,
+) -> None:
+    archive, manifest = _snapshot(tmp_path)
+    archive.with_name("metadata.json").write_text(
+        '{"factions":[{"id":50,"name":"Other"}]}', encoding="utf-8",
+    )
+    with pytest.raises(ApiDownloadError, match="Ambiguous Army metadata"):
+        verify_pinned_army_build_source(archive, manifest)
+
+
+def test_explicit_pinned_source_rejects_sidecar_symlink(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive, manifest = _snapshot(tmp_path)
+    sidecar = archive.with_name("metadata.json")
+    original_is_symlink = Path.is_symlink
+    monkeypatch.setattr(
+        Path, "is_symlink",
+        lambda path: path == sidecar or original_is_symlink(path),
+    )
+    with pytest.raises(ApiDownloadError, match="symlink"):
+        verify_pinned_army_build_source(archive, manifest)
+
+
+def test_explicit_pinned_source_rejects_archive_or_manifest_renaming(
+    tmp_path: Path,
+) -> None:
+    archive, manifest = _snapshot(tmp_path)
+    alternative = tmp_path / "JSON 20260918-120000.zip"
+    shutil.copyfile(archive, alternative)
+    with pytest.raises(ApiDownloadError, match="same archive basename"):
+        verify_pinned_army_build_source(alternative, manifest)
+
+
+def test_explicit_pinned_source_rejects_missing_manifest(
+    tmp_path: Path,
+) -> None:
+    archive, _ = _snapshot(tmp_path)
+    with pytest.raises(ApiDownloadError, match="provenance is required"):
+        verify_pinned_army_build_source(archive, tmp_path / "missing.json")
+
+
+def test_explicit_pinned_source_rejects_missing_snapshot_member(
+    tmp_path: Path,
+) -> None:
+    archive, manifest = _snapshot(tmp_path)
+    with zipfile.ZipFile(archive, "a") as output:
+        output.writestr("unexpected.json", "{}")
+    with pytest.raises(SnapshotProvenanceError, match="SHA-256 mismatch"):
+        verify_pinned_army_build_source(archive, manifest)
+
+
+
+def test_explicit_pinned_build_requires_v3_not_legacy_provenance(
+    tmp_path: Path,
+) -> None:
+    archive, manifest = _snapshot(tmp_path)
+    document = json.loads(manifest.read_text(encoding="utf-8"))
+    document["formatVersion"] = 2
+    document["source"].pop("dataChangedOn")
+    manifest.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ApiDownloadError, match="version-3"):
+        verify_pinned_army_build_source(archive, manifest)
+
+
+def test_explicit_pinned_build_rejects_non_english_army_manifest(
+    tmp_path: Path,
+) -> None:
+    archive, manifest = _snapshot(tmp_path)
+    document = json.loads(manifest.read_text(encoding="utf-8"))
+    document["source"]["language"] = "es"
+    manifest.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ApiDownloadError, match="expected 'en'"):
+        verify_pinned_army_build_source(archive, manifest)
+
+
+def test_explicit_pinned_build_rejects_manifest_recorded_archive_name(
+    tmp_path: Path,
+) -> None:
+    archive, manifest = _snapshot(tmp_path)
+    document = json.loads(manifest.read_text(encoding="utf-8"))
+    document["snapshot"]["archive"]["name"] = "different.zip"
+    manifest.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ApiDownloadError, match="same archive basename"):
+        verify_pinned_army_build_source(archive, manifest)
 
 def test_offline_army_reader_accepts_pinned_snapshot(tmp_path: Path) -> None:
     archive, manifest = _snapshot(tmp_path)

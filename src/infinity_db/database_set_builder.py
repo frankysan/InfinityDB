@@ -15,6 +15,7 @@ from typing import Any
 from infinity_army_data.cli import discover_metadata, latest_snapshot
 
 from .army_reference_storage import publish_army_reference_data
+from .army_snapshot_source import verify_pinned_army_build_source
 from .build_provenance import (
     FAMILIES,
     MANIFEST_FORMAT,
@@ -49,12 +50,19 @@ from .weapon_properties import load_weapon_properties
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def collect_build_manifest(root: Path, source: Path, metadata: Path | None) -> dict[str, Any]:
+def collect_build_manifest(
+    root: Path, source: Path, metadata: Path | None, *,
+    snapshot_manifest: Path | None = None,
+) -> dict[str, Any]:
     """Declare a conservative maintained-input envelope, never absolute host paths."""
     if not source.is_file() or not zipfile.is_zipfile(source):
         raise ValueError("Complete runtime builds require an immutable local Army ZIP")
     if not (root / "pyproject.toml").is_file():
         raise ValueError("Complete runtime builds require the project source checkout")
+    if snapshot_manifest is not None:
+        if metadata is not None:
+            raise ValueError("--snapshot-manifest cannot combine with --metadata")
+        verify_pinned_army_build_source(source, snapshot_manifest)
     envelope = discover_metadata(source, metadata, required=True)
     assert envelope is not None
     inputs = build_input_fingerprints(root)
@@ -142,14 +150,27 @@ def build_database_set(
     if args.no_verify:
         raise ValueError("Complete runtime builds cannot use --no-verify")
     root = root.resolve()
+    selected_manifest: Path | None = getattr(args, "snapshot_manifest", None)
+    if selected_manifest is not None and args.source is None:
+        raise ValueError("--snapshot-manifest requires an explicit Army ZIP source")
+    if selected_manifest is not None and args.metadata is not None:
+        raise ValueError("--snapshot-manifest cannot combine with --metadata")
     source = (args.source if args.source is not None else latest_snapshot()).resolve()
+    selected_manifest = selected_manifest.resolve() if selected_manifest is not None else None
     target = args.db_dir.resolve()
-    manifest = collect_build_manifest(root, source, args.metadata)
+    manifest = collect_build_manifest(
+        root, source, args.metadata, snapshot_manifest=selected_manifest,
+    )
+    selected_manifest_sha256 = (
+        file_sha256(selected_manifest) if selected_manifest is not None else None
+    )
     if target.exists() and not target.is_dir():
         raise ValueError("Runtime output must be a directory")
     protected = {source, *(root / name for name in manifest["inputs"])}
     if args.metadata is not None:
         protected.add(args.metadata.resolve())
+    if selected_manifest is not None:
+        protected.add(selected_manifest)
     for name in COMPLETE_RUNTIME_FILES:
         output = target / name
         if output.resolve() in protected or (output.exists() and not output.is_file()):
@@ -204,7 +225,15 @@ def build_database_set(
         result = validate_database_set(stage, require_complete=True)
         if result["buildProvenance"].get("buildSetId") != build_set_id(manifest):
             raise ValueError("Built runtime set does not match the selected build inputs")
-        if collect_build_manifest(root, source, args.metadata) != manifest:
+        if (
+            collect_build_manifest(
+                root, source, args.metadata, snapshot_manifest=selected_manifest,
+            ) != manifest
+            or (
+                selected_manifest is not None
+                and file_sha256(selected_manifest) != selected_manifest_sha256
+            )
+        ):
             raise ValueError(
                 "Build inputs changed during generation; selected outputs were retained"
             )

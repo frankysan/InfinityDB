@@ -107,9 +107,34 @@ for independently gated work.
 **Complete runtime build:** `infinity-db build --compact` uses the newest local
 Army ZIP and selected API metadata plus maintained Rules/configuration inputs.
 An explicit source ZIP pins another input; `--metadata` selects external
-metadata. It never downloads data. Default output is `data/generated/`;
-`--db-dir PATH` selects a complete alternate destination and is independent of
-the serving-only `INFINITY_DB_DB_DIR` setting. The old `--output-dir` form is
+metadata for the **legacy unpinned** build. It never downloads data.
+For an R1 source-pinned build, supply **both** the exact ZIP and its
+version-3 provenance manifest, optionally choosing a separate complete
+database-set output directory:
+
+```powershell
+infinity-db build "local/data/raw/army/JSON EXAMPLE.zip" --snapshot-manifest "local/data/manifests/snapshots/JSON EXAMPLE.json" --db-dir "local/work/data/army-selection/RUN_ID" --compact
+```
+
+This example is a path contract, **not** an instruction to move sources
+or publish a new tracked runtime set. The explicit manifest mode checks
+the selected ZIP's filename, exact archive/content hashes, source
+revision/date, language (`en`), document count and embedded metadata.
+A neighboring `metadata.json` is allowed only when byte-for-byte
+identical to the ZIP member; `--metadata` is forbidden with
+`--snapshot-manifest`. No other directory or newest-file fallback is
+searched. The selected manifest is checked again before publication;
+changed inputs leave the previously selected database set untouched.
+The ordinary `infinity-db build --compact` default and unpinned
+`--metadata` behavior are unchanged, as is the separate
+`infinity-army build` interface. This initial R1 selection does
+not modify Syncthing, the producer acquisition CLI or source
+locations; current symbol-publication pins and other maintained
+build inputs must still match the selected snapshot.
+
+Default output is `data/generated/`; `--db-dir PATH` selects a
+complete alternate destination and is independent of the serving-only
+`INFINITY_DB_DB_DIR` setting. The old `--output-dir` form is
 retired from the integrated build. Lossless verification is mandatory.
 
 Disposable files under ignored `data/work/build/` hold normalization, the

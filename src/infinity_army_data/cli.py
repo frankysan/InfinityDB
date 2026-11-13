@@ -310,6 +310,13 @@ def add_data_commands(
             "--db-dir", type=Path, default=Path("data/generated"),
             help="Build the complete runtime set from a local Army ZIP (default: data/generated)",
         )
+        p_build.add_argument(
+            "--snapshot-manifest", type=Path,
+            help=(
+                "Require an explicitly selected Army ZIP and matching version-3 "
+                "snapshot provenance; never search other source roots"
+            ),
+        )
     else:
         p_build.add_argument("--output-dir", type=Path, default=Path("data/work/build"))
     p_build.add_argument("--compact", action="store_true", help="Minify generated data files")
