@@ -324,6 +324,42 @@ parity and release acceptance remain separate validations; no real
 Playwright journey, source migration or deployment was performed. No T
 or M approval is implied.
 
+### Fourth bounded L2 output-contract update — release-candidate JSON (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`8be3d9763cea8780fb1aef0190bf7d1b54232a69`, after per-run
+cross-browser evidence was introduced. The optional `--json-output`
+from `tools.verify_release_candidate_browser` could previously
+truncate accepted evidence after its runtime/browser postflight.
+
+The verifier now rejects an existing selected output (including a
+dangling symlink) **before** starting browser or runtime acceptance.
+Its success-only receipt writer rechecks the destination and opens
+in exclusive-create mode, preserving prior bytes if another writer
+arrives before publication. A write failure blocks CLI acceptance
+without printing PASS. The optional-output interface, default/no-output
+behavior, exact complete Army/Rules/ITS database gate, served
+snapshot/static/version preflight, representative browser journeys
+and postflight identity checks remain unchanged. The [testing
+guide](testing.md#complete-set-release-candidate-browser-verifier)
+now recommends a fresh run-specific `local/validation/` destination,
+while preserving historical explicit paths. This is a single-file
+collision guard, **not atomic crash-safe publication**; an interrupted
+write may leave a new partial file to classify separately. Existing
+private artifacts have not been moved, deleted or rewritten.
+
+**Validation:** The Windows verifier test module passed **41/41**
+including real local Chromium preflight/DOM/postflight acceptance,
+two existing-file collision cases, dangling symlink refusal,
+a report appearing during verification, exclusive-create behavior,
+and blocked receipt-write errors. Ruff for the affected source and
+test files, repository Pyright (zero errors/warnings), Markdown lint,
+documentation links/backlog and `git diff --check` passed.
+Hosted release acceptance, Linux parity and complete CI remain
+separate gates; no hosted candidate was accepted or deployed.
+The tracked-retirement (T) and private-data migration (M)
+decisions are still unapproved.
+
 ## Observed starting condition
 
 The initial root-level inspection found:
@@ -2843,8 +2879,11 @@ then selected `reports/release-ci-v<version>.json` and
 `reports/release-tag-v<version>.txt`. The later
 [bounded L2 release-evidence update](#second-bounded-l2-output-contract-update--release-ci-records-2026-11-13)
 recommends `local/validation/` and adds collision refusal without
-removing historical explicit path support. The cross-browser JUnit filename
-and optional release-candidate JSON have separate collision risks.
+removing historical explicit path support. The cross-browser JUnit and
+release-candidate JSON collisions are addressed by the later
+[third](#third-bounded-l2-output-contract-update--cross-browser-evidence-2026-11-13)
+and [fourth](#fourth-bounded-l2-output-contract-update--release-candidate-json-2026-11-13)
+L2 output changes, without relocating pre-existing evidence.
 `release_validation_scope` writes to GitHub's workflow-controlled
 output file in append mode; that provider-owned step contract is a
 narrow **external output exception**, not a general ignored path.

@@ -137,6 +137,20 @@ def verify_release_candidate(
     }
 
 
+def _check_fresh_receipt(path: Path) -> None:
+    """Do not replace earlier release acceptance, including a dangling symlink."""
+    if path.exists() or path.is_symlink():
+        raise ReleaseCandidateError(f"Release-candidate JSON output already exists: {path}")
+
+
+def _write_success_receipt(path: Path, result: dict[str, Any]) -> None:
+    _check_fresh_receipt(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # Exclusive creation also prevents a later writer from replacing this receipt.
+    with path.open("x", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(result, sort_keys=True, indent=2) + "\n")
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", required=True, help="Hosted candidate HTTP(S) origin")
@@ -149,11 +163,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--slug", action="append", dest="slugs")
     parser.add_argument("--width", action="append", type=int, dest="widths")
     parser.add_argument(
-        "--json-output", type=Path, help="Write acceptance evidence only on success"
+        "--json-output", type=Path,
+        help="Write new acceptance evidence only on success (existing files are rejected)",
     )
     args = parser.parse_args(argv)
 
     try:
+        if args.json_output is not None:
+            _check_fresh_receipt(args.json_output)
         result = verify_release_candidate(
             args.base_url,
             expected_version=args.expected_version,
@@ -162,17 +179,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             widths=tuple(args.widths) if args.widths else WIDTHS,
             channel=args.channel,
         )
+        if args.json_output is not None:
+            _write_success_receipt(args.json_output, result)
     except Exception as exc:
-        # CLI boundary: missing Chromium, network errors and browser assertion
-        # failures must block release acceptance without a success artifact.
+        # CLI boundary: missing Chromium, network errors, browser assertion
+        # failures and output collisions must block acceptance without
+        # replacing previous evidence or reporting a successful receipt.
         print(f"Release-candidate acceptance BLOCKED: {exc}", file=sys.stderr)
         return 1
-    if args.json_output:
-        args.json_output.parent.mkdir(parents=True, exist_ok=True)
-        args.json_output.write_text(
-            json.dumps(result, sort_keys=True, indent=2) + "\n",
-            encoding="utf-8", newline="\n",
-        )
     print(
         "Release-candidate acceptance PASS: "
         f"version={result['expectedVersion']}, "

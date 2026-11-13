@@ -22,6 +22,7 @@ from infinity_db import __version__
 from infinity_db.database_set import COMPLETE_RUNTIME_FILES
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.web import create_app, create_app_from_database_set
+from tools import verify_release_candidate_browser as candidate_cli
 from tools.served_runtime import ServedRuntimeError
 from tools.verify_release_candidate_browser import (
     ReleaseCandidateError,
@@ -496,6 +497,109 @@ def test_release_gate_cli_does_not_write_report_after_failure(tmp_path: Path) ->
             "--expected-version", "1.0.0",
             "--json-output", str(output),
         ]) == 1
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("filename", ("acceptance.json", "nested/acceptance.json"))
+def test_release_gate_cli_refuses_existing_receipt_before_browser(
+    tmp_path: Path, filename: str, capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / filename
+    output.parent.mkdir(parents=True, exist_ok=True)
+    original = b'{"accepted":"earlier run"}\n'
+    output.write_bytes(original)
+    with patch(
+        "tools.verify_release_candidate_browser.verify_release_candidate",
+    ) as browser_gate:
+        assert main([
+            "--base-url", "https://example.org",
+            "--expected-version", "1.0.0",
+            "--json-output", str(output),
+        ]) == 1
+    browser_gate.assert_not_called()
+    assert output.read_bytes() == original
+    assert "already exists" in capsys.readouterr().err
+
+
+def test_release_gate_cli_rejects_dangling_output_symlink(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output = tmp_path / "acceptance.json"
+    # Portable Windows test: creating symlinks may require elevated permissions.
+    monkeypatch.setattr(type(output), "is_symlink", lambda path: path == output)
+    with patch(
+        "tools.verify_release_candidate_browser.verify_release_candidate",
+    ) as browser_gate:
+        assert main([
+            "--base-url", "https://example.org",
+            "--expected-version", "1.0.0",
+            "--json-output", str(output),
+        ]) == 1
+    browser_gate.assert_not_called()
+    assert not output.exists()
+
+
+def test_release_gate_cli_refuses_collision_arriving_during_browser_checks(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "acceptance.json"
+    original = b"another writer's successful acceptance\n"
+
+    def browser_gate(*args: object, **kwargs: object) -> dict[str, object]:
+        output.write_bytes(original)
+        return {
+            "expectedVersion": "1.0.0", "snapshotRevision": "a" * 64,
+            "browser": {"passed": 1, "total": 1},
+        }
+
+    with patch(
+        "tools.verify_release_candidate_browser.verify_release_candidate",
+        side_effect=browser_gate,
+    ):
+        assert main([
+            "--base-url", "https://example.org",
+            "--expected-version", "1.0.0",
+            "--json-output", str(output),
+        ]) == 1
+    captured = capsys.readouterr()
+    assert "already exists" in captured.err
+    assert "acceptance PASS" not in captured.out
+    assert output.read_bytes() == original
+
+
+def test_release_candidate_receipt_writer_uses_exclusive_creation(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "acceptance.json"
+    original = b"immutable evidence\n"
+    output.write_bytes(original)
+    with pytest.raises(ReleaseCandidateError, match="already exists"):
+        candidate_cli._write_success_receipt(output, {"status": "passed"})
+    assert output.read_bytes() == original
+
+
+def test_release_gate_cli_write_failure_blocks_success(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "acceptance.json"
+    report = {
+        "expectedVersion": "1.0.0", "snapshotRevision": "a" * 64,
+        "browser": {"passed": 1, "total": 1},
+    }
+    with (
+        patch("tools.verify_release_candidate_browser.verify_release_candidate",
+              return_value=report),
+        patch("tools.verify_release_candidate_browser._write_success_receipt",
+              side_effect=OSError("disk full")),
+    ):
+        assert main([
+            "--base-url", "https://example.org",
+            "--expected-version", "1.0.0",
+            "--json-output", str(output),
+        ]) == 1
+    captured = capsys.readouterr()
+    assert "disk full" in captured.err
+    assert "acceptance PASS" not in captured.out
     assert not output.exists()
 
 

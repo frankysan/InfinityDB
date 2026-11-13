@@ -41,8 +41,19 @@ with its pinned values:
 .\.venv\Scripts\python.exe -m tools.verify_release_candidate_browser --db-dir data/generated --base-url http://127.0.0.1:8000 --expected-version VERSION --channel chrome --json-output local/validation/project-infrastructure/release-candidate/RUN_ID/acceptance.json
 ```
 
-The optional JSON receipt is written only on success. Retain it with the pinned
-candidate evidence while acceptance is open. This command starts no server,
+The optional JSON receipt is written only on success. Its selected file must
+be new: the verifier rejects an existing file or symlink **before** runtime
+and browser work, and uses exclusive creation after postflight checks to
+prevent an intervening writer from truncating earlier evidence. Select a
+fresh `local/validation/` run-ID directory for every attempt, keeping
+accepted receipts and failed/incomplete diagnostics separate. If filesystem
+writing fails, CLI acceptance is blocked; any partially created **new**
+receipt requires inspection rather than reuse. Omitting `--json-output`
+still runs the verification without writing a receipt. Existing explicit
+legacy output paths are not migrated or deleted.
+
+Retain successful receipts with the pinned candidate evidence while
+acceptance is open. This command starts no server,
 build, acquisition or deployment. Complete-set identity plus selected Unit
 cases does not establish whole-reference completeness, all browser surfaces or
 post-deployment acceptance. The nested preflight and postflight `status` values
