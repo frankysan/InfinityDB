@@ -150,19 +150,16 @@ def test_chest_mine_does_not_inherit_variant_mine_references(
 
 @pytest.mark.parametrize("entry", _review()["variants"], ids=lambda item: item["slug"])
 def test_variant_source_effects_and_geometry_are_pinned(
-    weaponry_app: Callable, entry: dict[str, Any]
+    weaponry_app: Callable, entry: dict[str, Any], pinned_n53_core_pdf: Path,
 ) -> None:
     """Do not conflate chart mechanics, imported object geometry, or rule owners."""
     pdf = pytest.importorskip("pymupdf")
     from tools.audit_weaponry_family_clauses import _normalized_text
 
-    source = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
-    assert hashlib.sha256(source.read_bytes()).hexdigest() == (
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == (
         _review()["sources"]["corePdfSha256"]
     )
-    with pdf.open(source) as document:
+    with pdf.open(pinned_n53_core_pdf) as document:
         chart = _normalized_text(
             document[_review()["sources"]["weaponChartPrintedPage"] - 1].get_text()
         )

@@ -2187,6 +2187,56 @@ approved R6 private source move. No source path labels, ignored PDF or
 Wiki bytes, SVG overrides, Syncthing layout or generated databases were
 changed as part of this bounded test migration.
 
+### Twenty-ninth bounded L2 checkpoint — R4 weapon-chart source-only tests (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`f2bf26040623f369517fa9fc32fccd814afb577c`. The three current
+weapon-profile source-audit modules each still read the exact same N5.3
+English Core PDF from a fixed legacy path. Their audit tools already accept
+the caller's input PDF path and produce research classifications rather than
+published rule facts, so neither their APIs nor their accepted outputs need
+to change.
+
+- `tests/test_audit_weapon_chart_profiles.py`: the source-only complete
+  chart comparison now uses `pinned_n53_core_pdf`; the 173 compared rows,
+  candidate discrepancy and range statuses, auxiliary profiles, and named
+  Army/PDF differences remain checked as before.
+- `tests/test_audit_weapon_traits_prose.py`: the source-only trait/prose
+  alignment check uses the same selected PDF; its 173 trait rows and the
+  examined Uragan/Suppressive Fire p.188 anchors remain unchanged.
+- `tests/test_audit_mine_variant_effects.py`: each of seven source-only
+  variant checks uses the selected PDF and **independently** compares its
+  SHA-256 with `config/validation/mine-variant-effects.json`, retaining
+  chart footnote, rule-owner, source excerpt, Army object S and unresolved
+  PARA/review-status distinctions.
+
+All other synthetic, API and stored-profile checks in these modules retain
+their independent meaning. The optional PyMuPDF/fitz test imports remain
+inside their source checks, not the fixture or collection phase. The
+`--reference-pdf-layout legacy|local` pytest selector remains opt-in
+(default `legacy`) and hashes the only selected physical PDF before its
+content is opened; absent selected source skips its source-only test while
+wrong bytes, unsafe paths and link traversal fail without fallback. No
+historical PDF, Wiki/Army source, snapshot, publication database, SVG
+override or Syncthing input was moved or renamed. Production audit tools
+continue accepting explicit PDF paths and retain their reviewed discrepancy
+classification policy.
+
+**Windows validation:** `test_audit_weapon_chart_profiles.py` passed
+**27**, `test_audit_weapon_traits_prose.py` passed **15**, and
+`test_audit_mine_variant_effects.py` passed **25**. The shared
+`test_research_source_paths.py` suite passed **40, two skipped**:
+**107 passed, two skipped, zero failed** across all four focused suites.
+All real pinned source checks ran with supplied legacy bytes. Ruff, Pyright
+(zero errors/warnings), documentation lint/links/backlog and Git whitespace
+checks passed. Linux exact-commit evidence is recorded separately below.
+
+**Next:** Review the remaining bilingual/multi-revision and
+immunity/deployable source-test families by their actual current purpose and
+pin authority; do not bulk-replace source labels or retain historical
+tests solely to preserve old data paths. R5 real receiver ACL,
+backup/restore and R6 physical migration are still independently gated.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

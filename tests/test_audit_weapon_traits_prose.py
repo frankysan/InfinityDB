@@ -40,16 +40,16 @@ def test_traits_cell_keeps_multiline_text_without_absorbing_next_row() -> None:
     )
 
 
-def test_pinned_pdf_keeps_early_profile_and_trait_rows_aligned() -> None:
+def test_pinned_pdf_keeps_early_profile_and_trait_rows_aligned(
+    pinned_n53_core_pdf: Path,
+) -> None:
     from tools.audit_weapon_traits_prose import audit_traits_and_prose
 
     root = Path(__file__).resolve().parents[1]
-    pdf = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not pdf.is_file():
-        pytest.skip("Ignored N5.3 PDF unavailable")
     pytest.importorskip("fitz")
     report = audit_traits_and_prose(
-        pdf, root / "data/generated/army.db", root / "data/generated/rules_n5.db"
+        pinned_n53_core_pdf, root / "data/generated/army.db",
+        root / "data/generated/rules_n5.db",
     )
     assert report["corePdfSha256"] == (
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"

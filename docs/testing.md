@@ -6430,6 +6430,19 @@ assertion, source clause/page checks and separate runtime/API assertions; the
 Cover test still checks the pinned Wiki archive when available. It does not
 load optional PDF readers at test collection time or redirect other tests.
 
+The weapon-chart research source-only cases also use the same pinned N5.3
+Core fixture in `test_audit_weapon_chart_profiles.py`,
+`test_audit_weapon_traits_prose.py`, and
+`test_audit_mine_variant_effects.py`. The first two still call their existing
+audit functions with an explicit selected PDF and verify the exact pinned
+hash, extracted-row counts, comparison classifications and unresolved
+discrepancies. The Mine suite still checks seven chart/effect excerpts and
+the independent reviewed `corePdfSha256` manifest pin before comparing Army
+object geometry and maintained rule ownership. This is **test input**
+selection, not a change to those audit tools or an acceptance of deferred
+source discrepancies. As with other consumers, a missing selected PDF skips
+only source-dependent cases; a present wrong or linked source fails closed.
+
 The global `require_source_files` fixture retains its previous meaning for
 other suites. Further tests still bound to `data/pdf/` keep their original
 skip semantics until reviewed individually; no global path redirection or

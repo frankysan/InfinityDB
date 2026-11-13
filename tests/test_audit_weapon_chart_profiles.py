@@ -603,16 +603,15 @@ def test_auxiliary_markdown_report_includes_field_provenance() -> None:
     assert "S: PDF 1 vs Army 0" in markdown
 
 
-def test_pinned_n53_pdf_chart_source_differences() -> None:
-    """Local-only end-to-end PDF comparison; clean CI omits this source."""
+def test_pinned_n53_pdf_chart_source_differences(
+    pinned_n53_core_pdf: Path,
+) -> None:
+    """Compare pinned N5.3 chart rows against Army without changing review dispositions."""
     from tools.audit_weapon_chart_profiles import audit_chart
 
     root = Path(__file__).resolve().parents[1]
-    pdf = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not pdf.is_file():
-        pytest.skip("Ignored N5.3 PDF unavailable")
     pytest.importorskip("fitz")
-    report = audit_chart(pdf, root / "data/generated/army.db")
+    report = audit_chart(pinned_n53_core_pdf, root / "data/generated/army.db")
     assert report["corePdfSha256"] == (
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
     )
