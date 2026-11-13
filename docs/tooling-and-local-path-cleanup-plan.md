@@ -226,6 +226,33 @@ The [detailed L0 disposition and cross-repository evidence](#execution-phases)
 remains the audit trail. The [L1 prerequisites](#l1-approval-prerequisites--consolidated-outstanding-decision-register)
 remain binding for any physical migration.
 
+### First bounded L2 output-contract update — 2026-11-13
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`2eb4c0fe1fffcbf5b9a762f6143a14dcf203795e`, after the
+prospective P conventions were documented, checked and pushed.
+The existing pinned-determinism Docker runner already required an
+explicit output beneath `local/`. Its previous preflight nevertheless
+allowed an existing manifest to be overwritten on repeated runs.
+
+`tools.run_pinned_determinism` now rejects existing selected manifest
+paths and output symlinks **before launching Docker**, preserving the
+prior report bytes. The direct `--output` interface, existing
+`local/reports/` destinations, source-checks workflow and artifact
+consumer remain unchanged. Manual repeated evidence should use a
+fresh categorized `local/validation/determinism/<run-id>-<SHA>/`
+directory. This is a bounded preflight protection, **not** a general
+atomic concurrent-writer lock or a migration of generic
+`tools.build_determinism_manifest` outputs.
+
+**Validation:** Windows focused `test_run_pinned_determinism.py`
+passed **6/6**, including duplicate-output refusal before Docker and
+the portable symlink-rejection branch. Targeted Ruff, documentation
+lint/link/backlog checks and `git diff --check` passed. No real
+Docker run, Linux check, hosted CI, source migration or private-data
+modification was performed. The broader L2 writer/collision inventory,
+producer destination options and T/M gates remain open.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

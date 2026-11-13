@@ -61,6 +61,32 @@ def test_manifest_does_not_allow_absolute_outside_path(tmp_path: Path) -> None:
         runner._local_report_path(tmp_path, Path(os.path.abspath(os.sep)))
 
 
+def test_existing_manifest_refuses_overwrite_before_docker(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output = tmp_path / "local/validation/determinism/run-sha/manifest.json"
+    output.parent.mkdir(parents=True)
+    original = b'{"accepted":"previous run"}\n'
+    output.write_bytes(original)
+
+    def unexpected_docker(*args: str, timeout: int = 900) -> str:
+        pytest.fail("Docker must not start when the report already exists")
+
+    monkeypatch.setattr(runner, "_docker_command", unexpected_docker)
+    with pytest.raises(FileExistsError, match="already exists"):
+        runner._run_manifest(tmp_path, output.relative_to(tmp_path))
+    assert output.read_bytes() == original
+
+
+def test_symlink_manifest_is_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output = tmp_path / "local/validation/determinism/manifest.json"
+    monkeypatch.setattr(type(output), "is_symlink", lambda path: path == output)
+    with pytest.raises(ValueError, match="must not be a symlink"):
+        runner._local_report_path(tmp_path, output.relative_to(tmp_path))
+
+
 def test_image_probe_reports_digest_and_container_toolchain(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
 ) -> None:

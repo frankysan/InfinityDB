@@ -73,7 +73,10 @@ def _image_probe() -> None:
 
 
 def _local_report_path(root: Path, requested: Path) -> tuple[Path, Path]:
-    output = (root / requested).resolve()
+    requested_path = root / requested
+    if requested_path.is_symlink():
+        raise ValueError("Determinism output must not be a symlink")
+    output = requested_path.resolve()
     local = (root / "local").resolve()
     if not output.is_relative_to(local):
         raise ValueError("Determinism output must be beneath repository local/")
@@ -81,6 +84,8 @@ def _local_report_path(root: Path, requested: Path) -> tuple[Path, Path]:
     parent.mkdir(parents=True, exist_ok=True)
     if not parent.is_dir() or output.is_dir():
         raise ValueError("Expected a regular report output filename")
+    if output.exists():
+        raise FileExistsError(f"Determinism output already exists: {output}")
     return parent, output
 
 

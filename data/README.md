@@ -304,9 +304,13 @@ python -m tools.run_pinned_determinism --output local/reports/determinism-v2-con
 Use the selected project virtual environment on each host.
 The runner mounts the checkout read-only, disables container networking,
 runs with a temporary writable `/tmp`, and writes only the selected
-manifest under `local/`. The probe pulls and prints the exact pinned
-image digest and toolchain versions. Compare the Windows and Linux
-manifest files with:
+manifest under `local/`. Choose a fresh, categorized
+`local/validation/determinism/<UTC-run-id>-<short-SHA>/manifest.json`
+for each subsequent run. The runner refuses an already present manifest
+rather than overwriting its evidence; the old explicit `local/reports/`
+selection remains accepted until its independently reviewed cutover.
+The probe pulls and prints the exact pinned image digest and toolchain
+versions. Compare the Windows and Linux manifest files with:
 
 ```powershell
 python -m tools.compare_determinism_manifests local/reports/determinism-v2-windows.json local/reports/determinism-v2-linux.json
