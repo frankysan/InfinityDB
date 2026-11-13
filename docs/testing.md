@@ -6443,6 +6443,24 @@ selection, not a change to those audit tools or an acceptance of deferred
 source discrepancies. As with other consumers, a missing selected PDF skips
 only source-dependent cases; a present wrong or linked source fails closed.
 
+The multi-revision source checks in `test_application_rule_references.py`
+and `test_silent_immunity_source_scope.py` use the test-only
+`pinned_pdf_sources` fixture for separately pinned N5.2 English, N5.3
+English/Spanish and FAQ v0.0/v0.1 English/Spanish PDFs. The fixture accepts
+canonical source labels mapped to their independent SHA-256 values, checks
+**every supplied member** using the explicit `--reference-pdf-layout`
+selection, then skips the source-only test if any member is missing. An
+unavailable bilingual sibling therefore never hides a supplied corrupt
+revision. Language-specific clauses, historical differences, FAQ term
+inventory, and independently validated runtime/API results remain as before.
+The Reinforcements applicability test now uses the same fixture for its
+two historical N4 PDFs and current N5 Core/ITS18 references; the owning
+auditor still receives its own `source_layout` argument and **does not**
+authorize N4 procedures as N5. Its separately maintained manifest and source
+identity checks are unchanged. Hermetic multi-source cases in
+`test_research_source_paths.py` validate hash mismatch before missing-source
+skips, both physical layouts and no alternative-layout fallback.
+
 The global `require_source_files` fixture retains its previous meaning for
 other suites. Further tests still bound to `data/pdf/` keep their original
 skip semantics until reviewed individually; no global path redirection or

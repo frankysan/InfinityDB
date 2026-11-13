@@ -538,8 +538,13 @@ Tokens now use the shared `pinned_n53_core_pdf` fixture with that same
 explicit physical layout selector and original hash/clauses. The N5.3
 weapon-chart, trait-prose and Mine variant source-only reconciliation tests
 now reuse this selection without changing their audit input APIs or their
-reviewed discrepancies. Other direct readers and test prerequisites retain
-their individual path contracts.
+reviewed discrepancies. The multi-revision application/label and
+Silent/Immunity acceptance cases, plus the Reinforcements N4/N5/ITS
+applicability source test, select their own independently pinned PDF
+labels via `pinned_pdf_sources`. This does not blend editions or FAQ
+revisions or grant historical N4 rules N5 authority; mismatched sources
+fail even if another required source is missing. Other direct readers
+and test prerequisites retain their individual path contracts.
 Normal rules builds still do not open research PDFs. Override lookup paths
 belong to the external symbol producer and are independent of these PDF labels.
 

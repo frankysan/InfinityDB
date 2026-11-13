@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import sqlite3
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 
 import pytest
@@ -171,6 +171,44 @@ def pinned_n53_core_pdf(reference_pdf_layout: str) -> Path:
     if path is None:
         pytest.skip(f"Pinned N5.3 Core PDF unavailable in {reference_pdf_layout} layout")
     return path
+
+
+def _verified_pdf_sources(
+    root: Path, sources: Mapping[str, str], *, layout: str,
+) -> tuple[dict[str, Path], tuple[str, ...]]:
+    """Validate every supplied PDF before reporting any missing sibling."""
+    from tools.research.source_paths import pinned_pdf_path
+
+    selected: dict[str, Path] = {}
+    missing: list[str] = []
+    for label, pin in sources.items():
+        path = pinned_pdf_path(root, label, pin, layout=layout, missing_ok=True)
+        if path is None:
+            missing.append(label)
+        else:
+            selected[label] = path
+    return selected, tuple(missing)
+
+
+@pytest.fixture(scope="module")
+def pinned_pdf_sources(
+    reference_pdf_layout: str,
+) -> Callable[[Mapping[str, str]], dict[str, Path]]:
+    """Test-only exact-version PDF bindings, with no cross-layout fallback."""
+    root = Path(__file__).resolve().parents[1]
+
+    def select(sources: Mapping[str, str]) -> dict[str, Path]:
+        selected, missing = _verified_pdf_sources(
+            root, sources, layout=reference_pdf_layout,
+        )
+        if missing:
+            pytest.skip(
+                f"Pinned PDFs unavailable in {reference_pdf_layout} layout: "
+                + ", ".join(missing)
+            )
+        return selected
+
+    return select
 
 
 @pytest.fixture(scope="module")

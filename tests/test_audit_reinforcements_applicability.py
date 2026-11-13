@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
 import pymupdf
@@ -22,17 +23,20 @@ from tools.audit_reinforcements_applicability import (
 
 
 def test_pinned_current_references_do_not_authorize_n4_procedures_as_n5(
-    require_source_files,
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+    reference_pdf_layout: str,
 ) -> None:
-    require_source_files(*(
-        ROOT / path for path in (
-            "data/pdf/rules/reinforcement-rules-en.pdf",
-            "data/pdf/rules/reinforcement-rules-es.pdf",
-            "data/pdf/rules/n5-rules-v5.3-en.pdf",
-            "data/pdf/its/its-18-rules-v2026.09.01-en.pdf",
-        )
-    ))
-    report = audit_applicability()
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    historical = json.loads(
+        (ROOT / manifest["historicalInventory"]).read_text(encoding="utf-8")
+    )
+    sources = {
+        row["localPath"]: row["sha256"]
+        for row in (*historical["sources"], *manifest["currentReferences"])
+    }
+    assert len(sources) == 4
+    pinned_pdf_sources(sources)
+    report = audit_applicability(source_layout=reference_pdf_layout)
     assert report["currentReferencesVerified"] == 2
     assert report["historicalN4PdfsVerified"] == 2
     assert report["historicalActionsReviewed"] == ["Commlink", "Request Reinforcements"]

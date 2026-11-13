@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 from wsgiref.util import setup_testing_defaults
@@ -31,12 +32,12 @@ PINS = {
 
 
 def test_pinned_clauses_separate_timings_and_preserve_bilingual_wording(
-    require_source_files,
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
 ) -> None:
-    require_source_files(*(ROOT / relative for relative in PINS))
+    selected = pinned_pdf_sources(PINS)
     texts: list[dict[int, str]] = []
     for (relative, pin), pages in zip(PINS.items(), ((14, 95, 175), (14, 99, 182)), strict=True):
-        path = ROOT / relative
+        path = selected[relative]
         assert hashlib.sha256(path.read_bytes()).hexdigest() == pin
         with pymupdf.open(path) as pdf:
             texts.append({n: " ".join(str(pdf[n - 1].get_text("text")).casefold().split())
@@ -68,10 +69,11 @@ def test_pinned_clauses_separate_timings_and_preserve_bilingual_wording(
      "7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a"),
 ])
 def test_supplied_faq_identity_and_selected_term_inventory(
-    name: str, pin: str, require_source_files,
+    name: str, pin: str,
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
 ) -> None:
-    path = ROOT / "data/pdf/faq" / name
-    require_source_files(path)
+    label = f"data/pdf/faq/{name}"
+    path = pinned_pdf_sources({label: pin})[label]
     assert hashlib.sha256(path.read_bytes()).hexdigest() == pin
     with pymupdf.open(path) as pdf:
         text = " ".join(str(page.get_text("text")) for page in pdf).casefold()
@@ -136,11 +138,11 @@ def test_source_scope_is_visible_in_authored_stored_and_api_clarifications(
      "643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b", 174),
 ])
 def test_v1s082_trait_glossary_source_clauses(
-    relative: str, pin: str, page: int, require_source_files,
+    relative: str, pin: str, page: int,
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
 ) -> None:
     """The five additions retain their source conditions and language boundaries."""
-    path = ROOT / relative
-    require_source_files(path)
+    path = pinned_pdf_sources({relative: pin})[relative]
     assert hashlib.sha256(path.read_bytes()).hexdigest() == pin
     with pymupdf.open(path) as pdf:
         text = " ".join(str(pdf[page - 1].get_text("text")).casefold().split())

@@ -7,6 +7,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from conftest import _verified_pdf_sources
 
 from tools.research.source_paths import POLICY, SourcePathError, pinned_pdf_path
 
@@ -31,6 +32,45 @@ def test_only_explicit_layout_is_selected_without_writes(tmp_path, layout):
     before = {p: p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
     assert pinned_pdf_path(tmp_path, LABEL, DIGEST, layout=layout) == selected
     assert {p: p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()} == before
+
+
+@pytest.mark.parametrize("layout", ["legacy", "local"])
+def test_multiple_pinned_sources_verify_all_before_reporting_missing(
+    tmp_path: Path, layout: str,
+) -> None:
+    """A missing bilingual sibling must not suppress a supplied corrupt source."""
+    first_label = "data/pdf/rules/n5-rules-v5.3-en.pdf"
+    second_label = "data/pdf/rules/n5-rules-v5.3-es.pdf"
+    first_body = b"%PDF synthetic English revision"
+    second_body = b"%PDF synthetic Spanish revision"
+    sources = {
+        first_label: hashlib.sha256(first_body).hexdigest(),
+        second_label: hashlib.sha256(second_body).hexdigest(),
+    }
+    prefix = "" if layout == "legacy" else "local/"
+    first = tmp_path / f"{prefix}{first_label}"
+    second = tmp_path / f"{prefix}{second_label}"
+    first.parent.mkdir(parents=True)
+    first.write_bytes(first_body)
+    second.write_bytes(second_body)
+    selected, missing = _verified_pdf_sources(tmp_path, sources, layout=layout)
+    assert selected == {first_label: first, second_label: second}
+    assert missing == ()
+    first.unlink()
+    selected, missing = _verified_pdf_sources(tmp_path, sources, layout=layout)
+    assert selected == {second_label: second}
+    assert missing == (first_label,)
+    second.write_bytes(b"%PDF edited Spanish revision")
+    with pytest.raises(SourcePathError, match="hash mismatch"):
+        _verified_pdf_sources(tmp_path, sources, layout=layout)
+    # Even a good source in the other layout must not fulfill the missing pin.
+    alternate = tmp_path / (f"local/{first_label}" if layout == "legacy" else first_label)
+    alternate.parent.mkdir(parents=True, exist_ok=True)
+    alternate.write_bytes(first_body)
+    second.write_bytes(second_body)
+    selected, missing = _verified_pdf_sources(tmp_path, sources, layout=layout)
+    assert selected == {second_label: second}
+    assert missing == (first_label,)
 
 
 @pytest.mark.parametrize("layout", ["legacy", "local"])

@@ -2251,6 +2251,67 @@ pin authority; do not bulk-replace source labels or retain historical
 tests solely to preserve old data paths. R5 real receiver ACL,
 backup/restore and R6 physical migration are still independently gated.
 
+### Thirtieth bounded L2 checkpoint — R4 multi-revision and bilingual source-test selection (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`c2c7ec47dd5a5ceeeb9344a5f446f2a7f8a6f68d`. This bounded migration
+covers active acceptance tests that compare independent English/Spanish
+Core rules, historical N5.2 wording, FAQ revisions, and N4-vs-N5
+Reinforcements source applicability. It does **not** change semantic
+source identities, publication rules or producer paths.
+
+A test-only `pinned_pdf_sources` fixture accepts a mapping of canonical
+`data/pdf/...` labels to reviewed SHA-256 pins and resolves all requested
+members under one **explicit** `--reference-pdf-layout legacy|local`
+selection (default `legacy`). The helper verifies every supplied member
+before reporting any missing sibling. A missing required PDF skips only
+the source-only test; a present but corrupted, unreadable, linked or
+unapproved revision fails closed even if another source is missing. A
+selected missing PDF never falls back to the other layout. Existing
+`pinned_n53_core_pdf`, `require_source_files` and published application
+input contracts are unchanged.
+
+- `tests/test_application_rule_references.py` binds the exact N5.3
+  English/Spanish, N5.2 English source versions in the Attribute/SWC,
+  Hackable profile and V1S-082 Label-review clauses, with separate page
+  numbers, language predicates, and final curated/API comparisons.
+- `tests/test_silent_immunity_source_scope.py` binds a **two-source**
+  N5.3 English/Spanish timing comparison, individually pinned N5.2
+  glossary evidence, and FAQ v0.0 English/v0.1 English/Spanish source
+  identities. The unresolved Silent/Immunity timing and source-scoped
+  disclosure remain intact, rather than being normalized into a rule.
+- `tests/test_audit_reinforcements_applicability.py` gathers exactly four
+  manifest-defined source pins: historical N4 English/Spanish, current
+  N5.3 English and ITS Season 18 English. The production
+  `audit_applicability(source_layout=...)` interface already supported
+  explicit selection. Its source identity, completeness, historical
+  provenance, and **no N5 procedural authority** gates remain unchanged.
+
+Hermetic `tests/test_research_source_paths.py` cases cover both layouts,
+bilingual sibling absence, supplied sibling hash drift, and legacy/local
+no-fallback without creating or changing private source files. The
+specialized Reinforcements tests already exercise synthetic layout
+parity and false-authorization refusal. The larger `test_curated.py`,
+immunity/geometry and deployable source families are **not** modified
+in this checkpoint and require separate review by active test purpose.
+
+**Windows focused validation (working tree on the starting base):**
+`test_application_rule_references.py` **55 passed**;
+`test_silent_immunity_source_scope.py` **15 passed**;
+`test_audit_reinforcements_applicability.py` **18 passed**;
+`test_research_source_paths.py` **42 passed, two skipped**:
+**130 passed, two skipped, zero failed**. Legacy supplied source
+bytes were actually checked on Windows. Ruff and Pyright passed (zero
+errors/warnings). Windows documentation/whitespace and Linux exact-SHA
+results are recorded separately after completion.
+
+**Next R4:** Partition remaining current-source immunity/deployable/
+geometry modules from the much larger historical and curated-rule evidence
+suite; do not bulk-change provenance labels. R5 real receiver ACL,
+backup/restore and R6 physical migration are **not** authorized. This
+checkpoint moves no ignored PDF/Wiki content, SVG overrides, Syncthing
+folders or generated databases.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

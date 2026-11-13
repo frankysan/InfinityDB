@@ -87,10 +87,12 @@ when all contained work shares the same owner.
   consolidates Ammunition, visibility opposition, Cover, ARO/Deployment and
   Command Token PDF selection without changing their assertions.
   The weapon-chart, trait-prose and Mine variant tests now share the same
-  pinned source selector without altering research conclusions. **Next:**
-  review remaining multi-revision, bilingual, immunity/deployable and larger
-  curated-rule source test families individually; then receiver ACL/backup
-  evidence (R4/R5).
+  pinned source selector without altering research conclusions. The
+  multi-revision Application Rule, Silent/Immunity and Reinforcements
+  applicability tests also select their independently pinned English,
+  Spanish, historical and ITS PDFs without mixing source authority.
+  **Next:** review remaining single-Core immunity/deployable and larger
+  curated-rule source tests; then receiver ACL/backup evidence (R4/R5).
   Source relocation and private-data migration still require separate
   approval and backup/restore evidence. L2/R4 remain open, and hosted/release
   acceptance remains independent of fixture validation.
