@@ -2323,6 +2323,39 @@ acceptance. Neither command replaces complete release/browser gates,
 and this report change does not alter browser selectors or source
 fixtures.
 
+### Optional Structured Skill Charts and Trait Wiki browser receipts
+
+The final two optional browser CLI verifiers,
+`verify_structured_skill_charts_browser` and
+`verify_trait_wiki_browser`, use the same new-file-only `--output`
+contract. Their JSON output is an immutable *run receipt*, not a
+replacement for any cached source file. For example:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/structured-skill-charts/RUN_ID/charts.json
+.\.venv\Scripts\python.exe -m tools.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/research/traits/official-snapshot.html --output local/validation/browser/trait-wiki/RUN_ID/trait-wiki.json
+```
+
+Replace `RUN_ID` with a new UTC timestamp plus checkout revision;
+replace the `--wiki-html` example path with the actual retained,
+official Traits HTML snapshot. Do not copy private saved HTML into a
+report or tracked repository path. The Trait Wiki verifier still
+reads `--wiki-html` with UTF-8 BOM support, audits its references
+before launching the browser, and intercepts the official Wiki URL
+with the supplied HTML; it does not download or modify that source.
+The `--output` preflight now runs before even reading the saved
+HTML and rejects existing files, symlinks, and the input file itself
+if accidentally selected as the output destination.
+
+Both verifiers preserve their original source/DOM checks, `--headed`,
+`--base-url`, stdout-only operation, JSON serialization, and nonzero
+exit when observations fail. Fresh output parent directories are
+created only when writing. Publication uses exclusive creation, but
+a crash can leave an incomplete *new* receipt needing inspection.
+Historical paths remain valid explicit names only when unoccupied.
+These optional runs are not substitutes for the hosted browser or
+release acceptance gates.
+
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 
 **Project domains:** Web frontend, Project infrastructure

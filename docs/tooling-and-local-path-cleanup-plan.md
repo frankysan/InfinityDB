@@ -591,6 +591,61 @@ documentation lint/links/backlog and `git diff --check` all passed.
 The complete test suite, all-browser matrix, hosted exact-SHA CI and
 Linux worker acceptance were not run for this slice.
 
+### Tenth bounded L2 output-contract update — Structured Skill Charts and Trait Wiki browser receipts (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`d3a771af624a4c10dc2dea047287c0112cf17999`. Nine of the
+eleven optional browser verifier CLIs had migrated to the common
+exclusive-creation output writer. `verify_structured_skill_charts_browser`
+and `verify_trait_wiki_browser` were the final two unconditional
+`Path.write_text` JSON report writers. The Structured Skill
+Charts verifier checks Martial Arts, Booty and MetaChemistry source
+rows/DOM; the Trait Wiki verifier uniquely requires a private,
+previously saved official Traits HTML source via `--wiki-html`.
+
+Both now preflight selected `--output` paths through
+`tools.browser.report_output.require_new_browser_report` before
+reading source or starting a browser, and use
+`write_browser_report` to exclusively create unchanged sorted,
+indented UTF-8/LF JSON. The optional writer can create the parent
+directory for a fresh receipt. Existing destinations and symlinks
+are rejected, and a report arriving after preflight cannot be
+truncated. All original browser selectors, source comparisons,
+exit codes, headings, CLI arguments and output-free summaries remain
+unchanged.
+
+**Private source boundary:** `--wiki-html` is still mandatory,
+read using `utf-8-sig`, and passed as a string into the same source
+audit/browser mock of official Wiki routes. Its HTML bytes are
+never modified, copied to tracked sources or used as a writable
+output. An explicit attempt to select the saved HTML file itself
+as `--output` is blocked because it exists. The new report is
+separate from retained ignored source material. The
+[testing guide](testing.md#optional-structured-skill-charts-and-trait-wiki-browser-receipts)
+shows domain/run-scoped `local/validation/browser/` output examples.
+
+**L2 browser family:** All eleven previously audited optional
+browser CLI `--output` JSON paths now share the non-overwrite
+guard. This closes the *bounded browser-verifier receipt family*,
+not all possible L2 output producers, and does not retire or
+move any historical or private artifact. The newly created report
+is not crash-atomic; interruptions may leave incomplete *new*
+evidence requiring inspection. T retirements and M private-source
+actions remain unapproved. Complete hosted matrix, full-suite,
+Linux parity and release acceptance remain independent gates.
+
+**Validation:** Windows focused runs passed **69/69** shared browser
+report-contract tests (source/output separation, occupied and late
+collisions, preserved CLI summaries and failure status, mandatory
+Wiki HTML, UTF-8 BOM preservation), **17/17** structured chart
+source/publication tests and **22/22** Trait Wiki references/tests:
+**108 passed**, no skips or failures. Targeted Ruff for both tools
+and receipt tests, repository Pyright (zero errors/warnings),
+documentation lint/links/backlog and `git diff --check` passed.
+No new live third-party-snapshot Playwright run, hosted exact-SHA
+matrix, complete suite or Linux worker acceptance was executed
+for this L2 slice.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

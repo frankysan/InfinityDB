@@ -10,13 +10,13 @@ from __future__ import annotations
 
 import argparse
 import importlib
-import json
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlsplit
 
 from infinity_db.trait_wiki_references import load_trait_wiki_references
 from tools.audit_trait_wiki_anchors import audit_html
+from tools.browser.report_output import require_new_browser_report, write_browser_report
 
 
 def _browser_html(source_html: str) -> str:
@@ -183,17 +183,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--headed", action="store_true")
     args = parser.parse_args(argv)
+    require_new_browser_report(parser, args.output)
     report = verify(
         args.base_url,
         args.wiki_html.read_text(encoding="utf-8-sig"),
         headed=args.headed,
     )
-    if args.output:
-        args.output.write_text(
-            json.dumps(report, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
+    write_browser_report(parser, args.output, report)
     print(f"Trait Wiki browser navigation: {report['passed']}/{report['total']} passed")
     for result in report["results"]:
         if result["status"] != "passed":

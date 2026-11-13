@@ -17,6 +17,8 @@ from tools import (
     verify_non_skill_army_browser,
     verify_rule_fragment_browser,
     verify_states_browser,
+    verify_structured_skill_charts_browser,
+    verify_trait_wiki_browser,
     verify_traits_catalog_browser,
     verify_unit_skill_presentation_browser,
 )
@@ -37,6 +39,18 @@ PRESENTATION_MODULES = (
     verify_unit_skill_presentation_browser,
     verify_rule_fragment_browser,
 )
+FINAL_MODULES = (
+    verify_structured_skill_charts_browser,
+    verify_trait_wiki_browser,
+)
+
+
+def _final_args(module: Any, source: Path) -> list[str]:
+    return (
+        ["--wiki-html", str(source)]
+        if module is verify_trait_wiki_browser
+        else []
+    )
 
 
 def _stub_sources(module: Any, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -532,6 +546,179 @@ def test_rule_fragment_cli_self_host_refuses_existing_before_wsgi_start(
         verify_rule_fragment_browser.main(["--self-host", "--output", str(output)])
     assert exc.value.code == 1
     assert output.read_text(encoding="utf-8") == "previous"
+
+
+@pytest.mark.parametrize(
+    "module", FINAL_MODULES, ids=lambda module: module.__name__.split(".")[-1],
+)
+def test_final_cli_refuses_occupied_report_before_verification(
+    module: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    source = tmp_path / "official-traits.html"
+    source_bytes = b"\xef\xbb\xbf<!doctype html><title>official snapshot</title>\n"
+    source.write_bytes(source_bytes)
+    output = tmp_path / "previous.json"
+    previous = b"previously accepted browser evidence\n"
+    output.write_bytes(previous)
+
+    def no_browser(*args: Any, **kwargs: Any) -> None:
+        pytest.fail("An occupied report must prevent browser and audit work")
+
+    monkeypatch.setattr(module, "verify", no_browser)
+    with pytest.raises(SystemExit) as exc:
+        module.main([*_final_args(module, source), "--output", str(output)])
+    assert exc.value.code == 1
+    assert "already exists" in capsys.readouterr().err
+    assert output.read_bytes() == previous
+    assert source.read_bytes() == source_bytes
+
+
+@pytest.mark.parametrize(
+    "module", FINAL_MODULES, ids=lambda module: module.__name__.split(".")[-1],
+)
+@pytest.mark.parametrize("passed", (True, False))
+def test_final_cli_preserves_report_format_and_read_only_wiki_source(
+    module: Any, passed: bool, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    source = tmp_path / "official-traits.html"
+    source_bytes = b"\xef\xbb\xbf<!doctype html><title>Test snapshot</title>\n"
+    source.write_bytes(source_bytes)
+    output = tmp_path / "new-run" / "report.json"
+    identity_key = "traitId" if module is verify_trait_wiki_browser else "slug"
+    report = {
+        "format": "selected browser verifier",
+        "passed": int(passed),
+        "total": 1,
+        "results": [{
+            identity_key: "trait:boost" if module is verify_trait_wiki_browser else "booty",
+            "width": 390, "status": "passed" if passed else "failed",
+            **({} if passed else {"error": "observed failure"}),
+        }],
+    }
+    calls: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
+
+    def fake_verify(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        calls.append((args, kwargs))
+        return report
+
+    monkeypatch.setattr(module, "verify", fake_verify)
+    assert module.main([
+        *_final_args(module, source), "--base-url", "http://localhost:9876",
+        "--headed", "--output", str(output),
+    ]) == (0 if passed else 1)
+    assert output.read_bytes() == (
+        json.dumps(report, sort_keys=True, indent=2) + "\n"
+    ).encode("utf-8")
+    expected_args = (
+        ("http://localhost:9876", "<!doctype html><title>Test snapshot</title>\n")
+        if module is verify_trait_wiki_browser else ("http://localhost:9876",)
+    )
+    assert calls == [(expected_args, {"headed": True})]
+    assert source.read_bytes() == source_bytes
+    stdout = capsys.readouterr().out
+    assert ("1/1 passed" if passed else "0/1 passed") in stdout
+    if not passed:
+        assert "observed failure" in stdout
+
+
+@pytest.mark.parametrize(
+    "module", FINAL_MODULES, ids=lambda module: module.__name__.split(".")[-1],
+)
+def test_final_cli_without_report_remains_stdout_only(
+    module: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    source = tmp_path / "official-traits.html"
+    source_bytes = b"\xef\xbb\xbf<html>saved</html>"
+    source.write_bytes(source_bytes)
+    monkeypatch.setattr(
+        module, "verify",
+        lambda *args, **kwargs: {"passed": 0, "total": 0, "results": []},
+    )
+    assert module.main(_final_args(module, source)) == 0
+    assert "0/0 passed" in capsys.readouterr().out
+    assert list(tmp_path.iterdir()) == [source]
+    assert source.read_bytes() == source_bytes
+
+
+@pytest.mark.parametrize(
+    "module", FINAL_MODULES, ids=lambda module: module.__name__.split(".")[-1],
+)
+def test_final_cli_does_not_replace_report_created_during_verification(
+    module: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    source = tmp_path / "official-traits.html"
+    source_bytes = b"<html>saved</html>"
+    source.write_bytes(source_bytes)
+    output = tmp_path / "candidate.json"
+    earlier = b"another process finished earlier\n"
+
+    def competing_browser(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        output.write_bytes(earlier)
+        return {"passed": 0, "total": 0, "results": []}
+
+    monkeypatch.setattr(module, "verify", competing_browser)
+    with pytest.raises(SystemExit) as exc:
+        module.main([*_final_args(module, source), "--output", str(output)])
+    assert exc.value.code == 1
+    assert "already exists" in capsys.readouterr().err
+    assert output.read_bytes() == earlier
+    assert source.read_bytes() == source_bytes
+
+
+@pytest.mark.parametrize(
+    "module", FINAL_MODULES, ids=lambda module: module.__name__.split(".")[-1],
+)
+def test_final_cli_exception_leaves_no_report_or_new_directory(
+    module: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / "official-traits.html"
+    source_bytes = b"<html>saved</html>"
+    source.write_bytes(source_bytes)
+    output = tmp_path / "new-run" / "candidate.json"
+
+    def fail_browser(*args: Any, **kwargs: Any) -> None:
+        raise RuntimeError("required browser missing")
+
+    monkeypatch.setattr(module, "verify", fail_browser)
+    with pytest.raises(RuntimeError, match="required browser missing"):
+        module.main([*_final_args(module, source), "--output", str(output)])
+    assert not output.exists()
+    assert not output.parent.exists()
+    assert source.read_bytes() == source_bytes
+
+
+def test_trait_wiki_cli_does_not_allow_output_over_its_private_input(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    source = tmp_path / "official-traits.html"
+    source_bytes = b"\xef\xbb\xbf<html>saved provenance</html>\n"
+    source.write_bytes(source_bytes)
+
+    def no_browser(*args: Any, **kwargs: Any) -> None:
+        pytest.fail("The original Wiki snapshot must not be written as report")
+
+    monkeypatch.setattr(verify_trait_wiki_browser, "verify", no_browser)
+    with pytest.raises(SystemExit) as exc:
+        verify_trait_wiki_browser.main([
+            "--wiki-html", str(source), "--output", str(source),
+        ])
+    assert exc.value.code == 1
+    assert "already exists" in capsys.readouterr().err
+    assert source.read_bytes() == source_bytes
+
+
+def test_trait_wiki_cli_still_requires_saved_html_source(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit) as exc:
+        verify_trait_wiki_browser.main([])
+    assert exc.value.code == 2
+    assert "--wiki-html" in capsys.readouterr().err
 
 
 def test_rule_fragment_cli_self_host_runs_original_verifier(
