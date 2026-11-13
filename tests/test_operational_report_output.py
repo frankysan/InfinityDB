@@ -11,8 +11,9 @@ from typing import Any
 
 import pytest
 
-from tools import capacity_test, deployment_alerts, deployment_diagnostics, deployment_resources
+from tools.operations import deployment_alerts, deployment_diagnostics, deployment_resources
 from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
+from tools.performance import capacity_test
 
 MODULES = (
     capacity_test,
@@ -253,10 +254,9 @@ def test_helper_refuses_output_created_between_preflight_and_open(
 
 
 @pytest.mark.parametrize("module", MODULES, ids=lambda module: module.__name__.split(".")[-1])
-def test_direct_script_help_retains_invocation_compatibility(module: Any) -> None:
-    script = ROOT / "tools" / (module.__name__.split(".")[-1] + ".py")
+def test_module_help_retains_invocation_compatibility(module: Any) -> None:
     completed = subprocess.run(
-        [sys.executable, str(script), "--help"], cwd=ROOT,
+        [sys.executable, "-m", module.__name__, "--help"], cwd=ROOT,
         capture_output=True, text=True, check=False,
     )
     assert completed.returncode == 0, completed.stderr

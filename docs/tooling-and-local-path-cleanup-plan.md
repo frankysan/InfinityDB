@@ -23,6 +23,11 @@ test-worker runner, Linux browser-host profile and Docker host probe to the
 same package. Entrypoints use `python -m tools.performance.*` while retaining
 existing test runner behavior and the host-local profile path.
 
+The next dependency-coherent L4 batch groups the operational alert, diagnostic,
+resource and metrics-report tools under `tools/operations/`, and HTTP load
+testing under `tools/performance/`. It updates active tests and documented
+module commands without changing report formats or output destinations.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

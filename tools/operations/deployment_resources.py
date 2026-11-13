@@ -17,13 +17,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-try:
-    from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
-except ModuleNotFoundError:  # Direct execution as tools/deployment_resources.py.
-    from operations.receipt_output import (  # type: ignore[reportMissingImports]
-        require_new_receipt,
-        write_new_json_receipt,
-    )
+from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
 
 FORMAT = "InfinityDB deployment resource capture"
 FORMAT_VERSION = 1
@@ -783,7 +777,7 @@ def main(argv: list[str] | None = None) -> int:
     except OSError as exc:
         print(f"Resource report failed: {exc}", file=sys.stderr)
         return 2
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = Path(__file__).resolve().parents[2]
     try:
         report, command_exit_code = capture_resources(
             repo_root,

@@ -6674,9 +6674,9 @@ Available benchmark and capacity tools include:
 .\.venv\Scripts\python.exe -m tools.performance.benchmark_runtime --help
 .\.venv\Scripts\python.exe -m tools.performance.compare_runtime_benchmarks --help
 .\.venv\Scripts\python.exe -m tools.performance.benchmark_test_workers --help
-python tools\capacity_test.py --help
-python tools\deployment_resources.py --help
-python tools\deployment_alerts.py --help
+python -m tools.performance.capacity_test --help
+python -m tools.operations.deployment_resources --help
+python -m tools.operations.deployment_alerts --help
 ```
 
 **Test-worker benchmark report contract.** `tools.performance.benchmark_test_workers`

@@ -23,13 +23,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-try:
-    from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
-except ModuleNotFoundError:  # Direct execution as tools/capacity_test.py.
-    from operations.receipt_output import (  # type: ignore[reportMissingImports]
-        require_new_receipt,
-        write_new_json_receipt,
-    )
+from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
 
 FORMAT = "InfinityDB HTTP capacity test"
 FORMAT_VERSION = 1

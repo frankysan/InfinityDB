@@ -18,25 +18,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-try:
-    from tools.deployment_resources import FORMAT as RESOURCE_FORMAT
-    from tools.report_metrics import (
-        DEFAULT_METRICS_URL,
-        MetricsReport,
-        fetch_metrics,
-        parse_prometheus,
-    )
-except ModuleNotFoundError:  # Direct execution as tools/deployment_alerts.py.
-    from deployment_resources import FORMAT as RESOURCE_FORMAT
-    from report_metrics import DEFAULT_METRICS_URL, MetricsReport, fetch_metrics, parse_prometheus
-
-try:
-    from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
-except ModuleNotFoundError:  # Direct execution as tools/deployment_alerts.py.
-    from operations.receipt_output import (  # type: ignore[reportMissingImports]
-        require_new_receipt,
-        write_new_json_receipt,
-    )
+from tools.operations.deployment_resources import FORMAT as RESOURCE_FORMAT
+from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
+from tools.operations.report_metrics import (
+    DEFAULT_METRICS_URL,
+    MetricsReport,
+    fetch_metrics,
+    parse_prometheus,
+)
 
 FORMAT = "InfinityDB deployment alert evaluation"
 FORMAT_VERSION = 1

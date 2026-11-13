@@ -16,13 +16,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-try:
-    from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
-except ModuleNotFoundError:  # Direct execution as tools/deployment_diagnostics.py.
-    from operations.receipt_output import (  # type: ignore[reportMissingImports]
-        require_new_receipt,
-        write_new_json_receipt,
-    )
+from tools.operations.receipt_output import require_new_receipt, write_new_json_receipt
 
 FORMAT = "InfinityDB deployment diagnostics"
 FORMAT_VERSION = 1
@@ -410,7 +404,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Diagnostics capture failed: {exc}", file=sys.stderr)
             return 2
 
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = Path(__file__).resolve().parents[2]
     try:
         report = capture_diagnostics(
             repo_root,

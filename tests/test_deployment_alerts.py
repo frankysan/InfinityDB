@@ -6,14 +6,14 @@ from pathlib import Path
 
 import pytest
 
-from tools.deployment_alerts import (
+from tools.operations.deployment_alerts import (
     AlertThresholds,
     build_report,
     evaluate_resource_report,
     evaluate_server_errors,
     main,
 )
-from tools.report_metrics import parse_prometheus
+from tools.operations.report_metrics import parse_prometheus
 
 
 def _resource_report(
