@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -81,8 +82,10 @@ def write_source_plan(path: Path, plan: dict[str, Any]) -> Path:
     payload = (json.dumps(
         plan, indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False,
     ) + "\n").encode("utf-8")
+    if path.is_symlink():
+        raise ValueError(f"Refusing a symlink raw-symbol source plan: {path}")
     if path.exists():
-        if path.read_bytes() != payload:
+        if not path.is_file() or path.read_bytes() != payload:
             raise ValueError(f"Existing raw-symbol source plan differs: {path}")
         return path
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -92,11 +95,16 @@ def write_source_plan(path: Path, plan: dict[str, Any]) -> Path:
         with temporary.open("xb") as stream:
             created = True
             stream.write(payload)
-        temporary.replace(path)
-    except BaseException:
+        try:
+            # Same-directory hard link: publish atomically, without replacing a
+            # destination that another exporter created while we staged bytes.
+            os.link(temporary, path)
+        except FileExistsError as exc:
+            if path.is_symlink() or not path.is_file() or path.read_bytes() != payload:
+                raise ValueError(f"Existing raw-symbol source plan differs: {path}") from exc
+    finally:
         if created:
             temporary.unlink(missing_ok=True)
-        raise
     return path
 
 

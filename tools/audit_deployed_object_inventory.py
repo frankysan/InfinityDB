@@ -7,6 +7,17 @@ from pathlib import Path
 
 from infinity_db import deployed_object_inventory as _inventory
 
+if __package__:
+    from tools.research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+else:  # Direct execution as tools/audit_deployed_object_inventory.py.
+    from research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+
 # Preserve the developer audit's established Python import surface.
 CHART_AUXILIARY = _inventory.CHART_AUXILIARY
 REVIEW_CASES = _inventory.REVIEW_CASES
@@ -42,6 +53,7 @@ def main() -> int:
     )
     parser.add_argument("--json-output", type=Path)
     arguments = parser.parse_args()
+    require_new_audit_outputs(parser, arguments.json_output)
     report = audit_inventory(
         arguments.army_db, arguments.curated_source,
         arguments.delivery_reviews, arguments.candidate_reviews,
@@ -49,7 +61,7 @@ def main() -> int:
     )
     result = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
     if arguments.json_output is not None:
-        arguments.json_output.write_text(result, encoding="utf-8", newline="\n")
+        write_audit_text_or_exit(parser, arguments.json_output, result)
     else:
         print(result, end="")
     return 0

@@ -2494,6 +2494,68 @@ published references. Exclusive creation prevents overwrites,
 but an interruption can leave incomplete *new* output.
 No old report or source document is automatically moved or deleted.
 
+### Deployed-object receipts, Variant Usage candidates, and symbol export plans
+
+These related outputs are **not interchangeable** even though each
+is a JSON file:
+
+- `audit_deployed_object_inventory --json-output` is run
+  **evidence**: choose a fresh ignored destination such as
+  `local/validation/deployed-objects/RUN_ID/inventory.json`.
+  The requested file is checked before reading Army and curated
+  sources, then created exclusively with the original UTF-8/LF
+  serialization. Without `--json-output`, JSON goes to stdout.
+- `build_variant_usage --output` creates a **review candidate**,
+  not published runtime data. It preflights the destination
+  before the (potentially expensive) source projection, stages
+  complete JSON in an exclusive sibling `.json.tmp` file, and
+  installs the final candidate without replacing another run.
+  The existing strict name contract remains
+  `local/variant-usage-*.json` (for example
+  `local/variant-usage-20261113T090000Z-SHA.json`).
+  This loose-`local/` exception should be reviewed separately
+  with consumers before a categorized directory cutover.
+  `--check` remains read-only and mutually exclusive with output.
+- `export_symbol_source_plan` and
+  `export_symbol_override_lookups` produce **pinned source
+  decisions** for another repository, not mutable audit reports.
+  Their shared `write_source_plan` remains idempotent when an
+  already-published plan has exactly matching bytes; mismatched
+  or symlink destinations fail. New plan publication is now
+  atomic and no-clobber, using a same-directory staged file
+  and hard-link creation. A concurrent producer can publish
+  equal bytes without changing the first file, but cannot
+  replace different provenance decisions. Choose distinct,
+  source-identified paths under
+  `local/research/symbol-source-plans/RUN_ID/` when retaining
+  these handoff exports. Invoke both exporters as modules
+  (`python -m tools.export_symbol_source_plan` or
+  `python -m tools.export_symbol_override_lookups`),
+  rather than directly executing their `tools/*.py` files.
+  The deployed-object and Variant Usage CLIs also retain
+  their existing direct-script launch paths.
+
+A fresh receipt or candidate is not approval to republish
+original source files. Never move or delete original input
+archives, tracked curated reviews or historical reports as
+part of output creation. A stale fixed `.tmp` file from an
+interrupted symbol/Variant Usage export is not overwritten;
+inspect its ownership before cleaning it up. Same-directory
+hard-link creation requires filesystem support; an unsupported
+filesystem fails without replacing the final artifact.
+
+**Work-tree ZIPs are different again:** `create_work_archive`
+uses content-fingerprinted default names and safely reuses
+identical default archives, but an explicitly supplied
+`--output` remains an **intentional replaceable destination**.
+Select a new path for backups that must be retained; this
+batch does not silently change the work-archive CLI contract.
+Similarly, symbol publication candidates use fresh output
+directories, while explicitly promoted tracked publications
+have their own validation and replacement lifecycle. Build
+scratch, persistent SQLite state and append-only metrics
+are outside the immutable receipt contract.
+
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 
 **Project domains:** Web frontend, Project infrastructure

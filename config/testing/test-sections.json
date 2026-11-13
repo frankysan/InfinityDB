@@ -251,6 +251,7 @@
         "test_single_audit_report_output",
         "test_snapshot_archive",
         "test_specialized_audit_receipts",
+        "test_specialized_export_outputs",
         "test_source_audit_report_output",
         "test_test_sections",
         "test_version"

@@ -1020,25 +1020,6 @@ databases, deploys, Syncthing configuration or work-tree
 archives were altered. T retirement, M migration/deletion
 and L4 package moves remain separately gated.
 
-**Validation:** Windows focused tests passed:
-**25/25** new specialized-output tests (early and late collisions,
-legacy checklist regeneration, intentional catalog-scope refresh,
-failing review-gate evidence, exact pinned PDF and Restrictions
-candidate bytes and documented direct-script help);
-**15/15** existing interaction-review tests;
-**15/15** Restrictions/game-mode tests (including Chromium
-at three widths);
-**22/22** host-sampler tests (unchanged exclusive output contract);
-**57/57** existing source-audit writer tests;
-**111 passed / 1 skipped** check-runner/CI-consumer tests; and
-**15/15** test-section registry tests. Combined: **260 passed,
-1 skipped, zero failures**. Ruff passed for all modified Python
-tools and the new regression module, Pyright returned zero
-errors/warnings, documentation lint/links/backlog and
-`git diff --check` passed. No full-suite, hosted exact-SHA
-CI, Linux worker parity, real pinned-PDF extraction or
-deployment was executed in this bounded slice.
-
 **Validation:** Windows focused suites passed **31/31**
 specialized output regression cases, including retained checklist
 regeneration, source-alias rejection, deliberate catalog-scope
@@ -1063,6 +1044,118 @@ remaining specialized report writers, especially explicit
 ZIP export, source/planning exports, one-off ignored artifacts
 and maintained-state builders. Not every `--output` denotes
 immutable run evidence; classification must precede changes.
+
+### Sixteenth bounded L2 output-contract update — pinned exports and candidate protection (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`0f15d571c31d92357a579888d5a30e4ca6469839`, following
+the specialized Markdown/PDF/Restrictions candidate slice. This
+larger L2 batch reviewed developer-audit JSON, Variant Usage
+source candidates, symbol source/override handoff plans and
+deterministic work-tree ZIP archives together. Those output
+families have **different reuse/replacement contracts**.
+
+**Deployed-object audit receipt:** `audit_deployed_object_inventory`
+previously wrote `--json-output` through an unconditional
+`Path.write_text` and did not create nested directories.
+It now uses `tools.research.report_output`: occupied files and
+symlinks are checked **before** source/Army database analysis,
+and a new JSON report is created exclusively. Its original
+`ensure_ascii=False`, indentation, UTF-8/LF serialization and
+stdout-only fallback are unchanged. It does not rewrite the
+maintained delivery/candidate/source-domain review records.
+
+**Variant Usage review candidate:** `build_variant_usage` used
+a fixed sibling `.json.tmp` file followed by
+`Path.replace`, which could overwrite an earlier candidate
+despite the output representing unapproved source analysis.
+The selected `--output` path is now checked before source
+projection, including symlink and occupied-file rejection.
+The **existing strict `local/variant-usage-*.json` name
+restriction** remains for compatibility. Its sibling staging
+file is created exclusively, then the complete new candidate
+is published via same-directory `os.link`, which cannot
+replace a competing file. Only the temporary file created by
+the current invocation is cleaned up. Existing `--check`
+is still read-only, mutually exclusive with `--output`,
+and source-parity/summary JSON semantics are unchanged.
+The loose `local/` filename is a *documented temporary
+exception*, not a new path-policy template; consumer review
+is needed before allowing a categorized default directory.
+
+**Pinned symbol handoff plans:** `write_source_plan`, shared
+by `export_symbol_source_plan` and
+`export_symbol_override_lookups`, already accepted identical
+existing bytes idempotently and refused a different plan.
+However, its `.tmp` staging followed by `Path.replace`
+could overwrite a destination created concurrently. The
+publication now creates a hard link to its completely staged
+file, atomically and **without replacing existing bytes**.
+If another producer wins, identical bytes are accepted
+idempotently; differing or symlink destinations fail.
+The exclusive staging guard and cleanup of only owned
+`.tmp` files remain intact, as do exact JSON format,
+source hashes, source-plan provenance and read-only handoff.
+Hard-link support is required on the selected filesystem;
+an unsupported filesystem fails rather than degrading
+to an overwriting operation.
+
+**Excluded after explicit classification:**
+
+- `create_work_archive` retains its distinct work-tree ZIP
+  archive lifecycle: default names include commit/dirty
+  fingerprint and identical content is reused, while an
+  operator-chosen `--output` is an intentionally replaceable
+  backup destination. A regression test preserves that
+  behavior; no default path or ZIP membership changed.
+- `build_symbol_artwork_review` already uses exclusive new
+  HTML file creation. `prepare_symbol_publication` reserves
+  fresh candidate directories, while publisher/promoter
+  tools intentionally change validated tracked publication
+  state. No blanket receipt guard was added to these
+  stateful workflows, source downloads, pinned databases,
+  build intermediates or append-only metrics.
+- Existing ignored files and root-level archival material
+  were not moved. Private source/review migration (M),
+  historical tracked retirements (T), and L4 tool/package
+  reorganizations remain gated separately.
+
+The [testing guide](testing.md#deployed-object-receipts-variant-usage-candidates-and-symbol-export-plans)
+documents examples and the retained default/CLI boundaries.
+New source-audit receipts should use
+`local/validation/deployed-objects/<RUN_ID>/`, and pinned
+source-handoff exports can use
+`local/research/symbol-source-plans/<RUN_ID>/`. The strict
+Variant Usage filename exception and explicit ZIP replacement
+contract are called out rather than disguised as completed L2
+path migrations. Newly created report files may still be
+partial after interruption; existing source and previously
+accepted outputs are never implicitly deleted.
+
+**Validation:** Windows focused suites passed
+**19/19** new export/candidate contract tests (including
+supported direct-script versus module invocation);
+**6/6** pinned symbol source/override plan tests;
+**99 passed, 2 skipped** Variant Usage tests;
+**7/7** deployed-object inventory tests;
+**6/6** Variant Usage source-parity tests;
+**6/6** deployed-object reference tests;
+**8/8** work-tree archive tests including the unchanged
+explicit replacement contract; and **15/15** registered
+test-section tests. **Total: 166 passed, 2 skipped, zero
+failures.** Targeted Ruff passed for all changed Python
+files, repository Pyright returned zero errors/warnings,
+documentation lint (47 files), links (46 files), backlog
+validation and `git diff --check` passed. Test fixtures
+do not substitute for a live symbol handoff, cross-platform
+network filesystem hard-link acceptance, hosted exact-SHA CI,
+a complete suite or Linux-worker parity.
+
+**L2 state:** Open for final classification and closure audit
+of remaining special writers and for an explicit L3/L4
+handoff. Closing L2 must not imply approval of T/M or
+unverified host/Linux parity. A focused implementation batch
+does not replace the full suite or hosted exact-SHA CI.
 
 ## Observed starting condition
 

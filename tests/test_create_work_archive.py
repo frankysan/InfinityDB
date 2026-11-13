@@ -76,6 +76,21 @@ def test_work_archive_script_runs_from_repository_root(tmp_path: Path) -> None:
     assert "Created" in result.stdout
 
 
+def test_explicit_work_archive_destination_retains_intentional_replacement(
+    tmp_path: Path,
+) -> None:
+    root = _repo(tmp_path)
+    destination = tmp_path / "selected-worktree.zip"
+    assert create_work_archive(root, destination) == destination.resolve()
+    first_bytes = destination.read_bytes()
+    (root / "tracked.txt").write_text("changed archive contents", encoding="utf-8")
+
+    assert create_work_archive(root, destination) == destination.resolve()
+    assert destination.read_bytes() != first_bytes
+    with zipfile.ZipFile(destination) as archive:
+        assert archive.read("tracked.txt") == b"changed archive contents"
+
+
 def test_default_name_marks_dirty_worktree_with_content_fingerprint(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     revision = subprocess.run(
