@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
 
+from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
 from tools.weapon_chart_source import WeaponChartAuditError
 from tools.weapon_source_metadata import (
     _army_options,
@@ -262,14 +263,13 @@ def main() -> int:
     parser.add_argument("--json-output", type=Path, required=True)
     parser.add_argument("--markdown-output", type=Path, required=True)
     args = parser.parse_args()
+    require_new_audit_outputs(parser, args.json_output, args.markdown_output)
     try:
         report = audit(args.pdf_en, args.pdf_es, args.wiki_en, args.wiki_es, args.army_db)
     except (OSError, KeyError, WeaponChartAuditError) as exc:
         parser.error(str(exc))
-    args.json_output.parent.mkdir(parents=True, exist_ok=True)
-    args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
-    args.json_output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    args.markdown_output.write_text(markdown_report(report), encoding="utf-8", newline="\n")
+    write_audit_text_or_exit(parser, args.json_output, json.dumps(report, indent=2) + "\n")
+    write_audit_text_or_exit(parser, args.markdown_output, markdown_report(report))
     print(markdown_report(report))
     return 0
 

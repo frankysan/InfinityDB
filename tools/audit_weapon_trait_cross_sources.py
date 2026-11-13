@@ -23,6 +23,7 @@ from tools.audit_weapon_traits_prose import (
     _traits,
     audit_traits_and_prose,
 )
+from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
 
 REVIEW_PATH = Path("config/validation/weapon-trait-wiki-review.json")
 WIKI_MEMBER = "Weapon_Chart"
@@ -338,6 +339,7 @@ def main() -> int:
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     args = parser.parse_args()
+    require_new_audit_outputs(parser, args.json_output, args.markdown_output)
     try:
         report = audit_cross_sources(
             args.core_pdf, args.army_db, args.rules_db, args.wiki_history, args.review
@@ -346,13 +348,11 @@ def main() -> int:
         parser.error(str(exc))
     content = json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     if args.json_output:
-        args.json_output.parent.mkdir(parents=True, exist_ok=True)
-        args.json_output.write_text(content, encoding="utf-8", newline="\n")
+        write_audit_text_or_exit(parser, args.json_output, content)
     else:
         print(content, end="")
     if args.markdown_output:
-        args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
-        args.markdown_output.write_text(markdown_report(report), encoding="utf-8", newline="\n")
+        write_audit_text_or_exit(parser, args.markdown_output, markdown_report(report))
     return 0
 
 

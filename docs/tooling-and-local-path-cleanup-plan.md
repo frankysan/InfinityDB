@@ -792,6 +792,80 @@ zero errors/warnings, docs lint/links/backlog passed, and
 capture, live incident diagnostics, hosted CI, Linux parity
 or full suite was run for this slice.
 
+### Thirteenth bounded L2 output-contract update — eight source-audit JSON/Markdown writers (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`738d0c1b56d8f784af67248ec5b0354da4c9c234` after the
+four-command operational batch. This larger source-audit family
+repeated the same independently unsafe behavior: JSON and Markdown
+receipt paths could overwrite historical evidence, potentially
+*after* reading private source PDFs, Wiki archives and curated review
+files. Some commands require both outputs, some require JSON
+only, and others permit stdout-only JSON. Existing reference
+baseline reconciliation already has its separate verified writer;
+that implementation was not changed.
+
+**Scope (eight retained CLIs):**
+`audit_1_0_reference_inputs`,
+`audit_weapon_chart_profiles`,
+`audit_weapon_definition_gaps`,
+`audit_weapon_trait_cross_sources`,
+`audit_weapon_traits_prose`,
+`audit_weaponry_family_clauses`,
+`audit_wiki_weapon_chart_names`, and
+`audit_auxiliary_silhouette_provenance`.
+No source-audit result, source-authority policy, review decision,
+PDF extraction, Wiki archive, Army/Rules database, published
+profile or source-difference finding was edited.
+
+**Implemented contract:** `tools/research/report_output.py`
+preflights the full selected JSON/Markdown output set **before**
+calling the original audit. It rejects occupied files (including
+dangling symlinks), equivalent/canonicalized duplicate destinations,
+and any saved source path accidentally selected for output.
+The unchanged serialized JSON/Markdown strings are created using
+UTF-8/LF `Path.open("x")`, preserving each command's original
+`sort_keys`, `ensure_ascii`, Markdown rendering, stdout and
+CLI success status. An output arriving after initial preflight
+cannot replace accepted bytes. Directory creation is deferred until
+a fresh receipt is actually written. Invalid/occupied outputs
+exit 1 with a bounded error message, without starting the audit.
+
+The [testing guide](testing.md#source-and-weapon-audit-jsonmarkdown-run-receipts)
+now recommends ignored, role-named JSON and Markdown under
+`local/research/weapon-source-audits/<UTC-run-id>-<source-or-checkout-SHA>/`.
+Existing explicit destinations and source consumers remain supported
+when the output paths are unoccupied. This is a prospective writer
+change, not approval for relocating archived reports or source
+material. A new file is not crash-atomic, and the two-file output
+is not transactional: after partial failure, inspect and discard
+*only newly created incomplete receipts* through a separate
+approved retention process. No silent deletion or overwrite.
+
+**Validation:** Windows hermetic output-contract regression
+`tests/test_source_audit_report_output.py` passed **57/57**,
+including all eight CLI interfaces, first/second-path collisions,
+canonical duplicate destinations, late concurrent claims, source
+aliasing, stable JSON/Markdown bytes and stdout-only cases.
+The eight original audit tests passed **148/148** combined,
+including available pinned source fixture reviews. The
+test-section registry passed **15/15** more: **220 focused tests
+passed**, zero skips/failures. Ruff passed for all eight entrypoints,
+the shared helper and the new tests; repository Pyright returned
+**0 errors/warnings**, docs lint (47 files), Markdown links
+(46 files), backlog and `git diff --check` all passed. Hosted
+exact-SHA CI, a complete suite and Linux worker validation
+were not performed.
+
+**L2 state:** Still open. The remaining separate single-output
+semantic and runtime database audit CLI family, enrichment and
+source-presentation audits, and other specialized producers need
+classification by output purpose and actual consumer. Persistent
+SQLite, tracked source publication, append-only captures and
+temporary build state remain explicitly excluded from a blanket
+receipt rule. T tracked retirements and M private-file migration
+or deletion are not approved.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

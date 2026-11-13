@@ -17,6 +17,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
 from tools.weapon_chart_source import (
     PDF_PAGES,
     WeaponChartAuditError,
@@ -460,6 +461,7 @@ def main() -> int:
     parser.add_argument("--markdown-output", type=Path)
     parser.add_argument("--trait-review", type=Path, default=DEFAULT_REVIEW)
     args = parser.parse_args()
+    require_new_audit_outputs(parser, args.json_output, args.markdown_output)
     try:
         report = audit_traits_and_prose(
             args.core_pdf, args.army_db, args.rules_db, args.trait_review
@@ -468,13 +470,11 @@ def main() -> int:
         parser.error(str(exc))
     result = json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     if args.json_output:
-        args.json_output.parent.mkdir(parents=True, exist_ok=True)
-        args.json_output.write_text(result, encoding="utf-8", newline="\n")
+        write_audit_text_or_exit(parser, args.json_output, result)
     else:
         print(result, end="")
     if args.markdown_output:
-        args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
-        args.markdown_output.write_text(markdown_report(report), encoding="utf-8", newline="\n")
+        write_audit_text_or_exit(parser, args.markdown_output, markdown_report(report))
     return 0
 
 

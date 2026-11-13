@@ -20,8 +20,10 @@ from urllib.parse import parse_qs, urlsplit
 
 try:
     from tools.audit_enrichment_coverage import audit_coverage
+    from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
 except ModuleNotFoundError:  # Executing this file directly from the tools directory.
     from audit_enrichment_coverage import audit_coverage
+    from research.report_output import require_new_audit_outputs, write_audit_text_or_exit
 
 FORMAT = "InfinityDB 1.0 reference source evidence"
 VERSION = 4
@@ -825,6 +827,7 @@ def main() -> int:
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     args = parser.parse_args()
+    require_new_audit_outputs(parser, args.json_output, args.markdown_output)
     try:
         result = build_report(
             args.army_db, args.rules_db, args.wiki_history, args.core_pdf, args.faq_pdf,
@@ -836,15 +839,11 @@ def main() -> int:
         parser.error(str(exc))
     payload = json.dumps(result, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     if args.json_output:
-        args.json_output.parent.mkdir(parents=True, exist_ok=True)
-        args.json_output.write_text(payload, encoding="utf-8", newline="\n")
+        write_audit_text_or_exit(parser, args.json_output, payload)
     else:
         print(payload, end="")
     if args.markdown_output:
-        args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
-        args.markdown_output.write_text(
-            report_markdown(result), encoding="utf-8", newline="\n"
-        )
+        write_audit_text_or_exit(parser, args.markdown_output, report_markdown(result))
     return 0
 
 

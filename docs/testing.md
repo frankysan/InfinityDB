@@ -2356,6 +2356,44 @@ Historical paths remain valid explicit names only when unoccupied.
 These optional runs are not substitutes for the hosted browser or
 release acceptance gates.
 
+### Source and Weapon audit JSON/Markdown run receipts
+
+Eight maintained source-reconciliation commands now share a
+**new-file-only** report contract: `audit_1_0_reference_inputs`,
+`audit_weapon_chart_profiles`, `audit_weapon_definition_gaps`,
+`audit_weapon_trait_cross_sources`, `audit_weapon_traits_prose`,
+`audit_weaponry_family_clauses`,
+`audit_wiki_weapon_chart_names`, and
+`audit_auxiliary_silhouette_provenance`. Their existing required
+and optional `--json-output` / `--markdown-output` flags, current
+JSON/Markdown bytes and optional JSON stdout remain unchanged.
+
+For example, run the pinned Weapon Chart audit with the actual
+reviewed PDF path substituted for `PINNED_N5_PDF`:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.audit_weapon_chart_profiles --core-pdf PINNED_N5_PDF --json-output local/research/weapon-source-audits/RUN_ID/chart-profile.json --markdown-output local/research/weapon-source-audits/RUN_ID/chart-profile.md
+```
+
+Replace `RUN_ID` with a fresh UTC timestamp and source/checkout
+SHA. Both output destinations are validated *together before*
+opening any saved PDF, Wiki history, curated review, Army database
+or other source. Existing files, dangling symlinks, and identical
+or equivalent JSON/Markdown destinations fail closed. JSON/Markdown
+publication uses exclusive file creation, so a later collision
+cannot truncate earlier evidence. A source file accidentally chosen
+as an output path is likewise protected by the existing-file
+check. These commands do not publish or move source input bytes.
+
+Do not reuse a prior output path. Keep report receipts separate
+from original `local/research/` inputs and from tracked reviewed
+source material. A process interruption can still leave a
+partially written *new* report; multiple outputs are not a single
+transaction, so inspect the pair before accepting it. Historical
+explicit output paths remain supported only when unoccupied.
+Neither source authority, original audit semantics nor hosted
+release acceptance is changed by this report-writing safeguard.
+
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 
 **Project domains:** Web frontend, Project infrastructure
