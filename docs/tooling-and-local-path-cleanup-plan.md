@@ -496,6 +496,53 @@ backlog, and `git diff --check` passed. No direct hosted matrix,
 complete-suite run or new live multi-catalog Playwright acceptance
 was performed; those remain separately pinned validation gates.
 
+### Eighth bounded L2 output-contract update — Hacking and non-Skill browser receipts (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`d626da623dcb0cd240a017bd211d3ed444e03622`, after the first
+five catalog verifiers adopted `tools.browser.report_output`.
+Two more optional browser verifiers, `verify_hacking_programs_browser`
+and `verify_non_skill_army_browser`, still had direct
+`Path.write_text` JSON outputs. Hacking Programs could truncate a
+selected historical receipt, while non-Skill Army also created a
+parent directory before overwriting.
+
+Both entrypoints now preflight `--output` through the same helper
+**before** starting Playwright or a local WSGI server, and publish
+the unchanged sorted, indented UTF-8/LF JSON via exclusive creation.
+Existing files and symlinks fail closed; newly occupied paths cannot
+replace old evidence. Parent directories are created only for a fresh
+report. The original browser observations, source identities, fixed
+12-Program set, seven representative Army Unit cases, width checks,
+stdout summaries and nonzero failure semantics remain intact.
+Hacking Programs retains its `--self-host`/non-default
+`--base-url` exclusivity and the same source/WSGI acceptance; non-Skill
+Army still uses an externally served source-consistent application.
+Historical explicit report paths are accepted as names but never
+overwritten. There are no changes to published databases, runtime
+code, private saved HTML, hosted gates or browser engines.
+
+The [testing guide](testing.md#optional-hacking-programs-and-non-skill-army-browser-receipts)
+now recommends fresh domain-scoped `local/validation/browser/`
+run folders for each command. The four remaining specialized
+verifiers—`verify_unit_skill_presentation_browser`,
+`verify_rule_fragment_browser`,
+`verify_structured_skill_charts_browser` and
+`verify_trait_wiki_browser`—are outside this cutover. As with the
+preceding L2 slices, a new receipt may be partially written after
+an interrupted process, and the receipt is not an atomic or universal
+acceptance gate. T and M decisions remain unapproved.
+
+**Validation:** Windows regression checks passed **39/39**
+shared browser receipt tests (including the two specialized CLI paths,
+`--self-host`, collisions before/during verification, stdout-only
+invocation and unchanged failure outcomes), **10/10** Hacking Program
+source/publication tests and **14/14** non-Skill Army presentation tests:
+**63 passed**, no skips or failures. Targeted Ruff, repository Pyright,
+documentation lint/links/backlog and `git diff --check` results were
+verified separately. No fresh live Playwright matrix, hosted exact-SHA
+CI, full-suite execution or Linux validation was performed.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

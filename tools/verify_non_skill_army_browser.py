@@ -9,11 +9,12 @@ from __future__ import annotations
 
 import argparse
 import importlib
-import json
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from typing import Any
+
+from tools.browser.report_output import require_new_browser_report, write_browser_report
 
 WIDTHS = (1440, 390, 320)
 
@@ -189,14 +190,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--headed", action="store_true")
     args = parser.parse_args(argv)
-
+    require_new_browser_report(parser, args.output)
     report = verify(args.base_url, headed=args.headed)
-    if args.output is not None:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(
-            json.dumps(report, sort_keys=True, indent=2) + "\n",
-            encoding="utf-8", newline="\n",
-        )
+    write_browser_report(parser, args.output, report)
     print(f"Non-Skill Army browser acceptance: {report['passed']}/{report['total']} passed")
     for item in report["results"]:
         if item["status"] != "passed":

@@ -2264,6 +2264,34 @@ are not substitutes for the complete-set release-candidate browser gate.
 The other specialized browser commands retain independent report
 contracts pending their own L2 acceptance and test coverage.
 
+### Optional Hacking Programs and non-Skill Army browser receipts
+
+The Hacking Programs and non-Skill Army browser verifiers now use the
+same **new-file-only** JSON receipt contract as the catalog-navigation
+commands above. Their independent source checks and browser assertions
+are unchanged; failed observations still generate JSON when requested
+and still exit nonzero. The preflight rejects an existing output
+(including a dangling symlink) before any browser or local server starts,
+and exclusive creation protects earlier evidence from a later collision.
+
+Use new, domain-scoped `local/validation/browser/` paths for each run.
+For example, from the checkout root:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --self-host --output local/validation/browser/hacking-programs/RUN_ID/hacking-programs.json
+.\.venv\Scripts\python.exe -m tools.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/non-skill-army/RUN_ID/non-skill-army.json
+```
+
+Replace `RUN_ID` with a unique UTC run identifier and checkout revision.
+Hacking Programs retains `--self-host` for its own temporary loopback WSGI
+server, which must not be combined with a non-default `--base-url`.
+Non-Skill Army continues to require an independently running server.
+Both also retain `--headed` and stdout-only use. The optional report
+is not a substitute for hosted release acceptance, a source-parity
+review, or a live multi-engine browser matrix. Existing evidence and
+historical explicit paths are not migrated or overwritten, and a new
+receipt interrupted during writing requires inspection before reuse.
+
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 
 **Project domains:** Web frontend, Project infrastructure

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import importlib
-import json
 from pathlib import Path
 from socketserver import ThreadingMixIn
 from threading import Thread
@@ -15,6 +14,7 @@ from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 from infinity_db.database.repository import Database
 from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.web import create_app
+from tools.browser.report_output import require_new_browser_report, write_browser_report
 
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_DB = ROOT / "data/generated/army.db"
@@ -199,16 +199,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.self_host and args.base_url != "http://127.0.0.1:8000":
         parser.error("--self-host cannot be combined with --base-url")
+    require_new_browser_report(parser, args.output)
     report = (
         verify_local(headed=args.headed) if args.self_host
         else verify(args.base_url, headed=args.headed)
     )
-    if args.output is not None:
-        args.output.write_text(
-            json.dumps(report, sort_keys=True, indent=2) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
+    write_browser_report(parser, args.output, report)
     print(f"Hacking Programs browser navigation: {report['passed']}/{report['total']} passed")
     for item in report["results"]:
         if item["status"] == "failed":
