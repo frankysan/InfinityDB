@@ -940,6 +940,130 @@ rewrite/check modes. Subsequent L4 tool organization should
 happen only after import/entrypoint and generated-output consumer
 boundaries are audited. The reserved T/M phases remain gated.
 
+### Fifteenth bounded L2 output-contract update — specialized audit lifecycle boundaries (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`b5b9eb1f512aedf650b1f14e76a399915ab479d5`. The
+fourteenth L2 slice protected fourteen single-output JSON audits,
+but three retained source/check/publication CLIs needed a different
+contract review. These were combined into one **specialized
+research-and-validation batch**, not mechanically converted to
+new-file-only `--output` behavior.
+
+**Rules interaction checklist (`audit_rules_interactions`):**
+The existing `--output` deliberately **regenerates** a selected
+Markdown checklist, including the tracked
+`docs/rules-interaction-checklist.md`; it remains an explicit
+replacement command. `--check-output` remains read-only,
+`--report-catalog-scope-drift` remains a read-only database
+comparison, and `--refresh-catalog-scope` remains an explicit
+intentional rewrite of the reviewed scope using paired
+Army/Rules databases. All existing CI/release check arguments
+and exit statuses are unchanged. Checklist regeneration now
+also refuses a destination that aliases the policy JSON, catalog
+scope JSON or any file within the selected curated Rules directory;
+ordinary tracked checklist regeneration still works. Added
+**`--receipt-output`** for independent immutable Markdown
+*run evidence*. Its selected
+path is preflighted before source analysis and written through
+`tools.research.report_output` using exclusive UTF-8/LF
+creation. Receipt mode cannot combine with regenerating the
+checklist (`--output`), rewriting catalog scope
+(`--refresh-catalog-scope`) or producing drift-only stdout.
+Read-only `--check-output` and release gates are compatible,
+including retaining a fresh receipt from a failing review gate.
+No maintained checklist or catalog-scope bytes were changed
+by this batch.
+
+**Pinned PDF revisions (`audit_pdf_revision_deltas`):**
+The original fixed ignored output default
+`local/audits/pdf-deltas-2026-11-06.json` remains available
+*only when new*. Any existing or symlinked destination is
+rejected *before* reading the pinned PDF inventory or running
+expensive version-locked extraction. JSON formatting, source
+hash verification, pair selection, outside-`local/` prohibition
+and console summaries remain unchanged. The final JSON write
+uses exclusive creation, protecting against another process
+claiming the selected destination after extraction. New runs
+should choose `local/research/pdf-revision-deltas/<RUN_ID>/`.
+
+**Restrictions candidate (`audit_restrictions_source_chart`):**
+`--output` remains a *new candidate publication file*, not
+a replacement of tracked rules or a general audit receipt.
+The existing rule limiting it to ignored `local/`, and the
+mutual exclusion with `--check-publication`, are preserved.
+The previous `Path.write_bytes` following a preflight could
+truncate a concurrently created file. The shared
+`write_audit_bytes_or_exit` now exclusively opens `xb`
+after the existing source projection, with an added explicit
+dangling-symlink refusal. The exact projected bytes, typed
+negative-condition semantics, original tracked publication
+and read-only publication comparison are unchanged.
+
+**Excluded after contract inspection:** Host resource sampling
+already uses exclusive `open("x")` for its fresh
+`local/benchmarks/*.jsonl` streaming sample. No change is
+needed. Work-tree ZIP archiving has a distinct default
+content-addressed deduplication and *explicit replacement*
+contract, with separate inputs/consumers; it is not converted
+to a JSON audit receipt guard here. Other stateful publishers,
+tracked database builders and retention/migration decisions
+remain separate.
+
+The [testing guide](testing.md#specialized-audits-maintained-checklist-pdf-deltas-restrictions-candidates)
+documents run-scoped output examples and the explicit
+regeneration-versus-evidence boundary. Newly created receipts
+and publication candidates are not crash-atomic; operators
+must inspect interrupted new files. No private source copies,
+historical reports, release artifacts, tracked rule scope,
+databases, deploys, Syncthing configuration or work-tree
+archives were altered. T retirement, M migration/deletion
+and L4 package moves remain separately gated.
+
+**Validation:** Windows focused tests passed:
+**25/25** new specialized-output tests (early and late collisions,
+legacy checklist regeneration, intentional catalog-scope refresh,
+failing review-gate evidence, exact pinned PDF and Restrictions
+candidate bytes and documented direct-script help);
+**15/15** existing interaction-review tests;
+**15/15** Restrictions/game-mode tests (including Chromium
+at three widths);
+**22/22** host-sampler tests (unchanged exclusive output contract);
+**57/57** existing source-audit writer tests;
+**111 passed / 1 skipped** check-runner/CI-consumer tests; and
+**15/15** test-section registry tests. Combined: **260 passed,
+1 skipped, zero failures**. Ruff passed for all modified Python
+tools and the new regression module, Pyright returned zero
+errors/warnings, documentation lint/links/backlog and
+`git diff --check` passed. No full-suite, hosted exact-SHA
+CI, Linux worker parity, real pinned-PDF extraction or
+deployment was executed in this bounded slice.
+
+**Validation:** Windows focused suites passed **31/31**
+specialized output regression cases, including retained checklist
+regeneration, source-alias rejection, deliberate catalog-scope
+refresh, immutable failing-gate receipts, existing and late
+collisions, pinned PDF hashes/output bytes, Restrictions Chart
+projection bytes and direct-script launch. Existing
+`test_audit_rules_interactions` passed **15/15**,
+`test_game_mode_source_table` **15/15** (including Chromium
+at three widths), unchanged host-sampler contract **22/22**,
+shared source-audit writer **57/57**, test-section registration
+**15/15**, and CI check-runner consumers **111 passed with
+1 skipped**. **Total: 266 passed, 1 skipped, zero failures.**
+Targeted Ruff passed for all changed Python files,
+repository Pyright returned zero errors/warnings,
+docs lint (47 files), links (46 files), backlog validation
+and `git diff --check` passed. This does **not** assert
+full-suite, hosted exact-SHA CI, Linux worker parity,
+live pinned-PDF extraction or deployment acceptance.
+
+**L2 state:** Still open for a final focused inventory of
+remaining specialized report writers, especially explicit
+ZIP export, source/planning exports, one-off ignored artifacts
+and maintained-state builders. Not every `--output` denotes
+immutable run evidence; classification must precede changes.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

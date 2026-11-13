@@ -2429,8 +2429,70 @@ an accepted result. A crash may leave a partial *new* receipt.
 Existing ignored report locations remain valid explicit names
 only if unoccupied; no historical report is moved or deleted.
 The separate `audit_rules_interactions` CLI has a deliberate
-`--refresh-catalog-scope` source-maintenance mode and must be
-reviewed independently before its output paths are changed.
+`--refresh-catalog-scope` source-maintenance mode and is reviewed
+under a different publication/receipt contract below.
+
+### Specialized audits: maintained checklist, PDF deltas, Restrictions candidates
+
+These three retained tools have **different output lifecycles** and
+must not all receive a blanket overwrite prohibition.
+
+`audit_rules_interactions --output` still intentionally **regenerates**
+the maintained Markdown checklist (including the tracked
+`docs/rules-interaction-checklist.md`). Its existing
+`--check-output` reads and checks that document without modifying
+it; `--refresh-catalog-scope` intentionally updates the maintained
+catalog scope with an explicitly paired Army/Rules database. Neither
+operation was reclassified as ordinary run evidence. For a **fresh,
+non-overwriting** optional audit receipt, use the separate
+`--receipt-output` flag:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.audit_rules_interactions --check-output docs/rules-interaction-checklist.md --require-release 1.0.0 --receipt-output local/validation/rules-interactions/RUN_ID/interaction-review.md
+```
+
+`--receipt-output` is incompatible with `--output`,
+`--refresh-catalog-scope` or `--report-catalog-scope-drift`.
+It *can* accompany read-only checklist checking and release
+acceptance gates; a failing gate can still produce review evidence.
+Existing destinations, symlinks and selected source-file aliases
+fail before any audit or catalog refresh. `--output` continues to
+replace the selected checklist intentionally, but refuses
+destinations that alias the input policy, catalog scope or
+any curated rule source; it should not be used for append-only
+run receipts.
+
+The pinned PDF revision audit previously defaulted to a fixed
+`local/audits/pdf-deltas-2026-11-06.json` file. That default stays
+available if **unoccupied**, but existing files now cause an
+early failure **before PDF extraction or pin loading**. Choose a
+unique ignored receipt for each new research run:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.audit_pdf_revision_deltas --pairs faq-en faq-es --output local/research/pdf-revision-deltas/RUN_ID/deltas.json
+```
+
+`audit_restrictions_source_chart --output` is an explicitly
+requested *candidate publication*, not a replaceable tracked
+artifact or an ordinary diagnostic report. It already requires a
+previously unused path **under ignored `local/`**; the final byte
+write now also uses exclusive creation to reject a destination
+claimed during source projection:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --output local/research/restrictions/RUN_ID/restrictions-candidate.json
+.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --check-publication
+```
+
+Those two options are mutually exclusive in a single invocation.
+The existing Restrictions Chart read-only publication check and
+underlying negative-condition interpretation are unchanged.
+For all three tools, replace `RUN_ID` with a fresh UTC timestamp
+and short checkout/source revision. Keep ignored run evidence
+distinct from original private PDFs, curated files and tracked
+published references. Exclusive creation prevents overwrites,
+but an interruption can leave incomplete *new* output.
+No old report or source document is automatically moved or deleted.
 
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 

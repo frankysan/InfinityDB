@@ -40,3 +40,16 @@ def write_audit_text_or_exit(
             handle.write(content)
     except OSError as exc:
         parser.exit(1, f"Audit report output: {exc}\n")
+
+
+def write_audit_bytes_or_exit(
+    parser: argparse.ArgumentParser, path: Path, content: bytes,
+) -> None:
+    """Exclusively create a binary audit candidate; never truncate a previous one."""
+    try:
+        require_new_audit_outputs(parser, path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("xb") as handle:
+            handle.write(content)
+    except OSError as exc:
+        parser.exit(1, f"Audit report output: {exc}\n")

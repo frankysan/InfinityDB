@@ -16,6 +16,17 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
+if __package__:
+    from tools.research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+else:  # Support direct execution as tools/audit_pdf_revision_deltas.py.
+    from research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+
 try:
     import pymupdf as fitz
 except ImportError as exc:
@@ -224,6 +235,7 @@ def main() -> int:
         or "local" not in output.relative_to(ROOT).parts
     ):
         parser.error("Output must be inside repository local/")
+    require_new_audit_outputs(parser, output)
     pins = json.loads(PIN_PATH.read_text(encoding="utf-8"))
     expected = {
         artifact["path"].removeprefix("data/pdf/"): artifact["sha256"]
@@ -258,14 +270,13 @@ def main() -> int:
             print(f'  pp {candidate["before_page"]}->{candidate["after_page"]} '
                   f'({candidate["before_words"]}/{candidate["after_words"]} tokens): '
                   f'{candidate["before_excerpt"][:68]!a} => {candidate["after_excerpt"][:68]!a}')
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps({
+    write_audit_text_or_exit(parser, output, json.dumps({
         "method": (
             "version-locked PDF text extraction and nine-word sequence alignment; "
             "candidates are not rulings"
         ),
         "pairs": results,
-    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    }, ensure_ascii=False, indent=2) + "\n")
     print(f"Report: {output.relative_to(ROOT)}")
     return 0
 

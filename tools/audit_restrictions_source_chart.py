@@ -18,6 +18,11 @@ from infinity_db.restriction_conditions import (
     compile_restriction_conditions,
 )
 
+if __package__:
+    from tools.research.report_output import write_audit_bytes_or_exit
+else:  # Support direct execution as tools/audit_restrictions_source_chart.py.
+    from research.report_output import write_audit_bytes_or_exit
+
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "config/validation/restrictions-source-chart.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
@@ -322,14 +327,17 @@ def main() -> int:
         parser.error("--output and --check-publication are exclusive")
     if args.output:
         destination = args.output.resolve()
-        if not destination.is_relative_to(ROOT / "local") or destination.exists():
+        if (
+            not destination.is_relative_to((ROOT / "local").resolve())
+            or destination.exists()
+            or args.output.is_symlink()
+        ):
             parser.error("--output must name a new file beneath the ignored local/ directory")
         manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
         curated = json.loads(args.curated.read_text(encoding="utf-8"))
         records = {row["id"]: row for row in curated["records"]}
         data = publication_bytes(project_public_restrictions(manifest, records))
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_bytes(data)
+        write_audit_bytes_or_exit(parser, destination, data)
     report = audit_source_files(
         args.manifest, args.curated,
         PUBLICATION if args.check_publication else None,

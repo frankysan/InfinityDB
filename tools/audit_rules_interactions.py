@@ -17,6 +17,17 @@ from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.trait_catalog import TraitCatalog
 
+if __package__:
+    from tools.research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+else:  # Allow the documented tools/audit_rules_interactions.py invocation.
+    from research.report_output import (
+        require_new_audit_outputs,
+        write_audit_text_or_exit,
+    )
+
 REPORT_FORMAT = "InfinityDB rules interaction review"
 REPORT_FORMAT_VERSION = 2
 POLICY_FORMAT = "InfinityDB rules interaction review policy"
@@ -869,7 +880,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--rules", type=Path, default=DEFAULT_RULES_DIRECTORY)
     parser.add_argument("--policy", type=Path, default=DEFAULT_POLICY_PATH)
     parser.add_argument("--catalog-scope", type=Path, default=DEFAULT_CATALOG_SCOPE_PATH)
-    parser.add_argument("--output", type=Path, help="Write the generated Markdown checklist.")
+    parser.add_argument(
+        "--output", type=Path,
+        help="Regenerate the maintained Markdown checklist, replacing its existing content.",
+    )
+    parser.add_argument(
+        "--receipt-output", type=Path,
+        help="Create a separate new-only Markdown audit receipt without replacing the checklist.",
+    )
     parser.add_argument(
         "--check-output",
         type=Path,
@@ -913,11 +931,28 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
     try:
+        if args.output is not None:
+            destination = args.output.resolve()
+            if (
+                destination in {args.policy.resolve(), args.catalog_scope.resolve()}
+                or destination.is_relative_to(args.rules.resolve())
+            ):
+                raise RulesInteractionAuditError(
+                    "--output cannot replace policy, catalog scope, or curated rules sources"
+                )
+        if args.receipt_output is not None and (
+            args.output is not None or args.refresh_catalog_scope
+        ):
+            raise RulesInteractionAuditError(
+                "--receipt-output cannot be combined with --output or --refresh-catalog-scope"
+            )
         if args.report_catalog_scope_drift and (
             args.refresh_catalog_scope
             or args.output is not None
+            or args.receipt_output is not None
             or args.check_output is not None
             or args.require_release is not None
             or args.require_primary_release is not None
@@ -925,6 +960,7 @@ def main(argv: list[str] | None = None) -> int:
             raise RulesInteractionAuditError(
                 "--report-catalog-scope-drift cannot be combined with write or release gates"
             )
+        require_new_audit_outputs(parser, args.receipt_output)
         if (
             args.refresh_catalog_scope
             or args.report_catalog_scope_drift
@@ -969,6 +1005,9 @@ def main(argv: list[str] | None = None) -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(markdown, encoding="utf-8", newline="\n")
         print(f"Rules interaction checklist written: {args.output}")
+    if args.receipt_output is not None:
+        write_audit_text_or_exit(parser, args.receipt_output, markdown)
+        print(f"Rules interaction receipt written: {args.receipt_output}")
     if args.check_output is not None:
         try:
             current = args.check_output.read_text(encoding="utf-8")
