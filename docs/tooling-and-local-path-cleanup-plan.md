@@ -253,6 +253,40 @@ Docker run, Linux check, hosted CI, source migration or private-data
 modification was performed. The broader L2 writer/collision inventory,
 producer destination options and T/M gates remain open.
 
+### Second bounded L2 output-contract update — release CI records (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`fde55596096a17b717410bbfc21fdc75f27dba27`, following the
+pinned-determinism output guard. The active `prepare_release_ci_evidence`
+CLI already required explicit JSON and annotated-tag filenames, but wrote
+both using unconditional truncation, so a repeated command could replace
+accepted exact-SHA release evidence.
+
+The collector now preflights the two user-selected output paths **before
+network collection** and again after hosted evidence/metadata validation,
+rejecting existing files, symlinks and duplicate normalized destinations.
+Both files use exclusive creation so a race after the preflight cannot
+truncate an existing release record. All original CLI arguments, exact-SHA
+source/workflow checks and historical `reports/` path support remain.
+The current [release checklist](releasing.md) now recommends a fresh,
+revision-pinned `local/validation/project-infrastructure/release-ci/`
+folder and uses that same tag-message filename for the eventual
+operator-authorized tag. The paired outputs are **not an atomic
+two-file transaction**: an interruption or write failure may leave newly
+created partial evidence to inspect; no old record is removed.
+
+**Validation:** The Windows release-evidence test module passed **29/29**
+including both single-file collisions, duplicate selections, a file
+appearing after collection, output symlinks and exclusive-create behavior.
+The release-scope **4/4** and release-metadata **3/3** test modules also
+passed. Targeted Ruff, repository Pyright (zero errors/warnings),
+documentation lint/links/backlog and `git diff --check` passed.
+No GitHub requests, release tag, source mutation or deployment were
+performed. A broader batch must still check the report-generation
+inventory and CI/release acceptance at a separately selected exact SHA.
+This change does not approve any tracked retirement (T) or private-data
+migration (M).
+
 ## Observed starting condition
 
 The initial root-level inspection found:
@@ -2765,11 +2799,12 @@ It does not restate the previously accepted browser-verifier correction.
   A `--probe` may pull the pinned Docker image, but the actual comparison
   container has no network access or checkout-write mount.
 
-**Writer and cutover findings:** The release runbook still selects
-`reports/release-ci-v<version>.json` and
-`reports/release-tag-v<version>.txt`; those are compatibility-era
-examples to migrate to `local/validation/` after L1, with exact release
-tag/SHA provenance and collision refusal. The cross-browser JUnit filename
+**Writer and cutover findings at this L0 baseline:** The release runbook
+then selected `reports/release-ci-v<version>.json` and
+`reports/release-tag-v<version>.txt`. The later
+[bounded L2 release-evidence update](#second-bounded-l2-output-contract-update--release-ci-records-2026-11-13)
+recommends `local/validation/` and adds collision refusal without
+removing historical explicit path support. The cross-browser JUnit filename
 and optional release-candidate JSON have separate collision risks.
 `release_validation_scope` writes to GitHub's workflow-controlled
 output file in append mode; that provider-owned step contract is a

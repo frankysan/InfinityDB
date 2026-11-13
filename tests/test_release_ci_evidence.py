@@ -441,6 +441,106 @@ def test_main_writes_json_and_annotated_tag_message(
     assert "3 required workflows" in capsys.readouterr().out
 
 
+@pytest.mark.parametrize("occupied", ("evidence.json", "tag.txt"))
+def test_main_refuses_existing_release_record_before_network(
+    occupied: str, tmp_path: Path, monkeypatch, capsys,
+) -> None:
+    original = b"preserve accepted release evidence\n"
+    target = tmp_path / occupied
+    target.write_bytes(original)
+
+    def unexpected_collect(*args, **kwargs):
+        pytest.fail("Existing release evidence must be rejected before network calls")
+
+    monkeypatch.setattr(release_ci, "collect_release_evidence", unexpected_collect)
+    result = release_ci.main([
+        "--repository", REPOSITORY, "--commit", COMMIT, "--tag", "v1.1.0",
+        "--json-output", str(tmp_path / "evidence.json"),
+        "--tag-message-output", str(tmp_path / "tag.txt"),
+    ])
+
+    assert result == 1
+    assert "already exists" in capsys.readouterr().err
+    assert target.read_bytes() == original
+    other = "tag.txt" if occupied == "evidence.json" else "evidence.json"
+    assert not (tmp_path / other).exists()
+
+
+def test_main_refuses_same_output_path_before_network(
+    tmp_path: Path, monkeypatch, capsys,
+) -> None:
+    def unexpected_collect(*args, **kwargs):
+        pytest.fail("Duplicate release output paths must fail before network calls")
+
+    monkeypatch.setattr(release_ci, "collect_release_evidence", unexpected_collect)
+    target = tmp_path / "same.txt"
+    result = release_ci.main([
+        "--repository", REPOSITORY, "--commit", COMMIT, "--tag", "v1.1.0",
+        "--json-output", str(target),
+        "--tag-message-output", str(tmp_path / "nested" / ".." / "same.txt"),
+    ])
+
+    assert result == 1
+    assert "different files" in capsys.readouterr().err
+    assert not target.exists()
+
+
+def test_release_output_collision_after_collection_does_not_publish(
+    tmp_path: Path, monkeypatch, capsys,
+) -> None:
+    json_output = tmp_path / "release-ci.json"
+    tag_output = tmp_path / "tag-message.txt"
+    original = b"another writer arrived\n"
+
+    def collect(*args, **kwargs):
+        tag_output.write_bytes(original)
+        return {"commit_sha": COMMIT}
+
+    monkeypatch.setattr(release_ci, "collect_release_evidence", collect)
+    monkeypatch.setattr(release_ci, "render_tag_message", lambda *args: "tag text")
+    monkeypatch.setattr(release_ci, "verify_release_metadata_for_tag", lambda *args: None)
+    result = release_ci.main([
+        "--repository", REPOSITORY, "--commit", COMMIT, "--tag", "v1.1.0",
+        "--json-output", str(json_output),
+        "--tag-message-output", str(tag_output),
+    ])
+
+    assert result == 1
+    assert "already exists" in capsys.readouterr().err
+    assert tag_output.read_bytes() == original
+    assert not json_output.exists()
+
+
+def test_release_writer_uses_exclusive_creation(tmp_path: Path) -> None:
+    target = tmp_path / "evidence.json"
+    target.write_bytes(b"original\n")
+    with pytest.raises(FileExistsError):
+        release_ci._write_text(target, "replacement\n")
+    assert target.read_bytes() == b"original\n"
+
+
+def test_release_output_symlink_is_rejected_before_network(
+    tmp_path: Path, monkeypatch, capsys,
+) -> None:
+    target = tmp_path / "evidence.json"
+    monkeypatch.setattr(type(target), "is_symlink", lambda path: path == target)
+
+    def unexpected_collect(*args, **kwargs):
+        pytest.fail("Symlink output must fail before network calls")
+
+    monkeypatch.setattr(release_ci, "collect_release_evidence", unexpected_collect)
+    result = release_ci.main([
+        "--repository", REPOSITORY, "--commit", COMMIT, "--tag", "v1.1.0",
+        "--json-output", str(target),
+        "--tag-message-output", str(tmp_path / "tag.txt"),
+    ])
+
+    assert result == 1
+    assert "already exists" in capsys.readouterr().err
+    assert not target.exists()
+    assert not (tmp_path / "tag.txt").exists()
+
+
 def test_v1_cli_automatically_requires_cross_browser(monkeypatch, tmp_path: Path, capsys) -> None:
     def fake_collect(*args, **kwargs):
         assert kwargs["include_cross_browser"] is True
