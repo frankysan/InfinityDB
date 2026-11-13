@@ -83,7 +83,7 @@ class Reporter:
         if report_path is not None:
             validate_report_destination(report_path)
             report_path.parent.mkdir(parents=True, exist_ok=True)
-            self._file = report_path.open("w", encoding="utf-8", newline="")
+            self._file = report_path.open("x", encoding="utf-8", newline="")
 
     def write(self, text: str = "", *, end: str = "\n") -> None:
         rendered = text + end
@@ -291,6 +291,8 @@ def normalize_report_target_args(argv: list[str]) -> list[str]:
 
 def validate_report_destination(path: Path) -> None:
     """Never truncate a source file or any Git-tracked file as a check log."""
+    if path.is_symlink():
+        raise ValueError(f"Refusing to use a symlink as a check report: {path}")
     if path.suffix.lower() in {
         ".py", ".pyi", ".md", ".json", ".toml", ".yaml", ".yml",
         ".js", ".ts", ".css", ".html", ".svg", ".db", ".sqlite",
@@ -300,6 +302,8 @@ def validate_report_destination(path: Path) -> None:
     try:
         relative = resolved.relative_to(REPO_ROOT.resolve())
     except ValueError:
+        if path.exists():
+            raise FileExistsError(f"Check report already exists: {path}") from None
         return
     try:
         tracked = subprocess.run(
@@ -313,6 +317,8 @@ def validate_report_destination(path: Path) -> None:
         raise ValueError(f"Refusing to overwrite Git-tracked file with report: {path}")
     if tracked.returncode != 1:
         raise ValueError(f"Cannot verify whether report destination is tracked: {path}")
+    if path.exists():
+        raise FileExistsError(f"Check report already exists: {path}")
 
 
 def selected_stage_names(args: argparse.Namespace) -> tuple[str, ...]:

@@ -104,6 +104,81 @@ def test_built_bundle_is_accepted_by_staging_contract(tmp_path: Path) -> None:
     ) == sorted(published)
 
 
+def test_full_asset_bundle_rebuild_replaces_selected_final_zip_only(
+    tmp_path: Path,
+) -> None:
+    static, manifest, published = _publication(tmp_path)
+    destination = tmp_path / "full-assets.zip"
+    first, first_digest, _ = build_full_asset_bundle(
+        destination, static_root=static, publication_manifest=manifest,
+    )
+    before = first.read_bytes()
+    assert first_digest == hashlib.sha256(before).hexdigest()
+    second, second_digest, _ = build_full_asset_bundle(
+        destination, static_root=static, publication_manifest=manifest,
+    )
+    assert second == first
+    assert second.read_bytes() == before
+    assert second_digest == first_digest
+    assert not (tmp_path / ".full-assets.zip.tmp").exists()
+
+
+def test_full_asset_bundle_preserves_another_builds_staging(
+    tmp_path: Path,
+) -> None:
+    static, manifest, _ = _publication(tmp_path)
+    destination = tmp_path / "full-assets.zip"
+    staging = tmp_path / ".full-assets.zip.tmp"
+    previous = b"another bundle build is already staging"
+    staging.write_bytes(previous)
+    with pytest.raises(FullAssetBundleBuildError, match="Could not build"):
+        build_full_asset_bundle(
+            destination, static_root=static, publication_manifest=manifest,
+        )
+    assert staging.read_bytes() == previous
+    assert not destination.exists()
+
+
+def test_full_asset_bundle_rejects_symlink_destination(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    static, manifest, _ = _publication(tmp_path)
+    destination = tmp_path / "full-assets.zip"
+    original_is_symlink = Path.is_symlink
+    monkeypatch.setattr(
+        Path, "is_symlink",
+        lambda path: path == destination or original_is_symlink(path),
+    )
+    with pytest.raises(FullAssetBundleBuildError, match="symlink"):
+        build_full_asset_bundle(
+            destination, static_root=static, publication_manifest=manifest,
+        )
+    assert not destination.exists()
+    assert not (tmp_path / ".full-assets.zip.tmp").exists()
+
+
+def test_full_asset_bundle_cleans_only_owned_staging_after_write_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    static, manifest, _ = _publication(tmp_path)
+    destination = tmp_path / "full-assets.zip"
+    before = b"previous selected bundle destination"
+    destination.write_bytes(before)
+    original_writestr = zipfile.ZipFile.writestr
+
+    def failed_writestr(self, *args, **kwargs):
+        raise OSError("simulated staging failure")
+
+    monkeypatch.setattr(zipfile.ZipFile, "writestr", failed_writestr)
+    with pytest.raises(FullAssetBundleBuildError, match="simulated staging failure"):
+        build_full_asset_bundle(
+            destination, static_root=static, publication_manifest=manifest,
+        )
+    monkeypatch.setattr(zipfile.ZipFile, "writestr", original_writestr)
+    assert destination.read_bytes() == before
+    assert not (tmp_path / ".full-assets.zip.tmp").exists()
+
+
 def test_build_full_asset_bundle_rejects_incomplete_publication(tmp_path: Path) -> None:
     static, manifest, published = _publication(tmp_path)
     (static / published[-1]).unlink()

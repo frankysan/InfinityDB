@@ -67,29 +67,36 @@ def build_full_asset_bundle(
             "Validated publication count does not match files selected for bundling"
         )
 
+    if destination.is_symlink():
+        raise FullAssetBundleBuildError(f"Bundle destination must not be a symlink: {destination}")
     destination = destination.resolve()
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_name(f".{destination.name}.tmp")
-    temporary.unlink(missing_ok=True)
+    created = False
     try:
-        with zipfile.ZipFile(
-            temporary,
-            "w",
-            compression=_COMPRESSION,
-            compresslevel=_COMPRESSLEVEL,
-        ) as archive:
-            for path in files:
-                relative = path.relative_to(static_root).as_posix()
-                archive.writestr(
-                    _archive_info(relative),
-                    path.read_bytes(),
-                    compress_type=_COMPRESSION,
-                    compresslevel=_COMPRESSLEVEL,
-                )
+        with temporary.open("xb") as stream:
+            created = True
+            with zipfile.ZipFile(
+                stream,
+                "w",
+                compression=_COMPRESSION,
+                compresslevel=_COMPRESSLEVEL,
+            ) as archive:
+                for path in files:
+                    relative = path.relative_to(static_root).as_posix()
+                    archive.writestr(
+                        _archive_info(relative),
+                        path.read_bytes(),
+                        compress_type=_COMPRESSION,
+                        compresslevel=_COMPRESSLEVEL,
+                    )
+        # The final ZIP is intentionally replaceable; staging is not.
         temporary.replace(destination)
     except OSError as exc:
-        temporary.unlink(missing_ok=True)
         raise FullAssetBundleBuildError(f"Could not build full-asset bundle: {exc}") from exc
+    finally:
+        if created:
+            temporary.unlink(missing_ok=True)
 
     digest = hashlib.sha256(destination.read_bytes()).hexdigest()
     return destination, digest, len(files)

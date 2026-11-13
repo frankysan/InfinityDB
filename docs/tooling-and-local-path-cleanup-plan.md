@@ -1157,6 +1157,140 @@ handoff. Closing L2 must not imply approval of T/M or
 unverified host/Linux parity. A focused implementation batch
 does not replace the full suite or hosted exact-SHA CI.
 
+### Seventeenth bounded L2 writer-classification and remaining output-safety closeout (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`c2256b04f9da898747e7e3f3597f84c9100634a8` after sixteen
+non-destructive L2 output-contract slices. This pass went beyond
+the `tools/` reports alone: it reviewed active output commands in
+the `src/infinity_db` application CLI and acquisition provenance,
+sampled the maintained `scripts/` and GitHub workflow destinations,
+and cross-checked the known CLI/test/CI/export and build consumers.
+The targeted repository text scans included **127 readable
+`tools/` files, 1,081 `src/` files, 7 `scripts/` files
+and 5 workflow files**. These are *bounded text searches*
+for writers/entrypoints, not a formal whole-repository AST or
+external producer filesystem audit.
+
+**Gap A — retained check transcripts:** `tools/run_checks.py`
+already rejected source/data extensions and Git-tracked
+destinations, but its `Reporter` used `open("w")` for
+`--report`. That could truncate an earlier check result, including
+a repeated legacy `reports/CHECKS YYYYMMDD-HHMMSS.txt` within
+one second. It now rejects occupied output and symlink
+destinations *before* any selected stage, and opens the
+new transcript exclusively via `open("x")`. Current
+console streaming, partial-on-interruption semantics, report
+argument normalization, legacy defaults and original 0/1
+stage outcomes remain unchanged; collision returns the
+existing runner-error exit code **2**. The
+[testing guide](testing.md#reports) recommends fresh
+`local/validation/project-infrastructure/checks/<RUN_ID>/`
+paths without moving or replacing historical root reports.
+
+**Gap B — explicitly replaceable full-asset ZIP:** The
+`build_full_asset_bundle` workflow intentionally rebuilds
+the selected full-asset ZIP, including its existing default
+`reports/full-assets.zip`, for the manually selected
+external full-assets CI handoff. This is **not** immutable run
+evidence. Its former fixed `.<destination>.tmp` cleanup
+unconditionally deleted any existing staging file from
+another producer before writing. Staging is now exclusively
+reserved and cleaned up **only if created by this invocation**;
+a symlink final destination is refused. The *completed final
+ZIP remains intentionally replaceable* after canonical
+validation. ZIP bytes, digest, staging/CI consumer checks
+and default destinations are unchanged. The
+[optional full-asset CI guide](ci.md#optional-external-bundle-check)
+now recommends a fresh `local/handoffs/full-assets/<RUN_ID>/`
+path when different bundle generations must be retained.
+
+**Gap C — installed CLI Peripheral coverage:** The
+`infinity-db validate-peripheral-identities --database ...
+--output ...` command generated an optional source-validation
+JSON via unconditional `Path.write_text`. It now
+preflights occupied/symlink destinations before opening
+reviewed identity sources and uses an exclusive UTF-8/LF
+create at publication. The original JSON schema,
+`--database` dependency, console counts, source validation
+and 0/1 outcomes are unchanged. Standalone scenario-map
+SVG rendering is separately classified as an intentional
+repeatable render/export; its public behavior was not changed.
+
+**Gap D — immutable acquisition provenance:** The core
+`write_snapshot_manifest` (Army/Wiki/Symbol source
+handoffs) accepted an identical existing manifest
+idempotently, but wrote a fixed sibling `.json.tmp`
+and then called `Path.replace`, allowing a competing
+acquisition's provenance to be clobbered. It now refuses
+symlink outputs, exclusively stages complete canonical
+JSON, and atomically publishes with same-directory
+no-replace `os.link`. If the final path appears concurrently,
+the writer accepts *only identical canonical content*;
+a different provenance record is never overwritten.
+Stale staging is retained for owner inspection, and
+only this invocation's staging is removed. The
+[data lifecycle guide](../data/README.md#current-paths-and-behavior)
+documents this no-clobber guarantee and filesystem
+hard-link requirement. Nothing was downloaded or
+moved in this change.
+
+**Consolidated L2 writer classification:**
+
+| Writer/output family | Retention and publication contract | Remaining transition |
+| --- | --- | --- |
+| Check runner, release/CI/determinism/browser receipts, benchmark and operational measurements, audit JSON/Markdown, Peripheral review | Fresh evidence; reject occupied files and symlinks, use exclusive creation; retain failed-run evidence | Keep legacy explicit locations/readers until independently accepted, then prefer categorized `local/` paths |
+| Immutable Army/Wiki/Symbol snapshot manifests and exported source/override plans | Identical complete content is idempotent; different source identity is rejected; atomic no-replace publication | Cross-repository source/provenance staging and Windows/Linux filesystem acceptance |
+| Variant Usage and Restrictions candidates, symbol artwork comparisons and prepared publication candidates | New candidate file or directory, not tracked release state; preserve source hashes, review and publication boundary | Review strict legacy Variant Usage filename and candidate consumers before new-path cutover |
+| Rules interaction checklist, full-asset transfer ZIP, explicitly selected work-tree ZIP, scenario SVG, generated Army/Rules/ITS databases and web fonts | Deliberate regeneration or reviewed publication; may replace the selected artifact, with their own validation/recovery contract | Do not apply generic receipt-only semantics; protect serving and published three-database set |
+| Browser host profile, agent coordination registry, production metrics history and deployment state | Explicitly mutable host/runtime state or append-only records, not immutable audit files | Preserve operator-owned locations, volumes and coordination concurrency semantics |
+| Read-only stdout audits/benchmarks, temporary build/pytest scratch, installed-wheel smoke | No retained file, or disposable output under a controlled temporary lifecycle | Avoid treating these as historical evidence or migrating arbitrary temp directories |
+
+**Closeout decision:** The maintained, known **writer-safety
+and report-classification sub-scope** of L2 is complete at this
+bounded checkpoint, including the additional core CLI and
+snapshot-provenance writers. This **does not satisfy the
+full L2 phase exit** at
+[the execution definition](#l2--migrate-writers-readers-and-cross-repository-handoffs).
+L2 remains **OPEN** for the still-gated reader/default
+migration: exact Army/Wiki/Symbol producer and consumer
+path maps, Windows Syncthing and Linux staging/activation
+acceptance, external handoff contract checks, ambiguous
+legacy-vs-`local/` input selection and separately approved
+reversible M-copy/cutover. The 19 inaccessible
+historical `reports/` directories and independent
+backup/restore evidence are unresolved. No source paths,
+ignored originals, historical reports, build databases
+or container volumes were relocated or deleted; no
+T retirement, M copy/delete or broad L4 tool move is
+authorized by this closeout. The next non-destructive
+work should produce a **reader/producer path cutover
+decision package** from current verified paths; execution
+of any physical migration remains separately gated.
+
+**Validation:** Windows hermetic focused suites passed
+`test_run_checks` **116 passed / 1 skipped**,
+`test_build_full_asset_bundle` **8/8**,
+`test_stage_full_asset_bundle` **8/8**,
+`test_test_sections` **15/15**,
+`test_app_cli` **30/30**,
+`test_snapshot_provenance` **23/23**,
+`test_army_snapshot_source` **6/6** and
+`test_export_symbol_source_plan` **6/6**.
+Total **212 passed, 1 skipped, zero failures**.
+Regression cases cover early/late transcript and source
+report collisions, duplicate one-second default,
+symlink refusal, preservation of competing ZIP staging,
+deliberately replaceable final bundle bytes, no-clobber
+snapshot provenance, identical concurrent manifest
+idempotency and pinned consumer compatibility.
+Targeted Ruff and repository Pyright (zero
+errors/warnings), docs lint/links/backlog and
+`git diff --check` passed. The focused pass is **not**
+full-suite or hosted exact-SHA CI, Linux parity,
+live acquisition, live Docker/full-assets handoff
+or source/backup restoration validation.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

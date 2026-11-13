@@ -72,6 +72,15 @@ for independently gated work.
   document count, optional language, and optional input-artifact provenance. Army
   manifests also record the latest source-data date encoded by the contained Army
   document versions.
+  Immutable manifests accept an already-existing path only when its
+  complete canonical JSON bytes match the selected acquisition.
+  The writer creates an exclusive sibling staging file and uses
+  same-directory hard-link publication so a concurrent acquisition
+  cannot replace different provenance. Symlinks and stale staging
+  are rejected; verify ownership before removing interrupted
+  temporary files. Publishing requires hard-link support on the
+  selected filesystem; an unsupported mount must fail without
+  substituting an overwriting rename.
   Ignored by Git, excluded from Docker build context, and outside Python package
   data.
 - `manifests/symbol-publication.json` — tracked release manifest for the processed SVG

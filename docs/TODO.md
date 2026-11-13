@@ -54,8 +54,12 @@ when all contained work shares the same owner.
   The [L1 decision package](tooling-and-local-path-cleanup-plan.md#l1-decision-package--p-accepted-t-and-m-pending-2026-11-13)
   records accepted prospective path/lifecycle policy (P), while tracked
   retirements (T) and private-data migration (M) still require separate
-  decisions and recovery evidence. Implement non-destructive L2 writer/output
-  changes first, preserving legacy readers and published outputs.
+  decisions and recovery evidence. The
+  [L2 writer-safety closeout](tooling-and-local-path-cleanup-plan.md#seventeenth-bounded-l2-writer-classification-and-remaining-output-safety-closeout-2026-11-13)
+  covers the non-destructive output contracts; L2 is **still open** for
+  verified source-reader paths, cross-repository producer/Syncthing handoffs,
+  and independently approved, reversible path cutovers. Do not equate
+  writer-safety completion with L2 exit, L3 migration or L4 retirement.
 
 ### Backlog and development workflow simplification
 

@@ -573,11 +573,23 @@ This workflow is an independent publication-bundle check, not a way to supply as
 normal source CI. Staging enforces archive safety/size/path constraints and does not upload the
 expanded graphical tree as a workflow artifact.
 
-Build the external bundle from a validated tracked publication with:
+Build the external bundle from a validated tracked publication. Use a
+fresh run-specific path for a retained comparison across publication revisions:
 
 ```powershell
-python tools\build_full_asset_bundle.py --output reports\full-assets.zip
+python tools\build_full_asset_bundle.py --output local/handoffs/full-assets/RUN_ID/full-assets.zip
 ```
+
+Replace `RUN_ID` with a UTC timestamp and short checkout/publication SHA.
+The existing default and explicit `reports\full-assets.zip` destination
+remain supported: unlike a check transcript or research report, this is
+an **intentionally replaceable** transfer artifact. Do not reuse the path
+when earlier bundle bytes must be retained for separate verification.
+The builder reserves its sibling temporary ZIP exclusively, refuses
+symlink destinations and cleans up only staging owned by its own run,
+so another producer's temporary file is never silently deleted.
+An interrupted staging file requires inspection; the selected final
+ZIP is replaced only after its new bytes are assembled.
 
 The builder includes exactly the five published symbol categories, normalizes ZIP metadata so the
 same publication produces the same archive bytes, and prints the archive SHA-256. Host that ZIP at

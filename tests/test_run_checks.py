@@ -570,6 +570,92 @@ def test_reporter_tees_output_to_console_and_file(
     assert report_path.read_text(encoding="utf-8") == "hello\nworld"
 
 
+def test_reporter_refuses_existing_transcript_without_truncation(
+    tmp_path: Path,
+) -> None:
+    report_path = tmp_path / "reports" / "checks.txt"
+    report_path.parent.mkdir()
+    before = b"Retained test evidence from an earlier run\n"
+    report_path.write_bytes(before)
+
+    with pytest.raises(FileExistsError, match="already exists"):
+        run_checks.Reporter(report_path)
+    assert report_path.read_bytes() == before
+
+
+def test_reporter_refuses_output_symlink_before_file_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    report_path = tmp_path / "reports" / "dangling.txt"
+    original_is_symlink = Path.is_symlink
+    monkeypatch.setattr(
+        Path, "is_symlink",
+        lambda path: path == report_path or original_is_symlink(path),
+    )
+    with pytest.raises(ValueError, match="symlink"):
+        run_checks.Reporter(report_path)
+    assert not report_path.exists()
+
+
+def test_reporter_refuses_late_collision_after_validation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    report_path = tmp_path / "reports" / "late.txt"
+    prior = b"another check run claimed the transcript\n"
+    original_open = Path.open
+
+    def competing_open(
+        path: Path, mode: str = "r", buffering: int = -1,
+        encoding: str | None = None, errors: str | None = None,
+        newline: str | None = None,
+    ):
+        if path == report_path and mode == "x":
+            path.write_bytes(prior)
+        return original_open(
+            path, mode, buffering=buffering,
+            encoding=encoding, errors=errors, newline=newline,
+        )
+
+    monkeypatch.setattr(Path, "open", competing_open)
+    with pytest.raises(FileExistsError):
+        run_checks.Reporter(report_path)
+    assert report_path.read_bytes() == prior
+
+
+def test_run_checks_collision_blocks_stages_and_returns_runner_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    report_path = tmp_path / "reports" / "accepted.txt"
+    report_path.parent.mkdir()
+    prior = b"Earlier acceptance transcript\n"
+    report_path.write_bytes(prior)
+    monkeypatch.setattr(
+        run_checks, "run_stage",
+        lambda *_args, **_kwargs: pytest.fail("Collision must block all stages"),
+    )
+    assert run_checks.main([
+        "--stage", "lint", "--report", str(report_path),
+    ]) == run_checks.EXIT_RUNNER_ERROR
+    assert "already exists" in capsys.readouterr().err
+    assert report_path.read_bytes() == prior
+
+
+def test_default_check_transcript_filename_refuses_same_second_collision(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    started = datetime.fromisoformat("2026-11-13T10:00:00+01:00")
+    monkeypatch.setattr(run_checks, "REPORT_DIRECTORY", tmp_path)
+    report_path = run_checks.resolve_report_path(True, started)
+    assert report_path is not None
+    with run_checks.Reporter(report_path) as reporter:
+        reporter.write("first invocation")
+    before = report_path.read_bytes()
+    with pytest.raises(FileExistsError):
+        run_checks.Reporter(run_checks.resolve_report_path(True, started))
+    assert report_path.read_bytes() == before
+
+
 def test_run_stage_streams_output_and_reports_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],

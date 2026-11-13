@@ -300,6 +300,11 @@ def cmd_render_scenario_map(args: argparse.Namespace) -> int:
 
 
 def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
+    if args.output is not None:
+        if args.database is None:
+            raise ValueError("--output requires --database")
+        if args.output.exists() or args.output.is_symlink():
+            raise FileExistsError(f"Peripheral coverage report already exists: {args.output}")
     curated = load_peripheral_identity_curated(args.input)
     print(f"Validated Peripheral identity contract: {args.input}")
     print(
@@ -309,8 +314,6 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
         f"controller access: {curated.controller_access_count}"
     )
     if args.database is None:
-        if args.output is not None:
-            raise ValueError("--output requires --database")
         return 0
 
     report = audit_peripheral_identity_coverage(
@@ -351,9 +354,8 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
         )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(
-            json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
-        )
+        with args.output.open("x", encoding="utf-8", newline="\n") as output:
+            output.write(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
         print(f"Coverage report: {args.output}")
     if validation["status"] != "valid":
         print(

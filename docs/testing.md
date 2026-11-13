@@ -6449,17 +6449,49 @@ canonical finalized path.
 
 ## Reports
 
-Use `--report` to retain the complete check transcript:
+Use `--report` to retain the complete check transcript. The legacy
+no-path flag still chooses `reports/CHECKS YYYYMMDD-HHMMSS.txt`;
+a fresh, categorized destination is recommended for retained run evidence:
 
 ```powershell
-# reports/CHECKS YYYYMMDD-HHMMSS.txt
+# Existing default, available only when this timestamped file is unused
 python tools\run_checks.py --profile code --report
 
-# explicit destination
-python tools\run_checks.py --all --report reports\release-checks.txt
+# Recommended: substitute a fresh UTC run ID and short checkout SHA
+python tools\run_checks.py --all --report local/validation/project-infrastructure/checks/RUN_ID/checks.txt
 ```
 
-Generated reports are local evidence and are normally ignored by Git.
+The runner now refuses an occupied transcript path (including a
+symlink) **before running any requested check stage**, while the
+final `open("x")` also prevents a concurrent check from truncating
+earlier evidence. Collision and report-path errors return runner
+error status **2**, not an artificial test failure status **1**.
+The original `--report PATH` / `--report=PATH` syntax, default
+filename, stdout streaming and summary/error semantics are unchanged.
+A repeated command using the same second's default filename must
+choose a fresh explicit destination instead of overwriting it.
+
+Generated reports are ignored local evidence, not canonical test
+results. An interrupted new transcript can be partial and should
+be inspected; previous logs are never deleted or replaced. No
+existing file in root `reports/` was moved by this change.
+
+The installed `infinity-db validate-peripheral-identities` command
+has a separate optional coverage JSON receipt. When providing
+`--database` and `--output`, select a fresh destination:
+
+```powershell
+infinity-db validate-peripheral-identities --database data/generated/army.db --output local/validation/peripheral-identities/RUN_ID/coverage.json
+```
+
+It now rejects occupied or symlink outputs before loading the
+reviewed identity input and writes UTF-8/LF JSON through exclusive
+creation. Its original data checks and status (success=0,
+failed source mapping or output error=1) are unchanged. Without
+`--output`, it does not generate a report; without a database,
+`--output` remains invalid. Rendering standalone scenario-map
+SVGs is a separate intentional export/re-render contract,
+not an immutable review receipt.
 
 ## Exit status
 

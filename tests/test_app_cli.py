@@ -6,6 +6,7 @@ import socket
 import sqlite3
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -570,6 +571,128 @@ def test_validate_peripheral_identities_command_accepts_coverage_database() -> N
     )
     assert args.database == Path("data/generated/army.db")
     assert args.output == Path("reports/peripheral-coverage.json")
+
+
+def _mock_peripheral_report(monkeypatch: pytest.MonkeyPatch) -> dict:
+    report = {
+        "definitions": {
+            "mappedDefinitionCount": 1, "definitionCount": 1,
+            "coveragePercent": 100.0, "unmappedReviewGroupCount": 0,
+        },
+        "validation": {
+            "status": "valid", "staleMappingCount": 0, "sourceNameDriftCount": 0,
+        },
+        "unitBackedIdentities": {
+            "mappedSourceUnitCount": 0, "sourceUnitCount": 0,
+            "coveragePercent": 100.0, "logicalUnitCount": 0,
+        },
+        "controllerAccess": {
+            "mappedControllerOccurrenceCount": 0,
+            "sourceControllerOccurrenceCount": 0,
+            "eligibleEdgeCount": 0,
+        },
+        "controllerGraph": {"status": "unavailable"},
+    }
+    monkeypatch.setattr(
+        app_cli, "load_peripheral_identity_curated",
+        lambda *_args: SimpleNamespace(
+            entity_count=1, profile_count=1, mapping_count=1,
+            unit_mapping_count=1, controller_access_count=0,
+        ),
+    )
+    monkeypatch.setattr(app_cli, "load_curated_directory", lambda *_args: [])
+    monkeypatch.setattr(
+        app_cli, "audit_peripheral_identity_coverage",
+        lambda *_args, **_kwargs: report,
+    )
+    return report
+
+
+def test_peripheral_coverage_report_cannot_replace_existing_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "coverage.json"
+    previous = b"Previously accepted peripheral review\n"
+    output.write_bytes(previous)
+    monkeypatch.setattr(
+        app_cli, "load_peripheral_identity_curated",
+        lambda *_args: pytest.fail("Prior report must block source loading"),
+    )
+    assert main([
+        "validate-peripheral-identities", "--database", "unused-army.db",
+        "--output", str(output),
+    ]) == 1
+    assert "already exists" in capsys.readouterr().err
+    assert output.read_bytes() == previous
+
+
+def test_peripheral_coverage_new_report_preserves_json_format(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    report = _mock_peripheral_report(monkeypatch)
+    output = tmp_path / "fresh" / "coverage.json"
+    assert main([
+        "validate-peripheral-identities", "--database", "unused-army.db",
+        "--output", str(output),
+    ]) == 0
+    assert output.read_bytes() == (
+        json.dumps(report, indent=2, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+    assert f"Coverage report: {output}" in capsys.readouterr().out
+
+
+def test_peripheral_coverage_late_report_collision_preserves_existing_bytes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "coverage.json"
+    previous = b"Competing report was accepted first\n"
+    report = _mock_peripheral_report(monkeypatch)
+
+    def competing_audit(*_args, **_kwargs):
+        output.write_bytes(previous)
+        return report
+
+    monkeypatch.setattr(app_cli, "audit_peripheral_identity_coverage", competing_audit)
+    assert main([
+        "validate-peripheral-identities", "--database", "unused-army.db",
+        "--output", str(output),
+    ]) == 1
+    assert "exists" in capsys.readouterr().err
+    assert output.read_bytes() == previous
+
+
+def test_peripheral_coverage_rejects_dangling_symlink_output(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output = tmp_path / "dangling.json"
+    original_is_symlink = Path.is_symlink
+    monkeypatch.setattr(
+        Path, "is_symlink",
+        lambda path: path == output or original_is_symlink(path),
+    )
+    monkeypatch.setattr(
+        app_cli, "load_peripheral_identity_curated",
+        lambda *_args: pytest.fail("Symlink destination must block source loading"),
+    )
+    assert main([
+        "validate-peripheral-identities", "--database", "unused-army.db",
+        "--output", str(output),
+    ]) == 1
+
+
+def test_peripheral_coverage_requires_database_before_source_validation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        app_cli, "load_peripheral_identity_curated",
+        lambda *_args: pytest.fail("Missing database must block source loading"),
+    )
+    assert main([
+        "validate-peripheral-identities", "--output", "unused-coverage.json",
+    ]) == 1
 
 
 def test_serve_reports_an_already_bound_port(capsys: pytest.CaptureFixture[str]) -> None:
