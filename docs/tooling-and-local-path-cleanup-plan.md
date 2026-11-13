@@ -2614,6 +2614,63 @@ through explicit staging/parity tests only; R5 receiver ACL and
 independent backup/restore evidence and R6 physical private-data
 migration remain separately gated and unapproved.
 
+### Thirty-sixth bounded L2 checkpoint — R4 staged activation to pinned-reader parity (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`691a307feb3ddac2fcdd3686db86647dd7f8af15`. The prior
+[R4 final reader inventory](#thirty-fifth-bounded-l2-checkpoint--r4-final-direct-pdf-reader-inventory-2026-11-13)
+completed the direct physical-PDF consumer classification. This checkpoint
+closes the remaining *hermetic interface gap* between the staged-asset
+activator and pinned PDF source reader, without asserting a live cutover.
+
+The integrated `test_pinned_pdf_and_override_activate_with_matching_read_only_layouts`
+in `tests/test_activate_synced_assets.py` now:
+
+- creates disposable, independently named PDF and SVG override inputs in
+  the configured staged `pdf/rules/` and `image-overrides/Unit/` families;
+- previews both explicit `legacy` and `local` file layouts and checks
+  the preview leaves checkout bytes unchanged;
+- applies each file in an isolated checkout, verifies idempotent subsequent
+  activation, identical PDF/SVG bytes, no alternate-layout destinations,
+  and untouched staged inputs;
+- verifies the selected PDF through the actual pinned SHA-256 reader for
+  each layout, using the unchanged `data/pdf/...` source label;
+- introduces an independently valid legacy sibling beside a tampered
+  local-selected PDF, proving the pinned reader fails closed without
+  cross-layout fallback and the activator refuses to replace the
+  conflicting destination.
+
+The [staged-asset runbook](syncthing-assets.md#individual-pdfs-and-overrides)
+now explicitly documents **copy-only** compatibility for pinned research
+PDFs: `pinned_pdf_path` rejects symlinks/reparse points even when a
+different activation workflow permits symlink output. An override's matching
+hash is transport evidence only, **not artwork approval** or a declaration
+that symbol processing/publication has occurred.
+
+**R4 technical status:** The reader-binding and synthetic staged-layout
+acceptance slices are complete and retain the `legacy` default,
+provenance labels, source hash authority, independent symbol ownership and
+non-replacing activation. This is **not** evidence of real receiver ACLs,
+independent backups or tested restore, source synchronisation, a live
+`local/` file migration, or approved source deletion. Those belong to
+R5/R6, with separate explicit decisions. No ignored or private PDF,
+override, Wiki archive or runtime database was moved or deleted.
+
+**Windows validation:** The complete activation module passed
+**104 passed, four skipped** (filesystem-specific symlink/case fixtures);
+the shared PDF path module passed **42 passed, two skipped**, for
+**146 passed, six skipped, zero failed** combined. Ruff, canonical
+Pyright (zero errors/warnings), docs lint/links/backlog and whitespace
+checks passed. Linux exact-SHA fixture acceptance remains a separate
+gate. Hosted CI and full-project tests are not implied by focused
+acceptance.
+
+**Next:** Move the workstream to a **read-only R5 operational inventory**:
+verify current sender/receiver roots, effective ACLs, independent
+backup/restore capability and a per-family hash/rollback decision package.
+No physical move, ACL modification, Syncthing reconfiguration or private
+asset deletion is authorized by this R4 checkpoint.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

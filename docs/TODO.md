@@ -107,11 +107,14 @@ when all contained work shares the same owner.
   covers FAQ source pins, historical Reinforcements inputs, Visibility
   Zone whole-record and web evidence, and conditional reactive source
   pages; the two remaining compatibility defaults are intentionally retained.
-  **Next:** finish R4 staged/parity evidence, then receiver ACL/backup
-  evidence (R5) before any physical migration (R6).
+  The [staged-to-reader parity checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-sixth-bounded-l2-checkpoint--r4-staged-activation-to-pinned-reader-parity-2026-11-13)
+  completes R4's hermetic activation/reader contract across PDF and SVG
+  override layouts, including no fallback, conflict refusal and idempotence.
+  **Next:** read-only R5 receiver ACL and independent backup/restore
+  evidence; R6 physical migration remains separately gated and unapproved.
   Source relocation and private-data migration still require separate
-  approval and backup/restore evidence. L2/R4 remain open, and hosted/release
-  acceptance remains independent of fixture validation.
+  approval and backup/restore evidence. L2 remains open; hosted/release
+  acceptance is independent of fixture validation.
 
 ### Backlog and development workflow simplification
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import zipfile
@@ -13,6 +14,7 @@ import pytest
 from infinity_db.snapshot_provenance import build_snapshot_manifest
 from tools import activate_synced_assets as activation
 from tools.activate_synced_assets import main
+from tools.research.source_paths import SourcePathError, pinned_pdf_path
 
 
 @pytest.fixture
@@ -525,6 +527,78 @@ def test_local_file_layout_selects_explicit_destination_without_fallback(
     assert (checkout / local).read_bytes() == source.read_bytes()
     assert not (checkout / legacy).exists()
     assert _run([*args, "--apply"], staged, checkout) == 0
+
+
+def test_pinned_pdf_and_override_activate_with_matching_read_only_layouts(
+    staging: tuple[Path, Path],
+) -> None:
+    """The staged copy and the pinned research reader must agree on one layout."""
+    staged, _ = staging
+    label = "data/pdf/rules/reviewed-n5.pdf"
+    pdf_bytes = b"%PDF-1.7\\nsynthetic reviewed source\\n"
+    override_bytes = b'<svg xmlns="http://www.w3.org/2000/svg"></svg>'
+    pdf_staged = staged / "pdf/rules/reviewed-n5.pdf"
+    svg_staged = staged / "image-overrides/Unit/reviewed.svg"
+    pdf_staged.parent.mkdir(parents=True)
+    svg_staged.parent.mkdir(parents=True)
+    pdf_staged.write_bytes(pdf_bytes)
+    svg_staged.write_bytes(override_bytes)
+    pin = hashlib.sha256(pdf_bytes).hexdigest()
+    destinations = {
+        "legacy": (label, "image_overrides/Unit/reviewed.svg"),
+        "local": (
+            "local/data/pdf/rules/reviewed-n5.pdf",
+            "local/data/symbols/overrides/Unit/reviewed.svg",
+        ),
+    }
+
+    for layout, (pdf_destination, override_destination) in destinations.items():
+        checkout = staged.parent / f"checkout-{layout}"
+        checkout.mkdir()
+        for relative in (pdf_destination, override_destination):
+            args = ["activate", "--layout", layout, "--file", relative]
+            before_preview = {
+                path.relative_to(checkout): path.read_bytes()
+                for path in checkout.rglob("*") if path.is_file()
+            }
+            assert _run(args, staged, checkout) == 0  # Preview only.
+            assert {
+                path.relative_to(checkout): path.read_bytes()
+                for path in checkout.rglob("*") if path.is_file()
+            } == before_preview
+            assert _run([*args, "--apply"], staged, checkout) == 0
+            assert _run([*args, "--apply"], staged, checkout) == 0  # Idempotent.
+
+        selected = pinned_pdf_path(checkout, label, pin, layout=layout)
+        assert selected is not None
+        assert selected == checkout / pdf_destination
+        assert selected.read_bytes() == pdf_bytes
+        assert (checkout / override_destination).read_bytes() == override_bytes
+        other_pdf, other_override = destinations[
+            "local" if layout == "legacy" else "legacy"
+        ]
+        assert not (checkout / other_pdf).exists()
+        assert not (checkout / other_override).exists()
+
+    assert pdf_staged.read_bytes() == pdf_bytes
+    assert svg_staged.read_bytes() == override_bytes
+
+    # A correct legacy sibling cannot mask a corrupted selected local PDF.
+    local = staged.parent / "checkout-local"
+    legacy_copy = local / label
+    legacy_copy.parent.mkdir(parents=True)
+    legacy_copy.write_bytes(pdf_bytes)
+    selected = local / destinations["local"][0]
+    selected.write_bytes(b"%PDF-1.7\\nchanged after activation\\n")
+    with pytest.raises(SourcePathError, match="hash mismatch"):
+        pinned_pdf_path(local, label, pin, layout="local", missing_ok=True)
+    assert pinned_pdf_path(local, label, pin, layout="legacy") == legacy_copy
+    assert _run([
+        "activate", "--layout", "local", "--file",
+        destinations["local"][0], "--apply",
+    ], staged, local) == 1
+    assert selected.read_bytes() != pdf_bytes
+    assert pdf_staged.read_bytes() == pdf_bytes
 
 
 def test_local_file_layout_refuses_other_staging_siblings_and_conflicts(staging):

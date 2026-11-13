@@ -155,6 +155,10 @@ refuses staged symlinks and differing existing destination bytes, and cannot
 replace a tracked published artifact. Independently hash-check selected PDFs
 against the reviewed source pins **before any research or publication use**;
 read-only activation does not make unpinned staged bytes authoritative.
+Pinned research PDF readers reject symlinks and reparse points, even if the
+activation utility permits `--mode symlink` for other file workflows. Use
+the default **copy** mode when testing a selected PDF with the pinned reader.
+Neither activation nor a matching SVG byte hash constitutes artwork approval.
 
 ## MCP worker policy
 
