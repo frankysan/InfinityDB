@@ -2929,6 +2929,91 @@ remain pending. No files, runtime behavior, generated sources,
 remote workspaces, installed plugins or service state changed
 during this review.
 
+### Cross-repository producer and raster ownership verification — 2026-11-13
+
+**Repositories checked read-only:** InfinityDB at
+`eb272cd2eb3347211a14b04e9b72d3b002af10dd`,
+`InfinityDB-symbol-tools` at
+`a3420a40922970090d6710515b052f49b9bec629`
+(clean `main`), `InfinityDB-army-acquisition`,
+`InfinityDB-wiki-acquisition`, and `mcp-lab` at
+`8c426443ea9a21a99373dc64b19825f10b2e50f4`
+(clean `main`). This verifies **implementation/ownership**, not a
+complete acceptance of private source artifacts on either host.
+
+**Raster duplication resolved as an ownership decision:**
+`InfinityDB-symbol-tools/src/infinity_symbol_tools/svg_compress.py`
+contains the same resvg/Inkscape rasterization, Pillow RGB RMS/changed-
+pixel comparison over *both black and white backgrounds*,
+`VisualMetrics`, and multi-size/DPR `RasterValidator` implementation
+as InfinityDB's `tools/symbol_raster_validation.py`. The producer
+actually calls this implementation from
+`svg_canonical_compression.py` to produce pinned compression receipts,
+and has compressor/receipt tests. In the InfinityDB checkout the duplicate
+module has **zero other `tools/` consumers**, no CLI, and a
+two-test historical suite. **Proposed L5 disposition: retire that
+duplicate module and its redundant tests as a bounded tracked-code
+slice, after explicitly approved removal with a complete import/CI/
+docs/packaging scan.** Git history preserves its implementation;
+do not vendor it into InfinityDB again during L4.
+
+**Do not equate the producer's visual approval with independent
+application acceptance.** InfinityDB's
+`verify_raw_symbol_handoff`, `verify_effective_symbol_handoff`,
+`verify_symbol_duplicate_handoff`,
+`verify_processed_symbol_handoff` and
+`prepare_symbol_publication` independently validate the pinned
+source/receipt hashes, complete ZIP/CSV membership, XML/no-active-text
+and publication identities. `verify_processed_symbol_handoff`
+explicitly does **not** re-render or repeat the producer raster
+comparison. Neither the unused duplicate module nor its removal
+establishes new cross-host **post-publication visual parity**.
+If new artwork acceptance requires that guarantee, specify a
+separate, bounded image-comparison/reviewer gate with exact candidate
+and reference hashes, source assets, renderer/version/tolerances,
+review receipts and corresponding tests; do not silently claim an
+existing source-hash verifier tests appearance. Preserve the
+previously accepted artwork/publication cutoff independently.
+
+**Confirmed external L2 path contracts:**
+
+- `InfinityDB-symbol-tools` raw-acquisition CLI defaults to
+  `data/raw/symbols` and `data/manifests/snapshots`; its README's
+  intermediate commands select `data/effective`,
+  `data/intermediate` and `data/reports`. Actual newer
+  `tools/run_production_compression.py` uses
+  `local/p5-production-processed/<EFFECTIVE-SYMBOLS stem>/`.
+  Those are **mixed conventions in one producer** and must be
+  reconciled together, not treated as a ready-to-apply source move.
+- `InfinityDB-army-acquisition` CLI still defaults to
+  `data/raw` and `data/manifests/snapshots`.
+  `InfinityDB-wiki-acquisition` CLI still defaults to
+  `data/wiki`, `data/work/wiki`, and
+  `data/manifests/snapshots`. They are **separate repositories**:
+  implement any producer default change there in individually
+  reviewed commits with their own CLI tests, docs, immutable
+  ZIP/manifest provenance, and consumer pairing checks. Do not
+  rewrite old manifests or infer receipt identity from paths.
+- The `mcp-lab` execution interface accepts tracked `tools.*`
+  entrypoints by string and knows several browser/test runner
+  allowlists, so InfinityDB L4 moves must update the MCP-allowed
+  module/job behavior and direct script invocations at the same
+  cutoff; no local MCP imports of `symbol_raster_validation`
+  were found. The installed MCP gateway did not accept a focused
+  `InfinityDB-symbol-tools` pytest invocation through either
+  permitted test-job route (reported `validation_unknown`).
+  **Do not claim producer pytest was executed in this review.**
+
+**Cross-repository acceptance before L2/L5:** Obtain compatible
+current producer `pytest` results and the exact source/processed
+handoff receipts; verify InfinityDB's independent read-only
+candidate/source checks; exercise new writer/reader defaults in a
+scratch path with intentionally colliding filenames; preserve exact
+selected inputs and no-network normal build; validate Windows/Linux
+receiver activation on the approved source family. No producer,
+application, MCP, ignored asset or service files were changed.
+**L0 physical-data recovery blockers and L1 approvals remain open.**
+
 ### L1 candidate policy decisions — proposal only
 
 **Eligible for user review, not yet approved:** Adopt the stated
