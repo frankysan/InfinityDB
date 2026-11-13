@@ -2078,11 +2078,25 @@ the browser-centric reference-acceptance helper, so optional PyMuPDF remains
 **optional at collection time**. Existing real-PDF checks use
 `pytest.importorskip` only at their original source-validation boundary.
 
-**Windows validation:** All **eight** Hacking Program statistics source tests
-passed (zero skipped, zero failures), including both independently pinned
-real source checks and the new synthetic layout case. Ruff passed. Type,
-documentation, Linux exact-SHA and hosted CI evidence are tracked separately;
-no source-migration acceptance follows from the test-only change.
+**Windows validation:** The Hacking Program chart suite passed **8 tests**
+(zero skipped), including both independently pinned real source checks and
+the new synthetic layout case. The shared PDF path suite passed **40, two
+skipped**: **48 passed, two skipped, zero failures** across the bounded
+suites. Ruff, Pyright (zero errors/warnings), documentation lint, link/backlog
+checks and Git whitespace checks all passed.
+
+**Linux exact-SHA verification (2026-11-13):** After explicit `origin` fetch,
+the registered `linux-dev` worker temporarily detached to
+`cf7a30808c94d5e01166baa56f04eac15f4b1a71`. The Hacking Program
+chart suite passed **8**, including its pinned PDF and archive checks, and
+the shared PDF path suite passed **42** including Linux symlink cases:
+**50 passed, zero skipped, zero failures**. The worker's original detached
+HEAD `8de09b277e579bd8cb942c6aba242bfe4f71ceca` was then explicitly
+restored. Neither worker performed real local-layout PDF migration; the
+local layout was exercised with synthetic fixture bytes only. Exact-SHA
+GitHub wheel/deployment smoke workflows succeeded for the code commit;
+Source checks were still **in progress**, not accepted as green, when
+recorded. No source-migration acceptance follows from this test-only change.
 
 **Next R4 work:** Inventory other directly fixed-path source-only test
 families, then adapt only meaningful active readers without weakening the
