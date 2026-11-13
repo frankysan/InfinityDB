@@ -4,9 +4,9 @@
 
 For public internet serving, InfinityDB deploys an immutable Docker image
 containing the application, processed graphical assets and the complete tracked
-`army.db` / `rules_n5.db` pair. Structured runtime facts are embedded; no JSON
-publication or raw source archive is required at startup. Rollback uses a matching
-retained image for the older release's data format.
+`army.db` / `rules_n5.db` / `its_18.db` set. Structured runtime facts are
+embedded; no JSON publication or raw source archive is required at startup.
+Rollback uses a matching retained image for the older release's data format.
 
 Caddy listens on HTTP and proxies traffic to the application, which is not exposed
 directly on the host. Put Caddy behind an external TLS reverse proxy for public HTTPS.

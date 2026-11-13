@@ -2449,6 +2449,66 @@ refresh are separately authorized maintainer operations, not ignored
 run reports. No tool, curated fact, generated checklist, private
 source, database or publication changed; **L0/L1 remain open**.
 
+### Tracked document lifecycle review and runbook alignment — 2026-11-13
+
+**Scope:** Reviewed the **33** tracked `docs/` entries against the
+[documentation authority map](README.md), current consumers, maintained
+source/release evidence and the existing earlier L0 dispositions.
+No wholesale document retirement follows from a completed milestone
+or a version suffix. `docs/` is not an archive for generated private
+reports, but it does legitimately contain reviewed, source-pinned evidence.
+
+- **Retain as current contracts:** the canonical architecture, data model,
+  application/project domains, browser design, CI, testing, deployment,
+  server migration, release, backlog, coordination, Syncthing, validation
+  queue, agent context, changelog and documentation-map owners. Rules
+  semantics/research, official clarifications and N5 source history own
+  current research/evidence interpretation, not a competing task ledger.
+  `its-season-database.md` describes the active season schema while
+  `season-publication-ownership.md` preserves cross-domain ownership;
+  their completed P3 chronology is **not** current implementation work.
+- **Retain as uniquely source-pinned historical evidence:**
+  `faq-v0.1-scope-inventory.md`; the main `rules-explanation-audit-1.0.md`
+  and its inventory, N5.3 reconciliation and source-manifest appendices;
+  and `v1.0-source-coverage-audit.md`. They hold question identities,
+  REA/SRC finding and source-version locators, reviewed scope boundaries
+  and accepted test/route evidence that cannot safely be replaced by a
+  generic release summary. Keep their historical-status labels, not
+  duplicate live work in them.
+- **Completed plan retained pending bounded disposition:**
+  `restructuring-plan.md` is P0–P6 historical implementation/acceptance
+  evidence, not a current runbook; it has independent links and recorded
+  decisions. `v1.0-coverage-workflow-plan.md` is a **specific tracked
+  retirement candidate after L1 approval**: V1S-082's release scope is
+  owned by `releasing.md`, optional future source-first work by
+  `TODO.md`, the selected 35-record cohort and four clause-scoped reviews
+  by their tracked `config/validation/` manifests and validator, and
+  the measured benchmarks/source discoveries by
+  `v1.0-source-coverage-audit.md`. The last source-audit link to the
+  historical plan now targets the exact tracked pilot manifest, with
+  original constraints retained in the audit. Before deleting, rerun
+  a repository-wide backlink/unique-methodology review and docs/link
+  checks; Git history supplies the finished execution narrative.
+- **Separate extraction candidate, not a deletion target:** `testing.md`
+  remains the active check guide but contains substantial revision-pinned
+  1.0 test transcripts. Later narrow the *current commands* section and
+  classify the original acceptance evidence with source audits/CI rather
+  than treating the entire 11k-line document as either obsolete or
+  current instruction. Preserve existing deep links during that work.
+- **Correct active operator guidance now:** `server-migration.md` still
+  claimed current tracked `variant-usage.json` and
+  `weapon-profile-sources.json` sidecars, v8/v9 deployed-object export
+  and a schema-specific staging bundle. These are no longer the selected
+  runtime contract: the verified Dockerfile copies `army.db`,
+  `rules_n5.db` and `its_18.db` directly. The migration guide and
+  `deployment.md` introduction now agree with the three-file release
+  requirements; history/backup volume handling is unchanged.
+
+**Boundary:** This is L0 classification and a narrowly scoped
+documentation correction. It does not authorize deletion of the old
+V1S-082 plan, wholesale shortening of audit evidence, ignored-data
+migration, L1 policy approval or any deployment.
+
 ### L1 approval prerequisites — consolidated outstanding decision register
 
 This is a **review checklist**, not permission to perform L2/L3. The private
