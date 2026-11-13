@@ -2727,6 +2727,7 @@ def audit_visibility_zone_evidence(
     *,
     root: Path = PROJECT_ROOT,
     verify_pdfs: bool = False,
+    source_layout: str = "legacy",
 ) -> dict[str, Any]:
     """Selected bilingual source/term/browser evidence, without whole-record approval."""
     from infinity_db.curated import load_curated_document
@@ -2779,9 +2780,14 @@ def audit_visibility_zone_evidence(
         for language, (relative, pin) in zip(
             ("english", "spanish"), expected_pins.items(), strict=True
         ):
-            path = root / relative
-            if _sha256(path) != pin:
-                raise ReferenceBaselineError(f"Visibility PDF hash mismatch: {language}")
+            try:
+                path = pinned_pdf_path(root, relative, pin, layout=source_layout)
+            except SourcePathError as exc:
+                raise ReferenceBaselineError(
+                    f"Visibility {language} PDF verification failed: {exc}"
+                ) from exc
+            if path is None:
+                raise ReferenceBaselineError(f"Visibility {language} PDF unavailable")
             with pymupdf.open(path) as pdf:
                 value = pdf[manifest["sourcePages"][language] - 1].get_text()
                 if not isinstance(value, str):
@@ -3322,7 +3328,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         if args.audit_visibility_zones:
             evidence = audit_visibility_zone_evidence(
-                verify_pdfs=args.verify_visibility_pdfs,
+                verify_pdfs=args.verify_visibility_pdfs, source_layout=args.source_layout,
             )
             ids = {record["id"] for record in evidence["records"]}
             added = set(report["addedIds"])

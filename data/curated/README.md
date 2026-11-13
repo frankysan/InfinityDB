@@ -519,9 +519,15 @@ back to legacy files. Non-PDF source groups, published database selection,
 JSON source identities and Markdown labels remain unchanged. The revision-delta
 audit resolves every selected original PDF from its existing private hash
 inventory, verifies it before extraction and again against extracted bytes,
-and preserves unchanged pair names/page references in its reports. Direct
-research readers outside these scopes and source-dependent test setup still
-retain their individually reviewed path contracts.
+and preserves unchanged pair names/page references in its reports. The
+reference reporter's opt-in bilingual Visibility Zone clause verification
+uses the same explicit selector and pinned source labels. Its other optional
+`--verify-declaration-pdf` and `--verify-conditional-pdf` arguments remain
+caller-selected paths with independent SHA-256 checks, not implicit lookups.
+The Hacking Program statistics auditor also accepts an explicit `--pdf`
+source path and verifies its manifest pin; no automatic path selection was
+added to that caller-owned input. Source-dependent test prerequisites and
+other direct readers retain their individually reviewed path contracts.
 Normal rules builds still do not open research PDFs. Override lookup paths
 belong to the external symbol producer and are independent of these PDF labels.
 

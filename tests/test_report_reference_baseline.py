@@ -721,6 +721,86 @@ def test_five_visibility_zone_terms_are_reviewed_post_inventory_additions() -> N
                for row in evidence["records"])
 
 
+def test_visibility_pdf_layouts_keep_evidence_and_source_identity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    pymupdf = pytest.importorskip("pymupdf")
+    manifest = json.loads((
+        ROOT / "config/validation/visibility-zone-terms-v1.json"
+    ).read_text(encoding="utf-8"))
+    selections: list[tuple[str, str]] = []
+
+    def selected(root: Path, label: str, digest: str, *, layout: str) -> Path:
+        assert root == ROOT
+        assert manifest["sourcePins"][label] == digest
+        selections.append((label, layout))
+        prefix = "data/pdf" if layout == "legacy" else "local/data/pdf"
+        return root / prefix / label.removeprefix("data/pdf/")
+
+    class PdfPage:
+        def __init__(self, path: Path):
+            language = "english" if path.name.endswith("-en.pdf") else "spanish"
+            self.text = " ".join(
+                entry[f"{language}Clause"] for entry in manifest["entries"]
+            )
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args: object) -> None:
+            return None
+
+        def __getitem__(self, index: int):
+            assert index in (143, 147)
+            return self
+
+        def get_text(self) -> str:
+            return self.text
+
+    monkeypatch.setattr(baseline_cli, "pinned_pdf_path", selected)
+    monkeypatch.setattr(pymupdf, "open", PdfPage)
+    legacy = audit_visibility_zone_evidence(verify_pdfs=True)
+    local = audit_visibility_zone_evidence(verify_pdfs=True, source_layout="local")
+    assert legacy == local
+    assert local["verifiedPdfLanguages"] == ["english", "spanish"]
+    assert selections == [
+        (label, layout) for layout in ("legacy", "local")
+        for label in manifest["sourcePins"]
+    ]
+
+
+def test_visibility_pdf_binding_rejects_mismatch_before_open(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    pymupdf = pytest.importorskip("pymupdf")
+
+    def reject(*_args: object, **_kwargs: object) -> Path:
+        raise baseline_cli.SourcePathError("Source hash mismatch")
+
+    monkeypatch.setattr(baseline_cli, "pinned_pdf_path", reject)
+    with patch.object(pymupdf, "open", side_effect=AssertionError("PDF opened before hash check")):
+        with pytest.raises(ReferenceBaselineError, match="Source hash mismatch"):
+            audit_visibility_zone_evidence(verify_pdfs=True, source_layout="local")
+
+
+def test_visibility_pdf_layout_cli_flag_is_forwarded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    selected: list[tuple[bool, str]] = []
+
+    def audit(*, verify_pdfs: bool = False, source_layout: str = "legacy") -> dict:
+        selected.append((verify_pdfs, source_layout))
+        return audit_visibility_zone_evidence()
+
+    monkeypatch.setattr(baseline_cli, "audit_visibility_zone_evidence", audit)
+    assert main([
+        "--reconcile-explanation-inventory", "--audit-visibility-zones",
+        "--verify-visibility-pdfs", "--source-layout", "local",
+        "--json-output", str(tmp_path / "visibility.json"),
+    ]) == 0
+    assert selected == [(True, "local")]
+
+
 def test_five_visibility_zone_terms_match_bilingual_pinned_pdfs() -> None:
     for relative in (
         "data/pdf/rules/n5-rules-v5.3-en.pdf",

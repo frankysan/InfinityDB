@@ -6390,6 +6390,13 @@ as default and do not search the other layout when selected sources are missing.
 Focused regressions are in `test_report_reference_baseline.py` and
 `test_specialized_audit_receipts.py`, including synthetic PDF equivalence,
 no fallback, source-pinning failure and unchanged report serialization.
+The reference-baseline suite additionally exercises explicit legacy/local
+binding for the five bilingual Visibility Zone term clauses, preserving their
+existing review disposition and failing before PDF parsing on a bad hash.
+Source tests that currently require `data/pdf/` through a fixed path or an
+explicit `require_source_files` prerequisite retain their legacy skip semantics
+until separately migrated; do not globally redirect test data or silently
+turn a skipped source test into unpinned evidence.
 
 ## Maintained snapshot-note validation
 

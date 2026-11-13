@@ -1913,6 +1913,60 @@ test setup; R5 private backup/restore and R6 physical moves/deletions
 remain unapproved and blocked. No ignored source or published artifact
 was moved, altered or deleted.
 
+### Twenty-fifth bounded L2 checkpoint — R4 remaining direct PDF reader disposition (2026-11-13)
+
+**Starting base:** Clean `dev/tooling-workspace-cleanup` at
+`3a6a0afc2ac3f1a9f08a71eb4fd59cbbd837103e`.
+This slice separates implicit fixed-path source reads from callers that already
+explicitly supply a pinned PDF path. No private PDF data or published source
+identity was changed.
+
+- **Bilingual Visibility Zone reviewer:**
+  `report_reference_baseline.audit_visibility_zone_evidence` previously read
+  `root / data/pdf/rules/n5-rules-v5.3-{en,es}.pdf` directly. Optional
+  `source_layout=legacy|local` now selects exactly one path with the common
+  `pinned_pdf_path` resolver; `--source-layout` is forwarded through the
+  reconciliation CLI when `--verify-visibility-pdfs` is set. The bilingual
+  pin definitions, selected page numbers, five reviewed term IDs and report
+  contents remain unchanged. Missing, changed or linked selected sources
+  fail closed before PDF parsing; no search or fallback is introduced.
+- **Explicit-path exceptions (retained):** The same reporter's
+  `--verify-declaration-pdf` and `--verify-conditional-pdf` inputs already
+  receive caller-selected paths and check pinned bytes. The separate
+  `audit_hacking_program_statistics_chart --pdf` similarly hashes its
+  manifest-pinned input. Its `PDF` constant is a legacy **test prerequisite**,
+  not the CLI's implicit source lookup. These explicit interfaces should not
+  acquire an automatic file search or silently override user paths.
+- **Source-dependent acceptance tests (still legacy-bound):**
+  `tests/reference_acceptance_support.py::pdf_pages` and its Basic Attack,
+  Hacking, and Template consumers require the pinned N5 PDF via the existing
+  `require_source_files` precondition. The Template suite separately pins
+  the FAQ and Wiki. `test_hacking_device_program_source_chart.py` imports
+  the statistics PDF constant and uses explicit missing-source skips. Additional
+  source suites contain direct `ROOT / data/pdf/...` prerequisites.
+  Review their source-only fixture/skip contract family by family before
+  offering opt-in layout selection. Do not globally redirect `ROOT`, interpret
+  any available PDF as the correct revision, or change test skip/approval scope.
+
+**Windows validation:** The focused reference-baseline suite passed
+**84 tests, two skipped**, including hermetic selected-layout parity, CLI
+forwarding and hash-failure refusal before PDF opening. The pinned Hacking
+Program source suite passed **7 tests**, including the real supplied PDF/Army
+archive verification. The common PDF path tests passed **40 tests, two skipped**.
+Total: **131 passed, four skipped, zero failures**. Ruff, Pyright (zero errors
+or warnings), documentation lint/links/backlog and Git whitespace checks passed.
+The real Visibility Zone PDF test ran where the pinned source was available;
+source-dependent skips on clean checkouts remain explicit. No live private
+PDF relocation, Syncthing reconfiguration, public source publication or
+R5/R6 approval follows from these changes; Linux parity and hosted CI
+require their own evidence.
+
+**Next R4 step:** Choose and adapt a coherent source-dependent acceptance
+fixture family with explicit opt-in selection and reproducible hash checks;
+validate the source-only tests on both hosts with supplied pins. Keep the
+staged override producer's reviewed basenames/hash bindings separate from the
+receiver's physical destination mapping.
+
 ## Observed starting condition
 
 The initial root-level inspection found:
