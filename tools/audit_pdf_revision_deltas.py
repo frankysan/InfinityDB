@@ -21,11 +21,13 @@ if __package__:
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
+    from tools.research.source_paths import SourcePathError, pinned_pdf_path
 else:  # Support direct execution as tools/audit_pdf_revision_deltas.py.
     from research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
+    from research.source_paths import SourcePathError, pinned_pdf_path
 
 try:
     import pymupdf as fitz
@@ -69,8 +71,10 @@ class Extracted:
     words: list[str]
 
 
-def extract(relative: str, skip_pages: int) -> Extracted:
-    path = SOURCE / relative
+def extract(
+    relative: str, skip_pages: int, *, source_path: Path | None = None,
+) -> Extracted:
+    path = source_path if source_path is not None else SOURCE / relative
     payload = path.read_bytes()
     sha256 = hashlib.sha256(payload).hexdigest()
     starts: list[int] = []
@@ -227,6 +231,10 @@ def main() -> int:
         default=["its18-en", "faq-en", "faq-es"],
     )
     parser.add_argument("--output", default="local/audits/pdf-deltas-2026-11-06.json")
+    parser.add_argument(
+        "--source-layout", choices=("legacy", "local"), default="legacy",
+        help="Select physical PDF input under data/pdf or local/data/pdf; keep original labels",
+    )
     args = parser.parse_args()
     output = ROOT / args.output
     if (
@@ -248,8 +256,19 @@ def main() -> int:
         for relative in [before_name, after_name]:
             cache_key = (relative, skip)
             if cache_key not in documents:
-                extracted = extract(relative, skip)
-                if extracted.sha256 != expected.get(relative):
+                digest = expected.get(relative)
+                if digest is None:
+                    raise SystemExit(f"Unpinned PDF: {relative}")
+                try:
+                    source = pinned_pdf_path(
+                        ROOT, f"data/pdf/{relative}", digest, layout=args.source_layout,
+                    )
+                except SourcePathError as exc:
+                    raise SystemExit(f"Unpinned or changed PDF: {relative}: {exc}") from exc
+                if source is None:
+                    raise SystemExit(f"Selected PDF is unavailable: {relative}")
+                extracted = extract(relative, skip, source_path=source)
+                if extracted.sha256 != digest:
                     raise SystemExit(f"Unpinned or changed PDF: {relative} {extracted.sha256}")
                 documents[cache_key] = extracted
         result = summarize(

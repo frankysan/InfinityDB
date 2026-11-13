@@ -1825,6 +1825,52 @@ until the affected per-family consumers and validation are accepted. R5
 operational evidence and R6 copying/deletion retain their separate gates;
 no source-label rewrite or physical relocation is authorized by this checkpoint.
 
+### Twenty-third bounded L2 checkpoint — R4 read-only reference and revision-delta PDF consumers (2026-11-13)
+
+**Scope:** Two additional research consumers now accept an explicit
+`--source-layout legacy|local` physical PDF binding, retaining `legacy` as the
+default. Both continue to report canonical `data/pdf/...` source identities.
+No published source rows, annotated citations, version chronology, source hash
+pins, tracked three-database serving input, producer or private PDF bytes were
+rewritten. R4 remains open for other direct readers and staged PDF/override
+activation; R5 operational recovery and R6 physical copy/delete gates remain
+separate and unapproved.
+
+- `tools.report_reference_baseline` resolves only PDF source groups under
+  `local/data/pdf/...` when explicitly selected, using the existing reviewed
+  source SHA-256. It does not scan the legacy root as a fallback. Absent local
+  sources retain missing status, while conflicting/unpinned PDF source hashes
+  and supplied altered bytes reject the opt-in report. Non-PDF source and
+  runtime publication selection are unchanged; default legacy status and
+  mismatch reporting remain compatible.
+- `tools.audit_pdf_revision_deltas` resolves each exact selected PDF from
+  its existing private pin inventory against the declared physical layout,
+  checks hash identity before text extraction, and checks extracted bytes
+  again. The pair labels and comparison report fields remain unchanged.
+  An absent or conflicting selected PDF blocks a fresh report; no alternate
+  layout is consulted and prior report files remain protected by exclusive
+  creation. No private PDF inventory or existing report has been modified.
+- The canonical [curated-data policy](../data/curated/README.md#explicit-physical-pdf-bindings-for-research)
+  and [testing contract](testing.md) describe both selectors. The new
+  hermetic regression fixtures cover source labels, selected-layout parity,
+  no fallback, mismatched hashes and report non-overwrite behavior.
+
+**Windows focused validation:** `test_report_reference_baseline.py`
+**81 passed / two skipped**, `test_specialized_audit_receipts.py` **34 passed**,
+`test_research_source_paths.py` **40 passed / two skipped**, and
+`test_source_coverage_dispositions.py` **23 passed**:
+**178 passed, four skipped, zero failures**. The two skips in each relevant
+suite are optional unavailable or filesystem-dependent evidence cases, not
+accepted source migrations. Targeted Ruff, repository Pyright (zero errors or
+warnings), documentation lint/link/backlog checks and Git whitespace checks
+passed. No full suite, hosted exact-SHA CI, live private PDF migration,
+Windows/Linux receiver activation or backup/restore acceptance is claimed.
+
+**Next R4 work:** Audit remaining direct PDF readers for fixed roots and
+hash-authority assumptions; separately review staged PDF/override mappings,
+including current published source labels and producer lookup provenance.
+Do not treat this code-only selection as private-source migration approval.
+
 ## Observed starting condition
 
 The initial root-level inspection found:

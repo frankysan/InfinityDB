@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -36,9 +37,23 @@ def _pdf_setup(
     monkeypatch.setattr(pdf_delta, "PIN_PATH", pins)
     examined: list[str] = []
 
-    def extracted(relative: str, skipped: int) -> pdf_delta.Extracted:
+    def select_source(
+        selected_root: Path, label: str, digest: str, *, layout: str,
+    ) -> Path:
+        assert selected_root == root
+        assert label in {"data/pdf/" + before, "data/pdf/" + after}
+        assert digest == ("old-sha" if label.endswith(before) else "new-sha")
+        prefix = "data/pdf" if layout == "legacy" else "local/data/pdf"
+        return root / prefix / label.removeprefix("data/pdf/")
+
+    monkeypatch.setattr(pdf_delta, "pinned_pdf_path", select_source)
+
+    def extracted(
+        relative: str, skipped: int, *, source_path: Path | None = None,
+    ) -> pdf_delta.Extracted:
         examined.append(relative)
         assert skipped == skip
+        assert source_path is not None
         return pdf_delta.Extracted(
             path=relative,
             sha256="old-sha" if relative == before else "new-sha",
@@ -123,6 +138,98 @@ def test_pdf_revision_report_fresh_preserves_serialization_and_pins(
     assert "Report: local/audits/fresh/run.json" in (
         capsys.readouterr().out.replace("\\", "/")
     )
+
+
+def test_pdf_revision_local_layout_uses_exact_pinned_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, _, examined = _pdf_setup(tmp_path, monkeypatch)
+    monkeypatch.setattr(pdf_delta, "summarize", _pdf_result)
+    selected: list[tuple[str, str, str]] = []
+
+    def select_source(root: Path, label: str, digest: str, *, layout: str) -> Path:
+        assert root == tmp_path
+        selected.append((label, digest, layout))
+        return root / "local/data/pdf" / label.removeprefix("data/pdf/")
+
+    monkeypatch.setattr(pdf_delta, "pinned_pdf_path", select_source)
+    assert _pdf_main(
+        monkeypatch, "--pairs", "faq-en", "--source-layout", "local",
+        "--output", "local/audits/local.json",
+    ) == 0
+    before, after, _ = pdf_delta.PAIRS["faq-en"]
+    assert examined == [before, after]
+    assert selected == [
+        (f"data/pdf/{before}", "old-sha", "local"),
+        (f"data/pdf/{after}", "new-sha", "local"),
+    ]
+    assert (tmp_path / "local/audits/local.json").is_file()
+
+
+def test_pdf_revision_selected_hash_failure_does_not_create_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, _, examined = _pdf_setup(tmp_path, monkeypatch)
+
+    def reject(*args: Any, **kwargs: Any) -> Path:
+        raise pdf_delta.SourcePathError("Source hash mismatch")
+
+    monkeypatch.setattr(pdf_delta, "pinned_pdf_path", reject)
+    with pytest.raises(SystemExit, match="Source hash mismatch"):
+        _pdf_main(
+            monkeypatch, "--pairs", "faq-en", "--source-layout", "local",
+            "--output", "local/audits/rejected.json",
+        )
+    assert not examined
+    assert not (tmp_path / "local/audits/rejected.json").exists()
+
+
+def test_pdf_revision_real_pdfs_are_layout_equivalent_without_fallback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(pdf_delta, "ROOT", tmp_path)
+    before, after, _ = pdf_delta.PAIRS["faq-en"]
+    pins = []
+    for relative, phrase in ((before, "Original rules phrase"), (after, "Updated rules phrase")):
+        with pdf_delta.fitz.open() as doc:
+            doc.new_page()
+            doc.new_page().insert_text((72, 72), phrase)
+            payload = doc.tobytes()
+        for root in ("data/pdf", "local/data/pdf"):
+            destination = tmp_path / root / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(payload)
+        pins.append({
+            "path": "data/pdf/" + relative,
+            "sha256": hashlib.sha256(payload).hexdigest(),
+        })
+    pin_path = tmp_path / "pins.json"
+    pin_path.write_text(json.dumps({"artifacts": pins}), encoding="utf-8")
+    monkeypatch.setattr(pdf_delta, "PIN_PATH", pin_path)
+    assert _pdf_main(
+        monkeypatch, "--pairs", "faq-en", "--source-layout", "legacy",
+        "--output", "local/validation/legacy.json",
+    ) == 0
+    assert _pdf_main(
+        monkeypatch, "--pairs", "faq-en", "--source-layout", "local",
+        "--output", "local/validation/local.json",
+    ) == 0
+    assert (tmp_path / "local/validation/legacy.json").read_bytes() == (
+        tmp_path / "local/validation/local.json"
+    ).read_bytes()
+    # A corrupt selected source must not fall back to the intact legacy sibling.
+    (tmp_path / "local/data/pdf" / after).write_bytes(b"bad pdf")
+    rejected = tmp_path / "local/validation/rejected.json"
+    with pytest.raises(SystemExit, match="Source hash mismatch"):
+        _pdf_main(
+            monkeypatch, "--pairs", "faq-en", "--source-layout", "local",
+            "--output", "local/validation/rejected.json",
+        )
+    assert not rejected.exists()
+    assert _pdf_main(
+        monkeypatch, "--pairs", "faq-en", "--source-layout", "legacy",
+        "--output", "local/validation/legacy-again.json",
+    ) == 0
 
 
 def test_pdf_revision_late_collision_does_not_clobber_report(

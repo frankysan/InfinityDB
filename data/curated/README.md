@@ -505,14 +505,23 @@ points, unreadable files, invalid policy and hash conflicts fail closed.
 Historical missing inputs can remain explicitly not supplied; they cannot
 become verified merely because an alternative root contains a matching file.
 
-Currently integrated readers are `verify_reinforcements_inputs` in the
+Integrated readers include `verify_reinforcements_inputs` in the
 source-evidence auditor (optional `source_layout` API keyword) and
 `tools.audit_reinforcements_applicability` (`--source-layout legacy|local`).
 The latter applies the selected layout to both historical annex PDFs and its
 current Core/ITS reference PDFs, preserving the same applicability report.
-This does not apply the mapping to every PDF reader: the reference reporter,
-revision-delta audit, other direct readers and source-dependent test setup
-retain their existing explicit/default path contracts until their R4 review.
+`tools.report_reference_baseline` and `tools.audit_pdf_revision_deltas` also
+accept `--source-layout legacy|local` for PDF evidence. The reporter keeps
+its existing legacy-status semantics; when `local` is explicitly selected,
+its canonical PDF groups require one valid published SHA-256, reject conflicting
+or altered bytes, and mark absent selected PDFs missing rather than falling
+back to legacy files. Non-PDF source groups, published database selection,
+JSON source identities and Markdown labels remain unchanged. The revision-delta
+audit resolves every selected original PDF from its existing private hash
+inventory, verifies it before extraction and again against extracted bytes,
+and preserves unchanged pair names/page references in its reports. Direct
+research readers outside these scopes and source-dependent test setup still
+retain their individually reviewed path contracts.
 Normal rules builds still do not open research PDFs. Override lookup paths
 belong to the external symbol producer and are independent of these PDF labels.
 

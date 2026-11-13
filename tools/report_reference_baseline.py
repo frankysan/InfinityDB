@@ -30,8 +30,10 @@ from infinity_db.variant_usage_source import normalized_source_connection
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 
 if __package__:
+    from .research.source_paths import SourcePathError, pinned_pdf_path
     from .served_runtime import ServedRuntimeError, verify_served_runtime
 else:
+    from research.source_paths import SourcePathError, pinned_pdf_path
     from served_runtime import ServedRuntimeError, verify_served_runtime
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -791,15 +793,35 @@ def _revision_oldid(url: str | None) -> str | None:
 
 
 def _artifact_evidence(
-    root: Path, local_path: str | None, url: str | None, hashes: set[str]
+    root: Path, local_path: str | None, url: str | None, hashes: set[str],
+    *, source_layout: str = "legacy",
 ) -> dict[str, Any]:
-    """Compare exact local bytes when possible; never equate an oldid URL with a file."""
+    """Verify an explicitly selected PDF layout without changing its source identity."""
     location = _source_location(root, local_path)
+    selected = root / local_path if local_path is not None else None
+    if source_layout == "local" and local_path is not None and local_path.startswith("data/pdf/"):
+        if len(hashes) != 1:
+            raise ReferenceBaselineError(
+                f"Local PDF source requires one declared SHA-256: {local_path}"
+            )
+        try:
+            selected = pinned_pdf_path(
+                root, local_path, next(iter(hashes)), layout=source_layout, missing_ok=True,
+            )
+        except SourcePathError as exc:
+            raise ReferenceBaselineError(str(exc)) from exc
+        location = "available" if selected is not None else "missing-local-artifact"
     actual_sha: str | None = None
     matches: bool | None = None
     oldid = _revision_oldid(url) if local_path is None else None
-    if location == "available" and local_path is not None:
-        actual_sha = _sha256(root / local_path)
+    if location == "available" and selected is not None:
+        actual_sha = _sha256(selected)
+        if (
+            source_layout == "local" and local_path is not None
+            and local_path.startswith("data/pdf/")
+        ):
+            if actual_sha not in hashes:
+                raise ReferenceBaselineError(f"Source hash mismatch: {local_path}")
         if len(hashes) > 1:
             status = "conflicting-source-hashes"
         elif hashes:
@@ -812,6 +834,7 @@ def _artifact_evidence(
     else:
         status = location
     return {
+        "localStatus": location,
         "verificationStatus": status,
         "artifactSha256": actual_sha,
         "declaredHashMatches": matches,
@@ -895,8 +918,11 @@ def build_baseline(
     root: Path = PROJECT_ROOT,
     army_archive: Path | None = None,
     normalized: Path | None = None,
+    source_layout: str = "legacy",
 ) -> dict[str, Any]:
     """Inventory published identities; intentionally make no completeness claims."""
+    if source_layout not in {"legacy", "local"}:
+        raise ReferenceBaselineError(f"Unknown source layout: {source_layout}")
     if normalized is not None and army_archive is None:
         raise ReferenceBaselineError(
             "Verified normalized source requires --army-archive for source parity"
@@ -1031,7 +1057,10 @@ def build_baseline(
                 "retrievedDates": sorted(group["retrievedDates"]),
                 "acquiredAt": sorted(group["acquiredAt"]),
                 "declaredSha256": sorted(hashes),
-                **_artifact_evidence(root, group["localPath"], group["url"], hashes),
+                **_artifact_evidence(
+                    root, group["localPath"], group["url"], hashes,
+                    source_layout=source_layout,
+                ),
             })
         verification_counts: dict[str, int] = {}
         for source in sources:
@@ -3128,6 +3157,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--army-archive", type=Path, help="Verify exact ZIP bytes against Army pin")
     parser.add_argument(
+        "--source-layout", choices=("legacy", "local"), default="legacy",
+        help="Select physical PDF evidence under data/pdf or local/data/pdf; labels stay unchanged",
+    )
+    parser.add_argument(
         "--normalized", type=Path,
         help="Attested normalized.json for --army-archive, without a raw sibling",
     )
@@ -3337,7 +3370,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("--normalized requires --army-archive")
     report = build_baseline(
         args.army_db, args.rules_db, army_archive=args.army_archive,
-        normalized=args.normalized,
+        normalized=args.normalized, source_layout=args.source_layout,
     )
     if args.verify_server:
         try:

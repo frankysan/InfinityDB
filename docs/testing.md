@@ -6377,6 +6377,17 @@ their explicit missing-source skips on clean checkouts. These fixtures do not
 authorize copying private PDFs or changing their recorded paths; see the
 [research binding contract](../data/curated/README.md#explicit-physical-pdf-bindings-for-research).
 
+The opt-in `--source-layout local` for `tools.report_reference_baseline` and
+`tools.audit_pdf_revision_deltas` changes only physical PDF lookup. Baseline
+source groups retain original source labels and reported identities; local PDF
+verification requires one published SHA-256 and rejects mismatches. The delta
+audit requires the existing ignored `local/pdf-revision-inventory.json` pins and
+verifies exact selected PDF bytes before extracting text. Both retain `legacy`
+as default and do not search the other layout when selected sources are missing.
+Focused regressions are in `test_report_reference_baseline.py` and
+`test_specialized_audit_receipts.py`, including synthetic PDF equivalence,
+no fallback, source-pinning failure and unchanged report serialization.
+
 ## Maintained snapshot-note validation
 
 The routine pytest suite recursively validates every maintained JSON snapshot note under

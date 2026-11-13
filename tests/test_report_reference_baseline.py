@@ -1307,6 +1307,50 @@ def test_local_source_hash_evidence_and_unpinned_pdf(tmp_path: Path) -> None:
     assert conflict["verificationStatus"] == "conflicting-source-hashes"
 
 
+def test_explicit_local_pdf_layout_keeps_source_labels_and_verifies_hash(tmp_path: Path) -> None:
+    label = "data/pdf/rules/pinned.pdf"
+    original = b"unchanged reviewed source"
+    digest = hashlib.sha256(original).hexdigest()
+    legacy = tmp_path / label
+    legacy.parent.mkdir(parents=True)
+    legacy.write_bytes(original)
+    # The local layout must not discover or accept the legacy copy.
+    missing = _artifact_evidence(
+        tmp_path, label, None, {digest}, source_layout="local",
+    )
+    assert missing["localStatus"] == "missing-local-artifact"
+    assert missing["artifactSha256"] is None
+    assert _artifact_evidence(tmp_path, label, None, {digest})[
+        "verificationStatus"
+    ] == "hash-matched"
+
+    local = tmp_path / "local/data/pdf/rules/pinned.pdf"
+    local.parent.mkdir(parents=True)
+    local.write_bytes(original)
+    selected = _artifact_evidence(tmp_path, label, None, {digest}, source_layout="local")
+    assert selected["localStatus"] == "available"
+    assert selected["verificationStatus"] == "hash-matched"
+    assert selected["artifactSha256"] == digest
+    assert selected["declaredHashMatches"] is True
+
+    local.write_bytes(b"tampered source")
+    with pytest.raises(ReferenceBaselineError, match="Source hash mismatch"):
+        _artifact_evidence(tmp_path, label, None, {digest}, source_layout="local")
+    with pytest.raises(ReferenceBaselineError, match="one declared SHA-256"):
+        _artifact_evidence(tmp_path, label, None, {digest, "0" * 64}, source_layout="local")
+    with pytest.raises(ReferenceBaselineError, match="one declared SHA-256"):
+        _artifact_evidence(tmp_path, label, None, set(), source_layout="local")
+
+
+def test_local_baseline_layout_is_opt_in_and_retains_source_inventory(tmp_path: Path) -> None:
+    legacy = build_baseline(ARMY_DB, RULES_DB, root=tmp_path)
+    local = build_baseline(ARMY_DB, RULES_DB, root=tmp_path, source_layout="local")
+    assert local["sourceInventory"] == legacy["sourceInventory"]
+    assert local["sourceGroups"] == legacy["sourceGroups"]
+    with pytest.raises(ReferenceBaselineError, match="Unknown source layout"):
+        build_baseline(ARMY_DB, RULES_DB, root=tmp_path, source_layout="unknown")
+
+
 def test_url_pin_is_not_offline_content_verification(tmp_path: Path) -> None:
     exact = "https://infinitythewiki.com/index.php?title=Reset&oldid=3056"
     assert _revision_oldid(exact) == "3056"
