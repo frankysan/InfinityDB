@@ -23,7 +23,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from infinity_army_data.deterministic_io import write_json_lf
+from infinity_army_data.deterministic_io import json_text
 
 try:
     from tools.create_work_archive import create_work_archive
@@ -36,6 +36,29 @@ FORMAT = "InfinityDB cross-platform determinism manifest"
 FORMAT_VERSION = 2
 LEGACY_FORMAT_VERSION = 1
 FIXED_ARCHIVE_TIME = datetime(2000, 1, 1, tzinfo=UTC)
+
+
+def _require_fresh_output(path: Path) -> None:
+    """Preserve prior manifests and diagnostics, including dangling symlinks."""
+    if path.exists() or path.is_symlink():
+        raise FileExistsError(f"Determinism output already exists: {path}")
+
+
+def _check_output_selection(output: Path, diagnostics: Path | None) -> None:
+    """Reject collisions before running the expensive deterministic builds."""
+    _require_fresh_output(output)
+    if diagnostics is not None:
+        if output.resolve() == diagnostics.resolve():
+            raise ValueError("Manifest and diagnostics outputs must be different files")
+        _require_fresh_output(diagnostics)
+
+
+def _write_new_json(path: Path, value: Any) -> None:
+    """Emit exactly the canonical LF JSON bytes without replacing earlier evidence."""
+    _require_fresh_output(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("x", encoding="utf-8", newline="\n") as handle:
+        handle.write(json_text(value, sort_keys=True))
 
 
 def sha256_file(path: Path) -> str:
@@ -139,6 +162,8 @@ def build_manifest(
     project_root: Path, *, legacy_paired: bool = False,
     diagnostics_output: Path | None = None,
 ) -> dict[str, Any]:
+    if diagnostics_output is not None:
+        _require_fresh_output(diagnostics_output)
     source_fixture = project_root / "tests" / "fixtures" / "deployment-smoke"
     with tempfile.TemporaryDirectory(prefix="infinitydb-determinism-") as temporary:
         root = Path(temporary)
@@ -227,7 +252,7 @@ def build_manifest(
                     "work.zip": _zip_diagnostics(work_archive),
                 },
             }
-            write_json_lf(diagnostics_output, diagnostics, sort_keys=True)
+            _write_new_json(diagnostics_output, diagnostics)
 
         return {
             "format": FORMAT,
@@ -240,29 +265,36 @@ def build_manifest(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--output", type=Path, required=True,
+        help="New canonical manifest filename (existing files are rejected)",
+    )
     parser.add_argument(
         "--legacy-paired", action="store_true",
         help="Generate the original v1 manifest, including a disposable raw archive",
     )
     parser.add_argument(
         "--diagnostics-output", type=Path,
-        help="Optional SQLite table/header and ZIP member diagnostics in local/",
+        help="New optional SQLite/ZIP diagnostics filename (use local/validation/)",
     )
     args = parser.parse_args(argv)
 
     project_root = Path(__file__).resolve().parents[1]
-    print(
-        f"Determinism environment: Python {sys.version_info.major}."
-        f"{sys.version_info.minor}.{sys.version_info.micro}, "
-        f"SQLite {sqlite3.sqlite_version}, zlib {zlib.ZLIB_VERSION} "
-        f"(runtime {zlib.ZLIB_RUNTIME_VERSION})"
-    )
-    manifest = build_manifest(
-        project_root, legacy_paired=args.legacy_paired,
-        diagnostics_output=args.diagnostics_output,
-    )
-    write_json_lf(args.output, manifest, sort_keys=True)
+    try:
+        _check_output_selection(args.output, args.diagnostics_output)
+        print(
+            f"Determinism environment: Python {sys.version_info.major}."
+            f"{sys.version_info.minor}.{sys.version_info.micro}, "
+            f"SQLite {sqlite3.sqlite_version}, zlib {zlib.ZLIB_VERSION} "
+            f"(runtime {zlib.ZLIB_RUNTIME_VERSION})"
+        )
+        manifest = build_manifest(
+            project_root, legacy_paired=args.legacy_paired,
+            diagnostics_output=args.diagnostics_output,
+        )
+        _write_new_json(args.output, manifest)
+    except (OSError, ValueError) as exc:
+        parser.exit(1, f"Determinism output: {exc}\n")
     print(f"Determinism manifest: {args.output}")
     for name, digest in manifest["artifacts"].items():
         print(f"{digest}  {name}")

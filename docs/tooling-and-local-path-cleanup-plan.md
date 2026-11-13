@@ -241,9 +241,11 @@ prior report bytes. The direct `--output` interface, existing
 `local/reports/` destinations, source-checks workflow and artifact
 consumer remain unchanged. Manual repeated evidence should use a
 fresh categorized `local/validation/determinism/<run-id>-<SHA>/`
-directory. This is a bounded preflight protection, **not** a general
-atomic concurrent-writer lock or a migration of generic
-`tools.build_determinism_manifest` outputs.
+directory. This first change was a bounded preflight protection,
+**not** an atomic concurrent-writer lock; the later
+[fifth L2 output update](#fifth-bounded-l2-output-contract-update--generic-determinism-manifest-2026-11-13)
+adds exclusive-create behavior to the generic generator without
+migrating existing evidence.
 
 **Validation:** Windows focused `test_run_pinned_determinism.py`
 passed **6/6**, including duplicate-output refusal before Docker and
@@ -359,6 +361,47 @@ Hosted release acceptance, Linux parity and complete CI remain
 separate gates; no hosted candidate was accepted or deployed.
 The tracked-retirement (T) and private-data migration (M)
 decisions are still unapproved.
+
+### Fifth bounded L2 output-contract update — generic determinism manifest (2026-11-13)
+
+**Baseline:** Clean `dev/tooling-workspace-cleanup` at
+`b8f5869ae0e6afadc2ff2de3657588787fe4f30e`, following the
+release-candidate receipt guard. The direct generic
+`tools.build_determinism_manifest` CLI had two independently
+truncating destinations: required `--output` and optional
+`--diagnostics-output`. Unlike the previously protected Docker wrapper,
+direct invocation and the library's optional diagnostics branch could
+silently replace previously accepted evidence.
+
+The generator now checks both selected filenames before starting any
+expensive fixture/database/archive work, rejects existing files and
+symlinks, and detects a duplicate normalized destination. Both outputs
+use exclusive file creation and the unchanged canonical `json_text`
+serialization (sorted keys, UTF-8, LF, and trailing newline). Direct
+`build_manifest(..., diagnostics_output=...)` preflights and
+exclusively writes diagnostics as well. Collisions arriving during
+the build cannot truncate either previous output. No existing CLI
+arguments, v1/v2 manifest format, hash membership, direct comparison,
+Docker command/mount, or hosted artifact upload path were changed.
+
+The current [CI owner](ci.md#cross-platform-deterministic-outputs)
+documents fresh categorized local report destinations while preserving
+the hosted `local/reports/determinism-manifest.json` compatibility
+path. The two outputs are **not an atomic transaction**: an interrupted
+or failed build may leave a new partial diagnostics or manifest file
+that requires separate inspection. No existing private evidence was
+moved or deleted; this is not an L3 migration or L4 tool cutover.
+
+**Validation:** The Windows hermetic comparator/generator regression
+module passed **22/22** (including both occupied destinations, duplicate
+selection, symlink refusal, the direct diagnostics path, late-arriving
+manifest collision, canonical byte formatting and exclusive creation).
+The pinned Docker wrapper passed **6/6** and deterministic I/O tests
+passed **4/4**, for **32/32 focused tests**. Targeted Ruff, repository
+Pyright (zero errors/warnings), documentation lint/links/backlog and
+`git diff --check` passed. A real pinned Docker manifest build, hosted
+cross-platform byte parity and exact-SHA CI acceptance were not run.
+T retirements and M private-source actions remain unapproved.
 
 ## Observed starting condition
 

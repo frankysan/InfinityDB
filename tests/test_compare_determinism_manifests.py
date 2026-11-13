@@ -110,6 +110,127 @@ def test_manifest_cli_selects_explicit_legacy_export(
     )
 
 
+@pytest.mark.parametrize("occupied", ("manifest", "diagnostics"))
+def test_manifest_cli_rejects_existing_evidence_before_build(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str], occupied: str,
+) -> None:
+    manifest_path = tmp_path / "manifest.json"
+    diagnostic_path = tmp_path / "diagnostics.json"
+    occupied_path = manifest_path if occupied == "manifest" else diagnostic_path
+    original = b'{"previous": "accepted evidence"}\n'
+    occupied_path.write_bytes(original)
+
+    def unexpected_build(*args: object, **kwargs: object) -> object:
+        pytest.fail("Preflight should reject occupied output before building")
+
+    monkeypatch.setattr(manifest_builder, "build_manifest", unexpected_build)
+    with pytest.raises(SystemExit) as error:
+        manifest_builder.main([
+            "--output", str(manifest_path),
+            "--diagnostics-output", str(diagnostic_path),
+        ])
+    assert error.value.code == 1
+    assert "already exists" in capsys.readouterr().err
+    assert occupied_path.read_bytes() == original
+    other = diagnostic_path if occupied == "manifest" else manifest_path
+    assert not other.exists()
+
+
+def test_manifest_cli_rejects_same_normalized_output_before_build(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def unexpected_build(*args: object, **kwargs: object) -> object:
+        pytest.fail("Same path selected for two outputs must fail before building")
+
+    monkeypatch.setattr(manifest_builder, "build_manifest", unexpected_build)
+    output = tmp_path / "manifest.json"
+    with pytest.raises(SystemExit) as error:
+        manifest_builder.main([
+            "--output", str(output),
+            "--diagnostics-output", str(tmp_path / "subdir" / ".." / "manifest.json"),
+        ])
+    assert error.value.code == 1
+    assert "different files" in capsys.readouterr().err
+    assert not output.exists()
+
+
+def test_manifest_cli_rejects_dangling_symlink_before_build(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "manifest.json"
+    # Creating symlinks may require additional privileges on Windows.
+    monkeypatch.setattr(type(output), "is_symlink", lambda path: path == output)
+
+    def unexpected_build(*args: object, **kwargs: object) -> object:
+        pytest.fail("Symlink output must fail before building")
+
+    monkeypatch.setattr(manifest_builder, "build_manifest", unexpected_build)
+    with pytest.raises(SystemExit) as error:
+        manifest_builder.main(["--output", str(output)])
+    assert error.value.code == 1
+    assert "already exists" in capsys.readouterr().err
+    assert not output.exists()
+
+
+def test_direct_manifest_builder_rejects_existing_diagnostics_before_build(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    diagnostics = tmp_path / "diagnostics.json"
+    original = b"prior detailed diagnostics\n"
+    diagnostics.write_bytes(original)
+
+    def unexpected_run(*args: object, **kwargs: object) -> None:
+        pytest.fail("Existing diagnostics must fail before the expensive build")
+
+    monkeypatch.setattr(manifest_builder, "_run", unexpected_run)
+    with pytest.raises(FileExistsError, match="already exists"):
+        manifest_builder.build_manifest(tmp_path, diagnostics_output=diagnostics)
+    assert diagnostics.read_bytes() == original
+
+
+def test_manifest_cli_does_not_replace_output_created_during_build(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "manifest.json"
+    original = b"another writer's output\n"
+
+    def build(*args: object, **kwargs: object) -> dict[str, object]:
+        output.write_bytes(original)
+        return {
+            "format": manifest_builder.FORMAT,
+            "formatVersion": 2,
+            "artifacts": {"build/army.db": "a" * 64},
+        }
+
+    monkeypatch.setattr(manifest_builder, "build_manifest", build)
+    with pytest.raises(SystemExit) as error:
+        manifest_builder.main(["--output", str(output)])
+    assert error.value.code == 1
+    captured = capsys.readouterr()
+    assert "already exists" in captured.err
+    assert "Determinism manifest:" not in captured.out
+    assert output.read_bytes() == original
+
+
+def test_manifest_output_uses_canonical_json_and_exclusive_creation(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "nested" / "manifest.json"
+    document = {"z": "Å", "a": {"value": 1}}
+    manifest_builder._write_new_json(output, document)
+    from infinity_army_data.deterministic_io import json_text
+
+    original = json_text(document, sort_keys=True).encode("utf-8")
+    assert output.read_bytes() == original
+    with pytest.raises(FileExistsError, match="already exists"):
+        manifest_builder._write_new_json(output, {"replacement": True})
+    assert output.read_bytes() == original
+
+
 def test_manifest_fixture_copy_normalizes_only_json_line_endings(
     tmp_path: Path,
 ) -> None:

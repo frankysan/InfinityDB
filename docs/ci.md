@@ -453,6 +453,22 @@ logical parity nor the installed tracked database alone replaces that hosted che
 Generators remain responsible for canonical bytes; `.gitattributes` only prevents tracked
 checksum-bound files from being rewritten by checkout line-ending conversion.
 
+The current [pinned container runner](../tools/run_pinned_determinism.py)
+invokes `tools.build_determinism_manifest` with an explicit report path
+and uploads that selected JSON for comparison. The underlying generator
+also supports direct `--output` and optional `--diagnostics-output`.
+Both destinations must be **new**: it rejects pre-existing files or
+symlinks and two names resolving to the same path *before* generating
+artifacts, and uses exclusive creation to prevent a later collision.
+The canonical JSON content, v1/v2 format selection, exact SHA-256
+comparison and existing hosted `local/reports/determinism-manifest.json`
+path remain unchanged. For local repeatable investigations, choose a
+fresh `local/validation/determinism/<UTC-run-id>-<short-SHA>/`
+directory for `manifest.json` and optional `diagnostics.json`. The
+two outputs are not an atomic pair: an interrupted run can leave a new
+partial file for inspection, but may not replace existing evidence.
+Do not recycle or delete accepted historical reports to reuse a path.
+
 ## Installed wheel smoke
 
 `.github/workflows/installed-wheel.yml` builds a wheel, installs it in a fresh virtual environment,
