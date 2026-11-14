@@ -542,7 +542,7 @@ restart is observable even when version and snapshot revision are unchanged. Rea
 endpoint does not advance either timestamp.
 
 The accepted boundary for retained metrics history is a separate operational service, not writable
-state inside the application container. `tools/metrics_history.py` now owns the standalone SQLite
+state inside the application container. `tools/operations/metrics_history.py` now owns the standalone SQLite
 collection/aggregation engine: one rolling scrape state is converted into generation-aware counter
 deltas and bounded weekly summaries keyed by week/version/snapshot. The deployed service scrapes
 the private `app:8000/internal/metrics` endpoint over the Compose network, runs with an immutable

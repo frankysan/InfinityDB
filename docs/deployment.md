@@ -272,7 +272,7 @@ container restarts.
 
 Retained history does not make the web-facing application container writable. The implemented
 topology uses a separate `metrics-history` operational service on the private Compose network.
-The standalone collection/aggregation/reporting engine is implemented in `tools/metrics_history.py`
+The standalone collection/aggregation/reporting engine is implemented in `tools/operations/metrics_history.py`
 and runs through the dedicated Compose service. The service scrapes
 `http://app:8000/internal/metrics` directly, exposes no public/LAN port, runs with an immutable root
 filesystem, and owns one dedicated writable SQLite
@@ -306,8 +306,8 @@ its catalog, variant and Army query values are never retained as labels.
 The engine can also be exercised manually from a checkout against the trusted LAN metrics listener:
 
 ```powershell
-python tools/metrics_history.py --database local/reports/metrics-history.db collect --url http://127.0.0.1:9090/metrics
-python tools/metrics_history.py --database local/reports/metrics-history.db status
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db collect --url http://127.0.0.1:9090/metrics
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db status
 ```
 
 Retained history is queryable without exposing another HTTP endpoint. `periods` lists the exact
@@ -317,10 +317,10 @@ aggregate all matching retained periods. `compare` defaults to the latest two ex
 independent `--from-*` and `--to-*` selectors. For example:
 
 ```powershell
-python tools/metrics_history.py --database local/reports/metrics-history.db periods
-python tools/metrics_history.py --database local/reports/metrics-history.db report
-python tools/metrics_history.py --database local/reports/metrics-history.db report --week 2026-10-05
-python tools/metrics_history.py --database local/reports/metrics-history.db compare --from-version 0.9.1 --to-version 0.10.0
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db periods
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db report
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db report --week 2026-10-05
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db compare --from-version 0.9.1 --to-version 0.10.0
 ```
 
 Human-readable reports include request/status counts, 4xx+5xx and 5xx rates, normalized-route
@@ -364,7 +364,7 @@ silently accumulate collector images. Periodic collection handles normal operati
 unexpected restart, generation detection prevents reset counters from being interpreted as deltas.
 
 The persistent history database is independent forward-moving operational state. Its on-disk format is
-versioned separately from the application. `tools/metrics_history.py` owns an explicit
+versioned separately from the application. `tools/operations/metrics_history.py` owns an explicit
 one-version-at-a-time forward-migration registry: every persisted format increment must add the
 previous -> next migration before `FORMAT_VERSION` is raised. Each migration and its `format_version`
 update run in one SQLite transaction. A failed migration therefore leaves the previous committed format

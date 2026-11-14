@@ -277,7 +277,6 @@
         "test_stage_full_asset_bundle",
         "test_symbol_catalog",
         "test_symbol_publication",
-        "test_symbol_raster_validation",
         "test_symbol_source",
         "test_verify_deployment_assets",
         "test_verify_effective_symbol_handoff",

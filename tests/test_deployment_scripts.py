@@ -105,7 +105,7 @@ def test_metrics_history_service_is_immutable_private_and_volume_backed() -> Non
     assert "condition: service_healthy" in metrics_service
 
     assert "FROM python:3.11-slim" in dockerfile
-    assert "tools/metrics_history.py /app/metrics_history.py" in dockerfile
+    assert "tools/operations/metrics_history.py /app/metrics_history.py" in dockerfile
     assert "USER metrics" in dockerfile
     assert "ENTRYPOINT" in dockerfile
     assert 'CMD ["run"]' in dockerfile

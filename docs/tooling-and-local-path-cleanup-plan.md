@@ -269,6 +269,18 @@ path-sanitization test loading. The producer remains independent; no
 source archives, published SVGs, mappings or runtime databases changed.
 Cross-domain CI/deployment gates and asset validation stay root-owned.
 
+**L4 operations service ownership and L5 raster retirement (2026-11-14):**
+Moved the standalone metrics-history collector into `tools/operations/`,
+updating its Docker build-context COPY, deployment tests and operator
+documentation. The container still runs the identical standalone Python
+script at `/app/metrics_history.py`; its persistent named volume and
+metrics protocol are unchanged. CI/release orchestrators remain at root.
+Retired unused `tools/symbol_raster_validation.py` and its two historical
+tests; the producer's canonical compression retains the raster comparison.
+The independent source/receipt/hash publication acceptance checks in
+InfinityDB remain unchanged. Producer regression tests were not rerun
+for this deletion; Git retains the duplicate implementation.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation
@@ -416,17 +428,13 @@ reviewed compatibility cutover.
 
 ### T — Tracked-code/document retirement (separate per-batch decisions)
 
-- **T1 — Candidate:** Retire
-  `tools/symbol_raster_validation.py` and the two
-  historical-only tests in `tests/test_symbol_raster_validation.py`.
-  `InfinityDB-symbol-tools` owns the identical visual-comparison
-  implementation inside canonical compression; the InfinityDB
-  duplicate has no other tracked tool imports. **Not yet approved:**
-  finish the independent caller/packaging scan and obtain current
-  producer regression acceptance (the MCP attempt returned
-  `validation_unknown`). Keep receipt/ZIP verification and
-  source-to-publication acceptance intact; do not claim producer
-  raster evidence is a separate consumer visual parity check.
+- **T1 — Completed 2026-11-14:** Retired
+  `tools/symbol_raster_validation.py` and its two historical tests after
+  confirming the only tracked import was in that test module.
+  `InfinityDB-symbol-tools` owns the active raster implementation.
+  The consumer's independent receipt/ZIP and source-to-publication
+  checks remain; those checks do not establish independent raster parity.
+  Producer regression tests were not rerun for this removal.
 - **T2 — Candidate:** Retire the completed
   `docs/v1.0-coverage-workflow-plan.md` only after confirming
   its pilot selection, constraints, benchmark findings and

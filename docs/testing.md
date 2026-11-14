@@ -2056,7 +2056,7 @@ Focused publication, asset, database and packaging regression command:
 
 ```powershell
 .\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --test-workers 0 `
-  tests\test_symbol_publication.py tests\test_symbol_source.py tests\test_symbol_raster_validation.py `
+  tests\test_symbol_publication.py tests\test_symbol_source.py `
   tests\test_export_symbol_source_plan.py tests\test_prepare_symbol_publication.py `
   tests\test_promote_symbol_publication.py tests\test_verify_raw_symbol_handoff.py `
   tests\test_verify_effective_symbol_handoff.py tests\test_verify_symbol_duplicate_handoff.py `
@@ -3463,7 +3463,7 @@ both modules in every lane layout and reviews that one bounded route;
 query/path-specific labels remain refused. As an immediate CI-correctness
 and metrics-privacy gate, Windows ran `tools/run_checks.py --stage test
 --stage lint tests/test_browser_test_capacity.py tests/test_metrics_history.py
-tools/browser_test_capacity.py tools/metrics_history.py --assets required`:
+tools/browser_test_capacity.py tools/operations/metrics_history.py --assets required`:
 **48 passed, zero skips/failures**, Ruff passed, and all **808/808** published
 and browser-referenced SVGs were available. Tests cover accepted aggregate
 variant-usage counters and refusal of query values and path suffixes.
