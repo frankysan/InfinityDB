@@ -15,7 +15,7 @@ from contextlib import ExitStack
 from pathlib import Path
 from typing import Any
 
-from tools.browser_test_capacity import browser_slot
+from tools.testing.browser_test_capacity import browser_slot
 
 # Exactly these modules are grouped on chromium-b in four-lane mode.
 POOLED_BROWSER_MODULES = frozenset({

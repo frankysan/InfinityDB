@@ -18,7 +18,7 @@ from typing import Any
 
 import pytest
 
-from tools.resource_waits import capture_resource_waits
+from tools.testing.resource_waits import capture_resource_waits
 
 _SETUP_WAITS: pytest.StashKey[list[tuple[str, float]]] = pytest.StashKey()
 _WAIT_PROPERTY_PREFIX = "infinitydb_wait_"

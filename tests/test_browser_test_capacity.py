@@ -9,12 +9,6 @@ from pathlib import Path
 
 import pytest
 
-from tools.browser_test_capacity import (
-    CHROMIUM_SCHEDULING_LANES,
-    browser_lane_groups,
-    browser_slot,
-    scenario_faq_split_lane,
-)
 from tools.performance.analyze_chromium_timeline import (
     load_slot_records,
     summarize_timeline,
@@ -22,13 +16,19 @@ from tools.performance.analyze_chromium_timeline import (
 from tools.performance.analyze_chromium_timeline import (
     main as timeline_main,
 )
-from tools.pytest_startup_profile import (
+from tools.testing.browser_test_capacity import (
+    CHROMIUM_SCHEDULING_LANES,
+    browser_lane_groups,
+    browser_slot,
+    scenario_faq_split_lane,
+)
+from tools.testing.pytest_startup_profile import (
     XdistStartupProfile,
     summarized_skip_details,
     summarized_skip_reasons,
 )
-from tools.resource_waits import capture_resource_waits, record_resource_wait
-from tools.test_sections import load_test_sections
+from tools.testing.resource_waits import capture_resource_waits, record_resource_wait
+from tools.testing.test_sections import load_test_sections
 
 
 def test_two_browser_lanes_cover_all_real_chromium_modules() -> None:
@@ -198,7 +198,7 @@ def test_browser_slot_is_exclusive_across_processes_and_reusable(tmp_path: Path)
     probe = (
         "import sys\n"
         "from pathlib import Path\n"
-        "from tools.browser_test_capacity import browser_slot\n"
+        "from tools.testing.browser_test_capacity import browser_slot\n"
         "try:\n"
         "    with browser_slot(Path(sys.argv[1]), slots=1, timeout_seconds=0.2):\n"
         "        pass\n"

@@ -16,8 +16,8 @@ from urllib.parse import quote, urlencode
 import pytest
 
 from infinity_db.web import create_app
-from tools.browser_test_metrics import launch_timed_chromium
 from tools.browser_wsgi_transport import route_browser_page, wsgi_response
+from tools.testing.browser_test_metrics import launch_timed_chromium
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-reinforcements-browser.test"

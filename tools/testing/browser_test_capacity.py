@@ -18,7 +18,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import BinaryIO
 
-from tools.resource_waits import record_resource_wait
+from tools.testing.resource_waits import record_resource_wait
 
 CHROMIUM_SCHEDULING_LANES = {
     # Stable, opt-in xdist groups prevent workers waiting on the two-slot lock.

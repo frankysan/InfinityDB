@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = REPO_ROOT / "config" / "testing" / "test-sections.json"
 
 

@@ -10,15 +10,15 @@ from pathlib import Path
 
 import pytest
 
-from tools.browser_test_capacity import (
+from tools.testing.browser_test_capacity import (
     browser_lane_groups,
     browser_slot,
     scenario_faq_split_lane,
 )
-from tools.browser_test_metrics import POOLED_BROWSER_MODULES, ChromiumLanePool
-from tools.test_sections import load_test_sections, section_for_module
+from tools.testing.browser_test_metrics import POOLED_BROWSER_MODULES, ChromiumLanePool
+from tools.testing.test_sections import load_test_sections, section_for_module
 
-pytest_plugins = ("tools.pytest_startup_profile",)
+pytest_plugins = ("tools.testing.pytest_startup_profile",)
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

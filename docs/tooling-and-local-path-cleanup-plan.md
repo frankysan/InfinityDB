@@ -281,6 +281,25 @@ The independent source/receipt/hash publication acceptance checks in
 InfinityDB remain unchanged. Producer regression tests were not rerun
 for this deletion; Git retains the duplicate implementation.
 
+**L4 test infrastructure grouping (2026-11-14):** Moved the
+pytest startup profiler, resource-wait attribution, Chromium test capacity
+and timing helpers, and test-section configuration parser to
+`tools/testing/`. Updated the pytest plugin registration, test fixtures,
+cross-process browser probe and both module/direct `run_checks` imports.
+The tracked test-section manifest and actual browser slot limits are
+unchanged.
+
+**L4 remaining root disposition (2026-11-14):** Retain
+`tools/run_checks.py` as the established root operator entrypoint and keep
+cross-domain CI/release, source-build, deterministic-build and deployment
+commands in place until a consumer-driven cutover adds actual value.
+Helpers shared across publication/release domains (including
+`asset_validation`, `browser_wsgi_transport` and `snapshot_archive`)
+remain root-owned for now. The `agent_*` utilities, `dev_status`,
+`create_work_archive` and `inspect_raw_archive` are the next
+development/data ownership candidates; do not retain or retire them by
+filename age alone. No compatibility wrappers were introduced.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

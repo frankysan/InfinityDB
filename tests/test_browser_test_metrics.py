@@ -8,14 +8,14 @@ from typing import Any
 
 import pytest
 
-from tools.browser_test_capacity import browser_slot
-from tools.browser_test_metrics import (
+from tools.performance import probe_docker_test_host
+from tools.testing.browser_test_capacity import browser_slot
+from tools.testing.browser_test_metrics import (
     POOLED_BROWSER_MODULES,
     ChromiumLanePool,
     TimedBrowser,
     launch_timed_chromium,
 )
-from tools.performance import probe_docker_test_host
 
 
 class _FakeBrowser:
