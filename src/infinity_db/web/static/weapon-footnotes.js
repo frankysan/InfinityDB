@@ -1,10 +1,11 @@
 // Reviewed source notation, not gameplay Traits. Exact N5.3 chart evidence:
 // config/validation/mine-variant-effects.json (seven Mines),
 // weapon-trait-wiki-review.json (Sepsitor Plus),
-// weapon-trait-source-review.json (Chest Mine CC, Deactivator), and
-// data/curated/weapon-shared-effect-reviews.json (Blitzen and grenades).
-// Source-review policies pin PDF SHA-256
-// 53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f.
+// weapon-trait-source-review.json (Chest Mine CC, Deactivator),
+// data/curated/weapon-shared-effect-reviews.json (Blitzen, E/M Carbine,
+// grenades and grenade launchers), and the cited E/M CC Weapon definition
+// in data/curated/rules/n5-core-v5.3.json (p. 177). Source reviews pin
+// N5.3 PDF SHA-256 53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f.
 const CATEGORIES = {
   "[*]": "Weaponry",
   "[**]": "Ammunition",
@@ -18,9 +19,13 @@ const SOURCE_MARKERS = /\[\*{1,3}\]/g;
 // mode (a mode-less review applies only to a mode-less source profile).
 const REVIEWED_CHART = {
   "blitzen": { marker: "[**]", page: 178, ruleId: "ammunition:em" },
+  "e-m-carbine": { marker: "[**]", page: 176, ruleId: "ammunition:em" },
+  "e-m-cc-weapon": { marker: "[**]", page: 177, ruleId: "ammunition:em" },
   "smoke-grenades": { marker: "[**]", page: 178, ruleId: "ammunition:smoke" },
   "e-m-grenades": { marker: "[**]", page: 178, ruleId: "ammunition:em" },
   "eclipse-grenades": { marker: "[**]", page: 178, ruleId: "ammunition:eclipse" },
+  "smoke-grenade-launcher": { marker: "[**]", page: 179, ruleId: "ammunition:smoke" },
+  "e-m-grenade-launcher": { marker: "[**]", page: 179, ruleId: "ammunition:em" },
   "chest-mine": { marker: "[*]", page: 181, mode: "CC Mode", ruleId: "weapon:chest-mine" },
   "ap-mine": { marker: "[*]", page: 181, ruleId: "weapon:mines" },
   "e-m-mine": { marker: "[**]", page: 181, ruleId: "ammunition:em" },

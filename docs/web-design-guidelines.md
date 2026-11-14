@@ -80,16 +80,17 @@ publication/row/mode identifies the exact rule and that target is routable
 from the published API; otherwise show the legend category and leave the
 exact target unverified.
 
-The reviewed chart subset covers seven named Mines (N5.3 p. 181),
-Sepsitor Plus (p. 187), Blitzen and Smoke/E/M/Eclipse Grenades (p. 178),
-and **Chest Mine CC Mode only** (p. 181). Do not apply the CC mapping to
-Chest Mine's BS Mode, whose Army marker remains independently visible.
-Deactivator's reviewed p. 186 `[***]` marker belongs to the **Equipment**
-catalog, linking to its published `equipment:deactivator` rule card; it
-must not create an inferred Weapon rule. Show Army and PDF markers with
-their source labels if they disagree or one omits the marker (SRC-013/014).
-Split combined labels such as `NON-LETHAL [**]` for display, keeping
-original source notation in API data and Developer Mode. Do not infer
+The reviewed N5.3 chart subset covers E/M Carbine (p. 176), E/M CC
+Weapon (p. 177, combined N+E/M), Blitzen and Smoke/E/M/Eclipse Grenades
+(p. 178), Smoke/E/M Grenade Launchers (p. 179), seven named Mines
+and **Chest Mine CC Mode only** (p. 181), Deactivator Equipment (p. 186)
+and Sepsitor Plus (p. 187). The combined E/M CC marker links to E/M
+Ammunition, not an invented combined-Ammunition rule. Do not apply the
+Chest Mine CC mapping to its BS Mode, whose Army marker stays unlinked.
+Deactivator's `[***]` marker links to `equipment:deactivator`, never an
+inferred Weapon. Show Army and PDF markers separately on disagreement
+(SRC-013/014). Split combined labels such as `NON-LETHAL [**]` for display,
+retaining the raw source in the API and Developer Mode. Never infer
 missing gameplay Traits or agreement between publications.
 
 **Glossary term previews.** Where curated rules prose names a reviewed Visibility Zone

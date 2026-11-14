@@ -50,9 +50,13 @@ def test_reviewed_weapon_footnotes_are_accessible_and_routable(
     page.on("pageerror", lambda error: errors.append(str(error)))
     cases = (
         ("blitzen", "/ammunition/em", "N5.3 chart p. 178"),
+        ("e-m-carbine", "/ammunition/em", "N5.3 chart p. 176"),
+        ("e-m-cc-weapon", "/ammunition/em", "N5.3 chart p. 177"),
         ("smoke-grenades", "/ammunition/smoke", "N5.3 chart p. 178"),
         ("e-m-grenades", "/ammunition/em", "N5.3 chart p. 178"),
         ("eclipse-grenades", "/ammunition/eclipse", "N5.3 chart p. 178"),
+        ("smoke-grenade-launcher", "/ammunition/smoke", "N5.3 chart p. 179"),
+        ("e-m-grenade-launcher", "/ammunition/em", "N5.3 chart p. 179"),
         ("chest-mine", "#rule-weapon-chest-mine", "N5.3 chart p. 181"),
         ("para-mine", "#rule-weapon-mines", "N5.3 chart p. 181"),
         ("sepsitor-plus", "#rule-weapon-sepsitor-plus", "N5.3 chart p. 187"),

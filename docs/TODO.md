@@ -58,16 +58,16 @@ Use these links to jump directly to a workstream:
   a direct Glossary/rules link; retain raw provenance and explicit unresolved
   mappings.
 
-  Implemented subset: standalone/combined Army markers are separated from
-  Traits without changing source data. Exact reviewed N5.3 chart mappings
-  now cover seven named Mines (p. 181), Sepsitor Plus (p. 187), Blitzen,
-  Smoke/E/M/Eclipse Grenades (p. 178), Chest Mine **CC Mode** (p. 181),
-  and Deactivator **Equipment** (p. 186, `[***]`). Chest Mine BS Mode
-  retains its unlinked Army marker; source differences SRC-013/014 remain
-  explicit. Chromium acceptance covers the reviewed Weapon and Equipment
-  pages at 1440/390/320 px, light/dark, keyboard and touch.
-  Remaining: other chart rows/modes and publisher clarification of
-  unresolved source mismatches.
+  Implemented subset: markers are separated from Traits without changing
+  Army data, including combined labels. Reviewed mappings cover seven named
+  Mines and Chest Mine CC Mode (p. 181); E/M Carbine (p. 176); E/M CC Weapon
+  (p. 177, combined N+E/M); Blitzen and Smoke/E/M/Eclipse Grenades (p. 178);
+  Smoke/E/M Grenade Launchers (p. 179); Deactivator Equipment (p. 186);
+  and Sepsitor Plus (p. 187). Exact mode/catalog scope is preserved,
+  including Chest Mine BS Mode's unresolved Army marker. SRC-013/014
+  differences remain visible. Chromium acceptance covers reviewed pages
+  at 1440/390/320 px, light/dark, keyboard and touch. Remaining: other
+  chart rows/modes and publisher clarification of unresolved mismatches.
 
 ### Per-reference change history
 

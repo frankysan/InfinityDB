@@ -167,6 +167,33 @@ def test_reviewed_chart_markers_match_pinned_evidence() -> None:
     assert "[*]" in sepsitor["semanticReview"]["finding"]
 
 
+def test_em_cc_chart_marker_has_explicit_pinned_ammunition_evidence() -> None:
+    curated = json.loads(
+        (ROOT / "data/curated/rules/n5-core-v5.3.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    record = next(
+        row for row in curated["records"] if row["id"] == "weapon:e-m-cc-weapon"
+    )
+    assert "N+E/M" in record["summary"]
+    assert "[**] note points to the Ammunition section" in record["summary"]
+    assert any(
+        citation["sourceId"] == "n5-core-v5.3-pdf"
+        and citation.get("page") == 177
+        for citation in record["citations"]
+    )
+    reviews = json.loads(
+        (ROOT / "data/curated/weapon-shared-effect-reviews.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    selected = current_pdf_source(
+        ROOT / "data/generated/rules_n5.db", "n5-core-v5.3", "n5-core-v5.3-pdf",
+    )
+    assert reviews["sourceSha256"] == selected["sha256"]
+
+
 @pytest.mark.parametrize(("slug", "marker", "rule_id"), [
     ("ap-mine", "[*]", "weapon:mines"),
     ("e-m-mine", "[**]", "weapon:mines"),
@@ -239,14 +266,17 @@ for (const [slug, item] of Object.entries(payloads)) {
     assert result.returncode == 0, result.stderr
 
 
-@pytest.mark.parametrize(("slug", "ammunition_id"), [
-    ("blitzen", "em"),
-    ("smoke-grenades", "smoke"),
-    ("e-m-grenades", "em"),
-    ("eclipse-grenades", "eclipse"),
+@pytest.mark.parametrize(("slug", "ammunition_id", "page"), [
+    ("blitzen", "em", 178),
+    ("e-m-carbine", "em", 176),
+    ("smoke-grenades", "smoke", 178),
+    ("e-m-grenades", "em", 178),
+    ("eclipse-grenades", "eclipse", 178),
+    ("smoke-grenade-launcher", "smoke", 179),
+    ("e-m-grenade-launcher", "em", 179),
 ])
 def test_more_reviewed_chart_footnotes_keep_exact_ammunition_owner(
-    app: Callable, slug: str, ammunition_id: str,
+    app: Callable, slug: str, ammunition_id: str, page: int,
 ) -> None:
     reviews = json.loads(
         (ROOT / "data/curated/weapon-shared-effect-reviews.json").read_text(
@@ -254,7 +284,7 @@ def test_more_reviewed_chart_footnotes_keep_exact_ammunition_owner(
         )
     )
     review = next(row for row in reviews["reviews"] if row["slug"] == slug)
-    assert review["chartPage"] == 178
+    assert review["chartPage"] == page
     assert "[**]" in review["reason"]
     status, _headers, body = _request(app, f"/api/weapons/{slug}")
     assert status == "200 OK"
@@ -297,7 +327,9 @@ def test_chest_mine_cc_footnote_is_mode_scoped_to_reviewed_chart_cell(
 def test_extra_reviewed_targets_are_routable_in_actual_api(app: Callable) -> None:
     payloads = {}
     for slug in (
-        "blitzen", "smoke-grenades", "e-m-grenades", "eclipse-grenades", "chest-mine",
+        "blitzen", "e-m-carbine", "e-m-cc-weapon",
+        "smoke-grenades", "e-m-grenades", "eclipse-grenades",
+        "smoke-grenade-launcher", "e-m-grenade-launcher", "chest-mine",
     ):
         status, _headers, body = _request(app, f"/api/weapons/{slug}")
         assert status == "200 OK"
@@ -312,9 +344,13 @@ const {weaponFootnotesForProfile} = await import(
 const payloads = JSON.parse(readFileSync(0, 'utf8'));
 const targets = {
   blitzen: '/ammunition/em',
+  'e-m-carbine': '/ammunition/em',
+  'e-m-cc-weapon': '/ammunition/em',
   'smoke-grenades': '/ammunition/smoke',
   'e-m-grenades': '/ammunition/em',
   'eclipse-grenades': '/ammunition/eclipse',
+  'smoke-grenade-launcher': '/ammunition/smoke',
+  'e-m-grenade-launcher': '/ammunition/em',
   'chest-mine': '#rule-weapon-chest-mine',
 };
 for (const [slug, item] of Object.entries(payloads)) {
