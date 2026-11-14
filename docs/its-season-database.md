@@ -86,7 +86,7 @@ From the repository root, with the project virtual environment:
 ```
 
 The standalone developer tool still defaults to the ignored
-`data/work/its/its_18.db` and cannot overwrite the tracked runtime artifact.
+`local/work/its/its_18.db` and cannot overwrite the tracked runtime artifact.
 Use `infinity-db build --compact` to regenerate the complete
 `army.db` / `rules_n5.db` / `its_18.db` set. The builder first validates
 all three outputs and their cross-publication references, then replaces the

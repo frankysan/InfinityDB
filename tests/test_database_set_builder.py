@@ -337,7 +337,8 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert item["profile_citations_available"] is True
     assert all(profile["profile_citations"] for profile in item["profiles"])
     assert not (root / "must-not-write").exists()
-    assert not list((root / "data/work/build").iterdir())
+    assert not list((root / "local/work/build").iterdir())
+    assert not (root / "data/work/build").exists()
     second = builder.build_database_set(args, _fake_army, root=root)
     assert second == first
 
@@ -400,7 +401,7 @@ def test_failure_before_publication_retains_all_destination_bytes(
     with pytest.raises(ValueError):
         builder.build_database_set(args, _fake_army, root=root)
     assert _digests(args.db_dir) == before
-    assert not list((root / "data/work/build").iterdir())
+    assert not list((root / "local/work/build").iterdir())
 
 
 def test_interrupted_replacement_is_rejected_and_rerun_recovers(
@@ -499,7 +500,7 @@ def test_output_cannot_replace_the_selected_source_archive(project) -> None:
     with pytest.raises(ValueError, match="replace an input"):
         builder.build_database_set(args, _fake_army, root=root)
     assert file_sha256(source) == before
-    assert not (root / "data/work/build").exists()
+    assert not (root / "local/work/build").exists()
 
 
 def _pin_army_source_for_build(root: Path, args: argparse.Namespace) -> Path:
@@ -557,7 +558,7 @@ def test_pinned_army_build_requires_unambiguous_explicit_inputs(project) -> None
     with pytest.raises(ValueError, match="cannot combine with --metadata"):
         builder.build_database_set(args, _fake_army, root=root)
     assert not args.db_dir.exists()
-    assert not (root / "data/work/build").exists()
+    assert not (root / "local/work/build").exists()
 
 
 @pytest.mark.parametrize("layout", ("data/raw", "local/data/raw/army"))
@@ -648,7 +649,7 @@ def test_pinned_build_rejects_conflicting_sidecar_before_any_publication(
     with pytest.raises(ValueError, match="Ambiguous Army metadata"):
         builder.build_database_set(args, _fake_army, root=root)
     assert not args.db_dir.exists()
-    assert not (root / "data/work/build").exists()
+    assert not (root / "local/work/build").exists()
 
 
 def test_pinned_build_rejects_manifest_modified_during_generation(
@@ -672,7 +673,7 @@ def test_pinned_build_rejects_manifest_modified_during_generation(
     with pytest.raises(ValueError, match="Build inputs changed"):
         builder.build_database_set(args, _fake_army, root=root)
     assert _digests(args.db_dir) == before
-    assert not list((root / "data/work/build").iterdir())
+    assert not list((root / "local/work/build").iterdir())
 
 
 def test_runtime_and_narrow_build_outputs_are_explicitly_exclusive() -> None:

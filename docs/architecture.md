@@ -157,7 +157,7 @@ InfinityDB deliberately separates four kinds of repository data:
 - `data/generated/` contains the three tracked runtime databases: `army.db`,
   `rules_n5.db` and `its_18.db`. Structured reference facts and symbol mappings are embedded.
   SVG/CSS/JS remain ordinary static files. Development intermediates and raw
-  exports belong under ignored `data/work/build/`.
+  exports belong under ignored `local/work/build/`.
 
 Runtime code must not reach back into raw archives or working-tree curation to reinterpret an
 already-built database. Build-time configuration may be packaged for installed build commands, but

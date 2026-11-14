@@ -276,7 +276,9 @@ def add_data_commands(
     """Register ingestion commands for both the standalone tools and application CLI."""
     p_merge = sub.add_parser("merge", help="Merge raw Army JSON files into lossless master.json")
     p_merge.add_argument("source", type=Path, help="Source directory or ZIP archive")
-    p_merge.add_argument("output", nargs="?", type=Path, default=Path("data/generated/master.json"))
+    p_merge.add_argument(
+        "output", nargs="?", type=Path, default=Path("local/work/build/army/master.json")
+    )
     p_merge.add_argument("--compact", action="store_true", help="Minify JSON output")
     p_merge.add_argument(
         "--no-verify", action="store_true", help="Skip lossless reconstruction verification"
@@ -291,7 +293,7 @@ def add_data_commands(
     p_norm = sub.add_parser("normalize", help="Normalize master.json into relational-style tables")
     p_norm.add_argument("input", type=Path, help="master.json input")
     p_norm.add_argument(
-        "output", nargs="?", type=Path, default=Path("data/generated/normalized.json")
+        "output", nargs="?", type=Path, default=Path("local/work/build/army/normalized.json")
     )
     p_norm.add_argument("--report", type=Path, default=None, help="Validation report output path")
     p_norm.add_argument("--compact", action="store_true", help="Minify normalized JSON")
@@ -318,7 +320,7 @@ def add_data_commands(
             ),
         )
     else:
-        p_build.add_argument("--output-dir", type=Path, default=Path("data/work/build"))
+        p_build.add_argument("--output-dir", type=Path, default=Path("local/work/build/army"))
     p_build.add_argument("--compact", action="store_true", help="Minify generated data files")
     p_build.add_argument(
         "--no-verify", action="store_true", help="Skip lossless reconstruction verification"

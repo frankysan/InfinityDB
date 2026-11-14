@@ -40,7 +40,7 @@ from .source_anomalies import (
 
 DEFAULT_DATABASE = Path("data/generated/army.db")
 DEFAULT_RULES_DATABASE = Path("data/generated/rules_n5.db")
-DEFAULT_STANDALONE_RULES_DATABASE = Path("data/work/build/rules-standalone.db")
+DEFAULT_STANDALONE_RULES_DATABASE = Path("local/work/build/rules-standalone.db")
 DEFAULT_CURATED_RULES = Path("data/curated/rules")
 DEFAULT_PERIPHERAL_IDENTITIES = Path("data/curated/peripherals/army-identities.json")
 
@@ -457,7 +457,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_rules.add_argument(
         "--output", type=Path,
         help=(
-            "Standalone output (default: ignored data/work/build/rules-standalone.db); "
+            "Standalone output (default: ignored local/work/build/rules-standalone.db); "
             "not a complete serving set"
         ),
     )

@@ -145,21 +145,24 @@ def test_separate_merge_normalize_export_commands(
 ) -> None:
     monkeypatch.chdir(tmp_path)
     assert main(["merge", str(source_directory)]) == 0
-    assert main(["normalize", "data/generated/master.json"]) == 0
-    normalized = json.loads(Path("data/generated/normalized.json").read_text(encoding="utf-8"))
+    master = Path("local/work/build/army/master.json")
+    normalized_path = Path("local/work/build/army/normalized.json")
+    assert master.is_file()
+    assert main(["normalize", str(master)]) == 0
+    normalized = json.loads(normalized_path.read_text(encoding="utf-8"))
     identity_config = load_identity_config()
     assert normalized[IDENTITY_CONFIG_METADATA_KEY] == identity_config.document
     assert normalized[IDENTITY_CONFIG_SHA256_METADATA_KEY] == identity_config.content_sha256
     display_identities = load_display_identity_curated()
     assert normalized[DISPLAY_IDENTITY_METADATA_KEY] == display_identities.document
     assert normalized[DISPLAY_IDENTITY_SHA256_METADATA_KEY] == display_identities.content_sha256
-    assert main(["export", "data/generated/normalized.json", "data/generated/army.db"]) == 0
+    assert main(["export", str(normalized_path), "data/generated/army.db"]) == 0
     default_database = tmp_path / "data/generated/army.db"
     assert default_database.is_file()
     assert not raw_database_path(default_database).exists()
     custom_database = tmp_path / "custom.db"
     assert main([
-        "export", "data/generated/normalized.json", str(custom_database), "--with-raw",
+        "export", str(normalized_path), str(custom_database), "--with-raw",
     ]) == 0
     assert raw_database_path(custom_database).is_file()
     with sqlite3.connect(custom_database) as connection:
@@ -545,6 +548,9 @@ def test_build_rules_command_defaults_to_curated_rules() -> None:
     args = parser.parse_args(["build-rules"])
     assert args.input == Path("data/curated/rules")
     assert args.output is None
+    assert app_cli.DEFAULT_STANDALONE_RULES_DATABASE == Path(
+        "local/work/build/rules-standalone.db"
+    )
 
     explicit = parser.parse_args(["build-rules", "--output", "rules_n5.db"])
     assert explicit.output == Path("rules_n5.db")

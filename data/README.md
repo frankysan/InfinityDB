@@ -133,7 +133,10 @@ searched. The selected manifest is checked again before publication;
 changed inputs leave the previously selected database set untouched.
 The ordinary `infinity-db build --compact` default and unpinned
 `--metadata` behavior are unchanged, as is the separate
-`infinity-army build` interface. This initial R1 selection does
+`infinity-army build` source-selection interface. Standalone Army
+`merge`, `normalize` and `build` now write their default intermediates to
+`local/work/build/army/` rather than ignored `data/generated/` or `data/work/`.
+This initial R1 selection does
 not modify Syncthing, the producer acquisition CLI or source
 locations; current symbol-publication pins and other maintained
 build inputs must still match the selected snapshot.
@@ -143,7 +146,7 @@ complete alternate destination and is independent of the serving-only
 `INFINITY_DB_DB_DIR` setting. The old `--output-dir` form is
 retired from the integrated build. Lossless verification is mandatory.
 
-Disposable files under ignored `data/work/build/` hold normalization, the
+Disposable files under ignored `local/work/build/` hold normalization, the
 matched Army/raw pair, Rules and ITS construction. The variant-usage publication
 takes its source-only relationships from `normalized.json`, reconstructs
 the necessary source tables in memory, and verifies the complete normalized

@@ -3051,7 +3051,7 @@ required Army fingerprint without a self-referential Rules hash. Other embedded
 projections and shared build provenance are validated before replacement.
 
 The narrow `build-rules` developer command retains a standalone v10 export under
-ignored `data/work/build/rules-standalone.db`; it cannot overwrite the tracked
+ignored `local/work/build/rules-standalone.db`; it cannot overwrite the tracked
 Rules file and does not assemble a serving directory. Legacy CLI schema modes,
 checkout assembly, v10 candidate publication and Docker bundle-copy wrappers
 are retired. Current serving requires the complete schemas; low-level fixture

@@ -50,6 +50,16 @@ missing destinations or conflicts. This brings the Windows source-copy count
 to **124 files**. No live raw-symbol handoff, override application, publication,
 Syncthing activation, or producer/default-path change was performed.
 
+**B1 local work-output cutover (2026-11-14):** Standalone Army merge, normalize
+and build JSON, complete runtime-set temporary builds, narrow Rules builds and
+standalone ITS builds now write to `local/work/build/army/`, `local/work/build/` (temporary
+`runtime-*` directory), `local/work/build/rules-standalone.db` and
+`local/work/its/its_18.db` respectively. Serving still publishes only the
+three tracked `data/generated/` databases. The ignored legacy raw Army SQLite
+source used by selected research audits remains on its existing path; there
+is no implicit raw-source migration. Default Army ZIP selection is unchanged
+until the producer and source-selection contracts are aligned.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

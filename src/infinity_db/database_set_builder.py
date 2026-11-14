@@ -176,7 +176,7 @@ def build_database_set(
         if output.resolve() in protected or (output.exists() and not output.is_file()):
             raise ValueError(f"Runtime output would replace an input or non-file: {name}")
 
-    work = root / "data/work/build"
+    work = root / "local/work/build"
     work.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="runtime-", dir=work) as directory:
         stage = Path(directory)

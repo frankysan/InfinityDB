@@ -9,6 +9,13 @@ def test_cli_build_parses() -> None:
     args = build_parser().parse_args(["build", "army.zip", "--compact"])
     assert args.command == "build"
     assert args.compact is True
+    assert args.output_dir == Path("local/work/build/army")
+    assert build_parser().parse_args(["merge", "source.zip"]).output == Path(
+        "local/work/build/army/master.json"
+    )
+    assert build_parser().parse_args(["normalize", "master.json"]).output == Path(
+        "local/work/build/army/normalized.json"
+    )
 
 
 def test_build_without_source_uses_newest_raw_zip(tmp_path: Path) -> None:
