@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import stat
+import sys
 import tempfile
 import zipfile
 from pathlib import Path, PurePosixPath
@@ -22,14 +23,15 @@ try:
         AssetSetValidation,
         validate_asset_set,
     )
-except ModuleNotFoundError:  # Direct execution as tools/stage_full_asset_bundle.py.
+except ModuleNotFoundError:  # Direct execution as tools/ci/stage_full_asset_bundle.py.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from asset_validation import (  # type: ignore[no-redef]
         PUBLISHED_ASSET_CATEGORIES,
         AssetSetValidation,
         validate_asset_set,
     )
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STATIC_ROOT = REPO_ROOT / "src" / "infinity_db" / "web" / "static"
 DEFAULT_PUBLICATION_MANIFEST = REPO_ROOT / "data" / "manifests" / "symbol-publication.json"
 DEFAULT_URL_ENV = "FULL_ASSET_BUNDLE_URL"

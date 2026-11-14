@@ -474,7 +474,7 @@ Do not recycle or delete accepted historical reports to reuse a path.
 `.github/workflows/installed-wheel.yml` builds a wheel, installs it in a fresh virtual environment,
 stages controlled Army/rules fixtures outside the repository checkout, and exercises the installed
 contract. Both the workflow and isolated preflight call
-`tools/installed_wheel_smoke.py`, keeping CLI, configuration, runtime-route and
+`tools/ci/installed_wheel_smoke.py`, keeping CLI, configuration, runtime-route and
 asset-free acceptance in one implementation. The installed wheel has no developer
 dependencies or editable import path; runtime probes use Python's isolated mode
 and reject application imports outside that environment.
@@ -564,7 +564,7 @@ require graphical assets.
 `.github/workflows/full-asset-checks.yml` is manual/dispatch-only. It can be dispatched against an
 authorized candidate branch before merge, and uses the exact selected ref/SHA checked out by GitHub
 Actions. It uses the `full-assets` environment to obtain a checksum-pinned HTTPS bundle, stages it
-with `tools/stage_full_asset_bundle.py`, validates it against the tracked publication manifest, and
+with `tools/ci/stage_full_asset_bundle.py`, validates it against the tracked publication manifest, and
 runs full checks with assets required. The environment's deployment-branch/tag policy must allow the
 selected candidate ref; do not restrict the environment to `main` when pre-merge validation is
 required.
@@ -577,7 +577,7 @@ Build the external bundle from a validated tracked publication. Use a
 fresh run-specific path for a retained comparison across publication revisions:
 
 ```powershell
-python tools\build_full_asset_bundle.py --output local/handoffs/full-assets/RUN_ID/full-assets.zip
+python tools\ci\build_full_asset_bundle.py --output local/handoffs/full-assets/RUN_ID/full-assets.zip
 ```
 
 Replace `RUN_ID` with a UTC timestamp and short checkout/publication SHA.

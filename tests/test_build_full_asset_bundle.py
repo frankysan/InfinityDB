@@ -2,24 +2,40 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
 import pytest
 
-from tools.build_full_asset_bundle import (
+from tools.ci.build_full_asset_bundle import (
     DEFAULT_OUTPUT,
     REPO_ROOT,
     FullAssetBundleBuildError,
     build_full_asset_bundle,
 )
-from tools.stage_full_asset_bundle import stage_asset_bundle
+from tools.ci.stage_full_asset_bundle import stage_asset_bundle
 
 SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>'
 
 
 def test_default_bundle_output_is_under_local() -> None:
+    assert REPO_ROOT == Path(__file__).resolve().parents[1]
     assert DEFAULT_OUTPUT == REPO_ROOT / "local/work/full-assets/full-assets.zip"
+
+
+@pytest.mark.parametrize("tool", ("build_full_asset_bundle.py", "stage_full_asset_bundle.py"))
+def test_full_asset_cli_supports_direct_script_without_pythonpath(tool: str) -> None:
+    root = Path(__file__).resolve().parents[1]
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    result = subprocess.run(
+        [sys.executable, str(root / "tools/ci" / tool), "--help"],
+        cwd=root, env=env, capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def _manifest(path: Path, published: list[str]) -> Path:

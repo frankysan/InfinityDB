@@ -200,7 +200,7 @@ def smoke_wheel(wheel: Path, source: Path, work: Path, *, require_assets: bool) 
         shutil.copyfile(source / "data/generated" / name, runtime / name)
     for mode in ("normal", "asset-free"):
         run([
-            python, "-I", str(source / "tools/installed_wheel_smoke.py"),
+            python, "-I", str(source / "tools/ci/installed_wheel_smoke.py"),
             "--work-dir", str(inputs), "--verify-runtime", mode,
             "--assets", "required" if require_assets else "off",
         ], inputs)
@@ -210,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--wheel", type=Path)
     parser.add_argument("--work-dir", type=Path, required=True)
-    parser.add_argument("--source-root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--source-root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--assets", choices=("off", "required"), default="required")
     parser.add_argument("--verify-runtime", choices=("normal", "asset-free"))
     args = parser.parse_args(argv)

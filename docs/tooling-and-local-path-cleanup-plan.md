@@ -372,6 +372,25 @@ runner's pinned image, environment and `local/` report outputs. Release
 metadata and hosted evidence contracts remain unchanged. Root-level runtime
 and shared asset helpers remain in place; no compatibility wrappers added.
 
+**L4 full-asset and installed-wheel CI grouping (2026-11-14):**
+Moved the private full-asset bundle producer and stager, and installed-wheel
+smoke checker to `tools/ci/`. Updated optional/full-asset and wheel workflows,
+preflight's Git-exported CLI path, the wheel checker's isolated subprocess
+invocation, focused tests and current operator documentation. Direct scripts,
+default asset locations, deterministic bundle bytes, private asset validation
+and installed-wheel isolation remain unchanged.
+
+**L4 root disposition (2026-11-14):** Retain `run_checks` as the
+stable operator entrypoint; `activate_synced_assets` for staged local
+operations; shared `asset_validation`, `browser_wsgi_transport`,
+`runtime_semantic_baseline`, `served_runtime` and `snapshot_archive`
+helpers; and the cross-domain `preview_runtime_image`,
+`verify_checkout_server`, `verify_deployment_assets` and
+`verify_release_candidate_browser` acceptance commands. These remaining
+root files each have active cross-domain consumers or an established
+operator-facing entrypoint. No additional relocation or compatibility
+wrapper is justified solely to empty `tools/`.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

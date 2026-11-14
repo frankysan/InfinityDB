@@ -5,20 +5,22 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import sys
 import zipfile
 from pathlib import Path
 
 try:
     from tools.asset_validation import PUBLISHED_ASSET_CATEGORIES, validate_asset_set
     from tools.snapshot_archive import _archive_info
-except ModuleNotFoundError:  # Direct execution as tools/build_full_asset_bundle.py.
+except ModuleNotFoundError:  # Direct execution as tools/ci/build_full_asset_bundle.py.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from asset_validation import (  # type: ignore[no-redef]
         PUBLISHED_ASSET_CATEGORIES,
         validate_asset_set,
     )
     from snapshot_archive import _archive_info  # type: ignore[no-redef]
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STATIC_ROOT = REPO_ROOT / "src" / "infinity_db" / "web" / "static"
 DEFAULT_PUBLICATION_MANIFEST = REPO_ROOT / "data" / "manifests" / "symbol-publication.json"
 DEFAULT_OUTPUT = REPO_ROOT / "local" / "work" / "full-assets" / "full-assets.zip"

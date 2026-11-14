@@ -534,8 +534,9 @@ def test_install_and_docker_require_the_complete_three_database_set() -> None:
 def test_installed_wheel_smoke_runs_database_health_check() -> None:
     workflow = _read(".github/workflows/installed-wheel.yml")
 
-    assert "python tools/installed_wheel_smoke.py" in workflow
-    smoke = _read("tools/installed_wheel_smoke.py")
+    assert "python tools/ci/installed_wheel_smoke.py" in workflow
+    smoke = _read("tools/ci/installed_wheel_smoke.py")
+    assert '"tools/ci/installed_wheel_smoke.py"' in smoke
     assert '[main_cli, "database-health", "generated/army.db", "--normalized",' in smoke
     assert '"generated/normalized.json"]' in smoke
 

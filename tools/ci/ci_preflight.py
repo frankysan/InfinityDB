@@ -252,7 +252,7 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 wheel = next(wheel_dir.glob("*.whl"))
                 result = subprocess.run([
-                    sys.executable, str(export / "tools/installed_wheel_smoke.py"),
+                    sys.executable, str(export / "tools/ci/installed_wheel_smoke.py"),
                     "--wheel", str(wheel), "--source-root", str(export),
                     "--work-dir", str(Path(tmp) / "installed-wheel"), "--assets", args.assets,
                 ], cwd=export, env={key: value for key, value in os.environ.items() if key not in {

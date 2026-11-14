@@ -31,7 +31,7 @@ jobs:
         env:
           FULL_ASSET_BUNDLE_URL: ${{ secrets.FULL_ASSET_BUNDLE_URL }}
           FULL_ASSET_BUNDLE_SHA256: ${{ secrets.FULL_ASSET_BUNDLE_SHA256 }}
-        run: python tools/stage_full_asset_bundle.py
+        run: python tools/ci/stage_full_asset_bundle.py
 
       - name: Set up Node.js for documentation linting
         uses: actions/setup-node@v4
