@@ -72,6 +72,16 @@ visible under **Properties** without assigning an unverified domain. Preserve
 source order within each heading and avoid duplicating a `State:` prefix under a
 States heading.
 
+Army's N5.3 Weapon Chart markers `[*]`, `[**]` and `[***]` denote
+Weaponry, Ammunition, and Skills/Equipment rule sections, respectively.
+Display them separately from Traits. Link a marker only when exactly
+one target is already supported by the published mode/weapon rules
+or Ammunition/Skill/Equipment reference; otherwise show its legend
+category and explicitly leave the exact target unverified. This is
+**Army notation**, not proof of parity with the printed PDF chart.
+Preserve chart/Army conflicts and combined source-marker text without
+silently rewriting source Traits or inventing rule ownership.
+
 **Glossary term previews.** Where curated rules prose names a reviewed Visibility Zone
 variant, use a typed `term:` link to its Game term definition. The shared inline
 reference preview provides the explanation on hover, keyboard focus, or touch,

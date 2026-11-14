@@ -160,6 +160,7 @@
         "test_theme_contrast",
         "test_web",
         "test_web_metrics",
+        "test_weapon_chart_footnotes",
         "test_weaponry_catalog_api"
       ]
     },

@@ -58,6 +58,12 @@ Use these links to jump directly to a workstream:
   a direct Glossary/rules link; retain raw provenance and explicit unresolved
   mappings.
 
+  A first browser slice now separates standalone Army markers from Traits
+  and links uniquely resolved published rule targets; uncertain ones remain
+  labeled but unlinked. Still outstanding: exact PDF chart row/mode
+  reconciliation, combined markers, and the known PARA Mine/Sepsitor
+  Plus source discrepancies (SRC-013/014).
+
 ### Per-reference change history
 
 - [ ] **Data processing + Web backend + Web frontend:** Add optional
