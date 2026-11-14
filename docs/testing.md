@@ -2566,7 +2566,7 @@ are outside the immutable receipt contract.
 
 **Project domains:** Web frontend, Project infrastructure
 
-Use `python -m tools.run_cross_browser_compatibility --engine chromium` for
+Use `python -m tools.browser.run_cross_browser_compatibility --engine chromium` for
 an explicitly selected local engine; `firefox`, `webkit` and `msedge` are
 also supported. Install `playwright==1.64.1` and that engine using
 `python -m playwright install <engine>` first (on Linux CI the matching OS

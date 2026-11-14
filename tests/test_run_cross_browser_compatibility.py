@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import run_cross_browser_compatibility as runner
+from tools.browser import run_cross_browser_compatibility as runner
 
 SHA = "0123456789abcdef0123456789abcdef01234567"
 
@@ -112,7 +112,7 @@ def test_hosted_ci_uploads_new_report_tree_even_after_failure() -> None:
     ).read_text(encoding="utf-8")
     assert "if: always()" in workflow
     assert f"path: {runner.REPORT_BASE.as_posix()}/" in workflow
-    assert "python -m tools.run_cross_browser_compatibility --engine" in workflow
+    assert "python -m tools.browser.run_cross_browser_compatibility --engine" in workflow
 
 
 def test_bad_git_revision_rejected_before_creating_report(

@@ -34,7 +34,7 @@ if ENGINE and (
 ):
     raise ValueError(
         "Selected cross-browser test requires a fresh local/validation/ artifact "
-        "directory; run it through tools.run_cross_browser_compatibility"
+        "directory; run it through tools.browser.run_cross_browser_compatibility"
     )
 
 pytestmark = pytest.mark.skipif(

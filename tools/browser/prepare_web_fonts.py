@@ -11,7 +11,7 @@ from typing import Protocol, cast
 
 from fontTools.ttLib import TTFont
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "src" / "infinity_db" / "web" / "static" / "fonts"
 
 
@@ -101,7 +101,7 @@ README = """# Browser fonts
 This directory is the canonical browser-font publication for InfinityDB.
 
 The WOFF2 files are generated from upstream Google Fonts TTF downloads with
-`tools/prepare_web_fonts.py`. Source TTFs may be staged in these family directories for
+`tools/browser/prepare_web_fonts.py`. Source TTFs may be staged in these family directories for
 regeneration, but they are gitignored and excluded from wheels/runtime packages. An unpacked
 Google Fonts download containing the expected family directories may also be supplied from
 any external directory. The helper requires the project's `symbols` optional dependencies.

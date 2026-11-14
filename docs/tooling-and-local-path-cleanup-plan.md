@@ -326,6 +326,15 @@ repository root; V1S retirement gating and indexed preflight behavior are
 unchanged. `tools/run_checks.py` remains the root operator entrypoint.
 No compatibility wrappers were introduced.
 
+**L4 browser build and validation utilities (2026-11-14):**
+Moved `prepare_web_fonts` and `run_cross_browser_compatibility`
+into `tools/browser/` and updated their source consumers, focused
+tests, hosted cross-browser workflow and maintained commands. Both tools
+still resolve the checkout root and preserve published WOFF2/license
+outputs and local validation evidence paths. The generated font README
+and tracked publication copy now identify the new tool path.
+No compatibility wrappers or published font binary changes were made.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation
