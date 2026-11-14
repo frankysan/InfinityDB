@@ -28,6 +28,19 @@ resource and metrics-report tools under `tools/operations/`, and HTTP load
 testing under `tools/performance/`. It updates active tests and documented
 module commands without changing report formats or output destinations.
 
+**R6 Windows source-copy checkpoint (2026-11-14):** 96 ignored files were
+copied without replacing or deleting originals: six Army ZIPs, five Army
+provenance JSONs, five Wiki/Human-Sphere ZIPs, five matching provenance JSONs,
+and 75 PDFs. `tools.data.copy_legacy_sources` selects these families explicitly,
+checks source/destination SHA-256, refuses differing destinations and supports
+idempotent repeat copies. One older Army ZIP has no matching manifest and is
+not a source-pinned build candidate. The selected newest Army pair passed
+`tools.export_symbol_source_plan` from `local/data/` (1,101 authoritative URLs);
+the N5 v5.2/v5.3 PDF comparison passed using `--source-layout local`.
+The copies establish an alternate source home, **not** a default reader,
+producer, Syncthing sender, Linux receiver, tracked source-label or deployment
+cutover. Preserve all legacy originals until those consumers are updated.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

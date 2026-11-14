@@ -46,6 +46,11 @@ tools, change CLI defaults, alter producer staging/Syncthing or approve
 a migration. See the [cleanup execution plan](../docs/tooling-and-local-path-cleanup-plan.md)
 for independently gated work.
 
+**R6 copy status (2026-11-14):** The Windows checkout has hash-checked copies
+of Army and Wiki/Human-Sphere snapshot ZIPs with available provenance, plus
+PDFs, under `local/data/`. Legacy ignored originals and all existing default
+reader, producer and Syncthing paths are retained. The copy is not a cutover.
+
 ## Current paths and behavior
 
 - `raw/` — immutable downloaded Corvus Belli Army snapshot archives. Army

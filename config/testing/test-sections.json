@@ -231,6 +231,7 @@
         "test_check_v1_backlog_ci",
         "test_browser_wsgi_transport",
         "test_capacity_test",
+        "test_copy_legacy_sources",
         "test_compare_determinism_manifests",
         "test_compare_runtime_benchmarks",
         "test_create_work_archive",
