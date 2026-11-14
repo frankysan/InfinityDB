@@ -41,6 +41,15 @@ The copies establish an alternate source home, **not** a default reader,
 producer, Syncthing sender, Linux receiver, tracked source-label or deployment
 cutover. Preserve all legacy originals until those consumers are updated.
 
+**R6 symbol-source copy extension (2026-11-14):** All 14 historical raw-symbol
+ZIPs and 14 matching v1/v3 provenance manifests were copied from
+`data/raw/symbols/` and `data/manifests/snapshots/` to their explicit
+`local/data/` destinations. The extended helper verifies archive basenames,
+family type and archive/destination SHA-256; a second dry run found zero
+missing destinations or conflicts. This brings the Windows source-copy count
+to **124 files**. No live raw-symbol handoff, override application, publication,
+Syncthing activation, or producer/default-path change was performed.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

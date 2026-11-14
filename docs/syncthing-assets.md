@@ -109,11 +109,13 @@ Preview a selected pair on Linux without changing the checkout:
 ./.venv/bin/python -m tools.activate_synced_assets activate --layout local --snapshot 'JSON 20260929-114335'
 ```
 
-The R3 snapshot and R4 individual-file mappings permit `--layout local`
-**only as a selected, non-destructive capability**. Real source migration
-remains unapproved. Use `--apply` with the local layout only in disposable
-test checkouts until an independently reviewed source-family copy decision.
-None of these commands changes the five Syncthing staging folders.
+The R3 snapshot and R4 individual-file mappings permit explicit
+`--layout local` activation. On 2026-11-14, the Windows checkout received
+hash-checked, non-replacing R6 copies of Army, Wiki/Human-Sphere and raw-symbol
+sources plus PDFs under `local/data/` using a separate copy helper. These
+copies do not change the five Syncthing staging folders, Linux receiver,
+producer paths or default legacy activation layout. Live receiver `--apply`
+remains a separate, explicitly selected operation.
 
 Snapshot and manifest basenames must agree. Duplicate selections, case-colliding
 manifest names and non-lowercase `.json` suffixes fail closed. Full-pair
@@ -145,8 +147,8 @@ original provenance. These are the two **explicit** file layouts:
 ./.venv/bin/python -m tools.activate_synced_assets activate --layout local --file 'local/data/symbols/overrides/Unit/example.svg'
 ```
 
-These commands are previews. In the local layout, `--apply` remains restricted
-to disposable test checkouts until a family-specific M-copy approval. Both
+These commands are previews; `--apply` must be explicitly selected for a
+specific receiver file and is not implied by the Windows R6 copy. Both
 layouts reject a path belonging to the other layout and never search an
 alternate checkout/staging root. Nested relative basenames are preserved;
 receiver `image-overrides` (hyphen) is **not** renamed. Raw/wiki snapshot ZIPs

@@ -19,6 +19,7 @@ def _army_fixture(root: Path, name: str = "JSON 20260929-114335") -> tuple[Path,
     archive.write_bytes(b"immutable sample snapshot")
     manifest.write_text(json.dumps({
         "snapshot": {
+            "type": "army",
             "archive": {
                 "name": archive.name,
                 "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
@@ -79,3 +80,43 @@ def test_pdf_family_keeps_nested_paths_without_other_files(tmp_path: Path) -> No
         tmp_path / "local/data/pdf/legacy/mission-pack/mission.pdf"
     ).read_bytes() == b"pdf bytes"
     assert not (tmp_path / "local/data/pdf/legacy/mission-pack/desktop.ini").exists()
+
+def test_symbol_archives_copy_with_legacy_provenance_unchanged(tmp_path: Path) -> None:
+    name = "SYMBOLS 20260919-131535"
+    archive = tmp_path / "data/raw/symbols" / f"{name}.zip"
+    manifest = tmp_path / "data/manifests/snapshots" / f"{name}.json"
+    archive.parent.mkdir(parents=True)
+    manifest.parent.mkdir(parents=True)
+    archive.write_bytes(b"immutable raw SVG collection")
+    manifest.write_text(json.dumps({
+        "format": "InfinityDB snapshot provenance",
+        "formatVersion": 1,
+        "snapshot": {
+            "type": "symbols",
+            "archive": {
+                "name": archive.name,
+                "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+            },
+        },
+    }), encoding="utf-8")
+
+    assert copy_family(tmp_path, "symbols", apply=False) == (2, 0, 0)
+    assert copy_family(tmp_path, "symbols", apply=True) == (2, 2, 0)
+    assert copy_family(tmp_path, "symbols", apply=True) == (2, 0, 0)
+    assert (
+        tmp_path / "local/data/raw/symbols" / archive.name
+    ).read_bytes() == archive.read_bytes()
+    assert (
+        tmp_path / "local/data/manifests/snapshots" / manifest.name
+    ).read_bytes() == manifest.read_bytes()
+
+
+def test_source_family_must_match_manifest_type(tmp_path: Path) -> None:
+    archive, manifest = _army_fixture(tmp_path)
+    record = json.loads(manifest.read_text(encoding="utf-8"))
+    record["snapshot"]["type"] = "symbols"
+    manifest.write_text(json.dumps(record), encoding="utf-8")
+    with pytest.raises(ValueError, match="Archive and provenance disagree"):
+        candidates(tmp_path, "army")
+    assert archive.exists()
+    assert not (tmp_path / "local").exists()

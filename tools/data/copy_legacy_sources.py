@@ -37,6 +37,10 @@ def candidates(root: Path, family: str) -> tuple[list[tuple[Path, Path, str]], i
             item for item in source_dir.glob("*.zip")
             if item.name.startswith(("WIKI-", "HUMAN-SPHERE "))
         )
+    elif family == "symbols":
+        source_dir = root / "data/raw/symbols"
+        destination_dir = root / "local/data/raw/symbols"
+        archives = sorted(source_dir.glob("SYMBOLS *.zip"))
     elif family == "pdf":
         source_dir, destination_dir = root / "data/pdf", root / "local/data/pdf"
         archives = sorted(source_dir.rglob("*.pdf"))
@@ -60,8 +64,14 @@ def candidates(root: Path, family: str) -> tuple[list[tuple[Path, Path, str]], i
             continue
         _regular_file(manifest)
         record = json.loads(manifest.read_text(encoding="utf-8"))
-        archive_info = record["snapshot"]["archive"]
-        if archive_info["name"] != archive.name or archive_info["sha256"] != digest:
+        snapshot = record["snapshot"]
+        archive_info = snapshot["archive"]
+        expected_type = "wiki" if family == "wiki" else family
+        if (
+            snapshot["type"] != expected_type
+            or archive_info["name"] != archive.name
+            or archive_info["sha256"] != digest
+        ):
             raise ValueError(f"Archive and provenance disagree: {archive.name}")
         entries.append((
             manifest,
@@ -109,7 +119,7 @@ def copy_family(root: Path, family: str, *, apply: bool) -> tuple[int, int, int]
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--family", required=True, choices=("army", "wiki", "pdf"))
+    parser.add_argument("--family", required=True, choices=("army", "wiki", "symbols", "pdf"))
     parser.add_argument(
         "--apply", action="store_true", help="Copy only missing identical-source inputs"
     )
