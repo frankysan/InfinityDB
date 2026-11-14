@@ -56,7 +56,7 @@ hypothetical tests that do not have a concrete acceptance need.
   diary. Do not carry a locally completed VR merely to await hosted CI.
 - **Existing IDs remain valid.** Use the next unused `VD-NNNN` and
   `VR-NNNN` for deferred obligations; never reuse historical IDs. The two
-  sections below remain machine-readable by `tools.dev_status`. Record a
+  sections below remain machine-readable by `tools.dev.dev_status`. Record a
   concrete trigger in the entry; status counters no longer define due work.
 
 ## Pending test design

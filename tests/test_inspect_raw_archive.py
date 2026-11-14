@@ -11,7 +11,7 @@ import pytest
 from infinity_db.database import export_database, raw_database_path
 from infinity_db.database.schema import METADATA_TABLE, RAW_ROWS_TABLE, ROW_JSON, TABLES
 from tests.test_database import _normalized_fixture_data
-from tools.inspect_raw_archive import inspect_raw_archive, main
+from tools.data.inspect_raw_archive import inspect_raw_archive, main
 
 
 def _paired_fixture(tmp_path: Path) -> tuple[Path, Path]:

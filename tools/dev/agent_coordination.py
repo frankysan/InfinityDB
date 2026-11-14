@@ -21,7 +21,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-from tools.agent_workspaces import WorkspaceError, guard
+from tools.dev.agent_workspaces import WorkspaceError, guard
 
 _STATE_NAME = "infinitydb-agent-coordination"
 _SHA = re.compile(r"[a-f0-9]{40}\Z")
@@ -364,12 +364,12 @@ def integrate_proposal(
     This operation never pushes, rebases, resets or changes another checkout.
     """
     # Lazy import: global claims reuse this module's normalized scope contract.
-    from tools.agent_global_coordination import (
+    from tools.dev.agent_global_coordination import (
         GlobalClaimError,
         begin_integration,
         finish_integration,
     )
-    from tools.agent_global_coordination import (
+    from tools.dev.agent_global_coordination import (
         status as global_status,
     )
 
@@ -495,7 +495,7 @@ def _recovery_inspection(
     owner: str, integration_id: str, expected_head: str, proposal_head: str,
     global_claim_id: str, global_integration_id: str,
 ) -> dict:
-    from tools import agent_global_coordination as remote
+    from tools.dev import agent_global_coordination as remote
 
     current = guard(root, agent, task)
     entry = _get_claim(root, claim_id, agent, task, state)
@@ -571,7 +571,7 @@ def _recovery_inspection(
 
 def inspect_integration(root: Path, agent: str, task: str, claim_id: str, **identity) -> dict:
     """Read a reproducible recovery receipt without changing Git or registries."""
-    from tools.agent_global_coordination import GlobalClaimError
+    from tools.dev.agent_global_coordination import GlobalClaimError
 
     root = _root(root)
     with _mutex(root) as directory:
@@ -586,7 +586,7 @@ def recover_integration(
     inspection: str, jobs_inspected: bool, **identity,
 ) -> dict:
     """Settle inspected metadata only; retain reservations, claims and Git state."""
-    from tools import agent_global_coordination as remote
+    from tools.dev import agent_global_coordination as remote
 
     if jobs_inspected is not True:
         raise CoordinationError("Inspect affected jobs and confirm they are idle before recovery")

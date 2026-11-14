@@ -245,8 +245,8 @@ When useful, inspect development status with the optional read-only
 repository-local command instead of repeating unrelated inventory queries:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.dev_status
-.\.venv\Scripts\python.exe -m tools.dev_status --json
+.\.venv\Scripts\python.exe -m tools.dev.dev_status
+.\.venv\Scripts\python.exe -m tools.dev.dev_status --json
 ```
 
 On Linux/macOS use `.venv/bin/python`. `--offline` skips both network/monitor
@@ -346,7 +346,7 @@ check examines every earlier open ID across workstreams and fails
 unexplained skips:
 
 ```powershell
-$taskId = (.\.venv\Scripts\python.exe -m tools.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable
+$taskId = (.\.venv\Scripts\python.exe -m tools.dev.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable
 .\.venv\Scripts\python.exe -m tools.check_v1_backlog --select $taskId
 ```
 

@@ -17,8 +17,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-from tools.agent_coordination import _PROTECTED, CoordinationError, _overlaps, _scope
-from tools.agent_workspaces import WorkspaceError, guard
+from tools.dev.agent_coordination import _PROTECTED, CoordinationError, _overlaps, _scope
+from tools.dev.agent_workspaces import WorkspaceError, guard
 
 REF = "refs/heads/coordination/agent-claims"
 STATE_FILE = "claims.json"

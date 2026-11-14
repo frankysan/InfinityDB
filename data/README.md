@@ -428,7 +428,7 @@ fingerprint. `infinity-db database-health data/generated/army.db --require-raw` 
 operator-facing validation command for this pair contract; omitting `--require-raw` validates only
 the published application database.
 
-For local source inspection, `tools.inspect_raw_archive` supports either
+For local source inspection, `tools.data.inspect_raw_archive` supports either
 an explicit `--normalized` source JSON file verified against the application's
 complete `export_pair_sha256` generation or the legacy paired raw SQLite
 archive. Its historical name is retained for existing callers. It never
@@ -439,8 +439,8 @@ rows preserve their exact source JSON (including absent versus null fields).
 From the repository root, for a matched local Army export:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.inspect_raw_archive --application local/data/build/army.db --normalized local/data/build/normalized.json verify
-.venv\Scripts\python.exe -m tools.inspect_raw_archive --application local/data/build/army.db --normalized local/data/build/normalized.json rows skills --start 0 --limit 20
+.venv\Scripts\python.exe -m tools.data.inspect_raw_archive --application local/data/build/army.db --normalized local/data/build/normalized.json verify
+.venv\Scripts\python.exe -m tools.data.inspect_raw_archive --application local/data/build/army.db --normalized local/data/build/normalized.json rows skills --start 0 --limit 20
 ```
 
 The `local/data/build/` paths above are illustrative: select the actual
@@ -570,7 +570,7 @@ and [InfinityDB-symbol-tools](https://github.com/frankysan/InfinityDB-symbol-too
 producers write version-3 `InfinityDB snapshot provenance` documents under the
 selected working directory's `manifests/snapshots/`. Producers hand off only immutable
 source ZIPs and their matching manifests. InfinityDB's offline
-`tools.army_snapshot_source` verifies acquired Army ZIPs; the normal build,
+`tools.data.army_snapshot_source` verifies acquired Army ZIPs; the normal build,
 serve and Docker workflows never install or run the external producers. Version 3 retains the logical content and exact
 archive identities introduced in version 2 and adds `source.dataChangedOn` for
 Army snapshots. Version-1 and version-2 manifests remain valid historical

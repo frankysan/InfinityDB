@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.snapshot_provenance import sha256_file
-from tools.army_snapshot_source import resolve_army_snapshot
+from tools.data.army_snapshot_source import resolve_army_snapshot
 from tools.symbols.symbol_source import (
     DEFAULT_LEGACY_ARMIES,
     DEFAULT_STATIC_CONFIG,

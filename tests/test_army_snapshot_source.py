@@ -12,7 +12,7 @@ import pytest
 
 from infinity_db.army_snapshot_source import verify_pinned_army_build_source
 from infinity_db.snapshot_provenance import SnapshotProvenanceError, write_snapshot_manifest
-from tools.army_snapshot_source import (
+from tools.data.army_snapshot_source import (
     ApiDownloadError,
     resolve_army_snapshot,
     snapshot_source_revision_counts,
