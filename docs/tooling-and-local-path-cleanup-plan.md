@@ -75,6 +75,18 @@ The next operational task is transferring new producer ZIP/manifest
 pairs to the main checkout and updating Syncthing's sender inputs
 when desired.
 
+**R6 Syncthing sender path cutover (2026-11-14):** The four source
+sender folders change to `local/data/raw/`, `local/data/wiki/`,
+`local/data/pdf/` and `local/data/manifests/snapshots/`, preserving
+the corresponding folder IDs and Linux staging destinations. The optional
+legacy `image_overrides/` sender remains unchanged. The local receiver
+map now places Army ZIPs beneath `raw/army/`; symbol archives remain under
+`raw/symbols/`. The expanded historical Wiki/Human-Sphere mirrors stay
+under the old Windows `data/wiki/` and are excluded from the new sender;
+the immutable ZIP archives remain available. New producer ZIP/manifest
+pairs can be imported with `tools.data.import_acquisition_snapshot` before
+Syncthing makes them available to Linux.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

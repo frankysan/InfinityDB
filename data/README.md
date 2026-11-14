@@ -140,8 +140,10 @@ Standalone `merge`, `normalize` and `build` write default intermediates
 under `local/work/build/army/`. The standalone Army and Wiki producer
 repositories now create new ZIPs and provenance in their **own** ignored
 `local/data/` directories; transferring a selected pair to this checkout
-remains an explicit step. Neither the existing Syncthing sender/receiver
-mapping nor the deployed three-file runtime set changed. Current
+can use `tools.data.import_acquisition_snapshot` for verified ZIP/manifest
+pairs. Four Syncthing sender source paths use `local/data/` while Linux
+staging roots and the optional image-overrides sender remain unchanged.
+The deployed three-file runtime set is unaffected. Current
 symbol-publication pins and other maintained inputs must still match.
 
 Default output is `data/generated/`; `--db-dir PATH` selects a

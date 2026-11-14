@@ -17,7 +17,7 @@
     "local": {
       "manifest": {"staging": "snapshots", "destination": "local/data/manifests/snapshots"},
       "archives": {
-        "army": {"staging": "raw", "destination": "local/data/raw/army"},
+        "army": {"staging": "raw/army", "destination": "local/data/raw/army"},
         "wiki": {"staging": "wiki", "destination": "local/data/wiki"},
         "symbols": {"staging": "raw/symbols", "destination": "local/data/raw/symbols"}
       },

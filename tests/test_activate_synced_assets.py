@@ -252,13 +252,14 @@ def test_explicit_layout_roundtrip_preserves_pair_bytes(staging, kind, selection
     recorded = new[kind] if selection == "local-new-path" else old[kind]
     if selection == "local-no-path":
         recorded = None
+    layout = "legacy" if selection == "legacy" else "local"
+    staged_folder = "raw/army" if kind == "army" and layout == "local" else folders[kind]
     name, archive = _snapshot(
         staged, f"{kind}-20260929-114335", kind=kind,
-        staged_folder=folders[kind], recorded_root=recorded,
+        staged_folder=staged_folder, recorded_root=recorded,
     )
     source_manifest = staged / "snapshots" / f"{name}.json"
     original = (archive.read_bytes(), source_manifest.read_bytes())
-    layout = "legacy" if selection == "legacy" else "local"
     assert _run(["list", "--layout", layout], staged, checkout) == 0
     assert name in capsys.readouterr().out
     assert _run(["verify", "--layout", layout], staged, checkout) == 0
@@ -375,7 +376,7 @@ def test_case_colliding_manifest_inventory_is_rejected_on_case_sensitive_hosts(s
 @pytest.mark.parametrize("layout", ["legacy", "local"])
 def test_manifest_destination_conflict_prevents_archive_copy(staging, layout):
     staged, checkout = staging
-    name, _ = _snapshot(staged)
+    name, _ = _snapshot(staged, staged_folder="raw/army" if layout == "local" else "raw")
     base = "data" if layout == "legacy" else "local/data"
     destination = checkout / base / "manifests/snapshots" / f"{name}.json"
     destination.parent.mkdir(parents=True)
@@ -391,7 +392,9 @@ def test_manifest_destination_conflict_prevents_archive_copy(staging, layout):
 @pytest.mark.parametrize("source", ["archive", "manifest", "archive-directory", "checkout-root"])
 def test_symlink_guard_runs_before_destination_creation(staging, layout, source, monkeypatch):
     staged, checkout = staging
-    name, archive = _snapshot(staged)
+    name, archive = _snapshot(
+        staged, staged_folder="raw/army" if layout == "local" else "raw",
+    )
     targets = {"archive": archive, "manifest": staged / "snapshots" / f"{name}.json",
                "archive-directory": archive.parent, "checkout-root": checkout}
     original = Path.is_symlink
@@ -424,7 +427,9 @@ def test_inaccessible_staged_manifest_fails_without_checkout_writes(staging, lay
 @pytest.mark.parametrize("layout", ["legacy", "local"])
 def test_archive_changed_after_preflight_is_not_published(staging, layout, monkeypatch):
     staged, checkout = staging
-    name, archive = _snapshot(staged)
+    name, archive = _snapshot(
+        staged, staged_folder="raw/army" if layout == "local" else "raw",
+    )
     original = activation._destination
 
     def mutate_after_preflight(root, relative, *, apply):
@@ -476,7 +481,7 @@ def test_layout_configuration_selects_one_explicit_staged_location(staging):
 @pytest.mark.parametrize("version", [1, 2])
 def test_supported_historical_manifests_keep_their_original_bytes(staging, layout, version):
     staged, checkout = staging
-    name, _ = _snapshot(staged)
+    name, _ = _snapshot(staged, staged_folder="raw/army" if layout == "local" else "raw")
     path = staged / "snapshots" / f"{name}.json"
     document = json.loads(path.read_text(encoding="utf-8"))
     document["formatVersion"] = version
@@ -654,7 +659,7 @@ def test_invalid_layout_policy_is_rejected_without_fallback(staging, failure):
 @pytest.mark.parametrize("layout", ["legacy", "local"])
 def test_changed_manifest_is_rejected_before_destination_creation(staging, layout, monkeypatch):
     staged, checkout = staging
-    name, _ = _snapshot(staged)
+    name, _ = _snapshot(staged, staged_folder="raw/army" if layout == "local" else "raw")
     path = staged / "snapshots" / f"{name}.json"
     original = activation.validate_snapshot_manifest
 

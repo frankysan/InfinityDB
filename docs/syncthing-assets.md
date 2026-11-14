@@ -10,32 +10,34 @@ responsibilities. Syncthing never updates a checkout or triggers a test.
 ## Layout and synchronization
 
 Windows is the authoritative **Send Only** Syncthing device; `linux-dev` is
-**Receive Only**. Five independent folder IDs/paths are configured as follows:
+**Receive Only**. The source-path cutover preserves all five folder IDs and
+Linux staging folder roots:
 
 | Windows repository subdirectory | Linux staging folder |
 | --- | --- |
-| `data/raw/` | `~/syncthing/infinitydb/raw/` |
-| `data/wiki/` | `~/syncthing/infinitydb/wiki/` |
-| `data/pdf/` | `~/syncthing/infinitydb/pdf/` |
-| `data/manifests/snapshots/` | `~/syncthing/infinitydb/snapshots/` |
-| `image_overrides/` | `~/syncthing/infinitydb/image-overrides/` (optional) |
+| `local/data/raw/` | `~/syncthing/infinitydb/raw/` |
+| `local/data/wiki/` | `~/syncthing/infinitydb/wiki/` |
+| `local/data/pdf/` | `~/syncthing/infinitydb/pdf/` |
+| `local/data/manifests/snapshots/` | `~/syncthing/infinitydb/snapshots/` |
+| `image_overrides/` | `~/syncthing/infinitydb/image-overrides/` (optional, unchanged) |
 
-**L2 path-cutover boundary:** The
-[reader/producer decision package](tooling-and-local-path-cleanup-plan.md#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13)
-proposes `local/data/` source destinations but does **not** migrate
-them. The activation tool now supports explicit `--layout local`
-verification and preview alongside the default `legacy` layout, as
-described below. This reader capability does not change the five current
-folders, their IDs, sender roots, receiver permissions or backup policy.
-Physical source/Syncthing cutover still needs its own family-specific approval.
+**Source cutover:** The source families were copied to `local/data/`
+with hash verification before the Windows sender paths were changed.
+`tools.operations.cutover_syncthing_sender` previews the four folder-path
+changes and applies them with `--apply` via the local Syncthing API, without
+changing folder IDs, modes, devices or the optional override sender.
+The receiver folders remain at the same staging locations. The
+`--layout local` activation maps the nested Army ZIPs to `raw/army/`.
+`--layout legacy` remains available for old staging arrangements, but
+does not discover the new Army subdirectory.
 
 The Syncthing folder IDs must match between the devices; their physical
 paths need not. The optional Linux receiver uses `image-overrides/` (hyphen),
 while the repository destination remains `image_overrides/` (underscore). The
 explicit activation tool maps between them; do not rename either to match
-its counterpart. Do **not** synchronize the whole repository, the
+its counterpart. Do **not** synchronize the whole repository or entire `local/` tree, the
 `data/generated/` directory (contains tracked release databases),
-`data/curated/`, `local/`, `data/work/`, `reports/`, environment
+`data/curated/`, `data/work/`, `reports/`, environment
 files, virtualenvs, or caches. The Linux source staging directory is outside
 `~/InfinityDB`.
 
@@ -86,7 +88,7 @@ their permitted source/destination families are rejected without fallback.
 
 | Snapshot family | Staged source in `local` mode | `local` checkout destination |
 | --- | --- | --- |
-| Army | `raw/<original basename>.zip` | `local/data/raw/army/<original basename>.zip` |
+| Army | `raw/army/<original basename>.zip` | `local/data/raw/army/<original basename>.zip` |
 | Wiki / Human Sphere | `wiki/<original basename>.zip` | `local/data/wiki/<original basename>.zip` |
 | Raw symbols | `raw/symbols/<original basename>.zip` | `local/data/raw/symbols/<original basename>.zip` |
 | Matching provenance | `snapshots/<original stem>.json` | `local/data/manifests/snapshots/<original stem>.json` |
@@ -109,13 +111,14 @@ Preview a selected pair on Linux without changing the checkout:
 ./.venv/bin/python -m tools.activate_synced_assets activate --layout local --snapshot 'JSON 20260929-114335'
 ```
 
-The R3 snapshot and R4 individual-file mappings permit explicit
-`--layout local` activation. On 2026-11-14, the Windows checkout received
-hash-checked, non-replacing R6 copies of Army, Wiki/Human-Sphere and raw-symbol
-sources plus PDFs under `local/data/` using a separate copy helper. These
-copies do not change the five Syncthing staging folders, Linux receiver,
-producer paths or default legacy activation layout. Live receiver `--apply`
-remains a separate, explicitly selected operation.
+On 2026-11-14, the Windows checkout received hash-checked, non-replacing
+copies of Army, Wiki/Human-Sphere and raw-symbol sources plus PDFs under
+`local/data/`. The four sender paths now use that layout; the optional
+override sender remains unchanged. Existing extracted Wiki/Human Sphere
+mirror directories under legacy `data/wiki/` are **not** synchronized
+from the new ZIP-only sender root. They remain on Windows.
+Linux checkout activation remains an explicit `--layout local` command;
+this does not trigger builds, Git operations or live acquisition.
 
 Snapshot and manifest basenames must agree. Duplicate selections, case-colliding
 manifest names and non-lowercase `.json` suffixes fail closed. Full-pair
@@ -259,9 +262,9 @@ boundary. A separate owner-authorized check is needed. Matching earlier
 receiver snapshots or today's sender global counts cannot substitute
 for a fresh receiver API query.
 
-Neither Syncthing replication nor Syncthing versioning is an independent
-backup. An offline or separately versioned source backup and verified
-trial restore remain mandatory before any R6 copy proposal.
+Syncthing replication is not a source backup. The original immutable
+archive and provenance files remain under the legacy Windows source
+directories during this cutover; deleting them is a later, separate cleanup.
 
 The activation tool uses `~/syncthing/infinitydb` by default. Configure the
 worker's **actual** staging root via a systemd drop-in, avoiding changes to

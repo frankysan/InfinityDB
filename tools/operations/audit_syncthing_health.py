@@ -18,10 +18,10 @@ from pathlib import Path
 from typing import Any
 
 FAMILIES = {
-    "raw": ("data/raw", "raw"),
-    "wiki": ("data/wiki", "wiki"),
-    "pdf": ("data/pdf", "pdf"),
-    "snapshots": ("data/manifests/snapshots", "snapshots"),
+    "raw": ("local/data/raw", "raw"),
+    "wiki": ("local/data/wiki", "wiki"),
+    "pdf": ("local/data/pdf", "pdf"),
+    "snapshots": ("local/data/manifests/snapshots", "snapshots"),
     "image-overrides": ("image_overrides", "image-overrides"),
 }
 ROOT = Path(__file__).resolve().parents[2]
