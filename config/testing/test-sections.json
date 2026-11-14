@@ -216,6 +216,7 @@
       "description": "Development checks, deployment, archive/report tooling, and operational helpers.",
       "modules": [
         "test_activate_synced_assets",
+        "test_active_backlog",
         "test_audit_syncthing_receiver",
         "test_audit_syncthing_health",
         "test_research_source_paths",

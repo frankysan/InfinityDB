@@ -37,9 +37,10 @@ Use these links to jump directly to a workstream:
   - [ ] Consolidate remaining overlapping guidance into its canonical owner;
     retire completed plans, reports and audits only when no independent
     work or evidence requires them.
-  - [ ] Extend existing backlog checks and agent closeout guidance to catch
-    duplicate task IDs, inconsistent parent/subtask status and unsupported
-    removal of unfinished work, without routine manual bookkeeping.
+  The existing docs-stage checker now catches duplicate explicit task IDs
+  and open children under checked parents, and warns when unfinished tasks
+  disappear relative to the current committed backlog. Warnings require
+  review, not automatic task closure or extra bookkeeping.
   **Decision:** Defer GitHub Issues/Projects unless coordination problems
   persist; do not add a parallel task registry or status synchronization.
 

@@ -340,3 +340,32 @@ def test_ci_source_workflow_checks_history_with_full_checkout() -> None:
     assert "if: needs.fast-validation.outputs.full == 'true' && matrix.primary" in workflow
     assert "matrix.check_args == '--all'" not in workflow
     assert "backlog_base:" in workflow
+
+
+def test_ci_warns_about_removed_open_active_task(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    root, adoption = _repository(tmp_path)
+    before = _new_commit(
+        root, "TODO.md",
+        _todo(1, 2, 3) + "## Active development\n- [ ] TASK-101: Still needed.\n",
+        "docs: register current active task",
+    )
+    after = _new_commit(
+        root, "TODO.md", _todo(1, 2, 3) + "## Active development\n",
+        "docs: remove current active task",
+    )
+    event_path = tmp_path / "active-removal.json"
+    event_path.write_text(
+        json.dumps({"before": before, "after": after}), encoding="utf-8",
+    )
+    environment = {
+        "GITHUB_EVENT_NAME": "push",
+        "GITHUB_SHA": after,
+        "GITHUB_EVENT_PATH": str(event_path),
+    }
+    assert main(environment, repository=root, adoption_base=adoption) == 0
+    output = capsys.readouterr().out
+    assert "BKL003" in output
+    assert "TASK-101" in output
+    assert "0 errors, 1 warnings" in output

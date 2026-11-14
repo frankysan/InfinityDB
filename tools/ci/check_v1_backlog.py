@@ -1,4 +1,4 @@
-"""Check historical V1S declarations when the legacy register is present."""
+"""Check active TODO structure and historical V1S retirement evidence."""
 
 from __future__ import annotations
 
@@ -384,6 +384,144 @@ def analyze_backlog(markdown: str, *, source: str = "docs/TODO.md") -> BacklogAn
     return BacklogAnalysis(
         tasks=tuple(task.finish() for task in tasks),
         diagnostics=tuple(sorted(diagnostics, key=lambda item: (item.line, item.code))),
+    )
+
+
+@dataclass(frozen=True)
+class ActiveTask:
+    """One checkbox in the active development backlog."""
+
+    line: int
+    title: str
+    checked: bool
+    task_id: str | None
+    parent_line: int | None
+
+
+@dataclass(frozen=True)
+class ActiveBacklogAnalysis:
+    tasks: tuple[ActiveTask, ...]
+    diagnostics: tuple[Diagnostic, ...]
+
+
+# Only explicitly leading tokens declare IDs. Referenced IDs in prose do not.
+ACTIVE_ID = re.compile(r"^(?:\*\*)?(?P<id>[A-Za-z][A-Za-z0-9]{1,9}-\d{3,4})(?=[\s:.)]|\*\*)")
+
+
+def analyze_active_backlog(
+    markdown: str, *, source: str = "docs/TODO.md",
+) -> ActiveBacklogAnalysis:
+    """Check all current checkboxes without changing the historical V1S parser."""
+    tasks: list[ActiveTask] = []
+    diagnostics: list[Diagnostic] = []
+    stack: list[tuple[int, int, bool | None]] = []
+    seen: dict[str, int] = {}
+    active = False
+    fence: tuple[str, int] | None = None
+    for number, line in enumerate(markdown.splitlines(), 1):
+        match = FENCE.match(line)
+        if match:
+            marker = match.group("fence")
+            if fence is None:
+                fence = (marker[0], len(marker))
+            elif marker[0] == fence[0] and len(marker) >= fence[1]:
+                fence = None
+            continue
+        if fence:
+            continue
+        heading = _heading_title(line)
+        if heading is not None:
+            level, title = heading
+            if level == 2:
+                active = title == "active development"
+            stack.clear()
+            continue
+        if not active:
+            continue
+        item = LIST_ITEM.match(line)
+        if item is None:
+            continue
+        indent = len(item.group("indent").expandtabs(4))
+        while stack and stack[-1][0] >= indent:
+            stack.pop()
+        checkbox = CHECKBOX.match(item.group("body"))
+        if checkbox is None:
+            stack.append((indent, number, None))
+            continue
+        checked = checkbox.group("state").casefold() == "x"
+        parent = next((node for node in reversed(stack) if node[2] is not None), None)
+        checked_parent = next((node for node in reversed(stack) if node[2] is True), None)
+        if not checked and checked_parent is not None:
+            diagnostics.append(Diagnostic(
+                code="BKL002", severity="error", source=source, line=number,
+                message=f"open task under checked parent at line {checked_parent[1]}",
+                suggestion="Reopen the parent or complete all descendants before checking it.",
+            ))
+        title = (checkbox.group("body") or "").strip()
+        identity = ACTIVE_ID.match(title)
+        task_id = identity.group("id").upper() if identity else None
+        if task_id is not None:
+            if task_id in seen:
+                diagnostics.append(Diagnostic(
+                    code="BKL001", severity="error", source=source, line=number,
+                    message=f"duplicate task ID {task_id} (first at line {seen[task_id]})",
+                    suggestion="Give each explicitly identified active task a unique ID.",
+                ))
+            else:
+                seen[task_id] = number
+        tasks.append(ActiveTask(
+            line=number, title=title, checked=checked, task_id=task_id,
+            parent_line=parent[1] if parent else None,
+        ))
+        stack.append((indent, number, checked))
+    return ActiveBacklogAnalysis(
+        tuple(tasks), tuple(sorted(diagnostics, key=lambda item: (item.line, item.code))),
+    )
+
+
+def review_active_removals(
+    before: str, after: str, *, source: str = "HEAD:docs/TODO.md",
+) -> tuple[Diagnostic, ...]:
+    """Warn about disappearing open tasks, without treating rewrites as closeouts."""
+    from difflib import SequenceMatcher
+
+    earlier = analyze_active_backlog(before, source=source)
+    current = analyze_active_backlog(after)
+    if earlier.diagnostics or current.diagnostics:
+        return ()
+    remaining = list(current.tasks)
+    missing: list[ActiveTask] = []
+    for task in earlier.tasks:
+        if task.checked:
+            continue
+        matched: ActiveTask | None = None
+        for candidate in remaining:
+            if task.task_id is not None:
+                equivalent = candidate.task_id == task.task_id
+            else:
+                equivalent = candidate.task_id is None and (
+                    candidate.title == task.title
+                    or SequenceMatcher(
+                        None, candidate.title.casefold(), task.title.casefold(),
+                        autojunk=False,
+                    ).ratio() >= 0.8
+                )
+            if equivalent:
+                matched = candidate
+                break
+        if matched is not None:
+            remaining.remove(matched)
+        else:
+            missing.append(task)
+    missing_lines = {task.line for task in missing}
+    return tuple(
+        Diagnostic(
+            code="BKL003", severity="warning", source=source, line=task.line,
+            message=f"open task disappeared: {task.task_id or task.title[:90]}",
+            suggestion="Verify completion, supersession or transfer in the change and "
+                       "its canonical evidence; a rewrite alone is not acceptance.",
+        )
+        for task in missing if task.parent_line not in missing_lines
     )
 
 
@@ -824,7 +962,27 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     analysis = analyze_backlog(markdown, source=str(args.todo))
-    diagnostics = list(analysis.diagnostics)
+    active = analyze_active_backlog(markdown, source=str(args.todo))
+    diagnostics = [*analysis.diagnostics, *active.diagnostics]
+    canonical = args.todo.resolve() == (ROOT / "docs" / "TODO.md").resolve()
+    if canonical:
+        try:
+            if args.base:
+                previous = _git(ROOT, "show", f"{args.base}:docs/TODO.md")
+                if args.target_state == "index":
+                    proposed = _git(ROOT, "show", ":docs/TODO.md")
+                elif args.target_state == "commit":
+                    proposed = _git(ROOT, "show", f"{args.target}:docs/TODO.md")
+                else:
+                    proposed = markdown
+            else:
+                previous = _git(ROOT, "show", "HEAD:docs/TODO.md")
+                proposed = markdown
+            if previous != proposed:
+                diagnostics.extend(review_active_removals(previous, proposed))
+        except ValueError:
+            # A copied/installed checkout need not have Git history.
+            pass
     if args.base:
         diagnostics.extend(audit_retirements(
             args.base, args.target, enforce=args.enforce_closeout,
@@ -854,6 +1012,7 @@ def main(argv: list[str] | None = None) -> int:
             "status": "fail" if errors else "pass",
             "source": str(args.todo),
             "declarations": len(analysis.tasks),
+            "activeTasks": len(active.tasks),
             "errors": errors,
             "warnings": warnings,
             "diagnostics": [asdict(item) for item in diagnostics],
@@ -875,11 +1034,11 @@ def main(argv: list[str] | None = None) -> int:
             f"  Suggested correction: {diagnostic.suggestion}"
         )
     if errors:
-        print(f"V1S backlog: FAIL ({errors} error(s), {warnings} warning(s))", file=sys.stderr)
+        print(f"Backlog: FAIL ({errors} error(s), {warnings} warning(s))", file=sys.stderr)
         return 1
     print(
-        f"V1S backlog: PASS ({len(analysis.tasks)} declarations; "
-        f"{warnings} warning(s))"
+        f"Backlog: PASS ({len(analysis.tasks)} V1S declarations, "
+        f"{len(active.tasks)} active tasks; {warnings} warning(s))"
     )
     return 0
 

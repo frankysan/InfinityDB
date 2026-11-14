@@ -22,6 +22,7 @@ from tools.ci.check_v1_backlog import (
     _register_bounds,
     analyze_backlog,
     audit_retirements,
+    review_active_removals,
 )
 
 # First tested adoption commit for Git-aware retirement and selection checks.
@@ -195,6 +196,11 @@ def main(
         diagnostics = audit_retirements(
             audit_range.base, audit_range.target,
             repository=repository, enforce=True,
+        )
+        diagnostics += review_active_removals(
+            _git(repository, "show", f"{audit_range.base}:docs/TODO.md"),
+            _git(repository, "show", f"{audit_range.target}:docs/TODO.md"),
+            source=f"{audit_range.base[:12]}:docs/TODO.md",
         )
     except (OSError, UnicodeError, ValueError) as exc:
         print(f"V1S CI retirement check: SETUP ERROR: {exc}", file=sys.stderr)

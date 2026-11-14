@@ -313,6 +313,15 @@ remaining dependency. Invoke the [V1S checkpoint](testing.md#v1s-backlog-checks)
 only for reopened numbered V1S work. Do not turn routine unrelated development
 into an administrative full-backlog or queue review.
 
+Current `TODO.md` checkboxes are checked by the existing docs stage:
+duplicate **leading, explicitly supplied** task IDs and open descendants
+of checked parents are errors; IDs are optional. When the worktree changes
+or a Git base is supplied, removed open tasks produce advisory `BKL003`
+warnings. Unnumbered descriptions are matched conservatively so ordinary
+rewrites are less likely to trigger false alarms. A warning asks the
+maintainer to verify completion, supersession or transfer using the same
+commit and canonical evidence; it is not a separate acceptance gate.
+
 ## Private local workspace
 
 `local/` is Git-ignored and excluded from Docker build contexts. Use it for private audit evidence,
