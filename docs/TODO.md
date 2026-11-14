@@ -102,15 +102,19 @@ existing release checklist still apply.
   contexts, URL/API compatibility, performance and implementation/maintenance
   cost. Record a scoped v1.1.0 implement-or-defer decision; do not make the
   full boolean-filtering system an implicit release prerequisite.
-  **Decision: defer AND/OR/NOT per category beyond v1.1.0.** OR within a
-  category and AND between categories already cover common discovery.
-  Examples for future review: requiring both MSV and Mimetism, or excluding
-  a Skill. However, NOT needs an explicit whole-Unit versus compatible
-  profile/loadout scope, while intra-category AND needs occurrence-coherent
-  semantics. A three-state control for six categories, new share-state/API
-  expression syntax, query changes and regression coverage are a substantial
-  multi-layer implementation and maintenance cost relative to unverified
-  demand. No release blocker or hidden boolean semantics are introduced.
+  **Revised decision: implement experimental per-filter AND/OR in v1.1.0.**
+  Small independent switches for all six categorical filters default to OR,
+  with AND enabled when two or more items are selected. AND requires all
+  selected values to match the same compatible Army/profile-group/loadout
+  occurrence (Unit-wide facts remain Unit-wide). Existing shared URLs keep
+  their OR behavior; optional `and_filters` state records explicit modes.
+  **NOT remains deferred** because exclusion needs separate semantics and UI.
+
+- [x] **Web backend + Web frontend — experimental AND/OR switches:**
+  Implement occurrence-coherent AND matching, defaults and legacy URL/API
+  compatibility, six compact accessible toggles, share-state round trips
+  and focused synthetic/browser acceptance. Keep final release acceptance
+  open for manual testing.
 
 - [x] **Web backend — caching investigation:** Benchmark repeated and
   varied multi-selection and count queries on a representative snapshot.

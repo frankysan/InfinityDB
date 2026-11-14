@@ -23,6 +23,13 @@ def test_multi_selection_query_preserves_legacy_and_canonical_values() -> None:
     assert _unit_query("skill_id=2,1,2")["skill_id"] == (1, 2)
     assert _unit_query("equipment_id=0&weapon_id=rifle")["equipment_id"] == 0
     assert _unit_query("skill_id=")["skill_id"] is None
+    assert _unit_query("skill_id=1,2&and_filters=weapon,skill")["and_filters"] == (
+        "skill", "weapon",
+    )
+    assert _unit_query("skill_id=1,2")["and_filters"] == ()
+    assert _unit_query("and_filters=troop_type,classification")["and_filters"] == (
+        "classification", "troop_type",
+    )
 
 
 @pytest.mark.parametrize(
@@ -35,6 +42,9 @@ def test_multi_selection_query_preserves_legacy_and_canonical_values() -> None:
         "skill_id=" + ",".join(str(number) for number in range(17)),
         "skill_id=" + "x" * 1025,
         "skill_id=../../etc/passwd",
+        "and_filters=skill,skill",
+        "and_filters=not",
+        "and_filters=skill&and_filters=weapon",
     ],
 )
 def test_multi_selection_rejects_invalid_queries(query: str) -> None:
@@ -63,6 +73,16 @@ def test_multi_selection_matches_union_of_one_category() -> None:
         chosen[0][1] | chosen[1][1]
     )
     assert combined["total"] == len(combined["items"])
+    required = database.list_units(
+        skill_id=tuple(item_id for item_id, _ in chosen),
+        and_filters=("skill",), limit=10_000, _unbounded=True,
+        include_usage_counts=True,
+    )
+    assert {item["id"] for item in required["items"]} <= {
+        item["id"] for item in combined["items"]
+    }
+    for item_id, _ in chosen:
+        assert required["usage_counts"]["skills"].get(str(item_id), 0) == required["total"]
 
 
 @pytest.mark.parametrize(
@@ -167,6 +187,11 @@ def test_multi_selection_http_request_and_legacy_contract() -> None:
     equipment_id = database.list_catalog_items("equipment")[0]["id"]
     status, payload = request(f"equipment_id={encoded},{equipment_id}")
     assert status == 200
+    status, required = request(
+        f"equipment_id={encoded},{equipment_id}&and_filters=equipment"
+    )
+    assert status == 200
+    assert required["total"] <= payload["total"]
     encoded_ids = catalog.logical_unit_ids_for_filter(encoded)
     assert encoded_ids is not None
     visible_encoded_ids = {
@@ -249,7 +274,7 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
                 (101, 1, 2, 102, 10, '0'),
                 (201, 1, 1, 103, 10, '0');
             INSERT INTO loadout_payload_weapons VALUES
-                (100, 4), (101, 5), (102, 6), (103, 5);
+                (100, 4), (101, 5), (102, 6), (103, 5), (100, 8);
         """)
     database = Database(path)
 
@@ -260,6 +285,7 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
         army: int | None = None,
         points: int | None = None,
         ava: int | None = None,
+        and_requirements: tuple[tuple[str, tuple[int, ...]], ...] = (),
     ) -> set[tuple[int, ...]]:
         result = database._contextual_unit_filter_matches(
             army_id=army,
@@ -278,6 +304,7 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
             swc_min=None,
             swc_max=None,
             force_loadout_context=True,
+            and_requirements=and_requirements,
         )
         return set(result.get(1, ()))
 
@@ -291,10 +318,21 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
     assert matches((1, 99), (5, 98), army=502) == set()
     assert matches((2, 99), (5, 98), army=502) == set()
     assert matches((1, 99), (4, 98), army=501, ava=2) == set()
+    # Both selected Weapons must be carried by the same loadout.
+    assert matches((1,), (4, 8), army=501, points=10, and_requirements=(
+        ("weapons", (4,)), ("weapons", (8,)),
+    )) == {(1, 101, 1)}
+    assert matches((1,), (4, 5), army=501, and_requirements=(
+        ("weapons", (4,)), ("weapons", (5,)),
+    )) == set()
+    # Different profile groups cannot satisfy separate required Skills.
+    assert matches((1, 2), (4, 8), army=501, and_requirements=(
+        ("skills", (1,)), ("skills", (2,)),
+    )) == set()
     # Usage counts are scoped to the matching loadout and its profile group.
     group_one = database._unit_filter_usage_counts({(1, 1, 101, 1, 100)})
     assert group_one["skills"] == {"1": 1}
-    assert group_one["weapons"] == {"4": 1}
+    assert group_one["weapons"] == {"4": 1, "8": 1}
     assert group_one["equipment"] == {}
 
     second_loadout = database._unit_filter_usage_counts({(1, 1, 101, 1, 101)})
@@ -306,7 +344,7 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
         (1, 1, 101, 1, 100), (1, 1, 101, 2, 102),
     })
     assert combined["skills"] == {"1": 1, "2": 1}
-    assert combined["weapons"] == {"4": 1, "6": 1}
+    assert combined["weapons"] == {"4": 1, "6": 1, "8": 1}
 
 
 

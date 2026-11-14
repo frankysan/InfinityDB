@@ -22,11 +22,27 @@ export function normalizeMultiSelection(value, items) {
 
 export function createUnitMultiSelect(select, label, onChange) {
   const originalLabel = select.parentElement.querySelector(`label[for="${select.id}"]`);
+  const modeSwitch = document.createElement("input");
   if (originalLabel) {
     const caption = document.createElement("span");
     caption.className = "unit-multi-label";
     caption.textContent = originalLabel.textContent;
-    originalLabel.replaceWith(caption);
+    const header = document.createElement("div");
+    header.className = "unit-multi-header";
+    const modeLabel = document.createElement("label");
+    modeLabel.className = "unit-multi-mode";
+    modeSwitch.type = "checkbox";
+    modeSwitch.setAttribute("role", "switch");
+    modeSwitch.setAttribute("aria-label", `Match all selected ${label}`);
+    modeSwitch.disabled = true;
+    modeLabel.append(
+      document.createTextNode("OR"),
+      modeSwitch,
+      document.createTextNode("AND"),
+    );
+    header.append(caption, modeLabel);
+    originalLabel.replaceWith(header);
+    modeSwitch.addEventListener("change", onChange);
   }
   select.hidden = true;
   select.style.display = "none";
@@ -78,6 +94,7 @@ export function createUnitMultiSelect(select, label, onChange) {
     summary.textContent = description;
     summary.setAttribute("aria-label", `${label}: ${description}`);
     clear.disabled = count === 0;
+    modeSwitch.disabled = count < 2;
     for (const [id, { checkbox }] of rows) {
       checkbox.checked = selected.has(id);
       checkbox.disabled = !checkbox.checked && count >= MAX_SELECTIONS;
@@ -157,6 +174,8 @@ export function createUnitMultiSelect(select, label, onChange) {
   renderSelection();
   return {
     value,
+    mode: () => modeSwitch.checked ? "and" : "or",
+    setMode(mode) { modeSwitch.checked = mode === "and"; },
     setCounts(counts) {
       choices.setAttribute("aria-busy", counts === null ? "true" : "false");
       for (const item of items) {

@@ -422,6 +422,7 @@ def _unit_query(query: str) -> dict:
             "order",
             "extended",
             "counts",
+            "and_filters",
             "cache_bust",
         }:
             raise ValueError(f"Unknown query parameter: {key}")
@@ -460,7 +461,17 @@ def _unit_query(query: str) -> dict:
     except ValueError as exc:
         raise ValueError("This filter selection is invalid.") from exc
 
+    and_filters = params.get("and_filters", [""])[0]
+    allowed_and = {
+        "skill", "equipment", "weapon", "troop_type", "classification", "characteristic",
+    }
+    and_keys = and_filters.split(",") if and_filters else []
+    if len(and_filters) > 128 or any(key not in allowed_and for key in and_keys):
+        raise ValueError("Invalid AND filter selection")
+    if len(and_keys) != len(set(and_keys)):
+        raise ValueError("Duplicate AND filter selection")
     return {
+        "and_filters": tuple(sorted(and_keys)),
         "army_id": _domain_filter_identifier(params, "army_id"),
         "declared_faction_id": declared_faction_id,
         "search": search,

@@ -3156,13 +3156,13 @@ When AVA/Points/SWC participates in a query, another selected profile/loadout cr
 satisfied by an unrelated option elsewhere on the same logical Unit. This prevents semantically
 impossible cross-option matches.
 
-Unit Explorer multi-selection uses **OR within each categorical filter** and
-**AND between different filters**. Multi-valued queries require the selected
-categories to match compatible Army/profile-group/loadout occurrences, while
-Unit-wide source options remain Unit-wide. Alternatives within one category
-do not require the Unit to carry every alternative. Pagination and sorting do
-not change membership. Historical single-value queries retain their existing
-matching behavior.
+Unit Explorer multi-selection defaults to **OR within each categorical filter**
+and **AND between different filters**. Each of the six multi-select categories
+also has an experimental OR/AND switch, enabled when at least two values are
+selected. In AND mode, **all** selected values must match a compatible
+Army/profile-group/loadout occurrence; facts attached to the Unit as a whole
+remain Unit-wide. Pagination and sorting do not change membership. Historical
+single-value queries retain their existing matching behavior.
 
 The `/api/units` parameters `skill_id`, `equipment_id`, `weapon_id`,
 `troop_type`, `classification` and `characteristic` accept one legacy
@@ -3170,7 +3170,14 @@ slug/numeric ID or up to 16 comma-separated selections. The API normalizes
 and deduplicates identifiers in deterministic order and rejects repeated
 query keys and malformed identifiers. Unknown values continue to fail closed.
 The format fits existing v1 share-state string fields without a new token
-version or server-stored sharing state.
+version or server-stored sharing state. The optional `and_filters` parameter
+accepts comma-separated category names: `skill`, `equipment`, `weapon`,
+`troop_type`, `classification`, `characteristic`. Omitted categories
+use OR. The v1 share-state format appends the mode field, so existing
+tokens continue to work without a version bump. In AND mode a single
+application option may match through any of its valid source IDs; each
+distinct selected option must still match the same context. NOT/exclusion
+is not implemented.
 
 Presentation-encoded Equipment selections resolve through their source
 Characteristics. They participate as OR alternatives alongside ordinary

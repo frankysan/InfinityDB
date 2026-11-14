@@ -40,6 +40,14 @@ const elements = {
   sort: document.querySelector("#table-container th"),
 };
 
+const AND_FILTER_KEYS = [
+  ["skillId", "skill"], ["equipmentId", "equipment"], ["weaponId", "weapon"],
+  ["troopType", "troop_type"], ["classification", "classification"],
+  ["characteristic", "characteristic"],
+];
+const normalizeAndFilters = (value) => AND_FILTER_KEYS
+  .map(([, key]) => key).filter((key) => value.split(",").includes(key)).join(",");
+
 const multiControls = Object.fromEntries([
   ["skillId", elements.skill, "Skills"],
   ["equipmentId", elements.equipment, "Equipment"],
@@ -337,6 +345,7 @@ function readLocation() {
     troopType: domainMultiFilterIdentifiers(troopType),
     classification: domainMultiFilterIdentifiers(classification),
     characteristic: domainMultiFilterIdentifiers(characteristic),
+    andFilters: normalizeAndFilters(params.get("and_filters") || ""),
     ava: avaExact,
     avaMin: avaExact ? "" : integerFilterValue(avaMin, { max: 99 }),
     avaMax: avaExact ? "" : integerFilterValue(avaMax, { max: 99 }),
@@ -369,6 +378,7 @@ function writeLocation(replace = false) {
   if (state.troopType) params.set("troop_type", state.troopType);
   if (state.classification) params.set("classification", state.classification);
   if (state.characteristic) params.set("characteristic", state.characteristic);
+  if (state.andFilters) params.set("and_filters", state.andFilters);
   if (state.ava) params.set("ava", state.ava);
   if (state.avaMin) params.set("ava_min", state.avaMin);
   if (state.avaMax) params.set("ava_max", state.avaMax);
@@ -389,6 +399,9 @@ function syncFilters() {
   elements.army.value = state.armyId;
   elements.search.value = state.search;
   for (const [key, control] of Object.entries(multiControls)) control.setValue(state[key]);
+  for (const [key, name] of AND_FILTER_KEYS) {
+    multiControls[key].setMode(state.andFilters.split(",").includes(name) ? "and" : "or");
+  }
   elements.specialist.value = state.specialist;
   elements.extended.checked = state.extended;
   elements.ava.value = state.ava;
@@ -655,6 +668,8 @@ function applyFilters() {
     equipmentId: multiControls.equipmentId.value(), weaponId: multiControls.weaponId.value(),
     troopType: multiControls.troopType.value(), classification: multiControls.classification.value(),
     characteristic: multiControls.characteristic.value(),
+    andFilters: AND_FILTER_KEYS.filter(([key]) => multiControls[key].mode() === "and")
+      .map(([, name]) => name).join(","),
     ava: avaExactFilterValue(elements.ava.value),
     avaMin: numericRangeStateValue(
       "ava", numericRangeControls.ava, elements.avaMin,
@@ -699,7 +714,7 @@ function clearFilters() {
   state = {
     ...state, armyId: "", declaredFactionId: "", search: "", offset: 0,
     skillId: "", specialist: "", equipmentId: "", weaponId: "",
-    troopType: "", classification: "", characteristic: "",
+    troopType: "", classification: "", characteristic: "", andFilters: "",
     ava: "", avaMin: "", avaMax: "", points: "", pointsMin: "", pointsMax: "",
     swc: "", swcMin: "", swcMax: "",
     ...optionalUnitFilters(),
