@@ -6,7 +6,7 @@ import sys
 import zipfile
 from pathlib import Path
 
-from tools.create_work_archive import create_work_archive, work_archive_files
+from tools.dev.create_work_archive import create_work_archive, work_archive_files
 
 
 def _git(root: Path, *args: str) -> None:
@@ -56,24 +56,33 @@ def test_work_archive_script_runs_from_repository_root(tmp_path: Path) -> None:
     tools_dir = root / "tools"
     tools_dir.mkdir()
     source_root = Path(__file__).resolve().parents[1]
-    (tools_dir / "create_work_archive.py").write_bytes(
-        (source_root / "tools" / "create_work_archive.py").read_bytes()
+    (tools_dir / "__init__.py").write_bytes((source_root / "tools" / "__init__.py").read_bytes())
+    dev_dir = tools_dir / "dev"
+    dev_dir.mkdir()
+    (dev_dir / "__init__.py").write_bytes(
+        (source_root / "tools" / "dev" / "__init__.py").read_bytes()
+    )
+    (dev_dir / "create_work_archive.py").write_bytes(
+        (source_root / "tools" / "dev" / "create_work_archive.py").read_bytes()
     )
     (tools_dir / "snapshot_archive.py").write_bytes(
         (source_root / "tools" / "snapshot_archive.py").read_bytes()
     )
     output = tmp_path / "script.zip"
 
-    result = subprocess.run(
-        [sys.executable, "tools/create_work_archive.py", "--output", str(output)],
-        cwd=root,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-
-    assert output.is_file()
-    assert "Created" in result.stdout
+    for command in (
+        ["tools/dev/create_work_archive.py"],
+        ["-m", "tools.dev.create_work_archive"],
+    ):
+        result = subprocess.run(
+            [sys.executable, *command, "--output", str(output)],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        assert output.is_file()
+        assert "Created" in result.stdout
 
 
 def test_explicit_work_archive_destination_retains_intentional_replacement(

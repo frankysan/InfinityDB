@@ -2550,7 +2550,7 @@ inspect its ownership before cleaning it up. Same-directory
 hard-link creation requires filesystem support; an unsupported
 filesystem fails without replacing the final artifact.
 
-**Work-tree ZIPs are different again:** `create_work_archive`
+**Work-tree ZIPs are different again:** `tools.dev.create_work_archive`
 uses content-fingerprinted default names and safely reuses
 identical default archives, but an explicitly supplied
 `--output` remains an **intentional replaceable destination**.

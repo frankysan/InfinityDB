@@ -8,7 +8,10 @@ from pathlib import Path
 
 try:
     from tools.snapshot_archive import _archive_info
-except ModuleNotFoundError:
+except ModuleNotFoundError:  # Direct script execution without the repository root on sys.path.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from snapshot_archive import _archive_info
 
 _COMPRESSION = zipfile.ZIP_DEFLATED
@@ -140,7 +143,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, help="Optional output ZIP path.")
     args = parser.parse_args()
 
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[2]
     files = work_archive_files(root)
     archive = create_work_archive(root, args.output)
     print(f"Created {archive} ({len(files)} files, {archive.stat().st_size:,} bytes)")

@@ -295,9 +295,7 @@ cross-domain CI/release, source-build, deterministic-build and deployment
 commands in place until a consumer-driven cutover adds actual value.
 Helpers shared across publication/release domains (including
 `asset_validation`, `browser_wsgi_transport` and `snapshot_archive`)
-remain root-owned for now. `create_work_archive` remains a separate
-developer-tool candidate; do not retain or retire it by filename age alone.
-No compatibility wrappers were introduced.
+remain root-owned for now. No compatibility wrappers were introduced.
 
 **L4 agent and source-inspection grouping (2026-11-14):** Moved
 `agent_coordination`, `agent_global_coordination`, `agent_workspaces`
@@ -307,8 +305,17 @@ source-row inspector and the offline Army snapshot verifier facade into
 targeted tests and maintained operator commands. Entry points now use
 `python -m tools.dev.*` and `python -m tools.data.*`; the optional
 coordination protocol, read-only inspection contracts and source provenance
-checks are unchanged. The archive creator and cross-domain helpers remain
-root-owned for subsequent review.
+checks are unchanged. Cross-domain helpers remain root-owned for
+subsequent review.
+
+**L4 work-tree archive grouping (2026-11-14):** Moved the maintained
+work-tree ZIP creator to `tools/dev/create_work_archive.py`, keeping
+its default naming, source selection, deterministic bytes and explicit
+output-replacement contract. Updated the determinism manifest builder's
+module/direct-script imports, the archive CLI's repository-root resolution,
+focused direct/module invocation tests and current operator reference.
+The shared `tools.snapshot_archive` helper remains root-owned for
+other bundle consumers. No other artifact generator or output path changed.
 
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a

@@ -26,10 +26,10 @@ from typing import Any
 from infinity_army_data.deterministic_io import json_text
 
 try:
-    from tools.create_work_archive import create_work_archive
+    from tools.dev.create_work_archive import create_work_archive
     from tools.snapshot_archive import create_timestamped_archive
 except ImportError:  # pragma: no cover - direct script execution fallback
-    from create_work_archive import create_work_archive
+    from dev.create_work_archive import create_work_archive
     from snapshot_archive import create_timestamped_archive
 
 FORMAT = "InfinityDB cross-platform determinism manifest"
