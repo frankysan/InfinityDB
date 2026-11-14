@@ -223,16 +223,20 @@ def test_and_or_switch_preserves_share_state(
         page.locator(".unit-multi-option").first.wait_for(state="attached")
         switches = page.locator('.unit-multi-mode input[role="switch"]')
         assert switches.count() == 6
-        assert all(switch.is_disabled() for switch in switches.all())
+        assert all(switch.is_enabled() for switch in switches.all())
         page.locator(".advanced-filters > summary").click()
         control = page.locator(".unit-multi-select").first
+        toggle = switches.first
+        toggle.check()
+        assert toggle.is_checked()
+        toggle.uncheck()
         control.locator("summary").click()
         options = control.locator(".unit-multi-option input")
         options.nth(0).check()
-        options.nth(1).check()
-        toggle = switches.first
         assert toggle.is_enabled()
         toggle.check()
+        assert toggle.is_checked()
+        options.nth(1).check()
         assert toggle.is_checked()
         assert page.evaluate("""async () => {
             const { readShareState } = await import('/static/share-state.js');
@@ -244,9 +248,15 @@ def test_and_or_switch_preserves_share_state(
         assert toggle.is_checked()
         page.go_back(wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => !document.querySelector('.unit-multi-mode input').checked"
+            "() => document.querySelectorAll('.unit-multi-chip').length === 1"
         )
+        assert toggle.is_checked()
+        assert toggle.is_enabled()
+        page.goto(f"{origin}/units", wait_until="domcontentloaded")
+        page.locator(".unit-multi-option").first.wait_for(state="attached")
+        toggle = page.locator('.unit-multi-mode input[role="switch"]').first
         assert not toggle.is_checked()
+        assert toggle.is_enabled()
     finally:
         page.close()
 

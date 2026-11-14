@@ -3158,8 +3158,9 @@ impossible cross-option matches.
 
 Unit Explorer multi-selection defaults to **OR within each categorical filter**
 and **AND between different filters**. Each of the six multi-select categories
-also has an experimental OR/AND switch, enabled when at least two values are
-selected. In AND mode, **all** selected values must match a compatible
+also has an experimental OR/AND switch that stays operable with zero, one,
+or multiple selections and retains its mode as selections change. In AND
+mode, **all** selected values must match a compatible
 Army/profile-group/loadout occurrence; facts attached to the Unit as a whole
 remain Unit-wide. Pagination and sorting do not change membership. Historical
 single-value queries retain their existing matching behavior.

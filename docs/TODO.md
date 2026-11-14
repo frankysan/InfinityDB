@@ -104,8 +104,9 @@ existing release checklist still apply.
   full boolean-filtering system an implicit release prerequisite.
   **Revised decision: implement experimental per-filter AND/OR in v1.1.0.**
   Small independent switches for all six categorical filters default to OR,
-  with AND enabled when two or more items are selected. AND requires all
-  selected values to match the same compatible Army/profile-group/loadout
+  and remain clickable regardless of selection count. The chosen mode
+  persists as options are added or removed. AND requires all selected values
+  to match the same compatible Army/profile-group/loadout
   occurrence (Unit-wide facts remain Unit-wide). Existing shared URLs keep
   their OR behavior; optional `and_filters` state records explicit modes.
   **NOT remains deferred** because exclusion needs separate semantics and UI.

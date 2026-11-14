@@ -34,7 +34,6 @@ export function createUnitMultiSelect(select, label, onChange) {
     modeSwitch.type = "checkbox";
     modeSwitch.setAttribute("role", "switch");
     modeSwitch.setAttribute("aria-label", `Match all selected ${label}`);
-    modeSwitch.disabled = true;
     modeLabel.append(
       document.createTextNode("OR"),
       modeSwitch,
@@ -94,7 +93,6 @@ export function createUnitMultiSelect(select, label, onChange) {
     summary.textContent = description;
     summary.setAttribute("aria-label", `${label}: ${description}`);
     clear.disabled = count === 0;
-    modeSwitch.disabled = count < 2;
     for (const [id, { checkbox }] of rows) {
       checkbox.checked = selected.has(id);
       checkbox.disabled = !checkbox.checked && count >= MAX_SELECTIONS;
