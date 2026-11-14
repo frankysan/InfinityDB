@@ -171,10 +171,11 @@ def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     gitignore = _read(".gitignore")
     attributes = _read(".gitattributes")
 
-    assert "!data/generated/army.db" in gitignore
-    assert "!data/generated/rules_n5.db" in gitignore
-    assert "data/generated/army.db binary" in attributes
-    assert "data/generated/rules_n5.db binary" in attributes
+    # The three published databases are tracked directly, without ignore negations.
+    assert "data/generated/*" not in gitignore.splitlines()
+    for name in ("army.db", "rules_n5.db", "its_18.db"):
+        assert (ROOT / "data/generated" / name).is_file()
+        assert f"data/generated/{name} binary" in attributes
 
 
 def test_docker_context_excludes_nonlocal_private_font_inputs_and_scratch() -> None:
@@ -217,8 +218,8 @@ def test_release_images_require_embedded_deployed_objects() -> None:
     workflow = _read(".github/workflows/deployment-smoke.yml")
     smoke = _read("scripts/verify-container-image.sh")
 
-    assert "data/generated/*" in gitignore
-    assert "!data/generated/deployed-objects.json" not in gitignore
+    assert "data/generated/*" not in gitignore.splitlines()
+    assert "data/generated/*" in dockerignore
     assert "!data/generated/deployed-objects.json" not in dockerignore
     assert "data/generated/rules_n5.db /app/data/rules_n5.db" in dockerfile
     assert "tools.prepare_runtime_bundle" not in deploy

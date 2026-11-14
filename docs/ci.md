@@ -581,10 +581,10 @@ python tools\build_full_asset_bundle.py --output local/handoffs/full-assets/RUN_
 ```
 
 Replace `RUN_ID` with a UTC timestamp and short checkout/publication SHA.
-The existing default and explicit `reports\full-assets.zip` destination
-remain supported: unlike a check transcript or research report, this is
-an **intentionally replaceable** transfer artifact. Do not reuse the path
-when earlier bundle bytes must be retained for separate verification.
+The default is `local/work/full-assets/full-assets.zip`. Explicit
+output destinations remain supported: unlike a check transcript or research
+report, this is an **intentionally replaceable** transfer artifact. Do not
+reuse a path when earlier bundle bytes must be retained for separate verification.
 The builder reserves its sibling temporary ZIP exclusively, refuses
 symlink destinations and cleans up only staging owned by its own run,
 so another producer's temporary file is never silently deleted.

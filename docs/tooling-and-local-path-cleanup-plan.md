@@ -186,6 +186,16 @@ archival is complete. The optional `image-overrides` Syncthing sender now uses
 receiver). Its retired main-checkout directory and ignore exception are gone;
 the tracked publications remain tracked without ignore negations.
 
+**L3 final ignore follow-up (2026-11-14):** Raw source files now
+reside below `local/data/raw/`; the legacy `data/raw/` directory is
+absent and its tracked empty `.gitkeep` is no longer needed.
+Deployment tests now assert that the three published SQLite databases remain
+present and binary-attributed without obsolete Git ignore negations.
+The remaining `.gitignore` entries are conventional tool caches, OS/editor
+files, optional source-font inputs and legacy loose ZIP/patch safeguards.
+`.dockerignore` retains its independent exclusion rules for build contexts,
+including the tracked database and manifest allowlist.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user
