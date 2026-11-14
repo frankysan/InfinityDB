@@ -16,18 +16,26 @@ from typing import Any
 
 from infinity_db.identities import DEFAULT_IDENTITY_CONFIG
 from infinity_db.snapshot_provenance import sha256_file
-from tools.export_symbol_override_lookups import build_override_lookup_plan
-from tools.symbol_publication import PUBLICATION_MANIFEST, build_publication, load_snapshot_index
-from tools.symbol_source import DEFAULT_LEGACY_ARMIES, DEFAULT_STATIC_CONFIG, discover_symbol_source
-from tools.verify_effective_symbol_handoff import _member, verify_effective_symbol_handoff
-from tools.verify_processed_symbol_handoff import (
+from tools.symbols.export_symbol_override_lookups import build_override_lookup_plan
+from tools.symbols.symbol_publication import (
+    PUBLICATION_MANIFEST,
+    build_publication,
+    load_snapshot_index,
+)
+from tools.symbols.symbol_source import (
+    DEFAULT_LEGACY_ARMIES,
+    DEFAULT_STATIC_CONFIG,
+    discover_symbol_source,
+)
+from tools.symbols.verify_effective_symbol_handoff import _member, verify_effective_symbol_handoff
+from tools.symbols.verify_processed_symbol_handoff import (
     FORMAT,
     _load,
     _pin,
     _rows,
     verify_processed_symbol_handoff,
 )
-from tools.verify_symbol_duplicate_handoff import verify_duplicate_symbol_handoff
+from tools.symbols.verify_symbol_duplicate_handoff import verify_duplicate_symbol_handoff
 
 
 @dataclass(frozen=True)

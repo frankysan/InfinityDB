@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
-from tools.verify_effective_symbol_handoff import _json, _member, _object
+from tools.symbols.verify_effective_symbol_handoff import _json, _member, _object
 
 RECEIPT_FORMAT = "InfinityDB symbol processing stage receipt"
 FONT_FORMAT = "InfinityDB SVG font audit"

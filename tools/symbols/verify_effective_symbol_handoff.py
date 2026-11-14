@@ -16,7 +16,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
-from tools.verify_raw_symbol_handoff import verify_raw_handoff
+from tools.symbols.verify_raw_symbol_handoff import verify_raw_handoff
 
 LOOKUP_FORMAT = "InfinityDB symbol override lookup plan"
 EFFECTIVE_FORMAT = "InfinityDB effective symbol processing report"

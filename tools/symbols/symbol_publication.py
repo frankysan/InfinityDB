@@ -13,7 +13,7 @@ from typing import Any, NamedTuple
 
 from infinity_db.identities import load_identity_config, normalized_profile_identity
 from infinity_db.snapshot_provenance import sha256_file
-from tools.path_sanitization import sanitize_filename
+from tools.symbols.path_sanitization import sanitize_filename
 
 PUBLICATION_MAPPING_FORMAT = "InfinityDB symbol publication mapping"
 PUBLICATION_MAPPING_VERSION = 2

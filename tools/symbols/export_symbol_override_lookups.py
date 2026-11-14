@@ -13,8 +13,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from tools.export_symbol_source_plan import build_source_plan, write_source_plan
-from tools.symbol_source import (
+from tools.symbols.export_symbol_source_plan import build_source_plan, write_source_plan
+from tools.symbols.symbol_source import (
     DEFAULT_LEGACY_ARMIES,
     DEFAULT_STATIC_CONFIG,
     discover_symbol_source,

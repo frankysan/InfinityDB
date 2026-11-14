@@ -260,6 +260,15 @@ release-candidate consumer and active `python -m tools.browser.*` commands.
 The cross-domain release-candidate orchestrator and WSGI transport remain at
 `tools/`. Browser acceptance behavior and report formats are unchanged.
 
+**L4 symbol handoff and publication grouping (2026-11-14):** Moved
+the pinned raw/override plan exporters, four independent raw/effective/
+duplicate/processed handoff verifiers, publication preparation/promotion,
+shared symbol source/publication models, path sanitizer and offline
+artwork-review generator/template into `tools/symbols/`. Updated all active imports, operator commands and
+path-sanitization test loading. The producer remains independent; no
+source archives, published SVGs, mappings or runtime databases changed.
+Cross-domain CI/deployment gates and asset validation stay root-owned.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation
@@ -6280,7 +6289,7 @@ required.
 1. Finalize the per-file L0 disposition. Move only genuinely maintained
    modules into the selected categories in small, dependency-coherent
    slices, preserving useful test semantics. Include
-   `tools/templates/symbol_artwork_review.html` with its current owner
+   `tools/symbols/templates/symbol_artwork_review.html` with its current owner
    if the review builder moves.
 2. Replace imports and command invocations atomically; update CLI help,
    docs, tests, CI, module packaging and MCP allowlists. Do not leave

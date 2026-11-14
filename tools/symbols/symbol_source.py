@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 
 from infinity_db.legacy_armies import DEFAULT_LEGACY_ARMIES, LegacyArmy, load_legacy_armies
 from infinity_db.snapshot_provenance import portable_project_path
-from tools.path_sanitization import sanitize_filename
+from tools.symbols.path_sanitization import sanitize_filename
 
 ASSET_HOST = "assets.corvusbelli.net"
 ASSET_ROOT_PATH = "/army/img/"

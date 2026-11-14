@@ -7,8 +7,8 @@ from typing import Any
 
 import pytest
 
-from tools import symbol_publication
-from tools.symbol_publication import slugify
+from tools.symbols import symbol_publication
+from tools.symbols.symbol_publication import slugify
 
 SVG = b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>'
 

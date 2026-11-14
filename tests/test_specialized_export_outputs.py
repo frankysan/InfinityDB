@@ -11,8 +11,8 @@ from typing import Any
 import pytest
 
 from tools import build_variant_usage as variants
-from tools import export_symbol_source_plan as symbols
 from tools.data import audit_deployed_object_inventory as deployed
+from tools.symbols import export_symbol_source_plan as symbols
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -322,8 +322,8 @@ def test_symbol_plan_existing_mismatched_content_is_immutable(
 @pytest.mark.parametrize(("module", "flag", "direct_script"), (
     ("data/audit_deployed_object_inventory", "--json-output", True),
     ("build_variant_usage", "--output", True),
-    ("export_symbol_source_plan", "--output", False),
-    ("export_symbol_override_lookups", "--output", False),
+    ("symbols.export_symbol_source_plan", "--output", False),
+    ("symbols.export_symbol_override_lookups", "--output", False),
 ))
 def test_export_and_inventory_documented_launch_contract(
     module: str, flag: str, direct_script: bool,
@@ -338,3 +338,23 @@ def test_export_and_inventory_documented_launch_contract(
     )
     assert result.returncode == 0, result.stderr
     assert flag in result.stdout
+
+
+@pytest.mark.parametrize("module", [
+    "export_symbol_source_plan",
+    "export_symbol_override_lookups",
+    "verify_raw_symbol_handoff",
+    "verify_effective_symbol_handoff",
+    "verify_symbol_duplicate_handoff",
+    "verify_processed_symbol_handoff",
+    "prepare_symbol_publication",
+    "promote_symbol_publication",
+    "build_symbol_artwork_review",
+])
+def test_symbol_command_module_entrypoint_help(module: str) -> None:
+    process = subprocess.run(
+        [sys.executable, "-m", f"tools.symbols.{module}", "--help"],
+        cwd=ROOT, capture_output=True, text=True, check=False,
+    )
+    assert process.returncode == 0, process.stderr
+    assert "usage:" in process.stdout.lower()

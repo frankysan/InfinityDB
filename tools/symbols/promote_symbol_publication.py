@@ -15,8 +15,11 @@ from pathlib import Path
 
 from infinity_db.snapshot_provenance import sha256_file
 from tools.asset_validation import validate_asset_set
-from tools.prepare_symbol_publication import SymbolPublicationHandoff, prepare_symbol_publication
-from tools.symbol_publication import GENERATED_CATEGORIES, portable_svg_member
+from tools.symbols.prepare_symbol_publication import (
+    SymbolPublicationHandoff,
+    prepare_symbol_publication,
+)
+from tools.symbols.symbol_publication import GENERATED_CATEGORIES, portable_svg_member
 
 MANIFEST = "data/manifests/symbol-publication.json"
 STATIC = "src/infinity_db/web/static"

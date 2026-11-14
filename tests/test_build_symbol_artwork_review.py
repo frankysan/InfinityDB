@@ -9,7 +9,7 @@ import re
 
 import pytest
 
-from tools import build_symbol_artwork_review as review
+from tools.symbols import build_symbol_artwork_review as review
 
 SVG = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M0 0h5v5z"/></svg>'
 NEW = SVG.replace(b"h5", b"h6")

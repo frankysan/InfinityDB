@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 LOCAL_ROOT = REPO_ROOT / "local"
 COMPARISON_FORMAT = "InfinityDB external symbol candidate publication comparison"
 PROVENANCE_FORMAT = "InfinityDB symbol artwork provenance"

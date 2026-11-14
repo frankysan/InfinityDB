@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.verify_processed_symbol_handoff import (
+from tools.symbols.verify_processed_symbol_handoff import (
     ProcessedSymbolHandoffError,
     verify_processed_symbol_handoff,
 )

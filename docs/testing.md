@@ -2535,9 +2535,9 @@ is a JSON file:
   source-identified paths under
   `local/research/symbol-source-plans/RUN_ID/` when retaining
   these handoff exports. Invoke both exporters as modules
-  (`python -m tools.export_symbol_source_plan` or
-  `python -m tools.export_symbol_override_lookups`),
-  rather than directly executing their `tools/*.py` files.
+  (`python -m tools.symbols.export_symbol_source_plan` or
+  `python -m tools.symbols.export_symbol_override_lookups`),
+  rather than directly executing their `tools/symbols/*.py` files.
   The deployed-object and Variant Usage CLIs also retain
   their existing direct-script launch paths.
 

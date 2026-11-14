@@ -16,7 +16,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 from infinity_db.snapshot_provenance import sha256_file
-from tools.verify_effective_symbol_handoff import _member, _sha
+from tools.symbols.verify_effective_symbol_handoff import _member, _sha
 
 FORMAT = "InfinityDB symbol processing stage receipt"
 
