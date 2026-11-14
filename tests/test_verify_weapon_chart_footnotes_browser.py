@@ -131,3 +131,60 @@ def test_reviewed_weapon_footnote_supports_touch(
         assert not errors, errors
     finally:
         context.close()
+
+
+def test_deactivator_equipment_footnote_links_to_canonical_rule(
+    app: Any, browser: Any,
+) -> None:
+    context = browser.new_context(viewport={"width": 1440, "height": 900})
+    page = context.new_page()
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/equipment/deactivator", wait_until="domcontentloaded")
+        link = page.locator(
+            '.weapon-source-footnotes a[href="#rule-equipment-deactivator"]'
+        )
+        link.wait_for(state="visible", timeout=30000)
+        note = page.locator(".weapon-source-footnotes").inner_text()
+        assert "Army and N5.3 chart p. 186" in note
+        assert "[***] Skills and Equipment" in note
+        assert page.locator("#rule-equipment-deactivator").count() == 1
+        assert page.locator('.weapon-source-footnotes a[href*="weapon-"]').count() == 0
+        for width in (1440, 390, 320):
+            page.set_viewport_size({"width": width, "height": 900})
+            for scheme in ("light", "dark"):
+                page.evaluate(
+                    "(scheme) => document.documentElement.dataset.theme = scheme",
+                    scheme,
+                )
+                assert link.is_visible(), (width, scheme)
+                assert page.evaluate(
+                    "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                ), (width, scheme)
+        link.focus()
+        assert link.evaluate("(node) => document.activeElement === node")
+        link.press("Enter")
+        assert page.url.endswith("#rule-equipment-deactivator")
+        assert not errors, errors
+    finally:
+        context.close()
+
+    touch_context = browser.new_context(
+        viewport={"width": 390, "height": 844}, has_touch=True, is_mobile=True,
+    )
+    touch_page = touch_context.new_page()
+    route_browser_page(touch_page, app, ORIGIN)
+    try:
+        touch_page.goto(
+            f"{ORIGIN}/equipment/deactivator", wait_until="domcontentloaded"
+        )
+        touch_link = touch_page.locator(
+            '.weapon-source-footnotes a[href="#rule-equipment-deactivator"]'
+        )
+        touch_link.wait_for(state="visible", timeout=30000)
+        touch_link.tap()
+        assert touch_page.url.endswith("#rule-equipment-deactivator")
+    finally:
+        touch_context.close()

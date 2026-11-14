@@ -345,7 +345,7 @@ def test_weapon_profile_page_separates_source_markers_from_traits() -> None:
         encoding="utf-8"
     )
     assert "withoutWeaponFootnotes(reference)" in page
-    assert "weaponFootnotesForProfile(profile, weaponRules, weaponSlug)" in page
+    assert "weaponFootnotesForProfile(profile, weaponRules, weaponSlug, catalog)" in page
     assert "footnote.source" in page
     assert 'node.setAttribute("aria-label",' in page
     assert 'value.append(" (exact target not verified)")' in page
@@ -376,3 +376,62 @@ def test_weapon_footnote_module_is_served_from_registered_assets(
     assert status == "200 OK"
     assert headers["Content-Type"].startswith("text/javascript")
     assert expected in body
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node.js not installed")
+def test_deactivator_footnote_is_equipment_scoped_and_links_reviewed_rule(
+    app: Callable,
+) -> None:
+    review = json.loads(
+        (ROOT / "config/validation/weapon-trait-source-review.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert review["verifiedSourceCells"]["186:DEACTIVATOR"] == [
+        "BS WEAPON (WIP)", "[***]",
+    ]
+    status, _headers, body = _request(app, "/api/equipment/deactivator")
+    assert status == "200 OK"
+    item = json.loads(body)
+    assert item["slug"] == "deactivator"
+    assert len(item["profiles"]) == 1
+    profile = item["profiles"][0]
+    assert not profile.get("mode")
+    assert "[***]" in profile["traits"]
+    assert any(
+        rule["id"] == "equipment:deactivator" and rule["kind"] == "equipment"
+        for rule in item["rules"]
+    )
+
+    script = """
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const source = readFileSync('./src/infinity_db/web/static/weapon-footnotes.js');
+const {weaponFootnotesForProfile} = await import(
+  'data:text/javascript;base64,' + source.toString('base64')
+);
+const item = JSON.parse(readFileSync(0, 'utf8'));
+const profile = item.profiles[0];
+const rows = weaponFootnotesForProfile(
+  profile, item.rules, item.slug, 'equipment',
+);
+assert.equal(rows.length, 1);
+assert.equal(rows[0].source, 'Army and N5.3 chart p. 186');
+assert.equal(rows[0].marker, '[***]');
+assert.equal(rows[0].category, 'Skills and Equipment');
+assert.equal(rows[0].unresolved, false);
+assert.deepEqual(rows[0].target, {
+  label: 'Deactivator', href: '#rule-equipment-deactivator',
+});
+// Never resolve the Equipment rule from the Weapon catalog or another item.
+assert.equal(weaponFootnotesForProfile(profile, item.rules, item.slug)[0].target, null);
+assert.equal(weaponFootnotesForProfile(profile, item.rules, 'other', 'equipment')[0].target,
+  null);
+assert.equal(weaponFootnotesForProfile(profile, [], item.slug, 'equipment')[0].target, null);
+"""
+    result = subprocess.run(
+        ["node", "--input-type=module", "--eval", script],
+        input=json.dumps(item), cwd=ROOT, capture_output=True, text=True,
+        check=False, timeout=25,
+    )
+    assert result.returncode == 0, result.stderr

@@ -1,7 +1,10 @@
-// Reviewed source notation, not gameplay Traits. Exact current N5.3 chart
-// evidence: config/validation/mine-variant-effects.json (seven Mines) and
-// config/validation/weapon-trait-wiki-review.json (Sepsitor Plus).
-// Both reviews pin PDF SHA-256 53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f.
+// Reviewed source notation, not gameplay Traits. Exact N5.3 chart evidence:
+// config/validation/mine-variant-effects.json (seven Mines),
+// weapon-trait-wiki-review.json (Sepsitor Plus),
+// weapon-trait-source-review.json (Chest Mine CC, Deactivator), and
+// data/curated/weapon-shared-effect-reviews.json (Blitzen and grenades).
+// Source-review policies pin PDF SHA-256
+// 53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f.
 const CATEGORIES = {
   "[*]": "Weaponry",
   "[**]": "Ammunition",
@@ -29,6 +32,12 @@ const REVIEWED_CHART = {
   "sepsitor-plus": {
     marker: "[*]", page: 187, ruleId: "weapon:sepsitor-plus", issue: "SRC-014",
   },
+};
+
+// N5.3 p. 186; exact reviewed cell in weapon-trait-source-review.json.
+// This is the Equipment catalog identity, not a Weapon of the same name.
+const REVIEWED_EQUIPMENT_CHART = {
+  "deactivator": { marker: "[***]", page: 186, ruleId: "equipment:deactivator" },
 };
 
 export function weaponFootnoteMarkers(value) {
@@ -69,9 +78,10 @@ function href(reference) {
 function reviewedTarget(review, profile, weaponRules) {
   if (!review) return null;
   const { ruleId } = review;
-  if (ruleId.startsWith("weapon:")) {
+  if (ruleId.startsWith("weapon:") || ruleId.startsWith("equipment:")) {
     const rules = [...(profile.rules || []), ...weaponRules];
-    const record = rules.find((rule) => rule.id === ruleId && rule.kind === "weapon");
+    const kind = ruleId.split(":", 1)[0];
+    const record = rules.find((rule) => rule.id === ruleId && rule.kind === kind);
     return record ? {
       label: record.name || ruleId,
       href: `#rule-${ruleId.replaceAll(":", "-")}`,
@@ -98,8 +108,11 @@ function reviewedTarget(review, profile, weaponRules) {
   return null;
 }
 
-export function weaponFootnotesForProfile(profile, weaponRules = [], weaponSlug = null) {
-  const review = REVIEWED_CHART[weaponSlug];
+export function weaponFootnotesForProfile(
+  profile, weaponRules = [], weaponSlug = null, catalog = "weapons",
+) {
+  const review = catalog === "weapons" ? REVIEWED_CHART[weaponSlug]
+    : catalog === "equipment" ? REVIEWED_EQUIPMENT_CHART[weaponSlug] : null;
   const chart = review && (review.mode
     ? profile.mode === review.mode : !profile.mode) ? review : null;
   const chartTarget = reviewedTarget(chart, profile, weaponRules);

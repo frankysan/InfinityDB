@@ -282,7 +282,7 @@ function weaponTraitLinks(traits, showStatePrefix = true) {
 }
 
 function weaponFootnoteRow(profile, weaponRules, weaponSlug) {
-  const footnotes = weaponFootnotesForProfile(profile, weaponRules, weaponSlug);
+  const footnotes = weaponFootnotesForProfile(profile, weaponRules, weaponSlug, catalog);
   if (!footnotes.length) return null;
   const row = document.createElement("div");
   row.className = "weapon-data-row weapon-source-footnotes";
@@ -521,7 +521,7 @@ function weaponVariants(variants, profileCitationsAvailable = null, weaponRules 
         propertiesRow.append(propertiesHeading, propertiesText);
         card.append(propertiesRow);
       }
-      if (catalog === "weapons") {
+      if (catalog === "weapons" || (catalog === "equipment" && weaponSlug === "deactivator")) {
         const footnotes = weaponFootnoteRow(profile, weaponRules, weaponSlug);
         if (footnotes) card.append(footnotes);
       }
@@ -707,7 +707,7 @@ function render(item) {
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),
     ...(!mineFamily && profiles ? [profiles] : []),
     ...(catalog === "equipment" && item.profiles?.length
-      ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])] : []),
+      ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }], null, item.rules || [], item.slug)] : []),
     ...(catalog === "equipment" && item.hacking_programs?.length
       ? [hackingProgramsSection(item.hacking_programs)] : []),
     ...(catalog === "equipment" && exactUsage

@@ -61,13 +61,13 @@ Use these links to jump directly to a workstream:
   Implemented subset: standalone/combined Army markers are separated from
   Traits without changing source data. Exact reviewed N5.3 chart mappings
   now cover seven named Mines (p. 181), Sepsitor Plus (p. 187), Blitzen,
-  Smoke/E/M/Eclipse Grenades (p. 178), and Chest Mine **CC Mode** (p. 181).
-  Chest Mine BS Mode retains its unlinked Army marker; source differences
-  SRC-013/014 remain explicit. Chromium acceptance covers seven affected
-  Weapon pages at 1440/390/320 px, light/dark, keyboard and touch.
-  Remaining: other chart rows/modes; Deactivator's reviewed p. 186
-  Equipment marker needs a separate presentation decision; and publisher
-  clarification is still needed for unresolved source mismatches.
+  Smoke/E/M/Eclipse Grenades (p. 178), Chest Mine **CC Mode** (p. 181),
+  and Deactivator **Equipment** (p. 186, `[***]`). Chest Mine BS Mode
+  retains its unlinked Army marker; source differences SRC-013/014 remain
+  explicit. Chromium acceptance covers the reviewed Weapon and Equipment
+  pages at 1440/390/320 px, light/dark, keyboard and touch.
+  Remaining: other chart rows/modes and publisher clarification of
+  unresolved source mismatches.
 
 ### Per-reference change history
 
