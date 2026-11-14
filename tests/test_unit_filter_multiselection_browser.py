@@ -88,6 +88,10 @@ def test_unit_multiselect_url_state_keyboard_and_removal(
 
         first = control.locator(".unit-multi-option input").nth(0)
         second = control.locator(".unit-multi-option input").nth(1)
+        row_height = first.evaluate(
+            "(checkbox) => checkbox.closest('label').getBoundingClientRect().height"
+        )
+        assert 28 <= row_height <= 38, row_height
         if width == 390:
             first.tap()
         else:

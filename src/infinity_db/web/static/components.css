@@ -2315,9 +2315,11 @@ h2 {
 
 .unit-multi-option input {
   flex: 0 0 auto;
+  min-height: 16px;
   width: 16px;
   height: 16px;
   margin: 0;
+  padding: 0;
 }
 
 .unit-multi-notice {
