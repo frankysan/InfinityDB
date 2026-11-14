@@ -277,85 +277,23 @@ when all contained work shares the same owner.
   or an in-memory hand-off that skips only the duplicate build-path pass; the
   standalone `export` command must retain full untrusted-input validation.
 
-- [ ] **Retire `army.raw.db` as a supported retained artifact**, and remove the
-  intermediate raw SQLite format once its independent source-audit and build
-  consumers have tested replacements. The complete runtime builder now
-  skips raw-archive generation entirely; variant usage and Army v27–v31
-  overlays use fully verified normalized source. Standalone `infinity-db export`
-  also defaults to application-only output; explicit `--with-raw` retains a
-  lossless paired export for independent audit/research consumers.
-  - [ ] Review remaining standalone raw-format contracts: paired export,
-    explicit pair-health consumers, and historical raw-only research. The
-    pinned source ZIP verification in `report_reference_baseline` now accepts
-    verified normalized input without a raw sibling. The Army/faction identity,
-    source-presentation completeness, Skill/Equipment source-variant, and
-    three semantic relationship audits also use verified normalized input;
-    source-row inspection and standalone variant candidates are migrated too.
-    `build_determinism_manifest` now defaults to **v2 rawless**
-    application-output determinism. Explicit `--legacy-paired` retains the
-    original v1 raw hash in a disposable export; existing v1 manifests remain
-    comparable with v1, but cannot be silently compared with v2. Neither
-    format requires a persistent ignored `army.raw.db`.
-    `audit_source_variant_inputs` now rejects mismatched application/raw
-    pairs, and its exact Extra-owner lookup accepts verified source when an
-    application path is supplied. Retain legacy raw-based APIs as parity
-    oracles while independent consumers remain.
-    Preserve source-only row fidelity, absence-versus-null distinctions,
-    exact occurrence/extra relationships and fail-closed provenance.
-    Army v27–v31 overlays have also moved to verified normalized input in the
-    complete builder; the legacy raw-pair publisher calls remain opt-in.
-  - [x] Make standalone `infinity-db export` application-only by default;
-    retain explicit legacy `--with-raw` (and the `--no-raw` alias), verified
-    `database-health --normalized PATH`, and a versioned v2 rawless
-    determinism manifest with explicit v1 legacy generation.
-  - [x] Make the direct Python `export_database()` default application-only
-    as well; retained legacy tests and consumers explicitly select
-    `include_raw=True` when asserting pair/archive semantics.
-  - [x] Run and diagnose manifest **v2 on Windows and Linux at the same
-    commit**. After explicit branch push, Linux fetch and exact-SHA checkout,
-    the strict comparator failed on five physical artifacts at `73da5e48`.
-    All 108 SQLite user-table digests and all 1,608 ZIP member payloads
-    match; the remaining differences are ZIP deflate bytes and SQLite
-    writer-version/layout bytes, not demonstrated source-content drift.
-    The disposable Army fixture's stale Windows CRLF bytes were separately
-    normalized, restoring parity for all generated JSON artifacts.
-  - [x] Achieve **byte-identical v2 outputs on Windows and Linux** using
-    `tools.run_pinned_determinism` and the same digest-pinned linux/amd64
-    Python 3.11.18 OCI runtime (SQLite 3.40.1, zlib 1.2.13). At
-    `a164c4b8`, both workers generated all 10 matching SHA-256 hashes;
-    the unmodified strict comparator returned exit 0. The host-native
-    five-artifact mismatch remains expected with unpinned libraries.
-  - [x] Separate GitHub Actions native platform checks from strict
-    digest-pinned determinism: retain the existing Windows/macOS/Linux
-    source-checks matrix, add Ubuntu 24.04/26.04 independent container
-    jobs using `tools.run_pinned_determinism`, and keep the existing
-    strict SHA-256 comparator and required job identity unchanged.
-    No Docker support is assumed on hosted Windows/macOS.
-  - [x] Close out hosted GitHub Actions acceptance on cleanup PR #29:
-    the pinned Ubuntu 24.04/26.04 determinism jobs and strict byte
-    comparison passed. A tracked Army/Rules database rebuild resolved
-    stale provenance; deferring a build-only normalization import then
-    restored immutable-container startup without adding private inputs.
-    At exact pushed SHA `28a8e52b`, Source checks, deployment smoke and
-    installed-wheel smoke all completed successfully. Source checks
-    includes Windows/macOS Python 3.11, Ubuntu Python 3.11/3.14 and the
-    required `Cross-platform deterministic outputs` job. Local repeatable
-    three-database builds and Docker preview (41/41 semantic routes)
-    passed. This closes the hosted acceptance gate, **not** L1 policy
-    approval, release/deployment authorization or private-data deletion.
-  - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
-    inspection and programmatic `include_raw=True` interfaces. Keep the
-    independent source-identity/research semantics and their focused tests
-    until replacements are accepted. Verify a complete three-database build,
-    full regression gate and documented commands before removing pair APIs
-    or compatibility tests.
-  - [ ] Classify the existing ignored `data/generated/army.raw.db` as
-    retirement-candidate local evidence, not a valid current pair. Preserve its
-    bytes pending the cleanup manifest's independent backup/restore and
-    deletion approval; never delete or accept a mismatched pair implicitly.
-  The [historical L0 retirement decision](https://github.com/frankysan/InfinityDB/blob/1063096f51a3050594039cba84b1515d90a4ff0b/docs/tooling-and-local-path-cleanup-plan.md#raw-archive-retirement-decision--2026-11-12)
-  records the original consumer boundaries; the still-open item above
-  remains independently tracked here.
+- [ ] **Retire the remaining explicit raw-SQLite interfaces** once independent
+  research and source-audit consumers no longer need them. Complete runtime
+  builds and default standalone exports already omit `army.raw.db`; verified
+  normalized input replaces the legacy sibling for maintained source audits.
+  Rawless v2 determinism and the independent native-platform checks are
+  documented in [CI](ci.md#cross-platform-deterministic-outputs) and the
+  [data lifecycle](../data/README.md).
+  - [ ] Review the remaining opt-in paired-export, pair-health, source-row
+    inspection and programmatic `include_raw=True` contracts. Retire only
+    those without independent consumers, preserving source-only row fidelity,
+    absent-versus-null values, exact occurrence/Extra relationships and
+    fail-closed provenance. Keep useful compatibility/parity paths until
+    focused replacement tests and complete-set build checks pass.
+  - [ ] Decide whether any legacy ignored `data/generated/army.raw.db`
+    contains unique evidence worth retaining. It is not a current matched
+    runtime pair and must not be silently deleted; a separately reviewed
+    disposition suffices without reopening the completed workspace cleanup.
 
 ### Army snapshot maintenance
 
