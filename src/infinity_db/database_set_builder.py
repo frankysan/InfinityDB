@@ -155,7 +155,14 @@ def build_database_set(
         raise ValueError("--snapshot-manifest requires an explicit Army ZIP source")
     if selected_manifest is not None and args.metadata is not None:
         raise ValueError("--snapshot-manifest cannot combine with --metadata")
+    implicit_source = args.source is None
     source = (args.source if args.source is not None else latest_snapshot()).resolve()
+    if implicit_source and args.metadata is None:
+        selected_manifest = root / "local/data/manifests/snapshots" / f"{source.stem}.json"
+        if not selected_manifest.is_file():
+            raise ValueError(
+                f"Default Army source needs matching snapshot provenance: {selected_manifest}"
+            )
     selected_manifest = selected_manifest.resolve() if selected_manifest is not None else None
     target = args.db_dir.resolve()
     manifest = collect_build_manifest(

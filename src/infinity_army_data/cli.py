@@ -21,7 +21,7 @@ from .metadata import MetadataError, decode_metadata, load_metadata
 from .normalize import normalize_master, validate_normalized
 from .normalize import write_json as write_normalized
 
-DEFAULT_RAW_DIRECTORY = Path("data/raw")
+DEFAULT_RAW_DIRECTORY = Path("local/data/raw/army")
 
 
 def snapshot_downloaded_on(source: Path) -> str | None:
@@ -48,13 +48,31 @@ def snapshot_archive_sha256(source: Path) -> str | None:
 
 
 def latest_snapshot(directory: Path = DEFAULT_RAW_DIRECTORY) -> Path:
-    """Return the newest raw ZIP snapshot, preferring file modification time."""
-    archives = [path for path in directory.glob("*.zip") if path.is_file()]
+    """Select the latest Army acquisition timestamp, independent of copy mtimes."""
+    archives: list[tuple[datetime, int, Path]] = []
+    for path in directory.glob("*.zip"):
+        if not path.is_file():
+            continue
+        match = re.fullmatch(
+            r"JSON (\d{8})(?:-(\d{6})(?:-(\d+))?)?\.zip",
+            path.name,
+            re.IGNORECASE,
+        )
+        if match is None:
+            continue
+        try:
+            acquired = datetime.strptime(
+                match.group(1) + (match.group(2) or "000000"), "%Y%m%d%H%M%S"
+            )
+        except ValueError:
+            continue
+        archives.append((acquired, int(match.group(3) or 0), path))
     if not archives:
         raise ValueError(
-            f"No ZIP snapshots found in {directory}; provide a source path or run the downloader"
+            f"No timestamped Army ZIP snapshots found in {directory}; "
+            "provide an explicit source or transfer an acquired snapshot"
         )
-    return max(archives, key=lambda path: (path.stat().st_mtime_ns, path.name.casefold()))
+    return max(archives, key=lambda item: (item[0], item[1], item[2].name.casefold()))[2]
 
 
 def discover_metadata(
@@ -305,7 +323,7 @@ def add_data_commands(
         nargs="?",
         type=Path,
         default=None,
-        help="Source directory or ZIP archive (default: newest ZIP in data/raw)",
+        help="Source directory or ZIP (default: latest timestamp in local/data/raw/army)",
     )
     if database_set_build:
         p_build.add_argument(

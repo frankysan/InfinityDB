@@ -60,6 +60,21 @@ source used by selected research audits remains on its existing path; there
 is no implicit raw-source migration. Default Army ZIP selection is unchanged
 until the producer and source-selection contracts are aligned.
 
+**R6 producer/default-reader cutover (2026-11-14):** The standalone Army and
+Wiki acquisition CLIs now default to their own ignored `local/data/`
+trees (Wiki work to `local/work/wiki/`), while accepting legacy paths
+explicitly. InfinityDB's implicit Army selection reads only the
+`local/data/raw/army/` ZIP family by acquisition timestamp, not
+filesystem mtime; the integrated default build requires a same-basename
+v3 manifest in `local/data/manifests/snapshots/` when no `--metadata`
+override is given. Explicitly selected legacy Army paths and
+`--snapshot-manifest` remain supported. This change does **not** copy
+new source material between repositories, alter the five legacy
+Syncthing sender folders, run live acquisitions, or delete originals.
+The next operational task is transferring new producer ZIP/manifest
+pairs to the main checkout and updating Syncthing's sender inputs
+when desired.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

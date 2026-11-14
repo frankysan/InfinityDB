@@ -545,6 +545,36 @@ def test_pinned_army_build_selection_preserves_legacy_cli_contract() -> None:
         army_parser().parse_args(["build", "--snapshot-manifest", "a.json"])
 
 
+def test_implicit_build_selects_matching_local_provenance_without_legacy_fallback(
+    project, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, args = project
+    source_manifest = _pin_army_source_for_build(root, args)
+    local_source = root / "local/data/raw/army" / args.source.name
+    local_source.parent.mkdir(parents=True)
+    shutil.copyfile(args.source, local_source)
+    monkeypatch.setattr(builder, "latest_snapshot", lambda: local_source)
+    args.source = None
+
+    with pytest.raises(ValueError, match="Default Army source needs matching snapshot provenance"):
+        builder.build_database_set(args, _fake_army, root=root)
+    assert not args.db_dir.exists()
+    assert not (root / "local/work/build").exists()
+
+    local_manifest = root / "local/data/manifests/snapshots" / source_manifest.name
+    local_manifest.parent.mkdir(parents=True)
+    shutil.copyfile(source_manifest, local_manifest)
+    monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
+    result = builder.build_database_set(args, _fake_army, root=root)
+    assert result["buildProvenance"]["status"] == "matched"
+    assert result["buildProvenance"]["buildSetId"] == build_set_id(
+        builder.collect_build_manifest(
+            root, local_source, None, snapshot_manifest=local_manifest,
+        )
+    )
+    assert not list((root / "local/work/build").iterdir())
+
+
 def test_pinned_army_build_requires_unambiguous_explicit_inputs(project) -> None:
     root, args = project
     manifest = _pin_army_source_for_build(root, args)

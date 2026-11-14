@@ -110,10 +110,13 @@ unchanged; these copies are not a cutover.
   See [ITS season database](../docs/its-season-database.md).
   The old filenames and required JSON publications are retired.
 
-**Complete runtime build:** `infinity-db build --compact` uses the newest local
-Army ZIP and selected API metadata plus maintained Rules/configuration inputs.
-An explicit source ZIP pins another input; `--metadata` selects external
-metadata for the **legacy unpinned** build. It never downloads data.
+**Complete runtime build:** `infinity-db build --compact` selects the latest
+timestamped Army ZIP from `local/data/raw/army/` (not by copy mtime), with
+its matching v3 manifest in `local/data/manifests/snapshots/`. Missing or
+mismatched provenance blocks this implicit build; it never falls back to
+`data/raw/` or downloads data. An explicit source ZIP remains supported;
+`--snapshot-manifest` pins its provenance. Explicit `--metadata` retains
+the legacy unpinned metadata override behavior.
 For an R1 source-pinned build, supply **both** the exact ZIP and its
 version-3 provenance manifest, optionally choosing a separate complete
 database-set output directory:
@@ -131,15 +134,15 @@ identical to the ZIP member; `--metadata` is forbidden with
 `--snapshot-manifest`. No other directory or newest-file fallback is
 searched. The selected manifest is checked again before publication;
 changed inputs leave the previously selected database set untouched.
-The ordinary `infinity-db build --compact` default and unpinned
-`--metadata` behavior are unchanged, as is the separate
-`infinity-army build` source-selection interface. Standalone Army
-`merge`, `normalize` and `build` now write their default intermediates to
-`local/work/build/army/` rather than ignored `data/generated/` or `data/work/`.
-This initial R1 selection does
-not modify Syncthing, the producer acquisition CLI or source
-locations; current symbol-publication pins and other maintained
-build inputs must still match the selected snapshot.
+The standalone `infinity-army build` also discovers the latest timestamped
+ZIP only in `local/data/raw/army/`; explicit source paths still work.
+Standalone `merge`, `normalize` and `build` write default intermediates
+under `local/work/build/army/`. The standalone Army and Wiki producer
+repositories now create new ZIPs and provenance in their **own** ignored
+`local/data/` directories; transferring a selected pair to this checkout
+remains an explicit step. Neither the existing Syncthing sender/receiver
+mapping nor the deployed three-file runtime set changed. Current
+symbol-publication pins and other maintained inputs must still match.
 
 Default output is `data/generated/`; `--db-dir PATH` selects a
 complete alternate destination and is independent of the serving-only
