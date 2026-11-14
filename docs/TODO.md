@@ -22,11 +22,53 @@ when all contained work shares the same owner.
 
 Use these links to jump directly to a workstream:
 
-- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Unit Explorer](#unit-explorer-discovery), [Sharing](#routing-and-long-term-compatibility).
+- **Reference and UI:** [Unit Explorer](#unit-explorer-discovery), [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
 - **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
 ## Active development
+
+### Unit Explorer discovery
+
+**v1.1.0 final feature:** Deliver this as the last planned new player-facing
+feature before freezing the v1.1.0 release candidate. No further feature
+addition is planned between its completion and release; fixes, documentation,
+validation and the existing release checklist remain applicable.
+
+- [ ] **Web backend + Web frontend:** Show contextual usage counts in the
+  Skills, Equipment and Weapons filter dropdowns. Counts represent distinct
+  logical Units in the complete *currently filtered* population, including
+  every active filter (also the selection in the counted dropdown), Army
+  context and optional availability. Preserve the existing
+  [profile/loadout matching semantics](data-model.md#context-coherent-filtering).
+  They are not alternative counts produced by removing/replacing a filter,
+  and must not vary with pagination, sorting or extended view.
+  - [ ] **Count contract:** Specify the per-option response shape and the
+    shared result/count population, including zero counts, distinct Unit
+    identity, selected values and profile/loadout-context restrictions.
+  - [ ] **Backend aggregation:** Compute all three dropdown count sets in
+    batches from the same effective filtered population as the Unit results;
+    avoid per-option queries and duplicate-Unit inflation.
+  - [ ] **Frontend integration:** Show counts alongside Skills, Equipment
+    and Weapons options without changing existing single-selection or
+    filtering behavior; keep labels and selected values coherent.
+  - [ ] **Asynchronous consistency:** Refresh counts on every relevant
+    filter/Army/availability change, prevent stale in-flight responses
+    from overwriting newer state, and handle loading, cancellation and errors
+    without presenting counts for a different result set.
+  - [ ] **Semantic tests:** Check cross-profile/loadout matching, combined
+    filters (including the counted dropdown's selection), Army and
+    availability scoping, zero results, distinct logical Units, and
+    pagination/sort/extended-view independence.
+  - [ ] **Acceptance and closeout:** Verify accessible option announcements,
+    keyboard and touch behavior, responsive layouts and loading states;
+    measure representative count-query latency and add caching only if
+    justified by results. Update current-behavior documentation and the
+    v1.1.0 changelog entry.
+
+  Multi-selection and per-filter AND/OR/NOT are separate future extensions.
+  Server-response/count caching is an optimization option, not a
+  prerequisite or an accepted infrastructure commitment.
 
 ### External source clarifications
 
@@ -121,23 +163,6 @@ Use these links to jump directly to a workstream:
   `minis` only when a reviewed source contract or roster-builder use establishes their
   player-facing meaning. Until then retain the source values without inferring either
   current availability or a miniature-count rule.
-
-### Unit Explorer discovery
-
-- [ ] **Web backend + Web frontend:** Add contextual usage counts to the
-  Skills, Equipment, and Weapons filter dropdowns. Count distinct logical
-  Units in the complete currently filtered population, retaining every active
-  filter, including the selection in the counted dropdown, Army context, and
-  optional availability. Preserve the existing
-  [profile/loadout matching semantics](data-model.md#context-coherent-filtering).
-  Counts describe usage within that population, not hypothetical totals obtained
-  by replacing or removing a filter, and are independent of pagination, sorting,
-  and extended view. Compute counts in batches, keep them synchronized with
-  displayed results, and validate accessible presentation, loading/cancellation
-  behavior, semantic correctness, and representative performance.
-  Multi-selection and per-filter AND/OR/NOT remain separate proposed
-  extensions. Server-response/count caching is a measured implementation option,
-  not a prerequisite or an accepted infrastructure commitment.
 
 ### Routing and long-term compatibility
 
