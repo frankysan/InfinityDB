@@ -20,28 +20,28 @@ New or materially revised work items use the canonical project-domain labels
 defined in `docs/project-domains.md`; section-level domain declarations may be used
 when all contained work shares the same owner.
 
+Use these links to jump directly to a workstream:
+
+- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Unit Explorer](#unit-explorer-discovery), [Sharing](#routing-and-long-term-compatibility).
+- **Engineering:** [Workflow](#backlog-and-development-workflow-simplification), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
+- **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
+
 ## Active development
 
 ### Backlog and development workflow simplification
 
 **Project domain:** Project infrastructure
 
-- [ ] **Reduce maintenance overhead in the existing Git-based task workflow,**
-  following the completed tooling and documentation cleanup
-  and [backlog retirement policy](README.md#backlog-completion-and-retirement):
-  - [ ] Improve `TODO.md` navigability: keep concise, prioritized, actionable
-    work items; link detailed plans rather than copying their contents; remove
-    stale or completed entries without losing open dependencies.
-  - [ ] Complete documentation consolidation first: retain one canonical owner
-    for current guidance, and retire, relabel or preserve completed plans,
-    reports and audits according to their actual remaining purpose.
-  - [ ] Improve existing backlog checks and agent closeout guidance to catch
+- [ ] **Simplify the Git-based backlog workflow** under the
+  [backlog completion policy](README.md#backlog-completion-and-retirement):
+  - [ ] Consolidate remaining overlapping guidance into its canonical owner;
+    retire completed plans, reports and audits only when no independent
+    work or evidence requires them.
+  - [ ] Extend existing backlog checks and agent closeout guidance to catch
     duplicate task IDs, inconsistent parent/subtask status and unsupported
-    removal of unfinished tasks, without requiring routine manual bookkeeping.
-  **Decision:** Defer GitHub Issues/Projects adoption. Reconsider only if
-  cross-repository coordination, dependency tracking or agent task continuity
-  remains problematic after these improvements. Do not create a parallel task
-  registry or automated status synchronization in this phase.
+    removal of unfinished work, without routine manual bookkeeping.
+  **Decision:** Defer GitHub Issues/Projects unless coordination problems
+  persist; do not add a parallel task registry or status synchronization.
 
 ### External source clarifications
 
@@ -176,79 +176,45 @@ when all contained work shares the same owner.
 
 **Project domain:** Project infrastructure
 
-- [ ] **Optional; explicit user request only:** Complete tool-independent
-  multi-agent workspace coordination. The
-  [checkout and claim protocol](multi-agent-workspaces.md#activation-and-default-workflow)
-  is disabled by default.
-  Deferred: further coordination infrastructure work is outside ordinary
-  autonomous development; authority: user; revisit: only when the user explicitly
-  requests that work. Existing tools and acceptance evidence do not activate it.
-  Worktrees, local/global claims, dual-registry pinned fast-forward integration
-  and MCP named-checkout pytest/non-test checks are implemented. The real
-  coordination ref is initialized; its version-2 transition preserves existing
-  claims and requires each older client to update explicitly. See
-  [focused safety acceptance](testing.md#agent-coordination-safety-acceptance).
-  [Inspected integration recovery](multi-agent-workspaces.md#inspected-integration-recovery)
-  now settles interrupted metadata while retaining claims and reservations.
-  - [ ] After explicitly updating its coordination client, exercise a
-    non-destructive real claim/status round trip from an owned Linux development
-    checkout. Preserve the independent interactive checkout and pinned test
-    checkout; disposable-clone race tests do not satisfy this operational gate.
-    Blocked: the live Linux probe read version 2 and rejected a Windows-owned
-    scope, but its metadata push was rejected; authority: integration owner;
-    retry: after authorized remote write access/policy verification. The remote
-    registry and existing claims stayed unchanged.
-  - [ ] Implement inspected abandoned-task recovery and ownership-transfer
-    tooling, including disconnected owners, task reassignment and cross-machine
-    handoff. Preserve the documented inspection/idle-job requirements; never
-    expire claims or assume an unresponsive owner's checkout can be overwritten.
-  - [ ] Complete MCP named-checkout Git operations and the remote worker
-    allowlist without broadening validation-checkout write privileges.
-  - [ ] Add read-only workspace/claim/integration status to the monitor and
-    verify race/refusal behavior on actual Linux before unattended use.
+- [ ] **Optional; explicit user request only:** Complete remaining
+  multi-agent coordination; the [checkout/claim protocol](multi-agent-workspaces.md#activation-and-default-workflow)
+  stays disabled by default. Implemented worktrees, claims, integration and
+  recovery are documented there; see [focused acceptance](testing.md#agent-coordination-safety-acceptance).
+  - [ ] Verify an owned Linux checkout's real claim/status round trip after
+    authorized remote metadata-push access is restored. Keep interactive
+    and pinned test checkouts independent; the earlier registry push was
+    rejected without changing the existing remote claims.
+  - [ ] Add inspected abandoned-task recovery, ownership transfer and
+    cross-machine handoff; never auto-expire claims or overwrite an owner.
+  - [ ] Complete named-checkout MCP Git operations and the remote worker
+    allowlist without adding write access to validation checkouts.
+  - [ ] Surface read-only workspace/claim/integration status in the monitor
+    and verify real Linux refusal/race behavior before unattended use.
 
 ### Performance, storage, and build tooling
 
-- [ ] **Finish v10 rules-data release acceptance:** The matched
-  v10 artifact set was promoted to tracked `data/generated/` in development
-  on 2026-11-08. It contains 17 normalized deployed objects (one unresolved
-  delivery), 151 exact-variant groups (v2), reviewed citations for 62 Weapons,
-  and the unchanged pinned Army database. The read-only v9→v10 common-table
-  parity audit passed: only schema metadata and Battleground map annotations/
-  labels changed among existing records; seven normalized deployed-object
-  tables were added. Checkout hosting and release image packaging are
-  independently supported. The *previous tagged production release* remains
-  v9; there has been no deployment or new release tag.
-  - [ ] Obtain terminal hosted Source, Deployment, Wheel and Cross-browser
-    acceptance for the exact promoted-artifact SHA; confirm the release image
-    against the tracked four-file set. Local tracked-image build, startup,
-    provenance, deployed-object, variant and Weapon API smoke passed
-    2026-11-08, and the disposable image/container were removed.
-  - [ ] After hosted acceptance, audit and retire superseded v9 promotion
-    helpers (preserving any remaining v8/v9 compatibility consumers). Keep
-    the immutable-image release model simple: no live replacement locks,
-    in-container regeneration or multi-file runtime transaction machinery.
+- [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
+  v10 Rules set receives the applicable release-candidate acceptance.
+  The current set includes 17 normalized deployed objects (one unresolved
+  delivery), 151 exact-variant groups and 62 reviewed Weapon citations.
+  [Releasing](releasing.md) owns exact-SHA Source, Wheel, Deployment and
+  matched four-file image evidence; [cross-browser checks](ci.md#cross-browser-release-compatibility-gate)
+  are opt-in for v1.1+ when browser risk warrants them.
+  Preserve independent v8/v9 compatibility consumers, and keep immutable
+  images free of live replacement locks or in-container regeneration.
 
-- [ ] **Browser test infrastructure research — deferred:** Continue the
-  [Chromium lifecycle and concurrency investigation](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark).
-  The historical instrumentation
-  gates (VR-0023/24) are complete; Linux uses its validated four-slot profile, Windows retains
-  two slots, and clean CI is unchanged. Raw captures stay in ignored
-  `local/benchmarks/`.
-  - [ ] Diagnose intermittent full-load Windows Glossary and Spec-Ops
-    chart visibility timeouts using the existing failure-only API/DOM
-    diagnostics; passing isolated runs do not establish their cause.
-  - [ ] Profile the Scenario FAQ long tail, fresh browser contexts
-    versus pooled-browser reuse, and CPU/RAM behavior under sustained
-    parallel load; revisit alternate capacities only with repeated
-    stable evidence on a dedicated host.
-  - [ ] Revisit exact cross-host optional source-PDF/staging coverage
-    if equivalent source-byte audit coverage becomes a requirement;
-    platform-only and missing ignored-source skips must remain labeled,
-    not silently treated as equal test coverage.
-  - [ ] Consider a pinned Playwright container only after verifying a
-    Linux test container engine, separate from production Compose.
-    Escalate findings separately if they expose current correctness or reliability defects.
+- [ ] **Deferred browser test-performance investigation:** Use the existing
+  [Chromium benchmarks](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)
+  and failure-only API/DOM diagnostics. Linux four-slot and Windows two-slot
+  settings remain unchanged unless repeated evidence supports a change.
+  - [ ] Reproduce intermittent full-load Windows Glossary/Spec-Ops
+    chart-visibility timeouts; isolated passing tests do not explain them.
+  - [ ] Measure Scenario FAQ tail latency, fresh versus pooled contexts,
+    and CPU/RAM under sustained parallel load before adjusting capacity.
+  - [ ] Review cross-host optional PDF/staging source-byte coverage only if
+    needed; label host-only and missing-source skips explicitly.
+  - [ ] Consider a pinned Playwright test container only after verifying a
+    suitable Linux test container engine, separate from production Compose.
 
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a
