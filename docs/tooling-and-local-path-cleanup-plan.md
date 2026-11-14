@@ -196,6 +196,26 @@ files, optional source-font inputs and legacy loose ZIP/patch safeguards.
 `.dockerignore` retains its independent exclusion rules for build contexts,
 including the tracked database and manifest allowlist.
 
+**L4 canonical payload audit grouping (2026-11-14):** The maintained
+profile semantics, loadout semantics and semantic-deduplication auditors,
+together with their shared `payload_audit_common` helper, moved from the
+flat `tools/` root to `tools/data/`. Their individual CLI/report and
+schema-check contracts remain; test imports, current data-model references
+and direct-script report helper lookup were updated together. The remaining
+Army, source-attached and browser audit commands retain their independent
+ownership pending separate consumer-based batches.
+
+**L5 V1S-082 plan retirement (2026-11-14):** Retired
+`docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
+tracked reference scan found no active code, test, workflow or documentation
+link requiring it. The current citation/release gate remains in
+`docs/releasing.md`, outstanding optional reconciliation in `docs/TODO.md`,
+the 35-record pilot and scoped disposition contracts in
+`config/validation/`, and benchmark/source outcomes in
+`docs/v1.0-source-coverage-audit.md`. The deleted plan's optional
+future methodology remains available in Git history, not as a second
+live implementation plan.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user
