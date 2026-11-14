@@ -3156,14 +3156,16 @@ When AVA/Points/SWC participates in a query, another selected profile/loadout cr
 satisfied by an unrelated option elsewhere on the same logical Unit. This prevents semantically
 impossible cross-option matches.
 
-Unit Explorer multi-selection defaults to **OR within each categorical filter**
-and **AND between different filters**. Each of the six multi-select categories
-also has an experimental OR/AND switch that stays operable with zero, one,
-or multiple selections and retains its mode as selections change. In AND
-mode, **all** selected values must match a compatible
-Army/profile-group/loadout occurrence; facts attached to the Unit as a whole
-remain Unit-wide. Pagination and sorting do not change membership. Historical
-single-value queries retain their existing matching behavior.
+On a fresh Unit Explorer visit, multi-selection defaults to **AND within
+each categorical filter** and **AND between different filters**. Each of the six
+categories has an independent switch labelled AND (left) and OR (right), always
+operable even with zero or one selected option. AND requires **all** selected
+values to match a compatible Army/profile-group/loadout occurrence; Unit-wide
+source facts remain Unit-wide. OR matches any selection within that filter.
+The chosen modes persist through sharing, navigation and clearing selections.
+The direct API and historical shared links that omit mode settings retain the
+previous OR-within-category behavior. Pagination and sorting do not alter
+membership; single-value queries remain equivalent under AND and OR.
 
 The `/api/units` parameters `skill_id`, `equipment_id`, `weapon_id`,
 `troop_type`, `classification` and `characteristic` accept one legacy
@@ -3181,25 +3183,32 @@ distinct selected option must still match the same context. NOT/exclusion
 is not implemented.
 
 Presentation-encoded Equipment selections resolve through their source
-Characteristics. They participate as OR alternatives alongside ordinary
-Equipment selections and respect the same profile-group/loadout context in
-combined queries. Unknown mixed identifiers continue to fail closed.
+Characteristics and respect the same profile-group/loadout context in combined
+queries. **Cube and Cube 2.0 are not selectable from the Equipment filter menu**;
+their choices remain in Characteristics, and their existing catalog routes and
+historical filter URLs remain compatible. Unknown mixed identifiers fail closed.
 
-The optional `/api/units?counts=1` response adds `usage_counts` with
-`skills`, `equipment` and `weapons` maps keyed by application item ID
-(or public slug for presentation-encoded Equipment). Each number counts
-**distinct logical Units** using that option in the complete currently
-filtered population, not just the returned page. The effective population
-includes every active filter (including selections in the counted category),
-Army context and optional-unit availability. Matching source occurrences
-are scoped to compatible Army/profile-group/loadout contexts when those
-constraints are active. Sort order, page offset, page size and extended
-display do not affect the counts. Omitted map entries mean zero; selected
-options are never omitted from the UI merely because their count is zero.
-These are usage counts, not predictions of the effect of adding or removing
-a filter. The backend aggregates all three catalogs in one batched SQLite
-query without querying each option separately. The count payload is
-opt-in; existing `/api/units` clients keep their original response shape.
+The optional `/api/units?counts=1` response adds `usage_counts` and
+`baseline_usage_counts`, each containing `skills`, `equipment`, `weapons`,
+`troop_types`, `classifications` and `characteristics` maps, keyed by
+application item ID, source vocabulary ID or public encoded-Equipment slug.
+Each number counts **distinct logical Units**, not profile or loadout rows.
+
+`usage_counts` describes the complete *currently filtered* population,
+including the selected category itself, Army context, numeric constraints and
+optional-unit availability. Counts are independent of pagination, sorting and
+extended view. Compatible Army/profile-group/loadout contexts are respected;
+Classification aliases are deduplicated across source categories.
+
+`baseline_usage_counts` ignores discovery filters, Army selection and search
+but retains the effective optional-unit Settings flags (Mercenaries, Spec-Ops,
+Team Operations and Reinforcements). Options with zero baseline usage are
+hidden from the filter menu; they remain removable if already selected by a
+historical URL. Options with positive baseline usage but zero current usage are
+slightly dimmed yet remain fully selectable. Unlisted count keys mean zero.
+These are actual usage counts, not predictions of adding/removing selections.
+Counts are batched in SQLite rather than queried individually. The response
+extension is opt-in; API clients omitting `counts=1` retain the old shape.
 
 Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
 the source facts. A combined source Classification can participate in more than one public

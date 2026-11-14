@@ -102,8 +102,9 @@ def test_unit_multiselect_url_state_keyboard_and_removal(
         control.locator("summary").press("Enter")
         assert control.get_attribute("open") is not None
 
-        first = control.locator(".unit-multi-option input").nth(0)
-        second = control.locator(".unit-multi-option input").nth(1)
+        available = control.locator(".unit-multi-option:not([hidden]) input")
+        first = available.nth(0)
+        second = available.nth(1)
         row_height = first.evaluate(
             "(checkbox) => checkbox.closest('label').getBoundingClientRect().height"
         )
@@ -153,6 +154,7 @@ def test_unit_multiselect_legacy_invalid_and_empty_links(
             page.goto(f"{origin}/units?skill_id={identifier}", wait_until="domcontentloaded")
             page.locator(".unit-multi-chip").first.wait_for(state="attached")
             assert page.locator(".unit-multi-chip").count() == 1
+            assert page.locator('.unit-multi-mode input[role="switch"]').first.is_checked()
             page.reload(wait_until="domcontentloaded")
             page.locator(".unit-multi-chip").first.wait_for(state="attached")
             assert page.locator(".unit-multi-chip").count() == 1
@@ -224,6 +226,8 @@ def test_and_or_switch_preserves_share_state(
         switches = page.locator('.unit-multi-mode input[role="switch"]')
         assert switches.count() == 6
         assert all(switch.is_enabled() for switch in switches.all())
+        assert all(not switch.is_checked() for switch in switches.all())
+        assert switches.first.locator("xpath=..").text_content().strip() == "ANDOR"
         page.locator(".advanced-filters > summary").click()
         control = page.locator(".unit-multi-select").first
         toggle = switches.first
@@ -231,7 +235,7 @@ def test_and_or_switch_preserves_share_state(
         assert toggle.is_checked()
         toggle.uncheck()
         control.locator("summary").click()
-        options = control.locator(".unit-multi-option input")
+        options = control.locator(".unit-multi-option:not([hidden]) input")
         options.nth(0).check()
         assert toggle.is_enabled()
         toggle.check()
@@ -241,7 +245,7 @@ def test_and_or_switch_preserves_share_state(
         assert page.evaluate("""async () => {
             const { readShareState } = await import('/static/share-state.js');
             return readShareState('units').params.get('and_filters');
-        }""") == "skill"
+        }""") == "equipment,weapon,troop_type,classification,characteristic"
         page.reload(wait_until="domcontentloaded")
         page.locator(".unit-multi-option").first.wait_for(state="attached")
         toggle = page.locator('.unit-multi-mode input[role="switch"]').first
@@ -257,6 +261,58 @@ def test_and_or_switch_preserves_share_state(
         toggle = page.locator('.unit-multi-mode input[role="switch"]').first
         assert not toggle.is_checked()
         assert toggle.is_enabled()
+    finally:
+        page.close()
+
+
+def test_contextual_and_baseline_counts_control_menu_visibility(
+    app: Any, origin: str, browser: Any,
+) -> None:
+    page = browser.new_page(viewport={"width": 1024, "height": 800})
+    route_browser_page(page, app, origin)
+    try:
+        page.goto(f"{origin}/units", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => [...document.querySelectorAll('.unit-multi-count')].some("
+            "(item) => Number(item.textContent.replaceAll(',', '')) > 0)"
+        )
+        controls = page.locator(".unit-multi-select")
+        assert controls.count() == 6
+        for index in range(6):
+            counts = controls.nth(index).locator(".unit-multi-count")
+            assert counts.count() > 0
+            assert "…" not in counts.all_text_contents()
+
+        # Hide options absent from the Settings-adjusted unfiltered population.
+        assert controls.first.locator(".unit-multi-option[hidden]").count() > 0
+
+        # Cube/2.0 are Characteristic identities, not Equipment menu options.
+        equipment = controls.nth(1)
+        assert equipment.locator('input[value="cube"]').is_hidden()
+        assert equipment.locator('input[value="cube-2"]').is_hidden()
+        characteristics = controls.nth(5)
+        visible_characteristics = characteristics.locator(
+            ".unit-multi-option:not([hidden])"
+        ).all_text_contents()
+        assert any("Cube" in name for name in visible_characteristics)
+        assert any("Cube 2.0" in name for name in visible_characteristics)
+
+        # A currently zero-use option stays selectable.
+        page.goto(
+            f"{origin}/units?search=impossible-unique-unit-name",
+            wait_until="domcontentloaded",
+        )
+        page.locator("#empty-state").wait_for(state="visible")
+        page.locator(".advanced-filters > summary").click()
+        skill_control = page.locator(".unit-multi-select").first
+        skill_control.locator("summary").click()
+        first_visible = skill_control.locator(".unit-multi-option:not([hidden])").first
+        assert "unit-multi-zero-use" in first_visible.get_attribute("class")
+        first_visible.locator("input").check()
+        assert page.locator(".unit-multi-chip").count() == 1
+        assert "0 matching Units" in first_visible.locator("input").get_attribute(
+            "aria-label"
+        )
     finally:
         page.close()
 

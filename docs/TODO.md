@@ -66,7 +66,7 @@ existing release checklist still apply.
     sharing and Back navigation at desktop and narrow widths.
 
 - [x] **Web backend + Web frontend — contextual usage counts:** Show distinct
-  logical Unit counts beside Skills, Equipment and Weapons options in the
+  logical Unit counts beside all six categorical options in the
   complete *currently filtered* population. Respect multi-selection, every
   other active filter, Army context, optional availability and the selection
   in the counted dropdown itself. Counts are not hypothetical alternatives
@@ -75,11 +75,14 @@ existing release checklist still apply.
   - [x] **Count contract:** Specify the per-option response shape and the
     shared result/count population, including selected and zero-count options,
     multi-selection and coherent profile/loadout contexts.
-  - [x] **Backend aggregation:** Compute all three dropdown count sets in
+  - [x] **Backend aggregation:** Compute all six dropdown count sets in
     batches against the effective result population, without per-option
     round trips, duplicate-Unit inflation or mismatched query semantics.
-  - [x] **Frontend integration:** Show counts alongside Skills, Equipment
-    and Weapons options while preserving selections and accessible labels.
+  - [x] **Frontend integration:** Show counts alongside all six categorical
+    filters while preserving selections and accessible labels. Separate the
+    Settings-adjusted unfiltered baseline from the currently filtered counts;
+    hide baseline-zero choices, dim current-zero choices without disabling
+    them, and omit Cube/Cube 2.0 from Equipment choices only.
   - [x] **Asynchronous consistency:** Refresh counts on every relevant
     filter/Army/availability change, preventing stale in-flight responses
     from overwriting newer state and handling loading, aborts and errors.
@@ -103,9 +106,11 @@ existing release checklist still apply.
   cost. Record a scoped v1.1.0 implement-or-defer decision; do not make the
   full boolean-filtering system an implicit release prerequisite.
   **Revised decision: implement experimental per-filter AND/OR in v1.1.0.**
-  Small independent switches for all six categorical filters default to OR,
-  and remain clickable regardless of selection count. The chosen mode
-  persists as options are added or removed. AND requires all selected values
+  Small independent switches for all six categorical filters default to AND
+  on fresh Unit Explorer visits, with AND on the left and OR on the right.
+  They remain clickable regardless of selection count and persist as items
+  are added or removed. Direct API and historic links without a mode retain
+  OR for backward compatibility. AND requires all selected values
   to match the same compatible Army/profile-group/loadout
   occurrence (Unit-wide facts remain Unit-wide). Existing shared URLs keep
   their OR behavior; optional `and_filters` state records explicit modes.
@@ -124,12 +129,14 @@ existing release checklist still apply.
   replacement, memory use and added maintenance. Implement only if the
   measured benefit justifies the cost; otherwise record the no-cache decision.
   **Decision: no additional cache for v1.1.0.** On the 9,175,040-byte
-  snapshot, `tools.performance.benchmark_runtime` (Windows, 3 cold
-  Database instances and 5 repeated calls per case) measured median cold
-  query times of 137 ms for uncounted Units, 247 ms with counts, 115 ms
-  with Army/counts, 217 ms with multi-selection/counts, and 328 ms with
-  a Points range/counts. Repeated identical calls via the existing
-  per-Database 128-entry `list_units` LRU were ~0.001–0.002 ms.
+  snapshot, `tools.performance.benchmark_runtime` (Windows, 2 cold
+  Database instances and 3 repeated calls per case, after adding all six
+  count categories) measured median cold query times of 125 ms without
+  counts, 277 ms with counts, 152 ms with Army/counts, 240 ms with
+  multi-selection/counts, and 362 ms with Points range/counts. Repeated
+  identical calls via the existing 128-entry `list_units` LRU were
+  ~0.002 ms. The HTTP API's additional Settings-only baseline query is
+  not included in these repository-level timings.
   HTTP responses also have a 300-second max-age. Another bounded response
   or count cache would duplicate behavior while adding state keys, memory
   and snapshot-invalidation maintenance. These are local query benchmarks,

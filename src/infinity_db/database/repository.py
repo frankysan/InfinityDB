@@ -3106,6 +3106,9 @@ class Database:
         result: dict[str, dict[str, int]] = {
             **{catalog: {} for catalog in catalogs},
             "equipment_characteristics": {},
+            "troop_types": {},
+            "classifications": {},
+            "characteristics": {},
         }
         if not eligible:
             return result
@@ -3140,12 +3143,39 @@ class Database:
                 "FROM eligible AS e "
                 f"JOIN unit_option_{catalog} AS i ON i.unit_id = e.unit_id"
             )
+        sources.append(
+            "SELECT 'troop_types' AS catalog, pp.type_id AS item_id, e.logical_id "
+            "FROM eligible AS e JOIN profile_payload_occurrences AS ppo "
+            f"ON {predicates['profile']} "
+            "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
+            "WHERE pp.type_id IS NOT NULL"
+        )
+        sources.append(
+            "SELECT 'classifications' AS catalog, cm.public_id AS item_id, e.logical_id "
+            "FROM eligible AS e JOIN profile_groups AS fg "
+            "ON fg.army_id = e.army_id AND fg.unit_id = e.unit_id "
+            "AND (e.group_id IS NULL OR fg.group_id = e.group_id) "
+            "JOIN classification_aliases AS cm ON cm.source_id = fg.category_id"
+        )
         for level, occurrence, payload in (
             ("profile", "ppo", "profile"),
             ("loadout", "lpo", "loadout"),
         ):
             sources.append(
                 "SELECT 'equipment_characteristics' AS catalog, "
+                "i.characteristic_id AS item_id, e.logical_id "
+                "FROM eligible AS e "
+                f"JOIN {payload}_payload_occurrences AS {occurrence} "
+                f"ON {predicates[level]} "
+                f"JOIN {payload}_payload_characteristics AS i "
+                f"ON i.{payload}_payload_id = {occurrence}.{payload}_payload_id"
+            )
+        for level, occurrence, payload in (
+            ("profile", "ppo", "profile"),
+            ("loadout", "lpo", "loadout"),
+        ):
+            sources.append(
+                "SELECT 'characteristics' AS catalog, "
                 "i.characteristic_id AS item_id, e.logical_id "
                 "FROM eligible AS e "
                 f"JOIN {payload}_payload_occurrences AS {occurrence} "
@@ -3161,7 +3191,23 @@ class Database:
             "ON acs.catalog = u.catalog AND acs.source_item_id = u.item_id "
             "GROUP BY u.catalog, COALESCE(acs.application_item_id, u.item_id)"
         )
+        classification_aliases = [
+            (source_id, int(item["id"]))
+            for item in self.list_unit_filter_values()["classifications"]
+            for source_id in self._classification_filter_source_ids(int(item["id"]))
+        ]
         with self._connect() as connection:
+            connection.execute(
+                "CREATE TEMP TABLE classification_aliases "
+                "(source_id INTEGER, public_id INTEGER)"
+            )
+            connection.executemany(
+                "INSERT INTO classification_aliases VALUES (?, ?)", classification_aliases,
+            )
+            connection.execute(
+                "CREATE INDEX classification_alias_lookup ON "
+                "classification_aliases (source_id)"
+            )
             connection.execute(
                 "CREATE TEMP TABLE eligible (logical_id INTEGER, unit_id INTEGER, "
                 "army_id INTEGER, group_id INTEGER, loadout_id INTEGER)"

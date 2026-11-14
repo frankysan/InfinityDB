@@ -33,11 +33,11 @@ export function createUnitMultiSelect(select, label, onChange) {
     modeLabel.className = "unit-multi-mode";
     modeSwitch.type = "checkbox";
     modeSwitch.setAttribute("role", "switch");
-    modeSwitch.setAttribute("aria-label", `Match all selected ${label}`);
+    modeSwitch.setAttribute("aria-label", `Match any selected ${label} instead of all`);
     modeLabel.append(
-      document.createTextNode("OR"),
-      modeSwitch,
       document.createTextNode("AND"),
+      modeSwitch,
+      document.createTextNode("OR"),
     );
     header.append(caption, modeLabel);
     originalLabel.replaceWith(header);
@@ -83,6 +83,16 @@ export function createUnitMultiSelect(select, label, onChange) {
   let selected = new Set();
   let items = [];
   const rows = new Map();
+  let baselineCounts = null;
+  function updateVisibility() {
+    const query = search.value.trim().toLocaleLowerCase();
+    for (const item of items) {
+      const { row } = rows.get(item.value);
+      row.hidden = Boolean(item.hidden)
+        || (baselineCounts !== null && !Number(baselineCounts[item.id] || 0))
+        || !item.name.toLocaleLowerCase().includes(query);
+    }
+  }
   const value = () => [...selected].sort().join(",");
   const displayName = (id) => items.find((item) => item.value === id)?.name || `${id} (unavailable)`;
 
@@ -117,6 +127,7 @@ export function createUnitMultiSelect(select, label, onChange) {
   function setItems(newItems, formatName = (item) => item.name) {
     items = newItems.map((item) => ({
       id: String(item.id), value: item.slug || String(item.id), name: String(formatName(item)),
+      hidden: Boolean(item.hidden),
     }));
     rows.clear();
     choices.replaceChildren();
@@ -146,16 +157,11 @@ export function createUnitMultiSelect(select, label, onChange) {
     }
     search.disabled = false;
     renderSelection();
-    search.dispatchEvent(new Event("input"));
+    updateVisibility();
   }
 
   search.disabled = true;
-  search.addEventListener("input", () => {
-    const query = search.value.trim().toLocaleLowerCase();
-    for (const item of items) {
-      rows.get(item.value).row.hidden = !item.name.toLocaleLowerCase().includes(query);
-    }
-  });
+  search.addEventListener("input", updateVisibility);
   clear.addEventListener("click", () => {
     if (!selected.size) return;
     selected.clear();
@@ -172,12 +178,18 @@ export function createUnitMultiSelect(select, label, onChange) {
   renderSelection();
   return {
     value,
-    mode: () => modeSwitch.checked ? "and" : "or",
-    setMode(mode) { modeSwitch.checked = mode === "and"; },
+    mode: () => modeSwitch.checked ? "or" : "and",
+    setMode(mode) { modeSwitch.checked = mode === "or"; },
+    setBaselineCounts(counts) {
+      baselineCounts = counts;
+      updateVisibility();
+    },
     setCounts(counts) {
       choices.setAttribute("aria-busy", counts === null ? "true" : "false");
       for (const item of items) {
-        const { checkbox, count } = rows.get(item.value);
+        const { checkbox, count, row } = rows.get(item.value);
+        row.classList.toggle("unit-multi-zero-use",
+          counts !== null && counts !== undefined && !Number(counts[item.id] || 0));
         const value = counts === null ? null
           : counts === undefined ? undefined : Number(counts[item.id] || 0);
         count.textContent = value == null ? (value === null ? "…" : "—") : value.toLocaleString();

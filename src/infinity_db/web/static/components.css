@@ -2352,6 +2352,14 @@ h2 {
   cursor: pointer;
 }
 
+.unit-multi-option.unit-multi-zero-use {
+  opacity: .72;
+}
+
+.unit-multi-option.unit-multi-zero-use:focus-within {
+  opacity: .85;
+}
+
 .unit-multi-option:hover,
 .unit-multi-option:focus-within {
   background: var(--color-surface-hover, var(--color-surface-default));

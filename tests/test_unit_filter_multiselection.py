@@ -261,6 +261,13 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
             CREATE TABLE application_catalog_sources (
                 catalog TEXT, source_item_id INTEGER, application_item_id INTEGER
             );
+            CREATE TABLE troop_types (id INTEGER, name TEXT);
+            CREATE TABLE categories (id INTEGER, name TEXT);
+            CREATE TABLE characteristics (id INTEGER, name TEXT);
+            CREATE TABLE profile_payloads (id INTEGER, type_id INTEGER);
+            CREATE TABLE profile_groups (
+                army_id INTEGER, unit_id INTEGER, group_id INTEGER, category_id INTEGER
+            );
             INSERT INTO logical_unit_sources VALUES (1, 1);
             INSERT INTO application_army_sources VALUES (101, 501, 1), (201, 502, 1);
             INSERT INTO profile_payload_occurrences VALUES
@@ -268,6 +275,14 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
                 (101, 1, 2, 20, 2),
                 (201, 1, 1, 30, 3);
             INSERT INTO profile_payload_skills VALUES (10, 1), (20, 2), (30, 3);
+            INSERT INTO troop_types VALUES (7, 'Light Infantry'), (8, 'Heavy Infantry');
+            INSERT INTO categories VALUES (9, 'Regular'), (10, 'Elite');
+            INSERT INTO characteristics VALUES (11, 'Cube'), (12, 'Cube 2.0');
+            INSERT INTO profile_payloads VALUES (10, 7), (20, 8), (30, 7);
+            INSERT INTO profile_groups VALUES (101, 1, 1, 9), (101, 1, 2, 10),
+                (201, 1, 1, 9);
+            INSERT INTO profile_payload_characteristics VALUES (10, 11), (20, 12);
+            INSERT INTO loadout_payload_characteristics VALUES (100, 12);
             INSERT INTO loadout_payload_occurrences VALUES
                 (101, 1, 1, 100, 10, '0'),
                 (101, 1, 1, 101, 20, '0'),
@@ -334,10 +349,14 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
     assert group_one["skills"] == {"1": 1}
     assert group_one["weapons"] == {"4": 1, "8": 1}
     assert group_one["equipment"] == {}
+    assert group_one["troop_types"] == {"7": 1}
+    assert group_one["classifications"]["9"] == 1
+    assert group_one["characteristics"] == {"11": 1, "12": 1}
 
     second_loadout = database._unit_filter_usage_counts({(1, 1, 101, 1, 101)})
     assert second_loadout["skills"] == {"1": 1}
     assert second_loadout["weapons"] == {"5": 1}
+    assert second_loadout["characteristics"] == {"11": 1}
 
     # Multiple matching occurrences of one Unit count once per option.
     combined = database._unit_filter_usage_counts({
@@ -436,9 +455,29 @@ def test_http_usage_counts_are_opt_in_and_stable_across_requests() -> None:
     again = request("limit=1&counts=1")
     assert counted["usage_counts"] == again["usage_counts"]
     assert counted["total"] == baseline["total"]
-    assert set(counted["usage_counts"]) == {"skills", "equipment", "weapons"}
-    assert counted["usage_counts"]["skills"]
-    assert "equipment_characteristics" not in counted["usage_counts"]
-    assert request("search=impossible-unique-unit-name&counts=1")["usage_counts"] == {
-        "skills": {}, "equipment": {}, "weapons": {},
+    assert set(counted["usage_counts"]) == {
+        "skills", "equipment", "weapons", "troop_types",
+        "classifications", "characteristics",
     }
+    assert "baseline_usage_counts" not in baseline
+    assert counted["baseline_usage_counts"] == counted["usage_counts"]
+    assert counted["baseline_usage_counts"] == again["baseline_usage_counts"]
+    assert counted["usage_counts"]["skills"]
+    assert counted["usage_counts"]["troop_types"]
+    assert counted["usage_counts"]["characteristics"]
+    assert "equipment_characteristics" not in counted["usage_counts"]
+    empty = request("search=impossible-unique-unit-name&counts=1")
+    assert empty["usage_counts"] == {
+        key: {} for key in counted["usage_counts"]
+    }
+    assert empty["baseline_usage_counts"] == counted["baseline_usage_counts"]
+    optional_query = "mercs=1&specops=1&teamops=1&reinforcement=1"
+    optional = request(f"limit=1&counts=1&{optional_query}")
+    assert optional["baseline_usage_counts"] == optional["usage_counts"]
+    for catalog, counts in counted["baseline_usage_counts"].items():
+        for item_id, quantity in counts.items():
+            assert optional["baseline_usage_counts"][catalog].get(item_id, 0) >= quantity
+    filtered_optional = request(
+        f"search=impossible-unique-unit-name&counts=1&{optional_query}"
+    )
+    assert filtered_optional["baseline_usage_counts"] == optional["baseline_usage_counts"]

@@ -45,6 +45,7 @@ const AND_FILTER_KEYS = [
   ["troopType", "troop_type"], ["classification", "classification"],
   ["characteristic", "characteristic"],
 ];
+const ALL_AND_FILTERS = AND_FILTER_KEYS.map(([, key]) => key).join(",");
 const normalizeAndFilters = (value) => AND_FILTER_KEYS
   .map(([, key]) => key).filter((key) => value.split(",").includes(key)).join(",");
 
@@ -161,7 +162,8 @@ function hasActiveFilters() {
     || state.ava || state.avaMin || state.avaMax
     || state.points || state.pointsMin || state.pointsMax
     || state.swc || state.swcMin || state.swcMax
-    || optionalUnitPreferenceDifferences().length > 0;
+    || optionalUnitPreferenceDifferences().length > 0
+    || state.andFilters !== ALL_AND_FILTERS;
 }
 
 function domainFilterIdentifier(value) {
@@ -310,7 +312,7 @@ function updateNumericRangeFromInput(control, changed) {
 }
 
 function readLocation() {
-  const { params } = readShareState("units");
+  const { params, source } = readShareState("units");
   const optionalUnits = readOptionalUnitLocation(params);
   const offset = Number(params.get("offset") || 0);
   const armyId = params.get("army_id") || "";
@@ -345,7 +347,9 @@ function readLocation() {
     troopType: domainMultiFilterIdentifiers(troopType),
     classification: domainMultiFilterIdentifiers(classification),
     characteristic: domainMultiFilterIdentifiers(characteristic),
-    andFilters: normalizeAndFilters(params.get("and_filters") || ""),
+    andFilters: params.has("and_filters")
+      ? normalizeAndFilters(params.get("and_filters") || "")
+      : source === "none" ? ALL_AND_FILTERS : "",
     ava: avaExact,
     avaMin: avaExact ? "" : integerFilterValue(avaMin, { max: 99 }),
     avaMax: avaExact ? "" : integerFilterValue(avaMax, { max: 99 }),
@@ -556,7 +560,10 @@ function renderDeclaredMembershipContext(data) {
 function renderUnits(data) {
   for (const [key, catalog] of [
     ["skillId", "skills"], ["equipmentId", "equipment"], ["weaponId", "weapons"],
+    ["troopType", "troop_types"], ["classification", "classifications"],
+    ["characteristic", "characteristics"],
   ]) {
+    multiControls[key].setBaselineCounts(data.baseline_usage_counts?.[catalog] ?? null);
     multiControls[key].setCounts(data.usage_counts?.[catalog]);
   }
   renderUnitRows(elements.list, data.items, { extended: state.extended });
@@ -596,7 +603,7 @@ async function load() {
   const signal = controller.signal;
   const currentRequest = ++requestNumber;
   showPanel(elements.loading);
-  for (const key of ["skillId", "equipmentId", "weaponId"]) multiControls[key].setCounts(null);
+  for (const key of Object.keys(multiControls)) multiControls[key].setCounts(null);
   elements.unitCount.textContent = "—";
   elements.unitCountShown.replaceChildren();
   elements.unitCountFiltered.replaceChildren();
@@ -621,7 +628,9 @@ async function load() {
       populateCatalogFilter(elements.equipment, equipment.items, "Equipment");
       populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
       multiControls.skillId.setItems(skills.items);
-      multiControls.equipmentId.setItems(equipment.items);
+      multiControls.equipmentId.setItems(equipment.items.map((item) => ({
+        ...item, hidden: ["cube", "cube-2"].includes(item.slug),
+      })));
       multiControls.weaponId.setItems(weapons.items);
       populateCatalogFilter(
         elements.troopType, unitFilters.troop_types, "Troop types",
@@ -650,7 +659,7 @@ async function load() {
     renderUnits(data);
   } catch (error) {
     if (signal.aborted || currentRequest !== requestNumber) return;
-    for (const key of ["skillId", "equipmentId", "weaponId"]) multiControls[key].setCounts(undefined);
+    for (const key of Object.keys(multiControls)) multiControls[key].setCounts(undefined);
     elements.errorMessage.textContent = error instanceof TypeError
       ? "Could not reach InfinityDB. Check your connection and try again."
       : collectionLoadMessage(error, "units");
@@ -714,7 +723,7 @@ function clearFilters() {
   state = {
     ...state, armyId: "", declaredFactionId: "", search: "", offset: 0,
     skillId: "", specialist: "", equipmentId: "", weaponId: "",
-    troopType: "", classification: "", characteristic: "", andFilters: "",
+    troopType: "", classification: "", characteristic: "", andFilters: ALL_AND_FILTERS,
     ava: "", avaMin: "", avaMax: "", points: "", pointsMin: "", pointsMax: "",
     swc: "", swcMin: "", swcMax: "",
     ...optionalUnitFilters(),
