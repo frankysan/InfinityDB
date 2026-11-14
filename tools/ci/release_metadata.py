@@ -8,7 +8,7 @@ import tomllib
 from datetime import date
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 HEADING = re.compile(r"^## \[([^\]]+)\] - ([^\n]+)$", re.MULTILINE)
 README = re.compile(
     r"^Current release: \*\*([^*]+)\*\* \(([^)]+)\)\.", re.MULTILINE,

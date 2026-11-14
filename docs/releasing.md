@@ -289,7 +289,7 @@ development suite and an isolated preflight merely because a release is due:
   release-specific acceptance requirement. A successful, equivalent hosted
   Source matrix counts as the cumulative run; **do not automatically run the
   same full suite locally and again in preflight**.
-- [ ] Run `python -m tools.release_metadata` **after finalizing** the target
+- [ ] Run `python -m tools.ci.release_metadata` **after finalizing** the target
   version, README and dated `docs/CHANGELOG.md` heading. `Unreleased` is
   valid during development but **not** for this release gate.
 - [ ] Confirm the intended changes to user-facing routes work, with focused
@@ -339,7 +339,7 @@ and the 1.0 acceptance records.
   ignored `local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/`:
 
   ```text
-  python -m tools.prepare_release_ci_evidence --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/evidence.json --tag-message-output local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/annotated-tag.txt
+  python -m tools.ci.prepare_release_ci_evidence --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/evidence.json --tag-message-output local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/annotated-tag.txt
   ```
 
   The collector rejects both files if either already exists or the two output

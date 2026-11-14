@@ -13,12 +13,12 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from tools.prepare_release_ci_evidence import (
+from tools.ci.prepare_release_ci_evidence import (
     ReleaseEvidenceError,
     collect_release_evidence,
 )
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 SHA = re.compile(r"^[0-9a-f]{40}$")
 TEST_PATH = re.compile(r"^tests/test_[A-Za-z0-9_]+\.py$")
 METADATA = frozenset({"README.md", "docs/CHANGELOG.md", "THIRD_PARTY_NOTICES.md"})

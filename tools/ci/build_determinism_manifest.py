@@ -29,6 +29,7 @@ try:
     from tools.dev.create_work_archive import create_work_archive
     from tools.snapshot_archive import create_timestamped_archive
 except ImportError:  # pragma: no cover - direct script execution fallback
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from dev.create_work_archive import create_work_archive
     from snapshot_archive import create_timestamped_archive
 
@@ -279,7 +280,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
     try:
         _check_output_selection(args.output, args.diagnostics_output)
         print(

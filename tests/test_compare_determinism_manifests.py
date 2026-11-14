@@ -1,15 +1,33 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
+import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
 import pytest
 
-from tools import build_determinism_manifest as manifest_builder
-from tools.compare_determinism_manifests import compare
-from tools.compare_determinism_manifests import main as compare_main
+from tools.ci import build_determinism_manifest as manifest_builder
+from tools.ci.compare_determinism_manifests import compare
+from tools.ci.compare_determinism_manifests import main as compare_main
+
+
+@pytest.mark.parametrize("script", (
+    "ci/build_determinism_manifest.py",
+    "ci/compare_determinism_manifests.py",
+))
+def test_determinism_commands_support_direct_script_help(script: str) -> None:
+    root = Path(__file__).resolve().parents[1]
+    environment = os.environ.copy()
+    environment.pop("PYTHONPATH", None)
+    result = subprocess.run(
+        [sys.executable, str(root / "tools" / script), "--help"],
+        cwd=root, env=environment, capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def _write(

@@ -7,7 +7,7 @@ from subprocess import CompletedProcess
 
 import pytest
 
-from tools import prepare_release_ci_evidence as release_ci
+from tools.ci import prepare_release_ci_evidence as release_ci
 
 COMMIT = "0123456789abcdef0123456789abcdef01234567"
 REPOSITORY = "example/InfinityDB"

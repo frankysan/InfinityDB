@@ -362,6 +362,16 @@ operator commands. Runtime semantic baseline and served-runtime helpers
 remain root-owned because browser, release and development diagnostics
 share them. No source evidence, report output or database artifact changed.
 
+**L4 release/CI and determinism grouping (2026-11-14):** Moved
+the determinism manifest generator, manifest comparator, pinned OCI runner,
+release metadata gate, exact-SHA hosted CI evidence collector and change-aware
+release validation scope into `tools/ci/`. Updated workflow launch paths,
+focused tests, package imports and maintained operator commands. Both
+determinism execution modes preserve checkout-root lookup and the Docker
+runner's pinned image, environment and `local/` report outputs. Release
+metadata and hosted evidence contracts remain unchanged. Root-level runtime
+and shared asset helpers remain in place; no compatibility wrappers added.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

@@ -41,10 +41,10 @@ a local deferral or a green worker run is not a CI exemption.
 The required **fast-validation** job runs before the expensive Source matrix.
 It runs Ruff, focused release-note tests, Markdownlint, document links and
 backlog integrity. Finalized version/changelog/README metadata is **release-only**:
-run `python -m tools.release_metadata` before the approved release merge,
+run `python -m tools.ci.release_metadata` before the approved release merge,
 not for every development PR with a legitimate `Unreleased` heading.
 
-`tools.release_validation_scope` compares the exact PR/push candidate with
+`tools.ci.release_validation_scope` compares the exact PR/push candidate with
 its preceding branch SHA, requiring Git ancestry and an unambiguous path diff.
 Only tracked Markdown, explicit release metadata and independent
 `tests/test_*.py` modules qualify for focused Source checks. Changed test
@@ -453,8 +453,8 @@ logical parity nor the installed tracked database alone replaces that hosted che
 Generators remain responsible for canonical bytes; `.gitattributes` only prevents tracked
 checksum-bound files from being rewritten by checkout line-ending conversion.
 
-The current [pinned container runner](../tools/run_pinned_determinism.py)
-invokes `tools.build_determinism_manifest` with an explicit report path
+The current [pinned container runner](../tools/ci/run_pinned_determinism.py)
+invokes `tools.ci.build_determinism_manifest` with an explicit report path
 and uploads that selected JSON for comparison. The underlying generator
 also supports direct `--output` and optional `--diagnostics-output`.
 Both destinations must be **new**: it rejects pre-existing files or
@@ -523,7 +523,7 @@ overlay served by the current application.
 
 ## Release evidence retention
 
-`tools/prepare_release_ci_evidence.py` verifies the three required hosted workflows for one exact
+`tools/ci/prepare_release_ci_evidence.py` verifies the three required hosted workflows for one exact
 40-character candidate release commit: `Source checks`, `Installed wheel smoke`, and
 `Deployment smoke test`. It queries each workflow by its maintained workflow filename and commit SHA,
 uses the latest completed run for that workflow/commit, and fails if that run is not successful. An
@@ -606,7 +606,7 @@ A successful pre-merge candidate run satisfies the optional pre-merge full-asset
 [the release checklist](releasing.md#5-land-the-release-commit-verify-hosted-ci-and-tag).
 If the final protected-`main` release commit has a different SHA because the pull request is
 merged or squashed, that earlier run does not count as exact-SHA release evidence. When
-`tools/prepare_release_ci_evidence.py --include-full-assets` is used, dispatch **Full-asset checks**
+`tools/ci/prepare_release_ci_evidence.py --include-full-assets` is used, dispatch **Full-asset checks**
 again for the final release SHA and require that exact run just like the other hosted workflows.
 
 Environment configuration for this optional workflow is repository administration and is tracked as

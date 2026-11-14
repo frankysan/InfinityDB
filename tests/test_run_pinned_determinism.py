@@ -7,7 +7,17 @@ from pathlib import Path
 
 import pytest
 
-from tools import run_pinned_determinism as runner
+from tools.ci import run_pinned_determinism as runner
+
+
+def test_entrypoint_resolves_checkout_root_after_relocation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[Path, Path]] = []
+    monkeypatch.setattr(runner, "_run_manifest", lambda root, output: calls.append((root, output)))
+    selected = Path("local/validation/determinism/test.json")
+    assert runner.main(["--output", str(selected)]) == 0
+    assert calls == [(Path(__file__).resolve().parents[1], selected)]
 
 
 def test_report_path_is_confined_to_local(tmp_path: Path) -> None:
@@ -51,7 +61,7 @@ def test_manifest_container_readonly_checkout_no_network(
     assert f"type=bind,source={tmp_path / 'local/reports'},target=/output" in mounts
     assert runner.IMAGE in command
     assert command[-5:] == (
-        "python", "-m", "tools.build_determinism_manifest",
+        "python", "-m", "tools.ci.build_determinism_manifest",
         "--output", "/output/determinism.json",
     )
 

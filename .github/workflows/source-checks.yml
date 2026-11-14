@@ -44,7 +44,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VALIDATION_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: >-
-          python -m tools.release_validation_scope
+          python -m tools.ci.release_validation_scope
           --base "$VALIDATION_BASE" --head HEAD
           --repository "${{ github.repository }}" --github-output "$GITHUB_OUTPUT"
 
@@ -199,12 +199,12 @@ jobs:
       # All generated artifacts come from the immutable container toolchain.
       - name: Verify pinned OCI image and SQLite/zlib toolchain
         if: needs.fast-validation.outputs.full == 'true'
-        run: python3 -m tools.run_pinned_determinism --probe
+        run: python3 -m tools.ci.run_pinned_determinism --probe
 
       - name: Build canonical deterministic-output manifest
         if: needs.fast-validation.outputs.full == 'true'
         run: >-
-          python3 -m tools.run_pinned_determinism
+          python3 -m tools.ci.run_pinned_determinism
           --output local/reports/determinism-manifest.json
 
       - name: Upload canonical deterministic-output manifest
@@ -250,7 +250,7 @@ jobs:
 
       - name: Compare artifact hashes
         if: needs.fast-validation.outputs.full == 'true'
-        run: python tools/compare_determinism_manifests.py determinism-manifests
+        run: python tools/ci/compare_determinism_manifests.py determinism-manifests
 
       - name: Enforce native source-check result
         if: ${{ always() && needs.source-checks.result != 'success' }}

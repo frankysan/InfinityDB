@@ -266,7 +266,7 @@ def test_weapon_profile_citations_are_release_paired_and_packaged() -> None:
     dockerfile = _read("Dockerfile")
     smoke = _read("scripts/verify-container-image.sh")
     workflow = _read(".github/workflows/deployment-smoke.yml")
-    determinism = _read("tools/build_determinism_manifest.py")
+    determinism = _read("tools/ci/build_determinism_manifest.py")
 
     assert "!data/generated/weapon-profile-sources.json" not in gitignore
     assert "data/generated/weapon-profile-sources.json binary" not in attributes
@@ -666,7 +666,7 @@ def test_source_ci_separates_native_builds_from_pinned_determinism() -> None:
     for os_name in ("ubuntu-latest", "windows-latest", "macos-latest"):
         assert f"- os: {os_name}" in native
     assert 'python tools/run_checks.py ${{ matrix.check_args }}' in native
-    assert "tools.run_pinned_determinism" not in native
+    assert "tools.ci.run_pinned_determinism" not in native
     assert "matrix.determinism" not in native
     assert "determinism-manifest.json" not in native
 
@@ -677,7 +677,7 @@ def test_source_ci_separates_native_builds_from_pinned_determinism() -> None:
     assert "fail-fast: false" in pinned
     assert "ref: ${{ github.event.pull_request.head.sha || github.sha }}" in pinned
     assert "fetch-depth: 0" in pinned
-    assert "python3 -m tools.run_pinned_determinism --probe" in pinned
+    assert "python3 -m tools.ci.run_pinned_determinism --probe" in pinned
     assert "actions/setup-python" not in pinned
     assert "python -m pip install" not in pinned
     assert "--output local/reports/determinism-manifest.json" in pinned
@@ -699,7 +699,7 @@ def test_source_ci_separates_native_builds_from_pinned_determinism() -> None:
     )
     assert "pattern: determinism-container-*" in strict
     assert "path: determinism-manifests" in strict
-    assert "python tools/compare_determinism_manifests.py determinism-manifests" in strict
+    assert "python tools/ci/compare_determinism_manifests.py determinism-manifests" in strict
     assert "Reuse validated deterministic baseline" in strict
 
 

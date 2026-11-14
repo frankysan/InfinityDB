@@ -17,8 +17,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from tools.release_metadata import ROOT as RELEASE_ROOT
-from tools.release_metadata import check_repository
+from tools.ci.release_metadata import ROOT as RELEASE_ROOT
+from tools.ci.release_metadata import check_repository
 
 GITHUB_API_BASE = "https://api.github.com"
 GITHUB_API_VERSION = "2026-03-10"

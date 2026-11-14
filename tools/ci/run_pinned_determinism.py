@@ -114,7 +114,7 @@ def _run_manifest(root: Path, output: Path) -> None:
         "--env", "GIT_CONFIG_KEY_0=safe.directory",
         "--env", "GIT_CONFIG_VALUE_0=/workspace",
         IMAGE,
-        "python", "-m", "tools.build_determinism_manifest",
+        "python", "-m", "tools.ci.build_determinism_manifest",
         "--output", report_path,
     ]
     output_text = _docker_command(*command, timeout=1800)
@@ -130,7 +130,7 @@ def main(argv: list[str] | None = None) -> int:
     actions.add_argument("--probe", action="store_true")
     actions.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[2]
     try:
         if args.probe:
             _image_probe()
