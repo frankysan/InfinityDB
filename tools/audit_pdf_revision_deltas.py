@@ -13,6 +13,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import cast
 
@@ -36,7 +37,7 @@ except ImportError as exc:
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "data" / "pdf"
+SOURCE = ROOT / "local/data/pdf"
 PAIRS = {
     "its18-en": ("its/its-18-rules-v2026.09.01-en.pdf", "its/its-18-rules-v2026.09.11-en.pdf", 1),
     "n5-v1-v1.1-en": ("rules/n5-rules-v1-en.pdf", "rules/n5-rules-v1.1-en.pdf", 1),
@@ -224,24 +225,34 @@ def summarize(name: str, old: Extracted, new: Extracted, skip: int) -> dict:
     }
 
 
+def default_output_path(pairs: list[str], *, now: datetime | None = None) -> Path:
+    """Select a fresh, scope-labeled ignored run receipt without clobbering prior runs."""
+    stamp = (now or datetime.now(UTC)).astimezone(UTC).strftime("%Y%m%dT%H%M%S%fZ")
+    scope = pairs[0] if len(pairs) == 1 else f"{len(pairs)}-pairs"
+    return Path("local/audits/pdf-revision-deltas") / f"{stamp}-{scope}" / "report.json"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--pairs", nargs="+", choices=sorted(PAIRS),
         default=["its18-en", "faq-en", "faq-es"],
     )
-    parser.add_argument("--output", default="local/audits/pdf-deltas-2026-11-06.json")
+    parser.add_argument(
+        "--output", type=Path,
+        help=(
+            "New ignored JSON report; default: unique UTC run "
+            "under local/audits/pdf-revision-deltas/"
+        ),
+    )
     parser.add_argument(
         "--source-layout", choices=("legacy", "local"), default="local",
         help="Select physical PDF input under data/pdf or local/data/pdf; keep original labels",
     )
     args = parser.parse_args()
-    output = ROOT / args.output
-    if (
-        output.resolve() == ROOT
-        or ROOT not in output.resolve().parents
-        or "local" not in output.relative_to(ROOT).parts
-    ):
+    output = ROOT / (args.output if args.output is not None
+                     else default_output_path(args.pairs))
+    if not output.resolve().is_relative_to((ROOT / "local").absolute()):
         parser.error("Output must be inside repository local/")
     require_new_audit_outputs(parser, output)
     pins = json.loads(PIN_PATH.read_text(encoding="utf-8"))

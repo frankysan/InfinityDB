@@ -153,6 +153,16 @@ Rules DB is distinct from the maintained standalone build default at
 `local/work/build/rules-standalone.db`. The one-use relocation script
 was removed after the moves; no current runtime or published data changed.
 
+**L3 audit output-default cleanup (2026-11-14):** The remaining maintained
+fixed, dated research report default in `tools.audit_pdf_revision_deltas`
+was changed to a fresh UTC run and selected pair-scope directory under
+`local/audits/pdf-revision-deltas/`. Explicit `--output` remains supported,
+non-overwriting, and limited to ignored `local/`. The local source default
+and pinned inventory are retained; report JSON and extraction semantics
+are unchanged. The independent Rules interaction `--output` is a deliberate
+tracked checklist regeneration, not a run receipt; its immutable
+`--receipt-output` remains the correct audit-evidence mechanism.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

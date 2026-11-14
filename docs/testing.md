@@ -2462,15 +2462,20 @@ destinations that alias the input policy, catalog scope or
 any curated rule source; it should not be used for append-only
 run receipts.
 
-The pinned PDF revision audit previously defaulted to a fixed
-`local/audits/pdf-deltas-2026-11-06.json` file. That default stays
-available if **unoccupied**, but existing files now cause an
-early failure **before PDF extraction or pin loading**. Choose a
-unique ignored receipt for each new research run:
+The pinned PDF revision audit now creates a fresh report by default beneath
+`local/audits/pdf-revision-deltas/<UTC-run-id>-<pair-scope>/report.json`.
+Run `--pairs faq-en faq-es` to select a specific scope, or supply an
+explicit `--output` path for a reviewed experiment:
 
 ```powershell
+.\.venv\Scripts\python.exe -m tools.audit_pdf_revision_deltas --pairs faq-en faq-es
 .\.venv\Scripts\python.exe -m tools.audit_pdf_revision_deltas --pairs faq-en faq-es --output local/research/pdf-revision-deltas/RUN_ID/deltas.json
 ```
+
+Both paths must be new files under ignored `local/`. Existing files and
+symlinks fail **before PDF extraction or pin loading**, and the write uses
+exclusive creation. The retired 2026-11-06 pathname remains an explicit
+`--output` choice only, not a reusable default.
 
 `audit_restrictions_source_chart --output` is an explicitly
 requested *candidate publication*, not a replaceable tracked

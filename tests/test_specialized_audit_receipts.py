@@ -7,6 +7,7 @@ import hashlib
 import json
 import subprocess
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -102,18 +103,60 @@ def test_pdf_revision_report_preflight_blocks_existing_before_pin_read(
     assert output.read_bytes() == previous
 
 
-def test_pdf_revision_fixed_default_also_refuses_existing_receipt(
+def test_pdf_revision_default_is_new_run_scoped_and_descriptive() -> None:
+    now = datetime(2026, 11, 14, 12, 13, 14, 123456, tzinfo=UTC)
+    assert pdf_delta.default_output_path(["faq-en"], now=now) == Path(
+        "local/audits/pdf-revision-deltas/"
+        "20261114T121314123456Z-faq-en/report.json"
+    )
+    assert pdf_delta.default_output_path(["faq-en", "faq-es"], now=now) == Path(
+        "local/audits/pdf-revision-deltas/"
+        "20261114T121314123456Z-2-pairs/report.json"
+    )
+
+
+def test_pdf_revision_dynamic_default_refuses_collision_before_reading_pins(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(pdf_delta, "ROOT", tmp_path)
     monkeypatch.setattr(pdf_delta, "PIN_PATH", tmp_path / "missing-pins.json")
-    output = tmp_path / "local/audits/pdf-deltas-2026-11-06.json"
+    relative = Path("local/audits/pdf-revision-deltas/pinned-run/report.json")
+    monkeypatch.setattr(pdf_delta, "default_output_path", lambda pairs: relative)
+    output = tmp_path / relative
     output.parent.mkdir(parents=True)
-    output.write_bytes(b"accepted November report")
+    output.write_bytes(b"accepted prior run")
     with pytest.raises(SystemExit) as exc:
         _pdf_main(monkeypatch, "--pairs", "faq-en")
     assert exc.value.code == 1
-    assert output.read_bytes() == b"accepted November report"
+    assert output.read_bytes() == b"accepted prior run"
+
+
+def test_pdf_revision_dynamic_default_creates_new_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _pins, _original, examined = _pdf_setup(tmp_path, monkeypatch)
+    monkeypatch.setattr(pdf_delta, "summarize", _pdf_result)
+    relative = Path("local/audits/pdf-revision-deltas/new-run/report.json")
+    monkeypatch.setattr(pdf_delta, "default_output_path", lambda pairs: relative)
+    assert _pdf_main(monkeypatch, "--pairs", "faq-en") == 0
+    output = tmp_path / relative
+    assert output.is_file()
+    assert json.loads(output.read_text(encoding="utf-8"))["pairs"][0]["pair"] == "faq-en"
+    assert len(examined) == 2
+
+
+def test_pdf_revision_rejects_misplaced_local_segment_before_pin_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(pdf_delta, "ROOT", tmp_path)
+    monkeypatch.setattr(pdf_delta, "PIN_PATH", tmp_path / "missing-pins.json")
+    with pytest.raises(SystemExit) as exc:
+        _pdf_main(
+            monkeypatch, "--pairs", "faq-en",
+            "--output", "other/local/misplaced.json",
+        )
+    assert exc.value.code == 2
+    assert not (tmp_path / "other").exists()
 
 
 def test_pdf_revision_report_fresh_preserves_serialization_and_pins(

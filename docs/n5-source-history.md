@@ -87,8 +87,10 @@ revision pairs**: four N5 core transitions in **each** of English and Spanish,
 FAQ v0.0 to v0.1 in each language, and ITS Season 18 English 2026.09.01 to
 2026.09.11. It requires exact bytes matching the existing ignored
 `local/research/pdf/revision-inventory.json` hashes, excludes cover pages, and compares
-normalized extracted tokens using nine-token windows. Results are in
-`local/audits/pdf-deltas-2026-11-06.json` (ignored). The report is a
+normalized extracted tokens using nine-token windows. The historical
+2026-11-06 results were saved in `local/audits/pdf-deltas-2026-11-06.json`;
+new runs default to a fresh UTC run directory under
+`local/audits/pdf-revision-deltas/`. Each report is a
 **candidate-triage index**, not a line-by-line certified change log: tables,
 diagrams, column order, typography, bilingual translations and scenario
 applicability require human inspection. Layout shifts produce false positives,
