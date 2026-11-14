@@ -22,7 +22,7 @@ from infinity_db.web import create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
 from tools.runtime_semantic_baseline import DEFAULT_BASELINE, capture, check
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 ORIGIN = "http://database-set-acceptance.test"
 
 

@@ -22,8 +22,8 @@ from infinity_db.curated import load_curated_document
 from infinity_db.database import export_database, raw_database_path
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.variant_usage_source import normalized_source_connection
-from tools import report_reference_baseline as baseline_cli
-from tools.report_reference_baseline import (
+from tools.research import report_reference_baseline as baseline_cli
+from tools.research.report_reference_baseline import (
     _NESTED_SOURCE_FIELDS,
     CURRENT_CITATION_COLLECTIONS,
     FROZEN_DECLARATION_COMMIT,
@@ -350,9 +350,10 @@ def _reviewed_explanation_join_inputs() -> dict[str, Any]:
 
 def test_frozen_declaration_evidence_works_without_git_and_rejects_drift(tmp_path: Path) -> None:
     report = reconcile_explanation_inventory()
-    with patch("tools.report_reference_baseline.subprocess.run", side_effect=AssertionError(
-        "The clean export must not require Git history"
-    )):
+    with patch(
+        "tools.research.report_reference_baseline.subprocess.run",
+        side_effect=AssertionError("The clean export must not require Git history"),
+    ):
         crosswalk = reconcile_declaration_owners(report, repository=tmp_path)
         assert verify_declaration_review(crosswalk)["retiredReviewed"] == 17
         changed = tmp_path / "changed.json"
@@ -536,7 +537,7 @@ def test_reviewed_explanation_join_cli_is_deterministic_and_non_approving(
 def test_selected_weapon_browser_evidence_fails_closed_on_missing_test() -> None:
     """Selected browser markers must resolve to an actual maintained test."""
     with patch.dict(
-        "tools.report_reference_baseline.SELECTED_EXPLANATION_BROWSER_TESTS",
+        "tools.research.report_reference_baseline.SELECTED_EXPLANATION_BROWSER_TESTS",
         {"weapon:multi-rifle": "test_nonexistent_multi_weapon_browser_case"},
         clear=True,
     ):
@@ -1117,7 +1118,7 @@ def test_report_cli_refuses_existing_output_before_audit(
     original = b"accepted previous report\n"
     selected.write_bytes(original)
     with patch(
-        "tools.report_reference_baseline.build_baseline",
+        "tools.research.report_reference_baseline.build_baseline",
         side_effect=AssertionError("A collision must block work before the audit"),
     ) as build:
         with pytest.raises(SystemExit) as exit_info:
@@ -1138,7 +1139,7 @@ def test_report_cli_refuses_duplicate_normalized_destinations(
 ) -> None:
     output = tmp_path / "baseline.json"
     with patch(
-        "tools.report_reference_baseline.build_baseline",
+        "tools.research.report_reference_baseline.build_baseline",
         side_effect=AssertionError("Repeated destination must fail before audit"),
     ) as build:
         with pytest.raises(SystemExit) as exit_info:
@@ -1159,7 +1160,7 @@ def test_report_cli_refuses_dangling_symlink_before_audit(
     # Windows may require privileges for filesystem symlink creation.
     monkeypatch.setattr(type(output), "is_symlink", lambda path: path == output)
     with patch(
-        "tools.report_reference_baseline.build_baseline",
+        "tools.research.report_reference_baseline.build_baseline",
         side_effect=AssertionError("Symlink must block work"),
     ) as build:
         with pytest.raises(SystemExit) as exit_info:
@@ -1178,7 +1179,7 @@ def test_report_cli_refuses_existing_review_evidence_before_reconciliation(
     original = b"review evidence to preserve\n"
     output.write_bytes(original)
     with patch(
-        "tools.report_reference_baseline.reconcile_explanation_inventory",
+        "tools.research.report_reference_baseline.reconcile_explanation_inventory",
         side_effect=AssertionError("Review output collision must block work"),
     ) as reconcile:
         with pytest.raises(SystemExit) as exit_info:
@@ -1194,7 +1195,7 @@ def test_citation_minimum_cli_refuses_existing_json_before_audit(
     output = tmp_path / "minimum.json"
     output.write_bytes(b"previous citation audit\n")
     with patch(
-        "tools.report_reference_baseline.audit_current_rule_citation_minimum",
+        "tools.research.report_reference_baseline.audit_current_rule_citation_minimum",
         side_effect=AssertionError("Existing receipt must block work"),
     ) as audit:
         with pytest.raises(SystemExit) as exit_info:
@@ -1215,8 +1216,11 @@ def test_report_cli_refuses_output_appearing_during_audit(
         return {"inventory": [], "sourceGroups": []}
 
     with (
-        patch("tools.report_reference_baseline.build_baseline", side_effect=build),
-        patch("tools.report_reference_baseline.render_markdown", return_value="# report\n"),
+        patch("tools.research.report_reference_baseline.build_baseline", side_effect=build),
+        patch(
+            "tools.research.report_reference_baseline.render_markdown",
+            return_value="# report\n",
+        ),
     ):
         with pytest.raises(SystemExit) as exit_info:
             main(["--json-output", str(output)])
@@ -1247,8 +1251,11 @@ def test_report_cli_preserves_json_markdown_format_and_stdout_only(
     md_output = tmp_path / "baseline.md"
     report = {"inventory": [{"id": "example"}], "sourceGroups": [{"id": "source"}]}
     with (
-        patch("tools.report_reference_baseline.build_baseline", return_value=report),
-        patch("tools.report_reference_baseline.render_markdown", return_value="# Report\n"),
+        patch("tools.research.report_reference_baseline.build_baseline", return_value=report),
+        patch(
+            "tools.research.report_reference_baseline.render_markdown",
+            return_value="# Report\n",
+        ),
     ):
         assert main([
             "--json-output", str(json_output),
@@ -1474,7 +1481,7 @@ def _verified_smoke_army_export(tmp_path: Path) -> tuple[Path, Path, Path]:
 
 def test_normalized_archive_source_parity_without_raw_sibling(tmp_path: Path) -> None:
     archive, published, normalized = _verified_smoke_army_export(tmp_path)
-    from tools.report_reference_baseline import _metadata
+    from tools.research.report_reference_baseline import _metadata
 
     with closing(sqlite3.connect(published)) as army, closing(sqlite3.connect(
         raw_database_path(published)
@@ -1512,7 +1519,7 @@ def test_archive_baseline_with_verified_normalized_source_and_no_raw(
     # This tiny fixture uses the tracked full Rules DB, whose reviewed Weapon
     # citations are deliberately bound to a different, released Army generation.
     monkeypatch.setattr(
-        "tools.report_reference_baseline.load_runtime_weapon_profile_publication",
+        "tools.research.report_reference_baseline.load_runtime_weapon_profile_publication",
         lambda *_: (None, None),
     )
     with pytest.raises(ReferenceBaselineError, match="requires --army-archive"):
@@ -2239,8 +2246,8 @@ class _VersionResponse(BytesIO):
 @pytest.mark.parametrize(
     "command",
     (
-        (str(Path("tools") / "report_reference_baseline.py"),),
-        ("-m", "tools.report_reference_baseline"),
+        (str(Path("tools") / "research" / "report_reference_baseline.py"),),
+        ("-m", "tools.research.report_reference_baseline"),
     ),
 )
 def test_baseline_cli_runs_with_no_pythonpath(command: tuple[str, ...]) -> None:

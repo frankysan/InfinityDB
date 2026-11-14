@@ -127,6 +127,7 @@
         "test_variant_usage",
         "test_variant_usage_source",
         "test_variant_usage_storage",
+        "test_verify_complete_database_build",
         "test_verify_its_pilot_parity",
         "test_visibility_zone_whole_record",
         "test_trait_wiki_references",

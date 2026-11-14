@@ -352,6 +352,16 @@ V1S-082 scoped review contract and local scratch paths are unchanged.
 The shared reference-baseline reporter remains root-owned for a
 separate consumer-driven review; no compatibility wrappers were added.
 
+**L4 source reporter and complete-set verification grouping
+(2026-11-14):** Moved the read-only source/reference baseline reporter to
+`tools/research/report_reference_baseline.py` and the opt-in pinned-ZIP
+complete-database verifier to `tools/data/verify_complete_database_build.py`.
+Updated focused imports, the disposition-gate consumer, direct/module
+reporter execution, the independent build-verifier root, and maintained
+operator commands. Runtime semantic baseline and served-runtime helpers
+remain root-owned because browser, release and development diagnostics
+share them. No source evidence, report output or database artifact changed.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

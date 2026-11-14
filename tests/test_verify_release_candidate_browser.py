@@ -95,7 +95,7 @@ def test_release_verifier_import_does_not_load_reference_reporter() -> None:
         [
             sys.executable, "-c",
             "import sys; import tools.verify_release_candidate_browser; "
-            "assert 'tools.report_reference_baseline' not in sys.modules",
+            "assert 'tools.research.report_reference_baseline' not in sys.modules",
         ],
         cwd=ROOT, capture_output=True, text=True, check=False,
     )

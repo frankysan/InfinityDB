@@ -16,8 +16,8 @@ from typing import Any
 
 from infinity_db.curated import load_curated_document
 
-# Reuse the existing reference-inventory contract; ownership stays at tools/.
-from tools.report_reference_baseline import (
+# Reuse the reference-inventory contract from the neighboring reporter.
+from tools.research.report_reference_baseline import (
     CURRENT_EXPLANATION_COLLECTIONS,
     PROJECT_ROOT,
     reconcile_explanation_inventory,

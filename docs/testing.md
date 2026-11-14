@@ -654,7 +654,7 @@ were not established by this batch. The builder regression uses shipped
 release-database fixtures, not a fresh Army normalization and source build.
 
 **2026-11-09 P2.3 real source-ZIP acceptance (Windows):** The opt-in
-`tools.verify_complete_database_build` diagnostic rebuilt the same immutable
+`tools.data.verify_complete_database_build` diagnostic rebuilt the same immutable
 `data/raw/JSON 20260929-114335.zip` twice (archive SHA-256
 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`).
 Both runs performed lossless normalization, all 73 source validation checks
@@ -671,7 +671,7 @@ Build-set ID:
 The two output directories and intermediate raw data were temporary under
 ignored `local/`; no tracked release artifacts were replaced. Re-run the
 opt-in diagnostic with
-`python -m tools.verify_complete_database_build "data/raw/JSON 20260929-114335.zip" --sha256 f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`.
+`python -m tools.data.verify_complete_database_build "data/raw/JSON 20260929-114335.zip" --sha256 f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`.
 The historical citation builder and new maintained builder produced identical
 tracked publication bytes. These are Windows local checks, not cross-platform
 byte reproducibility, Docker, browser or hosted CI acceptance.
@@ -690,7 +690,7 @@ fetch transition without weakening source or payload comparisons.
 
 The pinned source archive `JSON 20260929-114335.zip` (SHA-256
 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
-was independently built twice using `tools.verify_complete_database_build`
+was independently built twice using `tools.data.verify_complete_database_build`
 into isolated ignored directories. Both complete v13/compatibility-15
 two-file outputs passed 73 Army normalization checks (116 known
 baseline warnings), full selected-set health, source/provenance matching,
@@ -720,7 +720,7 @@ canonical Pyright (0 errors), documentation checks and `git diff --check`
 passed.
 
 The same pinned Army source ZIP and metadata were built twice through
-`tools.verify_complete_database_build`. Both opt-in Rules v14
+`tools.data.verify_complete_database_build`. Both opt-in Rules v14
 (compatibility 16) sets passed 73 Army normalization checks (116 known
 source warnings), full selected database-set validation, 151 variant
 groups, 62 reviewed Weapons/69 profile citations, 6 Restrictions chart
@@ -2697,7 +2697,7 @@ gates passed against the unchanged V1S-084 release pair:
 - Source occupancy inspected **70 tables / 441 fields** using the matched
   raw sibling. **0/39** potentially unrepresented fields were populated;
   zero confirmed gap families and two existing scope decisions were retained.
-- `tools.report_reference_baseline --army-archive` verified the pinned
+- `tools.research.report_reference_baseline --army-archive` verified the pinned
   September 29 ZIP hash, all **58** source files, **4,137** Unit membership
   occurrences, **4,748** groups, **5,020** profiles and **12,993** loadout
   options, plus the published references, extras, Includes, Peripherals,
@@ -2911,7 +2911,7 @@ source/record declarations; it does not read source text, resolve cross-source
 differences, require multiple citations or approve browser routes.
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.report_reference_baseline --audit-current-citation-minimum
+.\.venv\Scripts\python.exe -m tools.research.report_reference_baseline --audit-current-citation-minimum
 ```
 
 The standalone check exits nonzero for any missing applicable current
@@ -6391,7 +6391,7 @@ Pinned-source pytest fixtures now default to the `local` physical layout;
 fixture checks. Archive-based Wiki acceptance tests also look up immutable
 ZIPs under `local/data/wiki/` without changing their provenance labels.
 
-The `--source-layout` flag for `tools.report_reference_baseline` and
+The `--source-layout` flag for `tools.research.report_reference_baseline` and
 `tools.audit_pdf_revision_deltas` changes only physical PDF lookup;
 their CLI defaults now use `local` and explicit `legacy` remains supported.
 Baseline source groups retain original source labels and reported identities;
@@ -7008,7 +7008,7 @@ reconcile its exact identities against the *current* N5 Core/Hacking curated
 collections without overwriting the original audit, run:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --json-output local/audits/v1-current-explanation-inventory.json --markdown-output local/audits/v1-current-explanation-inventory.md
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --reconcile-explanation-inventory --json-output local/audits/v1-current-explanation-inventory.json --markdown-output local/audits/v1-current-explanation-inventory.md
 ```
 
 The report pins the frozen appendix's SHA-256, validates current curated
@@ -7213,7 +7213,7 @@ permissions, individual variants and full normal-browser explanation
 acceptance remain separate work. Generate ignored review evidence with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --reconcile-declarations --verify-declaration-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json-output local/audits/v1-declaration-migration-reviewed.json --markdown-output local/audits/v1-declaration-migration-reviewed.md
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --reconcile-explanation-inventory --reconcile-declarations --verify-declaration-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json-output local/audits/v1-declaration-migration-reviewed.json --markdown-output local/audits/v1-declaration-migration-reviewed.md
 ```
 
 For the **three numerical Army replacement Skills**, a separate
@@ -7228,7 +7228,7 @@ Without the private Army ZIP this optional audit cannot claim source
 closure. Produce an ignored report with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --verify-numeric-army-archive "data/raw/JSON 20260929-114335.zip" --json-output local/audits/v1-numeric-attribute-replacements.json --markdown-output local/audits/v1-numeric-attribute-replacements.md
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --reconcile-explanation-inventory --verify-numeric-army-archive "data/raw/JSON 20260929-114335.zip" --json-output local/audits/v1-numeric-attribute-replacements.json --markdown-output local/audits/v1-numeric-attribute-replacements.md
 ```
 
 The historical source identities occur twice for Polaris Bearpode
@@ -7252,7 +7252,7 @@ and the selected printed clause text. Reproduce its ignored JSON/Markdown
 evidence with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --audit-conditional-declarations --verify-conditional-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json-output local/audits/v1-conditional-declaration-evidence.json --markdown-output local/audits/v1-conditional-declaration-evidence.md
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --reconcile-explanation-inventory --audit-conditional-declarations --verify-conditional-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json-output local/audits/v1-conditional-declaration-evidence.json --markdown-output local/audits/v1-conditional-declaration-evidence.md
 ```
 
 The ten entries cover Order declaration/Resolution timing, Look Out!,
@@ -7394,7 +7394,7 @@ browser acceptance remain under [the TODO](TODO.md) and
 `tests/test_report_reference_baseline.py` covers identity counts,
 malformed/duplicate historical rows, fingerprint drift and report output.
 
-The offline `tools/report_reference_baseline.py` command inventories the published Army
+The offline `tools/research/report_reference_baseline.py` command inventories the published Army
 source snapshot identity, rules collections and source citations, and row counts by
 canonical family. Scenario membership evidence is separated by source collection,
 revision and publication identity: the current Rules database has four N5 core
@@ -7413,7 +7413,7 @@ the route hint is null rather than a guessed destination.
 Generate ignored review artifacts from the repository root, replacing `RUN_ID`:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.report_reference_baseline --json-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.json --markdown-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.md
+.\.venv\Scripts\python.exe -m tools.research.report_reference_baseline --json-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.json --markdown-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.md
 ```
 
 Use a new, run-specific directory for every attempt. All selected report
@@ -8086,7 +8086,7 @@ when it exists locally and skips when it is absent. Example for
 the present input:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/report_reference_baseline.py --army-archive "data/raw/JSON 20260929-114335.zip" --verify-server http://127.0.0.1:8000 --json-output local/audits/1.0-baseline-pair.json --markdown-output local/audits/1.0-baseline-pair.md
+.\.venv\Scripts\python.exe tools/research/report_reference_baseline.py --army-archive "data/raw/JSON 20260929-114335.zip" --verify-server http://127.0.0.1:8000 --json-output local/audits/1.0-baseline-pair.json --markdown-output local/audits/1.0-baseline-pair.md
 ```
 
 Missing ignored PDFs/wiki snapshots are explicitly
@@ -8204,7 +8204,7 @@ The 2026-10-15 source-evidence rerun found **113/113** exact
 historical Wiki revisions, **82/82** English snapshot references across 70
 pages, and **2/2** Spanish snapshot references across two pages. The
 shipped Army database's source archive hash was also matched with the
-pinned locally available Army ZIP by `tools/report_reference_baseline.py`.
+pinned locally available Army ZIP by `tools/research/report_reference_baseline.py`.
 Detailed hashes and inventories remain under ignored `local/audits/`.
 The former 83-gap/15-pending result is superseded: Repeater/Cube links
 were reconciled and the maintained interaction ledger now has zero pending
@@ -11709,7 +11709,7 @@ historical 367-record D/S denominator is not changed. Reproduce the
 selected bilingual-source and identity audit with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --audit-visibility-zones --verify-visibility-pdfs --json-output local/audits/v1-visibility-zone-reconciliation.json --markdown-output local/audits/v1-visibility-zone-reconciliation.md
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --reconcile-explanation-inventory --audit-visibility-zones --verify-visibility-pdfs --json-output local/audits/v1-visibility-zone-reconciliation.json --markdown-output local/audits/v1-visibility-zone-reconciliation.md
 ```
 
 The audit rejects changed identities, curated clauses, citation pages,

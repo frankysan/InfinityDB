@@ -30,13 +30,15 @@ from infinity_db.variant_usage_source import normalized_source_connection
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 
 if __package__:
-    from .research.source_paths import SourcePathError, pinned_pdf_path
-    from .served_runtime import ServedRuntimeError, verify_served_runtime
+    from ..served_runtime import ServedRuntimeError, verify_served_runtime
+    from .source_paths import SourcePathError, pinned_pdf_path
 else:
-    from research.source_paths import SourcePathError, pinned_pdf_path
+    # Direct invocation from tools/research/ must still resolve the shared helper.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from served_runtime import ServedRuntimeError, verify_served_runtime
+    from source_paths import SourcePathError, pinned_pdf_path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 REPORT_FORMAT = "InfinityDB 1.0 reference evidence baseline"
 REPORT_VERSION = 2
 
