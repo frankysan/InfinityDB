@@ -2,12 +2,12 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Deployment
 
-**Status (2026-11-14):** R1–R6 source/path cutovers and L4 maintained-tool
-grouping are complete on `dev/tooling-workspace-cleanup`. L5 has completed
-bounded retirements, including completed-plan documentation retirement;
-further one-use investigations remain. L6 output hygiene/enforcement and
-L7 integrated acceptance remain open; do not treat them as prerequisites
-for unrelated development.
+**Status (2026-11-14):** R1–R6 source/path cutovers and L4 tool
+grouping are complete on `dev/tooling-workspace-cleanup`. L5 is closed
+after bounded retirements; remaining candidates serve current independent
+research or regression purposes. L6 is closed using existing collision-safe
+writers and path guidance; no new enforcement overhead was justified.
+L7 integrated acceptance remains open. Merge/release/deployment are separate.
 Prospective P1–P5 conventions were accepted on 2026-11-13. Older
 chronological checkpoints below document what was pending *then*, not
 new approvals or blockers for work already completed.
@@ -423,14 +423,15 @@ tracked frozen evidence; none was retired by version or age alone.
 **L5 1.0 audit retirement (2026-11-14):** Retired the dated
 `docs/v1.0-source-coverage-audit.md` and all four
 `docs/rules-explanation-audit-1.0*.md` files to Git history (13,586 lines).
-Docs-only backlinks now use immutable commit-pinned GitHub references; the
-four `config/validation/source-coverage-dispositions-v1.json` evidence
-references likewise point to the original reviewed SHA without changing
-the source/record fingerprints, review statuses or validator. The active
-reference-baseline reporter now reads a 367-row, SHA-pinned identity fixture
-from `config/validation/` instead of the retired audit appendix. Source
-disagreements, FAQ scope and acceptance tests keep their existing owners.
-No source input, curation or published database changed.
+Docs-only backlinks now use immutable commit-pinned GitHub references.
+The four `config/validation/source-coverage-dispositions-v1.json`
+`evidenceRef` values remain at their original reviewed, historical paths:
+hosted CI confirmed these tracked bytes are part of runtime build-input
+freshness, so changing them would require unnecessary database rebuilding.
+The active reference-baseline reporter reads a 367-row, SHA-pinned identity
+fixture from `config/validation/` instead of the retired audit appendix.
+Source disagreements, FAQ scope and acceptance tests keep their owners.
+No curated source, runtime behavior or published database changed.
 
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.

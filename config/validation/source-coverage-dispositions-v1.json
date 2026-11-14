@@ -24,7 +24,7 @@
         "status": "accepted",
         "reviewer": "gpt-6-source-review",
         "reviewedOn": "2026-11-06",
-        "evidenceRef": "https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
+        "evidenceRef": "docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
       },
       "browser": {
         "status": "pending"
@@ -52,7 +52,7 @@
         "status": "accepted",
         "reviewer": "gpt-6-source-review",
         "reviewedOn": "2026-11-06",
-        "evidenceRef": "https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
+        "evidenceRef": "docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
       },
       "browser": {
         "status": "pending"
@@ -80,7 +80,7 @@
         "status": "accepted",
         "reviewer": "gpt-6-source-review",
         "reviewedOn": "2026-11-06",
-        "evidenceRef": "https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
+        "evidenceRef": "docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
       },
       "browser": {
         "status": "pending"
@@ -108,7 +108,7 @@
         "status": "accepted",
         "reviewer": "gpt-6-source-review",
         "reviewedOn": "2026-11-06",
-        "evidenceRef": "https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
+        "evidenceRef": "docs/v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06"
       },
       "browser": {
         "status": "pending"

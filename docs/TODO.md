@@ -30,14 +30,10 @@ when all contained work shares the same owner.
   ([implementation record](tooling-and-local-path-cleanup-plan.md)).
   R1–R6 source/path cutovers and L4 tool grouping are complete; do not
   reopen their historical approval gates.
-  - [ ] **L5:** Finish genuinely one-use investigation/tool retirements
-    where consumers are superseded. The completed P0–P6 plan and five
-    historical 1.0 audit files are retired to Git history; preserve active
-    source-question registers and executable evidence checks.
-  - [ ] **L6:** Finish proportionate report naming/non-overwrite defaults and
-    address only path-policy violations with a demonstrated maintenance cost.
-    Keep ignored-path inventory opt-in; do not add mandatory tooling solely
-    to police a single-developer checkout.
+  L5 is complete: superseded plans and 1.0 audits were retired; remaining
+  tool candidates have independent research or regression consumers. L6
+  is complete through existing collision-safe report writers and documented
+  paths, without adding a mandatory path checker or ignored-file scanner.
   - [ ] **L7:** Confirm latest exact-SHA hosted CI and focused integrated
     source/build/publication/runtime contracts; record remaining legitimate
     `local/` or cross-host exceptions and close the plan.
