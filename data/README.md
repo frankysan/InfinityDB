@@ -86,6 +86,12 @@ the retired source roots.
   and related reports are preserved under its `legacy/` subdirectory.
   The old root-level candidate output format remains an explicit
   compatibility path, not the recommended location.
+- `local/research/pdf/revision-inventory.json` pins private PDF source
+  hashes for the revision-difference audit without changing citation labels.
+- The completed v1 changelog, N5 citation migration, Hacking Device
+  citation staging, and reviewed-reference artifacts are preserved under
+  `local/archive/legacy-root/` by domain; the old standalone Rules database
+  is preserved there under `legacy-builds/`. None are active build inputs.
 - `local/data/manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
   record is labeled from the archive filename, records both the logical snapshot
   content SHA-256 and exact archive SHA-256, and records the snapshot type,

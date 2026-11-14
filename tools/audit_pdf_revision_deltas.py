@@ -59,7 +59,7 @@ FOOTER = re.compile(
 SOURCE_HEADER = re.compile(r"^FAQs?\s+V\d+\.\d+\s+-\s+(?:English|Espa[nñ]ol)", re.I)
 PAGE_NUMBER = re.compile(r"^\s*\d{1,3}\s*$")
 PUNCTUATION = re.compile(r"[\s\u00a0]+")
-PIN_PATH = ROOT / "local" / "pdf-revision-inventory.json"
+PIN_PATH = ROOT / "local/research/pdf/revision-inventory.json"
 
 
 @dataclass

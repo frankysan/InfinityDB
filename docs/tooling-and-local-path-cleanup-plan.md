@@ -142,6 +142,17 @@ Focused export tests validated both variants. The migration/inventory
 helper is retired after use; this is archival organization, not a
 source-data deletion or publication change.
 
+**L3 remaining source-output exceptions (2026-11-14):** Four completed
+research/review stage directories and the old root-level standalone
+Rules database were renamed into `local/archive/legacy-root/`. The
+active PDF revision-difference inventory moved from the top of `local/`
+to `local/research/pdf/revision-inventory.json`, updating its sole
+reader and the current source-history documentation. All six original
+entries were preserved without changing bytes. The retired original
+Rules DB is distinct from the maintained standalone build default at
+`local/work/build/rules-standalone.db`. The one-use relocation script
+was removed after the moves; no current runtime or published data changed.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

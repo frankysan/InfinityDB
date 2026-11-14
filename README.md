@@ -241,7 +241,7 @@ in the complete SQLite set. ITS Season 18 is published separately in
 `its_18.db`. No JSON sidecar is required to serve the built set.
 
 For independent Rules-export development, `infinity-db build-rules` writes a
-standalone v10 database under ignored `data/work/build/rules-standalone.db`.
+standalone v10 database under ignored `local/work/build/rules-standalone.db`.
 An explicit `--output` selects its destination. This narrow command does not
 produce a complete serving set or change which directory `serve` opens.
 

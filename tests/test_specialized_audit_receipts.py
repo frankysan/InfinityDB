@@ -20,6 +20,10 @@ from tools.research.report_output import write_audit_bytes_or_exit
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_pdf_revision_inventory_uses_categorized_research_input() -> None:
+    assert pdf_delta.PIN_PATH == ROOT / "local/research/pdf/revision-inventory.json"
+
+
 def _pdf_setup(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> tuple[Path, bytes, list[str]]:
