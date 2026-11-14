@@ -30,45 +30,81 @@ Use these links to jump directly to a workstream:
 
 ### Unit Explorer discovery
 
-**v1.1.0 final feature:** Deliver this as the last planned new player-facing
-feature before freezing the v1.1.0 release candidate. No further feature
-addition is planned between its completion and release; fixes, documentation,
-validation and the existing release checklist remain applicable.
+**v1.1.0 final feature:** Complete multi-selection first, followed by contextual
+usage counts and the bounded advanced-filtering/caching investigations below.
+This is the last planned new player-facing feature workstream before freezing
+the v1.1.0 release candidate. Implementation of optional extensions requires
+an explicit benefit/cost decision; fixes, documentation, validation and the
+existing release checklist still apply.
 
-- [ ] **Web backend + Web frontend:** Show contextual usage counts in the
-  Skills, Equipment and Weapons filter dropdowns. Counts represent distinct
-  logical Units in the complete *currently filtered* population, including
-  every active filter (also the selection in the counted dropdown), Army
-  context and optional availability. Preserve the existing
-  [profile/loadout matching semantics](data-model.md#context-coherent-filtering).
-  They are not alternative counts produced by removing/replacing a filter,
-  and must not vary with pagination, sorting or extended view.
+- [ ] **Web backend + Web frontend — multi-selection (highest priority):**
+  Support multiple simultaneous selections in applicable Unit Explorer
+  categorical filters (Skills, Equipment, Weapons, Troop Type,
+  Classification and Characteristics), without changing unrelated
+  Specialist Troops or numeric exact/range behavior by default.
+  - [ ] **Selection semantics and compatibility:** Define predictable
+    within-filter and between-filter matching (including the default
+    combination), keep compatible profile/loadout occurrences together per
+    [context-coherent filtering](data-model.md#context-coherent-filtering),
+    and preserve existing single-value API parameters and shared URLs.
+  - [ ] **Backend/API:** Accept bounded, validated, deduplicated sets of
+    filter values; query matching logical Units without duplicates or
+    cross-profile/loadout false positives. Specify canonical ordering,
+    invalid-value handling and backward-compatible response behavior.
+  - [ ] **Browser interaction and sharing:** Implement accessible, usable
+    multi-select controls with clear selected-state feedback, individual
+    removal, reset, keyboard and touch support; round-trip selections
+    through share-state URLs, Back/Forward and persisted view state.
+  - [ ] **Focused acceptance:** Cover same-category and cross-category
+    combinations, Army/availability context, incompatible loadouts,
+    invalid/legacy URLs, empty results and narrow-screen interaction.
+
+- [ ] **Web backend + Web frontend — contextual usage counts:** Show distinct
+  logical Unit counts beside Skills, Equipment and Weapons options in the
+  complete *currently filtered* population. Respect multi-selection, every
+  other active filter, Army context, optional availability and the selection
+  in the counted dropdown itself. Counts are not hypothetical alternatives
+  computed by dropping/replacing a selection, and are independent of page,
+  sorting and extended view.
   - [ ] **Count contract:** Specify the per-option response shape and the
-    shared result/count population, including zero counts, distinct Unit
-    identity, selected values and profile/loadout-context restrictions.
+    shared result/count population, including selected and zero-count options,
+    multi-selection and coherent profile/loadout contexts.
   - [ ] **Backend aggregation:** Compute all three dropdown count sets in
-    batches from the same effective filtered population as the Unit results;
-    avoid per-option queries and duplicate-Unit inflation.
+    batches against the effective result population, without per-option
+    round trips, duplicate-Unit inflation or mismatched query semantics.
   - [ ] **Frontend integration:** Show counts alongside Skills, Equipment
-    and Weapons options without changing existing single-selection or
-    filtering behavior; keep labels and selected values coherent.
+    and Weapons options while preserving selections and accessible labels.
   - [ ] **Asynchronous consistency:** Refresh counts on every relevant
-    filter/Army/availability change, prevent stale in-flight responses
-    from overwriting newer state, and handle loading, cancellation and errors
-    without presenting counts for a different result set.
+    filter/Army/availability change, preventing stale in-flight responses
+    from overwriting newer state and handling loading, aborts and errors.
   - [ ] **Semantic tests:** Check cross-profile/loadout matching, combined
-    filters (including the counted dropdown's selection), Army and
-    availability scoping, zero results, distinct logical Units, and
-    pagination/sort/extended-view independence.
+    multi-select filters, selected-option counts, zero results, distinct Units
+    and pagination/sort/extended-view independence.
   - [ ] **Acceptance and closeout:** Verify accessible option announcements,
     keyboard and touch behavior, responsive layouts and loading states;
-    measure representative count-query latency and add caching only if
-    justified by results. Update current-behavior documentation and the
-    v1.1.0 changelog entry.
+    measure representative count-query latency and document the count
+    contract alongside the overall feature closeout.
 
-  Multi-selection and per-filter AND/OR/NOT are separate future extensions.
-  Server-response/count caching is an optimization option, not a
-  prerequisite or an accepted infrastructure commitment.
+- [ ] **Web backend + Web frontend — advanced-filtering investigation:**
+  Compare per-filter AND/OR/NOT controls (and exclusion/negation) with the
+  simpler multi-select semantics. Assess concrete search use cases, user
+  comprehension, UI complexity, query correctness across profile/loadout
+  contexts, URL/API compatibility, performance and implementation/maintenance
+  cost. Record a scoped v1.1.0 implement-or-defer decision; do not make the
+  full boolean-filtering system an implicit release prerequisite.
+
+- [ ] **Web backend — caching investigation:** Benchmark repeated and
+  varied multi-selection and count queries on a representative snapshot.
+  Compare uncached response latency and cost against simple bounded
+  response/count caching, including cache keys, invalidation on snapshot
+  replacement, memory use and added maintenance. Implement only if the
+  measured benefit justifies the cost; otherwise record the no-cache decision.
+
+- [ ] **Web frontend + Web backend — final acceptance and closeout:**
+  Verify keyboard, screen-reader, touch, responsive layouts, loading/error
+  behavior and shared-link compatibility for the accepted v1.1.0 scope.
+  Update current-behavior docs and the v1.1.0 changelog, then proceed to
+  release preparation rather than adding another feature.
 
 ### External source clarifications
 
