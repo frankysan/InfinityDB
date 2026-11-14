@@ -248,6 +248,7 @@
         "test_release_ci_evidence",
         "test_release_metadata",
         "test_release_validation_scope",
+        "test_rebuild_runtime_set",
         "test_report_metrics",
         "test_run_checks",
         "test_run_cross_browser_compatibility",
