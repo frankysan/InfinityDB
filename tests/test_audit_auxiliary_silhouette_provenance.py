@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
 import pytest
 
-from tools.audit_auxiliary_silhouette_provenance import (
+from tools.research.audit_auxiliary_silhouette_provenance import (
     audit,
     html_rows,
     markdown_report,
@@ -14,7 +15,7 @@ from tools.audit_auxiliary_silhouette_provenance import (
     wiki_chart_s,
     wiki_dazer_s,
 )
-from tools.audit_weapon_chart_profiles import WeaponChartAuditError
+from tools.research.audit_weapon_chart_profiles import WeaponChartAuditError
 
 
 class FakePage:
@@ -91,14 +92,25 @@ def test_wiki_profile_parsers_preserve_chart_vs_dedicated_context() -> None:
     assert wiki_dazer_s(dedicated_es) == 1
 
 
-def test_pinned_object_matrix_if_source_archives_available() -> None:
+def test_pinned_object_matrix_if_source_archives_available(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+) -> None:
     pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
+    labels = {
+        "data/pdf/rules/n5-rules-v5.3-en.pdf": (
+            "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+        ),
+        "data/pdf/rules/n5-rules-v5.3-es.pdf": (
+            "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"
+        ),
+    }
+    pdfs = pinned_pdf_sources(labels)
     inputs = [
-        root / "data/pdf/rules/n5-rules-v5.3-en.pdf",
-        root / "data/pdf/rules/n5-rules-v5.3-es.pdf",
-        root / "data/wiki/WIKI-en 20260926-200832.zip",
-        root / "data/wiki/WIKI-es 20261009-211304.zip",
+        pdfs["data/pdf/rules/n5-rules-v5.3-en.pdf"],
+        pdfs["data/pdf/rules/n5-rules-v5.3-es.pdf"],
+        root / "local/data/wiki/WIKI-en 20260926-200832.zip",
+        root / "local/data/wiki/WIKI-es 20261009-211304.zip",
         root / "data/generated/army.db",
     ]
     if not all(path.exists() for path in inputs):

@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from tools.capacity_test import (
+from tools.performance.capacity_test import (
     RequestResult,
     ScenarioCase,
     _base_url,
@@ -191,7 +191,9 @@ def test_main_writes_report_and_fails_when_load_phase_has_errors(
             },
         ],
     }
-    monkeypatch.setattr("tools.capacity_test.capacity_test", lambda *_args, **_kwargs: report)
+    monkeypatch.setattr(
+        "tools.performance.capacity_test.capacity_test", lambda *_args, **_kwargs: report
+    )
     output = tmp_path / "capacity.json"
 
     assert main(["http://example.invalid", "--output", str(output)]) == 1

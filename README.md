@@ -226,6 +226,13 @@ Place the verified handoff under `data/raw/` and
 The normal offline build never fetches data. See the
 [snapshot provenance and handoff contract](data/README.md#cross-repository-acquisition-handoff-p53).
 
+Development workers can verify or preview staged snapshots with an explicit
+`local` layout while the default remains `legacy`. See the
+[staged asset runbook](docs/syncthing-assets.md#explicit-snapshot-layouts)
+for the mapping and separately approved source-migration boundary.
+The [research PDF binding contract](data/curated/README.md#explicit-physical-pdf-bindings-for-research)
+lists the source auditors that also support an explicit physical PDF layout.
+
 ### Build the rules reference
 
 The normal `infinity-db build --compact` includes curated Rules, reviewed
@@ -234,7 +241,7 @@ in the complete SQLite set. ITS Season 18 is published separately in
 `its_18.db`. No JSON sidecar is required to serve the built set.
 
 For independent Rules-export development, `infinity-db build-rules` writes a
-standalone v10 database under ignored `data/work/build/rules-standalone.db`.
+standalone v10 database under ignored `local/work/build/rules-standalone.db`.
 An explicit `--output` selects its destination. This narrow command does not
 produce a complete serving set or change which directory `serve` opens.
 
@@ -335,16 +342,15 @@ tests/                      # Pipeline, database, API, web, and tool regression 
 tools/                      # Offline handoff verification, publication, auditing, and checks
 scripts/                    # Linux deployment and maintenance scripts
 data/
-  raw/                      # Immutable Army/source snapshots, ignored by Git
-  wiki/                     # Wiki research snapshots, ignored by Git
-  pdf/                      # Local rules/FAQ/ITS research documents, ignored by Git
-  curated/                  # Source-controlled reviewed rules, identities, and annotations
-  manifests/                # Tracked symbol publication plus ignored build provenance
-  work/                     # Rebuildable processing work, ignored by Git
-  reports/                  # Generated processing reports, ignored by Git
-  logs/                     # Verbose pipeline logs, ignored by Git
-  backups/                  # Local retained processing/publication history, ignored by Git
-  generated/                # Tracked runtime DBs plus ignored intermediate build artifacts
+  curated/                  # Tracked reviewed rules, identities and annotations
+  manifests/                # Tracked symbol publication manifest
+  generated/                # Tracked Army, Rules and ITS runtime databases
+local/                      # Ignored source, build, research and archive workspace
+  data/                     # Local Army, Wiki, PDFs and symbol-source evidence
+  work/                     # Replaceable build outputs
+  audits/                   # Run-scoped audit evidence
+  reports/                  # Local check and operational reports
+  archive/                  # Retained historical material
 ```
 
 ## Development checks

@@ -8,14 +8,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
 import pytest
 
-from tools.audit_weaponry_family_clauses import _normalized_text
+from tools.research.audit_weaponry_family_clauses import _normalized_text
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PINNED_PDF_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 
 
@@ -96,13 +96,11 @@ def test_canonical_skill_rules_preserve_scope_and_different_trigger_targets() ->
     ),
 )
 def test_pinned_pdf_explicit_trigger_exceptions_if_source_available(
-    page: int, source_excerpt: str,
+    page: int, source_excerpt: str, pinned_n53_core_pdf: Path,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    if not SOURCE.exists():
-        pytest.skip("Pinned N5.3 source PDF unavailable in checkout")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
-    with pdf.open(SOURCE) as doc:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(pinned_n53_core_pdf) as doc:
         page_text = _normalized_text(doc[page - 1].get_text())
     assert _normalized_text(source_excerpt) in page_text, (page, source_excerpt)
 
@@ -190,13 +188,11 @@ def test_boost_and_mine_representations_stay_separate() -> None:
     ),
 )
 def test_boost_mine_source_conditions_if_pinned_pdf_is_available(
-    page: int, source_excerpt: str,
+    page: int, source_excerpt: str, pinned_n53_core_pdf: Path,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    if not SOURCE.exists():
-        pytest.skip("Pinned N5.3 source PDF unavailable in checkout")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
-    with pdf.open(SOURCE) as document:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(pinned_n53_core_pdf) as document:
         printed = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(source_excerpt) in printed, (page, source_excerpt)
 
@@ -257,13 +253,11 @@ def test_drop_bears_uses_and_rolls_differ_by_deployment_mode() -> None:
     ),
 )
 def test_drop_bears_source_clauses_if_pinned_pdf_available(
-    page: int, source_excerpt: str,
+    page: int, source_excerpt: str, pinned_n53_core_pdf: Path,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    if not SOURCE.exists():
-        pytest.skip("Pinned N5.3 core rules unavailable")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
-    with pdf.open(SOURCE) as document:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(pinned_n53_core_pdf) as document:
         page_text = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(source_excerpt) in page_text, (page, source_excerpt)
 
@@ -321,13 +315,11 @@ def test_mine_dispenser_inherits_only_drop_bears_bs_placement_semantics() -> Non
     ),
 )
 def test_mine_dispenser_mode_inheritance_matches_pinned_pdf(
-    page: int, source_excerpt: str,
+    page: int, source_excerpt: str, pinned_n53_core_pdf: Path,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    if not SOURCE.exists():
-        pytest.skip("Pinned N5.3 source PDF unavailable")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
-    with pdf.open(SOURCE) as doc:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(pinned_n53_core_pdf) as doc:
         text = _normalized_text(doc[page - 1].get_text())
     assert _normalized_text(source_excerpt) in text, (page, source_excerpt)
 
@@ -395,11 +387,13 @@ def test_pitcher_and_disco_delivery_lifecycle_keeps_objects_separate() -> None:
 )
 def test_fired_deployable_faq_covers_both_launchers(
     page: int, excerpt: str,
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    faq = ROOT / "data/pdf/faq/n5-faq-v0.1-en.pdf"
-    if not faq.exists():
-        pytest.skip("Pinned N5 FAQ v0.1 unavailable")
+    faq_label = "data/pdf/faq/n5-faq-v0.1-en.pdf"
+    faq = pinned_pdf_sources({
+        faq_label: "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa",
+    })[faq_label]
     assert hashlib.sha256(faq.read_bytes()).hexdigest() == (
         "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa"
     )
@@ -421,13 +415,11 @@ def test_fired_deployable_faq_covers_both_launchers(
     ),
 )
 def test_delivery_lifecycle_is_printed_in_pinned_core(
-    page: int, excerpt: str,
+    page: int, excerpt: str, pinned_n53_core_pdf: Path,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    if not SOURCE.exists():
-        pytest.skip("Pinned N5.3 source PDF unavailable")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
-    with pdf.open(SOURCE) as document:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(pinned_n53_core_pdf) as document:
         found = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(excerpt) in found, (page, excerpt)
 
@@ -509,13 +501,11 @@ def test_disco_ball_states_phase_removes_template_not_ball() -> None:
     ),
 )
 def test_deployed_repeater_and_disco_ball_lifecycle_has_pinned_sources(
-    page: int, excerpt: str,
+    page: int, excerpt: str, pinned_n53_core_pdf: Path,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    if not SOURCE.exists():
-        pytest.skip("Pinned English N5.3 source PDF unavailable")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
-    with pdf.open(SOURCE) as doc:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(pinned_n53_core_pdf) as doc:
         normalized = _normalized_text(doc[page - 1].get_text())
     assert _normalized_text(excerpt) in normalized, (page, excerpt)
 
@@ -592,13 +582,11 @@ def test_fastpanda_and_wildparrot_remain_distinct_deployed_objects() -> None:
     ),
 )
 def test_fastpanda_wildparrot_mechanics_match_pinned_core(
-    page: int, excerpt: str,
+    page: int, excerpt: str, pinned_n53_core_pdf: Path,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    if not SOURCE.exists():
-        pytest.skip("Pinned N5.3 source PDF unavailable in checkout")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
-    with pdf.open(SOURCE) as doc:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(pinned_n53_core_pdf) as doc:
         found = _normalized_text(doc[page - 1].get_text())
     assert _normalized_text(excerpt) in found, (page, excerpt)
 
@@ -665,13 +653,11 @@ def test_dazer_support_equipment_placement_and_persistent_effects() -> None:
     ),
 )
 def test_dazer_lifecycle_matches_pinned_english_core(
-    page: int, excerpt: str,
+    page: int, excerpt: str, pinned_n53_core_pdf: Path,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    if not SOURCE.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
-    with pdf.open(SOURCE) as document:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(pinned_n53_core_pdf) as document:
         printed = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(excerpt) in printed, (page, excerpt)
 
@@ -747,13 +733,11 @@ def test_deactivator_removal_and_persistent_effects_stay_distinct() -> None:
     ),
 )
 def test_deactivator_and_allied_activation_pinned_source_clauses(
-    page: int, excerpt: str,
+    page: int, excerpt: str, pinned_n53_core_pdf: Path,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    if not SOURCE.exists():
-        pytest.skip("Pinned N5.3 English PDF unavailable")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
-    with pdf.open(SOURCE) as document:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(pinned_n53_core_pdf) as document:
         text = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(excerpt) in text, (page, excerpt)
 
@@ -821,12 +805,10 @@ def test_deactivator_same_order_devices_keep_distinct_trigger_rules() -> None:
     ),
 )
 def test_deactivator_hostile_device_clauses_in_pinned_n53_pdf(
-    page: int, excerpt: str,
+    page: int, excerpt: str, pinned_n53_core_pdf: Path,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    if not SOURCE.exists():
-        pytest.skip("Pinned N5.3 English PDF unavailable")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
-    with pdf.open(SOURCE) as document:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(pinned_n53_core_pdf) as document:
         page_text = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(excerpt) in page_text, (page, excerpt)

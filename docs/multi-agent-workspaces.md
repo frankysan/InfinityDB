@@ -81,17 +81,17 @@ From a **clean** primary checkout on `dev/v1.0.0`:
 Windows PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.agent_workspaces create --agent copilot-01 --task v1s-082 --machine windows
+.\.venv\Scripts\python.exe -m tools.dev.agent_workspaces create --agent copilot-01 --task v1s-082 --machine windows
 cd ..\InfinityDB-agent-windows-copilot-01-v1s-082
-py -3 -m tools.agent_workspaces guard --agent copilot-01 --task v1s-082
+py -3 -m tools.dev.agent_workspaces guard --agent copilot-01 --task v1s-082
 ```
 
 Linux:
 
 ```sh
-./.venv/bin/python -m tools.agent_workspaces create --agent codex-01 --task v1s-083 --machine devbox
+./.venv/bin/python -m tools.dev.agent_workspaces create --agent codex-01 --task v1s-083 --machine devbox
 cd ../InfinityDB-agent-devbox-codex-01-v1s-083
-python3 -m tools.agent_workspaces guard --agent codex-01 --task v1s-083
+python3 -m tools.dev.agent_workspaces guard --agent codex-01 --task v1s-083
 ```
 
 The helper creates a sibling `InfinityDB-agent-<machine>-<agent>-<task>/`
@@ -118,7 +118,7 @@ shared only when the underlying execution cannot modify them.
 
 ## Local coordination CLI (Phase 2, single-machine scope)
 
-The portable `tools.agent_coordination` module provides durable **local**
+The portable `tools.dev.agent_coordination` module provides durable **local**
 claims shared by all worktrees using the *same Git common directory*.
 It uses an OS-exclusive file lock for every read-modify-write transaction,
 writes state atomically, never expires or steals ownership automatically,
@@ -130,8 +130,8 @@ An assigned development agent runs from its worktree (with its own Python
 environment available):
 
 ```powershell
-python -m tools.agent_coordination claim --agent chatgpt --task workspace-bootstrap --path tools/ --path tests/
-python -m tools.agent_coordination status
+python -m tools.dev.agent_coordination claim --agent chatgpt --task workspace-bootstrap --path tools/ --path tests/
+python -m tools.dev.agent_coordination status
 ```
 
 The first command returns an opaque, non-secret claim ID. Before a handoff,
@@ -139,8 +139,8 @@ check the active claim and full changed-file scope, then explicitly release
 it after the integrator has received the proposal:
 
 ```powershell
-python -m tools.agent_coordination check --agent chatgpt --task workspace-bootstrap --claim-id <claim-id>
-python -m tools.agent_coordination release --agent chatgpt --task workspace-bootstrap --claim-id <claim-id>
+python -m tools.dev.agent_coordination check --agent chatgpt --task workspace-bootstrap --claim-id <claim-id>
+python -m tools.dev.agent_coordination release --agent chatgpt --task workspace-bootstrap --claim-id <claim-id>
 ```
 
 Development claims refuse duplicate task ownership, one agent worktree
@@ -158,9 +158,9 @@ On the designated primary, the integration owner may acquire an exclusive
 *local* integration reservation pinned to an exact SHA:
 
 ```powershell
-python -m tools.agent_coordination acquire-integration --owner integrator --expected-head <40-character-sha>
-python -m tools.agent_coordination check-integration --owner integrator --claim-id <claim-id> --expected-head <40-character-sha>
-python -m tools.agent_coordination release-integration --owner integrator --claim-id <claim-id>
+python -m tools.dev.agent_coordination acquire-integration --owner integrator --expected-head <40-character-sha>
+python -m tools.dev.agent_coordination check-integration --owner integrator --claim-id <claim-id> --expected-head <40-character-sha>
+python -m tools.dev.agent_coordination release-integration --owner integrator --claim-id <claim-id>
 ```
 
 Once an agent's proposal is **committed and its scope verified**, the designated
@@ -169,9 +169,9 @@ its branch. The `--primary` option resolves the locally registered primary
 checkout through Git's common directory:
 
 ```powershell
-python -m tools.agent_coordination acquire-integration --primary --owner integrator --expected-head <primary-sha>
-python -m tools.agent_coordination integrate-proposal --agent chatgpt --task workspace-bootstrap --claim-id <task-claim-id> --owner integrator --integration-id <integration-claim-id> --expected-head <primary-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id> --global-revision <reviewed-registry-revision>
-python -m tools.agent_coordination release-integration --primary --owner integrator --claim-id <integration-claim-id>
+python -m tools.dev.agent_coordination acquire-integration --primary --owner integrator --expected-head <primary-sha>
+python -m tools.dev.agent_coordination integrate-proposal --agent chatgpt --task workspace-bootstrap --claim-id <task-claim-id> --owner integrator --integration-id <integration-claim-id> --expected-head <primary-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id> --global-revision <reviewed-registry-revision>
+python -m tools.dev.agent_coordination release-integration --primary --owner integrator --claim-id <integration-claim-id>
 ```
 
 `integrate-proposal` requires the primary checkout and agent checkout to be
@@ -206,7 +206,7 @@ owns `dev/v1.0.0`; the global registry does not designate a second owner.
 
 ## Cross-machine claims through a dedicated Git ref
 
-`tools.agent_global_coordination` adds a tool-independent global registry
+`tools.dev.agent_global_coordination` adds a tool-independent global registry
 using the configured `origin` remote and the dedicated
 `refs/heads/coordination/agent-claims` Git ref. It records only normalized
 task IDs, machine/agent names, baselines and repository-relative path scopes;
@@ -217,8 +217,8 @@ An authorized Windows integration owner initializes this ref **once**, after
 the code is integrated and reviewed:
 
 ```powershell
-python -m tools.agent_global_coordination bootstrap
-python -m tools.agent_global_coordination status
+python -m tools.dev.agent_global_coordination bootstrap
+python -m tools.dev.agent_global_coordination status
 ```
 
 On **each machine's assigned agent worktree**, claim local and global scope
@@ -226,9 +226,9 @@ before edits. Both commands require explicit invocation; neither fetches,
 merges or modifies the source checkout:
 
 ```powershell
-python -m tools.agent_coordination claim --agent copilot --task v1s-082 --path src/
-python -m tools.agent_global_coordination claim --agent copilot --task v1s-082 --path src/
-python -m tools.agent_global_coordination check --agent copilot --task v1s-082 --claim-id <global-claim-id>
+python -m tools.dev.agent_coordination claim --agent copilot --task v1s-082 --path src/
+python -m tools.dev.agent_global_coordination claim --agent copilot --task v1s-082 --path src/
+python -m tools.dev.agent_global_coordination check --agent copilot --task v1s-082 --claim-id <global-claim-id>
 ```
 
 Record both claim IDs separately. Check the **local claim** as well; it verifies
@@ -244,8 +244,8 @@ Before integration, the designated primary owner additionally reserves
 global integration ownership (alongside the local integration reservation):
 
 ```powershell
-python -m tools.agent_global_coordination acquire-integration --owner integrator --expected-head <primary-sha>
-python -m tools.agent_global_coordination check-integration --owner integrator --claim-id <global-integration-id> --expected-head <primary-sha>
+python -m tools.dev.agent_global_coordination acquire-integration --owner integrator --expected-head <primary-sha>
+python -m tools.dev.agent_global_coordination check-integration --owner integrator --claim-id <global-integration-id> --expected-head <primary-sha>
 ```
 
 Read `status` after acquiring both reservations and pass that exact global
@@ -369,7 +369,7 @@ branch transfer or a reviewed patch, not silent copying of a checkout.
 
 ## Inspected integration recovery
 
-`tools.agent_coordination` provides a bounded recovery path for an interrupted
+`tools.dev.agent_coordination` provides a bounded recovery path for an interrupted
 integration with its original identities and reservations still present. It
 does not recover abandoned task claims or transfer ownership between agents.
 The designated integration owner first inspects affected jobs through their
@@ -381,7 +381,7 @@ their branches, HEADs, index, working files, remote source tip and both registri
 From the original owned proposal checkout, request a read-only receipt:
 
 ```powershell
-python -m tools.agent_coordination inspect-integration --agent chatgpt --task workspace-bootstrap --claim-id <local-task-id> --owner integrator --integration-id <local-integration-id> --expected-head <before-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id>
+python -m tools.dev.agent_coordination inspect-integration --agent chatgpt --task workspace-bootstrap --claim-id <local-task-id> --owner integrator --integration-id <local-integration-id> --expected-head <before-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id>
 ```
 
 Review the returned local/global revisions, source HEADs, scope, changed paths,
@@ -395,7 +395,7 @@ an unrelated newer tip requires separate investigation.
 After inspecting jobs and confirming they are idle, settle metadata explicitly:
 
 ```powershell
-python -m tools.agent_coordination recover-integration --agent chatgpt --task workspace-bootstrap --claim-id <local-task-id> --owner integrator --integration-id <local-integration-id> --expected-head <before-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id> --inspection <reviewed-digest> --jobs-inspected
+python -m tools.dev.agent_coordination recover-integration --agent chatgpt --task workspace-bootstrap --claim-id <local-task-id> --owner integrator --integration-id <local-integration-id> --expected-head <before-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id> --inspection <reviewed-digest> --jobs-inspected
 ```
 
 `--jobs-inspected` is the caller's explicit idle-job attestation; this portable
@@ -438,8 +438,8 @@ If two proposed patches conflict, keep both original workspaces intact and
 resolve the conflict under the integration owner. An in-flight test result
 belongs only to its pinned revision and actual inputs.
 
-**Implemented:** this maintained contract, `tools.agent_workspaces`
-create/guard, the local-Git-store `tools.agent_coordination` claim/integration
+**Implemented:** this maintained contract, `tools.dev.agent_workspaces`
+create/guard, the local-Git-store `tools.dev.agent_coordination` claim/integration
 CLI and focused isolation/concurrency tests. These are usable without MCP.
 **Implemented:** global cross-host claim and integration reservations via a
 dedicated fast-forward-only Git ref, and mandatory dual-registry integration

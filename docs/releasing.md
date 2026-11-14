@@ -334,12 +334,21 @@ and the 1.0 acceptance records.
 - [ ] If a required check fails, repair on the development branch and
   produce a new approved SHA. Re-run only affected local checks, but obtain
   exact-SHA hosted evidence for the corrected candidate before tagging.
-- [ ] Run the release-evidence collector, substituting the actual target SHA
-  and version; output belongs under ignored `reports/`:
+- [ ] Run the release-evidence collector, substituting the exact target
+  SHA, version and a fresh UTC run ID. New release evidence belongs under
+  ignored `local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/`:
 
   ```text
-  python -m tools.prepare_release_ci_evidence --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output reports/release-ci-v<version>.json --tag-message-output reports/release-tag-v<version>.txt
+  python -m tools.prepare_release_ci_evidence --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/evidence.json --tag-message-output local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/annotated-tag.txt
   ```
+
+  The collector rejects both files if either already exists or the two output
+  selections resolve to the same file. Re-running a completed check requires a
+  fresh evidence directory; never delete earlier accepted evidence merely to
+  reuse its name. Older explicit `reports/` paths remain readable and usable
+  for their historical records. If output fails midway, inspect any newly
+  created partial file before retrying; the two writes are not one atomic
+  filesystem transaction.
 
   Use `--include-cross-browser` when the optional browser matrix is selected
   for v1.1+; `--include-full-assets` when its independent bundle check is
@@ -351,7 +360,7 @@ and the 1.0 acceptance records.
 - [ ] Create and push the **annotated** tag on the verified `main` SHA:
 
   ```text
-  git tag -a v<version> <release-sha> -F reports/release-tag-v<version>.txt
+  git tag -a v<version> <release-sha> -F local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/annotated-tag.txt
   ```
 
   Verify the remote tag points to the intended SHA and preserves its
@@ -381,5 +390,5 @@ the production host must not substitute newly built data.
   release gates.
 
 Record concise release outcomes in the changelog or normal release/deployment
-records. Keep detailed operational reports under ignored `local/` or
-`reports/`, not a second tracked release checklist.
+records. Keep detailed operational reports under ignored `local/`,
+not a second tracked release checklist.

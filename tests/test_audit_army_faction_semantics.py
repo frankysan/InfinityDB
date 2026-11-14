@@ -3,16 +3,21 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import sqlite3
 import sys
 from pathlib import Path
 
+import pytest
+
 from infinity_army_data.normalize import normalize_master, validate_normalized
 from infinity_db.database import export_database, raw_database_path
-from tools import audit_army_faction_semantics as army_audit
-from tools.audit_army_faction_semantics import audit_database
+from tools.data import audit_army_faction_semantics as army_audit
+from tools.data.audit_army_faction_semantics import audit_database
 
 
-def _army_database(tmp_path: Path) -> Path:
+def _army_database(
+    tmp_path: Path, *, normalized_output: Path | None = None,
+) -> Path:
     master = {
         "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
         "armyMetadata": {
@@ -65,8 +70,67 @@ def _army_database(tmp_path: Path) -> Path:
     normalized = normalize_master(master)
     validate_normalized(normalized)
     path = tmp_path / "army.db"
-    export_database(normalized, path)
+    export_database(normalized, path, include_raw=True)
+    if normalized_output is not None:
+        normalized_output.write_text(
+            json.dumps(normalized, ensure_ascii=False), encoding="utf-8",
+        )
     return path
+
+
+def test_faction_normalized_source_matches_raw_and_works_without_archive(
+    tmp_path: Path,
+) -> None:
+    normalized = tmp_path / "normalized.json"
+    army = _army_database(tmp_path, normalized_output=normalized)
+    raw = raw_database_path(army)
+    expected = audit_database(army)
+    assert audit_database(army, normalized=normalized) == expected
+    original_army = army.read_bytes()
+    original_source = normalized.read_bytes()
+
+    raw.unlink()
+    assert audit_database(army, normalized=normalized) == expected
+    assert not raw.exists()
+    assert army.read_bytes() == original_army
+    assert normalized.read_bytes() == original_source
+
+
+def test_faction_normalized_source_rejects_drift_without_raw_fallback(
+    tmp_path: Path,
+) -> None:
+    normalized = tmp_path / "normalized.json"
+    army = _army_database(tmp_path, normalized_output=normalized)
+    document = json.loads(normalized.read_text(encoding="utf-8"))
+    document["tables"]["units"][0]["name"] = "unverified"
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match"):
+        audit_database(army, normalized=normalized)
+    assert raw_database_path(army).exists()
+
+
+def test_faction_raw_path_rejects_mismatched_generation(
+    tmp_path: Path,
+) -> None:
+    army = _army_database(tmp_path)
+    with sqlite3.connect(raw_database_path(army)) as raw:
+        raw.execute(
+            "UPDATE __infinity_metadata SET value=? WHERE key='warnings'",
+            (json.dumps("different generation"),),
+        )
+    with pytest.raises(army_audit.ArmyFactionAuditError, match="metadata differ"):
+        audit_database(army)
+
+
+def test_faction_cli_accepts_verified_normalized_without_raw(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    normalized = tmp_path / "normalized.json"
+    army = _army_database(tmp_path, normalized_output=normalized)
+    expected = audit_database(army)
+    raw_database_path(army).unlink()
+    assert army_audit.main([str(army), "--normalized", str(normalized)]) == 0
+    assert json.loads(capsys.readouterr().out) == expected
 
 
 def test_army_faction_audit_distinguishes_list_occurrence_from_game_wide_membership(

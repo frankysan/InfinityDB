@@ -7,6 +7,7 @@ equate a source-page citation with full whole-corpus browser acceptance.
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
 import pytest
@@ -17,8 +18,6 @@ from infinity_db.rules_database import RulesDatabase
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RULES = ROOT / "data/generated/rules_n5.db"
-EN = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-ES = ROOT / "data/pdf/rules/n5-rules-v5.3-es.pdf"
 SHA_EN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 SHA_ES = "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"
 
@@ -114,27 +113,33 @@ PHASE_CLAUSES = {
 }
 
 
-def test_order_and_turn_phase_source_clauses_are_pinned() -> None:
-    if not EN.is_file():
-        pytest.skip("Pinned English N5.3 source not available")
+def test_order_and_turn_phase_source_clauses_are_pinned(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pdf = pytest.importorskip("pymupdf")
-    assert hashlib.sha256(EN.read_bytes()).hexdigest() == SHA_EN
-    with pdf.open(EN) as document:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == SHA_EN
+    with pdf.open(pinned_n53_core_pdf) as document:
         for number, clauses in PHASE_CLAUSES.items():
             text = " ".join(document[number - 1].get_text().split()).casefold()
             for clause in clauses:
                 assert " ".join(clause.split()).casefold() in text, (number, clause)
 
 
-def test_lieutenant_order_count_bilingual_double_negative_is_not_hidden() -> None:
-    if not EN.is_file() or not ES.is_file():
-        pytest.skip("Pinned bilingual N5.3 sources not available")
+def test_lieutenant_order_count_bilingual_double_negative_is_not_hidden(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+) -> None:
+    sources = pinned_pdf_sources({
+        "data/pdf/rules/n5-rules-v5.3-en.pdf": SHA_EN,
+        "data/pdf/rules/n5-rules-v5.3-es.pdf": SHA_ES,
+    })
+    en = sources["data/pdf/rules/n5-rules-v5.3-en.pdf"]
+    es = sources["data/pdf/rules/n5-rules-v5.3-es.pdf"]
     pdf = pytest.importorskip("pymupdf")
-    assert hashlib.sha256(EN.read_bytes()).hexdigest() == SHA_EN
-    assert hashlib.sha256(ES.read_bytes()).hexdigest() == SHA_ES
-    with pdf.open(EN) as document:
+    assert hashlib.sha256(en.read_bytes()).hexdigest() == SHA_EN
+    assert hashlib.sha256(es.read_bytes()).hexdigest() == SHA_ES
+    with pdf.open(en) as document:
         en = " ".join(document[16].get_text().split())
-    with pdf.open(ES) as document:
+    with pdf.open(es) as document:
         es = " ".join(document[16].get_text().split())
     assert "not in a non-Null State" in en
     assert "Teniente en estado no Nulo" in es

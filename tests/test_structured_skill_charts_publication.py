@@ -20,7 +20,7 @@ from infinity_db.structured_chart_outcomes import (
     project_metachemistry_rows,
 )
 from infinity_db.web import create_app
-from tools.verify_structured_skill_charts_browser import (
+from tools.browser.verify_structured_skill_charts_browser import (
     CHARTS,
     source_charts,
     source_only_chart,

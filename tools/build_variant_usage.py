@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 from infinity_db.variant_usage import (
+    build_variant_usage_from_normalized,
     build_variant_usage_projection,
     validate_variant_usage_candidate,
 )
@@ -19,15 +21,23 @@ def main() -> None:
     destinations = parser.add_mutually_exclusive_group()
     destinations.add_argument(
         "--output", type=Path,
-        help="optional ignored local/*.json candidate; no tracked release publication",
+        help=(
+            "ignored local/candidates/variant-usage/variant-usage-*.json candidate; "
+            "legacy local/variant-usage-*.json is also accepted"
+        ),
     )
     destinations.add_argument(
         "--check", type=Path,
         help="verify an existing candidate against the exact current inputs without writing",
     )
-    parser.add_argument(
-        "--raw-db", type=Path, required=True,
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument(
+        "--raw-db", type=Path,
         help="Explicit validated, paired Army raw archive for source-only inspection",
+    )
+    source.add_argument(
+        "--normalized", type=Path,
+        help="Explicit normalized.json bound to the selected Army export generation",
     )
     parser.add_argument(
         "--army-db", type=Path, default=ROOT / "data/generated/army.db",
@@ -36,28 +46,52 @@ def main() -> None:
         "--rules-db", type=Path, default=ROOT / "data/generated/rules_n5.db",
     )
     args = parser.parse_args()
-    result = build_variant_usage_projection(
-        args.army_db, args.raw_db, args.rules_db,
+    destination: Path | None = None
+    if args.output is not None:
+        candidate = (ROOT / args.output).resolve()
+        local_root = (ROOT / "local").resolve()
+        allowed_parents = {
+            local_root,
+            local_root / "candidates" / "variant-usage",
+        }
+        if (
+            candidate.parent not in allowed_parents
+            or candidate.suffix != ".json"
+            or not candidate.name.startswith("variant-usage-")
+        ):
+            parser.error(
+                "--output must be local/candidates/variant-usage/"
+                "variant-usage-*.json (or the legacy local/ location)"
+            )
+        if (ROOT / args.output).is_symlink() or candidate.exists() or candidate.is_symlink():
+            parser.exit(1, f"Variant usage candidate already exists: {args.output}\n")
+        destination = candidate
+    result = (
+        build_variant_usage_from_normalized(
+            args.army_db, args.normalized, args.rules_db,
+        )
+        if args.normalized is not None
+        else build_variant_usage_projection(args.army_db, args.raw_db, args.rules_db)
     )
     if args.check is not None:
         validate_variant_usage_candidate(ROOT / args.check, result)
-    if args.output is not None:
-        destination = (ROOT / args.output).resolve()
-        local_root = (ROOT / "local").resolve()
-        if (
-            destination.parent != local_root
-            or destination.suffix != ".json"
-            or not destination.name.startswith("variant-usage-")
-        ):
-            parser.error("--output must be local/variant-usage-*.json")
+    if destination is not None:
         destination.parent.mkdir(parents=True, exist_ok=True)
         temporary = destination.with_suffix(".json.tmp")
-        temporary.write_text(
-            json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
-        temporary.replace(destination)
+        created = False
+        try:
+            with temporary.open("x", encoding="utf-8", newline="\n") as output:
+                created = True
+                output.write(
+                    json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+                )
+            # Preserve the staged, complete candidate without an overwriting rename.
+            os.link(temporary, destination)
+        except FileExistsError as exc:
+            parser.exit(1, f"Variant usage candidate already exists: {exc}\n")
+        finally:
+            if created:
+                temporary.unlink(missing_ok=True)
     print(json.dumps({
         "scope": result["scope"],
         "variantGroups": len(result["variants"]),

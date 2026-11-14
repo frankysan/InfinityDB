@@ -21,7 +21,7 @@ from .metadata import MetadataError, decode_metadata, load_metadata
 from .normalize import normalize_master, validate_normalized
 from .normalize import write_json as write_normalized
 
-DEFAULT_RAW_DIRECTORY = Path("data/raw")
+DEFAULT_RAW_DIRECTORY = Path("local/data/raw/army")
 
 
 def snapshot_downloaded_on(source: Path) -> str | None:
@@ -48,13 +48,31 @@ def snapshot_archive_sha256(source: Path) -> str | None:
 
 
 def latest_snapshot(directory: Path = DEFAULT_RAW_DIRECTORY) -> Path:
-    """Return the newest raw ZIP snapshot, preferring file modification time."""
-    archives = [path for path in directory.glob("*.zip") if path.is_file()]
+    """Select the latest Army acquisition timestamp, independent of copy mtimes."""
+    archives: list[tuple[datetime, int, Path]] = []
+    for path in directory.glob("*.zip"):
+        if not path.is_file():
+            continue
+        match = re.fullmatch(
+            r"JSON (\d{8})(?:-(\d{6})(?:-(\d+))?)?\.zip",
+            path.name,
+            re.IGNORECASE,
+        )
+        if match is None:
+            continue
+        try:
+            acquired = datetime.strptime(
+                match.group(1) + (match.group(2) or "000000"), "%Y%m%d%H%M%S"
+            )
+        except ValueError:
+            continue
+        archives.append((acquired, int(match.group(3) or 0), path))
     if not archives:
         raise ValueError(
-            f"No ZIP snapshots found in {directory}; provide a source path or run the downloader"
+            f"No timestamped Army ZIP snapshots found in {directory}; "
+            "provide an explicit source or transfer an acquired snapshot"
         )
-    return max(archives, key=lambda path: (path.stat().st_mtime_ns, path.name.casefold()))
+    return max(archives, key=lambda item: (item[0], item[1], item[2].name.casefold()))[2]
 
 
 def discover_metadata(
@@ -276,7 +294,9 @@ def add_data_commands(
     """Register ingestion commands for both the standalone tools and application CLI."""
     p_merge = sub.add_parser("merge", help="Merge raw Army JSON files into lossless master.json")
     p_merge.add_argument("source", type=Path, help="Source directory or ZIP archive")
-    p_merge.add_argument("output", nargs="?", type=Path, default=Path("data/generated/master.json"))
+    p_merge.add_argument(
+        "output", nargs="?", type=Path, default=Path("local/work/build/army/master.json")
+    )
     p_merge.add_argument("--compact", action="store_true", help="Minify JSON output")
     p_merge.add_argument(
         "--no-verify", action="store_true", help="Skip lossless reconstruction verification"
@@ -291,7 +311,7 @@ def add_data_commands(
     p_norm = sub.add_parser("normalize", help="Normalize master.json into relational-style tables")
     p_norm.add_argument("input", type=Path, help="master.json input")
     p_norm.add_argument(
-        "output", nargs="?", type=Path, default=Path("data/generated/normalized.json")
+        "output", nargs="?", type=Path, default=Path("local/work/build/army/normalized.json")
     )
     p_norm.add_argument("--report", type=Path, default=None, help="Validation report output path")
     p_norm.add_argument("--compact", action="store_true", help="Minify normalized JSON")
@@ -303,15 +323,22 @@ def add_data_commands(
         nargs="?",
         type=Path,
         default=None,
-        help="Source directory or ZIP archive (default: newest ZIP in data/raw)",
+        help="Source directory or ZIP (default: latest timestamp in local/data/raw/army)",
     )
     if database_set_build:
         p_build.add_argument(
             "--db-dir", type=Path, default=Path("data/generated"),
             help="Build the complete runtime set from a local Army ZIP (default: data/generated)",
         )
+        p_build.add_argument(
+            "--snapshot-manifest", type=Path,
+            help=(
+                "Require an explicitly selected Army ZIP and matching version-3 "
+                "snapshot provenance; never search other source roots"
+            ),
+        )
     else:
-        p_build.add_argument("--output-dir", type=Path, default=Path("data/work/build"))
+        p_build.add_argument("--output-dir", type=Path, default=Path("local/work/build/army"))
     p_build.add_argument("--compact", action="store_true", help="Minify generated data files")
     p_build.add_argument(
         "--no-verify", action="store_true", help="Skip lossless reconstruction verification"

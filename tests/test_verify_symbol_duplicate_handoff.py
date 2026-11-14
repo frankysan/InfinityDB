@@ -10,7 +10,7 @@ import pytest
 from test_verify_effective_symbol_handoff import _fixtures
 
 from infinity_db.snapshot_provenance import sha256_file
-from tools.verify_symbol_duplicate_handoff import (
+from tools.symbols.verify_symbol_duplicate_handoff import (
     DuplicateHandoffError,
     verify_duplicate_symbol_handoff,
 )

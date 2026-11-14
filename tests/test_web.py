@@ -38,7 +38,7 @@ from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web import create_app, create_app_from_database_set
 from infinity_db.web.presentation import static_asset_revision
-from tools.verify_general_rules_browser import source_rules
+from tools.browser.verify_general_rules_browser import source_rules
 
 STATIC_ASSET_REVISION = static_asset_revision(SymbolCatalog())
 STATIC_ASSET_VERSION = f"{__version__}-{STATIC_ASSET_REVISION}"
@@ -6244,14 +6244,14 @@ def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
     ):
         assert fragment in base, fragment
 
-def test_visibility_zone_five_term_explanations_match_pinned_n5_3_source() -> None:
+def test_visibility_zone_five_term_explanations_match_pinned_n5_3_source(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned English N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     review = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text(
             encoding="utf-8"

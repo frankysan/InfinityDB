@@ -22,10 +22,20 @@ from infinity_db.web import create_app
 ENGINE = os.environ.get("INFINITYDB_CROSS_BROWSER_ENGINE", "")
 ENGINES = ("chromium", "firefox", "webkit", "msedge")
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACTS = ROOT / "local/cross-browser-compatibility"
+REPORT_DIR = os.environ.get("INFINITYDB_CROSS_BROWSER_ARTIFACT_DIR", "")
+ARTIFACTS = (ROOT / REPORT_DIR).resolve() if REPORT_DIR else ROOT / "local/validation"
 
 if ENGINE and ENGINE not in ENGINES:
     raise ValueError(f"Unsupported cross-browser engine: {ENGINE!r}")
+if ENGINE and (
+    not REPORT_DIR
+    or not ARTIFACTS.is_relative_to(ROOT / "local/validation")
+    or not ARTIFACTS.is_dir()
+):
+    raise ValueError(
+        "Selected cross-browser test requires a fresh local/validation/ artifact "
+        "directory; run it through tools.run_cross_browser_compatibility"
+    )
 
 pytestmark = pytest.mark.skipif(
     not ENGINE, reason="Cross-browser pilot requires an explicitly selected engine"

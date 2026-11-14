@@ -18,8 +18,8 @@ import pytest
 
 from infinity_db.weapon_properties import WeaponProperties
 from infinity_db.web import create_app
-from tools.browser_test_metrics import launch_timed_chromium
 from tools.browser_wsgi_transport import route_browser_page
+from tools.testing.browser_test_metrics import launch_timed_chromium
 
 
 class _ThreadedServer(ThreadingMixIn, WSGIServer):

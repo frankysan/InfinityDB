@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_weapon_chart_profiles import WeaponChartAuditError
-from tools.audit_wiki_weapon_chart_names import (
+from tools.research.audit_weapon_chart_profiles import WeaponChartAuditError
+from tools.research.audit_wiki_weapon_chart_names import (
     audit,
     markdown_report,
     reconcile,
@@ -94,7 +94,7 @@ def test_reconcile_aliases_and_different_alternative_table_values() -> None:
 
 def test_pinned_english_wiki_identity_inventory_if_sources_available() -> None:
     root = Path(__file__).resolve().parents[1]
-    wiki = root / "data/wiki/WIKI-en 20260926-200832.zip"
+    wiki = root / "local/data/wiki/WIKI-en 20260926-200832.zip"
     army = root / "data/generated/army.db"
     curated = root / "data/curated/rules/n5-core-v5.3.json"
     if not all(path.exists() for path in (wiki, army, curated)):

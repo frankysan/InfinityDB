@@ -36,6 +36,15 @@ not required.
 
 ## Tooling and validation
 
+For **new** ignored project artifacts and maintained tool modules, follow
+the accepted prospective [workspace conventions](docs/architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
+and [artifact policy](data/README.md#accepted-ignored-artifact-policy-prospective).
+Existing commands, ignored sources and root tools remain in their current
+locations until a reviewed cutover. The [cleanup plan](docs/tooling-and-local-path-cleanup-plan.md)
+separates prospective policy from tracked retirements and private-data
+migration; do not interpret path-policy acceptance as permission to move
+or delete existing files.
+
 Use the project's virtual environment (normally
 `.venv\\Scripts\\python.exe` on Windows or `.venv/bin/python` on
 Linux/macOS), not system Python. The [testing guide](docs/testing.md)

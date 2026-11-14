@@ -9,7 +9,7 @@ from urllib.request import urlopen
 
 import pytest
 
-from tools.verify_rule_fragment_browser import (
+from tools.browser.verify_rule_fragment_browser import (
     _assert_hosted,
     _check_fresh_deep_link,
     _direct_fragment,
@@ -30,7 +30,7 @@ def test_self_host_serves_the_tracked_candidate_on_an_ephemeral_port() -> None:
                 assert response.status == 200
         return {"total": 1, "passed": 1}
 
-    with patch("tools.verify_rule_fragment_browser.verify", side_effect=probe):
+    with patch("tools.browser.verify_rule_fragment_browser.verify", side_effect=probe):
         assert verify_local() == {"total": 1, "passed": 1}
 
 
@@ -184,9 +184,9 @@ def test_direct_link_uses_fresh_page_and_closes_it() -> None:
     url = "http://localhost/weapons/para-mine#rule-weapon-mines"
 
     with (
-        patch("tools.verify_rule_fragment_browser._ready") as ready,
-        patch("tools.verify_rule_fragment_browser._assert_target") as target,
-        patch("tools.verify_rule_fragment_browser._check_errors") as errors_check,
+        patch("tools.browser.verify_rule_fragment_browser._ready") as ready,
+        patch("tools.browser.verify_rule_fragment_browser._assert_target") as target,
+        patch("tools.browser.verify_rule_fragment_browser._check_errors") as errors_check,
     ):
         _check_fresh_deep_link(
             context, url, "#rule-weapon-mines", errors, network_errors
@@ -205,7 +205,7 @@ def test_direct_link_closes_fresh_page_on_render_failure() -> None:
     fresh_page = context.new_page.return_value
     fresh_page.goto.return_value.status = 200
     with patch(
-        "tools.verify_rule_fragment_browser._ready",
+        "tools.browser.verify_rule_fragment_browser._ready",
         side_effect=AssertionError("Detail did not render"),
     ):
         with pytest.raises(AssertionError, match="Detail did not render"):

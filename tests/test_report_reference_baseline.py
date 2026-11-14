@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 import subprocess
+import sys
 import zipfile
+from collections.abc import Callable, Mapping
+from contextlib import closing
 from io import BytesIO
 from pathlib import Path
 from typing import Any
@@ -12,9 +16,13 @@ from unittest.mock import patch
 
 import pytest
 
+from infinity_army_data.cli import main as army_data_main
 from infinity_army_data.merge import load_sources
 from infinity_db.curated import load_curated_document
+from infinity_db.database import export_database, raw_database_path
 from infinity_db.snapshot_revision import database_set_snapshot_revision
+from infinity_db.variant_usage_source import normalized_source_connection
+from tools import report_reference_baseline as baseline_cli
 from tools.report_reference_baseline import (
     _NESTED_SOURCE_FIELDS,
     CURRENT_CITATION_COLLECTIONS,
@@ -49,6 +57,7 @@ from tools.report_reference_baseline import (
     verify_declaration_review,
     verify_served_revision,
 )
+from tools.research.source_paths import pinned_pdf_path
 
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_DB = ROOT / "data/generated/army.db"
@@ -503,7 +512,16 @@ def test_reviewed_explanation_join_cli_is_deterministic_and_non_approving(
     ]
     assert main(args) == 0
     first = output.read_bytes()
-    assert main(args) == 0 and output.read_bytes() == first
+    first_markdown = markdown.read_bytes()
+    fresh = [
+        *args[:-4],
+        "--json-output", str(tmp_path / "joined-second.json"),
+        "--markdown-output", str(tmp_path / "joined-second.md"),
+    ]
+    assert main(fresh) == 0
+    assert (tmp_path / "joined-second.json").read_bytes() == first
+    assert (tmp_path / "joined-second.md").read_bytes() == first_markdown
+    assert output.read_bytes() == first
     saved = json.loads(first)
     joined = saved["reviewedEvidenceJoin"]
     assert len(joined["historicalRecords"]) == 367
@@ -562,11 +580,11 @@ def test_post_inventory_equipment_distinguishes_source_variants_from_public_fire
                for item in added_equipment)
 
 
-def test_post_inventory_ecm_and_firewall_clauses_match_pinned_n5_3_pdf() -> None:
+def test_post_inventory_ecm_and_firewall_clauses_match_pinned_n5_3_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     """Selected source clauses only, not full Equipment review or gameplay resolution."""
-    pdf = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not pdf.is_file():
-        pytest.skip("Pinned N5.3 English PDF unavailable")
+    pdf = pinned_n53_core_pdf
     pymupdf = pytest.importorskip("pymupdf")
     pins = json.loads((
         ROOT / "config/validation/restrictions-source-chart.json"
@@ -592,7 +610,9 @@ def test_post_inventory_ecm_and_firewall_clauses_match_pinned_n5_3_pdf() -> None
                 assert " ".join(phrase.split()).casefold() in source, (page, phrase)
 
 
-def test_declaration_migration_review_matches_historical_owners_and_current_pdf() -> None:
+def test_declaration_migration_review_matches_historical_owners_and_current_pdf(
+    reference_pdf_layout: str,
+) -> None:
     report = reconcile_explanation_inventory()
     try:
         crosswalk = reconcile_declaration_owners(report)
@@ -602,19 +622,23 @@ def test_declaration_migration_review_matches_historical_owners_and_current_pdf(
         raise
     assert crosswalk["retiredCount"] == 17
     assert crosswalk["addedCount"] == 20
-    source = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if source.is_file():
-        pytest.importorskip("pymupdf")
-    verified = verify_declaration_review(
-        crosswalk, pdf_path=source if source.is_file() else None,
+    pins = json.loads((
+        ROOT / "config/validation/restrictions-source-chart.json"
+    ).read_text(encoding="utf-8"))
+    source = pinned_pdf_path(
+        ROOT, "data/pdf/rules/n5-rules-v5.3-en.pdf",
+        pins["sourcePdfSha256"], layout=reference_pdf_layout, missing_ok=True,
     )
+    if source is not None:
+        pytest.importorskip("pymupdf")
+    verified = verify_declaration_review(crosswalk, pdf_path=source)
     assert verified["retiredReviewed"] == 17
     assert verified["newHeadingsReviewed"] == 20
     assert verified["kindCorrections"] == 3
     assert verified["multiOwnerSplits"] == 1
     assert verified["retiredCategoryAliasesCreated"] == 0
     assert verified["fullRecordApprovalsIssued"] == 0
-    if source.is_file():
+    if source is not None:
         assert verified["status"] == "pinned-n5.3-pdf-headings-verified"
 
 
@@ -705,15 +729,98 @@ def test_five_visibility_zone_terms_are_reviewed_post_inventory_additions() -> N
                for row in evidence["records"])
 
 
-def test_five_visibility_zone_terms_match_bilingual_pinned_pdfs() -> None:
-    for relative in (
-        "data/pdf/rules/n5-rules-v5.3-en.pdf",
-        "data/pdf/rules/n5-rules-v5.3-es.pdf",
-    ):
-        if not (ROOT / relative).is_file():
-            pytest.skip(f"Pinned source unavailable: {relative}")
+def test_visibility_pdf_layouts_keep_evidence_and_source_identity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    pymupdf = pytest.importorskip("pymupdf")
+    manifest = json.loads((
+        ROOT / "config/validation/visibility-zone-terms-v1.json"
+    ).read_text(encoding="utf-8"))
+    selections: list[tuple[str, str]] = []
+
+    def selected(root: Path, label: str, digest: str, *, layout: str) -> Path:
+        assert root == ROOT
+        assert manifest["sourcePins"][label] == digest
+        selections.append((label, layout))
+        prefix = "data/pdf" if layout == "legacy" else "local/data/pdf"
+        return root / prefix / label.removeprefix("data/pdf/")
+
+    class PdfPage:
+        def __init__(self, path: Path):
+            language = "english" if path.name.endswith("-en.pdf") else "spanish"
+            self.text = " ".join(
+                entry[f"{language}Clause"] for entry in manifest["entries"]
+            )
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args: object) -> None:
+            return None
+
+        def __getitem__(self, index: int):
+            assert index in (143, 147)
+            return self
+
+        def get_text(self) -> str:
+            return self.text
+
+    monkeypatch.setattr(baseline_cli, "pinned_pdf_path", selected)
+    monkeypatch.setattr(pymupdf, "open", PdfPage)
+    legacy = audit_visibility_zone_evidence(verify_pdfs=True)
+    local = audit_visibility_zone_evidence(verify_pdfs=True, source_layout="local")
+    assert legacy == local
+    assert local["verifiedPdfLanguages"] == ["english", "spanish"]
+    assert selections == [
+        (label, layout) for layout in ("legacy", "local")
+        for label in manifest["sourcePins"]
+    ]
+
+
+def test_visibility_pdf_binding_rejects_mismatch_before_open(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    pymupdf = pytest.importorskip("pymupdf")
+
+    def reject(*_args: object, **_kwargs: object) -> Path:
+        raise baseline_cli.SourcePathError("Source hash mismatch")
+
+    monkeypatch.setattr(baseline_cli, "pinned_pdf_path", reject)
+    with patch.object(pymupdf, "open", side_effect=AssertionError("PDF opened before hash check")):
+        with pytest.raises(ReferenceBaselineError, match="Source hash mismatch"):
+            audit_visibility_zone_evidence(verify_pdfs=True, source_layout="local")
+
+
+def test_visibility_pdf_layout_cli_flag_is_forwarded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    selected: list[tuple[bool, str]] = []
+
+    def audit(*, verify_pdfs: bool = False, source_layout: str = "legacy") -> dict:
+        selected.append((verify_pdfs, source_layout))
+        return audit_visibility_zone_evidence()
+
+    monkeypatch.setattr(baseline_cli, "audit_visibility_zone_evidence", audit)
+    assert main([
+        "--reconcile-explanation-inventory", "--audit-visibility-zones",
+        "--verify-visibility-pdfs", "--source-layout", "local",
+        "--json-output", str(tmp_path / "visibility.json"),
+    ]) == 0
+    assert selected == [(True, "local")]
+
+
+def test_five_visibility_zone_terms_match_bilingual_pinned_pdfs(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+    reference_pdf_layout: str,
+) -> None:
+    manifest = json.loads((
+        ROOT / "config/validation/visibility-zone-terms-v1.json"
+    ).read_text(encoding="utf-8"))
+    pinned_pdf_sources(manifest["sourcePins"])
     pytest.importorskip("pymupdf")
-    evidence = audit_visibility_zone_evidence(verify_pdfs=True)
+    evidence = audit_visibility_zone_evidence(
+        verify_pdfs=True, source_layout=reference_pdf_layout,
+    )
     assert evidence["verifiedPdfLanguages"] == ["english", "spanish"]
     assert evidence["reviewedTermCount"] == 5
 
@@ -800,12 +907,11 @@ def test_conditional_declaration_crosswalk_validates_selected_source_evidence() 
                for row in result["cases"])
 
 
-def test_conditional_declaration_crosswalk_checks_pinned_pdf_when_present() -> None:
-    source = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.is_file():
-        pytest.skip("Pinned N5.3 source PDF is unavailable")
+def test_conditional_declaration_crosswalk_checks_pinned_pdf_when_present(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pytest.importorskip("pymupdf")
-    result = audit_conditional_declaration_evidence(pdf_path=source)
+    result = audit_conditional_declaration_evidence(pdf_path=pinned_n53_core_pdf)
     assert result["status"] == "pinned-source-clause-and-curated-evidence-verified"
     assert result["selectedCaseCount"] == 10
 
@@ -870,7 +976,7 @@ def test_conditional_declaration_crosswalk_cli_does_not_approve_whole_corpus(
 
 
 def test_numeric_army_source_skill_replacements_do_not_modify_base_profiles() -> None:
-    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    archive = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
     if not archive.is_file():
         pytest.skip("Pinned private Army source ZIP unavailable")
     report = audit_numeric_army_replacement_variants(archive)
@@ -906,7 +1012,7 @@ def test_numeric_army_source_skill_replacements_do_not_modify_base_profiles() ->
 def test_numeric_army_variants_reject_unverified_source_and_curated_drift(
     tmp_path: Path,
 ) -> None:
-    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    archive = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
     if not archive.is_file():
         pytest.skip("Pinned private Army source ZIP unavailable")
     curated = ROOT / "data/curated/rules/n5-core-v5.3.json"
@@ -927,7 +1033,7 @@ def test_numeric_army_variants_reject_unverified_source_and_curated_drift(
 def test_numeric_army_replacement_cli_preserves_full_record_gate(
     tmp_path: Path,
 ) -> None:
-    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    archive = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
     if not archive.is_file():
         pytest.skip("Pinned private Army source ZIP unavailable")
     json_output = tmp_path / "numeric.json"
@@ -1000,6 +1106,160 @@ def test_explanation_reconciliation_cli_writes_ignored_style_reports(
     assert "not a v1.0 release gate pass" in markdown
     assert "declaration-category:aro:p40" in markdown
     assert "rule:game-modes" in markdown
+
+
+@pytest.mark.parametrize("occupied", ("json", "markdown"))
+def test_report_cli_refuses_existing_output_before_audit(
+    tmp_path: Path, occupied: str, capsys: pytest.CaptureFixture[str],
+) -> None:
+    json_output, md_output = tmp_path / "baseline.json", tmp_path / "baseline.md"
+    selected = json_output if occupied == "json" else md_output
+    original = b"accepted previous report\n"
+    selected.write_bytes(original)
+    with patch(
+        "tools.report_reference_baseline.build_baseline",
+        side_effect=AssertionError("A collision must block work before the audit"),
+    ) as build:
+        with pytest.raises(SystemExit) as exit_info:
+            main([
+                "--json-output", str(json_output),
+                "--markdown-output", str(md_output),
+            ])
+    assert exit_info.value.code == 1
+    assert "already exists" in capsys.readouterr().err
+    build.assert_not_called()
+    assert selected.read_bytes() == original
+    other = md_output if occupied == "json" else json_output
+    assert not other.exists()
+
+
+def test_report_cli_refuses_duplicate_normalized_destinations(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "baseline.json"
+    with patch(
+        "tools.report_reference_baseline.build_baseline",
+        side_effect=AssertionError("Repeated destination must fail before audit"),
+    ) as build:
+        with pytest.raises(SystemExit) as exit_info:
+            main([
+                "--json-output", str(output),
+                "--markdown-output", str(tmp_path / "nested" / ".." / "baseline.json"),
+            ])
+    assert exit_info.value.code == 1
+    assert "different files" in capsys.readouterr().err
+    build.assert_not_called()
+    assert not output.exists()
+
+
+def test_report_cli_refuses_dangling_symlink_before_audit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output = tmp_path / "baseline.json"
+    # Windows may require privileges for filesystem symlink creation.
+    monkeypatch.setattr(type(output), "is_symlink", lambda path: path == output)
+    with patch(
+        "tools.report_reference_baseline.build_baseline",
+        side_effect=AssertionError("Symlink must block work"),
+    ) as build:
+        with pytest.raises(SystemExit) as exit_info:
+            main(["--json-output", str(output)])
+    assert exit_info.value.code == 1
+    build.assert_not_called()
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("option", ("--review-batches-output", "--review-pilot-output"))
+def test_report_cli_refuses_existing_review_evidence_before_reconciliation(
+    tmp_path: Path, option: str,
+) -> None:
+    output = tmp_path / "local" / "validation" / "previous.json"
+    output.parent.mkdir(parents=True)
+    original = b"review evidence to preserve\n"
+    output.write_bytes(original)
+    with patch(
+        "tools.report_reference_baseline.reconcile_explanation_inventory",
+        side_effect=AssertionError("Review output collision must block work"),
+    ) as reconcile:
+        with pytest.raises(SystemExit) as exit_info:
+            main(["--reconcile-explanation-inventory", option, str(output)])
+    assert exit_info.value.code == 1
+    reconcile.assert_not_called()
+    assert output.read_bytes() == original
+
+
+def test_citation_minimum_cli_refuses_existing_json_before_audit(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "minimum.json"
+    output.write_bytes(b"previous citation audit\n")
+    with patch(
+        "tools.report_reference_baseline.audit_current_rule_citation_minimum",
+        side_effect=AssertionError("Existing receipt must block work"),
+    ) as audit:
+        with pytest.raises(SystemExit) as exit_info:
+            main(["--audit-current-citation-minimum", "--json-output", str(output)])
+    assert exit_info.value.code == 1
+    audit.assert_not_called()
+    assert output.read_bytes() == b"previous citation audit\n"
+
+
+def test_report_cli_refuses_output_appearing_during_audit(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "baseline.json"
+    original = b"another process published its report\n"
+
+    def build(*args: object, **kwargs: object) -> dict[str, Any]:
+        output.write_bytes(original)
+        return {"inventory": [], "sourceGroups": []}
+
+    with (
+        patch("tools.report_reference_baseline.build_baseline", side_effect=build),
+        patch("tools.report_reference_baseline.render_markdown", return_value="# report\n"),
+    ):
+        with pytest.raises(SystemExit) as exit_info:
+            main(["--json-output", str(output)])
+    assert exit_info.value.code == 1
+    captured = capsys.readouterr()
+    assert "already exists" in captured.err
+    assert "category rows" not in captured.out
+    assert output.read_bytes() == original
+
+
+def test_report_writer_preserves_utf8_lf_and_uses_exclusive_creation(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "nested" / "baseline.md"
+    text = "ÅÄÖ\nsource line\n"
+    baseline_cli._write_new_report(output, text)
+    original = text.encode("utf-8")
+    assert output.read_bytes() == original
+    with pytest.raises(FileExistsError, match="already exists"):
+        baseline_cli._write_new_report(output, "replacement")
+    assert output.read_bytes() == original
+
+
+def test_report_cli_preserves_json_markdown_format_and_stdout_only(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    json_output = tmp_path / "baseline.json"
+    md_output = tmp_path / "baseline.md"
+    report = {"inventory": [{"id": "example"}], "sourceGroups": [{"id": "source"}]}
+    with (
+        patch("tools.report_reference_baseline.build_baseline", return_value=report),
+        patch("tools.report_reference_baseline.render_markdown", return_value="# Report\n"),
+    ):
+        assert main([
+            "--json-output", str(json_output),
+            "--markdown-output", str(md_output),
+        ]) == 0
+        assert main([]) == 0
+    assert json_output.read_bytes() == (
+        json.dumps(report, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+    assert md_output.read_bytes() == b"# Report\n"
+    assert capsys.readouterr().out.count("category rows") == 2
 
 
 def test_baseline_reports_pinned_publication_without_claiming_completeness() -> None:
@@ -1137,6 +1397,50 @@ def test_local_source_hash_evidence_and_unpinned_pdf(tmp_path: Path) -> None:
     assert conflict["verificationStatus"] == "conflicting-source-hashes"
 
 
+def test_explicit_local_pdf_layout_keeps_source_labels_and_verifies_hash(tmp_path: Path) -> None:
+    label = "data/pdf/rules/pinned.pdf"
+    original = b"unchanged reviewed source"
+    digest = hashlib.sha256(original).hexdigest()
+    legacy = tmp_path / label
+    legacy.parent.mkdir(parents=True)
+    legacy.write_bytes(original)
+    # The local layout must not discover or accept the legacy copy.
+    missing = _artifact_evidence(
+        tmp_path, label, None, {digest}, source_layout="local",
+    )
+    assert missing["localStatus"] == "missing-local-artifact"
+    assert missing["artifactSha256"] is None
+    assert _artifact_evidence(tmp_path, label, None, {digest})[
+        "verificationStatus"
+    ] == "hash-matched"
+
+    local = tmp_path / "local/data/pdf/rules/pinned.pdf"
+    local.parent.mkdir(parents=True)
+    local.write_bytes(original)
+    selected = _artifact_evidence(tmp_path, label, None, {digest}, source_layout="local")
+    assert selected["localStatus"] == "available"
+    assert selected["verificationStatus"] == "hash-matched"
+    assert selected["artifactSha256"] == digest
+    assert selected["declaredHashMatches"] is True
+
+    local.write_bytes(b"tampered source")
+    with pytest.raises(ReferenceBaselineError, match="Source hash mismatch"):
+        _artifact_evidence(tmp_path, label, None, {digest}, source_layout="local")
+    with pytest.raises(ReferenceBaselineError, match="one declared SHA-256"):
+        _artifact_evidence(tmp_path, label, None, {digest, "0" * 64}, source_layout="local")
+    with pytest.raises(ReferenceBaselineError, match="one declared SHA-256"):
+        _artifact_evidence(tmp_path, label, None, set(), source_layout="local")
+
+
+def test_local_baseline_layout_is_opt_in_and_retains_source_inventory(tmp_path: Path) -> None:
+    legacy = build_baseline(ARMY_DB, RULES_DB, root=tmp_path)
+    local = build_baseline(ARMY_DB, RULES_DB, root=tmp_path, source_layout="local")
+    assert local["sourceInventory"] == legacy["sourceInventory"]
+    assert local["sourceGroups"] == legacy["sourceGroups"]
+    with pytest.raises(ReferenceBaselineError, match="Unknown source layout"):
+        build_baseline(ARMY_DB, RULES_DB, root=tmp_path, source_layout="unknown")
+
+
 def test_url_pin_is_not_offline_content_verification(tmp_path: Path) -> None:
     exact = "https://infinitythewiki.com/index.php?title=Reset&oldid=3056"
     assert _revision_oldid(exact) == "3056"
@@ -1148,6 +1452,129 @@ def test_url_pin_is_not_offline_content_verification(tmp_path: Path) -> None:
     assert pinned["declaredHashMatches"] is None
     assert _artifact_evidence(tmp_path, None, "https://example.org", set())[
         "verificationStatus"] == "url-without-revision-pin"
+
+
+def _verified_smoke_army_export(tmp_path: Path) -> tuple[Path, Path, Path]:
+    """Build a real, tiny ZIP-pinned export for source-archive parity acceptance."""
+    fixture = ROOT / "tests/fixtures/deployment-smoke"
+    archive = tmp_path / "JSON 20261112-000000.zip"
+    with zipfile.ZipFile(archive, "w") as destination:
+        for source in sorted(fixture.glob("*.json")):
+            destination.write(source, arcname=source.name)
+    generated = tmp_path / "generated"
+    assert army_data_main([
+        "build", str(archive), "--output-dir", str(generated), "--compact",
+    ]) == 0
+    normalized = generated / "normalized.json"
+    published = generated / "army.db"
+    export_database(json.loads(normalized.read_text(encoding="utf-8")),
+                    published, finalize=False, include_raw=True)
+    return archive, published, normalized
+
+
+def test_normalized_archive_source_parity_without_raw_sibling(tmp_path: Path) -> None:
+    archive, published, normalized = _verified_smoke_army_export(tmp_path)
+    from tools.report_reference_baseline import _metadata
+
+    with closing(sqlite3.connect(published)) as army, closing(sqlite3.connect(
+        raw_database_path(published)
+    )) as raw:
+        army.row_factory = sqlite3.Row
+        evidence_meta = _metadata(army, "__infinity_metadata")["_meta"]
+        raw_evidence = _verify_army_archive_sources(
+            archive, evidence_meta, army, raw,
+        )
+        with normalized_source_connection(published, normalized) as (source, _generation):
+            json_evidence = _verify_army_archive_sources(
+                archive, evidence_meta, army, source,
+                source_storage="verified-normalized.json",
+            )
+        expected = dict(raw_evidence)
+        expected["nestedStorage"] = {
+            **raw_evidence["nestedStorage"],
+            "profiles": "verified-normalized.json",
+            "loadout_options": "verified-normalized.json",
+        }
+        assert json_evidence == expected
+    raw_database_path(published).unlink()
+    with closing(sqlite3.connect(published)) as army:
+        with normalized_source_connection(published, normalized) as (source, _generation):
+            assert _verify_army_archive_sources(
+                archive, evidence_meta, army, source,
+                source_storage="verified-normalized.json",
+            ) == json_evidence
+
+
+def test_archive_baseline_with_verified_normalized_source_and_no_raw(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive, published, normalized = _verified_smoke_army_export(tmp_path)
+    # This tiny fixture uses the tracked full Rules DB, whose reviewed Weapon
+    # citations are deliberately bound to a different, released Army generation.
+    monkeypatch.setattr(
+        "tools.report_reference_baseline.load_runtime_weapon_profile_publication",
+        lambda *_: (None, None),
+    )
+    with pytest.raises(ReferenceBaselineError, match="requires --army-archive"):
+        build_baseline(published, RULES_DB, normalized=normalized)
+    raw_database_path(published).unlink()
+    report = build_baseline(
+        published, RULES_DB, army_archive=archive, normalized=normalized,
+    )
+    assert report["armySnapshot"]["archiveVerification"] == (
+        "hash-verified-source-identities"
+    )
+    evidence = report["armySnapshot"]["sourceIdentityEvidence"]
+    assert evidence["matchedArmyListIds"] == 2
+    assert evidence["nestedStorage"]["profiles"] == "verified-normalized.json"
+    assert "verified normalized.json" in render_markdown(report)
+    output = tmp_path / "baseline.json"
+    assert main([
+        "--army-db", str(published), "--rules-db", str(RULES_DB),
+        "--army-archive", str(archive), "--normalized", str(normalized),
+        "--json-output", str(output),
+    ]) == 0
+    saved = json.loads(output.read_text(encoding="utf-8"))
+    assert saved["armySnapshot"]["sourceIdentityEvidence"]["nestedStorage"] == (
+        evidence["nestedStorage"]
+    )
+    assert not raw_database_path(published).exists()
+
+
+def test_baseline_refuses_unverified_normalized_source_without_raw_fallback(
+    tmp_path: Path,
+) -> None:
+    archive, published, normalized = _verified_smoke_army_export(tmp_path)
+    # Keep the valid legacy raw sibling present to demonstrate that an
+    # explicitly selected but changed normalized source never falls back.
+    document = json.loads(normalized.read_text(encoding="utf-8"))
+    document["tables"]["units"][0]["name"] = "unverified change"
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ReferenceBaselineError, match="Verified normalized Army source"):
+        build_baseline(
+            published, RULES_DB, army_archive=archive, normalized=normalized,
+        )
+    assert raw_database_path(published).exists()
+
+
+def test_baseline_cli_refuses_normalized_without_pinned_archive(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit) as exc:
+        main(["--normalized", str(tmp_path / "normalized.json")])
+    assert exc.value.code == 2
+    assert "--normalized requires --army-archive" in capsys.readouterr().err
+
+
+def test_normalized_archive_source_rejects_provenance_drift(tmp_path: Path) -> None:
+    archive, published, normalized = _verified_smoke_army_export(tmp_path)
+    raw_database_path(published).unlink()
+    document = json.loads(normalized.read_text(encoding="utf-8"))
+    document["tables"]["units"][0]["name"] = "unsourced revision"
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match"):
+        with normalized_source_connection(published, normalized):
+            pytest.fail("Tampered normalized source was accepted")
 
 
 def _synthetic_army_archive(tmp_path: Path) -> Path:
@@ -1702,7 +2129,7 @@ def _require_release_matched_raw_army() -> None:
 
 
 def test_pinned_army_archive_nested_publication_when_available() -> None:
-    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    archive = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
     if not archive.is_file():
         pytest.skip("Optional pinned Army source archive is not available")
     _require_release_matched_raw_army()
@@ -1809,6 +2236,23 @@ class _VersionResponse(BytesIO):
     status = 200
 
 
+@pytest.mark.parametrize(
+    "command",
+    (
+        (str(Path("tools") / "report_reference_baseline.py"),),
+        ("-m", "tools.report_reference_baseline"),
+    ),
+)
+def test_baseline_cli_runs_with_no_pythonpath(command: tuple[str, ...]) -> None:
+    environment = os.environ.copy()
+    environment.pop("PYTHONPATH", None)
+    result = subprocess.run(
+        [sys.executable, *command, "--help"], cwd=ROOT, env=environment,
+        capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+
 def test_served_revision_matches_exact_inventoried_database_pair() -> None:
     from infinity_db.web import create_app
 
@@ -1822,7 +2266,7 @@ def test_served_revision_matches_exact_inventoried_database_pair() -> None:
         "static_revision": "abc",
     }
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(json.dumps(payload).encode()),
     ) as opened:
         observed = verify_served_revision(report, "http://127.0.0.1:8000")
@@ -1837,7 +2281,7 @@ def test_served_revision_rejects_stale_and_invalid_runtime() -> None:
     report = {"runtimeSnapshotRevision": "a" * 64}
     stale = {"snapshot_revision": "b" * 64}
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(json.dumps(stale).encode()),
     ):
         with pytest.raises(ReferenceBaselineError, match="does not match"):
@@ -1851,7 +2295,7 @@ def test_served_revision_rejects_stale_and_invalid_runtime() -> None:
         with pytest.raises(ReferenceBaselineError, match="Server base URL"):
             verify_served_revision(report, base)
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(b"[]"),
     ):
         with pytest.raises(ReferenceBaselineError, match="did not return an object"):
@@ -1864,7 +2308,7 @@ def test_baseline_cli_rejects_stale_server_before_writing_outputs(
     path = tmp_path / "baseline.json"
     payload = {"snapshot_revision": "0" * 64}
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(json.dumps(payload).encode()),
     ):
         assert main([
@@ -1884,7 +2328,7 @@ def test_baseline_cli_records_served_pair_in_json_and_markdown(tmp_path: Path) -
     json_path = tmp_path / "baseline.json"
     markdown_path = tmp_path / "baseline.md"
     with patch(
-        "tools.report_reference_baseline.urlopen",
+        "tools.served_runtime.urlopen",
         return_value=_VersionResponse(json.dumps(payload).encode()),
     ):
         assert main([
@@ -1910,8 +2354,8 @@ def test_pinned_army_derived_relationships_have_live_published_targets() -> None
     Existence checks do not prove player-facing rendering or correct game rules.
     """
     from infinity_db.database.peripheral_relationships import validate_peripheral_relationships
-    from tools.audit_fireteam_semantics import audit_database as audit_fireteams
-    from tools.audit_unit_semantics import audit_database as audit_units
+    from tools.data.audit_fireteam_semantics import audit_database as audit_fireteams
+    from tools.data.audit_unit_semantics import audit_database as audit_units
 
     baseline = build_baseline(ARMY_DB, RULES_DB)
     fireteams = audit_fireteams(ARMY_DB)
@@ -1979,7 +2423,7 @@ def test_pinned_army_derived_relationships_have_live_published_targets() -> None
 
 def test_pinned_army_derived_relationships_match_raw_source_when_available() -> None:
     """Source derivation requires the ignored, release-matched raw sibling."""
-    from tools.audit_army_faction_semantics import audit_database as audit_factions
+    from tools.data.audit_army_faction_semantics import audit_database as audit_factions
 
     _require_release_matched_raw_army()
     faction = audit_factions(ARMY_DB)
@@ -2015,7 +2459,15 @@ def test_baseline_cli_writes_stable_local_reports(tmp_path: Path) -> None:
     ]
     assert main(args) == 0
     first = json_output.read_bytes()
-    assert main(args) == 0
+    first_markdown = markdown_output.read_bytes()
+    next_args = [
+        *args[:-4],
+        "--json-output", str(tmp_path / "baseline-second.json"),
+        "--markdown-output", str(tmp_path / "baseline-second.md"),
+    ]
+    assert main(next_args) == 0
+    assert (tmp_path / "baseline-second.json").read_bytes() == first
+    assert (tmp_path / "baseline-second.md").read_bytes() == first_markdown
     assert json_output.read_bytes() == first
     saved = json.loads(first)
     assert saved["formatVersion"] == 2

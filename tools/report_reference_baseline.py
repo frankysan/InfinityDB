@@ -16,19 +16,25 @@ import subprocess
 import sys
 from collections import Counter
 from collections.abc import Sequence
-from contextlib import closing
+from contextlib import ExitStack, closing
 from pathlib import Path, PureWindowsPath
 from typing import Any
-from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlsplit
-from urllib.request import Request, urlopen
 
 from infinity_army_data.merge import SourceDocument, load_sources, merge_sources
 from infinity_db.application_domains import application_domain, semantic_record_domain
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.snapshot_revision import database_set_snapshot_revision
+from infinity_db.variant_usage_source import normalized_source_connection
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
+
+if __package__:
+    from .research.source_paths import SourcePathError, pinned_pdf_path
+    from .served_runtime import ServedRuntimeError, verify_served_runtime
+else:
+    from research.source_paths import SourcePathError, pinned_pdf_path
+    from served_runtime import ServedRuntimeError, verify_served_runtime
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPORT_FORMAT = "InfinityDB 1.0 reference evidence baseline"
@@ -37,6 +43,39 @@ REPORT_VERSION = 2
 
 class ReferenceBaselineError(ValueError):
     """The supplied published data cannot provide a trustworthy baseline."""
+
+
+def _require_new_report_outputs(*paths: Path | None) -> None:
+    """Preflight every selected report before costly source/audit work."""
+    seen: set[Path] = set()
+    for path in paths:
+        if path is None:
+            continue
+        if path.exists() or path.is_symlink():
+            raise FileExistsError(f"Reference baseline output already exists: {path}")
+        resolved = path.resolve()
+        if resolved in seen:
+            raise ReferenceBaselineError(
+                "Reference baseline report outputs must be different files"
+            )
+        seen.add(resolved)
+
+
+def _write_new_report(path: Path, content: str) -> None:
+    """Write UTF-8/LF evidence without replacing a previous accepted report."""
+    _require_new_report_outputs(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("x", encoding="utf-8", newline="\n") as handle:
+        handle.write(content)
+
+
+def _write_report_or_exit(
+    parser: argparse.ArgumentParser, path: Path, content: str,
+) -> None:
+    try:
+        _write_new_report(path, content)
+    except (OSError, ValueError) as exc:
+        parser.exit(1, f"Reference baseline output: {exc}\n")
 
 
 def _connect(path: Path) -> sqlite3.Connection:
@@ -578,6 +617,8 @@ def _verify_published_unit_options(
 def _verify_army_archive_sources(
     archive: Path, metadata: dict[str, Any], army: sqlite3.Connection,
     raw_army: sqlite3.Connection | None = None,
+    *,
+    source_storage: str = "paired-army.raw.db",
 ) -> dict[str, Any]:
     """Match individual raw Army source identities to the published list rows.
 
@@ -735,8 +776,8 @@ def _verify_army_archive_sources(
         "matchedNestedSourceRows": nested_counts,
         "nestedStorage": {
             "profile_groups": "published-army.db",
-            "profiles": "paired-army.raw.db",
-            "loadout_options": "paired-army.raw.db",
+            "profiles": source_storage,
+            "loadout_options": source_storage,
         },
     }
 
@@ -752,15 +793,35 @@ def _revision_oldid(url: str | None) -> str | None:
 
 
 def _artifact_evidence(
-    root: Path, local_path: str | None, url: str | None, hashes: set[str]
+    root: Path, local_path: str | None, url: str | None, hashes: set[str],
+    *, source_layout: str = "legacy",
 ) -> dict[str, Any]:
-    """Compare exact local bytes when possible; never equate an oldid URL with a file."""
+    """Verify an explicitly selected PDF layout without changing its source identity."""
     location = _source_location(root, local_path)
+    selected = root / local_path if local_path is not None else None
+    if source_layout == "local" and local_path is not None and local_path.startswith("data/pdf/"):
+        if len(hashes) != 1:
+            raise ReferenceBaselineError(
+                f"Local PDF source requires one declared SHA-256: {local_path}"
+            )
+        try:
+            selected = pinned_pdf_path(
+                root, local_path, next(iter(hashes)), layout=source_layout, missing_ok=True,
+            )
+        except SourcePathError as exc:
+            raise ReferenceBaselineError(str(exc)) from exc
+        location = "available" if selected is not None else "missing-local-artifact"
     actual_sha: str | None = None
     matches: bool | None = None
     oldid = _revision_oldid(url) if local_path is None else None
-    if location == "available" and local_path is not None:
-        actual_sha = _sha256(root / local_path)
+    if location == "available" and selected is not None:
+        actual_sha = _sha256(selected)
+        if (
+            source_layout == "local" and local_path is not None
+            and local_path.startswith("data/pdf/")
+        ):
+            if actual_sha not in hashes:
+                raise ReferenceBaselineError(f"Source hash mismatch: {local_path}")
         if len(hashes) > 1:
             status = "conflicting-source-hashes"
         elif hashes:
@@ -773,6 +834,7 @@ def _artifact_evidence(
     else:
         status = location
     return {
+        "localStatus": location,
         "verificationStatus": status,
         "artifactSha256": actual_sha,
         "declaredHashMatches": matches,
@@ -855,8 +917,16 @@ def build_baseline(
     *,
     root: Path = PROJECT_ROOT,
     army_archive: Path | None = None,
+    normalized: Path | None = None,
+    source_layout: str = "legacy",
 ) -> dict[str, Any]:
     """Inventory published identities; intentionally make no completeness claims."""
+    if source_layout not in {"legacy", "local"}:
+        raise ReferenceBaselineError(f"Unknown source layout: {source_layout}")
+    if normalized is not None and army_archive is None:
+        raise ReferenceBaselineError(
+            "Verified normalized source requires --army-archive for source parity"
+        )
     with (
         closing(_connect(army_database)) as army,
         closing(_connect(rules_database)) as rules,
@@ -877,16 +947,30 @@ def build_baseline(
                 raise ReferenceBaselineError(f"Army archive is unavailable: {army_archive}")
             if _sha256(army_archive) != archive_sha:
                 raise ReferenceBaselineError("Army archive SHA-256 differs from published metadata")
-            raw_path = raw_database_path(army_database)
-            try:
-                validate_database_pair(army_database, raw_path=raw_path)
-            except ValueError as exc:
-                raise ReferenceBaselineError(
-                    f"Published Army/raw source database pair is invalid: {exc}"
-                ) from exc
-            with closing(_connect(raw_path)) as raw_connection:
+            with ExitStack() as source_stack:
+                if normalized is None:
+                    raw_path = raw_database_path(army_database)
+                    try:
+                        validate_database_pair(army_database, raw_path=raw_path)
+                    except ValueError as exc:
+                        raise ReferenceBaselineError(
+                            f"Published Army/raw source database pair is invalid: {exc}"
+                        ) from exc
+                    source = source_stack.enter_context(closing(_connect(raw_path)))
+                    source_storage = "paired-army.raw.db"
+                else:
+                    try:
+                        source, _generation = source_stack.enter_context(
+                            normalized_source_connection(army_database, normalized)
+                        )
+                    except (OSError, ValueError, sqlite3.Error) as exc:
+                        raise ReferenceBaselineError(
+                            f"Verified normalized Army source is invalid: {exc}"
+                        ) from exc
+                    source_storage = "verified-normalized.json"
                 archive_evidence = _verify_army_archive_sources(
-                    army_archive, raw_army, army, raw_connection,
+                    army_archive, raw_army, army, source,
+                    source_storage=source_storage,
                 )
                 sources, _ = load_sources(army_archive)
                 archive_evidence["matchedPublishedReferences"] = (
@@ -973,7 +1057,10 @@ def build_baseline(
                 "retrievedDates": sorted(group["retrievedDates"]),
                 "acquiredAt": sorted(group["acquiredAt"]),
                 "declaredSha256": sorted(hashes),
-                **_artifact_evidence(root, group["localPath"], group["url"], hashes),
+                **_artifact_evidence(
+                    root, group["localPath"], group["url"], hashes,
+                    source_layout=source_layout,
+                ),
             })
         verification_counts: dict[str, int] = {}
         for source in sources:
@@ -1096,49 +1183,13 @@ def verify_served_revision(report: dict[str, Any], base_url: str) -> dict[str, s
     This does not verify external source artifacts, rules semantics, or browser
     rendering.
     """
-    parsed = urlsplit(base_url)
-    if (
-        parsed.scheme not in {"http", "https"}
-        or not parsed.netloc
-        or parsed.username is not None
-        or parsed.password is not None
-        or parsed.path not in {"", "/"}
-        or parsed.query
-        or parsed.fragment
-    ):
-        raise ReferenceBaselineError(
-            "Server base URL must be an HTTP(S) origin without credentials, path or query"
-        )
-    version_url = base_url.rstrip("/") + "/api/version"
     try:
-        request = Request(
-            version_url,
-            headers={"Accept": "application/json", "User-Agent": "Mozilla/5.0"},
+        observed = verify_served_runtime(
+            report["runtimeSnapshotRevision"], base_url,
         )
-        with urlopen(request, timeout=10) as response:
-            if response.status != 200:
-                raise ReferenceBaselineError(
-                    f"Runtime version endpoint returned HTTP {response.status}"
-                )
-            payload = json.load(response)
-    except (HTTPError, URLError, TimeoutError, OSError, ValueError) as exc:
-        raise ReferenceBaselineError(f"Could not verify runtime version: {exc}") from exc
-    if not isinstance(payload, dict):
-        raise ReferenceBaselineError("Runtime version endpoint did not return an object")
-    actual = payload.get("snapshot_revision")
-    expected = report["runtimeSnapshotRevision"]
-    if not isinstance(actual, str) or actual != expected:
-        raise ReferenceBaselineError(
-            f"Runtime snapshot revision does not match inventoried runtime artifacts: "
-            f"expected {expected}, received {actual!r}"
-        )
-    return {
-        "versionUrl": version_url,
-        "snapshotRevision": actual,
-        "appVersion": str(payload.get("version", "")),
-        "staticRevision": str(payload.get("static_revision", "")),
-        "status": "exact-database-pair-match-not-source-completeness",
-    }
+    except ServedRuntimeError as exc:
+        raise ReferenceBaselineError(str(exc)) from exc
+    return {**observed, "status": "exact-database-pair-match-not-source-completeness"}
 
 
 def render_markdown(report: dict[str, Any]) -> str:
@@ -1175,8 +1226,14 @@ def render_markdown(report: dict[str, Any]) -> str:
              f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['profiles']} "
              "profiles and "
              f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['loadout_options']} "
-             "loadouts in export-paired army.raw.db. "
-             "Derived runtime payloads and browser presentation remain unverified."]
+             + (
+                 "loadouts in verified normalized.json. "
+                 if snapshot['sourceIdentityEvidence'].get('nestedStorage', {}).get(
+                     'profiles'
+                 ) == "verified-normalized.json"
+                 else "loadouts in export-paired army.raw.db. "
+              )
+             + "Derived runtime payloads and browser presentation remain unverified."]
             if (snapshot.get("sourceIdentityEvidence") or {}).get("matchedNestedSourceRows")
             else []
         ),
@@ -2670,6 +2727,7 @@ def audit_visibility_zone_evidence(
     *,
     root: Path = PROJECT_ROOT,
     verify_pdfs: bool = False,
+    source_layout: str = "legacy",
 ) -> dict[str, Any]:
     """Selected bilingual source/term/browser evidence, without whole-record approval."""
     from infinity_db.curated import load_curated_document
@@ -2722,9 +2780,14 @@ def audit_visibility_zone_evidence(
         for language, (relative, pin) in zip(
             ("english", "spanish"), expected_pins.items(), strict=True
         ):
-            path = root / relative
-            if _sha256(path) != pin:
-                raise ReferenceBaselineError(f"Visibility PDF hash mismatch: {language}")
+            try:
+                path = pinned_pdf_path(root, relative, pin, layout=source_layout)
+            except SourcePathError as exc:
+                raise ReferenceBaselineError(
+                    f"Visibility {language} PDF verification failed: {exc}"
+                ) from exc
+            if path is None:
+                raise ReferenceBaselineError(f"Visibility {language} PDF unavailable")
             with pymupdf.open(path) as pdf:
                 value = pdf[manifest["sourcePages"][language] - 1].get_text()
                 if not isinstance(value, str):
@@ -3100,6 +3163,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--army-archive", type=Path, help="Verify exact ZIP bytes against Army pin")
     parser.add_argument(
+        "--source-layout", choices=("legacy", "local"), default="local",
+        help="Select physical PDF evidence under data/pdf or local/data/pdf; labels stay unchanged",
+    )
+    parser.add_argument(
+        "--normalized", type=Path,
+        help="Attested normalized.json for --army-archive, without a raw sibling",
+    )
+    parser.add_argument(
         "--verify-server", metavar="BASE_URL",
         help="Check that the server uses this exact Army/rules database pair",
     )
@@ -3154,6 +3225,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Verify exact pinned English and Spanish Visibility Zone clauses",
     )
     args = parser.parse_args(argv)
+    try:
+        _require_new_report_outputs(
+            args.json_output, args.markdown_output,
+            args.review_batches_output, args.review_pilot_output,
+        )
+    except (OSError, ValueError) as exc:
+        parser.exit(1, f"Reference baseline output: {exc}\n")
     if args.audit_current_citation_minimum:
         if (
             args.reconcile_explanation_inventory
@@ -3174,10 +3252,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             parser.error("Current citation minimum is a standalone read-only audit")
         minimum = audit_current_rule_citation_minimum()
         if args.json_output is not None:
-            args.json_output.parent.mkdir(parents=True, exist_ok=True)
-            args.json_output.write_text(
+            _write_report_or_exit(
+                parser, args.json_output,
                 json.dumps(minimum, indent=2, sort_keys=True) + "\n",
-                encoding="utf-8", newline="\n",
             )
         print(
             f"Current N5 citation minimum: {minimum['withCurrentCitation']}/"
@@ -3205,14 +3282,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         report = reconcile_explanation_inventory()
         if args.review_pilot_output is not None:
-            target = args.review_pilot_output.resolve()
-            if not target.is_relative_to((PROJECT_ROOT / "local").resolve()):
+            target = args.review_pilot_output
+            if not target.resolve().is_relative_to((PROJECT_ROOT / "local").resolve()):
                 parser.error("--review-pilot-output must be under ignored local/")
             pilot = build_explanation_review_pilot(report)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(
-                json.dumps(pilot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8",
-                newline="\n",
+            _write_report_or_exit(
+                parser, target, json.dumps(pilot, indent=2, ensure_ascii=False) + "\n",
             )
             summary = pilot["summary"]
             if summary["sourcePageIdentityComplete"]:
@@ -3236,14 +3311,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 f"{summary['sourceFirstProbes']} source-first probes; zero approvals"
             )
         if args.review_batches_output is not None:
-            target = args.review_batches_output.resolve()
-            if not target.is_relative_to((PROJECT_ROOT / "local").resolve()):
+            target = args.review_batches_output
+            if not target.resolve().is_relative_to((PROJECT_ROOT / "local").resolve()):
                 parser.error("--review-batches-output must be under ignored local/")
             plan = plan_explanation_review_batches(report)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(
-                json.dumps(plan, indent=2, ensure_ascii=False) + "\n",
-                encoding="utf-8", newline="\n",
+            _write_report_or_exit(
+                parser, target, json.dumps(plan, indent=2, ensure_ascii=False) + "\n",
             )
             summary = plan["summary"]
             print(
@@ -3255,7 +3328,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         if args.audit_visibility_zones:
             evidence = audit_visibility_zone_evidence(
-                verify_pdfs=args.verify_visibility_pdfs,
+                verify_pdfs=args.verify_visibility_pdfs, source_layout=args.source_layout,
             )
             ids = {record["id"] for record in evidence["records"]}
             added = set(report["addedIds"])
@@ -3283,8 +3356,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             (args.markdown_output, render_explanation_reconciliation(report)),
         ):
             if path is not None:
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(content, encoding="utf-8", newline="\n")
+                _write_report_or_exit(parser, path, content)
         print(
             f"Explanation inventory: {report['frozenCount']} frozen, "
             f"{report['currentCount']} current, {report['retainedCount']} retained, "
@@ -3300,8 +3372,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             or args.audit_visibility_zones or args.verify_visibility_pdfs
             or args.join_reviewed_evidence):
         parser.error("reconciliation flags require --reconcile-explanation-inventory")
+    if args.normalized is not None and args.army_archive is None:
+        parser.error("--normalized requires --army-archive")
     report = build_baseline(
         args.army_db, args.rules_db, army_archive=args.army_archive,
+        normalized=args.normalized, source_layout=args.source_layout,
     )
     if args.verify_server:
         try:
@@ -3314,8 +3389,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         (args.markdown_output, render_markdown(report)),
     ):
         if path is not None:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(content, encoding="utf-8", newline="\n")
+            _write_report_or_exit(parser, path, content)
     print(f"{REPORT_FORMAT}: {len(report['inventory'])} category rows, "
           f"{len(report['sourceGroups'])} source groups; all require review")
     return 0

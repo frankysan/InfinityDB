@@ -13,6 +13,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
+from .database.normalized_source import verified_army_export_generation
 from .database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
@@ -144,14 +145,14 @@ def read_unit_filter_semantics(connection: sqlite3.Connection) -> UnitFilterConf
     return config
 
 
-def publish_unit_filter_semantics(army: Path, raw: Path, source: Path) -> None:
-    """Extend the matched v28 export pair without reinterpreting source facts."""
+def publish_unit_filter_semantics(
+    army: Path, raw: Path | None, source: Path, *, normalized: Path | None = None,
+) -> None:
+    """Publish v29 from an explicitly verified raw or normalized Army source."""
     source_bytes = source.read_bytes()
     document = json.loads(source_bytes)
     expected = parse_unit_filter_config(document)
-    generation = validate_database_pair(army, raw_path=raw)
-    if generation is None:
-        raise ValueError("Unit filter publication requires a paired Army source")
+    generation = verified_army_export_generation(army, raw, normalized)
     with closing(sqlite3.connect(army)) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
         if connection.execute("PRAGMA user_version").fetchone()[0] != PREVIOUS_SCHEMA_VERSION:
@@ -231,6 +232,8 @@ def publish_unit_filter_semantics(army: Path, raw: Path, source: Path) -> None:
             connection.execute(f"PRAGMA user_version={ARMY_SCHEMA_VERSION}")
         vacuum_deterministic_sqlite(connection)
     normalize_sqlite_header(army)
+    if raw is None:
+        return
     with closing(sqlite3.connect(raw)) as connection:
         if connection.execute("PRAGMA user_version").fetchone()[0] != PREVIOUS_SCHEMA_VERSION:
             raise ValueError("Unit filter raw export requires Army v28")

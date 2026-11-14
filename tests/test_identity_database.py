@@ -94,7 +94,7 @@ def test_export_pins_identity_manifest_and_hash_in_both_database_siblings(tmp_pa
     path = tmp_path / "army.db"
     config = load_identity_config()
 
-    export_database(normalized_empty(), path)
+    export_database(normalized_empty(), path, include_raw=True)
 
     for database_path in (path, raw_database_path(path)):
         assert metadata_value(database_path, IDENTITY_CONFIG_METADATA_KEY) == config.document
@@ -118,7 +118,7 @@ def test_export_prefers_identity_policy_pinned_in_normalized_data(tmp_path: Path
     data.update(identity_metadata(config))
     path = tmp_path / "army.db"
 
-    export_database(data, path)
+    export_database(data, path, include_raw=True)
 
     for database_path in (path, raw_database_path(path)):
         assert metadata_value(database_path, IDENTITY_CONFIG_METADATA_KEY) == config.document

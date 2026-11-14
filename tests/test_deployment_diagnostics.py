@@ -5,7 +5,7 @@ import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 
-from tools.deployment_diagnostics import (
+from tools.operations.deployment_diagnostics import (
     DiagnosticEvent,
     _load_resource_window,
     _sanitize_message,
@@ -184,6 +184,6 @@ def test_main_writes_deterministic_newline_policy(tmp_path: Path, monkeypatch) -
             "summary": {"diagnosticLines": 0},
         }
 
-    monkeypatch.setattr("tools.deployment_diagnostics.capture_diagnostics", fake_capture)
+    monkeypatch.setattr("tools.operations.deployment_diagnostics.capture_diagnostics", fake_capture)
     assert main(["--output", str(output)]) == 0
     assert output.read_bytes().endswith(b"\n")

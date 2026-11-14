@@ -4979,7 +4979,7 @@ identify N4. A fresh check of the [official Wiki annex](https://infinitythewiki.
 detailed rules as originating in N4; no edition-identified N5 annex or
 explicit unchanged-adoption ruling was established in this review.
 Failure to find one does **not** establish that no such source exists.
-The read-only `tools.audit_reinforcements_applicability` check at
+The read-only `tools.research.audit_reinforcements_applicability` check at
 `ba057539` exited 0 with two current references and two historical
 annex PDFs, explicitly reporting N5 procedural publication as
 `BLOCKED`. This is source/applicability evidence, not an acceptance

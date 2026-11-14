@@ -17,6 +17,53 @@ The type-check stage explicitly passes the runner's interpreter to Pyright for d
 resolution, so invoking the virtual-environment Python works without first activating that
 environment in the shell.
 
+## Complete-set release-candidate browser verifier
+
+`tools.verify_release_candidate_browser` compares an explicit release version,
+the static fingerprint and the **complete Army/Rules/ITS database identity**
+against the selected server before and after representative Unit-detail browser
+cases. It validates the selected directory through the same complete-set
+validator as serving, including embedded publications, schemas, integrity and
+matched build/source provenance. A missing or invalid ITS database blocks the
+gate before network/browser work. Changes to the local selected set or static
+fingerprint during the check also block acceptance.
+
+Use one `--db-dir` containing the three runtime databases; its default is the
+checkout's `data/generated/`. The former individual `--army-db`/`--rules-db`
+selectors and two-path Python API are retired for this gate. Other research
+tools and explicit low-level fixture APIs retain their independently documented
+contracts. An alternate directory never falls back to the checkout's databases.
+
+For an already-running candidate, replace the version, origin and `RUN_ID`
+with its pinned values:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_release_candidate_browser --db-dir data/generated --base-url http://127.0.0.1:8000 --expected-version VERSION --channel chrome --json-output local/validation/project-infrastructure/release-candidate/RUN_ID/acceptance.json
+```
+
+The optional JSON receipt is written only on success. Its selected file must
+be new: the verifier rejects an existing file or symlink **before** runtime
+and browser work, and uses exclusive creation after postflight checks to
+prevent an intervening writer from truncating earlier evidence. Select a
+fresh `local/validation/` run-ID directory for every attempt, keeping
+accepted receipts and failed/incomplete diagnostics separate. If filesystem
+writing fails, CLI acceptance is blocked; any partially created **new**
+receipt requires inspection rather than reuse. Omitting `--json-output`
+still runs the verification without writing a receipt. Existing explicit
+legacy output paths are not migrated or deleted.
+
+Retain successful receipts with the pinned candidate evidence while
+acceptance is open. This command starts no server,
+build, acquisition or deployment. Complete-set identity plus selected Unit
+cases does not establish whole-reference completeness, all browser surfaces or
+post-deployment acceptance. The nested preflight and postflight `status` values
+are `exact-runtime-revision-match-not-source-completeness`; they describe the
+selected complete runtime revision, not a two-database pair.
+
+Focused regressions live in `tests/test_verify_release_candidate_browser.py`,
+including missing/invalid/mismatched ITS inputs, ITS-only byte changes, local
+drift and real loopback Chromium preflight/DOM/postflight acceptance.
+
 ## 1.0.1 release preparation
 
 **Project domains:** Web frontend, Data processing, Project infrastructure
@@ -198,8 +245,8 @@ When useful, inspect development status with the optional read-only
 repository-local command instead of repeating unrelated inventory queries:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.dev_status
-.\.venv\Scripts\python.exe -m tools.dev_status --json
+.\.venv\Scripts\python.exe -m tools.dev.dev_status
+.\.venv\Scripts\python.exe -m tools.dev.dev_status --json
 ```
 
 On Linux/macOS use `.venv/bin/python`. `--offline` skips both network/monitor
@@ -299,7 +346,7 @@ check examines every earlier open ID across workstreams and fails
 unexplained skips:
 
 ```powershell
-$taskId = (.\.venv\Scripts\python.exe -m tools.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable
+$taskId = (.\.venv\Scripts\python.exe -m tools.dev.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable
 .\.venv\Scripts\python.exe -m tools.check_v1_backlog --select $taskId
 ```
 
@@ -1739,6 +1786,12 @@ resvg **0.48.1**, while the external run used **0.49.0**. This was not a
 matched-input/toolchain processor comparison. The failed report remains
 preserved; neither its thresholds nor its result were changed.
 
+The earlier readiness audit found **1,101** legacy archive identities and
+**808** canonical SVGs; **29** override-sourced assets lacked verified
+original upstream bytes in that archive. The external producer subsequently
+acquired a new raw snapshot with its own provenance rather than treating those
+overridden bytes as upstream originals.
+
 Rebuilt the existing in-tree pipeline through **compression only**, using
 `tools.build_symbols` with isolated data root
 `local/p5-matched-legacy-20261111`, the explicit four-file raw-symbol handoff,
@@ -1780,9 +1833,10 @@ It does not accept artwork changes against the tracked release, semantic
 publication or actual browser/Docker behavior. The complete duplicate mapping
 resolves `units/shasvastii-seed-soldiers-1-2.svg` to
 `units/shasvastii-seed-soldiers-1-1.svg`; its application publication still
-needs verification. Keep those gates and in-tree retirement open under P5.
-Tracked SVGs, databases and publication manifest were unchanged. No full Linux,
-hosted-CI or release acceptance is implied.
+needed verification at this checkpoint. The later cutover and processor
+retirement are recorded below. Tracked SVGs, databases and publication
+manifest were unchanged by this comparison. No full Linux, hosted-CI or
+release acceptance is implied.
 
 ### P5.7 external semantic publication candidate
 
@@ -1826,35 +1880,63 @@ That preparation did not change tracked SVGs, the manifest or runtime databases.
 ### P5.7 override provenance classification
 
 **2026-11-11, Windows development checkout based on `35a069d8`:**
-The offline audit `tools.classify_symbol_artwork_provenance` verified pinned
+The now-retired P5-specific offline audit verified pinned
 historical/candidate manifests, effective archive members, original source
 identities, exact duplicate assignments, override donors/current files and
-publication output hashes. The [P5 runbook](symbol-pipeline-parity-runbook.md#override-provenance-classification)
-owns the input-selection schema, commands, findings and acceptance limits.
+publication output hashes. This audit requires the retired in-tree build and
+matched-input evidence; it is not a general classifier for future external-only
+publications.
+
+The historical selection JSON uses `format: "InfinityDB symbol provenance inputs"`,
+`formatVersion: 1`, an `overrideRoot` and a `files` mapping of role to
+`{"path": "...", "sha256": "..."}`. Relative paths resolve from the working
+directory. Its required roles were:
+
+- `comparison`, `current_manifest`, `candidate_manifest`, `candidate_evidence`;
+- `historical_build`, `historical_archive`, `historical_compression`,
+  `baseline_audit`, `matched_inputs`;
+- `effective_report`, `effective_archive`, `raw_archive`, `duplicate_receipt`,
+  `override_lookups`, `candidate_compressed`.
+
+Optional `override_notes` and `legacy_tree_notes` pinned the then-current notes
+files. The audit retained repeated override declarations and their line numbers;
+they describe intent, not verified historical edits. The audit hashed the
+selected files, checked their connections and effective bytes, and left
+unsupported attribution unresolved; matched-input parity was corroborated by
+identity, not rerun. The saved selector's current-manifest path now contains the
+promoted manifest. Its original bytes are in Git at
+`35a069d8:data/manifests/symbol-publication.json`; a replay must explicitly
+select those hash-matched bytes and will have a different selection fingerprint.
 
 Private selectors and output are
 `local/p5-symbol-provenance-inputs-with-notes-20261111.json` and
 `local/p5-symbol-provenance-final-20261111.json`.
-All **118 changed assets / 154 related source identities** are covered:
-**1 changed applied override**, **56 newly applied overrides**,
-**61 processing-only differences**, and **0 unresolved canonical causes**.
-Newly applied overrides do not establish historical file edits; present-day
-`overrides.txt` declarations are separately labelled contextual evidence.
-Related aliases retain their own methods/hashes and publication destinations.
-The removed Seed Soldier filename remains unresolved compatibility work.
+All **118 changed assets / 154 related source identities** are covered; 25
+assets have multiple source identities. The verified canonical causes are
+**1 changed applied override** (Morat), **56 newly applied overrides** (53
+direct, 3 propagated), **61 processing-only differences** (57 upstream inputs,
+4 unchanged overrides), and **0 upstream changes, removed overrides or
+unresolved causes**. The unchanged historical overrides are Onyx, Peripheral,
+Impetuous and Lieutenant. Newly applied overrides do not establish historical
+file edits, and processing-only does not mean compression-only or visual
+equivalence. Related aliases retain their own methods/hashes and destinations.
+The removed Seed Soldier filename was still unresolved compatibility work at
+this audit; the later cutover preserved it.
 
-Focused regression command:
+The earlier unclassified review displayed **118 pairs** (4 Army,
+1 Characteristic, 2 Order, 11 Peripheral and 100 Unit) and passed Chrome
+checks at 1440/390/320 widths. Its private receipt is
+`local/p5-symbol-artwork-browser-validation.json`; browser test exports were
+not artwork approvals.
 
-```powershell
-.\.venv\Scripts\python.exe tools/run_checks.py --stage test --assets off --test-workers 0 tests/test_classify_symbol_artwork_provenance.py tests/test_build_symbol_artwork_review.py tests/test_test_sections.py
-```
-
-The cohort passed **84 tests, zero skips**, including six real-Chrome fixture
-cases at 1440/390/320 pixels, with and without provenance. Assertions cover
-direct/propagated overrides, unchanged overrides, alias remapping, ambiguous
+The then-focused cohort passed **84 tests, zero skips**, including six
+real-Chrome fixture cases at 1440/390/320 pixels, with and without provenance.
+Assertions covered direct/propagated overrides, unchanged overrides, alias remapping, ambiguous
 canonical selection, drift/disconnected evidence, note declarations, report
 coverage/hash consistency, local output integrity and atomic decision imports.
-Ruff and focused Pyright passed. The documentation stage also passed.
+Ruff and focused Pyright passed. The documentation stage also passed. The
+classifier-specific tests were retired with the historical generator; current
+artwork-review and symbol-handoff tests retain their separate contracts.
 
 The actual production page
 `local/p5-symbol-artwork-review-classified-20261111.html` rendered
@@ -1863,18 +1945,20 @@ The actual production page
 JSON export/import after reload and stale-provenance rejection passed.
 There were no page/request/HTTP errors, external requests or horizontal overflow.
 Screenshots were visually inspected; the private browser receipt is
-`local/p5-symbol-provenance-browser-validation.json`. All artwork decisions
-remain unreviewed. These checks do not establish artwork approval, sole visual
-causality, compression-only equivalence, application publication or Docker/
-Linux/hosted-CI/release acceptance. Production SVGs, manifests, databases and
-parity thresholds were unchanged.
+`local/p5-symbol-provenance-browser-validation.json`. At this audit, all
+artwork decisions remained unreviewed. These checks did not establish artwork
+approval, sole visual causality, compression-only equivalence, application
+publication or Docker/Linux/hosted-CI/release acceptance. Production SVGs,
+manifests, databases and parity thresholds were unchanged.
 
 ### P5.7 accepted symbol publication cutover
 
 **2026-11-11, Windows development checkout based on `e70195cd`:**
 The user approved all 118 changed artworks. No artwork review was repeated.
-The [P5 runbook](symbol-pipeline-parity-runbook.md#accepted-publication-cutover)
-owns the executed promotion/recovery commands and acceptance boundary.
+Promotion selected `local/p5-accepted-cutover-20261111/promotion-inputs.json`
+and a fresh transaction under the same directory. The
+[current promotion lifecycle](../data/README.md#accepted-external-symbol-publication-promotion)
+owns the operation and interrupted-transaction recovery.
 
 Promotion reverified the approved candidate's complete raw/effective/stage/
 processed receipt chain and reproduced its manifest/evidence byte-for-byte.
@@ -1887,6 +1971,8 @@ under `local/p5-accepted-cutover-20261111/publication/`.
 
 | Artifact | SHA-256 |
 | --- | --- |
+| Previous symbol manifest | `92a27c349c6ac23d81de138ee7bff5d196f0f83caa5846417ebd1d89427a3eb5` |
+| Approved candidate manifest | `acb3a2384fc985db59df429ce45daba413452cf1956534a0b1c24d5daebc3948` |
 | Promoted symbol manifest | `a88c7ead46cb2b68c67deece21af1e2f0a072a3c7a44a8b319ae32f64fc10d17` |
 | Seed Soldier alias and canonical SVG | `cdaca8ef8ee6494f7e1a539610d7ca1d8384e7b585d4e5d45a96935092961c74` |
 | `army.db` | `0bfe048c7224cfe5b4c62c3ff9a3e9999b1a7e7d6374b0c19917c7f976400b39` |
@@ -1970,7 +2056,7 @@ Focused publication, asset, database and packaging regression command:
 
 ```powershell
 .\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --test-workers 0 `
-  tests\test_symbol_publication.py tests\test_symbol_source.py tests\test_symbol_raster_validation.py `
+  tests\test_symbol_publication.py tests\test_symbol_source.py `
   tests\test_export_symbol_source_plan.py tests\test_prepare_symbol_publication.py `
   tests\test_promote_symbol_publication.py tests\test_verify_raw_symbol_handoff.py `
   tests\test_verify_effective_symbol_handoff.py tests\test_verify_symbol_duplicate_handoff.py `
@@ -2147,6 +2233,335 @@ address cross-layer consumers, and make a single meaningful validation and
 commit where appropriate. Do not use batching to postpone a known critical
 correctness check or to hide outstanding acceptance.
 
+### Optional catalog-navigation browser report evidence
+
+Five independent optional browser commands—`verify_ammunition_browser`,
+`verify_general_rules_browser`, `verify_labels_browser`,
+`verify_states_browser` and `verify_traits_catalog_browser`—use a
+common non-overwriting report helper under `tools/browser/`. Each continues
+to check its own curated catalog identities and returns nonzero when
+a browser observation fails; stdout-only runs remain available.
+
+For example, give the selected command a **new** run-specific
+`--output` destination:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.browser.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/catalog-navigation/RUN_ID/labels.json
+```
+
+Replace `RUN_ID` with a UTC run identifier and short checkout revision.
+The filename may not already exist, even on a repeated manual invocation:
+it is checked before source discovery or Playwright launch, and JSON is
+written with exclusive creation after verification. Existing explicit
+legacy output locations are supported as paths but never overwritten.
+The helper retains each original report's sorted, indented UTF-8/LF
+format, including a report of failed browser observations; it never
+turns a failed check into acceptance. Parent directories are created
+only when the selected new report is ready to be written. An interrupted
+write may leave **new partial evidence** requiring inspection; report
+creation is not a multi-file transaction. These optional catalog checks
+are not substitutes for the complete-set release-candidate browser gate.
+The other specialized browser commands retain independent report
+contracts pending their own L2 acceptance and test coverage.
+
+### Optional Hacking Programs and non-Skill Army browser receipts
+
+The Hacking Programs and non-Skill Army browser verifiers now use the
+same **new-file-only** JSON receipt contract as the catalog-navigation
+commands above. Their independent source checks and browser assertions
+are unchanged; failed observations still generate JSON when requested
+and still exit nonzero. The preflight rejects an existing output
+(including a dangling symlink) before any browser or local server starts,
+and exclusive creation protects earlier evidence from a later collision.
+
+Use new, domain-scoped `local/validation/browser/` paths for each run.
+For example, from the checkout root:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.browser.verify_hacking_programs_browser --self-host --output local/validation/browser/hacking-programs/RUN_ID/hacking-programs.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/non-skill-army/RUN_ID/non-skill-army.json
+```
+
+Replace `RUN_ID` with a unique UTC run identifier and checkout revision.
+Hacking Programs retains `--self-host` for its own temporary loopback WSGI
+server, which must not be combined with a non-default `--base-url`.
+Non-Skill Army continues to require an independently running server.
+Both also retain `--headed` and stdout-only use. The optional report
+is not a substitute for hosted release acceptance, a source-parity
+review, or a live multi-engine browser matrix. Existing evidence and
+historical explicit paths are not migrated or overwritten, and a new
+receipt interrupted during writing requires inspection before reuse.
+
+### Optional Unit Skill and rule-fragment browser receipts
+
+`verify_unit_skill_presentation_browser` and
+`verify_rule_fragment_browser` also use the shared new-file-only
+`--output` contract. For each browser run, select a fresh
+`local/validation/browser/` directory scoped to the command and
+candidate revision, for example:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.browser.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/unit-skill-presentation/RUN_ID/unit-skill.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_rule_fragment_browser --self-host --output local/validation/browser/rule-fragments/RUN_ID/fragments.json
+```
+
+Replace `RUN_ID` with a new UTC timestamp plus short checkout SHA.
+Both commands now reject an occupied or symlink output before any
+browser activity and exclusively create canonical sorted, indented
+UTF-8/LF JSON after verification. Historical explicit paths remain
+valid names, but cannot be overwritten. Failures in individual
+observations still produce an optional failed report and nonzero exit;
+without `--output`, summary-only operation remains unchanged.
+
+Unit Skill Presentation retains repeatable `--slug`, `--width`
+and `--exclude-optional` selections, `--distance-unit`, `--headed`
+and `--channel`. Rule Fragment retains `--self-host` on a temporary
+loopback WSGI app, mutually exclusive with non-default `--base-url`,
+and its actual Weapon/Glossary deep-link checks. An interrupted new
+file may be partially written, so receipts must be inspected before
+acceptance. Neither command replaces complete release/browser gates,
+and this report change does not alter browser selectors or source
+fixtures.
+
+### Optional Structured Skill Charts and Trait Wiki browser receipts
+
+The final two optional browser CLI verifiers,
+`verify_structured_skill_charts_browser` and
+`verify_trait_wiki_browser`, use the same new-file-only `--output`
+contract. Their JSON output is an immutable *run receipt*, not a
+replacement for any cached source file. For example:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.browser.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/structured-skill-charts/RUN_ID/charts.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/research/traits/official-snapshot.html --output local/validation/browser/trait-wiki/RUN_ID/trait-wiki.json
+```
+
+Replace `RUN_ID` with a new UTC timestamp plus checkout revision;
+replace the `--wiki-html` example path with the actual retained,
+official Traits HTML snapshot. Do not copy private saved HTML into a
+report or tracked repository path. The Trait Wiki verifier still
+reads `--wiki-html` with UTF-8 BOM support, audits its references
+before launching the browser, and intercepts the official Wiki URL
+with the supplied HTML; it does not download or modify that source.
+The `--output` preflight now runs before even reading the saved
+HTML and rejects existing files, symlinks, and the input file itself
+if accidentally selected as the output destination.
+
+Both verifiers preserve their original source/DOM checks, `--headed`,
+`--base-url`, stdout-only operation, JSON serialization, and nonzero
+exit when observations fail. Fresh output parent directories are
+created only when writing. Publication uses exclusive creation, but
+a crash can leave an incomplete *new* receipt needing inspection.
+Historical paths remain valid explicit names only when unoccupied.
+These optional runs are not substitutes for the hosted browser or
+release acceptance gates.
+
+### Source and Weapon audit JSON/Markdown run receipts
+
+Eight maintained source-reconciliation commands now share a
+**new-file-only** report contract: `audit_1_0_reference_inputs`,
+`audit_weapon_chart_profiles`, `audit_weapon_definition_gaps`,
+`audit_weapon_trait_cross_sources`, `audit_weapon_traits_prose`,
+`audit_weaponry_family_clauses`,
+`audit_wiki_weapon_chart_names`, and
+`audit_auxiliary_silhouette_provenance`. Their existing required
+and optional `--json-output` / `--markdown-output` flags, current
+JSON/Markdown bytes and optional JSON stdout remain unchanged.
+
+For example, run the pinned Weapon Chart audit with the actual
+reviewed PDF path substituted for `PINNED_N5_PDF`:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.research.audit_weapon_chart_profiles --core-pdf PINNED_N5_PDF --json-output local/research/weapon-source-audits/RUN_ID/chart-profile.json --markdown-output local/research/weapon-source-audits/RUN_ID/chart-profile.md
+```
+
+Replace `RUN_ID` with a fresh UTC timestamp and source/checkout
+SHA. Both output destinations are validated *together before*
+opening any saved PDF, Wiki history, curated review, Army database
+or other source. Existing files, dangling symlinks, and identical
+or equivalent JSON/Markdown destinations fail closed. JSON/Markdown
+publication uses exclusive file creation, so a later collision
+cannot truncate earlier evidence. A source file accidentally chosen
+as an output path is likewise protected by the existing-file
+check. These commands do not publish or move source input bytes.
+
+Do not reuse a prior output path. Keep report receipts separate
+from original `local/research/` inputs and from tracked reviewed
+source material. A process interruption can still leave a
+partially written *new* report; multiple outputs are not a single
+transaction, so inspect the pair before accepting it. Historical
+explicit output paths remain supported only when unoccupied.
+Neither source authority, original audit semantics nor hosted
+release acceptance is changed by this report-writing safeguard.
+
+### Single-output semantic and runtime audit JSON receipts
+
+Fourteen maintained `audit_*` commands that accept an optional
+`--output` JSON path also use
+`tools.research.report_output` to preserve existing evidence.
+They cover Army/faction, physical database separation, enrichment
+coverage, Fireteam, loadout, normalization links, peripheral,
+profile, relationship, runtime database surface, semantic
+deduplication, source presentation, Trait Wiki anchors and logical
+Unit semantics. Unlike the multi-output Weapon audits, each of
+these commands accepts only one report destination.
+
+Use a unique run-specific path under `local/validation/` for
+application/database investigations, and `local/research/` when
+auditing retained third-party sources, for example:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.data.audit_unit_semantics data/generated/army.db --output local/validation/data-model/unit-semantics/RUN_ID/unit-semantics.json
+.\.venv\Scripts\python.exe -m tools.research.audit_trait_wiki_anchors SAVED_TRAITS_HTML --output local/research/trait-wiki-audits/RUN_ID/anchors.json
+```
+
+Replace `RUN_ID` with a fresh UTC timestamp and short revision
+identifier; replace `SAVED_TRAITS_HTML` with the actual saved
+official HTML path. All chosen report files are checked before
+reading the respective database or Wiki input, including existing
+files and dangling symlinks. The writer exclusively creates UTF-8/LF
+JSON, preserving each command's own serialization, summary, stdout
+fallback and audit failure codes. It does not alter or publish the
+input database, archived Wiki HTML or curated review bytes.
+
+A fresh report from a failing semantic gate is still evidence, not
+an accepted result. A crash may leave a partial *new* receipt.
+Existing ignored report locations remain valid explicit names
+only if unoccupied; no historical report is moved or deleted.
+The separate `audit_rules_interactions` CLI has a deliberate
+`--refresh-catalog-scope` source-maintenance mode and is reviewed
+under a different publication/receipt contract below.
+
+### Specialized audits: maintained checklist, PDF deltas, Restrictions candidates
+
+These three retained tools have **different output lifecycles** and
+must not all receive a blanket overwrite prohibition.
+
+`audit_rules_interactions --output` still intentionally **regenerates**
+the maintained Markdown checklist (including the tracked
+`docs/rules-interaction-checklist.md`). Its existing
+`--check-output` reads and checks that document without modifying
+it; `--refresh-catalog-scope` intentionally updates the maintained
+catalog scope with an explicitly paired Army/Rules database. Neither
+operation was reclassified as ordinary run evidence. For a **fresh,
+non-overwriting** optional audit receipt, use the separate
+`--receipt-output` flag:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.data.audit_rules_interactions --check-output docs/rules-interaction-checklist.md --require-release 1.0.0 --receipt-output local/validation/rules-interactions/RUN_ID/interaction-review.md
+```
+
+`--receipt-output` is incompatible with `--output`,
+`--refresh-catalog-scope` or `--report-catalog-scope-drift`.
+It *can* accompany read-only checklist checking and release
+acceptance gates; a failing gate can still produce review evidence.
+Existing destinations, symlinks and selected source-file aliases
+fail before any audit or catalog refresh. `--output` continues to
+replace the selected checklist intentionally, but refuses
+destinations that alias the input policy, catalog scope or
+any curated rule source; it should not be used for append-only
+run receipts.
+
+The pinned PDF revision audit now creates a fresh report by default beneath
+`local/audits/pdf-revision-deltas/<UTC-run-id>-<pair-scope>/report.json`.
+Run `--pairs faq-en faq-es` to select a specific scope, or supply an
+explicit `--output` path for a reviewed experiment:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.research.audit_pdf_revision_deltas --pairs faq-en faq-es
+.\.venv\Scripts\python.exe -m tools.research.audit_pdf_revision_deltas --pairs faq-en faq-es --output local/research/pdf-revision-deltas/RUN_ID/deltas.json
+```
+
+Both paths must be new files under ignored `local/`. Existing files and
+symlinks fail **before PDF extraction or pin loading**, and the write uses
+exclusive creation. The retired 2026-11-06 pathname remains an explicit
+`--output` choice only, not a reusable default.
+
+`audit_restrictions_source_chart --output` is an explicitly
+requested *candidate publication*, not a replaceable tracked
+artifact or an ordinary diagnostic report. It already requires a
+previously unused path **under ignored `local/`**; the final byte
+write now also uses exclusive creation to reject a destination
+claimed during source projection:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --output local/research/restrictions/RUN_ID/restrictions-candidate.json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --check-publication
+```
+
+Those two options are mutually exclusive in a single invocation.
+The existing Restrictions Chart read-only publication check and
+underlying negative-condition interpretation are unchanged.
+For all three tools, replace `RUN_ID` with a fresh UTC timestamp
+and short checkout/source revision. Keep ignored run evidence
+distinct from original private PDFs, curated files and tracked
+published references. Exclusive creation prevents overwrites,
+but an interruption can leave incomplete *new* output.
+No old report or source document is automatically moved or deleted.
+
+### Deployed-object receipts, Variant Usage candidates, and symbol export plans
+
+These related outputs are **not interchangeable** even though each
+is a JSON file:
+
+- `audit_deployed_object_inventory --json-output` is run
+  **evidence**: choose a fresh ignored destination such as
+  `local/validation/deployed-objects/RUN_ID/inventory.json`.
+  The requested file is checked before reading Army and curated
+  sources, then created exclusively with the original UTF-8/LF
+  serialization. Without `--json-output`, JSON goes to stdout.
+- `build_variant_usage --output` creates a **review candidate**,
+  not published runtime data. It preflights the destination
+  before the (potentially expensive) source projection, stages
+  complete JSON in an exclusive sibling `.json.tmp` file, and
+  installs the final candidate without replacing another run.
+  The preferred categorized path is
+  `local/candidates/variant-usage/variant-usage-*.json` (for example
+  `local/candidates/variant-usage/variant-usage-20261114T090000Z-SHA.json`).
+  The original strict root-level `local/variant-usage-*.json` name remains
+  available for explicit compatibility. Eleven historical candidate and
+  validation files are preserved in `local/candidates/variant-usage/legacy/`.
+  `--check` remains read-only and mutually exclusive with output.
+- `export_symbol_source_plan` and
+  `export_symbol_override_lookups` produce **pinned source
+  decisions** for another repository, not mutable audit reports.
+  Their shared `write_source_plan` remains idempotent when an
+  already-published plan has exactly matching bytes; mismatched
+  or symlink destinations fail. New plan publication is now
+  atomic and no-clobber, using a same-directory staged file
+  and hard-link creation. A concurrent producer can publish
+  equal bytes without changing the first file, but cannot
+  replace different provenance decisions. Choose distinct,
+  source-identified paths under
+  `local/research/symbol-source-plans/RUN_ID/` when retaining
+  these handoff exports. Invoke both exporters as modules
+  (`python -m tools.symbols.export_symbol_source_plan` or
+  `python -m tools.symbols.export_symbol_override_lookups`),
+  rather than directly executing their `tools/symbols/*.py` files.
+  The deployed-object and Variant Usage CLIs also retain
+  their existing direct-script launch paths.
+
+A fresh receipt or candidate is not approval to republish
+original source files. Never move or delete original input
+archives, tracked curated reviews or historical reports as
+part of output creation. A stale fixed `.tmp` file from an
+interrupted symbol/Variant Usage export is not overwritten;
+inspect its ownership before cleaning it up. Same-directory
+hard-link creation requires filesystem support; an unsupported
+filesystem fails without replacing the final artifact.
+
+**Work-tree ZIPs are different again:** `create_work_archive`
+uses content-fingerprinted default names and safely reuses
+identical default archives, but an explicitly supplied
+`--output` remains an **intentional replaceable destination**.
+Select a new path for backups that must be retained; this
+batch does not silently change the work-archive CLI contract.
+Similarly, symbol publication candidates use fresh output
+directories, while explicitly promoted tracked publications
+have their own validation and replacement lifecycle. Build
+scratch, persistent SQLite state and append-only metrics
+are outside the immutable receipt contract.
+
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 
 **Project domains:** Web frontend, Project infrastructure
@@ -2157,10 +2572,26 @@ also supported. Install `playwright==1.64.1` and that engine using
 `python -m playwright install <engine>` first (on Linux CI the matching OS
 libraries are installed with `--with-deps`). The helper runs the dedicated
 `tests/test_cross_browser_compatibility.py` cohort with one engine, exits
-nonzero on failed/missing browser setup and writes JUnit and failure traces
-under ignored `local/cross-browser-compatibility/`. The ordinary source
-suite does not require Playwright and skips this opt-in module without an
-engine. The hosted matrix is [optional for v1.1+, mandatory for v1.0.x](ci.md#cross-browser-release-compatibility-gate).
+nonzero on failed/missing browser setup and stores its JUnit report and
+failure screenshot/Playwright trace files together under a fresh
+`local/validation/project-infrastructure/cross-browser/<UTC-run-id>-<short-SHA>/<engine>/`
+directory. The output directory is created exclusively before pytest starts;
+an existing directory fails without modifying previous evidence. Use
+`--output-dir local/validation/project-infrastructure/cross-browser/<RUN_ID>/<engine>`
+to select another fresh directory under `local/validation/`. The runner
+requires a resolvable checkout Git HEAD SHA for its automatic directory
+and passes the same output directory to its test module. The HEAD label does
+not certify that a local worktree is clean; only separately verified
+exact-SHA acceptance can do that. Run the module via this runner rather
+than setting only the browser engine environment variable.
+Hosted CI uploads the `local/validation/project-infrastructure/cross-browser/`
+tree, preserving the same JUnit and failure traces on both successful and
+failed runs. Previously retained `local/cross-browser-compatibility/`
+artifacts remain unchanged and are not treated as current run output.
+
+The ordinary source suite does not require Playwright and skips this
+opt-in module without an engine. The hosted matrix is
+[optional for v1.1+, mandatory for v1.0.x](ci.md#cross-browser-release-compatibility-gate).
 A successful local cohort cannot replace any selected hosted gate, and the
 81-page Unit matrix is not multiplied across browser engines.
 
@@ -2246,7 +2677,7 @@ The Weapon fragment verifier gained a `--self-host` mode for the tracked
 Army/rules pair, removing the need for a separately running development server.
 Its new ephemeral-server regression and existing unit tests passed **12/12**.
 A separate real Chromium invocation of
-`tools.verify_rule_fragment_browser --self-host` passed **69/69** checks at
+`tools.browser.verify_rule_fragment_browser --self-host` passed **69/69** checks at
 1440/390/320 px in 248 seconds, following soft-navigation, source-backed
 rule cards, Glossary-to-Weapon fragments and fresh deep links. The full
 JSON report is under ignored `local/audits/v1s086-rule-fragments.json`.
@@ -2286,8 +2717,8 @@ gates passed against the unchanged V1S-084 release pair:
 Use the **explicit 1.0 scope**, independently of the historical checklist:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_rules_interactions --catalog-scope data/curated/rules-interactions/catalog-scope-1.0.0.json --database data/generated/infinity.db --rules-database data/generated/rules.db --require-primary-release 1.0.0 --require-release 1.0.0
-.venv\Scripts\python.exe -m tools.audit_rules_interactions --check-output docs/rules-interaction-checklist.md
+.venv\Scripts\python.exe -m tools.data.audit_rules_interactions --catalog-scope data/curated/rules-interactions/catalog-scope-1.0.0.json --database data/generated/infinity.db --rules-database data/generated/rules.db --require-primary-release 1.0.0 --require-release 1.0.0
+.venv\Scripts\python.exe -m tools.data.audit_rules_interactions --check-output docs/rules-interaction-checklist.md
 ```
 
 The default historical 0.7 scope intentionally has a different denominator
@@ -2449,7 +2880,7 @@ requiring exactly one source note, the Deployable review date and baseline
 locator counts. The immediate CI/publication-integrity repair passed **117
 tests** in the reviewed Windows worktree based on that SHA. The seven exact
 targets were `tests/test_deployed_object_citation_migrations.py`,
-`tests/test_deployed_object_non_catalog_queue.py`,
+the then-existing `tests/test_deployed_object_non_catalog_queue.py` (now retired),
 `tests/test_rules_database.py::test_rea038_direct_recovery_contact_does_not_inherit_allied_gate`,
 `tests/test_silent_immunity_source_scope.py`,
 `tests/test_source_coverage_dispositions.py`,
@@ -3032,7 +3463,7 @@ both modules in every lane layout and reviews that one bounded route;
 query/path-specific labels remain refused. As an immediate CI-correctness
 and metrics-privacy gate, Windows ran `tools/run_checks.py --stage test
 --stage lint tests/test_browser_test_capacity.py tests/test_metrics_history.py
-tools/browser_test_capacity.py tools/metrics_history.py --assets required`:
+tools/testing/browser_test_capacity.py tools/operations/metrics_history.py --assets required`:
 **48 passed, zero skips/failures**, Ruff passed, and all **808/808** published
 and browser-referenced SVGs were available. Tests cover accepted aggregate
 variant-usage counters and refusal of query values and path suffixes.
@@ -4156,13 +4587,13 @@ on the same host within the same run**, not across hosts or reboots.
 This instrumentation does not change slot admission, test isolation or
 scheduling and does not require running a permanent monitor.
 
-The tracked offline analyzer `tools.analyze_chromium_timeline` reconstructs
+The tracked offline analyzer `tools.performance.analyze_chromium_timeline` reconstructs
 concurrent admission requests and held slots from completed, timestamped
 JSONL records. Run it after an instrumented benchmark, e.g. from the
 repository root on `devbox`:
 
 ```bash
-./.venv/bin/python -m tools.analyze_chromium_timeline local/benchmarks/chromium-RUN --slots 4
+./.venv/bin/python -m tools.performance.analyze_chromium_timeline local/benchmarks/chromium-RUN --slots 4
 ```
 
 Use the actual `local/benchmarks/chromium-*/` path printed by the runner.
@@ -4270,7 +4701,7 @@ separately.
 
 Pytest's native `setup` duration includes time blocked acquiring a Chromium
 slot. This is **waiting**, not active fixture initialization; the two numbers
-must not be added. InfinityDB's `tools.pytest_startup_profile` plugin now
+must not be added. InfinityDB's `tools.testing.pytest_startup_profile` plugin now
 records Chromium-slot acquisition waits during setup and transfers their
 durations through pytest's `user_properties` to the xdist controller. For
 significant waits (at least 50 ms), the final console report displays:
@@ -4843,7 +5274,7 @@ earlier full-load failure and does not justify promoting
 four Chromium slots as the default.
 
 **2026-11-03 bounded CPU/RAM sampling for Chromium benchmarks (VR-0024):**
-A new `tools.sample_test_host_resources` module runs **alongside**,
+A new `tools.performance.sample_test_host_resources` module runs **alongside**,
 but never launches or modifies, independently scheduled test jobs.
 It records one JSONL metadata header, timestamped host CPU-busy
 and physical-memory-usage samples, and a final summary in a new
@@ -4857,11 +5288,11 @@ from other workloads as well as the test run. Use a unique filename
 and start the sampler just before a comparable test job:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.sample_test_host_resources --output local/benchmarks/host-load-windows-2slot.jsonl --duration-seconds 780 --interval-seconds 5
+.\.venv\Scripts\python.exe -m tools.performance.sample_test_host_resources --output local/benchmarks/host-load-windows-2slot.jsonl --duration-seconds 780 --interval-seconds 5
 ```
 
 On Linux, use
-`./.venv/bin/python -m tools.sample_test_host_resources --output local/benchmarks/host-load-linux-2slot.jsonl --duration-seconds 780 --interval-seconds 5`.
+`./.venv/bin/python -m tools.performance.sample_test_host_resources --output local/benchmarks/host-load-linux-2slot.jsonl --duration-seconds 780 --interval-seconds 5`.
 The module refuses absolute/escaping paths, overwrites and
 unbounded sampling configurations; the source/test schema is
 portable, while native measurements support Windows and Linux.
@@ -4973,12 +5404,12 @@ Linux CPU **35.58%/100%**, RAM **21.07%/25.66%**.
 Whole-capture means still include post-test time.
 
 To align captures with the real test duration, the new read-only
-`tools.analyze_test_host_resources` calculates overlap-weighted
+`tools.performance.analyze_test_host_resources` calculates overlap-weighted
 CPU/RAM percentages using sample intervals and refuses incomplete
 or malformed captures. For example on Windows:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.analyze_test_host_resources --input local/benchmarks/host-load-full-windows-20261103-fixed.jsonl --test-start 2026-11-03T08:55:33+01:00 --duration-seconds 538.37
+.\.venv\Scripts\python.exe -m tools.performance.analyze_test_host_resources --input local/benchmarks/host-load-full-windows-20261103-fixed.jsonl --test-start 2026-11-03T08:55:33+01:00 --duration-seconds 538.37
 ```
 
 Windows test-window coverage was **100%** across 109 intervals;
@@ -5078,7 +5509,7 @@ The existing two-slot Windows limit remains appropriate.
 **Host-specific capacity decision (2026-11-03):** The dedicated Linux
 MCP worker may opt into the *validated* four-slot, four-lane, eight-worker
 Scenario FAQ A/D split profile, while Windows retains two slots.
-`tools.browser_test_host_profile` stores a strict, ignored
+`tools.performance.browser_test_host_profile` stores a strict, ignored
 `local/browser-test-profile.json` marker on the Linux worker only.
 The maintained `tools.run_checks --stage test` adopts that profile
 when no worker, distribution, slot, lane, split or browser-reuse
@@ -5089,9 +5520,9 @@ profile does **not** change clean CI, Windows, standalone direct
 a Git change. Enable/check/disable on Linux with:
 
 ```bash
-python -m tools.browser_test_host_profile enable
-python -m tools.browser_test_host_profile status
-python -m tools.browser_test_host_profile disable
+python -m tools.performance.browser_test_host_profile enable
+python -m tools.performance.browser_test_host_profile status
+python -m tools.performance.browser_test_host_profile disable
 ```
 
 **Host-profile acceptance (VR-0049 retired):** At pinned
@@ -5164,7 +5595,7 @@ four-slot and Windows two-slot limits remain unchanged; no
 production browser or CI configuration changes.
 
 **Docker host readiness:** the fixed, read-only
-`python -m tools.probe_docker_test_host` probe found the Docker CLI and
+`python -m tools.performance.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version
 and engine-info queries failed (exit 1, unclassified by the probe).
 The Linux container engine is **not yet verified as usable** from the
@@ -5238,9 +5669,9 @@ occurrence counts.
 Inspect a specific source family without dumping the entire inventory:
 
 ```powershell
-python -m tools.audit_source_variant_inputs --catalog skills `
+python -m tools.data.audit_source_variant_inputs --catalog skills `
     --source-id 74 --source-id 263 --source-id 271
-python -m tools.audit_source_variant_inputs --catalog equipment --source-id 169
+python -m tools.data.audit_source_variant_inputs --catalog equipment --source-id 169
 ```
 
 The first command selects Super-Jump, Jump and Climb; the second selects
@@ -5250,7 +5681,7 @@ explicitly. To inspect only the remaining unresolved source IDs without
 truncating the console response, use:
 
 ```powershell
-python -m tools.audit_source_variant_inputs --catalog skills --unresolved-only --brief
+python -m tools.data.audit_source_variant_inputs --catalog skills --unresolved-only --brief
 ```
 
 `--unresolved-only` filters the displayed items without changing the
@@ -5452,7 +5883,7 @@ Device Plus extra `344` (`UPGRADE: SR-1`, two occurrences)
 remains open because it lacks a program target.
 
 **Read-only exact source-owner provenance (2026-11-01):**
-`tools.audit_source_variant_inputs` accepts
+`tools.data.audit_source_variant_inputs` accepts
 `--catalog equipment --source-id 101 --owner-extra-id 344`
 to inspect only direct raw Army relationship owners. The
 `occurrenceOwners` result includes original owner type,
@@ -5764,7 +6195,7 @@ verifier; the user confirmed that run. Both reports are bounded
 checkout-specific browser evidence, not CI browser tests or proof of
 whole-catalog source-to-browser completeness.
 
-The maintained optional verifier `tools.verify_non_skill_army_browser`
+The maintained optional verifier `tools.browser.verify_non_skill_army_browser`
 repeats the seven real-browser cases at those three widths. It checks
 the client-rendered general profile, published API buckets, the correct
 Equipment/Training/Attribute-override table rows, valid Equipment
@@ -5775,7 +6206,7 @@ running for the **same checkout and databases**, run from the repository
 root in PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/audits/non-skill-army-browser/current.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/audits/non-skill-army-browser/current.json
 ```
 
 The optional verifier requires Playwright with Chromium installed and
@@ -5854,7 +6285,7 @@ For the frozen local candidate, serve the tracked database pair in an ephemeral
 WSGI app and run the full-width and mobile-width Chromium check:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_rule_fragment_browser --self-host --output local/audits/weapon-rule-fragments-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_rule_fragment_browser --self-host --output local/audits/weapon-rule-fragments-browser.json
 ```
 
 For an existing development or deployed server, use `--base-url URL`
@@ -5910,6 +6341,151 @@ the ignored raw Army archive and not a live Chromium acceptance run.
 The original responsive/browser investigation remains dated evidence;
 the final 1.0 gate still requires validation against the final source
 pair, served revision and normal player-visible pages.
+
+## Snapshot provenance publication
+
+The [snapshot provenance contract](../data/README.md#snapshot-provenance-contract)
+is exercised offline by `tests/test_snapshot_manifest_publication.py` and
+`tests/test_snapshot_provenance.py`. The former covers byte-exact replay,
+CRLF conflicts, exclusive staging, competing manifest publication,
+transaction ownership, symlink refusal and unsupported hard links. The
+latter also covers historical formats, content hashes and portable
+producer/consumer copies. No external producer package or live acquisition
+is required by InfinityDB's normal test suite.
+
+`tests/test_army_snapshot_source.py` adds the stricter explicitly selected
+Army ZIP/manifest identity checks. `tests/test_database_set_builder.py`
+checks equivalent legacy/local input layouts through complete set generation
+and rejects source/manifest drift before publication. Run these four modules
+as a focused acquisition/build batch when changing that handoff.
+
+Each standalone producer owns its acquisition-level rollback tests and full
+offline suite. The [R2 acceptance record](tooling-and-local-path-cleanup-plan.md#twentieth-bounded-l2-checkpoint--r2-snapshot-producer-publication-alignment-2026-11-13)
+pins producer revisions and Windows/Linux byte-conformance evidence; those
+results do not turn local fixture checks into current hosted/release acceptance.
+
+`tests/test_activate_synced_assets.py` independently exercises the configured
+staged-asset layouts in disposable directories: legacy/local pair parity,
+read-only verification/preview, explicit apply, historical provenance,
+path/schema/hash rejection, duplicate selection, symlinks, inaccessible inputs
+and destination conflicts. It also verifies explicit local-file destinations
+for PDFs and overrides under `local/data/`, while preserving the legacy
+default and current Syncthing staging folders. Mixed-layout file requests,
+receiver-path confusion and conflicting destination bytes fail closed.
+Real source synchronization, receiver ACLs and backup/restore acceptance
+are separate from these hermetic fixtures; see
+the [activation runbook](syncthing-assets.md#explicit-snapshot-layouts).
+
+`tests/test_research_source_paths.py` covers explicit physical PDF selection
+with unchanged provenance labels: exact hash checks, missing selected inputs
+without fallback, path/policy rejection, symlink/reparse-point refusal and
+unreadable sources. The source-evidence and Reinforcements applicability suites
+also compare complete historical source reports and current/historical authority
+outcomes across layouts using synthetic PDFs. Real pinned-source tests retain
+their explicit missing-source skips on clean checkouts. These fixtures do not
+authorize copying private PDFs or changing their recorded paths; see the
+[research binding contract](../data/curated/README.md#explicit-physical-pdf-bindings-for-research).
+
+Pinned-source pytest fixtures now default to the `local` physical layout;
+`--reference-pdf-layout legacy` remains available for deliberate legacy
+fixture checks. Archive-based Wiki acceptance tests also look up immutable
+ZIPs under `local/data/wiki/` without changing their provenance labels.
+
+The `--source-layout` flag for `tools.report_reference_baseline` and
+`tools.audit_pdf_revision_deltas` changes only physical PDF lookup;
+their CLI defaults now use `local` and explicit `legacy` remains supported.
+Baseline source groups retain original source labels and reported identities;
+local PDF verification requires one published SHA-256 and rejects mismatches.
+The delta audit uses pinned PDF hashes and verifies selected bytes before
+extracting text; neither tool searches the other layout on missing sources.
+Focused regressions are in `test_report_reference_baseline.py` and
+`test_specialized_audit_receipts.py`, including synthetic PDF equivalence,
+no fallback, source-pinning failure and unchanged report serialization.
+The reference-baseline suite additionally exercises explicit legacy/local
+binding for the five bilingual Visibility Zone term clauses, preserving their
+existing review disposition and failing before PDF parsing on a bad hash.
+The three shared Basic Attack, Hacking follow-up and Template reference
+source-acceptance tests support the explicit test-only
+`--reference-pdf-layout legacy|local` selector (default: `legacy`). It
+selects only canonical Core/FAQ `data/pdf/...` source labels through the
+common pinned SHA-256 resolver. The selected physical files can reside under
+`data/pdf/` or `local/data/pdf/` without changing citation or test semantics.
+Missing selected PDFs still skip their source-only checks; present mismatched,
+linked, unreadable or unsafe selected inputs fail rather than falling back to
+another layout. The pinned Wiki ZIP and runtime/API/browser assertions are
+unchanged. For example, with the venv active, run the bounded source check:
+
+```powershell
+python -m pytest tests/test_template_reference.py::test_template_conditions_match_pinned_pdf_wiki_and_faq -q --reference-pdf-layout local
+```
+
+Hermetic regression cases in `test_combat_attack_reference.py` cover both
+physical selections, hash changes, missing-local-with-legacy-present, invalid
+layouts and page extraction from a synthetic PDF. The Hacking Program
+statistics source tests also use `--reference-pdf-layout` for their exact
+Core N5.3 PDF via the pinned resolver directly, without loading optional
+PyMuPDF at test collection time. Their independently pinned Army archive
+remains at its existing source path, and
+`tools.audit_hacking_program_statistics_chart` retains its caller-supplied
+`--pdf` input. Their additional hermetic
+regression rejects altered selected bytes, missing local sources despite an
+available legacy PDF, unsupported layouts and drift in the statistics manifest
+pin. On either layout a supplied wrong PDF fails rather than becoming a skip.
+The five Core N5.3 source-only tests for Ammunition identity,
+Smoke/Eclipse visibility opposition, Cover/vertical movement, ARO/Deployment,
+and Command Tokens use the shared `pinned_n53_core_pdf` fixture. This fixture
+uses the same `--reference-pdf-layout legacy|local` selection and the pinned
+resolver, skips only absent selected PDFs, and fails closed on wrong hashes,
+unsafe paths or links. Each owning test retains its own exact N5.3 SHA-256
+assertion, source clause/page checks and separate runtime/API assertions; the
+Cover test still checks the pinned Wiki archive when available. It does not
+load optional PDF readers at test collection time or redirect other tests.
+
+The weapon-chart research source-only cases also use the same pinned N5.3
+Core fixture in `test_audit_weapon_chart_profiles.py`,
+`test_audit_weapon_traits_prose.py`, and
+`test_audit_mine_variant_effects.py`. The first two still call their existing
+audit functions with an explicit selected PDF and verify the exact pinned
+hash, extracted-row counts, comparison classifications and unresolved
+discrepancies. The Mine suite still checks seven chart/effect excerpts and
+the independent reviewed `corePdfSha256` manifest pin before comparing Army
+object geometry and maintained rule ownership. This is **test input**
+selection, not a change to those audit tools or an acceptance of deferred
+source discrepancies. As with other consumers, a missing selected PDF skips
+only source-dependent cases; a present wrong or linked source fails closed.
+
+The multi-revision source checks in `test_application_rule_references.py`
+and `test_silent_immunity_source_scope.py` use the test-only
+`pinned_pdf_sources` fixture for separately pinned N5.2 English, N5.3
+English/Spanish and FAQ v0.0/v0.1 English/Spanish PDFs. The fixture accepts
+canonical source labels mapped to their independent SHA-256 values, checks
+**every supplied member** using the explicit `--reference-pdf-layout`
+selection, then skips the source-only test if any member is missing. An
+unavailable bilingual sibling therefore never hides a supplied corrupt
+revision. Language-specific clauses, historical differences, FAQ term
+inventory, and independently validated runtime/API results remain as before.
+The Reinforcements applicability test now uses the same fixture for its
+two historical N4 PDFs and current N5 Core/ITS18 references; the owning
+auditor still receives its own `source_layout` argument and **does not**
+authorize N4 procedures as N5. Its separately maintained manifest and source
+identity checks are unchanged. Hermetic multi-source cases in
+`test_research_source_paths.py` validate hash mismatch before missing-source
+skips, both physical layouts and no alternative-layout fallback.
+
+The 16 `test_immunity_*.py` modules with a source-only N5.3 English Core
+PDF prerequisite now use `pinned_n53_core_pdf`. Their individual SHA-256
+assertions and rule-page checks for AP/DA/T2 criticals, BTS and E/M
+exceptions, combined saving rolls, printed Missile/Monofilament/Plasma/
+Flash Pulse examples, and Oblivion are unchanged. These checks remain
+separate from curated/API validation, and a missing selected PDF skips
+only the source-only case. No unresolved immunity interaction has been
+turned into an inferred ruling, and no weapon/profile source identities
+have been changed.
+
+The global `require_source_files` fixture retains its previous meaning for
+other suites. Further tests still bound to `data/pdf/` keep their original
+skip semantics until reviewed individually; no global path redirection or
+source-only skip can establish publication approval.
 
 ## Maintained snapshot-note validation
 
@@ -6024,17 +6600,49 @@ canonical finalized path.
 
 ## Reports
 
-Use `--report` to retain the complete check transcript:
+Use `--report` to retain the complete check transcript. The legacy
+no-path flag still chooses `reports/CHECKS YYYYMMDD-HHMMSS.txt`;
+a fresh, categorized destination is recommended for retained run evidence:
 
 ```powershell
-# reports/CHECKS YYYYMMDD-HHMMSS.txt
+# Existing default, available only when this timestamped file is unused
 python tools\run_checks.py --profile code --report
 
-# explicit destination
-python tools\run_checks.py --all --report reports\release-checks.txt
+# Recommended: substitute a fresh UTC run ID and short checkout SHA
+python tools\run_checks.py --all --report local/validation/project-infrastructure/checks/RUN_ID/checks.txt
 ```
 
-Generated reports are local evidence and are normally ignored by Git.
+The runner now refuses an occupied transcript path (including a
+symlink) **before running any requested check stage**, while the
+final `open("x")` also prevents a concurrent check from truncating
+earlier evidence. Collision and report-path errors return runner
+error status **2**, not an artificial test failure status **1**.
+The original `--report PATH` / `--report=PATH` syntax, default
+filename, stdout streaming and summary/error semantics are unchanged.
+A repeated command using the same second's default filename must
+choose a fresh explicit destination instead of overwriting it.
+
+Generated reports are ignored local evidence, not canonical test
+results. An interrupted new transcript can be partial and should
+be inspected; previous logs are never deleted or replaced. No
+existing file in root `reports/` was moved by this change.
+
+The installed `infinity-db validate-peripheral-identities` command
+has a separate optional coverage JSON receipt. When providing
+`--database` and `--output`, select a fresh destination:
+
+```powershell
+infinity-db validate-peripheral-identities --database data/generated/army.db --output local/validation/peripheral-identities/RUN_ID/coverage.json
+```
+
+It now rejects occupied or symlink outputs before loading the
+reviewed identity input and writes UTF-8/LF JSON through exclusive
+creation. Its original data checks and status (success=0,
+failed source mapping or output error=1) are unchanged. Without
+`--output`, it does not generate a report; without a database,
+`--output` remains invalid. Rendering standalone scenario-map
+SVGs is a separate intentional export/re-render contract,
+not an immutable review receipt.
 
 ## Exit status
 
@@ -6074,13 +6682,34 @@ tools below for representative query-performance comparisons.
 Available benchmark and capacity tools include:
 
 ```powershell
-python tools\benchmark_runtime.py --help
-python tools\compare_runtime_benchmarks.py --help
-python tools\benchmark_test_workers.py --help
-python tools\capacity_test.py --help
-python tools\deployment_resources.py --help
-python tools\deployment_alerts.py --help
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_runtime --help
+.\.venv\Scripts\python.exe -m tools.performance.compare_runtime_benchmarks --help
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_test_workers --help
+python -m tools.performance.capacity_test --help
+python -m tools.operations.deployment_resources --help
+python -m tools.operations.deployment_alerts --help
 ```
+
+**Test-worker benchmark report contract.** `tools.performance.benchmark_test_workers`
+runs real test jobs and always writes one JSON measurement receipt.
+For new runs, supply a unique, domain-scoped ignored destination:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_test_workers --workers 0 4 --repeat 2 --report local/performance/test-workers/RUN_ID/worker-comparison.json
+```
+
+Replace `RUN_ID` with a UTC timestamp plus short checkout SHA.
+The selected `--report` path is checked **before** any test subprocess
+starts, and the receipt is created exclusively even if another process
+claims the path while the benchmark runs. Existing files or symlinks
+fail without starting expensive repetitions; select another run ID
+instead of overwriting accepted measurements. The legacy default
+`reports/TEST-WORKERS <timestamp>.json` remains supported for callers
+without `--report`, but now also refuses collisions. Success or
+failed test repetitions still produce the original UTF-8/LF JSON
+report and preserve the existing benchmark success/failure exit code.
+An interrupted new report may be partial and should be inspected;
+no old reports are moved, deleted, or silently republished.
 
 Use runtime benchmarks for repository/query performance and the worker benchmark for deciding whether
 a different local pytest worker setting is warranted. `capacity_test.py` is deliberately HTTP-level:
@@ -6108,8 +6737,20 @@ operational policy there rather than maintaining a second copy in this test refe
 
 `deployment_alerts.py` evaluates a fresh resource report together with bounded aggregate metrics and
 health samples, producing monitoring-friendly OK/warning/critical/unknown exit codes without retaining
-endpoint URLs or user/request identity data. Generated benchmark/capacity/resource/alert reports belong
-in ignored report/audit storage unless a specific result is needed as release evidence.
+endpoint URLs or user/request identity data. Four operational report commands
+(`capacity_test`, `deployment_resources`, `deployment_diagnostics`,
+`deployment_alerts`) share the maintained
+`tools.operations.receipt_output` new-file-only JSON contract. Give
+each `--output` a fresh `local/performance/http-capacity/` or
+`local/operations/deployment/` run-specific path; occupied paths,
+including symlinks, fail before collection, and exclusive file
+creation protects an already-completed report during a race.
+Successful and failed measurements still retain their original JSON
+and exit statuses. Source resource receipts must never be reused
+as output paths. For matching commands, outputs and exception codes,
+see [deployment guidance](deployment.md#repeatable-http-capacity-scenario).
+An interrupted new receipt may be partial; no historical report
+is renamed, removed or auto-overwritten.
 
 Live-metrics tests pin the generation timing contract before retained history exists: one shared
 generation-start timestamp is created with the preloaded request registry, only completed instrumented
@@ -6172,9 +6813,9 @@ Start the local server in one PowerShell window:
 Run the needed verifier from a second repository-root PowerShell window:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_ammunition_browser --base-url http://127.0.0.1:8000 --output local/audits/ammunition-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/audits/labels-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_general_rules_browser --base-url http://127.0.0.1:8000 --output local/audits/general-rules-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_ammunition_browser --base-url http://127.0.0.1:8000 --output local/audits/ammunition-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/audits/labels-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_general_rules_browser --base-url http://127.0.0.1:8000 --output local/audits/general-rules-browser.json
 ```
 
 **Historical acceptance, 2026-10-19:** Ammunition 33/33, Labels 72/72,
@@ -6219,9 +6860,9 @@ With the current checkout's development server running on
 verifier from the repository root in PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_states_browser --base-url http://127.0.0.1:8000 --output local/audits/states-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --base-url http://127.0.0.1:8000 --output local/audits/hacking-programs-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_traits_catalog_browser --base-url http://127.0.0.1:8000 --output local/audits/traits-catalog-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_states_browser --base-url http://127.0.0.1:8000 --output local/audits/states-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_hacking_programs_browser --base-url http://127.0.0.1:8000 --output local/audits/hacking-programs-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_traits_catalog_browser --base-url http://127.0.0.1:8000 --output local/audits/traits-catalog-browser.json
 ```
 
 **Historical browser acceptance, 2026-10-19:** States 72/72,
@@ -6246,7 +6887,7 @@ local Army database, follows reviewed destinations and rejects JavaScript errors
 incomplete loading and horizontal overflow. With the matching development server running:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
 ```
 
 **Historical acceptance:** successive 9/9 runs on 2026-10-19/20 covered the
@@ -6756,10 +7397,10 @@ malformed/duplicate historical rows, fingerprint drift and report output.
 The offline `tools/report_reference_baseline.py` command inventories the published Army
 source snapshot identity, rules collections and source citations, and row counts by
 canonical family. Scenario membership evidence is separated by source collection,
-revision and publication identity: the current published rules database has
-four N5 core scenarios and a distinct ITS Season 18 Battleground pilot.
-The aggregate five memberships must **not** be described as five core missions
-or counted as evidence of 1.0 scenario browser completeness.
+revision and publication identity: the current Rules database has four N5 core
+scenario memberships. The ITS Season 18 Battleground pilot is in the separate
+ITS database, outside this two-database report. Neither count establishes
+scenario browser completeness.
 
 Each category now also includes an optional `routeHint` (browser/API discovery
 surfaces and presentation mode) derived from the published application-domain
@@ -6769,36 +7410,43 @@ points*, not mappings of every source record or verified player-facing evidence;
 `apiReadPath`, `browserEntryPoint`, and all fact/relationship/presentation
 review fields remain pending. Where domain ownership or publication is ambiguous,
 the route hint is null rather than a guessed destination.
-Generate ignored review artifacts from the repository root:
+Generate ignored review artifacts from the repository root, replacing `RUN_ID`:
 
 ```powershell
-python tools/report_reference_baseline.py --json-output reports/1.0-baseline.json --markdown-output docs/audits/1.0-baseline.md
+.\.venv\Scripts\python.exe -m tools.report_reference_baseline --json-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.json --markdown-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.md
 ```
 
-To ensure the **running development/release server** uses the exact Army and
-rules database bytes and applicable Weapon-profile publication inventoried
-from this checkout, add
+Use a new, run-specific directory for every attempt. All selected report
+outputs—baseline JSON, Markdown, current citation minimum JSON, explanation
+reconciliation, review batch plans and review pilots—must be new files.
+The command checks every selected destination for existing files or symlinks
+and rejects duplicate resolved paths before collecting evidence. Each writer
+uses exclusive file creation, protecting earlier reports if a collision
+appears during the audit. The individual writes are not an atomic multi-file
+transaction: an interrupted attempt can leave new partial evidence for
+inspection; do not delete accepted earlier reports to reuse names. Historical
+explicit `local/audits/` destinations remain supported as paths, but
+pre-existing artifacts at those destinations are never overwritten.
+
+For a server using exactly the inventoried Army and Rules databases, add
 `--verify-server http://127.0.0.1:8000` (substitute the actual server origin).
-The check queries the served `/api/version` response and requires its
-`snapshot_revision` to equal the SHA-256 of
-`"<Army database SHA-256>:<rules database SHA-256>:<Weapon-profile publication SHA-256 or none>"`,
-the runtime's snapshot identity. The baseline validates a co-located
-publication against the database pair before fingerprinting it; a missing
-or independently located publication contributes `none`. On mismatch it
-exits nonzero **before writing
-baseline outputs**; a successful run records `servedSnapshot` in JSON.
-The server option is opt-in and never starts, deploys, or modifies a server.
-It checks runtime identity, not static assets, processed symbols, PDF/Wiki
-bytes, browser correctness or full source completeness; these require
-independent checks. Rerun against the final candidate and deployment, not
-only a local development server.
+The check compares `/api/version` with the runtime snapshot identity computed
+from the two selected database filenames and SHA-256 hashes. The reporter also
+validates Weapon citations embedded in the Rules database. On mismatch it exits
+nonzero **before writing baseline outputs**; success records `servedSnapshot`
+in JSON. The opt-in check never starts, deploys or modifies a server. It does
+not verify static assets, PDF/Wiki bytes, browser correctness or source
+completeness. A server using the complete Army/Rules/ITS set has a different
+identity and cannot pass this two-database check; use the
+[complete-set release verifier](#complete-set-release-candidate-browser-verifier)
+for that candidate.
 
 Optionally pass `--army-archive <path>` to verify the exact Army ZIP SHA-256 against
-the one embedded in `infinity.db`. With the pinned source ZIP available, the
+the one embedded in `army.db`. With the pinned source ZIP available, the
 baseline checks each source faction/list ID, filename, source-file SHA-256,
 version and Army/reinforcement kind against the published `army_lists` rows.
 It also checks every source Unit occurrence and its original list position
-against `infinity.db::army_units`, matches the source-version counts,
+against `army.db::army_units`, matches the source-version counts,
 and rejects unexpected JSON documents, duplicate Unit IDs or source-file
 count mismatches. The September 29 archive has **59 JSON documents**:
 58 Army-list source files plus one `metadata.json` document; these counts
@@ -6807,11 +7455,11 @@ including the source-provenance and Unit-occurrence counts. It fails closed
 on source identity, provenance or Unit-membership mismatches. It also
 requires the validated application/raw database export pair and verifies
 all source profile-group identities, positions, categories and text fields
-against published `infinity.db::profile_groups`. Every nested source
+against published `army.db::profile_groups`. Every nested source
 profile's identity, position and core attribute fields, and each loadout's
 identity, position, name, Points, SWC, miniature count and disabled flag,
-are compared with `infinity.raw.db::profiles` and
-`infinity.raw.db::loadout_options` respectively. These two tables
+are compared with `army.raw.db::profiles` and
+`army.raw.db::loadout_options` respectively. These two tables
 are intentionally **not** in the published application database.
 The optional audit also compares every source profile/loadout Skill,
 Equipment and Weapon occurrence against the corresponding reusable
@@ -6898,7 +7546,7 @@ all combined-source variants, or browser acceptance. The existing
 parity for global Unit options, Orders and expanded Includes.
 
 The normal Unit detail **browser acceptance** is available through
-`tools.verify_unit_skill_presentation_browser`. It compares each rendered
+`tools.browser.verify_unit_skill_presentation_browser`. It compares each rendered
 General Profile and each army-local profile/loadout section with the normal
 `/api/units/<slug>` response: exact row category, item name, linked
 Skill/Equipment/Weapon destination, quantity and rendered Extras.
@@ -6940,7 +7588,7 @@ The separate CLI defaults to seven Units × three widths (**21 pages**).
 To check an already running candidate server and save ignored evidence:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json
 ```
 
 Use `--exclude-optional teamops` (repeat for multiple flags),
@@ -7468,7 +8116,7 @@ matched in the 2026-10-28 local review. This gate complements, but
 does not replace, question coverage, scenario applicability or browser
 verification.
 
-The separate read-only `tools/audit_1_0_reference_inputs.py` command
+The separate read-only `tools/research/audit_1_0_reference_inputs.py` command
 cross-checks supplied **source bytes** with the existing enrichment report,
 the current curated Wiki citation archive and historical Wiki revisions. These
 inputs are explicit and never downloaded automatically. Keep evidence output in
@@ -7476,7 +8124,7 @@ the ignored `local/` workspace:
 
 ```powershell
 .venv\Scripts\python.exe -m infinity_db build-rules --output local/audits/1.0-rules-current.db
-.venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5.3-en.pdf" --faq-pdf "data/pdf/faq/n5-faq-v0.1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
+.venv\Scripts\python.exe -m tools.research.audit_1_0_reference_inputs --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5.3-en.pdf" --faq-pdf "data/pdf/faq/n5-faq-v0.1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
 ```
 
 All 12 PDF source declarations now carry maintained SHA-256 pins for six
@@ -7597,14 +8245,14 @@ procedures against the exact candidate and retain new execution logs privately.
 
 ## 1.0 Weapon Trait archived-Wiki cross-reference
 
-`tools/audit_weapon_trait_cross_sources.py` is an **offline, read-only**
+`tools/research/audit_weapon_trait_cross_sources.py` is an **offline, read-only**
 source-reconciliation tool, not part of normal builds or CI. It requires the
 pinned v5.3 PDF and the exact archived Wiki history ZIP in addition to the
 shipped generated databases. It fails closed if the nine maintained review
 identities or the PDF/Wiki payload hashes no longer match.
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_weapon_trait_cross_sources --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --wiki-history "C:\path\to\WIKI-en-history.zip" --json-output docs/audits/weapon-trait-cross-source.json --markdown-output docs/audits/weapon-trait-cross-source.md
+.\.venv\Scripts\python.exe -m tools.research.audit_weapon_trait_cross_sources --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --wiki-history "C:\path\to\WIKI-en-history.zip" --json-output docs/audits/weapon-trait-cross-source.json --markdown-output docs/audits/weapon-trait-cross-source.md
 ```
 
 This compares **Traits**, not all weapon-profile values or rules prose; the
@@ -7615,7 +8263,7 @@ remains manual and source-specific.
 
 ## 1.0 Weapon Chart partial evidence audit
 
-The read-only `tools/audit_weapon_chart_profiles.py` compares the printed N5 v5.3
+The read-only `tools/research/audit_weapon_chart_profiles.py` compares the printed N5 v5.3
 Weapon Chart to the shipped Army metadata. Its PDF layout reader reconstructs
 wrapped names and two-line Plasma saving cells, selects a unique explicit or
 mode-less profile, and keeps Disco Ball's auxiliary object profile separate from
@@ -7628,7 +8276,7 @@ offline audit additionally requires PyMuPDF (`python -m pip install pymupdf`);
 normal CI and tests do not need that optional dependency. Run from the repository root:
 
 ```powershell
-.venv\Scripts\python.exe tools/audit_weapon_chart_profiles.py --core-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --army-db data/generated/army.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
+.venv\Scripts\python.exe -m tools.research.audit_weapon_chart_profiles --core-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --army-db data/generated/army.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
 ```
 
 The output includes the source PDF SHA-256, raw compared fields, range-band
@@ -7661,7 +8309,7 @@ all input hashes. It requires the locally retained source archives, PyMuPDF,
 and the generated Army database (none are added to Git):
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/army.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
+.venv\Scripts\python.exe -m tools.research.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/army.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
 ```
 
 The output reports source values, **not** a gameplay ruling or permission to
@@ -7673,7 +8321,7 @@ Before creating a distinct deployed-object/reverse-use model, generate the
 read-only source/profile and curated-rule *candidate* inventory:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_inventory --army-db data/generated/army.db --curated-source data/curated/rules/n5-core-v5.3.json --json-output local/audits/deployed-object-inventory.json
+.venv\Scripts\python.exe -m tools.data.audit_deployed_object_inventory --army-db data/generated/army.db --curated-source data/curated/rules/n5-core-v5.3.json --json-output local/audits/deployed-object-inventory.json
 ```
 
 The report matches the 14 pinned supplementary Weapon Chart profiles using
@@ -7811,7 +8459,7 @@ or delivery links are inferred.
 
 The completed delivery-coverage audit examined the objects already
 identified, independently of keyword discovery. The continuing validation
-runs through `tools.audit_deployed_object_inventory`,
+runs through `tools.data.audit_deployed_object_inventory`,
 `tests/test_deployed_object_reference.py` and
 `tests/test_deployed_object_storage.py` rather than the retired queue command.
 
@@ -7833,28 +8481,25 @@ exact Army profile selectors/attributes, lost source clauses/citations, and
 invented missing-attribute values. Source text and alternative Silhouette
 values remain unchanged; no canonical object or carrier IDs are created.
 
-### Non-catalog game-element discovery
+### Non-catalog game-element review evidence
 
 Weapon/Equipment definition scans do not examine Skills, generic rules,
-Traits, terminology or States. Audit their own definition summaries and
-structured detail fields without turning keyword mentions into object IDs:
-
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_non_catalog_queue
-.venv\Scripts\python.exe -m tools.audit_deployed_object_non_catalog_queue --json
-```
+Traits, terminology or States. A completed keyword review examined their
+definition summaries and structured details without turning mentions into
+object IDs. Its one-use discovery command is retired; it is not an ongoing
+source-completeness gate.
 
 The separate `config/validation/deployed-object-non-catalog-reviews.json`
 manifest pins **61 source-reviewed definitions** in this bounded keyword scan,
-with no unreviewed candidates. Access Width gate Tokens label scenery
-openings (p. 145); Army Retreat Tokens indicate existing Trooper conditions
+which had no unreviewed candidates at completion. Access Width gate Tokens
+label scenery openings (p. 145); Army Retreat Tokens indicate existing Trooper conditions
 (p. 146); Combat Group affiliation identifies the group of an existing
 deployed Weapon or Equipment Marker (p. 10). None creates an additional
 deployed-object profile or delivery permission.
 Six earlier decisions initially had PDF-only evidence recorded in the
 audit manifest. Their verified N5.3 citations have since been migrated to
 maintained rules records and synchronized with the rules database/publication;
-the audit now reports no missing maintained N5.3 citations.
+all 61 had a maintained N5.3 citation at command retirement.
 The original three Skill decisions distinguish `skill:place-deployable`
 (delivery action, p. 82), `skill:minelayer` (deployment method, p. 102)
 and `skill:request-speedball` (support State Tokens, p. 84). Additional
@@ -7931,34 +8576,30 @@ These six definitions now have **maintained N5.3 PDF citations** in the
 curated rules and regenerated `rules.db`. Their former
 `citationStatus: pdf-verified-manifest-only` and `pdfExcerpt` fields
 were retired as part of the coordinated promotion, which also refreshed
-the deployed-object publication fingerprint. The audit continues to
-verify exact source pages and summary/detail evidence. Its
-`reviewedPdfOnly` and `missingMaintainedN5Citation` reports are now empty.
+the deployed-object publication fingerprint. The retained regression continues
+to verify exact source pages and summary/detail evidence.
 
 The decisions were manually compared with pinned English N5.3 pages.
-The audit validator pins source citations already in maintained definitions
-or explicit transitional PDF-only review evidence, plus curated summary
-and detail evidence; it does **not** parse the PDF in CI. No new ARM/BTS/STR/S
-value, Army carrier, delivery edge or runtime object is inferred.
+The regression checks source citations in maintained definitions and curated
+summary and detail evidence; it does **not** parse the PDF in CI. It pins the
+reviewed identity/classification pairs independently of JSON formatting;
+rebaseline those pins only after a source review of the changed decisions.
+No new ARM/BTS/STR/S value, Army carrier, delivery edge or runtime object is inferred.
 Summary-only glossary/trait reviews remain valid only while they lack
-detailed source fields. All 61 keyword-matching definitions are classified,
-but the scan covers neither unmentioned terms nor other source domains and
-is **not** a complete N5.3 object inventory.
-`tests/test_deployed_object_non_catalog_queue.py` checks these boundaries.
+detailed source fields. The 61 reviewed definitions remain classified,
+but the historical scan covered neither unmentioned terms nor other source
+domains and is **not** a complete N5.3 object inventory.
+`tests/test_source_conflict_publication.py` checks the retained review boundaries.
 
-### Expanded non-catalog battlefield-element discovery
+### Expanded non-catalog battlefield-element review evidence
 
-The current 61-definition queue excludes other relevant wording, including
-Consoles, Supply Boxes, Disco Balls, and Marker/decoy representations. Run a
-separate, read-only pass over Skill/Rule/Trait/Term/State definitions:
+The original review excluded other relevant wording, including Consoles,
+Supply Boxes, Disco Balls, and Marker/decoy representations. A separate
+completed pass reviewed Skill/Rule/Trait/Term/State definitions; its one-use
+discovery command is also retired.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_expanded_queue
-.venv\Scripts\python.exe -m tools.audit_deployed_object_expanded_queue --json
-```
-
-The expanded audit excludes all 61 candidates from the original scan rather
-than recounting them. It identifies **28 additional definitions, all
+The expanded audit excluded all 61 candidates from the original scan rather
+than recounting them. It identified **28 additional definitions, all
 classified** in `config/validation/deployed-object-expanded-reviews.json`,
 with no PDF-only decisions or missing maintained N5.3 citations. N5.3 pp. 151
 and 153 establish that Domination's four Consoles and Supplies' three Supply
@@ -8006,18 +8647,17 @@ The five previously PDF-only records—`state:decoy`,
 and `skill:explode`—now have their verified N5.3 source pages
 in the maintained curated definitions and regenerated `rules.db`.
 Temporary `pdfExcerpt` and `citationStatus` metadata has been
-retired. The expanded audit's `reviewedPdfOnly` and
-`missingMaintainedN5Citation` reports are now empty. CI still
-validates the curated citations, not the ignored source PDF.
+retired. The retained regression validates the curated citations, not the
+ignored source PDF.
 
-This expanded scan is deliberately bounded to named objectives/devices
+This expanded scan was deliberately bounded to named objectives/devices
 and Marker/decoy wording, not all N5.3 prose, source tables, or possible
-game elements. The manifest and validator reject unsupported IDs,
-lost detail clauses, stale citations or inferred object profiles. No
+game elements. The retained manifest and regression reject changed reviewed
+identity/classification pairs, lost evidence, stale citations or inferred object
+profiles; they do not discover new keyword matches. No
 production database, published object count, Unit ownership or approved
 delivery path is changed.
-`tests/test_deployed_object_expanded_queue.py` checks the discovery and
-fail-closed review boundaries.
+`tests/test_source_conflict_publication.py` checks these review boundaries.
 
 ### N5.3 Hacking Device Programs source chart
 
@@ -8217,8 +8857,8 @@ the four-device Program entitlement chart and does not authorize additional
 Equipment, Unit carrier or deployed-object identities.
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --json
-.venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --archive "data/raw/JSON 20260929-114335.zip" --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.venv\Scripts\python.exe -m tools.research.audit_hacking_program_statistics_chart --json
+.venv\Scripts\python.exe -m tools.research.audit_hacking_program_statistics_chart --archive "data/raw/JSON 20260929-114335.zip" --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 ```
 
 The offline default checks the exact source rows against the published
@@ -8249,13 +8889,13 @@ Army's source-derived `—` while adding a brief note to consult the
 Program's individual requirements/effects rather than interpreting a
 missing Troop Type as no valid target. The source regression verifies the
 printed chart key and program-specific clauses; the maintained
-`tools.verify_hacking_programs_browser` acceptance checks the conditional
+`tools.browser.verify_hacking_programs_browser` acceptance checks the conditional
 note alongside all original Army stat cells at 1440/390/320 px.
 
 For repeatable localhost browser acceptance without an external server:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --self-host --output local/hacking-program-target-scope-browser-20261030.json
+.venv\Scripts\python.exe -m tools.browser.verify_hacking_programs_browser --self-host --output local/hacking-program-target-scope-browser-20261030.json
 ```
 
 The self-host mode launches a disposable loopback WSGI server using the
@@ -8277,7 +8917,7 @@ The maintained validator cross-checks existing curated records and flags
 missing or insufficiently scoped typed relationships:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --json
 ```
 
 The current command runs offline from the reviewed manifest and curated JSON.
@@ -8309,8 +8949,8 @@ plain text. The JSON must match the deterministic source projection
 byte-for-byte:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --check-publication --json
-.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --output local/restrictions-reference-staged.json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --check-publication --json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --output local/restrictions-reference-staged.json
 ```
 
 The second command stages replacement bytes under the ignored `local/`
@@ -8736,8 +9376,8 @@ pp. 149–156) against maintained scenario geometry, scoped rules and Skills,
 scoring references, and the published deployed-object identities:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_core_scenario_objects
-.venv\Scripts\python.exe -m tools.audit_core_scenario_objects --json
+.venv\Scripts\python.exe -m tools.data.audit_core_scenario_objects
+.venv\Scripts\python.exe -m tools.data.audit_core_scenario_objects --json
 ```
 
 Alternate database selection and input hashes follow the
@@ -8848,7 +9488,7 @@ unresolved identities independently from source-profile value differences.
 The pinned Wiki and Army files are private, not committed:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_wiki_weapon_chart_names --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --army-db data/generated/army.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
+.venv\Scripts\python.exe -m tools.research.audit_wiki_weapon_chart_names --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --army-db data/generated/army.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
 ```
 
 A name alias is not a new Weapon rule or corrected Weapon Chart profile.
@@ -8859,8 +9499,8 @@ during source revision research, combine the existing enrichment and chart
 reports in a deterministic source-to-reference triage. This is not a release gate:
 
 ```powershell
-.venv\Scripts\python.exe tools/audit_enrichment_coverage.py data/generated/army.db --rules data/generated/rules_n5.db --output local/audits/weapon-enrichment.json
-.venv\Scripts\python.exe tools/audit_weapon_definition_gaps.py --army-db data/generated/army.db --enrichment local/audits/weapon-enrichment.json --chart local/audits/weapon-chart.json --json-output local/audits/weapon-triage.json --markdown-output local/audits/weapon-triage.md
+.venv\Scripts\python.exe -m tools.data.audit_enrichment_coverage data/generated/army.db --rules data/generated/rules_n5.db --output local/audits/weapon-enrichment.json
+.venv\Scripts\python.exe -m tools.research.audit_weapon_definition_gaps --army-db data/generated/army.db --enrichment local/audits/weapon-enrichment.json --chart local/audits/weapon-chart.json --json-output local/audits/weapon-triage.json --markdown-output local/audits/weapon-triage.md
 ```
 
 **Current-input regression (2026-10-31):** the triage now retains historical
@@ -8916,7 +9556,7 @@ local and Git-ignored.
 
 ## 1.0 Weapon Traits and special-weapon source inventory
 
-`tools/audit_weapon_traits_prose.py` uses the same optional N5 v5.3 PDF and
+`tools/research/audit_weapon_traits_prose.py` uses the same optional N5 v5.3 PDF and
 generated Army database, plus `rules_n5.db`, to compare positionally reconstructed
 Traits against raw Army `metadata_weapons.properties`. The offline check keeps
 printed wording, mode identities, source page, and Army properties in each report.
@@ -8925,7 +9565,7 @@ named curated Weapon definitions, without treating a missing dedicated Weapon
 record as proof that no gameplay rule representation exists.
 
 ```powershell
-python tools/audit_weapon_traits_prose.py --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
+python -m tools.research.audit_weapon_traits_prose --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
 ```
 
 The corrected N5 v5.3 audit yields 147 literal Trait-list matches, 16 reviewed
@@ -11122,7 +11762,7 @@ Repeater's current reference now cites the Hacking Area page in the verified
 English Wiki snapshot alongside the N5.3 rulebook and Repeater page. The
 mechanics and imported Army Equipment values were not changed.
 
-The `tools/audit_enrichment_coverage.py` baseline now uses the same
+The `tools/data/audit_enrichment_coverage.py` baseline now uses the same
 `EquipmentCatalog` as the published `/api/equipment` endpoints, covering Army
 Equipment, profile-symbol-encoded Cube/Cube 2.0 and curated-only Firewall.
 The rebuilt current-rules/Army enrichment audit reported **0 release blockers**
@@ -11199,7 +11839,7 @@ For subsequent Army snapshot reviews, the source-presentation audit has an opt-i
 fail-closed occupancy gate:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/audit_source_presentation.py data/generated/infinity.db --require-no-occupied-gaps --output local/audits/source-presentation.json
+.\.venv\Scripts\python.exe -m tools.data.audit_source_presentation data/generated/army.db --require-no-occupied-gaps --output local/audits/source-presentation.json
 ```
 
 This gate passes only when a checksum-matched raw source database is available
@@ -11677,7 +12317,7 @@ public Trait detail pages scroll correctly in a browser. Legacy MediaWiki
 encoding matters: Suppressive Fire (SF) uses `.28SF.29`, not a
 display-name-derived fragment.
 
-`tools/audit_trait_wiki_anchors.py` reads a saved HTML response from the
+`tools/research/audit_trait_wiki_anchors.py` reads a saved HTML response from the
 official `https://infinitythewiki.com/Traits` page. It checks every mapped
 fragment against the page's actual heading `id` and its rendered text,
 reporting missing fragments and wrong-heading matches separately. The
@@ -11696,7 +12336,7 @@ To run the source check explicitly from the repository root in PowerShell:
 
 ```powershell
 Invoke-WebRequest -Uri "https://infinitythewiki.com/Traits" -OutFile "local/audits/traits-current.html"
-.\.venv\Scripts\python.exe tools/audit_trait_wiki_anchors.py local/audits/traits-current.html --inventory-unmapped --output local/audits/trait-wiki-anchors.json
+.\.venv\Scripts\python.exe -m tools.research.audit_trait_wiki_anchors local/audits/traits-current.html --inventory-unmapped --output local/audits/trait-wiki-anchors.json
 ```
 
 Keep the HTML and report under ignored `local/audits`, with a capture
@@ -11717,7 +12357,7 @@ previous Trait Wiki link was placed exclusively in the developer-only
 sets its reviewed URL and reveals it when `wiki` is available; the
 developer-only source metadata on other catalog pages is unchanged.
 
-`tools/verify_trait_wiki_browser.py` is an optional browser acceptance
+`tools/browser/verify_trait_wiki_browser.py` is an optional browser acceptance
 check. With a running local InfinityDB application and an existing official
 Traits HTML snapshot, it visits all 33 `/traits/{slug}` routes in a clean
 Chromium context with Developer Mode off; each page must render the visible
@@ -11742,7 +12382,7 @@ test suite:
 ```powershell
 .\.venv\Scripts\python.exe -m pip install playwright
 .\.venv\Scripts\python.exe -m playwright install chromium
-.\.venv\Scripts\python.exe -m tools.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/audits/traits-current.html --output local/audits/trait-wiki-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/audits/traits-current.html --output local/audits/trait-wiki-browser.json
 ```
 
 If all routes report HTTP 404, the verifier is reaching the wrong/stale

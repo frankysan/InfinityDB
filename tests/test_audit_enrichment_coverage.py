@@ -10,7 +10,7 @@ from infinity_army_data.normalize import normalize_master
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import export_database
 from infinity_db.rules_database import export_rules_database
-from tools.audit_enrichment_coverage import (
+from tools.data.audit_enrichment_coverage import (
     DEFAULT_CLASSIFICATION_PATH,
     EnrichmentCoverageAuditError,
     _catalog_gap_classification,

@@ -24,6 +24,7 @@ from infinity_db.rules_database import (
     RulesDatabase,
     export_rules_database,
 )
+from tools.research.source_paths import pinned_pdf_path
 
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "data/generated/rules_n5.db"
@@ -31,7 +32,9 @@ CHART = ROOT / "config/validation/restrictions-source-chart.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 
 
-def test_english_core_pdf_pin_survives_curated_export(tmp_path: Path) -> None:
+def test_english_core_pdf_pin_survives_curated_export(
+    tmp_path: Path, reference_pdf_layout: str,
+) -> None:
     documents = load_curated_directory(ROOT / "data/curated/rules")
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     pins = {
@@ -50,12 +53,17 @@ def test_english_core_pdf_pin_survives_curated_export(tmp_path: Path) -> None:
             "SELECT collection_id, sha256 FROM sources WHERE id = ?", (chart["sourceId"],),
         ))
     assert stored == pins
-    pdf = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if pdf.exists():
+    pdf = pinned_pdf_path(
+        ROOT, "data/pdf/rules/n5-rules-v5.3-en.pdf",
+        chart["sourcePdfSha256"], layout=reference_pdf_layout, missing_ok=True,
+    )
+    if pdf is not None:
         assert hashlib.sha256(pdf.read_bytes()).hexdigest() == chart["sourcePdfSha256"]
 
 
-def test_all_selected_pdf_sources_have_consistent_pins_and_exports(tmp_path: Path) -> None:
+def test_all_selected_pdf_sources_have_consistent_pins_and_exports(
+    tmp_path: Path, reference_pdf_layout: str,
+) -> None:
     documents = load_curated_directory(ROOT / "data/curated/rules")
     pdfs = [(doc["collection"]["id"], source)
             for _, doc in documents for source in doc["sources"] if source["kind"] == "pdf"]
@@ -79,8 +87,11 @@ def test_all_selected_pdf_sources_have_consistent_pins_and_exports(tmp_path: Pat
     for _, source in pdfs:
         assert len(source["sha256"]) == 64
         assert source_pins.setdefault(source["id"], source["sha256"]) == source["sha256"]
-        path = ROOT / source["localPath"]
-        if path.exists():
+        path = pinned_pdf_path(
+            ROOT, source["localPath"], source["sha256"],
+            layout=reference_pdf_layout, missing_ok=True,
+        )
+        if path is not None:
             assert hashlib.sha256(path.read_bytes()).hexdigest() == source["sha256"]
     assert len(source_pins) == 8
     output = tmp_path / "rules_n5.db"

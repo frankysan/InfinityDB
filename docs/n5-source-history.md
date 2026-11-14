@@ -82,13 +82,15 @@ Hosted CI and final source-wide acceptance remain separate.
 
 **Project domain:** Data processing
 
-The new, read-only `tools.audit_pdf_revision_deltas` compares **11 adjacent
+The new, read-only `tools.research.audit_pdf_revision_deltas` compares **11 adjacent
 revision pairs**: four N5 core transitions in **each** of English and Spanish,
 FAQ v0.0 to v0.1 in each language, and ITS Season 18 English 2026.09.01 to
 2026.09.11. It requires exact bytes matching the existing ignored
-`local/pdf-revision-inventory.json` hashes, excludes cover pages, and compares
-normalized extracted tokens using nine-token windows. Results are in
-`local/audits/pdf-deltas-2026-11-06.json` (ignored). The report is a
+`local/research/pdf/revision-inventory.json` hashes, excludes cover pages, and compares
+normalized extracted tokens using nine-token windows. The historical
+2026-11-06 results were saved in `local/audits/pdf-deltas-2026-11-06.json`;
+new runs default to a fresh UTC run directory under
+`local/audits/pdf-revision-deltas/`. Each report is a
 **candidate-triage index**, not a line-by-line certified change log: tables,
 diagrams, column order, typography, bilingual translations and scenario
 applicability require human inspection. Layout shifts produce false positives,
@@ -409,7 +411,7 @@ source-only normalized tables, while `infinity.raw.db` omits
 application projections. Their initial direct attempts against
 either file therefore failed on missing tables, **not because
 source relationships were missing**. The bounded paired-audit
-helper `tools.paired_audit_connection` now opens the application
+helper `tools.data.paired_audit_connection` now opens the application
 database read-only, verifies the raw sibling's shared export
 metadata/fingerprint and exposes required raw tables through
 temporary SQLite views. It preserves the combined-schema
@@ -466,7 +468,7 @@ a different source archive
 from the selected current archive
 (`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`).
 Applying it directly **still fails closed**. The new
-opt-in `tools.audit_relationship_semantics
+opt-in `tools.data.audit_relationship_semantics
 data/generated/infinity.db --current-only` reports
 **eight unresolved constraints referencing those five
 source IDs**, without borrowing the prior historical
@@ -691,7 +693,7 @@ For each suspected discrepancy or missing rule:
    evidence. If sources conflict, retain each original value and citation; do not
    silently select one based only on recency.
 7. **Promote only reviewed findings** to maintained data and durable contracts.
-   Put intermediate diffs and raw comparison evidence in ignored `docs/audits/`.
+   Put intermediate diffs and raw comparison evidence in ignored `local/audits/`.
    Normal builds/tests must remain offline and must not fetch these sources.
 
 When recording a finding, preserve `source kind`, `URL/path`, `publication or
@@ -929,7 +931,7 @@ Army import or introduce game-session roll selection.
 
 ## Reviewed 1.0 Weapon Trait evidence boundary
 
-The read-only `tools/audit_weapon_trait_cross_sources.py` retains nine historically
+The read-only `tools/research/audit_weapon_trait_cross_sources.py` retains nine historically
 reviewed N5 v5.3 Weapon Trait identities against archived `Weapon_Chart` Wiki
 revision `4083` (exact payload hash in `config/validation/weapon-trait-wiki-review.json`).
 After correcting the tall Cybermine cell extraction, **eight** PDF/Army Trait
@@ -1028,4 +1030,4 @@ This review does **not** change imported source metadata, assume that an
 implicit effect is the same as an explicitly listed Trait, or establish
 complete special-weapon prose links. The remaining work stays in
 `docs/TODO.md`. New generated evidence belongs in ignored `local/audits/`;
-legacy `docs/audits/` remains supported.
+legacy `docs/audits/` evidence should be moved to `local/archive/`.

@@ -12,8 +12,8 @@ from typing import Any
 import pytest
 
 from infinity_db.web import create_app
-from tools.browser_test_metrics import launch_timed_chromium
 from tools.browser_wsgi_transport import route_browser_page
+from tools.testing.browser_test_metrics import launch_timed_chromium
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-accessible-navigation.test"

@@ -58,10 +58,19 @@ ASCII art, keeping labels readable in both source and rendered form.
 ## Active cleanup plans
 
 - [tooling-and-local-path-cleanup-plan.md](tooling-and-local-path-cleanup-plan.md) —
-  proposed post-v1.1.0 audit and migration of maintained `tools/` modules,
-  Git-ignored data into `local/`, categorized private output paths,
-  and bounded one-use tool retirement. Implementation is not started;
-  the [backlog](TODO.md) owns the active task.
+  active post-v1.1.0 tool/path cleanup. Its
+  [L1 decision package](tooling-and-local-path-cleanup-plan.md#l1-decision-package--p-accepted-t-and-m-pending-2026-11-13)
+  records **P accepted** for new path and lifecycle conventions, while
+  tracked retirements (T) and private-data relocation/deletion (M) remain
+  separately gated. The accepted policy is owned by
+  [architecture](architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
+  and [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective);
+  existing paths and commands are not migrated by that approval. All current
+  root tools are named in the L0 record; recovery/host evidence remains open.
+  The [L2 reader/producer decision package](tooling-and-local-path-cleanup-plan.md#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13)
+  maps candidate paths and the non-destructive R1–R6 acceptance order;
+  it is not permission to change live paths or Syncthing. The
+  [backlog](TODO.md) owns the implementation task.
 
 ## Completed strategic migrations
 
@@ -99,7 +108,7 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   Keep unique source/provenance evidence while it supports unresolved questions;
   use `TODO.md` for current work and `rules-semantics.md` for reviewed meaning.
 - `rules-interaction-checklist.md` — generated cross-release interaction-review ledger. Regenerate
-  it with `tools/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
+  it with `tools/data/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
   original review/defer decision and are evidence provenance, not the active roadmap; use `TODO.md`
   for current milestone planning.
 
@@ -255,14 +264,13 @@ unique or ignored private data is never bulk-deleted on the basis of naming
 or age; such removal requires its own verified review and authorization.**
 Avoid maintaining a permanent second archive or completed-task register.
 
-The next [tooling and local-path cleanup project](tooling-and-local-path-cleanup-plan.md)
-will audit current files against this policy and establish the detailed
+The active [tooling and local-path cleanup project](tooling-and-local-path-cleanup-plan.md)
+audits existing files against this policy and proposes detailed
 directory/naming rules; it does not retroactively authorize mass deletions.
 
 ## Planning and history
 
 - `TODO.md` — only work that is still unimplemented or intentionally deferred.
-- [workflow-improvement-review-2026-11-04.md](workflow-improvement-review-2026-11-04.md) — dated review of task, validation, CI and tooling workflow improvements; recommendations, not an active task ledger.
 - `CHANGELOG.md` — concise release outcomes and upgrade consequences.
 - `AI_CONTEXT.md` — compact agent-oriented index of non-obvious current invariants and pointers to
   canonical documentation. It is not a second architecture or data-model specification.
@@ -344,9 +352,9 @@ server-specific operational notes, command output, screenshots, diagnostics, and
 material. For example, `local/audits/` and `local/operations/` can hold private findings without
 placing them in public project documentation.
 
-Existing ignored locations such as `docs/audits/` and `reports/` remain supported for compatibility.
-New private operational evidence should be kept under `local/`. No build, test, CI, runtime, or
-release step may depend on its contents.
+Historical evidence previously written to `docs/audits/` or root `reports/`
+belongs under `local/archive/` or a categorized `local/` report directory.
+No build, test, CI, runtime, or release step may depend on private evidence.
 
 A normal audit therefore has three steps:
 

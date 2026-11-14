@@ -3,12 +3,13 @@ from __future__ import annotations
 import hashlib
 import json
 import zipfile
+from collections.abc import Callable, Mapping
 from functools import partial
 from pathlib import Path
 
 import pytest
 
-from tools.audit_1_0_reference_inputs import (
+from tools.research.audit_1_0_reference_inputs import (
     SourceEvidenceError,
     _oldid_pin,
     _wiki_history_language,
@@ -102,7 +103,7 @@ def test_historical_reinforcements_report_uses_actual_availability(
 ) -> None:
     import sqlite3
 
-    from tools import audit_1_0_reference_inputs as audit
+    from tools.research import audit_1_0_reference_inputs as audit
 
     inventory = _reinforcements_inventory(tmp_path, present)
     monkeypatch.setattr(audit, "verify_reinforcements_inputs", partial(
@@ -207,13 +208,19 @@ def test_historical_inventory_contract_cannot_silently_expand(
         verify_reinforcements_inputs(inventory, tmp_path)
 
 
-def test_available_pinned_historical_reinforcements_bytes_match_review() -> None:
+def test_available_pinned_historical_reinforcements_bytes_match_review(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+    reference_pdf_layout: str,
+) -> None:
     root = Path(__file__).resolve().parents[1]
     inventory = root / "config/validation/reinforcements-source-inputs.json"
     document = json.loads(inventory.read_text(encoding="utf-8"))
-    if not all((root / source["localPath"]).is_file() for source in document["sources"]):
-        pytest.skip("Ignored historical PDFs unavailable; byte identity not verified")
-    evidence = verify_reinforcements_inputs(inventory, root)
+    pinned_pdf_sources({
+        source["localPath"]: source["sha256"] for source in document["sources"]
+    })
+    evidence = verify_reinforcements_inputs(
+        inventory, root, source_layout=reference_pdf_layout,
+    )
     assert evidence["verifiedCount"] == 2
     assert evidence["n5AuthorityVerified"] is False
 

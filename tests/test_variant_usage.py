@@ -871,6 +871,42 @@ def test_variant_usage_source_only_peripheral_attachments_require_exact_parity(
         build_peripheral_provenance(application, raw)
 
 
+def test_variant_usage_cli_supports_normalized_without_raw(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    from tools import build_variant_usage as cli
+
+    result = {
+        "scope": "read-only-candidate-not-published", "variants": [],
+        "familyOnlyUniqueUnitCounts": {}, "unresolvedSourceRows": [],
+        "diagnosticCounts": {}, "sourceSnapshot": {},
+        "relationships": {"includes": [], "includePaths": [],
+                          "peripheralAttachments": [], "peripheralControllerEdges": []},
+    }
+    army, normalized, rules = (
+        tmp_path / "army.db", tmp_path / "normalized.json", tmp_path / "rules_n5.db",
+    )
+    def from_normalized(selected_army: Path, selected_source: Path,
+                        selected_rules: Path) -> dict[str, Any]:
+        assert (selected_army, selected_source, selected_rules) == (army, normalized, rules)
+        return result
+
+    monkeypatch.setattr(cli, "build_variant_usage_from_normalized", from_normalized)
+    monkeypatch.setattr(
+        cli, "build_variant_usage_projection",
+        lambda *_args: pytest.fail("Legacy raw path must not be used"),
+    )
+    monkeypatch.setattr(
+        "sys.argv",
+        ["build_variant_usage", "--army-db", str(army), "--rules-db", str(rules),
+         "--normalized", str(normalized)],
+    )
+    cli.main()
+    assert json.loads(capsys.readouterr().out)["scope"] == result["scope"]
+    assert not list(tmp_path.glob("*.json"))
+
+
 def test_variant_usage_cli_check_never_writes_candidate(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:

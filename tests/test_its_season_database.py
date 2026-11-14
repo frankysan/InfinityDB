@@ -18,11 +18,15 @@ from infinity_db.its_season_database import (
     select_its_scenario,
 )
 from infinity_db.rules_database import RulesDatabase, export_rules_database
-from tools.build_its_season import main
+from tools.build_its_season import DEFAULT_OUTPUT, main
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"
 TRACKED_RULES = ROOT / "data/generated/rules_n5.db"
+
+
+def test_standalone_its_output_defaults_to_ignored_local_workspace() -> None:
+    assert DEFAULT_OUTPUT == ROOT / "local/work/its/its_18.db"
 
 
 def _modified_source(tmp_path: Path, mutator) -> Path:

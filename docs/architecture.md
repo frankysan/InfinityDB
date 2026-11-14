@@ -56,6 +56,35 @@ Unless a section is explicitly marked **Design direction**, it describes current
 10. **Determinism and portability are artifact contracts.** Given the same inputs and declared
     toolchain, persistent generated artifacts must be byte-identical across supported platforms.
 
+## Accepted workspace conventions (prospective, not a path migration)
+
+New project-owned Git-ignored source material, research, run evidence and
+intermediates should be organized under `local/` by domain, purpose, scope
+and lifetime. The intended families are `local/data/`, `local/research/`,
+`local/validation/`, `local/performance/`, `local/operations/`,
+`local/work/` and `local/handoffs/`. Create categories when needed, not
+empty trees or a `misc/` catch-all. Preserve exact upstream source names
+and identities for immutable acquisitions.
+
+New maintained developer/operator modules should be grouped by responsibility
+beneath `tools/data/`, `research/`, `symbols/`, `browser/`, `testing/`,
+`ci/`, `operations/`, `performance/`, `dev/` or `_shared/`, with
+`tools/run_checks.py` and package `__init__.py` as the initial minimal
+root exceptions. Existing modules and their imports/entrypoints are **not**
+renamed by this policy; each requires a validated, atomic cutover.
+
+The prospective conventions do not alter the currently implemented paths
+below. Standard language/OS/editor caches, virtual environments, host secrets,
+explicit test scratch, externally owned staging and the production
+`metrics_history` volume retain separately justified ownership. Normal
+checkout/installed-wheel serving, deterministic builds and Docker images
+must never depend on accidentally present private `local/` contents.
+Published databases, maintained configuration, reviewed curation, accepted
+source/review records and symbol publication remain tracked. See the
+[artifact lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective)
+for naming and retention. The [active cleanup plan](tooling-and-local-path-cleanup-plan.md)
+tracks legacy paths, producer changes and separately gated migrations.
+
 ## System boundaries
 
 InfinityDB has six engineering domains:
@@ -128,7 +157,7 @@ InfinityDB deliberately separates four kinds of repository data:
 - `data/generated/` contains the three tracked runtime databases: `army.db`,
   `rules_n5.db` and `its_18.db`. Structured reference facts and symbol mappings are embedded.
   SVG/CSS/JS remain ordinary static files. Development intermediates and raw
-  exports belong under ignored `data/work/build/`.
+  exports belong under ignored `local/work/build/`.
 
 Runtime code must not reach back into raw archives or working-tree curation to reinterpret an
 already-built database. Build-time configuration may be packaged for installed build commands, but
@@ -321,9 +350,10 @@ InfinityDB serves three tracked runtime databases:
 - `data/generated/rules_n5.db` — curated N5 rules/reference semantics;
 - `data/generated/its_18.db` — ITS Season 18 scenario publications and scoped policies.
 
-`army.raw.db` is a development/audit archive of normalized source structures and is not a
-production runtime dependency. Runtime repositories query application tables and materialized
-provenance; they do not fall back to raw normalized tables for convenience.
+`army.raw.db` remains an optional **legacy paired-export** research format,
+available only on explicit request. Neither complete runtime builds nor the
+default standalone export creates it. Runtime repositories query application
+tables and materialized provenance; they never fall back to raw source tables.
 
 The complete serving contract requires Army v31, Rules v17 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.
@@ -512,7 +542,7 @@ restart is observable even when version and snapshot revision are unchanged. Rea
 endpoint does not advance either timestamp.
 
 The accepted boundary for retained metrics history is a separate operational service, not writable
-state inside the application container. `tools/metrics_history.py` now owns the standalone SQLite
+state inside the application container. `tools/operations/metrics_history.py` now owns the standalone SQLite
 collection/aggregation engine: one rolling scrape state is converted into generation-aware counter
 deltas and bounded weekly summaries keyed by week/version/snapshot. The deployed service scrapes
 the private `app:8000/internal/metrics` endpoint over the Compose network, runs with an immutable

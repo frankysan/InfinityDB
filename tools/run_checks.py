@@ -23,16 +23,18 @@ try:
         AssetModeSelection,
         select_asset_mode,
     )
-    from tools.browser_test_host_profile import linux_four_slots_enabled
-    from tools.test_sections import load_test_sections
+    from tools.performance.browser_test_host_profile import linux_four_slots_enabled
+    from tools.testing.test_sections import load_test_sections
 except ModuleNotFoundError:  # Direct execution as tools/run_checks.py.
     from asset_validation import (  # type: ignore[no-redef]
         ASSET_MODES,
         AssetModeSelection,
         select_asset_mode,
     )
-    from browser_test_host_profile import linux_four_slots_enabled  # type: ignore[no-redef]
-    from test_sections import load_test_sections  # type: ignore[no-redef]
+    from performance.browser_test_host_profile import (
+        linux_four_slots_enabled,  # type: ignore[no-redef]
+    )
+    from testing.test_sections import load_test_sections  # type: ignore[no-redef]
 
 STAGE_ORDER = ("test", "lint", "docs", "type", "build", "rules", "preflight")
 PROFILES = {
@@ -55,7 +57,7 @@ EXIT_OK = 0
 EXIT_STAGE_FAILURE = 1
 EXIT_RUNNER_ERROR = 2
 REPO_ROOT = Path(__file__).resolve().parents[1]
-REPORT_DIRECTORY = REPO_ROOT / "reports"
+REPORT_DIRECTORY = REPO_ROOT / "local" / "reports" / "checks"
 STATIC_ROOT = REPO_ROOT / "src" / "infinity_db" / "web" / "static"
 PUBLICATION_MANIFEST = REPO_ROOT / "data" / "manifests" / "symbol-publication.json"
 MODULE_ROOT = Path(__file__).resolve().parents[1] / "src"
@@ -83,7 +85,7 @@ class Reporter:
         if report_path is not None:
             validate_report_destination(report_path)
             report_path.parent.mkdir(parents=True, exist_ok=True)
-            self._file = report_path.open("w", encoding="utf-8", newline="")
+            self._file = report_path.open("x", encoding="utf-8", newline="")
 
     def write(self, text: str = "", *, end: str = "\n") -> None:
         rendered = text + end
@@ -219,7 +221,7 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help=(
             "Also write the complete console transcript to a UTF-8 text file. "
-            "With no PATH, use reports/CHECKS YYYYMMDD-HHMMSS.txt."
+            "With no PATH, use local/reports/checks/CHECKS YYYYMMDD-HHMMSS.txt."
         ),
     )
     parser.add_argument(
@@ -271,7 +273,7 @@ def normalize_report_target_args(argv: list[str]) -> list[str]:
     """Keep a pytest target after bare --report from becoming an output path.
 
     --report PATH remains supported for explicit report destinations such as
-    reports/checks.txt; --report=PATH is unambiguous for other filenames.
+    local/reports/checks/checks.txt; --report=PATH is unambiguous for other filenames.
     """
     tokens = list(argv)
     for i, token in enumerate(tokens[:-1]):
@@ -291,6 +293,8 @@ def normalize_report_target_args(argv: list[str]) -> list[str]:
 
 def validate_report_destination(path: Path) -> None:
     """Never truncate a source file or any Git-tracked file as a check log."""
+    if path.is_symlink():
+        raise ValueError(f"Refusing to use a symlink as a check report: {path}")
     if path.suffix.lower() in {
         ".py", ".pyi", ".md", ".json", ".toml", ".yaml", ".yml",
         ".js", ".ts", ".css", ".html", ".svg", ".db", ".sqlite",
@@ -300,6 +304,8 @@ def validate_report_destination(path: Path) -> None:
     try:
         relative = resolved.relative_to(REPO_ROOT.resolve())
     except ValueError:
+        if path.exists():
+            raise FileExistsError(f"Check report already exists: {path}") from None
         return
     try:
         tracked = subprocess.run(
@@ -313,6 +319,8 @@ def validate_report_destination(path: Path) -> None:
         raise ValueError(f"Refusing to overwrite Git-tracked file with report: {path}")
     if tracked.returncode != 1:
         raise ValueError(f"Cannot verify whether report destination is tracked: {path}")
+    if path.exists():
+        raise FileExistsError(f"Check report already exists: {path}")
 
 
 def selected_stage_names(args: argparse.Namespace) -> tuple[str, ...]:
@@ -476,18 +484,19 @@ def run_stage(
     if stage.name == "rules":
         if source_occupancy_gate:
             commands.append((
-                sys.executable, "-m", "tools.audit_source_presentation",
+                sys.executable, "-m", "tools.data.audit_source_presentation",
                 "data/generated/army.db", "--require-no-occupied-gaps",
             ))
         commands.append((
-            sys.executable, "-m", "tools.audit_rules_interactions",
+            sys.executable, "-m", "tools.data.audit_rules_interactions",
             "--check-output", "docs/rules-interaction-checklist.md",
             "--require-release", "1.0.0",
         ))
     commands.append(stage.command)
     if stage.name == "build":
         # The small portable fixture need not match the full symbol publication.
-        # Still exercise the application/raw exporter after the source pipeline.
+        # Exercise the application-only exporter after the source pipeline.
+        # Paired raw export remains an explicit legacy compatibility test.
         output = Path(stage.command[stage.command.index("--output-dir") + 1])
         commands.append((
             sys.executable, "-m", "infinity_db", "export",

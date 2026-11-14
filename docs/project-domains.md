@@ -42,7 +42,8 @@ Typical responsibilities include:
 - Army merge, normalization, identity resolution, enrichment, and provenance;
 - rules/reference curation and validation;
 - SQLite schema/export behavior and generation of `army.db`,
-  `army.raw.db`, and `rules_n5.db`;
+  `rules_n5.db` and `its_18.db`, with an explicit optional legacy
+  `army.raw.db` audit export;
 - deterministic generated-data contracts and data-build audits.
 
 This domain includes the meaning and correctness of curated/normalized data, not

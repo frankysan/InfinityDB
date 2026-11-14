@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import hashlib
 import re
+from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
 
 import pytest
 from reference_acceptance_support import (
-    PDF,
+    PDF_LABEL,
+    PIN,
     WIKI,
     WIKI_PIN,
     api,
@@ -16,13 +18,63 @@ from reference_acceptance_support import (
     pdf_pages,
     published,
     records,
+    selected_pdf,
 )
 from test_verify_ammunition_publication_browser import browser as browser
 
+from tools.research.source_paths import SourcePathError
 
-def test_basic_attacks_match_pinned_pdf_and_archived_wiki(require_source_files) -> None:
-    require_source_files(PDF, WIKI)
-    pages = pdf_pages((36, 39, 40, 42, 51, 52))
+
+def test_reference_source_prerequisite_requires_selected_layout_and_pin(
+    tmp_path: Path,
+) -> None:
+    payload = b"%PDF hermetic source label, not a parsed official publication"
+    pin = hashlib.sha256(payload).hexdigest()
+    legacy = tmp_path / PDF_LABEL
+    local = tmp_path / "local/data/pdf" / Path(PDF_LABEL).relative_to("data/pdf")
+    for path in (legacy, local):
+        path.parent.mkdir(parents=True)
+        path.write_bytes(payload)
+    assert selected_pdf(PDF_LABEL, pin, root=tmp_path) == local
+    assert selected_pdf(PDF_LABEL, pin, layout="legacy", root=tmp_path) == legacy
+    local.write_bytes(b"unreviewed revision")
+    with pytest.raises(SourcePathError, match="hash mismatch"):
+        selected_pdf(PDF_LABEL, pin, layout="local", root=tmp_path)
+    local.unlink()
+    assert selected_pdf(PDF_LABEL, pin, root=tmp_path) is None
+    assert selected_pdf(PDF_LABEL, pin, layout="legacy", root=tmp_path) == legacy
+    with pytest.raises(SourcePathError, match="Unknown research source layout"):
+        selected_pdf(PDF_LABEL, pin, layout="automatic", root=tmp_path)
+
+
+def test_reference_pdf_page_reader_uses_explicit_verified_path(tmp_path: Path) -> None:
+    import pymupdf
+
+    with pymupdf.open() as document:
+        page = document.new_page()
+        page.insert_text((72, 72), "Explicit Source Layout Proof")
+        payload = document.tobytes()
+    path = tmp_path / "local/data/pdf/rules/n5-rules-v5.3-en.pdf"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(payload)
+    pin = hashlib.sha256(payload).hexdigest()
+    selected = selected_pdf(PDF_LABEL, pin, layout="local", root=tmp_path)
+    assert selected is not None and selected == path
+    assert "explicit source layout proof" in pdf_pages(
+        (1,), pdf_path=selected, pin=pin,
+    )[1]
+    with pytest.raises(AssertionError):
+        pdf_pages((1,), pdf_path=selected, pin="0" * 64)
+
+
+def test_basic_attacks_match_pinned_pdf_and_archived_wiki(
+    require_source_files, reference_pdf_layout: str,
+) -> None:
+    pdf = selected_pdf(PDF_LABEL, PIN, layout=reference_pdf_layout)
+    if pdf is None:
+        pytest.skip(f"Pinned PDF unavailable in {reference_pdf_layout} layout: {PDF_LABEL}")
+    require_source_files(WIKI)
+    pages = pdf_pages((36, 39, 40, 42, 51, 52), pdf_path=pdf)
     for page, phrases in {
         36: ("those dice will be lost", "same point"),
         39: ("one for the entire burst", "all shots"),

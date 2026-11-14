@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tools.report_metrics import parse_prometheus, render_report
+from tools.operations.report_metrics import parse_prometheus, render_report
 
 SAMPLE = """\
 # HELP infinitydb_build_info build info

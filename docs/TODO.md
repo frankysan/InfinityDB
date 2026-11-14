@@ -39,6 +39,113 @@ when all contained work shares the same owner.
   preserve three-database serving and published asset compatibility, and
   validate Windows/Linux producer handoffs separately. This project follows
   v1.1.0 restructuring development and is not part of its release gate.
+  The [P5 retirement checkpoint](tooling-and-local-path-cleanup-plan.md#completed-p5-comparison-tool-retirement--2026-11-12)
+  records the first completed-tool removal; the
+  [artwork-review checkpoint](tooling-and-local-path-cleanup-plan.md#p5-artwork-review-workflow-and-runbook-checkpoint--2026-11-12)
+  records the runbook disposition and explicit review inputs. The
+  [provenance checkpoint](tooling-and-local-path-cleanup-plan.md#p5-provenance-classifier-retirement--2026-11-12)
+  retires the one-use P5 generator while retaining saved-report validation. The
+  [reporter checkpoint](tooling-and-local-path-cleanup-plan.md#reference-reporter-dependency-checkpoint--2026-11-12)
+  separates shared runtime verification while preserving active source checks.
+  The [deployed-object checkpoint](tooling-and-local-path-cleanup-plan.md#deployed-object-discovery-retirement--2026-11-12)
+  retires completed discovery commands while preserving their reviewed evidence.
+  The [Hacking Program checkpoint](tooling-and-local-path-cleanup-plan.md#hacking-program-statistics-audit-disposition--2026-11-12)
+  retains the separate, source-pinned statistics audit.
+  The [L1 decision package](tooling-and-local-path-cleanup-plan.md#l1-decision-package--p-accepted-t-and-m-pending-2026-11-13)
+  records accepted prospective path/lifecycle policy (P), while tracked
+  retirements (T) and private-data migration (M) still require separate
+  decisions and recovery evidence. The
+  [L2 writer-safety closeout](tooling-and-local-path-cleanup-plan.md#seventeenth-bounded-l2-writer-classification-and-remaining-output-safety-closeout-2026-11-13)
+  covers the non-destructive output contracts. The
+  [L2 reader/producer cutover decision package](tooling-and-local-path-cleanup-plan.md#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13)
+  maps current Army/Wiki/Symbol/PDF paths and their consumers to candidate
+  `local/` destinations, including the embedded-provenance and Syncthing
+  blockers. The
+  [R1 Army selection checkpoint](tooling-and-local-path-cleanup-plan.md#nineteenth-bounded-l2-checkpoint--r1-explicit-army-source-selection-2026-11-13)
+  implements explicit ZIP/manifest validation and legacy/new-layout
+  byte parity without migrating sources or changing the default.
+  R1 has Windows/Linux fixture acceptance. The
+  [R2 producer checkpoint](tooling-and-local-path-cleanup-plan.md#twentieth-bounded-l2-checkpoint--r2-snapshot-producer-publication-alignment-2026-11-13)
+  records completed byte-exact publication and transactional rollback
+  protection, with Windows/Linux producer suites and consumer handoff parity.
+  The [R3 activation checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-first-bounded-l2-checkpoint--r3-explicit-staged-snapshot-layouts-2026-11-13)
+  adds explicit configured legacy/local snapshot selection and
+  Windows/Linux fixture parity, retaining the current staging folders.
+  The [first R4 checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-second-bounded-l2-checkpoint--r4-inventory-and-first-pdf-binding-2026-11-13)
+  inventories PDFs/overrides and adds the Reinforcements PDF binding.
+  [R4 research readers](tooling-and-local-path-cleanup-plan.md#twenty-third-bounded-l2-checkpoint--r4-read-only-reference-and-revision-delta-pdf-consumers-2026-11-13)
+  now include the reference reporter and revision-delta audit; the
+  [R4 activation checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-fourth-bounded-l2-checkpoint--r4-explicit-staged-pdf-and-override-destinations-2026-11-13)
+  provides explicit local PDF/override destinations in disposable checkouts.
+  The [remaining-reader checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-fifth-bounded-l2-checkpoint--r4-remaining-direct-pdf-reader-disposition-2026-11-13)
+  now binds Visibility Zone evidence to the exact selected PDF layout and
+  distinguishes already-explicit readers from legacy-bound test fixtures;
+  Windows/Linux fixture parity covers the staged PDF/override mappings.
+  The follow-up Hacking Program statistics source tests now also use
+  explicit PDF layout selection without changing the auditor's `--pdf` API,
+  Army archive path or source pin. The next bounded Core source-only group
+  consolidates Ammunition, visibility opposition, Cover, ARO/Deployment and
+  Command Token PDF selection without changing their assertions.
+  The weapon-chart, trait-prose and Mine variant tests now share the same
+  pinned source selector without altering research conclusions. The
+  multi-revision Application Rule, Silent/Immunity and Reinforcements
+  applicability tests also select their independently pinned English,
+  Spanish, historical and ITS PDFs without mixing source authority.
+  The 16 single-Core immunity evidence modules now also select the pinned
+  PDF explicitly without changing any example/critical/BTS rule conclusions.
+  The deployable/FAQ, geometry, movement, terrain, bilingual phase and turn
+  sequence source tests now select independently pinned PDFs explicitly;
+  optional Wiki ZIP evidence remains on its separate legacy path.
+  The [curated and mixed-source checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-third-bounded-l2-checkpoint--r4-curated-and-mixed-source-acceptance-2026-11-13)
+  now binds 21 remaining curated source-only tests, Weapon profiles, bilingual
+  auxiliary Silhouette evidence and the optional Hacking Program chart check to
+  explicit PDF layouts. The [mixed-source checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-fourth-bounded-l2-checkpoint--r4-mixed-source-publication-and-export-readers-2026-11-13)
+  also binds the remaining Weaponry catalog PDF evidence, reference-baseline
+  source-only/optional checks and restrictions export pin checks without
+  changing publication behavior. The
+  [final reader inventory](tooling-and-local-path-cleanup-plan.md#thirty-fifth-bounded-l2-checkpoint--r4-final-direct-pdf-reader-inventory-2026-11-13)
+  covers FAQ source pins, historical Reinforcements inputs, Visibility
+  Zone whole-record and web evidence, and conditional reactive source
+  pages; the two remaining compatibility defaults are intentionally retained.
+  The [staged-to-reader parity checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-sixth-bounded-l2-checkpoint--r4-staged-activation-to-pinned-reader-parity-2026-11-13)
+  completes R4's hermetic activation/reader contract across PDF and SVG
+  override layouts, including no fallback, conflict refusal and idempotence.
+  The [R5 receiver access checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-seventh-bounded-l2-checkpoint--r5-live-receiver-access-evidence-2026-11-13)
+  confirms the worker's read-only access to five Linux Syncthing receiver
+  roots and three pinned source samples. The
+  [R5 sender/recursive checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-eighth-bounded-l2-checkpoint--r5-sender-health-and-recursive-receiver-access-2026-11-13)
+  now verifies the live Windows Send Only service and all five folders'
+  zero-pending/idle status, plus a complete 35,833-entry read-only
+  effective-access census on Linux. **Scope reset (2026-11-13):**
+  R5 is closed as sufficient for this single-operator project; further
+  receiver-status, ACL-inheritance, formal backup/restore, and exhaustive
+  rollback-tooling gates are no longer prerequisites. **Next:** resume
+  practical L2/R6 cleanup in larger, coherent batches with focused
+  consumer tests and simple checks of important private source copies.
+  Preserve hard-to-recreate originals until reviewed; do not bulk-delete
+  private data or publish it accidentally. Hosted/release acceptance
+  remains independent of fixture validation.
+
+### Backlog and development workflow simplification
+
+**Project domain:** Project infrastructure
+
+- [ ] **Reduce maintenance overhead in the existing Git-based task workflow,**
+  coordinated with the ongoing [tooling and documentation cleanup](tooling-and-local-path-cleanup-plan.md)
+  and [backlog retirement policy](README.md#backlog-completion-and-retirement):
+  - [ ] Improve `TODO.md` navigability: keep concise, prioritized, actionable
+    work items; link detailed plans rather than copying their contents; remove
+    stale or completed entries without losing open dependencies.
+  - [ ] Complete documentation consolidation first: retain one canonical owner
+    for current guidance, and retire, relabel or preserve completed plans,
+    reports and audits according to their actual remaining purpose.
+  - [ ] Improve existing backlog checks and agent closeout guidance to catch
+    duplicate task IDs, inconsistent parent/subtask status and unsupported
+    removal of unfinished tasks, without requiring routine manual bookkeeping.
+  **Decision:** Defer GitHub Issues/Projects adoption. Reconsider only if
+  cross-repository coordination, dependency tracking or agent task continuity
+  remains problematic after these improvements. Do not create a parallel task
+  registry or automated status synchronization in this phase.
 
 ### External source clarifications
 
@@ -274,10 +381,84 @@ when all contained work shares the same owner.
   or an in-memory hand-off that skips only the duplicate build-path pass; the
   standalone `export` command must retain full untrusted-input validation.
 
-- [ ] Evaluate artifact-level deduplication for development builds. `normalized.json` and
-  `infinity.raw.db` intentionally retain overlapping lossless source structure today; measure
-  the duplication on a controlled build, then decide whether post-export workflows need both
-  or whether one should be documented as a regenerable/transient artifact.
+- [ ] **Retire `army.raw.db` as a supported retained artifact**, and remove the
+  intermediate raw SQLite format once its independent source-audit and build
+  consumers have tested replacements. The complete runtime builder now
+  skips raw-archive generation entirely; variant usage and Army v27–v31
+  overlays use fully verified normalized source. Standalone `infinity-db export`
+  also defaults to application-only output; explicit `--with-raw` retains a
+  lossless paired export for independent audit/research consumers.
+  - [ ] Review remaining standalone raw-format contracts: paired export,
+    explicit pair-health consumers, and historical raw-only research. The
+    pinned source ZIP verification in `report_reference_baseline` now accepts
+    verified normalized input without a raw sibling. The Army/faction identity,
+    source-presentation completeness, Skill/Equipment source-variant, and
+    three semantic relationship audits also use verified normalized input;
+    source-row inspection and standalone variant candidates are migrated too.
+    `build_determinism_manifest` now defaults to **v2 rawless**
+    application-output determinism. Explicit `--legacy-paired` retains the
+    original v1 raw hash in a disposable export; existing v1 manifests remain
+    comparable with v1, but cannot be silently compared with v2. Neither
+    format requires a persistent ignored `army.raw.db`.
+    `audit_source_variant_inputs` now rejects mismatched application/raw
+    pairs, and its exact Extra-owner lookup accepts verified source when an
+    application path is supplied. Retain legacy raw-based APIs as parity
+    oracles while independent consumers remain.
+    Preserve source-only row fidelity, absence-versus-null distinctions,
+    exact occurrence/extra relationships and fail-closed provenance.
+    Army v27–v31 overlays have also moved to verified normalized input in the
+    complete builder; the legacy raw-pair publisher calls remain opt-in.
+  - [x] Make standalone `infinity-db export` application-only by default;
+    retain explicit legacy `--with-raw` (and the `--no-raw` alias), verified
+    `database-health --normalized PATH`, and a versioned v2 rawless
+    determinism manifest with explicit v1 legacy generation.
+  - [x] Make the direct Python `export_database()` default application-only
+    as well; retained legacy tests and consumers explicitly select
+    `include_raw=True` when asserting pair/archive semantics.
+  - [x] Run and diagnose manifest **v2 on Windows and Linux at the same
+    commit**. After explicit branch push, Linux fetch and exact-SHA checkout,
+    the strict comparator failed on five physical artifacts at `73da5e48`.
+    All 108 SQLite user-table digests and all 1,608 ZIP member payloads
+    match; the remaining differences are ZIP deflate bytes and SQLite
+    writer-version/layout bytes, not demonstrated source-content drift.
+    The disposable Army fixture's stale Windows CRLF bytes were separately
+    normalized, restoring parity for all generated JSON artifacts.
+  - [x] Achieve **byte-identical v2 outputs on Windows and Linux** using
+    `tools.run_pinned_determinism` and the same digest-pinned linux/amd64
+    Python 3.11.18 OCI runtime (SQLite 3.40.1, zlib 1.2.13). At
+    `a164c4b8`, both workers generated all 10 matching SHA-256 hashes;
+    the unmodified strict comparator returned exit 0. The host-native
+    five-artifact mismatch remains expected with unpinned libraries.
+  - [x] Separate GitHub Actions native platform checks from strict
+    digest-pinned determinism: retain the existing Windows/macOS/Linux
+    source-checks matrix, add Ubuntu 24.04/26.04 independent container
+    jobs using `tools.run_pinned_determinism`, and keep the existing
+    strict SHA-256 comparator and required job identity unchanged.
+    No Docker support is assumed on hosted Windows/macOS.
+  - [x] Close out hosted GitHub Actions acceptance on cleanup PR #29:
+    the pinned Ubuntu 24.04/26.04 determinism jobs and strict byte
+    comparison passed. A tracked Army/Rules database rebuild resolved
+    stale provenance; deferring a build-only normalization import then
+    restored immutable-container startup without adding private inputs.
+    At exact pushed SHA `28a8e52b`, Source checks, deployment smoke and
+    installed-wheel smoke all completed successfully. Source checks
+    includes Windows/macOS Python 3.11, Ubuntu Python 3.11/3.14 and the
+    required `Cross-platform deterministic outputs` job. Local repeatable
+    three-database builds and Docker preview (41/41 semantic routes)
+    passed. This closes the hosted acceptance gate, **not** L1 policy
+    approval, release/deployment authorization or private-data deletion.
+  - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
+    inspection and programmatic `include_raw=True` interfaces. Keep the
+    independent source-identity/research semantics and their focused tests
+    until replacements are accepted. Verify a complete three-database build,
+    full regression gate and documented commands before removing pair APIs
+    or compatibility tests.
+  - [ ] Classify the existing ignored `data/generated/army.raw.db` as
+    retirement-candidate local evidence, not a valid current pair. Preserve its
+    bytes pending the cleanup manifest's independent backup/restore and
+    deletion approval; never delete or accept a mismatched pair implicitly.
+  The [L0 retirement decision](tooling-and-local-path-cleanup-plan.md#raw-archive-retirement-decision--2026-11-12)
+  records the current consumer and safety boundaries.
 
 ### Army snapshot maintenance
 

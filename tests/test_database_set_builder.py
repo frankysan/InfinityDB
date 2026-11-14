@@ -10,6 +10,7 @@ import shutil
 import sqlite3
 import zipfile
 from contextlib import closing
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,7 @@ from infinity_db.database_set import (
     COMPLETE_RUNTIME_FILES,
     validate_database_set,
 )
+from infinity_db.snapshot_provenance import SnapshotProvenanceError, write_snapshot_manifest
 from infinity_db.sqlite_determinism import normalize_sqlite_header, vacuum_deterministic_sqlite
 from infinity_db.web import create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
@@ -38,7 +40,9 @@ RELEASE = Path(__file__).resolve().parents[1] / "data/generated"
 
 
 @pytest.fixture
-def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
+def project(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> tuple[Path, argparse.Namespace]:
     root = tmp_path / "project"
     for name in (
         "pyproject.toml",
@@ -53,8 +57,8 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         "data/curated/identities/army-overview.json",
         "data/curated/identities/legacy-armies.json",
         "tools/build_weapon_profile_publication.py",
-        "tools/audit_enrichment_coverage.py",
-        "tools/audit_weapon_definition_gaps.py",
+        "tools/data/audit_enrichment_coverage.py",
+        "tools/research/audit_weapon_definition_gaps.py",
     ):
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -96,6 +100,24 @@ def project(tmp_path: Path) -> tuple[Path, argparse.Namespace]:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(RELEASE.parent.parent / "src/infinity_db/web/static" / relative, target)
     args = build_parser().parse_args(["build", str(source), "--db-dir", str(root / "output")])
+    # This synthetic builder fixture deliberately writes "build-only" instead
+    # of a real normalized document. Keep its existing raw-pair overlay path;
+    # real normalized-source acceptance is covered by the pinned ZIP rebuild.
+    for name in (
+        "publish_equipment_encodings", "publish_skill_classifications",
+        "publish_unit_filter_semantics", "publish_army_reference_data",
+        "publish_symbol_paths",
+    ):
+        publisher = getattr(builder, name)
+
+        def legacy_source(
+            army: Path, _raw: Path | None, *sources: Path,
+            normalized: Path | None = None, _publisher=publisher,
+        ) -> None:
+            assert _raw is None and normalized == army.with_name("normalized.json")
+            _publisher(army, army.with_name("army.raw.db"), *sources)
+
+        monkeypatch.setattr(builder, name, legacy_source)
     return root, args
 
 
@@ -267,8 +289,10 @@ def test_builder_code_and_selected_metadata_are_inputs(project) -> None:
     (root / "src/sample.py").write_bytes(b"# changed\r\n")
     assert builder.collect_build_manifest(root, args.source, None) == code_change
     # Historical audits are now independent diagnostics, not build inputs.
-    (root / "tools/audit_enrichment_coverage.py").write_text("changed", encoding="utf-8")
-    (root / "tools/audit_weapon_definition_gaps.py").write_text("changed", encoding="utf-8")
+    (root / "tools/data/audit_enrichment_coverage.py").write_text("changed", encoding="utf-8")
+    (root / "tools/research/audit_weapon_definition_gaps.py").write_text(
+        "changed", encoding="utf-8"
+    )
     assert builder.collect_build_manifest(root, args.source, None) == code_change
     metadata = root / "other-metadata.json"
     metadata.write_text('{"factions":[{"id":2,"name":"Other"}]}', encoding="utf-8")
@@ -315,7 +339,8 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert item["profile_citations_available"] is True
     assert all(profile["profile_citations"] for profile in item["profiles"])
     assert not (root / "must-not-write").exists()
-    assert not list((root / "data/work/build").iterdir())
+    assert not list((root / "local/work/build").iterdir())
+    assert not (root / "data/work/build").exists()
     second = builder.build_database_set(args, _fake_army, root=root)
     assert second == first
 
@@ -378,7 +403,7 @@ def test_failure_before_publication_retains_all_destination_bytes(
     with pytest.raises(ValueError):
         builder.build_database_set(args, _fake_army, root=root)
     assert _digests(args.db_dir) == before
-    assert not list((root / "data/work/build").iterdir())
+    assert not list((root / "local/work/build").iterdir())
 
 
 def test_interrupted_replacement_is_rejected_and_rerun_recovers(
@@ -477,7 +502,210 @@ def test_output_cannot_replace_the_selected_source_archive(project) -> None:
     with pytest.raises(ValueError, match="replace an input"):
         builder.build_database_set(args, _fake_army, root=root)
     assert file_sha256(source) == before
+    assert not (root / "local/work/build").exists()
+
+
+def _pin_army_source_for_build(root: Path, args: argparse.Namespace) -> Path:
+    """Give the existing synthetic builder fixture a valid source revision and v3 pin."""
+    with zipfile.ZipFile(args.source, "a") as archive:
+        archive.writestr(
+            "101-first-army.json",
+            json.dumps({"version": "7.26246.158", "units": []}),
+        )
+    symbols_path = root / "data/manifests/symbol-publication.json"
+    symbols = json.loads(symbols_path.read_text(encoding="utf-8"))
+    symbols["sourceSnapshot"]["armyArtifact"]["sha256"] = file_sha256(args.source)
+    symbols_path.write_text(json.dumps(symbols), encoding="utf-8")
+    return write_snapshot_manifest(
+        args.source,
+        root / "data/manifests/snapshots",
+        snapshot_type="army",
+        acquired_at=datetime(2026, 9, 17, 12, 0, tzinfo=UTC),
+        source_url="https://api.corvusbelli.com/army",
+        document_count=2,
+        language="en",
+        project_root=root,
+        source_data_changed_on=date(2026, 9, 3),
+    )
+
+
+def test_pinned_army_build_selection_preserves_legacy_cli_contract() -> None:
+    app = build_parser().parse_args(["build"])
+    assert app.source is None and app.snapshot_manifest is None
+    assert app.db_dir == Path("data/generated")
+    pinned = build_parser().parse_args([
+        "build", "local/data/raw/army/source.zip",
+        "--snapshot-manifest", "local/data/manifests/snapshots/source.json",
+        "--db-dir", "local/work/test-databases",
+    ])
+    assert pinned.source == Path("local/data/raw/army/source.zip")
+    assert pinned.snapshot_manifest == Path(
+        "local/data/manifests/snapshots/source.json"
+    )
+    assert pinned.db_dir == Path("local/work/test-databases")
+    with pytest.raises(SystemExit):
+        army_parser().parse_args(["build", "--snapshot-manifest", "a.json"])
+
+
+def test_implicit_build_selects_matching_local_provenance_without_legacy_fallback(
+    project, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, args = project
+    source_manifest = _pin_army_source_for_build(root, args)
+    local_source = root / "local/data/raw/army" / args.source.name
+    local_source.parent.mkdir(parents=True)
+    shutil.copyfile(args.source, local_source)
+    monkeypatch.setattr(builder, "latest_snapshot", lambda: local_source)
+    args.source = None
+
+    with pytest.raises(ValueError, match="Default Army source needs matching snapshot provenance"):
+        builder.build_database_set(args, _fake_army, root=root)
+    assert not args.db_dir.exists()
+    assert not (root / "local/work/build").exists()
+
+    local_manifest = root / "local/data/manifests/snapshots" / source_manifest.name
+    local_manifest.parent.mkdir(parents=True)
+    shutil.copyfile(source_manifest, local_manifest)
+    monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
+    result = builder.build_database_set(args, _fake_army, root=root)
+    assert result["buildProvenance"]["status"] == "matched"
+    assert result["buildProvenance"]["buildSetId"] == build_set_id(
+        builder.collect_build_manifest(
+            root, local_source, None, snapshot_manifest=local_manifest,
+        )
+    )
+    assert not list((root / "local/work/build").iterdir())
+
+
+def test_pinned_army_build_requires_unambiguous_explicit_inputs(project) -> None:
+    root, args = project
+    manifest = _pin_army_source_for_build(root, args)
+    args.snapshot_manifest = manifest
+    selected = args.source
+    args.source = None
+    with pytest.raises(ValueError, match="requires an explicit Army ZIP"):
+        builder.build_database_set(args, _fake_army, root=root)
+    args.source = selected
+    args.metadata = root / "other-metadata.json"
+    with pytest.raises(ValueError, match="cannot combine with --metadata"):
+        builder.build_database_set(args, _fake_army, root=root)
+    assert not args.db_dir.exists()
+    assert not (root / "local/work/build").exists()
+
+
+@pytest.mark.parametrize("layout", ("data/raw", "local/data/raw/army"))
+def test_pinned_source_selection_uses_explicit_archive_not_implicit_newest(
+    project, monkeypatch: pytest.MonkeyPatch, layout: str,
+) -> None:
+    root, args = project
+    manifest = _pin_army_source_for_build(root, args)
+    selected = root / layout / args.source.name
+    selected.parent.mkdir(parents=True)
+    shutil.copyfile(args.source, selected)
+    args.source = selected
+    args.snapshot_manifest = manifest
+    monkeypatch.setattr(
+        builder, "latest_snapshot",
+        lambda: pytest.fail("Pinned build must never select the newest ZIP"),
+    )
+    expected = builder.collect_build_manifest(
+        root, selected, None, snapshot_manifest=manifest,
+    )
+    assert expected["source"]["archiveSha256"] == file_sha256(selected)
+    assert expected["source"]["metadataName"] == "metadata.json"
+    assert not args.db_dir.exists()
     assert not (root / "data/work/build").exists()
+
+
+def test_pinned_complete_build_produces_same_three_database_set_from_both_layouts(
+    project, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, args = project
+    manifest = _pin_army_source_for_build(root, args)
+    local_source = root / "local/data/raw/army" / args.source.name
+    local_source.parent.mkdir(parents=True)
+    shutil.copyfile(args.source, local_source)
+    local_manifest = root / "local/data/manifests/snapshots" / manifest.name
+    local_manifest.parent.mkdir(parents=True)
+    shutil.copyfile(manifest, local_manifest)
+
+    monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
+    monkeypatch.setattr(
+        builder, "latest_snapshot",
+        lambda: pytest.fail("Explicit source must not use latest_snapshot"),
+    )
+    args.snapshot_manifest = manifest
+    legacy_result = builder.build_database_set(args, _fake_army, root=root)
+    legacy_digests = {
+        filename: file_sha256(args.db_dir / filename)
+        for filename in COMPLETE_RUNTIME_FILES
+    }
+    assert legacy_result["buildProvenance"]["status"] == "matched"
+
+    args.source = local_source
+    args.snapshot_manifest = local_manifest
+    local_result = builder.build_database_set(args, _fake_army, root=root)
+    assert local_result["buildProvenance"]["status"] == "matched"
+    assert local_result["buildProvenance"]["buildSetId"] == (
+        legacy_result["buildProvenance"]["buildSetId"]
+    )
+    assert {
+        filename: file_sha256(args.db_dir / filename)
+        for filename in COMPLETE_RUNTIME_FILES
+    } == legacy_digests
+
+
+def test_pinned_build_rejects_changed_archive_before_any_publication(
+    project,
+) -> None:
+    root, args = project
+    manifest = _pin_army_source_for_build(root, args)
+    args.snapshot_manifest = manifest
+    with zipfile.ZipFile(args.source, "a") as archive:
+        archive.writestr("new-source.json", "{}")
+    with pytest.raises(SnapshotProvenanceError, match="SHA-256 mismatch"):
+        builder.build_database_set(args, _fake_army, root=root)
+    assert not args.db_dir.exists()
+    assert not (root / "data/work/build").exists()
+
+
+def test_pinned_build_rejects_conflicting_sidecar_before_any_publication(
+    project,
+) -> None:
+    root, args = project
+    manifest = _pin_army_source_for_build(root, args)
+    args.snapshot_manifest = manifest
+    args.source.with_name("metadata.json").write_text(
+        '{"factions":[{"id":9,"name":"Unrelated"}]}', encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Ambiguous Army metadata"):
+        builder.build_database_set(args, _fake_army, root=root)
+    assert not args.db_dir.exists()
+    assert not (root / "local/work/build").exists()
+
+
+def test_pinned_build_rejects_manifest_modified_during_generation(
+    project, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, args = project
+    manifest = _pin_army_source_for_build(root, args)
+    args.snapshot_manifest = manifest
+    args.db_dir.mkdir()
+    for name in COMPLETE_RUNTIME_FILES:
+        shutil.copyfile(RELEASE / name, args.db_dir / name)
+    before = _digests(args.db_dir)
+
+    def rewrite_provenance(stage: Path, root: Path, record: dict[str, Any]) -> None:
+        _fake_rules(stage, root, record)
+        document = json.loads(manifest.read_text(encoding="utf-8"))
+        document["source"]["url"] = "https://api.corvusbelli.com/army-modified"
+        manifest.write_text(json.dumps(document), encoding="utf-8")
+
+    monkeypatch.setattr(builder, "_build_rules_and_publications", rewrite_provenance)
+    with pytest.raises(ValueError, match="Build inputs changed"):
+        builder.build_database_set(args, _fake_army, root=root)
+    assert _digests(args.db_dir) == before
+    assert not list((root / "local/work/build").iterdir())
 
 
 def test_runtime_and_narrow_build_outputs_are_explicitly_exclusive() -> None:

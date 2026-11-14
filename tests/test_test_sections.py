@@ -6,13 +6,13 @@ from typing import cast
 
 import pytest
 
-from tools import pytest_startup_profile
-from tools.pytest_startup_profile import (
+from tools.testing import pytest_startup_profile
+from tools.testing.pytest_startup_profile import (
     XdistStartupProfile,
     _runner_launch_timestamp,
     incompatible_loadgroup_versions,
 )
-from tools.test_sections import load_test_sections, section_for_module
+from tools.testing.test_sections import load_test_sections, section_for_module
 
 
 @pytest.mark.parametrize(

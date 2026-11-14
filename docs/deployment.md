@@ -4,9 +4,9 @@
 
 For public internet serving, InfinityDB deploys an immutable Docker image
 containing the application, processed graphical assets and the complete tracked
-`army.db` / `rules_n5.db` pair. Structured runtime facts are embedded; no JSON
-publication or raw source archive is required at startup. Rollback uses a matching
-retained image for the older release's data format.
+`army.db` / `rules_n5.db` / `its_18.db` set. Structured runtime facts are
+embedded; no JSON publication or raw source archive is required at startup.
+Rollback uses a matching retained image for the older release's data format.
 
 Caddy listens on HTTP and proxies traffic to the application, which is not exposed
 directly on the host. Put Caddy behind an external TLS reverse proxy for public HTTPS.
@@ -272,7 +272,7 @@ container restarts.
 
 Retained history does not make the web-facing application container writable. The implemented
 topology uses a separate `metrics-history` operational service on the private Compose network.
-The standalone collection/aggregation/reporting engine is implemented in `tools/metrics_history.py`
+The standalone collection/aggregation/reporting engine is implemented in `tools/operations/metrics_history.py`
 and runs through the dedicated Compose service. The service scrapes
 `http://app:8000/internal/metrics` directly, exposes no public/LAN port, runs with an immutable root
 filesystem, and owns one dedicated writable SQLite
@@ -306,8 +306,8 @@ its catalog, variant and Army query values are never retained as labels.
 The engine can also be exercised manually from a checkout against the trusted LAN metrics listener:
 
 ```powershell
-python tools/metrics_history.py --database reports/metrics-history.db collect --url http://127.0.0.1:9090/metrics
-python tools/metrics_history.py --database reports/metrics-history.db status
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db collect --url http://127.0.0.1:9090/metrics
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db status
 ```
 
 Retained history is queryable without exposing another HTTP endpoint. `periods` lists the exact
@@ -317,10 +317,10 @@ aggregate all matching retained periods. `compare` defaults to the latest two ex
 independent `--from-*` and `--to-*` selectors. For example:
 
 ```powershell
-python tools/metrics_history.py --database reports/metrics-history.db periods
-python tools/metrics_history.py --database reports/metrics-history.db report
-python tools/metrics_history.py --database reports/metrics-history.db report --week 2026-10-05
-python tools/metrics_history.py --database reports/metrics-history.db compare --from-version 0.9.1 --to-version 0.10.0
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db periods
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db report
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db report --week 2026-10-05
+python tools/operations/metrics_history.py --database local/reports/metrics-history.db compare --from-version 0.9.1 --to-version 0.10.0
 ```
 
 Human-readable reports include request/status counts, 4xx+5xx and 5xx rates, normalized-route
@@ -364,7 +364,7 @@ silently accumulate collector images. Periodic collection handles normal operati
 unexpected restart, generation detection prevents reset counters from being interpreted as deltas.
 
 The persistent history database is independent forward-moving operational state. Its on-disk format is
-versioned separately from the application. `tools/metrics_history.py` owns an explicit
+versioned separately from the application. `tools/operations/metrics_history.py` owns an explicit
 one-version-at-a-time forward-migration registry: every persisted format increment must add the
 previous -> next migration before `FORMAT_VERSION` is raised. Each migration and its `format_version`
 update run in one SQLite transaction. A failed migration therefore leaves the previous committed format
@@ -408,14 +408,14 @@ the dependency-free report tool:
 
 ```powershell
 $env:INFINITYDB_METRICS_URL = "http://192.168.1.20:9090/metrics"
-python tools/report_metrics.py
+python -m tools.operations.report_metrics
 ```
 
 The report shows application/snapshot identity, metrics-generation start/latest-request timestamps
 and observed span, active and completed requests, status-class counts, average and approximate p95
 latency, average response size, and the busiest normalized routes. It consumes only the bounded
 aggregate Prometheus surface and therefore cannot reconstruct visitor histories. Use
-`python tools/report_metrics.py --raw` when the raw Prometheus exposition is needed for another local
+`python -m tools.operations.report_metrics --raw` when the raw Prometheus exposition is needed for another local
 monitoring tool.
 
 Raw request logging is not enabled in normal operation. If it is temporarily required for a
@@ -424,10 +424,16 @@ retention before enabling it. Error logs and host/container health data remain a
 when they do not embed request-identifying values.
 
 For routine retained diagnostics, do not archive raw Docker logs. Instead collect a bounded,
-sanitized warning/error report from the existing Caddy/Gunicorn streams:
+sanitized warning/error report from the existing Caddy/Gunicorn streams. For each
+example below, replace `RUN_ID` with a **new** UTC run timestamp plus short
+checkout SHA (and keep the same run ID for paired evidence). All four operational
+report commands reject an existing output file *before* reading logs, gathering
+resources, sending load-test traffic or starting alert sampling, and use
+exclusive creation to guard against later collisions. Old explicit paths still
+work if unoccupied; do not reuse a previous report filename.
 
 ```sh
-.venv/bin/python tools/deployment_diagnostics.py --output reports/deployment-diagnostics.json
+.venv/bin/python -m tools.operations.deployment_diagnostics --output local/operations/deployment/diagnostics/RUN_ID/diagnostics.json
 ```
 
 The extractor ignores routine informational lines, discards Caddy structured request fields,
@@ -437,7 +443,7 @@ does not enable Caddy or Gunicorn access logging. To align diagnostics exactly w
 run, reuse the resource report's capture window:
 
 ```sh
-.venv/bin/python tools/deployment_diagnostics.py --resource-report reports/capacity-resources.json --output reports/capacity-diagnostics.json
+.venv/bin/python -m tools.operations.deployment_diagnostics --resource-report local/performance/http-capacity/RUN_ID/resources.json --output local/operations/deployment/diagnostics/RUN_ID/capacity-diagnostics.json
 ```
 
 Treat the generated JSON as short-lived operational evidence. If a concrete incident requires the
@@ -452,7 +458,7 @@ exercises Unit browsing, global search, Unit/catalog details, and matching JSON 
 it does not benchmark only the health endpoint. For example, after starting the loopback test stack:
 
 ```powershell
-python tools\capacity_test.py http://localhost:8080 --output reports\capacity-local.json
+python -m tools.performance.capacity_test http://localhost:8080 --output local/performance/http-capacity/RUN_ID/capacity.json
 ```
 
 The defaults run a 60-second steady phase at concurrency 8 followed by a 10-second burst at
@@ -465,7 +471,7 @@ The HTTP report is only one half of a capacity result. On the Linux deployment h
 capacity command with the resource sampler so both ignored JSON reports cover the same interval:
 
 ```bash
-COMPOSE_PROJECT_NAME=infinitydb-test .venv/bin/python tools/deployment_resources.py --output reports/capacity-resources.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output reports/capacity.json
+COMPOSE_PROJECT_NAME=infinitydb-test .venv/bin/python -m tools.operations.deployment_resources --output local/performance/http-capacity/RUN_ID/resources.json -- .venv/bin/python -m tools.performance.capacity_test http://localhost:8080 --output local/performance/http-capacity/RUN_ID/capacity.json
 ```
 
 The resource report records host CPU, memory/swap, filesystem space/inodes, aggregate network rates,
@@ -501,7 +507,7 @@ COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml sh scripts/deploy-local-
 ```
 
 ```bash
-COMPOSE_PROJECT_NAME=infinitydb-test COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml .venv/bin/python tools/deployment_resources.py --output reports/capacity-resources-2x4-4cpu-4g.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output reports/capacity-2x4-4cpu-4g.json
+COMPOSE_PROJECT_NAME=infinitydb-test COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml .venv/bin/python -m tools.operations.deployment_resources --output local/performance/http-capacity/RUN_ID-2x4/resources.json -- .venv/bin/python -m tools.performance.capacity_test http://localhost:8080 --output local/performance/http-capacity/RUN_ID-2x4/capacity.json
 ```
 
 Then deploy and measure the **4x4 experiment** with the same resource cap:
@@ -511,7 +517,7 @@ COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml:compose.capacity-4x4.yam
 ```
 
 ```bash
-COMPOSE_PROJECT_NAME=infinitydb-test COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml:compose.capacity-4x4.yaml .venv/bin/python tools/deployment_resources.py --output reports/capacity-resources-4x4-4cpu-4g.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output reports/capacity-4x4-4cpu-4g.json
+COMPOSE_PROJECT_NAME=infinitydb-test COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml:compose.capacity-4x4.yaml .venv/bin/python -m tools.operations.deployment_resources --output local/performance/http-capacity/RUN_ID-4x4/resources.json -- .venv/bin/python -m tools.performance.capacity_test http://localhost:8080 --output local/performance/http-capacity/RUN_ID-4x4/capacity.json
 ```
 
 Both valid reports must record `cpuLimitCores: 4.0` and `memoryLimitBytes: 4294967296`. The control
@@ -600,8 +606,17 @@ After collecting a fresh resource report, evaluate the deployment alert policy a
 and a bounded aggregate-metrics/health sampling interval:
 
 ```bash
-.venv/bin/python tools/deployment_alerts.py --resource-report reports/capacity-resources.json --output reports/deployment-alerts.json
+.venv/bin/python -m tools.operations.deployment_alerts --resource-report local/performance/http-capacity/RUN_ID/resources.json --output local/operations/deployment/alerts/RUN_ID/alerts.json
 ```
+
+When evaluating a matched 2x4 or 4x4 capacity experiment, select its
+corresponding `RUN_ID-2x4` or `RUN_ID-4x4` resource report instead.
+Keep the alert receipt separate from the input resource file. Alert
+statuses remain OK=0, warning=1, critical=2, unknown=3;
+report-file errors return **3 (unknown)**, never a synthetic critical
+status. Resource/diagnostic report failures return 2; capacity-report
+errors return 2, distinct from ordinary load-phase failure (1).
+Do not interpret an output error as a completed diagnostic.
 
 By default the evaluator samples metrics for 60 seconds and checks `/health` at both ends of that
 interval. `INFINITYDB_METRICS_URL` can select the trusted metrics listener; unless

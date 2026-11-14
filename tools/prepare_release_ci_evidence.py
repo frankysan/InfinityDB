@@ -480,13 +480,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--json-output",
         type=Path,
         required=True,
-        help="write machine-readable evidence JSON to this ignored/local path",
+        help="write new machine-readable evidence JSON (existing files are rejected)",
     )
     parser.add_argument(
         "--tag-message-output",
         type=Path,
         required=True,
-        help="write the annotated Git tag message to this ignored/local path",
+        help="write a new annotated Git tag message (existing files are rejected)",
     )
     parser.add_argument(
         "--include-full-assets",
@@ -501,14 +501,26 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _check_fresh_outputs(json_output: Path, tag_output: Path) -> None:
+    """Guard both immutable release records before work or publication."""
+    if json_output.resolve() == tag_output.resolve():
+        raise ReleaseEvidenceError("Release evidence outputs must be different files")
+    for path in (json_output, tag_output):
+        if path.exists() or path.is_symlink():
+            raise ReleaseEvidenceError(f"Release evidence output already exists: {path}")
+
+
 def _write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text, encoding="utf-8", newline="\n")
+    # Exclusive creation also protects against another writer racing preflight.
+    with path.open("x", encoding="utf-8", newline="\n") as handle:
+        handle.write(text)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        _check_fresh_outputs(args.json_output, args.tag_message_output)
         tag = validate_tag(args.tag)
         evidence = collect_release_evidence(
             args.repository,
@@ -519,15 +531,17 @@ def main(argv: list[str] | None = None) -> int:
         )
         tag_message = render_tag_message(tag, evidence)
         verify_release_metadata_for_tag(tag, args.commit)
-    except ReleaseEvidenceError as exc:
+        # Hosted lookup may be slow; recheck both outputs before any write.
+        _check_fresh_outputs(args.json_output, args.tag_message_output)
+        _write_text(
+            args.json_output,
+            json.dumps(evidence, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+        )
+        _write_text(args.tag_message_output, tag_message)
+    except (ReleaseEvidenceError, OSError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    _write_text(
-        args.json_output,
-        json.dumps(evidence, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-    )
-    _write_text(args.tag_message_output, tag_message)
     print(
         "Hosted CI evidence verified for "
         f"{evidence['commit_sha']}: {len(evidence['workflows'])} required workflows"

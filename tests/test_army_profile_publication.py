@@ -16,7 +16,7 @@ from infinity_db.web import create_app
 from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "data/raw/JSON 20260929-114335.zip"
+SOURCE = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
 ARMY = ROOT / "data/generated/army.db"
 SOURCE_CONTEXTS = {
     1912: {101, 102, 104, 105, 106, 107},

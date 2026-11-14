@@ -7,7 +7,7 @@ from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
-from tools import dev_status
+from tools.dev import dev_status
 
 BACKLOG = """# Backlog
 ### Pre-planned 1.0 execution slices

@@ -9,14 +9,15 @@ from pathlib import Path
 from typing import Any
 
 EXPECTED_FORMAT = "InfinityDB cross-platform determinism manifest"
-EXPECTED_FORMAT_VERSION = 1
+SUPPORTED_FORMAT_VERSIONS = frozenset({1, 2})
 
 
 def _load(path: Path) -> dict[str, Any]:
     document = json.loads(path.read_text(encoding="utf-8"))
     if document.get("format") != EXPECTED_FORMAT:
         raise ValueError(f"Unexpected determinism manifest format: {path}")
-    if document.get("formatVersion") != EXPECTED_FORMAT_VERSION:
+    version = document.get("formatVersion")
+    if type(version) is not int or version not in SUPPORTED_FORMAT_VERSIONS:
         raise ValueError(f"Unexpected determinism manifest version: {path}")
     artifacts = document.get("artifacts")
     if not isinstance(artifacts, dict) or not artifacts:
@@ -29,6 +30,14 @@ def compare(paths: list[Path]) -> list[str]:
         raise ValueError("At least two determinism manifests are required")
     documents = [(path, _load(path)) for path in paths]
     baseline_path, baseline = documents[0]
+    version = baseline["formatVersion"]
+    for path, document in documents[1:]:
+        if document["formatVersion"] != version:
+            raise ValueError(
+                f"Cannot compare determinism manifest v{version} ({baseline_path}) "
+                f"with v{document['formatVersion']} ({path}); "
+                "regenerate using the same format version on both systems"
+            )
     baseline_artifacts = baseline["artifacts"]
     errors: list[str] = []
     for path, document in documents[1:]:
@@ -46,10 +55,17 @@ def compare(paths: list[Path]) -> list[str]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("root", type=Path, help="Directory containing downloaded manifests")
+    parser.add_argument(
+        "paths", type=Path, nargs="+",
+        help="Two or more manifest JSON files, or one directory of determinism-manifest.json files",
+    )
     args = parser.parse_args(argv)
 
-    paths = sorted(args.root.rglob("determinism-manifest.json"))
+    paths = (
+        sorted(args.paths[0].rglob("determinism-manifest.json"))
+        if len(args.paths) == 1 and args.paths[0].is_dir()
+        else args.paths
+    )
     try:
         errors = compare(paths)
     except (OSError, ValueError, json.JSONDecodeError) as exc:

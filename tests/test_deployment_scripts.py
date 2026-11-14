@@ -105,7 +105,7 @@ def test_metrics_history_service_is_immutable_private_and_volume_backed() -> Non
     assert "condition: service_healthy" in metrics_service
 
     assert "FROM python:3.11-slim" in dockerfile
-    assert "tools/metrics_history.py /app/metrics_history.py" in dockerfile
+    assert "tools/operations/metrics_history.py /app/metrics_history.py" in dockerfile
     assert "USER metrics" in dockerfile
     assert "ENTRYPOINT" in dockerfile
     assert 'CMD ["run"]' in dockerfile
@@ -171,10 +171,30 @@ def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     gitignore = _read(".gitignore")
     attributes = _read(".gitattributes")
 
-    assert "!data/generated/army.db" in gitignore
-    assert "!data/generated/rules_n5.db" in gitignore
-    assert "data/generated/army.db binary" in attributes
-    assert "data/generated/rules_n5.db binary" in attributes
+    # The three published databases are tracked directly, without ignore negations.
+    assert "data/generated/*" not in gitignore.splitlines()
+    for name in ("army.db", "rules_n5.db", "its_18.db"):
+        assert (ROOT / "data/generated" / name).is_file()
+        assert f"data/generated/{name} binary" in attributes
+
+
+def test_docker_context_excludes_nonlocal_private_font_inputs_and_scratch() -> None:
+    """Git-ignored local inputs must not silently enter Docker's build context."""
+    dockerignore = set(_read(".dockerignore").splitlines())
+    gitignore = _read(".gitignore")
+    for pattern in (
+        "src/infinity_db/web/static/fonts/**/*.ttf",
+        "src/infinity_db/web/static/fonts/**/README.txt",
+    ):
+        assert pattern in gitignore
+        assert pattern in dockerignore
+    for pattern in (
+        ".pytest-tmp/", ".cache/", ".tmp.drivedownload/", ".tmp.driveupload/",
+    ):
+        assert pattern in dockerignore
+    for extension in ("zip", "patch"):
+        assert f"*.{extension}" in gitignore.splitlines()
+        assert f"**/*.{extension}" in dockerignore
 
 
 def test_docker_packages_only_explicit_complete_databases() -> None:
@@ -198,8 +218,8 @@ def test_release_images_require_embedded_deployed_objects() -> None:
     workflow = _read(".github/workflows/deployment-smoke.yml")
     smoke = _read("scripts/verify-container-image.sh")
 
-    assert "data/generated/*" in gitignore
-    assert "!data/generated/deployed-objects.json" not in gitignore
+    assert "data/generated/*" not in gitignore.splitlines()
+    assert "data/generated/*" in dockerignore
     assert "!data/generated/deployed-objects.json" not in dockerignore
     assert "data/generated/rules_n5.db /app/data/rules_n5.db" in dockerfile
     assert "tools.prepare_runtime_bundle" not in deploy
@@ -516,7 +536,8 @@ def test_installed_wheel_smoke_runs_database_health_check() -> None:
 
     assert "python tools/installed_wheel_smoke.py" in workflow
     smoke = _read("tools/installed_wheel_smoke.py")
-    assert '[main_cli, "database-health", "generated/army.db", "--require-raw"]' in smoke
+    assert '[main_cli, "database-health", "generated/army.db", "--normalized",' in smoke
+    assert '"generated/normalized.json"]' in smoke
 
 
 def test_full_asset_checks_can_run_against_candidate_branch() -> None:
@@ -622,12 +643,64 @@ def test_source_ci_runs_one_full_suite_and_cross_platform_build_checks() -> None
     assert "&& matrix.primary" in workflow
     assert "timeout-minutes: ${{ matrix.timeout_minutes }}" in job
     source_checks = workflow.split("- name: Run source checks", 1)[1].split(
-        "- name: Report deterministic-output toolchain", 1
+        "\n  determinism-container:", 1
     )[0]
     assert "python tools/run_checks.py ${{ matrix.check_args }}" in source_checks
     assert "--test-workers" not in source_checks
     assert "matrix.test_workers" not in workflow
     assert "--assets required --build-source tests/fixtures/deployment-smoke" in source_checks
+
+
+def test_source_ci_separates_native_builds_from_pinned_determinism() -> None:
+    workflow = _read(".github/workflows/source-checks.yml")
+    native = workflow.split("  source-checks:", 1)[1].split(
+        "  determinism-container:", 1
+    )[0]
+    pinned = workflow.split("  determinism-container:", 1)[1].split(
+        "  deterministic-outputs:", 1
+    )[0]
+    strict = workflow.split("  deterministic-outputs:", 1)[1]
+
+    # Preserve native Windows, macOS and Linux validations with the existing
+    # full/focused scope decision. No Docker assumption on Windows/macOS.
+    for os_name in ("ubuntu-latest", "windows-latest", "macos-latest"):
+        assert f"- os: {os_name}" in native
+    assert 'python tools/run_checks.py ${{ matrix.check_args }}' in native
+    assert "tools.run_pinned_determinism" not in native
+    assert "matrix.determinism" not in native
+    assert "determinism-manifest.json" not in native
+
+    # Two independent x64 Ubuntu host releases execute the same immutable
+    # Linux OCI toolchain; the strict published v2 manifest is not altered.
+    assert "os: [ubuntu-24.04, ubuntu-26.04]" in pinned
+    assert "runs-on: ${{ matrix.os }}" in pinned
+    assert "fail-fast: false" in pinned
+    assert "ref: ${{ github.event.pull_request.head.sha || github.sha }}" in pinned
+    assert "fetch-depth: 0" in pinned
+    assert "python3 -m tools.run_pinned_determinism --probe" in pinned
+    assert "actions/setup-python" not in pinned
+    assert "python -m pip install" not in pinned
+    assert "--output local/reports/determinism-manifest.json" in pinned
+    assert "name: determinism-container-${{ matrix.os }}" in pinned
+    assert "path: local/reports/determinism-manifest.json" in pinned
+    assert "if-no-files-found: error" in pinned
+    assert "if: needs.fast-validation.outputs.full == 'true'" in pinned
+
+    # Keep the established required job and its fail-closed exact-hash
+    # comparison. One missing manifest fails (at least two are required).
+    assert "needs: [fast-validation, source-checks, determinism-container]" in strict
+    assert "needs.determinism-container.result == 'success'" in strict
+    assert "needs.fast-validation.result == 'success'" in strict
+    assert "needs.source-checks.result != 'success'" in strict
+    assert "always()" in strict
+    assert "exit 1" in strict
+    assert strict.index("Compare artifact hashes") < strict.index(
+        "Enforce native source-check result"
+    )
+    assert "pattern: determinism-container-*" in strict
+    assert "path: determinism-manifests" in strict
+    assert "python tools/compare_determinism_manifests.py determinism-manifests" in strict
+    assert "Reuse validated deterministic baseline" in strict
 
 
 def test_wheel_packages_all_registered_static_assets() -> None:

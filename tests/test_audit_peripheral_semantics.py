@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_peripheral_semantics import (
+from tools.data.audit_peripheral_semantics import (
     REQUIRED_COLUMNS,
     PeripheralSemanticsAuditError,
     audit_database,

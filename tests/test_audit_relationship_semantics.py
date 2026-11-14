@@ -6,12 +6,22 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_relationship_semantics import (
+from tools.data.audit_relationship_semantics import (
+    DEFAULT_HISTORICAL_RELATION_ENDPOINTS,
     REQUIRED_COLUMNS,
     RelationshipSemanticsAuditError,
     audit_database,
     main,
 )
+
+
+def test_historical_endpoint_default_uses_repository_curated_data() -> None:
+    expected = (
+        Path(__file__).resolve().parents[1]
+        / "data/curated/relationships/historical-unit-endpoints.json"
+    )
+    assert DEFAULT_HISTORICAL_RELATION_ENDPOINTS == expected
+    assert expected.is_file()
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: object) -> None:

@@ -101,7 +101,7 @@ def test_pinned_chain_of_command_non_specialist_owners_do_not_qualify_alone(
     scenario_app: Application, context: str,
 ) -> None:
     """Source-option exclusions are not a blanket permanent Unit classification."""
-    from tools.audit_source_variant_inputs import source_extra_owner_context
+    from tools.data.audit_source_variant_inputs import source_extra_owner_context
 
     root = Path(__file__).parents[1]
     owners = source_extra_owner_context(

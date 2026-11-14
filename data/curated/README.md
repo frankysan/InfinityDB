@@ -375,7 +375,7 @@ During mapping review, validate it against the exact generated Army snapshot and
 deterministic coverage/review queue with:
 
 ```powershell
-infinity-db validate-peripheral-identities --database data/generated/army.db --output "reports/PERIPHERAL IDENTITY COVERAGE.json"
+infinity-db validate-peripheral-identities --database data/generated/army.db --output "local/audits/peripheral-identities/coverage.json"
 ```
 
 The snapshot-bound pass requires the database SHA-256 provenance to match exactly one
@@ -486,6 +486,70 @@ duplicating that Label definition locally. If the same Label ID is carried by mo
 one current collection, its name and description must agree exactly. Rules export rejects
 unresolved current Label references and conflicting current Label definitions, while
 historical collections remain self-contained.
+
+### Explicit physical PDF bindings for research
+
+The recorded `localPath` is a provenance label retained in curated JSON and
+generated `sources.local_path` rows. Changing a research file's physical
+location must not silently rewrite that label, its SHA-256, source ID,
+edition, authority, URL, version or printed-page citations.
+
+The research-only `tools.research.source_paths.pinned_pdf_path` helper uses
+[validated path policy](../../config/operations/research-source-layouts.json)
+to resolve a canonical `data/pdf/...` label against one explicitly selected
+physical layout. `legacy` selects `data/pdf/...` and remains the default;
+`local` selects the corresponding `local/data/pdf/...`. Every supplied source
+requires its existing exact SHA-256. There is no sibling-root search, implicit
+fallback, source discovery, copy or publication. Unsafe labels, links/reparse
+points, unreadable files, invalid policy and hash conflicts fail closed.
+Historical missing inputs can remain explicitly not supplied; they cannot
+become verified merely because an alternative root contains a matching file.
+
+Integrated readers include `verify_reinforcements_inputs` in the
+source-evidence auditor (optional `source_layout` API keyword) and
+`tools.audit_reinforcements_applicability` (`--source-layout legacy|local`).
+The latter applies the selected layout to both historical annex PDFs and its
+current Core/ITS reference PDFs, preserving the same applicability report.
+`tools.report_reference_baseline` and `tools.audit_pdf_revision_deltas` also
+accept `--source-layout legacy|local` for PDF evidence. The reporter keeps
+its existing legacy-status semantics; when `local` is explicitly selected,
+its canonical PDF groups require one valid published SHA-256, reject conflicting
+or altered bytes, and mark absent selected PDFs missing rather than falling
+back to legacy files. Non-PDF source groups, published database selection,
+JSON source identities and Markdown labels remain unchanged. The revision-delta
+audit resolves every selected original PDF from its existing private hash
+inventory, verifies it before extraction and again against extracted bytes,
+and preserves unchanged pair names/page references in its reports. The
+reference reporter's opt-in bilingual Visibility Zone clause verification
+uses the same explicit selector and pinned source labels. Its other optional
+`--verify-declaration-pdf` and `--verify-conditional-pdf` arguments remain
+caller-selected paths with independent SHA-256 checks, not implicit lookups.
+The Hacking Program statistics auditor also accepts an explicit `--pdf`
+source path and verifies its manifest pin; no automatic path selection was
+added to that caller-owned input. The Basic Attack, Hacking follow-up,
+Template and Hacking Program statistics source-acceptance tests accept the
+explicit test-only `--reference-pdf-layout legacy|local` selection for pinned
+Core/FAQ PDFs. The statistics suite additionally checks the unchanged
+canonical Core hash before resolving its PDF. This does not relocate the
+pinned Army archive or test Wiki ZIP, turn source-only skips into approvals,
+or alter browser/runtime validation. The five separate Core N5.3 source-only
+tests for Ammunition, visibility opposition, Cover, ARO/Deployment and Command
+Tokens now use the shared `pinned_n53_core_pdf` fixture with that same
+explicit physical layout selector and original hash/clauses. The N5.3
+weapon-chart, trait-prose and Mine variant source-only reconciliation tests
+now reuse this selection without changing their audit input APIs or their
+reviewed discrepancies. The multi-revision application/label and
+Silent/Immunity acceptance cases, plus the Reinforcements N4/N5/ITS
+applicability source test, select their own independently pinned PDF
+labels via `pinned_pdf_sources`. This does not blend editions or FAQ
+revisions or grant historical N4 rules N5 authority; mismatched sources
+fail even if another required source is missing. The 16 immunity evidence
+modules with fixed N5.3 Core prerequisites now use `pinned_n53_core_pdf`,
+keeping their independent hash/page assertions and curated/API outcomes.
+Other direct readers and test prerequisites retain their individual path
+contracts.
+Normal rules builds still do not open research PDFs. Override lookup paths
+belong to the external symbol producer and are independent of these PDF labels.
 
 Do not bulk-copy PDF or wiki text, images, or page markup. Keep core rules,
 FAQs/errata, and ITS seasons in separate collections so versions cannot be

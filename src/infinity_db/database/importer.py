@@ -401,18 +401,19 @@ def export_database(
     identity_config: IdentityConfig | None = None,
     peripheral_identities: PeripheralIdentityCurated | None = None,
     finalize: bool = True,
+    include_raw: bool = False,
 ) -> None:
-    """Validate the full normalized model, then publish application and raw siblings.
+    """Validate source and publish an application database, optionally with raw sibling.
 
-    Export first builds a complete relational staging database and runs every
-    source-to-canonical consistency check against it. Only after that succeeds is
-    the self-contained application subset copied into ``path``. The sibling raw
-    database preserves exact normalized rows, including absent versus null fields,
-    for development, audit, and reconstruction use.
+    Full source-to-canonical consistency is validated against a complete staging
+    database before publication. Application-only export is the default;
+    it retains full source validation and the deterministic generation
+    fingerprint. Explicit ``include_raw=True`` additionally writes a paired
+    lossless source archive, including absent-versus-null source fields, for
+    legacy research or compatibility consumers.
 
     ``finalize=False`` is intended for semantic tests that only need valid SQLite
-    contents. Production/release builds keep the default and therefore repack the
-    generated siblings into InfinityDB's byte-deterministic canonical layout.
+    contents. Production/release builds keep deterministic finalization.
     """
     table_columns = validate_input(data)
     identity_config = resolve_identity_config(data, identity_config)
@@ -425,6 +426,11 @@ def export_database(
     )
     path = Path(path)
     archive_path = raw_database_path(path)
+    if not include_raw and (archive_path.exists() or archive_path.is_symlink()):
+        raise ValueError(
+            "Application-only export refuses an existing raw sibling; "
+            "select a fresh destination instead"
+        )
     path.parent.mkdir(parents=True, exist_ok=True)
 
     def temporary_path(target: Path) -> Path:
@@ -436,7 +442,7 @@ def export_database(
 
     staging_temporary = temporary_path(path.with_name(f"{path.name}.staging"))
     published_temporary = temporary_path(path)
-    archive_temporary = temporary_path(archive_path)
+    archive_temporary = temporary_path(archive_path) if include_raw else None
     try:
         connection = sqlite3.connect(staging_temporary)
         try:
@@ -512,45 +518,47 @@ def export_database(
         # tables are excluded from the published application database.
         Database(staging_temporary).validate(source_consistency=True)
 
-        archive_connection = sqlite3.connect(archive_temporary)
-        try:
-            configure_deterministic_sqlite(archive_connection)
-            archive_connection.execute("PRAGMA foreign_keys = ON")
-            with archive_connection:
-                archive_connection.execute("BEGIN")
-                create_raw_archive(
-                    archive_connection, data, identity_config, metadata=metadata
-                )
+        if archive_temporary is not None:
+            archive_connection = sqlite3.connect(archive_temporary)
+            try:
+                configure_deterministic_sqlite(archive_connection)
+                archive_connection.execute("PRAGMA foreign_keys = ON")
+                with archive_connection:
+                    archive_connection.execute("BEGIN")
+                    create_raw_archive(
+                        archive_connection, data, identity_config, metadata=metadata
+                    )
+                if finalize:
+                    vacuum_deterministic_sqlite(archive_connection)
+                if archive_connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
+                    raise ValueError("Raw archive integrity check failed")
+                if archive_connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
+                    raise ValueError("Raw archive contains broken foreign keys")
+            finally:
+                archive_connection.close()
             if finalize:
-                vacuum_deterministic_sqlite(archive_connection)
-            if archive_connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
-                raise ValueError("Raw archive integrity check failed")
-            if archive_connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
-                raise ValueError("Raw archive contains broken foreign keys")
-        finally:
-            archive_connection.close()
-        if finalize:
-            normalize_sqlite_header(archive_temporary)
-        archive_check = sqlite3.connect(archive_temporary)
-        try:
-            if archive_check.execute("PRAGMA quick_check").fetchone()[0] != "ok":
-                raise ValueError("Raw archive integrity check failed after finalization")
-        finally:
-            archive_check.close()
+                normalize_sqlite_header(archive_temporary)
+            archive_check = sqlite3.connect(archive_temporary)
+            try:
+                if archive_check.execute("PRAGMA quick_check").fetchone()[0] != "ok":
+                    raise ValueError("Raw archive integrity check failed after finalization")
+            finally:
+                archive_check.close()
 
         _publish_application_database(
             staging_temporary, published_temporary, data, metadata, finalize=finalize
         )
         Database(published_temporary).validate()
-        validate_database_pair(published_temporary, raw_path=archive_temporary)
+        if archive_temporary is not None:
+            validate_database_pair(published_temporary, raw_path=archive_temporary)
 
-        # The raw archive is replaced first and the application database last. The
-        # application replacement is the publication commit point: interruption in
-        # between leaves serving on the previous validated application database,
-        # while raw-dependent tooling rejects the mismatched pair until export reruns.
-        os.replace(archive_temporary, archive_path)
+        # Paired exports retain the raw-first publication commit order. Without
+        # an archive, one atomic application replacement is the only commit.
+        if archive_temporary is not None:
+            os.replace(archive_temporary, archive_path)
         os.replace(published_temporary, path)
     finally:
         staging_temporary.unlink(missing_ok=True)
         published_temporary.unlink(missing_ok=True)
-        archive_temporary.unlink(missing_ok=True)
+        if archive_temporary is not None:
+            archive_temporary.unlink(missing_ok=True)

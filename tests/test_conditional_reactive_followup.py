@@ -177,11 +177,11 @@ def test_followup_reactive_clauses_match_curated_and_published_api() -> None:
         assert status == "200 OK" and b"<html" in html.lower(), detail
 
 
-def test_followup_reactive_clauses_retain_exact_pinned_source_pages() -> None:
+def test_followup_reactive_clauses_retain_exact_pinned_source_pages(
+    pinned_n53_core_pdf: Path,
+) -> None:
     entries = _review_rows(_manifest())
-    pdf = ROOT / _manifest()["source"]["path"]
-    if not pdf.is_file():
-        pytest.skip("Pinned N5.3 English source PDF unavailable")
+    pdf = pinned_n53_core_pdf
     pymupdf = pytest.importorskip("pymupdf")
     assert hashlib.sha256(pdf.read_bytes()).hexdigest() == PIN
     with pymupdf.open(pdf) as document:

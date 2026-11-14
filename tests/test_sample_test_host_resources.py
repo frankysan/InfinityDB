@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.sample_test_host_resources import (
+from tools.performance.sample_test_host_resources import (
     HostCounters,
     cpu_busy_percent,
     linux_cpu_counters,

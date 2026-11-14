@@ -24,7 +24,6 @@ from infinity_db.web import create_app
 ROOT = Path(__file__).resolve().parents[1]
 ARMY = ROOT / "data/generated/army.db"
 RULES = ROOT / "data/generated/rules_n5.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PDF_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 COMBINED = {
     5: ("N+E/M", ("ammunition:normal", "ammunition:em")),
@@ -40,13 +39,12 @@ BASE = frozenset({
 
 
 def test_pinned_combination_source_evidence_is_independent_of_army_map(
-    require_source_files,
+    pinned_n53_core_pdf: Path,
 ) -> None:
     """Page 67 describes three combined examples; two are Army metadata only."""
-    require_source_files(PDF)
     fitz = pytest.importorskip("fitz")
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PDF_SHA256
-    with fitz.open(PDF) as document:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PDF_SHA256
+    with fitz.open(pinned_n53_core_pdf) as document:
         page = " ".join(document[66].get_text("text").split()).casefold()
         assert "combined ammunition works as a single ammunition" in page
         assert "additional saving roll" in page

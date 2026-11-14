@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from tools.audit_weapon_trait_cross_sources import (
+from tools.research.audit_weapon_trait_cross_sources import (
     WeaponTraitWikiError,
     _load_review,
     markdown_report,
