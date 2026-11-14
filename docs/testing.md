@@ -2510,11 +2510,12 @@ is a JSON file:
   before the (potentially expensive) source projection, stages
   complete JSON in an exclusive sibling `.json.tmp` file, and
   installs the final candidate without replacing another run.
-  The existing strict name contract remains
-  `local/variant-usage-*.json` (for example
-  `local/variant-usage-20261113T090000Z-SHA.json`).
-  This loose-`local/` exception should be reviewed separately
-  with consumers before a categorized directory cutover.
+  The preferred categorized path is
+  `local/candidates/variant-usage/variant-usage-*.json` (for example
+  `local/candidates/variant-usage/variant-usage-20261114T090000Z-SHA.json`).
+  The original strict root-level `local/variant-usage-*.json` name remains
+  available for explicit compatibility. Eleven historical candidate and
+  validation files are preserved in `local/candidates/variant-usage/legacy/`.
   `--check` remains read-only and mutually exclusive with output.
 - `export_symbol_source_plan` and
   `export_symbol_override_lookups` produce **pinned source

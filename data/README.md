@@ -77,6 +77,15 @@ the retired source roots.
   four-file Docker preparation bundle; it is not used for serving or deployment.
 - `local/archive/its/its_18-legacy-output.db` preserves the old standalone
   ITS build, which differs from the current `local/work/its/its_18.db`.
+- `local/archive/legacy-root/` groups 414 completed one-off local runs by
+  domain and lifetime: recovery, restructuring, v1-release, validation-logs,
+  rules-research, reference-review, infrastructure-history, and one-off-scripts.
+  Their original names and contents were retained by same-volume rename.
+- `local/candidates/variant-usage/` is the preferred location for new
+  `variant-usage-*.json` review candidates. Eleven historical candidates
+  and related reports are preserved under its `legacy/` subdirectory.
+  The old root-level candidate output format remains an explicit
+  compatibility path, not the recommended location.
 - `local/data/manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
   record is labeled from the archive filename, records both the logical snapshot
   content SHA-256 and exact archive SHA-256, and records the snapshot type,

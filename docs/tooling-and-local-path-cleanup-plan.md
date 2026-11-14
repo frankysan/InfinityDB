@@ -126,6 +126,22 @@ work, symbol publication and Syncthing mappings were untouched. The one-use
 relocation helper is retired after execution. Empty old directories and
 Explorer metadata are non-blocking housekeeping only.
 
+**L3 root-level `local/` consolidation (2026-11-14):** 425 ignored
+top-level entries were relocated without replacing or deleting their
+contents: 414 completed recovery, restructuring, v1 closeout, validation,
+rules research, reference-review, infrastructure and one-off script
+artifacts under `local/archive/legacy-root/`, plus 11 old variant-usage
+candidates and related diagnostics under
+`local/candidates/variant-usage/legacy/`. A code-reference scan excluded
+five specifically referenced paths; active domain directories and pinned
+PDF inventory remained at the root. Top-level clutter dropped from
+455 to **30** entries. The `build_variant_usage --output` CLI now also
+accepts the preferred categorized `local/candidates/variant-usage/`
+destination without dropping its legacy root-level filename contract.
+Focused export tests validated both variants. The migration/inventory
+helper is retired after use; this is archival organization, not a
+source-data deletion or publication change.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

@@ -21,7 +21,10 @@ def main() -> None:
     destinations = parser.add_mutually_exclusive_group()
     destinations.add_argument(
         "--output", type=Path,
-        help="optional ignored local/*.json candidate; no tracked release publication",
+        help=(
+            "ignored local/candidates/variant-usage/variant-usage-*.json candidate; "
+            "legacy local/variant-usage-*.json is also accepted"
+        ),
     )
     destinations.add_argument(
         "--check", type=Path,
@@ -47,12 +50,19 @@ def main() -> None:
     if args.output is not None:
         candidate = (ROOT / args.output).resolve()
         local_root = (ROOT / "local").resolve()
+        allowed_parents = {
+            local_root,
+            local_root / "candidates" / "variant-usage",
+        }
         if (
-            candidate.parent != local_root
+            candidate.parent not in allowed_parents
             or candidate.suffix != ".json"
             or not candidate.name.startswith("variant-usage-")
         ):
-            parser.error("--output must be local/variant-usage-*.json")
+            parser.error(
+                "--output must be local/candidates/variant-usage/"
+                "variant-usage-*.json (or the legacy local/ location)"
+            )
         if (ROOT / args.output).is_symlink() or candidate.exists() or candidate.is_symlink():
             parser.exit(1, f"Variant usage candidate already exists: {args.output}\n")
         destination = candidate

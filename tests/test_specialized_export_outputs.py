@@ -165,9 +165,13 @@ def test_variant_candidate_preflight_prevents_expensive_projection(
     assert prior.read_bytes() == previous
 
 
+@pytest.mark.parametrize("output_name", (
+    "local/variant-usage-r1.json",
+    "local/candidates/variant-usage/variant-usage-r1.json",
+))
 def test_variant_candidate_fresh_is_canonical_and_staged_atomically(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    capsys: pytest.CaptureFixture[str], output_name: str,
 ) -> None:
     (tmp_path / "local").mkdir()
     result = json.loads(json.dumps(VARIANT_RESULT))
@@ -175,16 +179,16 @@ def test_variant_candidate_fresh_is_canonical_and_staged_atomically(
         variants, "build_variant_usage_from_normalized",
         lambda *_args: result,
     )
-    _variant(monkeypatch, tmp_path, "local/variant-usage-r1.json")
-    output = tmp_path / "local/variant-usage-r1.json"
+    _variant(monkeypatch, tmp_path, output_name)
+    output = tmp_path / output_name
     expected = (json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode(
         "utf-8"
     )
     assert output.read_bytes() == expected
-    assert not (tmp_path / "local/variant-usage-r1.json.tmp").exists()
+    assert not output.with_suffix(".json.tmp").exists()
     summary = json.loads(capsys.readouterr().out)
     assert summary["scope"] == result["scope"]
-    assert summary["output"].replace("\\", "/") == "local/variant-usage-r1.json"
+    assert summary["output"].replace("\\", "/") == output_name
 
 
 def test_variant_candidate_race_does_not_replace_other_result(
