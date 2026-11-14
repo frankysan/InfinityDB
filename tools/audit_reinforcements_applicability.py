@@ -230,7 +230,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=MANIFEST)
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--source-layout", choices=("legacy", "local"), default="legacy")
+    parser.add_argument("--source-layout", choices=("legacy", "local"), default="local")
     args = parser.parse_args()
     report = audit_applicability(args.manifest, source_layout=args.source_layout)
     if args.json:

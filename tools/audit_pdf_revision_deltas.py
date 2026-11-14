@@ -232,7 +232,7 @@ def main() -> int:
     )
     parser.add_argument("--output", default="local/audits/pdf-deltas-2026-11-06.json")
     parser.add_argument(
-        "--source-layout", choices=("legacy", "local"), default="legacy",
+        "--source-layout", choices=("legacy", "local"), default="local",
         help="Select physical PDF input under data/pdf or local/data/pdf; keep original labels",
     )
     args = parser.parse_args()

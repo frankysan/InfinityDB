@@ -39,30 +39,28 @@ The three published `data/generated/` databases, tracked curated
 inputs, the symbol publication manifest, reviewed generated checklists
 and immutable tracked acceptance/source records **remain tracked**.
 Normal serve, Docker and installed-wheel builds do not require `local/`
-research artifacts. The following **current** paths, readers and writers
-remain supported until each explicitly validated cutover; acceptance
-of this policy **does not move or delete existing private files**, retire
-tools, change CLI defaults, alter producer staging/Syncthing or approve
-a migration. See the [cleanup execution plan](../docs/tooling-and-local-path-cleanup-plan.md)
-for independently gated work.
+research artifacts. See the [cleanup execution plan](../docs/tooling-and-local-path-cleanup-plan.md)
+for completed migrations and remaining unique legacy material.
 
-**R6 copy status (2026-11-14):** The Windows checkout has 124 hash-checked
-copies under `local/data/`: Army, Wiki/Human-Sphere and raw-symbol ZIPs, their
+**R6 cutover (2026-11-14):** The Windows checkout has 124 hash-checked
+files under `local/data/`: Army, Wiki/Human-Sphere and raw-symbol ZIPs, their
 available provenance manifests, and PDFs. One older Army ZIP has no manifest.
-Legacy originals and default reader, producer and Syncthing paths remain
-unchanged; these copies are not a cutover.
+All **49 verified duplicate ZIPs/manifests** were retired from ignored
+legacy `data/` after source-reader and Syncthing cutover. The four Windows
+Syncthing source folders and current Army build inputs use `local/data/`.
+PDF research CLI defaults use `local/data/pdf/`, retaining canonical
+`data/pdf/` labels. Legacy PDFs and unique extracted Wiki directories
+remain until their remaining consumers and uses are reviewed.
 
 ## Current paths and behavior
 
-- `raw/` — immutable downloaded Corvus Belli Army snapshot archives. Army
-  acquisition writes `JSON YYYYMMDD-HHMMSS.zip`; historical symbol archives
-  may remain in `raw/symbols/`. Ignored by Git.
-- `wiki/` — local wiki research material. The downloader persists immutable
-  `WIKI-<language> YYYYMMDD-HHMMSS.zip` Infinity Wiki snapshots here; English (`en`)
-  is the default and Spanish (`es`) is an explicit alternative. Human Sphere uses the
-  distinct English-only `HUMAN-SPHERE YYYYMMDD-HHMMSS.zip` identity. History-enabled
-  acquisitions add `-history` before the timestamp. Ignored by Git.
-- `pdf/` — local rules/FAQ/ITS research documents. Ignored by Git.
+- `local/data/raw/army/` — immutable Corvus Belli Army snapshot ZIPs.
+  Older raw-symbol ZIPs reside under `local/data/raw/symbols/`.
+- `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
+  Human Sphere snapshot ZIPs, including history variants. Unique extracted
+  mirror directories temporarily remain under legacy `data/wiki/`.
+- `local/data/pdf/` — source-PDF copies for new research; legacy
+  `data/pdf/` copies are retained for remaining explicit readers.
 - `work/wiki/` — local wiki crawl work. Successful acquisitions remove their
   work directory after publishing the immutable archive and provenance;
   incomplete/error runs preserve downloaded work here for inspection. Ignored
@@ -71,7 +69,7 @@ unchanged; these copies are not a cutover.
   may contain ignored historical in-tree processing evidence. The retired
   processor cannot resume it; accepted external promotions use a transaction
   under `local/`.
-- `manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
+- `local/data/manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
   record is labeled from the archive filename, records both the logical snapshot
   content SHA-256 and exact archive SHA-256, and records the snapshot type,
   archive label/path when project-relative, acquisition time, source URL,
@@ -179,7 +177,7 @@ their exact file hashes.
 `infinity-db export NORMALIZED.json OUTPUT.db` explicitly creates an Army/raw
 development pair. Their work outputs are not complete serving sets.
 `build-rules` retains a narrow standalone v10 export in ignored
-`data/work/build/rules-standalone.db`, without runtime assembly or promotion.
+`local/work/build/rules-standalone.db`, without runtime assembly or promotion.
 Research tools receive an explicit raw archive path; normal serving never opens it.
 
 Source/release verification compares the recorded build-input hashes against

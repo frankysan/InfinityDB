@@ -117,15 +117,47 @@ def copy_family(root: Path, family: str, *, apply: bool) -> tuple[int, int, int]
     return len(entries), copied, missing
 
 
+def retire_family(root: Path, family: str, *, apply: bool) -> int:
+    """Remove legacy duplicates only when every selected local copy matches."""
+    if family == "pdf":
+        raise ValueError("PDF retirement requires separate physical-reader cutover")
+    entries, missing = candidates(root, family)
+    for source, destination, digest in entries:
+        _regular_file(source)
+        if (
+            destination.is_symlink()
+            or not destination.is_file()
+            or sha256_file(destination) != digest
+            or sha256_file(source) != digest
+        ):
+            raise ValueError(f"Unverified destination; original retained: {source}")
+    if apply:
+        for source, _, _ in entries:
+            source.unlink()
+    print(
+        f"{family}: {len(entries)} verified duplicate files; "
+        f"{'retired' if apply else 'would retire'} {len(entries)}; "
+        f"{missing} archive(s) without a matching manifest"
+    )
+    return len(entries)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--family", required=True, choices=("army", "wiki", "symbols", "pdf"))
     parser.add_argument(
-        "--apply", action="store_true", help="Copy only missing identical-source inputs"
+        "--apply", action="store_true", help="Perform the selected copy or duplicate retirement"
+    )
+    parser.add_argument(
+        "--retire-duplicates", action="store_true",
+        help="Retire already-copied legacy Army/Wiki/symbol ZIP and manifest files",
     )
     args = parser.parse_args(argv)
     try:
-        copy_family(ROOT, args.family, apply=args.apply)
+        if args.retire_duplicates:
+            retire_family(ROOT, args.family, apply=args.apply)
+        else:
+            copy_family(ROOT, args.family, apply=args.apply)
     except (OSError, ValueError, KeyError, TypeError) as exc:
         parser.exit(1, f"Source copy refused: {exc}\n")
     return 0

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.data.copy_legacy_sources import candidates, copy_family
+from tools.data.copy_legacy_sources import candidates, copy_family, retire_family
 
 
 def _army_fixture(root: Path, name: str = "JSON 20260929-114335") -> tuple[Path, Path]:
@@ -120,3 +120,30 @@ def test_source_family_must_match_manifest_type(tmp_path: Path) -> None:
         candidates(tmp_path, "army")
     assert archive.exists()
     assert not (tmp_path / "local").exists()
+
+
+def test_retirement_only_removes_verified_duplicates(tmp_path: Path) -> None:
+    archive, manifest = _army_fixture(tmp_path)
+    copy_family(tmp_path, "army", apply=True)
+    assert retire_family(tmp_path, "army", apply=False) == 2
+    assert archive.exists() and manifest.exists()
+    assert retire_family(tmp_path, "army", apply=True) == 2
+    assert not archive.exists() and not manifest.exists()
+    assert (tmp_path / "local/data/raw/army" / archive.name).is_file()
+    assert (tmp_path / "local/data/manifests/snapshots" / manifest.name).is_file()
+
+
+def test_retirement_fails_before_deleting_if_one_copy_differs(tmp_path: Path) -> None:
+    archive, manifest = _army_fixture(tmp_path)
+    copy_family(tmp_path, "army", apply=True)
+    (tmp_path / "local/data/manifests/snapshots" / manifest.name).write_text(
+        "mismatched", encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Unverified destination"):
+        retire_family(tmp_path, "army", apply=True)
+    assert archive.exists() and manifest.exists()
+
+
+def test_pdf_retirement_is_not_part_of_archive_cleanup(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="PDF retirement"):
+        retire_family(tmp_path, "pdf", apply=True)

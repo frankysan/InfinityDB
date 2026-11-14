@@ -53,13 +53,13 @@ Run the commands below **on Linux**, with the InfinityDB repository as the
 current directory, after synchronized inputs show Up to Date.
 
 ```bash
-./.venv/bin/python -m tools.activate_synced_assets list
-./.venv/bin/python -m tools.activate_synced_assets verify --snapshot 'JSON 20260929-114335'
-./.venv/bin/python -m tools.activate_synced_assets activate --snapshot 'JSON 20260929-114335'
-./.venv/bin/python -m tools.activate_synced_assets activate --snapshot 'JSON 20260929-114335' --apply
+./.venv/bin/python -m tools.activate_synced_assets list --layout local
+./.venv/bin/python -m tools.activate_synced_assets verify --layout local --snapshot 'JSON 20260929-114335'
+./.venv/bin/python -m tools.activate_synced_assets activate --layout local --snapshot 'JSON 20260929-114335'
+./.venv/bin/python -m tools.activate_synced_assets activate --layout local --snapshot 'JSON 20260929-114335' --apply
 ```
 
-- `list` enumerates staged snapshot manifest names.
+- `list --layout local` enumerates staged snapshot manifest names.
 - `verify` validates each selected manifest with the shared provenance
   validator, including exact archive SHA-256 and logical-content SHA-256
   where its version provides one. Supported historical v1/v2 and current v3
@@ -94,7 +94,7 @@ their permitted source/destination families are rejected without fallback.
 | Matching provenance | `snapshots/<original stem>.json` | `local/data/manifests/snapshots/<original stem>.json` |
 
 The `legacy` layout continues to translate the manifest's `data/raw/` or
-`data/wiki/` label into the corresponding staged folder, preserving nested
+`data/wiki/` label into the corresponding old staged folder, preserving nested
 relative paths such as `raw/symbols/`. It rejects a new-layout path instead of
 silently switching layouts. The explicitly selected `local` mode selects one
 configured family directory plus the original archive basename. Its optional
@@ -111,12 +111,14 @@ Preview a selected pair on Linux without changing the checkout:
 ./.venv/bin/python -m tools.activate_synced_assets activate --layout local --snapshot 'JSON 20260929-114335'
 ```
 
-On 2026-11-14, the Windows checkout received hash-checked, non-replacing
-copies of Army, Wiki/Human-Sphere and raw-symbol sources plus PDFs under
-`local/data/`. The four sender paths now use that layout; the optional
-override sender remains unchanged. Existing extracted Wiki/Human Sphere
-mirror directories under legacy `data/wiki/` are **not** synchronized
-from the new ZIP-only sender root. They remain on Windows.
+On 2026-11-14, the Windows checkout received hash-checked copies of Army,
+Wiki/Human-Sphere, raw-symbol sources and PDFs under `local/data/`.
+After the cutover, 49 exact duplicate legacy ZIP/manifest files were
+retired; their `local/data/` copies remain intact. The four sender paths
+use the local layout; the optional override sender is unchanged.
+Existing extracted Wiki/Human Sphere mirror directories under legacy
+`data/wiki/` are **not** synchronized from the ZIP-only sender root.
+They remain on Windows.
 Linux checkout activation remains an explicit `--layout local` command;
 this does not trigger builds, Git operations or live acquisition.
 
@@ -139,7 +141,7 @@ original provenance. These are the two **explicit** file layouts:
 
 | Selection | Staged source | Checkout destination |
 | --- | --- | --- |
-| Default `--layout legacy` | `pdf/<relative>.pdf` | `data/pdf/<relative>.pdf` |
+| Explicit `--layout legacy` | `pdf/<relative>.pdf` | `data/pdf/<relative>.pdf` |
 | Default `--layout legacy` | `image-overrides/<relative>.svg` | `image_overrides/<relative>.svg` |
 | Explicit `--layout local` | `pdf/<relative>.pdf` | `local/data/pdf/<relative>.pdf` |
 | Explicit `--layout local` | `image-overrides/<relative>.svg` | `local/data/symbols/overrides/<relative>.svg` |

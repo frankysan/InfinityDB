@@ -3163,7 +3163,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--army-archive", type=Path, help="Verify exact ZIP bytes against Army pin")
     parser.add_argument(
-        "--source-layout", choices=("legacy", "local"), default="legacy",
+        "--source-layout", choices=("legacy", "local"), default="local",
         help="Select physical PDF evidence under data/pdf or local/data/pdf; labels stay unchanged",
     )
     parser.add_argument(

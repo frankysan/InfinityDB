@@ -87,6 +87,20 @@ the immutable ZIP archives remain available. New producer ZIP/manifest
 pairs can be imported with `tools.data.import_acquisition_snapshot` before
 Syncthing makes them available to Linux.
 
+**R6 verified duplicate retirement and PDF defaults (2026-11-14):**
+Following the local sender/receiver cutover, 49 ignored legacy source
+files were verified byte-identical and removed: 11 Army ZIP/manifest
+files (including one archive with no manifest), 10 Wiki/Human-Sphere
+ZIP/manifest files, and 28 raw-symbol ZIP/manifest files. All 49 local
+destinations remain intact. The expanded Wiki mirrors, legacy PDFs
+and other unique data remain. Default PDF research CLI selection in
+`tools.report_reference_baseline`,
+`tools.audit_pdf_revision_deltas`, and
+`tools.audit_reinforcements_applicability` now uses `local/data/pdf/`;
+explicit `--source-layout legacy` remains supported. Printed citation
+and source labels are unchanged. Keep the one-use copy helper only
+until the remaining PDF migration is complete.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user
