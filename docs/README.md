@@ -73,6 +73,16 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   original review/defer decision and are evidence provenance, not the active roadmap; use `TODO.md`
   for current milestone planning.
 
+Other retained, **bounded source/implementation evidence** has a distinct purpose:
+[FAQ v0.1 applicability inventory](faq-v0.1-scope-inventory.md) pins reviewed
+question/scope decisions; [ITS database notes](its-season-database.md)
+document the selected season schema and current builder commands; and
+[season-publication ownership](season-publication-ownership.md) records
+the N5/FAQ/ITS authority boundary. These are not additional
+backlog or release checklists; current semantics belong to the
+[data model](data-model.md), [data lifecycle](../data/README.md),
+and [source clarification register](official-source-clarifications.md).
+
 The completed 1.0 source-coverage audit and four rules-explanation audit files
 were retired to Git history at the `add2280` baseline. A compact 367-record
 identity fixture remains under `config/validation/` for the actively used
@@ -88,148 +98,54 @@ only when it contains unique rationale that still guides active work.
 
 **Project domain:** Project infrastructure
 
-A one-use tool is a script written for a bounded migration, investigation, recovery or publication
-step rather than an ongoing supported command. An audit may likewise be a dated investigation or
-frozen acceptance record rather than maintained guidance. Names such as `stage_*`, `promote_*`
-and `audit_*` are **candidates for review**, not proof that a file is disposable. Do not classify
-reusable source validators, release gates or helpers as one-use solely from their names or age.
+Use this policy for bounded tools, plans, reports, audits and generated
+evidence. A name such as `stage_*`, `promote_*` or `audit_*`, or an old
+version/date, is not proof that the item is disposable. Prefer a maintained
+existing command when the operation will recur.
 
-**Plan retirement when creating one-use work.** State the purpose, owning TODO/source-review ID,
-expected artifacts/evidence, and the event after which the tool or report can be retired. Put
-one-off output, backup files and execution logs under ignored `local/`; avoid making permanent
-build, CI, runtime or release commands depend on them. Prefer extending an existing maintained
-tool over accumulating a new wrapper when the operation is expected to recur.
+At creation, identify the domain, owner, purpose, expected artifacts,
+source/revision scope and completion or retirement trigger. Categorize
+temporary output in ignored `local/`; do not make builds, CI, runtime
+or release procedures depend on private execution logs.
 
-**Review at bounded task closeout**, after successful publication/acceptance of the intended
-artifact, or during a deliberate repository-hygiene pass. Use this order:
+At task closeout, a deliberate cleanup or an accepted publication:
 
-1. **Establish completion and provenance.** Identify the original research, development
-   or presentation purpose and its exact input/output revisions or source hashes where material.
-   Determine whether that purpose has been fulfilled, superseded or remains independently
-   necessary for an open migration, a specific reproducible source investigation or a current
-   release requirement. Historical reproducibility by itself is not a mandate to retain
-   executable build and serving paths; Git history preserves their implementation.
-2. **Audit consumers to plan the change, not to justify retention by circular reference.**
-   Search imports, module invocations, tests/fixtures, CI, scripts, package entry points,
-   generated-file recipes, agent skills, TODO items, source audits and operator procedures.
-   For each consumer, identify its **independent current purpose** in research, development
-   or presentation. A test that exists only to verify a historical command, an obsolete
-   staging path or compatibility already superseded by the current format is not evidence
-   that the command must remain. Remove or replace that test and its fixture together with
-   the retired implementation. Keep or migrate tests that enforce **still-valid invariants**
-   such as source provenance, semantic parity, deterministic rebuilding and fail-closed
-   selection. Do not retain old code merely to keep its tests green.
-3. **Preserve lasting knowledge.** Transfer accepted semantics, source discrepancies, unresolved
-   decisions, reproducibility requirements and current procedures to their canonical owners.
-   Keep stable finding IDs and source-version/hash evidence that an open reconciliation relies on.
-   A large frozen baseline can remain tracked while it is needed for acceptance, but it must be
-   labeled historical rather than maintained current state.
-4. **Choose the smallest useful disposition based on purpose, not dependency count:**
-   - **Retain** only when there is a concrete, unsuperseded research, development or
-     presentation need, a current supported builder/runtime or reusable verification contract,
-     or a genuinely open source/release obligation. Mere imports, historical test coverage,
-     age, speculative future reuse or the ability to reproduce an old tool are insufficient.
-   - **Extract and replace** if a one-use entry point contains reusable logic: move that logic to
-     a maintained module, update its consumers/tests and then retire only the obsolete wrapper.
-   - **Retain evidence under a categorized ignored `local/` path** (currently
-     `local/provenance/` where appropriate) if unique raw findings, private inputs,
-     recovery material or replay instructions justify a local copy. Record source
-     revision, purpose and limits. Since `local/` is ignored, such copies are
-     **not shared Git provenance** and cannot be required by a clean checkout.
-   - **Delete from the tracked tree** if the work is complete, references are cleared and
-     its content is already recoverable from Git history or canonical records. Do not copy
-     every obsolete script into `local/` by default; that would create a second archive.
-5. **Close out atomically.** Remove or replace historical-only tests/fixtures, stale
-   commands, links and imports in the same change, while moving relevant invariant checks
-   onto the replacement contract. State the retired paths, their fulfilled/superseded
-   purpose, preserved evidence and remaining independent consumers. Run focused tests for
-   current behavior and the `docs` stage (including links), inspect the diff, and verify
-   current CI/release paths no longer depend on retired material. Use the
-   [VD/VR queue](validation-queue.md) only for genuinely deferred checks.
+1. **Confirm independent purpose and consumers.** Check the owning task,
+   current imports/entry points, tests, CI, packaging, source readers,
+   operator procedures and links. Historical-only tests or obsolete
+   staging dependencies do not justify retaining an obsolete implementation.
+   Preserve tests of continuing source, parity, compatibility and
+   deterministic-publication invariants when replacing their old producer.
+2. **Preserve lasting meaning.** Transfer accepted semantics,
+   source discrepancies, unresolved work, supported procedures and
+   reproducibility requirements to their canonical
+   [documentation owners](#canonical-current-state-documents). Keep
+   stable source identities, revisions, hashes and reviewed provenance
+   needed by open research or publication acceptance.
+3. **Choose the smallest useful disposition:**
+   - **Retain** actively supported operations, open research or unique
+     source/acceptance evidence in their appropriate tracked owner.
+   - **Extract and replace** reusable validators/parsers or current
+     policy embedded in a one-use wrapper or historical narrative.
+   - **Rename/relocate** still-useful material whose path obscures its
+     purpose, preserving source identity and updating consumers together.
+   - **Retire** superseded tracked tools, plans, reports and audits to
+     Git history after transferring any open findings and removing
+     obsolete entry points, tests and links. Do not create a second
+     `archive/` or completed-task registry in the tracked tree.
+   - **Preserve private evidence** in categorized `local/` only when
+     unique research, recovery, source or legal/provenance needs justify
+     retention. Ignored copies cannot replace shared Git-backed evidence.
+4. **Validate the change proportionally.** Run checks for surviving
+   behavior, the documentation/link stage, and Git diff/consumer review.
+   State retired paths, preserved evidence and remaining dependencies in
+   the commit or canonical closeout. Use the
+   [validation queue](validation-queue.md) only for genuinely deferred tests.
 
-A one-use audit **report** follows the same procedure: first reconcile its actionable findings
-with `TODO.md`, `official-source-clarifications.md` or other appropriate owners; then delete the
-superseded narrative or preserve only genuinely unique evidence. Audit findings are not closed
-merely because a newer report exists. Do not rewrite or discard immutable upstream snapshots,
-license/provenance obligations, or reviewed historical evidence required by the
-[data lifecycle](../data/README.md). Prefer explicit retention with a reason over uncertain loss.
-
-## Disposition and naming of completed files
-
-**Project domain:** Project infrastructure
-
-Apply the same lifecycle decision to **tools, plans, reports, audits, temporary
-scripts and their generated evidence**. At creation, identify the domain, owner,
-purpose, scope and retirement trigger, using the path and name where possible.
-A recurring maintained tool has no artificial expiry; a bounded investigation
-should have an explicit completion condition. A date or version in a filename
-describes the scope of evidence, **not** a reason by itself to delete it.
-
-At task closeout or during a deliberate audit, classify the item:
-
-- **Active:** Still owns a current contract, reusable operation, open research
-  question or release obligation. Keep it in its canonical location and update
-  stale naming, implementation or docs as needed.
-- **Bounded/open:** Needed for an unfinished specific task or unresolved
-  dependency. Keep with a named owner and review it when that dependency closes;
-  do not invent a time-based deletion deadline.
-- **Frozen evidence:** Unique, verified source/provenance, accepted release
-  evidence, unresolved research findings or legally required material. Retain
-  immutably in its appropriate tracked owner or an approved, protected ignored
-  location. Record why it is needed and what would permit retirement.
-- **Superseded/completed:** No independent active consumer or unique evidence
-  remains. Remove the tracked file with its historical-only tests, references
-  and commands. Git history normally provides the archive; do not create a
-  permanent copy solely to preserve old code or a finished narrative.
-
-Choose one disposition, with the reason recorded in the relevant change:
-
-1. **Remove** redundant tracked implementations, completed plans, duplicate
-   reports and obsolete audits once lasting conclusions, current instructions,
-   open findings and supported consumers have been reconciled. Prefer deletion
-   to an automatic `archive/` or `old/` directory. A historical test that only
-   exercises the retired implementation does not establish a live need.
-2. **Archive evidence** only when it has a concrete retention purpose: for
-   example a source hash/revision needed for a still-open clarification, a
-   signed/reviewed acceptance record, unique research findings or recovery
-   material. Shared, independently required evidence belongs with its
-   maintained tracked source; machine-specific or nonpublishable evidence
-   belongs in a categorized ignored `local/` directory with appropriate
-   backup/permissions. An ignored local copy cannot substitute for required
-   clean-checkout evidence. Record source identity, scope, status, owner,
-   integrity hash where material, and the trigger for the next review.
-3. **Rename or relocate** an *otherwise still useful* item when its current
-   path incorrectly implies that it is active, generic, or owned by another
-   subsystem. Prefer a descriptive domain/scope/version/date in its new
-   location; mark a retained completed plan as historical at its top. Migrate
-   consumers and links in the same change. Do not rename immutable upstream
-   originals, published asset URLs or source-referenced artifacts without an
-   explicitly verified provenance/compatibility migration. Renaming alone
-   does not justify retaining a superseded file.
-4. **Extract and replace** when one-use code contains a genuinely reusable
-   validator/parser, or when an obsolete document mixes still-current policy
-   with historical commentary. Move current logic or policy to its canonical
-   owner, preserve relevant invariant tests, then retire the old wrapper or
-   narrative.
-
-Apply the decision by file type: completed **plans** leave `TODO.md` and
-either retire to Git history or remain visibly labeled historical if their
-unique decisions still matter; completed **audits** first transfer unresolved
-findings and accepted interpretations to their authoritative registers;
-**reports** retain only needed acceptance/provenance evidence rather than
-every intermediate rendering; **tools** lose obsolete commands, imports and
-historical-only tests together. Do not delete a source archive or backup
-merely because its producing tool has been retired.
-
-For each retirement batch, review live imports, invocations, test purpose,
-CI, packaging, generated-output recipes, links, agent instructions, upstream
-handoffs and actual data ownership. Verify any migrated file's identity,
-validate affected behavior, and review the final diff. Record what was retired,
-the fulfilled purpose, where surviving knowledge/evidence lives and any
-outstanding obligation in the commit or canonical closeout. **Uncertain,
-unique or ignored private data is never bulk-deleted on the basis of naming
-or age; such removal requires its own verified review and authorization.**
-Avoid maintaining a permanent second archive or completed-task register.
+Do not silently delete immutable upstream inputs, published artifacts,
+source-referenced files, backups or unique ignored/private evidence.
+Uncertain deletion requires separate review and authorization; age,
+filename or a completed producer task is insufficient.
 
 Tool and workspace cleanup completed on 2026-11-14. The detailed historical
 execution record remains in Git history; current conventions belong to
@@ -321,6 +237,11 @@ warnings. Unnumbered descriptions are matched conservatively so ordinary
 rewrites are less likely to trigger false alarms. A warning asks the
 maintainer to verify completion, supersession or transfer using the same
 commit and canonical evidence; it is not a separate acceptance gate.
+
+The Git-based `TODO.md` workflow remains the sole task register. Defer
+GitHub Issues/Projects unless concrete cross-repository coordination,
+dependency tracking or agent handoff problems justify the additional
+overhead; do not create a parallel register or automatic status sync.
 
 ## Private local workspace
 

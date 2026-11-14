@@ -23,26 +23,10 @@ when all contained work shares the same owner.
 Use these links to jump directly to a workstream:
 
 - **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Unit Explorer](#unit-explorer-discovery), [Sharing](#routing-and-long-term-compatibility).
-- **Engineering:** [Workflow](#backlog-and-development-workflow-simplification), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
+- **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
 ## Active development
-
-### Backlog and development workflow simplification
-
-**Project domain:** Project infrastructure
-
-- [ ] **Simplify the Git-based backlog workflow** under the
-  [backlog completion policy](README.md#backlog-completion-and-retirement):
-  - [ ] Consolidate remaining overlapping guidance into its canonical owner;
-    retire completed plans, reports and audits only when no independent
-    work or evidence requires them.
-  The existing docs-stage checker now catches duplicate explicit task IDs
-  and open children under checked parents, and warns when unfinished tasks
-  disappear relative to the current committed backlog. Warnings require
-  review, not automatic task closure or extra bookkeeping.
-  **Decision:** Defer GitHub Issues/Projects unless coordination problems
-  persist; do not add a parallel task registry or status synchronization.
 
 ### External source clarifications
 
