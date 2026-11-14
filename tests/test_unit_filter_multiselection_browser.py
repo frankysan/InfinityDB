@@ -1,0 +1,117 @@
+"""Browser acceptance for the Unit Explorer categorical multi-select controls."""
+
+from collections.abc import Iterator
+from pathlib import Path
+from socketserver import ThreadingMixIn
+from threading import Thread
+from typing import Any
+from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
+
+import pytest
+
+from infinity_db.web import create_app
+from tools.browser_wsgi_transport import route_browser_page
+
+
+class _ThreadedServer(ThreadingMixIn, WSGIServer):
+    daemon_threads = True
+
+
+class _QuietHandler(WSGIRequestHandler):
+    def log_message(self, format: str, *args: object) -> None:
+        pass
+
+
+@pytest.fixture(scope="module")
+def app() -> Any:
+    root = Path(__file__).resolve().parents[1]
+    return create_app(
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
+    )
+
+
+@pytest.fixture(scope="module")
+def origin(app: Any) -> Iterator[str]:
+    server = make_server(
+        "127.0.0.1", 0, app, server_class=_ThreadedServer, handler_class=_QuietHandler
+    )
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        yield f"http://127.0.0.1:{server.server_port}"
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+@pytest.fixture(scope="module")
+def browser() -> Iterator[Any]:
+    sync_api = pytest.importorskip("playwright.sync_api")
+    with sync_api.sync_playwright() as driver:
+        try:
+            chrome = driver.chromium.launch(channel="chrome")
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                pytest.skip(f"Chrome unavailable: {exc}")
+            raise
+        try:
+            yield chrome
+        finally:
+            chrome.close()
+
+
+@pytest.mark.parametrize("width", [1280, 390])
+def test_unit_multiselect_url_state_keyboard_and_removal(
+    app: Any, origin: str, browser: Any, width: int
+) -> None:
+    page = browser.new_page(
+        viewport={"width": width, "height": 900},
+        has_touch=width == 390, is_mobile=width == 390,
+    )
+    route_browser_page(page, app, origin)
+    errors: list[str] = []
+    page.on("pageerror", lambda exc: errors.append(str(exc)))
+    try:
+        page.goto(f"{origin}/units", wait_until="domcontentloaded")
+        control = page.locator(".unit-multi-select").first
+        control.locator(".unit-multi-option").first.wait_for(state="attached")
+        assert page.locator(".unit-multi-select").count() == 6
+        assert page.locator("#skill-filter").is_hidden()
+
+        if page.locator(".advanced-filters").get_attribute("open") is None:
+            page.locator(".advanced-filters > summary").click()
+        control.locator("summary").focus()
+        control.locator("summary").press("Enter")
+        assert control.get_attribute("open") is not None
+
+        first = control.locator(".unit-multi-option input").nth(0)
+        second = control.locator(".unit-multi-option input").nth(1)
+        if width == 390:
+            first.tap()
+        else:
+            first.focus()
+            first.press("Space")
+        assert first.is_checked()
+        second.check()
+        assert "2 selected" in control.locator("summary").inner_text()
+        assert page.locator(".unit-multi-chip").count() == 2
+
+        selected = page.evaluate("""async () => {
+            const { readShareState } = await import('/static/share-state.js');
+            return readShareState('units').params.get('skill_id');
+        }""")
+        assert selected is not None and len(selected.split(",")) == 2
+
+        page.locator(".unit-multi-chip").first.click()
+        assert page.locator(".unit-multi-chip").count() == 1
+        page.go_back(wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelectorAll('.unit-multi-chip').length === 2"
+        )
+        assert not errors, errors
+        assert "2 selected" in page.locator(".unit-multi-select summary").first.inner_text()
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
+    finally:
+        page.close()

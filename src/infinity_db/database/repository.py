@@ -2412,6 +2412,7 @@ class Database:
         troop_type_ids: tuple[int, ...],
         classification_ids: tuple[int, ...],
         characteristic_ids: tuple[int, ...],
+        equipment_characteristic_ids: tuple[int, ...],
         ava: int | str | None,
         ava_min: int | None,
         ava_max: int | None,
@@ -2587,39 +2588,70 @@ class Database:
             where.append(f"({profile_clause} OR {loadout_clause})")
 
         for catalog, source_ids in rule_source_ids.items():
-            if not source_ids:
+            alternatives: list[str] = []
+            if source_ids:
+                placeholders = ", ".join("?" for _ in source_ids)
+                profile_clause = (
+                    "EXISTS (SELECT 1 FROM profile_payload_occurrences AS rp "
+                    f"JOIN profile_payload_{catalog} AS ri "
+                    "ON ri.profile_payload_id = rp.profile_payload_id "
+                    f"WHERE rp.army_id = {base}.army_id AND rp.unit_id = {base}.unit_id "
+                    f"AND rp.group_id = {base}.group_id AND ri.item_id IN ({placeholders}))"
+                )
+                parameters.extend(source_ids)
+                if has_loadout_filter:
+                    loadout_clause = (
+                        f"EXISTS (SELECT 1 FROM loadout_payload_{catalog} AS li "
+                        "WHERE li.loadout_payload_id = lpo.loadout_payload_id "
+                        f"AND li.item_id IN ({placeholders}))"
+                    )
+                else:
+                    loadout_clause = (
+                        "EXISTS (SELECT 1 FROM loadout_payload_occurrences AS rl "
+                        f"JOIN loadout_payload_{catalog} AS li "
+                        "ON li.loadout_payload_id = rl.loadout_payload_id "
+                        "WHERE rl.army_id = ppo.army_id AND rl.unit_id = ppo.unit_id "
+                        "AND rl.group_id = ppo.group_id "
+                        f"AND li.item_id IN ({placeholders}))"
+                    )
+                parameters.extend(source_ids)
+                option_clause = (
+                    f"EXISTS (SELECT 1 FROM unit_option_{catalog} AS ui "
+                    f"WHERE ui.unit_id = {base}.unit_id AND ui.item_id IN ({placeholders}))"
+                )
+                parameters.extend(source_ids)
+                alternatives.append(f"({profile_clause} OR {loadout_clause} OR {option_clause})")
+            if catalog == "equipment" and equipment_characteristic_ids:
+                placeholders = ", ".join("?" for _ in equipment_characteristic_ids)
+                profile_clause = (
+                    "EXISTS (SELECT 1 FROM profile_payload_occurrences AS cp "
+                    "JOIN profile_payload_characteristics AS cpc "
+                    "ON cpc.profile_payload_id = cp.profile_payload_id "
+                    f"WHERE cp.army_id = {base}.army_id AND cp.unit_id = {base}.unit_id "
+                    f"AND cp.group_id = {base}.group_id "
+                    f"AND cpc.characteristic_id IN ({placeholders}))"
+                )
+                parameters.extend(equipment_characteristic_ids)
+                if has_loadout_filter:
+                    loadout_clause = (
+                        "EXISTS (SELECT 1 FROM loadout_payload_characteristics AS cl "
+                        "WHERE cl.loadout_payload_id = lpo.loadout_payload_id "
+                        f"AND cl.characteristic_id IN ({placeholders}))"
+                    )
+                else:
+                    loadout_clause = (
+                        "EXISTS (SELECT 1 FROM loadout_payload_occurrences AS clp "
+                        "JOIN loadout_payload_characteristics AS cl "
+                        "ON cl.loadout_payload_id = clp.loadout_payload_id "
+                        "WHERE clp.army_id = ppo.army_id AND clp.unit_id = ppo.unit_id "
+                        "AND clp.group_id = ppo.group_id "
+                        f"AND cl.characteristic_id IN ({placeholders}))"
+                    )
+                parameters.extend(equipment_characteristic_ids)
+                alternatives.append(f"({profile_clause} OR {loadout_clause})")
+            if not alternatives:
                 return {}
-            placeholders = ", ".join("?" for _ in source_ids)
-            profile_clause = (
-                "EXISTS (SELECT 1 FROM profile_payload_occurrences AS rp "
-                f"JOIN profile_payload_{catalog} AS ri "
-                "ON ri.profile_payload_id = rp.profile_payload_id "
-                f"WHERE rp.army_id = {base}.army_id AND rp.unit_id = {base}.unit_id "
-                f"AND rp.group_id = {base}.group_id AND ri.item_id IN ({placeholders}))"
-            )
-            parameters.extend(source_ids)
-            if has_loadout_filter:
-                loadout_clause = (
-                    f"EXISTS (SELECT 1 FROM loadout_payload_{catalog} AS li "
-                    "WHERE li.loadout_payload_id = lpo.loadout_payload_id "
-                    f"AND li.item_id IN ({placeholders}))"
-                )
-            else:
-                loadout_clause = (
-                    "EXISTS (SELECT 1 FROM loadout_payload_occurrences AS rl "
-                    f"JOIN loadout_payload_{catalog} AS li "
-                    "ON li.loadout_payload_id = rl.loadout_payload_id "
-                    "WHERE rl.army_id = ppo.army_id AND rl.unit_id = ppo.unit_id "
-                    "AND rl.group_id = ppo.group_id "
-                    f"AND li.item_id IN ({placeholders}))"
-                )
-            parameters.extend(source_ids)
-            option_clause = (
-                f"EXISTS (SELECT 1 FROM unit_option_{catalog} AS ui "
-                f"WHERE ui.unit_id = {base}.unit_id AND ui.item_id IN ({placeholders}))"
-            )
-            parameters.extend(source_ids)
-            where.append(f"({profile_clause} OR {loadout_clause} OR {option_clause})")
+            where.append("(" + " OR ".join(alternatives) + ")")
 
         query = (
             "SELECT DISTINCT lus.logical_unit_id, "
@@ -3031,6 +3063,7 @@ class Database:
         extended: bool = False,
         _unbounded: bool = False,
         _logical_unit_ids: frozenset[int] | None = None,
+        _equipment_characteristic_ids: tuple[int, ...] = (),
     ) -> dict[str, Any]:
         unresolved_army_filter = False
         if army_id is not None:
@@ -3050,6 +3083,12 @@ class Database:
             raise ValueError(
                 "declared_faction_id must be a nonnegative SQLite signed 64-bit integer"
             )
+        if (
+            not isinstance(_equipment_characteristic_ids, tuple)
+            or len(_equipment_characteristic_ids) > 16
+            or any(type(item) is not int or item < 0 for item in _equipment_characteristic_ids)
+        ):
+            raise ValueError("_equipment_characteristic_ids must contain up to 16 nonnegative IDs")
         selected_catalog_refs = {
             "skills": self._selected_filter_refs(skill_id),
             "equipment": self._selected_filter_refs(equipment_id),
@@ -3080,12 +3119,23 @@ class Database:
             for ref in unit_filter_refs["characteristics"]
             if (item_id := self._unit_filter_source_id("characteristics", ref)) is not None
         }))
-        categorical_selections = (*selected_catalog_refs.values(), *unit_filter_refs.values())
+        categorical_selections = (
+            selected_catalog_refs["skills"],
+            (*selected_catalog_refs["equipment"], *_equipment_characteristic_ids),
+            selected_catalog_refs["weapons"],
+            *unit_filter_refs.values(),
+        )
         has_multi_selection = any(len(refs) > 1 for refs in categorical_selections)
         force_multi_context = has_multi_selection and (
             sum(bool(refs) for refs in categorical_selections) > 1 or army_id is not None
         )
+        equipment_overlay_units = frozenset().union(*(
+            self._logical_unit_ids_for_unit_filter("characteristics", source_id)
+            for source_id in _equipment_characteristic_ids
+        ))
         logical_unit_filters = []
+        if any(item_id is None for ids in rule_filters.values() for item_id in ids):
+            logical_unit_filters.append(frozenset())
         if _logical_unit_ids is not None:
             logical_unit_filters.append(_logical_unit_ids)
         for public_name, refs in unit_filter_refs.items():
@@ -3160,6 +3210,8 @@ class Database:
         }
         matching_sources_by_rule: dict[str, set[int]] = {}
         rule_source_ids: dict[str, tuple[int, ...]] = {}
+        if _equipment_characteristic_ids:
+            rule_filters.setdefault("equipment", ())
         if rule_filters:
             with self._connect() as connection:
                 for catalog, application_ids in rule_filters.items():
@@ -3199,6 +3251,7 @@ class Database:
                 troop_type_ids=troop_type_filter_ids,
                 classification_ids=classification_filter_ids,
                 characteristic_ids=characteristic_filter_ids,
+                equipment_characteristic_ids=_equipment_characteristic_ids,
                 ava=ava,
                 ava_min=ava_min,
                 ava_max=ava_max,
@@ -3236,8 +3289,11 @@ class Database:
             if any(group["id"] not in allowed for allowed in logical_unit_filters):
                 continue
             if any(
-                not set(group["source_ids"]).intersection(source_ids)
-                for source_ids in matching_sources_by_rule.values()
+                not (
+                    set(group["source_ids"]).intersection(source_ids)
+                    or (catalog == "equipment" and group["id"] in equipment_overlay_units)
+                )
+                for catalog, source_ids in matching_sources_by_rule.items()
             ):
                 continue
             if search:

@@ -165,5 +165,24 @@ def test_multi_selection_http_request_and_legacy_contract() -> None:
     )
     equipment_id = database.list_catalog_items("equipment")[0]["id"]
     status, payload = request(f"equipment_id={encoded},{equipment_id}")
-    assert status == 400
-    assert "presentation-encoded Equipment" in payload["error"]
+    assert status == 200
+    encoded_ids = catalog.logical_unit_ids_for_filter(encoded)
+    assert encoded_ids is not None
+    visible_encoded_ids = {
+        item["id"] for item in database.list_units(
+            _logical_unit_ids=encoded_ids, limit=10_000, _unbounded=True,
+        )["items"]
+    }
+    ordinary_ids = {
+        item["id"] for item in database.list_units(
+            equipment_id=equipment_id, limit=10_000, _unbounded=True,
+        )["items"]
+    }
+    assert payload["total"] == len(visible_encoded_ids | ordinary_ids)
+    assert {item["id"] for item in payload["items"]} <= visible_encoded_ids | ordinary_ids
+    status, filtered = request(f"equipment_id={encoded},{equipment_id}&skill_id={first}")
+    assert status == 200
+    assert filtered["total"] <= payload["total"]
+    status, invalid = request(f"equipment_id={encoded},does-not-exist")
+    assert status == 200
+    assert invalid["total"] == 0

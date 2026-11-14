@@ -175,6 +175,26 @@ class EquipmentCatalog:
             return None
         return self.database.logical_unit_ids_for_characteristic(encoding.characteristic)
 
+    def characteristic_filter_id_for_equipment(self, item_ref: int | str) -> int | None:
+        """Return the source Characteristic backing presentation-only Equipment."""
+
+        if not isinstance(item_ref, str):
+            return None
+        if self.database.application_catalog_id("equipment", item_ref) is not None:
+            return None
+        encoding = self._encoding_by_slug().get(item_ref)
+        if encoding is None:
+            return None
+        characteristic = encoding.characteristic.casefold()
+        return next(
+            (
+                int(item["id"])
+                for item in self.database.list_unit_filter_values()["characteristics"]
+                if item["name"].casefold() == characteristic
+            ),
+            None,
+        )
+
     def enrich_unit(self, unit: dict[str, Any]) -> dict[str, Any]:
         """Link presentation characteristics to their canonical Equipment identity."""
 

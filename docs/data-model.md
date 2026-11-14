@@ -3172,9 +3172,10 @@ query keys and malformed identifiers. Unknown values continue to fail closed.
 The format fits existing v1 share-state string fields without a new token
 version or server-stored sharing state.
 
-The current backend rejects multi-selection containing presentation-encoded
-Equipment with HTTP 400 rather than silently misrepresenting its Characteristic
-matching. The browser control and this overlay composition remain open work.
+Presentation-encoded Equipment selections resolve through their source
+Characteristics. They participate as OR alternatives alongside ordinary
+Equipment selections and respect the same profile-group/loadout context in
+combined queries. Unknown mixed identifiers continue to fail closed.
 
 Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
 the source facts. A combined source Classification can participate in more than one public

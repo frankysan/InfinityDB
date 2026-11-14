@@ -1463,26 +1463,39 @@ class ApiHandler:
                 payload = {"error": str(exc)}
             else:
                 equipment_selection = query.get("equipment_id")
-                if isinstance(equipment_selection, tuple) and any(
-                    self.equipment_catalog.logical_unit_ids_for_filter(ref) is not None
-                    for ref in equipment_selection
-                ):
-                    return WebResponse.json(
-                        {"error": (
-                            "Multi-selection of presentation-encoded Equipment "
-                            "is not yet supported"
-                        )},
-                        status=HTTPStatus.BAD_REQUEST,
-                        cache_control=cache_control,
-                    )
                 try:
-                    logical_unit_ids = self.equipment_catalog.logical_unit_ids_for_filter(
-                        equipment_selection
-                        if isinstance(equipment_selection, (int, str))
-                        else None
-                    )
-                    if logical_unit_ids is not None:
-                        query["equipment_id"] = None
+                    logical_unit_ids = None
+                    if isinstance(equipment_selection, tuple):
+                        encoded = {
+                            ref: self.equipment_catalog.characteristic_filter_id_for_equipment(ref)
+                            for ref in equipment_selection
+                            if self.equipment_catalog.logical_unit_ids_for_filter(ref) is not None
+                        }
+                        if encoded:
+                            if any(value is None for value in encoded.values()):
+                                raise ValueError(
+                                    "Equipment filter cannot resolve its Characteristic"
+                                )
+                            query["_equipment_characteristic_ids"] = tuple(
+                                sorted(
+                                    value for value in set(encoded.values()) if value is not None
+                                )
+                            )
+                            ordinary = tuple(
+                                ref for ref in equipment_selection if ref not in encoded
+                            )
+                            query["equipment_id"] = (
+                                ordinary if len(ordinary) > 1
+                                else ordinary[0] if ordinary else None
+                            )
+                    else:
+                        logical_unit_ids = self.equipment_catalog.logical_unit_ids_for_filter(
+                            equipment_selection
+                            if isinstance(equipment_selection, (int, str))
+                            else None
+                        )
+                        if logical_unit_ids is not None:
+                            query["equipment_id"] = None
                     specialist = query.pop("specialist")
                     if specialist:
                         if self.rules_database is None:

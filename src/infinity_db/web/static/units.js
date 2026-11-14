@@ -4,6 +4,7 @@ import {
   unitAdvancedFiltersOpen,
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
+import { createUnitMultiSelect, normalizeMultiSelection, parseMultiSelection } from "./unit-multiselect.js";
 import { readShareState, writeShareState } from "./share-state.js";
 import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
@@ -38,6 +39,17 @@ const elements = {
   next: [byId("next-page-top"), byId("next-page-bottom")],
   sort: document.querySelector("#table-container th"),
 };
+
+const multiControls = Object.fromEntries([
+  ["skillId", elements.skill, "Skills"],
+  ["equipmentId", elements.equipment, "Equipment"],
+  ["weaponId", elements.weapon, "Weapons"],
+  ["troopType", elements.troopType, "Troop types"],
+  ["classification", elements.classification, "Classifications"],
+  ["characteristic", elements.characteristic, "Characteristics"],
+].map(([stateKey, element, label]) => [
+  stateKey, createUnitMultiSelect(element, label, applyFilters),
+]));
 
 const numericRangeControls = {
   ava: {
@@ -146,6 +158,10 @@ function hasActiveFilters() {
 
 function domainFilterIdentifier(value) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? value : "";
+}
+
+function domainMultiFilterIdentifiers(value) {
+  return parseMultiSelection(value).join(",");
 }
 
 function integerFilterValue(value, { max = Number.MAX_SAFE_INTEGER } = {}) {
@@ -313,14 +329,14 @@ function readLocation() {
   return {
     armyId: domainFilterIdentifier(armyId),
     declaredFactionId: /^\d+$/.test(declaredFactionId) ? declaredFactionId : "",
-    skillId: domainFilterIdentifier(skillId),
+    skillId: domainMultiFilterIdentifiers(skillId),
     specialist: ["standard", "domination", "supplies", "firefight"].includes(specialist)
       ? specialist : "",
-    equipmentId: domainFilterIdentifier(equipmentId),
-    weaponId: domainFilterIdentifier(weaponId),
-    troopType: domainFilterIdentifier(troopType),
-    classification: domainFilterIdentifier(classification),
-    characteristic: domainFilterIdentifier(characteristic),
+    equipmentId: domainMultiFilterIdentifiers(equipmentId),
+    weaponId: domainMultiFilterIdentifiers(weaponId),
+    troopType: domainMultiFilterIdentifiers(troopType),
+    classification: domainMultiFilterIdentifiers(classification),
+    characteristic: domainMultiFilterIdentifiers(characteristic),
     ava: avaExact,
     avaMin: avaExact ? "" : integerFilterValue(avaMin, { max: 99 }),
     avaMax: avaExact ? "" : integerFilterValue(avaMax, { max: 99 }),
@@ -372,13 +388,8 @@ function writeLocation(replace = false) {
 function syncFilters() {
   elements.army.value = state.armyId;
   elements.search.value = state.search;
-  elements.skill.value = state.skillId;
+  for (const [key, control] of Object.entries(multiControls)) control.setValue(state[key]);
   elements.specialist.value = state.specialist;
-  elements.equipment.value = state.equipmentId;
-  elements.weapon.value = state.weaponId;
-  elements.troopType.value = state.troopType;
-  elements.classification.value = state.classification;
-  elements.characteristic.value = state.characteristic;
   elements.extended.checked = state.extended;
   elements.ava.value = state.ava;
   elements.points.value = state.points;
@@ -466,26 +477,14 @@ function catalogFilterValue(item) {
 }
 
 function normalizeCatalogFilterState(items, stateKey) {
-  const current = state[stateKey];
-  if (!current || !/^\d+$/.test(current)) return false;
-  const item = items.find((candidate) => (
-    String(candidate.id) === current
-    || candidate.source_ids?.some((sourceId) => String(sourceId) === current)
-  ));
-  if (!item) return false;
-  const replacement = catalogFilterValue(item);
-  if (replacement === current) return false;
+  const replacement = normalizeMultiSelection(state[stateKey], items);
+  if (replacement === state[stateKey]) return false;
   state[stateKey] = replacement;
   return true;
 }
 
 function normalizeUnitFilterState(items, stateKey) {
-  const current = state[stateKey];
-  if (!current || !/^\d+$/.test(current)) return false;
-  const item = items.find((candidate) => String(candidate.id) === current);
-  if (!item?.slug || item.slug === current) return false;
-  state[stateKey] = item.slug;
-  return true;
+  return normalizeCatalogFilterState(items, stateKey);
 }
 
 function populateCatalogFilter(element, items, label, displayName = (item) => item.name) {
@@ -602,12 +601,18 @@ async function load() {
       populateCatalogFilter(elements.skill, skills.items, "Skills");
       populateCatalogFilter(elements.equipment, equipment.items, "Equipment");
       populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
+      multiControls.skillId.setItems(skills.items);
+      multiControls.equipmentId.setItems(equipment.items);
+      multiControls.weaponId.setItems(weapons.items);
       populateCatalogFilter(
         elements.troopType, unitFilters.troop_types, "Troop types",
         (item) => item.display_name || item.name,
       );
       populateCatalogFilter(elements.classification, unitFilters.classifications, "Classifications");
       populateCatalogFilter(elements.characteristic, unitFilters.characteristics, "Characteristics");
+      multiControls.troopType.setItems(unitFilters.troop_types, (item) => item.display_name || item.name);
+      multiControls.classification.setItems(unitFilters.classifications);
+      multiControls.characteristic.setItems(unitFilters.characteristics);
       populateNumericFilter("ava", unitFilters.numeric?.ava);
       populateNumericFilter("points", unitFilters.numeric?.points);
       populateNumericFilter("swc", unitFilters.numeric?.swc);
@@ -639,10 +644,10 @@ function applyFilters() {
   clearTimeout(searchTimer);
   const next = {
     armyId: elements.army.value, search: elements.search.value.trim(),
-    skillId: elements.skill.value, specialist: elements.specialist.value,
-    equipmentId: elements.equipment.value, weaponId: elements.weapon.value,
-    troopType: elements.troopType.value, classification: elements.classification.value,
-    characteristic: elements.characteristic.value,
+    skillId: multiControls.skillId.value(), specialist: elements.specialist.value,
+    equipmentId: multiControls.equipmentId.value(), weaponId: multiControls.weaponId.value(),
+    troopType: multiControls.troopType.value(), classification: multiControls.classification.value(),
+    characteristic: multiControls.characteristic.value(),
     ava: avaExactFilterValue(elements.ava.value),
     avaMin: numericRangeStateValue(
       "ava", numericRangeControls.ava, elements.avaMin,

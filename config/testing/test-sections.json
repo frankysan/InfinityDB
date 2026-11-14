@@ -188,6 +188,7 @@
         "test_verify_scenario_faq_browser",
         "test_verify_sidebar_density_browser",
         "test_verify_turn_sequence_browser",
+        "test_unit_filter_multiselection_browser",
         "test_verify_unit_skill_presentation_browser",
         "test_verify_variant_usage_publication_browser",
         "test_verify_embedded_variant_usage_browser",
