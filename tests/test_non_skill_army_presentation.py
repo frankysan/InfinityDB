@@ -22,7 +22,7 @@ from tools.verify_non_skill_army_browser import CASES, WIDTHS, projected_buckets
 ROOT = Path(__file__).resolve().parents[1]
 APPLICATION_DB = ROOT / "data/generated/army.db"
 RULES_DB = ROOT / "data/generated/rules_n5.db"
-ARMY_ZIP = ROOT / "data/raw/JSON 20260929-114335.zip"
+ARMY_ZIP = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
 
 # Original Army Skill IDs deliberately published in other player-facing buckets.
 SOURCE_BUCKETS = {

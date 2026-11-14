@@ -101,6 +101,19 @@ explicit `--source-layout legacy` remains supported. Printed citation
 and source labels are unchanged. Keep the one-use copy helper only
 until the remaining PDF migration is complete.
 
+**R6 final private-source relocation (2026-11-14):** The 75 old PDF
+copies were hash-checked against `local/data/pdf/` and retired.
+The two unique expanded Wiki directories were moved without re-extraction
+to `local/data/wiki-extracted/`, outside the synchronized ZIP folder.
+The unique `rules/sources.txt` PDF revision index was moved into
+`local/data/pdf/rules/`. Source-only test fixtures and maintained Wiki
+archive physical paths now use the local sources by default; canonical
+curated/source labels remain unchanged. The one-use migration helper and
+its tests are retired. Windows denied removal of the now-empty legacy
+`data/pdf/faq/` directory; any remaining empty marker directories are
+non-blocking OS cleanup, not active input sources. No runtime DB or
+Syncthing sender configuration change was needed.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

@@ -976,7 +976,7 @@ def test_conditional_declaration_crosswalk_cli_does_not_approve_whole_corpus(
 
 
 def test_numeric_army_source_skill_replacements_do_not_modify_base_profiles() -> None:
-    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    archive = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
     if not archive.is_file():
         pytest.skip("Pinned private Army source ZIP unavailable")
     report = audit_numeric_army_replacement_variants(archive)
@@ -1012,7 +1012,7 @@ def test_numeric_army_source_skill_replacements_do_not_modify_base_profiles() ->
 def test_numeric_army_variants_reject_unverified_source_and_curated_drift(
     tmp_path: Path,
 ) -> None:
-    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    archive = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
     if not archive.is_file():
         pytest.skip("Pinned private Army source ZIP unavailable")
     curated = ROOT / "data/curated/rules/n5-core-v5.3.json"
@@ -1033,7 +1033,7 @@ def test_numeric_army_variants_reject_unverified_source_and_curated_drift(
 def test_numeric_army_replacement_cli_preserves_full_record_gate(
     tmp_path: Path,
 ) -> None:
-    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    archive = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
     if not archive.is_file():
         pytest.skip("Pinned private Army source ZIP unavailable")
     json_output = tmp_path / "numeric.json"
@@ -2129,7 +2129,7 @@ def _require_release_matched_raw_army() -> None:
 
 
 def test_pinned_army_archive_nested_publication_when_available() -> None:
-    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    archive = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
     if not archive.is_file():
         pytest.skip("Optional pinned Army source archive is not available")
     _require_release_matched_raw_army()

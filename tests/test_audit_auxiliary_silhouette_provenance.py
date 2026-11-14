@@ -109,8 +109,8 @@ def test_pinned_object_matrix_if_source_archives_available(
     inputs = [
         pdfs["data/pdf/rules/n5-rules-v5.3-en.pdf"],
         pdfs["data/pdf/rules/n5-rules-v5.3-es.pdf"],
-        root / "data/wiki/WIKI-en 20260926-200832.zip",
-        root / "data/wiki/WIKI-es 20261009-211304.zip",
+        root / "local/data/wiki/WIKI-en 20260926-200832.zip",
+        root / "local/data/wiki/WIKI-es 20261009-211304.zip",
         root / "data/generated/army.db",
     ]
     if not all(path.exists() for path in inputs):

@@ -5145,7 +5145,7 @@ def test_n5_numeric_replacement_variants_match_pinned_army_snapshot() -> None:
     import zipfile
     from collections import Counter
 
-    archive = Path(__file__).parents[1] / "data/raw/JSON 20260929-114335.zip"
+    archive = Path(__file__).parents[1] / "local/data/raw/army/JSON 20260929-114335.zip"
     if not archive.exists():
         pytest.skip("Pinned private Army snapshot is not installed")
     assert hashlib.sha256(archive.read_bytes()).hexdigest() == (

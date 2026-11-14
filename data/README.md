@@ -45,26 +45,30 @@ for completed migrations and remaining unique legacy material.
 **R6 cutover (2026-11-14):** The Windows checkout has 124 hash-checked
 files under `local/data/`: Army, Wiki/Human-Sphere and raw-symbol ZIPs, their
 available provenance manifests, and PDFs. One older Army ZIP has no manifest.
-All **49 verified duplicate ZIPs/manifests** were retired from ignored
-legacy `data/` after source-reader and Syncthing cutover. The four Windows
-Syncthing source folders and current Army build inputs use `local/data/`.
-PDF research CLI defaults use `local/data/pdf/`, retaining canonical
-`data/pdf/` labels. Legacy PDFs and unique extracted Wiki directories
-remain until their remaining consumers and uses are reviewed.
+All **124 verified duplicate source files** (49 ZIPs/manifests plus 75 PDFs)
+were retired from ignored legacy `data/` after the source-reader and
+Syncthing cutover. The four Windows sender folders and current Army build
+inputs use `local/data/`. PDF research and pinned-source test defaults
+use `local/data/pdf/`, retaining canonical `data/pdf/` source labels.
+The unique expanded Wiki mirrors were moved to
+`local/data/wiki-extracted/` (outside the synchronized ZIP sender);
+the PDF revision index moved to `local/data/pdf/rules/sources.txt`.
+Only obsolete Windows-locked directory/marker remnants may still occupy
+the retired source roots.
 
 ## Current paths and behavior
 
 - `local/data/raw/army/` — immutable Corvus Belli Army snapshot ZIPs.
   Older raw-symbol ZIPs reside under `local/data/raw/symbols/`.
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
-  Human Sphere snapshot ZIPs, including history variants. Unique extracted
-  mirror directories temporarily remain under legacy `data/wiki/`.
-- `local/data/pdf/` — source-PDF copies for new research; legacy
-  `data/pdf/` copies are retained for remaining explicit readers.
-- `work/wiki/` — local wiki crawl work. Successful acquisitions remove their
-  work directory after publishing the immutable archive and provenance;
-  incomplete/error runs preserve downloaded work here for inspection. Ignored
-  by Git.
+  Human Sphere snapshot ZIPs, including history variants. The two unique
+  expanded mirrors live under `local/data/wiki-extracted/`, which is not
+  synchronized.
+- `local/data/pdf/` — physical research PDFs and the preserved
+  `rules/sources.txt` revision index. Canonical `data/pdf/` source labels
+  remain unchanged in curated provenance.
+- The independent Wiki acquisition checkout keeps incomplete crawl work
+  under its own `local/work/wiki/`.
 - `work/symbols/`, `reports/symbols/`, `logs/symbols/` and `backups/symbols/`
   may contain ignored historical in-tree processing evidence. The retired
   processor cannot resume it; accepted external promotions use a transaction

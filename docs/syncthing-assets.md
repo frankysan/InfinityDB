@@ -113,12 +113,12 @@ Preview a selected pair on Linux without changing the checkout:
 
 On 2026-11-14, the Windows checkout received hash-checked copies of Army,
 Wiki/Human-Sphere, raw-symbol sources and PDFs under `local/data/`.
-After the cutover, 49 exact duplicate legacy ZIP/manifest files were
-retired; their `local/data/` copies remain intact. The four sender paths
-use the local layout; the optional override sender is unchanged.
-Existing extracted Wiki/Human Sphere mirror directories under legacy
-`data/wiki/` are **not** synchronized from the ZIP-only sender root.
-They remain on Windows.
+After the cutover, 49 exact duplicate legacy ZIP/manifest files and
+75 duplicate PDFs were retired; their `local/data/` copies remain
+intact. The four sender paths use the local layout; the optional override
+sender is unchanged. Two unique expanded Wiki/Human-Sphere directories
+were moved to `local/data/wiki-extracted/`, **outside** the ZIP-only
+sender root. They remain local to Windows.
 Linux checkout activation remains an explicit `--layout local` command;
 this does not trigger builds, Git operations or live acquisition.
 

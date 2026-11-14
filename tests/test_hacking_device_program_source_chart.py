@@ -33,7 +33,7 @@ PDF_PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 
 
 def _selected_statistics_pdf(
-    manifest: dict, *, layout: str = "legacy", root: Path = ROOT,
+    manifest: dict, *, layout: str = "local", root: Path = ROOT,
 ) -> Path | None:
     """Only exact N5.3 source evidence; never trust an amended manifest pin."""
     assert manifest["sourcePdfSha256"] == PDF_PIN
@@ -242,14 +242,15 @@ def test_n53_statistics_pdf_layout_is_pinned_and_never_falls_back(
     for path in (legacy, local):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(payload)
-    assert _selected_statistics_pdf(manifest, root=tmp_path) == legacy
-    assert _selected_statistics_pdf(manifest, layout="local", root=tmp_path) == local
+    assert _selected_statistics_pdf(manifest, root=tmp_path) == local
+    assert _selected_statistics_pdf(manifest, layout="legacy", root=tmp_path) == legacy
     local.write_bytes(b"unexpected source revision")
     with pytest.raises(SourcePathError, match="hash mismatch"):
         _selected_statistics_pdf(manifest, layout="local", root=tmp_path)
     local.unlink()
     assert _selected_statistics_pdf(manifest, layout="local", root=tmp_path) is None
-    assert _selected_statistics_pdf(manifest, root=tmp_path) == legacy
+    assert _selected_statistics_pdf(manifest, root=tmp_path) is None
+    assert _selected_statistics_pdf(manifest, layout="legacy", root=tmp_path) == legacy
     with pytest.raises(AssertionError):
         _selected_statistics_pdf({"sourcePdfSha256": "0" * 64}, root=tmp_path)
     with pytest.raises(SourcePathError, match="Unknown research source layout"):
@@ -261,7 +262,7 @@ def test_n53_program_statistics_pinned_archive_and_pdf_evidence(
 ) -> None:
     manifest = json.loads(STATISTICS.read_text(encoding="utf-8"))
     pdf = _selected_statistics_pdf(manifest, layout=reference_pdf_layout)
-    archive = ROOT / manifest["armyArchive"]
+    archive = ROOT / "local/data/raw/army" / Path(manifest["armyArchive"]).name
     if pdf is None or not archive.is_file():
         pytest.skip("Optional pinned N5.3 PDF / Army archive unavailable")
     pytest.importorskip("pymupdf")

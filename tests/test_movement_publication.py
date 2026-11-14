@@ -68,7 +68,7 @@ def test_movement_source_pages_and_archived_move_requirements(
             text = " ".join(pdf[page - 1].get_text().split()).casefold()
             for phrase in phrases:
                 assert phrase.casefold() in text, (page, phrase)
-    archive = ROOT / "data/wiki/WIKI-en 20260926-200832.zip"
+    archive = ROOT / "local/data/wiki/WIKI-en 20260926-200832.zip"
     if archive.is_file():
         assert hashlib.sha256(archive.read_bytes()).hexdigest() == (
             "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"

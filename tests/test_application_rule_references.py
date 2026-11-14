@@ -953,7 +953,7 @@ def test_label_vocabulary_sources_reach_published_details() -> None:
 
 def test_label_vocabulary_archived_wiki_member_covers_published_headings() -> None:
     root = Path(__file__).parents[1]
-    wiki = root / "data/wiki/WIKI-en 20260926-200832.zip"
+    wiki = root / "local/data/wiki/WIKI-en 20260926-200832.zip"
     if not wiki.is_file():
         pytest.skip("Pinned Label Wiki archive unavailable")
     assert hashlib.sha256(wiki.read_bytes()).hexdigest() == (

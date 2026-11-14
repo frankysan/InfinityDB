@@ -16,11 +16,11 @@ from tools.research.source_paths import pinned_pdf_path
 
 ROOT = Path(__file__).resolve().parents[1]
 PDF_LABEL = "data/pdf/rules/n5-rules-v5.3-en.pdf"
-PDF = ROOT / PDF_LABEL  # Historical default for existing external test callers.
+PDF = ROOT / "local/data/pdf" / Path(PDF_LABEL).relative_to("data/pdf")
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 FAQ_LABEL = "data/pdf/faq/n5-faq-v0.1-en.pdf"
 FAQ_PIN = "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa"
-WIKI = ROOT / "data/wiki/WIKI-en 20260926-200832.zip"
+WIKI = ROOT / "local/data/wiki/WIKI-en 20260926-200832.zip"
 WIKI_PIN = "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"
 RULES = ROOT / "data/generated/rules_n5.db"
 ORIGIN = "http://infinitydb-source-acceptance.test"
@@ -36,7 +36,7 @@ def records(name: str = "n5-core-v5.3.json") -> dict[str, Any]:
 
 
 def selected_pdf(
-    label: str, pin: str, *, layout: str = "legacy", root: Path = ROOT,
+    label: str, pin: str, *, layout: str = "local", root: Path = ROOT,
 ) -> Path | None:
     """Only the chosen pinned PDF; missing sources remain missing, never fall back."""
     return pinned_pdf_path(root, label, pin, layout=layout, missing_ok=True)

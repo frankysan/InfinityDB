@@ -6380,6 +6380,11 @@ their explicit missing-source skips on clean checkouts. These fixtures do not
 authorize copying private PDFs or changing their recorded paths; see the
 [research binding contract](../data/curated/README.md#explicit-physical-pdf-bindings-for-research).
 
+Pinned-source pytest fixtures now default to the `local` physical layout;
+`--reference-pdf-layout legacy` remains available for deliberate legacy
+fixture checks. Archive-based Wiki acceptance tests also look up immutable
+ZIPs under `local/data/wiki/` without changing their provenance labels.
+
 The `--source-layout` flag for `tools.report_reference_baseline` and
 `tools.audit_pdf_revision_deltas` changes only physical PDF lookup;
 their CLI defaults now use `local` and explicit `legacy` remains supported.
