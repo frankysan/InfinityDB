@@ -48,9 +48,13 @@ existing release checklist still apply.
     [context-coherent filtering](data-model.md#context-coherent-filtering),
     and preserve existing single-value API parameters and shared URLs.
   - [ ] **Backend/API:** Accept bounded, validated, deduplicated sets of
-    filter values; query matching logical Units without duplicates or
-    cross-profile/loadout false positives. Specify canonical ordering,
-    invalid-value handling and backward-compatible response behavior.
+    filter values; complete coherent composition of presentation-encoded
+    Equipment (Characteristic-backed) with ordinary Equipment selections;
+    these combinations currently return HTTP 400 rather than false matches.
+    Extend cross-profile/loadout and multi-category regression fixtures.
+    The initial API/query stage already accepts bounded, deduplicated,
+    comma-separated values with legacy scalar compatibility; retain that
+    validation, canonical ordering, and unknown-identifier fail-closed contract.
   - [ ] **Browser interaction and sharing:** Implement accessible, usable
     multi-select controls with clear selected-state feedback, individual
     removal, reset, keyboard and touch support; round-trip selections

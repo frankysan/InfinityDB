@@ -116,6 +116,7 @@
         "test_skill_config",
         "test_skill_classification_storage",
         "test_unit_filter_storage",
+        "test_unit_filter_multiselection",
         "test_army_reference_storage",
         "test_symbol_path_storage",
         "test_ammunition_reference_storage",

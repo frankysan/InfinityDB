@@ -3156,6 +3156,26 @@ When AVA/Points/SWC participates in a query, another selected profile/loadout cr
 satisfied by an unrelated option elsewhere on the same logical Unit. This prevents semantically
 impossible cross-option matches.
 
+Unit Explorer multi-selection uses **OR within each categorical filter** and
+**AND between different filters**. Multi-valued queries require the selected
+categories to match compatible Army/profile-group/loadout occurrences, while
+Unit-wide source options remain Unit-wide. Alternatives within one category
+do not require the Unit to carry every alternative. Pagination and sorting do
+not change membership. Historical single-value queries retain their existing
+matching behavior.
+
+The `/api/units` parameters `skill_id`, `equipment_id`, `weapon_id`,
+`troop_type`, `classification` and `characteristic` accept one legacy
+slug/numeric ID or up to 16 comma-separated selections. The API normalizes
+and deduplicates identifiers in deterministic order and rejects repeated
+query keys and malformed identifiers. Unknown values continue to fail closed.
+The format fits existing v1 share-state string fields without a new token
+version or server-stored sharing state.
+
+The current backend rejects multi-selection containing presentation-encoded
+Equipment with HTTP 400 rather than silently misrepresenting its Characteristic
+matching. The browser control and this overlay composition remain open work.
+
 Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
 the source facts. A combined source Classification can participate in more than one public
 Classification filter, while source Characteristics that duplicate a canonical current Skill can be

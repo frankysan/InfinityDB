@@ -345,6 +345,28 @@ def _domain_filter_identifier(params: dict, key: str) -> int | str | None:
         raise ValueError("This filter selection is invalid.") from exc
 
 
+def _unit_filter_selection(
+    params: dict[str, list[str]], key: str
+) -> int | str | tuple[int | str, ...] | None:
+    """Parse a single legacy identifier or up to 16 OR-selected identifiers."""
+
+    raw = params.get(key, [""])[0]
+    if not raw:
+        return None
+    values = raw.split(",")
+    if len(raw) > 1024 or len(values) > 16 or any(not value for value in values):
+        raise ValueError("This filter selection is invalid.")
+    selected = tuple(
+        item
+        for value in values
+        if (item := _domain_filter_identifier({key: [value]}, key)) is not None
+    )
+    if len(selected) != len(values):
+        raise ValueError("This filter selection is invalid.")
+    ordered = tuple(sorted(set(selected), key=str))
+    return ordered[0] if len(ordered) == 1 else ordered
+
+
 def _validated_query_params(query: str, allowed: set[str]) -> dict[str, list[str]]:
     params = parse_qs(query, keep_blank_values=True, max_num_fields=40)
     unknown = sorted(set(params) - allowed)
@@ -441,13 +463,13 @@ def _unit_query(query: str) -> dict:
         "army_id": _domain_filter_identifier(params, "army_id"),
         "declared_faction_id": declared_faction_id,
         "search": search,
-        "skill_id": _domain_filter_identifier(params, "skill_id"),
+        "skill_id": _unit_filter_selection(params, "skill_id"),
         "specialist": specialist,
-        "equipment_id": _domain_filter_identifier(params, "equipment_id"),
-        "weapon_id": _domain_filter_identifier(params, "weapon_id"),
-        "troop_type": _domain_filter_identifier(params, "troop_type"),
-        "classification": _domain_filter_identifier(params, "classification"),
-        "characteristic": _domain_filter_identifier(params, "characteristic"),
+        "equipment_id": _unit_filter_selection(params, "equipment_id"),
+        "weapon_id": _unit_filter_selection(params, "weapon_id"),
+        "troop_type": _unit_filter_selection(params, "troop_type"),
+        "classification": _unit_filter_selection(params, "classification"),
+        "characteristic": _unit_filter_selection(params, "characteristic"),
         "ava": ava,
         "ava_min": ava_min,
         "ava_max": ava_max,
@@ -1440,9 +1462,24 @@ class ApiHandler:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
             else:
+                equipment_selection = query.get("equipment_id")
+                if isinstance(equipment_selection, tuple) and any(
+                    self.equipment_catalog.logical_unit_ids_for_filter(ref) is not None
+                    for ref in equipment_selection
+                ):
+                    return WebResponse.json(
+                        {"error": (
+                            "Multi-selection of presentation-encoded Equipment "
+                            "is not yet supported"
+                        )},
+                        status=HTTPStatus.BAD_REQUEST,
+                        cache_control=cache_control,
+                    )
                 try:
                     logical_unit_ids = self.equipment_catalog.logical_unit_ids_for_filter(
-                        query.get("equipment_id")
+                        equipment_selection
+                        if isinstance(equipment_selection, (int, str))
+                        else None
                     )
                     if logical_unit_ids is not None:
                         query["equipment_id"] = None
