@@ -57,7 +57,7 @@ def project(
         "data/curated/identities/army-overview.json",
         "data/curated/identities/legacy-armies.json",
         "tools/build_weapon_profile_publication.py",
-        "tools/audit_enrichment_coverage.py",
+        "tools/data/audit_enrichment_coverage.py",
         "tools/research/audit_weapon_definition_gaps.py",
     ):
         path = root / name
@@ -289,7 +289,7 @@ def test_builder_code_and_selected_metadata_are_inputs(project) -> None:
     (root / "src/sample.py").write_bytes(b"# changed\r\n")
     assert builder.collect_build_manifest(root, args.source, None) == code_change
     # Historical audits are now independent diagnostics, not build inputs.
-    (root / "tools/audit_enrichment_coverage.py").write_text("changed", encoding="utf-8")
+    (root / "tools/data/audit_enrichment_coverage.py").write_text("changed", encoding="utf-8")
     (root / "tools/research/audit_weapon_definition_gaps.py").write_text(
         "changed", encoding="utf-8"
     )

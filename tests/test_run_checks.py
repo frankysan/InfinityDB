@@ -796,7 +796,7 @@ def test_rules_stage_runs_interaction_audit_before_database_build(
 
     assert result.status == "PASS"
     assert commands[0] == (
-        sys.executable, "-m", "tools.audit_rules_interactions",
+        sys.executable, "-m", "tools.data.audit_rules_interactions",
         "--check-output", "docs/rules-interaction-checklist.md",
         "--require-release", "1.0.0",
     )
@@ -842,7 +842,7 @@ def test_opt_in_source_occupancy_gate_runs_before_rules_review_and_build(
             "data/generated/army.db", "--require-no-occupied-gaps",
         ),
         (
-            sys.executable, "-m", "tools.audit_rules_interactions",
+            sys.executable, "-m", "tools.data.audit_rules_interactions",
             "--check-output", "docs/rules-interaction-checklist.md",
             "--require-release", "1.0.0",
         ),
@@ -922,7 +922,7 @@ def test_rules_stage_stops_before_build_when_review_audit_fails(
     assert result.status == "FAIL"
     assert result.returncode == 2
     assert len(commands) == 1
-    assert commands[0][2] == "tools.audit_rules_interactions"
+    assert commands[0][2] == "tools.data.audit_rules_interactions"
 
 
 def test_build_source_without_build_stage_is_configuration_error(

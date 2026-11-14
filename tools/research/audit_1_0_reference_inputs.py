@@ -19,7 +19,7 @@ from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
 if __package__:
-    from tools.audit_enrichment_coverage import audit_coverage
+    from tools.data.audit_enrichment_coverage import audit_coverage
 
     from .report_output import require_new_audit_outputs, write_audit_text_or_exit
     from .source_paths import SourcePathError, pinned_pdf_path
@@ -27,7 +27,7 @@ else:  # Support direct execution as a script in tools/research/.
     import sys
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from audit_enrichment_coverage import audit_coverage
+    from data.audit_enrichment_coverage import audit_coverage
     from report_output import require_new_audit_outputs, write_audit_text_or_exit
     from source_paths import SourcePathError, pinned_pdf_path
 

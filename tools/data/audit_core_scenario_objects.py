@@ -19,7 +19,7 @@ from infinity_db.scenario_definition import parse_scenario_definition_record
 from infinity_db.scenario_geometry import MarkerElement
 from infinity_db.scenario_mission import ElementStatusComparison, ElementStatusCount
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 ARMY = ROOT / "data/generated/army.db"
 RULES = ROOT / "data/generated/rules_n5.db"

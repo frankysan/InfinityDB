@@ -24,7 +24,7 @@ from infinity_db.curated import (
 from infinity_db.database import raw_database_path
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from tests.test_audit_runtime_database_surface import _runtime_database
-from tools.audit_source_variant_inputs import (
+from tools.data.audit_source_variant_inputs import (
     inventory_source_variants,
     reviewed_extra_signature,
     select_source_variants,
@@ -120,7 +120,7 @@ def test_source_variant_cli_selects_verified_normalized_with_owner_evidence(
     matched_source_inputs: tuple[Path, Path, Path, Path],
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
 ) -> None:
-    from tools.audit_source_variant_inputs import main
+    from tools.data.audit_source_variant_inputs import main
 
     application, raw, normalized, rules = matched_source_inputs
     raw.unlink()
@@ -161,7 +161,7 @@ def test_source_variant_cli_rejects_mismatched_raw_generation(
     matched_source_inputs: tuple[Path, Path, Path, Path],
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
 ) -> None:
-    from tools.audit_source_variant_inputs import main
+    from tools.data.audit_source_variant_inputs import main
 
     application, raw, _normalized, rules = matched_source_inputs
     with sqlite3.connect(raw) as connection:
@@ -212,7 +212,7 @@ def test_source_variant_selection_preserves_full_summary_and_exact_ids() -> None
 def test_audit_cli_unresolved_filter_preserves_full_summary(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], brief: bool,
 ) -> None:
-    from tools import audit_source_variant_inputs as audit
+    from tools.data import audit_source_variant_inputs as audit
 
     report = {"catalogs": {"skills": {
         "summary": {"publishedSourceIds": 2, "statuses": {
@@ -264,7 +264,7 @@ def test_audit_cli_source_selection(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
     source_args: list[str], expected_raw: Path | None, expected_normalized: Path | None,
 ) -> None:
-    from tools import audit_source_variant_inputs as audit
+    from tools.data import audit_source_variant_inputs as audit
 
     selected: list[tuple[Path, Path | None, Path, Path | None]] = []
 
@@ -2124,7 +2124,7 @@ def test_tagcom_270_complete_recipient_mod_signatures_in_both_exports(
         {"extras": [[370, "TEXT", "Dodge (PH+1), GizmoKit (PH+1)"]],
          "reviewed": True, "count": 2},
     ]
-    from tools.audit_source_variant_inputs import reviewed_extra_signature
+    from tools.data.audit_source_variant_inputs import reviewed_extra_signature
     assert not reviewed_extra_signature(
         [(1, 312, "TEXT", "Dodge (PH+3)")],
         reviewed_values=set(), distance_allowed=False,
@@ -2177,7 +2177,7 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
                     [384, "TEXT", "BTS=6"]],
          "reviewed": True, "count": 4},
     ]
-    from tools.audit_source_variant_inputs import reviewed_extra_signature
+    from tools.data.audit_source_variant_inputs import reviewed_extra_signature
     assert not reviewed_extra_signature(
         [(1, 281, "TEXT", "BS=13")],
         reviewed_values=set(), distance_allowed=False,

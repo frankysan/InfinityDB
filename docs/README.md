@@ -108,7 +108,7 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   Keep unique source/provenance evidence while it supports unresolved questions;
   use `TODO.md` for current work and `rules-semantics.md` for reviewed meaning.
 - `rules-interaction-checklist.md` — generated cross-release interaction-review ledger. Regenerate
-  it with `tools/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
+  it with `tools/data/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
   original review/defer decision and are evidence provenance, not the active roadmap; use `TODO.md`
   for current milestone planning.
 

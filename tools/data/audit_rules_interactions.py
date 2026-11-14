@@ -17,12 +17,15 @@ from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.trait_catalog import TraitCatalog
 
-if __package__:
+if __package__ == "tools.data":
     from tools.research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
-else:  # Allow the documented tools/audit_rules_interactions.py invocation.
+else:  # Support direct execution from tools/data/.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
@@ -34,7 +37,7 @@ POLICY_FORMAT = "InfinityDB rules interaction review policy"
 POLICY_FORMAT_VERSION = 1
 CATALOG_SCOPE_FORMAT = "InfinityDB rules interaction catalog scope"
 CATALOG_SCOPE_FORMAT_VERSION = 2
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RULES_DIRECTORY = PROJECT_ROOT / "data" / "curated" / "rules"
 DEFAULT_POLICY_PATH = (
     PROJECT_ROOT / "data" / "curated" / "rules-interactions" / "reviews.json"
@@ -763,7 +766,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         "policy, and current curated rules graph. Do not edit it by hand. Regenerate it with:",
         "",
         "```powershell",
-        "python tools/audit_rules_interactions.py --output docs/rules-interaction-checklist.md",
+        "python -m tools.data.audit_rules_interactions "
+        "--output docs/rules-interaction-checklist.md",
         "```",
         "",
         "Release labels in this checklist record the original review/defer scope. They are",
@@ -1017,7 +1021,7 @@ def main(argv: list[str] | None = None) -> int:
         if current.replace("\r\n", "\n") != markdown:
             print(
                 "Rules interaction checklist is stale; regenerate with "
-                "tools/audit_rules_interactions.py --output "
+                "python -m tools.data.audit_rules_interactions --output "
                 f"{args.check_output}"
             )
             return 1

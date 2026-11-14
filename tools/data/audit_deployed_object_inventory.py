@@ -7,12 +7,15 @@ from pathlib import Path
 
 from infinity_db import deployed_object_inventory as _inventory
 
-if __package__:
+if __package__ == "tools.data":
     from tools.research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
-else:  # Direct execution as tools/audit_deployed_object_inventory.py.
+else:  # Support direct execution from tools/data/.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,

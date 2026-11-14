@@ -243,6 +243,15 @@ database-builder's audit-exclusion fixture. Preserved published data,
 pinned manifests and report contracts; historical restructuring decisions
 remain in Git history and the original plan narrative.
 
+**L4 curation/data audit grouping (2026-11-14):** Moved the six remaining
+root-level curation audits (core scenario objects, deployed objects,
+enrichment coverage, maintained-text links, rules interactions and exact
+source variants) to `tools/data/`. Updated dependent imports and operator
+commands, CLI repository-root defaults, and the generated rules-interaction
+checklist command together. Existing direct-script and module entrypoints
+remain supported at the new paths; audit data and publication contracts
+are unchanged.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

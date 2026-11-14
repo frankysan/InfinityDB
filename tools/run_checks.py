@@ -488,7 +488,7 @@ def run_stage(
                 "data/generated/army.db", "--require-no-occupied-gaps",
             ))
         commands.append((
-            sys.executable, "-m", "tools.audit_rules_interactions",
+            sys.executable, "-m", "tools.data.audit_rules_interactions",
             "--check-output", "docs/rules-interaction-checklist.md",
             "--require-release", "1.0.0",
         ))

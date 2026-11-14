@@ -2448,7 +2448,7 @@ non-overwriting** optional audit receipt, use the separate
 `--receipt-output` flag:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_rules_interactions --check-output docs/rules-interaction-checklist.md --require-release 1.0.0 --receipt-output local/validation/rules-interactions/RUN_ID/interaction-review.md
+.\.venv\Scripts\python.exe -m tools.data.audit_rules_interactions --check-output docs/rules-interaction-checklist.md --require-release 1.0.0 --receipt-output local/validation/rules-interactions/RUN_ID/interaction-review.md
 ```
 
 `--receipt-output` is incompatible with `--output`,
@@ -2717,8 +2717,8 @@ gates passed against the unchanged V1S-084 release pair:
 Use the **explicit 1.0 scope**, independently of the historical checklist:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_rules_interactions --catalog-scope data/curated/rules-interactions/catalog-scope-1.0.0.json --database data/generated/infinity.db --rules-database data/generated/rules.db --require-primary-release 1.0.0 --require-release 1.0.0
-.venv\Scripts\python.exe -m tools.audit_rules_interactions --check-output docs/rules-interaction-checklist.md
+.venv\Scripts\python.exe -m tools.data.audit_rules_interactions --catalog-scope data/curated/rules-interactions/catalog-scope-1.0.0.json --database data/generated/infinity.db --rules-database data/generated/rules.db --require-primary-release 1.0.0 --require-release 1.0.0
+.venv\Scripts\python.exe -m tools.data.audit_rules_interactions --check-output docs/rules-interaction-checklist.md
 ```
 
 The default historical 0.7 scope intentionally has a different denominator
@@ -5669,9 +5669,9 @@ occurrence counts.
 Inspect a specific source family without dumping the entire inventory:
 
 ```powershell
-python -m tools.audit_source_variant_inputs --catalog skills `
+python -m tools.data.audit_source_variant_inputs --catalog skills `
     --source-id 74 --source-id 263 --source-id 271
-python -m tools.audit_source_variant_inputs --catalog equipment --source-id 169
+python -m tools.data.audit_source_variant_inputs --catalog equipment --source-id 169
 ```
 
 The first command selects Super-Jump, Jump and Climb; the second selects
@@ -5681,7 +5681,7 @@ explicitly. To inspect only the remaining unresolved source IDs without
 truncating the console response, use:
 
 ```powershell
-python -m tools.audit_source_variant_inputs --catalog skills --unresolved-only --brief
+python -m tools.data.audit_source_variant_inputs --catalog skills --unresolved-only --brief
 ```
 
 `--unresolved-only` filters the displayed items without changing the
@@ -5883,7 +5883,7 @@ Device Plus extra `344` (`UPGRADE: SR-1`, two occurrences)
 remains open because it lacks a program target.
 
 **Read-only exact source-owner provenance (2026-11-01):**
-`tools.audit_source_variant_inputs` accepts
+`tools.data.audit_source_variant_inputs` accepts
 `--catalog equipment --source-id 101 --owner-extra-id 344`
 to inspect only direct raw Army relationship owners. The
 `occurrenceOwners` result includes original owner type,
@@ -8321,7 +8321,7 @@ Before creating a distinct deployed-object/reverse-use model, generate the
 read-only source/profile and curated-rule *candidate* inventory:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_inventory --army-db data/generated/army.db --curated-source data/curated/rules/n5-core-v5.3.json --json-output local/audits/deployed-object-inventory.json
+.venv\Scripts\python.exe -m tools.data.audit_deployed_object_inventory --army-db data/generated/army.db --curated-source data/curated/rules/n5-core-v5.3.json --json-output local/audits/deployed-object-inventory.json
 ```
 
 The report matches the 14 pinned supplementary Weapon Chart profiles using
@@ -8459,7 +8459,7 @@ or delivery links are inferred.
 
 The completed delivery-coverage audit examined the objects already
 identified, independently of keyword discovery. The continuing validation
-runs through `tools.audit_deployed_object_inventory`,
+runs through `tools.data.audit_deployed_object_inventory`,
 `tests/test_deployed_object_reference.py` and
 `tests/test_deployed_object_storage.py` rather than the retired queue command.
 
@@ -9376,8 +9376,8 @@ pp. 149–156) against maintained scenario geometry, scoped rules and Skills,
 scoring references, and the published deployed-object identities:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_core_scenario_objects
-.venv\Scripts\python.exe -m tools.audit_core_scenario_objects --json
+.venv\Scripts\python.exe -m tools.data.audit_core_scenario_objects
+.venv\Scripts\python.exe -m tools.data.audit_core_scenario_objects --json
 ```
 
 Alternate database selection and input hashes follow the
@@ -9499,7 +9499,7 @@ during source revision research, combine the existing enrichment and chart
 reports in a deterministic source-to-reference triage. This is not a release gate:
 
 ```powershell
-.venv\Scripts\python.exe tools/audit_enrichment_coverage.py data/generated/army.db --rules data/generated/rules_n5.db --output local/audits/weapon-enrichment.json
+.venv\Scripts\python.exe -m tools.data.audit_enrichment_coverage data/generated/army.db --rules data/generated/rules_n5.db --output local/audits/weapon-enrichment.json
 .venv\Scripts\python.exe -m tools.research.audit_weapon_definition_gaps --army-db data/generated/army.db --enrichment local/audits/weapon-enrichment.json --chart local/audits/weapon-chart.json --json-output local/audits/weapon-triage.json --markdown-output local/audits/weapon-triage.md
 ```
 
@@ -11762,7 +11762,7 @@ Repeater's current reference now cites the Hacking Area page in the verified
 English Wiki snapshot alongside the N5.3 rulebook and Repeater page. The
 mechanics and imported Army Equipment values were not changed.
 
-The `tools/audit_enrichment_coverage.py` baseline now uses the same
+The `tools/data/audit_enrichment_coverage.py` baseline now uses the same
 `EquipmentCatalog` as the published `/api/equipment` endpoints, covering Army
 Equipment, profile-symbol-encoded Cube/Cube 2.0 and curated-only Firewall.
 The rebuilt current-rules/Army enrichment audit reported **0 release blockers**

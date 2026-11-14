@@ -6,7 +6,7 @@ This file is generated from the maintained public-catalog scope, interaction-rev
 policy, and current curated rules graph. Do not edit it by hand. Regenerate it with:
 
 ```powershell
-python tools/audit_rules_interactions.py --output docs/rules-interaction-checklist.md
+python -m tools.data.audit_rules_interactions --output docs/rules-interaction-checklist.md
 ```
 
 Release labels in this checklist record the original review/defer scope. They are

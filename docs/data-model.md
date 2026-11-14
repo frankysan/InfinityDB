@@ -218,7 +218,7 @@ matches are not claimed to have zero possible users. The completed detailed-keyw
 reroll (N5.3 p. 121), classified in
 `config/validation/deployed-object-candidate-reviews.json` as automatic
 Equipment, not a placed battlefield Token or an independent object.
-The maintained `tools.audit_deployed_object_inventory` checks candidate
+The maintained `tools.data.audit_deployed_object_inventory` checks candidate
 decisions and reviews additional clauses in all 106 curated Weapon/Equipment
 definitions. The projection and storage tests verify the 17 published
 reviewed object identities and their approved delivery origins. All 17 have
@@ -1243,7 +1243,7 @@ without an `appliesTo`, a fabricated program ID,
 or a modified published rules artifact.
 
 The read-only, exact-owner diagnostic
-`python -m tools.audit_source_variant_inputs --catalog equipment
+`python -m tools.data.audit_source_variant_inputs --catalog equipment
 --source-id 101 --owner-extra-id 344` reports this
 `occurrenceOwners` evidence alongside the ordinary
 source-signature audit. It reads the ignored pinned raw
@@ -1263,10 +1263,10 @@ Keep the two raw occurrences unresolved and do not add a
 generic Saving Roll effect without official confirmation.
 
 **Remaining source-parameter inventory (pinned Army source and current
-generated rules database):** `tools/audit_source_variant_inputs.py` produces a
+generated rules database):** `tools/data/audit_source_variant_inputs.py` produces a
 deterministic, read-only JSON inventory from `infinity.db`,
 `infinity.raw.db` and `rules.db`
-(`python -m tools.audit_source_variant_inputs`). It inspects exact
+(`python -m tools.data.audit_source_variant_inputs`). It inspects exact
 source IDs, direct profile/loadout/Unit-option relationship rows,
 ordered extra IDs/types/values, raw occurrence values and reviewed
 source-variant mappings. For targeted reviews, pass `--catalog skills`
@@ -4262,9 +4262,9 @@ historical inventories into this document. Important examples include:
 - `tools/data/audit_fireteam_semantics.py` — Fireteam chart semantics;
 - `tools/data/audit_source_presentation.py` — source-to-player-presentation coverage;
 - `tools/data/audit_semantic_deduplication.py` — canonicalization evidence;
-- `tools/audit_enrichment_coverage.py` and `tools/audit_rules_interactions.py` — rules/reference
+- `tools/data/audit_enrichment_coverage.py` and `tools/data/audit_rules_interactions.py` — rules/reference
   coverage and interaction review; and
-- `tools/audit_maintained_text_links.py` — maintained-prose semantic-link completeness.
+- `tools/data/audit_maintained_text_links.py` — maintained-prose semantic-link completeness.
 
 Generated reports and one-off audit measurements belong under ignored report/audit workspaces. Only
 durable semantic conclusions belong in this document.

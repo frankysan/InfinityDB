@@ -10,10 +10,10 @@ from typing import Any
 
 import pytest
 
-from tools import audit_enrichment_coverage
 from tools.data import (
     audit_army_faction_semantics,
     audit_database_separation,
+    audit_enrichment_coverage,
     audit_fireteam_semantics,
     audit_loadout_semantics,
     audit_normalization_links,

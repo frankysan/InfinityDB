@@ -174,7 +174,7 @@ is part of the deliverable. Full PDF text/artwork is not reproduced here.
 Reproducible read-only inventory steps, using the virtual-environment interpreter:
 
 ```text
-<venv-python> -B tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md
+<venv-python> -B tools/data/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md
 git rev-parse HEAD
 git diff --check -- docs
 git check-ignore docs/rules-explanation-audit-1.0.md docs/rules-explanation-audit-1.0-inventory.md
@@ -2657,7 +2657,7 @@ remediation references, inventory arithmetic, protected-input hashes, and
 comparison against pre-existing repository changes.
 
 The existing read-only command
-`python -B tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md`
+`python -B tools/data/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md`
 passed: 182/182 primary catalog, 111/126 supporting identities, 15 pending,
 314 authored relations, 113 future interactions. That is a historical graph
 check, not a 1.0 explanation pass. The full code/data test suite, Ruff, Pyright,

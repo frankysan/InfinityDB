@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_deployed_object_inventory import (
+from tools.data.audit_deployed_object_inventory import (
     CHART_AUXILIARY,
     _profile_stats,
     audit_inventory,

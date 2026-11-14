@@ -20,12 +20,15 @@ from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.trait_catalog import TraitCatalog
 
-if __package__:
+if __package__ == "tools.data":
     from tools.research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
-else:  # Support direct execution from the tools/ directory.
+else:  # Support direct execution from tools/data/.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
@@ -51,7 +54,7 @@ KNOWN_GAP_CODES = frozenset(
         "unreviewed_rule",
     }
 )
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CLASSIFICATION_PATH = (
     PROJECT_ROOT / "data" / "curated" / "enrichment-coverage" / "classifications.json"
 )

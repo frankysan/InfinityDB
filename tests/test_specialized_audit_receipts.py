@@ -13,7 +13,7 @@ from typing import Any
 
 import pytest
 
-from tools import audit_rules_interactions as interactions
+from tools.data import audit_rules_interactions as interactions
 from tools.research import audit_pdf_revision_deltas as pdf_delta
 from tools.research import audit_restrictions_source_chart as restrictions
 from tools.research.report_output import write_audit_bytes_or_exit
@@ -623,7 +623,12 @@ def test_rules_interaction_check_mode_stays_read_only() -> None:
 
 
 @pytest.mark.parametrize(("filename", "flag"), [
-    ("audit_rules_interactions.py", "--output"),
+    ("data/audit_core_scenario_objects.py", "--json"),
+    ("data/audit_deployed_object_inventory.py", "--json-output"),
+    ("data/audit_enrichment_coverage.py", "--output"),
+    ("data/audit_maintained_text_links.py", "--review-policy"),
+    ("data/audit_rules_interactions.py", "--output"),
+    ("data/audit_source_variant_inputs.py", "--catalog"),
     ("research/audit_1_0_reference_inputs.py", "--json-output"),
     ("research/audit_reinforcements_applicability.py", "--source-layout"),
     ("research/audit_hacking_program_statistics_chart.py", "--manifest"),
