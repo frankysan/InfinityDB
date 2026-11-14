@@ -329,6 +329,10 @@ deprecated alias for the default mode. The Python
 `infinity_db.database.export_database(...)` API also defaults to
 application-only output. Direct research callers requiring legacy paired
 SQLite evidence must select `include_raw=True` explicitly.
+The `tools.audit_source_variant_inputs` CLI expects an optional paired archive
+at `local/work/build/army/army.raw.db` unless `--raw` or `--normalized` is
+supplied. This path is a local research input, not a publication artifact;
+the application's source generation must match the selected raw archive.
 
 Application-only export **refuses** a destination with an existing raw
 sibling, rather than silently deleting or leaving stale private source

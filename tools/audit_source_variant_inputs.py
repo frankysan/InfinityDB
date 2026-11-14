@@ -441,7 +441,7 @@ def main() -> None:
     if args.unresolved_only and not args.catalog:
         parser.error("--unresolved-only requires --catalog")
     raw = args.raw if args.raw is not None else (
-        None if args.normalized is not None else Path("data/work/build/army.raw.db")
+        None if args.normalized is not None else Path("local/work/build/army/army.raw.db")
     )
     try:
         if args.normalized is not None:

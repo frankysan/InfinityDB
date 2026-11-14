@@ -225,7 +225,7 @@ def require_source_files() -> Callable[..., None]:
 @pytest.fixture(scope="module")
 def requires_pinned_raw_army_archive() -> None:
     """Only source-provenance tests need the ignored full Army raw archive."""
-    path = Path(__file__).resolve().parents[1] / "data/work/build/army.raw.db"
+    path = Path(__file__).resolve().parents[1] / "local/work/build/army/army.raw.db"
     if not path.is_file() or path.stat().st_size == 0:
         pytest.skip("Full Army raw archive is ignored and unavailable in clean CI")
     # A present but malformed archive is an error, not a reason to skip.

@@ -163,6 +163,19 @@ are unchanged. The independent Rules interaction `--output` is a deliberate
 tracked checklist regeneration, not a run receipt; its immutable
 `--receipt-output` remains the correct audit-evidence mechanism.
 
+**L3/L5 generated-workspace cleanup (2026-11-14):** The active
+`tools.audit_source_variant_inputs` raw default and optional pinned source
+tests now use `local/work/build/army/army.raw.db`, preserving explicit `--raw`
+and `--normalized` support and strict source-generation matching. The former
+`data/work/build/army.raw.db` is absent. The two ignored raw databases under
+`data/generated/` are byte-identical historical copies, not the test input.
+A local PowerShell relocation script is provided separately to archive one
+raw copy, the historical JSON intermediates, deployed-object JSON, obsolete
+UI check/screenshots and v0.1.0 wheel under `local/archive/legacy-generated/`;
+it removes only verified duplicate and Explorer metadata. This move must be
+executed locally because MCP does not support moving these ignored/binary
+files. The three tracked publication databases remain in `data/generated/`.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user
