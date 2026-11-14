@@ -35,14 +35,14 @@ def test_reference_source_prerequisite_requires_selected_layout_and_pin(
     for path in (legacy, local):
         path.parent.mkdir(parents=True)
         path.write_bytes(payload)
-    assert selected_pdf(PDF_LABEL, pin, root=tmp_path) == legacy
-    assert selected_pdf(PDF_LABEL, pin, layout="local", root=tmp_path) == local
+    assert selected_pdf(PDF_LABEL, pin, root=tmp_path) == local
+    assert selected_pdf(PDF_LABEL, pin, layout="legacy", root=tmp_path) == legacy
     local.write_bytes(b"unreviewed revision")
     with pytest.raises(SourcePathError, match="hash mismatch"):
         selected_pdf(PDF_LABEL, pin, layout="local", root=tmp_path)
     local.unlink()
-    assert selected_pdf(PDF_LABEL, pin, layout="local", root=tmp_path) is None
-    assert selected_pdf(PDF_LABEL, pin, root=tmp_path) == legacy
+    assert selected_pdf(PDF_LABEL, pin, root=tmp_path) is None
+    assert selected_pdf(PDF_LABEL, pin, layout="legacy", root=tmp_path) == legacy
     with pytest.raises(SourcePathError, match="Unknown research source layout"):
         selected_pdf(PDF_LABEL, pin, layout="automatic", root=tmp_path)
 
