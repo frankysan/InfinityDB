@@ -69,10 +69,14 @@ the retired source roots.
   remain unchanged in curated provenance.
 - The independent Wiki acquisition checkout keeps incomplete crawl work
   under its own `local/work/wiki/`.
-- `work/symbols/`, `reports/symbols/`, `logs/symbols/` and `backups/symbols/`
-  may contain ignored historical in-tree processing evidence. The retired
-  processor cannot resume it; accepted external promotions use a transaction
-  under `local/`.
+- `local/archive/symbols/` retains historical in-tree symbol work, reports,
+  build logs, backup sets and the old build manifest. The retired processor
+  cannot resume that material; accepted external promotions use their own
+  transactions under `local/`.
+- `local/archive/runtime/pre-direct-database-set/` retains the obsolete
+  four-file Docker preparation bundle; it is not used for serving or deployment.
+- `local/archive/its/its_18-legacy-output.db` preserves the old standalone
+  ITS build, which differs from the current `local/work/its/its_18.db`.
 - `local/data/manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
   record is labeled from the archive filename, records both the logical snapshot
   content SHA-256 and exact archive SHA-256, and records the snapshot type,
@@ -94,8 +98,8 @@ the retired source roots.
 - `manifests/symbol-publication.json` — tracked release manifest for the processed SVG
   publication. It owns the published path/SHA-256 inventory, browser mappings, summary,
   and compact Army source archive identity used to bind `army.db` during deployment.
-- `manifests/army-symbol-build.json` — ignored historical in-tree build evidence,
-  not a current pipeline, publication, or deployment input.
+- `local/archive/symbols/army-symbol-build.json` — ignored historical in-tree
+  build evidence, not a current pipeline, publication, or deployment input.
 - `curated/rules/` — source-controlled, human-reviewed rules-reference
   collections consumed by `infinity-db build-rules`.
 - `curated/identities/` — source-controlled, reviewed source-derived identity and

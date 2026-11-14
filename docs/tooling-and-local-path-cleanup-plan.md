@@ -114,6 +114,18 @@ its tests are retired. Windows denied removal of the now-empty legacy
 non-blocking OS cleanup, not active input sources. No runtime DB or
 Syncthing sender configuration change was needed.
 
+**Historical in-tree artifact cleanup (2026-11-14):** Seven obsolete
+ignored locations moved by same-filesystem rename into `local/archive/`:
+symbol work, reports, logs and backups; the historical
+`army-symbol-build.json`; the old standalone `its_18.db`; and the retired
+four-file `data/runtime/` deployment bundle. No current maintained source,
+test or tool consumes the original paths. The old ITS build differs from the
+current `local/work/its/its_18.db`, so both are retained. A repeat
+dry-run confirmed zero pending moves. Tracked releases, currently generated
+work, symbol publication and Syncthing mappings were untouched. The one-use
+relocation helper is retired after execution. Empty old directories and
+Explorer metadata are non-blocking housekeeping only.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user
