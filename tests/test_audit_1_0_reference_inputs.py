@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_1_0_reference_inputs import (
+from tools.research.audit_1_0_reference_inputs import (
     SourceEvidenceError,
     _oldid_pin,
     _wiki_history_language,
@@ -103,7 +103,7 @@ def test_historical_reinforcements_report_uses_actual_availability(
 ) -> None:
     import sqlite3
 
-    from tools import audit_1_0_reference_inputs as audit
+    from tools.research import audit_1_0_reference_inputs as audit
 
     inventory = _reinforcements_inventory(tmp_path, present)
     monkeypatch.setattr(audit, "verify_reinforcements_inputs", partial(

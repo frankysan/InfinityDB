@@ -15,8 +15,8 @@ from typing import Any
 from urllib.parse import unquote, urlsplit
 
 from infinity_db.trait_wiki_references import load_trait_wiki_references
-from tools.audit_trait_wiki_anchors import audit_html
 from tools.browser.report_output import require_new_browser_report, write_browser_report
+from tools.research.audit_trait_wiki_anchors import audit_html
 
 
 def _browser_html(source_html: str) -> str:

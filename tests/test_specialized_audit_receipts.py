@@ -13,9 +13,9 @@ from typing import Any
 
 import pytest
 
-from tools import audit_pdf_revision_deltas as pdf_delta
-from tools import audit_restrictions_source_chart as restrictions
 from tools import audit_rules_interactions as interactions
+from tools.research import audit_pdf_revision_deltas as pdf_delta
+from tools.research import audit_restrictions_source_chart as restrictions
 from tools.research.report_output import write_audit_bytes_or_exit
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -622,15 +622,21 @@ def test_rules_interaction_check_mode_stays_read_only() -> None:
     assert interactions.DEFAULT_CHECKLIST_PATH.read_bytes() == original
 
 
-@pytest.mark.parametrize("filename", [
-    "audit_rules_interactions.py",
-    "audit_restrictions_source_chart.py",
-    "audit_pdf_revision_deltas.py",
+@pytest.mark.parametrize(("filename", "flag"), [
+    ("audit_rules_interactions.py", "--output"),
+    ("research/audit_1_0_reference_inputs.py", "--json-output"),
+    ("research/audit_reinforcements_applicability.py", "--source-layout"),
+    ("research/audit_hacking_program_statistics_chart.py", "--manifest"),
+    ("research/audit_restrictions_source_chart.py", "--output"),
+    ("research/audit_pdf_revision_deltas.py", "--output"),
+    ("research/audit_trait_wiki_anchors.py", "--output"),
 ])
-def test_specialized_audit_direct_script_help_still_works(filename: str) -> None:
+def test_specialized_audit_direct_script_help_still_works(
+    filename: str, flag: str,
+) -> None:
     process = subprocess.run(
         [sys.executable, str(ROOT / "tools" / filename), "--help"],
         cwd=ROOT, capture_output=True, text=True, check=False,
     )
     assert process.returncode == 0, process.stderr
-    assert "--output" in process.stdout
+    assert flag in process.stdout

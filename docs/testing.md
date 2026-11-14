@@ -2412,7 +2412,7 @@ auditing retained third-party sources, for example:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.data.audit_unit_semantics data/generated/army.db --output local/validation/data-model/unit-semantics/RUN_ID/unit-semantics.json
-.\.venv\Scripts\python.exe -m tools.audit_trait_wiki_anchors SAVED_TRAITS_HTML --output local/research/trait-wiki-audits/RUN_ID/anchors.json
+.\.venv\Scripts\python.exe -m tools.research.audit_trait_wiki_anchors SAVED_TRAITS_HTML --output local/research/trait-wiki-audits/RUN_ID/anchors.json
 ```
 
 Replace `RUN_ID` with a fresh UTC timestamp and short revision
@@ -2468,8 +2468,8 @@ Run `--pairs faq-en faq-es` to select a specific scope, or supply an
 explicit `--output` path for a reviewed experiment:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_pdf_revision_deltas --pairs faq-en faq-es
-.\.venv\Scripts\python.exe -m tools.audit_pdf_revision_deltas --pairs faq-en faq-es --output local/research/pdf-revision-deltas/RUN_ID/deltas.json
+.\.venv\Scripts\python.exe -m tools.research.audit_pdf_revision_deltas --pairs faq-en faq-es
+.\.venv\Scripts\python.exe -m tools.research.audit_pdf_revision_deltas --pairs faq-en faq-es --output local/research/pdf-revision-deltas/RUN_ID/deltas.json
 ```
 
 Both paths must be new files under ignored `local/`. Existing files and
@@ -2485,8 +2485,8 @@ write now also uses exclusive creation to reject a destination
 claimed during source projection:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --output local/research/restrictions/RUN_ID/restrictions-candidate.json
-.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --check-publication
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --output local/research/restrictions/RUN_ID/restrictions-candidate.json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --check-publication
 ```
 
 Those two options are mutually exclusive in a single invocation.
@@ -8116,7 +8116,7 @@ matched in the 2026-10-28 local review. This gate complements, but
 does not replace, question coverage, scenario applicability or browser
 verification.
 
-The separate read-only `tools/audit_1_0_reference_inputs.py` command
+The separate read-only `tools/research/audit_1_0_reference_inputs.py` command
 cross-checks supplied **source bytes** with the existing enrichment report,
 the current curated Wiki citation archive and historical Wiki revisions. These
 inputs are explicit and never downloaded automatically. Keep evidence output in
@@ -8124,7 +8124,7 @@ the ignored `local/` workspace:
 
 ```powershell
 .venv\Scripts\python.exe -m infinity_db build-rules --output local/audits/1.0-rules-current.db
-.venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5.3-en.pdf" --faq-pdf "data/pdf/faq/n5-faq-v0.1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
+.venv\Scripts\python.exe -m tools.research.audit_1_0_reference_inputs --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5.3-en.pdf" --faq-pdf "data/pdf/faq/n5-faq-v0.1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
 ```
 
 All 12 PDF source declarations now carry maintained SHA-256 pins for six
@@ -8857,8 +8857,8 @@ the four-device Program entitlement chart and does not authorize additional
 Equipment, Unit carrier or deployed-object identities.
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --json
-.venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --archive "data/raw/JSON 20260929-114335.zip" --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.venv\Scripts\python.exe -m tools.research.audit_hacking_program_statistics_chart --json
+.venv\Scripts\python.exe -m tools.research.audit_hacking_program_statistics_chart --archive "data/raw/JSON 20260929-114335.zip" --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 ```
 
 The offline default checks the exact source rows against the published
@@ -8917,7 +8917,7 @@ The maintained validator cross-checks existing curated records and flags
 missing or insufficiently scoped typed relationships:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --json
 ```
 
 The current command runs offline from the reviewed manifest and curated JSON.
@@ -8949,8 +8949,8 @@ plain text. The JSON must match the deterministic source projection
 byte-for-byte:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --check-publication --json
-.\.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --output local/restrictions-reference-staged.json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --check-publication --json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --output local/restrictions-reference-staged.json
 ```
 
 The second command stages replacement bytes under the ignored `local/`
@@ -12317,7 +12317,7 @@ public Trait detail pages scroll correctly in a browser. Legacy MediaWiki
 encoding matters: Suppressive Fire (SF) uses `.28SF.29`, not a
 display-name-derived fragment.
 
-`tools/audit_trait_wiki_anchors.py` reads a saved HTML response from the
+`tools/research/audit_trait_wiki_anchors.py` reads a saved HTML response from the
 official `https://infinitythewiki.com/Traits` page. It checks every mapped
 fragment against the page's actual heading `id` and its rendered text,
 reporting missing fragments and wrong-heading matches separately. The
@@ -12336,7 +12336,7 @@ To run the source check explicitly from the repository root in PowerShell:
 
 ```powershell
 Invoke-WebRequest -Uri "https://infinitythewiki.com/Traits" -OutFile "local/audits/traits-current.html"
-.\.venv\Scripts\python.exe tools/audit_trait_wiki_anchors.py local/audits/traits-current.html --inventory-unmapped --output local/audits/trait-wiki-anchors.json
+.\.venv\Scripts\python.exe -m tools.research.audit_trait_wiki_anchors local/audits/traits-current.html --inventory-unmapped --output local/audits/trait-wiki-anchors.json
 ```
 
 Keep the HTML and report under ignored `local/audits`, with a capture

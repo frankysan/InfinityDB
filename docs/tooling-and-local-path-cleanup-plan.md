@@ -224,6 +224,16 @@ Updated the opt-in rules occupancy gate, affected tests and active
 data-model/testing references without changing audit policies or report
 formats. Direct CLI entrypoints now use `python -m tools.data.*`.
 
+**L4 pinned-source research audit grouping (2026-11-14):** Moved the
+PDF revision, 1.0 reference-input, Reinforcements applicability,
+Hacking Program statistics, Restrictions Chart and Trait Wiki anchor
+auditors into `tools/research/`. Corrected repository-root defaults,
+module/direct-script imports, the Trait Wiki browser verifier, focused
+test imports and current operator commands. Their source-version pins,
+manifest acceptance rules, source-byte read-only behavior, existing
+report schemas and required inputs remain unchanged; no retained
+research evidence or published asset was relocated.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

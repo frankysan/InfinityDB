@@ -14,12 +14,18 @@ import json
 from pathlib import Path
 from typing import Any
 
-from tools.audit_1_0_reference_inputs import (
-    SourceEvidenceError,
-    verify_reinforcements_inputs,
-)
+if __package__:
+    from .audit_1_0_reference_inputs import (
+        SourceEvidenceError,
+        verify_reinforcements_inputs,
+    )
+else:
+    from audit_1_0_reference_inputs import (
+        SourceEvidenceError,
+        verify_reinforcements_inputs,
+    )
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "config/validation/reinforcements-n5-applicability-review.json"
 EXPECTED_REFERENCES = {
     "n5-core-v5.3-pdf": (

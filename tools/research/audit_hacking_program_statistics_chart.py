@@ -16,7 +16,7 @@ from typing import Any
 
 from infinity_db.database.repository import Database
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "config/validation/hacking-program-statistics-source-chart.json"
 ARMY_DB = ROOT / "data/generated/army.db"
 EXPECTED_NAMES = (

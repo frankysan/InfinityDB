@@ -18,18 +18,22 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
-try:
+if __package__:
     from tools.audit_enrichment_coverage import audit_coverage
-    from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
-    from tools.research.source_paths import SourcePathError, pinned_pdf_path
-except ModuleNotFoundError:  # Executing this file directly from the tools directory.
+
+    from .report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from .source_paths import SourcePathError, pinned_pdf_path
+else:  # Support direct execution as a script in tools/research/.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from audit_enrichment_coverage import audit_coverage
-    from research.report_output import require_new_audit_outputs, write_audit_text_or_exit
-    from research.source_paths import SourcePathError, pinned_pdf_path
+    from report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from source_paths import SourcePathError, pinned_pdf_path
 
 FORMAT = "InfinityDB 1.0 reference source evidence"
 VERSION = 4
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 REINFORCEMENTS_INVENTORY = ROOT / "config/validation/reinforcements-source-inputs.json"
 FAQ_INVENTORY = ROOT / "config/validation/n5-faq-v0.1-question-inventory.json"
 REVISION_ID = re.compile(r'"wgRevisionId":(\d+)')

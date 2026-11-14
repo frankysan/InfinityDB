@@ -82,7 +82,7 @@ Hosted CI and final source-wide acceptance remain separate.
 
 **Project domain:** Data processing
 
-The new, read-only `tools.audit_pdf_revision_deltas` compares **11 adjacent
+The new, read-only `tools.research.audit_pdf_revision_deltas` compares **11 adjacent
 revision pairs**: four N5 core transitions in **each** of English and Spanish,
 FAQ v0.0 to v0.1 in each language, and ITS Season 18 English 2026.09.01 to
 2026.09.11. It requires exact bytes matching the existing ignored

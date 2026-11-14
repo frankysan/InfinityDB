@@ -10,10 +10,7 @@ from typing import Any
 
 import pytest
 
-from tools import (
-    audit_enrichment_coverage,
-    audit_trait_wiki_anchors,
-)
+from tools import audit_enrichment_coverage
 from tools.data import (
     audit_army_faction_semantics,
     audit_database_separation,
@@ -28,6 +25,7 @@ from tools.data import (
     audit_source_presentation,
     audit_unit_semantics,
 )
+from tools.research import audit_trait_wiki_anchors
 
 MODULES = (
     audit_army_faction_semantics,

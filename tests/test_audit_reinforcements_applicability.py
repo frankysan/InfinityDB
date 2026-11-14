@@ -14,8 +14,11 @@ import pytest
 from infinity_db.database.repository import Database
 from infinity_db.declaration_matrix import core_declaration_matrix
 from infinity_db.rules_database import RulesDatabase
-from tools.audit_1_0_reference_inputs import SourceEvidenceError, verify_reinforcements_inputs
-from tools.audit_reinforcements_applicability import (
+from tools.research.audit_1_0_reference_inputs import (
+    SourceEvidenceError,
+    verify_reinforcements_inputs,
+)
+from tools.research.audit_reinforcements_applicability import (
     MANIFEST,
     ROOT,
     audit_applicability,

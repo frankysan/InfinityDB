@@ -18,17 +18,17 @@ from pathlib import Path
 from typing import cast
 
 if __package__:
-    from tools.research.report_output import (
+    from .report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
-    from tools.research.source_paths import SourcePathError, pinned_pdf_path
-else:  # Support direct execution as tools/audit_pdf_revision_deltas.py.
-    from research.report_output import (
+    from .source_paths import SourcePathError, pinned_pdf_path
+else:  # Support direct execution as a script in tools/research/.
+    from report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
-    from research.source_paths import SourcePathError, pinned_pdf_path
+    from source_paths import SourcePathError, pinned_pdf_path
 
 try:
     import pymupdf as fitz
@@ -36,7 +36,7 @@ except ImportError as exc:
     raise SystemExit("PyMuPDF is required: install the dev extra") from exc
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "local/data/pdf"
 PAIRS = {
     "its18-en": ("its/its-18-rules-v2026.09.01-en.pdf", "its/its-18-rules-v2026.09.11-en.pdf", 1),

@@ -13,7 +13,7 @@ import pytest
 
 from infinity_db.curated import load_curated_document
 from infinity_db.database.repository import Database
-from tools.audit_hacking_program_statistics_chart import (
+from tools.research.audit_hacking_program_statistics_chart import (
     ARMY_DB,
     ROOT,
     audit_files,
@@ -21,7 +21,7 @@ from tools.audit_hacking_program_statistics_chart import (
     program_key,
     verify_pdf,
 )
-from tools.audit_hacking_program_statistics_chart import MANIFEST as STATISTICS
+from tools.research.audit_hacking_program_statistics_chart import MANIFEST as STATISTICS
 from tools.research.source_paths import SourcePathError, pinned_pdf_path
 
 MANIFEST = ROOT / "config/validation/hacking-device-program-source-chart.json"

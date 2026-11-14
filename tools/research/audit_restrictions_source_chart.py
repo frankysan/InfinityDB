@@ -19,11 +19,11 @@ from infinity_db.restriction_conditions import (
 )
 
 if __package__:
-    from tools.research.report_output import write_audit_bytes_or_exit
-else:  # Support direct execution as tools/audit_restrictions_source_chart.py.
-    from research.report_output import write_audit_bytes_or_exit
+    from .report_output import write_audit_bytes_or_exit
+else:  # Support direct execution as a script in tools/research/.
+    from report_output import write_audit_bytes_or_exit
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "config/validation/restrictions-source-chart.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 SUBJECTS = ("TAG", "Motorcycle", "Aerial", "VH", "REM", "Irregular")

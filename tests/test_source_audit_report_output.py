@@ -10,7 +10,6 @@ from typing import Any
 import pytest
 
 from tools import (
-    audit_1_0_reference_inputs,
     audit_auxiliary_silhouette_provenance,
     audit_weapon_chart_profiles,
     audit_weapon_definition_gaps,
@@ -19,6 +18,7 @@ from tools import (
     audit_weaponry_family_clauses,
     audit_wiki_weapon_chart_names,
 )
+from tools.research import audit_1_0_reference_inputs
 from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
 
 MODULES = (

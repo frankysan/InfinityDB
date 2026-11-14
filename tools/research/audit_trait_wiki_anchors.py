@@ -18,12 +18,12 @@ from urllib.parse import unquote, urlsplit
 from infinity_db.trait_wiki_references import load_trait_wiki_references
 
 if __package__:
-    from tools.research.report_output import (
+    from .report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
-else:  # Support direct execution from the tools/ directory.
-    from research.report_output import (
+else:  # Support direct execution as a script in tools/research/.
+    from report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
@@ -149,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.inventory_unmapped:
         from infinity_db.curated import load_curated_directory
 
-        root = Path(__file__).resolve().parents[1]
+        root = Path(__file__).resolve().parents[2]
         canonical_traits = {
             record["id"]: record["name"]
             for _, document in load_curated_directory(root / "data" / "curated")

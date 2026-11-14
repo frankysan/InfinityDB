@@ -2636,7 +2636,7 @@ source-only manifest at
 `config/validation/restrictions-source-chart.json`. Its six ordered
 subjects and 14 negative conditions are projected reproducibly to
 `src/infinity_db/web/static/restrictions-reference.json` by
-`tools.audit_restrictions_source_chart`. The packaged JSON remains the tracked v10 source publication. The
+`tools.research.audit_restrictions_source_chart`. The packaged JSON remains the tracked v10 source publication. The
 browser now fetches `GET /api/restrictions/chart`: pre-v13 servers return
 that exact packaged chart, while opt-in Rules v13 servers project the
 same response from relational SQLite. Neither path reads maintained
