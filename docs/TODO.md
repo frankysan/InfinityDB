@@ -65,7 +65,7 @@ existing release checklist still apply.
     Chromium checks legacy/invalid URLs, empty results, keyboard, touch,
     sharing and Back navigation at desktop and narrow widths.
 
-- [ ] **Web backend + Web frontend — contextual usage counts:** Show distinct
+- [x] **Web backend + Web frontend — contextual usage counts:** Show distinct
   logical Unit counts beside Skills, Equipment and Weapons options in the
   complete *currently filtered* population. Respect multi-selection, every
   other active filter, Army context, optional availability and the selection
@@ -83,28 +83,53 @@ existing release checklist still apply.
   - [x] **Asynchronous consistency:** Refresh counts on every relevant
     filter/Army/availability change, preventing stale in-flight responses
     from overwriting newer state and handling loading, aborts and errors.
-  - [ ] **Semantic tests:** Check cross-profile/loadout matching, combined
+  - [x] **Semantic tests:** Check cross-profile/loadout matching, combined
     multi-select filters, selected-option counts, zero results, distinct Units
-    and pagination/sort/extended-view independence.
-  - [ ] **Acceptance and closeout:** Verify accessible option announcements,
+    and pagination/sort/extended-view independence. Synthetic source
+    contexts verify counts exclude other groups and loadouts and deduplicate
+    matching occurrences of one logical Unit.
+  - [x] **Acceptance and closeout:** Verify accessible option announcements,
     keyboard and touch behavior, responsive layouts and loading states;
     measure representative count-query latency and document the count
-    contract alongside the overall feature closeout.
+    contract alongside the overall feature closeout. Chromium verifies
+    accessible count names, loading/error announcements, keyboard and touch
+    at mobile and desktop widths; benchmark results follow below.
 
-- [ ] **Web backend + Web frontend — advanced-filtering investigation:**
+- [x] **Web backend + Web frontend — advanced-filtering investigation:**
   Compare per-filter AND/OR/NOT controls (and exclusion/negation) with the
   simpler multi-select semantics. Assess concrete search use cases, user
   comprehension, UI complexity, query correctness across profile/loadout
   contexts, URL/API compatibility, performance and implementation/maintenance
   cost. Record a scoped v1.1.0 implement-or-defer decision; do not make the
   full boolean-filtering system an implicit release prerequisite.
+  **Decision: defer AND/OR/NOT per category beyond v1.1.0.** OR within a
+  category and AND between categories already cover common discovery.
+  Examples for future review: requiring both MSV and Mimetism, or excluding
+  a Skill. However, NOT needs an explicit whole-Unit versus compatible
+  profile/loadout scope, while intra-category AND needs occurrence-coherent
+  semantics. A three-state control for six categories, new share-state/API
+  expression syntax, query changes and regression coverage are a substantial
+  multi-layer implementation and maintenance cost relative to unverified
+  demand. No release blocker or hidden boolean semantics are introduced.
 
-- [ ] **Web backend — caching investigation:** Benchmark repeated and
+- [x] **Web backend — caching investigation:** Benchmark repeated and
   varied multi-selection and count queries on a representative snapshot.
   Compare uncached response latency and cost against simple bounded
   response/count caching, including cache keys, invalidation on snapshot
   replacement, memory use and added maintenance. Implement only if the
   measured benefit justifies the cost; otherwise record the no-cache decision.
+  **Decision: no additional cache for v1.1.0.** On the 9,175,040-byte
+  snapshot, `tools.performance.benchmark_runtime` (Windows, 3 cold
+  Database instances and 5 repeated calls per case) measured median cold
+  query times of 137 ms for uncounted Units, 247 ms with counts, 115 ms
+  with Army/counts, 217 ms with multi-selection/counts, and 328 ms with
+  a Points range/counts. Repeated identical calls via the existing
+  per-Database 128-entry `list_units` LRU were ~0.001–0.002 ms.
+  HTTP responses also have a 300-second max-age. Another bounded response
+  or count cache would duplicate behavior while adding state keys, memory
+  and snapshot-invalidation maintenance. These are local query benchmarks,
+  not production HTTP latency or concurrency measurements; reconsider
+  only if real-world use demonstrates a bottleneck.
 
 - [ ] **Web frontend + Web backend — final acceptance and closeout:**
   Verify keyboard, screen-reader, touch, responsive layouts, loading/error

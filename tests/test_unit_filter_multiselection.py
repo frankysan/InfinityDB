@@ -224,6 +224,18 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
                 loadout_payload_id INTEGER, item_id INTEGER
             );
             CREATE TABLE unit_option_weapons (unit_id INTEGER, item_id INTEGER);
+            CREATE TABLE profile_payload_equipment (profile_payload_id INTEGER, item_id INTEGER);
+            CREATE TABLE loadout_payload_equipment (loadout_payload_id INTEGER, item_id INTEGER);
+            CREATE TABLE unit_option_equipment (unit_id INTEGER, item_id INTEGER);
+            CREATE TABLE profile_payload_characteristics (
+                profile_payload_id INTEGER, characteristic_id INTEGER
+            );
+            CREATE TABLE loadout_payload_characteristics (
+                loadout_payload_id INTEGER, characteristic_id INTEGER
+            );
+            CREATE TABLE application_catalog_sources (
+                catalog TEXT, source_item_id INTEGER, application_item_id INTEGER
+            );
             INSERT INTO logical_unit_sources VALUES (1, 1);
             INSERT INTO application_army_sources VALUES (101, 501, 1), (201, 502, 1);
             INSERT INTO profile_payload_occurrences VALUES
@@ -279,6 +291,23 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
     assert matches((1, 99), (5, 98), army=502) == set()
     assert matches((2, 99), (5, 98), army=502) == set()
     assert matches((1, 99), (4, 98), army=501, ava=2) == set()
+    # Usage counts are scoped to the matching loadout and its profile group.
+    group_one = database._unit_filter_usage_counts({(1, 1, 101, 1, 100)})
+    assert group_one["skills"] == {"1": 1}
+    assert group_one["weapons"] == {"4": 1}
+    assert group_one["equipment"] == {}
+
+    second_loadout = database._unit_filter_usage_counts({(1, 1, 101, 1, 101)})
+    assert second_loadout["skills"] == {"1": 1}
+    assert second_loadout["weapons"] == {"5": 1}
+
+    # Multiple matching occurrences of one Unit count once per option.
+    combined = database._unit_filter_usage_counts({
+        (1, 1, 101, 1, 100), (1, 1, 101, 2, 102),
+    })
+    assert combined["skills"] == {"1": 1, "2": 1}
+    assert combined["weapons"] == {"4": 1, "6": 1}
+
 
 
 def test_multiselect_availability_and_result_views_are_consistent() -> None:

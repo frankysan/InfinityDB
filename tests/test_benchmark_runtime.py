@@ -53,8 +53,11 @@ def test_discover_cases_covers_representative_runtime_paths() -> None:
     assert [case.name for case in cases] == [
         "armies",
         "units",
+        "units-counts",
+        "units-counts-numeric",
         "traits",
         "units-by-army",
+        "units-counts-by-army",
         "unit-detail",
         "unit-search",
         "skills-catalog",

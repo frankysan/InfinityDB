@@ -137,8 +137,8 @@ export function createUnitMultiSelect(select, label, onChange) {
   search.disabled = true;
   search.addEventListener("input", () => {
     const query = search.value.trim().toLocaleLowerCase();
-    for (const { row } of rows.values()) {
-      row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
+    for (const item of items) {
+      rows.get(item.value).row.hidden = !item.name.toLocaleLowerCase().includes(query);
     }
   });
   clear.addEventListener("click", () => {

@@ -179,3 +179,31 @@ def test_unit_multiselect_legacy_invalid_and_empty_links(
     finally:
         page.close()
 
+def test_contextual_counts_accessible_loading_and_failure(
+    app: Any, origin: str, browser: Any,
+) -> None:
+    page = browser.new_page(viewport={"width": 390, "height": 820}, has_touch=True, is_mobile=True)
+    route_browser_page(page, app, origin)
+    try:
+        page.goto(f"{origin}/units", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => [...document.querySelectorAll('.unit-multi-count')].some("
+            "(item) => Number(item.textContent.replaceAll(',', '')) > 0)"
+        )
+        page.locator(".advanced-filters > summary").click()
+        control = page.locator(".unit-multi-select").first
+        control.locator("summary").click()
+        checkbox = control.locator(".unit-multi-option input").first
+        assert "matching Unit" in checkbox.get_attribute("aria-label")
+        assert control.locator(".unit-multi-choices").get_attribute("aria-busy") == "false"
+        page.route("**/api/units?*", lambda route: route.abort())
+        loading_label = checkbox.evaluate(
+            "(input) => { input.click(); return input.getAttribute('aria-label'); }"
+        )
+        assert "count loading" in loading_label
+        page.locator("#error-state").wait_for(state="visible")
+        assert "count unavailable" in checkbox.get_attribute("aria-label")
+        assert control.locator(".unit-multi-choices").get_attribute("aria-busy") == "false"
+    finally:
+        page.close()
+

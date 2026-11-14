@@ -67,6 +67,15 @@ def discover_cases(database: Database) -> list[BenchmarkCase]:
     cases = [
         BenchmarkCase("armies", lambda db: db.list_armies()),
         BenchmarkCase("units", lambda db: db.list_units(limit=50)),
+        BenchmarkCase(
+            "units-counts", lambda db: db.list_units(limit=50, include_usage_counts=True)
+        ),
+        BenchmarkCase(
+            "units-counts-numeric",
+            lambda db: db.list_units(
+                points_min=10, points_max=35, limit=50, include_usage_counts=True,
+            ),
+        ),
         BenchmarkCase("traits", lambda db: db.list_traits()),
     ]
     if armies:
@@ -75,6 +84,14 @@ def discover_cases(database: Database) -> list[BenchmarkCase]:
             BenchmarkCase(
                 "units-by-army",
                 lambda db, value=army_id: db.list_units(army_id=value, limit=50),
+            )
+        )
+        cases.append(
+            BenchmarkCase(
+                "units-counts-by-army",
+                lambda db, value=army_id: db.list_units(
+                    army_id=value, limit=50, include_usage_counts=True,
+                ),
             )
         )
     if unit is not None:
@@ -98,6 +115,20 @@ def discover_cases(database: Database) -> list[BenchmarkCase]:
                 lambda db, value=catalog: db.list_catalog_items(value),
             )
         )
+        if catalog == "skills" and len(items) >= 2:
+            ids = tuple(
+                item["id"] for item in sorted(
+                    items, key=lambda item: item.get("use_count", 0), reverse=True,
+                )[:2]
+            )
+            cases.append(
+                BenchmarkCase(
+                    "units-counts-multiselect",
+                    lambda db, value=ids: db.list_units(
+                        skill_id=value, limit=50, include_usage_counts=True,
+                    ),
+                )
+            )
         if items:
             item_id = items[0]["id"]
             cases.append(
