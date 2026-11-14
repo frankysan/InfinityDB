@@ -2423,7 +2423,8 @@ class Database:
         swc_min: float | None,
         swc_max: float | None,
         force_loadout_context: bool = False,
-    ) -> dict[int, frozenset[tuple[int, int, int]]]:
+        include_loadout_id: bool = False,
+    ) -> dict[int, frozenset[tuple[int, ...]]]:
         """Return matching source Army/profile-group contexts for coherent filters.
 
         Once a contextual numeric constraint is present, categorical and catalog
@@ -2653,10 +2654,15 @@ class Database:
                 return {}
             where.append("(" + " OR ".join(alternatives) + ")")
 
+        loadout_column = (
+            ", lpo.loadout_payload_id AS matching_loadout_id "
+            if include_loadout_id and has_loadout_filter else ""
+        )
         query = (
             "SELECT DISTINCT lus.logical_unit_id, "
             f"{base}.unit_id, {base}.army_id, {base}.group_id "
-            f"FROM {table} AS {base} "
+            + loadout_column
+            + f"FROM {table} AS {base} "
             + loadout_join
             + f"JOIN logical_unit_sources AS lus ON lus.source_unit_id = {base}.unit_id"
         )
@@ -2664,11 +2670,12 @@ class Database:
             query += " WHERE " + " AND ".join(where)
         with self._connect() as connection:
             rows = connection.execute(query, parameters).fetchall()
-        contexts: dict[int, set[tuple[int, int, int]]] = defaultdict(set)
+        contexts: dict[int, set[tuple[int, ...]]] = defaultdict(set)
         for row in rows:
-            contexts[int(row["logical_unit_id"])].add(
-                (int(row["unit_id"]), int(row["army_id"]), int(row["group_id"]))
-            )
+            key = (int(row["unit_id"]), int(row["army_id"]), int(row["group_id"]))
+            if include_loadout_id:
+                key += (int(row["matching_loadout_id"]),) if has_loadout_filter else (0,)
+            contexts[int(row["logical_unit_id"])].add(key)
         return {logical_id: frozenset(items) for logical_id, items in contexts.items()}
 
     @instance_lru_cache(maxsize=1)
@@ -3032,6 +3039,86 @@ class Database:
             "variants": [variant for variant in variants.values() if variant["units"]],
         }
 
+    def _unit_filter_usage_counts(
+        self, eligible: set[tuple[int, int, int, int | None, int | None]]
+    ) -> dict[str, dict[str, int]]:
+        """Batch distinct logical-Unit usage within visible matching source contexts."""
+
+        catalogs = ("skills", "equipment", "weapons")
+        result: dict[str, dict[str, int]] = {
+            **{catalog: {} for catalog in catalogs},
+            "equipment_characteristics": {},
+        }
+        if not eligible:
+            return result
+
+        predicates = {
+            "profile": (
+                "ppo.army_id = e.army_id AND ppo.unit_id = e.unit_id "
+                "AND (e.group_id IS NULL OR ppo.group_id = e.group_id)"
+            ),
+            "loadout": (
+                "lpo.army_id = e.army_id AND lpo.unit_id = e.unit_id "
+                "AND (e.group_id IS NULL OR lpo.group_id = e.group_id) "
+                "AND (e.loadout_id IS NULL OR lpo.loadout_payload_id = e.loadout_id)"
+            ),
+        }
+        sources: list[str] = []
+        for catalog in catalogs:
+            for level, occurrence, payload in (
+                ("profile", "ppo", "profile"),
+                ("loadout", "lpo", "loadout"),
+            ):
+                sources.append(
+                    f"SELECT '{catalog}' AS catalog, i.item_id, e.logical_id "
+                    "FROM eligible AS e "
+                    f"JOIN {payload}_payload_occurrences AS {occurrence} "
+                    f"ON {predicates[level]} "
+                    f"JOIN {payload}_payload_{catalog} AS i "
+                    f"ON i.{payload}_payload_id = {occurrence}.{payload}_payload_id"
+                )
+            sources.append(
+                f"SELECT '{catalog}' AS catalog, i.item_id, e.logical_id "
+                "FROM eligible AS e "
+                f"JOIN unit_option_{catalog} AS i ON i.unit_id = e.unit_id"
+            )
+        for level, occurrence, payload in (
+            ("profile", "ppo", "profile"),
+            ("loadout", "lpo", "loadout"),
+        ):
+            sources.append(
+                "SELECT 'equipment_characteristics' AS catalog, "
+                "i.characteristic_id AS item_id, e.logical_id "
+                "FROM eligible AS e "
+                f"JOIN {payload}_payload_occurrences AS {occurrence} "
+                f"ON {predicates[level]} "
+                f"JOIN {payload}_payload_characteristics AS i "
+                f"ON i.{payload}_payload_id = {occurrence}.{payload}_payload_id"
+            )
+        sql = (
+            "WITH uses AS (" + " UNION ALL ".join(sources) + ") "
+            "SELECT u.catalog, COALESCE(acs.application_item_id, u.item_id) AS item_id, "
+            "COUNT(DISTINCT u.logical_id) AS unit_count "
+            "FROM uses AS u LEFT JOIN application_catalog_sources AS acs "
+            "ON acs.catalog = u.catalog AND acs.source_item_id = u.item_id "
+            "GROUP BY u.catalog, COALESCE(acs.application_item_id, u.item_id)"
+        )
+        with self._connect() as connection:
+            connection.execute(
+                "CREATE TEMP TABLE eligible (logical_id INTEGER, unit_id INTEGER, "
+                "army_id INTEGER, group_id INTEGER, loadout_id INTEGER)"
+            )
+            connection.executemany(
+                "INSERT INTO eligible VALUES (?, ?, ?, ?, ?)", eligible,
+            )
+            connection.execute(
+                "CREATE INDEX eligible_occurrence ON "
+                "eligible (unit_id, army_id, group_id, loadout_id)"
+            )
+            for row in connection.execute(sql):
+                result[row["catalog"]][str(row["item_id"])] = int(row["unit_count"])
+        return result
+
     @instance_lru_cache(maxsize=128)
     def list_units(
         self,
@@ -3064,6 +3151,7 @@ class Database:
         _unbounded: bool = False,
         _logical_unit_ids: frozenset[int] | None = None,
         _equipment_characteristic_ids: tuple[int, ...] = (),
+        include_usage_counts: bool = False,
     ) -> dict[str, Any]:
         unresolved_army_filter = False
         if army_id is not None:
@@ -3184,6 +3272,8 @@ class Database:
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
             raise ValueError("_unbounded must be a boolean")
+        if type(include_usage_counts) is not bool:
+            raise ValueError("include_usage_counts must be a boolean")
         if _logical_unit_ids is not None and (
             not isinstance(_logical_unit_ids, frozenset)
             or any(type(unit_id) is not int for unit_id in _logical_unit_ids)
@@ -3262,6 +3352,7 @@ class Database:
                 swc_min=swc_min,
                 swc_max=swc_max,
                 force_loadout_context=force_multi_context,
+                include_loadout_id=include_usage_counts,
             )
             if has_numeric_filters or force_multi_context
             else None
@@ -3319,7 +3410,7 @@ class Database:
                     continue
                 matching_occurrence_keys = frozenset(
                     (source_id, source_army_id)
-                    for source_id, source_army_id, _group_id in contexts
+                    for source_id, source_army_id, *_rest in contexts
                 )
 
             requirements = minimal_availability_requirements(
@@ -3342,6 +3433,30 @@ class Database:
                 declared_faction_ids_by_unit,
             )
             grouped.append({**group, "armies": visible_armies})
+        if include_usage_counts:
+            eligible_contexts: set[tuple[int, int, int, int | None, int | None]] = set()
+            for group in grouped:
+                for occurrence in group["army_occurrences"]:
+                    if army_id is not None and occurrence["id"] != army_id:
+                        continue
+                    source_id = occurrence["source_id"]
+                    source_army_id = occurrence["source_army_id"]
+                    required = army_required_flags(
+                        occurrence, group, canonical_factions[source_id],
+                        declared_faction_ids_by_unit[source_id],
+                    )
+                    if not required <= selected_flags:
+                        continue
+                    if contextual_matches is None:
+                        eligible_contexts.add((group["id"], source_id, source_army_id, None, None))
+                    else:
+                        for context in contextual_matches.get(group["id"], ()):
+                            if context[:2] != (source_id, source_army_id):
+                                continue
+                            eligible_contexts.add((
+                                group["id"], source_id, source_army_id, context[2],
+                                context[3] or None,
+                            ))
         grouped.sort(
             key=lambda group: (unit_sort_key(group["name"]), group["id"]),
             reverse=descending,
@@ -3397,6 +3512,8 @@ class Database:
             "offset": offset,
             "availability": summary,
         }
+        if include_usage_counts:
+            result["usage_counts"] = self._unit_filter_usage_counts(eligible_contexts)
         if declared_faction_id is not None:
             application_armies = self._application_army_graph()
             application_id = application_armies["source_to_application"].get(

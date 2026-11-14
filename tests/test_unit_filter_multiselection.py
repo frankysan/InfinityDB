@@ -248,7 +248,7 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
         army: int | None = None,
         points: int | None = None,
         ava: int | None = None,
-    ) -> set[tuple[int, int, int]]:
+    ) -> set[tuple[int, ...]]:
         result = database._contextual_unit_filter_matches(
             army_id=army,
             rule_source_ids={"skills": skill_ids, "weapons": weapon_ids},
@@ -305,3 +305,73 @@ def test_multiselect_availability_and_result_views_are_consistent() -> None:
     assert sorted_result["total"] == extended_result["total"] == default["total"]
     assert {unit["id"] for unit in sorted_result["items"]} <= default_ids
     assert {unit["id"] for unit in extended_result["items"]} <= default_ids
+
+@pytest.mark.parametrize(
+    "filters",
+    [
+        {},
+        {"search": "unit-name-that-does-not-exist"},
+        {"skill_id": ("aerial", "berserk")},
+        {"army_id": "does-not-exist"},
+        {"mercs": True, "specops": True, "teamops": True, "reinforcement": True},
+    ],
+)
+def test_usage_counts_match_filtered_population(filters: dict) -> None:
+    database = Database(Path("data/generated/army.db"))
+    first = database.list_units(include_usage_counts=True, limit=1, **filters)
+    last = database.list_units(
+        include_usage_counts=True, limit=1, offset=2, descending=True, extended=True,
+        **filters,
+    )
+    assert first["usage_counts"] == last["usage_counts"]
+    assert first["total"] == last["total"]
+    for catalog in ("skills", "equipment", "weapons", "equipment_characteristics"):
+        assert all(
+            0 < value <= first["total"]
+            for value in first["usage_counts"][catalog].values()
+        )
+    if not first["total"]:
+        assert all(not counts for counts in first["usage_counts"].values())
+
+
+def test_usage_counts_include_selected_item_and_logical_unit_deduplication() -> None:
+    database = Database(Path("data/generated/army.db"))
+    available = next(
+        item for item in database.list_catalog_items("skills")
+        if database.list_units(skill_id=item["id"])["total"] > 0
+    )
+    result = database.list_units(
+        skill_id=available["id"], include_usage_counts=True,
+    )
+    assert result["total"] > 0
+    assert result["usage_counts"]["skills"][str(available["id"])] == result["total"]
+
+def test_http_usage_counts_are_opt_in_and_stable_across_requests() -> None:
+    path = Path("data/generated/army.db")
+    app = create_app(path, rules_database_path=Path("data/generated/rules_n5.db"))
+
+    def request(query: str) -> dict:
+        environ: dict = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO="/api/units", QUERY_STRING=query, REQUEST_METHOD="GET")
+        status: list[str] = []
+
+        def start_response(code: str, _headers: list, _exc_info=None) -> None:
+            status.append(code)
+
+        result = json.loads(b"".join(app(environ, start_response)))
+        assert status[0].startswith("200 "), result
+        return result
+
+    baseline = request("limit=1")
+    assert "usage_counts" not in baseline
+    counted = request("limit=1&counts=1")
+    again = request("limit=1&counts=1")
+    assert counted["usage_counts"] == again["usage_counts"]
+    assert counted["total"] == baseline["total"]
+    assert set(counted["usage_counts"]) == {"skills", "equipment", "weapons"}
+    assert counted["usage_counts"]["skills"]
+    assert "equipment_characteristics" not in counted["usage_counts"]
+    assert request("search=impossible-unique-unit-name&counts=1")["usage_counts"] == {
+        "skills": {}, "equipment": {}, "weapons": {},
+    }

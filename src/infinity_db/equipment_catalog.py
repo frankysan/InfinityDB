@@ -175,6 +175,16 @@ class EquipmentCatalog:
             return None
         return self.database.logical_unit_ids_for_characteristic(encoding.characteristic)
 
+    def presentation_equipment_characteristic_ids(self) -> dict[str, int]:
+        """Map presentation-only Equipment slugs to source Characteristic IDs."""
+
+        result: dict[str, int] = {}
+        for encoding in self._encodings:
+            source_id = self.characteristic_filter_id_for_equipment(encoding.equipment_id)
+            if source_id is not None:
+                result[encoding.equipment_id] = source_id
+        return result
+
     def characteristic_filter_id_for_equipment(self, item_ref: int | str) -> int | None:
         """Return the source Characteristic backing presentation-only Equipment."""
 

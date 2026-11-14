@@ -3177,6 +3177,22 @@ Characteristics. They participate as OR alternatives alongside ordinary
 Equipment selections and respect the same profile-group/loadout context in
 combined queries. Unknown mixed identifiers continue to fail closed.
 
+The optional `/api/units?counts=1` response adds `usage_counts` with
+`skills`, `equipment` and `weapons` maps keyed by application item ID
+(or public slug for presentation-encoded Equipment). Each number counts
+**distinct logical Units** using that option in the complete currently
+filtered population, not just the returned page. The effective population
+includes every active filter (including selections in the counted category),
+Army context and optional-unit availability. Matching source occurrences
+are scoped to compatible Army/profile-group/loadout contexts when those
+constraints are active. Sort order, page offset, page size and extended
+display do not affect the counts. Omitted map entries mean zero; selected
+options are never omitted from the UI merely because their count is zero.
+These are usage counts, not predictions of the effect of adding or removing
+a filter. The backend aggregates all three catalogs in one batched SQLite
+query without querying each option separately. The count payload is
+opt-in; existing `/api/units` clients keep their original response shape.
+
 Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
 the source facts. A combined source Classification can participate in more than one public
 Classification filter, while source Characteristics that duplicate a canonical current Skill can be

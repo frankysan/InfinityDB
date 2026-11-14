@@ -72,15 +72,15 @@ existing release checklist still apply.
   in the counted dropdown itself. Counts are not hypothetical alternatives
   computed by dropping/replacing a selection, and are independent of page,
   sorting and extended view.
-  - [ ] **Count contract:** Specify the per-option response shape and the
+  - [x] **Count contract:** Specify the per-option response shape and the
     shared result/count population, including selected and zero-count options,
     multi-selection and coherent profile/loadout contexts.
-  - [ ] **Backend aggregation:** Compute all three dropdown count sets in
+  - [x] **Backend aggregation:** Compute all three dropdown count sets in
     batches against the effective result population, without per-option
     round trips, duplicate-Unit inflation or mismatched query semantics.
-  - [ ] **Frontend integration:** Show counts alongside Skills, Equipment
+  - [x] **Frontend integration:** Show counts alongside Skills, Equipment
     and Weapons options while preserving selections and accessible labels.
-  - [ ] **Asynchronous consistency:** Refresh counts on every relevant
+  - [x] **Asynchronous consistency:** Refresh counts on every relevant
     filter/Army/availability change, preventing stale in-flight responses
     from overwriting newer state and handling loading, aborts and errors.
   - [ ] **Semantic tests:** Check cross-profile/loadout matching, combined

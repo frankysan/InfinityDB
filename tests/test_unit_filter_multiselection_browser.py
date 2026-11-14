@@ -78,6 +78,11 @@ def test_unit_multiselect_url_state_keyboard_and_removal(
         control = page.locator(".unit-multi-select").first
         control.locator(".unit-multi-option").first.wait_for(state="attached")
         assert page.locator(".unit-multi-select").count() == 6
+        page.wait_for_function(
+            "() => [...document.querySelectorAll('.unit-multi-count')].some("
+            "(item) => Number(item.textContent.replaceAll(',', '')) > 0)"
+        )
+        assert page.locator(".unit-multi-count").first.text_content() != "…"
         assert page.locator(".advanced-filter-row > .field > select").evaluate_all(
             "(selects) => selects.map((select) => select.id)"
         ) == [
@@ -164,6 +169,12 @@ def test_unit_multiselect_legacy_invalid_and_empty_links(
         )
         page.locator("#empty-state").wait_for(state="visible")
         assert page.locator(".unit-multi-chip").count() == 2
+        counts = page.locator(".unit-multi-select").first.locator(".unit-multi-count")
+        assert counts.count() > 0
+        assert all(value == "0" for value in counts.all_text_contents())
+        assert "0 matching Units" in page.locator(
+            ".unit-multi-option input"
+        ).first.get_attribute("aria-label")
         assert not errors, errors
     finally:
         page.close()

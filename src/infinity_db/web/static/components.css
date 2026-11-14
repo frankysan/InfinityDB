@@ -2322,6 +2322,14 @@ h2 {
   padding: 0;
 }
 
+.unit-multi-count {
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .unit-multi-notice {
   margin: 6px 0 0;
   font-size: var(--font-size-xs);

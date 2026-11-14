@@ -101,7 +101,7 @@ export function createUnitMultiSelect(select, label, onChange) {
 
   function setItems(newItems, formatName = (item) => item.name) {
     items = newItems.map((item) => ({
-      value: item.slug || String(item.id), name: String(formatName(item)),
+      id: String(item.id), value: item.slug || String(item.id), name: String(formatName(item)),
     }));
     rows.clear();
     choices.replaceChildren();
@@ -111,7 +111,9 @@ export function createUnitMultiSelect(select, label, onChange) {
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.value = item.value;
-      row.append(checkbox, document.createTextNode(item.name));
+      const count = document.createElement("span");
+      count.className = "unit-multi-count";
+      row.append(checkbox, document.createTextNode(item.name), count);
       checkbox.addEventListener("change", () => {
         if (checkbox.checked && selected.size >= MAX_SELECTIONS) {
           checkbox.checked = false;
@@ -124,7 +126,7 @@ export function createUnitMultiSelect(select, label, onChange) {
         renderSelection();
         onChange();
       });
-      rows.set(item.value, { row, checkbox });
+      rows.set(item.value, { row, checkbox, count });
       choices.append(row);
     }
     search.disabled = false;
@@ -155,6 +157,20 @@ export function createUnitMultiSelect(select, label, onChange) {
   renderSelection();
   return {
     value,
+    setCounts(counts) {
+      choices.setAttribute("aria-busy", counts === null ? "true" : "false");
+      for (const item of items) {
+        const { checkbox, count } = rows.get(item.value);
+        const value = counts === null ? null
+          : counts === undefined ? undefined : Number(counts[item.id] || 0);
+        count.textContent = value == null ? (value === null ? "…" : "—") : value.toLocaleString();
+        count.setAttribute("aria-hidden", "true");
+        checkbox.setAttribute("aria-label", value === null
+          ? `${item.name}, count loading`
+          : value === undefined ? `${item.name}, count unavailable`
+            : `${item.name}, ${value} matching ${value === 1 ? "Unit" : "Units"}`);
+      }
+    },
     setValue(next) {
       selected = new Set(parseMultiSelection(next));
       notice.textContent = "";

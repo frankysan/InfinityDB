@@ -541,6 +541,11 @@ function renderDeclaredMembershipContext(data) {
 }
 
 function renderUnits(data) {
+  for (const [key, catalog] of [
+    ["skillId", "skills"], ["equipmentId", "equipment"], ["weaponId", "weapons"],
+  ]) {
+    multiControls[key].setCounts(data.usage_counts?.[catalog]);
+  }
   renderUnitRows(elements.list, data.items, { extended: state.extended });
   renderAvailabilitySummary(data);
   renderDeclaredMembershipContext(data);
@@ -578,6 +583,7 @@ async function load() {
   const signal = controller.signal;
   const currentRequest = ++requestNumber;
   showPanel(elements.loading);
+  for (const key of ["skillId", "equipmentId", "weaponId"]) multiControls[key].setCounts(null);
   elements.unitCount.textContent = "—";
   elements.unitCountShown.replaceChildren();
   elements.unitCountFiltered.replaceChildren();
@@ -631,6 +637,7 @@ async function load() {
     renderUnits(data);
   } catch (error) {
     if (signal.aborted || currentRequest !== requestNumber) return;
+    for (const key of ["skillId", "equipmentId", "weaponId"]) multiControls[key].setCounts(undefined);
     elements.errorMessage.textContent = error instanceof TypeError
       ? "Could not reach InfinityDB. Check your connection and try again."
       : collectionLoadMessage(error, "units");

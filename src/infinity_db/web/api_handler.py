@@ -421,6 +421,7 @@ def _unit_query(query: str) -> dict:
             "reinforcement",
             "order",
             "extended",
+            "counts",
             "cache_bust",
         }:
             raise ValueError(f"Unknown query parameter: {key}")
@@ -487,6 +488,7 @@ def _unit_query(query: str) -> dict:
         "reinforcement": _flag(params, "reinforcement"),
         "descending": order == "desc",
         "extended": _flag(params, "extended"),
+        "include_usage_counts": _flag(params, "counts"),
     }
 
 
@@ -1510,6 +1512,19 @@ class ApiHandler:
                     if logical_unit_ids is not None:
                         query["_logical_unit_ids"] = frozenset(logical_unit_ids)
                     payload = self.database.list_units(**query)
+                    if "usage_counts" in payload:
+                        source_counts = payload["usage_counts"]
+                        counts = {
+                            catalog: dict(values) for catalog, values in source_counts.items()
+                            if catalog != "equipment_characteristics"
+                        }
+                        characteristics = source_counts["equipment_characteristics"]
+                        for slug, source_id in (
+                            self.equipment_catalog.presentation_equipment_characteristic_ids().items()
+                        ):
+                            if str(source_id) in characteristics:
+                                counts["equipment"][slug] = characteristics[str(source_id)]
+                        payload = {**payload, "usage_counts": counts}
                     payload = {
                         **payload,
                         "items": enrich_unit_items(self.database, payload["items"]),
