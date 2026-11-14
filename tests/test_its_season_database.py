@@ -18,7 +18,7 @@ from infinity_db.its_season_database import (
     select_its_scenario,
 )
 from infinity_db.rules_database import RulesDatabase, export_rules_database
-from tools.build_its_season import DEFAULT_OUTPUT, main
+from tools.data.build_its_season import DEFAULT_OUTPUT, main
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"

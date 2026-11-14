@@ -14,7 +14,7 @@ from infinity_db.its_season_database import (
     inspect_its_database,
 )
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SOURCE = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"
 DEFAULT_OUTPUT = ROOT / "local/work/its/its_18.db"
 

@@ -13,7 +13,7 @@ from infinity_db.variant_usage import (
     validate_variant_usage_candidate,
 )
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def main() -> None:

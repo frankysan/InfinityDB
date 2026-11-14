@@ -2397,7 +2397,7 @@ profile-versus-loadout and unresolved-variant fixtures before publishing.
 
 **Project domain:** Data processing
 
-The candidate builder (`tools.build_variant_usage`) validates direct source
+The candidate builder (`tools.data.build_variant_usage`) validates direct source
 rows and typed signatures against the matched local Army/rules publication.
 `variant_usage_includes.py` also compares every retained raw Include with
 its materialized edge, preserving multiplicity, quantity, raw fields and

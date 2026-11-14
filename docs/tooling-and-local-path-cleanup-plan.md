@@ -335,6 +335,14 @@ outputs and local validation evidence paths. The generated font README
 and tracked publication copy now identify the new tool path.
 No compatibility wrappers or published font binary changes were made.
 
+**L4 data builder and publication checks (2026-11-14):** Moved the
+standalone ITS season builder, Variant Usage candidate builder and embedded
+Weapon citation verifier to `tools/data/`. Updated direct/module CLI tests,
+the deploy-assets verifier's module/direct-script dependency, isolated build
+fixture, and maintained operator commands. Existing source inputs, local
+candidate paths and read-only publication checks remain unchanged. The
+cross-domain deployment verifier and release orchestrators remain at root.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

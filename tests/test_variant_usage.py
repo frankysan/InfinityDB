@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_variant_usage_tool_has_no_loose_json_publication_mode(
     monkeypatch: pytest.MonkeyPatch, retired_flag: str,
 ) -> None:
-    from tools.build_variant_usage import main
+    from tools.data.build_variant_usage import main
 
     monkeypatch.setattr(
         "sys.argv", ["build_variant_usage", "--raw-db", "local/army.raw.db", retired_flag],
@@ -875,7 +875,7 @@ def test_variant_usage_cli_supports_normalized_without_raw(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    from tools import build_variant_usage as cli
+    from tools.data import build_variant_usage as cli
 
     result = {
         "scope": "read-only-candidate-not-published", "variants": [],
@@ -910,7 +910,7 @@ def test_variant_usage_cli_supports_normalized_without_raw(
 def test_variant_usage_cli_check_never_writes_candidate(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from tools import build_variant_usage as cli
+    from tools.data import build_variant_usage as cli
 
     result = {
         "scope": "read-only-candidate-not-published", "variants": [],

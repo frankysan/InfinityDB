@@ -10,8 +10,8 @@ from typing import Any
 
 import pytest
 
-from tools import build_variant_usage as variants
 from tools.data import audit_deployed_object_inventory as deployed
+from tools.data import build_variant_usage as variants
 from tools.symbols import export_symbol_source_plan as symbols
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -321,7 +321,7 @@ def test_symbol_plan_existing_mismatched_content_is_immutable(
 
 @pytest.mark.parametrize(("module", "flag", "direct_script"), (
     ("data/audit_deployed_object_inventory", "--json-output", True),
-    ("build_variant_usage", "--output", True),
+    ("data/build_variant_usage", "--output", True),
     ("symbols.export_symbol_source_plan", "--output", False),
     ("symbols.export_symbol_override_lookups", "--output", False),
 ))

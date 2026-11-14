@@ -22,14 +22,14 @@ try:
         AssetValidationError,
         validate_asset_set,
     )
-    from tools.build_weapon_profile_publication import DEFAULT_REVIEWS, check_embedded_profiles
+    from tools.data.build_weapon_profile_publication import DEFAULT_REVIEWS, check_embedded_profiles
 except ImportError:  # pragma: no cover - direct script execution fallback
     from asset_validation import (  # type: ignore[no-redef]
         AssetSetValidation,
         AssetValidationError,
         validate_asset_set,
     )
-    from build_weapon_profile_publication import (  # type: ignore[no-redef]
+    from data.build_weapon_profile_publication import (  # type: ignore[no-redef]
         DEFAULT_REVIEWS,
         check_embedded_profiles,
     )

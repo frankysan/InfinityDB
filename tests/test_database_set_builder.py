@@ -56,7 +56,7 @@ def project(
         "config/catalogs/unit-filter-semantics.json",
         "data/curated/identities/army-overview.json",
         "data/curated/identities/legacy-armies.json",
-        "tools/build_weapon_profile_publication.py",
+        "tools/data/build_weapon_profile_publication.py",
         "tools/data/audit_enrichment_coverage.py",
         "tools/research/audit_weapon_definition_gaps.py",
     ):

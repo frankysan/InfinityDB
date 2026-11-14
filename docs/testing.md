@@ -9521,7 +9521,7 @@ Verify that its source-paired rows still match the authored decisions without
 reading the PDF, generating loose JSON or acquiring sources:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.build_weapon_profile_publication
+.\.venv\Scripts\python.exe -m tools.data.build_weapon_profile_publication
 ```
 
 The read-only check requires exact embedded citation identities, current PDF
