@@ -12,13 +12,13 @@ import pytest
 
 from infinity_db.database import raw_database_path
 from tests.test_audit_runtime_database_surface import _runtime_database
-from tools.audit_normalization_links import audit_database as audit_normalization
-from tools.audit_normalization_links import main as normalization_main
-from tools.audit_peripheral_semantics import audit_database as audit_peripherals
-from tools.audit_peripheral_semantics import main as peripherals_main
-from tools.audit_relationship_semantics import audit_database as audit_relationships
-from tools.audit_relationship_semantics import main as relationships_main
-from tools.paired_audit_connection import open_paired_audit_connection
+from tools.data.audit_normalization_links import audit_database as audit_normalization
+from tools.data.audit_normalization_links import main as normalization_main
+from tools.data.audit_peripheral_semantics import audit_database as audit_peripherals
+from tools.data.audit_peripheral_semantics import main as peripherals_main
+from tools.data.audit_relationship_semantics import audit_database as audit_relationships
+from tools.data.audit_relationship_semantics import main as relationships_main
+from tools.data.paired_audit_connection import open_paired_audit_connection
 
 
 def test_paired_connection_reads_source_views_without_modifying_siblings(

@@ -2411,7 +2411,7 @@ application/database investigations, and `local/research/` when
 auditing retained third-party sources, for example:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_unit_semantics data/generated/army.db --output local/validation/data-model/unit-semantics/RUN_ID/unit-semantics.json
+.\.venv\Scripts\python.exe -m tools.data.audit_unit_semantics data/generated/army.db --output local/validation/data-model/unit-semantics/RUN_ID/unit-semantics.json
 .\.venv\Scripts\python.exe -m tools.audit_trait_wiki_anchors SAVED_TRAITS_HTML --output local/research/trait-wiki-audits/RUN_ID/anchors.json
 ```
 

@@ -11,14 +11,21 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.database.schema import DATABASE_TABLES
-from tools.paired_audit_connection import open_paired_audit_connection
+
+if __package__:
+    from .paired_audit_connection import open_paired_audit_connection
+else:  # Support direct execution from the tools/data/ directory.
+    from paired_audit_connection import open_paired_audit_connection
 
 if __package__:
     from tools.research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
-else:  # Support direct execution from the tools/ directory.
+else:  # Support direct execution from the tools/data/ directory.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,

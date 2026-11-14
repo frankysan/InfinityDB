@@ -2354,8 +2354,8 @@ def test_pinned_army_derived_relationships_have_live_published_targets() -> None
     Existence checks do not prove player-facing rendering or correct game rules.
     """
     from infinity_db.database.peripheral_relationships import validate_peripheral_relationships
-    from tools.audit_fireteam_semantics import audit_database as audit_fireteams
-    from tools.audit_unit_semantics import audit_database as audit_units
+    from tools.data.audit_fireteam_semantics import audit_database as audit_fireteams
+    from tools.data.audit_unit_semantics import audit_database as audit_units
 
     baseline = build_baseline(ARMY_DB, RULES_DB)
     fireteams = audit_fireteams(ARMY_DB)
@@ -2423,7 +2423,7 @@ def test_pinned_army_derived_relationships_have_live_published_targets() -> None
 
 def test_pinned_army_derived_relationships_match_raw_source_when_available() -> None:
     """Source derivation requires the ignored, release-matched raw sibling."""
-    from tools.audit_army_faction_semantics import audit_database as audit_factions
+    from tools.data.audit_army_faction_semantics import audit_database as audit_factions
 
     _require_release_matched_raw_army()
     faction = audit_factions(ARMY_DB)

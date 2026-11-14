@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.database.schema import create_schema
-from tools.audit_normalization_links import (
+from tools.data.audit_normalization_links import (
     FILTER_CATALOG_LINKS,
     NormalizationLinkAuditError,
     audit_database,

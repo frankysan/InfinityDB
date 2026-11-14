@@ -16,14 +16,20 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from tools.paired_audit_connection import open_paired_audit_connection
+if __package__:
+    from .paired_audit_connection import open_paired_audit_connection
+else:  # Support direct execution from the tools/data/ directory.
+    from paired_audit_connection import open_paired_audit_connection
 
 if __package__:
     from tools.research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
-else:  # Support direct execution from the tools/ directory.
+else:  # Support direct execution from the tools/data/ directory.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
@@ -33,7 +39,7 @@ REPORT_FORMAT = "InfinityDB relationship semantics audit"
 REPORT_FORMAT_VERSION = 6
 
 DEFAULT_HISTORICAL_RELATION_ENDPOINTS = (
-    Path(__file__).resolve().parents[1]
+    Path(__file__).resolve().parents[2]
     / "data"
     / "curated"
     / "relationships"

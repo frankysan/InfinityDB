@@ -411,7 +411,7 @@ source-only normalized tables, while `infinity.raw.db` omits
 application projections. Their initial direct attempts against
 either file therefore failed on missing tables, **not because
 source relationships were missing**. The bounded paired-audit
-helper `tools.paired_audit_connection` now opens the application
+helper `tools.data.paired_audit_connection` now opens the application
 database read-only, verifies the raw sibling's shared export
 metadata/fingerprint and exposes required raw tables through
 temporary SQLite views. It preserves the combined-schema
@@ -468,7 +468,7 @@ a different source archive
 from the selected current archive
 (`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`).
 Applying it directly **still fails closed**. The new
-opt-in `tools.audit_relationship_semantics
+opt-in `tools.data.audit_relationship_semantics
 data/generated/infinity.db --current-only` reports
 **eight unresolved constraints referencing those five
 source IDs**, without borrowing the prior historical

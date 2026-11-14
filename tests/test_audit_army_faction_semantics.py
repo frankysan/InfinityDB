@@ -11,8 +11,8 @@ import pytest
 
 from infinity_army_data.normalize import normalize_master, validate_normalized
 from infinity_db.database import export_database, raw_database_path
-from tools import audit_army_faction_semantics as army_audit
-from tools.audit_army_faction_semantics import audit_database
+from tools.data import audit_army_faction_semantics as army_audit
+from tools.data.audit_army_faction_semantics import audit_database
 
 
 def _army_database(

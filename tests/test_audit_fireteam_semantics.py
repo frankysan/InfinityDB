@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_fireteam_semantics import (
+from tools.data.audit_fireteam_semantics import (
     REQUIRED_COLUMNS,
     FireteamSemanticsAuditError,
     audit_database,

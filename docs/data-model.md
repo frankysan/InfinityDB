@@ -4253,13 +4253,13 @@ historical inventories into this document. Important examples include:
 
 - `tools/audit_database_separation.py` — application/raw table boundary;
 - `tools/audit_runtime_database_surface.py` — runtime repository access boundary;
-- `tools/audit_unit_semantics.py` — logical Unit/source semantics;
+- `tools/data/audit_unit_semantics.py` — logical Unit/source semantics;
 - `tools/data/audit_profile_semantics.py` and `tools/data/audit_loadout_semantics.py` — profile/loadout payload
   boundaries;
-- `tools/audit_army_faction_semantics.py` — Army/grouping/faction semantics;
-- `tools/audit_peripheral_semantics.py` — Peripheral mappings/access pools;
-- `tools/audit_relationship_semantics.py` — source/application relationship interpretation;
-- `tools/audit_fireteam_semantics.py` — Fireteam chart semantics;
+- `tools/data/audit_army_faction_semantics.py` — Army/grouping/faction semantics;
+- `tools/data/audit_peripheral_semantics.py` — Peripheral mappings/access pools;
+- `tools/data/audit_relationship_semantics.py` — source/application relationship interpretation;
+- `tools/data/audit_fireteam_semantics.py` — Fireteam chart semantics;
 - `tools/audit_source_presentation.py` — source-to-player-presentation coverage;
 - `tools/data/audit_semantic_deduplication.py` — canonicalization evidence;
 - `tools/audit_enrichment_coverage.py` and `tools/audit_rules_interactions.py` — rules/reference

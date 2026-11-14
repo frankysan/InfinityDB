@@ -11,22 +11,22 @@ from typing import Any
 import pytest
 
 from tools import (
-    audit_army_faction_semantics,
     audit_database_separation,
     audit_enrichment_coverage,
-    audit_fireteam_semantics,
-    audit_normalization_links,
-    audit_peripheral_semantics,
-    audit_relationship_semantics,
     audit_runtime_database_surface,
     audit_source_presentation,
     audit_trait_wiki_anchors,
-    audit_unit_semantics,
 )
 from tools.data import (
+    audit_army_faction_semantics,
+    audit_fireteam_semantics,
     audit_loadout_semantics,
+    audit_normalization_links,
+    audit_peripheral_semantics,
     audit_profile_semantics,
+    audit_relationship_semantics,
     audit_semantic_deduplication,
+    audit_unit_semantics,
 )
 
 MODULES = (

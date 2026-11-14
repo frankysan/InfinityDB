@@ -17,7 +17,7 @@ from typing import Any
 
 from infinity_db.database.publication import validate_database_pair
 from infinity_db.rules_database import RulesDatabase
-from tools.paired_audit_connection import open_paired_audit_connection
+from tools.data.paired_audit_connection import open_paired_audit_connection
 
 CATEGORIES = ("skills", "equipment")
 OWNERS = ("profile", "option", "unit_option")

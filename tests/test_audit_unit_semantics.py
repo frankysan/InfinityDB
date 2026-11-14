@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_unit_semantics import (
+from tools.data.audit_unit_semantics import (
     EXPECTED_COLUMNS,
     UnitSemanticsAuditError,
     audit_database,

@@ -205,6 +205,16 @@ and direct-script report helper lookup were updated together. The remaining
 Army, source-attached and browser audit commands retain their independent
 ownership pending separate consumer-based batches.
 
+**L4 Army semantic audit grouping (2026-11-14):** Relocated
+`audit_unit_semantics`, `audit_fireteam_semantics`,
+`audit_army_faction_semantics`, `audit_peripheral_semantics`,
+`audit_relationship_semantics`, `audit_normalization_links` and
+their shared `paired_audit_connection` helper to `tools/data/`.
+Updated dependent tests, the source-variant consumer, active command references
+and the relationship audit's repository-curated historical-endpoint default.
+The source/normalized verification behavior and separate semantic audit
+contracts are unchanged. No published databases or private inputs were moved.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation
