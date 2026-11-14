@@ -317,6 +317,15 @@ focused direct/module invocation tests and current operator reference.
 The shared `tools.snapshot_archive` helper remains root-owned for
 other bundle consumers. No other artifact generator or output path changed.
 
+**L4 documentation and CI validation grouping (2026-11-14):** Moved
+`check_doc_links`, `check_v1_backlog`, `check_v1_backlog_ci` and
+`ci_preflight` into `tools/ci/`. Updated runner and development-status
+imports, direct-script preflight path, Source CI workflow, tests, and
+current operator commands. The two standalone checkers still resolve the
+repository root; V1S retirement gating and indexed preflight behavior are
+unchanged. `tools/run_checks.py` remains the root operator entrypoint.
+No compatibility wrappers were introduced.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

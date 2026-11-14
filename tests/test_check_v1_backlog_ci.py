@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.check_v1_backlog_ci import choose_ci_range, main
+from tools.ci.check_v1_backlog_ci import choose_ci_range, main
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -336,7 +336,7 @@ def test_ci_source_workflow_checks_history_with_full_checkout() -> None:
         encoding="utf-8",
     )
     assert "fetch-depth: 0" in workflow
-    assert "python -m tools.check_v1_backlog_ci" in workflow
+    assert "python -m tools.ci.check_v1_backlog_ci" in workflow
     assert "if: needs.fast-validation.outputs.full == 'true' && matrix.primary" in workflow
     assert "matrix.check_args == '--all'" not in workflow
     assert "backlog_base:" in workflow

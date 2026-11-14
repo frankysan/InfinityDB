@@ -27,7 +27,7 @@ run_checks = load_run_checks()
 
 
 def load_ci_preflight():
-    path = Path(__file__).resolve().parents[1] / "tools" / "ci_preflight.py"
+    path = Path(__file__).resolve().parents[1] / "tools" / "ci" / "ci_preflight.py"
     spec = importlib.util.spec_from_file_location("infinitydb_ci_preflight", path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -738,8 +738,8 @@ def test_docs_stage_runs_markdownlint_before_local_link_validation(
     assert result.status == "PASS"
     assert commands == [
         ("npm", "run", "lint:docs"),
-        (sys.executable, "-m", "tools.check_doc_links"),
-        (sys.executable, "-m", "tools.check_v1_backlog"),
+        (sys.executable, "-m", "tools.ci.check_doc_links"),
+        (sys.executable, "-m", "tools.ci.check_v1_backlog"),
     ]
 
 
@@ -759,7 +759,7 @@ def test_docs_stage_fails_after_static_backlog_rejection(
 
     def fake_popen(command, **kwargs):
         commands.append(tuple(command))
-        return FakeProcess(1 if command[-1] == "tools.check_v1_backlog" else 0)
+        return FakeProcess(1 if command[-1] == "tools.ci.check_v1_backlog" else 0)
 
     monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
     with run_checks.Reporter() as reporter:
@@ -769,7 +769,7 @@ def test_docs_stage_fails_after_static_backlog_rejection(
     assert result.status == "FAIL"
     assert result.returncode == 1
     assert len(commands) == 3
-    assert commands[-1] == (sys.executable, "-m", "tools.check_v1_backlog")
+    assert commands[-1] == (sys.executable, "-m", "tools.ci.check_v1_backlog")
 
 
 def test_rules_stage_runs_interaction_audit_before_database_build(
@@ -1050,7 +1050,7 @@ def test_ci_preflight_stage_runs_isolated_full_index_despite_local_targets(
     assert stage.name == "preflight"
     assert stage.command == (
         sys.executable,
-        str(Path(__file__).resolve().parents[1] / "tools" / "ci_preflight.py"),
+        str(Path(__file__).resolve().parents[1] / "tools" / "ci" / "ci_preflight.py"),
         "--isolated", "--assets", "required" if include_assets else "off",
         "--", "-n", "auto", "--dist", "worksteal",
         "-m", "full_assets or not full_assets" if include_assets else "not full_assets", "-q",

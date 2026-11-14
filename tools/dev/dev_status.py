@@ -16,7 +16,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from tools.check_v1_backlog import ROOT, _note_details, analyze_backlog, review_selection
+from tools.ci.check_v1_backlog import ROOT, _note_details, analyze_backlog, review_selection
 
 MAX_RESPONSE = 1024 * 1024
 QUEUE_ENTRY = re.compile(

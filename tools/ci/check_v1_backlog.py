@@ -10,7 +10,7 @@ import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 REGISTER_HEADING = "pre-planned 1.0 execution slices"
 HEADING = re.compile(r"^ {0,3}(?P<marks>#{1,6})\s+(?P<title>.+?)\s*#*\s*$")
 FENCE = re.compile(r"^ {0,3}(?P<fence>`{3,}|~{3,})")

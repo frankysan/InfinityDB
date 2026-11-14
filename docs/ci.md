@@ -233,7 +233,7 @@ at execution time; other matrix legs do not require npm.
 ### V1S Git-aware retirement gate
 
 The primary Ubuntu 3.11 Source leg uses a full-history checkout and runs
-`python -m tools.check_v1_backlog_ci` before installing dependencies.
+`python -m tools.ci.check_v1_backlog_ci` before installing dependencies.
 The regular `docs` stage separately checks current TODO structure without Git.
 The CI retirement check enforces newly removed V1S identifiers only within an
 explicitly selected, first-parent-compatible range, with the same
@@ -352,7 +352,7 @@ a conflict, not an overwrite.
 
 The primary Ubuntu 3.11 `--all` leg includes the isolated `preflight` stage
 after the ordinary test/build/rules stages. It invokes
-`tools/ci_preflight.py --isolated`, installs only indexed `.[dev,symbols]`
+`tools/ci/ci_preflight.py --isolated`, installs only indexed `.[dev,symbols]`
 dependencies in a fresh environment, verifies indexed release-artifact provenance,
 and runs indexed Ruff, pytest and Pyright. It then exercises the built wheel in a
 second fresh environment using the same smoke helper as the installed-wheel workflow.

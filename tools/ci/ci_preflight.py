@@ -26,7 +26,7 @@ import tomllib
 import zipfile
 from pathlib import Path, PurePosixPath
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_ROOT = "src/"
 # Tracked package files deliberately left out of the wheel (design sources).
 WHEEL_EXEMPT_PREFIXES = ("infinity_db/web/static/logo/",)

@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from tools.check_v1_backlog import (
+from tools.ci.check_v1_backlog import (
     ROOT,
     _git,
     _register_bounds,

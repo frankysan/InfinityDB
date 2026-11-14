@@ -74,8 +74,8 @@ jobs:
       - name: Validate documentation and backlog structure
         run: |
           npm run lint:docs
-          python -m tools.check_doc_links
-          python -m tools.check_v1_backlog
+          python -m tools.ci.check_doc_links
+          python -m tools.ci.check_v1_backlog
 
   source-checks:
     needs: fast-validation
@@ -134,7 +134,7 @@ jobs:
 
       - name: Check V1S retirement history
         if: needs.fast-validation.outputs.full == 'true' && matrix.primary
-        run: python -m tools.check_v1_backlog_ci
+        run: python -m tools.ci.check_v1_backlog_ci
 
       - name: Install development dependencies
         if: needs.fast-validation.outputs.full == 'true'

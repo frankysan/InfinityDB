@@ -307,7 +307,7 @@ profiles retain their existing Python/data-only stage sets.
 
 The documentation stage first runs the lockfile-pinned `markdownlint-cli2` dependency
 with the project's `.markdownlint.json` rules, excluding local material,
-dependencies and reports. It then runs `tools.check_doc_links` with the
+dependencies and reports. It then runs `tools.ci.check_doc_links` with the
 same Python interpreter as the check runner to validate relative Markdown
 paths and heading anchors across **all Git-tracked Markdown files**, including
 nested references, plus new `docs/*.md` drafts before staging. Without Git
@@ -316,7 +316,7 @@ The link checker excludes ignored private files, does not access external
 URLs, validate application routes or substitute for browser acceptance;
 it checks ordinary inline links and reference definitions, not arbitrary
 embedded HTML. Its file count can differ from Markdownlint's glob selection.
-The final docs-stage command, `tools.check_v1_backlog`, checks only the
+The final docs-stage command, `tools.ci.check_v1_backlog`, checks only the
 tracked V1S register's static structure. It needs no Git history or ignored
 inputs, and it does **not** automatically choose a task or approve closeout.
 Install the Markdownlint dependency **explicitly** before `docs` or `--all`:
@@ -347,7 +347,7 @@ unexplained skips:
 
 ```powershell
 $taskId = (.\.venv\Scripts\python.exe -m tools.dev.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --select $taskId
+.\.venv\Scripts\python.exe -m tools.ci.check_v1_backlog --select $taskId
 ```
 
 A user-directed priority exception is permitted **only** when the selected
@@ -367,9 +367,9 @@ acceptance evidence in the eventual commit. After committing, audit the
 introducing history from a deliberately chosen ancestor revision:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --base HEAD --target-state index
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --base HEAD --target-state worktree
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --base HEAD~1 --enforce-closeout
+.\.venv\Scripts\python.exe -m tools.ci.check_v1_backlog --base HEAD --target-state index
+.\.venv\Scripts\python.exe -m tools.ci.check_v1_backlog --base HEAD --target-state worktree
+.\.venv\Scripts\python.exe -m tools.ci.check_v1_backlog --base HEAD~1 --enforce-closeout
 ```
 
 The `HEAD~1` example checks only the most recent first-parent commit; use
@@ -421,7 +421,7 @@ To catch undeclared dependencies and reliance on ignored local evidence before
 committing, use the isolated mode after staging the intended candidate:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/ci_preflight.py --isolated -- -n auto
+.\.venv\Scripts\python.exe tools/ci/ci_preflight.py --isolated -- -n auto
 ```
 
 `tools/run_checks.py --all` and `--profile all` include this isolated validation
@@ -458,7 +458,7 @@ declaration when a developer already has that package installed.
 For a quick packaging/untracked check without repeating pytest or installing dependencies:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/ci_preflight.py --skip-pytest
+.\.venv\Scripts\python.exe tools/ci/ci_preflight.py --skip-pytest
 ```
 
 `--skip-wheel` omits the wheel audit and installed-wheel smoke; combining the skip switches exercises
@@ -503,7 +503,7 @@ The Phase 1 V1S backlog checker is a separate offline structural check; it does
 not yet perform Git-history closeout or task-selection validation:
 
 ```powershell
-python -m tools.check_v1_backlog
+python -m tools.ci.check_v1_backlog
 ```
 
 It reads the designated execution-slice section from `docs/TODO.md` without

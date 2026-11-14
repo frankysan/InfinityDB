@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.check_v1_backlog import (
+from tools.ci.check_v1_backlog import (
     BacklogAnalysis,
     analyze_backlog,
     audit_pending_retirements,

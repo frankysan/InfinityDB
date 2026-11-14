@@ -366,7 +366,7 @@ def stage_definitions(
         if name in {"test", "preflight"}:
             command = (
                 [python, "-m", "pytest"] if name == "test" else
-                [python, str(REPO_ROOT / "tools" / "ci_preflight.py"), "--isolated",
+                [python, str(REPO_ROOT / "tools" / "ci" / "ci_preflight.py"), "--isolated",
                  "--assets", "required" if include_full_assets else "off", "--"]
             )
             if test_workers != "0":
@@ -503,8 +503,8 @@ def run_stage(
             str(output / "normalized.json"), str(output / "army.db"),
         ))
     if stage.name == "docs":
-        commands.append((sys.executable, "-m", "tools.check_doc_links"))
-        commands.append((sys.executable, "-m", "tools.check_v1_backlog"))
+        commands.append((sys.executable, "-m", "tools.ci.check_doc_links"))
+        commands.append((sys.executable, "-m", "tools.ci.check_v1_backlog"))
     for command in commands:
         reporter.write(f"Command: {format_command(command)}")
         reporter.write()
