@@ -11839,7 +11839,7 @@ For subsequent Army snapshot reviews, the source-presentation audit has an opt-i
 fail-closed occupancy gate:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/audit_source_presentation.py data/generated/infinity.db --require-no-occupied-gaps --output local/audits/source-presentation.json
+.\.venv\Scripts\python.exe -m tools.data.audit_source_presentation data/generated/army.db --require-no-occupied-gaps --output local/audits/source-presentation.json
 ```
 
 This gate passes only when a checksum-matched raw source database is available

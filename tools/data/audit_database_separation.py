@@ -38,8 +38,8 @@ from infinity_db.unit_filter_storage import ARMY_SCHEMA_VERSION as FILTER_SCHEMA
 from infinity_db.unit_filter_storage import ARMY_V29_PUBLISHED_TABLES
 
 if __package__:
-    from tools.audit_runtime_database_surface import audit_database as audit_runtime_surface
-else:
+    from .audit_runtime_database_surface import audit_database as audit_runtime_surface
+else:  # Support direct execution from the tools/data/ directory.
     from audit_runtime_database_surface import audit_database as audit_runtime_surface
 
 if __package__:
@@ -47,7 +47,10 @@ if __package__:
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
-else:  # Support direct execution from the tools/ directory.
+else:  # Support direct execution from the tools/data/ directory.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from research.report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
@@ -587,7 +590,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--project-root",
         type=Path,
-        default=Path(__file__).resolve().parents[1],
+        default=Path(__file__).resolve().parents[2],
         help="Repository root used for runtime serving-surface verification",
     )
     parser.add_argument("--output", type=Path, help="Optional deterministic JSON report path")

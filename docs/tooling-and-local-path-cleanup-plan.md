@@ -215,6 +215,15 @@ and the relationship audit's repository-curated historical-endpoint default.
 The source/normalized verification behavior and separate semantic audit
 contracts are unchanged. No published databases or private inputs were moved.
 
+**L4 database-boundary audit grouping (2026-11-14):** Moved
+`audit_database_separation`, `audit_runtime_database_surface` and
+`audit_source_presentation` into `tools/data/`. The separation audit
+retains its runtime-surface sibling import, while the two default
+`--project-root` values continue to resolve to the repository root.
+Updated the opt-in rules occupancy gate, affected tests and active
+data-model/testing references without changing audit policies or report
+formats. Direct CLI entrypoints now use `python -m tools.data.*`.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

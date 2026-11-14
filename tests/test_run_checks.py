@@ -838,7 +838,7 @@ def test_opt_in_source_occupancy_gate_runs_before_rules_review_and_build(
     assert result.status == "PASS"
     assert commands == [
         (
-            sys.executable, "-m", "tools.audit_source_presentation",
+            sys.executable, "-m", "tools.data.audit_source_presentation",
             "data/generated/army.db", "--require-no-occupied-gaps",
         ),
         (
@@ -894,7 +894,7 @@ def test_source_occupancy_failure_blocks_rules_review_and_build(
     assert result.status == "FAIL"
     assert result.returncode == 1
     assert len(commands) == 1
-    assert commands[0][2] == "tools.audit_source_presentation"
+    assert commands[0][2] == "tools.data.audit_source_presentation"
 
 
 def test_rules_stage_stops_before_build_when_review_audit_fails(

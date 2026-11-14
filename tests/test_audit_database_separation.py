@@ -9,7 +9,7 @@ import pytest
 
 from infinity_db.database import raw_database_path
 from tests.test_audit_runtime_database_surface import _runtime_database
-from tools.audit_database_separation import (
+from tools.data.audit_database_separation import (
     CANONICAL,
     CONTEXTUAL,
     PUBLISHED_TABLES_BY_VERSION,
@@ -17,9 +17,14 @@ from tools.audit_database_separation import (
     DatabaseSeparationAuditError,
     _table_classification,
     audit_database,
+    build_parser,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_default_project_root_tracks_module_relocation() -> None:
+    assert build_parser().parse_args(["army.db"]).project_root == ROOT
 
 
 def _item(report: dict, table: str) -> dict:

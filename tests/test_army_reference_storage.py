@@ -190,7 +190,7 @@ def test_pre_v30_retains_authored_adapters(v29) -> None:
 
 
 def test_runtime_audit_traces_embedded_army_data(v30) -> None:
-    from tools.audit_runtime_database_surface import audit_database
+    from tools.data.audit_runtime_database_surface import audit_database
 
     army, _raw = v30
     before = hashlib.sha256(army.read_bytes()).hexdigest()

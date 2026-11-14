@@ -9,7 +9,7 @@ import pytest
 from infinity_db.database import raw_database_path
 from infinity_db.database.publication import EXPORT_PAIR_SHA256_KEY, validate_database_pair
 from tests.test_audit_runtime_database_surface import _runtime_database
-from tools import audit_source_presentation as audit
+from tools.data import audit_source_presentation as audit
 
 ROOT = Path(__file__).resolve().parents[1]
 

@@ -6,16 +6,21 @@ from pathlib import Path
 
 from infinity_army_data.normalize import normalize_master, validate_normalized
 from infinity_db.database import export_database
-from tools.audit_runtime_database_surface import (
+from tools.data.audit_runtime_database_surface import (
     CANONICAL,
     CONTEXTUAL,
     NO_ISSUE,
     SOURCE,
+    _parser,
     audit_database,
     discover_runtime_database_methods,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_default_project_root_tracks_module_relocation() -> None:
+    assert _parser().parse_args(["army.db"]).project_root == ROOT
 
 
 def _runtime_database(

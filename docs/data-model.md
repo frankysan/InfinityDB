@@ -3193,7 +3193,7 @@ in one pinned snapshot does not justify permanently excluding their semantics.
 
 ### Source-field occupancy and publication limits
 
-`tools/audit_source_presentation.py` assigns a presentation/scope policy to
+`tools/data/audit_source_presentation.py` assigns a presentation/scope policy to
 every normalized source field, while its paired-raw-database inspection checks
 whether potential gaps actually contain values. The 2026-10-15 pinned
 Army-source assessment covered **70 source tables and 441 fields**. Of these,
@@ -4251,8 +4251,8 @@ The HTTP/browser layer may change presentation without changing these semantic o
 Current semantic contracts are executable through focused audit tools rather than copied as
 historical inventories into this document. Important examples include:
 
-- `tools/audit_database_separation.py` — application/raw table boundary;
-- `tools/audit_runtime_database_surface.py` — runtime repository access boundary;
+- `tools/data/audit_database_separation.py` — application/raw table boundary;
+- `tools/data/audit_runtime_database_surface.py` — runtime repository access boundary;
 - `tools/data/audit_unit_semantics.py` — logical Unit/source semantics;
 - `tools/data/audit_profile_semantics.py` and `tools/data/audit_loadout_semantics.py` — profile/loadout payload
   boundaries;
@@ -4260,7 +4260,7 @@ historical inventories into this document. Important examples include:
 - `tools/data/audit_peripheral_semantics.py` — Peripheral mappings/access pools;
 - `tools/data/audit_relationship_semantics.py` — source/application relationship interpretation;
 - `tools/data/audit_fireteam_semantics.py` — Fireteam chart semantics;
-- `tools/audit_source_presentation.py` — source-to-player-presentation coverage;
+- `tools/data/audit_source_presentation.py` — source-to-player-presentation coverage;
 - `tools/data/audit_semantic_deduplication.py` — canonicalization evidence;
 - `tools/audit_enrichment_coverage.py` and `tools/audit_rules_interactions.py` — rules/reference
   coverage and interaction review; and

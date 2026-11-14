@@ -484,7 +484,7 @@ def run_stage(
     if stage.name == "rules":
         if source_occupancy_gate:
             commands.append((
-                sys.executable, "-m", "tools.audit_source_presentation",
+                sys.executable, "-m", "tools.data.audit_source_presentation",
                 "data/generated/army.db", "--require-no-occupied-gaps",
             ))
         commands.append((
