@@ -293,9 +293,11 @@ assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual
 database argument or `--require-raw`. The existing individual Army/raw health
 command remains available. The [data model](../docs/data-model.md#shared-metadata-and-integrity)
-owns the embedded build-provenance fields. The P2.6 filename, default
-selection and shared serving-directory contract are implemented; remaining
-cleanup and integration acceptance are in the [restructuring plan](../docs/restructuring-plan.md).
+owns the embedded build-provenance fields.
+The P2.6 filename, default selection and shared serving-directory contract
+are implemented. The [workspace cleanup plan](../docs/tooling-and-local-path-cleanup-plan.md)
+owns subsequent path hygiene, and [release guidance](../docs/releasing.md)
+owns future integration and release acceptance.
 
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
 source control so machine-local snapshot state does not obscure code changes.

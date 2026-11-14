@@ -156,9 +156,9 @@ Version **1.0.1** delivered improved scenario maps, reference-page spacing,
 version-specific release notes and safer local-build/deployment workflows.
 Its Rules database embeds reviewed deployed objects while retaining the reference baseline.
 The 1.1.0 restructuring development milestone is complete; the
-[backlog](docs/TODO.md) tracks other unfinished work and the
-[historical restructuring record](docs/restructuring-plan.md) retains
-migration evidence. Version **1.1.0** has not been released.
+[backlog](docs/TODO.md) tracks unfinished work, while the
+[hosted acceptance record](docs/testing.md#p63--hosted-source-acceptance-and-restructuring-closeout-2026-11-12)
+preserves the milestone's exact-SHA evidence. Version **1.1.0** has not been released.
 
 ## Requirements and setup
 

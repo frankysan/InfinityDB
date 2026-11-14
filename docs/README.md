@@ -59,7 +59,7 @@ ASCII art, keeping labels readable in both source and rendered form.
 
 - [tooling-and-local-path-cleanup-plan.md](tooling-and-local-path-cleanup-plan.md) —
   ongoing post-v1.1.0 closeout. R1–R6 local source/path cutovers and L4
-  tool grouping are complete; L5 document retirement, proportionate L6
+  tool grouping are complete; L5 bounded retirements, proportionate L6
   output conventions and L7 acceptance remain open. The early L0/L1
   checkpoints in the plan are **historical**, not renewed prerequisites
   for completed work. Current path and lifecycle policy is owned by
@@ -67,14 +67,6 @@ ASCII art, keeping labels readable in both source and rendered form.
   and [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective).
   The [backlog](TODO.md) lists only remaining actions; private-source
   deletion, release and deployment remain separately scoped.
-
-## Completed strategic migrations
-
-- [restructuring-plan.md](restructuring-plan.md) — historical P0–P6
-  simplification and acceptance record, completed in development on
-  2026-11-12. It does not define current workflows or open work.
-  Consult the canonical owners above and [active backlog](TODO.md)
-  rather than following superseded historical commands.
 
 ## Maintained evidence and research
 

@@ -552,8 +552,8 @@ Do not report Ruff/Pyright as run when those tools are unavailable in the active
 
 ### P1 migration semantic baseline
 
-The [P1.3 snapshot-pinned baseline](restructuring-plan.md#p13--snapshot-pinned-runtime-and-browser-route-baseline-2026-11-09)
-is a focused, offline 41-route comparison for Army/Rules database restructuring.
+The snapshot-pinned semantic baseline established during P1.3 is a focused,
+offline 41-route comparison for Army/Rules database restructuring.
 Use `python -m tools.runtime_semantic_baseline --check --identical-artifacts`
 for the current tracked DBs, or specify `--army-db` and `--rules-db`
 without `--identical-artifacts` to compare a rebuilt database set.
@@ -2179,9 +2179,14 @@ required hosted workflows:
 This supersedes the prior local Windows test failure as the integrated
 development acceptance decision, without changing that historical
 failed test receipt. The focused fixes and their separate green
-regressions are recorded immediately above. P6.4's file counts
-and observed individual timings are in the
-[historical restructuring record](restructuring-plan.md#p64--structural-measurement-closeout-2026-11-12).
+regressions are recorded immediately above. The dated P6.4 measurements
+at the 2026-11-12 milestone were **146 to 123** tracked Python modules
+under `tools/` (23 fewer), with seven shell scripts, five workflows and
+two installed CLIs unchanged. The serving contract changed from four
+required files (two SQLite databases plus JSON sidecars) to three SQLite
+databases. Observed runs took 46.48 seconds for a complete pinned rebuild,
+58.77 seconds for Docker/41-route acceptance, and 1184.07 seconds for
+full Windows tests. No speedup is claimed without a comparable baseline.
 The developer-facing architectural and operational contracts are
 maintained in [architecture](architecture.md), [data model](data-model.md),
 [data lifecycle](../data/README.md), [CI](ci.md) and [release process](releasing.md).
@@ -2195,8 +2200,7 @@ post-deployment checks require their own explicit approval.
 change, run the relevant focused checks, review/deliver the diff, and report
 actual results. Tests may be designed, written and executed during the same
 implementation pass. Choose checks by actual behavior and risk, not by a
-per-edit validation quota. This is the canonical short development lifecycle;
-see the [restructuring decision](restructuring-plan.md#p02--proposed-normal-task-lifecycle-2026-11-09).
+per-edit validation quota. This is the canonical short development lifecycle.
 
 - **Ordinary changes:** run appropriate new or existing focused regressions
   plus lint/type/docs/data checks when relevant. For documentation-only edits,

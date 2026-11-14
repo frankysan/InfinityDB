@@ -4,9 +4,10 @@
 
 **Status (2026-11-14):** R1–R6 source/path cutovers and L4 maintained-tool
 grouping are complete on `dev/tooling-workspace-cleanup`. L5 has completed
-several bounded retirements but its documentation lifecycle review is not
-closed. L6 output hygiene/enforcement and L7 integrated acceptance remain
-open; do not treat them as prerequisites for unrelated development.
+bounded retirements, including completed-plan documentation retirement;
+further one-use investigations remain. L6 output hygiene/enforcement and
+L7 integrated acceptance remain open; do not treat them as prerequisites
+for unrelated development.
 Prospective P1–P5 conventions were accepted on 2026-11-13. Older
 chronological checkpoints below document what was pending *then*, not
 new approvals or blockers for work already completed.
@@ -408,6 +409,16 @@ the 35-record pilot and scoped disposition contracts in
 `docs/v1.0-source-coverage-audit.md`. The deleted plan's optional
 future methodology remains available in Git history, not as a second
 live implementation plan.
+
+**L5 P0–P6 completed-plan retirement (2026-11-14):** Retired
+`docs/restructuring-plan.md` (3,709 lines) to Git history following P6
+development acceptance. Its P6.4 dated counts and observed timings now
+live beside exact-SHA acceptance in `docs/testing.md`; the architecture,
+data lifecycle, current workflow, release policy and remaining tasks stay
+with their canonical owners. Reconciled all README, data-guide, testing
+and documentation-index links. The question-level FAQ inventory, 1.0
+source-coverage/REA audits and their immutable source/finding IDs remain
+tracked frozen evidence; none was retired by version or age alone.
 
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
@@ -5678,10 +5689,10 @@ reports, but it does legitimately contain reviewed, source-pinned evidence.
   and accepted test/route evidence that cannot safely be replaced by a
   generic release summary. Keep their historical-status labels, not
   duplicate live work in them.
-- **Completed plan retained pending bounded disposition:**
-  `restructuring-plan.md` is P0–P6 historical implementation/acceptance
-  evidence, not a current runbook; it has independent links and recorded
-  decisions. `v1.0-coverage-workflow-plan.md` is a **specific tracked
+- **Completed plans pending disposition at this checkpoint:**
+  `restructuring-plan.md` then held P0–P6 historical evidence and links;
+  these were reconciled and the plan retired on 2026-11-14.
+  `v1.0-coverage-workflow-plan.md` was a **specific tracked
   retirement candidate after L1 approval**: V1S-082's release scope is
   owned by `releasing.md`, optional future source-first work by
   `TODO.md`, the selected 35-record cohort and four clause-scoped reviews

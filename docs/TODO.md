@@ -30,9 +30,9 @@ when all contained work shares the same owner.
   ([implementation record](tooling-and-local-path-cleanup-plan.md)).
   R1–R6 source/path cutovers and L4 tool grouping are complete; do not
   reopen their historical approval gates.
-  - [ ] **L5:** Reconcile remaining completed plans, reports and one-use
-    investigations against current consumers and canonical source evidence.
-    Retire superseded tracked narratives or code; keep unique, open findings.
+  - [ ] **L5:** Retire remaining genuinely one-use investigations and
+    superseded reports after consumer reconciliation. The completed P0–P6
+    plan is retired; retain unique source-pinned evidence and open findings.
   - [ ] **L6:** Finish proportionate report naming/non-overwrite defaults and
     address only path-policy violations with a demonstrated maintenance cost.
     Keep ignored-path inventory opt-in; do not add mandatory tooling solely
