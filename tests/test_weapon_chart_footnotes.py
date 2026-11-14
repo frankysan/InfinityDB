@@ -239,6 +239,107 @@ for (const [slug, item] of Object.entries(payloads)) {
     assert result.returncode == 0, result.stderr
 
 
+@pytest.mark.parametrize(("slug", "ammunition_id"), [
+    ("blitzen", "em"),
+    ("smoke-grenades", "smoke"),
+    ("e-m-grenades", "em"),
+    ("eclipse-grenades", "eclipse"),
+])
+def test_more_reviewed_chart_footnotes_keep_exact_ammunition_owner(
+    app: Callable, slug: str, ammunition_id: str,
+) -> None:
+    reviews = json.loads(
+        (ROOT / "data/curated/weapon-shared-effect-reviews.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    review = next(row for row in reviews["reviews"] if row["slug"] == slug)
+    assert review["chartPage"] == 178
+    assert "[**]" in review["reason"]
+    status, _headers, body = _request(app, f"/api/weapons/{slug}")
+    assert status == "200 OK"
+    payload = json.loads(body)
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert not profile.get("mode")
+    published_ammunition = {
+        part.get("public_reference", {}).get("id")
+        for part in profile.get("ammunition_parts", [])
+    }
+    published_ammunition.update(
+        reference.get("public_reference", {}).get("id")
+        for reference in profile.get("rule_references", [])
+        if reference.get("kind") == "ammunition"
+    )
+    assert ammunition_id in published_ammunition
+
+
+def test_chest_mine_cc_footnote_is_mode_scoped_to_reviewed_chart_cell(
+    app: Callable,
+) -> None:
+    review = json.loads(
+        (ROOT / "config/validation/weapon-trait-source-review.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert "[*]" in review["verifiedSourceCells"]["181:CHEST MINES (CC Mode)"]
+    status, _headers, body = _request(app, "/api/weapons/chest-mine")
+    assert status == "200 OK"
+    payload = json.loads(body)
+    assert {profile["mode"] for profile in payload["profiles"]} == {
+        "BS Mode", "CC Mode",
+    }
+    assert "weapon:chest-mine" in {rule["id"] for rule in payload["rules"]}
+    assert "weapon:mines" not in {rule["id"] for rule in payload["rules"]}
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node.js not installed")
+def test_extra_reviewed_targets_are_routable_in_actual_api(app: Callable) -> None:
+    payloads = {}
+    for slug in (
+        "blitzen", "smoke-grenades", "e-m-grenades", "eclipse-grenades", "chest-mine",
+    ):
+        status, _headers, body = _request(app, f"/api/weapons/{slug}")
+        assert status == "200 OK"
+        payloads[slug] = json.loads(body)
+    script = """
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const source = readFileSync('./src/infinity_db/web/static/weapon-footnotes.js');
+const {weaponFootnotesForProfile} = await import(
+  'data:text/javascript;base64,' + source.toString('base64')
+);
+const payloads = JSON.parse(readFileSync(0, 'utf8'));
+const targets = {
+  blitzen: '/ammunition/em',
+  'smoke-grenades': '/ammunition/smoke',
+  'e-m-grenades': '/ammunition/em',
+  'eclipse-grenades': '/ammunition/eclipse',
+  'chest-mine': '#rule-weapon-chest-mine',
+};
+for (const [slug, item] of Object.entries(payloads)) {
+  const matched = [];
+  for (const profile of item.profiles) {
+    const rows = weaponFootnotesForProfile(profile, item.rules, slug);
+    matched.push(...rows.filter(row => row.source.includes('N5.3 chart')));
+    if (slug === 'chest-mine' && profile.mode === 'BS Mode') {
+      assert.equal(matched.length, 0);
+    }
+  }
+  assert.equal(matched.length, 1, slug);
+  assert.equal(matched[0].marker, slug === 'chest-mine' ? '[*]' : '[**]');
+  assert.equal(matched[0].target?.href, targets[slug], slug);
+}
+"""
+    result = subprocess.run(
+        ["node", "--input-type=module", "--eval", script],
+        input=json.dumps(payloads), cwd=ROOT, capture_output=True, text=True,
+        check=False, timeout=25,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+
 def test_weapon_profile_page_separates_source_markers_from_traits() -> None:
     page = (ROOT / "src/infinity_db/web/static/catalog-detail.js").read_text(
         encoding="utf-8"

@@ -80,12 +80,16 @@ publication/row/mode identifies the exact rule and that target is routable
 from the published API; otherwise show the legend category and leave the
 exact target unverified.
 
-The currently reviewed chart subset covers seven named Mines on N5.3 p. 181
-and Sepsitor Plus on p. 187. Show Army and PDF markers with their source
-labels if they disagree or one omits the marker (SRC-013/014). Split
-combined source labels such as `NON-LETHAL [**]` for display, keeping
-their original notation in API data and Developer Mode. Do not infer
-missing gameplay Traits, rule owners or agreement between publications.
+The reviewed chart subset covers seven named Mines (N5.3 p. 181),
+Sepsitor Plus (p. 187), Blitzen and Smoke/E/M/Eclipse Grenades (p. 178),
+and **Chest Mine CC Mode only** (p. 181). Do not apply the CC mapping to
+Chest Mine's BS Mode, whose Army marker remains independently visible.
+Deactivator's p. 186 Skills/Equipment marker belongs to an Equipment
+presentation decision, not an inferred Weapon rule. Show Army and PDF
+markers with their source labels if they disagree or one omits the marker
+(SRC-013/014). Split combined labels such as `NON-LETHAL [**]` for
+display, keeping original source notation in API data and Developer Mode.
+Do not infer missing gameplay Traits or agreement between publications.
 
 **Glossary term previews.** Where curated rules prose names a reviewed Visibility Zone
 variant, use a typed `term:` link to its Game term definition. The shared inline

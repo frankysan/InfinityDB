@@ -11,8 +11,14 @@ const CATEGORIES = {
 const SOURCE_MARKERS = /\[\*{1,3}\]/g;
 
 // This small, independently reviewed chart subset is intentionally not a
-// general weapon-name heuristic. Match only the exact single-mode catalog slug.
+// general weapon-name heuristic. Match the reviewed catalog slug and exact
+// mode (a mode-less review applies only to a mode-less source profile).
 const REVIEWED_CHART = {
+  "blitzen": { marker: "[**]", page: 178, ruleId: "ammunition:em" },
+  "smoke-grenades": { marker: "[**]", page: 178, ruleId: "ammunition:smoke" },
+  "e-m-grenades": { marker: "[**]", page: 178, ruleId: "ammunition:em" },
+  "eclipse-grenades": { marker: "[**]", page: 178, ruleId: "ammunition:eclipse" },
+  "chest-mine": { marker: "[*]", page: 181, mode: "CC Mode", ruleId: "weapon:chest-mine" },
   "ap-mine": { marker: "[*]", page: 181, ruleId: "weapon:mines" },
   "e-m-mine": { marker: "[**]", page: 181, ruleId: "ammunition:em" },
   "monofilament-mine": { marker: "[*]", page: 181, ruleId: "weapon:mines" },
@@ -93,7 +99,9 @@ function reviewedTarget(review, profile, weaponRules) {
 }
 
 export function weaponFootnotesForProfile(profile, weaponRules = [], weaponSlug = null) {
-  const chart = profile.mode ? null : REVIEWED_CHART[weaponSlug];
+  const review = REVIEWED_CHART[weaponSlug];
+  const chart = review && (review.mode
+    ? profile.mode === review.mode : !profile.mode) ? review : null;
   const chartTarget = reviewedTarget(chart, profile, weaponRules);
   const seen = new Set();
   const army = (profile.traits || [])
