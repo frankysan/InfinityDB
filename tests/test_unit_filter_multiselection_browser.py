@@ -78,6 +78,17 @@ def test_unit_multiselect_url_state_keyboard_and_removal(
         control = page.locator(".unit-multi-select").first
         control.locator(".unit-multi-option").first.wait_for(state="attached")
         assert page.locator(".unit-multi-select").count() == 6
+        assert page.locator(".advanced-filter-row > .field > select").evaluate_all(
+            "(selects) => selects.map((select) => select.id)"
+        ) == [
+            "skill-filter",
+            "equipment-filter",
+            "weapon-filter",
+            "troop-type-filter",
+            "classification-filter",
+            "characteristic-filter",
+            "specialist-filter",
+        ]
         assert page.locator("#skill-filter").is_hidden()
 
         if page.locator(".advanced-filters").get_attribute("open") is None:
