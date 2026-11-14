@@ -130,3 +130,41 @@ def test_unit_multiselect_url_state_keyboard_and_removal(
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
     finally:
         page.close()
+
+def test_unit_multiselect_legacy_invalid_and_empty_links(
+    app: Any, origin: str, browser: Any,
+) -> None:
+    page = browser.new_page(viewport={"width": 1024, "height": 768})
+    route_browser_page(page, app, origin)
+    errors: list[str] = []
+    page.on("pageerror", lambda exc: errors.append(str(exc)))
+    try:
+        catalog = page.request.get(f"{origin}/api/skills").json()["items"]
+        legacy_id = catalog[0]["id"]
+        legacy_slug = catalog[0]["slug"]
+
+        # Numeric and slug legacy query strings continue working after reload.
+        for identifier in (str(legacy_id), legacy_slug):
+            page.goto(f"{origin}/units?skill_id={identifier}", wait_until="domcontentloaded")
+            page.locator(".unit-multi-chip").first.wait_for(state="attached")
+            assert page.locator(".unit-multi-chip").count() == 1
+            page.reload(wait_until="domcontentloaded")
+            page.locator(".unit-multi-chip").first.wait_for(state="attached")
+            assert page.locator(".unit-multi-chip").count() == 1
+
+        # A malformed legacy selection is ignored rather than sent to the API.
+        page.goto(f"{origin}/units?skill_id=aerial,,berserk", wait_until="domcontentloaded")
+        page.locator(".unit-multi-option").first.wait_for(state="attached")
+        assert page.locator(".unit-multi-chip").count() == 0
+
+        # Syntactically valid but unknown slugs fail closed to empty results.
+        page.goto(
+            f"{origin}/units?skill_id=does-not-exist,also-missing",
+            wait_until="domcontentloaded",
+        )
+        page.locator("#empty-state").wait_for(state="visible")
+        assert page.locator(".unit-multi-chip").count() == 2
+        assert not errors, errors
+    finally:
+        page.close()
+

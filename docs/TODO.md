@@ -37,7 +37,7 @@ the v1.1.0 release candidate. Implementation of optional extensions requires
 an explicit benefit/cost decision; fixes, documentation, validation and the
 existing release checklist still apply.
 
-- [ ] **Web backend + Web frontend — multi-selection (highest priority):**
+- [x] **Web backend + Web frontend — multi-selection (highest priority):**
   Support multiple simultaneous selections in applicable Unit Explorer
   categorical filters (Skills, Equipment, Weapons, Troop Type,
   Classification and Characteristics), without changing unrelated
@@ -57,11 +57,13 @@ existing release checklist still apply.
     multi-select controls with clear selected-state feedback, individual
     removal, reset, keyboard and touch support; round-trip selections
     through share-state URLs, Back/Forward and persisted view state.
-  - [ ] **Focused acceptance:** Cover same-category and cross-category
+  - [x] **Focused acceptance:** Cover same-category and cross-category
     combinations, Army/availability context, incompatible loadouts,
     invalid/legacy URLs, empty results and narrow-screen interaction.
-    Expand synthetic cross-profile/loadout cases; browser checks already
-    cover keyboard, touch, selection removal, sharing and Back navigation.
+    Synthetic SQL fixture covers disjoint Army/group/loadout matches, AVA
+    and Points; published data checks optional availability and view modes.
+    Chromium checks legacy/invalid URLs, empty results, keyboard, touch,
+    sharing and Back navigation at desktop and narrow widths.
 
 - [ ] **Web backend + Web frontend — contextual usage counts:** Show distinct
   logical Unit counts beside Skills, Equipment and Weapons options in the
