@@ -14,7 +14,7 @@ import pytest
 
 from infinity_db.curated import load_curated_directory, load_curated_document
 from infinity_db.rules_database import RulesDatabase, export_rules_database
-from tools.audit_core_scenario_objects import (
+from tools.data.audit_core_scenario_objects import (
     ARMY,
     CURATED,
     RULES,

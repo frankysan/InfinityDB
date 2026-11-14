@@ -14,6 +14,7 @@ from .army_overview_copy import (
     ARMY_OVERVIEW_COPY_FORMAT_VERSION,
     parse_army_overview_copy,
 )
+from .database.normalized_source import verified_army_export_generation
 from .database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
@@ -160,16 +161,15 @@ def read_army_reference_data(
 
 
 def publish_army_reference_data(
-    army: Path, raw: Path, overview_source: Path, legacy_source: Path,
+    army: Path, raw: Path | None, overview_source: Path, legacy_source: Path,
+    *, normalized: Path | None = None,
 ) -> None:
-    """Extend the disposable matched v29 pair with both authored Army datasets."""
+    """Publish v30 from an explicitly verified raw or normalized Army source."""
     overview_bytes, legacy_bytes = overview_source.read_bytes(), legacy_source.read_bytes()
     overview_document, legacy_document = json.loads(overview_bytes), json.loads(legacy_bytes)
     summaries = parse_army_overview_copy(overview_document)
     legacy = parse_legacy_armies(legacy_document)
-    generation = validate_database_pair(army, raw_path=raw)
-    if generation is None:
-        raise ValueError("Army reference publication requires a paired Army source")
+    generation = verified_army_export_generation(army, raw, normalized)
     with closing(sqlite3.connect(army)) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
         if connection.execute("PRAGMA user_version").fetchone()[0] != PREVIOUS_SCHEMA_VERSION:
@@ -253,6 +253,8 @@ def publish_army_reference_data(
             connection.execute(f"PRAGMA user_version={ARMY_SCHEMA_VERSION}")
         vacuum_deterministic_sqlite(connection)
     normalize_sqlite_header(army)
+    if raw is None:
+        return
     with closing(sqlite3.connect(raw)) as connection:
         if connection.execute("PRAGMA user_version").fetchone()[0] != PREVIOUS_SCHEMA_VERSION:
             raise ValueError("Army reference raw export requires Army v29")

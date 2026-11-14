@@ -17,7 +17,6 @@ from infinity_db.web import create_app
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RULES = ROOT / "data/generated/rules_n5.db"
-SOURCE = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 SOURCE_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 
 # Pinned Command Module mode and restriction evidence, not an executable engine.
@@ -49,12 +48,12 @@ COMMAND_CLAUSES = {
 }
 
 
-def test_n5_command_resource_and_all_three_modes_are_pinned_source_obligations() -> None:
-    if not SOURCE.is_file():
-        pytest.skip("Pinned N5.3 English source PDF unavailable")
+def test_n5_command_resource_and_all_three_modes_are_pinned_source_obligations(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pymupdf = pytest.importorskip("pymupdf")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == SOURCE_SHA256
-    with pymupdf.open(SOURCE) as pdf:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == SOURCE_SHA256
+    with pymupdf.open(pinned_n53_core_pdf) as pdf:
         for page, clauses in COMMAND_CLAUSES.items():
             text = " ".join(pdf[page - 1].get_text().split()).casefold()
             for clause in clauses:

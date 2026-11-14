@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -17,6 +19,16 @@ from infinity_db.deployment_provenance import (
 from tools.verify_deployment_assets import DeploymentAssetError, verify_deployment_assets
 
 SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>'
+
+
+def test_direct_deployment_verifier_imports_moved_weapon_check() -> None:
+    root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [sys.executable, str(root / "tools/verify_deployment_assets.py"), "--help"],
+        cwd=root, capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--skip-svg" in result.stdout
 
 
 def _sha256(path: Path) -> str:

@@ -14,12 +14,12 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.trait_wiki_references import load_trait_wiki_references
 from infinity_db.web import create_app
-from tools.audit_trait_wiki_anchors import audit_html
-from tools.audit_trait_wiki_anchors import main as audit_anchors_main
-from tools.verify_ammunition_browser import WIDTHS
-from tools.verify_ammunition_browser import verify as verify_catalog_browser
-from tools.verify_trait_wiki_browser import _browser_html, _validate_trait_page_response
-from tools.verify_traits_catalog_browser import source_traits
+from tools.browser.verify_ammunition_browser import WIDTHS
+from tools.browser.verify_ammunition_browser import verify as verify_catalog_browser
+from tools.browser.verify_trait_wiki_browser import _browser_html, _validate_trait_page_response
+from tools.browser.verify_traits_catalog_browser import source_traits
+from tools.research.audit_trait_wiki_anchors import audit_html
+from tools.research.audit_trait_wiki_anchors import main as audit_anchors_main
 
 
 def _document(url: str, *, name: str = "Non-Lethal") -> dict:
@@ -242,7 +242,7 @@ def test_unmapped_trait_candidates_use_exact_html_ids_without_guessing() -> None
 def test_trait_wiki_anchor_audit_fails_closed_with_json_report(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    from tools import audit_trait_wiki_anchors as audit
+    from tools.research import audit_trait_wiki_anchors as audit
 
     html_path = tmp_path / "traits.html"
     output = tmp_path / "anchors.json"
@@ -268,7 +268,7 @@ def test_trait_wiki_anchor_cli_inventories_unmapped_without_publishing(
     import hashlib
 
     from infinity_db import curated
-    from tools import audit_trait_wiki_anchors as audit
+    from tools.research import audit_trait_wiki_anchors as audit
 
     html = '<h3 id="Boost">Boost</h3><h3 id="ARM_.3D_0">ARM = 0</h3>'
     path = tmp_path / "wiki.html"

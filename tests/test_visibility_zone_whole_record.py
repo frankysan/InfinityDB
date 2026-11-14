@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Callable, Mapping
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -24,8 +25,6 @@ MANIFEST = ROOT / "config/validation/visibility-zone-whole-record-v1.json"
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RULES = ROOT / "data/generated/rules_n5.db"
 ARMY = ROOT / "data/generated/army.db"
-EN = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-ES = ROOT / "data/pdf/rules/n5-rules-v5.3-es.pdf"
 PINS = {
     "english": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
     "spanish": "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f",
@@ -251,13 +250,21 @@ def test_five_visibility_zone_full_term_accepted_facts_and_source_identity() -> 
         # exact Chromium test named in the acceptance manifest.
 
 
-def test_five_visibility_zone_every_operative_source_clause_is_pinned_bilingually() -> None:
+def test_five_visibility_zone_every_operative_source_clause_is_pinned_bilingually(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+) -> None:
     _check_review(_review())
-    if not EN.is_file() or not ES.is_file():
-        pytest.skip("Pinned English and Spanish N5.3 sources unavailable")
+    labels = {
+        "english": "data/pdf/rules/n5-rules-v5.3-en.pdf",
+        "spanish": "data/pdf/rules/n5-rules-v5.3-es.pdf",
+    }
+    sources = pinned_pdf_sources({
+        label: PINS[language] for language, label in labels.items()
+    })
     pymupdf = pytest.importorskip("pymupdf")
     texts = []
-    for language, path, page in (("english", EN, 144), ("spanish", ES, 148)):
+    for language, page in (("english", 144), ("spanish", 148)):
+        path = sources[labels[language]]
         assert hashlib.sha256(path.read_bytes()).hexdigest() == PINS[language]
         with pymupdf.open(path) as pdf:
             texts.append(" ".join(pdf[page - 1].get_text().split()).casefold())

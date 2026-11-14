@@ -5,23 +5,27 @@ from __future__ import annotations
 import importlib.util
 import os
 import sqlite3
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 
 import pytest
 
-from tools.browser_test_capacity import (
+from tools.testing.browser_test_capacity import (
     browser_lane_groups,
     browser_slot,
     scenario_faq_split_lane,
 )
-from tools.browser_test_metrics import POOLED_BROWSER_MODULES, ChromiumLanePool
-from tools.test_sections import load_test_sections, section_for_module
+from tools.testing.browser_test_metrics import POOLED_BROWSER_MODULES, ChromiumLanePool
+from tools.testing.test_sections import load_test_sections, section_for_module
 
-pytest_plugins = ("tools.pytest_startup_profile",)
+pytest_plugins = ("tools.testing.pytest_startup_profile",)
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--reference-pdf-layout", choices=("legacy", "local"), default="local",
+        help="Explicit PDF layout for selected pinned source tests; never search a fallback.",
+    )
     parser.addoption(
         "--browser-lanes",
         action="store_true",
@@ -148,6 +152,66 @@ def pooled_chromium_browser(
 
 
 @pytest.fixture(scope="module")
+def reference_pdf_layout(request: pytest.FixtureRequest) -> str:
+    """Select the local PDF copies by default for pinned-source tests."""
+    return str(request.config.getoption("--reference-pdf-layout"))
+
+
+@pytest.fixture(scope="module")
+def pinned_n53_core_pdf(reference_pdf_layout: str) -> Path:
+    """Select exactly one pinned N5.3 Core PDF for source-only acceptance tests."""
+    from tools.research.source_paths import pinned_pdf_path
+
+    label = "data/pdf/rules/n5-rules-v5.3-en.pdf"
+    sha256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+    path = pinned_pdf_path(
+        Path(__file__).resolve().parents[1], label, sha256,
+        layout=reference_pdf_layout, missing_ok=True,
+    )
+    if path is None:
+        pytest.skip(f"Pinned N5.3 Core PDF unavailable in {reference_pdf_layout} layout")
+    return path
+
+
+def _verified_pdf_sources(
+    root: Path, sources: Mapping[str, str], *, layout: str,
+) -> tuple[dict[str, Path], tuple[str, ...]]:
+    """Validate every supplied PDF before reporting any missing sibling."""
+    from tools.research.source_paths import pinned_pdf_path
+
+    selected: dict[str, Path] = {}
+    missing: list[str] = []
+    for label, pin in sources.items():
+        path = pinned_pdf_path(root, label, pin, layout=layout, missing_ok=True)
+        if path is None:
+            missing.append(label)
+        else:
+            selected[label] = path
+    return selected, tuple(missing)
+
+
+@pytest.fixture(scope="module")
+def pinned_pdf_sources(
+    reference_pdf_layout: str,
+) -> Callable[[Mapping[str, str]], dict[str, Path]]:
+    """Test-only exact-version PDF bindings, with no cross-layout fallback."""
+    root = Path(__file__).resolve().parents[1]
+
+    def select(sources: Mapping[str, str]) -> dict[str, Path]:
+        selected, missing = _verified_pdf_sources(
+            root, sources, layout=reference_pdf_layout,
+        )
+        if missing:
+            pytest.skip(
+                f"Pinned PDFs unavailable in {reference_pdf_layout} layout: "
+                + ", ".join(missing)
+            )
+        return selected
+
+    return select
+
+
+@pytest.fixture(scope="module")
 def require_source_files() -> Callable[..., None]:
     """Skip only absent local evidence; present bytes must still pass their audit."""
     def require(*paths: Path) -> None:
@@ -161,7 +225,7 @@ def require_source_files() -> Callable[..., None]:
 @pytest.fixture(scope="module")
 def requires_pinned_raw_army_archive() -> None:
     """Only source-provenance tests need the ignored full Army raw archive."""
-    path = Path(__file__).resolve().parents[1] / "data/work/build/army.raw.db"
+    path = Path(__file__).resolve().parents[1] / "local/work/build/army/army.raw.db"
     if not path.is_file() or path.stat().st_size == 0:
         pytest.skip("Full Army raw archive is ignored and unavailable in clean CI")
     # A present but malformed archive is an error, not a reason to skip.

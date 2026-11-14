@@ -18,7 +18,6 @@ from infinity_db.weapon_ammunition_references import load_ammunition_reference_m
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PDF_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 ARMY = ROOT / "data/generated/army.db"
 RULES = ROOT / "data/generated/rules_n5.db"
@@ -42,11 +41,10 @@ EXPECTED = {
 }
 
 
-def test_pinned_n53_rules_support_exact_non_comms_em_cc_case(require_source_files) -> None:
-    require_source_files(PDF)
+def test_pinned_n53_rules_support_exact_non_comms_em_cc_case(pinned_n53_core_pdf: Path) -> None:
     fitz = pytest.importorskip("pymupdf")
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PDF_SHA256
-    with fitz.open(PDF) as source:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PDF_SHA256
+    with fitz.open(pinned_n53_core_pdf) as source:
         pages = {
             number: " ".join(source[number - 1].get_text("text").casefold().split())
             for number in (64, 67, 95, 96, 177)

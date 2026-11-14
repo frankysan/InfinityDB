@@ -13,13 +13,13 @@ from infinity_db.snapshot_provenance import (
     SnapshotProvenanceError,
     write_snapshot_manifest,
 )
-from tools.export_symbol_override_lookups import (
+from tools.symbols.export_symbol_override_lookups import (
     FORMAT as OVERRIDE_FORMAT,
 )
-from tools.export_symbol_override_lookups import (
+from tools.symbols.export_symbol_override_lookups import (
     build_override_lookup_plan,
 )
-from tools.export_symbol_source_plan import (
+from tools.symbols.export_symbol_source_plan import (
     FORMAT,
     VERSION,
     build_source_plan,

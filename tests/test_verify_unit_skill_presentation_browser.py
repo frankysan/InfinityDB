@@ -16,9 +16,8 @@ from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 import pytest
 
 from infinity_db.web import create_app
-from tools.browser_wsgi_transport import route_browser_page
-from tools.verify_non_skill_army_browser import CASES, WIDTHS
-from tools.verify_unit_skill_presentation_browser import (
+from tools.browser.verify_non_skill_army_browser import CASES, WIDTHS
+from tools.browser.verify_unit_skill_presentation_browser import (
     DEFAULT_SLUGS,
     DOM_SNAPSHOT,
     OPTIONAL_FLAGS,
@@ -31,6 +30,7 @@ from tools.verify_unit_skill_presentation_browser import (
     expected_items,
     verify,
 )
+from tools.browser_wsgi_transport import route_browser_page
 
 
 def _item(

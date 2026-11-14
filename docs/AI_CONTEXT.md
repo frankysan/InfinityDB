@@ -151,7 +151,7 @@ release/audit narrative belongs in the changelog and Git history.
 - Army v31 and Rules v17 embed exact variants, reviewed Weapon citations,
   deployed objects, maintained reference facts and symbol mappings/hashes.
 - Build-only raw Army exports and intermediate JSON belong in ignored
-  `data/work/build/`. Research tools take explicit raw paths.
+  `local/work/build/`. Research tools take explicit raw paths.
 - `data/manifests/symbol-publication.json`: tracked processed-SVG build/release
   contract and Army source binding; normal serving uses embedded mappings/hashes.
 - Raw Army/wiki/PDF/source-symbol archives and detailed build state remain local.

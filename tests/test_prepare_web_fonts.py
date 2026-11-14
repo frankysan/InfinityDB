@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tools.prepare_web_fonts import FACES, LICENSES, README
+from tools.browser.prepare_web_fonts import DEFAULT_OUTPUT_ROOT, FACES, LICENSES, README
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 FONT_ROOT = PROJECT_ROOT / "src" / "infinity_db" / "web" / "static" / "fonts"
 
 
 def test_published_web_fonts_match_the_preparation_contract() -> None:
+    assert DEFAULT_OUTPUT_ROOT == FONT_ROOT
     expected = {Path(spec.destination).as_posix() for spec in FACES}
     expected.update(Path(target).as_posix() for _, target in LICENSES)
     expected.add("README.md")

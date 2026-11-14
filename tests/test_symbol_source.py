@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import symbol_source
+from tools.symbols import symbol_source
 
 
 def unit_url(name: str) -> str:

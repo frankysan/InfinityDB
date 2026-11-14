@@ -36,6 +36,15 @@ not required.
 
 ## Tooling and validation
 
+For **new** ignored project artifacts and maintained tool modules, follow
+the accepted prospective [workspace conventions](docs/architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
+and [artifact policy](data/README.md#accepted-ignored-artifact-policy-prospective).
+Maintained tools and supported source readers were categorized and
+migrated in the 2026-11-14 cleanup. Preserve current published/curated
+artifacts and explicit external staging, test scratch and service-volume
+exceptions. The [data lifecycle](data/README.md) owns current source paths;
+do not silently delete unique ignored private evidence.
+
 Use the project's virtual environment (normally
 `.venv\\Scripts\\python.exe` on Windows or `.venv/bin/python` on
 Linux/macOS), not system Python. The [testing guide](docs/testing.md)

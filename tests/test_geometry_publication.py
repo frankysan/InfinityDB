@@ -18,7 +18,6 @@ from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
 RULES = ROOT / "data/generated/rules_n5.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 NEW_IDS = {
     "rule:line-of-fire", "rule:zone-of-control", "rule:zones-and-contact",
     "rule:coherency", "rule:distances-and-measurements",
@@ -66,11 +65,11 @@ def _text(record: dict[str, Any]) -> str:
     ]])
 
 
-def test_geometry_source_clauses_match_pinned_pdf_and_wiki() -> None:
-    if not PDF.is_file():
-        pytest.skip("Pinned English N5.3 PDF unavailable")
+def test_geometry_source_clauses_match_pinned_pdf_and_wiki(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pymupdf = pytest.importorskip("pymupdf")
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == (
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == (
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
     )
     excerpts = {
@@ -86,12 +85,12 @@ def test_geometry_source_clauses_match_pinned_pdf_and_wiki() -> None:
              "cannot be used to cancel the Engaged State", "mandatory and inevitable",
              "conditions of the space", "Pieces of Equipment will be removed"),
     }
-    with pymupdf.open(PDF) as pdf:
+    with pymupdf.open(pinned_n53_core_pdf) as pdf:
         for page, phrases in excerpts.items():
             source = " ".join(pdf[page - 1].get_text().split()).casefold()
             for phrase in phrases:
                 assert phrase.casefold() in source, (page, phrase)
-    archive = ROOT / "data/wiki/WIKI-en 20260926-200832.zip"
+    archive = ROOT / "local/data/wiki/WIKI-en 20260926-200832.zip"
     if archive.is_file():
         assert hashlib.sha256(archive.read_bytes()).hexdigest() == (
             "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"

@@ -19,7 +19,6 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 ARMY = ROOT / "data/generated/army.db"
 RULES = ROOT / "data/generated/rules_n5.db"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
@@ -44,10 +43,11 @@ EXPECTED = {
 }
 
 
-def test_grenade_em_immunity_derived_from_exact_pinned_rule_and_chart(require_source_files) -> None:
-    require_source_files(PDF)
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
-    with pymupdf.open(PDF) as document:
+def test_grenade_em_immunity_derived_from_exact_pinned_rule_and_chart(
+    pinned_n53_core_pdf: Path,
+) -> None:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PIN
+    with pymupdf.open(pinned_n53_core_pdf) as document:
         pages: dict[int, str] = {}
         for number in (64, 95, 96, 179):
             raw = document[number - 1].get_text("text")

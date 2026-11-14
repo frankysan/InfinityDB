@@ -3,9 +3,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tools.benchmark_runtime import FORMAT as BENCHMARK_FORMAT
-from tools.benchmark_runtime import FORMAT_VERSION as BENCHMARK_FORMAT_VERSION
-from tools.compare_runtime_benchmarks import compare_reports, main
+from tools.performance.benchmark_runtime import FORMAT as BENCHMARK_FORMAT
+from tools.performance.benchmark_runtime import FORMAT_VERSION as BENCHMARK_FORMAT_VERSION
+from tools.performance.compare_runtime_benchmarks import compare_reports, main
 
 
 def _report(*, size: int = 1000, cold: int = 20, warm: int = 200) -> dict:

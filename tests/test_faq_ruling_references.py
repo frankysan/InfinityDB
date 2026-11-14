@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import re
+from collections.abc import Callable, Mapping
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -125,7 +126,9 @@ def _export(base: list[tuple[Path, dict]], temp: Path, records: list[dict],
         "n5-faq-v0.1-es-pdf",
     ),
 )
-def test_pinned_faq_pdf_source_identity_and_available_bytes(source_id: str) -> None:
+def test_pinned_faq_pdf_source_identity_and_available_bytes(
+    source_id: str, pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+) -> None:
     """Audit-only byte pins; a clean CI checkout cannot verify ignored PDFs."""
     root = Path(__file__).resolve().parents[1]
     inventory = json.loads(
@@ -151,10 +154,7 @@ def test_pinned_faq_pdf_source_identity_and_available_bytes(source_id: str) -> N
     assert source["pageCount"] == pin["filePages"]
     assert re.fullmatch(r"[0-9a-f]{64}", pin["sha256"])
 
-    path = root / pin["localPath"]
-    if not path.exists():
-        pytest.skip(f"Local-only source PDF unavailable: {pin['localPath']}")
-    assert path.is_file()
+    path = pinned_pdf_sources({pin["localPath"]: pin["sha256"]})[pin["localPath"]]
     with path.open("rb") as stream:
         actual_sha256 = hashlib.file_digest(stream, "sha256").hexdigest()
     assert actual_sha256 == pin["sha256"], f"FAQ source bytes changed: {source_id}"

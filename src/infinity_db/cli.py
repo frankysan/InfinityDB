@@ -40,7 +40,7 @@ from .source_anomalies import (
 
 DEFAULT_DATABASE = Path("data/generated/army.db")
 DEFAULT_RULES_DATABASE = Path("data/generated/rules_n5.db")
-DEFAULT_STANDALONE_RULES_DATABASE = Path("data/work/build/rules-standalone.db")
+DEFAULT_STANDALONE_RULES_DATABASE = Path("local/work/build/rules-standalone.db")
 DEFAULT_CURATED_RULES = Path("data/curated/rules")
 DEFAULT_PERIPHERAL_IDENTITIES = Path("data/curated/peripherals/army-identities.json")
 
@@ -60,7 +60,7 @@ def _validate_source_anomaly_baseline(source: Path) -> None:
     )
 
 
-def _export(source: Path, destination: Path) -> None:
+def _export(source: Path, destination: Path, *, include_raw: bool = False) -> None:
     with source.open(encoding="utf-8") as handle:
         normalized = json.load(handle)
     peripheral_identities = load_peripheral_identity_curated()
@@ -73,10 +73,12 @@ def _export(source: Path, destination: Path) -> None:
     if peripheral_identity_source_for_snapshot(peripheral_identities, snapshot_sha256) is None:
         peripheral_identities = None
     export_database(
-        normalized, destination, peripheral_identities=peripheral_identities
+        normalized, destination, peripheral_identities=peripheral_identities,
+        include_raw=include_raw,
     )
     print(f"Database ready: {destination}")
-    print(f"Raw archive ready: {raw_database_path(destination)}")
+    if include_raw:
+        print(f"Raw archive ready: {raw_database_path(destination)}")
 
 
 def cmd_normalize(args: argparse.Namespace) -> int:
@@ -122,14 +124,13 @@ def _build_army(
     normalized = args.output_dir / "normalized.json"
     _validate_source_anomaly_baseline(normalized)
     database = args.output_dir / "army.db"
-    _export(normalized, database)
+    _export(normalized, database, include_raw=False)
     print(f"Application database size: {database.stat().st_size:,} bytes")
-    print(f"Raw archive size: {raw_database_path(database).stat().st_size:,} bytes")
     return 0
 
 
 def cmd_export(args: argparse.Namespace) -> int:
-    _export(args.input, args.output)
+    _export(args.input, args.output, include_raw=args.with_raw)
     return 0
 
 
@@ -138,6 +139,8 @@ def cmd_database_health(args: argparse.Namespace) -> int:
     if args.database is None:
         if args.require_raw:
             raise ValueError("--require-raw applies to an Army database, not --db-dir")
+        if args.normalized is not None:
+            raise ValueError("--normalized applies to an Army database, not --db-dir")
         report = database_set_health_report(args.db_dir or DEFAULT_DATABASE_DIRECTORY)
         if args.json:
             print(json.dumps(report, indent=2, sort_keys=True))
@@ -155,13 +158,16 @@ def cmd_database_health(args: argparse.Namespace) -> int:
             print("Source-policy freshness and graphical assets: not checked")
         return 0 if report["status"] == "healthy" else 1
 
-    report = database_health_report(args.database, require_raw=args.require_raw)
+    report = database_health_report(
+        args.database, require_raw=args.require_raw, normalized=args.normalized,
+    )
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0 if report["status"] == "healthy" else 1
 
     application = report["application"]
     raw_archive = report["rawArchive"]
+    normalized_source = report.get("normalizedSource")
     print(f"Database health: {report['status']}")
     print(f"Application database: {application['path']}")
     if application["bytes"] is not None:
@@ -197,6 +203,17 @@ def cmd_database_health(args: argparse.Namespace) -> int:
             print(f"Raw archive error: {error}")
     else:
         print("Raw archive: not checked (use --require-raw to validate the sibling pair)")
+    if args.normalized is not None:
+        assert normalized_source is not None
+        print(f"Normalized source: {normalized_source['path']}")
+        print(
+            f"Normalized source verification: {normalized_source['status']} "
+            f"({normalized_source['validationMs']:.3f} ms)"
+        )
+        if generation := normalized_source.get("pairSha256"):
+            print(f"Export generation SHA-256: {generation}")
+        if error := normalized_source.get("error"):
+            print(f"Normalized source error: {error}")
     return 0 if report["status"] == "healthy" else 1
 
 def cmd_serve(args: argparse.Namespace) -> int:
@@ -283,6 +300,11 @@ def cmd_render_scenario_map(args: argparse.Namespace) -> int:
 
 
 def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
+    if args.output is not None:
+        if args.database is None:
+            raise ValueError("--output requires --database")
+        if args.output.exists() or args.output.is_symlink():
+            raise FileExistsError(f"Peripheral coverage report already exists: {args.output}")
     curated = load_peripheral_identity_curated(args.input)
     print(f"Validated Peripheral identity contract: {args.input}")
     print(
@@ -292,8 +314,6 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
         f"controller access: {curated.controller_access_count}"
     )
     if args.database is None:
-        if args.output is not None:
-            raise ValueError("--output requires --database")
         return 0
 
     report = audit_peripheral_identity_coverage(
@@ -334,9 +354,8 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
         )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(
-            json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
-        )
+        with args.output.open("x", encoding="utf-8", newline="\n") as output:
+            output.write(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
         print(f"Coverage report: {args.output}")
     if validation["status"] != "valid":
         print(
@@ -374,6 +393,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_export = sub.add_parser("export", help="Import validated normalized JSON into SQLite")
     p_export.add_argument("input", type=Path, help="normalized.json input")
     p_export.add_argument("output", type=Path, help="Explicit development output SQLite file")
+    export_mode = p_export.add_mutually_exclusive_group()
+    export_mode.add_argument(
+        "--with-raw", action="store_true",
+        help="Legacy paired export: also publish and validate the lossless raw SQLite sibling",
+    )
+    export_mode.add_argument(
+        "--no-raw", action="store_true",
+        help="Deprecated compatibility alias; application-only export is now the default",
+    )
     p_export.set_defaults(func=cmd_export)
 
     p_health = sub.add_parser(
@@ -386,10 +414,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--db-dir", type=Path,
         help="Validate one complete runtime directory without fallback",
     )
-    p_health.add_argument(
+    source_health = p_health.add_mutually_exclusive_group()
+    source_health.add_argument(
         "--require-raw",
         action="store_true",
         help="Require and validate the release-matched raw database sibling",
+    )
+    source_health.add_argument(
+        "--normalized", type=Path,
+        help="Verify full normalized.json against the selected Army export generation",
     )
     p_health.add_argument(
         "--json",
@@ -424,7 +457,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_rules.add_argument(
         "--output", type=Path,
         help=(
-            "Standalone output (default: ignored data/work/build/rules-standalone.db); "
+            "Standalone output (default: ignored local/work/build/rules-standalone.db); "
             "not a complete serving set"
         ),
     )

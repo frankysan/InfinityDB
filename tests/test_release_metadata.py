@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from tools.release_metadata import metadata_errors
+from tools.ci.release_metadata import metadata_errors
 
 README = (
     "Current release: **1.0.1** (2026-11-09). "

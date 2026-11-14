@@ -21,7 +21,6 @@ from infinity_db.web import create_app
 ROOT = Path(__file__).resolve().parents[1]
 ARMY = ROOT / "data/generated/army.db"
 RULES = ROOT / "data/generated/rules_n5.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 EXPECTED = {
     "sourceAmmunitionId": 30,
@@ -44,10 +43,9 @@ EXPECTED = {
 }
 
 
-def test_n53_ap_shock_bts_and_silent_evidence(require_source_files) -> None:
-    require_source_files(PDF)
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
-    with pymupdf.open(PDF) as pdf:
+def test_n53_ap_shock_bts_and_silent_evidence(pinned_n53_core_pdf: Path) -> None:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PIN
+    with pymupdf.open(pinned_n53_core_pdf) as pdf:
         pages = {}
         for number in (63, 65, 67, 95, 96, 175, 182):
             raw = pdf[number - 1].get_text("text")

@@ -5,7 +5,7 @@ import json
 import re
 import sqlite3
 import zipfile
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from contextlib import closing
 from copy import deepcopy
 from functools import partial
@@ -41,10 +41,10 @@ from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.web import create_app, create_app_from_database_set
-from tools.audit_1_0_reference_inputs import _WikiHeadings
-from tools.verify_ammunition_browser import WIDTHS, source_names, verify
-from tools.verify_general_rules_browser import source_rules
-from tools.verify_labels_browser import source_names as label_source_names
+from tools.browser.verify_ammunition_browser import WIDTHS, source_names, verify
+from tools.browser.verify_general_rules_browser import source_rules
+from tools.browser.verify_labels_browser import source_names as label_source_names
+from tools.research.audit_1_0_reference_inputs import _WikiHeadings
 
 
 def _reference_database(tmp_path: Path) -> Database:
@@ -291,12 +291,12 @@ def test_attributes_are_current_canonical_embedded_records(tmp_path: Path) -> No
      "643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b", "en"),
 ])
 def test_attribute_dash_and_swc_source_clauses(
-    relative: str, pin: str, language: str, require_source_files: Callable[..., None],
+    relative: str, pin: str, language: str,
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
 ) -> None:
     import pymupdf
 
-    path = Path(__file__).parents[1] / relative
-    require_source_files(path)
+    path = pinned_pdf_sources({relative: pin})[relative]
     assert hashlib.sha256(path.read_bytes()).hexdigest() == pin
     with pymupdf.open(path) as document:
         text = " ".join(str(document[8].get_text("text")).casefold().split())
@@ -373,12 +373,11 @@ def test_attribute_dash_and_swc_export_and_api(tmp_path: Path) -> None:
 ])
 def test_hackable_profile_help_pinned_source(
     relative: str, pin: str, page: int, clauses: tuple[str, ...],
-    require_source_files: Callable[..., None],
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
 ) -> None:
     import pymupdf
 
-    source = Path(__file__).parents[1] / relative
-    require_source_files(source)
+    source = pinned_pdf_sources({relative: pin})[relative]
     assert hashlib.sha256(source.read_bytes()).hexdigest() == pin
     with pymupdf.open(source) as pdf:
         text = " ".join(str(pdf[page - 1].get_text("text")).casefold().split())
@@ -954,7 +953,7 @@ def test_label_vocabulary_sources_reach_published_details() -> None:
 
 def test_label_vocabulary_archived_wiki_member_covers_published_headings() -> None:
     root = Path(__file__).parents[1]
-    wiki = root / "data/wiki/WIKI-en 20260926-200832.zip"
+    wiki = root / "local/data/wiki/WIKI-en 20260926-200832.zip"
     if not wiki.is_file():
         pytest.skip("Pinned Label Wiki archive unavailable")
     assert hashlib.sha256(wiki.read_bytes()).hexdigest() == (
@@ -1083,12 +1082,12 @@ def test_label_vocabulary_sources_keep_collection_scope_and_missing_data(
 )
 def test_v1s082_label_review_pinned_sources(
     filename: str, digest: str, page: int, clause: str,
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
 ) -> None:
     """Pin the reviewed versions and preserve the bilingual timing difference."""
     root = Path(__file__).parents[1]
-    path = root / "data/pdf/rules" / filename
-    if not path.is_file():
-        pytest.skip(f"Pinned local PDF unavailable: {filename}")
+    label = f"data/pdf/rules/{filename}"
+    path = pinned_pdf_sources({label: digest})[label]
     assert hashlib.sha256(path.read_bytes()).hexdigest() == digest
     pdf = pytest.importorskip("pymupdf")
     with pdf.open(path) as document:

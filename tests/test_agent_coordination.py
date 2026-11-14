@@ -11,8 +11,8 @@ from threading import Barrier
 
 import pytest
 
-from tools import agent_global_coordination as global_coordination
-from tools.agent_coordination import (
+from tools.dev import agent_global_coordination as global_coordination
+from tools.dev.agent_coordination import (
     CoordinationError,
     _common_dir,
     acquire_integration,
@@ -23,13 +23,13 @@ from tools.agent_coordination import (
     release,
     status,
 )
-from tools.agent_coordination import (
+from tools.dev.agent_coordination import (
     integrate_proposal as _integrate_proposal,
 )
-from tools.agent_coordination import (
+from tools.dev.agent_coordination import (
     release_integration as _release_integration,
 )
-from tools.agent_workspaces import create
+from tools.dev.agent_workspaces import create
 
 
 def integrate_proposal(root: Path, agent: str, task: str, claim_id: str, **kwargs) -> dict:
@@ -185,7 +185,7 @@ def test_separate_processes_cannot_claim_same_scope(tmp_path: Path) -> None:
     )}
     def start(workspace: Path, agent: str, task: str) -> subprocess.Popen[str]:
         return subprocess.Popen(
-            [sys.executable, "-m", "tools.agent_coordination", "claim",
+            [sys.executable, "-m", "tools.dev.agent_coordination", "claim",
              "--agent", agent, "--task", task, "--path", "src/"],
             cwd=workspace, env=env, text=True,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,

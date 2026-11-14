@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.deployed_object_reference import project_deployed_references
-from tools.audit_deployed_object_inventory import audit_inventory
+from tools.data.audit_deployed_object_inventory import audit_inventory
 
 
 @pytest.fixture(scope="module")

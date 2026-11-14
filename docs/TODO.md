@@ -22,23 +22,26 @@ when all contained work shares the same owner.
 
 ## Active development
 
-### Tooling and local workspace cleanup
+### Backlog and development workflow simplification
 
-**Project domains:** Project infrastructure, Data processing, Acquisition
+**Project domain:** Project infrastructure
 
-- [ ] **Audit and implement the next tooling/path cleanup project** according
-  to the [phased plan](tooling-and-local-path-cleanup-plan.md). Inventory
-  every maintained `tools/` module, its consumers and retirement purpose;
-  classify completed plans, reports and audits for removal, evidence
-  retention or historical renaming; classify ignored files and allowed
-  location exceptions; migrate private
-  `data/` and other non-exempt ignored artifacts to structured `local/`
-  destinations; organize retained tools by responsibility; retire completed
-  investigations; and enforce output naming/lifetime conventions.
-  Approve the migration manifest before deleting ignored source/evidence,
-  preserve three-database serving and published asset compatibility, and
-  validate Windows/Linux producer handoffs separately. This project follows
-  v1.1.0 restructuring development and is not part of its release gate.
+- [ ] **Reduce maintenance overhead in the existing Git-based task workflow,**
+  following the completed tooling and documentation cleanup
+  and [backlog retirement policy](README.md#backlog-completion-and-retirement):
+  - [ ] Improve `TODO.md` navigability: keep concise, prioritized, actionable
+    work items; link detailed plans rather than copying their contents; remove
+    stale or completed entries without losing open dependencies.
+  - [ ] Complete documentation consolidation first: retain one canonical owner
+    for current guidance, and retire, relabel or preserve completed plans,
+    reports and audits according to their actual remaining purpose.
+  - [ ] Improve existing backlog checks and agent closeout guidance to catch
+    duplicate task IDs, inconsistent parent/subtask status and unsupported
+    removal of unfinished tasks, without requiring routine manual bookkeeping.
+  **Decision:** Defer GitHub Issues/Projects adoption. Reconsider only if
+  cross-repository coordination, dependency tracking or agent task continuity
+  remains problematic after these improvements. Do not create a parallel task
+  registry or automated status synchronization in this phase.
 
 ### External source clarifications
 
@@ -274,10 +277,85 @@ when all contained work shares the same owner.
   or an in-memory hand-off that skips only the duplicate build-path pass; the
   standalone `export` command must retain full untrusted-input validation.
 
-- [ ] Evaluate artifact-level deduplication for development builds. `normalized.json` and
-  `infinity.raw.db` intentionally retain overlapping lossless source structure today; measure
-  the duplication on a controlled build, then decide whether post-export workflows need both
-  or whether one should be documented as a regenerable/transient artifact.
+- [ ] **Retire `army.raw.db` as a supported retained artifact**, and remove the
+  intermediate raw SQLite format once its independent source-audit and build
+  consumers have tested replacements. The complete runtime builder now
+  skips raw-archive generation entirely; variant usage and Army v27–v31
+  overlays use fully verified normalized source. Standalone `infinity-db export`
+  also defaults to application-only output; explicit `--with-raw` retains a
+  lossless paired export for independent audit/research consumers.
+  - [ ] Review remaining standalone raw-format contracts: paired export,
+    explicit pair-health consumers, and historical raw-only research. The
+    pinned source ZIP verification in `report_reference_baseline` now accepts
+    verified normalized input without a raw sibling. The Army/faction identity,
+    source-presentation completeness, Skill/Equipment source-variant, and
+    three semantic relationship audits also use verified normalized input;
+    source-row inspection and standalone variant candidates are migrated too.
+    `build_determinism_manifest` now defaults to **v2 rawless**
+    application-output determinism. Explicit `--legacy-paired` retains the
+    original v1 raw hash in a disposable export; existing v1 manifests remain
+    comparable with v1, but cannot be silently compared with v2. Neither
+    format requires a persistent ignored `army.raw.db`.
+    `audit_source_variant_inputs` now rejects mismatched application/raw
+    pairs, and its exact Extra-owner lookup accepts verified source when an
+    application path is supplied. Retain legacy raw-based APIs as parity
+    oracles while independent consumers remain.
+    Preserve source-only row fidelity, absence-versus-null distinctions,
+    exact occurrence/extra relationships and fail-closed provenance.
+    Army v27–v31 overlays have also moved to verified normalized input in the
+    complete builder; the legacy raw-pair publisher calls remain opt-in.
+  - [x] Make standalone `infinity-db export` application-only by default;
+    retain explicit legacy `--with-raw` (and the `--no-raw` alias), verified
+    `database-health --normalized PATH`, and a versioned v2 rawless
+    determinism manifest with explicit v1 legacy generation.
+  - [x] Make the direct Python `export_database()` default application-only
+    as well; retained legacy tests and consumers explicitly select
+    `include_raw=True` when asserting pair/archive semantics.
+  - [x] Run and diagnose manifest **v2 on Windows and Linux at the same
+    commit**. After explicit branch push, Linux fetch and exact-SHA checkout,
+    the strict comparator failed on five physical artifacts at `73da5e48`.
+    All 108 SQLite user-table digests and all 1,608 ZIP member payloads
+    match; the remaining differences are ZIP deflate bytes and SQLite
+    writer-version/layout bytes, not demonstrated source-content drift.
+    The disposable Army fixture's stale Windows CRLF bytes were separately
+    normalized, restoring parity for all generated JSON artifacts.
+  - [x] Achieve **byte-identical v2 outputs on Windows and Linux** using
+    `tools.run_pinned_determinism` and the same digest-pinned linux/amd64
+    Python 3.11.18 OCI runtime (SQLite 3.40.1, zlib 1.2.13). At
+    `a164c4b8`, both workers generated all 10 matching SHA-256 hashes;
+    the unmodified strict comparator returned exit 0. The host-native
+    five-artifact mismatch remains expected with unpinned libraries.
+  - [x] Separate GitHub Actions native platform checks from strict
+    digest-pinned determinism: retain the existing Windows/macOS/Linux
+    source-checks matrix, add Ubuntu 24.04/26.04 independent container
+    jobs using `tools.run_pinned_determinism`, and keep the existing
+    strict SHA-256 comparator and required job identity unchanged.
+    No Docker support is assumed on hosted Windows/macOS.
+  - [x] Close out hosted GitHub Actions acceptance on cleanup PR #29:
+    the pinned Ubuntu 24.04/26.04 determinism jobs and strict byte
+    comparison passed. A tracked Army/Rules database rebuild resolved
+    stale provenance; deferring a build-only normalization import then
+    restored immutable-container startup without adding private inputs.
+    At exact pushed SHA `28a8e52b`, Source checks, deployment smoke and
+    installed-wheel smoke all completed successfully. Source checks
+    includes Windows/macOS Python 3.11, Ubuntu Python 3.11/3.14 and the
+    required `Cross-platform deterministic outputs` job. Local repeatable
+    three-database builds and Docker preview (41/41 semantic routes)
+    passed. This closes the hosted acceptance gate, **not** L1 policy
+    approval, release/deployment authorization or private-data deletion.
+  - [ ] Decide when to retire the remaining *explicit* raw-only pair-health,
+    inspection and programmatic `include_raw=True` interfaces. Keep the
+    independent source-identity/research semantics and their focused tests
+    until replacements are accepted. Verify a complete three-database build,
+    full regression gate and documented commands before removing pair APIs
+    or compatibility tests.
+  - [ ] Classify the existing ignored `data/generated/army.raw.db` as
+    retirement-candidate local evidence, not a valid current pair. Preserve its
+    bytes pending the cleanup manifest's independent backup/restore and
+    deletion approval; never delete or accept a mismatched pair implicitly.
+  The [historical L0 retirement decision](https://github.com/frankysan/InfinityDB/blob/1063096f51a3050594039cba84b1515d90a4ff0b/docs/tooling-and-local-path-cleanup-plan.md#raw-archive-retirement-decision--2026-11-12)
+  records the original consumer boundaries; the still-open item above
+  remains independently tracked here.
 
 ### Army snapshot maintenance
 

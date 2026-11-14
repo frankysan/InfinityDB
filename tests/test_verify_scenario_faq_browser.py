@@ -14,12 +14,12 @@ import pytest
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.web import create_app_from_database_set
-from tools.browser_wsgi_transport import route_browser_page, wsgi_response
-from tools.verify_unit_skill_presentation_browser import (
+from tools.browser.verify_unit_skill_presentation_browser import (
     DOM_SNAPSHOT,
     _settings_script,
     assert_unit_dom,
 )
+from tools.browser_wsgi_transport import route_browser_page, wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-browser.test"

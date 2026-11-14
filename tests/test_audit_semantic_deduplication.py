@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_semantic_deduplication import (
+from tools.data.audit_semantic_deduplication import (
     REQUIRED_COLUMNS,
     SemanticDeduplicationAuditError,
     audit_database,

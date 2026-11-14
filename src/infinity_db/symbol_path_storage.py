@@ -11,6 +11,7 @@ from typing import Any
 
 from .army_reference_storage import ARMY_SCHEMA_VERSION as PREVIOUS_SCHEMA_VERSION
 from .army_reference_storage import ARMY_V30_PUBLISHED_TABLES, read_army_reference_data
+from .database.normalized_source import verified_army_export_generation
 from .database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
@@ -114,8 +115,11 @@ def read_symbol_publication(connection: sqlite3.Connection) -> dict[str, Any]:
     return result
 
 
-def publish_symbol_paths(army: Path, raw: Path, source: Path, assets: Path) -> None:
-    """Extend one disposable v30 pair after verifying source and actual SVG bytes."""
+def publish_symbol_paths(
+    army: Path, raw: Path | None, source: Path, assets: Path, *,
+    normalized: Path | None = None,
+) -> None:
+    """Publish v31 from a verified Army source and actual SVG bytes."""
     source_bytes = source.read_bytes()
     document = json.loads(source_bytes)
     projection, catalog = _projection(document)
@@ -126,7 +130,7 @@ def publish_symbol_paths(army: Path, raw: Path, source: Path, assets: Path) -> N
         path = assets.joinpath(*relative.split("/"))
         if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
             raise ValueError(f"Published symbol bytes differ or are missing: {relative}")
-    generation = validate_database_pair(army, raw_path=raw)
+    generation = verified_army_export_generation(army, raw, normalized)
     with closing(sqlite3.connect(army)) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
         if connection.execute("PRAGMA user_version").fetchone()[0] != PREVIOUS_SCHEMA_VERSION:
@@ -186,6 +190,8 @@ def publish_symbol_paths(army: Path, raw: Path, source: Path, assets: Path) -> N
             connection.execute(f"PRAGMA user_version={ARMY_SCHEMA_VERSION}")
         vacuum_deterministic_sqlite(connection)
     normalize_sqlite_header(army)
+    if raw is None:
+        return
     with closing(sqlite3.connect(raw)) as connection:
         if connection.execute("PRAGMA user_version").fetchone()[0] != PREVIOUS_SCHEMA_VERSION:
             raise ValueError("Symbol raw export requires Army v30")

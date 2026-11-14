@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from tools.release_validation_scope import ChangeScope, classify_paths, plan_validation
+from tools.ci.release_validation_scope import ChangeScope, classify_paths, plan_validation
 
 
 def test_only_documentation_or_independent_tests_can_reuse_source_evidence(
     monkeypatch,
 ) -> None:
     monkeypatch.setattr(
-        "tools.release_validation_scope.baseline_is_valid",
+        "tools.ci.release_validation_scope.baseline_is_valid",
         lambda repository, sha, token: True,
     )
     scope = plan_validation(
@@ -40,7 +40,7 @@ def test_runtime_build_ci_or_shared_test_changes_fail_closed() -> None:
 
 def test_missing_green_baseline_forces_full_validation(monkeypatch) -> None:
     monkeypatch.setattr(
-        "tools.release_validation_scope.baseline_is_valid",
+        "tools.ci.release_validation_scope.baseline_is_valid",
         lambda repository, sha, token: False,
     )
     assert plan_validation(

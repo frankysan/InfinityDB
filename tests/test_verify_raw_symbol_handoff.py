@@ -11,9 +11,9 @@ from pathlib import Path
 import pytest
 
 from infinity_db.snapshot_provenance import sha256_file, write_snapshot_manifest
-from tools.export_symbol_source_plan import FORMAT, VERSION
 from tools.snapshot_archive import create_timestamped_archive
-from tools.verify_raw_symbol_handoff import (
+from tools.symbols.export_symbol_source_plan import FORMAT, VERSION
+from tools.symbols.verify_raw_symbol_handoff import (
     REPORT_FORMAT,
     REPORT_VERSION,
     RawHandoffError,

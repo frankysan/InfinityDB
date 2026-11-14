@@ -6,7 +6,7 @@ from typing import cast
 
 from infinity_db.database import Database
 from infinity_db.database.schema import APPLICATION_ID, SCHEMA_VERSION
-from tools.benchmark_runtime import _summary, discover_cases, main
+from tools.performance.benchmark_runtime import _summary, discover_cases, main
 
 
 class FakeDatabase:

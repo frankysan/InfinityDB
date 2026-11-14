@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def load_module():
-    module_path = ROOT / "tools" / "path_sanitization.py"
+    module_path = ROOT / "tools" / "symbols" / "path_sanitization.py"
     spec = importlib.util.spec_from_file_location("path_sanitization", module_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_loadout_semantics import (
+from tools.data.audit_loadout_semantics import (
     EXPECTED_COLUMNS,
     PAYLOAD_FIELDS,
     PAYLOAD_FORMAT,
@@ -16,7 +16,7 @@ from tools.audit_loadout_semantics import (
     audit_database,
     main,
 )
-from tools.payload_audit_common import canonical_json
+from tools.data.payload_audit_common import canonical_json
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: object) -> None:

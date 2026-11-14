@@ -13,27 +13,27 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.restriction_conditions import compile_restriction_conditions
 from infinity_db.rules_database import RulesDatabase
-from tools.audit_restrictions_source_chart import (
+from tools.research.audit_restrictions_source_chart import (
     CURATED as RESTRICTIONS_CURATED,
 )
-from tools.audit_restrictions_source_chart import (
+from tools.research.audit_restrictions_source_chart import (
     MANIFEST as RESTRICTIONS_MANIFEST,
 )
-from tools.audit_restrictions_source_chart import (
+from tools.research.audit_restrictions_source_chart import (
     PUBLICATION as RESTRICTIONS_PUBLICATION,
 )
-from tools.audit_restrictions_source_chart import (
+from tools.research.audit_restrictions_source_chart import (
     audit_source_files as audit_restrictions_files,
 )
-from tools.audit_restrictions_source_chart import (
+from tools.research.audit_restrictions_source_chart import (
     main as restrictions_main,
 )
-from tools.audit_restrictions_source_chart import (
+from tools.research.audit_restrictions_source_chart import (
     project_public_restrictions,
     restrictions_audit,
     verify_published_restrictions,
 )
-from tools.audit_restrictions_source_chart import (
+from tools.research.audit_restrictions_source_chart import (
     publication_bytes as restrictions_publication_bytes,
 )
 
@@ -384,7 +384,7 @@ def test_n53_seven_non_graph_restrictions_keep_source_scoped_api_and_browser_cov
     """Test explicit v9 Restrictions without assuming tracked release schema v9."""
     from infinity_db.curated import load_curated_directory
     from infinity_db.rules_database import RulesDatabase, export_rules_database
-    from tools.audit_restrictions_source_chart import ROOT
+    from tools.research.audit_restrictions_source_chart import ROOT
 
     manifest, records = _restriction_inputs()
     report = restrictions_audit(manifest, records)
@@ -675,7 +675,7 @@ def test_restrictions_reference_has_standalone_rules_page() -> None:
     from wsgiref.util import setup_testing_defaults
 
     from infinity_db.web import create_app
-    from tools.audit_restrictions_source_chart import ROOT
+    from tools.research.audit_restrictions_source_chart import ROOT
 
     app = create_app(
         ROOT / "data/generated/army.db",
@@ -739,7 +739,7 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
 
     playwright = pytest.importorskip("playwright.sync_api")
     from infinity_db.web import create_app
-    from tools.audit_restrictions_source_chart import ROOT
+    from tools.research.audit_restrictions_source_chart import ROOT
 
     app = create_app(
         ROOT / "data/generated/army.db",

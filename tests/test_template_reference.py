@@ -8,8 +8,10 @@ from zipfile import ZipFile
 
 import pytest
 from reference_acceptance_support import (
-    PDF,
-    ROOT,
+    FAQ_LABEL,
+    FAQ_PIN,
+    PDF_LABEL,
+    PIN,
     WIKI,
     WIKI_PIN,
     api,
@@ -17,14 +19,20 @@ from reference_acceptance_support import (
     pdf_pages,
     published,
     records,
+    selected_pdf,
 )
 from test_verify_ammunition_publication_browser import browser as browser
 
 
-def test_template_conditions_match_pinned_pdf_wiki_and_faq(require_source_files) -> None:
-    faq = ROOT / "data/pdf/faq/n5-faq-v0.1-en.pdf"
-    require_source_files(PDF, WIKI, faq)
-    pages = pdf_pages((43, 44, 45, 46, 47, 49))
+def test_template_conditions_match_pinned_pdf_wiki_and_faq(
+    require_source_files, reference_pdf_layout: str,
+) -> None:
+    pdf = selected_pdf(PDF_LABEL, PIN, layout=reference_pdf_layout)
+    faq = selected_pdf(FAQ_LABEL, FAQ_PIN, layout=reference_pdf_layout)
+    if pdf is None or faq is None:
+        pytest.skip(f"Pinned Core/FAQ PDFs unavailable in {reference_pdf_layout} layout")
+    require_source_files(WIKI)
+    pages = pdf_pages((43, 44, 45, 46, 47, 49), pdf_path=pdf)
     for page, phrases in {
         43: ("main target", "automatically considered a failure", "half their width"),
         44: ("that shot is cancelled", "other shots", "can still declare aros",
@@ -44,9 +52,7 @@ def test_template_conditions_match_pinned_pdf_wiki_and_faq(require_source_files)
                                  "Impact_Template_Weapons": 3782}.items():
             assert re.search(r'"wgRevisionId"\s*:\s*' + str(revision),
                              archive.read(member).decode("utf-8"))
-    assert hashlib.sha256(faq.read_bytes()).hexdigest() == (
-        "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa"
-    )
+    assert hashlib.sha256(faq.read_bytes()).hexdigest() == FAQ_PIN
     import pymupdf
     with pymupdf.open(faq) as document:
         # File page 1 is the cover; printed FAQ page 1 is file page 2.

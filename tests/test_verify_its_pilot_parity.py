@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.curated import load_curated_document
-from tools.verify_its_pilot_parity import ROOT, SOURCE, verify_pilot
+from tools.data.verify_its_pilot_parity import ROOT, SOURCE, verify_pilot
 
 
 def test_its_pilot_matches_independent_api_and_svg_variants() -> None:

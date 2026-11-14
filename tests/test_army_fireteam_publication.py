@@ -16,7 +16,7 @@ from infinity_db.web import create_app
 from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_ZIP = ROOT / "data/raw/JSON 20260929-114335.zip"
+ARMY_ZIP = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
 ARMY_DB = ROOT / "data/generated/army.db"
 
 

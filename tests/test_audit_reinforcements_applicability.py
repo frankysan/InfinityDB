@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
 import pymupdf
@@ -13,8 +14,11 @@ import pytest
 from infinity_db.database.repository import Database
 from infinity_db.declaration_matrix import core_declaration_matrix
 from infinity_db.rules_database import RulesDatabase
-from tools.audit_1_0_reference_inputs import SourceEvidenceError
-from tools.audit_reinforcements_applicability import (
+from tools.research.audit_1_0_reference_inputs import (
+    SourceEvidenceError,
+    verify_reinforcements_inputs,
+)
+from tools.research.audit_reinforcements_applicability import (
     MANIFEST,
     ROOT,
     audit_applicability,
@@ -22,17 +26,20 @@ from tools.audit_reinforcements_applicability import (
 
 
 def test_pinned_current_references_do_not_authorize_n4_procedures_as_n5(
-    require_source_files,
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+    reference_pdf_layout: str,
 ) -> None:
-    require_source_files(*(
-        ROOT / path for path in (
-            "data/pdf/rules/reinforcement-rules-en.pdf",
-            "data/pdf/rules/reinforcement-rules-es.pdf",
-            "data/pdf/rules/n5-rules-v5.3-en.pdf",
-            "data/pdf/its/its-18-rules-v2026.09.01-en.pdf",
-        )
-    ))
-    report = audit_applicability()
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    historical = json.loads(
+        (ROOT / manifest["historicalInventory"]).read_text(encoding="utf-8")
+    )
+    sources = {
+        row["localPath"]: row["sha256"]
+        for row in (*historical["sources"], *manifest["currentReferences"])
+    }
+    assert len(sources) == 4
+    pinned_pdf_sources(sources)
+    report = audit_applicability(source_layout=reference_pdf_layout)
     assert report["currentReferencesVerified"] == 2
     assert report["historicalN4PdfsVerified"] == 2
     assert report["historicalActionsReviewed"] == ["Commlink", "Request Reinforcements"]
@@ -88,6 +95,40 @@ def test_synthetic_source_gate_never_authorizes_n5_procedures(
     assert report["currentReferencesVerified"] == 2
     assert report["historicalN4PdfsVerified"] == 2
     assert report["n5ProceduresAuthorized"] is False
+
+
+def test_explicit_pdf_layout_preserves_labels_pins_and_authority_report(synthetic_sources):
+    root, manifest = synthetic_sources
+    before = audit_applicability(manifest, root)
+    inventory = root / "config/validation/reinforcements-source-inputs.json"
+    historical_before = verify_reinforcements_inputs(inventory, root)
+    declarations = {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in root.rglob("*.json")
+    }
+    for path in (root / "data/pdf").rglob("*.pdf"):
+        target = root / "local/data/pdf" / path.relative_to(root / "data/pdf")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        # These are synthetic fixtures; private source PDFs are never migrated by tests.
+        path.rename(target)
+    after = audit_applicability(manifest, root, source_layout="local")
+    assert verify_reinforcements_inputs(
+        inventory, root, source_layout="local",
+    ) == historical_before
+    assert before == after
+    assert after["n5ProceduresAuthorized"] is False
+    assert {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in root.rglob("*.json")
+    } == declarations
+    with pytest.raises(SourceEvidenceError, match="not fully verified"):
+        audit_applicability(manifest, root)
+
+
+def test_local_pdf_layout_never_falls_back_to_existing_legacy_files(synthetic_sources):
+    root, manifest = synthetic_sources
+    with pytest.raises(SourceEvidenceError, match="not fully verified"):
+        audit_applicability(manifest, root, source_layout="local")
 
 
 @pytest.mark.parametrize("defect", [

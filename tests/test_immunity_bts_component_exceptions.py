@@ -24,7 +24,6 @@ ROOT = Path(__file__).resolve().parents[1]
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 ARMY = ROOT / "data/generated/army.db"
 RULES = ROOT / "data/generated/rules_n5.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 EXPECTED = [
     {
@@ -66,11 +65,10 @@ EXPECTED = [
 
 @pytest.mark.parametrize("index", (0, 1))
 def test_partial_bts_immunity_is_grounded_in_pinned_source_and_weapon(
-    index: int, require_source_files,
+    index: int, pinned_n53_core_pdf: Path,
 ) -> None:
-    require_source_files(PDF)
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
-    with pymupdf.open(PDF) as pdf:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PIN
+    with pymupdf.open(pinned_n53_core_pdf) as pdf:
         pages = {n: " ".join(str(pdf[n - 1].get_text("text")).casefold().split())
                  for n in (63, 64, 65, 67, 95, 96, 177, 182)}
     assert "immunity (ammunition): the ammunition listed between brackets" in pages[95]

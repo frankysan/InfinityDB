@@ -32,13 +32,13 @@ flowchart TD
     normalized["Validated normalized source model"]
     export["SQLite export"]
     runtime["army.db<br/>Canonical application/runtime data"]
-    archive["army.raw.db<br/>Lossless normalized source/audit archive"]
+    archive["Optional legacy army.raw.db<br/>Lossless audit export"]
 
     snapshot --> master
     master --> normalized
     normalized --> export
     export --> runtime
-    export --> archive
+    export -.->|explicit --with-raw| archive
 ```
 
 Curated rules data follows a separate path:
@@ -218,7 +218,7 @@ matches are not claimed to have zero possible users. The completed detailed-keyw
 reroll (N5.3 p. 121), classified in
 `config/validation/deployed-object-candidate-reviews.json` as automatic
 Equipment, not a placed battlefield Token or an independent object.
-The maintained `tools.audit_deployed_object_inventory` checks candidate
+The maintained `tools.data.audit_deployed_object_inventory` checks candidate
 decisions and reviews additional clauses in all 106 curated Weapon/Equipment
 definitions. The projection and storage tests verify the 17 published
 reviewed object identities and their approved delivery origins. All 17 have
@@ -269,7 +269,7 @@ output is not an image input. Current container checks verify the embedded
 HTTP/browser entry points. The selected snapshot's source,
 full-depth Include and reverse-use reviews and three-width object browser
 acceptance are complete; their evidence is in the
-[source audit](v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05).
+[source audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05).
 Repeat those reviews after source changes. Final frozen-input source-wide and
 release-matched acceptance remain separate from focused development checks.
 Do not describe these delivery origins or partial reverse uses as proof of
@@ -1243,7 +1243,7 @@ without an `appliesTo`, a fabricated program ID,
 or a modified published rules artifact.
 
 The read-only, exact-owner diagnostic
-`python -m tools.audit_source_variant_inputs --catalog equipment
+`python -m tools.data.audit_source_variant_inputs --catalog equipment
 --source-id 101 --owner-extra-id 344` reports this
 `occurrenceOwners` evidence alongside the ordinary
 source-signature audit. It reads the ignored pinned raw
@@ -1263,10 +1263,10 @@ Keep the two raw occurrences unresolved and do not add a
 generic Saving Roll effect without official confirmation.
 
 **Remaining source-parameter inventory (pinned Army source and current
-generated rules database):** `tools/audit_source_variant_inputs.py` produces a
+generated rules database):** `tools/data/audit_source_variant_inputs.py` produces a
 deterministic, read-only JSON inventory from `infinity.db`,
 `infinity.raw.db` and `rules.db`
-(`python -m tools.audit_source_variant_inputs`). It inspects exact
+(`python -m tools.data.audit_source_variant_inputs`). It inspects exact
 source IDs, direct profile/loadout/Unit-option relationship rows,
 ordered extra IDs/types/values, raw occurrence values and reviewed
 source-variant mappings. For targeted reviews, pass `--catalog skills`
@@ -2397,7 +2397,7 @@ profile-versus-loadout and unresolved-variant fixtures before publishing.
 
 **Project domain:** Data processing
 
-The candidate builder (`tools.build_variant_usage`) validates direct source
+The candidate builder (`tools.data.build_variant_usage`) validates direct source
 rows and typed signatures against the matched local Army/rules publication.
 `variant_usage_includes.py` also compares every retained raw Include with
 its materialized edge, preserving multiplicity, quantity, raw fields and
@@ -2439,7 +2439,7 @@ The intermediate candidate remains ignored and is not a runtime artifact.
 The reviewed public publication is separately tracked as
 `data/generated/variant-usage.json`; it is built with `--publish` from a
 matched local raw/database/source pair and checked with `--check-publication`
-before staging. See the [candidate evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
+before staging. See the [candidate evidence](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
 
 #### Rule-variant usage API
 
@@ -2537,7 +2537,7 @@ as provenance. Include traversal and Peripheral access describe context,
 verified compatible Army contexts remain source-only. Deterministic ordering,
 source-pair fingerprints, fail-closed exclusions, and the published API/
 browser contract are specified in the implemented sections above and
-[variant-source evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
+[variant-source evidence](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
 The dated V1S-062 design-only workplan is retained in Git history, not
 presented as unfinished implementation.
 
@@ -2636,7 +2636,7 @@ source-only manifest at
 `config/validation/restrictions-source-chart.json`. Its six ordered
 subjects and 14 negative conditions are projected reproducibly to
 `src/infinity_db/web/static/restrictions-reference.json` by
-`tools.audit_restrictions_source_chart`. The packaged JSON remains the tracked v10 source publication. The
+`tools.research.audit_restrictions_source_chart`. The packaged JSON remains the tracked v10 source publication. The
 browser now fetches `GET /api/restrictions/chart`: pre-v13 servers return
 that exact packaged chart, while opt-in Rules v13 servers project the
 same response from relational SQLite. Neither path reads maintained
@@ -3051,7 +3051,7 @@ required Army fingerprint without a self-referential Rules hash. Other embedded
 projections and shared build provenance are validated before replacement.
 
 The narrow `build-rules` developer command retains a standalone v10 export under
-ignored `data/work/build/rules-standalone.db`; it cannot overwrite the tracked
+ignored `local/work/build/rules-standalone.db`; it cannot overwrite the tracked
 Rules file and does not assemble a serving directory. Legacy CLI schema modes,
 checkout assembly, v10 candidate publication and Docker bundle-copy wrappers
 are retired. Current serving requires the complete schemas; low-level fixture
@@ -3193,7 +3193,7 @@ in one pinned snapshot does not justify permanently excluding their semantics.
 
 ### Source-field occupancy and publication limits
 
-`tools/audit_source_presentation.py` assigns a presentation/scope policy to
+`tools/data/audit_source_presentation.py` assigns a presentation/scope policy to
 every normalized source field, while its paired-raw-database inspection checks
 whether potential gaps actually contain values. The 2026-10-15 pinned
 Army-source assessment covered **70 source tables and 441 fields**. Of these,
@@ -4231,15 +4231,16 @@ Current build validation rejects normalized Army data without valid required met
 ## Application query model
 
 Runtime repositories query canonical/materialized application structures and compose contextual
-source detail as needed. They must not infer semantics from raw IDs or reach into `infinity.raw.db`.
+source detail as needed. They must not infer semantics from raw IDs or reach into the optional
+legacy `army.raw.db` source archive.
 
 Examples:
 
 - Unit lists operate on logical Unit identity and materialized Army availability.
 - Unit detail returns one logical Unit with source/Army/profile/loadout context preserved.
 - catalog filters resolve canonical application identity and match all materialized source members.
-- rules-backed States and other rules-only concepts are read from `rules.db`; their presence does
-  not imply mutable in-game state in `infinity.db`.
+- rules-backed States and other rules-only concepts are read from `rules_n5.db`; their presence does
+  not imply mutable in-game state in `army.db`.
 - search and Glossary project canonical domain identities rather than creating another identity
   namespace.
 
@@ -4250,20 +4251,20 @@ The HTTP/browser layer may change presentation without changing these semantic o
 Current semantic contracts are executable through focused audit tools rather than copied as
 historical inventories into this document. Important examples include:
 
-- `tools/audit_database_separation.py` — application/raw table boundary;
-- `tools/audit_runtime_database_surface.py` — runtime repository access boundary;
-- `tools/audit_unit_semantics.py` — logical Unit/source semantics;
-- `tools/audit_profile_semantics.py` and `tools/audit_loadout_semantics.py` — profile/loadout payload
+- `tools/data/audit_database_separation.py` — application/raw table boundary;
+- `tools/data/audit_runtime_database_surface.py` — runtime repository access boundary;
+- `tools/data/audit_unit_semantics.py` — logical Unit/source semantics;
+- `tools/data/audit_profile_semantics.py` and `tools/data/audit_loadout_semantics.py` — profile/loadout payload
   boundaries;
-- `tools/audit_army_faction_semantics.py` — Army/grouping/faction semantics;
-- `tools/audit_peripheral_semantics.py` — Peripheral mappings/access pools;
-- `tools/audit_relationship_semantics.py` — source/application relationship interpretation;
-- `tools/audit_fireteam_semantics.py` — Fireteam chart semantics;
-- `tools/audit_source_presentation.py` — source-to-player-presentation coverage;
-- `tools/audit_semantic_deduplication.py` — canonicalization evidence;
-- `tools/audit_enrichment_coverage.py` and `tools/audit_rules_interactions.py` — rules/reference
+- `tools/data/audit_army_faction_semantics.py` — Army/grouping/faction semantics;
+- `tools/data/audit_peripheral_semantics.py` — Peripheral mappings/access pools;
+- `tools/data/audit_relationship_semantics.py` — source/application relationship interpretation;
+- `tools/data/audit_fireteam_semantics.py` — Fireteam chart semantics;
+- `tools/data/audit_source_presentation.py` — source-to-player-presentation coverage;
+- `tools/data/audit_semantic_deduplication.py` — canonicalization evidence;
+- `tools/data/audit_enrichment_coverage.py` and `tools/data/audit_rules_interactions.py` — rules/reference
   coverage and interaction review; and
-- `tools/audit_maintained_text_links.py` — maintained-prose semantic-link completeness.
+- `tools/data/audit_maintained_text_links.py` — maintained-prose semantic-link completeness.
 
 Generated reports and one-off audit measurements belong under ignored report/audit workspaces. Only
 durable semantic conclusions belong in this document.

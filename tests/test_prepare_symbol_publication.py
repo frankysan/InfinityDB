@@ -13,9 +13,9 @@ import pytest
 from test_verify_processed_symbol_handoff import _csv, _fixture, _pin
 from test_verify_symbol_duplicate_handoff import _evidence
 
-from tools import prepare_symbol_publication as candidate
-from tools.symbol_publication import FactionInfo, SnapshotIndex
-from tools.verify_processed_symbol_handoff import FORMAT
+from tools.symbols import prepare_symbol_publication as candidate
+from tools.symbols.symbol_publication import FactionInfo, SnapshotIndex
+from tools.symbols.verify_processed_symbol_handoff import FORMAT
 
 
 def _write(path: Path, value: dict) -> None:

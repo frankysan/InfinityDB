@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -20,8 +21,10 @@ from infinity_db.curated import (
     _validate_variant_semantics,
     load_curated_directory,
 )
+from infinity_db.database import raw_database_path
 from infinity_db.rules_database import RulesDatabase, export_rules_database
-from tools.audit_source_variant_inputs import (
+from tests.test_audit_runtime_database_surface import _runtime_database
+from tools.data.audit_source_variant_inputs import (
     inventory_source_variants,
     reviewed_extra_signature,
     select_source_variants,
@@ -29,6 +32,152 @@ from tools.audit_source_variant_inputs import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture
+def matched_source_inputs(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
+    normalized = tmp_path / "normalized.json"
+    application = _runtime_database(tmp_path, normalized_output=normalized)
+    return (
+        application, raw_database_path(application), normalized,
+        ROOT / "data/generated/rules_n5.db",
+    )
+
+
+def test_inventory_verified_normalized_matches_raw_and_needs_no_archive(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+) -> None:
+    application, raw, normalized, rules = matched_source_inputs
+    legacy = inventory_source_variants(application, raw, rules)
+    verified = inventory_source_variants(
+        application, None, rules, normalized=normalized,
+    )
+    assert verified == legacy
+    assert verified["catalogs"]["skills"]["summary"]["sourceIdsWithDirectRows"] > 0
+    assert verified["catalogs"]["equipment"]["summary"]["sourceIdsWithDirectRows"] > 0
+    raw.unlink()
+    assert inventory_source_variants(
+        application, None, rules, normalized=normalized,
+    ) == legacy
+    assert not raw.exists()
+
+
+def test_owner_extra_lookup_verified_normalized_matches_raw(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+) -> None:
+    application, raw, normalized, _rules = matched_source_inputs
+    expected = source_extra_owner_context(
+        raw, catalog="skills", source_id=11, extra_id=41,
+        application_path=application,
+    )
+    assert expected
+    raw.unlink()
+    actual = source_extra_owner_context(
+        None, catalog="skills", source_id=11, extra_id=41,
+        application_path=application, normalized=normalized,
+    )
+    assert actual == expected
+    assert not raw.exists()
+
+
+def test_inventory_and_owner_lookup_reject_mismatched_raw_pair(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+) -> None:
+    application, raw, _normalized, rules = matched_source_inputs
+    with sqlite3.connect(raw) as connection:
+        connection.execute(
+            "UPDATE __infinity_metadata SET value = ? WHERE key = 'warnings'",
+            (json.dumps("stale generation"),),
+        )
+    with pytest.raises(ValueError, match="metadata differ"):
+        inventory_source_variants(application, raw, rules)
+    with pytest.raises(ValueError, match="metadata differ"):
+        source_extra_owner_context(
+            raw, catalog="skills", source_id=11, extra_id=41,
+            application_path=application,
+        )
+
+
+def test_inventory_and_owner_lookup_fail_closed_on_normalized_drift(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+) -> None:
+    application, raw, normalized, rules = matched_source_inputs
+    document = json.loads(normalized.read_text(encoding="utf-8"))
+    document["tables"]["units"][0]["name"] = "unverified alteration"
+    normalized.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match"):
+        inventory_source_variants(application, None, rules, normalized=normalized)
+    with pytest.raises(ValueError, match="does not match"):
+        source_extra_owner_context(
+            None, catalog="skills", source_id=11, extra_id=41,
+            application_path=application, normalized=normalized,
+        )
+    # A still-valid raw archive is never used as implicit fallback.
+    assert raw.exists()
+
+
+def test_source_variant_cli_selects_verified_normalized_with_owner_evidence(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    from tools.data.audit_source_variant_inputs import main
+
+    application, raw, normalized, rules = matched_source_inputs
+    raw.unlink()
+    monkeypatch.setattr("sys.argv", [
+        "audit_source_variant_inputs",
+        "--application", str(application), "--rules", str(rules),
+        "--normalized", str(normalized), "--catalog", "skills",
+        "--source-id", "11", "--owner-extra-id", "41",
+    ])
+    main()
+    selected = json.loads(capsys.readouterr().out)
+    assert selected["selectedSourceIds"] == [11]
+    assert selected["occurrenceOwners"]
+    assert not raw.exists()
+
+
+def test_source_variant_source_selection_rejects_conflict_and_missing_file(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+) -> None:
+    application, raw, normalized, rules = matched_source_inputs
+    with pytest.raises(ValueError, match="exactly one"):
+        inventory_source_variants(
+            application, raw, rules, normalized=normalized,
+        )
+    with pytest.raises(ValueError, match="exactly one"):
+        source_extra_owner_context(
+            raw, catalog="skills", source_id=11, extra_id=41,
+            application_path=application, normalized=normalized,
+        )
+    with pytest.raises(FileNotFoundError):
+        inventory_source_variants(
+            application, None, rules,
+            normalized=normalized.with_name("unavailable.json"),
+        )
+
+
+def test_source_variant_cli_rejects_mismatched_raw_generation(
+    matched_source_inputs: tuple[Path, Path, Path, Path],
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    from tools.data.audit_source_variant_inputs import main
+
+    application, raw, _normalized, rules = matched_source_inputs
+    with sqlite3.connect(raw) as connection:
+        connection.execute(
+            "UPDATE __infinity_metadata SET value = ? WHERE key = 'warnings'",
+            (json.dumps("another generation"),),
+        )
+    monkeypatch.setattr("sys.argv", [
+        "audit_source_variant_inputs",
+        "--application", str(application), "--rules", str(rules),
+        "--raw", str(raw), "--catalog", "skills",
+    ])
+    with pytest.raises(SystemExit) as exc:
+        main()
+    assert exc.value.code == 2
+    assert "metadata differ" in capsys.readouterr().err
 
 
 def test_source_variant_selection_preserves_full_summary_and_exact_ids() -> None:
@@ -63,7 +212,7 @@ def test_source_variant_selection_preserves_full_summary_and_exact_ids() -> None
 def test_audit_cli_unresolved_filter_preserves_full_summary(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], brief: bool,
 ) -> None:
-    from tools import audit_source_variant_inputs as audit
+    from tools.data import audit_source_variant_inputs as audit
 
     report = {"catalogs": {"skills": {
         "summary": {"publishedSourceIds": 2, "statuses": {
@@ -103,10 +252,42 @@ def test_audit_cli_unresolved_filter_preserves_full_summary(
         )
 
 
+@pytest.mark.parametrize(
+    ("source_args", "expected_raw", "expected_normalized"),
+    [
+        ([], Path("local/work/build/army/army.raw.db"), None),
+        (["--raw", "explicit.raw.db"], Path("explicit.raw.db"), None),
+        (["--normalized", "explicit.json"], None, Path("explicit.json")),
+    ],
+)
+def test_audit_cli_source_selection(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+    source_args: list[str], expected_raw: Path | None, expected_normalized: Path | None,
+) -> None:
+    from tools.data import audit_source_variant_inputs as audit
+
+    selected: list[tuple[Path, Path | None, Path, Path | None]] = []
+
+    def capture(
+        application: Path, raw: Path | None, rules: Path, *, normalized: Path | None = None,
+    ) -> dict:
+        selected.append((application, raw, rules, normalized))
+        return {"catalogs": {}}
+
+    monkeypatch.setattr(audit, "inventory_source_variants", capture)
+    monkeypatch.setattr("sys.argv", ["audit_source_variant_inputs", *source_args])
+    audit.main()
+    assert selected == [(
+        Path("data/generated/army.db"), expected_raw,
+        Path("data/generated/rules_n5.db"), expected_normalized,
+    )]
+    assert json.loads(capsys.readouterr().out) == {"catalogs": {}}
+
+
 def _inventory() -> dict:
     return inventory_source_variants(
         ROOT / "data/generated/army.db",
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         ROOT / "data/generated/rules_n5.db",
     )
 
@@ -170,7 +351,7 @@ def test_commlink_source_260_exact_optional_reinforcements_variants() -> None:
     assert sum(len(ids) for _raw, ids in expected.values()) == 42
     for extra_id, (raw, ids) in expected.items():
         owners = source_extra_owner_context(
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=260, extra_id=extra_id,
         )
         assert {owner["occurrence_id"] for owner in owners} == ids
@@ -225,7 +406,7 @@ def test_commlink_typed_legacy_variant_in_fresh_publication(
     }
     report = inventory_source_variants(
         ROOT / "data/generated/army.db",
-        ROOT / "data/work/build/army.raw.db", fresh,
+        ROOT / "local/work/build/army/army.raw.db", fresh,
     )
     [item] = select_source_variants(report, "skills", [260])["items"]
     assert item["status"] == "reviewed-extra-parameter"
@@ -269,7 +450,7 @@ def test_lieutenant_source_119_exact_command_token_and_order_qualifiers() -> Non
     ]
     for extra_id, (raw, ids, count) in expected.items():
         rows = source_extra_owner_context(
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=119, extra_id=extra_id,
         )
         assert len(rows) == count
@@ -362,7 +543,7 @@ def test_lieutenant_reviewed_resource_extras_fresh_release_pair(tmp_path: Path) 
     [item] = select_source_variants(
         inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", fresh,
+            ROOT / "local/work/build/army/army.raw.db", fresh,
         ),
         "skills", [119],
     )["items"]
@@ -414,7 +595,7 @@ def test_terrain_source_58_exact_types_and_reviewed_effects(tmp_path: Path) -> N
     }
     report = inventory_source_variants(
         ROOT / "data/generated/army.db",
-        ROOT / "data/work/build/army.raw.db", candidate,
+        ROOT / "local/work/build/army/army.raw.db", candidate,
     )
     [item] = select_source_variants(report, "skills", [58])["items"]
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
@@ -432,7 +613,7 @@ def test_terrain_source_58_exact_types_and_reviewed_effects(tmp_path: Path) -> N
         TERRAIN_SOURCE_SPECS, counts, strict=True,
     ):
         owners = source_extra_owner_context(
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=58, extra_id=extra_id,
         )
         assert len(owners) == count
@@ -510,7 +691,7 @@ def test_doctor_source_53_exact_qualifiers_preserve_2w_and_reroll_boundary() -> 
     assert sum(count for _raw, count, _ids, _owners in expected.values()) == 103
     for extra_id, (raw, count, ids, owners) in expected.items():
         rows = source_extra_owner_context(
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=53, extra_id=extra_id,
         )
         assert len(rows) == count
@@ -571,7 +752,7 @@ def test_engineer_source_49_qualifiers_remain_unreviewed_and_owner_exact() -> No
 
     for extra_id, (raw, ids, owners) in expected.items():
         rows = source_extra_owner_context(
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=49, extra_id=extra_id,
         )
         assert {row["occurrence_id"] for row in rows} == ids
@@ -632,7 +813,7 @@ def test_infiltration_source_47_exact_ph_and_reroll_owners() -> None:
 
     for extra_id, (raw, ids, owners) in expected.items():
         rows = source_extra_owner_context(
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=47, extra_id=extra_id,
         )
         assert {row["occurrence_id"] for row in rows} == ids
@@ -696,7 +877,7 @@ def test_combat_jump_exact_source_35_landings_and_explosion(tmp_path: Path) -> N
     for rules in (original, candidate):
         [source] = select_source_variants(inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", rules,
+            ROOT / "local/work/build/army/army.raw.db", rules,
         ), "skills", [35])["items"]
         reviewed = True
         assert (source["name"], source["applicationId"], source["occurrences"]) == (
@@ -713,7 +894,7 @@ def test_combat_jump_exact_source_35_landings_and_explosion(tmp_path: Path) -> N
         assert source["reviewedExtra"] == typed if reviewed else source["reviewedExtra"] is None
         assert inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", rules,
+            ROOT / "local/work/build/army/army.raw.db", rules,
         )["catalogs"]["skills"]["summary"]["statuses"] == _expected_skill_statuses(rules)
 
 
@@ -768,7 +949,7 @@ def test_camouflage_one_use_source_29_signature_and_faq_scope() -> None:
         "reviewed": "camouflage" in reviewed, "count": 223,
     }]
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=29, extra_id=43,
     )
     assert len(owners) == 223
@@ -828,7 +1009,7 @@ def test_camouflage_one_use_fresh_v9_effect_and_source_29(tmp_path: Path) -> Non
     }
     [source] = select_source_variants(inventory_source_variants(
         ROOT / "data/generated/army.db",
-        ROOT / "data/work/build/army.raw.db", candidate,
+        ROOT / "local/work/build/army/army.raw.db", candidate,
     ), "skills", [29])["items"]
     assert source["status"] == "reviewed-extra-parameter"
     assert source["reviewedExtra"] == typed
@@ -886,7 +1067,7 @@ def test_religious_troop_total_source_83_is_unresolved_and_owner_pinned() -> Non
         "extras": [[33, "TEXT", "Total"]], "reviewed": False, "count": 1,
     }]
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=83, extra_id=33,
     )
     assert len(owners) == 1
@@ -919,7 +1100,7 @@ def test_religious_troop_total_source_83_is_unresolved_and_owner_pinned() -> Non
     # The same Team-Ops unit qualifies Terrain on its light/bot profiles,
     # but not on the Heavy profile where its sole Religious Troop extra occurs.
     terrain_owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=58, extra_id=33,
     )
     assert {
@@ -962,7 +1143,7 @@ def test_parachutist_deployment_zone_source_33_exact_owners() -> None:
     }
 
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=33, extra_id=48,
     )
     assert len(owners) == 17
@@ -1051,7 +1232,7 @@ def test_discover_131_exact_source_extras_and_owners() -> None:
     }
     for extra_id, (ids, owners, raw) in expected.items():
         rows = source_extra_owner_context(
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=131, extra_id=extra_id,
         )
         assert {row["occurrence_id"] for row in rows} == ids
@@ -1146,7 +1327,7 @@ def test_regeneration_62_exact_states_phase_ph_values_in_both_exports(
         )
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", path,
+            ROOT / "local/work/build/army/army.raw.db", path,
         )
         [item] = select_source_variants(report, "skills", [62])["items"]
         assert (item["name"], item["applicationId"], item["occurrences"]) == (
@@ -1171,7 +1352,7 @@ def test_booty_metachemistry_exact_chart_rerolls_in_both_exports(
         params = rules.skill_reviewed_extra_semantics()
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", path,
+            ROOT / "local/work/build/army/army.raw.db", path,
         )
         for source_id, skill, occurrence_count, signature_count in (
             (25, "booty", 482, 108), (55, "metachemistry", 117, 60),
@@ -1222,7 +1403,7 @@ def test_hacker_skill_source_1000_exact_direct_programs_in_both_exports(
         assert len(combos) == 1
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", path,
+            ROOT / "local/work/build/army/army.raw.db", path,
         )
         [item] = select_source_variants(report, "skills", [1000])["items"]
         assert (item["name"], item["applicationId"], item["occurrences"]) == (
@@ -1239,7 +1420,7 @@ def test_hacker_skill_source_1000_exact_direct_programs_in_both_exports(
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_journalist_plus_three_stays_unreviewed_pending_src_027() -> None:
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=272, extra_id=1,
     )
     assert len(owners) == 1
@@ -1270,16 +1451,16 @@ def test_journalist_plus_three_stays_unreviewed_pending_src_027() -> None:
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_charontid_unqualified_sr_owners_are_exact_source_loadouts() -> None:
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="equipment", source_id=101, extra_id=344,
     )
     assert len(owners) == 2
     assert source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="equipment", source_id=100, extra_id=344,
     ) == []
     assert source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="equipment", source_id=101, extra_id=9999,
     ) == []
     assert [(row["owner"], row["occurrence_id"], row["parent_id"])
@@ -1344,7 +1525,7 @@ def test_bs_attack_source_201_exact_signatures_and_sr2_owners() -> None:
         (305, "SR-1", 507), (308, "+1SD", 176), (337, "SR-2", 9),
     ))
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=201, extra_id=337,
     )
     assert len(owners) == 9
@@ -1373,7 +1554,7 @@ def test_cc_attack_source_240_exact_signatures_and_damage_owners() -> None:
         (292, "Continous Damage", 1), (293, "Antimaterial", 106),
     ))
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=240, extra_id=4,
     )
     assert [
@@ -1403,7 +1584,7 @@ def test_peripheral_source_243_exact_subtypes_and_profile_ownership() -> None:
     occurrence_ids: set[int] = set()
     for extra_id, raw, expected_count in specs:
         owners = source_extra_owner_context(
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=243, extra_id=extra_id,
         )
         assert len(owners) == expected_count
@@ -1448,7 +1629,7 @@ def test_transmutation_source_246_exact_signatures_and_profile_owners() -> None:
     occurrence_ids: set[int] = set()
     for extra_id, raw, expected_count in specs:
         owners = source_extra_owner_context(
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=246, extra_id=extra_id,
         )
         assert len(owners) == expected_count
@@ -1804,7 +1985,7 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
     # extra signatures: reviewed PH MODs do not certify those combinations.
     report = inventory_source_variants(
         ROOT / "data/generated/army.db",
-        ROOT / "data/work/build/army.raw.db", output,
+        ROOT / "local/work/build/army/army.raw.db", output,
     )["catalogs"]["skills"]
     sources = {item["id"]: item for item in report["items"]}
     assert report["summary"]["statuses"] == _expected_skill_statuses(output)
@@ -1836,7 +2017,7 @@ def test_vulnerability_viral_source_220_matches_both_rules_exports(
         params = rules.skill_reviewed_extra_semantics()["vulnerability"]
         result = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", path,
+            ROOT / "local/work/build/army/army.raw.db", path,
         )
         [row] = select_source_variants(result, "skills", [220])["items"]
         assert row["occurrences"] == 2
@@ -1877,7 +2058,7 @@ def test_decoy_215_exact_deployment_replica_counts_in_both_exports(
         ]
         result = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", path,
+            ROOT / "local/work/build/army/army.raw.db", path,
         )
         [row] = select_source_variants(result, "skills", [215])["items"]
         assert (row["name"], row["applicationId"], row["occurrences"]) == (
@@ -1915,7 +2096,7 @@ def test_ft_master_261_lists_exact_cancellation_trigger_units_in_both_exports(
         ]
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", path,
+            ROOT / "local/work/build/army/army.raw.db", path,
         )
         [row] = select_source_variants(report, "skills", [261])["items"]
         assert (row["name"], row["applicationId"], row["occurrences"]) == (
@@ -1943,7 +2124,7 @@ def test_tagcom_270_complete_recipient_mod_signatures_in_both_exports(
         {"extras": [[370, "TEXT", "Dodge (PH+1), GizmoKit (PH+1)"]],
          "reviewed": True, "count": 2},
     ]
-    from tools.audit_source_variant_inputs import reviewed_extra_signature
+    from tools.data.audit_source_variant_inputs import reviewed_extra_signature
     assert not reviewed_extra_signature(
         [(1, 312, "TEXT", "Dodge (PH+3)")],
         reviewed_values=set(), distance_allowed=False,
@@ -1966,7 +2147,7 @@ def test_tagcom_270_complete_recipient_mod_signatures_in_both_exports(
         assert "tagcom" not in rules.skill_reviewed_extra_semantics()
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", path,
+            ROOT / "local/work/build/army/army.raw.db", path,
         )
         [row] = select_source_variants(report, "skills", [270])["items"]
         assert (row["name"], row["applicationId"], row["occurrences"]) == (
@@ -1996,7 +2177,7 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
                     [384, "TEXT", "BTS=6"]],
          "reviewed": True, "count": 4},
     ]
-    from tools.audit_source_variant_inputs import reviewed_extra_signature
+    from tools.data.audit_source_variant_inputs import reviewed_extra_signature
     assert not reviewed_extra_signature(
         [(1, 281, "TEXT", "BS=13")],
         reviewed_values=set(), distance_allowed=False,
@@ -2015,7 +2196,7 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
         assert set(combos) == {"remdriver", "tagcom", "hacker"}
         result = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", path,
+            ROOT / "local/work/build/army/army.raw.db", path,
         )
         [row] = select_source_variants(result, "skills", [255])["items"]
         assert (row["name"], row["applicationId"], row["occurrences"]) == (
@@ -2054,7 +2235,7 @@ def test_bangbomb_skill_266_reuses_equipment_scope_in_both_exports(
         }]
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", rules_path,
+            ROOT / "local/work/build/army/army.raw.db", rules_path,
         )
         [row] = select_source_variants(report, "skills", [266])["items"]
         assert (row["name"], row["applicationId"], row["occurrences"]) == (
@@ -2097,7 +2278,7 @@ def test_medikit_target_ph_skill_273_is_equipment_owned_in_both_exports(
         }
         result = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", rules_path,
+            ROOT / "local/work/build/army/army.raw.db", rules_path,
         )
         [row] = select_source_variants(result, "skills", [273])["items"]
         assert (row["name"], row["applicationId"], row["occurrences"]) == (
@@ -2139,7 +2320,7 @@ def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
         }
         result = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", rules_path,
+            ROOT / "local/work/build/army/army.raw.db", rules_path,
         )
         [row] = select_source_variants(result, "skills", [254])["items"]
         assert (row["name"], row["applicationId"], row["occurrences"]) == (
@@ -2164,7 +2345,7 @@ def test_impersonation_imp2_matches_pinned_source_and_both_exports(
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             rules_path,
         )
         [item] = select_source_variants(report, "skills", [249])["items"]
@@ -2205,7 +2386,7 @@ def test_dodge_source_signatures_are_exact_and_independent(tmp_path: Path) -> No
     )
     inventory = inventory_source_variants(
         ROOT / "data/generated/army.db",
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         output,
     )["catalogs"]["skills"]["items"]
     dodge = next(item for item in inventory if item["id"] == 40)
@@ -2247,7 +2428,7 @@ def test_surprise_attack_signatures_preserve_conditional_target_mods(tmp_path: P
         assert parameters["target"] == "opponent"
         assert parameters["applies_to"] == ["surprise-attack-target-face-to-face-aro"]
         report = inventory_source_variants(
-            ROOT / "data/generated/army.db", ROOT / "data/work/build/army.raw.db", path,
+            ROOT / "data/generated/army.db", ROOT / "local/work/build/army/army.raw.db", path,
         )
         source = next(row for row in report["catalogs"]["skills"]["items"] if row["id"] == 191)
         assert source["status"] == "reviewed-numeric-parameter"
@@ -2326,7 +2507,7 @@ def test_evo_trinity_grant_and_sr_modifier_match_tracked_and_fresh_rules(
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             rules_path,
         )
         [row] = select_source_variants(report, "equipment", [182])["items"]
@@ -2365,7 +2546,7 @@ def test_albedo_183_modifiers_match_pinned_source_and_both_rules_exports(
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             rules_path,
         )
         [item] = select_source_variants(report, "equipment", [183])["items"]
@@ -2416,7 +2597,7 @@ def test_medikit_source_106_burst_matches_tracked_and_fresh_rules(
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             rules_path,
         )
         [row] = select_source_variants(report, "equipment", [106])["items"]
@@ -2447,7 +2628,7 @@ def test_gizmokit_source_237_burst_matches_tracked_and_fresh_rules(
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             rules_path,
         )
         [row] = select_source_variants(report, "equipment", [237])["items"]
@@ -2479,7 +2660,7 @@ def test_deactivator_source_238_variants_match_tracked_and_fresh_rules(
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             rules_path,
         )
         [row] = select_source_variants(report, "equipment", [238])["items"]
@@ -2509,7 +2690,7 @@ def test_bangbomb_source_246_matches_tracked_and_fresh_rules(tmp_path: Path) -> 
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             rules_path,
         )
         [row] = select_source_variants(report, "equipment", [246])["items"]
@@ -2541,7 +2722,7 @@ def test_ecm_source_variants_match_tracked_and_fresh_rules(tmp_path: Path) -> No
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             rules_path,
         )
         reviewed = RulesDatabase(rules_path).equipment_reviewed_extra_semantics()
@@ -2557,7 +2738,7 @@ def test_ecm_source_variants_match_tracked_and_fresh_rules(tmp_path: Path) -> No
                  "reviewed": True, "count": number}
                 for extra_id, raw, number in signatures
             ]
-    raw = ROOT / "data/work/build/army.raw.db"
+    raw = ROOT / "local/work/build/army/army.raw.db"
     juggernauts = source_extra_owner_context(
         raw, catalog="equipment", source_id=239, extra_id=51,
     )
@@ -2581,7 +2762,7 @@ def test_tinbot_firewall_source_extras_match_fresh_export(tmp_path: Path) -> Non
     for path in (ROOT / "data/generated/rules_n5.db", fresh):
         rows = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             path,
         )["catalogs"]["equipment"]["items"]
         item = next(row for row in rows if row["id"] == 169)
@@ -2619,7 +2800,7 @@ def test_tinbot_discover_ecm_extras_match_tracked_and_fresh_rules(tmp_path: Path
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             rules_path,
         )
         reviewed = RulesDatabase(rules_path).equipment_reviewed_extra_semantics()
@@ -2662,7 +2843,7 @@ def test_killer_hacking_device_exact_source_variants_match_both_exports(
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             rules_path,
         )
         [row] = select_source_variants(report, "equipment", [145])["items"]
@@ -2729,7 +2910,7 @@ def test_hacking_device_program_grants_preserve_unreviewed_overrides(
     for path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             path,
         )
         reviewed = RulesDatabase(path).equipment_reviewed_extra_semantics()
@@ -2834,7 +3015,7 @@ def test_neurocinetics_reactive_burst_extra_has_exact_source_owners() -> None:
     assert item["rawValues"] == []
 
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=109, extra_id=8,
     )
     assert sorted((owner["army_id"], owner["unit_slug"]) for owner in owners) == [
@@ -2878,7 +3059,7 @@ def test_neurocinetics_burst_is_identical_in_fresh_and_published_rules(
         [row] = select_source_variants(
             inventory_source_variants(
                 ROOT / "data/generated/army.db",
-                ROOT / "data/work/build/army.raw.db", db_path,
+                ROOT / "local/work/build/army/army.raw.db", db_path,
             ),
             "skills", [109],
         )["items"]
@@ -2920,7 +3101,7 @@ def test_minelayer_two_deployment_count_matches_pinned_source() -> None:
         "minelayer"
     ] == expected
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=56, extra_id=267,
     )
     assert sorted((o["army_id"], o["unit_slug"], o["owner"]) for o in owners) == [
@@ -2968,7 +3149,7 @@ def test_minelayer_unparameterized_rows_do_not_inherit_two_items() -> None:
         reviewed_values=reviewed_values, distance_allowed=False,
     )
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=56, extra_id=267,
     )
     profile_owners = [owner for owner in owners if owner["owner"] == "profile"]
@@ -3010,7 +3191,7 @@ def test_chain_of_command_non_specialist_matches_exact_source_owners() -> None:
     ] == expected
 
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=26, extra_id=375,
     )
     assert sorted((o["army_id"], o["unit_slug"]) for o in owners) == [
@@ -3060,7 +3241,7 @@ def test_forward_observer_special_die_exact_profile_owners() -> None:
         "forward-observer"
     ] == expected
     owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=59, extra_id=308,
     )
     assert sorted((o["army_id"], o["unit_slug"], o["owner"]) for o in owners) == [
@@ -3116,7 +3297,7 @@ def test_forward_observer_special_die_fresh_export_preserves_exact_scope(
         [row] = select_source_variants(
             inventory_source_variants(
                 ROOT / "data/generated/army.db",
-                ROOT / "data/work/build/army.raw.db", rules_path,
+                ROOT / "local/work/build/army/army.raw.db", rules_path,
             ),
             "skills", [59],
         )["items"]
@@ -3171,7 +3352,7 @@ def test_infiltration_ph_exact_source_47_and_unreviewed_reroll(tmp_path: Path) -
         assert typed == expected
         [row] = select_source_variants(inventory_source_variants(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db", path,
+            ROOT / "local/work/build/army/army.raw.db", path,
         ), "skills", [47])["items"]
         assert (row["name"], row["applicationId"], row["occurrences"]) == (
             "Infiltration", 47, 216,
@@ -3203,7 +3384,7 @@ def test_infiltration_ph_exact_source_47_and_unreviewed_reroll(tmp_path: Path) -
     )
     for extra_id, _ph, count in INFILTRATION_PH_SOURCE_SPECS:
         owners = source_extra_owner_context(
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=47, extra_id=extra_id,
         )
         assert len(owners) == count
@@ -3217,7 +3398,7 @@ def test_infiltration_ph_exact_source_47_and_unreviewed_reroll(tmp_path: Path) -
     # V1S-050: preserve all five bare ReRoll source owners without promoting
     # the missing PH=X to an invented Infiltration Roll modifier.
     bare_owners = source_extra_owner_context(
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=47, extra_id=277,
     )
     assert len(bare_owners) == 5

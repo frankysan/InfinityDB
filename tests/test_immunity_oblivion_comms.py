@@ -18,7 +18,6 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 RULES = ROOT / "data/generated/rules_n5.db"
 ARMY = ROOT / "data/generated/army.db"
@@ -49,10 +48,9 @@ EXPECTED = {
 }
 
 
-def test_pinned_comms_exclusion_oblivion_and_saving_attribute(require_source_files) -> None:
-    require_source_files(PDF)
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
-    with pymupdf.open(PDF) as source:
+def test_pinned_comms_exclusion_oblivion_and_saving_attribute(pinned_n53_core_pdf: Path) -> None:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PIN
+    with pymupdf.open(pinned_n53_core_pdf) as source:
         pages = {}
         for number in (57, 58, 95):
             raw = source[number - 1].get_text("text")

@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-from tools.source_coverage_dispositions import (
+from tools.research.source_coverage_dispositions import (
     DEFAULT_MANIFEST,
     DispositionError,
     current_evidence_inputs,
@@ -67,7 +67,7 @@ def _approve(review: dict[str, Any]) -> dict[str, Any]:
         "status": "accepted",
         "reviewer": "source-reviewer",
         "reviewedOn": "2026-11-06",
-        "evidenceRef": "docs/v1.0-source-coverage-audit.md#scoped-example",
+        "evidenceRef": "fixture:scoped-example",
     }
     return review
 
@@ -153,7 +153,7 @@ def test_source_first_exclusion_requires_scoped_signed_off_rationale(
         "status": "excluded-with-rationale",
         "reviewer": "source-reviewer",
         "reviewedOn": "2026-11-06",
-        "evidenceRef": "docs/v1.0-source-coverage-audit.md#scoped-example",
+        "evidenceRef": "fixture:scoped-example",
         "reason": "Outside the v1.0 reference definition",
     }
     result = _validate(_manifest(row), tmp_path)
@@ -201,7 +201,7 @@ def test_browser_acceptance_requires_exact_revision_artifacts_and_contract(
         "status": "accepted",
         "reviewer": "browser-reviewer",
         "reviewedOn": "2026-11-06",
-        "evidenceRef": "docs/v1.0-source-coverage-audit.md#browser-case",
+        "evidenceRef": "fixture:browser-case",
         "appGitSha": GIT_SHA,
         "armyDbSha256": ARMY_SHA,
         "rulesDbSha256": RULES_SHA,
@@ -230,7 +230,7 @@ def test_browser_contract_paths_are_restricted(tmp_path: Path, path: str) -> Non
         "status": "accepted",
         "reviewer": "browser-reviewer",
         "reviewedOn": "2026-11-06",
-        "evidenceRef": "docs/v1.0-source-coverage-audit.md#browser-case",
+        "evidenceRef": "fixture:browser-case",
         "appGitSha": GIT_SHA,
         "armyDbSha256": ARMY_SHA,
         "rulesDbSha256": RULES_SHA,

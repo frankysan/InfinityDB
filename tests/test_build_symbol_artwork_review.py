@@ -9,7 +9,7 @@ import re
 
 import pytest
 
-from tools import build_symbol_artwork_review as review
+from tools.symbols import build_symbol_artwork_review as review
 
 SVG = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M0 0h5v5z"/></svg>'
 NEW = SVG.replace(b"h5", b"h6")
@@ -208,17 +208,152 @@ def test_refuses_output_outside_local(inputs):
     assert not inputs["output"].exists()
 
 
-def test_cli_fails_cleanly_without_creating_report(inputs, capsys):
+def review_args(inputs):
+    return [
+        "--comparison", str(inputs["comparison"]),
+        "--current", str(inputs["current"]),
+        "--candidate", str(inputs["candidate"]),
+        "--current-manifest", str(inputs["current_manifest"]),
+        "--manifest", str(inputs["candidate_manifest"]),
+        "--output", str(inputs["output"]),
+    ]
+
+
+def comparison_args(inputs, output):
+    return [
+        "--write-comparison",
+        "--comparison", str(output),
+        "--current-manifest", str(inputs["current_manifest"]),
+        "--manifest", str(inputs["candidate_manifest"]),
+        "--expected-current-sha256", sha(inputs["current_manifest"].read_bytes()),
+        "--expected-candidate-sha256", sha(inputs["candidate_manifest"].read_bytes()),
+    ]
+
+
+@pytest.mark.parametrize("flag", [
+    "--comparison", "--current", "--candidate", "--current-manifest", "--manifest", "--output",
+])
+def test_cli_requires_explicit_review_inputs(inputs, flag, capsys):
+    args = review_args(inputs)
+    index = args.index(flag)
+    del args[index:index + 2]
     with pytest.raises(SystemExit) as error:
-        review.main(["--comparison", str(inputs["comparison"].with_name("absent.json")),
-                     "--output", str(inputs["output"])])
+        review.main(args)
+    assert error.value.code == 2
+    assert flag in capsys.readouterr().err
+    assert not inputs["output"].exists()
+
+
+def test_cli_fails_cleanly_without_creating_report(inputs, capsys):
+    args = review_args(inputs)
+    args[args.index("--comparison") + 1] = str(inputs["comparison"].with_name("absent.json"))
+    with pytest.raises(SystemExit) as error:
+        review.main(args)
     assert error.value.code == 1
     assert "Review generation failed" in capsys.readouterr().err
     assert not inputs["output"].exists()
 
 
+def test_cli_writes_pinned_comparison_then_builds_review(inputs):
+    comparison = inputs["output"].with_name("new-comparison.json")
+    args = comparison_args(inputs, comparison)
+    assert review.main(args) == 0
+    assert json.loads(comparison.read_bytes()) == json.loads(inputs["comparison"].read_bytes())
+    first = comparison.read_bytes()
+    with pytest.raises(SystemExit) as error:
+        review.main(args)
+    assert error.value.code == 1
+    assert comparison.read_bytes() == first
+
+    second = comparison.with_name("second-comparison.json")
+    assert review.main(comparison_args(inputs, second)) == 0
+    assert second.read_bytes() == first
+    inputs["comparison"] = comparison
+    assert review.main(review_args(inputs)) == 0
+    report = payload(inputs["output"])
+    assert report["pins"]["comparisonSha256"] == sha(first)
+    assert report["removed"][0]["status"] == "unresolved compatibility requirement"
+
+
+def test_generated_comparison_includes_added_and_unchanged_assets(inputs):
+    before = json.loads(inputs["current_manifest"].read_bytes())
+    after = json.loads(inputs["candidate_manifest"].read_bytes())
+    for root in ("current", "candidate"):
+        (inputs[root] / "units/same.svg").write_bytes(SVG)
+    (inputs["candidate"] / "units/new.svg").write_bytes(NEW)
+    before["publishedSha256ByPath"]["units/same.svg"] = sha(SVG)
+    after["publishedSha256ByPath"]["units/same.svg"] = sha(SVG)
+    after["publishedSha256ByPath"]["units/new.svg"] = sha(NEW)
+    write_json(inputs["current_manifest"], before)
+    write_json(inputs["candidate_manifest"], after)
+
+    comparison = inputs["output"].with_name("new-comparison.json")
+    assert review.main(comparison_args(inputs, comparison)) == 0
+    assert json.loads(comparison.read_bytes())["assetComparison"] == {
+        "before": 3, "after": 3, "changed": ["units/a.svg"],
+        "missing": ["units/old.svg"], "added": ["units/new.svg"],
+    }
+    inputs["comparison"] = comparison
+    assert review.main(review_args(inputs)) == 0
+    assert payload(inputs["output"])["added"] == ["units/new.svg"]
+
+
+@pytest.mark.parametrize("flag", ["--expected-current-sha256", "--expected-candidate-sha256"])
+def test_cli_rejects_missing_or_mismatched_comparison_pins(inputs, flag, capsys):
+    comparison = inputs["output"].with_name("new-comparison.json")
+    args = comparison_args(inputs, comparison)
+    index = args.index(flag)
+    missing = args[:index] + args[index + 2:]
+    with pytest.raises(SystemExit) as error:
+        review.main(missing)
+    assert error.value.code == 2
+    assert flag in capsys.readouterr().err
+    args[index + 1] = "0" * 64
+    with pytest.raises(SystemExit) as error:
+        review.main(args)
+    assert error.value.code == 1
+    assert "Manifest hash mismatch" in capsys.readouterr().err
+    args[index + 1] = "not-a-sha256"
+    with pytest.raises(SystemExit) as error:
+        review.main(args)
+    assert error.value.code == 1
+    assert "Invalid expected" in capsys.readouterr().err
+    assert not comparison.exists()
+
+
+@pytest.mark.parametrize("output", ["outside.json", "local/not-json.html"])
+def test_comparison_refuses_invalid_output(inputs, output):
+    destination = inputs["current"].parent / output
+    with pytest.raises(ValueError, match="JSON file under ignored local"):
+        review.write_comparison(
+            inputs["current_manifest"], inputs["candidate_manifest"], destination,
+            expected_current_sha256=sha(inputs["current_manifest"].read_bytes()),
+            expected_candidate_sha256=sha(inputs["candidate_manifest"].read_bytes()),
+        )
+    assert not destination.exists()
+
+
+def test_cli_rejects_review_only_inputs_in_comparison_mode(inputs, capsys):
+    comparison = inputs["output"].with_name("new-comparison.json")
+    args = comparison_args(inputs, comparison) + ["--current", str(inputs["current"])]
+    with pytest.raises(SystemExit) as error:
+        review.main(args)
+    assert error.value.code == 2
+    assert "--current" in capsys.readouterr().err
+    assert not comparison.exists()
+
+
+def test_cli_rejects_comparison_only_pins_in_review_mode(inputs, capsys):
+    args = review_args(inputs) + ["--expected-current-sha256", "0" * 64]
+    with pytest.raises(SystemExit) as error:
+        review.main(args)
+    assert error.value.code == 2
+    assert "--expected-current-sha256" in capsys.readouterr().err
+    assert not inputs["output"].exists()
+
+
 def add_provenance(inputs):
-    """Minimal explicit renderer fixture; full archive attribution is tested separately."""
+    """Minimal renderer fixture; it does not establish source attribution."""
     pins = {
         "comparisonSha256": sha(inputs["comparison"].read_bytes()),
         "currentManifestSha256": sha(inputs["current_manifest"].read_bytes()),
@@ -255,10 +390,20 @@ def test_provenance_is_embedded_and_changes_review_identity(inputs):
     assert classified["pins"]["provenanceSha256"] == sha(inputs["provenance"].read_bytes())
 
 
-@pytest.mark.parametrize("change", ["pins", "partial", "duplicates", "hash", "cause", "summary"])
+@pytest.mark.parametrize(
+    "change",
+    [
+        "format", "version", "pins", "partial", "duplicates", "hash",
+        "candidate-hash", "cause", "summary", "count",
+    ],
+)
 def test_rejects_stale_or_inconsistent_provenance_before_writing(inputs, change):
     report = add_provenance(inputs)
-    if change == "pins":
+    if change == "format":
+        report["format"] = "unexpected"
+    elif change == "version":
+        report["formatVersion"] = 2
+    elif change == "pins":
         report["publicationPins"]["candidateManifestSha256"] = "0" * 64
     elif change == "partial":
         report["assets"] = []
@@ -266,10 +411,14 @@ def test_rejects_stale_or_inconsistent_provenance_before_writing(inputs, change)
         report["assets"].append(report["assets"][0])
     elif change == "hash":
         report["assets"][0]["currentSha256"] = "0" * 64
+    elif change == "candidate-hash":
+        report["assets"][0]["candidateSha256"] = "0" * 64
     elif change == "cause":
         report["assets"][0]["cause"] = "guess"
-    else:
+    elif change == "summary":
         report["summary"]["processing-only"] = 999
+    else:
+        report["comparedAssets"] = 0
     write_json(inputs["provenance"], report)
     with pytest.raises(ValueError):
         review.build_report(**inputs)

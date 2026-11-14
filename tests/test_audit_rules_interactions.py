@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_rules_interactions import (
+from tools.data.audit_rules_interactions import (
     DEFAULT_CATALOG_SCOPE_PATH,
     DEFAULT_CHECKLIST_PATH,
     DEFAULT_POLICY_PATH,
@@ -659,7 +659,7 @@ def test_primary_release_gate_rejects_pending_catalog_items(
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
     report["summary"]["primaryCatalog"]["pending"] = 1
     monkeypatch.setattr(
-        "tools.audit_rules_interactions.audit_rules_interactions",
+        "tools.data.audit_rules_interactions.audit_rules_interactions",
         lambda *_args: report,
     )
     assert main(["--require-primary-release", "0.7.0"]) == 1
@@ -677,7 +677,7 @@ def test_rules_interaction_1_0_gate_reports_regressed_pending_item(
     pending["status"] = "pending"
     report["summary"]["supporting"]["releases"]["1.0.0"]["pending"] = 1
     monkeypatch.setattr(
-        "tools.audit_rules_interactions.audit_rules_interactions",
+        "tools.data.audit_rules_interactions.audit_rules_interactions",
         lambda *_args: report,
     )
     assert main(["--require-release", "1.0.0"]) == 1
@@ -689,7 +689,7 @@ def test_rules_interaction_1_0_gate_reports_regressed_pending_item(
 def test_catalog_scope_drift_is_read_only_and_preserves_review_exceptions(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    from tools.audit_rules_interactions import _catalog_scope_drift
+    from tools.data.audit_rules_interactions import _catalog_scope_drift
 
     baseline = {
         "targetRelease": "0.7.0",

@@ -41,10 +41,10 @@ a local deferral or a green worker run is not a CI exemption.
 The required **fast-validation** job runs before the expensive Source matrix.
 It runs Ruff, focused release-note tests, Markdownlint, document links and
 backlog integrity. Finalized version/changelog/README metadata is **release-only**:
-run `python -m tools.release_metadata` before the approved release merge,
+run `python -m tools.ci.release_metadata` before the approved release merge,
 not for every development PR with a legitimate `Unreleased` heading.
 
-`tools.release_validation_scope` compares the exact PR/push candidate with
+`tools.ci.release_validation_scope` compares the exact PR/push candidate with
 its preceding branch SHA, requiring Git ancestry and an unambiguous path diff.
 Only tracked Markdown, explicit release metadata and independent
 `tests/test_*.py` modules qualify for focused Source checks. Changed test
@@ -233,7 +233,7 @@ at execution time; other matrix legs do not require npm.
 ### V1S Git-aware retirement gate
 
 The primary Ubuntu 3.11 Source leg uses a full-history checkout and runs
-`python -m tools.check_v1_backlog_ci` before installing dependencies.
+`python -m tools.ci.check_v1_backlog_ci` before installing dependencies.
 The regular `docs` stage separately checks current TODO structure without Git.
 The CI retirement check enforces newly removed V1S identifiers only within an
 explicitly selected, first-parent-compatible range, with the same
@@ -352,7 +352,7 @@ a conflict, not an overwrite.
 
 The primary Ubuntu 3.11 `--all` leg includes the isolated `preflight` stage
 after the ordinary test/build/rules stages. It invokes
-`tools/ci_preflight.py --isolated`, installs only indexed `.[dev,symbols]`
+`tools/ci/ci_preflight.py --isolated`, installs only indexed `.[dev,symbols]`
 dependencies in a fresh environment, verifies indexed release-artifact provenance,
 and runs indexed Ruff, pytest and Pyright. It then exercises the built wheel in a
 second fresh environment using the same smoke helper as the installed-wheel workflow.
@@ -453,12 +453,28 @@ logical parity nor the installed tracked database alone replaces that hosted che
 Generators remain responsible for canonical bytes; `.gitattributes` only prevents tracked
 checksum-bound files from being rewritten by checkout line-ending conversion.
 
+The current [pinned container runner](../tools/ci/run_pinned_determinism.py)
+invokes `tools.ci.build_determinism_manifest` with an explicit report path
+and uploads that selected JSON for comparison. The underlying generator
+also supports direct `--output` and optional `--diagnostics-output`.
+Both destinations must be **new**: it rejects pre-existing files or
+symlinks and two names resolving to the same path *before* generating
+artifacts, and uses exclusive creation to prevent a later collision.
+The canonical JSON content, v1/v2 format selection, exact SHA-256
+comparison and existing hosted `local/reports/determinism-manifest.json`
+path remain unchanged. For local repeatable investigations, choose a
+fresh `local/validation/determinism/<UTC-run-id>-<short-SHA>/`
+directory for `manifest.json` and optional `diagnostics.json`. The
+two outputs are not an atomic pair: an interrupted run can leave a new
+partial file for inspection, but may not replace existing evidence.
+Do not recycle or delete accepted historical reports to reuse a path.
+
 ## Installed wheel smoke
 
 `.github/workflows/installed-wheel.yml` builds a wheel, installs it in a fresh virtual environment,
 stages controlled Army/rules fixtures outside the repository checkout, and exercises the installed
 contract. Both the workflow and isolated preflight call
-`tools/installed_wheel_smoke.py`, keeping CLI, configuration, runtime-route and
+`tools/ci/installed_wheel_smoke.py`, keeping CLI, configuration, runtime-route and
 asset-free acceptance in one implementation. The installed wheel has no developer
 dependencies or editable import path; runtime probes use Python's isolated mode
 and reject application imports outside that environment.
@@ -507,13 +523,13 @@ overlay served by the current application.
 
 ## Release evidence retention
 
-`tools/prepare_release_ci_evidence.py` verifies the three required hosted workflows for one exact
+`tools/ci/prepare_release_ci_evidence.py` verifies the three required hosted workflows for one exact
 40-character candidate release commit: `Source checks`, `Installed wheel smoke`, and
 `Deployment smoke test`. It queries each workflow by its maintained workflow filename and commit SHA,
 uses the latest completed run for that workflow/commit, and fails if that run is not successful. An
 older successful run therefore cannot hide a later failed rerun for the same candidate.
 
-The tool writes two ignored local files under `reports/` during release preparation:
+The tool writes two ignored local files under `local/validation/` during release preparation:
 
 - machine-readable JSON containing the repository, candidate commit, workflow/run identity, attempt,
   trigger, timestamps, conclusion, and GitHub run URL; and
@@ -548,7 +564,7 @@ require graphical assets.
 `.github/workflows/full-asset-checks.yml` is manual/dispatch-only. It can be dispatched against an
 authorized candidate branch before merge, and uses the exact selected ref/SHA checked out by GitHub
 Actions. It uses the `full-assets` environment to obtain a checksum-pinned HTTPS bundle, stages it
-with `tools/stage_full_asset_bundle.py`, validates it against the tracked publication manifest, and
+with `tools/ci/stage_full_asset_bundle.py`, validates it against the tracked publication manifest, and
 runs full checks with assets required. The environment's deployment-branch/tag policy must allow the
 selected candidate ref; do not restrict the environment to `main` when pre-merge validation is
 required.
@@ -557,11 +573,23 @@ This workflow is an independent publication-bundle check, not a way to supply as
 normal source CI. Staging enforces archive safety/size/path constraints and does not upload the
 expanded graphical tree as a workflow artifact.
 
-Build the external bundle from a validated tracked publication with:
+Build the external bundle from a validated tracked publication. Use a
+fresh run-specific path for a retained comparison across publication revisions:
 
 ```powershell
-python tools\build_full_asset_bundle.py --output reports\full-assets.zip
+python tools\ci\build_full_asset_bundle.py --output local/handoffs/full-assets/RUN_ID/full-assets.zip
 ```
+
+Replace `RUN_ID` with a UTC timestamp and short checkout/publication SHA.
+The default is `local/work/full-assets/full-assets.zip`. Explicit
+output destinations remain supported: unlike a check transcript or research
+report, this is an **intentionally replaceable** transfer artifact. Do not
+reuse a path when earlier bundle bytes must be retained for separate verification.
+The builder reserves its sibling temporary ZIP exclusively, refuses
+symlink destinations and cleans up only staging owned by its own run,
+so another producer's temporary file is never silently deleted.
+An interrupted staging file requires inspection; the selected final
+ZIP is replaced only after its new bytes are assembled.
 
 The builder includes exactly the five published symbol categories, normalizes ZIP metadata so the
 same publication produces the same archive bytes, and prints the archive SHA-256. Host that ZIP at
@@ -578,7 +606,7 @@ A successful pre-merge candidate run satisfies the optional pre-merge full-asset
 [the release checklist](releasing.md#5-land-the-release-commit-verify-hosted-ci-and-tag).
 If the final protected-`main` release commit has a different SHA because the pull request is
 merged or squashed, that earlier run does not count as exact-SHA release evidence. When
-`tools/prepare_release_ci_evidence.py --include-full-assets` is used, dispatch **Full-asset checks**
+`tools/ci/prepare_release_ci_evidence.py --include-full-assets` is used, dispatch **Full-asset checks**
 again for the final release SHA and require that exact run just like the other hosted workflows.
 
 Environment configuration for this optional workflow is repository administration and is tracked as

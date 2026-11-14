@@ -1,5 +1,6 @@
 import json
 import re
+from collections.abc import Callable, Mapping
 from copy import deepcopy
 from pathlib import Path
 
@@ -12,6 +13,19 @@ from infinity_db.curated import (
     load_curated_directory,
     load_curated_document,
 )
+
+# Source-only version comparisons must preserve independent review fingerprints.
+_PINNED_CORE_PDF_SOURCES = {
+    "data/pdf/rules/n5-rules-v5.2-en.pdf": (
+        "643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b"
+    ),
+    "data/pdf/rules/n5-rules-v5.3-en.pdf": (
+        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+    ),
+    "data/pdf/rules/n5-rules-v5.3-es.pdf": (
+        "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"
+    ),
+}
 
 
 @pytest.mark.parametrize("digest", ("a" * 64, "A" * 64, None, "", "g" * 64, "a" * 63, 123))
@@ -3379,14 +3393,14 @@ def test_n5_cyberplug_connected_controller_idle_and_reactive_split() -> None:
     assert "without ordinary reaction eligibility" in reactive
 
 
-def test_n5_cyberplug_aro_examples_match_pinned_pdf() -> None:
+def test_n5_cyberplug_aro_examples_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     manifest = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
     )
@@ -3447,14 +3461,14 @@ def test_n5_speculative_attack_template_aro_sequence() -> None:
     )
 
 
-def test_n5_speculative_attack_aro_procedure_matches_pinned_pdf() -> None:
+def test_n5_speculative_attack_aro_procedure_matches_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     manifest = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
     )
@@ -3515,14 +3529,14 @@ def test_n5_suppressive_fire_aro_scope_and_g_jumper_exception() -> None:
     )
 
 
-def test_n5_suppressive_fire_proxy_and_reactive_burst_match_pinned_pdf() -> None:
+def test_n5_suppressive_fire_proxy_and_reactive_burst_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     manifest = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
     )
@@ -3579,14 +3593,14 @@ def test_n5_hacking_area_aro_windows_and_marker_delay() -> None:
     assert "does not turn an unrevealed Marker into a valid" in marker
 
 
-def test_n5_hacking_area_source_heading_and_aro_examples_match_pdf() -> None:
+def test_n5_hacking_area_source_heading_and_aro_examples_match_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     manifest = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
     )
@@ -3651,14 +3665,14 @@ def test_n5_alert_is_optional_automatic_conclusion_not_an_aro() -> None:
     assert not facts["restrictions"]
 
 
-def test_n5_alert_conclusion_and_activation_rules_match_pinned_pdf() -> None:
+def test_n5_alert_conclusion_and_activation_rules_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     manifest = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text(
             encoding="utf8"
@@ -3982,14 +3996,14 @@ def test_n5_cautious_movement_aro_suppression_has_scoped_exceptions() -> None:
     )
 
 
-def test_n5_cautious_movement_aro_conditions_match_pinned_pdf() -> None:
+def test_n5_cautious_movement_aro_conditions_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     config = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
     )
@@ -4060,14 +4074,14 @@ def test_n5_conditional_climb_jump_declarations_keep_base_types() -> None:
     assert any("[[state:prone]]" in note for note in jumping["clarifications"])
 
 
-def test_n5_conditional_movement_clauses_match_pinned_pdf() -> None:
+def test_n5_conditional_movement_clauses_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     provenance = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text(
             encoding="utf8"
@@ -4134,14 +4148,21 @@ def test_esx02_jet_propulsion_is_variant_only_and_distance_neutral() -> None:
     } >= {("n5-core-v5.3-pdf", 113), ("n5-core-v5.3-es-pdf", 116)}
 
 
-def test_esx02_jet_propulsion_wording_in_pinned_source_versions() -> None:
+def test_esx02_jet_propulsion_wording_in_pinned_source_versions(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+) -> None:
     pdf = pytest.importorskip("pymupdf")
-    root = Path(__file__).resolve().parents[1]
-    old = root / "data/pdf/rules/n5-rules-v5.2-en.pdf"
-    current = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    spanish = root / "data/pdf/rules/n5-rules-v5.3-es.pdf"
-    if not all(path.exists() for path in (old, current, spanish)):
-        pytest.skip("Required pinned N5.2/N5.3 PDFs unavailable")
+    sources = pinned_pdf_sources({
+        label: _PINNED_CORE_PDF_SOURCES[label]
+        for label in (
+            "data/pdf/rules/n5-rules-v5.2-en.pdf",
+            "data/pdf/rules/n5-rules-v5.3-en.pdf",
+            "data/pdf/rules/n5-rules-v5.3-es.pdf",
+        )
+    })
+    old = sources["data/pdf/rules/n5-rules-v5.2-en.pdf"]
+    current = sources["data/pdf/rules/n5-rules-v5.3-en.pdf"]
+    spanish = sources["data/pdf/rules/n5-rules-v5.3-es.pdf"]
     with pdf.open(old) as book:
         old_text = " ".join(book[111].get_text().split())
     with pdf.open(current) as book:
@@ -4378,14 +4399,14 @@ def test_guard_neurocinetics_total_reaction_n53_citations() -> None:
         assert record["citations"][0]["page"] == page
 
 
-def test_reactive_combat_automatic_conditions_match_n53_pdf() -> None:
+def test_reactive_combat_automatic_conditions_match_n53_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     config = json.loads((root / "config/validation/weaponry-family-clauses.json").read_text("utf8"))
     assert hashlib.sha256(source.read_bytes()).hexdigest() == config["corePdfSha256"]
     cases = (
@@ -4456,14 +4477,14 @@ def test_n5_stealth_counters_preserve_attack_only_sixth_sense_scope() -> None:
     )
 
 
-def test_n5_stealth_counter_scope_matches_pinned_pdf() -> None:
+def test_n5_stealth_counter_scope_matches_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     config = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
     )
@@ -4517,13 +4538,19 @@ def test_esx01_stealth_contact_reaction_choices_are_explicit_and_scoped() -> Non
     } >= {("n5-core-v5.3-pdf", 112), ("n5-core-v5.3-es-pdf", 114)}
 
 
-def test_esx01_current_spanish_stealth_agrees_with_english_primary_source() -> None:
+def test_esx01_current_spanish_stealth_agrees_with_english_primary_source(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+) -> None:
     pdf = pytest.importorskip("pymupdf")
-    root = Path(__file__).parents[1]
-    english = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    spanish = root / "data/pdf/rules/n5-rules-v5.3-es.pdf"
-    if not english.exists() or not spanish.exists():
-        pytest.skip("Pinned current N5.3 English/Spanish PDFs unavailable")
+    sources = pinned_pdf_sources({
+        label: _PINNED_CORE_PDF_SOURCES[label]
+        for label in (
+            "data/pdf/rules/n5-rules-v5.3-en.pdf",
+            "data/pdf/rules/n5-rules-v5.3-es.pdf",
+        )
+    })
+    english = sources["data/pdf/rules/n5-rules-v5.3-en.pdf"]
+    spanish = sources["data/pdf/rules/n5-rules-v5.3-es.pdf"]
     with pdf.open(english) as book:
         english_text = " ".join(book[111].get_text().split())
     with pdf.open(spanish) as book:
@@ -4621,13 +4648,13 @@ def test_n5_guard_aerial_unconscious_exception_is_conditional() -> None:
                for x in unconscious["facts"]["effects"])
 
 
-def test_n5_guard_aerial_exception_matches_pinned_pdf() -> None:
+def test_n5_guard_aerial_exception_matches_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     config = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
     )
@@ -4935,14 +4962,14 @@ def test_n5_declaration_categories_follow_exact_source_headings() -> None:
         assert retired not in {r["id"] for r in document["records"]}
 
 
-def test_n5_declaration_source_headings_match_pinned_pdf() -> None:
+def test_n5_declaration_source_headings_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     provenance = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text(
             encoding="utf8"
@@ -4995,14 +5022,14 @@ def test_n5_discover_marker_retry_and_attack_sequence() -> None:
     )
 
 
-def test_n5_discover_retry_and_aro_exception_match_pinned_pdf() -> None:
+def test_n5_discover_retry_and_aro_exception_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     config = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
     )
@@ -5063,14 +5090,14 @@ def test_n5_short_skill_pages_match_source_headings() -> None:
     )
 
 
-def test_n5_short_skill_declarations_match_pinned_pdf() -> None:
+def test_n5_short_skill_declarations_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     provenance = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text(
             encoding="utf8"
@@ -5118,7 +5145,7 @@ def test_n5_numeric_replacement_variants_match_pinned_army_snapshot() -> None:
     import zipfile
     from collections import Counter
 
-    archive = Path(__file__).parents[1] / "data/raw/JSON 20260929-114335.zip"
+    archive = Path(__file__).parents[1] / "local/data/raw/army/JSON 20260929-114335.zip"
     if not archive.exists():
         pytest.skip("Pinned private Army snapshot is not installed")
     assert hashlib.sha256(archive.read_bytes()).hexdigest() == (
@@ -5212,14 +5239,14 @@ def test_n5_deployment_and_long_skill_categories_use_own_headings() -> None:
         assert retired not in records
 
 
-def test_n5_deployment_and_long_skill_headings_match_pinned_pdf() -> None:
+def test_n5_deployment_and_long_skill_headings_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     provenance = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text(
             encoding="utf8"
@@ -5281,14 +5308,14 @@ def test_n5_deployment_only_skills_are_not_automatic_metadata() -> None:
     assert "declaration-category:automatic:p89" not in records
 
 
-def test_n5_deployment_only_headings_match_pinned_pdf() -> None:
+def test_n5_deployment_only_headings_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     provenance = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text(
             encoding="utf8"
@@ -5356,14 +5383,14 @@ def test_n5_automatic_category_pages_reconcile_to_actual_skill_headings() -> Non
         assert obsolete not in records
 
 
-def test_n5_reconciled_automatic_heading_pages_match_pinned_pdf() -> None:
+def test_n5_reconciled_automatic_heading_pages_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     provenance = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text(
             encoding="utf8"
@@ -5441,14 +5468,14 @@ def test_n5_look_out_alerted_aro_is_dodge_only_and_conditional() -> None:
     assert records["skill:dodge"]["facts"]["typeIds"] == ["short-skill", "aro"]
 
 
-def test_n5_look_out_aro_procedure_matches_pinned_pdf() -> None:
+def test_n5_look_out_aro_procedure_matches_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     provenance = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
     )
@@ -5521,14 +5548,14 @@ def test_n5_reload_place_deployable_aro_rules_preserve_timing() -> None:
                for item in deploy["facts"]["restrictions"])
 
 
-def test_n5_reload_place_deployable_aro_clauses_match_pinned_pdf() -> None:
+def test_n5_reload_place_deployable_aro_clauses_match_pinned_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     import hashlib
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     config = json.loads(
         (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
     )
@@ -5715,13 +5742,19 @@ def test_esx03_msv3_marker_attack_is_not_global_revelation() -> None:
     }
 
 
-def test_esx03_msv3_source_disclosure_and_state_cancellation_are_scoped() -> None:
+def test_esx03_msv3_source_disclosure_and_state_cancellation_are_scoped(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+) -> None:
     pdf = pytest.importorskip("pymupdf")
-    root = Path(__file__).resolve().parents[1]
-    english = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    spanish = root / "data/pdf/rules/n5-rules-v5.3-es.pdf"
-    if not english.exists() or not spanish.exists():
-        pytest.skip("Pinned current English/Spanish N5.3 PDFs unavailable")
+    sources = pinned_pdf_sources({
+        label: _PINNED_CORE_PDF_SOURCES[label]
+        for label in (
+            "data/pdf/rules/n5-rules-v5.3-en.pdf",
+            "data/pdf/rules/n5-rules-v5.3-es.pdf",
+        )
+    })
+    english = sources["data/pdf/rules/n5-rules-v5.3-en.pdf"]
+    spanish = sources["data/pdf/rules/n5-rules-v5.3-es.pdf"]
     with pdf.open(english) as book:
         english_visor = " ".join(book[124].get_text().split())
         english_state = " ".join(book[157].get_text().split())

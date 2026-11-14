@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 from test_prepare_symbol_publication import _inputs, _write
 
-from tools import promote_symbol_publication as promotion
-from tools.prepare_symbol_publication import prepare_symbol_publication
+from tools.symbols import promote_symbol_publication as promotion
+from tools.symbols.prepare_symbol_publication import prepare_symbol_publication
 
 OLD_SVG = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><path d="M0 0h1"/></svg>'
 

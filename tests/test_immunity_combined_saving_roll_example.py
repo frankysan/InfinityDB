@@ -16,7 +16,6 @@ from infinity_db.weapon_combined_saving_rolls import WeaponCombinedSavingRolls
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 ARMY = ROOT / "data/generated/army.db"
 RULES = ROOT / "data/generated/rules_n5.db"
@@ -31,11 +30,12 @@ def reviewed_case() -> dict:
     return immunity["facts"]["immunityInteraction"]["reviewedSavingRollCases"][0]
 
 
-def test_printed_plasma_immunity_example_has_independent_n53_evidence(require_source_files) -> None:
-    require_source_files(PDF)
+def test_printed_plasma_immunity_example_has_independent_n53_evidence(
+    pinned_n53_core_pdf: Path,
+) -> None:
     fitz = pytest.importorskip("fitz")
-    assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
-    with fitz.open(PDF) as source:
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == PIN
+    with fitz.open(pinned_n53_core_pdf) as source:
         page = " ".join(source[95].get_text("text").split()).casefold()
     for phrase in (
         "example 3", "immunity (enhanced)", "plasma rifle",

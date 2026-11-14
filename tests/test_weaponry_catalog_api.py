@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
 from wsgiref.util import setup_testing_defaults
@@ -435,12 +435,11 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
     assert profiles[203]["burst"] == "1"
 
 
-def test_pheroware_chart_heading_matches_pinned_n53_pdf() -> None:
+def test_pheroware_chart_heading_matches_pinned_n53_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pdf = pytest.importorskip("pymupdf")
-    root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     assert hashlib.sha256(source.read_bytes()).hexdigest() == (
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
     )
@@ -2235,13 +2234,20 @@ def test_ammunition_metadata_links_are_reviewed_base_types(
         ]
 
 
-def test_esx04_ap_t2_cc_row_in_bilingual_current_n53_charts() -> None:
+def test_esx04_ap_t2_cc_row_in_bilingual_current_n53_charts(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+) -> None:
     pdf = pytest.importorskip("pymupdf")
-    root = Path(__file__).resolve().parents[1]
-    english = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    spanish = root / "data/pdf/rules/n5-rules-v5.3-es.pdf"
-    if not english.exists() or not spanish.exists():
-        pytest.skip("Pinned bilingual N5.3 rulebook PDFs unavailable")
+    sources = pinned_pdf_sources({
+        "data/pdf/rules/n5-rules-v5.3-en.pdf": (
+            "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+        ),
+        "data/pdf/rules/n5-rules-v5.3-es.pdf": (
+            "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"
+        ),
+    })
+    english = sources["data/pdf/rules/n5-rules-v5.3-en.pdf"]
+    spanish = sources["data/pdf/rules/n5-rules-v5.3-es.pdf"]
     with pdf.open(english) as book:
         en_chart = " ".join(book[176].get_text().split())
     with pdf.open(spanish) as book:
@@ -3327,18 +3333,14 @@ def test_modifiers_explained_player_reference_and_mixed_weapon_navigation(
     assert "Vorpal" in family["summary"]
 
 
-def test_modifiers_explained_pinned_page75_scope() -> None:
-    import hashlib
-
+def test_modifiers_explained_pinned_page75_scope(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pymupdf = pytest.importorskip("pymupdf")
-
-    pdf = Path(__file__).resolve().parents[1] / (
-        "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    )
-    if not pdf.exists():
-        pytest.skip("Pinned official N5.3 PDF unavailable")
+    pdf = pinned_n53_core_pdf
     expected = json.loads(
-        (pdf.parents[3] / "config/validation/weaponry-family-clauses.json")
+        (Path(__file__).resolve().parents[1] /
+         "config/validation/weaponry-family-clauses.json")
         .read_text(encoding="utf8")
     )["corePdfSha256"]
     assert hashlib.sha256(pdf.read_bytes()).hexdigest() == expected

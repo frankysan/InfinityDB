@@ -9,15 +9,22 @@ import pytest
 
 from infinity_db.database import raw_database_path
 from tests.test_audit_runtime_database_surface import _runtime_database
-from tools.audit_database_separation import (
+from tools.data.audit_database_separation import (
     CANONICAL,
     CONTEXTUAL,
+    PUBLISHED_TABLES_BY_VERSION,
     SOURCE_ONLY,
     DatabaseSeparationAuditError,
+    _table_classification,
     audit_database,
+    build_parser,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_default_project_root_tracks_module_relocation() -> None:
+    assert build_parser().parse_args(["army.db"]).project_root == ROOT
 
 
 def _item(report: dict, table: str) -> dict:
@@ -100,3 +107,43 @@ def test_database_separation_audit_is_deterministic_and_read_only(tmp_path: Path
     assert first == second
     assert hashlib.sha256(path.read_bytes()).hexdigest() == before
     assert hashlib.sha256(raw_path.read_bytes()).hexdigest() == raw_before
+
+
+@pytest.mark.parametrize(
+    ("version", "extra_count"),
+    [(26, 0), (27, 2), (28, 4), (29, 8), (30, 11), (31, 14)],
+)
+def test_database_separation_audit_classifies_versioned_publication_tables(
+    version: int, extra_count: int,
+) -> None:
+    published = PUBLISHED_TABLES_BY_VERSION[version]
+    base = PUBLISHED_TABLES_BY_VERSION[26]
+    extra = set(published) - set(base)
+    classification = _table_classification(published)
+
+    assert len(extra) == extra_count
+    assert set(published) <= set(classification)
+    assert all(classification[name] != SOURCE_ONLY for name in extra)
+    assert sum(role == SOURCE_ONLY for role in classification.values()) == 46
+
+
+def test_database_separation_audit_rejects_unknown_published_extension() -> None:
+    unknown = dict(PUBLISHED_TABLES_BY_VERSION[31])
+    unknown["unreviewed_extension"] = unknown["published_symbol_paths"]
+    with pytest.raises(DatabaseSeparationAuditError, match="policy is invalid"):
+        _table_classification(unknown)
+
+
+def test_database_separation_audit_accepts_current_tracked_army_database(
+    tmp_path: Path,
+) -> None:
+    published = ROOT / "data/generated/army.db"
+    report = audit_database(
+        published, project_root=ROOT, raw_path=tmp_path / "not-available.raw.db"
+    )
+
+    assert report["database"]["tableCount"] == 98
+    assert report["rawArchive"]["status"] == "not_available"
+    assert report["summary"]["runtimeSourceOnlyViolationCount"] == 0
+    assert report["summary"]["foreignKeyBlockerCount"] == 0
+    assert report["summary"]["validationSourceOnlyDependencyCount"] == 0

@@ -4,7 +4,15 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from reference_acceptance_support import PDF, browse, pdf_pages, published, records
+from reference_acceptance_support import (
+    PDF_LABEL,
+    PIN,
+    browse,
+    pdf_pages,
+    published,
+    records,
+    selected_pdf,
+)
 from test_verify_ammunition_publication_browser import browser as browser
 
 PROGRAM_PAGES = {
@@ -14,9 +22,13 @@ PROGRAM_PAGES = {
 }
 
 
-def test_hacking_sources_pin_citation_pages_and_distinct_procedures(require_source_files) -> None:
-    require_source_files(PDF)
-    pages = pdf_pages((55, 56, 59, 60, 61))
+def test_hacking_sources_pin_citation_pages_and_distinct_procedures(
+    reference_pdf_layout: str,
+) -> None:
+    pdf = selected_pdf(PDF_LABEL, PIN, layout=reference_pdf_layout)
+    if pdf is None:
+        pytest.skip(f"Pinned PDF unavailable in {reference_pdf_layout} layout: {PDF_LABEL}")
+    pages = pdf_pages((55, 56, 59, 60, 61), pdf_path=pdf)
     assert "supportware programs" in pages[55]
     assert "only sustain one active supportware" in pages[55]
     assert "this is a range amplifier" in pages[56]

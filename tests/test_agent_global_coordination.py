@@ -8,9 +8,9 @@ from threading import Barrier
 
 import pytest
 
-from tools import agent_coordination as local
-from tools import agent_global_coordination as global_coordination
-from tools.agent_global_coordination import (
+from tools.dev import agent_coordination as local
+from tools.dev import agent_global_coordination as global_coordination
+from tools.dev.agent_global_coordination import (
     GlobalClaimError,
     acquire_integration,
     bootstrap,
@@ -21,7 +21,7 @@ from tools.agent_global_coordination import (
     release_integration,
     status,
 )
-from tools.agent_workspaces import create
+from tools.dev.agent_workspaces import create
 
 
 def _git(root: Path, *args: str) -> str:

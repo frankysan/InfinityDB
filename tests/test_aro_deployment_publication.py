@@ -18,7 +18,6 @@ ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RULES = ROOT / "data/generated/rules_n5.db"
 ARMY = ROOT / "data/generated/army.db"
-PDF = Path("data/pdf/rules/n5-rules-v5.3-en.pdf")
 SOURCE_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 NEW_ID = "rule:automatic-reaction-order"
 CHANGED_ID = "rule:deployment-phase"
@@ -50,12 +49,11 @@ def _records() -> dict[str, dict[str, Any]]:
     return {record["id"]: record for record in records}
 
 
-def test_n5_3_core_aro_and_deployment_clauses_match_pinned_source() -> None:
-    file = ROOT / PDF
-    if not file.is_file():
-        pytest.skip("Pinned English N5.3 PDF not available on this worker")
+def test_n5_3_core_aro_and_deployment_clauses_match_pinned_source(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pymupdf = pytest.importorskip("pymupdf")
-    assert hashlib.sha256(file.read_bytes()).hexdigest() == SOURCE_SHA256
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == SOURCE_SHA256
     clauses = {
         13: (
             "An enemy Trooper activates within its Line of Fire",
@@ -84,7 +82,7 @@ def test_n5_3_core_aro_and_deployment_clauses_match_pinned_source() -> None:
             "Players can measure the size of the Deployment Zones",
         ),
     }
-    with pymupdf.open(file) as pdf:
+    with pymupdf.open(pinned_n53_core_pdf) as pdf:
         for page, excerpts in clauses.items():
             source = " ".join(pdf[page - 1].get_text().split()).casefold()
             for excerpt in excerpts:

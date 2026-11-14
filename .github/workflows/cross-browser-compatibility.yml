@@ -52,13 +52,13 @@ jobs:
         run: python -m infinity_db database-health --db-dir data/generated
 
       - name: Run selected critical journeys
-        run: python -m tools.run_cross_browser_compatibility --engine ${{ matrix.engine }}
+        run: python -m tools.browser.run_cross_browser_compatibility --engine ${{ matrix.engine }}
 
       - name: Upload JUnit and failure traces
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: cross-browser-${{ matrix.engine }}-${{ runner.os }}
-          path: local/cross-browser-compatibility/
+          path: local/validation/project-infrastructure/cross-browser/
           if-no-files-found: warn
           retention-days: 7

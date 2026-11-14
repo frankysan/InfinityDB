@@ -10,20 +10,39 @@ responsibilities. Syncthing never updates a checkout or triggers a test.
 ## Layout and synchronization
 
 Windows is the authoritative **Send Only** Syncthing device; `linux-dev` is
-**Receive Only**. Five independent folder IDs/paths are configured as follows:
+**Receive Only**. Four source folders are sent from InfinityDB, while the
+override sender is now owned by the sibling InfinityDB-symbol-tools repository.
+All five folder IDs and Linux staging folder roots are preserved:
 
-| Windows repository subdirectory | Linux staging folder |
+| Windows sender directory | Linux staging folder |
 | --- | --- |
-| `data/raw/` | `~/syncthing/infinitydb/raw/` |
-| `data/wiki/` | `~/syncthing/infinitydb/wiki/` |
-| `data/pdf/` | `~/syncthing/infinitydb/pdf/` |
-| `data/manifests/snapshots/` | `~/syncthing/infinitydb/snapshots/` |
-| `image_overrides/` | `~/syncthing/infinitydb/image_overrides/` (optional) |
+| `local/data/raw/` | `~/syncthing/infinitydb/raw/` |
+| `local/data/wiki/` | `~/syncthing/infinitydb/wiki/` |
+| `local/data/pdf/` | `~/syncthing/infinitydb/pdf/` |
+| `local/data/manifests/snapshots/` | `~/syncthing/infinitydb/snapshots/` |
+| `../InfinityDB-symbol-tools/local/image_overrides/` | `~/syncthing/infinitydb/image-overrides/` (optional symbol-tools source) |
+
+**Source cutover:** The source families were copied to `local/data/`
+with hash verification before the Windows sender paths were changed.
+`tools.operations.cutover_syncthing_sender` previews the four folder-path
+changes and applies them with `--apply` via the local Syncthing API, without
+changing folder IDs, modes or devices. The optional override sender was
+subsequently redirected to `InfinityDB-symbol-tools/local/image_overrides/`
+through Syncthing Advanced Configuration; its folder ID and Linux receiver
+remain unchanged. The receiver folders remain at the same staging locations. The
+`--layout local` activation maps the nested Army ZIPs to `raw/army/`.
+`--layout legacy` remains available for old staging arrangements, but
+does not discover the new Army subdirectory.
 
 The Syncthing folder IDs must match between the devices; their physical
-paths need not. Do **not** synchronize the whole repository, the
+paths need not. The optional Linux receiver uses `image-overrides/` (hyphen).
+The original main-checkout `image_overrides/` directory has been retired;
+symbol-tools owns the Windows source. An explicitly selected local activation
+can still copy received SVG evidence to `local/data/symbols/overrides/` in
+InfinityDB, but legacy activation into the checkout root is unsupported.
+Do **not** synchronize the whole repository or entire `local/` tree, the
 `data/generated/` directory (contains tracked release databases),
-`data/curated/`, `local/`, `data/work/`, `reports/`, environment
+`data/curated/`, `data/work/`, `reports/`, environment
 files, virtualenvs, or caches. The Linux source staging directory is outside
 `~/InfinityDB`.
 
@@ -39,15 +58,17 @@ Run the commands below **on Linux**, with the InfinityDB repository as the
 current directory, after synchronized inputs show Up to Date.
 
 ```bash
-./.venv/bin/python -m tools.activate_synced_assets list
-./.venv/bin/python -m tools.activate_synced_assets verify --snapshot 'JSON 20260929-114335'
-./.venv/bin/python -m tools.activate_synced_assets activate --snapshot 'JSON 20260929-114335'
-./.venv/bin/python -m tools.activate_synced_assets activate --snapshot 'JSON 20260929-114335' --apply
+./.venv/bin/python -m tools.activate_synced_assets list --layout local
+./.venv/bin/python -m tools.activate_synced_assets verify --layout local --snapshot 'JSON 20260929-114335'
+./.venv/bin/python -m tools.activate_synced_assets activate --layout local --snapshot 'JSON 20260929-114335'
+./.venv/bin/python -m tools.activate_synced_assets activate --layout local --snapshot 'JSON 20260929-114335' --apply
 ```
 
-- `list` enumerates staged snapshot manifest names.
-- `verify` compares each selected archive's SHA-256 against its staged
-  snapshot manifest. Omit `--snapshot` to validate all staged manifests,
+- `list --layout local` enumerates staged snapshot manifest names.
+- `verify` validates each selected manifest with the shared provenance
+  validator, including exact archive SHA-256 and logical-content SHA-256
+  where its version provides one. Supported historical v1/v2 and current v3
+  provenance remain readable. Omit `--snapshot` to validate all staged manifests,
   which may require reading large archives.
 - `activate --snapshot` verifies the archive, then plans both the archive
   and its matching provenance JSON in the checkout. **It is a dry run unless
@@ -59,22 +80,98 @@ current directory, after synchronized inputs show Up to Date.
   already matches the requested symlink); conflicting files are never
   overwritten. There is no bulk cleanup, delete or reverse synchronization.
 
-PDFs and optional local override evidence have no mandatory archive manifest pin.
-The external producer owns override application; syncing these files does not
-make them an InfinityDB build input.
-Activate an individual file explicitly; the command measures its SHA-256 but
-cannot independently establish original provenance:
+### Explicit snapshot layouts
+
+[The maintained layout policy](../config/operations/synced-asset-layouts.json)
+defines version-1 `legacy` and `local` mappings. Every command accepts
+`--layout`; omitting it always selects `legacy`. No environment variable,
+embedded producer path or newest-file search selects a different layout.
+`INFINITYDB_SYNC_STAGING_ROOT` still selects only the external staging root.
+The policy is validated before reading selected inputs or creating destinations;
+unknown fields/versions, duplicate JSON keys, unsafe paths and routes outside
+their permitted source/destination families are rejected without fallback.
+
+| Snapshot family | Staged source in `local` mode | `local` checkout destination |
+| --- | --- | --- |
+| Army | `raw/army/<original basename>.zip` | `local/data/raw/army/<original basename>.zip` |
+| Wiki / Human Sphere | `wiki/<original basename>.zip` | `local/data/wiki/<original basename>.zip` |
+| Raw symbols | `raw/symbols/<original basename>.zip` | `local/data/raw/symbols/<original basename>.zip` |
+| Matching provenance | `snapshots/<original stem>.json` | `local/data/manifests/snapshots/<original stem>.json` |
+
+The `legacy` layout continues to translate the manifest's `data/raw/` or
+`data/wiki/` label into the corresponding old staged folder, preserving nested
+relative paths such as `raw/symbols/`. It rejects a new-layout path instead of
+silently switching layouts. The explicitly selected `local` mode selects one
+configured family directory plus the original archive basename. Its optional
+producer-relative `archive.path` is validated as portable text but is not
+followed, even if it names another existing file. Old, new or absent producer
+path labels therefore work without modifying provenance. Alternate staged
+locations need a reviewed policy change; the tool does not search siblings.
+Derived symbol archives are not implicitly selected from other processing roots.
+
+Preview a selected pair on Linux without changing the checkout:
+
+```bash
+./.venv/bin/python -m tools.activate_synced_assets verify --layout local --snapshot 'JSON 20260929-114335'
+./.venv/bin/python -m tools.activate_synced_assets activate --layout local --snapshot 'JSON 20260929-114335'
+```
+
+On 2026-11-14, the Windows checkout received hash-checked copies of Army,
+Wiki/Human-Sphere, raw-symbol sources and PDFs under `local/data/`.
+After the cutover, 49 exact duplicate legacy ZIP/manifest files and
+75 duplicate PDFs were retired; their `local/data/` copies remain
+intact. The four sender paths use the local layout; the optional override
+sender was subsequently redirected to the symbol-tools repository.
+Two unique expanded Wiki/Human-Sphere directories
+were moved to `local/data/wiki-extracted/`, **outside** the ZIP-only
+sender root. They remain local to Windows.
+Linux checkout activation remains an explicit `--layout local` command;
+this does not trigger builds, Git operations or live acquisition.
+
+Snapshot and manifest basenames must agree. Duplicate selections, case-colliding
+manifest names and non-lowercase `.json` suffixes fail closed. Full-pair
+preflight checks destination conflicts before any activation writes; source
+hashes and symlink guards are checked again before each file is activated.
+Copy publication never replaces a destination. A late I/O error or source
+change may leave an earlier **newly activated file** from that explicit apply:
+the pair is not a multi-file transaction. Inspect and retry the same verified
+selection; prior conflicting bytes are never overwritten or deleted.
+
+### Individual PDFs and overrides
+
+PDFs and optional override evidence have no mandatory snapshot manifest pin.
+The external symbol producer owns override lookup/application; activating these
+files does **not** approve new artwork or make it an InfinityDB build input.
+The command measures a SHA-256 of its selected staged file but cannot establish
+original provenance. The legacy layout supports PDFs only; override evidence requires the
+explicit local layout. These are the supported file layouts:
+
+| Selection | Staged source | Checkout destination |
+| --- | --- | --- |
+| Explicit `--layout legacy` | `pdf/<relative>.pdf` | `data/pdf/<relative>.pdf` |
+| Explicit `--layout local` | `pdf/<relative>.pdf` | `local/data/pdf/<relative>.pdf` |
+| Explicit `--layout local` | `image-overrides/<relative>.svg` | `local/data/symbols/overrides/<relative>.svg` |
 
 ```bash
 ./.venv/bin/python -m tools.activate_synced_assets activate --file 'data/pdf/rules/n5-rules-v5.3-en.pdf'
-./.venv/bin/python -m tools.activate_synced_assets activate --file 'data/pdf/rules/n5-rules-v5.3-en.pdf' --mode symlink --apply
+./.venv/bin/python -m tools.activate_synced_assets activate --layout local --file 'local/data/pdf/rules/n5-rules-v5.3-en.pdf'
+./.venv/bin/python -m tools.activate_synced_assets activate --layout local --file 'local/data/symbols/overrides/Unit/example.svg'
 ```
 
-Paths in `--file` must be relative to the repository and restricted to
-`data/pdf/` and `image_overrides/`. Raw/wiki snapshot ZIPs must go
-through `--snapshot` to ensure their hashes are verified first.
-The tool refuses symlinks within the staging source and destination conflicts.
-Existing tracked files are outside its permitted destination paths.
+These commands are previews; `--apply` must be explicitly selected for a
+specific receiver file and is not implied by the Windows R6 copy. Both
+layouts reject a path belonging to the other layout and never search an
+alternate checkout/staging root. Nested relative basenames are preserved;
+receiver `image-overrides` (hyphen) is **not** renamed. Raw/wiki snapshot ZIPs
+must use `--snapshot` and its independent provenance verification. The tool
+refuses staged symlinks and differing existing destination bytes, and cannot
+replace a tracked published artifact. Independently hash-check selected PDFs
+against the reviewed source pins **before any research or publication use**;
+read-only activation does not make unpinned staged bytes authoritative.
+Pinned research PDF readers reject symlinks and reparse points, even if the
+activation utility permits `--mode symlink` for other file workflows. Use
+the default **copy** mode when testing a selected PDF with the pinned reader.
+Neither activation nor a matching SVG byte hash constitutes artwork approval.
 
 ## MCP worker policy
 
@@ -98,6 +195,84 @@ and descendants cover files added by Syncthing later. If Syncthing applies
 restrictive source permission bits to new files, recheck effective ACL masks
 with `getfacl` and repeat the access test after synchronization. Do not give
 the worker write permission to the receive-only staging source.
+
+### Read-only receiver access audit (R5)
+
+Run the maintained metadata-only probe as `mcpworker` with the service's
+`INFINITYDB_SYNC_STAGING_ROOT` environment already configured:
+
+```bash
+./.venv/bin/python -m tools.operations.audit_syncthing_receiver
+```
+
+It reports only the five known folder categories, a fixed selection of
+three source-path access probes, whether the executing identity can read or
+write their current paths, and named/default POSIX ACL entries when
+`getfacl` is installed. It never reads file contents, prints a private
+source inventory, changes ACLs or tests access by writing. A missing
+configured root is reported as unavailable rather than silently choosing
+another home directory. The live Linux check on 2026-11-13 found all five
+folder roots readable and nonwritable by `mcpworker`, with
+`user:mcpworker:r-x` and `default:user:mcpworker:r-x` entries, and all
+three selected files readable and nonwritable.
+
+The optional `--recursive` flag performs an effective-access census of
+each configured receiver family, traversing **without following symlinks**.
+It checks every encountered entry for the worker's read/write access and
+reports only aggregate file/directory counts, inaccessible or writable
+entries, links, scan errors and a hard entry limit. It reads no payload
+bytes, prints no private file paths and writes nothing. A partial scan
+cannot pass. On 2026-11-13, the `linux-dev` probe completed **35,833
+entries (27,560 files and 8,273 directories)** across all five families,
+with zero unreadable, writable, linked or uninspectable entries:
+
+```bash
+./.venv/bin/python -m tools.operations.audit_syncthing_receiver --recursive
+```
+
+This proves **effective read-only access to the observed entries at
+inspection time**, not every nested default ACL/mask or how future files
+inherit permissions. The probe intentionally keeps
+`recursive_acl_verified: false`. Do not treat successful access testing
+as backup, synchronization, artwork or migration approval.
+
+### Read-only Syncthing service health (R5)
+
+The credential-redacted status probe reads only the executing identity's
+standard Syncthing configuration (or an explicitly configured
+`INFINITYDB_SYNCTHING_CONFIG` path), matches the five expected source
+folders, then uses **loopback GET only** to query current folder state.
+It bypasses proxies and refuses redirects; API keys remain in memory and
+are never included in reports. No service configuration, synchronization
+or folder content is changed.
+
+On Windows, from the InfinityDB repository root:
+
+```powershell
+.\\.venv\\Scripts\\python.exe -m tools.operations.audit_syncthing_health --role sender
+```
+
+On the Linux receiver, only from an identity with authorized access to
+the Syncthing service configuration:
+
+```bash
+./.venv/bin/python -m tools.operations.audit_syncthing_health --role receiver
+```
+
+On 2026-11-13, Windows returned **five live, idle Send Only folders**:
+the configured IDs and roots matched, local/global counts matched,
+pending files/bytes/deletions and pull errors were all zero, and
+versioning was unconfigured. The Linux `mcpworker` execution reported
+`config-not-readable` under its current configuration discovery;
+**receiver live API state remains unverified**. Do not move or expose
+the owner's Syncthing API credentials to the worker to bypass this
+boundary. A separate owner-authorized check is needed. Matching earlier
+receiver snapshots or today's sender global counts cannot substitute
+for a fresh receiver API query.
+
+Syncthing replication is not a source backup. The original immutable
+archive and provenance files remain under the legacy Windows source
+directories during this cutover; deleting them is a later, separate cleanup.
 
 The activation tool uses `~/syncthing/infinitydb` by default. Configure the
 worker's **actual** staging root via a systemd drop-in, avoiding changes to

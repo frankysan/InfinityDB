@@ -25,6 +25,7 @@ from infinity_db.unit_filter_storage import (
     ARMY_SCHEMA_VERSION as FILTER_SCHEMA_VERSION,
 )
 
+from .normalized_source import verified_normalized_generation
 from .paths import raw_database_path
 from .publication import validate_database_pair
 from .repository import Database
@@ -63,8 +64,12 @@ def _read_revisions(path: Path) -> tuple[int, int | None]:
         connection.close()
 
 
-def database_health_report(path: Path, *, require_raw: bool = False) -> dict[str, Any]:
-    """Validate one application database and optionally its expected raw sibling."""
+def database_health_report(
+    path: Path, *, require_raw: bool = False, normalized: Path | None = None,
+) -> dict[str, Any]:
+    """Validate an Army application and one optional, explicitly selected source."""
+    if require_raw and normalized is not None:
+        raise ValueError("Select either --require-raw or --normalized, not both")
 
     from infinity_db.army_reference_storage import (
         ARMY_COMPATIBILITY_VERSION as REFERENCE_COMPATIBILITY_VERSION,
@@ -143,8 +148,31 @@ def database_health_report(path: Path, *, require_raw: bool = False) -> dict[str
             raw_archive["pairSha256"] = pair_sha256
         raw_archive["validationMs"] = (time.perf_counter() - raw_started) * 1000
 
-    healthy = application["status"] == "valid" and (
-        not require_raw or raw_archive["status"] == "valid"
+    normalized_source: dict[str, Any] = {
+        "required": normalized is not None,
+        "path": str(normalized) if normalized is not None else None,
+        "bytes": normalized.stat().st_size if normalized is not None and normalized.is_file()
+        else None,
+        "status": "not-checked",
+        "pairSha256": None,
+        "validationMs": None,
+    }
+    if normalized is not None:
+        source_started = time.perf_counter()
+        try:
+            generation = verified_normalized_generation(database_path, normalized)
+        except (OSError, sqlite3.Error, ValueError, KeyError, TypeError) as exc:
+            normalized_source["status"] = "invalid"
+            normalized_source["error"] = str(exc)
+        else:
+            normalized_source["status"] = "valid"
+            normalized_source["pairSha256"] = generation
+        normalized_source["validationMs"] = (time.perf_counter() - source_started) * 1000
+
+    healthy = (
+        application["status"] == "valid"
+        and (not require_raw or raw_archive["status"] == "valid")
+        and (normalized is None or normalized_source["status"] == "valid")
     )
     return {
         "format": HEALTH_REPORT_FORMAT,
@@ -152,4 +180,5 @@ def database_health_report(path: Path, *, require_raw: bool = False) -> dict[str
         "status": "healthy" if healthy else "unhealthy",
         "application": application,
         "rawArchive": raw_archive,
+        **({"normalizedSource": normalized_source} if normalized is not None else {}),
     }

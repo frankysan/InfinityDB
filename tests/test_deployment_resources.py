@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.deployment_resources import (
+from tools.operations.deployment_resources import (
     ContainerSnapshot,
     HostSnapshot,
     ResourceCaptureError,
@@ -176,7 +176,7 @@ def _host_sample(
 
 
 def test_host_summary_reports_rates_without_identity_data(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("tools.deployment_resources.os.cpu_count", lambda: 4)
+    monkeypatch.setattr("tools.operations.deployment_resources.os.cpu_count", lambda: 4)
     report = summarize_host(
         [
             _host_sample(
@@ -331,21 +331,23 @@ def test_main_wraps_command_but_does_not_retain_command_line(
             "command": {"ran": True, "exitCode": 7},
         }, 7
 
-    monkeypatch.setattr("tools.deployment_resources.capture_resources", fake_capture)
+    monkeypatch.setattr("tools.operations.deployment_resources.capture_resources", fake_capture)
     exit_code = main(
         [
             "--output",
             str(output),
             "--",
             "python",
-            "tools/capacity_test.py",
+            "-m",
+            "tools.performance.capacity_test",
             "http://127.0.0.1:8080",
         ]
     )
     assert exit_code == 7
     assert observed["command"] == [
         "python",
-        "tools/capacity_test.py",
+        "-m",
+        "tools.performance.capacity_test",
         "http://127.0.0.1:8080",
     ]
     document = json.loads(output.read_text(encoding="utf-8"))

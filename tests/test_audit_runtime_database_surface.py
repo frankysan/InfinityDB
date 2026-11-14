@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 
 from infinity_army_data.normalize import normalize_master, validate_normalized
 from infinity_db.database import export_database
-from tools.audit_runtime_database_surface import (
+from tools.data.audit_runtime_database_surface import (
     CANONICAL,
     CONTEXTUAL,
     NO_ISSUE,
     SOURCE,
+    _parser,
     audit_database,
     discover_runtime_database_methods,
 )
@@ -17,7 +19,13 @@ from tools.audit_runtime_database_surface import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def _runtime_database(tmp_path: Path) -> Path:
+def test_default_project_root_tracks_module_relocation() -> None:
+    assert _parser().parse_args(["army.db"]).project_root == ROOT
+
+
+def _runtime_database(
+    tmp_path: Path, *, normalized_output: Path | None = None,
+) -> Path:
     nested = {
         "skills": [{"id": 11, "extra": [41]}],
         "equip": [{"id": 21, "extra": [42]}],
@@ -116,7 +124,11 @@ def _runtime_database(tmp_path: Path) -> Path:
     normalized = normalize_master(master)
     validate_normalized(normalized)
     path = tmp_path / "army.db"
-    export_database(normalized, path)
+    export_database(normalized, path, include_raw=True)
+    if normalized_output is not None:
+        normalized_output.write_text(
+            json.dumps(normalized, ensure_ascii=False), encoding="utf-8",
+        )
     return path
 
 

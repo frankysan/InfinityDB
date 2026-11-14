@@ -6,7 +6,7 @@ serving set; release/hosted acceptance is separately tracked.
 The ITS season database is an independently validated, deterministic SQLite
 artifact created from the existing reviewed curated ITS collection. The
 implementation lives in `src/infinity_db/its_season_database.py`, with the
-developer entry point in `tools/build_its_season.py`.
+developer entry point in `tools/data/build_its_season.py`.
 
 ## Current source and scope
 
@@ -80,13 +80,13 @@ resolution and overlay presentation belong to P3.4.
 From the repository root, with the project virtual environment:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.build_its_season
-.\.venv\Scripts\python.exe -m tools.build_its_season --check
-.\.venv\Scripts\python.exe -m tools.build_its_season --output local/its_18.db
+.\.venv\Scripts\python.exe -m tools.data.build_its_season
+.\.venv\Scripts\python.exe -m tools.data.build_its_season --check
+.\.venv\Scripts\python.exe -m tools.data.build_its_season --output local/its_18.db
 ```
 
 The standalone developer tool still defaults to the ignored
-`data/work/its/its_18.db` and cannot overwrite the tracked runtime artifact.
+`local/work/its/its_18.db` and cannot overwrite the tracked runtime artifact.
 Use `infinity-db build --compact` to regenerate the complete
 `army.db` / `rules_n5.db` / `its_18.db` set. The builder first validates
 all three outputs and their cross-publication references, then replaces the

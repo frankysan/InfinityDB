@@ -1,7 +1,7 @@
 """Opt-in Army v27 publication of reviewed Equipment presentation encodings.
 
-The base Army exporter and tracked v26 release remain unchanged. A completed
-two-file build extends only its disposable, matched application/raw export pair.
+The base Army exporter is unchanged. Complete builds verify normalized source
+provenance without opening the optional raw export sibling.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
+from .database.normalized_source import verified_army_export_generation
 from .database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
@@ -135,15 +136,14 @@ def read_equipment_encodings(
 
 
 def publish_equipment_encodings(
-    army: Path, raw: Path, source: Path,
+    army: Path, raw: Path | None, source: Path,
+    *, normalized: Path | None = None,
 ) -> None:
-    """Extend a matched disposable v26 pair; keep raw/published metadata identical."""
+    """Publish v27 from an explicitly verified raw or normalized Army source."""
     encodings = load_equipment_presentation_config(source)
     if len(encodings) != 2:
         raise ValueError("Reviewed Equipment presentation inventory requires two entries")
-    pair = validate_database_pair(army, raw_path=raw)
-    if pair is None:
-        raise ValueError("Equipment presentation publication requires pinned Army generation")
+    pair = verified_army_export_generation(army, raw, normalized)
     source_sha = hashlib.sha256(source.read_bytes()).hexdigest()
     with closing(sqlite3.connect(army)) as connection:
         connection.execute("PRAGMA foreign_keys=ON")
@@ -203,6 +203,8 @@ def publish_equipment_encodings(
             connection.execute(f"PRAGMA user_version={ARMY_SCHEMA_VERSION}")
         vacuum_deterministic_sqlite(connection)
     normalize_sqlite_header(army)
+    if raw is None:
+        return
     with closing(sqlite3.connect(raw)) as connection:
         if connection.execute("PRAGMA user_version").fetchone()[0] != BASE_SCHEMA_VERSION:
             raise ValueError("Equipment presentation raw export requires Army v26")

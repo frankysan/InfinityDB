@@ -193,7 +193,7 @@ def test_metadata_rows_are_stored_but_do_not_create_armies(tmp_path: Path) -> No
     envelope = decode_metadata(json.dumps(metadata_source()).encode(), "metadata.json")
     normalized = normalize_master(master(envelope))
     path = tmp_path / "army.db"
-    export_database(normalized, path)
+    export_database(normalized, path, include_raw=True)
     assert Database(path).list_armies() == [
         {
             "id": 101,
@@ -471,8 +471,9 @@ def test_build_discovers_required_sidecar_metadata(
     assert "Skipped non-Army JSON files: metadata.json" not in capsys.readouterr().err
     with sqlite3.connect(output / "army.db") as connection:
         assert connection.execute("SELECT name FROM army_lists").fetchone()[0] == "Official First"
-    with sqlite3.connect(output / "army.raw.db") as raw_connection:
-        assert raw_connection.execute("SELECT COUNT(*) FROM metadata_factions").fetchone()[0] == 2
+    normalized = json.loads((output / "normalized.json").read_text(encoding="utf-8"))
+    assert len(normalized["tables"]["metadata_factions"]) == 2
+    assert not (output / "army.raw.db").exists()
 
 
 def test_build_rejects_a_source_without_metadata(tmp_path: Path) -> None:

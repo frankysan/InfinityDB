@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from tools.asset_validation import validate_asset_set
-from tools.stage_full_asset_bundle import (
+from tools.ci.stage_full_asset_bundle import (
     AssetBundleError,
     download_asset_bundle,
     stage_asset_bundle,
@@ -183,7 +183,7 @@ def test_download_asset_bundle_requires_pinned_digest(
     def fake_urlopen(*args: object, **kwargs: object) -> io.BytesIO:
         return io.BytesIO(payload)
 
-    monkeypatch.setattr("tools.stage_full_asset_bundle.urlopen", fake_urlopen)
+    monkeypatch.setattr("tools.ci.stage_full_asset_bundle.urlopen", fake_urlopen)
     destination = tmp_path / "assets.zip"
     digest = hashlib.sha256(payload).hexdigest()
 
@@ -203,7 +203,7 @@ def test_download_asset_bundle_rejects_non_https_redirect(
             return "http://example.invalid/assets.zip"
 
     monkeypatch.setattr(
-        "tools.stage_full_asset_bundle.urlopen",
+        "tools.ci.stage_full_asset_bundle.urlopen",
         lambda *args, **kwargs: RedirectedResponse(b"bundle"),
     )
 

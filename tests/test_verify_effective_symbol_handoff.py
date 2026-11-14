@@ -12,7 +12,7 @@ import pytest
 
 from infinity_db.snapshot_provenance import sha256_file, write_snapshot_manifest
 from tools.snapshot_archive import create_timestamped_archive
-from tools.verify_effective_symbol_handoff import (
+from tools.symbols.verify_effective_symbol_handoff import (
     EffectiveHandoffError,
     verify_effective_symbol_handoff,
 )

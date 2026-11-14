@@ -19,6 +19,7 @@ from infinity_db.database.publication import validate_database_pair
 from infinity_db.rules_database import RulesDatabase, _variant_semantics
 from infinity_db.variant_usage_includes import build_include_provenance
 from infinity_db.variant_usage_peripherals import build_peripheral_provenance
+from infinity_db.variant_usage_source import normalized_source_connection
 
 CATALOGS = ("skills", "equipment")
 OWNERS = ("profile", "option", "unit_option")
@@ -370,13 +371,20 @@ def _include_peripheral_provenance(
 
 def build_variant_usage_projection(
     application_path: Path,
-    raw_path: Path,
+    raw_path: Path | sqlite3.Connection,
     rules_path: Path,
+    *,
+    verified_export_pair: str | None = None,
 ) -> dict[str, Any]:
-    """Create a source-bound projection using embedded deployed objects only."""
-    export_pair = validate_database_pair(application_path, raw_path=raw_path)
-    if export_pair is None:
-        raise ValueError("Variant usage requires a pinned Army export pair")
+    """Create source-bound usage from an archive or verified normalized source."""
+    if isinstance(raw_path, sqlite3.Connection):
+        if verified_export_pair is None:
+            raise ValueError("Normalized variant source requires a verified export generation")
+        export_pair = verified_export_pair
+    else:
+        export_pair = validate_database_pair(application_path, raw_path=raw_path)
+        if export_pair is None:
+            raise ValueError("Variant usage requires a pinned Army export pair")
     embedded = (
         RulesDatabase(rules_path).deployed_objects_payload(application_path)
         if rules_path.is_file() else None
@@ -385,7 +393,9 @@ def build_variant_usage_projection(
         raise ValueError("Variant usage requires source-matched embedded deployed objects")
     with (
         closing(_connect(application_path)) as application,
-        closing(_connect(raw_path)) as raw,
+        closing(
+            raw_path if isinstance(raw_path, sqlite3.Connection) else _connect(raw_path)
+        ) as raw,
         closing(_connect(rules_path)) as rules,
     ):
         snapshot = _snapshot(application)
@@ -489,7 +499,8 @@ def build_variant_usage_projection(
             "sourceSnapshot": {
                 "armyArchiveSha256": snapshot,
                 "armyDatabaseSha256": _digest(application_path),
-                "rawDatabaseSha256": _digest(raw_path),
+                **({"rawDatabaseSha256": _digest(raw_path)}
+                   if isinstance(raw_path, Path) else {}),
                 "rulesDatabaseSha256": _digest(rules_path),
                 "exportPairSha256": export_pair,
             },
@@ -501,6 +512,16 @@ def build_variant_usage_projection(
             "unresolvedSourceRows": unresolved,
             "relationships": _include_peripheral_provenance(application, raw),
         }
+
+
+def build_variant_usage_from_normalized(
+    application_path: Path, normalized_path: Path, rules_path: Path,
+) -> dict[str, Any]:
+    """Build from a verified transient normalized source without a raw archive."""
+    with normalized_source_connection(application_path, normalized_path) as (source, export_pair):
+        return build_variant_usage_projection(
+            application_path, source, rules_path, verified_export_pair=export_pair,
+        )
 
 
 def validate_variant_usage_candidate(candidate_path: Path, expected: dict[str, Any]) -> None:

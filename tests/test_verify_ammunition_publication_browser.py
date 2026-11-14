@@ -19,8 +19,8 @@ import pytest
 from infinity_db.database.repository import Database
 from infinity_db.weapon_ammunition_references import load_ammunition_reference_map
 from infinity_db.web import create_app
-from tools.browser_test_metrics import launch_timed_chromium
 from tools.browser_wsgi_transport import route_browser_page
+from tools.testing.browser_test_metrics import launch_timed_chromium
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-ammunition-parity.test"

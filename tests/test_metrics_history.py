@@ -2,14 +2,16 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import subprocess
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
 from infinity_db.web.metrics import LATENCY_BUCKETS, RESPONSE_SIZE_BUCKETS, ROUTES
-from tools import metrics_history
-from tools.metrics_history import (
+from tools.operations import metrics_history
+from tools.operations.metrics_history import (
     SAFE_LATENCY_BOUNDS,
     SAFE_RESPONSE_SIZE_BOUNDS,
     SAFE_ROUTES,
@@ -20,6 +22,25 @@ from tools.metrics_history import (
     open_history_database,
     parse_history_snapshot,
 )
+
+
+def test_default_history_database_is_under_local() -> None:
+    assert metrics_history.DEFAULT_DATABASE == Path("local/reports/metrics-history.db")
+
+
+@pytest.mark.parametrize("command", ["module", "direct"])
+def test_metrics_history_relocated_cli_help(command: str) -> None:
+    root = Path(__file__).resolve().parents[1]
+    invocation = (
+        [sys.executable, "-m", "tools.operations.metrics_history"]
+        if command == "module"
+        else [sys.executable, str(root / "tools/operations/metrics_history.py")]
+    )
+    result = subprocess.run(
+        [*invocation, "--help"], cwd=root, text=True, capture_output=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--database" in result.stdout
 
 
 def _timestamp(year: int, month: int, day: int, hour: int = 12) -> float:

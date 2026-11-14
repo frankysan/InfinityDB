@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import re
 import sqlite3
+from pathlib import Path
 
 import pytest
 
 from infinity_db.curated import load_curated_document
 from infinity_db.database.repository import Database
-from tools.audit_hacking_program_statistics_chart import (
+from tools.research.audit_hacking_program_statistics_chart import (
     ARMY_DB,
     ROOT,
     audit_files,
@@ -19,13 +21,25 @@ from tools.audit_hacking_program_statistics_chart import (
     program_key,
     verify_pdf,
 )
-from tools.audit_hacking_program_statistics_chart import MANIFEST as STATISTICS
-from tools.audit_hacking_program_statistics_chart import PDF as STATISTICS_PDF
+from tools.research.audit_hacking_program_statistics_chart import MANIFEST as STATISTICS
+from tools.research.source_paths import SourcePathError, pinned_pdf_path
 
 MANIFEST = ROOT / "config/validation/hacking-device-program-source-chart.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 PROGRAMS = ROOT / "data/curated/rules/n5-hacking-programs-v5.3.json"
 PROGRAM_LINKS = re.compile(r"\[\[hacking-program:([a-z0-9-]+)(?:\|[^\]]*)?\]\]")
+PDF_LABEL = "data/pdf/rules/n5-rules-v5.3-en.pdf"
+PDF_PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+
+
+def _selected_statistics_pdf(
+    manifest: dict, *, layout: str = "local", root: Path = ROOT,
+) -> Path | None:
+    """Only exact N5.3 source evidence; never trust an amended manifest pin."""
+    assert manifest["sourcePdfSha256"] == PDF_PIN
+    return pinned_pdf_path(root, PDF_LABEL, PDF_PIN, layout=layout, missing_ok=True)
+
+
 EXPECTED_DEVICES = (
     ("equipment:hacking-device", "Hacking Device",
      ("carbonite", "spotlight", "total-control", "oblivion")),
@@ -216,13 +230,43 @@ def test_n53_statistics_fail_closed_on_changed_columns_and_source_scope() -> Non
         audit_statistics(manifest, altered)
 
 
-def test_n53_program_statistics_pinned_archive_and_pdf_evidence() -> None:
+def test_n53_statistics_pdf_layout_is_pinned_and_never_falls_back(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = b"%PDF synthetic source for path-selection testing only"
+    digest = hashlib.sha256(payload).hexdigest()
+    monkeypatch.setitem(globals(), "PDF_PIN", digest)
+    manifest = {"sourcePdfSha256": digest}
+    legacy = tmp_path / PDF_LABEL
+    local = tmp_path / "local/data/pdf" / Path(PDF_LABEL).relative_to("data/pdf")
+    for path in (legacy, local):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(payload)
+    assert _selected_statistics_pdf(manifest, root=tmp_path) == local
+    assert _selected_statistics_pdf(manifest, layout="legacy", root=tmp_path) == legacy
+    local.write_bytes(b"unexpected source revision")
+    with pytest.raises(SourcePathError, match="hash mismatch"):
+        _selected_statistics_pdf(manifest, layout="local", root=tmp_path)
+    local.unlink()
+    assert _selected_statistics_pdf(manifest, layout="local", root=tmp_path) is None
+    assert _selected_statistics_pdf(manifest, root=tmp_path) is None
+    assert _selected_statistics_pdf(manifest, layout="legacy", root=tmp_path) == legacy
+    with pytest.raises(AssertionError):
+        _selected_statistics_pdf({"sourcePdfSha256": "0" * 64}, root=tmp_path)
+    with pytest.raises(SourcePathError, match="Unknown research source layout"):
+        _selected_statistics_pdf(manifest, layout="automatic", root=tmp_path)
+
+
+def test_n53_program_statistics_pinned_archive_and_pdf_evidence(
+    reference_pdf_layout: str,
+) -> None:
     manifest = json.loads(STATISTICS.read_text(encoding="utf-8"))
-    archive = ROOT / manifest["armyArchive"]
-    if not archive.is_file() or not STATISTICS_PDF.is_file():
+    pdf = _selected_statistics_pdf(manifest, layout=reference_pdf_layout)
+    archive = ROOT / "local/data/raw/army" / Path(manifest["armyArchive"]).name
+    if pdf is None or not archive.is_file():
         pytest.skip("Optional pinned N5.3 PDF / Army archive unavailable")
     pytest.importorskip("pymupdf")
-    report = audit_files(archive_path=archive, pdf_path=STATISTICS_PDF)
+    report = audit_files(archive_path=archive, pdf_path=pdf)
     assert report["archiveReconciled"] is True
     assert report["statisticsMismatches"] == []
     assert report["verifiedPdfSha256"] == manifest["sourcePdfSha256"]
@@ -230,19 +274,23 @@ def test_n53_program_statistics_pinned_archive_and_pdf_evidence() -> None:
     altered = copy.deepcopy(manifest)
     altered["rows"][1]["ps"] = "8"
     with pytest.raises(ValueError, match="printed ps cell mismatch"):
-        verify_pdf(STATISTICS_PDF, altered)
+        verify_pdf(pdf, altered)
     altered = copy.deepcopy(manifest)
     altered["rows"][1]["specialEvidence"][0]["pdf"] = "MISSING CLAUSE"
     with pytest.raises(ValueError, match="printed Special clause drift"):
-        verify_pdf(STATISTICS_PDF, altered)
+        verify_pdf(pdf, altered)
 
 
-def test_n53_unlisted_program_troop_types_have_distinct_source_scope() -> None:
+def test_n53_unlisted_program_troop_types_have_distinct_source_scope(
+    reference_pdf_layout: str,
+) -> None:
     """A blank Target cell is not a uniform 'no valid target' rule."""
-    if not STATISTICS_PDF.is_file():
+    manifest = json.loads(STATISTICS.read_text(encoding="utf-8"))
+    source = _selected_statistics_pdf(manifest, layout=reference_pdf_layout)
+    if source is None:
         pytest.skip("Optional pinned N5.3 PDF unavailable")
     pymupdf = pytest.importorskip("pymupdf")
-    with pymupdf.open(STATISTICS_PDF) as pdf:
+    with pymupdf.open(source) as pdf:
         pages = {
             number: " ".join(pdf[number - 1].get_text("text").upper().split())
             for number in (57, 59, 60, 61)
@@ -253,7 +301,6 @@ def test_n53_unlisted_program_troop_types_have_distinct_source_scope() -> None:
         pages[60]
     )
     assert "GENERATES A WHITE NOISE ZONE" in pages[61]
-    manifest = json.loads(STATISTICS.read_text(encoding="utf-8"))
     unlisted = {
         program_key(row["name"]) for row in manifest["rows"] if not row["targets"]
     }
