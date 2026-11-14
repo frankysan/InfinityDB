@@ -269,7 +269,7 @@ output is not an image input. Current container checks verify the embedded
 HTTP/browser entry points. The selected snapshot's source,
 full-depth Include and reverse-use reviews and three-width object browser
 acceptance are complete; their evidence is in the
-[source audit](v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05).
+[source audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05).
 Repeat those reviews after source changes. Final frozen-input source-wide and
 release-matched acceptance remain separate from focused development checks.
 Do not describe these delivery origins or partial reverse uses as proof of
@@ -2439,7 +2439,7 @@ The intermediate candidate remains ignored and is not a runtime artifact.
 The reviewed public publication is separately tracked as
 `data/generated/variant-usage.json`; it is built with `--publish` from a
 matched local raw/database/source pair and checked with `--check-publication`
-before staging. See the [candidate evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
+before staging. See the [candidate evidence](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
 
 #### Rule-variant usage API
 
@@ -2537,7 +2537,7 @@ as provenance. Include traversal and Peripheral access describe context,
 verified compatible Army contexts remain source-only. Deterministic ordering,
 source-pair fingerprints, fail-closed exclusions, and the published API/
 browser contract are specified in the implemented sections above and
-[variant-source evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
+[variant-source evidence](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
 The dated V1S-062 design-only workplan is retained in Git history, not
 presented as unfinished implementation.
 

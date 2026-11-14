@@ -275,7 +275,7 @@ The published 0.10.0 scope classified missing Weapon rule definitions as `later-
 and deferred Commlink to its separately scoped Reinforcements Extra work. These retained
 classifications describe that release's reviewed scope; they do not waive the 1.0 completeness
 gate. The bounded review against the pinned 1.0 inputs is preserved in
-[the source-coverage audit](../../docs/v1.0-source-coverage-audit.md).
+[the source-coverage audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md).
 Other defects in those catalogs, including stale citations, ambiguous mappings, unresolved links,
 or unreviewed rules, retain their normal conservative classification and can still block the
 release under review. The policy is release-planning metadata only; it must not be consumed as rules

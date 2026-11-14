@@ -2673,7 +2673,7 @@ On the unchanged frozen source/database pair at `3c8b16018f914fc1ee69fe769216a7c
 All **808/808** processed SVGs were required. Published cross-domain API/page
 destinations, Glossary references, Weapon local fragments and cited context
 were covered without a new source-wide inventory. The previously accepted
-[V1S-082 routing census](v1.0-source-coverage-audit.md#v1s-082-maintained-reference-routing-census-2026-11-07)
+[V1S-082 routing census](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-maintained-reference-routing-census-2026-11-07)
 and [V1S-083 disclosure regressions](#known-source-disclosure-acceptance-v1s-083--vr-0137)
 remain applicable to the unchanged published data and browser consumers.
 
@@ -2751,7 +2751,7 @@ pragmas matched, but **1,594 bytes** differed. Its hash was
 versus tracked
 `90d600a5b7b0425ee590ef90891481433e179d4e96f4a7b1dbf26edfde672ca9`.
 Both had 336 × 4096-byte pages. This is logical-equivalence evidence under
-the [cross-host policy](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04),
+the [cross-host policy](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04),
 not cross-host byte parity or permission to replace a shipped artifact.
 
 Ignored `local/v1s085-*` reports retain the baseline/input/occupancy evidence,
@@ -3127,7 +3127,7 @@ and the rules database SHA-256 was
 The source-pinned audit confirmed 173 detected profile and Trait rows,
 including both early page-188 rows and separately matched Uragan modes;
 its differences remain disclosed in the
-[coverage audit](v1.0-source-coverage-audit.md#v1s-082-weapon-chart-early-row-correction-2026-11-07).
+[coverage audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-weapon-chart-early-row-correction-2026-11-07).
 Ruff, targeted Pyright and documentation checks passed. The dedicated MCP
 Linux worker was unavailable; Windows evidence does not establish Linux,
 hosted CI or final-candidate acceptance.
@@ -3260,7 +3260,7 @@ on `7712190e` (10 passed, 2 skips), and the complete suite now passes on
 the subsequent exact Git revision. Skips include opt-in migration checks,
 local-only missing sources and Windows-only checks; they are **not**
 independent hosted/frozen-candidate acceptance. See the
-[source-coverage audit](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-remaining-p-173-glossary-terms-2026-11-06)
+[source-coverage audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-remaining-p-173-glossary-terms-2026-11-06)
 for the evidence change and publication hashes.
 
 **2026-11-05 full-assets post-checker regression:**
@@ -7005,7 +7005,7 @@ approval of new source-derived wording.
 
 ### Frozen explanation-inventory reconciliation (V1-A08)
 
-The original October 9 [367-record explanation inventory](rules-explanation-audit-1.0-inventory.md)
+The original October 9 [367-record explanation inventory](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0-inventory.md)
 remains historical evidence: 304 selected clause comparisons (D) and 63
 screening-only rows (S), **neither of which is full-record approval**. To
 reconcile its exact identities against the *current* N5 Core/Hacking curated
@@ -8295,11 +8295,11 @@ Katyusha MRL prints unsigned `3` where Army has `+3`. The separate Disco Ball
 object's attributes match. The
 [early-row regression](#v1s-082-weapon-chart-early-row-regression-vr-0133)
 records the tested revision and source pins.
-The [V1S-070 source review](v1.0-source-coverage-audit.md#weapon-profile-and-multimode-chart-review-v1s-070-2026-11-05)
+The [V1S-070 source review](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#weapon-profile-and-multimode-chart-review-v1s-070-2026-11-05)
 records the existing source dispositions for Kobra and Katyusha; the Kobra
 correction request remains open under SRC-021. This is still partial evidence:
 the V1S-072 acceptance now covers the full published profile storage/API/browser
-projection (see the [acceptance evidence](v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05)),
+projection (see the [acceptance evidence](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05)),
 while remaining auxiliary/equipment discovery and special-weapon prose semantics
 stay under their separate 1.0 tasks. The chart report also records the exact Army
 database SHA-256 so it can be safely combined with enrichment evidence from the
@@ -9518,7 +9518,7 @@ output includes `resolvedSharedReviews` and `resolvedSharedReviewCount` so those
 two approvals remain auditable without counting them as missing definitions. This
 is triage evidence, not whole-Weapon or v1.0 completeness acceptance. The original
 baseline failure, reproduction and resolution remain documented in
-[V1-A05](v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions).
+[V1-A05](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions).
 
 The reviewed Weapon-profile citations are embedded in `rules_n5.db`.
 Verify that its source-paired rows still match the authored decisions without
@@ -9537,7 +9537,7 @@ The historical v1.0.0-specific `--assess-release` and
 `--require-release` branches were retired in P5.2: they judged the already
 completed 1.0 milestone, not ongoing Weapon source reconciliation. The dated
 result, including Commlink's then-pending status, remains in
-[v1.0 source coverage audit](v1.0-source-coverage-audit.md).
+[v1.0 source coverage audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md).
 The generic Weapon triage and current reviewed source/definition assertions
 remain available.
 
@@ -10144,7 +10144,7 @@ Spanish Immunity revision 3677 separately retains the failed-save
 Stunned result. The exact historical alternative chart revision
 3988 was independently verified in S21's Wiki history archive
 (timestamp 2026-08-27T14:21:00Z; SHA-256 recorded in the
-[source manifest](rules-explanation-audit-1.0-sources.md)).
+[source manifest](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0-sources.md)).
 This remains an **unresolved external publication conflict**, not
 authority to modify the source Army profile.
 The weapon's source notes/citations expose the disagreement.
@@ -10195,8 +10195,8 @@ without horizontal clipping. Two 320 px Ammunition pages triggered the
 they were explicitly allowed as known independent UI exceptions.
 
 The source audit, exact Wiki revision hashes and timestamps are
-recorded in [the rules-explanation audit](rules-explanation-audit-1.0.md)
-and [source manifest](rules-explanation-audit-1.0-sources.md).
+recorded in [the rules-explanation audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0.md)
+and [source manifest](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0-sources.md).
 Private PDF/HTML extractions, 320 px screenshots and browser results
 remain in `local/audits/` and `local/audits/rea028-browser/`.
 No raw source archives, new universal rule evaluator, or guessed

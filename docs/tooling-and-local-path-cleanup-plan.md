@@ -420,6 +420,18 @@ and documentation-index links. The question-level FAQ inventory, 1.0
 source-coverage/REA audits and their immutable source/finding IDs remain
 tracked frozen evidence; none was retired by version or age alone.
 
+**L5 1.0 audit retirement (2026-11-14):** Retired the dated
+`docs/v1.0-source-coverage-audit.md` and all four
+`docs/rules-explanation-audit-1.0*.md` files to Git history (13,586 lines).
+Docs-only backlinks now use immutable commit-pinned GitHub references; the
+four `config/validation/source-coverage-dispositions-v1.json` evidence
+references likewise point to the original reviewed SHA without changing
+the source/record fingerprints, review statuses or validator. The active
+reference-baseline reporter now reads a 367-row, SHA-pinned identity fixture
+from `config/validation/` instead of the retired audit appendix. Source
+disagreements, FAQ scope and acceptance tests keep their existing owners.
+No source input, curation or published database changed.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user
@@ -3815,7 +3827,7 @@ identity/classification pairs, verifies current cited pages and summary/detail
 anchors, checks summary-only and non-object boundaries, and preserves the
 14 promoted source/database citation checks. It does **not** parse the source
 PDF or discover new keyword matches. The review used the pinned English N5.3
-source identified in the [historical source audit](v1.0-source-coverage-audit.md#deployed-object-source-discovery-v1s-073-2026-11-05);
+source identified in the [historical source audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#deployed-object-source-discovery-v1s-073-2026-11-05);
 the current curated source SHA-256 is
 `ca6364073ea48854bf51fe1efc31f2c9cf22fb444283a75c3f595ef54463b57a`.
 The non-catalog and expanded review-manifest SHA-256 values are
@@ -5681,14 +5693,13 @@ reports, but it does legitimately contain reviewed, source-pinned evidence.
   `its-season-database.md` describes the active season schema while
   `season-publication-ownership.md` preserves cross-domain ownership;
   their completed P3 chronology is **not** current implementation work.
-- **Retain as uniquely source-pinned historical evidence:**
-  `faq-v0.1-scope-inventory.md`; the main `rules-explanation-audit-1.0.md`
-  and its inventory, N5.3 reconciliation and source-manifest appendices;
-  and `v1.0-source-coverage-audit.md`. They hold question identities,
-  REA/SRC finding and source-version locators, reviewed scope boundaries
-  and accepted test/route evidence that cannot safely be replaced by a
-  generic release summary. Keep their historical-status labels, not
-  duplicate live work in them.
+- **Historical source-evidence retention checkpoint (2026-11-13):**
+  `faq-v0.1-scope-inventory.md` and the five 1.0 source-coverage/REA audit
+  files were retained at that time. The five completed 1.0 audit narratives
+  were subsequently retired to Git history on 2026-11-14 after live evidence
+  references and backlinks were reconciled. The separate FAQ question/scope
+  inventory remains retained; current source disagreements belong to the
+  clarification register and active development tasks to `TODO.md`.
 - **Completed plans pending disposition at this checkpoint:**
   `restructuring-plan.md` then held P0–P6 historical evidence and links;
   these were reconciled and the plan retired on 2026-11-14.
@@ -5697,12 +5708,11 @@ reports, but it does legitimately contain reviewed, source-pinned evidence.
   owned by `releasing.md`, optional future source-first work by
   `TODO.md`, the selected 35-record cohort and four clause-scoped reviews
   by their tracked `config/validation/` manifests and validator, and
-  the measured benchmarks/source discoveries by
-  `v1.0-source-coverage-audit.md`. The last source-audit link to the
-  historical plan now targets the exact tracked pilot manifest, with
-  original constraints retained in the audit. Before deleting, rerun
-  a repository-wide backlink/unique-methodology review and docs/link
-  checks; Git history supplies the finished execution narrative.
+  by the dated source-coverage audit (now available in Git history).
+  Its four accepted clause references use exact-SHA GitHub permalinks;
+  the pilot and manifest remain tracked and the relevant review scope
+  remains enforced. This is a historical checkpoint, not a live audit
+  retention requirement.
 - **Separate extraction candidate, not a deletion target:** `testing.md`
   remains the active check guide but contains substantial revision-pinned
   1.0 test transcripts. Later narrow the *current commands* section and

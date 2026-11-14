@@ -81,24 +81,16 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   `TODO.md` tracks only the remaining follow-up work.
 - `n5-source-history.md` — N5 official update-post index, historical Army evidence, and
   cross-source reconciliation procedure; an index, not a verified completeness ledger.
-- [v1.0-source-coverage-audit.md](v1.0-source-coverage-audit.md) — dated 2026-10-31
-  baseline evidence with subsequent source, browser, artifact and local candidate
-  acceptance records. It preserves the reviewed 1.0 input scope without implying
-  exhaustive whole-source coverage. Historical snapshots in this file are not
-  current task status; `releasing.md` owns release handoff and `TODO.md`
-  owns active development.
-- [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — dated
-  source/interaction assessment with implementation follow-ups and remaining
-  source conflicts. Its linked inventory, N5.3 reconciliation and source manifest
-  retain unique finding IDs, exact source hashes/revisions and unresolved
-  publication discrepancies; they remain **frozen baseline evidence**, not a
-  current defects list or a requirement for exhaustive post-1.0 source review.
-  Keep unique source/provenance evidence while it supports unresolved questions;
-  use `TODO.md` for current work and `rules-semantics.md` for reviewed meaning.
 - `rules-interaction-checklist.md` — generated cross-release interaction-review ledger. Regenerate
   it with `tools/data/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
   original review/defer decision and are evidence provenance, not the active roadmap; use `TODO.md`
   for current milestone planning.
+
+The completed 1.0 source-coverage audit and four rules-explanation audit files
+were retired to Git history at the `add2280` baseline. A compact 367-record
+identity fixture remains under `config/validation/` for the actively used
+baseline comparison. Use the maintained source-history, clarification and
+semantic registers for current meaning.
 
 Completed audit/closeout documents are **not** permanent reference documentation by default. Once
 an audit closes, move lasting contracts into the canonical owner above, record user/operator-visible

@@ -1081,7 +1081,7 @@ def test_frozen_explanation_parser_rejects_duplicate_and_malformed_rows() -> Non
 def test_frozen_explanation_reconciliation_rejects_changed_historical_snapshot(
     tmp_path: Path,
 ) -> None:
-    source = ROOT / "docs/rules-explanation-audit-1.0-inventory.md"
+    source = ROOT / "config/validation/frozen-explanation-inventory-v1.md"
     modified = tmp_path / "changed-history.md"
     modified.write_text(
         source.read_text(encoding="utf-8").replace(

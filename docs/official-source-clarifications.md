@@ -37,7 +37,7 @@ This register collects questions that may eventually be sent to Corvus Belli for
 ### SRC-003 — Direct Doctor/Engineer on non-Allied targets
 
 - **Status:** open — ruling needed. **Alias:** REA-038.
-- **Evidence:** N5.3 English pp. 90–91 and reviewed Wiki Doctor/Engineer requirements lack a universal Allied-only clause for **direct** use, unlike Allied-only Kits and delegated Servant/Cyberplug treatment (pp. 106–107, 123–124). Engaged and target-State restrictions remain independently applicable. [Detailed investigation](rules-explanation-audit-1.0.md#rea-038---direct-doctorengineer-target-allegiance-is-not-established).
+- **Evidence:** N5.3 English pp. 90–91 and reviewed Wiki Doctor/Engineer requirements lack a universal Allied-only clause for **direct** use, unlike Allied-only Kits and delegated Servant/Cyberplug treatment (pp. 106–107, 123–124). Engaged and target-State restrictions remain independently applicable. [Detailed investigation](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0.md#rea-038---direct-doctorengineer-target-allegiance-is-not-established).
 - **Question:** May Doctor or Engineer directly treat an otherwise eligible non-Allied Unconscious/Immobilized target? Does the answer differ for Neutral, Hostile or scenario-designated targets? Confirm distinctions from Kit/Peripheral use and Engaged restrictions.
 - **InfinityDB:** Does not infer universal non-Allied eligibility merely from missing Allied wording.
 
@@ -51,14 +51,14 @@ This register collects questions that may eventually be sent to Corvus Belli for
 ### SRC-005 — Special Dice and the Fireteam six-dice reminder
 
 - **Status:** open — correction requested. **Alias:** REA-041.
-- **Evidence:** Official Spanish N5.3 p. 75 excludes +1 Special Die from the Burst-6 cap, while its Fireteam reminder p. 140 includes extra dice in a maximum total of six. English N5.3 pp. 75/136 consistently distinguish Burst and Special Dice. [Full discrepancy](rules-explanation-audit-1.0.md#rea-041---spanish-fireteam-dice-reminder-conflicts-with-its-general-sd-rule).
+- **Evidence:** Official Spanish N5.3 p. 75 excludes +1 Special Die from the Burst-6 cap, while its Fireteam reminder p. 140 includes extra dice in a maximum total of six. English N5.3 pp. 75/136 consistently distinguish Burst and Special Dice. [Full discrepancy](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0.md#rea-041---spanish-fireteam-dice-reminder-conflicts-with-its-general-sd-rule).
 - **Question:** Does a Fireteam at B6 receiving +1 SD roll seven dice and then discard as appropriate, or is there an intended Fireteam-only total-six-dice limit? Which printed Spanish clause should be corrected?
 - **InfinityDB:** Follows general Burst/SD distinction; displays the official-source contradiction.
 
 ### SRC-006 — Dodge (ARM+3) success/failure condition
 
 - **Status:** open — correction requested. **Alias:** REA-042.
-- **Evidence:** Both English and Spanish N5.3 PDFs p. 75 say the +3 ARM/BLI applies whenever Dodge is declared; archived English/Spanish Wiki modifier templates instead require a **failed PH** Dodge Roll. [Full discrepancy](rules-explanation-audit-1.0.md#rea-042---dodge-arm3-has-incompatible-englishspanish-conditions).
+- **Evidence:** Both English and Spanish N5.3 PDFs p. 75 say the +3 ARM/BLI applies whenever Dodge is declared; archived English/Spanish Wiki modifier templates instead require a **failed PH** Dodge Roll. [Full discrepancy](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0.md#rea-042---dodge-arm3-has-incompatible-englishspanish-conditions).
 - **Question:** Does a Trooper with Dodge (ARM+3) receive the ARM bonus for applicable Saving Rolls following any Dodge declaration, including when its PH Roll succeeded but an Attack still hits, or only when that PH Roll fails?
 - **InfinityDB:** Uses the bilingual PDF interpretation; retains a visible Wiki conflict note.
 
@@ -88,14 +88,14 @@ This register collects questions that may eventually be sent to Corvus Belli for
 ### SRC-010 — Armed Turret E/Mitter Saving Roll count
 
 - **Status:** open — ruling needed. **Alias:** REA-045.
-- **Evidence:** Multiple pinned Army captures give Armed Turret weapon 226 / E/Mitter mode **one** BTS/2 Saving Roll, while standalone E/Mitter weapon 25, E/M Ammunition and N5.3 chart (English p. 186; Spanish p. 195) require **two**. No Turret-specific exception found. [Detailed provenance](rules-explanation-audit-1.0.md#rea-045---armed-turret-emitter-disagrees-with-standard-em-saving-rolls).
+- **Evidence:** Multiple pinned Army captures give Armed Turret weapon 226 / E/Mitter mode **one** BTS/2 Saving Roll, while standalone E/Mitter weapon 25, E/M Ammunition and N5.3 chart (English p. 186; Spanish p. 195) require **two**. No Turret-specific exception found. [Detailed provenance](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0.md#rea-045---armed-turret-emitter-disagrees-with-standard-em-saving-rolls).
 - **Question:** Is the Turret's one-roll E/Mitter mode intentional, or should it use two BTS/2 Saving Rolls per hit like ordinary E/Mitter?
 - **InfinityDB:** Preserves imported Turret mode and warns; does not invent a Turret-only E/M exception.
 
 ### SRC-011 — Armed Turret Silhouette S2 versus S1
 
 - **Status:** open — correction requested. **Alias:** REA-037.
-- **Evidence:** Detailed N5.3 Armed Turret profile uses S2, but the same PDF's deployable summary and final table show S1 (English/Spanish N5.3 around p. 74 and summary). [Source investigation](rules-explanation-audit-1.0.md).
+- **Evidence:** Detailed N5.3 Armed Turret profile uses S2, but the same PDF's deployable summary and final table show S1 (English/Spanish N5.3 around p. 74 and summary). [Source investigation](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0.md).
 - **Question:** Is Armed Turret S2 or S1 for placement, geometry, LoF and other Silhouette-dependent rules? Which table/profile is erroneous?
 - **InfinityDB:** Preserves the reviewed detailed S2 value with a conspicuous source discrepancy; separate from SRC-010.
 
@@ -137,7 +137,7 @@ This register collects questions that may eventually be sent to Corvus Belli for
 ### SRC-017 — AP Thunderbolt Wiki weapon-chart conflict
 
 - **Status:** open — correction requested.
-- **Evidence:** Verified N5.3 printed chart and pinned Army AP Thunderbolt profile conflict with current archived English and Spanish Wiki weapon-chart rows. [Source assessment](rules-explanation-audit-1.0.md) and [publisher-correction TODO](TODO.md).
+- **Evidence:** Verified N5.3 printed chart and pinned Army AP Thunderbolt profile conflict with current archived English and Spanish Wiki weapon-chart rows. [Source assessment](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0.md) and [publisher-correction TODO](TODO.md).
 - **Question:** Can the AP Thunderbolt English and Spanish Wiki entries be aligned with the current official printed and Army profile, or is a newer intentional weapon revision missing from those sources?
 - **InfinityDB:** Keeps selected source-backed weapon semantics and the source discrepancy.
 
@@ -151,14 +151,14 @@ This register collects questions that may eventually be sent to Corvus Belli for
 ### SRC-019 — Stun Pistol Spanish Wiki chart
 
 - **Status:** open — correction requested.
-- **Evidence:** Reviewed Spanish Wiki Stun Pistol chart differs from the aligned N5.3 PDF and pinned Army weapon profile. [Source assessment](rules-explanation-audit-1.0.md).
+- **Evidence:** Reviewed Spanish Wiki Stun Pistol chart differs from the aligned N5.3 PDF and pinned Army weapon profile. [Source assessment](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0.md).
 - **Question:** Which Stun Pistol profile is authoritative for N5.3, and should the Spanish Wiki chart be corrected to match the current PDF/Army data?
 - **InfinityDB:** Publishes its reviewed primary-source result and retains the Wiki discrepancy.
 
 ### SRC-020 — Flash Pulse Spanish Wiki state and Saving Roll
 
 - **Status:** open — correction requested. **Alias:** REA-027.
-- **Evidence:** Spanish Wiki weapon-chart revisions 3987/3988 give two PB/BTS rolls without State: Stunned; English/Spanish N5.3 PDFs and pinned Army weapon 72 specify one PB/BTS roll, Non-Lethal and Stunned. [Exact revision audit](rules-explanation-audit-1.0-sources.md).
+- **Evidence:** Spanish Wiki weapon-chart revisions 3987/3988 give two PB/BTS rolls without State: Stunned; English/Spanish N5.3 PDFs and pinned Army weapon 72 specify one PB/BTS roll, Non-Lethal and Stunned. [Exact revision audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0-sources.md).
 - **Question:** Should the Spanish Wiki Flash Pulse row show one Saving Roll and `State: Stunned` as in the N5.3 PDFs and Army?
 - **InfinityDB:** Uses one roll and the Stunned outcome; keeps the discrepant historical revisions as evidence.
 
@@ -244,7 +244,7 @@ This register collects questions that may eventually be sent to Corvus Belli for
 ### SRC-032 — CC Attack (+1 Dam) on current Reinforcement profiles
 
 - **Status:** open — source intent unknown. **Alias:** Skill source 240 / extra `4/TEXT:+1 Dam`; V1S-056.
-- **Evidence:** Pinned September 29, 2026 Army raw source lists precisely two `CC Attack (+1 Dam)` direct occurrences: REINF: SHONA CARANO, Special Instructor and Aristeia! Swordmaster, unit 1639, source profile occurrence 13859 (Code: Capital / Army 199), and REINF: CHAKSA AUXILIARS, unit 1675, occurrence 69477 (Deras kaar / Army 899). Both are profile-owned, not Army-wide effects. English N5.3 p. 37 defines Possibility of Survival (PS) and notes that *lower* numerical PS is more lethal; pp. 51–52 describe CC Attack, and p. 75 explains modern Skill modifier notation but never defines `+1 Dam`. These sources do not establish a translation between legacy Damage notation and current PS or an additional-Wounds effect. See the [bounded V1S-056 review](v1.0-source-coverage-audit.md#cc-attack-source-240-occurrence-review-v1s-056-2026-11-04).
+- **Evidence:** Pinned September 29, 2026 Army raw source lists precisely two `CC Attack (+1 Dam)` direct occurrences: REINF: SHONA CARANO, Special Instructor and Aristeia! Swordmaster, unit 1639, source profile occurrence 13859 (Code: Capital / Army 199), and REINF: CHAKSA AUXILIARS, unit 1675, occurrence 69477 (Deras kaar / Army 899). Both are profile-owned, not Army-wide effects. English N5.3 p. 37 defines Possibility of Survival (PS) and notes that *lower* numerical PS is more lethal; pp. 51–52 describe CC Attack, and p. 75 explains modern Skill modifier notation but never defines `+1 Dam`. These sources do not establish a translation between legacy Damage notation and current PS or an additional-Wounds effect. See the [bounded V1S-056 review](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#cc-attack-source-240-occurrence-review-v1s-056-2026-11-04).
 - **Question:** In the N5 Army profiles for these two Reinforcements, what exactly does `CC Attack (+1 Dam)` change under N5 rules: weapon PS (and, if so, in which numerical direction), Wounds inflicted, another attack statistic, or only an obsolete display string? Is there an official updated notation for both occurrences?
 - **InfinityDB:** Preserve the literal raw qualifier and its exact source owners, but do not turn it into a positive numerical PS adjustment, a negative PS adjustment or additional Wounds without authority. No global CC Attack modifier, Weapon override or proposed gameplay ruling is published. The exact owner/signature boundary is guarded by `tests/test_audit_source_variant_inputs.py::test_cc_attack_source_240_exact_signatures_and_damage_owners`.
 

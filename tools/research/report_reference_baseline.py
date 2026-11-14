@@ -1431,7 +1431,7 @@ def render_markdown(report: dict[str, Any]) -> str:
 
 
 FROZEN_EXPLANATION_INVENTORY = (
-    PROJECT_ROOT / "docs/rules-explanation-audit-1.0-inventory.md"
+    PROJECT_ROOT / "config/validation/frozen-explanation-inventory-v1.md"
 )
 FROZEN_DECLARATION_COMMIT = "c5400ab1b950990fdacc509be91c110fe85431fb"
 FROZEN_DECLARATION_SOURCE = (
@@ -1448,7 +1448,7 @@ HISTORICAL_EXPLANATION_INVENTORY_SHA256 = (
     "3f6b21bc6ba7e508e63cfaa74b1bdb3fdefe3ab3968418d813be18a36275675e"
 )
 FROZEN_EXPLANATION_INVENTORY_SHA256 = (
-    "624e0406c1159a9131a876128e70639a2ee9374981a640b11e9dc11dfc69fc00"
+    "1d19f5442749b9a56328bef5a2621d783ee02c207071ee6901813f7f0e2f5f81"
 )
 SELECTED_EXPLANATION_BROWSER_TESTS = {
     "rule:initiative-roll": "test_initiative_roll_normal_reference_navigation",
