@@ -26,105 +26,23 @@ when all contained work shares the same owner.
 
 **Project domains:** Project infrastructure, Data processing, Acquisition
 
-- [ ] **Audit and implement the next tooling/path cleanup project** according
-  to the [phased plan](tooling-and-local-path-cleanup-plan.md). Inventory
-  every maintained `tools/` module, its consumers and retirement purpose;
-  classify completed plans, reports and audits for removal, evidence
-  retention or historical renaming; classify ignored files and allowed
-  location exceptions; migrate private
-  `data/` and other non-exempt ignored artifacts to structured `local/`
-  destinations; organize retained tools by responsibility; retire completed
-  investigations; and enforce output naming/lifetime conventions.
-  Approve the migration manifest before deleting ignored source/evidence,
-  preserve three-database serving and published asset compatibility, and
-  validate Windows/Linux producer handoffs separately. This project follows
-  v1.1.0 restructuring development and is not part of its release gate.
-  The [P5 retirement checkpoint](tooling-and-local-path-cleanup-plan.md#completed-p5-comparison-tool-retirement--2026-11-12)
-  records the first completed-tool removal; the
-  [artwork-review checkpoint](tooling-and-local-path-cleanup-plan.md#p5-artwork-review-workflow-and-runbook-checkpoint--2026-11-12)
-  records the runbook disposition and explicit review inputs. The
-  [provenance checkpoint](tooling-and-local-path-cleanup-plan.md#p5-provenance-classifier-retirement--2026-11-12)
-  retires the one-use P5 generator while retaining saved-report validation. The
-  [reporter checkpoint](tooling-and-local-path-cleanup-plan.md#reference-reporter-dependency-checkpoint--2026-11-12)
-  separates shared runtime verification while preserving active source checks.
-  The [deployed-object checkpoint](tooling-and-local-path-cleanup-plan.md#deployed-object-discovery-retirement--2026-11-12)
-  retires completed discovery commands while preserving their reviewed evidence.
-  The [Hacking Program checkpoint](tooling-and-local-path-cleanup-plan.md#hacking-program-statistics-audit-disposition--2026-11-12)
-  retains the separate, source-pinned statistics audit.
-  The [L1 decision package](tooling-and-local-path-cleanup-plan.md#l1-decision-package--p-accepted-t-and-m-pending-2026-11-13)
-  records accepted prospective path/lifecycle policy (P), while tracked
-  retirements (T) and private-data migration (M) still require separate
-  decisions and recovery evidence. The
-  [L2 writer-safety closeout](tooling-and-local-path-cleanup-plan.md#seventeenth-bounded-l2-writer-classification-and-remaining-output-safety-closeout-2026-11-13)
-  covers the non-destructive output contracts. The
-  [L2 reader/producer cutover decision package](tooling-and-local-path-cleanup-plan.md#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13)
-  maps current Army/Wiki/Symbol/PDF paths and their consumers to candidate
-  `local/` destinations, including the embedded-provenance and Syncthing
-  blockers. The
-  [R1 Army selection checkpoint](tooling-and-local-path-cleanup-plan.md#nineteenth-bounded-l2-checkpoint--r1-explicit-army-source-selection-2026-11-13)
-  implements explicit ZIP/manifest validation and legacy/new-layout
-  byte parity without migrating sources or changing the default.
-  R1 has Windows/Linux fixture acceptance. The
-  [R2 producer checkpoint](tooling-and-local-path-cleanup-plan.md#twentieth-bounded-l2-checkpoint--r2-snapshot-producer-publication-alignment-2026-11-13)
-  records completed byte-exact publication and transactional rollback
-  protection, with Windows/Linux producer suites and consumer handoff parity.
-  The [R3 activation checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-first-bounded-l2-checkpoint--r3-explicit-staged-snapshot-layouts-2026-11-13)
-  adds explicit configured legacy/local snapshot selection and
-  Windows/Linux fixture parity, retaining the current staging folders.
-  The [first R4 checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-second-bounded-l2-checkpoint--r4-inventory-and-first-pdf-binding-2026-11-13)
-  inventories PDFs/overrides and adds the Reinforcements PDF binding.
-  [R4 research readers](tooling-and-local-path-cleanup-plan.md#twenty-third-bounded-l2-checkpoint--r4-read-only-reference-and-revision-delta-pdf-consumers-2026-11-13)
-  now include the reference reporter and revision-delta audit; the
-  [R4 activation checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-fourth-bounded-l2-checkpoint--r4-explicit-staged-pdf-and-override-destinations-2026-11-13)
-  provides explicit local PDF/override destinations in disposable checkouts.
-  The [remaining-reader checkpoint](tooling-and-local-path-cleanup-plan.md#twenty-fifth-bounded-l2-checkpoint--r4-remaining-direct-pdf-reader-disposition-2026-11-13)
-  now binds Visibility Zone evidence to the exact selected PDF layout and
-  distinguishes already-explicit readers from legacy-bound test fixtures;
-  Windows/Linux fixture parity covers the staged PDF/override mappings.
-  The follow-up Hacking Program statistics source tests now also use
-  explicit PDF layout selection without changing the auditor's `--pdf` API,
-  Army archive path or source pin. The next bounded Core source-only group
-  consolidates Ammunition, visibility opposition, Cover, ARO/Deployment and
-  Command Token PDF selection without changing their assertions.
-  The weapon-chart, trait-prose and Mine variant tests now share the same
-  pinned source selector without altering research conclusions. The
-  multi-revision Application Rule, Silent/Immunity and Reinforcements
-  applicability tests also select their independently pinned English,
-  Spanish, historical and ITS PDFs without mixing source authority.
-  The 16 single-Core immunity evidence modules now also select the pinned
-  PDF explicitly without changing any example/critical/BTS rule conclusions.
-  The deployable/FAQ, geometry, movement, terrain, bilingual phase and turn
-  sequence source tests now select independently pinned PDFs explicitly;
-  optional Wiki ZIP evidence remains on its separate legacy path.
-  The [curated and mixed-source checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-third-bounded-l2-checkpoint--r4-curated-and-mixed-source-acceptance-2026-11-13)
-  now binds 21 remaining curated source-only tests, Weapon profiles, bilingual
-  auxiliary Silhouette evidence and the optional Hacking Program chart check to
-  explicit PDF layouts. The [mixed-source checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-fourth-bounded-l2-checkpoint--r4-mixed-source-publication-and-export-readers-2026-11-13)
-  also binds the remaining Weaponry catalog PDF evidence, reference-baseline
-  source-only/optional checks and restrictions export pin checks without
-  changing publication behavior. The
-  [final reader inventory](tooling-and-local-path-cleanup-plan.md#thirty-fifth-bounded-l2-checkpoint--r4-final-direct-pdf-reader-inventory-2026-11-13)
-  covers FAQ source pins, historical Reinforcements inputs, Visibility
-  Zone whole-record and web evidence, and conditional reactive source
-  pages; the two remaining compatibility defaults are intentionally retained.
-  The [staged-to-reader parity checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-sixth-bounded-l2-checkpoint--r4-staged-activation-to-pinned-reader-parity-2026-11-13)
-  completes R4's hermetic activation/reader contract across PDF and SVG
-  override layouts, including no fallback, conflict refusal and idempotence.
-  The [R5 receiver access checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-seventh-bounded-l2-checkpoint--r5-live-receiver-access-evidence-2026-11-13)
-  confirms the worker's read-only access to five Linux Syncthing receiver
-  roots and three pinned source samples. The
-  [R5 sender/recursive checkpoint](tooling-and-local-path-cleanup-plan.md#thirty-eighth-bounded-l2-checkpoint--r5-sender-health-and-recursive-receiver-access-2026-11-13)
-  now verifies the live Windows Send Only service and all five folders'
-  zero-pending/idle status, plus a complete 35,833-entry read-only
-  effective-access census on Linux. **Scope reset (2026-11-13):**
-  R5 is closed as sufficient for this single-operator project; further
-  receiver-status, ACL-inheritance, formal backup/restore, and exhaustive
-  rollback-tooling gates are no longer prerequisites. **Next:** resume
-  practical L2/R6 cleanup in larger, coherent batches with focused
-  consumer tests and simple checks of important private source copies.
-  Preserve hard-to-recreate originals until reviewed; do not bulk-delete
-  private data or publish it accidentally. Hosted/release acceptance
-  remains independent of fixture validation.
+- [ ] **Close out the tooling and local-workspace cleanup**
+  ([implementation record](tooling-and-local-path-cleanup-plan.md)).
+  R1–R6 source/path cutovers and L4 tool grouping are complete; do not
+  reopen their historical approval gates.
+  - [ ] **L5:** Reconcile remaining completed plans, reports and one-use
+    investigations against current consumers and canonical source evidence.
+    Retire superseded tracked narratives or code; keep unique, open findings.
+  - [ ] **L6:** Finish proportionate report naming/non-overwrite defaults and
+    address only path-policy violations with a demonstrated maintenance cost.
+    Keep ignored-path inventory opt-in; do not add mandatory tooling solely
+    to police a single-developer checkout.
+  - [ ] **L7:** Confirm latest exact-SHA hosted CI and focused integrated
+    source/build/publication/runtime contracts; record remaining legitimate
+    `local/` or cross-host exceptions and close the plan.
+  Preserve the three tracked runtime databases and private-source identities.
+  Any additional ignored-source deletion, merge, release or deployment is a
+  separate decision.
 
 ### Backlog and development workflow simplification
 

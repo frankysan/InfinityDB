@@ -2,8 +2,14 @@
 
 **Project domains:** Project infrastructure, Data processing, Acquisition, Deployment
 
-**Status:** Active implementation on `dev/tooling-workspace-cleanup`.
-Prospective P1–P5 conventions accepted 2026-11-13.
+**Status (2026-11-14):** R1–R6 source/path cutovers and L4 maintained-tool
+grouping are complete on `dev/tooling-workspace-cleanup`. L5 has completed
+several bounded retirements but its documentation lifecycle review is not
+closed. L6 output hygiene/enforcement and L7 integrated acceptance remain
+open; do not treat them as prerequisites for unrelated development.
+Prospective P1–P5 conventions were accepted on 2026-11-13. Older
+chronological checkpoints below document what was pending *then*, not
+new approvals or blockers for work already completed.
 
 **Current cleanup decision (2026-11-13):** R5 Syncthing/receiver
 investigation is complete. Earlier requirements for further live-service
@@ -15,18 +21,19 @@ consumers together; check important copied inputs and retain unique
 originals until the replacement is verified. Public tracked artifacts,
 private-source publication, and deployment changes remain separately scoped.
 
-**L4 implementation:** The first maintained-tool batch groups five
-Chromium/host-resource and runtime benchmark utilities under
-`tools/performance/`, updating their test imports and documented invocations.
-Existing benchmark output paths remain unchanged. The next L4 batch moves the
-test-worker runner, Linux browser-host profile and Docker host probe to the
-same package. Entrypoints use `python -m tools.performance.*` while retaining
-existing test runner behavior and the host-local profile path.
+**Current closeout focus:** L4 groups owned tools beneath `tools/browser/`,
+`tools/ci/`, `tools/data/`, `tools/dev/`, `tools/operations/`,
+`tools/performance/`, `tools/research/`, `tools/symbols/` and
+`tools/testing/`. The remaining root files are reviewed shared helpers or
+operator entrypoints (see the L4 root disposition below). Existing CLI,
+source/publication and runtime contracts are preserved.
 
-The next dependency-coherent L4 batch groups the operational alert, diagnostic,
-resource and metrics-report tools under `tools/operations/`, and HTTP load
-testing under `tools/performance/`. It updates active tests and documented
-module commands without changing report formats or output destinations.
+Finish L5 by retiring only superseded documents or one-use code with
+independent consumers reconciled. For L6, prefer small changes to actual
+report defaults and checks over introducing a broad local inventory or
+mandatory process. L7 should use the existing exact-SHA hosted CI and
+targeted end-to-end checks, not repeat every historical validation.
+Production deployment and merging are separate decisions.
 
 **R6 Windows source-copy checkpoint (2026-11-14):** 96 ignored files were
 copied without replacing or deleting originals: six Army ZIPs, five Army

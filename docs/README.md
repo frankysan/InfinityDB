@@ -58,19 +58,15 @@ ASCII art, keeping labels readable in both source and rendered form.
 ## Active cleanup plans
 
 - [tooling-and-local-path-cleanup-plan.md](tooling-and-local-path-cleanup-plan.md) —
-  active post-v1.1.0 tool/path cleanup. Its
-  [L1 decision package](tooling-and-local-path-cleanup-plan.md#l1-decision-package--p-accepted-t-and-m-pending-2026-11-13)
-  records **P accepted** for new path and lifecycle conventions, while
-  tracked retirements (T) and private-data relocation/deletion (M) remain
-  separately gated. The accepted policy is owned by
+  ongoing post-v1.1.0 closeout. R1–R6 local source/path cutovers and L4
+  tool grouping are complete; L5 document retirement, proportionate L6
+  output conventions and L7 acceptance remain open. The early L0/L1
+  checkpoints in the plan are **historical**, not renewed prerequisites
+  for completed work. Current path and lifecycle policy is owned by
   [architecture](architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
-  and [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective);
-  existing paths and commands are not migrated by that approval. All current
-  root tools are named in the L0 record; recovery/host evidence remains open.
-  The [L2 reader/producer decision package](tooling-and-local-path-cleanup-plan.md#eighteenth-bounded-l2-checkpoint--readerproducer-path-cutover-decision-package-2026-11-13)
-  maps candidate paths and the non-destructive R1–R6 acceptance order;
-  it is not permission to change live paths or Syncthing. The
-  [backlog](TODO.md) owns the implementation task.
+  and [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective).
+  The [backlog](TODO.md) lists only remaining actions; private-source
+  deletion, release and deployment remain separately scoped.
 
 ## Completed strategic migrations
 
