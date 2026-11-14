@@ -343,6 +343,15 @@ fixture, and maintained operator commands. Existing source inputs, local
 candidate paths and read-only publication checks remain unchanged. The
 cross-domain deployment verifier and release orchestrators remain at root.
 
+**L4 data parity and source-disposition grouping (2026-11-14):**
+Moved `verify_its_pilot_parity` into `tools/data/` and the
+fingerprinted source-coverage disposition gate into `tools/research/`.
+Updated the parity source-root default, focused imports, and current
+disposition CLI example. The independent ITS HTTP/SVG parity checks,
+V1S-082 scoped review contract and local scratch paths are unchanged.
+The shared reference-baseline reporter remains root-owned for a
+separate consumer-driven review; no compatibility wrappers were added.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

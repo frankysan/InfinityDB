@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-from tools.source_coverage_dispositions import (
+from tools.research.source_coverage_dispositions import (
     DEFAULT_MANIFEST,
     DispositionError,
     current_evidence_inputs,

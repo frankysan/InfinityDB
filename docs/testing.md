@@ -6962,7 +6962,7 @@ The read-only validator checks the tracked
 current Core/Hacking curated records and declared source fingerprints:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.source_coverage_dispositions
+.\.venv\Scripts\python.exe -m tools.research.source_coverage_dispositions
 ```
 
 Each review has one stable clause key, exact source identity/page/member and

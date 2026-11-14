@@ -22,7 +22,7 @@ from infinity_db.web import create_app_from_database_set
 from infinity_db.web.api_handler import _enrich_scenario_api_item
 from tools.browser_wsgi_transport import wsgi_response
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"
 DATABASE_SET = ROOT / "data/generated"
 SEASON = "its-18"
