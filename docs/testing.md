@@ -2246,7 +2246,7 @@ For example, give the selected command a **new** run-specific
 `--output` destination:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/catalog-navigation/RUN_ID/labels.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/catalog-navigation/RUN_ID/labels.json
 ```
 
 Replace `RUN_ID` with a UTC run identifier and short checkout revision.
@@ -2278,8 +2278,8 @@ Use new, domain-scoped `local/validation/browser/` paths for each run.
 For example, from the checkout root:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --self-host --output local/validation/browser/hacking-programs/RUN_ID/hacking-programs.json
-.\.venv\Scripts\python.exe -m tools.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/non-skill-army/RUN_ID/non-skill-army.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_hacking_programs_browser --self-host --output local/validation/browser/hacking-programs/RUN_ID/hacking-programs.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/non-skill-army/RUN_ID/non-skill-army.json
 ```
 
 Replace `RUN_ID` with a unique UTC run identifier and checkout revision.
@@ -2301,8 +2301,8 @@ receipt interrupted during writing requires inspection before reuse.
 candidate revision, for example:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/unit-skill-presentation/RUN_ID/unit-skill.json
-.\.venv\Scripts\python.exe -m tools.verify_rule_fragment_browser --self-host --output local/validation/browser/rule-fragments/RUN_ID/fragments.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/unit-skill-presentation/RUN_ID/unit-skill.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_rule_fragment_browser --self-host --output local/validation/browser/rule-fragments/RUN_ID/fragments.json
 ```
 
 Replace `RUN_ID` with a new UTC timestamp plus short checkout SHA.
@@ -2332,8 +2332,8 @@ contract. Their JSON output is an immutable *run receipt*, not a
 replacement for any cached source file. For example:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/structured-skill-charts/RUN_ID/charts.json
-.\.venv\Scripts\python.exe -m tools.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/research/traits/official-snapshot.html --output local/validation/browser/trait-wiki/RUN_ID/trait-wiki.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/structured-skill-charts/RUN_ID/charts.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/research/traits/official-snapshot.html --output local/validation/browser/trait-wiki/RUN_ID/trait-wiki.json
 ```
 
 Replace `RUN_ID` with a new UTC timestamp plus checkout revision;
@@ -2677,7 +2677,7 @@ The Weapon fragment verifier gained a `--self-host` mode for the tracked
 Army/rules pair, removing the need for a separately running development server.
 Its new ephemeral-server regression and existing unit tests passed **12/12**.
 A separate real Chromium invocation of
-`tools.verify_rule_fragment_browser --self-host` passed **69/69** checks at
+`tools.browser.verify_rule_fragment_browser --self-host` passed **69/69** checks at
 1440/390/320 px in 248 seconds, following soft-navigation, source-backed
 rule cards, Glossary-to-Weapon fragments and fresh deep links. The full
 JSON report is under ignored `local/audits/v1s086-rule-fragments.json`.
@@ -6195,7 +6195,7 @@ verifier; the user confirmed that run. Both reports are bounded
 checkout-specific browser evidence, not CI browser tests or proof of
 whole-catalog source-to-browser completeness.
 
-The maintained optional verifier `tools.verify_non_skill_army_browser`
+The maintained optional verifier `tools.browser.verify_non_skill_army_browser`
 repeats the seven real-browser cases at those three widths. It checks
 the client-rendered general profile, published API buckets, the correct
 Equipment/Training/Attribute-override table rows, valid Equipment
@@ -6206,7 +6206,7 @@ running for the **same checkout and databases**, run from the repository
 root in PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/audits/non-skill-army-browser/current.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/audits/non-skill-army-browser/current.json
 ```
 
 The optional verifier requires Playwright with Chromium installed and
@@ -6285,7 +6285,7 @@ For the frozen local candidate, serve the tracked database pair in an ephemeral
 WSGI app and run the full-width and mobile-width Chromium check:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_rule_fragment_browser --self-host --output local/audits/weapon-rule-fragments-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_rule_fragment_browser --self-host --output local/audits/weapon-rule-fragments-browser.json
 ```
 
 For an existing development or deployed server, use `--base-url URL`
@@ -6813,9 +6813,9 @@ Start the local server in one PowerShell window:
 Run the needed verifier from a second repository-root PowerShell window:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_ammunition_browser --base-url http://127.0.0.1:8000 --output local/audits/ammunition-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/audits/labels-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_general_rules_browser --base-url http://127.0.0.1:8000 --output local/audits/general-rules-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_ammunition_browser --base-url http://127.0.0.1:8000 --output local/audits/ammunition-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/audits/labels-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_general_rules_browser --base-url http://127.0.0.1:8000 --output local/audits/general-rules-browser.json
 ```
 
 **Historical acceptance, 2026-10-19:** Ammunition 33/33, Labels 72/72,
@@ -6860,9 +6860,9 @@ With the current checkout's development server running on
 verifier from the repository root in PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_states_browser --base-url http://127.0.0.1:8000 --output local/audits/states-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --base-url http://127.0.0.1:8000 --output local/audits/hacking-programs-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_traits_catalog_browser --base-url http://127.0.0.1:8000 --output local/audits/traits-catalog-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_states_browser --base-url http://127.0.0.1:8000 --output local/audits/states-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_hacking_programs_browser --base-url http://127.0.0.1:8000 --output local/audits/hacking-programs-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_traits_catalog_browser --base-url http://127.0.0.1:8000 --output local/audits/traits-catalog-browser.json
 ```
 
 **Historical browser acceptance, 2026-10-19:** States 72/72,
@@ -6887,7 +6887,7 @@ local Army database, follows reviewed destinations and rejects JavaScript errors
 incomplete loading and horizontal overflow. With the matching development server running:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
 ```
 
 **Historical acceptance:** successive 9/9 runs on 2026-10-19/20 covered the
@@ -7546,7 +7546,7 @@ all combined-source variants, or browser acceptance. The existing
 parity for global Unit options, Orders and expanded Includes.
 
 The normal Unit detail **browser acceptance** is available through
-`tools.verify_unit_skill_presentation_browser`. It compares each rendered
+`tools.browser.verify_unit_skill_presentation_browser`. It compares each rendered
 General Profile and each army-local profile/loadout section with the normal
 `/api/units/<slug>` response: exact row category, item name, linked
 Skill/Equipment/Weapon destination, quantity and rendered Extras.
@@ -7588,7 +7588,7 @@ The separate CLI defaults to seven Units × three widths (**21 pages**).
 To check an already running candidate server and save ignored evidence:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json
 ```
 
 Use `--exclude-optional teamops` (repeat for multiple flags),
@@ -8889,13 +8889,13 @@ Army's source-derived `—` while adding a brief note to consult the
 Program's individual requirements/effects rather than interpreting a
 missing Troop Type as no valid target. The source regression verifies the
 printed chart key and program-specific clauses; the maintained
-`tools.verify_hacking_programs_browser` acceptance checks the conditional
+`tools.browser.verify_hacking_programs_browser` acceptance checks the conditional
 note alongside all original Army stat cells at 1440/390/320 px.
 
 For repeatable localhost browser acceptance without an external server:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --self-host --output local/hacking-program-target-scope-browser-20261030.json
+.venv\Scripts\python.exe -m tools.browser.verify_hacking_programs_browser --self-host --output local/hacking-program-target-scope-browser-20261030.json
 ```
 
 The self-host mode launches a disposable loopback WSGI server using the
@@ -12357,7 +12357,7 @@ previous Trait Wiki link was placed exclusively in the developer-only
 sets its reviewed URL and reveals it when `wiki` is available; the
 developer-only source metadata on other catalog pages is unchanged.
 
-`tools/verify_trait_wiki_browser.py` is an optional browser acceptance
+`tools/browser/verify_trait_wiki_browser.py` is an optional browser acceptance
 check. With a running local InfinityDB application and an existing official
 Traits HTML snapshot, it visits all 33 `/traits/{slug}` routes in a clean
 Chromium context with Developer Mode off; each page must render the visible
@@ -12382,7 +12382,7 @@ test suite:
 ```powershell
 .\.venv\Scripts\python.exe -m pip install playwright
 .\.venv\Scripts\python.exe -m playwright install chromium
-.\.venv\Scripts\python.exe -m tools.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/audits/traits-current.html --output local/audits/trait-wiki-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/audits/traits-current.html --output local/audits/trait-wiki-browser.json
 ```
 
 If all routes report HTTP 404, the verifier is reaching the wrong/stale

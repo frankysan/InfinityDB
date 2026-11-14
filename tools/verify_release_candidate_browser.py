@@ -21,12 +21,12 @@ from infinity_db.database_set import ARMY_DATABASE_FILENAME, validate_database_s
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web.presentation import static_asset_revision
-from tools.served_runtime import ServedRuntimeError, verify_served_runtime
-from tools.verify_unit_skill_presentation_browser import (
+from tools.browser.verify_unit_skill_presentation_browser import (
     DEFAULT_SLUGS,
     WIDTHS,
     verify,
 )
+from tools.served_runtime import ServedRuntimeError, verify_served_runtime
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 

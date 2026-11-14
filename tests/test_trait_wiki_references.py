@@ -14,12 +14,12 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.trait_wiki_references import load_trait_wiki_references
 from infinity_db.web import create_app
+from tools.browser.verify_ammunition_browser import WIDTHS
+from tools.browser.verify_ammunition_browser import verify as verify_catalog_browser
+from tools.browser.verify_trait_wiki_browser import _browser_html, _validate_trait_page_response
+from tools.browser.verify_traits_catalog_browser import source_traits
 from tools.research.audit_trait_wiki_anchors import audit_html
 from tools.research.audit_trait_wiki_anchors import main as audit_anchors_main
-from tools.verify_ammunition_browser import WIDTHS
-from tools.verify_ammunition_browser import verify as verify_catalog_browser
-from tools.verify_trait_wiki_browser import _browser_html, _validate_trait_page_response
-from tools.verify_traits_catalog_browser import source_traits
 
 
 def _document(url: str, *, name: str = "Non-Lethal") -> dict:

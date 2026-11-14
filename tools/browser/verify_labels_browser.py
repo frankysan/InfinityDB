@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Optional Chromium acceptance of all current State catalog/detail pages."""
+"""Optional Chromium catalog-to-definition acceptance for all current Labels."""
 
 from __future__ import annotations
 
@@ -8,26 +8,22 @@ from pathlib import Path
 
 from infinity_db.curated import load_curated_directory
 from tools.browser.report_output import require_new_browser_report, write_browser_report
-from tools.verify_ammunition_browser import ROOT, verify
+
+from .verify_ammunition_browser import ROOT, verify
 
 
-def source_states(root: Path = ROOT) -> dict[str, str]:
-    """Return current source-authored States, preserving exact route identities."""
-    result: dict[str, str] = {}
+def source_names(root: Path = ROOT) -> dict[str, str]:
+    """Select current curated Label identities; reject conflicting definitions."""
+    names: dict[str, str] = {}
     for _, document in load_curated_directory(root / "data/curated"):
         if document["collection"]["status"] != "current":
             continue
-        for record in document["records"]:
-            if record["kind"] != "state":
-                continue
-            record_id = record["id"]
-            if not record_id.startswith("state:") or record_id.count(":") != 1:
-                raise ValueError(f"Invalid State route identity: {record_id}")
-            slug = record_id.removeprefix("state:")
-            if slug in result:
-                raise ValueError(f"Duplicate State source identity: {record_id}")
-            result[slug] = record["name"]
-    return result
+        for label in document["labels"]:
+            slug, name = label["id"], label["name"]
+            if slug in names and names[slug] != name:
+                raise ValueError(f"Conflicting current Label name: {slug}")
+            names[slug] = name
+    return names
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -40,11 +36,11 @@ def main(argv: list[str] | None = None) -> int:
     report = verify(
         args.base_url,
         headed=args.headed,
-        catalog="states",
-        expected_names=source_states(),
+        catalog="labels",
+        expected_names=source_names(),
     )
     write_browser_report(parser, args.output, report)
-    print(f"States browser navigation: {report['passed']}/{report['total']} passed")
+    print(f"Labels browser navigation: {report['passed']}/{report['total']} passed")
     for item in report["results"]:
         if item["status"] == "failed":
             print(f"  {item['width']}px {item['slug']}: {item['error']}")

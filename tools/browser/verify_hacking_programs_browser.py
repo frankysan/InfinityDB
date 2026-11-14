@@ -16,7 +16,7 @@ from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.web import create_app
 from tools.browser.report_output import require_new_browser_report, write_browser_report
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 ARMY_DB = ROOT / "data/generated/army.db"
 WIDTHS = (1440, 390, 320)
 

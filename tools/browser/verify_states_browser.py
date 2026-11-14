@@ -1,36 +1,34 @@
 #!/usr/bin/env python3
-"""Optional Chromium catalog-to-detail acceptance for all current General Rules."""
+"""Optional Chromium acceptance of all current State catalog/detail pages."""
 
 from __future__ import annotations
 
 import argparse
 from pathlib import Path
 
-from infinity_db.application_domains import application_domain, record_matches_domain
 from infinity_db.curated import load_curated_directory
-from infinity_db.domain_slugs import route_slug_from_qualified_typed_domain_id
 from tools.browser.report_output import require_new_browser_report, write_browser_report
-from tools.verify_ammunition_browser import ROOT, verify
+
+from .verify_ammunition_browser import ROOT, verify
 
 
-def source_rules(root: Path = ROOT) -> dict[str, tuple[str, str]]:
-    """Select category-scoped General Rules and retain qualified record IDs."""
-    domain = application_domain("rules")
-    rules: dict[str, tuple[str, str]] = {}
+def source_states(root: Path = ROOT) -> dict[str, str]:
+    """Return current source-authored States, preserving exact route identities."""
+    result: dict[str, str] = {}
     for _, document in load_curated_directory(root / "data/curated"):
         if document["collection"]["status"] != "current":
             continue
         for record in document["records"]:
-            if not record_matches_domain(domain, record):
+            if record["kind"] != "state":
                 continue
             record_id = record["id"]
-            slug = route_slug_from_qualified_typed_domain_id(
-                record_id, expected_domain="rule", context="General Rule browser identity"
-            )
-            if slug in rules:
-                raise ValueError(f"Duplicate General Rule route slug: {slug}")
-            rules[slug] = (record_id, record["name"])
-    return rules
+            if not record_id.startswith("state:") or record_id.count(":") != 1:
+                raise ValueError(f"Invalid State route identity: {record_id}")
+            slug = record_id.removeprefix("state:")
+            if slug in result:
+                raise ValueError(f"Duplicate State source identity: {record_id}")
+            result[slug] = record["name"]
+    return result
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -40,16 +38,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--headed", action="store_true")
     args = parser.parse_args(argv)
     require_new_browser_report(parser, args.output)
-    rules = source_rules()
     report = verify(
         args.base_url,
         headed=args.headed,
-        catalog="rules",
-        expected_names={slug: name for slug, (_, name) in rules.items()},
-        expected_record_ids={slug: record_id for slug, (record_id, _) in rules.items()},
+        catalog="states",
+        expected_names=source_states(),
     )
     write_browser_report(parser, args.output, report)
-    print(f"General Rules browser navigation: {report['passed']}/{report['total']} passed")
+    print(f"States browser navigation: {report['passed']}/{report['total']} passed")
     for item in report["results"]:
         if item["status"] == "failed":
             print(f"  {item['width']}px {item['slug']}: {item['error']}")

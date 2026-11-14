@@ -10,7 +10,7 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.web import create_app
-from tools.verify_states_browser import source_states
+from tools.browser.verify_states_browser import source_states
 
 
 def test_state_catalog_exposes_reviewed_states_and_reverse_relations(tmp_path: Path) -> None:

@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-from tools import (
+from tools.browser import (
     verify_ammunition_browser,
     verify_general_rules_browser,
     verify_hacking_programs_browser,
@@ -43,6 +45,19 @@ FINAL_MODULES = (
     verify_structured_skill_charts_browser,
     verify_trait_wiki_browser,
 )
+
+
+@pytest.mark.parametrize(
+    "module", (*MODULES, *SPECIALIZED_MODULES, *PRESENTATION_MODULES, *FINAL_MODULES),
+)
+def test_browser_verifier_module_entrypoint_help(module: Any) -> None:
+    result = subprocess.run(
+        [sys.executable, "-m", module.__name__, "--help"],
+        cwd=Path(__file__).resolve().parents[1],
+        capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "usage:" in result.stdout.lower()
 
 
 def _final_args(module: Any, source: Path) -> list[str]:

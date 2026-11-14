@@ -18,8 +18,8 @@ from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.hacking_program_catalog import hacking_program_declaration_categories
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
+from tools.browser.verify_hacking_programs_browser import WIDTHS, source_programs
 from tools.research.source_paths import pinned_pdf_path
-from tools.verify_hacking_programs_browser import WIDTHS, source_programs
 
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_DB = ROOT / "data/generated/army.db"

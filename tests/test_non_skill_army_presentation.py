@@ -17,7 +17,7 @@ import pytest
 
 from infinity_db.database import Database
 from infinity_db.web import create_app
-from tools.verify_non_skill_army_browser import CASES, WIDTHS, projected_buckets
+from tools.browser.verify_non_skill_army_browser import CASES, WIDTHS, projected_buckets
 
 ROOT = Path(__file__).resolve().parents[1]
 APPLICATION_DB = ROOT / "data/generated/army.db"

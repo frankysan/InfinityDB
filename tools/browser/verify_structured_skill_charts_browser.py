@@ -17,7 +17,7 @@ from infinity_db.structured_chart_outcomes import (
 )
 from tools.browser.report_output import require_new_browser_report, write_browser_report
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 WIDTHS = (1440, 390, 320)
 CHARTS: dict[str, dict[str, Any]] = {
     "martial-arts": {

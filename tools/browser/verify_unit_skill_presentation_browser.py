@@ -21,7 +21,8 @@ from urllib.parse import quote, urlencode
 
 from tools.browser.report_output import require_new_browser_report, write_browser_report
 from tools.browser_wsgi_transport import route_browser_page
-from tools.verify_non_skill_army_browser import CASES, WIDTHS
+
+from .verify_non_skill_army_browser import CASES, WIDTHS
 
 DEFAULT_SLUGS = tuple(case.slug for case in CASES)
 OPTIONAL_FLAGS = ("mercs", "specops", "teamops", "reinforcement")

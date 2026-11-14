@@ -252,6 +252,14 @@ checklist command together. Existing direct-script and module entrypoints
 remain supported at the new paths; audit data and publication contracts
 are unchanged.
 
+**L4 browser verification grouping (2026-11-14):** Moved the eleven
+optional catalog, Army/program, interaction and Trait Wiki browser verifiers
+to `tools/browser/`, alongside the existing browser report writer.
+Updated their shared imports, source-root resolution, maintained tests,
+release-candidate consumer and active `python -m tools.browser.*` commands.
+The cross-domain release-candidate orchestrator and WSGI transport remain at
+`tools/`. Browser acceptance behavior and report formats are unchanged.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

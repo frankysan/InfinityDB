@@ -41,10 +41,10 @@ from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.web import create_app, create_app_from_database_set
+from tools.browser.verify_ammunition_browser import WIDTHS, source_names, verify
+from tools.browser.verify_general_rules_browser import source_rules
+from tools.browser.verify_labels_browser import source_names as label_source_names
 from tools.research.audit_1_0_reference_inputs import _WikiHeadings
-from tools.verify_ammunition_browser import WIDTHS, source_names, verify
-from tools.verify_general_rules_browser import source_rules
-from tools.verify_labels_browser import source_names as label_source_names
 
 
 def _reference_database(tmp_path: Path) -> Database:

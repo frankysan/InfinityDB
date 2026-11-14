@@ -10,7 +10,8 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.trait_wiki_references import load_trait_wiki_references
 from tools.browser.report_output import require_new_browser_report, write_browser_report
-from tools.verify_ammunition_browser import ROOT, verify
+
+from .verify_ammunition_browser import ROOT, verify
 
 
 def source_traits(root: Path = ROOT) -> dict[str, str]:
