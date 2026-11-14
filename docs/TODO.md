@@ -58,11 +58,14 @@ Use these links to jump directly to a workstream:
   a direct Glossary/rules link; retain raw provenance and explicit unresolved
   mappings.
 
-  A first browser slice now separates standalone Army markers from Traits
-  and links uniquely resolved published rule targets; uncertain ones remain
-  labeled but unlinked. Still outstanding: exact PDF chart row/mode
-  reconciliation, combined markers, and the known PARA Mine/Sepsitor
-  Plus source discrepancies (SRC-013/014).
+  Implemented subset: standalone and combined Army markers are separated
+  from Traits without changing source data. Pinned N5.3 chart reviews for
+  seven named Mines (p. 181) and Sepsitor Plus (p. 187) resolve exact rule
+  owners when the current API provides a route, with PDF/Army differences
+  shown separately for SRC-013/014. Other markers remain unlinked until
+  their exact source row/mode is reviewed. Remaining: reconcile other chart
+  rows and modes, obtain publisher clarification of unresolved mismatches,
+  and perform browser layout, keyboard and touch acceptance.
 
 ### Per-reference change history
 

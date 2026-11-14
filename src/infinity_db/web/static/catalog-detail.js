@@ -7,7 +7,7 @@ import { renderUnitRows } from "./unit-list.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
 import { referenceLoadMessage, tableViewport } from "./view-components.js";
 import { exactVariantRuleIds, exactVariantUsageSection } from "./variant-usage.js";
-import { isWeaponFootnote, weaponFootnotesForProfile } from "./weapon-footnotes.js";
+import { weaponFootnotesForProfile, withoutWeaponFootnotes } from "./weapon-footnotes.js";
 import {
   gameplayVariantRules,
   levelEffectsSection,
@@ -202,23 +202,24 @@ function weaponAmmunitionEffects(profile) {
 }
 
 function groupWeaponProperties(references) {
-  // Footnote notation points to a source rule section, not a Trait identity.
+  // Army mixes Traits, labels, State names and chart footnote notation.
   const groups = { Traits: [], Labels: [], States: [], Properties: [] };
   for (const reference of references) {
-    if (isWeaponFootnote(reference.label)) continue;
-    const catalogName = reference.public_reference?.catalog;
+    const property = withoutWeaponFootnotes(reference);
+    if (!property) continue;
+    const catalogName = property.public_reference?.catalog;
     if (catalogName === "labels") {
-      groups.Labels.push(reference);
+      groups.Labels.push(property);
     } else if (
       catalogName === "states"
-      || reference.state_references?.length
-      || /^state:/i.test(reference.label || "")
+      || property.state_references?.length
+      || /^state:/i.test(property.label || "")
     ) {
-      groups.States.push(reference);
-    } else if (reference.slug) {
-      groups.Traits.push(reference);
+      groups.States.push(property);
+    } else if (property.slug) {
+      groups.Traits.push(property);
     } else {
-      groups.Properties.push(reference);
+      groups.Properties.push(property);
     }
   }
   return groups;
@@ -280,8 +281,8 @@ function weaponTraitLinks(traits, showStatePrefix = true) {
   return fragment;
 }
 
-function weaponFootnoteRow(profile, weaponRules) {
-  const footnotes = weaponFootnotesForProfile(profile, weaponRules);
+function weaponFootnoteRow(profile, weaponRules, weaponSlug) {
+  const footnotes = weaponFootnotesForProfile(profile, weaponRules, weaponSlug);
   if (!footnotes.length) return null;
   const row = document.createElement("div");
   row.className = "weapon-data-row weapon-source-footnotes";
@@ -292,9 +293,10 @@ function weaponFootnoteRow(profile, weaponRules) {
   value.className = "weapon-data-value";
   for (const [index, footnote] of footnotes.entries()) {
     if (index) value.append(" · ");
+    value.append(`${footnote.source}: `);
     const node = document.createElement(footnote.target ? "a" : "span");
     node.textContent = footnote.marker;
-    node.title = `Army marker ${footnote.marker}: ${footnote.category} rules`;
+    node.title = `${footnote.source} ${footnote.marker}: ${footnote.category} rules`;
     if (footnote.target) {
       node.href = footnote.target.href;
       node.setAttribute("aria-label",
@@ -303,6 +305,9 @@ function weaponFootnoteRow(profile, weaponRules) {
     value.append(node, ` ${footnote.category}`);
     if (footnote.unresolved) {
       value.append(" (exact target not verified)");
+    }
+    if (footnote.mismatch) {
+      value.append(` (source discrepancy${footnote.issue ? `: ${footnote.issue}` : ""})`);
     }
   }
   row.append(heading, value);
@@ -390,7 +395,7 @@ function specialWeaponProfile(profile) {
   return card;
 }
 
-function weaponVariants(variants, profileCitationsAvailable = null, weaponRules = []) {
+function weaponVariants(variants, profileCitationsAvailable = null, weaponRules = [], weaponSlug = null) {
   const section = document.createElement("section");
   section.className = "weapon-variants";
   const rangeBands = canonicalWeaponRangeBands;
@@ -517,7 +522,7 @@ function weaponVariants(variants, profileCitationsAvailable = null, weaponRules 
         card.append(propertiesRow);
       }
       if (catalog === "weapons") {
-        const footnotes = weaponFootnoteRow(profile, weaponRules);
+        const footnotes = weaponFootnoteRow(profile, weaponRules, weaponSlug);
         if (footnotes) card.append(footnotes);
       }
       if (profile.rules?.length) {
@@ -681,7 +686,7 @@ function render(item) {
   });
   const levelEffects = levelEffectsSection(item.rules);
   const profiles = catalog === "weapons" && item.weapon_variants?.length
-    ? weaponVariants(item.weapon_variants, item.profile_citations_available, item.rules || []) : null;
+    ? weaponVariants(item.weapon_variants, item.profile_citations_available, item.rules || [], item.slug) : null;
   // Named Mines need their specific Weapon Chart profile before the long
   // shared family reference. Chest Mine does not use that family rule.
   const mineFamily = catalog === "weapons"

@@ -74,13 +74,18 @@ States heading.
 
 Army's N5.3 Weapon Chart markers `[*]`, `[**]` and `[***]` denote
 Weaponry, Ammunition, and Skills/Equipment rule sections, respectively.
-Display them separately from Traits. Link a marker only when exactly
-one target is already supported by the published mode/weapon rules
-or Ammunition/Skill/Equipment reference; otherwise show its legend
-category and explicitly leave the exact target unverified. This is
-**Army notation**, not proof of parity with the printed PDF chart.
-Preserve chart/Army conflicts and combined source-marker text without
-silently rewriting source Traits or inventing rule ownership.
+Display markers separately from Traits. **A unique related rule is not
+proof of the footnote's destination.** Link only when a pinned, reviewed
+publication/row/mode identifies the exact rule and that target is routable
+from the published API; otherwise show the legend category and leave the
+exact target unverified.
+
+The currently reviewed chart subset covers seven named Mines on N5.3 p. 181
+and Sepsitor Plus on p. 187. Show Army and PDF markers with their source
+labels if they disagree or one omits the marker (SRC-013/014). Split
+combined source labels such as `NON-LETHAL [**]` for display, keeping
+their original notation in API data and Developer Mode. Do not infer
+missing gameplay Traits, rule owners or agreement between publications.
 
 **Glossary term previews.** Where curated rules prose names a reviewed Visibility Zone
 variant, use a typed `term:` link to its Game term definition. The shared inline
