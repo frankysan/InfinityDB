@@ -529,7 +529,7 @@ overlay served by the current application.
 uses the latest completed run for that workflow/commit, and fails if that run is not successful. An
 older successful run therefore cannot hide a later failed rerun for the same candidate.
 
-The tool writes two ignored local files under `reports/` during release preparation:
+The tool writes two ignored local files under `local/validation/` during release preparation:
 
 - machine-readable JSON containing the repository, candidate commit, workflow/run identity, attempt,
   trigger, timestamps, conclusion, and GitHub run URL; and

@@ -176,6 +176,16 @@ it removes only verified duplicate and Explorer metadata. This move must be
 executed locally because MCP does not support moving these ignored/binary
 files. The three tracked publication databases remain in `data/generated/`.
 
+**L3 Git ignore simplification (2026-11-14):** Maintained check, benchmark,
+metrics-history and full-asset bundle defaults now write under `local/`.
+The remaining old root `reports/` artifacts are intended for local archival.
+Root `.gitignore` no longer needs blanket exceptions for `data/generated/`,
+`data/curated/`, `data/manifests/`, `docs/audits/` or `reports/` once local
+archival is complete. The optional `image-overrides` Syncthing sender now uses
+`InfinityDB-symbol-tools/local/image_overrides/` (same folder ID and Linux
+receiver). Its retired main-checkout directory and ignore exception are gone;
+the tracked publications remain tracked without ignore negations.
+
 **Planning baseline:** `dev/v1.1.0` at
 `a55b09ff5a7a37d6d7207f055a79ef2161a7e410`, inspected 2026-11-12.
 **Implementation baseline:** `dev/tooling-workspace-cleanup`, created with user

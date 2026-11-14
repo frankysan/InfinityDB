@@ -306,8 +306,8 @@ its catalog, variant and Army query values are never retained as labels.
 The engine can also be exercised manually from a checkout against the trusted LAN metrics listener:
 
 ```powershell
-python tools/metrics_history.py --database reports/metrics-history.db collect --url http://127.0.0.1:9090/metrics
-python tools/metrics_history.py --database reports/metrics-history.db status
+python tools/metrics_history.py --database local/reports/metrics-history.db collect --url http://127.0.0.1:9090/metrics
+python tools/metrics_history.py --database local/reports/metrics-history.db status
 ```
 
 Retained history is queryable without exposing another HTTP endpoint. `periods` lists the exact
@@ -317,10 +317,10 @@ aggregate all matching retained periods. `compare` defaults to the latest two ex
 independent `--from-*` and `--to-*` selectors. For example:
 
 ```powershell
-python tools/metrics_history.py --database reports/metrics-history.db periods
-python tools/metrics_history.py --database reports/metrics-history.db report
-python tools/metrics_history.py --database reports/metrics-history.db report --week 2026-10-05
-python tools/metrics_history.py --database reports/metrics-history.db compare --from-version 0.9.1 --to-version 0.10.0
+python tools/metrics_history.py --database local/reports/metrics-history.db periods
+python tools/metrics_history.py --database local/reports/metrics-history.db report
+python tools/metrics_history.py --database local/reports/metrics-history.db report --week 2026-10-05
+python tools/metrics_history.py --database local/reports/metrics-history.db compare --from-version 0.9.1 --to-version 0.10.0
 ```
 
 Human-readable reports include request/status counts, 4xx+5xx and 5xx rates, normalized-route

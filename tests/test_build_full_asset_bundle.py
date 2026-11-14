@@ -7,10 +7,19 @@ from pathlib import Path
 
 import pytest
 
-from tools.build_full_asset_bundle import FullAssetBundleBuildError, build_full_asset_bundle
+from tools.build_full_asset_bundle import (
+    DEFAULT_OUTPUT,
+    REPO_ROOT,
+    FullAssetBundleBuildError,
+    build_full_asset_bundle,
+)
 from tools.stage_full_asset_bundle import stage_asset_bundle
 
 SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>'
+
+
+def test_default_bundle_output_is_under_local() -> None:
+    assert DEFAULT_OUTPUT == REPO_ROOT / "local/work/full-assets/full-assets.zip"
 
 
 def _manifest(path: Path, published: list[str]) -> Path:

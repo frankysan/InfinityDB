@@ -21,7 +21,7 @@ except ModuleNotFoundError:  # Direct execution as tools/build_full_asset_bundle
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STATIC_ROOT = REPO_ROOT / "src" / "infinity_db" / "web" / "static"
 DEFAULT_PUBLICATION_MANIFEST = REPO_ROOT / "data" / "manifests" / "symbol-publication.json"
-DEFAULT_OUTPUT = REPO_ROOT / "reports" / "full-assets.zip"
+DEFAULT_OUTPUT = REPO_ROOT / "local" / "work" / "full-assets" / "full-assets.zip"
 _COMPRESSION = zipfile.ZIP_DEFLATED
 _COMPRESSLEVEL = 6
 
@@ -108,7 +108,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--output",
         type=Path,
         default=DEFAULT_OUTPUT,
-        help="Output ZIP path (default: reports/full-assets.zip)",
+        help="Output ZIP path (default: local/work/full-assets/full-assets.zip)",
     )
     parser.add_argument(
         "--static-root",

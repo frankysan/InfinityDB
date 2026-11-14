@@ -352,9 +352,9 @@ server-specific operational notes, command output, screenshots, diagnostics, and
 material. For example, `local/audits/` and `local/operations/` can hold private findings without
 placing them in public project documentation.
 
-Existing ignored locations such as `docs/audits/` and `reports/` remain supported for compatibility.
-New private operational evidence should be kept under `local/`. No build, test, CI, runtime, or
-release step may depend on its contents.
+Historical evidence previously written to `docs/audits/` or root `reports/`
+belongs under `local/archive/` or a categorized `local/` report directory.
+No build, test, CI, runtime, or release step may depend on private evidence.
 
 A normal audit therefore has three steps:
 

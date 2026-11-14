@@ -57,7 +57,7 @@ EXIT_OK = 0
 EXIT_STAGE_FAILURE = 1
 EXIT_RUNNER_ERROR = 2
 REPO_ROOT = Path(__file__).resolve().parents[1]
-REPORT_DIRECTORY = REPO_ROOT / "reports"
+REPORT_DIRECTORY = REPO_ROOT / "local" / "reports" / "checks"
 STATIC_ROOT = REPO_ROOT / "src" / "infinity_db" / "web" / "static"
 PUBLICATION_MANIFEST = REPO_ROOT / "data" / "manifests" / "symbol-publication.json"
 MODULE_ROOT = Path(__file__).resolve().parents[1] / "src"
@@ -221,7 +221,7 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help=(
             "Also write the complete console transcript to a UTF-8 text file. "
-            "With no PATH, use reports/CHECKS YYYYMMDD-HHMMSS.txt."
+            "With no PATH, use local/reports/checks/CHECKS YYYYMMDD-HHMMSS.txt."
         ),
     )
     parser.add_argument(
@@ -273,7 +273,7 @@ def normalize_report_target_args(argv: list[str]) -> list[str]:
     """Keep a pytest target after bare --report from becoming an output path.
 
     --report PATH remains supported for explicit report destinations such as
-    reports/checks.txt; --report=PATH is unambiguous for other filenames.
+    local/reports/checks/checks.txt; --report=PATH is unambiguous for other filenames.
     """
     tokens = list(argv)
     for i, token in enumerate(tokens[:-1]):

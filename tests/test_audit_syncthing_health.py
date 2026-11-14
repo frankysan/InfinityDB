@@ -34,6 +34,23 @@ def _config(
     return config
 
 
+def test_override_sender_is_in_symbol_tools_not_main_checkout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = tmp_path / "InfinityDB"
+    config = _config(tmp_path, root, "sender")
+    tree = ET.parse(config)
+    folder = next(
+        item for item in tree.getroot().findall("folder")
+        if item.get("id") == "infinity-image-overrides"
+    )
+    folder.set("path", str(root / "image_overrides"))
+    tree.write(config)
+    monkeypatch.setattr(health, "_live_status", lambda *_args: {"status": "available"})
+    report = health.inspect(config, role="sender", sender_root=root)
+    assert report["folders"]["image-overrides"] == {"status": "missing"}
+
+
 @pytest.mark.parametrize("role", ["sender", "receiver"])
 def test_inspects_exact_five_roles_and_reports_versioning_without_secret(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, role: str,

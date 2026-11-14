@@ -113,7 +113,7 @@ def _layouts(path: Path) -> dict[str, Layout]:
         # Direct-file activation is a separate, explicitly selected layout contract.
         # Staging roots stay on the existing receiver folders; no sender cutover.
         file_families = (
-            {"data/pdf": "pdf", "image_overrides": "image-overrides"}
+            {"data/pdf": "pdf"}
             if name == "legacy" else {
                 "local/data/pdf": "pdf",
                 "local/data/symbols/overrides": "image-overrides",

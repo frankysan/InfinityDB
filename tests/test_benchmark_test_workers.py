@@ -183,6 +183,12 @@ def test_report_writer_exclusive_creation_survives_post_check_collision(
     assert path.read_bytes() == prior
 
 
+def test_benchmark_default_report_is_under_local() -> None:
+    assert benchmark_test_workers.REPORT_DIRECTORY == (
+        benchmark_test_workers.REPO_ROOT / "local/benchmarks/test-workers"
+    )
+
+
 @pytest.mark.parametrize("default_path", (False, True))
 def test_benchmark_cli_rejects_occupied_report_before_test_runs(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,

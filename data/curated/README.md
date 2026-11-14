@@ -375,7 +375,7 @@ During mapping review, validate it against the exact generated Army snapshot and
 deterministic coverage/review queue with:
 
 ```powershell
-infinity-db validate-peripheral-identities --database data/generated/army.db --output "reports/PERIPHERAL IDENTITY COVERAGE.json"
+infinity-db validate-peripheral-identities --database data/generated/army.db --output "local/audits/peripheral-identities/coverage.json"
 ```
 
 The snapshot-bound pass requires the database SHA-256 provenance to match exactly one

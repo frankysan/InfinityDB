@@ -20,7 +20,7 @@ from typing import Any
 from tools.run_checks import REPO_ROOT, TEST_SECTION_NAMES, git_value
 
 DEFAULT_WORKERS = ("0", "4", "6", "8", "auto")
-REPORT_DIRECTORY = REPO_ROOT / "reports"
+REPORT_DIRECTORY = REPO_ROOT / "local" / "benchmarks" / "test-workers"
 EXIT_OK = 0
 EXIT_BENCHMARK_FAILURE = 1
 EXIT_USAGE_ERROR = 2
@@ -88,7 +88,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help=(
             "Optional fresh JSON report path (existing files are never replaced). "
-            "Defaults to reports/TEST-WORKERS <timestamp>.json."
+            "Defaults to local/benchmarks/test-workers/TEST-WORKERS <timestamp>.json."
         ),
     )
     parser.add_argument(

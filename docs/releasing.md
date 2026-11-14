@@ -390,5 +390,5 @@ the production host must not substitute newly built data.
   release gates.
 
 Record concise release outcomes in the changelog or normal release/deployment
-records. Keep detailed operational reports under ignored `local/` or
-`reports/`, not a second tracked release checklist.
+records. Keep detailed operational reports under ignored `local/`,
+not a second tracked release checklist.

@@ -10,32 +10,37 @@ responsibilities. Syncthing never updates a checkout or triggers a test.
 ## Layout and synchronization
 
 Windows is the authoritative **Send Only** Syncthing device; `linux-dev` is
-**Receive Only**. The source-path cutover preserves all five folder IDs and
-Linux staging folder roots:
+**Receive Only**. Four source folders are sent from InfinityDB, while the
+override sender is now owned by the sibling InfinityDB-symbol-tools repository.
+All five folder IDs and Linux staging folder roots are preserved:
 
-| Windows repository subdirectory | Linux staging folder |
+| Windows sender directory | Linux staging folder |
 | --- | --- |
 | `local/data/raw/` | `~/syncthing/infinitydb/raw/` |
 | `local/data/wiki/` | `~/syncthing/infinitydb/wiki/` |
 | `local/data/pdf/` | `~/syncthing/infinitydb/pdf/` |
 | `local/data/manifests/snapshots/` | `~/syncthing/infinitydb/snapshots/` |
-| `image_overrides/` | `~/syncthing/infinitydb/image-overrides/` (optional, unchanged) |
+| `../InfinityDB-symbol-tools/local/image_overrides/` | `~/syncthing/infinitydb/image-overrides/` (optional symbol-tools source) |
 
 **Source cutover:** The source families were copied to `local/data/`
 with hash verification before the Windows sender paths were changed.
 `tools.operations.cutover_syncthing_sender` previews the four folder-path
 changes and applies them with `--apply` via the local Syncthing API, without
-changing folder IDs, modes, devices or the optional override sender.
-The receiver folders remain at the same staging locations. The
+changing folder IDs, modes or devices. The optional override sender was
+subsequently redirected to `InfinityDB-symbol-tools/local/image_overrides/`
+through Syncthing Advanced Configuration; its folder ID and Linux receiver
+remain unchanged. The receiver folders remain at the same staging locations. The
 `--layout local` activation maps the nested Army ZIPs to `raw/army/`.
 `--layout legacy` remains available for old staging arrangements, but
 does not discover the new Army subdirectory.
 
 The Syncthing folder IDs must match between the devices; their physical
-paths need not. The optional Linux receiver uses `image-overrides/` (hyphen),
-while the repository destination remains `image_overrides/` (underscore). The
-explicit activation tool maps between them; do not rename either to match
-its counterpart. Do **not** synchronize the whole repository or entire `local/` tree, the
+paths need not. The optional Linux receiver uses `image-overrides/` (hyphen).
+The original main-checkout `image_overrides/` directory has been retired;
+symbol-tools owns the Windows source. An explicitly selected local activation
+can still copy received SVG evidence to `local/data/symbols/overrides/` in
+InfinityDB, but legacy activation into the checkout root is unsupported.
+Do **not** synchronize the whole repository or entire `local/` tree, the
 `data/generated/` directory (contains tracked release databases),
 `data/curated/`, `data/work/`, `reports/`, environment
 files, virtualenvs, or caches. The Linux source staging directory is outside
@@ -116,7 +121,8 @@ Wiki/Human-Sphere, raw-symbol sources and PDFs under `local/data/`.
 After the cutover, 49 exact duplicate legacy ZIP/manifest files and
 75 duplicate PDFs were retired; their `local/data/` copies remain
 intact. The four sender paths use the local layout; the optional override
-sender is unchanged. Two unique expanded Wiki/Human-Sphere directories
+sender was subsequently redirected to the symbol-tools repository.
+Two unique expanded Wiki/Human-Sphere directories
 were moved to `local/data/wiki-extracted/`, **outside** the ZIP-only
 sender root. They remain local to Windows.
 Linux checkout activation remains an explicit `--layout local` command;
@@ -137,12 +143,12 @@ PDFs and optional override evidence have no mandatory snapshot manifest pin.
 The external symbol producer owns override lookup/application; activating these
 files does **not** approve new artwork or make it an InfinityDB build input.
 The command measures a SHA-256 of its selected staged file but cannot establish
-original provenance. These are the two **explicit** file layouts:
+original provenance. The legacy layout supports PDFs only; override evidence requires the
+explicit local layout. These are the supported file layouts:
 
 | Selection | Staged source | Checkout destination |
 | --- | --- | --- |
 | Explicit `--layout legacy` | `pdf/<relative>.pdf` | `data/pdf/<relative>.pdf` |
-| Default `--layout legacy` | `image-overrides/<relative>.svg` | `image_overrides/<relative>.svg` |
 | Explicit `--layout local` | `pdf/<relative>.pdf` | `local/data/pdf/<relative>.pdf` |
 | Explicit `--layout local` | `image-overrides/<relative>.svg` | `local/data/symbols/overrides/<relative>.svg` |
 

@@ -175,11 +175,16 @@ def test_unpinned_override_uses_configured_receiver_path(
     (staged / "image_overrides").mkdir()
     (staged / "image_overrides" / "sample.svg").write_bytes(b"wrong sibling")
 
-    args = ["activate", "--file", "image_overrides/sample.svg"]
+    args = [
+        "activate", "--layout", "local", "--file",
+        "local/data/symbols/overrides/sample.svg",
+    ]
     assert _run(args, staged, checkout) == 0
     assert list(checkout.iterdir()) == []
     assert _run([*args, "--apply"], staged, checkout) == 0
-    assert (checkout / "image_overrides/sample.svg").read_bytes() == source.read_bytes()
+    assert (checkout / "local/data/symbols/overrides/sample.svg").read_bytes() == (
+        source.read_bytes()
+    )
 
 
 def test_override_refuses_unconfigured_staging_sibling(
@@ -550,17 +555,18 @@ def test_pinned_pdf_and_override_activate_with_matching_read_only_layouts(
     svg_staged.write_bytes(override_bytes)
     pin = hashlib.sha256(pdf_bytes).hexdigest()
     destinations = {
-        "legacy": (label, "image_overrides/Unit/reviewed.svg"),
+        "legacy": (label,),
         "local": (
             "local/data/pdf/rules/reviewed-n5.pdf",
             "local/data/symbols/overrides/Unit/reviewed.svg",
         ),
     }
 
-    for layout, (pdf_destination, override_destination) in destinations.items():
+    for layout, files in destinations.items():
+        pdf_destination = files[0]
         checkout = staged.parent / f"checkout-{layout}"
         checkout.mkdir()
-        for relative in (pdf_destination, override_destination):
+        for relative in files:
             args = ["activate", "--layout", layout, "--file", relative]
             before_preview = {
                 path.relative_to(checkout): path.read_bytes()
@@ -578,12 +584,10 @@ def test_pinned_pdf_and_override_activate_with_matching_read_only_layouts(
         assert selected is not None
         assert selected == checkout / pdf_destination
         assert selected.read_bytes() == pdf_bytes
-        assert (checkout / override_destination).read_bytes() == override_bytes
-        other_pdf, other_override = destinations[
-            "local" if layout == "legacy" else "legacy"
-        ]
-        assert not (checkout / other_pdf).exists()
-        assert not (checkout / other_override).exists()
+        if layout == "local":
+            assert (checkout / files[1]).read_bytes() == override_bytes
+        other_files = destinations["local" if layout == "legacy" else "legacy"]
+        assert all(not (checkout / relative).exists() for relative in other_files)
 
     assert pdf_staged.read_bytes() == pdf_bytes
     assert svg_staged.read_bytes() == override_bytes

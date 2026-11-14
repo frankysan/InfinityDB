@@ -494,6 +494,7 @@ def test_report_without_path_uses_timestamped_repository_filename() -> None:
     started_at = datetime.fromisoformat("2026-09-17T14:05:06+02:00")
 
     assert args.report is True
+    assert run_checks.REPORT_DIRECTORY == run_checks.REPO_ROOT / "local/reports/checks"
     assert run_checks.resolve_report_path(args.report, started_at) == (
         run_checks.REPORT_DIRECTORY / "CHECKS 20260917-140506.txt"
     )

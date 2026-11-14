@@ -10,8 +10,7 @@
         "symbols": {"staging": "raw", "destination": "data/raw"}
       },
       "files": {
-        "data/pdf": "pdf",
-        "image_overrides": "image-overrides"
+        "data/pdf": "pdf"
       }
     },
     "local": {

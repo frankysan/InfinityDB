@@ -31,9 +31,10 @@ and retention obligations are satisfied. Do not use an automatic age-based
 deletion rule. Standard language caches, virtual environments, OS/editor
 state, host secrets, selected test scratch, external producer staging and
 the production SQLite service volume are owner-specific exceptions, not
-alternative report roots. No blanket exception is granted for ignored
-`data/`, root `reports/`, `docs/audits/`, `image_overrides/` or loose
-web-font downloads.
+alternative report roots. Historical ignored `data/`, root `reports/` and
+`docs/audits/` material belongs under `local/`; the former
+`image_overrides/` sender now belongs to `InfinityDB-symbol-tools/local/image_overrides/`.
+Loose web-font downloads remain an exception until replaced by published assets.
 
 The three published `data/generated/` databases, tracked curated
 inputs, the symbol publication manifest, reviewed generated checklists

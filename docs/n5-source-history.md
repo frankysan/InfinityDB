@@ -693,7 +693,7 @@ For each suspected discrepancy or missing rule:
    evidence. If sources conflict, retain each original value and citation; do not
    silently select one based only on recency.
 7. **Promote only reviewed findings** to maintained data and durable contracts.
-   Put intermediate diffs and raw comparison evidence in ignored `docs/audits/`.
+   Put intermediate diffs and raw comparison evidence in ignored `local/audits/`.
    Normal builds/tests must remain offline and must not fetch these sources.
 
 When recording a finding, preserve `source kind`, `URL/path`, `publication or
@@ -1030,4 +1030,4 @@ This review does **not** change imported source metadata, assume that an
 implicit effect is the same as an explicitly listed Trait, or establish
 complete special-weapon prose links. The remaining work stays in
 `docs/TODO.md`. New generated evidence belongs in ignored `local/audits/`;
-legacy `docs/audits/` remains supported.
+legacy `docs/audits/` evidence should be moved to `local/archive/`.

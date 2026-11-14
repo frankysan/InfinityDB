@@ -21,7 +21,7 @@ from pathlib import Path
 FORMAT = "InfinityDB metrics history"
 FORMAT_VERSION = 1
 DEFAULT_METRICS_URL = "http://app:8000/internal/metrics"
-DEFAULT_DATABASE = Path("reports/metrics-history.db")
+DEFAULT_DATABASE = Path("local/reports/metrics-history.db")
 DEFAULT_INTERVAL_SECONDS = 300.0
 DEFAULT_RETENTION_WEEKS = 52
 DEFAULT_MAX_BYTES = 64 * 1024 * 1024

@@ -22,6 +22,10 @@ from tools.metrics_history import (
 )
 
 
+def test_default_history_database_is_under_local() -> None:
+    assert metrics_history.DEFAULT_DATABASE == Path("local/reports/metrics-history.db")
+
+
 def _timestamp(year: int, month: int, day: int, hour: int = 12) -> float:
     return datetime(year, month, day, hour, tzinfo=UTC).timestamp()
 

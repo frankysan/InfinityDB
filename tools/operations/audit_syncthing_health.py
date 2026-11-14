@@ -22,7 +22,7 @@ FAMILIES = {
     "wiki": ("local/data/wiki", "wiki"),
     "pdf": ("local/data/pdf", "pdf"),
     "snapshots": ("local/data/manifests/snapshots", "snapshots"),
-    "image-overrides": ("image_overrides", "image-overrides"),
+    "image-overrides": ("../InfinityDB-symbol-tools/local/image_overrides", "image-overrides"),
 }
 ROOT = Path(__file__).resolve().parents[2]
 COUNTS = (

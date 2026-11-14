@@ -342,16 +342,15 @@ tests/                      # Pipeline, database, API, web, and tool regression 
 tools/                      # Offline handoff verification, publication, auditing, and checks
 scripts/                    # Linux deployment and maintenance scripts
 data/
-  raw/                      # Immutable Army/source snapshots, ignored by Git
-  wiki/                     # Wiki research snapshots, ignored by Git
-  pdf/                      # Local rules/FAQ/ITS research documents, ignored by Git
-  curated/                  # Source-controlled reviewed rules, identities, and annotations
-  manifests/                # Tracked symbol publication plus ignored build provenance
-  work/                     # Rebuildable processing work, ignored by Git
-  reports/                  # Generated processing reports, ignored by Git
-  logs/                     # Verbose pipeline logs, ignored by Git
-  backups/                  # Local retained processing/publication history, ignored by Git
-  generated/                # Tracked runtime DBs plus ignored intermediate build artifacts
+  curated/                  # Tracked reviewed rules, identities and annotations
+  manifests/                # Tracked symbol publication manifest
+  generated/                # Tracked Army, Rules and ITS runtime databases
+local/                      # Ignored source, build, research and archive workspace
+  data/                     # Local Army, Wiki, PDFs and symbol-source evidence
+  work/                     # Replaceable build outputs
+  audits/                   # Run-scoped audit evidence
+  reports/                  # Local check and operational reports
+  archive/                  # Retained historical material
 ```
 
 ## Development checks
