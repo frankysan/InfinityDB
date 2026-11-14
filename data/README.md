@@ -40,8 +40,9 @@ The three published `data/generated/` databases, tracked curated
 inputs, the symbol publication manifest, reviewed generated checklists
 and immutable tracked acceptance/source records **remain tracked**.
 Normal serve, Docker and installed-wheel builds do not require `local/`
-research artifacts. See the [cleanup execution plan](../docs/tooling-and-local-path-cleanup-plan.md)
-for completed migrations and remaining unique legacy material.
+research artifacts. The 2026-11-14 cleanup completed the source and reader
+cutovers described below; unique local evidence and legitimate cross-host
+exceptions retain their independently documented ownership.
 
 **R6 cutover (2026-11-14):** The Windows checkout has 124 hash-checked
 files under `local/data/`: Army, Wiki/Human-Sphere and raw-symbol ZIPs, their
@@ -295,9 +296,9 @@ database argument or `--require-raw`. The existing individual Army/raw health
 command remains available. The [data model](../docs/data-model.md#shared-metadata-and-integrity)
 owns the embedded build-provenance fields.
 The P2.6 filename, default selection and shared serving-directory contract
-are implemented. The [workspace cleanup plan](../docs/tooling-and-local-path-cleanup-plan.md)
-owns subsequent path hygiene, and [release guidance](../docs/releasing.md)
-owns future integration and release acceptance.
+are implemented. Current file placement follows the
+[workspace conventions](../docs/architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration);
+[release guidance](../docs/releasing.md) owns integration and release acceptance.
 
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
 source control so machine-local snapshot state does not obscure code changes.

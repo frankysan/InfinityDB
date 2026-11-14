@@ -17,6 +17,33 @@ The type-check stage explicitly passes the runner's interpreter to Pyright for d
 resolution, so invoking the virtual-environment Python works without first activating that
 environment in the shell.
 
+## Tooling/workspace cleanup L7 closeout — 2026-11-14
+
+**Accepted revision:** `1063096f51a3050594039cba84b1515d90a4ff0b`
+on `dev/tooling-workspace-cleanup`. The exact-SHA hosted workflows all passed:
+[Source checks](https://github.com/frankysan/InfinityDB/actions/runs/43620863274)
+(Windows, macOS, Ubuntu, Python 3.11/3.14, and Ubuntu 24.04/26.04 pinned
+determinism), [Installed wheel smoke](https://github.com/frankysan/InfinityDB/actions/runs/43620863263),
+and [Deployment smoke test](https://github.com/frankysan/InfinityDB/actions/runs/43620863358).
+The superseded 1.0 review evidence reference edits were reverted before
+acceptance because that validation manifest is included in the pinned
+runtime source-input fingerprint.
+
+Local focused checks at the same revision passed: source-review tests
+**23/23**, documentation stage and Git whitespace check; full
+`tools.verify_deployment_assets` validated **808/808** published SVGs,
+**807/807** browser-referenced SVGs, and reviewed source/publication parity;
+the ephemeral checkout server and offline runtime-semantic comparison
+both passed **41/41** pinned routes against the complete Army/Rules/ITS set.
+These checks establish cleanup integration, not a new release or deployment.
+
+Legitimate placement exceptions remain: ordinary test/OS/virtualenv scratch,
+external producer/Syncthing staging, host-specific secrets and the deployed
+`metrics_history` persistent volume. Historical ignored-source remnants and
+separately reviewed raw evidence are not silently deleted. Current paths are
+owned by [architecture](architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
+and [data guidance](../data/README.md#current-paths-and-behavior).
+
 ## Complete-set release-candidate browser verifier
 
 `tools.verify_release_candidate_browser` compares an explicit release version,
@@ -6364,7 +6391,7 @@ and rejects source/manifest drift before publication. Run these four modules
 as a focused acquisition/build batch when changing that handoff.
 
 Each standalone producer owns its acquisition-level rollback tests and full
-offline suite. The [R2 acceptance record](tooling-and-local-path-cleanup-plan.md#twentieth-bounded-l2-checkpoint--r2-snapshot-producer-publication-alignment-2026-11-13)
+offline suite. The [historical R2 acceptance record](https://github.com/frankysan/InfinityDB/blob/1063096f51a3050594039cba84b1515d90a4ff0b/docs/tooling-and-local-path-cleanup-plan.md#twentieth-bounded-l2-checkpoint--r2-snapshot-producer-publication-alignment-2026-11-13)
 pins producer revisions and Windows/Linux byte-conformance evidence; those
 results do not turn local fixture checks into current hosted/release acceptance.
 

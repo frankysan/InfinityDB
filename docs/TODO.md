@@ -22,31 +22,12 @@ when all contained work shares the same owner.
 
 ## Active development
 
-### Tooling and local workspace cleanup
-
-**Project domains:** Project infrastructure, Data processing, Acquisition
-
-- [ ] **Close out the tooling and local-workspace cleanup**
-  ([implementation record](tooling-and-local-path-cleanup-plan.md)).
-  R1–R6 source/path cutovers and L4 tool grouping are complete; do not
-  reopen their historical approval gates.
-  L5 is complete: superseded plans and 1.0 audits were retired; remaining
-  tool candidates have independent research or regression consumers. L6
-  is complete through existing collision-safe report writers and documented
-  paths, without adding a mandatory path checker or ignored-file scanner.
-  - [ ] **L7:** Confirm latest exact-SHA hosted CI and focused integrated
-    source/build/publication/runtime contracts; record remaining legitimate
-    `local/` or cross-host exceptions and close the plan.
-  Preserve the three tracked runtime databases and private-source identities.
-  Any additional ignored-source deletion, merge, release or deployment is a
-  separate decision.
-
 ### Backlog and development workflow simplification
 
 **Project domain:** Project infrastructure
 
 - [ ] **Reduce maintenance overhead in the existing Git-based task workflow,**
-  coordinated with the ongoing [tooling and documentation cleanup](tooling-and-local-path-cleanup-plan.md)
+  following the completed tooling and documentation cleanup
   and [backlog retirement policy](README.md#backlog-completion-and-retirement):
   - [ ] Improve `TODO.md` navigability: keep concise, prioritized, actionable
     work items; link detailed plans rather than copying their contents; remove
@@ -372,8 +353,9 @@ when all contained work shares the same owner.
     retirement-candidate local evidence, not a valid current pair. Preserve its
     bytes pending the cleanup manifest's independent backup/restore and
     deletion approval; never delete or accept a mismatched pair implicitly.
-  The [L0 retirement decision](tooling-and-local-path-cleanup-plan.md#raw-archive-retirement-decision--2026-11-12)
-  records the current consumer and safety boundaries.
+  The [historical L0 retirement decision](https://github.com/frankysan/InfinityDB/blob/1063096f51a3050594039cba84b1515d90a4ff0b/docs/tooling-and-local-path-cleanup-plan.md#raw-archive-retirement-decision--2026-11-12)
+  records the original consumer boundaries; the still-open item above
+  remains independently tracked here.
 
 ### Army snapshot maintenance
 

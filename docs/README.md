@@ -55,19 +55,6 @@ documentation when Mermaid can clearly express the content. Use this for
 architecture flows, dependency graphs and similar relationships instead of
 ASCII art, keeping labels readable in both source and rendered form.
 
-## Active cleanup plans
-
-- [tooling-and-local-path-cleanup-plan.md](tooling-and-local-path-cleanup-plan.md) —
-  ongoing post-v1.1.0 closeout. R1–R6 local source/path cutovers and L4
-  tool grouping are complete; L5 bounded retirements, proportionate L6
-  output conventions and L7 acceptance remain open. The early L0/L1
-  checkpoints in the plan are **historical**, not renewed prerequisites
-  for completed work. Current path and lifecycle policy is owned by
-  [architecture](architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
-  and [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective).
-  The [backlog](TODO.md) lists only remaining actions; private-source
-  deletion, release and deployment remain separately scoped.
-
 ## Maintained evidence and research
 
 These files intentionally retain reviewed evidence that is useful beyond one release:
@@ -244,9 +231,10 @@ unique or ignored private data is never bulk-deleted on the basis of naming
 or age; such removal requires its own verified review and authorization.**
 Avoid maintaining a permanent second archive or completed-task register.
 
-The active [tooling and local-path cleanup project](tooling-and-local-path-cleanup-plan.md)
-audits existing files against this policy and proposes detailed
-directory/naming rules; it does not retroactively authorize mass deletions.
+Tool and workspace cleanup completed on 2026-11-14. The detailed historical
+execution record remains in Git history; current conventions belong to
+[architecture](architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
+and the [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective).
 
 ## Planning and history
 

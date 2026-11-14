@@ -82,8 +82,10 @@ must never depend on accidentally present private `local/` contents.
 Published databases, maintained configuration, reviewed curation, accepted
 source/review records and symbol publication remain tracked. See the
 [artifact lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective)
-for naming and retention. The [active cleanup plan](tooling-and-local-path-cleanup-plan.md)
-tracks legacy paths, producer changes and separately gated migrations.
+for naming and retention. The completed 2026-11-14 cleanup adopted the
+directory conventions and migrated the supported tools and source readers.
+Any remaining exceptional ignored material is owned by its existing
+producer/operator workflow, not a new cleanup gate.
 
 ## System boundaries
 
