@@ -16,18 +16,32 @@ from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
 
-from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
-from tools.weapon_chart_source import WeaponChartAuditError
-from tools.weapon_source_common import (
-    printed_name_and_mode as _printed_name_and_mode,
-)
-from tools.weapon_source_common import (
-    weapon_identity as _identity,
-)
-from tools.weapon_source_common import (
-    weapon_mode_identity as _mode_identity,
-)
-from tools.weapon_source_metadata import _metadata
+if __package__:
+    from .report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from .weapon_chart_source import WeaponChartAuditError
+    from .weapon_source_common import (
+        printed_name_and_mode as _printed_name_and_mode,
+    )
+    from .weapon_source_common import (
+        weapon_identity as _identity,
+    )
+    from .weapon_source_common import (
+        weapon_mode_identity as _mode_identity,
+    )
+    from .weapon_source_metadata import _metadata
+else:  # Support direct execution from tools/research/.
+    from report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from weapon_chart_source import WeaponChartAuditError
+    from weapon_source_common import (
+        printed_name_and_mode as _printed_name_and_mode,
+    )
+    from weapon_source_common import (
+        weapon_identity as _identity,
+    )
+    from weapon_source_common import (
+        weapon_mode_identity as _mode_identity,
+    )
+    from weapon_source_metadata import _metadata
 
 CHART_MEMBER = "Weapon_Chart"
 # Explicit source spellings, not a blanket singularization rule.

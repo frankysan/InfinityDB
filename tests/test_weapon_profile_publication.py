@@ -15,7 +15,6 @@ from storage_fixture_support import weapon_publication
 from infinity_db.database.repository import Database
 from infinity_db.weapon_profile_publication import file_sha256, profile_sha256
 from tools.audit_enrichment_coverage import audit_coverage
-from tools.audit_weapon_chart_profiles import audit_chart
 from tools.build_weapon_profile_publication import (
     DEFAULT_ARMY,
     DEFAULT_REVIEWS,
@@ -24,6 +23,7 @@ from tools.build_weapon_profile_publication import (
     check_embedded_profiles,
     main,
 )
+from tools.research.audit_weapon_chart_profiles import audit_chart
 
 PDF_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 

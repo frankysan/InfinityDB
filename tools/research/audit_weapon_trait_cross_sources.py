@@ -17,13 +17,22 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
-from tools.audit_weapon_traits_prose import (
-    _review_policy,
-    _reviewed_tokens,
-    _traits,
-    audit_traits_and_prose,
-)
-from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
+if __package__:
+    from .audit_weapon_traits_prose import (
+        _review_policy,
+        _reviewed_tokens,
+        _traits,
+        audit_traits_and_prose,
+    )
+    from .report_output import require_new_audit_outputs, write_audit_text_or_exit
+else:  # Support direct execution from tools/research/.
+    from audit_weapon_traits_prose import (
+        _review_policy,
+        _reviewed_tokens,
+        _traits,
+        audit_traits_and_prose,
+    )
+    from report_output import require_new_audit_outputs, write_audit_text_or_exit
 
 REVIEW_PATH = Path("config/validation/weapon-trait-wiki-review.json")
 WIKI_MEMBER = "Weapon_Chart"

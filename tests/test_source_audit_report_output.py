@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-from tools import (
+from tools.research import (
+    audit_1_0_reference_inputs,
     audit_auxiliary_silhouette_provenance,
     audit_weapon_chart_profiles,
     audit_weapon_definition_gaps,
@@ -18,7 +20,6 @@ from tools import (
     audit_weaponry_family_clauses,
     audit_wiki_weapon_chart_names,
 )
-from tools.research import audit_1_0_reference_inputs
 from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
 
 MODULES = (
@@ -293,3 +294,23 @@ def test_helper_fails_cleanly_for_unwritable_destination(
     assert exc.value.code == 1
     assert parent_file.read_text(encoding="utf-8") == "prior"
     assert "Audit report output:" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("name", [
+    "audit_auxiliary_silhouette_provenance",
+    "audit_weapon_chart_profiles",
+    "audit_weapon_definition_gaps",
+    "audit_weapon_trait_cross_sources",
+    "audit_weapon_traits_prose",
+    "audit_weaponry_family_clauses",
+    "audit_wiki_weapon_chart_names",
+])
+def test_weapon_source_audit_direct_script_help(name: str) -> None:
+    root = Path(__file__).resolve().parents[1]
+    script = root / "tools/research" / f"{name}.py"
+    result = subprocess.run(
+        [sys.executable, str(script), "--help"],
+        cwd=root, capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "usage:" in result.stdout

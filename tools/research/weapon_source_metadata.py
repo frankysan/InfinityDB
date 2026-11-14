@@ -8,8 +8,12 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from tools.weapon_chart_source import WeaponChartAuditError
-from tools.weapon_source_common import weapon_identity as _identity
+if __package__:
+    from .weapon_chart_source import WeaponChartAuditError
+    from .weapon_source_common import weapon_identity as _identity
+else:  # Support direct execution from tools/research/.
+    from weapon_chart_source import WeaponChartAuditError
+    from weapon_source_common import weapon_identity as _identity
 
 _RANGE_EDGES_CM = (20, 40, 60, 80, 100, 120, 240)
 

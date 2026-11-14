@@ -931,7 +931,7 @@ Army import or introduce game-session roll selection.
 
 ## Reviewed 1.0 Weapon Trait evidence boundary
 
-The read-only `tools/audit_weapon_trait_cross_sources.py` retains nine historically
+The read-only `tools/research/audit_weapon_trait_cross_sources.py` retains nine historically
 reviewed N5 v5.3 Weapon Trait identities against archived `Weapon_Chart` Wiki
 revision `4083` (exact payload hash in `config/validation/weapon-trait-wiki-review.json`).
 After correcting the tall Cybermine cell extraction, **eight** PDF/Army Trait

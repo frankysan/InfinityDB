@@ -2372,7 +2372,7 @@ For example, run the pinned Weapon Chart audit with the actual
 reviewed PDF path substituted for `PINNED_N5_PDF`:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_weapon_chart_profiles --core-pdf PINNED_N5_PDF --json-output local/research/weapon-source-audits/RUN_ID/chart-profile.json --markdown-output local/research/weapon-source-audits/RUN_ID/chart-profile.md
+.\.venv\Scripts\python.exe -m tools.research.audit_weapon_chart_profiles --core-pdf PINNED_N5_PDF --json-output local/research/weapon-source-audits/RUN_ID/chart-profile.json --markdown-output local/research/weapon-source-audits/RUN_ID/chart-profile.md
 ```
 
 Replace `RUN_ID` with a fresh UTC timestamp and source/checkout
@@ -8245,14 +8245,14 @@ procedures against the exact candidate and retain new execution logs privately.
 
 ## 1.0 Weapon Trait archived-Wiki cross-reference
 
-`tools/audit_weapon_trait_cross_sources.py` is an **offline, read-only**
+`tools/research/audit_weapon_trait_cross_sources.py` is an **offline, read-only**
 source-reconciliation tool, not part of normal builds or CI. It requires the
 pinned v5.3 PDF and the exact archived Wiki history ZIP in addition to the
 shipped generated databases. It fails closed if the nine maintained review
 identities or the PDF/Wiki payload hashes no longer match.
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_weapon_trait_cross_sources --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --wiki-history "C:\path\to\WIKI-en-history.zip" --json-output docs/audits/weapon-trait-cross-source.json --markdown-output docs/audits/weapon-trait-cross-source.md
+.\.venv\Scripts\python.exe -m tools.research.audit_weapon_trait_cross_sources --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --wiki-history "C:\path\to\WIKI-en-history.zip" --json-output docs/audits/weapon-trait-cross-source.json --markdown-output docs/audits/weapon-trait-cross-source.md
 ```
 
 This compares **Traits**, not all weapon-profile values or rules prose; the
@@ -8263,7 +8263,7 @@ remains manual and source-specific.
 
 ## 1.0 Weapon Chart partial evidence audit
 
-The read-only `tools/audit_weapon_chart_profiles.py` compares the printed N5 v5.3
+The read-only `tools/research/audit_weapon_chart_profiles.py` compares the printed N5 v5.3
 Weapon Chart to the shipped Army metadata. Its PDF layout reader reconstructs
 wrapped names and two-line Plasma saving cells, selects a unique explicit or
 mode-less profile, and keeps Disco Ball's auxiliary object profile separate from
@@ -8276,7 +8276,7 @@ offline audit additionally requires PyMuPDF (`python -m pip install pymupdf`);
 normal CI and tests do not need that optional dependency. Run from the repository root:
 
 ```powershell
-.venv\Scripts\python.exe tools/audit_weapon_chart_profiles.py --core-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --army-db data/generated/army.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
+.venv\Scripts\python.exe -m tools.research.audit_weapon_chart_profiles --core-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --army-db data/generated/army.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
 ```
 
 The output includes the source PDF SHA-256, raw compared fields, range-band
@@ -8309,7 +8309,7 @@ all input hashes. It requires the locally retained source archives, PyMuPDF,
 and the generated Army database (none are added to Git):
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/army.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
+.venv\Scripts\python.exe -m tools.research.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/army.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
 ```
 
 The output reports source values, **not** a gameplay ruling or permission to
@@ -9488,7 +9488,7 @@ unresolved identities independently from source-profile value differences.
 The pinned Wiki and Army files are private, not committed:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_wiki_weapon_chart_names --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --army-db data/generated/army.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
+.venv\Scripts\python.exe -m tools.research.audit_wiki_weapon_chart_names --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --army-db data/generated/army.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
 ```
 
 A name alias is not a new Weapon rule or corrected Weapon Chart profile.
@@ -9500,7 +9500,7 @@ reports in a deterministic source-to-reference triage. This is not a release gat
 
 ```powershell
 .venv\Scripts\python.exe tools/audit_enrichment_coverage.py data/generated/army.db --rules data/generated/rules_n5.db --output local/audits/weapon-enrichment.json
-.venv\Scripts\python.exe tools/audit_weapon_definition_gaps.py --army-db data/generated/army.db --enrichment local/audits/weapon-enrichment.json --chart local/audits/weapon-chart.json --json-output local/audits/weapon-triage.json --markdown-output local/audits/weapon-triage.md
+.venv\Scripts\python.exe -m tools.research.audit_weapon_definition_gaps --army-db data/generated/army.db --enrichment local/audits/weapon-enrichment.json --chart local/audits/weapon-chart.json --json-output local/audits/weapon-triage.json --markdown-output local/audits/weapon-triage.md
 ```
 
 **Current-input regression (2026-10-31):** the triage now retains historical
@@ -9556,7 +9556,7 @@ local and Git-ignored.
 
 ## 1.0 Weapon Traits and special-weapon source inventory
 
-`tools/audit_weapon_traits_prose.py` uses the same optional N5 v5.3 PDF and
+`tools/research/audit_weapon_traits_prose.py` uses the same optional N5 v5.3 PDF and
 generated Army database, plus `rules_n5.db`, to compare positionally reconstructed
 Traits against raw Army `metadata_weapons.properties`. The offline check keeps
 printed wording, mode identities, source page, and Army properties in each report.
@@ -9565,7 +9565,7 @@ named curated Weapon definitions, without treating a missing dedicated Weapon
 record as proof that no gameplay rule representation exists.
 
 ```powershell
-python tools/audit_weapon_traits_prose.py --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
+python -m tools.research.audit_weapon_traits_prose --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
 ```
 
 The corrected N5 v5.3 audit yields 147 literal Trait-list matches, 16 reviewed

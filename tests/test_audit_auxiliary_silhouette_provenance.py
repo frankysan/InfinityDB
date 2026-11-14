@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_auxiliary_silhouette_provenance import (
+from tools.research.audit_auxiliary_silhouette_provenance import (
     audit,
     html_rows,
     markdown_report,
@@ -15,7 +15,7 @@ from tools.audit_auxiliary_silhouette_provenance import (
     wiki_chart_s,
     wiki_dazer_s,
 )
-from tools.audit_weapon_chart_profiles import WeaponChartAuditError
+from tools.research.audit_weapon_chart_profiles import WeaponChartAuditError
 
 
 class FakePage:

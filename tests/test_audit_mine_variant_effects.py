@@ -154,7 +154,7 @@ def test_variant_source_effects_and_geometry_are_pinned(
 ) -> None:
     """Do not conflate chart mechanics, imported object geometry, or rule owners."""
     pdf = pytest.importorskip("pymupdf")
-    from tools.audit_weaponry_family_clauses import _normalized_text
+    from tools.research.audit_weaponry_family_clauses import _normalized_text
 
     assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == (
         _review()["sources"]["corePdfSha256"]

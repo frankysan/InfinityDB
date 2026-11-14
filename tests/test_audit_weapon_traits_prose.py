@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from tools.audit_weapon_traits_prose import (
+from tools.research.audit_weapon_traits_prose import (
     _normalized_traits,
     _review_policy,
     _reviewed_tokens,
@@ -43,7 +43,7 @@ def test_traits_cell_keeps_multiline_text_without_absorbing_next_row() -> None:
 def test_pinned_pdf_keeps_early_profile_and_trait_rows_aligned(
     pinned_n53_core_pdf: Path,
 ) -> None:
-    from tools.audit_weapon_traits_prose import audit_traits_and_prose
+    from tools.research.audit_weapon_traits_prose import audit_traits_and_prose
 
     root = Path(__file__).resolve().parents[1]
     pytest.importorskip("fitz")
@@ -141,7 +141,7 @@ def test_report_says_inventory_not_complete_definition() -> None:
 def test_prose_inventory_tracks_source_and_named_curated_definition(tmp_path) -> None:
     import sqlite3
 
-    from tools.audit_weapon_traits_prose import SPECIAL_SECTIONS, prose_inventory
+    from tools.research.audit_weapon_traits_prose import SPECIAL_SECTIONS, prose_inventory
 
     database = tmp_path / "rules_n5.db"
     with sqlite3.connect(database) as connection:
@@ -173,7 +173,7 @@ def test_prose_inventory_tracks_source_and_named_curated_definition(tmp_path) ->
 def test_prose_reference_coverage_does_not_infer_family_links(tmp_path) -> None:
     import sqlite3
 
-    from tools.audit_weapon_traits_prose import prose_reference_coverage
+    from tools.research.audit_weapon_traits_prose import prose_reference_coverage
 
     army = tmp_path / "army.db"
     rules = tmp_path / "rules_n5.db"

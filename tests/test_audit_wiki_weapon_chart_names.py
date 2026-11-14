@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_weapon_chart_profiles import WeaponChartAuditError
-from tools.audit_wiki_weapon_chart_names import (
+from tools.research.audit_weapon_chart_profiles import WeaponChartAuditError
+from tools.research.audit_wiki_weapon_chart_names import (
     audit,
     markdown_report,
     reconcile,

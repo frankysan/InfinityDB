@@ -9,7 +9,7 @@ import pytest
 from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase
 from tools.audit_enrichment_coverage import audit_coverage
-from tools.audit_weapon_definition_gaps import (
+from tools.research.audit_weapon_definition_gaps import (
     WeaponGapTriageError,
     load_shared_reviews,
     markdown_report,

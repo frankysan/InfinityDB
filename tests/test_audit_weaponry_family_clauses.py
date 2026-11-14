@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from tools.audit_weaponry_family_clauses import (
+from tools.research.audit_weaponry_family_clauses import (
     WeaponryFamilyAuditError,
     _read_policy,
     compare_family_clauses,

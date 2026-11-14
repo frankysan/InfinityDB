@@ -17,22 +17,40 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
-from tools.weapon_chart_source import (
-    PDF_PAGES,
-    WeaponChartAuditError,
-    _chart_burst_anchors,
-    rows_from_words,
-)
-from tools.weapon_source_common import (
-    source_file_sha256 as _sha256,
-)
-from tools.weapon_source_common import (
-    weapon_identity as _identity,
-)
-from tools.weapon_source_common import (
-    weapon_mode_identity as _mode_identity,
-)
+if __package__:
+    from .report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from .weapon_chart_source import (
+        PDF_PAGES,
+        WeaponChartAuditError,
+        _chart_burst_anchors,
+        rows_from_words,
+    )
+    from .weapon_source_common import (
+        source_file_sha256 as _sha256,
+    )
+    from .weapon_source_common import (
+        weapon_identity as _identity,
+    )
+    from .weapon_source_common import (
+        weapon_mode_identity as _mode_identity,
+    )
+else:  # Support direct execution from tools/research/.
+    from report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from weapon_chart_source import (
+        PDF_PAGES,
+        WeaponChartAuditError,
+        _chart_burst_anchors,
+        rows_from_words,
+    )
+    from weapon_source_common import (
+        source_file_sha256 as _sha256,
+    )
+    from weapon_source_common import (
+        weapon_identity as _identity,
+    )
+    from weapon_source_common import (
+        weapon_mode_identity as _mode_identity,
+    )
 
 FORMAT = "InfinityDB N5 v5.3 Weapon Traits and prose evidence"
 FORMAT_VERSION = 3
@@ -343,7 +361,10 @@ def audit_traits_and_prose(
         import fitz  # type: ignore[import-untyped]  # Optional offline PDF dependency.
     except ImportError as exc:
         raise WeaponChartAuditError("PDF audit requires PyMuPDF") from exc
-    from tools.audit_weapon_chart_profiles import audit_chart
+    if __package__:
+        from .audit_weapon_chart_profiles import audit_chart
+    else:
+        from audit_weapon_chart_profiles import audit_chart
 
     with fitz.open(pdf) as doc:
         if len(doc) < 188:

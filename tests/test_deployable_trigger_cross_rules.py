@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_weaponry_family_clauses import _normalized_text
+from tools.research.audit_weaponry_family_clauses import _normalized_text
 
 ROOT = Path(__file__).resolve().parents[1]
 PINNED_PDF_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"

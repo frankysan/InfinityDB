@@ -14,13 +14,22 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
-from tools.weapon_source_common import (
-    source_file_sha256 as _sha256,
-)
-from tools.weapon_source_common import (
-    weapon_identity as _identity,
-)
+if __package__:
+    from .report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from .weapon_source_common import (
+        source_file_sha256 as _sha256,
+    )
+    from .weapon_source_common import (
+        weapon_identity as _identity,
+    )
+else:  # Support direct execution from tools/research/.
+    from report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from weapon_source_common import (
+        source_file_sha256 as _sha256,
+    )
+    from weapon_source_common import (
+        weapon_identity as _identity,
+    )
 
 DEFAULT_REVIEW = Path('config/validation/weaponry-family-clauses.json')
 DEFAULT_ARMY = Path('data/generated/army.db')

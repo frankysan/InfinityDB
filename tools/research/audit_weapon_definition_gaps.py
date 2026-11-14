@@ -18,13 +18,23 @@ from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
 from infinity_db.weapon_profile_publication import profile_sha256
-from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
-from tools.weapon_source_common import (
-    source_file_sha256 as _sha256,
-)
-from tools.weapon_source_common import (
-    weapon_identity as _identity,
-)
+
+if __package__:
+    from .report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from .weapon_source_common import (
+        source_file_sha256 as _sha256,
+    )
+    from .weapon_source_common import (
+        weapon_identity as _identity,
+    )
+else:  # Support direct execution from tools/research/.
+    from report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from weapon_source_common import (
+        source_file_sha256 as _sha256,
+    )
+    from weapon_source_common import (
+        weapon_identity as _identity,
+    )
 
 FORMAT = "InfinityDB 1.0 weapon definition gap triage"
 FORMAT_VERSION = 3

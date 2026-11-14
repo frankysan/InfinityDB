@@ -234,6 +234,15 @@ manifest acceptance rules, source-byte read-only behavior, existing
 report schemas and required inputs remain unchanged; no retained
 research evidence or published asset was relocated.
 
+**L4 Weapon source-audit grouping (2026-11-14):** Moved the six maintained
+Weapon Chart, definition gap, trait cross-source, trait/prose, Weaponry family
+and Wiki chart audits, auxiliary Silhouette provenance auditor, and three
+shared source geometry/identity/Army metadata helpers into `tools/research/`.
+Updated internal and test imports, maintained operator examples, and the
+database-builder's audit-exclusion fixture. Preserved published data,
+pinned manifests and report contracts; historical restructuring decisions
+remain in Git history and the original plan narrative.
+
 **L5 V1S-082 plan retirement (2026-11-14):** Retired
 `docs/v1.0-coverage-workflow-plan.md` (108 lines) to Git history after a
 tracked reference scan found no active code, test, workflow or documentation

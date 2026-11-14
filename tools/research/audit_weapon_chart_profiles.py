@@ -17,33 +17,62 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
-from tools.weapon_chart_source import (
-    PDF_PAGES,
-    WeaponChartAuditError,
-    _chart_burst_anchors,
-    rows_from_words,
-)
-from tools.weapon_source_common import (
-    printed_name_and_mode as _printed_name_and_mode,
-)
-from tools.weapon_source_common import (
-    source_file_sha256 as _sha256,
-)
-from tools.weapon_source_common import (
-    weapon_identity as _identity,
-)
-from tools.weapon_source_common import (
-    weapon_mode_identity as _mode_identity,
-)
-from tools.weapon_source_metadata import (
-    _army_options,
-    _metadata,
-    _profile_attributes,
-)
-from tools.weapon_source_metadata import (
-    _source_range_bands as _source_range_bands,
-)
+if __package__:
+    from .report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from .weapon_chart_source import (
+        PDF_PAGES,
+        WeaponChartAuditError,
+        _chart_burst_anchors,
+        rows_from_words,
+    )
+    from .weapon_source_common import (
+        printed_name_and_mode as _printed_name_and_mode,
+    )
+    from .weapon_source_common import (
+        source_file_sha256 as _sha256,
+    )
+    from .weapon_source_common import (
+        weapon_identity as _identity,
+    )
+    from .weapon_source_common import (
+        weapon_mode_identity as _mode_identity,
+    )
+    from .weapon_source_metadata import (
+        _army_options,
+        _metadata,
+        _profile_attributes,
+    )
+    from .weapon_source_metadata import (
+        _source_range_bands as _source_range_bands,
+    )
+else:  # Support direct execution from tools/research/.
+    from report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from weapon_chart_source import (
+        PDF_PAGES,
+        WeaponChartAuditError,
+        _chart_burst_anchors,
+        rows_from_words,
+    )
+    from weapon_source_common import (
+        printed_name_and_mode as _printed_name_and_mode,
+    )
+    from weapon_source_common import (
+        source_file_sha256 as _sha256,
+    )
+    from weapon_source_common import (
+        weapon_identity as _identity,
+    )
+    from weapon_source_common import (
+        weapon_mode_identity as _mode_identity,
+    )
+    from weapon_source_metadata import (
+        _army_options,
+        _metadata,
+        _profile_attributes,
+    )
+    from weapon_source_metadata import (
+        _source_range_bands as _source_range_bands,
+    )
 
 FORMAT = "InfinityDB N5 Weapon Chart profile evidence"
 FORMAT_VERSION = 3

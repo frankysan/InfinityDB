@@ -16,13 +16,22 @@ from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
 
-from tools.research.report_output import require_new_audit_outputs, write_audit_text_or_exit
-from tools.weapon_chart_source import WeaponChartAuditError
-from tools.weapon_source_metadata import (
-    _army_options,
-    _metadata,
-    _profile_attributes,
-)
+if __package__:
+    from .report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from .weapon_chart_source import WeaponChartAuditError
+    from .weapon_source_metadata import (
+        _army_options,
+        _metadata,
+        _profile_attributes,
+    )
+else:  # Support direct execution from tools/research/.
+    from report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from weapon_chart_source import WeaponChartAuditError
+    from weapon_source_metadata import (
+        _army_options,
+        _metadata,
+        _profile_attributes,
+    )
 
 # Printed labels differ across languages; never auto-translate other objects.
 TARGETS = (

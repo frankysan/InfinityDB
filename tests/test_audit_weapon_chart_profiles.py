@@ -7,46 +7,46 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_weapon_chart_profiles import (
+from tools.research.audit_weapon_chart_profiles import (
     _identity as chart_weapon_identity,
 )
-from tools.audit_weapon_chart_profiles import (
+from tools.research.audit_weapon_chart_profiles import (
     _metadata as legacy_weapon_metadata,
 )
-from tools.audit_weapon_chart_profiles import (
+from tools.research.audit_weapon_chart_profiles import (
     _mode_identity as chart_mode_identity,
 )
-from tools.audit_weapon_chart_profiles import (
+from tools.research.audit_weapon_chart_profiles import (
     _printed_name_and_mode,
     _value,
     compare_rows,
     markdown_report,
     rows_from_words,
 )
-from tools.audit_weapon_chart_profiles import (
+from tools.research.audit_weapon_chart_profiles import (
     _sha256 as chart_source_sha256,
 )
-from tools.audit_weapon_definition_gaps import (
+from tools.research.audit_weapon_definition_gaps import (
     _identity as gap_weapon_identity,
 )
-from tools.audit_weapon_definition_gaps import (
+from tools.research.audit_weapon_definition_gaps import (
     _sha256 as gap_source_sha256,
 )
-from tools.weapon_chart_source import (
+from tools.research.weapon_chart_source import (
     PDF_PAGES,
     WeaponChartAuditError,
     _chart_burst_anchors,
 )
-from tools.weapon_chart_source import (
+from tools.research.weapon_chart_source import (
     rows_from_words as source_rows_from_words,
 )
-from tools.weapon_source_common import (
+from tools.research.weapon_source_common import (
     printed_name_and_mode,
     source_file_sha256,
     weapon_identity,
     weapon_mode_identity,
 )
-from tools.weapon_source_metadata import (
+from tools.research.weapon_source_metadata import (
     _army_options,
     _metadata,
     _profile_attributes,
@@ -254,7 +254,7 @@ def test_wrapped_name_is_reconstructed_within_row_boundaries() -> None:
 
 
 def test_early_rows_share_profile_and_trait_anchors_without_mode_leaks(monkeypatch) -> None:
-    from tools import audit_weapon_traits_prose
+    from tools.research import audit_weapon_traits_prose
 
     words = [
         (297.0, 99.0, "9"),
@@ -390,7 +390,7 @@ def test_discover_row_does_not_absorb_disco_ball_object_profile() -> None:
 
 
 def test_printed_range_mods_follow_vector_slots_not_color_meaning() -> None:
-    from tools.audit_weapon_chart_profiles import (
+    from tools.research.audit_weapon_chart_profiles import (
         _printed_range_bands,
         _source_range_bands,
     )
@@ -416,7 +416,7 @@ def test_printed_range_mods_follow_vector_slots_not_color_meaning() -> None:
 
 
 def test_bare_range_number_remains_different_from_signed_modifier() -> None:
-    from tools.audit_weapon_chart_profiles import _printed_range_bands
+    from tools.research.audit_weapon_chart_profiles import _printed_range_bands
 
     bands = _printed_range_bands(
         [(96.0, 305.0, "3")],
@@ -434,7 +434,7 @@ def test_bare_range_number_remains_different_from_signed_modifier() -> None:
 
 def test_katyusha_range_notation_review_preserves_source_values() -> None:
     """A reviewed chart glyph is not a global signed-MOD normalization."""
-    from tools.audit_weapon_chart_profiles import _metadata
+    from tools.research.audit_weapon_chart_profiles import _metadata
 
     root = Path(__file__).resolve().parents[1]
     review = json.loads(
@@ -499,7 +499,7 @@ def test_katyusha_range_notation_review_preserves_source_values() -> None:
 
 
 def test_disco_ball_is_separate_auxiliary_mode_profile() -> None:
-    from tools.audit_weapon_chart_profiles import (
+    from tools.research.audit_weapon_chart_profiles import (
         _printed_auxiliary_profiles,
         compare_auxiliary_profiles,
     )
@@ -524,7 +524,7 @@ def test_disco_ball_is_separate_auxiliary_mode_profile() -> None:
     assert matched[0]["status"] == "fields-match"
 
 def test_auxiliary_extractor_preserves_wrapped_object_identities() -> None:
-    from tools.audit_weapon_chart_profiles import _printed_auxiliary_profiles
+    from tools.research.audit_weapon_chart_profiles import _printed_auxiliary_profiles
 
     words = [
         (21.6, 545.6, "MONOFILAMENT"), (38.9, 555.2, "MINES"),
@@ -542,7 +542,7 @@ def test_auxiliary_extractor_preserves_wrapped_object_identities() -> None:
 
 
 def test_auxiliary_object_comparison_resolves_mines_modes_and_discrepancies() -> None:
-    from tools.audit_weapon_chart_profiles import compare_auxiliary_profiles
+    from tools.research.audit_weapon_chart_profiles import compare_auxiliary_profiles
 
     rows = [
         {"page": 181, "name": "AP MINES",
@@ -584,7 +584,7 @@ def test_auxiliary_object_comparison_resolves_mines_modes_and_discrepancies() ->
 
 
 def test_auxiliary_markdown_report_includes_field_provenance() -> None:
-    from tools.audit_weapon_chart_profiles import compare_auxiliary_profiles
+    from tools.research.audit_weapon_chart_profiles import compare_auxiliary_profiles
 
     compared = compare_auxiliary_profiles(
         [{"page": 186, "name": "DAZER",
@@ -607,7 +607,7 @@ def test_pinned_n53_pdf_chart_source_differences(
     pinned_n53_core_pdf: Path,
 ) -> None:
     """Compare pinned N5.3 chart rows against Army without changing review dispositions."""
-    from tools.audit_weapon_chart_profiles import audit_chart
+    from tools.research.audit_weapon_chart_profiles import audit_chart
 
     root = Path(__file__).resolve().parents[1]
     pytest.importorskip("fitz")
