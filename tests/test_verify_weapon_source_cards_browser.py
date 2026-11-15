@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from collections import defaultdict
 from collections.abc import Iterator
@@ -709,6 +710,13 @@ def _expected_weapon_trait_groups(profile: dict[str, Any]) -> dict[str, str]:
             continue
 
         source_label = reference.get("label") or ""
+        # Weapon Chart [*], [**] and [***] are footnote notation, not
+        # actual Weapon properties; the frontend strips those markers.
+        normalized_label = re.sub(r"\[\*{1,3}\]", "", source_label).strip()
+        if normalized_label != source_label:
+            if not normalized_label:
+                continue
+            source_alias = True
         state_references = reference.get("state_references") or []
         public_reference = reference.get("public_reference") or {}
         if public_reference.get("catalog") == "labels":
@@ -728,7 +736,9 @@ def _expected_weapon_trait_groups(profile: dict[str, Any]) -> dict[str, str]:
             label = " / ".join(state["label"] for state in state_references)
         else:
             label = (
-                reference.get("name") if source_alias else reference.get("label")
+                (reference.get("name") if slug else normalized_label)
+                if normalized_label != source_label
+                else reference.get("name") if source_alias else reference.get("label")
             ) or reference.get("name") or ""
             if group == "States" and label.casefold().startswith("state:"):
                 label = label.split(":", 1)[1].strip()

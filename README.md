@@ -94,10 +94,9 @@ its application metrics.
   and Skills, source-verification notes and deterministic maps all derive
   from maintained scenario definitions. Maps can be saved as standalone SVGs
   using the browser's image context menu, with the selected theme and units.
-  On the v1.1 development branch, ITS missions also expose an optional
-  event/Extra context selector; season-only restrictions are displayed only
-  when that context is explicitly chosen. The wider ITS library remains
-  outside the 1.0 completeness requirement.
+  The ITS Season 18 scenario also offers optional tournament and Extra
+  context selection; event-only restrictions appear only when explicitly
+  selected.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.
 - Supports System, Light, and Dark themes from Settings; System follows the operating-system

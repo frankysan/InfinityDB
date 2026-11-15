@@ -384,7 +384,9 @@ def test_weapon_profile_page_separates_source_markers_from_traits() -> None:
     assert "weaponFootnotesForProfile(profile, weaponRules, weaponSlug, catalog)" in page
     assert "footnote.source" in page
     assert 'node.setAttribute("aria-label",' in page
-    assert 'value.append(" (exact target not verified)")' in page
+    assert 'detail.className = "developer-only"' in page
+    assert 'detail.textContent = " (exact target not verified)"' in page
+    assert 'issue.className = "developer-only"' in page
     assert "source discrepancy" in page
 
 

@@ -21,6 +21,8 @@ are not retroactively relabeled.
   default N5 Skill restrictions.
 - Refreshed Army, Unit, Peripheral, Order and Characteristic symbols while
   preserving the existing Seed Soldier image URL.
+- Added links from reviewed N5.3 Weapon Chart footnotes to their rules, while
+  keeping unverified or conflicting source markers distinct from Traits.
 
 ### Added
 
@@ -47,6 +49,11 @@ are not retroactively relabeled.
   Extra selection. The policy API never applies a context by default; scenario
   pages show only policies chosen by the player and link to their official
   source references.
+- **Data processing + Web frontend:** Distinguished N5.3 Weapon Chart footnotes
+  from gameplay Traits and linked reviewed rules for Mines, grenades, E/M
+  weapons, Deactivator and Sepsitor Plus. Unverified footnote destinations
+  remain unlinked, and differing Army/PDF markers remain visible without
+  exposing internal issue IDs to players.
 - **Data processing + Project infrastructure:** Added `database-health --db-dir`
   to inspect a complete runtime directory offline, including SQLite integrity,
   source-matched references and file fingerprints. Missing or mismatched data

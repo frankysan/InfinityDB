@@ -71,11 +71,24 @@ def test_reviewed_weapon_footnotes_are_accessible_and_routable(
             )
             assert source in section_text
             if slug == "para-mine":
-                assert "SRC-013" in section_text
+                assert "SRC-013" not in section_text
                 assert "Army: [**]" in section_text
-                assert "exact target not verified" in section_text
+                assert "exact target not verified" not in section_text
             if slug == "sepsitor-plus":
-                assert "SRC-014" in section_text
+                assert "SRC-014" not in section_text
+            if slug in ("para-mine", "sepsitor-plus"):
+                page.evaluate(
+                    "() => document.documentElement.dataset.developerMode = 'true'"
+                )
+                developer_text = link.evaluate(
+                    "(node) => node.closest('.weapon-source-footnotes')?.innerText || ''"
+                )
+                assert ("SRC-013" if slug == "para-mine" else "SRC-014") in developer_text
+                if slug == "para-mine":
+                    assert "exact target not verified" in developer_text
+                page.evaluate(
+                    "() => document.documentElement.dataset.developerMode = 'false'"
+                )
             if slug == "chest-mine":
                 cc = page.locator(".weapon-profile").filter(
                     has=page.locator("h4", has_text="CC Mode")
@@ -87,7 +100,7 @@ def test_reviewed_weapon_footnotes_are_accessible_and_routable(
                 assert bs.locator(".weapon-source-footnotes a").count() == 0
                 bs_note = bs.locator(".weapon-source-footnotes").inner_text()
                 assert "Army: [*]" in bs_note
-                assert "exact target not verified" in bs_note
+                assert "exact target not verified" not in bs_note
             for width in (1440, 390, 320):
                 page.set_viewport_size({"width": width, "height": 900})
                 for scheme in ("light", "dark"):

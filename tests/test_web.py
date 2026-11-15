@@ -2053,7 +2053,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'</details><label class="extended-results-control">' in body
     assert b"Include optional units in this view" not in body
     assert b'id="optional-unit-context" class="optional-unit-view-value"' in body
-    assert b"View matches optional-unit Settings." in body
+    assert b"View matches optional-unit Settings in the Settings menu." in body
     for optional_filter in (b"mercs", b"specops", b"teamops", b"reinforcement"):
         assert b'id="unit-' + optional_filter + b'-filter"' not in body
         assert body.count(b'id="' + optional_filter + b'-filter"') == 1
@@ -2095,7 +2095,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'optionalUnitPreferenceDifferences().length > 0' in script
     assert b'...optionalUnitFilters(),' in script
     assert b'View differs from Settings:' in script
-    assert b'View matches optional-unit Settings.' in script
+    assert b'View matches optional-unit Settings in the Settings menu.' in script
     assert b'optionalUnitPreferenceDifferences()' in script
     assert b'byId("unit-mercs-filter")' not in script
     assert b'availabilityField?.remove()' not in script
@@ -3938,12 +3938,12 @@ def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None
     assert b"return army.public_slug || String(army.id);" in body
     assert b"return item.slug || String(item.id);" in body
     assert b"armyId: domainFilterIdentifier(armyId)" in body
-    assert b"skillId: domainFilterIdentifier(skillId)" in body
-    assert b"equipmentId: domainFilterIdentifier(equipmentId)" in body
-    assert b"weaponId: domainFilterIdentifier(weaponId)" in body
-    assert b"troopType: domainFilterIdentifier(troopType)" in body
-    assert b"classification: domainFilterIdentifier(classification)" in body
-    assert b"characteristic: domainFilterIdentifier(characteristic)" in body
+    assert b"skillId: domainMultiFilterIdentifiers(skillId)" in body
+    assert b"equipmentId: domainMultiFilterIdentifiers(equipmentId)" in body
+    assert b"weaponId: domainMultiFilterIdentifiers(weaponId)" in body
+    assert b"troopType: domainMultiFilterIdentifiers(troopType)" in body
+    assert b"classification: domainMultiFilterIdentifiers(classification)" in body
+    assert b"characteristic: domainMultiFilterIdentifiers(characteristic)" in body
     assert b"normalizeArmyFilterState(playableArmies)" in body
     for call in (
         b'normalizeCatalogFilterState(skills.items, "skillId")',
@@ -3957,7 +3957,10 @@ def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None
         b'normalizeUnitFilterState(unitFilters.characteristics, "characteristic")',
     ):
         assert call in body
-    assert b"candidate.source_ids?.some((sourceId) => String(sourceId) === current)" in body
+    status, _, multiselect = request(app, "/static/unit-multiselect.js")
+    assert status == 200
+    assert b"for (const sourceId of item.source_ids || [])" in multiselect
+    assert b"aliases.set(String(sourceId), canonical)" in multiselect
 
 
 def test_army_selector_uses_backend_role_and_playability(app: Callable) -> None:
@@ -4277,9 +4280,9 @@ def test_catalog_detail_frontend_uses_backend_trait_references(
     assert b"ruleReferenceHref(trait.public_reference)" in body
     assert b"trait.state_references" in body
     assert b"function groupWeaponProperties(references)" in body
-    assert b"groups.Labels.push(reference)" in body
-    assert b"groups.States.push(reference)" in body
-    assert b"groups.Properties.push(reference)" in body
+    assert b"groups.Labels.push(property)" in body
+    assert b"groups.States.push(property)" in body
+    assert b"groups.Properties.push(property)" in body
     assert b"state.public_reference" in body
     assert b"href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
     assert b"function canonicalTraitName(" not in body
@@ -7058,7 +7061,10 @@ def test_equipment_details_frontend_renders_metadata_profiles(app: Callable) -> 
 
     assert status == 200
     assert b'catalog === "equipment" && item.profiles?.length' in body
-    assert b"weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])" in body
+    assert (
+        b"weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }], "
+        b"null, item.rules || [], item.slug)" in body
+    )
     assert b'"Equipment profile"' not in body
     assert b'link.target = "_blank"' in body
     assert b'link.rel = "noopener noreferrer"' in body

@@ -304,10 +304,19 @@ function weaponFootnoteRow(profile, weaponRules, weaponSlug) {
     }
     value.append(node, ` ${footnote.category}`);
     if (footnote.unresolved) {
-      value.append(" (exact target not verified)");
+      const detail = document.createElement("span");
+      detail.className = "developer-only";
+      detail.textContent = " (exact target not verified)";
+      value.append(detail);
     }
     if (footnote.mismatch) {
-      value.append(` (source discrepancy${footnote.issue ? `: ${footnote.issue}` : ""})`);
+      value.append(" (source discrepancy)");
+      if (footnote.issue) {
+        const issue = document.createElement("span");
+        issue.className = "developer-only";
+        issue.textContent = ` (${footnote.issue})`;
+        value.append(issue);
+      }
     }
   }
   row.append(heading, value);
