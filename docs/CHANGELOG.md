@@ -36,6 +36,8 @@ are not retroactively relabeled.
   result total after choosing an option. Original source-usage counts remain
   available to API callers; historical filter links retain legacy semantics.
   Optional-unit Settings control which options appear in each menu.
+  Filtered profile/loadout results also identify their matching source
+  configurations in an expandable disclosure.
 - **Project infrastructure + Data processing:** Added explicit PDF-layout
   selection to the Reinforcements evidence auditor, preserving original source
   labels, byte pins and applicability findings. Legacy paths remain the default;

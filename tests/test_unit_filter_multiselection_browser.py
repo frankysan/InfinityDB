@@ -527,3 +527,33 @@ def test_bit_and_kiss_includes_one_linked_peripheral_per_loadout(
     finally:
         page.close()
 
+
+@pytest.mark.parametrize("scope", ["profile", "loadout"])
+@pytest.mark.parametrize("width", [1024, 390])
+def test_matching_context_disclosure_does_not_navigate(
+    app: Any, origin: str, browser: Any, scope: str, width: int,
+) -> None:
+    page = browser.new_page(
+        viewport={"width": width, "height": 800},
+        is_mobile=width == 390, has_touch=width == 390,
+    )
+    route_browser_page(page, app, origin)
+    try:
+        page.goto(
+            f"{origin}/units?skill_id=berserk&matching_scope={scope}",
+            wait_until="domcontentloaded",
+        )
+        summary = page.locator(".unit-match-contexts summary").first
+        summary.wait_for(state="visible")
+        assert "Matched:" in summary.inner_text()
+        url = page.url
+        if width == 390:
+            summary.tap()
+        else:
+            summary.click()
+        assert page.url == url
+        assert summary.locator("xpath=..").get_attribute("open") is not None
+        assert page.locator(".unit-match-contexts li").count() > 0
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
+    finally:
+        page.close()

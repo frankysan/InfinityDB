@@ -41,9 +41,6 @@ Use these links to jump directly to a workstream:
     Only uniquely source-backed Includes contribute capabilities; never infer
     properties from Controller access pools or transfer a Peripheral's Skills
     to its Controller.
-  - [ ] Present the actual matching profile/loadout context on result rows
-    where the source identifies it. Preserve the distinction between reference
-    discovery, a legal Army roster and simultaneous in-game abilities.
   - [ ] Check representative scoped-filter and prospective-count query
     performance, then rerun the affected pre-merge acceptance checks against
     the final candidate under [releasing](releasing.md).

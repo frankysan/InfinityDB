@@ -27,13 +27,14 @@ class MatchContext:
     swc: str | None = None
 
 
-def _satisfies(
+def matches_selected(
     properties: frozenset[Token],
     selected: Mapping[str, tuple[frozenset[Token], ...]],
     and_categories: frozenset[str],
     *,
     excluding: str | None = None,
 ) -> bool:
+    """True when the provided source-owned properties satisfy all selections."""
     for category, choices in selected.items():
         if category == excluding or not choices:
             continue
@@ -77,19 +78,23 @@ def evaluate(
             considered = candidates
 
         if any(
-            _satisfies(candidate.properties, selected, and_categories)
+            matches_selected(candidate.properties, selected, and_categories)
             for candidate in considered
         ):
             matches[logical_id] = frozenset(
                 (candidate.source_unit_id, candidate.source_army_id, candidate.group_id)
                 for candidate in candidates
-                if scope == "unit" or _satisfies(candidate.properties, selected, and_categories)
+                if scope == "unit" or matches_selected(
+                    candidate.properties, selected, and_categories,
+                )
             )
 
         for category in CATEGORIES:
             remaining = [
                 candidate.properties for candidate in considered
-                if _satisfies(candidate.properties, selected, and_categories, excluding=category)
+                if matches_selected(
+                    candidate.properties, selected, and_categories, excluding=category,
+                )
             ]
             if not remaining:
                 continue

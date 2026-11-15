@@ -73,7 +73,7 @@ from .schema import (
     SCHEMA_VERSION,
     quote,
 )
-from .unit_filter_matching import MatchContext
+from .unit_filter_matching import MatchContext, matches_selected
 from .unit_filter_matching import evaluate as evaluate_unit_filter_contexts
 
 SQLITE_INTEGER_MIN = -(2**63)
@@ -4105,6 +4105,22 @@ class Database:
                     profiles.append({**profile, "availability": availability})
                 item["profiles"] = profiles
 
+        if (
+            matching_scope in {"profile", "loadout"}
+            and (any(selected.values()) or has_numeric_filters)
+            and items
+        ):
+            visible_ids = {item["id"] for item in items}
+            matched = [
+                context for context in candidates
+                if context.logical_id in visible_ids
+                and matches_selected(context.properties, selected, scope_modes)
+            ]
+            evidence = self._unit_list_matching_context_labels(matched, army_names)
+            for item in items:
+                if item["id"] in evidence:
+                    item["matching_contexts"] = evidence[item["id"]]
+
         summary = availability_summary(matching_requirements, selected_flags)
         result = {
             "items": items,
@@ -4137,6 +4153,67 @@ class Database:
                 ),
             }
         return result
+
+    def _unit_list_matching_context_labels(
+        self, contexts: list[MatchContext], army_names: Mapping[int, str],
+    ) -> dict[int, dict[str, Any]]:
+        """Resolve the names of exact matching source occurrences for one page."""
+        if not contexts:
+            return {}
+        source_units = sorted({item.source_unit_id for item in contexts})
+        placeholders = ", ".join("?" for _ in source_units)
+        with self._connect() as connection:
+            profiles = {
+                (int(row["army_id"]), int(row["unit_id"]), int(row["group_id"]),
+                 int(row["occurrence_id"])): str(row["name"] or "")
+                for row in connection.execute(
+                    "SELECT o.army_id, o.unit_id, o.group_id, o.profile_id AS occurrence_id, "
+                    "p.name FROM profile_payload_occurrences AS o "
+                    "JOIN profile_payloads AS p ON p.id = o.profile_payload_id "
+                    f"WHERE o.unit_id IN ({placeholders})", source_units,
+                )
+            }
+            loadouts = {
+                (int(row["army_id"]), int(row["unit_id"]), int(row["group_id"]),
+                 int(row["occurrence_id"])): str(row["name"] or "")
+                for row in connection.execute(
+                    "SELECT o.army_id, o.unit_id, o.group_id, o.option_id AS occurrence_id, "
+                    "p.name FROM loadout_payload_occurrences AS o "
+                    "JOIN loadout_payloads AS p ON p.id = o.loadout_payload_id "
+                    f"WHERE o.unit_id IN ({placeholders})", source_units,
+                )
+            }
+        by_unit: dict[int, list[dict[str, str]]] = defaultdict(list)
+        seen: dict[int, set[tuple[int, ...]]] = defaultdict(set)
+        for item in sorted(
+            contexts,
+            key=lambda c: (c.logical_id, c.source_army_id, c.source_unit_id,
+                           c.group_id, c.option_id or 0, c.profile_id or 0),
+        ):
+            base = (item.source_army_id, item.source_unit_id, item.group_id)
+            profile_name = (
+                profiles.get((*base, item.profile_id), "")
+                if item.profile_id is not None else ""
+            )
+            loadout_name = (
+                loadouts.get((*base, item.option_id), "")
+                if item.option_id is not None else ""
+            )
+            if not profile_name and not loadout_name:
+                continue
+            identity = (*base, item.option_id or 0, item.profile_id or 0)
+            if identity in seen[item.logical_id]:
+                continue
+            seen[item.logical_id].add(identity)
+            by_unit[item.logical_id].append({
+                "army_name": army_names.get(item.source_army_id, ""),
+                "profile_name": profile_name,
+                "loadout_name": loadout_name,
+            })
+        return {
+            logical_id: {"total": len(labels), "examples": labels[:5]}
+            for logical_id, labels in by_unit.items()
+        }
 
     @instance_lru_cache(maxsize=64)
     def _unit_list_extended_profiles(

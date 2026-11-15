@@ -319,3 +319,29 @@ def test_new_scope_validated_and_legacy_remains_optional() -> None:
         _unit_query("matching_scope=invalid")
     with pytest.raises(ValueError, match="scope"):
         Database(Path("data/generated/army.db")).list_units(matching_scope="invalid")
+
+
+def test_scoped_results_name_only_supported_matching_configurations() -> None:
+    database = Database(Path("data/generated/army.db"))
+    for scope in ("profile", "loadout"):
+        result = database.list_units(
+            skill_id="berserk", matching_scope=scope, limit=25,
+        )
+        assert result["items"]
+        named = [item["matching_contexts"] for item in result["items"]
+                 if "matching_contexts" in item]
+        assert named
+        for evidence in named:
+            assert evidence["total"] >= len(evidence["examples"]) >= 1
+            assert len(evidence["examples"]) <= 5
+            for label in evidence["examples"]:
+                assert label["army_name"]
+                if scope == "profile":
+                    assert label["profile_name"]
+                else:
+                    assert label["loadout_name"]
+    for scope in ("unit", None):
+        result = database.list_units(skill_id="berserk", matching_scope=scope, limit=5)
+        assert all("matching_contexts" not in item for item in result["items"])
+    without_filters = database.list_units(matching_scope="profile", limit=5)
+    assert all("matching_contexts" not in item for item in without_filters["items"])

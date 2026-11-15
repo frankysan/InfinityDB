@@ -160,6 +160,38 @@ function extendedProfilesRow(unit, columnCount) {
   return row;
 }
 
+function matchDescription(context) {
+  const name = [context.profile_name, context.loadout_name]
+    .filter(Boolean).join(" · ");
+  return context.army_name ? `${name} (${context.army_name})` : name;
+}
+
+function matchingContexts(unit) {
+  const evidence = unit.matching_contexts;
+  if (!evidence?.examples?.length) return null;
+  const details = document.createElement("details");
+  details.className = "unit-match-contexts";
+  const summary = document.createElement("summary");
+  const first = matchDescription(evidence.examples[0]);
+  summary.textContent = `Matched: ${first}`
+    + (evidence.total > 1 ? ` (+${evidence.total - 1} more)` : "");
+  details.append(summary);
+  const list = document.createElement("ul");
+  for (const context of evidence.examples) {
+    const item = document.createElement("li");
+    item.textContent = matchDescription(context);
+    list.append(item);
+  }
+  const remainder = evidence.total - evidence.examples.length;
+  if (remainder > 0) {
+    const remaining = document.createElement("li");
+    remaining.textContent = `${remainder} more matching configurations`;
+    list.append(remaining);
+  }
+  details.append(list);
+  return details;
+}
+
 /** Render catalog unit records with the shared Unit explorer presentation. */
 export function renderUnitRows(container, units, { extended = false } = {}) {
   const fragment = document.createDocumentFragment();
@@ -169,7 +201,7 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
     const faction = unit.display_faction?.slug;
     if (faction) row.classList.add(`unit-row--faction-${faction}`);
     row.addEventListener("click", (event) => {
-      if (!event.target.closest("a")) {
+      if (!event.target.closest("a, .unit-match-contexts")) {
         const url = `/units/${unit.public_slug || unit.id}`;
         window.infinityNavigate ? window.infinityNavigate(url) : window.location.assign(url);
       }
@@ -199,6 +231,8 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
     }
     nameContent.append(unitSymbol(unit.symbol_path), nameLink);
     nameCell.append(nameContent);
+    const matches = matchingContexts(unit);
+    if (matches) nameCell.append(matches);
     const armyCell = document.createElement("td");
     armyCell.className = "table-column--descriptor";
     const armyList = document.createElement("div");
