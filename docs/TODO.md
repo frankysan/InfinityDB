@@ -22,27 +22,11 @@ when all contained work shares the same owner.
 
 Use these links to jump directly to a workstream:
 
-- **Reference and UI:** [Unit Explorer](#unit-explorer-matching-scopes), [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
+- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
 - **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
 ## Active development
-
-### Unit Explorer matching scopes
-
-**Project domains:** Data processing + Web backend + Web frontend
-
-- [ ] **Finish v1.1.0 Unit Explorer matching-scope acceptance.** Current
-  A/C/B semantics, API and share-state compatibility, and prospective count
-  behavior are documented in [the data model](data-model.md). The source-backed
-  evaluator, semantic fixture matrix and focused browser checks are implemented.
-  Embedded/Unit-backed Peripheral and optional-Unit-option source boundaries
-  have been reviewed against the pinned Army archive and materialized
-  A/C/B fixture cases; evidence is recorded in [testing](testing.md).
-  Unverified attachments and opaque compatibility fields remain source-only.
-  - [ ] Rerun affected pre-merge acceptance checks against the final v1.1.0
-    candidate under [releasing](releasing.md). Representative scoped-filter
-    performance is recorded in [testing](testing.md).
 
 ### External source clarifications
 
