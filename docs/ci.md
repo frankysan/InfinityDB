@@ -85,9 +85,10 @@ Each job installs Python 3.11.9, **Playwright 1.64.1** and its selected browser,
 checks the embedded deployed objects matched to the tracked
 Army/Rules/ITS database set and serves that complete set
 using an ephemeral WSGI server. One shared portable cohort runs
-**14 critical journeys** (seven at 1440 and 390 px) covering soft navigation,
-source citations, Weapon fragments, Unit detail, Core scenario selection,
-FAQ entry points and notice keyboard/touch behavior. Tests fail on missing
+**16 checks** (eight journeys at 1440 and 390 px) covering soft navigation,
+source citations, Weapon fragments, Unit detail, Unit Explorer matching
+disclosures, Core scenario selection, FAQ entry points and notice
+keyboard/touch behavior. Tests fail on missing
 browser executables, unhandled JavaScript/network errors or unavailable
 artifacts; the selected engine cannot silently skip. Each job uploads JUnit
 evidence and failure screenshot/trace artifacts, and the browser engine/version
