@@ -65,46 +65,46 @@ def test_specialist_filter_combines_persists_and_resets(
         )
         advanced = page.locator(".advanced-filters")
         if not advanced.evaluate("(node) => node.open"):
-            advanced.locator("summary").click()
+            advanced.locator(":scope > summary").click()
         specialist = page.locator("#specialist-filter")
-        assert specialist.locator("option").all_text_contents() == [
-            "Any", "Standard (InfinityDB)", "Domination", "Supplies", "Firefight",
-        ]
+        assert specialist.locator("option").all_text_contents() == ["Any", "Standard set"]
         assert page.locator('a[href="/rules/specialist-troops-standard"]').is_visible()
         specialist.select_option("standard")
         assert "s=v1.u." in page.url
         page.wait_for_function(
-            "() => document.querySelector('#unit-count')?.textContent?.includes(' / ')",
+            "() => document.querySelector('#unit-count')?.getAttribute('aria-busy') === 'false'",
             timeout=12000,
         )
         standard = int(page.locator("#unit-count").inner_text().split(" / ")[0]
                        .replace(",", ""))
         assert standard > 0
 
-        skills = page.locator("#skill-filter")
-        doctor = skills.locator("option").filter(has_text="Doctor").first
+        skills = page.locator(".unit-multi-select").first
+        skills.locator("summary").click()
+        doctor = skills.locator(".unit-multi-option").filter(has_text="Doctor").first
         assert doctor.count() == 1
-        doctor_id = doctor.get_attribute("value")
-        skills.select_option(doctor_id)
+        doctor_input = doctor.locator("input")
+        doctor_id = doctor_input.get_attribute("value")
+        doctor_input.check()
         page.wait_for_function(
-            "() => document.querySelector('#unit-count')?.textContent?.includes(' / ')",
+            "() => document.querySelector('#unit-count')?.getAttribute('aria-busy') === 'false'",
             timeout=12000,
         )
         combined = int(page.locator("#unit-count").inner_text().split(" / ")[0]
                        .replace(",", ""))
         assert combined <= standard
-        specialist.select_option("supplies")
         page.reload(wait_until="domcontentloaded")
         page.wait_for_function(
             "() => document.querySelector('#skill-filter')?.disabled === false",
             timeout=30000,
         )
-        assert specialist.input_value() == "supplies"
-        assert skills.input_value() == doctor_id
+        assert specialist.input_value() == "standard"
+        assert doctor_id is not None
+        assert skills.locator(f'input[value="{doctor_id}"]').is_checked()
         page.locator("#clear-filters").click()
         page.wait_for_function(
             "() => document.querySelector('#specialist-filter')?.value === '' "
-            "&& document.querySelector('#skill-filter')?.value === ''"
+            "&& !document.querySelector('.unit-multi-chip')"
         )
         assert not errors, errors
     finally:

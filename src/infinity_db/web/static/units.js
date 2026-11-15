@@ -341,7 +341,7 @@ function readLocation() {
     declaredFactionId: /^\d+$/.test(declaredFactionId) ? declaredFactionId : "",
     skillId: domainMultiFilterIdentifiers(skillId),
     specialist: ["standard", "domination", "supplies", "firefight"].includes(specialist)
-      ? specialist : "",
+      ? "standard" : "",
     equipmentId: domainMultiFilterIdentifiers(equipmentId),
     weaponId: domainMultiFilterIdentifiers(weaponId),
     troopType: domainMultiFilterIdentifiers(troopType),
@@ -604,10 +604,7 @@ async function load() {
   const currentRequest = ++requestNumber;
   showPanel(elements.loading);
   for (const key of Object.keys(multiControls)) multiControls[key].setCounts(null);
-  elements.unitCount.textContent = "—";
-  elements.unitCountShown.replaceChildren();
-  elements.unitCountFiltered.replaceChildren();
-  elements.unitCountFilteredTotal.textContent = "";
+  elements.unitCount.setAttribute("aria-busy", "true");
   elements.summary.textContent = "Loading units…";
   try {
     if (!armiesLoaded) {
@@ -657,8 +654,10 @@ async function load() {
       return load();
     }
     renderUnits(data);
+    elements.unitCount.setAttribute("aria-busy", "false");
   } catch (error) {
     if (signal.aborted || currentRequest !== requestNumber) return;
+    elements.unitCount.setAttribute("aria-busy", "false");
     for (const key of Object.keys(multiControls)) multiControls[key].setCounts(undefined);
     elements.errorMessage.textContent = error instanceof TypeError
       ? "Could not reach InfinityDB. Check your connection and try again."

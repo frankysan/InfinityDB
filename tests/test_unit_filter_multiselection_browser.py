@@ -199,10 +199,19 @@ def test_contextual_counts_accessible_loading_and_failure(
         assert "matching Unit" in checkbox.get_attribute("aria-label")
         assert control.locator(".unit-multi-choices").get_attribute("aria-busy") == "false"
         page.route("**/api/units?*", lambda route: route.abort())
-        loading_label = checkbox.evaluate(
-            "(input) => { input.click(); return input.getAttribute('aria-label'); }"
-        )
-        assert "count loading" in loading_label
+        snapshot = checkbox.evaluate("""(input) => {
+            const count = input.closest("label").querySelector(".unit-multi-count");
+            const main = document.querySelector("#unit-count");
+            const previous = { option: count.textContent, main: main.textContent };
+            input.click();
+            return {
+                previous, option: count.textContent, main: main.textContent,
+                label: input.getAttribute("aria-label"),
+            };
+        }""")
+        assert "count loading" in snapshot["label"]
+        assert snapshot["option"] == snapshot["previous"]["option"]
+        assert snapshot["main"] == snapshot["previous"]["main"]
         page.locator("#error-state").wait_for(state="visible")
         assert "count unavailable" in checkbox.get_attribute("aria-label")
         assert control.locator(".unit-multi-choices").get_attribute("aria-busy") == "false"
@@ -313,6 +322,71 @@ def test_contextual_and_baseline_counts_control_menu_visibility(
         assert "0 matching Units" in first_visible.locator("input").get_attribute(
             "aria-label"
         )
+    finally:
+        page.close()
+
+
+def test_individual_filter_clear_resets_search_and_keeps_counts_clear(
+    app: Any, origin: str, browser: Any,
+) -> None:
+    page = browser.new_page(viewport={"width": 1024, "height": 800})
+    route_browser_page(page, app, origin)
+    try:
+        page.goto(f"{origin}/units", wait_until="domcontentloaded")
+        control = page.locator(".unit-multi-select").first
+        control.locator(".unit-multi-option").first.wait_for(state="attached")
+        if page.locator(".advanced-filters").get_attribute("open") is None:
+            page.locator(".advanced-filters > summary").click()
+        control.locator("summary").click()
+        search = control.locator('input[type="search"]')
+        clear = control.locator(".unit-multi-clear")
+        assert clear.is_disabled()
+
+        search.fill("no-skill-has-this-name")
+        assert clear.is_enabled()
+        assert control.locator(".unit-multi-option:not([hidden])").count() == 0
+        clear.click()
+        assert search.input_value() == ""
+        assert clear.is_disabled()
+        assert control.locator(".unit-multi-option:not([hidden])").count() > 0
+
+        choice = control.locator(".unit-multi-option:not([hidden]) input").first
+        choice.check()
+        assert page.locator(".unit-multi-chip").count() == 1
+        search.fill("no-skill-has-this-name")
+        clear.click()
+        assert search.input_value() == ""
+        assert page.locator(".unit-multi-chip").count() == 0
+        assert control.locator(".unit-multi-option:not([hidden])").count() > 0
+
+        # The reserved scrollbar gutter must leave room for visible usage counts.
+        row = control.locator(".unit-multi-option:not([hidden])").first
+        count_box = row.locator(".unit-multi-count").bounding_box()
+        choices_box = control.locator(".unit-multi-choices").bounding_box()
+        assert count_box is not None and choices_box is not None
+        assert count_box["x"] + count_box["width"] < (
+            choices_box["x"] + choices_box["width"] - 8
+        )
+    finally:
+        page.close()
+
+
+def test_specialist_menu_has_only_unique_current_choices(
+    app: Any, origin: str, browser: Any,
+) -> None:
+    page = browser.new_page(viewport={"width": 1024, "height": 800})
+    route_browser_page(page, app, origin)
+    try:
+        page.goto(f"{origin}/units", wait_until="domcontentloaded")
+        options = page.locator("#specialist-filter option").evaluate_all(
+            "(items) => items.map((item) => [item.value, item.textContent])"
+        )
+        assert options == [["", "Any"], ["standard", "Standard set"]]
+        page.goto(f"{origin}/units?specialist=domination", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelector('#specialist-filter').value === 'standard'"
+        )
+        assert page.locator("#specialist-filter").input_value() == "standard"
     finally:
         page.close()
 

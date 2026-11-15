@@ -276,16 +276,20 @@ configured Army List.
 
 ### Specialist Troops filtering is contextual
 
-The Unit Explorer exposes an optional Specialist Troops selector with an
-**InfinityDB Standard** baseline and explicitly named reviewed scenarios.
-Filtering shows Units that have at least one qualifying Skill occurrence
-across their source profiles, loadouts or Unit options. Explain that this
-does not certify every profile or Army context and that the selected
-scenario governs qualification. Chain of Command (Non Specialist) is
-not a qualifying occurrence through that Skill; other qualifying Skills
-remain valid. Link to the reviewed General Rule instead of embedding
-a separate Skill list in presentation code. Keep the selector compatible
-with other advanced filters, pagination, reset, and versioned share URLs.
+The Unit Explorer exposes an optional Specialist Troops selector with
+**Standard set** (InfinityDB's reviewed reference) as its only current
+non-empty choice. Reviewed Domination, Supplies, and Firefight currently
+return the same candidate Unit set, so duplicate options are omitted.
+A focused test guards this equivalence; if scenarios diverge, show each
+functionally distinct choice. Existing scenario-specific API queries remain
+supported, and equivalent older Unit Explorer links display Standard set.
+
+Filtering shows Units with at least one qualifying Skill occurrence across
+source profiles, loadouts or Unit options. This does not certify each
+profile or Army context; actual status depends on scenario rules and the
+chosen profile. Chain of Command (Non Specialist) does not qualify through
+that Skill, while other qualifying Skills remain valid. Link to the reviewed
+General Rule rather than embedding a separate Skill list in UI code.
 
 ### Optimize for lookup, comparison, and scanning
 

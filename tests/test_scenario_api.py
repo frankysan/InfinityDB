@@ -64,6 +64,21 @@ def scenario_app() -> Application:
     return create_app_from_database_set(root / "data/generated")
 
 
+def test_unit_explorer_specialist_menu_contexts_have_same_candidates(
+    scenario_app: Application,
+) -> None:
+    """The one-option UI is valid while published scenarios have identical candidates."""
+    assert scenario_app.rules_database is not None
+    standard = candidate_unit_ids(
+        scenario_app.database, scenario_app.rules_database, "standard",
+    )
+    assert standard
+    for context in ("domination", "supplies", "firefight"):
+        assert candidate_unit_ids(
+            scenario_app.database, scenario_app.rules_database, context,
+        ) == standard
+
+
 def test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills() -> None:
     class FakeRules:
         def composed_record(self, identifier: str) -> dict:

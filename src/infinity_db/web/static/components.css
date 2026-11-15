@@ -2338,6 +2338,8 @@ h2 {
 .unit-multi-choices {
   max-height: 220px;
   overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-right: 8px;
   margin-top: 8px;
 }
 

@@ -3210,6 +3210,19 @@ These are actual usage counts, not predictions of adding/removing selections.
 Counts are batched in SQLite rather than queried individually. The response
 extension is opt-in; API clients omitting `counts=1` retain the old shape.
 
+Unit Explorer keeps the last displayed matching-Unit and per-option numbers
+visible while an updated request is pending; accessible loading/error states
+remain available. Each categorical filter's Clear button resets both selected
+items and that filter's local option search. Option lists reserve a scrollbar
+gutter so the usage count column remains unobstructed.
+
+The Specialist Troops selector exposes `Standard set` as the single currently
+distinct candidate set. Reviewed Domination, Supplies and Firefight candidate
+sets are identical on the current snapshot; a regression test guards this
+assumption. The API still accepts their context keys, and older UI URLs
+normalize these equivalent choices to Standard set. Actual Specialist status
+remains determined by the chosen scenario and profile.
+
 Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
 the source facts. A combined source Classification can participate in more than one public
 Classification filter, while source Characteristics that duplicate a canonical current Skill can be

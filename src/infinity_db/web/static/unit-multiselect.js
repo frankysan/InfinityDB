@@ -102,7 +102,7 @@ export function createUnitMultiSelect(select, label, onChange) {
     const description = count ? short : `All ${label.toLowerCase()}`;
     summary.textContent = description;
     summary.setAttribute("aria-label", `${label}: ${description}`);
-    clear.disabled = count === 0;
+    clear.disabled = count === 0 && !search.value;
     for (const [id, { checkbox }] of rows) {
       checkbox.checked = selected.has(id);
       checkbox.disabled = !checkbox.checked && count >= MAX_SELECTIONS;
@@ -161,13 +161,18 @@ export function createUnitMultiSelect(select, label, onChange) {
   }
 
   search.disabled = true;
-  search.addEventListener("input", updateVisibility);
+  search.addEventListener("input", () => {
+    updateVisibility();
+    clear.disabled = !selected.size && !search.value;
+  });
   clear.addEventListener("click", () => {
-    if (!selected.size) return;
+    const hadSelection = selected.size > 0;
     selected.clear();
+    search.value = "";
     notice.textContent = "";
     renderSelection();
-    onChange();
+    updateVisibility();
+    if (hadSelection) onChange();
   });
   details.addEventListener("toggle", () => {
     if (!details.open) return;
@@ -188,16 +193,18 @@ export function createUnitMultiSelect(select, label, onChange) {
       choices.setAttribute("aria-busy", counts === null ? "true" : "false");
       for (const item of items) {
         const { checkbox, count, row } = rows.get(item.value);
-        row.classList.toggle("unit-multi-zero-use",
-          counts !== null && counts !== undefined && !Number(counts[item.id] || 0));
-        const value = counts === null ? null
-          : counts === undefined ? undefined : Number(counts[item.id] || 0);
-        count.textContent = value == null ? (value === null ? "…" : "—") : value.toLocaleString();
+        if (counts === null) {
+          checkbox.setAttribute("aria-label", `${item.name}, count loading`);
+          continue;
+        }
+        const value = counts === undefined ? undefined : Number(counts[item.id] || 0);
+        row.classList.toggle("unit-multi-zero-use", value === 0);
+        const text = value === undefined ? "—" : value.toLocaleString();
+        if (count.textContent !== text) count.textContent = text;
         count.setAttribute("aria-hidden", "true");
-        checkbox.setAttribute("aria-label", value === null
-          ? `${item.name}, count loading`
-          : value === undefined ? `${item.name}, count unavailable`
-            : `${item.name}, ${value} matching ${value === 1 ? "Unit" : "Units"}`);
+        checkbox.setAttribute("aria-label", value === undefined
+          ? `${item.name}, count unavailable`
+          : `${item.name}, ${value} matching ${value === 1 ? "Unit" : "Units"}`);
       }
     },
     setValue(next) {
