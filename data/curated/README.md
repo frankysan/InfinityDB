@@ -435,21 +435,22 @@ URLs for the external producer and InfinityDB's verified publication.
 
 ## Curated rules reference data
 
-This directory is the handoff from local wiki/PDF research to rules-data
-ingestion. Developers and agents may read reference material in `data/wiki/`
-and `data/pdf/`, then write concise, human-reviewed facts under
-`data/curated/rules/`. The application and its build pipeline never read those
-raw reference trees directly.
+This directory is the handoff from local Wiki/PDF research to rules-data
+ingestion. Developers and agents read physical research inputs under
+`local/data/wiki/` and `local/data/pdf/`, then write concise, human-reviewed
+facts under `data/curated/rules/`. Normal application and runtime builds do not
+read those raw research trees directly. Canonical `data/wiki/` and `data/pdf/`
+source citation labels remain unchanged.
 
 ### Available reference families
 
 The local reference corpus may include:
 
-- N5 core rules revisions under `data/pdf/rules/`.
-- N5 FAQ revisions under `data/pdf/faq/`.
-- ITS seasons under `data/pdf/its/` and `data/pdf/legacy/`.
-- Wiki research snapshots under `data/wiki/`; the current downloader writes
-  `WIKI-<language> YYYYMMDD-HHMMSS.zip` archives.
+- N5 core rules revisions under `local/data/pdf/rules/`.
+- N5 FAQ revisions under `local/data/pdf/faq/`.
+- ITS seasons under `local/data/pdf/its/` and `local/data/pdf/legacy/`.
+- Wiki research snapshots under `local/data/wiki/`; the standalone Wiki
+  acquisition producer writes `WIKI-<language> YYYYMMDD-HHMMSS.zip` archives.
 
 Core rules can provide curated skills, equipment, weapons, ammunition, traits,
 states, attributes, timing, modifiers, deployment, hacking, fireteams, and

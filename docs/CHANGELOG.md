@@ -102,6 +102,13 @@ are not retroactively relabeled.
   and moved local research/build outputs to the ignored `local/` workspace.
   Retired superseded development plans and reports while preserving active
   documentation and reproducible release inputs.
+- **Acquisition + Project infrastructure:** Moved Army JSON and Wiki/Human Sphere
+  snapshot acquisition to standalone producers, retiring the in-tree downloader
+  and producer-export commands. InfinityDB remains an offline consumer of pinned
+  archives and provenance manifests.
+- **Data processing:** Normalized Army exports and complete runtime builds no
+  longer produce a raw Army SQLite companion by default. Explicit raw-source
+  export remains available for workflows that require it.
 - **Acquisition + Data processing:** Symbol acquisition and graphical processing
   now use the external producer. InfinityDB continues to verify and promote its
   handoff; the retired in-tree processor can no longer resume old builds.
@@ -150,6 +157,10 @@ are not retroactively relabeled.
   artifacts together; current images no longer consume the retired loose
   variant-usage, Weapon publication or deployed-object JSON files. The existing
   1.0.1 image remains the recovery path for the earlier format.
+- **Acquisition + Data processing:** Source rebuilds use pinned Army ZIPs and
+  matching manifests under `local/data/`; Wiki/PDF research inputs also live
+  there. Existing ignored source files are not migrated automatically.
+  Production images require none of those local acquisition files.
 
 ## [1.0.1] - 2026-11-09
 
