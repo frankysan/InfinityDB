@@ -3334,6 +3334,19 @@ name.
 Runtime Unit detail consumes the materialized application relationships and never opens the curated
 Peripheral JSON directly.
 
+In Unit-detail presentation, a unique exact name-and-quantity match between a
+source `Includes` target and an attached Peripheral is displayed only once as
+**Included peripherals**, linked to that target loadout (for example, KISS!
+(Repeater) on Bit). Other Include targets remain under **Includes**; Peripheral
+attachments without an unambiguous Include target remain under **Attached
+peripherals**. Controller eligibility appears separately as **Selectable
+peripherals — available to select, not automatically included**. No
+attachment, subtype, selected loadout, or requirement is inferred from an
+access pool or a partial name match. The separate profile group of an
+included Peripheral remains visible because its stats and loadouts belong
+to that Trooper. Original source occurrences and API relationship collections
+remain unchanged.
+
 ## Fireteams
 
 Fireteam charts are Army-local structured source data. InfinityDB materializes one canonical

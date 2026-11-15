@@ -74,6 +74,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Consolidated matching Peripheral metadata and exact
+  Included-loadout links into one **Included peripherals** row on Unit
+  profiles. Unresolved attachments and merely selectable Controller-access
+  pools remain distinct, so an eligible Peripheral is never presented as
+  automatically included; separate Peripheral Trooper profiles are retained.
 - **Web backend + Web frontend:** Simplified General-profile loadout details:
   when every compatible loadout has the same Skill, Equipment or Weapon but
   with different extras, General shows its base form once. The plain variant

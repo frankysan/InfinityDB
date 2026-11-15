@@ -495,3 +495,35 @@ def test_selected_option_count_equals_matching_unit_count(
     finally:
         page.close()
 
+
+@pytest.mark.parametrize("width", [1280, 390])
+def test_bit_and_kiss_includes_one_linked_peripheral_per_loadout(
+    app: Any, origin: str, browser: Any, width: int,
+) -> None:
+    page = browser.new_page(
+        viewport={"width": width, "height": 900},
+        is_mobile=width == 390, has_touch=width == 390,
+    )
+    route_browser_page(page, app, origin)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{origin}/units/bit-and-kiss", wait_until="domcontentloaded")
+        page.locator("#unit-content").wait_for(state="visible")
+        combined = page.locator(".army-profile").first
+        if combined.get_attribute("open") is None:
+            combined.locator("summary").click()
+        bit_loadouts = combined.locator(".loadout-table").first
+        assert bit_loadouts.get_by_text("Included peripherals", exact=True).count() == 2
+        assert bit_loadouts.get_by_text("Attached peripherals", exact=True).count() == 0
+        assert bit_loadouts.get_by_text("Includes", exact=True).count() == 0
+        assert bit_loadouts.get_by_role("link", name="KISS! (Repeater)").count() == 1
+        assert bit_loadouts.get_by_role("link", name="KISS!", exact=True).count() == 1
+        # The distinct KISS Trooper profile and its own loadouts remain visible.
+        assert combined.locator(".profile-details-table").count() == 2
+        assert combined.locator(".loadout-table").count() == 2
+        assert not errors, errors
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
+    finally:
+        page.close()
+

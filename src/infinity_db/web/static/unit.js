@@ -438,12 +438,41 @@ function includeItems(items, anchorScope) {
   return result;
 }
 
+function peripheralAttachments(item) {
+  // Only an unambiguous, exact label/quantity match joins source Includes
+  // with Peripheral metadata. Never infer included choices from Controller access.
+  const includes = item.includes || [];
+  const matched = new Set();
+  const linked = [];
+  const attached = [];
+  const normalized = (name) => String(name || "").trim().toLocaleLowerCase();
+  const quantity = (entry) => Number(entry.quantity ?? 1);
+  for (const peripheral of item.peripherals || []) {
+    const candidates = includes.map((include, index) => ({ include, index }))
+      .filter(({ include, index }) => !matched.has(index)
+        && normalized(include.name) === normalized(peripheral.name)
+        && quantity(include) === quantity(peripheral));
+    if (candidates.length === 1) {
+      const { include, index } = candidates[0];
+      matched.add(index);
+      linked.push({ peripheral, include });
+    } else {
+      attached.push(peripheral);
+    }
+  }
+  return {
+    linked, attached,
+    otherIncludes: includes.filter((include, index) => !matched.has(index)),
+  };
+}
+
 function appendIncludeRows(rows, item, anchorScope, colSpan = null) {
-  if (!(item.includes || []).length) return;
+  const remaining = peripheralAttachments(item).otherIncludes;
+  if (!remaining.length) return;
   rows.push([
     { value: "Includes", header: true, className: "data-label profile-item-label" },
     {
-      content: includeItems(item.includes, anchorScope),
+      content: includeItems(remaining, anchorScope),
       className: "profile-item-list",
       ...(colSpan ? { colSpan } : {}),
     },
@@ -482,22 +511,43 @@ function peripheralAccessItems(accessItems) {
   return result;
 }
 
-function appendPeripheralRows(rows, item, colSpan = null) {
-  if ((item.peripherals || []).length) {
+function appendPeripheralRows(rows, item, anchorScope, colSpan = null) {
+  const { linked, attached } = peripheralAttachments(item);
+  if (linked.length) {
+    const linkedItems = document.createDocumentFragment();
+    linked.forEach(({ include, peripheral }, index) => {
+      if (index) linkedItems.append(", ");
+      linkedItems.append(includeTargetLink(include, anchorScope));
+      const type = peripheral.type_label || peripheral.type_id;
+      if (type) linkedItems.append(` (${type})`);
+    });
     rows.push([
-      { content: profileHelpLabel("Peripherals", "peripheral"), header: true, className: "data-label profile-item-label" },
+      { content: profileHelpLabel("Included peripherals", "peripheral"), header: true, className: "data-label profile-item-label" },
       {
-        content: peripheralItems(item.peripherals),
+        content: linkedItems,
+        className: "profile-item-list",
+        ...(colSpan ? { colSpan } : {}),
+      },
+    ]);
+  }
+  if (attached.length) {
+    rows.push([
+      { content: profileHelpLabel("Attached peripherals", "peripheral"), header: true, className: "data-label profile-item-label" },
+      {
+        content: peripheralItems(attached),
         className: "profile-item-list",
         ...(colSpan ? { colSpan } : {}),
       },
     ]);
   }
   if ((item.peripheral_access || []).length) {
+    const access = peripheralAccessItems(item.peripheral_access);
+    const content = document.createDocumentFragment();
+    content.append(access, " — available to select, not automatically included");
     rows.push([
-      { content: profileHelpLabel("Controller access", "peripheral"), header: true, className: "data-label profile-item-label" },
+      { content: profileHelpLabel("Selectable peripherals", "peripheral"), header: true, className: "data-label profile-item-label" },
       {
-        content: peripheralAccessItems(item.peripheral_access),
+        content,
         className: "profile-item-list",
         ...(colSpan ? { colSpan } : {}),
       },
@@ -1122,7 +1172,7 @@ function profileTableRows(profiles, generalByIdentity, anchorScope) {
       rows, profile.specific_items, "data-label profile-item-label", "profile-item-list",
     );
     appendIncludeRows(rows, profile, anchorScope);
-    appendPeripheralRows(rows, profile);
+    appendPeripheralRows(rows, profile, anchorScope);
     return rows;
   });
 }
@@ -1188,7 +1238,7 @@ function loadoutTable(loadouts, anchorScope, anchoredPayloads) {
         rows, loadout.specific_items, "data-label profile-item-label", "profile-item-list", 2,
       );
       appendIncludeRows(rows, loadout, anchorScope, 2);
-      appendPeripheralRows(rows, loadout, 2);
+      appendPeripheralRows(rows, loadout, anchorScope, 2);
       return rows;
     }),
     "data-table--compact loadout-table",

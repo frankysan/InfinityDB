@@ -15,6 +15,13 @@ that entry point and contains no component rules.
 
 ## Design principles
 
+Unit-detail relationship rows must distinguish an **included Peripheral**
+(source-backed attachment with one exact Include target), an **attached
+Peripheral** whose target is not uniquely linkable, and an **eligible but
+unselected Peripheral** in a Controller access pool. Do not show duplicate
+Include/Peripheral rows for the same exact source target, or collapse an
+included Peripheral's separate Trooper profile and loadouts.
+
 ### Prefer reusable structures over page-local styling
 
 Recurring UI behavior should be represented by shared primitives with explicit semantics. A new page should normally compose existing structures before adding new ones. When two pages solve the same presentation problem differently, first determine whether the difference is meaningful; otherwise consolidate them.

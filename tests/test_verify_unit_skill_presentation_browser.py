@@ -408,7 +408,8 @@ def test_live_chromium_contextual_relationship_cohort() -> None:
             raise
         assert evidence["passed"] == evidence["total"] == 2 * len(slugs), (
             slugs,
-            [item for item in evidence["results"] if item["status"] != "passed"],
+            [(item["unit"], item["width"], item.get("error"))
+             for item in evidence["results"] if item["status"] != "passed"],
         )
         totals = {
             key: sum(item["counts"][key] for item in evidence["results"])
@@ -661,7 +662,8 @@ def test_live_chromium_unit_detail_matrix_when_available(matrix: str) -> None:
         if matrix == "core_default":
             result = verify_case(base_url, slugs=DEFAULT_SLUGS, channel="chrome")
             assert result["passed"] == result["total"] == len(WIDTHS) * len(DEFAULT_SLUGS), (
-                [entry for entry in result["results"] if entry["status"] != "passed"]
+                [(entry["unit"], entry["width"], entry.get("error"))
+                 for entry in result["results"] if entry["status"] != "passed"]
             )
             return
 
@@ -673,7 +675,8 @@ def test_live_chromium_unit_detail_matrix_when_available(matrix: str) -> None:
             )
             assert rich["passed"] == rich["total"] == len(rich_widths) * len(rich_slugs), (
                 rich_slugs,
-                [entry for entry in rich["results"] if entry["status"] != "passed"],
+                [(entry["unit"], entry["width"], entry.get("error"))
+                 for entry in rich["results"] if entry["status"] != "passed"],
             )
             return
 
@@ -929,8 +932,12 @@ def test_contextual_relationship_rows_fail_closed_on_missing_links_and_targets()
     }
     rows = [
         _row("Includes", "Heavy Option ×2", href="#loadout-101-42"),
-        _row("Peripherals", "Servant ×2 (Peripheral (Servant))"),
-        _row("Controller access", "Peripheral (Servant): Servant Unit", href="/units/servant"),
+        _row("Attached peripherals", "Servant ×2 (Peripheral (Servant))"),
+        _row(
+            "Selectable peripherals",
+            "Peripheral (Servant): Servant Unit — not automatically included",
+            href="/units/servant",
+        ),
     ]
     rows[2]["links"][0]["text"] = "Servant Unit"
     assert assert_relationship_rows(
@@ -940,13 +947,38 @@ def test_contextual_relationship_rows_fail_closed_on_missing_links_and_targets()
         (rows, set(), "Include target missing"),
         ([_row("Includes", "Heavy Option ×2", href="#loadout-999-42"), *rows[1:]],
          {"loadout-101-42"}, "missing Include link"),
-        ([rows[0], _row("Peripherals", "Other"), rows[2]],
+        ([rows[0], _row("Attached peripherals", "Other"), rows[2]],
          {"loadout-101-42"}, "missing Peripheral"),
-        ([rows[0], rows[1], _row("Controller access", "Other")],
+        ([rows[0], rows[1], _row("Selectable peripherals", "Other — not automatically included")],
          {"loadout-101-42"}, "missing Controller access type"),
     ):
         with pytest.raises(AssertionError, match=error):
             assert_relationship_rows(altered_rows, source, "101", anchors, "fixture")
+
+
+def test_included_peripheral_is_one_linked_row_not_two_source_rows() -> None:
+    source = {
+        "includes": [{
+            "loadout_payload_id": 72, "name": "KISS! (Repeater)", "quantity": 1,
+        }],
+        "peripherals": [{
+            "id": "peripheral:kiss-repeater", "name": "KISS! (Repeater)",
+            "quantity": 1, "type_label": "Synchronized",
+        }],
+    }
+    row = _row(
+        "Included peripherals", "KISS! (Repeater)",
+        href="#loadout-101-72",
+    )
+    row["text"] += " (Synchronized)"
+    assert assert_relationship_rows(
+        [row], source, "101", {"loadout-101-72"}, "bit-and-kiss",
+    ) == {"includes": 1, "peripherals": 1, "controllerTargets": 0}
+    with pytest.raises(AssertionError, match="unexpected or missing"):
+        assert_relationship_rows(
+            [row, _row("Attached peripherals", "KISS! (Repeater)")],
+            source, "101", {"loadout-101-72"}, "duplicated",
+        )
 
 
 def test_source_only_peripheral_has_no_inferred_type_in_browser() -> None:
@@ -956,11 +988,11 @@ def test_source_only_peripheral_has_no_inferred_type_in_browser() -> None:
         ]
     }
     assert assert_relationship_rows(
-        [_row("Peripherals", "Auxiliary ×2")], source, "101", set(), "source-only"
+        [_row("Attached peripherals", "Auxiliary ×2")], source, "101", set(), "source-only"
     )["peripherals"] == 1
     with pytest.raises(AssertionError, match="unreviewed type"):
         assert_relationship_rows(
-            [_row("Peripherals", "Auxiliary ×2 (—)")],
+            [_row("Attached peripherals", "Auxiliary ×2 (—)")],
             source, "101", set(), "source-only",
         )
 

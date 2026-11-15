@@ -229,51 +229,71 @@ def assert_relationship_rows(
     expected_includes = source.get("includes") or []
     expected_peripherals = source.get("peripherals") or []
     expected_access = source.get("peripheral_access") or []
+    unmatched_includes = set(range(len(expected_includes)))
+    linked_peripherals: dict[int, int] = {}
+    for peripheral_index, peripheral in enumerate(expected_peripherals):
+        candidates = [
+            include_index for include_index in unmatched_includes
+            if str(expected_includes[include_index].get("name") or "").strip().casefold()
+            == str(peripheral.get("name") or "").strip().casefold()
+            and int(expected_includes[include_index].get("quantity") or 1)
+            == int(peripheral.get("quantity") or 1)
+        ]
+        if len(candidates) == 1:
+            linked_peripherals[peripheral_index] = candidates[0]
+            unmatched_includes.remove(candidates[0])
     for label, has_items in (
-        ("Includes", bool(expected_includes)),
-        ("Peripherals", bool(expected_peripherals)),
-        ("Controller access", bool(expected_access)),
+        ("Includes", bool(unmatched_includes)),
+        ("Included peripherals", bool(linked_peripherals)),
+        ("Attached peripherals", len(linked_peripherals) < len(expected_peripherals)),
+        ("Selectable peripherals", bool(expected_access)),
     ):
         matching = [row for row in rows if row["heading"].strip().startswith(label)]
         if bool(matching) != has_items:
-            raise AssertionError(f"{context}: unexpected or missing {label} row")
+            raise AssertionError(
+                f"{context}: unexpected or missing {label} row; "
+                f"expected={has_items}, headings={[row['heading'] for row in rows]}"
+            )
         if has_items and len(matching) != 1:
             raise AssertionError(f"{context}: duplicate {label} row")
-    if expected_includes:
-        row = next(row for row in rows if row["heading"].strip().startswith("Includes"))
-        for item in expected_includes:
-            anchor = f"loadout-{anchor_scope}-{item['loadout_payload_id']}"
-            href = f"#{anchor}"
-            qty = item.get("quantity")
-            suffix = f" ×{qty}" if qty is not None and int(qty) != 1 else ""
-            title = f"{item.get('name') or 'Loadout'}{suffix}"
-            if not any(
-                link["href"] == href and link["text"] == title
-                for link in row["links"]
-            ):
-                raise AssertionError(f"{context}: missing Include link {href} ({title})")
-            if anchor not in anchors:
-                raise AssertionError(f"{context}: Include target missing {anchor}")
-            result["includes"] += 1
-    if expected_peripherals:
-        row = next(row for row in rows if row["heading"].strip().startswith("Peripherals"))
-        for item in expected_peripherals:
-            qty = item.get("quantity")
-            suffix = f" ×{qty}" if qty is not None and int(qty) != 1 else ""
-            label = item.get("type_label") or item.get("type_id")
-            type_suffix = f" ({label})" if label else ""
-            title = f"{item.get('name') or 'Peripheral'}{suffix}{type_suffix}"
-            if title not in row["text"]:
-                raise AssertionError(f"{context}: missing Peripheral {title}")
-            if item.get("source_only") and not label and f"{title} (" in row["text"]:
-                raise AssertionError(
-                    f"{context}: source-only Peripheral gained an unreviewed type"
-                )
-            result["peripherals"] += 1
+    for index, item in enumerate(expected_includes):
+        label = ("Includes" if index in unmatched_includes else "Included peripherals")
+        row = next(row for row in rows if row["heading"].strip().startswith(label))
+        anchor = f"loadout-{anchor_scope}-{item['loadout_payload_id']}"
+        href = f"#{anchor}"
+        qty = item.get("quantity")
+        suffix = f" ×{qty}" if qty is not None and int(qty) != 1 else ""
+        title = f"{item.get('name') or 'Loadout'}{suffix}"
+        if not any(
+            link["href"] == href and link["text"] == title
+            for link in row["links"]
+        ):
+            raise AssertionError(f"{context}: missing Include link {href} ({title})")
+        if anchor not in anchors:
+            raise AssertionError(f"{context}: Include target missing {anchor}")
+        result["includes"] += 1
+    for index, item in enumerate(expected_peripherals):
+        linked = index in linked_peripherals
+        label = "Included peripherals" if linked else "Attached peripherals"
+        row = next(row for row in rows if row["heading"].strip().startswith(label))
+        qty = item.get("quantity")
+        suffix = f" ×{qty}" if qty is not None and int(qty) != 1 else ""
+        type_label = item.get("type_label") or item.get("type_id")
+        type_suffix = f" ({type_label})" if type_label else ""
+        title = f"{item.get('name') or 'Peripheral'}{suffix}{type_suffix}"
+        if title not in row["text"]:
+            raise AssertionError(f"{context}: missing Peripheral {title}")
+        if item.get("source_only") and not type_label and f"{title} (" in row["text"]:
+            raise AssertionError(
+                f"{context}: source-only Peripheral gained an unreviewed type"
+            )
+        result["peripherals"] += 1
     if expected_access:
         row = next(
-            row for row in rows if row["heading"].strip().startswith("Controller access")
+            row for row in rows if row["heading"].strip().startswith("Selectable peripherals")
         )
+        if "not automatically included" not in row["text"]:
+            raise AssertionError(f"{context}: selectable Peripherals presented as included")
         for access in expected_access:
             label = access.get("type_label") or str(access.get("type_id"))
             if f"{label}:" not in row["text"]:

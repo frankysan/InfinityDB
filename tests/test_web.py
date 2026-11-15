@@ -4671,9 +4671,10 @@ def test_unit_details_frontend_presents_selection_relationships(app: Callable) -
 def test_unit_details_frontend_presents_peripheral_relationships(app: Callable) -> None:
     status, _, unit_js = request(app, "/static/unit.js")
     assert status == 200
-    assert b"function appendPeripheralRows(rows, item, colSpan = null)" in unit_js
-    assert b'profileHelpLabel("Peripherals", "peripheral")' in unit_js
-    assert b'profileHelpLabel("Controller access", "peripheral")' in unit_js
+    assert b"function appendPeripheralRows(rows, item, anchorScope, colSpan = null)" in unit_js
+    assert b'profileHelpLabel("Included peripherals", "peripheral")' in unit_js
+    assert b'profileHelpLabel("Attached peripherals", "peripheral")' in unit_js
+    assert b'profileHelpLabel("Selectable peripherals", "peripheral")' in unit_js
     assert b"group.append(unitLink(target));" in unit_js
     assert b"function renderPeripheralRelationships(unit)" in unit_js
     assert b"const controllers = unit.peripheral_controllers || [];" in unit_js
