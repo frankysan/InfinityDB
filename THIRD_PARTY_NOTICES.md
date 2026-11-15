@@ -49,10 +49,12 @@ archives, and other acquisition/provenance inputs remain ignored local build/res
 
 ## Infinity Wiki and rules documents
 
-The optional wiki research material under `data/wiki/` and user-supplied rules
-documents under `data/pdf/` are ignored by Git and are not part of the normal
-application package or Docker runtime image. Their text, images, and other contents must
-not be redistributed as MIT-licensed project material.
+Optional wiki research material under `local/data/wiki/` and user-supplied
+rules documents under `local/data/pdf/` are ignored by Git and are not
+part of the normal application package or Docker runtime image. Historical
+canonical `data/pdf/` citation labels do not indicate a current physical
+research directory. Their text, images and other contents must not be
+redistributed as MIT-licensed project material.
 
 Curated facts retain provenance appropriate to the source contract. PDF-derived
 facts use document edition/version/date and printed-page citations. Archived

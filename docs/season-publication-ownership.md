@@ -1,24 +1,22 @@
-# P3 — Source and publication ownership contract
+# Season source and publication ownership
 
-**Status:** P3.1–P3.5 implemented and locally acceptance-tested,
-including synthetic multi-season duplicate-slug isolation. Hosted Source
-checks and both smoke workflows passed on
-`09f91f442f82abba4df76641ef7ad688402673d4`. The production
-set still registers ITS 18 only.
-**Branch:** `dev/v1.1.0`.
-**Domains:** Data processing, Web backend, Web frontend.
+**Project domains:** Data processing, Web backend, Web frontend
 
-This is the ownership contract for separating season-scoped ITS publications from
-the N5 core without duplicating rules, breaking source citations, or introducing
-a second scenario renderer. It records existing behavior and target decisions;
-no database format or serving behavior changes during P3.1.
+The selected runtime registers ITS 18 only. The phased P3 implementation
+and its exact-SHA acceptance results remain in Git history and
+[testing evidence](testing.md), not in this ownership contract.
+
+This document defines the current boundary between N5 core and
+season-scoped ITS publications, including source authority, citation
+ownership, exact selection and cross-domain applicability. It does not
+serve as a migration checklist or release-acceptance record.
 
 ## Existing source and runtime inventory
 
 The complete build loads reviewed curated Rules and ITS sources, but the
 Rules exporter accepts only N5-owned collections. ITS-authored publications
 are built independently into `its_18.db` using the same selected source
-envelope. The following inventory records the pre-separation source roles:
+envelope. Their current authority is:
 
 - `n5-core-v5.3.json` — `core-rules`, `n5-core-v5.3`, effective
   2026-08-10. Owns canonical N5 rules and four core scenario definitions:
@@ -41,9 +39,7 @@ envelope. The following inventory records the pre-separation source roles:
   `its-18@2026.09.01`, with source `its-season-18-en-pdf`,
   printed pages 121–123.
 
-Before the P3.4 export split, `rules_n5.db` stored the ITS collection
-alongside N5 in its scenario tables. That co-location has been retired:
-the selected `rules_n5.db` now owns N5/FAQ/annex data, while
+The selected `rules_n5.db` owns N5/FAQ/annex data, while
 `its_18.db` alone stores ITS Battleground and its season policies.
 Both preserve source authority, revision, citation and content digest.
 
@@ -58,7 +54,7 @@ Both preserve source authority, revision, citation and content digest.
    FAQ authority. Scenario-specific `applicability.scenarioIds` does **not**
    change ownership. In particular, the Supplies marker-state and
    Annihilation Ancillary rulings stay N5 FAQ-owned.
-3. **ITS seasons:** `its_18.db` will own **all authored ITS 18** mission
+3. **ITS seasons:** `its_18.db` owns **all currently authored ITS 18** mission
    definitions, their geometry and game-size configurations, scenario-set
    membership, season Extras and tournament constraints, and rulings whose
    *publishing authority* is ITS 18. Other seasons get independent ownership;
@@ -89,7 +85,7 @@ specific mission; an ITS ruling may refer to an N5 Skill. The owner is chosen
 from the authored rule/publication's authority, while applicability is an
 explicit context-scoped relation resolved at read time.
 
-## Cross-boundary inventory and migration dispositions
+## Cross-boundary ownership
 
 - **Spec-Ops:** `n5-core-v5.3.json` now retains only the N5.3
   Special Skills, the core SpecBall procedure and its bilingual
@@ -109,10 +105,10 @@ explicit context-scoped relation resolved at read time.
   configurations without ITS 18 retain the pinned historical citation,
   while an incomplete registered ITS 18 source fails closed. The resulting
   marker sizes and public citation shape remain unchanged.
-- **Battleground:** Move `scenario:battleground`, its full scenario
+- **Battleground:** `its_18.db` owns `scenario:battleground`, its full
   definition, all 150–400 Army Point configurations, scoring, SVG geometry,
-  collection `its-18@2026.09.01`, and PDF pages 121–123 to the ITS owner
-  without editing their game semantics.
+  collection `its-18@2026.09.01`, and PDF pages 121–123. Its original
+  reviewed game semantics are preserved.
 - **Core scenarios:** The four `n5-core@5.3` missions and their reusable
   N5 component definitions remain in `rules_n5.db`. A later ITS season may
   independently publish a mission with the same typed scenario ID; do not
@@ -152,47 +148,19 @@ explicit context-scoped relation resolved at read time.
 - **Fail closed:** Unknown season, revision, scenario or cross-domain ID
   cannot fall back to another collection, an archived publication or a
   similarly named core record. Ambiguous identities require exact selection.
-- **No global slug assumption:** Today
-  `ScenarioCatalog._records()` rejects duplicate route slugs and resolves
-  from one `RulesDatabase`. P3.4 must key catalog resolution by owner and
-  publication identity, and P3.5 must prove same-named scenarios across
-  seasons remain separately selectable. Existing `/api/scenarios`,
-  detail/map routes, explicit `collection`/`revision` selectors and core
-  default behavior are the compatibility surface.
+- **No global slug assumption:** The publication registry keys ITS
+  resolution by owning season, revision and record identity. Synthetic
+  same-slug scenarios in different seasons are separately selectable.
+  Existing `/api/scenarios`, detail/map routes, explicit
+  `collection`/`revision` selectors and core default behavior remain
+  the compatibility surface.
 
-## Implementation sequence and acceptance
+## Future season expansion
 
-**P3.2 — Own and build `its_18.db`:** Define the season database's
-collections/sources/records, citations, scenario publications and geometry
-using the existing scenario model. Add an isolated, deterministic builder
-from pinned reviewed ITS inputs. Record source/build provenance and explicit
-N5 compatibility. Allow independent developer inspection, but do not
-introduce two authoritative serving copies or silently change the current
-two-database release until the coordinated registry/cutover.
-
-**P3.3 — Migrate the Battleground pilot:** Reuse its exact curated
-definitions and geometry; move season-only Spec-Ops and Extra overlays under
-ITS authority. Compare source citations, supported game sizes, JSON
-responses, rendered SVG bytes/meaning and no-sidecar operation with the
-P2 pinned baseline.
-
-**P3.4 — Centralize resolution:** Introduce the domain-aware backend
-registry, validate the selected multi-database set, and update collection
-selection, source lookups and FAQ/overlay resolution. Do not rely on
-`RulesDatabase.composed_records_by_kind("scenario")` returning every
-season; do not silently merge duplicate IDs. Coordinate CLI build,
-`--db-dir`, WSGI, Docker, CI and cache revisions in a single explicit
-serving cutover, keeping existing public selectors stable.
-
-**P3.5 — Verify isolation and growth:** Test two differently versioned
-season publications, including a duplicate scenario slug; no ITS defaults
-without selection; no leakage of tournament restrictions to core/free play;
-scoped FAQ and source citations survive; mixed/stale sets and unknown
-cross-domain references fail closed; local checkout and actual Docker
-preserve pinned HTTP, geometry, health and file-contract acceptance.
-Season 18 remains the content priority; adding S16/S17 scenarios is later
-coverage, not a P3 migration gate.
-
-**P3.1 exit:** Ownership, exceptions, selected publication identity,
-source provenance, core-to-season relationship and phased acceptance are
-specified. No migrated `its_18.db` or new runtime behavior is claimed.
+Additional actual ITS seasons require independently reviewed source
+publications, an explicit registry entry and matched build/package inputs.
+Season 18 is the current content priority; Seasons 16 and 17 remain future
+coverage, not a precondition for the existing runtime contract. The
+synthetic multi-season test proves isolation only, not the correctness
+of any uncurated season. See the [ITS database](its-season-database.md)
+for the maintained storage and selection contract.

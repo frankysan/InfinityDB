@@ -3,9 +3,11 @@
 **Project domain:** Data processing
 
 `data/curated/` contains source-controlled, human-reviewed information derived
-from external sources. Curated material is distinct from immutable external
-inputs under `data/raw/`, `data/wiki/`, and `data/pdf/`, and from generated
-provenance under `data/manifests/`.
+from external sources. Curated material is distinct from immutable physical
+research inputs under `local/data/raw/`, `local/data/wiki/`, and
+`local/data/pdf/`, and from the tracked publication manifest under
+`data/manifests/`. Source citations may still use canonical `data/pdf/`
+labels, independently of their physical `local/data/pdf/` layout.
 
 ## Current curated data
 
@@ -17,10 +19,11 @@ provenance under `data/manifests/`.
   `army-overview.json` contains short editorial gameplay summaries keyed by public Army slug;
   the copy is synthesized from current Army/rules data with external faction background used only
   as secondary context, and is kept separate from source-derived identity semantics.
-  Opt-in complete builds embed these summaries and the explicitly authored
-  `legacy-armies.json` identities in Army v30; serving reads the selected
-  SQLite projection. Earlier schemas and source-only tools retain the JSON
-  adapters. The [data model](../../docs/data-model.md#army-overview-and-historical-identities-in-army-v30-p24-opt-in)
+  Current complete builds embed these summaries and the explicitly authored
+  `legacy-armies.json` identities in Army v31, retaining the Army v30 schema
+  contract. Serving reads the selected SQLite projection; earlier schemas and
+  source-only tools retain the JSON adapters. The
+  [data model](../../docs/data-model.md#army-overview-and-historical-identities-in-army-v30)
   owns identity, parentage and provenance safeguards.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship

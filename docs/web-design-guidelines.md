@@ -291,6 +291,22 @@ chosen profile. Chain of Command (Non Specialist) does not qualify through
 that Skill, while other qualifying Skills remain valid. Link to the reviewed
 General Rule rather than embedding a separate Skill list in UI code.
 
+### Unit Explorer categorical filter controls
+
+Provide the six categorical filters as consistent searchable multi-select
+disclosures with independent, always-operable AND/OR switches, clear selected
+chips and accessible option counts. Keep the AND/OR labels adjacent to each
+switch; fresh views default to AND while legacy links retain their stored
+selection semantics. The [data model](data-model.md#context-coherent-filtering)
+owns the actual query and share-state contract.
+
+An individual Clear button resets both its selections and option search.
+Hide choices with no Settings-adjusted baseline usage; visually de-emphasize
+currently zero-match choices without disabling them. Reserve a scrollbar
+gutter for count labels, and retain the last displayed numbers while the
+next request loads instead of flashing placeholders. Keep option labels,
+counts, search, keyboard focus and chips usable at narrow widths.
+
 ### Optimize for lookup, comparison, and scanning
 
 InfinityDB is a dense reference application. The interface should make names, values, relationships, and differences easy to scan without feeling cramped. Decorative complexity must not compete with data hierarchy.

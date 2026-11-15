@@ -719,7 +719,7 @@ The pin identifies the local review input; source-section coverage and the
 final 1.0 input freeze remain separate gates. Publication-date metadata and
 gameplay content retain their previous values. The tracked v9 rules database
 and paired deployed-object publication were refreshed together; see
-[the artifact contract](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
+[the artifact contract](data-model.md#restriction-persistence-and-version-aware-api).
 
 ## Remaining reviewed PDF identities
 

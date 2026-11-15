@@ -81,8 +81,8 @@ For an Army database rebuild, preserve the exact immutable Army snapshot and its
 manifest:
 
 ```text
-data/raw/JSON YYYYMMDD-HHMMSS.zip
-data/manifests/snapshots/JSON YYYYMMDD-HHMMSS.json
+local/data/raw/army/JSON YYYYMMDD-HHMMSS.zip
+local/data/manifests/snapshots/JSON YYYYMMDD-HHMMSS.json
 ```
 
 For symbol regeneration, preserve the external producer's selected raw/effective
@@ -118,15 +118,17 @@ For a normal released-server migration, none of these local development/history 
 required:
 
 ```text
-data/raw/
-data/wiki/
-data/pdf/
-data/work/
-data/reports/
-data/logs/
-data/backups/
-image_overrides/
-reports/
+local/data/raw/
+local/data/wiki/
+local/data/wiki-extracted/
+local/data/pdf/
+local/work/
+local/research/
+local/validation/
+local/archive/
+local/operations/
+local/performance/
+local/handoffs/
 .venv/
 ```
 

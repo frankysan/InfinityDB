@@ -3,9 +3,9 @@
 **Project domain:** Project infrastructure
 
 This document owns **local check procedures, focused test selection, phased
-execution and retained dated validation evidence**. The older 1.0 acceptance
-entries below apply to their stated revisions and artifacts; they are not
-current TODO items or proof of post-deployment success. Hosted workflow
+execution and retained dated validation evidence**. Dated acceptance
+entries apply only to their recorded revisions and artifacts; they are not
+current TODO items or proof of a later release or deployment. Hosted workflow
 requirements belong in [CI](ci.md), release approval and production
 verification in [releasing](releasing.md).
 
@@ -526,15 +526,18 @@ python tools\run_checks.py --stage lint src/infinity_db/web tests/test_web.py
 python tools\run_checks.py --stage type
 ```
 
-The Phase 1 V1S backlog checker is a separate offline structural check; it does
-not yet perform Git-history closeout or task-selection validation:
+The backlog checker runs as part of the `docs` stage. It validates the
+active TODO's checkboxes and optional task IDs; when an explicit Git base
+is supplied, it also detects removed open tasks and can enforce numbered
+V1S closeout evidence. The historical V1S selection/retirement workflow
+is described in [V1S backlog checks](#v1s-backlog-checks).
+Run it independently when inspecting a proposed backlog edit:
 
 ```powershell
 python -m tools.ci.check_v1_backlog
 ```
 
-It reads the designated execution-slice section from `docs/TODO.md` without
-requiring Git. Use `--todo PATH` to inspect another Markdown backlog file.
+Use `--todo PATH` to inspect another Markdown backlog file.
 
 Positional targets are passed to pytest/Ruff for their respective stages. The `docs` stage
 always checks the configured Markdown set; `docs`, `type`, `build`, `rules`, and `preflight` ignore positional
@@ -542,9 +545,9 @@ targets. The runner accepts its documented options and test paths/node IDs, not 
 pytest flags. For keyword selection or other pytest-specific options, invoke pytest directly.
 
 **Check-report safety:** `--report` without a filename writes a timestamped
-transcript under `reports/`. Prefer placing test selectors **before**
-`--report`, or use `--report=reports/filename.txt` for an explicit
-output file. The runner also recognizes a Python test target immediately
+transcript under `local/reports/checks/`. Prefer placing test selectors
+**before** `--report`, or use
+`--report=local/reports/checks/filename.txt` for an explicit output file. The runner also recognizes a Python test target immediately
 following a bare `--report`, preserving it as a test selector instead of
 opening it as the destination. Reports cannot overwrite Python/source
 files or any Git-tracked file. This protection addresses a 2026-11-02
@@ -2811,9 +2814,9 @@ Database health required and validated the raw sibling; each staged app loaded
 the matched publications. The complete processed symbol set and its source
 binding passed against each staged pair: **808/808** published and
 browser-referenced SVGs. No active artifact needed replacement, and their
-hashes remained unchanged after acceptance. The
-[data-model artifact record](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted)
-owns the published fingerprints.
+hashes remained unchanged after acceptance. The historical artifact fingerprints belong to the pinned test and
+Git evidence; the [data model](data-model.md#restriction-persistence-and-version-aware-api)
+owns the supported schema and source contract.
 
 With `INFINITYDB_RELEASE_FAQ_PARITY=1`, a two-worker Windows batch using
 `tools.run_checks --stage test --assets required` passed **54 tests with zero
@@ -6631,12 +6634,12 @@ canonical finalized path.
 
 ## Reports
 
-Use `--report` to retain the complete check transcript. The legacy
-no-path flag still chooses `reports/CHECKS YYYYMMDD-HHMMSS.txt`;
-a fresh, categorized destination is recommended for retained run evidence:
+Use `--report` to retain the complete check transcript. Without an explicit
+path the runner creates `local/reports/checks/CHECKS YYYYMMDD-HHMMSS.txt`.
+A further categorized destination is useful for retained run evidence:
 
 ```powershell
-# Existing default, available only when this timestamped file is unused
+# Current default, available only when this timestamped file is unused
 python tools\run_checks.py --profile code --report
 
 # Recommended: substitute a fresh UTC run ID and short checkout SHA
@@ -6648,8 +6651,8 @@ symlink) **before running any requested check stage**, while the
 final `open("x")` also prevents a concurrent check from truncating
 earlier evidence. Collision and report-path errors return runner
 error status **2**, not an artificial test failure status **1**.
-The original `--report PATH` / `--report=PATH` syntax, default
-filename, stdout streaming and summary/error semantics are unchanged.
+The `--report PATH` / `--report=PATH` syntax, timestamped filename
+format, stdout streaming and summary/error semantics remain supported.
 A repeated command using the same second's default filename must
 choose a fresh explicit destination instead of overwriting it.
 
@@ -9159,7 +9162,7 @@ tests actual matched v8/v9 publication payloads, while
 `tests/test_deployment_scripts.py::test_deployment_smoke_builds_and_exercises_v8_rollback_image`
 pins the sequence and isolation of the CI image gates.
 The local promotion and remaining hosted acceptance are recorded in
-[the data model](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
+[the data model](data-model.md#restriction-persistence-and-version-aware-api).
 Normal tests never write to the tracked runtime database.
 
 ### N5.3 Silhouette Templates source and browser geometry
@@ -11433,7 +11436,7 @@ are retired. Low-level semantic fixtures are not release build modes.
 All CLI builds reject direct writes to
 the tracked rules database. The prepared 1.0.1 tracked release uses v10;
 its schema-specific publication contract is in
-[the data-model contract](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
+[the data-model contract](data-model.md#restriction-persistence-and-version-aware-api).
 Normal development checks skip this release-only gate:
 
 ```powershell

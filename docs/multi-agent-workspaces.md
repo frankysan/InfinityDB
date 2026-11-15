@@ -10,6 +10,14 @@ this protocol supplements Git and the
 it does not change [deferred-check ownership](validation-queue.md#queue-rules)
 or the release gate.
 
+**Current limitation:** The optional coordination implementation remains
+pinned to the retired `dev/v1.0.0` integration branch in
+`tools.dev.agent_coordination` and `tools.dev.agent_global_coordination`.
+The commands and branch names below describe that legacy protocol; they do
+**not** support `dev/v1.1.0` without a separate implementation change.
+Do not activate this optional system for the current development/release
+branch. Normal authorized Git/MCP workflows are not affected.
+
 ## Activation and default workflow
 
 **Default: this coordination system is not enabled.** Agents use the ordinary

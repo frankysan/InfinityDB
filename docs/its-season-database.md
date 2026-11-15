@@ -1,7 +1,10 @@
-# ITS 18 SQLite database (P3)
+# ITS Season 18 SQLite database
 
-**Status:** Schema v2 participates in the complete three-file build and
-serving set; release/hosted acceptance is separately tracked.
+**Project domain:** Data processing
+
+Schema v2 participates in the complete three-file build and serving set.
+This page owns the ITS database format, selection and build contract;
+release acceptance belongs in [releasing](releasing.md).
 
 The ITS season database is an independently validated, deterministic SQLite
 artifact created from the existing reviewed curated ITS collection. The
@@ -31,7 +34,7 @@ developer entry point in `tools/data/build_its_season.py`.
 ## Schema v2 and read contract
 
 The database has a distinct SQLite application ID (`0x49445331`) and
-`user_version=2` (v1 was the unhosted P3.2 pilot, superseded by dedicated
+`user_version=2` (v1 was an unhosted pilot, superseded by dedicated
 season policy storage). It does **not** masquerade as a Rules database.
 
 | Table | Ownership |
@@ -65,15 +68,15 @@ this freshness gate. `select_its_scenario` requires
 fall back to core missions or another season. It returns the composed
 record and the selected publication's precise source identity.
 
-P3.3 adds `seasonPolicies` to the **same** reviewed ITS curated document,
-but keeps them outside `records`. The Rules exporter therefore does not
+The reviewed ITS curated document stores `seasonPolicies`
+outside `records`. The Rules exporter therefore does not
 import event constraints as N5 rules or broaden its interaction-audit scope.
 The ITS builder separately validates exact `(seasonId, revision, context)`,
 typed `rules-n5` targets, source citations, review provenance and effect
 kind. `select_its_policies` returns policies only for a supplied season,
 exact revision and explicit play/Extra context; a missing or incorrect
-context never causes the policy to apply by default. Cross-database target
-resolution and overlay presentation belong to P3.4.
+context never causes the policy to apply by default. Cross-database target resolution and overlay presentation use the
+publication registry and the selected N5 Rules database.
 
 ## Local commands
 
@@ -96,14 +99,14 @@ the previous outputs. Identical builds produce byte-identical SQLite data.
 The test module `tests/test_its_season_database.py` covers the
 production ITS 18 schema, deterministic bytes, citation and geometry
 preservation, exact selection, drift, core compatibility, corruption
-and safe replacement. The P3.5 `tests/test_its_multiseason.py` uses
+and safe replacement. The `tests/test_its_multiseason.py` module uses
 a temporary, explicitly **synthetic** ITS 17 document and SQLite file
 to prove multiple independent seasons with the *same* Battleground
 slug, different publication content, isolated policy/citation sources,
 FAQ selection, cache fingerprints, ETags and invalid registration
 behavior. It is not an assertion about actual Season 17 rules.
 
-## P3.4 registry and selected runtime
+## Publication registry and selected runtime
 
 `src/infinity_db/publication_registry.py` provides typed
 `PublicationReference(domain, record_id, revision)` selection and
@@ -123,7 +126,7 @@ seasons/revisions never fall back to core. The internal explicit
 `create_app(..., season_databases={"its-18": path})` remains useful for
 isolated parity tests.
 
-## P3.5 — Multi-season growth acceptance
+## Multi-season isolation and growth
 
 The isolated ITS builder/inspector derives the owner from the validated
 `scenarioCollection.id` and requires a matching

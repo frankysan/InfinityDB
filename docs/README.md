@@ -14,6 +14,10 @@ Use these documents when deciding how the project works now:
   runtime/browser/deployment architecture, and accepted design direction.
 - `data-model.md` — current source/application identities, semantic provenance, persistence,
   query semantics, and generated-database contracts.
+- [its-season-database.md](its-season-database.md) — ITS Season 18 schema,
+  season-source binding, builder and selected publication contract.
+- [season-publication-ownership.md](season-publication-ownership.md) — current
+  N5/FAQ/ITS authority boundary, cross-domain references and version selection.
 - `application-domains.md` — canonical player-facing domain ownership and publication capabilities.
 - `web-design-guidelines.md` — target browser design and language contract, including reusable
   surfaces, tables, controls, responsive behavior, typography, accessibility, and theming. It states
@@ -23,11 +27,12 @@ Use these documents when deciding how the project works now:
   lifecycle.
 - `data/curated/README.md` — authored/curated data schemas and review contracts.
 - `testing.md` — local validation commands, test selectors, worker and asset
-  policies, plus dated 1.0 acceptance results. Historical runs are evidence for
-  their pinned inputs, not current-release approval.
-- [multi-agent-workspaces.md](multi-agent-workspaces.md) — optional coordination, enabled only
-  by explicit user request; its checkout roles, claims and serialized integration apply within
-  that requested scope, rather than to ordinary development by default.
+  policies, plus explicitly dated development and release-candidate evidence.
+  Historical runs validate their recorded revisions, not a later release.
+- [multi-agent-workspaces.md](multi-agent-workspaces.md) — legacy optional coordination
+  contract, currently branch-pinned to `dev/v1.0.0` in its implementing tools.
+  It must be adapted before use on the current branch; ordinary work does not
+  require it.
 - `validation-queue.md` — active register for genuinely deferred test design
   or execution (owner, prerequisites, resumption trigger and outcome); no
   mandatory per-edit entries or numeric thresholds.
@@ -73,15 +78,13 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   original review/defer decision and are evidence provenance, not the active roadmap; use `TODO.md`
   for current milestone planning.
 
-Other retained, **bounded source/implementation evidence** has a distinct purpose:
-[FAQ v0.1 applicability inventory](faq-v0.1-scope-inventory.md) pins reviewed
-question/scope decisions; [ITS database notes](its-season-database.md)
-document the selected season schema and current builder commands; and
-[season-publication ownership](season-publication-ownership.md) records
-the N5/FAQ/ITS authority boundary. These are not additional
-backlog or release checklists; current semantics belong to the
-[data model](data-model.md), [data lifecycle](../data/README.md),
-and [source clarification register](official-source-clarifications.md).
+Other retained, **bounded source/implementation evidence** has a distinct
+purpose: the [FAQ v0.1 applicability inventory](faq-v0.1-scope-inventory.md)
+pins reviewed question and scope decisions. It is not a second backlog,
+release checklist or current schema owner; consult the [data model](data-model.md),
+[data lifecycle](../data/README.md), and
+[source clarification register](official-source-clarifications.md) for
+maintained behavior.
 
 The completed 1.0 source-coverage audit and four rules-explanation audit files
 were retired to Git history at the `add2280` baseline. A compact 367-record

@@ -332,8 +332,9 @@ artifacts. Replacement-SHA hosted Source/deterministic acceptance remains open;
 the earlier focused passes do not certify the full suite or final candidate.
 
 The development dependencies include PyMuPDF so PDF-aware test modules collect and
-research tools type-check in a clean environment. Official PDFs under `data/pdf/`
-remain ignored local evidence. Only tests requiring absent PDF bytes skip; data/API
+research tools type-check in a clean environment. Official PDF bytes are ignored local evidence under `local/data/pdf/`;
+canonical `data/pdf/` source labels remain stable. Only tests requiring absent
+PDF bytes skip; data/API
 checks and synthetic evidence-gate regressions still run. Present PDFs retain their
 hash/text validation and must fail on changed or malformed evidence.
 

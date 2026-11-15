@@ -196,7 +196,7 @@ restrictive source permission bits to new files, recheck effective ACL masks
 with `getfacl` and repeat the access test after synchronization. Do not give
 the worker write permission to the receive-only staging source.
 
-### Read-only receiver access audit (R5)
+### Read-only receiver access audit
 
 Run the maintained metadata-only probe as `mcpworker` with the service's
 `INFINITYDB_SYNC_STAGING_ROOT` environment already configured:
@@ -209,22 +209,15 @@ It reports only the five known folder categories, a fixed selection of
 three source-path access probes, whether the executing identity can read or
 write their current paths, and named/default POSIX ACL entries when
 `getfacl` is installed. It never reads file contents, prints a private
-source inventory, changes ACLs or tests access by writing. A missing
-configured root is reported as unavailable rather than silently choosing
-another home directory. The live Linux check on 2026-11-13 found all five
-folder roots readable and nonwritable by `mcpworker`, with
-`user:mcpworker:r-x` and `default:user:mcpworker:r-x` entries, and all
-three selected files readable and nonwritable.
+source inventory, changes ACLs or tests access by writing. A missing configured root is reported as unavailable rather than
+silently choosing another home directory.
 
 The optional `--recursive` flag performs an effective-access census of
 each configured receiver family, traversing **without following symlinks**.
 It checks every encountered entry for the worker's read/write access and
 reports only aggregate file/directory counts, inaccessible or writable
 entries, links, scan errors and a hard entry limit. It reads no payload
-bytes, prints no private file paths and writes nothing. A partial scan
-cannot pass. On 2026-11-13, the `linux-dev` probe completed **35,833
-entries (27,560 files and 8,273 directories)** across all five families,
-with zero unreadable, writable, linked or uninspectable entries:
+bytes, prints no private file paths and writes nothing. A partial scan cannot pass. Run the complete observed-entry check with:
 
 ```bash
 ./.venv/bin/python -m tools.operations.audit_syncthing_receiver --recursive
@@ -236,7 +229,7 @@ inherit permissions. The probe intentionally keeps
 `recursive_acl_verified: false`. Do not treat successful access testing
 as backup, synchronization, artwork or migration approval.
 
-### Read-only Syncthing service health (R5)
+### Read-only Syncthing service health
 
 The credential-redacted status probe reads only the executing identity's
 standard Syncthing configuration (or an explicitly configured
@@ -259,20 +252,16 @@ the Syncthing service configuration:
 ./.venv/bin/python -m tools.operations.audit_syncthing_health --role receiver
 ```
 
-On 2026-11-13, Windows returned **five live, idle Send Only folders**:
-the configured IDs and roots matched, local/global counts matched,
-pending files/bytes/deletions and pull errors were all zero, and
-versioning was unconfigured. The Linux `mcpworker` execution reported
-`config-not-readable` under its current configuration discovery;
-**receiver live API state remains unverified**. Do not move or expose
-the owner's Syncthing API credentials to the worker to bypass this
-boundary. A separate owner-authorized check is needed. Matching earlier
-receiver snapshots or today's sender global counts cannot substitute
-for a fresh receiver API query.
+When `mcpworker` cannot read the owner's Syncthing configuration,
+the receiver probe reports `config-not-readable`; use an authorized
+service-owner identity instead of exposing its API credentials to the
+worker. A passing sender check never substitutes for a fresh
+receiver API query.
 
-Syncthing replication is not a source backup. The original immutable
-archive and provenance files remain under the legacy Windows source
-directories during this cutover; deleting them is a later, separate cleanup.
+Syncthing replication is not a source backup. The authoritative immutable
+archives and provenance on Windows now reside under the categorized
+`local/data/` layout; separately retained source evidence remains subject
+to the [data lifecycle](../data/README.md#current-paths-and-behavior).
 
 The activation tool uses `~/syncthing/infinitydb` by default. Configure the
 worker's **actual** staging root via a systemd drop-in, avoiding changes to

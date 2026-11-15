@@ -42,7 +42,8 @@ infinity-db build --compact
 infinity-db serve
 ```
 
-The build validates and replaces `data/generated/army.db` and `rules_n5.db`.
+The build validates and replaces the complete `data/generated/` set:
+`army.db`, `rules_n5.db` and `its_18.db`.
 Stop the service before rebuilding its selected directory. `serve --db-dir PATH`
 selects another complete set; otherwise `INFINITY_DB_DB_DIR` precedes the default
 `data/generated/` relative to the working directory. Invalid sets fail startup.
@@ -116,14 +117,6 @@ Weapon citations against maintained reviews, and the graphical publication's
 paths, hashes and Army source identity. Raw Army/PDF inputs are not needed on the
 server. The image copies the three databases directly into `/app/data/`; no
 `data/runtime/` copy or candidate promotion is required.
-
-**2026-11-12 development verification:** The P5.8 source-freshness blocker
-(VR-0148) was resolved by refreshing the tracked runtime databases. After the
-P6.1 build-input boundary update, `tools.verify_deployment_assets` passed on
-the complete tracked three-database set, checking source freshness,
-embedded citations and all published SVGs. This is development acceptance,
-not permission to merge, tag, release or deploy; those gates remain in
-[releasing](releasing.md).
 
 The image uses `INFINITY_DB_DB_DIR=/app/data`. Missing, invalid or incompatible
 databases fail before activation. `scripts/verify-container-image.sh --published-assets`

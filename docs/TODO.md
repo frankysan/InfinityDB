@@ -30,125 +30,22 @@ Use these links to jump directly to a workstream:
 
 ### Unit Explorer discovery
 
-**v1.1.0 final feature:** Complete multi-selection first, followed by contextual
-usage counts and the bounded advanced-filtering/caching investigations below.
-This is the last planned new player-facing feature workstream before freezing
-the v1.1.0 release candidate. Implementation of optional extensions requires
-an explicit benefit/cost decision; fixes, documentation, validation and the
-existing release checklist still apply.
+**v1.1.0 implementation complete.** Six searchable categorical multi-selects,
+per-filter AND/OR switches, coherent matching, contextual logical-Unit usage
+counts, Settings-aware option visibility and legacy-link compatibility are
+documented in the [data model](data-model.md#context-coherent-filtering) and
+[web design guidelines](web-design-guidelines.md). Fresh browser views default
+to AND; historic URLs and direct API calls without a mode retain OR.
+The existing bounded query cache remains sufficient for this release; NOT
+filtering is deferred rather than an implicit acceptance requirement.
 
-- [x] **Web backend + Web frontend — multi-selection (highest priority):**
-  Support multiple simultaneous selections in applicable Unit Explorer
-  categorical filters (Skills, Equipment, Weapons, Troop Type,
-  Classification and Characteristics), without changing unrelated
-  Specialist Troops or numeric exact/range behavior by default.
-  - [x] **Selection semantics and compatibility:** Define predictable
-    within-filter and between-filter matching (including the default
-    combination), keep compatible profile/loadout occurrences together per
-    [context-coherent filtering](data-model.md#context-coherent-filtering),
-    and preserve existing single-value API parameters and shared URLs.
-  - [x] **Backend/API:** Accept bounded, validated, deduplicated sets of
-    filter values; complete coherent composition of presentation-encoded
-    Equipment (Characteristic-backed) with ordinary Equipment selections.
-    Implemented with comma-separated API values, deterministic ordering,
-    legacy scalar compatibility, and unknown-identifier fail-closed behavior.
-    Mixed Equipment is covered by HTTP and query regression tests.
-  - [x] **Browser interaction and sharing:** Implement accessible, usable
-    multi-select controls with clear selected-state feedback, individual
-    removal, reset, keyboard and touch support; round-trip selections
-    through share-state URLs, Back/Forward and persisted view state.
-  - [x] **Focused acceptance:** Cover same-category and cross-category
-    combinations, Army/availability context, incompatible loadouts,
-    invalid/legacy URLs, empty results and narrow-screen interaction.
-    Synthetic SQL fixture covers disjoint Army/group/loadout matches, AVA
-    and Points; published data checks optional availability and view modes.
-    Chromium checks legacy/invalid URLs, empty results, keyboard, touch,
-    sharing and Back navigation at desktop and narrow widths.
-
-- [x] **Web backend + Web frontend — contextual usage counts:** Show distinct
-  logical Unit counts beside all six categorical options in the
-  complete *currently filtered* population. Respect multi-selection, every
-  other active filter, Army context, optional availability and the selection
-  in the counted dropdown itself. Counts are not hypothetical alternatives
-  computed by dropping/replacing a selection, and are independent of page,
-  sorting and extended view.
-  - [x] **Count contract:** Specify the per-option response shape and the
-    shared result/count population, including selected and zero-count options,
-    multi-selection and coherent profile/loadout contexts.
-  - [x] **Backend aggregation:** Compute all six dropdown count sets in
-    batches against the effective result population, without per-option
-    round trips, duplicate-Unit inflation or mismatched query semantics.
-  - [x] **Frontend integration:** Show counts alongside all six categorical
-    filters while preserving selections and accessible labels. Separate the
-    Settings-adjusted unfiltered baseline from the currently filtered counts;
-    hide baseline-zero choices, dim current-zero choices without disabling
-    them, and omit Cube/Cube 2.0 from Equipment choices only.
-  - [x] **Asynchronous consistency:** Refresh counts on every relevant
-    filter/Army/availability change, preventing stale in-flight responses
-    from overwriting newer state and handling loading, aborts and errors.
-  - [x] **Semantic tests:** Check cross-profile/loadout matching, combined
-    multi-select filters, selected-option counts, zero results, distinct Units
-    and pagination/sort/extended-view independence. Synthetic source
-    contexts verify counts exclude other groups and loadouts and deduplicate
-    matching occurrences of one logical Unit.
-  - [x] **Acceptance and closeout:** Verify accessible option announcements,
-    keyboard and touch behavior, responsive layouts and loading states;
-    measure representative count-query latency and document the count
-    contract alongside the overall feature closeout. Chromium verifies
-    accessible count names, loading/error announcements, keyboard and touch
-    at mobile and desktop widths; benchmark results follow below.
-
-- [x] **Web backend + Web frontend — advanced-filtering investigation:**
-  Compare per-filter AND/OR/NOT controls (and exclusion/negation) with the
-  simpler multi-select semantics. Assess concrete search use cases, user
-  comprehension, UI complexity, query correctness across profile/loadout
-  contexts, URL/API compatibility, performance and implementation/maintenance
-  cost. Record a scoped v1.1.0 implement-or-defer decision; do not make the
-  full boolean-filtering system an implicit release prerequisite.
-  **Revised decision: implement experimental per-filter AND/OR in v1.1.0.**
-  Small independent switches for all six categorical filters default to AND
-  on fresh Unit Explorer visits, with AND on the left and OR on the right.
-  They remain clickable regardless of selection count and persist as items
-  are added or removed. Direct API and historic links without a mode retain
-  OR for backward compatibility. AND requires all selected values
-  to match the same compatible Army/profile-group/loadout
-  occurrence (Unit-wide facts remain Unit-wide). Existing shared URLs keep
-  their OR behavior; optional `and_filters` state records explicit modes.
-  **NOT remains deferred** because exclusion needs separate semantics and UI.
-
-- [x] **Web backend + Web frontend — experimental AND/OR switches:**
-  Implement occurrence-coherent AND matching, defaults and legacy URL/API
-  compatibility, six compact accessible toggles, share-state round trips
-  and focused synthetic/browser acceptance. Keep final release acceptance
-  open for manual testing.
-
-- [x] **Web backend — caching investigation:** Benchmark repeated and
-  varied multi-selection and count queries on a representative snapshot.
-  Compare uncached response latency and cost against simple bounded
-  response/count caching, including cache keys, invalidation on snapshot
-  replacement, memory use and added maintenance. Implement only if the
-  measured benefit justifies the cost; otherwise record the no-cache decision.
-  **Decision: no additional cache for v1.1.0.** On the 9,175,040-byte
-  snapshot, `tools.performance.benchmark_runtime` (Windows, 2 cold
-  Database instances and 3 repeated calls per case, after adding all six
-  count categories, including merged-source usage) measured median cold
-  query times of 125 ms without counts, 413 ms with counts, 176 ms with
-  Army/counts, 329 ms with multi-selection/counts and 359 ms with a
-  Points range/counts. Repeated
-  identical calls via the existing 128-entry `list_units` LRU were
-  ~0.002 ms. The HTTP API's additional Settings-only baseline query is
-  not included in these repository-level timings.
-  HTTP responses also have a 300-second max-age. Another bounded response
-  or count cache would duplicate behavior while adding state keys, memory
-  and snapshot-invalidation maintenance. These are local query benchmarks,
-  not production HTTP latency or concurrency measurements; reconsider
-  only if real-world use demonstrates a bottleneck.
-
-- [ ] **Web frontend + Web backend — final acceptance and closeout:**
-  Verify keyboard, screen-reader, touch, responsive layouts, loading/error
-  behavior and shared-link compatibility for the accepted v1.1.0 scope.
-  Update current-behavior docs and the v1.1.0 changelog, then proceed to
-  release preparation rather than adding another feature.
+- [ ] **Web frontend + Web backend — final acceptance and closeout:** Review
+  screen-reader, keyboard, touch, responsive, loading/error and shared-link
+  behavior for the implemented v1.1.0 scope, then address any material defects
+  and retire this task before the release merge. Focused backend/browser
+  regressions have passed; manual screen-reader acceptance remains outstanding.
+  Merge approval, exact-SHA hosted CI, tagging and deployment are handled by
+  the [release checklist](releasing.md), not by additional TODO tasks.
 
 ### External source clarifications
 
@@ -373,7 +270,7 @@ The implemented artifact lifecycle is described in [data guidance](../data/READM
 ### ITS, scenarios, and game tools
 
 - [ ] Build a versioned ITS reference library from material under
-  `data/pdf/its/` and `data/pdf/legacy/`, keeping the current season distinct
+  `local/data/pdf/its/` and `local/data/pdf/legacy/`, keeping the current season distinct
   from archived seasons.
   - [ ] Keep season content isolated by season and effective date. A user choosing
     a prior event must see its matching scenario, objectives, extras, and FAQ
