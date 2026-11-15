@@ -17,6 +17,18 @@ The type-check stage explicitly passes the runner's interpreter to Pyright for d
 resolution, so invoking the virtual-environment Python works without first activating that
 environment in the shell.
 
+## Unit Explorer filter performance — 2026-11-15
+
+Windows development checkout based on `cd688672`, with the scoped Unit-option
+correction present, using `data/generated/army.db` (9,175,040 bytes). The
+`tools.performance.benchmark_runtime` cases ran 3 independent cold and 6
+identical cached samples per case. Median cold scoped AND/prospective-count
+queries were 1,069 ms (profile), 1,166 ms (loadout), 1,097 ms (unit).
+With the scoped index prebuilt by a different filter request, a fresh,
+uncached query took 226 ms, 243 ms and 214 ms respectively. Identical-query
+cache timings are not representative of changing selections. This is
+focused local performance evidence, not the v1.1.0 release gate.
+
 ## Tooling/workspace cleanup L7 closeout — 2026-11-14
 
 **Accepted revision:** `1063096f51a3050594039cba84b1515d90a4ff0b`

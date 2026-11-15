@@ -25,6 +25,7 @@ FORMAT_VERSION = 1
 class BenchmarkCase:
     name: str
     action: Callable[[Database], object]
+    setup: Callable[[Database], object] | None = None
 
 
 def _percentile(values: Sequence[float], fraction: float) -> float:
@@ -50,6 +51,14 @@ def _time(action: Callable[[], object]) -> float:
     started = time.perf_counter()
     action()
     return time.perf_counter() - started
+
+
+def _cold_sample(case: BenchmarkCase, path: Path) -> float:
+    if case.setup is None:
+        return _time(lambda: case.action(Database(path)))
+    database = Database(path)
+    case.setup(database)
+    return _time(lambda: case.action(database))
 
 
 def _catalog_detail_action(catalog: str, item_id: int) -> Callable[[Database], object]:
@@ -129,6 +138,48 @@ def discover_cases(database: Database) -> list[BenchmarkCase]:
                     ),
                 )
             )
+            # Exercise the explicitly scoped AND/count paths, not just the legacy
+            # multi-selection endpoint. Prefer a realistic cross-skill query.
+            by_slug = {str(item.get("slug")): item["id"] for item in items}
+            scoped_ids = (
+                (by_slug["berserk"], by_slug["engineer"])
+                if {"berserk", "engineer"} <= by_slug.keys()
+                else ids
+            )
+            for scope in ("profile", "loadout", "unit"):
+                cases.append(
+                    BenchmarkCase(
+                        f"units-scoped-{scope}-counts",
+                        lambda db, values=scoped_ids, mode=scope: db.list_units(
+                            skill_id=values, and_filters=("skill",),
+                            matching_scope=mode, limit=50, include_usage_counts=True,
+                        ),
+                    )
+                )
+            cases.append(
+                BenchmarkCase(
+                    "units-scoped-loadout-numeric-counts",
+                    lambda db, values=scoped_ids: db.list_units(
+                        skill_id=values, and_filters=("skill",),
+                        matching_scope="loadout", points_min=10, points_max=35,
+                        limit=50, include_usage_counts=True,
+                    ),
+                )
+            )
+            for scope in ("profile", "loadout", "unit"):
+                cases.append(
+                    BenchmarkCase(
+                        f"units-scoped-{scope}-after-index",
+                        lambda db, values=scoped_ids, mode=scope: db.list_units(
+                            skill_id=values, and_filters=("skill",),
+                            matching_scope=mode, limit=50, include_usage_counts=True,
+                        ),
+                        setup=lambda db, value=scoped_ids[0], mode=scope: db.list_units(
+                            skill_id=value, matching_scope=mode,
+                            limit=50, include_usage_counts=True,
+                        ),
+                    )
+                )
         if items:
             item_id = items[0]["id"]
             cases.append(
@@ -156,11 +207,10 @@ def benchmark_database(
     cases = discover_cases(database)
     results = []
     for case in cases:
-        cold_samples = [
-            _time(lambda action=case.action: action(Database(path)))
-            for _ in range(cold_iterations)
-        ]
+        cold_samples = [_cold_sample(case, path) for _ in range(cold_iterations)]
         warm_database = Database(path)
+        if case.setup is not None:
+            case.setup(warm_database)
         case.action(warm_database)
         warm_samples = [
             _time(lambda action=case.action, db=warm_database: action(db))

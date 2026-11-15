@@ -3132,7 +3132,8 @@ contexts, independently of each categorical AND/OR switch:
 - `unit` (**Anywhere in Unit**): criteria may occur across alternative
   configurations and reviewed source representations of the same logical Unit.
   Source Unit-option properties and `unit_option_include_targets` contribute
-  only at this broadest scope. Another logical Unit never contributes.
+  only at this broadest scope, and only from non-disabled Unit options.
+  Another logical Unit never contributes.
 
 An Include edge is resolved to a unique loadout occurrence in the same Army
 and source Unit. Missing/ambiguous targets and cycles fail closed. Source

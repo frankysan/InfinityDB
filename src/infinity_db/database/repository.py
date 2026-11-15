@@ -3265,8 +3265,11 @@ class Database:
 
             unit_option_includes: dict[tuple[int, int], list[int]] = defaultdict(list)
             for unit_id, target_army_id, target_payload_id in connection.execute(
-                "SELECT unit_id, target_army_id, target_loadout_payload_id "
-                "FROM unit_option_include_targets"
+                "SELECT t.unit_id, t.target_army_id, t.target_loadout_payload_id "
+                "FROM unit_option_include_targets AS t "
+                "JOIN unit_options AS o ON o.unit_id = t.unit_id "
+                "AND o.option_id = t.option_id "
+                "WHERE COALESCE(o.disabled, 0) = 0"
             ):
                 unit_option_includes[(int(unit_id), int(target_army_id))].append(
                     int(target_payload_id)
@@ -3274,7 +3277,10 @@ class Database:
             unit_option_props: dict[int, set[tuple[str, int]]] = defaultdict(set)
             for catalog in ("skills", "equipment", "weapons"):
                 for unit_id, source_id in connection.execute(
-                    f"SELECT unit_id, item_id FROM unit_option_{catalog}"
+                    f"SELECT v.unit_id, v.item_id FROM unit_option_{catalog} AS v "
+                    "JOIN unit_options AS o ON o.unit_id = v.unit_id "
+                    "AND o.option_id = v.option_id "
+                    "WHERE COALESCE(o.disabled, 0) = 0"
                 ):
                     if source_id is None:
                         continue

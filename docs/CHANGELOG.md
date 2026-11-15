@@ -40,6 +40,8 @@ are not retroactively relabeled.
   configurations in an expandable disclosure.
   Disabled loadouts cannot independently satisfy filters; explicit Includes
   still contribute their capabilities to a matching parent loadout.
+  Disabled Unit options do not contribute Skills, Equipment, Weapons or
+  Include targets to Anywhere in Unit matches.
 - **Project infrastructure + Data processing:** Added explicit PDF-layout
   selection to the Reinforcements evidence auditor, preserving original source
   labels, byte pins and applicability findings. Legacy paths remain the default;

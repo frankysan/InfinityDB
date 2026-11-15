@@ -170,9 +170,18 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
                 unit_id INTEGER, option_id INTEGER, target_army_id INTEGER,
                 target_loadout_payload_id INTEGER
             );
-            CREATE TABLE unit_option_skills (unit_id INTEGER, item_id INTEGER);
-            CREATE TABLE unit_option_equipment (unit_id INTEGER, item_id INTEGER);
-            CREATE TABLE unit_option_weapons (unit_id INTEGER, item_id INTEGER);
+            CREATE TABLE unit_options (
+                unit_id INTEGER, option_id INTEGER, disabled INTEGER
+            );
+            CREATE TABLE unit_option_skills (
+                unit_id INTEGER, option_id INTEGER, item_id INTEGER
+            );
+            CREATE TABLE unit_option_equipment (
+                unit_id INTEGER, option_id INTEGER, item_id INTEGER
+            );
+            CREATE TABLE unit_option_weapons (
+                unit_id INTEGER, option_id INTEGER, item_id INTEGER
+            );
             CREATE TABLE application_peripheral_controller_targets (
                 access_id INTEGER, target_logical_unit_id INTEGER
             );
@@ -200,12 +209,14 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
             INSERT INTO loadout_payload_skills VALUES (100,13),(101,19);
             INSERT INTO profile_occurrence_includes VALUES (101,1,1,1,300);
             INSERT INTO loadout_occurrence_includes VALUES (101,1,1,100,200);
-            INSERT INTO unit_option_skills VALUES (1,16);
-            INSERT INTO unit_option_include_targets VALUES (1,99,101,300);
+            INSERT INTO unit_options VALUES (1,99,0),(1,98,1);
+            INSERT INTO unit_option_skills VALUES (1,99,16),(1,98,21);
+            INSERT INTO unit_option_include_targets VALUES
+                (1,99,101,300),(1,98,101,800);
         """)
         connection.executemany(
             "INSERT INTO application_catalog_sources VALUES ('skills', ?, ?)",
-            [(item, item) for item in range(11, 21)],
+            [(item, item) for item in range(11, 22)],
         )
 
     # The curated Controller target pool is present but is NOT an attachment.
@@ -256,7 +267,7 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
         *(candidate.properties for candidate in unit_contexts)
     )
     assert {("skills", value) for value in (11, 13, 14, 15, 16, 18, 19)} <= logical_skills
-    assert {("skills", 17), ("skills", 20)}.isdisjoint(logical_skills)
+    assert {("skills", 17), ("skills", 20), ("skills", 21)}.isdisjoint(logical_skills)
 
     for scope, skill_pair, expected in (
         ("profile", (11, 12), False),

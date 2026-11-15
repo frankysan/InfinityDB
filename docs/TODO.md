@@ -41,9 +41,9 @@ Use these links to jump directly to a workstream:
     Only uniquely source-backed Includes contribute capabilities; never infer
     properties from Controller access pools or transfer a Peripheral's Skills
     to its Controller.
-  - [ ] Check representative scoped-filter and prospective-count query
-    performance, then rerun the affected pre-merge acceptance checks against
-    the final candidate under [releasing](releasing.md).
+  - [ ] Rerun affected pre-merge acceptance checks against the final v1.1.0
+    candidate under [releasing](releasing.md). Representative scoped-filter
+    performance is recorded in [testing](testing.md).
 
 ### External source clarifications
 
