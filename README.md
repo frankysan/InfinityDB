@@ -50,10 +50,12 @@ its application metrics.
 - Imports validated Infinity Army snapshots into a local SQLite database and
   serves a read-only browser and HTTP API.
 - Browses Units across Armies with name search, pagination, six categorical
-  multi-select filters, independent AND/OR choices, matching-Unit usage counts,
-  numeric ranges and optional availability. Unit Explorer filter state is
-  shareable; optional-unit Settings seed a new view but effective availability
-  is recorded in the URL without overwriting another user's saved preferences.
+  multi-select filters, independent AND/OR choices, and a matching scope:
+  **Same profile**, **Same loadout** or **Anywhere in Unit**. Prospective
+  option counts show how many logical Units would match after selecting each
+  choice, alongside numeric ranges and optional availability. Filter state is
+  shareable, and old links retain their previous matching behavior; optional-unit
+  Settings seed a new view without overwriting another user's saved preferences.
 - Shows a consolidated **General profile** alongside faction- and army-specific
   profiles, loadouts, availability, skills, equipment, and weapons.
 - Groups equivalent standard, reinforcement, and optional-mercenary source
@@ -156,9 +158,10 @@ Version **1.0.1** delivered improved scenario maps, reference-page spacing,
 version-specific release notes and safer local-build/deployment workflows.
 Its Rules database embeds reviewed deployed objects while retaining the reference baseline.
 Version **1.1.0** extends Unit Explorer discovery with searchable multi-selection,
-AND/OR combinations and usage counts; adds ITS Season 18 play-context selection,
-ships a matched Army/Rules/ITS runtime set, and consolidates developer tooling
-and local workspace organization. The [backlog](docs/TODO.md) tracks future work;
+AND/OR combinations, three matching scopes, and prospective option counts;
+adds reviewed KISS! (Repeater) loadout equipment, ITS Season 18 play-context
+selection, a matched Army/Rules/ITS runtime set, and consolidated developer
+tooling and local workspace organization. The [backlog](docs/TODO.md) tracks future work;
 the [changelog](docs/CHANGELOG.md#110---2026-11-15) documents upgrade implications.
 
 ## Requirements and setup

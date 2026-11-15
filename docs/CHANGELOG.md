@@ -12,10 +12,13 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Expanded Unit Explorer with multi-selection across six categories, per-filter
-  AND/OR switches, and live usage counts that reflect matching Units.
-  Options without any available Units are omitted; currently unmatched
-  options remain selectable.
+- Expanded Unit Explorer with multi-selection across six categories,
+  per-filter AND/OR switches, and a global matching scope (same profile,
+  same loadout or anywhere in Unit). Prospective counts show the number of
+  matching Units after selecting each option. Unavailable options are omitted;
+  currently unmatched options remain selectable.
+- Recognizes Repeater equipment on KISS! (Repeater) in Bit & KISS
+  without confusing it with the alternative Deployable Repeater loadout.
 - ITS Season 18 scenario pages offer explicit tournament and optional Extra
   context selection. Event-only Spec-Ops restrictions no longer appear as
   default N5 Skill restrictions.
@@ -28,10 +31,11 @@ are not retroactively relabeled.
 
 - **Web backend + Web frontend:** Added searchable, shareable multi-selection for
   Skills, Equipment, Weapons, Troop Type, Classification and Characteristics.
-  Each category has its own AND/OR switch and distinct logical-Unit usage counts,
-  including compatibility with older filter links. Counts reflect the complete
-  filtered set rather than just the current page; optional-unit Settings control
-  which options appear in each menu.
+  Each category has its own AND/OR switch and a global Same profile / Same loadout /
+  Anywhere in Unit selector, with prospective logical-Unit counts that equal the
+  result total after choosing an option. Original source-usage counts remain
+  available to API callers; historical filter links retain legacy semantics.
+  Optional-unit Settings control which options appear in each menu.
 - **Project infrastructure + Data processing:** Added explicit PDF-layout
   selection to the Reinforcements evidence auditor, preserving original source
   labels, byte pins and applicability findings. Legacy paths remain the default;
@@ -102,6 +106,11 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing + Web backend:** Published a reviewed, source-archive-pinned
+  correction for Repeater equipment on the KISS! (Repeater) loadout of
+  Bit & KISS (Unit #965). The selected KISS loadout, not Bit's Trooper
+  profile or unrelated loadouts, owns the added property; its separate
+  Deployable Repeater alternative remains unchanged.
 - **Web backend:** Corrected Unit Explorer option counts for logical Units
   merged from multiple Army source records, so selected Skills and Weapons
   match the number of displayed Units, including BS Attack and Adhesive

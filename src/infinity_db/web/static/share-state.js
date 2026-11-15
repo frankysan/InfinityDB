@@ -11,7 +11,7 @@ const SCHEMAS = Object.freeze({
       "troop_type", "classification", "characteristic", "ava", "ava_min", "ava_max",
       "points", "points_min", "points_max", "swc", "swc_min", "swc_max", "offset",
       "mercs", "specops", "teamops", "reinforcement", "order", "extended", "specialist",
-      "and_filters",
+      "and_filters", "matching_scope",
     ]),
   }),
   catalog: Object.freeze({ scope: "c", fields: Object.freeze(["q"]) }),

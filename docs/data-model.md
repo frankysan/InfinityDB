@@ -3096,7 +3096,7 @@ availability, so duplicate source representations do not inflate player-facing t
 
 ## Context-coherent filtering
 
-Profile/loadout-sensitive filters must be satisfied in one compatible occurrence context.
+Legacy queries that omit `matching_scope` keep the previous profile-group/loadout coherence model.
 
 - AVA belongs to an Army/profile occurrence.
 - Points and SWC belong to loadout occurrences.
@@ -3105,35 +3105,80 @@ Profile/loadout-sensitive filters must be satisfied in one compatible occurrence
 - Loadout-local Weapons/Equipment/Skills stay with the loadout.
 - Unit-option facts remain Unit-wide when the source does not attach them to a profile group.
 
-When AVA/Points/SWC participates in a query, another selected profile/loadout criterion cannot be
-satisfied by an unrelated option elsewhere on the same logical Unit. This prevents semantically
-impossible cross-option matches.
+With the legacy matcher, AVA/Points/SWC constrains an Army/profile-group/loadout context rather than
+an unrelated alternative option. Explicit new matching scopes are defined below.
 
-On a fresh Unit Explorer visit, multi-selection defaults to **AND within
-each categorical filter** and **AND between different filters**. Each of the six
-categories has an independent switch labelled AND (left) and OR (right), always
-operable even with zero or one selected option. AND requires **all** selected
-values to match a compatible Army/profile-group/loadout occurrence; Unit-wide
-source facts remain Unit-wide. OR matches any selection within that filter.
-The chosen modes persist through sharing, navigation and clearing selections.
-The direct API and historical shared links that omit mode settings retain the
-previous OR-within-category behavior. Pagination and sorting do not alter
-membership; single-value queries remain equivalent under AND and OR.
+An explicit `matching_scope` selects one of three nested source-backed
+contexts, independently of each categorical AND/OR switch:
+
+- `profile` (**Same profile**, fresh-view default): all AND criteria must occur
+  on one exact Army/source-Unit/group/profile occurrence and its compatible
+  selected loadout. Alternative profiles and unrelated models do not combine.
+- `loadout` (**Same loadout**): criteria may occur on constituent source profiles
+  and their one selected loadout, plus exact `profile_occurrence_includes` and
+  `loadout_occurrence_includes` targets. Transmutation states in that loadout
+  may collectively satisfy a reference query without implying simultaneous
+  active-game-state abilities.
+- `unit` (**Anywhere in Unit**): criteria may occur across alternative
+  configurations and reviewed source representations of the same logical Unit.
+  Source Unit-option properties and `unit_option_include_targets` contribute
+  only at this broadest scope. Another logical Unit never contributes.
+
+An Include edge is resolved to a unique loadout occurrence in the same Army
+and source Unit. Missing/ambiguous targets and cycles fail closed. Source
+`profile_peripherals`/`option_peripherals` records establish attachments,
+but embedded Peripheral identities alone do not publish property payloads;
+their Skills cannot be inferred from names or eligible Controller targets.
+`application_peripheral_controller_access` describes available choices, not
+automatic inclusions. Aggregating properties never transfers ownership
+from an included Peripheral to its Controller.
+
+The Army 2026-09-29 snapshot has one reviewed omission: Unit #965
+KISS! (Repeater) loadout option 3 has no source Equipment array, while
+its name identifies Repeater (source Equipment 63). Its alternative
+KISS! loadout instead explicitly carries Deployable Repeater (111).
+The authored, snapshot-hash-bound additions in
+`data/curated/relationships/loadout-capabilities.json` are checked
+against exact Army/source-Unit/group/option coordinates, loadout name,
+catalog name and absence from source payload at build time. Only the
+three KISS! (Repeater) occurrences in Combined Army, Onyx and Next Wave
+are currently reviewed. Complete builds project validated facts into
+`__infinity_metadata.reviewedLoadoutCapabilities`, with a curated
+content SHA-256 and count, leaving immutable Army source payloads
+untouched. Runtime Unit detail and the explicit A/C/B evaluator read
+only this database projection; the facts stay owned by KISS's selected
+loadout and may contribute to Bit only through its exact Includes edge.
+Other snapshot hashes do not inherit the correction. No arbitrary
+source-name substring creates a Skill or Equipment fact.
+
+With explicit scopes, numeric restrictions are applied to eligible contexts
+before evaluating categorical requirements. Under `unit`, a qualifying
+numeric occurrence can coexist with other categorical alternatives of
+that same logical Unit, but cannot make a different Unit eligible.
+
+Fresh Unit Explorer views default to `matching_scope=profile` and **AND within
+each categorical filter** and **AND between filters**. Each of six categorical
+filters has its own independent AND/OR switch. AND requires all selected
+choices in one evaluated context at the chosen scope; OR requires any of its
+choices, without double-counting Units. Different categories still combine
+with AND. Shared URLs without `matching_scope` retain the legacy matcher and
+show a compatibility selector until an explicit scope is chosen. Historical
+links without `and_filters` retain legacy OR-within-category selection. Sorting,
+pagination and extended presentation do not affect matching.
 
 The `/api/units` parameters `skill_id`, `equipment_id`, `weapon_id`,
 `troop_type`, `classification` and `characteristic` accept one legacy
 slug/numeric ID or up to 16 comma-separated selections. The API normalizes
 and deduplicates identifiers in deterministic order and rejects repeated
 query keys and malformed identifiers. Unknown values continue to fail closed.
-The format fits existing v1 share-state string fields without a new token
-version or server-stored sharing state. The optional `and_filters` parameter
-accepts comma-separated category names: `skill`, `equipment`, `weapon`,
-`troop_type`, `classification`, `characteristic`. Omitted categories
-use OR. The v1 share-state format appends the mode field, so existing
-tokens continue to work without a version bump. In AND mode a single
-application option may match through any of its valid source IDs; each
-distinct selected option must still match the same context. NOT/exclusion
-is not implemented.
+The optional `and_filters` parameter accepts comma-separated category names:
+`skill`, `equipment`, `weapon`, `troop_type`, `classification`, and
+`characteristic`; omitted categories use OR. The new `matching_scope` parameter
+accepts `profile`, `loadout`, or `unit`; omission preserves legacy behavior.
+Share-state v1 appends the new field after `and_filters`, keeping all historical
+field indices and tokens valid without a version bump. An application catalog
+choice may match through any of its valid source IDs, but distinct AND
+choices must share the selected matching scope. NOT/exclusion is unsupported.
 
 Presentation-encoded Equipment selections resolve through their source
 Characteristics and respect the same profile-group/loadout context in combined
@@ -3141,30 +3186,32 @@ queries. **Cube and Cube 2.0 are not selectable from the Equipment filter menu**
 their choices remain in Characteristics, and their existing catalog routes and
 historical filter URLs remain compatible. Unknown mixed identifiers fail closed.
 
-The optional `/api/units?counts=1` response adds `usage_counts` and
-`baseline_usage_counts`, each containing `skills`, `equipment`, `weapons`,
-`troop_types`, `classifications` and `characteristics` maps, keyed by
-application item ID, source vocabulary ID or public encoded-Equipment slug.
-Each number counts **distinct logical Units**, not profile or loadout rows.
+The optional `/api/units?counts=1` response retains `usage_counts` and
+`baseline_usage_counts`. When `matching_scope` is explicit it also exposes
+`prospective_counts`; all maps contain `skills`, `equipment`, `weapons`,
+`troop_types`, `classifications`, and `characteristics`, keyed by application
+item ID, vocabulary ID, or encoded-Equipment slug. Every count represents
+**distinct logical Units**, not profiles, loadouts or included models.
 
-`usage_counts` describes the complete *currently filtered* population,
-including the selected category itself, Army context, numeric constraints and
-optional-unit availability. Counts are independent of pagination, sorting and
-extended view. Without occurrence-specific constraints, counts include every
-raw source record merged into a matching logical Unit, so a selected option's
-count follows the same membership semantics as the Matching units total.
-With contextual constraints, Army/profile-group/loadout scope is preserved.
-Classification aliases are deduplicated across source categories.
+`usage_counts` retains its legacy **source-usage within the currently matching
+population** interpretation, including the prior context-specific and raw
+Unit-wide behavior. It is not the number of results after selecting an option;
+existing API callers remain compatible. `prospective_counts` drives the scoped
+player-facing menus. An **unselected** option has exactly the result `total`
+after selecting it under current AND/OR and matching scope; a **selected**
+option displays the current `total`. Both result membership and prospective
+counts use one shared scope evaluator and an indexed source occurrence graph,
+not separate database queries for each menu option.
 
-`baseline_usage_counts` ignores discovery filters, Army selection and search
-but retains the effective optional-unit Settings flags (Mercenaries, Spec-Ops,
-Team Operations and Reinforcements). Options with zero baseline usage are
-hidden from the filter menu; they remain removable if already selected by a
-historical URL. Options with positive baseline usage but zero current usage are
-slightly dimmed yet remain fully selectable. Unlisted count keys mean zero.
-These are actual usage counts, not predictions of adding/removing selections.
-Counts are batched in SQLite rather than queried individually. The response
-extension is opt-in; API clients omitting `counts=1` retain the old shape.
+`baseline_usage_counts` ignores discovery filters, Army selection and search,
+but retains the optional-unit Settings flags (Mercenaries, Spec-Ops, Team
+Operations, Reinforcements). With an explicit matching scope, the baseline is
+computed using that scope's prospective counts, including source-backed
+Includes. Without a scope, the legacy raw usage baseline is unchanged.
+Options absent from the baseline are hidden unless already selected; baseline
+options with zero current prospective matches remain selectable and dimmed.
+Unlisted count keys mean zero. Count extensions are opt-in; API clients without
+`counts=1` retain their previous response shape.
 
 Unit Explorer keeps the last displayed matching-Unit and per-option numbers
 visible while an updated request is pending; accessible loading/error states

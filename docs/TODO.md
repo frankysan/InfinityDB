@@ -54,6 +54,16 @@ Use these links to jump directly to a workstream:
   options, and unresolved relationships. Only reviewed source-backed links
   contribute to C/B; ambiguous compatibility must not create a positive match.
   Do not silently transfer Peripheral Skills to their Controller.
+- [ ] **Audit broader name-only source capabilities.** The first review
+  found three `KISS! (Repeater)` occurrences (Unit #965, Army lists 601,
+  604 and 605) without source Equipment 63. These are now corrected by
+  snapshot-pinned, additive loadout-owned facts, included in Unit details
+  and A/C/B matching. The alternative KISS! loadout retains its explicit
+  Deployable Repeater (111); the original Army payload is untouched.
+  Expand the reproducible `tools.data.audit_peripheral_variant_payloads`
+  candidate scan to other source-named Skill/Equipment/Weapon variants
+  where useful, and review each potential omission before adding facts.
+  Never infer catalogue properties globally from arbitrary names.
 - [ ] Build a small semantic fixture matrix covering two Skills on one profile,
   alternate profiles in one loadout, mutually exclusive loadouts, a main
   Trooper plus included Peripheral, unselected Controller access pools,

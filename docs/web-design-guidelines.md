@@ -295,14 +295,24 @@ General Rule rather than embedding a separate Skill list in UI code.
 
 Provide the six categorical filters as consistent searchable multi-select
 disclosures with independent, always-operable AND/OR switches, clear selected
-chips and accessible option counts. Keep the AND/OR labels adjacent to each
-switch; fresh views default to AND while legacy links retain their stored
-selection semantics. The [data model](data-model.md#context-coherent-filtering)
-owns the actual query and share-state contract.
+chips and accessible **prospective matching-Unit** counts. Keep AND/OR labels
+adjacent to each switch; fresh views default to AND. A separate global scope
+selector offers **Same profile** (fresh default), **Same loadout** and
+**Anywhere in Unit** in narrow-to-broad order. Explain that Included models
+can contribute only through source-backed links, that profile alternatives
+are not necessarily active together, and that matching is reference discovery,
+not a list-building or active-game-state legality claim. Historical shared
+links without a scope show a labelled legacy compatibility setting until
+changed. Switching scope updates the result and all count labels in one
+request and persists through sharing, navigation and Back/Forward.
+The [data model](data-model.md#context-coherent-filtering) owns the query
+and share-state contract.
 
 An individual Clear button resets both its selections and option search.
-Hide choices with no Settings-adjusted baseline usage; visually de-emphasize
-currently zero-match choices without disabling them. Reserve a scrollbar
+Hide choices with no Settings-adjusted, scope-aware baseline presence;
+visually de-emphasize currently zero-prospective-match choices without
+disabling them. A selected option's count always equals the current total.
+Reserve a scrollbar
 gutter for count labels, and retain the last displayed numbers while the
 next request loads instead of flashing placeholders. Keep option labels,
 counts, search, keyboard focus and chips usable at narrow widths.

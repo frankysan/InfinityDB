@@ -70,6 +70,9 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 "share/infinity-db/data/curated/peripherals" = [
   "data/curated/peripherals/army-identities.json",
 ]
+"share/infinity-db/data/curated/relationships" = [
+  "data/curated/relationships/loadout-capabilities.json",
+]
 "share/infinity-db/data/manifests" = [
   "data/manifests/symbol-publication.json",
 ]

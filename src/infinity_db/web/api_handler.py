@@ -423,6 +423,7 @@ def _unit_query(query: str) -> dict:
             "extended",
             "counts",
             "and_filters",
+            "matching_scope",
             "cache_bust",
         }:
             raise ValueError(f"Unknown query parameter: {key}")
@@ -470,8 +471,12 @@ def _unit_query(query: str) -> dict:
         raise ValueError("Invalid AND filter selection")
     if len(and_keys) != len(set(and_keys)):
         raise ValueError("Duplicate AND filter selection")
+    matching_scope = params.get("matching_scope", [""])[0]
+    if matching_scope not in {"", "profile", "loadout", "unit"}:
+        raise ValueError("Invalid matching scope")
     return {
         "and_filters": tuple(sorted(and_keys)),
+        "matching_scope": matching_scope or None,
         "army_id": _domain_filter_identifier(params, "army_id"),
         "declared_faction_id": declared_faction_id,
         "search": search,
@@ -1539,16 +1544,41 @@ class ApiHandler:
                                     counts["equipment"][slug] = characteristics[str(source_id)]
                             return counts
 
+                        def public_prospective(source: dict[str, dict[str, int]]) -> dict:
+                            counts = {catalog: dict(values) for catalog, values in source.items()}
+                            for slug, source_id in encoded_ids.items():
+                                key = f"characteristic:{source_id}"
+                                counts["equipment"][slug] = counts["equipment"].get(key, 0)
+                            counts["equipment"] = {
+                                key: count for key, count in counts["equipment"].items()
+                                if not key.startswith("characteristic:")
+                            }
+                            return counts
+
                         baseline = self.database.list_units(
                             limit=1, include_usage_counts=True,
+                            matching_scope=query["matching_scope"],
                             **{key: query[key] for key in (
                                 "mercs", "specops", "teamops", "reinforcement"
                             )},
                         )
+                        if "prospective_counts" in payload:
+                            payload["prospective_counts"] = public_prospective(
+                                payload["prospective_counts"]
+                            )
                         payload = {
                             **payload,
                             "usage_counts": public_counts(payload["usage_counts"]),
-                            "baseline_usage_counts": public_counts(baseline["usage_counts"]),
+                            "baseline_usage_counts": (
+                                public_counts(baseline["usage_counts"])
+                                if query["matching_scope"] is None
+                                else {
+                                    catalog: {key: value for key, value in counts.items() if value}
+                                    for catalog, counts in public_prospective(
+                                        baseline["prospective_counts"]
+                                    ).items()
+                                }
+                            ),
                         }
                     payload = {
                         **payload,

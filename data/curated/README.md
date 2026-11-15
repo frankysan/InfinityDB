@@ -28,6 +28,11 @@ labels, independently of their physical `local/data/pdf/` layout.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
   endpoints that cannot be resolved from the current Army snapshot alone.
+  `loadout-capabilities.json` separately records reviewed, additive
+  source-omitted loadout capabilities with exact source coordinates and
+  catalogue identities. The Army build validates each fact against its
+  pinned snapshot, publishes the resulting read model in database metadata,
+  and never rewrites source payloads or infers arbitrary facts from names.
 - `enrichment-coverage/` contains maintained release-scope classifications consumed by
   the rules-enrichment coverage audit; these decisions classify audit gaps without becoming
   runtime game semantics.

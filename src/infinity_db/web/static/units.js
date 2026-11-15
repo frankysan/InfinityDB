@@ -16,7 +16,8 @@ const elements = {
   skill: byId("skill-filter"), specialist: byId("specialist-filter"),
   equipment: byId("equipment-filter"), weapon: byId("weapon-filter"),
   troopType: byId("troop-type-filter"), classification: byId("classification-filter"),
-  characteristic: byId("characteristic-filter"),
+  characteristic: byId("characteristic-filter"), matchingScope: byId("matching-scope-filter"),
+  matchingScopeDescription: byId("matching-scope-description"),
   ava: byId("ava-filter"), avaMin: byId("ava-min-filter"), avaMax: byId("ava-max-filter"),
   avaMinValue: byId("ava-min-value"), avaMaxValue: byId("ava-max-value"),
   points: byId("points-filter"), pointsMin: byId("points-min-filter"), pointsMax: byId("points-max-filter"),
@@ -46,6 +47,22 @@ const AND_FILTER_KEYS = [
   ["characteristic", "characteristic"],
 ];
 const ALL_AND_FILTERS = AND_FILTER_KEYS.map(([, key]) => key).join(",");
+const MATCHING_SCOPE_DESCRIPTIONS = {
+  profile: "All AND selections must occur on one Trooper profile and its compatible loadout.",
+  loadout: "Selections may occur on different profiles in one loadout or an explicitly included model. Alternate states need not be active together.",
+  unit: "Selections may occur across the logical Unit’s alternative configurations. Eligible but unselected Peripherals do not contribute.",
+  "": "This shared link retains the previous matching behavior. Choose a scope to use the new semantics.",
+};
+function renderMatchingScope() {
+  const legacy = elements.matchingScope.querySelector('option[value=""]');
+  if (!state.matchingScope && !legacy) {
+    elements.matchingScope.prepend(new Option("Legacy shared-link matching", ""));
+  } else if (state.matchingScope && legacy) {
+    legacy.remove();
+  }
+  elements.matchingScope.value = state.matchingScope;
+  elements.matchingScopeDescription.textContent = MATCHING_SCOPE_DESCRIPTIONS[state.matchingScope];
+}
 const normalizeAndFilters = (value) => AND_FILTER_KEYS
   .map(([, key]) => key).filter((key) => value.split(",").includes(key)).join(",");
 
@@ -163,7 +180,7 @@ function hasActiveFilters() {
     || state.points || state.pointsMin || state.pointsMax
     || state.swc || state.swcMin || state.swcMax
     || optionalUnitPreferenceDifferences().length > 0
-    || state.andFilters !== ALL_AND_FILTERS;
+    || state.andFilters !== ALL_AND_FILTERS || state.matchingScope !== "profile";
 }
 
 function domainFilterIdentifier(value) {
@@ -347,6 +364,10 @@ function readLocation() {
     troopType: domainMultiFilterIdentifiers(troopType),
     classification: domainMultiFilterIdentifiers(classification),
     characteristic: domainMultiFilterIdentifiers(characteristic),
+    matchingScope: params.has("matching_scope")
+      ? (["profile", "loadout", "unit"].includes(params.get("matching_scope"))
+        ? params.get("matching_scope") : "profile")
+      : source === "none" ? "profile" : "",
     andFilters: params.has("and_filters")
       ? normalizeAndFilters(params.get("and_filters") || "")
       : source === "none" ? ALL_AND_FILTERS : "",
@@ -383,6 +404,7 @@ function writeLocation(replace = false) {
   if (state.classification) params.set("classification", state.classification);
   if (state.characteristic) params.set("characteristic", state.characteristic);
   if (state.andFilters) params.set("and_filters", state.andFilters);
+  if (state.matchingScope) params.set("matching_scope", state.matchingScope);
   if (state.ava) params.set("ava", state.ava);
   if (state.avaMin) params.set("ava_min", state.avaMin);
   if (state.avaMax) params.set("ava_max", state.avaMax);
@@ -402,6 +424,7 @@ function writeLocation(replace = false) {
 function syncFilters() {
   elements.army.value = state.armyId;
   elements.search.value = state.search;
+  renderMatchingScope();
   for (const [key, control] of Object.entries(multiControls)) control.setValue(state[key]);
   for (const [key, name] of AND_FILTER_KEYS) {
     multiControls[key].setMode(state.andFilters.split(",").includes(name) ? "and" : "or");
@@ -564,7 +587,7 @@ function renderUnits(data) {
     ["characteristic", "characteristics"],
   ]) {
     multiControls[key].setBaselineCounts(data.baseline_usage_counts?.[catalog] ?? null);
-    multiControls[key].setCounts(data.usage_counts?.[catalog]);
+    multiControls[key].setCounts(data.prospective_counts?.[catalog] ?? data.usage_counts?.[catalog]);
   }
   renderUnitRows(elements.list, data.items, { extended: state.extended });
   renderAvailabilitySummary(data);
@@ -676,6 +699,7 @@ function applyFilters() {
     equipmentId: multiControls.equipmentId.value(), weaponId: multiControls.weaponId.value(),
     troopType: multiControls.troopType.value(), classification: multiControls.classification.value(),
     characteristic: multiControls.characteristic.value(),
+    matchingScope: elements.matchingScope.value,
     andFilters: AND_FILTER_KEYS.filter(([key]) => multiControls[key].mode() === "and")
       .map(([, name]) => name).join(","),
     ava: avaExactFilterValue(elements.ava.value),
@@ -712,6 +736,7 @@ function applyFilters() {
     ...state, ...next, offset: 0, optionalUnitInvalid: false,
   };
   elements.clear.disabled = !hasActiveFilters();
+  renderMatchingScope();
   renderOptionalUnitContext();
   writeLocation();
   load();
@@ -723,6 +748,7 @@ function clearFilters() {
     ...state, armyId: "", declaredFactionId: "", search: "", offset: 0,
     skillId: "", specialist: "", equipmentId: "", weaponId: "",
     troopType: "", classification: "", characteristic: "", andFilters: ALL_AND_FILTERS,
+    matchingScope: "profile",
     ava: "", avaMin: "", avaMax: "", points: "", pointsMin: "", pointsMax: "",
     swc: "", swcMin: "", swcMax: "",
     ...optionalUnitFilters(),
@@ -760,6 +786,7 @@ function resetNumericRangeAndApply(control) {
 
 elements.filters.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); });
 elements.army.addEventListener("change", applyFilters);
+elements.matchingScope.addEventListener("change", applyFilters);
 for (const filter of [
   elements.skill, elements.specialist, elements.equipment, elements.weapon,
   elements.troopType, elements.classification, elements.characteristic,

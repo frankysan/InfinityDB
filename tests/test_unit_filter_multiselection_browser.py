@@ -394,6 +394,68 @@ def test_specialist_menu_has_only_unique_current_choices(
         page.close()
 
 
+@pytest.mark.parametrize("width", [1280, 390])
+def test_matching_scope_prospective_count_share_state_and_history(
+    app: Any, origin: str, browser: Any, width: int,
+) -> None:
+    page = browser.new_page(
+        viewport={"width": width, "height": 900},
+        has_touch=width == 390, is_mobile=width == 390,
+    )
+    route_browser_page(page, app, origin)
+    errors: list[str] = []
+    page.on("pageerror", lambda exc: errors.append(str(exc)))
+    try:
+        page.goto(
+            f"{origin}/units?skill_id=berserk&and_filters=skill&matching_scope=profile",
+            wait_until="domcontentloaded",
+        )
+        page.wait_for_function(
+            "() => document.querySelector('#unit-count')?.getAttribute('aria-busy') === 'false'"
+        )
+        selector = page.locator("#matching-scope-filter")
+        assert selector.input_value() == "profile"
+        control = page.locator(".unit-multi-select").first
+        control.locator("summary").click()
+        engineer = control.locator('input[value="engineer"]')
+        engineer.wait_for(state="attached")
+        prospective = engineer.locator("xpath=..").locator(".unit-multi-count").text_content()
+        assert prospective is not None
+        predicted = int(prospective.replace(",", ""))
+        engineer.check()
+        page.wait_for_function(
+            "() => document.querySelector('#unit-count')?.getAttribute('aria-busy') === 'false'"
+        )
+        shown = page.locator("#unit-count").text_content()
+        assert shown is not None
+        assert int(shown.split(" / ")[0].replace(",", "")) == predicted
+
+        selector.select_option("loadout")
+        page.wait_for_function(
+            "() => document.querySelector('#unit-count')?.getAttribute('aria-busy') === 'false'"
+        )
+        assert "different profiles" in page.locator("#matching-scope-description").inner_text()
+        assert selector.input_value() == "loadout"
+        page.go_back()
+        page.wait_for_function(
+            "() => document.querySelector('#matching-scope-filter')?.value === 'profile'"
+        )
+        assert selector.input_value() == "profile"
+
+        page.goto(f"{origin}/units?skill_id=berserk", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelector('#unit-count')?.getAttribute('aria-busy') === 'false'"
+        )
+        assert selector.input_value() == ""
+        assert "previous matching behavior" in (
+            page.locator("#matching-scope-description").inner_text()
+        )
+        selector.select_option("unit")
+        assert selector.input_value() == "unit"
+        assert not errors
+    finally:
+        page.close()
+
 @pytest.mark.parametrize(
     ("filter_name", "slug", "control_index"),
     [
@@ -401,6 +463,8 @@ def test_specialist_menu_has_only_unique_current_choices(
         ("weapon_id", "adhesive-launcher-rifle", 2),
     ],
 )
+
+
 def test_selected_option_count_equals_matching_unit_count(
     app: Any, origin: str, browser: Any,
     filter_name: str, slug: str, control_index: int,

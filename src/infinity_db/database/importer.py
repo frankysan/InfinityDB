@@ -64,6 +64,7 @@ from .publication import (
 )
 from .relation_constraints import materialize_relation_constraints
 from .relation_group_dependencies import materialize_relation_group_dependencies
+from .reviewed_loadout_capabilities import materialize_reviewed_loadout_capabilities
 from .schema import (
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
@@ -489,6 +490,17 @@ def export_database(
                 materialize_application_rule_references(connection)
                 materialize_profile_payloads(connection)
                 materialize_loadout_payloads(connection)
+                materialize_reviewed_loadout_capabilities(connection, metadata)
+                for key in (
+                    "reviewedLoadoutCapabilities",
+                    "reviewedLoadoutCapabilitiesSha256",
+                    "reviewedLoadoutCapabilitiesCount",
+                ):
+                    if key in metadata:
+                        connection.execute(
+                            f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
+                            (key, json_text(metadata[key])),
+                        )
                 materialize_application_fireteams(connection)
                 materialize_include_relationships(connection)
                 materialize_peripheral_source_labels(connection)

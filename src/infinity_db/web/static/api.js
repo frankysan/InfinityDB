@@ -116,7 +116,7 @@ export function getScenario(scenarioId, armyPoints, signal, { collection = "", r
   return getJson(`/api/scenarios/${encodeURIComponent(scenarioId)}?${params}`, signal);
 }
 
-export function getUnits({ armyId, declaredFactionId, search, skillId, specialist, equipmentId, weaponId, troopType, classification, characteristic, andFilters, ava, avaMin, avaMax, points, pointsMin, pointsMax, swc, swcMin, swcMax, limit, offset, mercs, specops, teamops, reinforcement, descending, extended }, signal) {
+export function getUnits({ armyId, declaredFactionId, search, skillId, specialist, equipmentId, weaponId, troopType, classification, characteristic, andFilters, matchingScope, ava, avaMin, avaMax, points, pointsMin, pointsMax, swc, swcMin, swcMax, limit, offset, mercs, specops, teamops, reinforcement, descending, extended }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset), counts: "1" });
   if (armyId) params.set("army_id", armyId);
   if (declaredFactionId) params.set("declared_faction_id", declaredFactionId);
@@ -129,6 +129,7 @@ export function getUnits({ armyId, declaredFactionId, search, skillId, specialis
   if (classification) params.set("classification", classification);
   if (characteristic) params.set("characteristic", characteristic);
   if (andFilters) params.set("and_filters", andFilters);
+  if (matchingScope) params.set("matching_scope", matchingScope);
   if (ava) params.set("ava", ava);
   if (avaMin) params.set("ava_min", avaMin);
   if (avaMax) params.set("ava_max", avaMax);
