@@ -152,7 +152,7 @@ function renderOptionalUnitContext() {
     : "";
   context.textContent = differences.length
     ? `${correction}View differs from Settings: ${differences.join("; ")}.`
-    : `${correction}View matches optional-unit Settings.`;
+    : `${correction}View matches optional-unit Settings in the Settings menu.`;
 }
 
 function hasActiveFilters() {

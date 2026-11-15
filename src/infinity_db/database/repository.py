@@ -3215,6 +3215,20 @@ class Database:
             connection.executemany(
                 "INSERT INTO eligible VALUES (?, ?, ?, ?, ?)", eligible,
             )
+            # Non-contextual Unit matching considers every merged source record,
+            # not only source occurrences with currently visible Army entries.
+            # Preserve exact Army/group/loadout scope for contextual filters.
+            connection.execute(
+                "INSERT INTO eligible (logical_id, unit_id, army_id, group_id, loadout_id) "
+                "SELECT DISTINCT e.logical_id, lus.source_unit_id, "
+                "COALESCE(source.army_id, e.army_id), NULL, NULL "
+                "FROM (SELECT DISTINCT logical_id, army_id FROM eligible "
+                "WHERE group_id IS NULL) AS e "
+                "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = e.logical_id "
+                "LEFT JOIN (SELECT unit_id, army_id FROM profile_payload_occurrences "
+                "UNION SELECT unit_id, army_id FROM loadout_payload_occurrences) AS source "
+                "ON source.unit_id = lus.source_unit_id"
+            )
             connection.execute(
                 "CREATE INDEX eligible_occurrence ON "
                 "eligible (unit_id, army_id, group_id, loadout_id)"

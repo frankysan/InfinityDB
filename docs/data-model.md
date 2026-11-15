@@ -3197,7 +3197,10 @@ Each number counts **distinct logical Units**, not profile or loadout rows.
 `usage_counts` describes the complete *currently filtered* population,
 including the selected category itself, Army context, numeric constraints and
 optional-unit availability. Counts are independent of pagination, sorting and
-extended view. Compatible Army/profile-group/loadout contexts are respected;
+extended view. Without occurrence-specific constraints, counts include every
+raw source record merged into a matching logical Unit, so a selected option's
+count follows the same membership semantics as the Matching units total.
+With contextual constraints, Army/profile-group/loadout scope is preserved.
 Classification aliases are deduplicated across source categories.
 
 `baseline_usage_counts` ignores discovery filters, Army selection and search

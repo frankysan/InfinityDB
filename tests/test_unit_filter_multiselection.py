@@ -365,6 +365,24 @@ def test_multiselect_contexts_reject_mixed_armies_groups_and_loadouts(
     assert combined["skills"] == {"1": 1, "2": 1}
     assert combined["weapons"] == {"4": 1, "6": 1, "8": 1}
 
+    # A logical Unit can merge raw sources that have no visible Army entry.
+    # Unscoped counts must see those sources, including option-only facts;
+    # contextual loadout counts must not include unrelated source groups.
+    with sqlite3.connect(path) as connection:
+        connection.executescript("""
+            INSERT INTO logical_unit_sources VALUES (2, 1), (3, 1);
+            INSERT INTO profile_payload_occurrences VALUES (301, 2, 1, 40, 1);
+            INSERT INTO profile_payloads VALUES (40, 7);
+            INSERT INTO profile_payload_skills VALUES (40, 9);
+            INSERT INTO unit_option_weapons VALUES (3, 10);
+        """)
+    unscoped = database._unit_filter_usage_counts({(1, 1, 101, None, None)})
+    assert unscoped["skills"]["9"] == 1
+    assert unscoped["weapons"]["10"] == 1
+    scoped = database._unit_filter_usage_counts({(1, 1, 101, 1, 100)})
+    assert "9" not in scoped["skills"]
+    assert "10" not in scoped["weapons"]
+
 
 
 def test_multiselect_availability_and_result_views_are_consistent() -> None:
@@ -481,3 +499,24 @@ def test_http_usage_counts_are_opt_in_and_stable_across_requests() -> None:
         f"search=impossible-unique-unit-name&counts=1&{optional_query}"
     )
     assert filtered_optional["baseline_usage_counts"] == optional["baseline_usage_counts"]
+
+@pytest.mark.parametrize(
+    ("catalog", "slug", "filter_name"),
+    [
+        ("skills", "bs-attack", "skill_id"),
+        ("weapons", "adhesive-launcher-rifle", "weapon_id"),
+    ],
+)
+def test_single_option_count_matches_matching_unit_total(
+    catalog: str, slug: str, filter_name: str,
+) -> None:
+    database = Database(Path("data/generated/army.db"))
+    item_id = database.application_catalog_id(catalog, slug)
+    assert item_id is not None
+    result = database.list_units(
+        **{
+            filter_name: slug, "mercs": True, "specops": True, "teamops": True,
+            "limit": 10_000, "_unbounded": True, "include_usage_counts": True,
+        },
+    )
+    assert result["usage_counts"][catalog].get(str(item_id), 0) == result["total"]

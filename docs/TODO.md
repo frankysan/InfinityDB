@@ -131,9 +131,10 @@ existing release checklist still apply.
   **Decision: no additional cache for v1.1.0.** On the 9,175,040-byte
   snapshot, `tools.performance.benchmark_runtime` (Windows, 2 cold
   Database instances and 3 repeated calls per case, after adding all six
-  count categories) measured median cold query times of 125 ms without
-  counts, 277 ms with counts, 152 ms with Army/counts, 240 ms with
-  multi-selection/counts, and 362 ms with Points range/counts. Repeated
+  count categories, including merged-source usage) measured median cold
+  query times of 125 ms without counts, 413 ms with counts, 176 ms with
+  Army/counts, 329 ms with multi-selection/counts and 359 ms with a
+  Points range/counts. Repeated
   identical calls via the existing 128-entry `list_units` LRU were
   ~0.002 ms. The HTTP API's additional Settings-only baseline query is
   not included in these repository-level timings.

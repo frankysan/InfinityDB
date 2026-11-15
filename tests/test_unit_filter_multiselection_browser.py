@@ -378,6 +378,9 @@ def test_specialist_menu_has_only_unique_current_choices(
     route_browser_page(page, app, origin)
     try:
         page.goto(f"{origin}/units", wait_until="domcontentloaded")
+        assert "View matches optional-unit Settings in the Settings menu." in (
+            page.locator("#optional-unit-context").inner_text()
+        )
         options = page.locator("#specialist-filter option").evaluate_all(
             "(items) => items.map((item) => [item.value, item.textContent])"
         )
@@ -387,6 +390,44 @@ def test_specialist_menu_has_only_unique_current_choices(
             "() => document.querySelector('#specialist-filter').value === 'standard'"
         )
         assert page.locator("#specialist-filter").input_value() == "standard"
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize(
+    ("filter_name", "slug", "control_index"),
+    [
+        ("skill_id", "bs-attack", 0),
+        ("weapon_id", "adhesive-launcher-rifle", 2),
+    ],
+)
+def test_selected_option_count_equals_matching_unit_count(
+    app: Any, origin: str, browser: Any,
+    filter_name: str, slug: str, control_index: int,
+) -> None:
+    page = browser.new_page(viewport={"width": 1024, "height": 800})
+    route_browser_page(page, app, origin)
+    try:
+        page.goto(
+            f"{origin}/units?{filter_name}={slug}&mercs=1&specops=1&teamops=1&reinforcement=0",
+            wait_until="domcontentloaded",
+        )
+        page.wait_for_function(
+            "() => document.querySelector('#unit-count')?.getAttribute('aria-busy') === 'false'"
+        )
+        displayed_total = page.locator("#unit-count").text_content()
+        assert displayed_total is not None
+        selected_option = page.locator(".unit-multi-select").nth(control_index).locator(
+            f'input[value="{slug}"]'
+        )
+        selected_option.wait_for(state="attached")
+        displayed_count = selected_option.locator(
+            "xpath=.."
+        ).locator(".unit-multi-count").text_content()
+        assert displayed_count is not None
+        assert int(displayed_count.replace(",", "")) == int(
+            displayed_total.split(" / ")[0].replace(",", "")
+        )
     finally:
         page.close()
 
