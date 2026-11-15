@@ -36,8 +36,9 @@ are not retroactively relabeled.
   result total after choosing an option. Original source-usage counts remain
   available to API callers; historical filter links retain legacy semantics.
   Optional-unit Settings control which options appear in each menu.
-  Filtered profile/loadout results also identify their matching source
-  configurations in an expandable disclosure.
+  Filtered profile/loadout results also compare matching configurations in an
+  expandable disclosure, highlighting selected differences in Skills, Equipment,
+  Weapons and Points/SWC instead of repeating identical Army source labels.
   Disabled loadouts cannot independently satisfy filters; explicit Includes
   still contribute their capabilities to a matching parent loadout.
   Disabled Unit options do not contribute Skills, Equipment, Weapons or

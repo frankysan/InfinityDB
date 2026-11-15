@@ -3184,14 +3184,18 @@ links without `and_filters` retain legacy OR-within-category selection. Sorting,
 pagination and extended presentation do not affect matching.
 
 When an explicit `profile` or `loadout` scope is filtered, returned page
-items can include `matching_contexts: {total, examples}`. Up to five
-examples name the source Army, profile and/or loadout occurrences that
-satisfy the selection. `total` counts matching source occurrences for that
-Unit in the eligible population. The Unit Explorer shows these labels in
-an expandable result-row disclosure. The names identify matching source
-configurations, not simultaneously usable alternative profiles. Broad
-`unit` scope and legacy requests omit the field rather than assigning one
-configuration to a match assembled across alternatives.
+items can include `matching_contexts: {total, source_matches, examples}`.
+The disclosure groups matching source occurrences with the same profile/loadout
+names, cost and named Skills/Equipment/Weapons. `source_matches` preserves
+the original occurrence count; `total` counts the grouped summaries.
+Up to five examples show Points, SWC and at most three distinguishing catalog
+items, preferring one each of Weapons, Equipment and Skills. Capabilities
+shared by all matching summaries are omitted unless only one summary exists.
+Names are resolved through the published catalog, not inferred from loadout
+text or unreviewed extras. This is a concise comparison, not an exhaustive
+loadout inventory or a claim that alternate profiles are simultaneously usable.
+Broad `unit` scope and legacy requests omit the field rather than assigning
+one configuration to a match assembled across alternatives.
 
 The `/api/units` parameters `skill_id`, `equipment_id`, `weapon_id`,
 `troop_type`, `classification` and `characteristic` accept one legacy

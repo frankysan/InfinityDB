@@ -4175,7 +4175,7 @@ class Database:
     def _unit_list_matching_context_labels(
         self, contexts: list[MatchContext], army_names: Mapping[int, str],
     ) -> dict[int, dict[str, Any]]:
-        """Resolve the names of exact matching source occurrences for one page."""
+        """Summarize matching source occurrences by distinct player-visible kit."""
         if not contexts:
             return {}
         source_units = sorted({item.source_unit_id for item in contexts})
@@ -4201,8 +4201,16 @@ class Database:
                     f"WHERE o.unit_id IN ({placeholders})", source_units,
                 )
             }
-        by_unit: dict[int, list[dict[str, str]]] = defaultdict(list)
-        seen: dict[int, set[tuple[int, ...]]] = defaultdict(set)
+        # Resolve public catalog names, not raw source IDs or inferred extras.
+        catalog_names = {
+            catalog: {
+                int(row["id"]): str(row["name"])
+                for row in self._application_catalog_graph(catalog)["items"].values()
+            }
+            for catalog in ("weapons", "equipment", "skills")
+        }
+        by_unit: dict[int, dict[tuple[Any, ...], dict[str, Any]]] = defaultdict(dict)
+        source_counts: dict[int, int] = defaultdict(int)
         for item in sorted(
             contexts,
             key=lambda c: (c.logical_id, c.source_army_id, c.source_unit_id,
@@ -4219,19 +4227,78 @@ class Database:
             )
             if not profile_name and not loadout_name:
                 continue
-            identity = (*base, item.option_id or 0, item.profile_id or 0)
-            if identity in seen[item.logical_id]:
-                continue
-            seen[item.logical_id].add(identity)
-            by_unit[item.logical_id].append({
-                "army_name": army_names.get(item.source_army_id, ""),
-                "profile_name": profile_name,
-                "loadout_name": loadout_name,
-            })
-        return {
-            logical_id: {"total": len(labels), "examples": labels[:5]}
-            for logical_id, labels in by_unit.items()
-        }
+            source_counts[item.logical_id] += 1
+            properties = tuple(sorted(
+                (catalog, catalog_names[catalog][value])
+                for catalog, value in item.properties
+                if catalog in catalog_names and value in catalog_names[catalog]
+            ))
+            # Collapse source occurrences with the same displayed names, costs
+            # and catalog capabilities, without claiming their unlisted extras
+            # or list-building constraints are necessarily interchangeable.
+            signature = (
+                profile_name.casefold(), loadout_name.casefold(),
+                item.points, item.swc, properties,
+            )
+            options = by_unit[item.logical_id]
+            if signature not in options:
+                options[signature] = {
+                    "profile_name": profile_name,
+                    "loadout_name": loadout_name,
+                    "army_name": army_names.get(item.source_army_id, ""),
+                    "points": item.points,
+                    "swc": item.swc,
+                    "_properties": properties,
+                    "armies": [],
+                }
+            army_name = army_names.get(item.source_army_id, "")
+            if army_name and army_name not in options[signature]["armies"]:
+                options[signature]["armies"].append(army_name)
+
+        result: dict[int, dict[str, Any]] = {}
+        for logical_id, unique in by_unit.items():
+            options = list(unique.values())
+            counts: dict[tuple[str, str], int] = defaultdict(int)
+            for option in options:
+                for token in option["_properties"]:
+                    counts[token] += 1
+            for option in options:
+                # Prefer distinctive weapons, equipment and skills; avoid
+                # repeating capabilities shared by every matching option.
+                properties = option.pop("_properties")
+                varying = [
+                    token for token in properties if counts[token] < len(options)
+                ]
+                if not varying and len(options) == 1:
+                    # A single match has no comparison set; show its headline
+                    # kit instead of an empty disclosure.
+                    varying = list(properties)
+                varying.sort(key=lambda token: (counts[token], token[1].casefold()))
+                # Prefer one salient difference per domain before filling
+                # remaining space; otherwise Weapons drown out Skills.
+                featured = []
+                for catalog in ("weapons", "equipment", "skills"):
+                    first = next((token for token in varying if token[0] == catalog), None)
+                    if first is not None:
+                        featured.append(first)
+                featured.extend(token for token in varying if token not in featured)
+                option["highlights"] = [
+                    {"category": catalog, "name": name}
+                    for catalog, name in featured[:3]
+                ]
+            options.sort(key=lambda option: (
+                option["points"] is None,
+                option["points"] if option["points"] is not None else 0,
+                option["swc"] or "",
+                option["profile_name"].casefold(),
+                option["loadout_name"].casefold(),
+            ))
+            result[logical_id] = {
+                "total": len(options),
+                "source_matches": source_counts[logical_id],
+                "examples": options[:5],
+            }
+        return result
 
     @instance_lru_cache(maxsize=64)
     def _unit_list_extended_profiles(

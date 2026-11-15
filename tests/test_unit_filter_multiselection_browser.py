@@ -553,7 +553,22 @@ def test_matching_context_disclosure_does_not_navigate(
             summary.click()
         assert page.url == url
         assert summary.locator("xpath=..").get_attribute("open") is not None
-        assert page.locator(".unit-match-contexts li").count() > 0
+        items = page.locator(".unit-match-contexts li")
+        assert items.count() > 0
+        details = page.locator(".unit-match-context-details").first
+        assert details.is_visible()
+        assert any(
+            category in details.inner_text()
+            for category in ("pts", "SWC", "Weapons:", "Equipment:", "Skills:")
+        )
+        items.first.click()
+        assert page.url == url
+        summary.focus()
+        summary.press("Enter")
+        assert summary.locator("xpath=..").get_attribute("open") is None
+        summary.press("Enter")
+        assert summary.locator("xpath=..").get_attribute("open") is not None
+        assert page.url == url
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
     finally:
         page.close()

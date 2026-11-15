@@ -129,6 +129,24 @@ def _exercise(page: Any, origin: str, journey: str) -> None:
         page.goto(f"{origin}/units/dragoes", wait_until="domcontentloaded")
         page.locator("#unit-content").wait_for(state="visible")
         page.locator(".general-profile").first.wait_for(state="attached")
+    elif journey == "matches":
+        page.goto(
+            f"{origin}/units?skill_id=berserk&matching_scope=loadout",
+            wait_until="domcontentloaded",
+        )
+        summary = page.locator(".unit-match-contexts summary").first
+        summary.wait_for(state="visible")
+        original_url = page.url
+        if page.viewport_size["width"] <= 390:
+            summary.tap()
+        else:
+            summary.click()
+        assert summary.locator("xpath=..").get_attribute("open") is not None
+        assert page.url == original_url
+        summary.focus()
+        summary.press("Enter")
+        assert summary.locator("xpath=..").get_attribute("open") is None
+        assert page.url == original_url
     elif journey == "scenario":
         page.goto(
             f"{origin}/scenarios/domination?army_points=150",
@@ -178,7 +196,7 @@ def _exercise(page: Any, origin: str, journey: str) -> None:
 
 @pytest.mark.parametrize("width", (1440, 390))
 @pytest.mark.parametrize(
-    "journey", ("navigation", "rule", "fragment", "unit", "scenario", "faq", "notice")
+    "journey", ("navigation", "rule", "fragment", "unit", "matches", "scenario", "faq", "notice")
 )
 def test_critical_browser_journey(browser: Any, origin: str, width: int, journey: str) -> None:
     """Reuse one portable browser contract for all four CI engine/platform jobs."""

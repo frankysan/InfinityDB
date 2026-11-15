@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sqlite3
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -370,27 +371,73 @@ def test_new_scope_validated_and_legacy_remains_optional() -> None:
         Database(Path("data/generated/army.db")).list_units(matching_scope="invalid")
 
 
-def test_scoped_results_name_only_supported_matching_configurations() -> None:
+def test_scoped_results_summarize_supported_matching_configurations() -> None:
     database = Database(Path("data/generated/army.db"))
     for scope in ("profile", "loadout"):
         result = database.list_units(
             skill_id="berserk", matching_scope=scope, limit=25,
         )
         assert result["items"]
-        named = [item["matching_contexts"] for item in result["items"]
-                 if "matching_contexts" in item]
-        assert named
-        for evidence in named:
+        summarized = [item["matching_contexts"] for item in result["items"]
+                      if "matching_contexts" in item]
+        assert summarized
+        for evidence in summarized:
+            assert evidence["source_matches"] >= evidence["total"]
             assert evidence["total"] >= len(evidence["examples"]) >= 1
             assert len(evidence["examples"]) <= 5
-            for label in evidence["examples"]:
-                assert label["army_name"]
+            for option in evidence["examples"]:
+                assert option["armies"]
+                assert option["army_name"] in option["armies"]
+                assert "points" in option and "swc" in option
+                assert len(option["highlights"]) <= 3
+                assert all(
+                    entry["name"]
+                    and entry["category"] in {"weapons", "equipment", "skills"}
+                    for entry in option["highlights"]
+                )
                 if scope == "profile":
-                    assert label["profile_name"]
+                    assert option["profile_name"]
                 else:
-                    assert label["loadout_name"]
+                    assert option["loadout_name"]
     for scope in ("unit", None):
         result = database.list_units(skill_id="berserk", matching_scope=scope, limit=5)
         assert all("matching_contexts" not in item for item in result["items"])
     without_filters = database.list_units(matching_scope="profile", limit=5)
     assert all("matching_contexts" not in item for item in without_filters["items"])
+
+
+def test_matching_summary_prioritizes_real_capability_differences_and_costs() -> None:
+    database = Database(Path("data/generated/army.db"))
+    candidate = next(
+        context for context in database._scoped_unit_filter_contexts()["profile"]
+        if context.profile_id is not None and context.option_id is not None
+    )
+    catalogs = {
+        name: database._application_catalog_graph(name)["items"]
+        for name in ("weapons", "equipment", "skills")
+    }
+    variants = [
+        frozenset((catalog, sorted(items)[index]) for catalog, items in catalogs.items())
+        for index in (0, 1)
+    ]
+    options = [
+        replace(candidate, properties=variants[0], points=19, swc="0"),
+        replace(candidate, properties=variants[1], points=24, swc="1"),
+    ]
+    summarized = database._unit_list_matching_context_labels(
+        [options[0], options[0], options[1]],
+        {candidate.source_army_id: "Example Army"},
+    )[candidate.logical_id]
+    assert summarized["source_matches"] == 3
+    assert summarized["total"] == 2
+    assert [entry["points"] for entry in summarized["examples"]] == [19, 24]
+    assert [entry["swc"] for entry in summarized["examples"]] == ["0", "1"]
+    assert all(entry["armies"] == ["Example Army"] for entry in summarized["examples"])
+    for index, option in enumerate(summarized["examples"]):
+        assert {entry["category"] for entry in option["highlights"]} == set(catalogs)
+        assert {
+            (entry["category"], entry["name"]) for entry in option["highlights"]
+        } == {
+            (catalog, catalogs[catalog][item_id]["name"])
+            for catalog, item_id in variants[index]
+        }

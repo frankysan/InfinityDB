@@ -3610,6 +3610,19 @@ html[data-distance-unit="in"] .unit-extended-statline {
   padding-left: 20px;
 }
 
+.unit-match-contexts li + li {
+  margin-top: 6px;
+}
+
+.unit-match-context-name {
+  font-weight: 550;
+}
+
+.unit-match-context-details {
+  display: block;
+  color: var(--color-text-secondary);
+}
+
 .unit-name a {
   color: inherit;
   text-decoration: none;

@@ -161,9 +161,10 @@ function extendedProfilesRow(unit, columnCount) {
 }
 
 function matchDescription(context) {
-  const name = [context.profile_name, context.loadout_name]
-    .filter(Boolean).join(" · ");
-  return context.army_name ? `${name} (${context.army_name})` : name;
+  const profile = context.profile_name || "";
+  const loadout = context.loadout_name || "";
+  if (profile.toLocaleLowerCase() === loadout.toLocaleLowerCase()) return profile;
+  return [profile, loadout].filter(Boolean).join(" · ");
 }
 
 function matchingContexts(unit) {
@@ -171,15 +172,43 @@ function matchingContexts(unit) {
   if (!evidence?.examples?.length) return null;
   const details = document.createElement("details");
   details.className = "unit-match-contexts";
+  // The enclosing table row is navigable; this disclosure must remain independent.
+  details.addEventListener("click", (event) => event.stopPropagation());
   const summary = document.createElement("summary");
-  const first = matchDescription(evidence.examples[0]);
-  summary.textContent = `Matched: ${first}`
-    + (evidence.total > 1 ? ` (+${evidence.total - 1} more)` : "");
+  const sharedName = evidence.total === evidence.examples.length
+    && evidence.examples.every((context) => (
+      matchDescription(context) === matchDescription(evidence.examples[0])
+    ));
+  const count = `${evidence.total} `
+    + (evidence.total === 1 ? "configuration" : "distinct configurations");
+  summary.textContent = sharedName
+    ? `Matched: ${matchDescription(evidence.examples[0])} · ${count}`
+    : `Matched: ${count}`;
   details.append(summary);
   const list = document.createElement("ul");
   for (const context of evidence.examples) {
     const item = document.createElement("li");
-    item.textContent = matchDescription(context);
+    if (!sharedName) {
+      const title = document.createElement("span");
+      title.className = "unit-match-context-name";
+      title.textContent = matchDescription(context);
+      item.append(title);
+    }
+    const parts = [];
+    if (context.points != null) parts.push(`${context.points} pts`);
+    if (context.swc != null) parts.push(`${context.swc} SWC`);
+    for (const category of ["weapons", "equipment", "skills"]) {
+      const names = (context.highlights || [])
+        .filter((entry) => entry.category === category)
+        .map((entry) => entry.name);
+      if (names.length) parts.push(`${category[0].toUpperCase() + category.slice(1)}: ${names.join(", ")}`);
+    }
+    if (parts.length) {
+      const description = document.createElement("span");
+      description.className = "unit-match-context-details";
+      description.textContent = parts.join(" · ");
+      item.append(description);
+    }
     list.append(item);
   }
   const remainder = evidence.total - evidence.examples.length;
