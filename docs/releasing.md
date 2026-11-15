@@ -150,7 +150,10 @@ that cannot be reviewed narrowly.
 - [ ] Update cross-references to changed or retired paths; run the documentation
   checks (Markdown lint, local links and backlog integrity).
 - [ ] Review player-facing text and accessibility when the release changes those
-  surfaces. Preserve licensing/provenance obligations.
+  surfaces. For significant interactive UI changes, verify relevant keyboard,
+  touch, responsive, loading/error and shared-link behavior; include manual
+  screen-reader acceptance where automated checks cannot establish usability.
+  Preserve licensing/provenance obligations.
 - [ ] Keep genuinely unfinished implementation work in `TODO.md`, not
   post-merge administrative closeout commits.
 

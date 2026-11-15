@@ -22,30 +22,11 @@ when all contained work shares the same owner.
 
 Use these links to jump directly to a workstream:
 
-- **Reference and UI:** [Unit Explorer](#unit-explorer-discovery), [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
+- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
 - **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
 ## Active development
-
-### Unit Explorer discovery
-
-**v1.1.0 implementation complete.** Six searchable categorical multi-selects,
-per-filter AND/OR switches, coherent matching, contextual logical-Unit usage
-counts, Settings-aware option visibility and legacy-link compatibility are
-documented in the [data model](data-model.md#context-coherent-filtering) and
-[web design guidelines](web-design-guidelines.md). Fresh browser views default
-to AND; historic URLs and direct API calls without a mode retain OR.
-The existing bounded query cache remains sufficient for this release; NOT
-filtering is deferred rather than an implicit acceptance requirement.
-
-- [ ] **Web frontend + Web backend — final acceptance and closeout:** Review
-  screen-reader, keyboard, touch, responsive, loading/error and shared-link
-  behavior for the implemented v1.1.0 scope, then address any material defects
-  and retire this task before the release merge. Focused backend/browser
-  regressions have passed; manual screen-reader acceptance remains outstanding.
-  Merge approval, exact-SHA hosted CI, tagging and deployment are handled by
-  the [release checklist](releasing.md), not by additional TODO tasks.
 
 ### External source clarifications
 
