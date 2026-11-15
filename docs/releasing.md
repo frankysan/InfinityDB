@@ -43,6 +43,11 @@ affected acceptance before the merge.
   "not yet released" or post-merge documentation work remains. Dated historical
   evidence retains its original version and truth; deployment verification
   remains an operational action, not a qualifier added to the release text.
+- [ ] **Changelog accuracy:** Compare `docs/CHANGELOG.md` with the actual
+  changes since the **last tagged release**. Include every meaningful shipped
+  player/operator capability, correction and compatibility/deployment impact;
+  remove claims about unfinished, deferred or unchanged behavior. Keep the
+  player summary concise without losing substantive details below it.
 - [ ] **Local full-suite validation:** The complete local pytest suite runs
   with `--assets required` and passes, including required browser tests.
   Review and explain skips, and pass Ruff, Pyright, docs/link/backlog,
@@ -302,10 +307,13 @@ instructions, because the web application parses it to render **What's changed**
 ### Finalize release notes and metadata
 
 - [ ] Confirm the pending heading names the agreed target version.
-- [ ] Cross-check the pending release against substantive player/operator changes in Git
-  history since the previous release and the last changelog update. Restore
-  missing outcomes, but do not turn commits, tests or internal refactors into
-  individual release-note entries.
+- [ ] Identify the **last tagged release** as the comparison baseline.
+  Review the Git diff, relevant commits and shipped application/data changes
+  from that tag through the intended release SHA against `docs/CHANGELOG.md`.
+  Restore missing meaningful player/operator outcomes, remove claims not
+  supported by the shipped changes, and include material behavior,
+  compatibility, data and deployment consequences. Do not turn individual
+  commits, tests, audits or internal refactors into release-note entries.
 - [ ] Review the complete pending section of `docs/CHANGELOG.md` as one release:
   use past tense for completed changes and present tense for ongoing behavior
   in that version, with an end-user-first perspective. Keep its `Player summary`
