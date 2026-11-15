@@ -389,12 +389,13 @@ release cannot be approved on focused tests alone.
   tracked runtime and symbol publication, builds both application and
   metrics-history images, verifies the images and starts app/Caddy. Docker
   image verification or a green hosted smoke job alone is **not** a substitute
-  for the running local deployment:
+  for the running local deployment. The public Caddy listener requires the
+  `localhost` host name; `/health` is exposed by the loopback metrics listener:
 
   ```sh
   sh ./scripts/deploy-local-test.sh
-  curl -fsS http://127.0.0.1:8080/health
-  curl -fsS http://127.0.0.1:8080/api/version
+  curl -fsS http://127.0.0.1:8081/health
+  curl -fsS http://localhost:8080/api/version
   curl -fsS http://127.0.0.1:8081/metrics
   docker compose -p infinitydb-test ps
   ```
