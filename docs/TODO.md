@@ -36,11 +36,10 @@ Use these links to jump directly to a workstream:
   A/C/B semantics, API and share-state compatibility, and prospective count
   behavior are documented in [the data model](data-model.md). The source-backed
   evaluator, semantic fixture matrix and focused browser checks are implemented.
-  - [ ] Review remaining ambiguous embedded and Unit-backed Peripheral
-    relationships, optional Unit options and profile/loadout compatibility.
-    Only uniquely source-backed Includes contribute capabilities; never infer
-    properties from Controller access pools or transfer a Peripheral's Skills
-    to its Controller.
+  Embedded/Unit-backed Peripheral and optional-Unit-option source boundaries
+  have been reviewed against the pinned Army archive and materialized
+  A/C/B fixture cases; evidence is recorded in [testing](testing.md).
+  Unverified attachments and opaque compatibility fields remain source-only.
   - [ ] Rerun affected pre-merge acceptance checks against the final v1.1.0
     candidate under [releasing](releasing.md). Representative scoped-filter
     performance is recorded in [testing](testing.md).

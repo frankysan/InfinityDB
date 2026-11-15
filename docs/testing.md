@@ -17,6 +17,34 @@ The type-check stage explicitly passes the runner's interpreter to Pyright for d
 resolution, so invoking the virtual-environment Python works without first activating that
 environment in the shell.
 
+## Unit Explorer Peripheral attachment and option review — 2026-11-15
+
+The pinned `JSON 20260929-114335.zip` Army snapshot contains 58 Army
+sources, 279 Peripheral filter definitions and 818 profile/loadout
+Peripheral attachments. No Peripheral filter definition supplies a structured
+Skills, Equipment, Weapons or Characteristics payload. The exact-name
+Skill/Equipment/Weapon suffix audit found only three missing capability
+occurrences: the reviewed KISS! (Repeater) Equipment 63 additions.
+
+The materialized A/C/B scope fixture verifies that included Peripheral
+capabilities remain separate from their Controller; profile/loadout
+Includes contribute at Same loadout, whereas enabled Unit-option properties
+and their uniquely resolved Include targets contribute only at Anywhere in
+Unit. Disabled option attachments are excluded, and targets
+belonging to another source Unit or ambiguously repeated in one Army/Unit
+cannot supply properties. Alternate source profiles remain separate at
+Same profile, while Same loadout combines only one group's selected loadout.
+The reviewed identity contract independently retains 56 embedded
+entities, 279 Army-local mappings, 17 Unit-backed source mappings, and four
+Controller access pools. A Unit-backed Peripheral remains a distinct logical
+Unit; access-pool eligibility does not transfer its Skills to the Controller.
+The source `compatible` and `habilities` fields are still opaque; no
+Army/group compatibility or extra abilities are inferred from them.
+Focused verification passed 16 scoped-filter, 22 Peripheral identity and
+18 Peripheral relationship tests. The fixture and snapshot-bound audit
+establish conservative filter behavior, not complete list-building legality
+or missing upstream semantic data.
+
 ## Unit Explorer filter performance — 2026-11-15
 
 Windows development checkout based on `cd688672`, with the scoped Unit-option

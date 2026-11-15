@@ -189,34 +189,37 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
             INSERT INTO application_peripheral_controller_targets VALUES (1,2);
             INSERT INTO profile_groups VALUES
                 (101,1,1,9),(101,1,2,9),(101,1,3,9),(101,2,1,9),
-                (201,3,1,9),(101,1,5,9);
+                (201,3,1,9),(101,1,5,9),(101,1,6,9);
             INSERT INTO profile_payloads VALUES
-                (10,7),(20,7),(30,7),(40,7),(50,7),(60,7),(70,7);
+                (10,7),(20,7),(30,7),(40,7),(50,7),(60,7),(70,7),(80,7);
             INSERT INTO profile_payload_occurrences VALUES
                 (101,1,1,1,10,1),(101,1,1,2,20,1),
                 (101,1,2,3,30,1),(101,1,3,4,40,1),
                 (101,2,1,5,50,1),(201,3,1,6,60,1),
-                (101,1,5,8,70,1);
+                (101,1,5,8,70,1),(101,1,6,9,80,1);
             INSERT INTO profile_payload_skills VALUES
-                (10,11),(20,12),(30,14),(40,15),(50,17),(60,18),(70,20);
+                (10,11),(20,12),(30,14),(40,15),(50,17),(60,18),
+                (70,20),(80,23);
             INSERT INTO loadout_payload_occurrences VALUES
                 (101,1,1,100,100,10,'0'),(101,1,1,101,101,20,'0'),
                 (101,1,2,200,200,10,'0'),(101,1,3,300,300,10,'0'),
                 (101,2,1,500,500,10,'0'),(201,3,1,600,600,10,'0'),
-                (101,1,5,800,800,10,'0');
+                (101,1,5,800,800,10,'0'),(101,1,6,900,900,10,'0');
             INSERT INTO loadout_payloads VALUES
-                (100,0),(101,0),(200,1),(300,1),(500,0),(600,0),(800,1);
-            INSERT INTO loadout_payload_skills VALUES (100,13),(101,19);
+                (100,0),(101,0),(200,1),(300,1),(500,0),(600,0),
+                (800,1),(900,1);
+            INSERT INTO loadout_payload_skills VALUES (100,13),(101,19),(900,22);
             INSERT INTO profile_occurrence_includes VALUES (101,1,1,1,300);
             INSERT INTO loadout_occurrence_includes VALUES (101,1,1,100,200);
             INSERT INTO unit_options VALUES (1,99,0),(1,98,1);
             INSERT INTO unit_option_skills VALUES (1,99,16),(1,98,21);
             INSERT INTO unit_option_include_targets VALUES
-                (1,99,101,300),(1,98,101,800);
+                (1,99,101,300),(1,99,101,900),
+                (1,99,101,500),(1,98,101,800);
         """)
         connection.executemany(
             "INSERT INTO application_catalog_sources VALUES ('skills', ?, ?)",
-            [(item, item) for item in range(11, 22)],
+            [(item, item) for item in range(11, 24)],
         )
 
     # The curated Controller target pool is present but is NOT an attachment.
@@ -237,7 +240,7 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
     # source Includes, not as independent root selections.
     for scope in ("profile", "loadout"):
         assert all(
-            candidate.group_id not in {2, 3, 5}
+            candidate.group_id not in {2, 3, 5, 6}
             for candidate in index[scope]
             if candidate.source_unit_id == 1 and candidate.source_army_id == 101
         )
@@ -266,8 +269,15 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
     logical_skills = frozenset().union(
         *(candidate.properties for candidate in unit_contexts)
     )
-    assert {("skills", value) for value in (11, 13, 14, 15, 16, 18, 19)} <= logical_skills
+    assert {("skills", value) for value in (11, 13, 14, 15, 16, 18, 19, 22, 23)} <= logical_skills
     assert {("skills", 17), ("skills", 20), ("skills", 21)}.isdisjoint(logical_skills)
+    # A selected Unit option may include a disabled target explicitly, but
+    # that target is not a root of the Same profile / Same loadout scopes.
+    for scope in ("profile", "loadout"):
+        assert all(
+            {("skills", 22), ("skills", 23)}.isdisjoint(candidate.properties)
+            for candidate in index[scope] if candidate.logical_id == 1
+        )
 
     for scope, skill_pair, expected in (
         ("profile", (11, 12), False),
@@ -277,6 +287,8 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
         ("profile", (11, 14), False),
         ("loadout", (11, 14), True),
         ("unit", (11, 18), True),
+        ("unit", (11, 22), True),
+        ("unit", (11, 23), True),
         ("unit", (11, 17), False),
     ):
         result, _ = matches(list(index[scope]), skill_pair, scope)
@@ -292,6 +304,13 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
         connection.execute(
             "INSERT INTO loadout_payload_occurrences VALUES (101,1,4,400,200,10,'0')"
         )
+        connection.execute("INSERT INTO profile_groups VALUES (101,1,7,9)")
+        connection.execute(
+            "INSERT INTO profile_payload_occurrences VALUES (101,1,7,10,10,1)"
+        )
+        connection.execute(
+            "INSERT INTO loadout_payload_occurrences VALUES (101,1,7,700,900,10,'0')"
+        )
     ambiguous = scoped_index()
     parent = next(
         candidate for candidate in ambiguous["loadout"]
@@ -300,6 +319,12 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
     )
     assert ("skills", 14) not in parent.properties
     assert ("skills", 15) in parent.properties
+    unit_skills = frozenset().union(*(
+        candidate.properties for candidate in ambiguous["unit"]
+        if candidate.logical_id == 1
+    ))
+    assert {("skills", 22), ("skills", 23)}.isdisjoint(unit_skills)
+    assert ("skills", 16) in unit_skills
 
 
 def test_scope_without_categorical_selections_preserves_unit_population() -> None:
