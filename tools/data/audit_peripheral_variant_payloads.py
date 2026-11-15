@@ -14,6 +14,7 @@ from infinity_army_data.merge import load_sources
 SUFFIX = re.compile(r"\s*\([^()]+\)\s*$")
 LABEL = re.compile(r"\(([^()]+)\)\s*$")
 PAYLOAD_FIELDS = ("skills", "equip", "weapons", "chars")
+CATALOG_FIELDS = {"skills": "skills", "equipment": "equip", "weapons": "weapons"}
 
 
 def summarize(archive: Path, *, unit_id: int, max_families: int) -> dict:
@@ -23,15 +24,22 @@ def summarize(archive: Path, *, unit_id: int, max_families: int) -> dict:
     target_units = []
     named_loadouts = []
     equipment_catalog = {}
+    catalog_by_name = {catalog: defaultdict(set) for catalog in CATALOG_FIELDS}
     source_count = 0
     for source in sources:
         army_id = source.faction_id
         data = source.data
         source_count += 1
         peripheral_by_id = {}
-        for entry in data.get("filters", {}).get("equip", []):
-            if isinstance(entry, dict):
-                equipment_catalog[entry.get("id")] = entry.get("name")
+        for catalog, field in CATALOG_FIELDS.items():
+            for entry in data.get("filters", {}).get(field, []):
+                if not isinstance(entry, dict) or entry.get("id") is None:
+                    continue
+                name = str(entry.get("name") or "").strip()
+                if name:
+                    catalog_by_name[catalog][name.casefold()].add(str(entry["id"]))
+                    if catalog == "equipment":
+                        equipment_catalog[entry["id"]] = name
         for definition in data.get("filters", {}).get("peripheral", []):
             if not isinstance(definition, dict):
                 continue
@@ -86,6 +94,8 @@ def summarize(archive: Path, *, unit_id: int, max_families: int) -> dict:
                                             if isinstance(v, dict)),
                         "skills": sorted(str(v.get("id")) for v in option.get("skills", [])
                                          if isinstance(v, dict)),
+                        "weapons": sorted(str(v.get("id")) for v in option.get("weapons", [])
+                                          if isinstance(v, dict)),
                     })
             if unit.get("id") == unit_id:
                 target_units.append({
@@ -138,8 +148,12 @@ def summarize(archive: Path, *, unit_id: int, max_families: int) -> dict:
         name_distinguished_loadouts.append({
             "armyId": group[0], "unitId": group[1], "groupId": group[2],
             "base": group[3],
-            "variants": [{key: item[key] for key in ("optionId", "name", "equipment", "skills")}
-                         for item in entries],
+            "variants": [
+                {key: item[key] for key in (
+                    "optionId", "name", "equipment", "skills", "weapons"
+                )}
+                for item in entries
+            ],
             "suffixWithEmptyEquipment": any(
                 item["hasSuffix"] and not item["equipment"] for item in entries
             ),
@@ -147,22 +161,35 @@ def summarize(archive: Path, *, unit_id: int, max_families: int) -> dict:
     name_distinguished_loadouts.sort(
         key=lambda v: (not v["suffixWithEmptyEquipment"], v["armyId"], v["unitId"])
     )
-    catalog_by_name = defaultdict(set)
-    for equipment_id, equipment_name in equipment_catalog.items():
-        if equipment_name:
-            catalog_by_name[str(equipment_name).casefold()].add(str(equipment_id))
-    catalog_suffix_candidates = []
+    # These are review candidates only; a suffix is never published as a fact.
+    capability_suffix_candidates = []
+    catalog_suffix_candidates = []  # Preserve the original Equipment-only audit.
     for item in named_loadouts:
         label_match = LABEL.search(item["name"])
         if label_match is None:
             continue
-        catalog_ids = catalog_by_name.get(label_match.group(1).strip().casefold(), set())
-        if not catalog_ids or catalog_ids.intersection(item["equipment"]):
-            continue
-        catalog_suffix_candidates.append({
-            key: item[key] for key in
-            ("armyId", "unitId", "groupId", "optionId", "name", "equipment")
-        } | {"namedEquipmentIdsAbsentFromLoadout": sorted(catalog_ids)})
+        label = label_match.group(1).strip().casefold()
+        for catalog, field in (
+            ("skills", "skills"), ("equipment", "equipment"), ("weapons", "weapons")
+        ):
+            missing = catalog_by_name[catalog].get(label, set()) - set(item[field])
+            if not missing:
+                continue
+            identity = {key: item[key] for key in
+                        ("armyId", "unitId", "groupId", "optionId", "name")}
+            capability_suffix_candidates.append({
+                **identity, "catalog": catalog,
+                "namedIdsAbsentFromLoadout": sorted(missing),
+            })
+            if catalog == "equipment":
+                catalog_suffix_candidates.append({
+                    **identity, "equipment": item["equipment"],
+                    "namedEquipmentIdsAbsentFromLoadout": sorted(missing),
+                })
+    capability_suffix_candidates.sort(
+        key=lambda item: (item["armyId"], item["unitId"], item["groupId"],
+                          item["optionId"], item["catalog"])
+    )
     catalog_suffix_candidates.sort(
         key=lambda item: (item["armyId"], item["unitId"], item["groupId"])
     )
@@ -185,6 +212,8 @@ def summarize(archive: Path, *, unit_id: int, max_families: int) -> dict:
             item["suffixWithEmptyEquipment"] for item in name_distinguished_loadouts
         ),
         "nameDistinguishedLoadoutFamilies": name_distinguished_loadouts[:max_families],
+        "capabilitySuffixCandidatesCount": len(capability_suffix_candidates),
+        "capabilitySuffixCandidates": capability_suffix_candidates[:max_families],
         "catalogSuffixCandidatesCount": len(catalog_suffix_candidates),
         "catalogSuffixCandidates": catalog_suffix_candidates[:max_families],
         "requestedUnitEquipmentCatalog": {str(key): value for key, value

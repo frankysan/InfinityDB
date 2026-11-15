@@ -97,6 +97,7 @@
         "test_martial_arts_variant_provenance",
         "test_other_source_variant_provenance",
         "test_peripheral_identities",
+        "test_peripheral_variant_audit",
         "test_peripheral_relationships",
         "test_reviewed_loadout_capabilities",
         "test_relation_constraints",
