@@ -836,11 +836,12 @@ Skill/Equipment variant**. It is a read-only projection of existing identity,
 payload and occurrence relationships, not a second source of Skill definitions,
 a loadout builder, or a record of randomized game results. The verified exact
 source-row projection has an API and normal Skill/Equipment browser consumers.
-Complete builds embed it in Rules v11; the tracked v10 release still uses a
-byte-exact JSON publication until the coordinated cutover. The embedded model,
-ignored candidate and legacy tracked publication have separate contracts
+Current complete builds embed the projection in Rules v17 (introduced in
+v11). The old byte-exact JSON serving publication belongs to the historical
+v10 compatibility contract; the selected runtime reads the embedded model.
+Dated pre-publication evidence and older artifact contracts are documented
 below. Exact-SHA hosted release acceptance belongs in
-[releasing](releasing.md#5-land-the-release-commit-verify-hosted-ci-and-tag).
+[releasing](releasing.md#5-approve-the-candidate-merge-verify-main-and-tag).
 
 **Rule identity and variant identity.** The primary grouping key is the
 published canonical rules identity (for example `skill:martial-arts`),

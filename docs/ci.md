@@ -13,13 +13,13 @@ inputs. A clean checkout must be able to validate source behavior, deterministic
 installed-package behavior, tracked release assets, and the production container.
 
 The local [phased validation workflow](testing.md#phased-development-and-validation)
-may batch discretionary broad checks between implementation passes. Its
-[active VD/VR queue](validation-queue.md) records pending design and
-execution, including deferred asynchronous Linux runs against explicitly
-selected revisions. These do **not** waive hosted CI acceptance; the
-risk-based Source scope is verified separately below. Outstanding validation for the
-relevant change must be resolved before merge or release acceptance;
-a local deferral or a green worker run is not a CI exemption.
+may batch discretionary broad checks during development. Its
+[deferred-validation queue](validation-queue.md) records genuinely blocked
+design/execution obligations. These do **not** waive hosted CI acceptance.
+At a release boundary, [releasing.md](releasing.md#mandatory-pre-merge-release-sign-off)
+also requires the **complete local asset-aware test suite** and a **real
+isolated Docker test deployment**. A successful hosted Source/Deployment
+smoke run does not substitute for either local release gate.
 
 ## Principles
 
@@ -604,7 +604,7 @@ The workflow downloads the pinned archive, revalidates every member against
 validated candidate.
 
 A successful pre-merge candidate run satisfies the optional pre-merge full-assets step in
-[the release checklist](releasing.md#5-land-the-release-commit-verify-hosted-ci-and-tag).
+[the release checklist](releasing.md#5-approve-the-candidate-merge-verify-main-and-tag).
 If the final protected-`main` release commit has a different SHA because the pull request is
 merged or squashed, that earlier run does not count as exact-SHA release evidence. When
 `tools/ci/prepare_release_ci_evidence.py --include-full-assets` is used, dispatch **Full-asset checks**

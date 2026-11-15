@@ -156,7 +156,12 @@ Deployment validation compares its SHA-256 with `army.db`.
 
 ## Isolated local deployment test
 
-For an isolated local-access-only deployment test on the same server, use:
+Before every release merge, the
+[release checklist](releasing.md#mandatory-pre-merge-release-sign-off)
+requires a **running Docker test deployment**, independent of hosted image
+smoke. Use a Docker Linux host with the synchronized candidate SHA and
+tracked runtime files; a separate development/test host is preferable.
+Run the isolated loopback-only deployment:
 
 ```sh
 sh ./scripts/deploy-local-test.sh

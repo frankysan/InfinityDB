@@ -19,6 +19,51 @@ environment**, not system Python: `.\.venv\Scripts\python.exe` in PowerShell
 or `.venv/bin/python` on Linux/macOS. Use the repository root as the
 working directory and substitute the actual release SHA/tag for placeholders.
 
+## Mandatory pre-merge release sign-off
+
+**Do not merge a development branch until every applicable item below is
+accepted for the final candidate.** These are release gates, not development
+backlog tasks. Use the detailed procedures in sections 1–4 below and retain
+one concise record of the candidate SHA, check results and any reviewed skips
+under ignored `local/validation/`. A failure requires a correction and renewed
+affected acceptance before the merge.
+
+- [ ] **Scope and correctness:** All promised release work and required
+  validation are complete; known player-impacting defects are resolved and
+  genuinely deferred non-blockers remain in `TODO.md`.
+- [ ] **Player-facing copy:** Review normal-mode pages, messages, empty/error
+  states and release notes. Everything visible to players is useful and
+  comprehensible without development context. Put technical IDs, internal
+  diagnostics, audit status and source-review tooling behind Developer Mode;
+  keep gameplay-significant caveats, accurate source citations, and necessary
+  attribution visible in normal mode.
+- [ ] **Finalized release references:** Every maintained current-state document,
+  version string, help/about surface and changelog presents the target as the
+  **current, fully released version**. No "candidate", "pending release",
+  "not yet released" or post-merge documentation work remains. Dated historical
+  evidence retains its original version and truth; deployment verification
+  remains an operational action, not a qualifier added to the release text.
+- [ ] **Local full-suite validation:** The complete local pytest suite runs
+  with `--assets required` and passes, including required browser tests.
+  Review and explain skips, and pass Ruff, Pyright, docs/link/backlog,
+  build/rules checks and finalized release metadata. A green hosted Source
+  workflow does **not** replace this local release gate.
+- [ ] **Publication integrity:** The tracked Army/Rules/ITS runtime set and
+  graphical assets are source-matched and pass deployment artifact validation.
+- [ ] **Real Docker test deployment:** Deploy the candidate into the isolated
+  `infinitydb-test` Docker Compose stack, not just a built-image verifier.
+  Confirm health, version/runtime identity, representative changed routes,
+  Caddy and metrics-history behavior, and no interaction with production.
+- [ ] **Browser and accessibility acceptance:** Exercise materially changed
+  player journeys in ordinary mode, including relevant desktop/mobile,
+  keyboard, touch, loading/error and shared-link behavior. Record manual
+  assistive-technology acceptance where needed.
+- [ ] **Merge-ready Git/CI:** The candidate tree is clean, all changes are
+  intentional, and the required PR Source, installed-wheel and Docker smoke
+  checks (and chosen additional browser checks) have passed for the candidate
+  SHA. Obtain merge approval; after the merge, verify the resulting exact
+  `main` SHA again before tagging.
+
 ## Version 1.0 data-completeness gate
 
 Version 1.0 represents the point where InfinityDB provides a **complete,
@@ -145,15 +190,25 @@ that cannot be reviewed narrowly.
 
 - [ ] Reconcile implemented behavior and current setup/CLI/deployment guidance
   in the authoritative documentation owners.
-- [ ] Review the pending changelog, current-release README statement, and any
-  version, source/publication or schema information affected by this release.
+- [ ] Verify that all maintained current-state documentation, generated version
+  surfaces, README, release-notes page, and package/API metadata present the
+  agreed target as the **current, released version**. Do not merge statements
+  describing this target as an unreleased candidate or awaiting a later
+  documentation update. Preserve truthful dated historical evidence.
 - [ ] Update cross-references to changed or retired paths; run the documentation
   checks (Markdown lint, local links and backlog integrity).
-- [ ] Review player-facing text and accessibility when the release changes those
-  surfaces. For significant interactive UI changes, verify relevant keyboard,
-  touch, responsive, loading/error and shared-link behavior; include manual
-  screen-reader acceptance where automated checks cannot establish usability.
-  Preserve licensing/provenance obligations.
+- [ ] Review normal-mode player-facing pages and controls for copy intended for
+  the player, not the developer. Technical identifiers, source-audit progress,
+  diagnostic fields, internal processing terminology and development guidance
+  belong in Developer Mode or outside the site. Preserve gameplay-significant
+  ambiguity, accurate source provenance, attribution and necessary accuracy
+  notices in ordinary mode rather than hiding important warnings.
+- [ ] For changed interactive surfaces, exercise keyboard/focus, screen-reader
+  labels where relevant, touch, responsive layouts, loading/error messages and
+  shared-link navigation; include manual assistive-technology acceptance when
+  automation cannot establish usability. Compare both Developer Mode states
+  so hidden technical content remains accessible to maintainers without
+  leaking into the default player view.
 - [ ] Keep genuinely unfinished implementation work in `TODO.md`, not
   post-merge administrative closeout commits.
 
@@ -264,11 +319,15 @@ instructions, because the web application parses it to render **What's changed**
 - [ ] Replace the target section's `Unreleased` status with the agreed release date.
 - [ ] Update the package/application version consistently in `pyproject.toml` and
   `src/infinity_army_data/__init__.py`.
-- [ ] Update the current-release statement in `README.md`.
-- [ ] Freeze the README/changelog for the target released version before the final
-  planned merge. The text describes the version being shipped; publication
-  evidence remains the tag, exact-SHA CI and production verification in this
-  checklist. Do not create a second merge merely to rewrite the TODO.
+- [ ] Update the current-release statement in `README.md`; verify
+  `What's changed`, version/footer copy and other maintained references against
+  the finalized version and date.
+- [ ] Freeze README, changelog, affected reference documents and version
+  metadata **as though the target release were already published** before the
+  final planned merge. Do not add "release candidate", "not deployed" or
+  "awaiting merge" qualifications to these release descriptions. Publication
+  evidence remains the exact-SHA hosted checks, tag and operational verification
+  later in this checklist; do not create a second merge just to repair prose.
 - [ ] Re-run the documentation audit checks affected by those release-metadata edits.
 
 Do not change the released version early merely to mark work in progress; development
@@ -276,67 +335,122 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
 
 ## 4. Run local release validation
 
-Run **one relevant acceptance set**, rather than repeating the whole
-development suite and an isolated preflight merely because a release is due:
+This is a **mandatory local release gate**, separate from development's
+risk-based selection and from hosted CI. Run it against a clean, pinned
+candidate checkout with the required graphical assets available. The final
+release cannot be approved on focused tests alone.
 
-- [ ] Check that the intended release inputs and runtime data match. When
-  Army/rules/curation or published assets changed, rebuild with the current
-  supported pipeline and validate source identity, citations, SQLite schema,
-  derived publications and source/asset pairing. Until P2 replaces the
-  publication pipeline, use its existing matched-artifact checks rather than
-  hand-editing a tracked release database.
-- [ ] Run `python -m tools.verify_deployment_assets` for the actual published
-  database and SVG set. Invalid/stale release artifacts are blockers.
-- [ ] Run changed-behavior focused tests and relevant lint/type/docs checks.
-  Run a broader test set only for a genuine cross-cutting risk or an explicit
-  release-specific acceptance requirement. A successful, equivalent hosted
-  Source matrix counts as the cumulative run; **do not automatically run the
-  same full suite locally and again in preflight**.
-- [ ] Run `python -m tools.ci.release_metadata` **after finalizing** the target
-  version, README and dated `docs/CHANGELOG.md` heading. `Unreleased` is
-  valid during development but **not** for this release gate.
-- [ ] Confirm the intended changes to user-facing routes work, with focused
-  browser checks when UI/navigation/layout changed. A large multi-browser or
-  whole-site matrix is optional unless a specific product risk justifies it.
-- [ ] Confirm the release commit contains only intentional changes and that
-  required pending test obligations for the release are resolved.
+- [ ] Verify the complete tracked Army/Rules/ITS set, inputs, source identity,
+  citations, SQLite schema and published SVGs. Rebuild from the supported
+  pipeline if inputs changed; never hand-edit a release database. Run
+  `python -m tools.verify_deployment_assets` and resolve all failures.
+- [ ] **Pass the complete local pytest suite with required assets**, including
+  browser coverage that is available on the selected test host. Save the
+  transcript, test counts, host, SHA and skip reasons. Required cohorts cannot
+  be silently skipped; review platform-specific and opt-in skips rather than
+  treating them as successful tests.
 
-The [Source workflow](ci.md#risk-based-source-validation) retains its
-change-aware hosted validation: one complete Linux suite with cross-platform
-build/determinism checks for executable or unknown changes, and focused
-reuse for eligible narrow updates.
-Installed-wheel and Docker smoke run as separate hosted checks on the final
-release SHA; they need not be reproduced locally when they already cover the
-exact intended artifact. Check newly changed components after any correction;
-a metadata-only adjustment does not invalidate an unrelated completed suite.
+  Windows PowerShell (from the repository root):
 
-## 5. Land the release commit, verify hosted CI, and tag
+  ```powershell
+  .\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --report
+  ```
+
+  Linux (an explicitly synchronized, SHA-pinned checkout):
+
+  ```sh
+  .venv/bin/python tools/run_checks.py --stage test --assets required --report
+  ```
+
+- [ ] Pass Ruff, Pyright, Markdownlint, document links, backlog checks and the
+  maintained Army/Rules build stages using the canonical runner, plus the
+  finalized release-metadata gate:
+
+  ```powershell
+  .\.venv\Scripts\python.exe tools\run_checks.py --stage lint --stage docs --stage type --stage build --stage rules --report
+  .\.venv\Scripts\python.exe -m tools.ci.release_metadata
+  ```
+
+- [ ] Verify changed player journeys with Developer Mode **off** first, then
+  check the availability of intentional technical detail in Developer Mode.
+  For relevant UI changes, cover narrow/wide viewports, keyboard, touch,
+  loading/error behavior and shared links. Record any required manual
+  accessibility acceptance and resolve material findings.
+- [ ] **Perform an isolated Docker test deployment** of the candidate release
+  on a Docker Linux host. The supported local Compose stack uses the actual
+  tracked runtime and symbol publication, builds both application and
+  metrics-history images, verifies the images and starts app/Caddy. Docker
+  image verification or a green hosted smoke job alone is **not** a substitute
+  for the running local deployment:
+
+  ```sh
+  sh ./scripts/deploy-local-test.sh
+  curl -fsS http://127.0.0.1:8080/health
+  curl -fsS http://127.0.0.1:8080/api/version
+  curl -fsS http://127.0.0.1:8081/metrics
+  docker compose -p infinitydb-test ps
+  ```
+
+  Verify the returned target version and runtime/static revisions, open the
+  application in a browser and smoke-test the release's changed routes,
+  player-visible copy and representative API calls. Inspect app/Caddy and
+  metrics-history status; confirm the stack is isolated as
+  `infinitydb-test`, not production. See
+  [isolated deployment instructions](deployment.md#isolated-local-deployment-test).
+  When acceptance is complete, stop only the test stack:
+
+  ```sh
+  sh ./scripts/stop-local-test.sh
+  ```
+
+- [ ] Confirm the intended Git changes, clean tracked tree, completed
+  acceptance and exact candidate SHA. Corrections to runtime code, tests,
+  databases or assets invalidate affected evidence: rerun the required
+  local gates on the corrected candidate before approving the merge.
+
+Hosted [Source checks](ci.md#risk-based-source-validation) retain
+cross-platform build/determinism coverage and risk-based matrix reuse,
+**in addition to** the local full-suite and Docker deployment required
+here. The independently required installed-wheel and Docker smoke workflows
+validate hosted packaging, not the local running-stack requirement. An
+isolated Git-index preflight is useful for a specific packaging risk, but
+is not a second default full-suite run.
+
+## 5. Approve the candidate, merge, verify main, and tag
 
 ### Development freeze and release-only handoff
 
-The approved merge should include the **final** version, dated changelog,
-README and affected documentation. After merging, verify CI, tag and deploy;
-do not create another routine PR just to mark release-only checklist items
-complete. Historical v1.0 V1S-093–095 handoff details remain in Git history
-and the 1.0 acceptance records.
+The **pre-merge sign-off above is mandatory**; it is not retroactively
+satisfied by CI on `main`. The approved merge includes the final version,
+dated changelog, README and all affected documentation. Historical v1.0
+V1S-093–095 handoff details remain in Git history and acceptance records.
+Do not create a routine second PR to finish release prose or TODO cleanup.
 
-- [ ] Merge the approved, locally verified candidate through the intended
-  PR workflow. The resulting `main` SHA (which may differ from the branch
-  tip after a merge/squash) is the candidate for tagging.
-- [ ] Verify that the latest **Source checks**, **Installed wheel smoke** and
-  **Deployment smoke test** workflows on this **exact SHA** are successful.
-  Source acceptance requires each applicable matrix job and its deterministic
-  output check, or a demonstrably valid focused baseline-reuse path. The
-  Docker workflow builds and smoke-tests the current immutable image; no
-  v8 rollback rehearsal is required.
-- [ ] The four-platform **Cross-browser compatibility** workflow is **opt-in
-  for v1.1.0 onward**: dispatch it for changes whose browser compatibility
-  risk warrants the extra coverage. The existing v1.0.x tag contract still
-  requires all four successful jobs. Also run optional `Full-asset checks`
-  only for a release that needs the external checksum-pinned bundle.
-- [ ] If a required check fails, repair on the development branch and
-  produce a new approved SHA. Re-run only affected local checks, but obtain
-  exact-SHA hosted evidence for the corrected candidate before tagging.
+- [ ] Before merging, verify that **Source checks**, **Installed wheel smoke**
+  and **Deployment smoke test** are successful for the **exact development
+  candidate SHA** in the PR. Inspect all applicable Source matrix and
+  deterministic-output jobs, or its demonstrably valid focused
+  baseline-reuse path. Missing, skipped or pending mandatory jobs do not pass.
+- [ ] Choose whether the four-platform **Cross-browser compatibility** check
+  is required for this release's changed browser behavior. For v1.1.0 onward
+  it remains opt-in, but significant navigation, accessibility or browser-API
+  changes warrant it; if selected, require all four exact-SHA jobs to pass.
+  The historical v1.0.x contract requires all four. Run optional
+  `Full-asset checks` only when the external checksum-pinned bundle is
+  relevant.
+- [ ] Check that the recorded local **full suite**, isolated **Docker
+  deployment**, player-copy review, documentation, metadata and required
+  accessibility acceptance are all complete. Obtain merge approval, then
+  merge the verified candidate through the intended PR workflow.
+- [ ] After merging, identify the resulting exact `main` SHA (which may
+  differ from the branch tip after a merge/squash). Verify the three
+  mandatory hosted workflows and any selected additional checks on this
+  exact SHA **before tagging**. The hosted Deployment smoke workflow validates
+  the immutable image but does not replace the pre-merge Docker test stack.
+- [ ] If any check fails, correct the development branch, run the applicable
+  local acceptance again (including the complete suite and running Docker
+  test for changed runtime behavior), and obtain green hosted evidence for
+  the replacement SHA. Do not merge or tag an unverified revision.
 - [ ] Run the release-evidence collector, substituting the exact target
   SHA, version and a fresh UTC run ID. New release evidence belongs under
   ignored `local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/`:

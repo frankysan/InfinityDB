@@ -171,15 +171,21 @@ checks before commit. Exact-SHA hosted Source/Wheel/Deployment/Cross-browser
 acceptance, release dating, tagging and deployment remain separate release
 checklist obligations.
 
-## Focused release validation after a verified baseline
+## Release-specific validation after a development baseline
 
-Finalize README, version and changelog metadata **before** the release PR.
-For subsequent documentation or independent-test changes, run
-`python -m tools.release_metadata`, Ruff and the affected pytest selectors
-before considering full validation. The hosted Source workflow independently
-requires a green four-workflow baseline; without it, the complete Source
-matrix runs. This does not exempt the exact-SHA browser, wheel or deployment
-gates. See [the CI policy](ci.md#risk-based-source-validation).
+During development, focused tests remain appropriate for narrow changes.
+For release preparation, however, [the release checklist](releasing.md#mandatory-pre-merge-release-sign-off)
+now requires a **local full-suite pass with required assets** and an
+**isolated running Docker deployment** before merge, in addition to
+the normal lint/type/docs/build and metadata checks. Hosted Source
+matrix reuse, installed-wheel smoke and container smoke remain independent
+checks, not substitutes for those local release gates.
+
+Finalize README, version and changelog metadata **before** the release PR;
+validate them with `python -m tools.ci.release_metadata`. If a late change
+affects runtime or tests, obtain fresh relevant local evidence and repeat
+the mandatory release gates for that corrected candidate.
+See [the CI policy](ci.md#risk-based-source-validation).
 
 ## Agent coordination safety acceptance
 
