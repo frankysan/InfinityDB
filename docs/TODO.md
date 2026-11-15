@@ -22,11 +22,57 @@ when all contained work shares the same owner.
 
 Use these links to jump directly to a workstream:
 
-- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
+- **Reference and UI:** [Unit Explorer](#unit-explorer-matching-scopes), [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
 - **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
 ## Active development
+
+### Unit Explorer matching scopes
+
+**Project domains:** Data processing + Web backend + Web frontend
+
+- [ ] **Resolve the v1.1.0 multi-selection semantics and count discrepancy before
+  pre-merge acceptance.** Separate each categorical filter's AND/OR operation from
+  one global matching scope, ordered narrowest to broadest:
+  - **A — Same profile (default):** All AND criteria belong to one Trooper
+    profile and its compatible selected loadout. Do not combine mutually
+    exclusive profiles, loadouts, or unrelated models.
+  - **C — Same loadout:** All criteria occur within one source-supported
+    selectable loadout, across its constituent profiles and explicitly attached
+    or selected Peripherals. Skills remain owned by their individual Troopers;
+    different Transmutation profiles within that loadout may satisfy different
+    criteria without asserting simultaneous in-game availability.
+  - **B — Anywhere in Unit:** All criteria occur across the same logical Unit's
+    available configurations and their reviewed associated models, including
+    alternative loadouts. This is broader than C, but never a union of unrelated
+    Army Units or every Peripheral merely available to a Controller.
+- [ ] Map the actual data contract before implementation: profile vs profile
+  group, profile/loadout compatibility, Transmutation and other alternate
+  states, profile/loadout Includes, embedded and Unit-backed Peripherals,
+  Controller target pools vs explicitly selected attachments, optional Unit
+  options, and unresolved relationships. Only reviewed source-backed links
+  contribute to C/B; ambiguous compatibility must not create a positive match.
+  Do not silently transfer Peripheral Skills to their Controller.
+- [ ] Build a small semantic fixture matrix covering two Skills on one profile,
+  alternate profiles in one loadout, mutually exclusive loadouts, a main
+  Trooper plus included Peripheral, unselected Controller access pools,
+  multiple Peripherals, Transmutation, cross-Army copies, and ambiguous edges.
+  Confirm the scope nesting A subset of C subset of B where relationships are
+  established; count each matching logical Unit once.
+- [ ] Use the same scope-aware evaluator for results and **prospective option
+  counts**: an unselected option's count must equal the Matching units total
+  after selecting it; selected options show the current total. AND narrows
+  compatible matches and OR unions them without duplication. Preserve the
+  existing `usage_counts` API contract separately; avoid one query per option.
+- [ ] Expose a clear global scope selector (A/C/B), retain category-local
+  AND/OR switches, explain that matching is reference discovery rather than a
+  full roster-legality or active-game-state simulation, and show matching
+  contexts when evidenced. Preserve legacy API/shared-link semantics, define
+  the new scope's share-state/default behavior, and validate narrow/mobile,
+  keyboard, touch, Back/Forward, count consistency and query performance.
+  Update the canonical data-model and web-design contracts only when built;
+  rerun affected v1.1.0 release gates against the updated candidate.
 
 ### External source clarifications
 
