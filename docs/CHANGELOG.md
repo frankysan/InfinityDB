@@ -8,10 +8,14 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
-## [1.1.0] - Unreleased
+## [1.1.0] - 2026-11-15
 
 ### Player summary
 
+- Expanded Unit Explorer with multi-selection across six categories, per-filter
+  AND/OR switches, and live usage counts that reflect matching Units.
+  Options without any available Units are omitted; currently unmatched
+  options remain selectable.
 - ITS Season 18 scenario pages offer explicit tournament and optional Extra
   context selection. Event-only Spec-Ops restrictions no longer appear as
   default N5 Skill restrictions.
@@ -20,6 +24,12 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Web backend + Web frontend:** Added searchable, shareable multi-selection for
+  Skills, Equipment, Weapons, Troop Type, Classification and Characteristics.
+  Each category has its own AND/OR switch and distinct logical-Unit usage counts,
+  including compatibility with older filter links. Counts reflect the complete
+  filtered set rather than just the current page; optional-unit Settings control
+  which options appear in each menu.
 - **Project infrastructure + Data processing:** Added explicit PDF-layout
   selection to the Reinforcements evidence auditor, preserving original source
   labels, byte pins and applicability findings. Legacy paths remain the default;
@@ -53,6 +63,17 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend + Web backend:** Made AND the default for new Unit Explorer
+  selections, while preserving historical OR behavior for older shared URLs.
+  Kept the OR/AND switches available even without selections. Combined filters
+  respect compatible Army/profile/loadout contexts.
+- **Web frontend:** Simplified Specialist Troops choices to the functionally
+  distinct **Standard set** and **Any** options. Existing scenario-specific API
+  requests remain available; old equivalent Unit Explorer selections still work.
+- **Project infrastructure:** Reorganized maintained developer tools by domain
+  and moved local research/build outputs to the ignored `local/` workspace.
+  Retired superseded development plans and reports while preserving active
+  documentation and reproducible release inputs.
 - **Acquisition + Data processing:** Symbol acquisition and graphical processing
   now use the external producer. InfinityDB continues to verify and promote its
   handoff; the retired in-tree processor can no longer resume old builds.
@@ -74,6 +95,13 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Web backend:** Corrected Unit Explorer option counts for logical Units
+  merged from multiple Army source records, so selected Skills and Weapons
+  match the number of displayed Units, including BS Attack and Adhesive
+  Launcher Rifle. Contextual profile/loadout restrictions remain intact.
+- **Web frontend:** Removed unnecessary count flicker during filter updates,
+  kept scrollbar gutters clear of counts and made individual Clear buttons
+  reset their corresponding option search text as well as selections.
 - **Acquisition + Data processing:** Kept snapshot provenance byte-exact across
   standalone producers and the offline consumer. Manifest collisions fail
   without replacing prior evidence, and acquisition rollback preserves a
@@ -81,6 +109,14 @@ are not retroactively relabeled.
 - **Deployment + Web backend:** Added the ITS season-policy API route to the
   bounded metrics-history allowlist, preserving request history for that route
   without accepting arbitrary metric labels.
+
+### Upgrade notes
+
+- **Deployment + Data processing:** The release ships a matched Army, Rules
+  and ITS Season 18 SQLite runtime set. Use the accompanying release image and
+  artifacts together; current images no longer consume the retired loose
+  variant-usage, Weapon publication or deployed-object JSON files. The existing
+  1.0.1 image remains the recovery path for the earlier format.
 
 ## [1.0.1] - 2026-11-09
 

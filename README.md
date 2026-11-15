@@ -5,8 +5,8 @@ Equipment, Skills, Weapons, core Scenarios, and relationships across Armies. It 
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Current release: **1.0.1** (2026-11-09). See the
-[release notes](docs/CHANGELOG.md#101---2026-11-09) for changes and upgrade
+Current release: **1.1.0** (2026-11-15). See the
+[release notes](docs/CHANGELOG.md#110---2026-11-15) for changes and upgrade
 considerations, and the [deployment guide](docs/deployment.md) for updates.
 
 ## Guiding principles
@@ -49,10 +49,11 @@ its application metrics.
 
 - Imports validated Infinity Army snapshots into a local SQLite database and
   serves a read-only browser and HTTP API.
-- Browses units across armies with name search, pagination, and filters for
-  skills, equipment, weapons, and optional availability. Unit Explorer filter state is shareable;
-  optional-unit Settings seed a new view but the effective availability choices are recorded in the
-  URL without overwriting another user's saved preferences.
+- Browses Units across Armies with name search, pagination, six categorical
+  multi-select filters, independent AND/OR choices, matching-Unit usage counts,
+  numeric ranges and optional availability. Unit Explorer filter state is
+  shareable; optional-unit Settings seed a new view but effective availability
+  is recorded in the URL without overwriting another user's saved preferences.
 - Shows a consolidated **General profile** alongside faction- and army-specific
   profiles, loadouts, availability, skills, equipment, and weapons.
 - Groups equivalent standard, reinforcement, and optional-mercenary source
@@ -155,10 +156,11 @@ for unfinished development work.
 Version **1.0.1** delivered improved scenario maps, reference-page spacing,
 version-specific release notes and safer local-build/deployment workflows.
 Its Rules database embeds reviewed deployed objects while retaining the reference baseline.
-The 1.1.0 restructuring development milestone is complete; the
-[backlog](docs/TODO.md) tracks unfinished work, while the
-[hosted acceptance record](docs/testing.md#p63--hosted-source-acceptance-and-restructuring-closeout-2026-11-12)
-preserves the milestone's exact-SHA evidence. Version **1.1.0** has not been released.
+Version **1.1.0** extends Unit Explorer discovery with searchable multi-selection,
+AND/OR combinations and usage counts; adds ITS Season 18 play-context selection,
+ships a matched Army/Rules/ITS runtime set, and consolidates developer tooling
+and local workspace organization. The [backlog](docs/TODO.md) tracks future work;
+the [changelog](docs/CHANGELOG.md#110---2026-11-15) documents upgrade implications.
 
 ## Requirements and setup
 
