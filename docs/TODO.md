@@ -32,47 +32,21 @@ Use these links to jump directly to a workstream:
 
 **Project domains:** Data processing + Web backend + Web frontend
 
-- [ ] **Resolve the v1.1.0 multi-selection semantics and count discrepancy before
-  pre-merge acceptance.** Separate each categorical filter's AND/OR operation from
-  one global matching scope, ordered narrowest to broadest:
-  - **A — Same profile (default):** All AND criteria belong to one Trooper
-    profile and its compatible selected loadout. Do not combine mutually
-    exclusive profiles, loadouts, or unrelated models.
-  - **C — Same loadout:** All criteria occur within one source-supported
-    selectable loadout, across its constituent profiles and explicitly attached
-    or selected Peripherals. Skills remain owned by their individual Troopers;
-    different Transmutation profiles within that loadout may satisfy different
-    criteria without asserting simultaneous in-game availability.
-  - **B — Anywhere in Unit:** All criteria occur across the same logical Unit's
-    available configurations and their reviewed associated models, including
-    alternative loadouts. This is broader than C, but never a union of unrelated
-    Army Units or every Peripheral merely available to a Controller.
-- [ ] Map the actual data contract before implementation: profile vs profile
-  group, profile/loadout compatibility, Transmutation and other alternate
-  states, profile/loadout Includes, embedded and Unit-backed Peripherals,
-  Controller target pools vs explicitly selected attachments, optional Unit
-  options, and unresolved relationships. Only reviewed source-backed links
-  contribute to C/B; ambiguous compatibility must not create a positive match.
-  Do not silently transfer Peripheral Skills to their Controller.
-- [ ] Build a small semantic fixture matrix covering two Skills on one profile,
-  alternate profiles in one loadout, mutually exclusive loadouts, a main
-  Trooper plus included Peripheral, unselected Controller access pools,
-  multiple Peripherals, Transmutation, cross-Army copies, and ambiguous edges.
-  Confirm the scope nesting A subset of C subset of B where relationships are
-  established; count each matching logical Unit once.
-- [ ] Use the same scope-aware evaluator for results and **prospective option
-  counts**: an unselected option's count must equal the Matching units total
-  after selecting it; selected options show the current total. AND narrows
-  compatible matches and OR unions them without duplication. Preserve the
-  existing `usage_counts` API contract separately; avoid one query per option.
-- [ ] Expose a clear global scope selector (A/C/B), retain category-local
-  AND/OR switches, explain that matching is reference discovery rather than a
-  full roster-legality or active-game-state simulation, and show matching
-  contexts when evidenced. Preserve legacy API/shared-link semantics, define
-  the new scope's share-state/default behavior, and validate narrow/mobile,
-  keyboard, touch, Back/Forward, count consistency and query performance.
-  Update the canonical data-model and web-design contracts only when built;
-  rerun affected v1.1.0 release gates against the updated candidate.
+- [ ] **Finish v1.1.0 Unit Explorer matching-scope acceptance.** Current
+  A/C/B semantics, API and share-state compatibility, and prospective count
+  behavior are documented in [the data model](data-model.md). The source-backed
+  evaluator, semantic fixture matrix and focused browser checks are implemented.
+  - [ ] Review remaining ambiguous embedded and Unit-backed Peripheral
+    relationships, optional Unit options and profile/loadout compatibility.
+    Only uniquely source-backed Includes contribute capabilities; never infer
+    properties from Controller access pools or transfer a Peripheral's Skills
+    to its Controller.
+  - [ ] Present the actual matching profile/loadout context on result rows
+    where the source identifies it. Preserve the distinction between reference
+    discovery, a legal Army roster and simultaneous in-game abilities.
+  - [ ] Check representative scoped-filter and prospective-count query
+    performance, then rerun the affected pre-merge acceptance checks against
+    the final candidate under [releasing](releasing.md).
 
 ### External source clarifications
 
