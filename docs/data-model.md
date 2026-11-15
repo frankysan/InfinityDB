@@ -780,6 +780,16 @@ profile identities, classifications, characteristics, or other contextual facts 
 Source profile IDs/names remain available as provenance even when multiple occurrences share one
 application payload identity.
 
+For presentation, when every loadout compatible with a General-profile identity
+carries the same Skill, Equipment or Weapon with the same quantity but differing
+extras, General displays its **base item without extras**. The base is a
+display-only common denominator, not an assertion that the Army source publishes
+a separate no-extra occurrence. Loadouts with only that base do not repeat it;
+loadouts with actual extras retain their exact variants. An item absent from any
+applicable loadout, or present with different quantities, is not promoted.
+Existing identical-extra shared variants retain their own identity. Source
+profile/loadout payloads, relationship semantics and filtering remain unchanged.
+
 ### Unit and General-profile symbols
 
 Every published logical Unit has exactly one effective graphical symbol. A General profile inherits

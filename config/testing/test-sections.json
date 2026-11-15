@@ -153,6 +153,7 @@
         "test_non_skill_army_presentation",
         "test_unit_source_options_notes",
         "test_unit_source_api_parity",
+        "test_unit_general_profile_extras",
         "test_support_weapon_deployable_references",
         "test_source_conflict_publication",
         "test_public_relation_destinations",

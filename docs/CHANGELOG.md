@@ -74,6 +74,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web backend + Web frontend:** Simplified General-profile loadout details:
+  when every compatible loadout has the same Skill, Equipment or Weapon but
+  with different extras, General shows its base form once. The plain variant
+  is omitted from individual loadout details, while extra-bearing variants
+  remain explicit (including Harbingers' Breaker Pistol).
 - **Web frontend + Web backend:** Made AND the default for new Unit Explorer
   selections, while preserving historical OR behavior for older shared URLs.
   Kept the OR/AND switches available even without selections. Combined filters

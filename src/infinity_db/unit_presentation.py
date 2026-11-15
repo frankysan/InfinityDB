@@ -186,19 +186,51 @@ def _common_items(profiles: list[dict[str, Any]], property_name: str) -> list[di
     return result
 
 
+def _common_bases_with_varying_extras(
+    loadouts: list[dict[str, Any]], property_name: str,
+) -> list[dict[str, Any]]:
+    """Present an item common to all loadouts once, without variant-specific extras.
+
+    This is a display-only projection: original item/extras occurrences remain
+    unchanged, and differing quantities do not imply a shared base.
+    """
+    if len(loadouts) < 2:
+        return []
+    result: list[dict[str, Any]] = []
+    seen: set[tuple[Any, Any]] = set()
+    for item in loadouts[0].get(property_name, ()):
+        item_id, quantity, _extras = _item_identity(item)
+        key = (item_id, quantity)
+        if key in seen:
+            continue
+        seen.add(key)
+        variants = [
+            {
+                _item_identity(candidate)[2]
+                for candidate in loadout.get(property_name, ())
+                if _item_identity(candidate)[:2] == key
+            }
+            for loadout in loadouts
+        ]
+        if all(variants) and len({frozenset(values) for values in variants}) > 1:
+            result.append({**item, "extras": []})
+    return result
+
+
 def _general_profile_skills(
     profiles: list[dict[str, Any]], loadouts: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
     skills = list(_common_items(profiles, "skills"))
-    if len(loadouts) != 1:
-        return skills
-    identities = {_item_identity(item) for item in skills}
-    for skill in loadouts[0].get("skills", ()):
-        identity = _item_identity(skill)
-        if identity not in identities:
-            identities.add(identity)
-            skills.append(skill)
-    return skills
+    if len(loadouts) == 1:
+        identities = {_item_identity(item) for item in skills}
+        for skill in loadouts[0].get("skills", ()):
+            identity = _item_identity(skill)
+            if identity not in identities:
+                identities.add(identity)
+                skills.append(skill)
+    return _unique_items([
+        *skills, *_common_bases_with_varying_extras(loadouts, "skills"),
+    ])
 
 
 def _without_shared(
@@ -666,8 +698,14 @@ def enrich_unit_presentation(
         order_type = _general_order_type(matching_profiles, matching_loadouts)
         shared_items = {
             "skills": _general_profile_skills(matching_profiles, matching_loadouts),
-            "equipment": _common_items(matching_profiles, "equipment"),
-            "weapons": _common_items(matching_loadouts, "weapons"),
+            "equipment": _unique_items([
+                *_common_items(matching_profiles, "equipment"),
+                *_common_bases_with_varying_extras(matching_loadouts, "equipment"),
+            ]),
+            "weapons": _unique_items([
+                *_common_items(matching_loadouts, "weapons"),
+                *_common_bases_with_varying_extras(matching_loadouts, "weapons"),
+            ]),
         }
         general = {
             "profile_identity": identity,
