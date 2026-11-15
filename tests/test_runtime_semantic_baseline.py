@@ -13,6 +13,8 @@ from tools.runtime_semantic_baseline import (
     DEFAULT_BASELINE,
     BaselineError,
     _artifact_identity,
+    _digest,
+    _json,
     capture,
     check,
     main,
@@ -133,6 +135,23 @@ def test_released_data_matches_pinned_p1_baseline() -> None:
         paths=tuple(row["path"] for row in fixture["probes"]),
         artifacts=_artifact_identity(army, rules),
     )
+    # The reviewed KISS! (Repeater) loadout adds one new logical Unit to
+    # the Repeater catalogue use count. Retain the original P1 baseline:
+    # removing exactly that addition must reproduce its pinned equipment hash.
+    equipment = _json(app, "/api/equipment")
+    prior_equipment = deepcopy(equipment)
+    repeater = next(
+        item for item in prior_equipment["items"] if item.get("slug") == "repeater"
+    )
+    assert repeater["use_count"] >= 1
+    repeater["use_count"] -= 1
+    expected_equipment_probe = next(
+        probe for probe in fixture["probes"] if probe["path"] == "/api/equipment"
+    )
+    assert _digest(semantic_payload(prior_equipment)) == (
+        expected_equipment_probe["semanticSha256"]
+    ), "Equipment catalog differs beyond the reviewed KISS! Repeater addition"
+    expected_equipment_probe["semanticSha256"] = _digest(semantic_payload(equipment))
     assert check(fixture, observed) == len(fixture["probes"])
 
 

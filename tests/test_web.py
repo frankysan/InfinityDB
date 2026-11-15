@@ -6769,7 +6769,8 @@ def test_unit_profile_help_links_are_rendered_from_rules_data(app: Callable) -> 
     assert b'"Profile notation"' in unit_js
     assert b'profileHelpLabel("Type", "troop-type")' in unit_js
     assert b'profileHelpLabel("Classification", "classification")' in unit_js
-    assert b'profileHelpLabel("Peripherals", "peripheral")' in unit_js
+    for label in ("Included", "Attached", "Selectable"):
+        assert f'profileHelpLabel("{label} peripherals", "peripheral")'.encode() in unit_js
     assert b'public_reference: { href: `/glossary#${item.id.replaceAll(":", "-")}` }' in unit_js
     assert unit_js.count(b'profileHelpLabel(label, property)') == 3
     assert b'"equipment-weapons"' not in unit_js
