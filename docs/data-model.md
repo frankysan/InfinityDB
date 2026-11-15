@@ -3143,6 +3143,12 @@ their Skills cannot be inferred from names or eligible Controller targets.
 automatic inclusions. Aggregating properties never transfers ownership
 from an included Peripheral to its Controller.
 
+Disabled loadout occurrences remain available as unique Include targets, but
+are not independently selectable root contexts in A/C/B. A group with only
+disabled loadouts does not generate a synthetic root; a profile-only group
+with no loadouts retains its normal profile context. Such Units remain
+visible without filters, without inventing selectable configurations.
+
 The Army 2026-09-29 snapshot has one reviewed omission: Unit #965
 KISS! (Repeater) loadout option 3 has no source Equipment array, while
 its name identifies Repeater (source Equipment 63). Its alternative

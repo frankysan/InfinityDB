@@ -129,6 +129,7 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
                 army_id INTEGER, unit_id INTEGER, group_id INTEGER, option_id INTEGER,
                 loadout_payload_id INTEGER, points INTEGER, swc TEXT
             );
+            CREATE TABLE loadout_payloads (id INTEGER, disabled INTEGER);
             CREATE TABLE profile_payloads (id INTEGER, type_id INTEGER);
             CREATE TABLE profile_groups (
                 army_id INTEGER, unit_id INTEGER, group_id INTEGER, category_id INTEGER
@@ -179,19 +180,23 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
             INSERT INTO application_peripheral_controller_targets VALUES (1,2);
             INSERT INTO profile_groups VALUES
                 (101,1,1,9),(101,1,2,9),(101,1,3,9),(101,2,1,9),
-                (201,3,1,9);
+                (201,3,1,9),(101,1,5,9);
             INSERT INTO profile_payloads VALUES
-                (10,7),(20,7),(30,7),(40,7),(50,7),(60,7);
+                (10,7),(20,7),(30,7),(40,7),(50,7),(60,7),(70,7);
             INSERT INTO profile_payload_occurrences VALUES
                 (101,1,1,1,10,1),(101,1,1,2,20,1),
                 (101,1,2,3,30,1),(101,1,3,4,40,1),
-                (101,2,1,5,50,1),(201,3,1,6,60,1);
+                (101,2,1,5,50,1),(201,3,1,6,60,1),
+                (101,1,5,8,70,1);
             INSERT INTO profile_payload_skills VALUES
-                (10,11),(20,12),(30,14),(40,15),(50,17),(60,18);
+                (10,11),(20,12),(30,14),(40,15),(50,17),(60,18),(70,20);
             INSERT INTO loadout_payload_occurrences VALUES
                 (101,1,1,100,100,10,'0'),(101,1,1,101,101,20,'0'),
                 (101,1,2,200,200,10,'0'),(101,1,3,300,300,10,'0'),
-                (101,2,1,500,500,10,'0'),(201,3,1,600,600,10,'0');
+                (101,2,1,500,500,10,'0'),(201,3,1,600,600,10,'0'),
+                (101,1,5,800,800,10,'0');
+            INSERT INTO loadout_payloads VALUES
+                (100,0),(101,0),(200,1),(300,1),(500,0),(600,0),(800,1);
             INSERT INTO loadout_payload_skills VALUES (100,13),(101,19);
             INSERT INTO profile_occurrence_includes VALUES (101,1,1,1,300);
             INSERT INTO loadout_occurrence_includes VALUES (101,1,1,100,200);
@@ -200,7 +205,7 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
         """)
         connection.executemany(
             "INSERT INTO application_catalog_sources VALUES ('skills', ?, ?)",
-            [(item, item) for item in range(11, 20)],
+            [(item, item) for item in range(11, 21)],
         )
 
     # The curated Controller target pool is present but is NOT an attachment.
@@ -217,6 +222,14 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
         return database._scoped_unit_filter_contexts()
 
     index = scoped_index()
+    # The disabled target loadouts can only contribute through their
+    # source Includes, not as independent root selections.
+    for scope in ("profile", "loadout"):
+        assert all(
+            candidate.group_id not in {2, 3, 5}
+            for candidate in index[scope]
+            if candidate.source_unit_id == 1 and candidate.source_army_id == 101
+        )
     profile = [
         candidate for candidate in index["profile"]
         if candidate.source_unit_id == 1 and candidate.group_id == 1
@@ -243,7 +256,7 @@ def test_materialized_profile_loadout_include_and_peripheral_boundaries(
         *(candidate.properties for candidate in unit_contexts)
     )
     assert {("skills", value) for value in (11, 13, 14, 15, 16, 18, 19)} <= logical_skills
-    assert ("skills", 17) not in logical_skills
+    assert {("skills", 17), ("skills", 20)}.isdisjoint(logical_skills)
 
     for scope, skill_pair, expected in (
         ("profile", (11, 12), False),

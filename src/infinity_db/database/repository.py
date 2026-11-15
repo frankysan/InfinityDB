@@ -3219,10 +3219,13 @@ class Database:
 
             loadouts: dict[tuple[int, int, int, int], tuple[int, frozenset, int | None, str | None]] = {}
             options_by_group: dict[tuple[int, int, int], list[tuple[int, int, int, int]]] = defaultdict(list)
+            groups_with_options: set[tuple[int, int, int]] = set()
             target_index: dict[tuple[int, int, int], list[tuple[int, int, int, int]]] = defaultdict(list)
             for row in connection.execute(
-                "SELECT army_id, unit_id, group_id, option_id, loadout_payload_id, points, swc "
-                "FROM loadout_payload_occurrences"
+                "SELECT o.army_id, o.unit_id, o.group_id, o.option_id, "
+                "o.loadout_payload_id, o.points, o.swc, p.disabled "
+                "FROM loadout_payload_occurrences AS o "
+                "JOIN loadout_payloads AS p ON p.id = o.loadout_payload_id"
             ):
                 army, unit, group, option = (
                     int(row["army_id"]), int(row["unit_id"]),
@@ -3230,7 +3233,9 @@ class Database:
                 )
                 payload_id = int(row["loadout_payload_id"])
                 key = (army, unit, group, option)
-                options_by_group[key[:3]].append(key)
+                groups_with_options.add(key[:3])
+                if not row["disabled"]:
+                    options_by_group[key[:3]].append(key)
                 loadouts[key] = (
                     payload_id, frozenset(
                         loadout_payload_props[payload_id] | reviewed_loadout_props[key]
@@ -3321,7 +3326,11 @@ class Database:
                 continue
             options = [
                 (key, loadouts[key]) for key in options_by_group.get(group_key, ())
-            ] or [((*group_key, 0), (0, frozenset(), None, None))]
+            ]
+            if not options and group_key not in groups_with_options:
+                # Profile-only groups have no loadout, but disabled-only
+                # groups cannot be selected as independent configurations.
+                options = [((*group_key, 0), (0, frozenset(), None, None))]
             for loadout_key, (_payload, loadout_props, points, swc) in options:
                 option = loadout_key[3] or None
                 for profile_id, props, ava in profiles:
@@ -3992,22 +4001,25 @@ class Database:
             scoped_matches, prospective_counts = evaluate_unit_filter_contexts(
                 candidates, selected, scope_modes, matching_scope,
             )
-            matching_requirements = []
-            filtered_groups = []
-            for group in grouped:
-                contexts = scoped_matches.get(group["id"])
-                if not contexts:
-                    continue
-                occurrence_keys = frozenset((source, army) for source, army, _ in contexts)
-                requirements = minimal_availability_requirements(
-                    group, canonical_factions, declared_faction_ids_by_unit,
-                    army_id, occurrence_keys,
-                )
-                if not requirements:
-                    continue
-                matching_requirements.append(requirements)
-                filtered_groups.append(group)
-            grouped = filtered_groups
+            if has_numeric_filters or any(selected.values()):
+                matching_requirements = []
+                filtered_groups = []
+                for group in grouped:
+                    contexts = scoped_matches.get(group["id"])
+                    if not contexts:
+                        continue
+                    occurrence_keys = frozenset(
+                        (source, army) for source, army, _ in contexts
+                    )
+                    requirements = minimal_availability_requirements(
+                        group, canonical_factions, declared_faction_ids_by_unit,
+                        army_id, occurrence_keys,
+                    )
+                    if not requirements:
+                        continue
+                    matching_requirements.append(requirements)
+                    filtered_groups.append(group)
+                grouped = filtered_groups
             if include_usage_counts:
                 for catalog, counts in prospective_counts.items():
                     base = counts.pop("__or_base__", 0)

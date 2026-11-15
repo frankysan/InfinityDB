@@ -38,6 +38,8 @@ are not retroactively relabeled.
   Optional-unit Settings control which options appear in each menu.
   Filtered profile/loadout results also identify their matching source
   configurations in an expandable disclosure.
+  Disabled loadouts cannot independently satisfy filters; explicit Includes
+  still contribute their capabilities to a matching parent loadout.
 - **Project infrastructure + Data processing:** Added explicit PDF-layout
   selection to the Reinforcements evidence auditor, preserving original source
   labels, byte pins and applicability findings. Legacy paths remain the default;
