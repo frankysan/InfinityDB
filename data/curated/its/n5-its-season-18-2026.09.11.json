@@ -49,6 +49,9 @@
       },
       {
         "scenarioId": "scenario:evacuation"
+      },
+      {
+        "scenarioId": "scenario:neutralization"
       }
     ]
   },
@@ -10652,6 +10655,1043 @@
           "sourceId": "its-season-18-es-pdf",
           "page": 91,
           "section": "Evacuación"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    },
+    {
+      "id": "scenario:neutralization",
+      "kind": "scenario",
+      "name": "Neutralization",
+      "summary": "ITS Season 18 mission suitable for Reinforcements. Extract Hyperthermal Techs from two central Boxes, Neutralize them within one of four Antenna-centered Circular Template Areas, and Control more Neutralizing Antennas than the opponent.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Side A"
+            },
+            {
+              "id": "side-b",
+              "name": "Side B"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "neutralize-hyperthermal-techs",
+              "name": "Neutralize Hyperthermal Techs",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "cumulative",
+              "maximumPoints": 4,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "For each Hyperthermal Tech Neutralized by your Trooper in a Neutralization Area, score 1 Objective Point at game end, up to 4."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "neutralize-more-techs",
+              "name": "Neutralize More Hyperthermal Techs",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, have Neutralized more Hyperthermal Techs than the opposing player."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "control-more-antennas",
+              "name": "Control More Neutralizing Antennas",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "element-status-comparison",
+                    "elementIds": [
+                      "antenna-a-left",
+                      "antenna-a-right",
+                      "antenna-b-left",
+                      "antenna-b-right"
+                    ],
+                    "status": "controlled",
+                    "comparison": "greater"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "classified-objective",
+              "name": "Classified Objective",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Complete the one Classified Objective assigned to the player for 2 Objective Points."
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "forces-and-exclusion",
+              "name": "Forces, Deployment, and Exclusion Zone",
+              "paragraphs": [
+                "Opposite table-edge Deployment Zones are [[distance:8:inch]] deep at 150 Army Points and [[distance:12:inch]] deep at 200–400 Army Points. The three reviewed maps specify all six Army Point configurations.",
+                "The central Exclusion Zone extends [[distance:4:inch]] on either side of the table centerline. Airborne Deployment and Superior Deployment cannot be used to deploy in that zone.",
+                "Troopers may not deploy inside any of the four Neutralization Areas, even where a circular area overlaps their Deployment Zone."
+              ]
+            },
+            {
+              "id": "hyperthermal-tech-boxes",
+              "name": "Hyperthermal Tech Boxes",
+              "paragraphs": [
+                "Two Hyperthermal Tech Boxes are positioned on the table centerline, as shown on the map. Each is represented by a Tech-Coffin Token or a 40 mm scenery piece.",
+                "A Specialist Troop in base contact with a Hyperthermal Tech Box may declare Extract Hyperthermal Tech (Attack, Scenario Short Skill). On a successful Normal WIP Roll, place one Hyperthermal Tech Token beside that Trooper; failed Rolls may be retried by spending another Short Skill.",
+                "The sources specify two Boxes and award up to four Neutralized Techs, but do not state a per-Box extraction limit or how depletion works. No one-use limit or starting Token inventory is inferred."
+              ]
+            },
+            {
+              "id": "hyperthermal-tech-tokens",
+              "name": "Hyperthermal Tech Tokens",
+              "paragraphs": [
+                "Hyperthermal Techs are represented by 25 mm Hyperthermal Tech Tokens or equivalent scenery. Extracted Tokens are carried; they are not initially located at the two Box positions as map markers.",
+                "Each Model can carry one Hyperthermal Tech, or two if it has Baggage. Only Models, not Markers, carry them. The English source explicitly prohibits a carrier from entering Marker States; the Spanish version does not repeat that sentence.",
+                "A carried Token stays on the table in Silhouette contact with its Trooper, and is dropped slightly outside contact if the carrier enters a Null State. Tokens do not obstruct movement or Line of Fire."
+              ]
+            },
+            {
+              "id": "pick-up-hyperthermal-tech",
+              "name": "Pick Up Hyperthermal Tech",
+              "paragraphs": [
+                "Attack, Scenario Short Skill. A Trooper in Silhouette contact with an uncarried Hyperthermal Tech or an allied Trooper in Normal State carrying one can pick it up without a Roll, placing the Token in Silhouette contact with the new carrier.",
+                "The Trooper picking it up suffers a Stun Ammunition hit, requiring one Saving Roll against BTS with PS 9. Immunity (Enhanced) and Immunity (BTS) do not apply to this hit. The shared Hyperthermal Tech carrying restrictions still apply."
+              ]
+            },
+            {
+              "id": "neutralization-areas",
+              "name": "Neutralization Areas",
+              "paragraphs": [
+                "Four Neutralization Areas are represented by Circular Templates, each centered on a Neutralizing Antenna at the front edge of a Deployment Zone. The map displays their full Circular Template footprints.",
+                "At the end of an Order or ARO, a Hyperthermal Tech is Neutralized if the Trooper carrying it is entirely inside a Neutralization Area and is not in a Null State. Remove the Token from the table and keep it aside as the player's count of Neutralized Techs."
+              ]
+            },
+            {
+              "id": "neutralizing-antennas",
+              "name": "Neutralizing Antennas and Control",
+              "paragraphs": [
+                "Four Neutralizing Antennas stand on the front boundaries of the Deployment Zones at the measured map positions. Each is a 40 mm Transmission Antenna Token or scenery piece.",
+                "A Neutralizing Antenna is Controlled by the sole player with a Trooper as a Model (not a Marker) in Silhouette contact, provided no enemy Trooper is in contact. Models in Null State do not count.",
+                "At the end of the game, controlling more of these four Antennas than the opponent awards 3 Objective Points. The Antennas do not require activation, and control is not awarded per Antenna."
+              ]
+            },
+            {
+              "id": "specialist-troops",
+              "name": "Specialist Troops",
+              "paragraphs": [
+                "Hackers, Doctors, Engineers, Forward Observers, Paramedics and Troopers with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] qualify as Specialist Troops for this mission.",
+                "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models to perform mission tasks reserved for Specialist Troops."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            },
+            {
+              "id": "retreat",
+              "checkAt": "tactical-phase",
+              "finishAt": "end-of-player-turn",
+              "condition": {
+                "kind": "reviewed-prose",
+                "text": "If either player starts their Active Turn in a Retreat! situation, the game ends at the end of that Player Turn."
+              }
+            }
+          ],
+          "sourceIssues": [
+            {
+              "id": "tech-box-extraction-capacity",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "neutralize-hyperthermal-techs",
+              "status": "needs-verification",
+              "description": "EN pp. 105–106 / ES pp. 105–107 specify two Hyperthermal Tech Boxes and an objective cap of four Neutralized Techs, but do not define the number of Techs a Box can yield or a depletion/removal rule. Do not invent a per-Box limit."
+            },
+            {
+              "id": "carrier-marker-state-bilingual-omission",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "neutralize-hyperthermal-techs",
+              "status": "needs-verification",
+              "description": "EN p. 107 says Models carrying Hyperthermal Techs cannot enter Marker States. ES p. 108 says only Models, not Markers, may carry Tokens but omits the additional prohibition on entering Marker States. Preserve the English restriction and record the Spanish omission."
+            }
+          ]
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Neutralization",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 8
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 24,
+                  "y2": 32
+                },
+                {
+                  "id": "exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 12,
+                  "x2": 24,
+                  "y2": 20
+                },
+                {
+                  "id": "neutralization-area-a-left",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 4,
+                  "y": 8,
+                  "radius": 2.5
+                },
+                {
+                  "id": "neutralization-area-a-right",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 20,
+                  "y": 8,
+                  "radius": 2.5
+                },
+                {
+                  "id": "neutralization-area-b-left",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 4,
+                  "y": 24,
+                  "radius": 2.5
+                },
+                {
+                  "id": "neutralization-area-b-right",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 20,
+                  "y": 24,
+                  "radius": 2.5
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 16,
+                  "x2": 24,
+                  "y2": 16
+                },
+                {
+                  "id": "antenna-a-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 4,
+                  "y": 8
+                },
+                {
+                  "id": "antenna-a-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 20,
+                  "y": 8
+                },
+                {
+                  "id": "antenna-b-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 4,
+                  "y": 24
+                },
+                {
+                  "id": "antenna-b-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 20,
+                  "y": 24
+                },
+                {
+                  "id": "tech-box-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 8,
+                  "y": 16
+                },
+                {
+                  "id": "tech-box-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 16,
+                  "y": 16
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 3.5,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 29,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "tech-box-left-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 20.5,
+                  "x2": 8,
+                  "y2": 20.5,
+                  "offset": 0
+                },
+                {
+                  "id": "antenna-right-from-right",
+                  "kind": "ruler",
+                  "x1": 20,
+                  "y1": 20.5,
+                  "x2": 24,
+                  "y2": 20.5,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-from-center",
+                  "kind": "ruler",
+                  "x1": 1.2,
+                  "y1": 12,
+                  "x2": 1.2,
+                  "y2": 16,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Neutralization",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 32,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 32,
+                  "y2": 48
+                },
+                {
+                  "id": "exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 32,
+                  "y2": 28
+                },
+                {
+                  "id": "neutralization-area-a-left",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 4,
+                  "y": 12,
+                  "radius": 2.5
+                },
+                {
+                  "id": "neutralization-area-a-right",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 28,
+                  "y": 12,
+                  "radius": 2.5
+                },
+                {
+                  "id": "neutralization-area-b-left",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 4,
+                  "y": 36,
+                  "radius": 2.5
+                },
+                {
+                  "id": "neutralization-area-b-right",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 28,
+                  "y": 36,
+                  "radius": 2.5
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 32,
+                  "y2": 24
+                },
+                {
+                  "id": "antenna-a-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 4,
+                  "y": 12
+                },
+                {
+                  "id": "antenna-a-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 28,
+                  "y": 12
+                },
+                {
+                  "id": "antenna-b-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 4,
+                  "y": 36
+                },
+                {
+                  "id": "antenna-b-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 28,
+                  "y": 36
+                },
+                {
+                  "id": "tech-box-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 12,
+                  "y": 24
+                },
+                {
+                  "id": "tech-box-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 20,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 5.5,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 43,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "tech-box-left-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 32.5,
+                  "x2": 12,
+                  "y2": 32.5,
+                  "offset": 0
+                },
+                {
+                  "id": "antenna-right-from-right",
+                  "kind": "ruler",
+                  "x1": 28,
+                  "y1": 32.5,
+                  "x2": 32,
+                  "y2": 32.5,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-from-center",
+                  "kind": "ruler",
+                  "x1": 1.2,
+                  "y1": 20,
+                  "x2": 1.2,
+                  "y2": 24,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Neutralization",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 48,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 48,
+                  "y2": 48
+                },
+                {
+                  "id": "exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 48,
+                  "y2": 28
+                },
+                {
+                  "id": "neutralization-area-a-left",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 4,
+                  "y": 12,
+                  "radius": 2.5
+                },
+                {
+                  "id": "neutralization-area-a-right",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 44,
+                  "y": 12,
+                  "radius": 2.5
+                },
+                {
+                  "id": "neutralization-area-b-left",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 4,
+                  "y": 36,
+                  "radius": 2.5
+                },
+                {
+                  "id": "neutralization-area-b-right",
+                  "kind": "circle",
+                  "style": "influence",
+                  "x": 44,
+                  "y": 36,
+                  "radius": 2.5
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 48,
+                  "y2": 24
+                },
+                {
+                  "id": "antenna-a-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 4,
+                  "y": 12
+                },
+                {
+                  "id": "antenna-a-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 44,
+                  "y": 12
+                },
+                {
+                  "id": "antenna-b-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 4,
+                  "y": 36
+                },
+                {
+                  "id": "antenna-b-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 44,
+                  "y": 36
+                },
+                {
+                  "id": "tech-box-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 20,
+                  "y": 24
+                },
+                {
+                  "id": "tech-box-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 28,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 5.5,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 43,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "tech-box-left-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 32.5,
+                  "x2": 20,
+                  "y2": 32.5,
+                  "offset": 0
+                },
+                {
+                  "id": "antenna-right-from-right",
+                  "kind": "ruler",
+                  "x1": 44,
+                  "y1": 32.5,
+                  "x2": 48,
+                  "y2": 32.5,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-from-center",
+                  "kind": "ruler",
+                  "x1": 1.2,
+                  "y1": 20,
+                  "x2": 1.2,
+                  "y2": 24,
+                  "offset": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 105,
+          "section": "Neutralization"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 106,
+          "section": "Neutralization"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 107,
+          "section": "Neutralization"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 108,
+          "section": "Neutralization"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 109,
+          "section": "Neutralization"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 105,
+          "section": "Neutralización"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 106,
+          "section": "Neutralización"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 107,
+          "section": "Neutralización"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 108,
+          "section": "Neutralización"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 109,
+          "section": "Neutralización"
         }
       ],
       "review": {

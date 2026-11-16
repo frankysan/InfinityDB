@@ -948,6 +948,114 @@ def test_evacuation_rejects_invalid_marker_positions(mutation: str) -> None:
         parse_scenario_definition_record(record)
 
 
+
+def test_neutralization_score_caps_regions_and_exact_source_geometry() -> None:
+    record = _records()["scenario:neutralization"]
+    mission, configurations = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *(("its-season-18-en-pdf", p) for p in range(105, 110)),
+        *(("its-season-18-es-pdf", p) for p in range(105, 110)),
+    ]
+    assert [s["swc"] for s in mission["gameSizes"]] == [3, 4, 5, 6, 7, 8]
+    objectives = {o["id"]: o for o in mission["objectives"]}
+    assert {id: (o["maximumPoints"], o["awards"][0]["objectivePoints"])
+            for id, o in objectives.items()} == {
+        "neutralize-hyperthermal-techs": (4, 1),
+        "neutralize-more-techs": (1, 1),
+        "control-more-antennas": (3, 3),
+        "classified-objective": (2, 2),
+    }
+    assert sum(o["maximumPoints"] for o in objectives.values()) == 10
+    assert all(o["timing"] == "end-of-game" for o in objectives.values())
+    assert objectives["control-more-antennas"]["awards"][0]["condition"] == {
+        "kind": "element-status-comparison",
+        "elementIds": [
+            "antenna-a-left", "antenna-a-right", "antenna-b-left", "antenna-b-right",
+        ],
+        "status": "controlled", "comparison": "greater",
+    }
+    rules = {r["id"]: " ".join(r["paragraphs"]) for r in mission["rules"]}
+    assert "Normal WIP Roll" in rules["hyperthermal-tech-boxes"]
+    assert "do not state a per-Box extraction limit" in rules["hyperthermal-tech-boxes"]
+    assert "two if it has Baggage" in rules["hyperthermal-tech-tokens"]
+    assert "Marker States" in rules["hyperthermal-tech-tokens"]
+    assert "Stun Ammunition hit" in rules["pick-up-hyperthermal-tech"]
+    assert "PS 9" in rules["pick-up-hyperthermal-tech"]
+    assert "end of an Order or ARO" in rules["neutralization-areas"]
+    assert "not a Marker" in rules["neutralizing-antennas"]
+    assert "no enemy Trooper" in rules["neutralizing-antennas"]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert [condition["id"] for condition in mission["endConditions"]] == [
+        "round-limit", "retreat",
+    ]
+    assert {issue["id"] for issue in mission["sourceIssues"]} == {
+        "tech-box-extraction-capacity", "carrier-marker-state-bilingual-omission",
+    }
+    assert all(issue["status"] == "needs-verification" for issue in mission["sourceIssues"])
+
+    for key, w, h, dep, left_box in (
+        ("150-points", 24, 32, 8, 8),
+        ("200-250-points", 32, 48, 12, 12),
+        ("300-400-points", 48, 48, 12, 20),
+    ):
+        geometry = configurations[key]
+        assert geometry["table"] == {"width": w, "height": h, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == dep
+        assert elements["deployment-b"]["y1"] == h - dep
+        assert (elements["exclusion-zone"]["y1"],
+                elements["exclusion-zone"]["y2"]) == (h / 2 - 4, h / 2 + 4)
+        expected_areas = {
+            "neutralization-area-a-left": (4, dep),
+            "neutralization-area-a-right": (w - 4, dep),
+            "neutralization-area-b-left": (4, h - dep),
+            "neutralization-area-b-right": (w - 4, h - dep),
+        }
+        assert {id: (e["x"], e["y"]) for id, e in elements.items()
+                if e["kind"] == "circle"} == expected_areas
+        assert all(elements[id]["radius"] == 2.5 for id in expected_areas)
+        assert {id: (e["markerType"], e["x"], e["y"])
+                for id, e in elements.items() if e["kind"] == "marker"} == {
+            "antenna-a-left": ("antenna", 4, dep),
+            "antenna-a-right": ("antenna", w - 4, dep),
+            "antenna-b-left": ("antenna", 4, h - dep),
+            "antenna-b-right": ("antenna", w - 4, h - dep),
+            "tech-box-left": ("tech-coffin", left_box, h / 2),
+            "tech-box-right": ("tech-coffin", w - left_box, h / 2),
+        }
+        rulers = {a["id"]: a for a in geometry["annotations"]}
+        assert rulers["tech-box-left-from-left"]["x2"] == left_box
+        assert rulers["antenna-right-from-right"]["x1"] == w - 4
+        assert rulers["exclusion-from-center"]["y2"] == h / 2
+        assert rulers["exclusion-from-center"]["y1"] == h / 2 - 4
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
+            assert svg.count('class="influence" data-region-shape="circle"') == 4
+            assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 4
+            assert svg.count('data-marker-type="tech-coffin" data-diameter-mm="40"') == 2
+            assert 'id="scenario-exclusion-hatch"' in svg
+            assert 'data-distance-inches="4"' in svg
+
+
+@pytest.mark.parametrize("mutation", ["missing-antenna", "invalid-antenna-kind", "bad-area-radius"])
+def test_neutralization_invalid_scoring_or_circle_fails_closed(mutation: str) -> None:
+    record = deepcopy(_records()["scenario:neutralization"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    elements = geometry["elements"]
+    if mutation == "missing-antenna":
+        geometry["elements"] = [
+            e for e in elements if e["id"] != "antenna-a-left"
+        ]
+    elif mutation == "invalid-antenna-kind":
+        next(e for e in elements if e["id"] == "antenna-a-left")["kind"] = "line"
+    else:
+        next(e for e in elements if e["id"] == "neutralization-area-a-left")[
+            "radius"
+        ] = 99
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (twelve reviewed hotfix missions).
+`its-18@2026.09.11` (thirteen reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Twelve missions are published with independent revision selection:
+Thirteen missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -140,8 +140,20 @@ Twelve missions are published with independent revision selection:
   Specialist Troops, Operational Learning, the three-round/Retreat! endings,
   and three recorded bilingual differences (Classified awards, first-round
   restriction and reactivation language). Sources: EN/ES pp. 88–91.
+- **Neutralization:** Two central 40 mm Tech-Coffin Hyperthermal Tech Boxes,
+  four 40 mm Neutralizing Antennas and four Circular Template Neutralization
+  Areas (radius 2.5 inches), each centered on an Antenna on the near edge of
+  a Deployment Zone. Six Army Point sizes share three geometry configurations,
+  with 8-/12-inch Deployment Zones and a central 4-inch half-width Exclusion
+  Zone. Scoring: 1 OP per Neutralized Hyperthermal Tech (up to 4 OP), 1 OP
+  for Neutralizing more Techs, 3 OP for Controlling more Antennas, and 2 OP for
+  one Classified Objective. Rules cover extraction, Stun Ammunition on pickup,
+  carrying/dropping, Neutralization at the end of an Order or ARO, and Model-only
+  Antenna Control. The source does not define the number of Techs extractable
+  per Box; the Spanish rules also omit an English Marker State prohibition.
+  Both remain explicit source issues (EN/ES pp. 105–109).
 
-All twelve missions share the existing geometry parser, model and SVG
+All thirteen missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of

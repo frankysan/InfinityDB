@@ -53,7 +53,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         ("2026.09.11", [
             "crossing-lines", "double-bind", "the-dig", "annihilation",
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
-            "b-pong", "akial-interference", "evacuation",
+            "b-pong", "akial-interference", "evacuation", "neutralization",
         ]),
     ):
         status, _, payload = _json(
@@ -71,7 +71,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 12
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 13
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -484,6 +484,72 @@ def test_evacuation_six_game_sizes_schematic_civilians_and_revision_isolation(
 
     assert _json(
         app, "/api/scenarios/evacuation?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+
+def test_neutralization_six_sizes_controlled_antennas_and_revision_isolation(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:neutralization", "2026.09.01",
+    )) is None
+    for points, width, height, depth, box_x in (
+        (150, 24, 32, 8, 8), (200, 32, 48, 12, 12),
+        (250, 32, 48, 12, 12), (300, 48, 48, 12, 20),
+        (350, 48, 48, 12, 20), (400, 48, 48, 12, 20),
+    ):
+        uri = (
+            f"/api/scenarios/neutralization?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == points // 50
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert elements["exclusion-zone"]["y1"] == height / 2 - 4
+        assert elements["exclusion-zone"]["y2"] == height / 2 + 4
+        assert elements["tech-box-left"]["x"] == box_x
+        assert elements["tech-box-right"]["x"] == width - box_x
+        assert {e["id"] for e in elements.values() if e["kind"] == "circle"} == {
+            "neutralization-area-a-left", "neutralization-area-a-right",
+            "neutralization-area-b-left", "neutralization-area-b-right",
+        }
+        assert all(e["radius"] == 2.5 for e in elements.values() if e["kind"] == "circle")
+        markers = {m["marker_type"]: m for m in item["placement"]["marker_dimensions"]}
+        assert {key: (m["count"], m["diameter_mm"]) for key, m in markers.items()} == {
+            "antenna": (4, 40), "tech-coffin": (2, 40),
+        }
+        assert [c["page"] for c in item["citations"]] == [105, 106, 107, 108, 109] * 2
+        assert {o["id"]: o["maximumPoints"] for o in item["objectives"]} == {
+            "neutralize-hyperthermal-techs": 4,
+            "neutralize-more-techs": 1,
+            "control-more-antennas": 3,
+            "classified-objective": 2,
+        }
+        assert item["objectives"][2]["awards"][0]["condition"]["kind"] == (
+            "element-status-comparison"
+        )
+        assert len(item["source_issues"]) == 2
+        svg_uri = uri.replace(
+            "/api/scenarios/neutralization?", "/api/scenarios/neutralization/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
+        assert svg_status == 200
+        assert svg.count(b'data-marker-type="antenna" data-diameter-mm="40"') == 4
+        assert svg.count(b'data-marker-type="tech-coffin" data-diameter-mm="40"') == 2
+        assert b'id="scenario-exclusion-hatch"' in svg
+
+    assert _json(
+        app, "/api/scenarios/neutralization?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 
