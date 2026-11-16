@@ -298,6 +298,12 @@ The implemented artifact lifecycle is described in [data guidance](../data/READM
 
 ### ITS, scenarios, and game tools
 
+**v1.2.0 priority:** Expand source-cited ITS Season 18 coverage, especially
+reconciling the current hotfix and publishing additional reviewed missions,
+scenario maps and their relevant context. Preserve the existing Battleground
+pilot and historical revision identities. Season 17 and Season 16 Part II
+remain later scope; do not claim complete Season 18 coverage before it is verified.
+
 - [ ] Build a versioned ITS reference library from material under
   `local/data/pdf/its/` and `local/data/pdf/legacy/`, keeping the current season distinct
   from archived seasons.
