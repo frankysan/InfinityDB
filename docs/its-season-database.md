@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (eleven reviewed hotfix missions).
+`its-18@2026.09.11` (twelve reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Eleven missions are published with independent revision selection:
+Twelve missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -130,8 +130,18 @@ Eleven missions are published with independent revision selection:
   p. 95 clauses about one Emit per Trooper per round and retrying failed WIP
   Rolls are recorded as a source issue, not reconciled by inference. Sources:
   EN pp. 92–96 and ES pp. 92–96. The original publication is unchanged.
+- **Evacuation:** Four schematic, fixed-position Civilians and two central 40 mm
+  Extraction Consoles, on all six Army Point sizes, with 8-/12-inch opposing
+  Deployment Zones. Civilians have no published physical base diameter;
+  the map displays center positions without asserting one. Player-deployed
+  enemy HVTs remain location-free. Score up to 4 OP for Extracted Civilians,
+  2 OP for Extracted enemy HVTs, and 4 OP for two Classified Objectives.
+  The mission includes the one-subject-per-successful-console-action procedure,
+  Specialist Troops, Operational Learning, the three-round/Retreat! endings,
+  and three recorded bilingual differences (Classified awards, first-round
+  restriction and reactivation language). Sources: EN/ES pp. 88–91.
 
-All eleven missions share the existing geometry parser, model and SVG
+All twelve missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of

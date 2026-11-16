@@ -13,7 +13,8 @@ SCENARIO_GEOMETRY_VERSION = 1
 _MM_PER_INCH = 25.4
 
 # Schematic markers without a single corroborated physical diameter are
-# separate from the size registry (Hardlock Beacons; B-Pong Tracking Beacon).
+# separate from the size registry (Hardlock Beacons; B-Pong Tracking Beacon;
+# Evacuation Civilians represented by Models or Tokens without fixed diameter).
 _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "console": 40.0,
     "supply-box": 25.0,

@@ -46,6 +46,9 @@
       },
       {
         "scenarioId": "scenario:akial-interference"
+      },
+      {
+        "scenarioId": "scenario:evacuation"
       }
     ]
   },
@@ -9767,6 +9770,888 @@
           "sourceId": "its-season-18-es-pdf",
           "page": 96,
           "section": "Interferencia Akial"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    },
+    {
+      "id": "scenario:evacuation",
+      "kind": "scenario",
+      "name": "Evacuation",
+      "summary": "ITS Season 18 mission suitable for Reinforcements. Extract the four map-placed Civilians and the enemy's two HVTs via Extraction Consoles, and complete two Classified Objectives.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Side A"
+            },
+            {
+              "id": "side-b",
+              "name": "Side B"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "extracted-civilians",
+              "name": "Extracted Civilians",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "cumulative",
+              "maximumPoints": 4,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, score 1 Objective Point for each of the four Civilians successfully Extracted using an Extraction Console (up to four)."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "extracted-enemy-hvts",
+              "name": "Extracted Enemy HVTs",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "cumulative",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, score 1 Objective Point for each opposing HVT successfully Extracted using an Extraction Console (up to two)."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "classified-objectives",
+              "name": "Classified Objectives",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "cumulative",
+              "maximumPoints": 4,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Each player has two Classified Objectives, worth 2 Objective Points each when completed (up to four), as specified explicitly in the English publication."
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "forces-and-deployment",
+              "name": "Forces and Deployment",
+              "paragraphs": [
+                "Players deploy at opposite table edges. Both Deployment Zones are [[distance:8:inch]] deep in 150-point games and [[distance:12:inch]] deep in 200–400-point games. Both languages show these dimensions on their published maps.",
+                "Troopers cannot deploy in Silhouette contact with a Civilian. Civilians and Extraction Consoles occupy fixed positions on the mission map; HVTs follow their normal player-selected deployment rules."
+              ]
+            },
+            {
+              "id": "civilians",
+              "name": "Civilians",
+              "paragraphs": [
+                "Four Civilians begin at the positions indicated on each game-size map. Each must be on an accessible point of the table, not on top of or inside scenery or buildings; terrain placement must allow this.",
+                "Use suitable civilian/HVT Models or Player A/B Tokens as the source permits. The source does not assign a fixed physical base diameter to the Civilian figures or Tokens, so map symbols indicate center positions only.",
+                "Civilians may be CivEvaced under the applicable CivEvac rules. Extraction is a separate successful Scenario Skill, not automatic from being CivEvaced."
+              ]
+            },
+            {
+              "id": "multiple-hvts",
+              "name": "Multiple HVTs",
+              "paragraphs": [
+                "Each player deploys two HVTs under the normal HVT deployment rules. The opponent's HVTs are eligible for Extraction and score 1 Objective Point each when successfully Extracted.",
+                "HVT locations are not fixed by the printed map. The four printed blue markers represent Civilians, not player-deployed HVTs."
+              ]
+            },
+            {
+              "id": "extraction-consoles",
+              "name": "Extraction Consoles",
+              "paragraphs": [
+                "Two Extraction Consoles begin on the table centerline at the printed positions. Each is a Console A Token or a scenery piece of 40 mm diameter.",
+                "The Consoles are shared extraction points; activating a Console does not itself award points or establish exclusive ownership."
+              ]
+            },
+            {
+              "id": "activate-extraction-console",
+              "name": "Activate Extraction Console",
+              "paragraphs": [
+                "Attack, Scenario Short Skill. Only a Specialist Troop in Silhouette contact with an Extraction Console and CivEvacing at least one Civilian or enemy HVT may declare this Skill.",
+                "The English publication prohibits this Skill in the first Game Round. The Spanish publication instead uses 'primer Turno de Juego'; the different timing term is retained as a source issue.",
+                "Spend a Short Skill and make a Normal WIP Roll. If it fails, another attempt can be made by spending another Short Skill. On success, choose one of the Civilians or enemy HVTs currently CivEvaced by that Specialist Troop, mark it Extracted and remove it from the table.",
+                "The Spanish source expressly states that a Console may be Activated after the opponent has Activated it; the English text is silent. Extraction is per successful action, not permanent Console Control."
+              ]
+            },
+            {
+              "id": "specialist-troops",
+              "name": "Specialist Troops",
+              "paragraphs": [
+                "Only Hackers, Doctors, Engineers, Forward Observers, Paramedics and Troopers with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] qualify as Specialist Troops for this mission.",
+                "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models to perform mission tasks reserved for Specialist Troops."
+              ]
+            },
+            {
+              "id": "operational-learning",
+              "name": "Operational Learning",
+              "paragraphs": [
+                "If a Specialist Troop fails a WIP Roll for a Scenario-labelled Skill, its next consecutive Order using the same Skill and target receives +3 to WIP. The third and subsequent consecutive Orders receive +3 and +1SD. These MODs are cumulative with other applicable Scenario MODs.",
+                "The sequence resets on a successful Roll, using a different Skill or target, an interruption, or an Order spent on another Trooper. Only one sequence per Trooper and Scenario-labelled Skill applies at once."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            },
+            {
+              "id": "retreat",
+              "checkAt": "tactical-phase",
+              "finishAt": "end-of-player-turn",
+              "condition": {
+                "kind": "reviewed-prose",
+                "text": "If either player starts their Active Turn in a Retreat! situation, the game ends at the end of that Player Turn."
+              }
+            }
+          ],
+          "sourceIssues": [
+            {
+              "id": "classified-points-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "classified-objectives",
+              "status": "needs-verification",
+              "description": "EN p. 88 explicitly awards 2 Objective Points for each of two Classified Objectives (4 possible). ES p. 88 says two Classified Objectives and '2 Puntos de Objetivo' without 'each', leaving whether it means per card or total ambiguous. The English wording is used, with the difference exposed."
+            },
+            {
+              "id": "activation-first-round-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "extracted-civilians",
+              "status": "needs-verification",
+              "description": "EN p. 90 forbids Activate Extraction Console during the first Game Round; ES p. 90 says 'primer Turno de Juego' (first Game Turn), which is different from the usual Spanish 'Ronda de Juego'. This could affect legal activation timing, so no unqualified reconciliation is asserted."
+            },
+            {
+              "id": "reactivation-english-omission",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "extracted-enemy-hvts",
+              "status": "needs-verification",
+              "description": "ES p. 90 expressly permits Activating an Extraction Console previously Activated by the adversary. EN p. 90 contains no corresponding sentence. The English action removes one CivEvaced subject per successful activation and does not establish exclusive console ownership."
+            }
+          ]
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Evacuation",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 8
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 24,
+                  "y2": 32
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 16,
+                  "x2": 24,
+                  "y2": 16
+                },
+                {
+                  "id": "civilian-left-top",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 6,
+                  "y": 12
+                },
+                {
+                  "id": "civilian-right-top",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 18,
+                  "y": 12
+                },
+                {
+                  "id": "civilian-left-bottom",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 6,
+                  "y": 20
+                },
+                {
+                  "id": "civilian-right-bottom",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 18,
+                  "y": 20
+                },
+                {
+                  "id": "console-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 8,
+                  "y": 16
+                },
+                {
+                  "id": "console-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 16,
+                  "y": 16
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 4.5,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 28.5,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "console-left-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 19,
+                  "x2": 8,
+                  "y2": 19,
+                  "offset": 0
+                },
+                {
+                  "id": "civilian-right-from-right",
+                  "kind": "ruler",
+                  "x1": 18,
+                  "y1": 19,
+                  "x2": 24,
+                  "y2": 19,
+                  "offset": 0
+                },
+                {
+                  "id": "civilian-upper-from-top",
+                  "kind": "ruler",
+                  "x1": 16,
+                  "y1": 0,
+                  "x2": 16,
+                  "y2": 12,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Evacuation",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 32,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 32,
+                  "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 32,
+                  "y2": 24
+                },
+                {
+                  "id": "civilian-left-top",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 6,
+                  "y": 16
+                },
+                {
+                  "id": "civilian-right-top",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 26,
+                  "y": 16
+                },
+                {
+                  "id": "civilian-left-bottom",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 6,
+                  "y": 32
+                },
+                {
+                  "id": "civilian-right-bottom",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 26,
+                  "y": 32
+                },
+                {
+                  "id": "console-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 12,
+                  "y": 24
+                },
+                {
+                  "id": "console-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 20,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.5,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 42.5,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "console-left-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 29,
+                  "x2": 12,
+                  "y2": 29,
+                  "offset": 0
+                },
+                {
+                  "id": "civilian-right-from-right",
+                  "kind": "ruler",
+                  "x1": 26,
+                  "y1": 29,
+                  "x2": 32,
+                  "y2": 29,
+                  "offset": 0
+                },
+                {
+                  "id": "civilian-upper-from-top",
+                  "kind": "ruler",
+                  "x1": 24,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 16,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Evacuation",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 48,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 48,
+                  "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 48,
+                  "y2": 24
+                },
+                {
+                  "id": "civilian-left-top",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 6,
+                  "y": 16
+                },
+                {
+                  "id": "civilian-right-top",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 42,
+                  "y": 16
+                },
+                {
+                  "id": "civilian-left-bottom",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 6,
+                  "y": 32
+                },
+                {
+                  "id": "civilian-right-bottom",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 42,
+                  "y": 32
+                },
+                {
+                  "id": "console-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 16,
+                  "y": 24
+                },
+                {
+                  "id": "console-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 32,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.5,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 42.5,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "console-left-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 29,
+                  "x2": 16,
+                  "y2": 29,
+                  "offset": 0
+                },
+                {
+                  "id": "civilian-right-from-right",
+                  "kind": "ruler",
+                  "x1": 42,
+                  "y1": 29,
+                  "x2": 48,
+                  "y2": 29,
+                  "offset": 0
+                },
+                {
+                  "id": "civilian-upper-from-top",
+                  "kind": "ruler",
+                  "x1": 40,
+                  "y1": 0,
+                  "x2": 40,
+                  "y2": 16,
+                  "offset": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 88,
+          "section": "Evacuation"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 89,
+          "section": "Evacuation"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 90,
+          "section": "Evacuation"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 91,
+          "section": "Evacuation"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 88,
+          "section": "Evacuación"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 89,
+          "section": "Evacuación"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 90,
+          "section": "Evacuación"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 91,
+          "section": "Evacuación"
         }
       ],
       "review": {

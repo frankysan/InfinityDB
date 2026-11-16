@@ -68,6 +68,7 @@ def _raster_friendly_svg(svg: str, colors: dict[str, str], *, theme: str, width:
                   "font-size": str(1.4 * text_scale)},
     }
     markers = [element for element in root.iter() if element.get("data-marker-type")]
+    has_civilians = any(element.get("data-marker-type") == "civilian" for element in markers)
     has_beacons = any(element.get("data-marker-type") == "beacon"
                       for element in markers)
     has_tracking_beacon = any(element.get("data-marker-type") == "tracking-beacon"
@@ -78,12 +79,19 @@ def _raster_friendly_svg(svg: str, colors: dict[str, str], *, theme: str, width:
     for element in root.iter():
         for klass in element.get("class", "").split():
             element.attrib.update(palette.get(klass, {}))
+        if has_civilians and element.get("data-marker-type") == "civilian":
+            element.attrib.update({
+                "fill": "#83d5eb" if theme == "dark" else "#74c9e6",
+                "stroke": "#b5efff" if theme == "dark" else "#237ca7",
+            })
         if has_tracking_beacon and element.get("data-marker-type") == "tracking-beacon":
             element.attrib.update({
                 "fill": "#75b9ec" if theme == "dark" else "#5f8ecc",
                 "stroke": "#c6e9ff" if theme == "dark" else "#24568f",
             })
-        if (has_beacons or has_tracking_beacon) and element.get("data-marker-type") == "console":
+        if (has_beacons or has_tracking_beacon or has_civilians) and element.get(
+            "data-marker-type"
+        ) == "console":
             element.attrib.update({
                 "fill": "#6aa968" if theme == "dark" else "#84ca7a",
                 "stroke": "#b7ebb0" if theme == "dark" else "#377735",

@@ -53,7 +53,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         ("2026.09.11", [
             "crossing-lines", "double-bind", "the-dig", "annihilation",
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
-            "b-pong", "akial-interference",
+            "b-pong", "akial-interference", "evacuation",
         ]),
     ):
         status, _, payload = _json(
@@ -71,7 +71,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 11
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 12
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -424,6 +424,66 @@ def test_akial_interference_api_six_sizes_sources_and_historical_isolation(
 
     assert _json(
         app, "/api/scenarios/akial-interference?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+
+def test_evacuation_six_game_sizes_schematic_civilians_and_revision_isolation(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:evacuation", "2026.09.01",
+    )) is None
+    for points, width, height, depth, console_offset in (
+        (150, 24, 32, 8, 4), (200, 32, 48, 12, 4),
+        (250, 32, 48, 12, 4), (300, 48, 48, 12, 8),
+        (350, 48, 48, 12, 8), (400, 48, 48, 12, 8),
+    ):
+        url = (
+            f"/api/scenarios/evacuation?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, url)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == points // 50
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert elements["console-left"]["x"] == width / 2 - console_offset
+        assert elements["console-right"]["x"] == width / 2 + console_offset
+        assert elements["civilian-left-top"]["x"] == 6
+        assert elements["civilian-left-top"]["y"] == depth + 4
+        assert elements["civilian-right-bottom"]["x"] == width - 6
+        assert elements["civilian-right-bottom"]["y"] == height - depth - 4
+        markers = {m["marker_type"]: m for m in item["placement"]["marker_dimensions"]}
+        assert markers["civilian"]["count"] == 4
+        assert markers["civilian"]["diameter_mm"] is None
+        assert markers["civilian"]["citation"] is None
+        assert markers["console"]["count"] == 2
+        assert markers["console"]["diameter_mm"] == 40
+        assert [c["page"] for c in item["citations"]] == [88, 89, 90, 91] * 2
+        assert {o["id"]: o["maximumPoints"] for o in item["objectives"]} == {
+            "extracted-civilians": 4,
+            "extracted-enemy-hvts": 2,
+            "classified-objectives": 4,
+        }
+        assert len(item["source_issues"]) == 3
+        svg_url = url.replace("/api/scenarios/evacuation?",
+                              "/api/scenarios/evacuation/map.svg?")
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_url)
+        assert svg_status == 200
+        assert svg.count(b'data-marker-type="civilian" data-physical-size="unspecified"') == 4
+        assert svg.count(b'data-physical-size="unspecified"') == 4
+        assert svg.count(b'data-marker-type="console" data-diameter-mm="40"') == 2
+
+    assert _json(
+        app, "/api/scenarios/evacuation?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 

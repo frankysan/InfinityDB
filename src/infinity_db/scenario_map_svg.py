@@ -113,6 +113,12 @@ _ANTENNA_TECH_MARKER_CSS = """.objective[data-marker-type="antenna"]{fill:#f7c86
 svg[data-theme="dark"] .objective[data-marker-type="antenna"]{fill:#97741e;stroke:#efd18d}
 svg[data-theme="dark"] .objective[data-marker-type="tech-coffin"]{fill:#725991;stroke:#dec9f1}
 """
+_EVACUATION_MARKER_CSS = """\
+.objective[data-marker-type="civilian"]{fill:#74c9e6;stroke:#237ca7}
+.objective[data-marker-type="console"]{fill:#84ca7a;stroke:#377735}
+svg[data-theme="dark"] .objective[data-marker-type="civilian"]{fill:#83d5eb;stroke:#b5efff}
+svg[data-theme="dark"] .objective[data-marker-type="console"]{fill:#6aa968;stroke:#b7ebb0}
+"""
 _RULER_CSS = """.placement-ruler{stroke-width:.11}
 .placement-ruler line{stroke-width:.11;stroke-dasharray:none}
 """
@@ -207,13 +213,15 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
         y = _resolved(geometry, element.y, "y")
         marker_type = escape(element.marker_type, quote=True)
         diameter_mm = marker_diameter_mm(element.marker_type)
-        if diameter_mm is None and element.marker_type not in {"beacon", "tracking-beacon"}:
+        if diameter_mm is None and element.marker_type not in {
+            "beacon", "tracking-beacon", "civilian",
+        }:
             raise ScenarioMapRenderError(
                 "scenario SVG renderer v1 has no canonical marker metadata for "
                 f"marker type {element.marker_type!r}"
             )
         if diameter_mm is None:
-            # Schematic: Hardlock omits size; B-Pong's two language sources disagree.
+            # Schematic: Hardlock omits size; B-Pong conflicts; Evacuation uses Models/Tokens.
             size_status = (
                 "conflicting-sources" if element.marker_type == "tracking-beacon"
                 else "unspecified"
@@ -508,7 +516,7 @@ def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
         if (
             isinstance(element, MarkerElement)
             and marker_diameter_mm(element.marker_type) is None
-            and element.marker_type not in {"beacon", "tracking-beacon"}
+            and element.marker_type not in {"beacon", "tracking-beacon", "civilian"}
         ):
             raise ScenarioMapRenderError(
                 "scenario SVG renderer v1 has no canonical marker metadata for "
@@ -574,6 +582,10 @@ def render_scenario_map_svg(
         isinstance(element, MarkerElement) and element.marker_type == "tracking-beacon"
         for element in geometry.elements
     )
+    has_civilians = any(
+        isinstance(element, MarkerElement) and element.marker_type == "civilian"
+        for element in geometry.elements
+    )
     has_beacons = any(
         isinstance(element, MarkerElement) and element.marker_type == "beacon"
         for element in geometry.elements
@@ -592,6 +604,7 @@ def render_scenario_map_svg(
         + (_ANTENNA_TECH_MARKER_CSS if has_tech_coffin or has_akial_antenna else "")
         + (_BEACON_MARKER_CSS if has_beacons else "")
         + (_TRACKING_BEACON_CSS if has_tracking_beacon else "")
+        + (_EVACUATION_MARKER_CSS if has_civilians else "")
         + (_RULER_CSS if has_rulers else "")
     )
     defs = _EXCLUSION_DEFS if has_exclusion else ""

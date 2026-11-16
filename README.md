@@ -72,7 +72,7 @@ its application metrics.
 - Provides selectable historical and September-hotfix ITS Season 18 scenario
   publications, including Battleground, Annihilation, Crossing Lines,
   Double Bind, The Dig, Cutthroat, Superiority, Uplink Center, Hardlock, B-Pong
-  and Akial Interference, with game-size deployment maps, scoring,
+  Akial Interference and Evacuation, with game-size deployment maps, scoring,
   reviewed source citations, and explicit Double Bind Main Objective choices.
   Season 18 mission coverage remains partial.
 - Includes global search and a federated Glossary across player-facing reference domains, with

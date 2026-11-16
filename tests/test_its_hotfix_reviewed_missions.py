@@ -862,6 +862,92 @@ def test_akial_interference_rejects_antenna_outside_table() -> None:
         parse_scenario_definition_record(record)
 
 
+
+def test_evacuation_civilian_console_positions_and_scoring() -> None:
+    record = _records()["scenario:evacuation"]
+    mission, configurations = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *(("its-season-18-en-pdf", p) for p in range(88, 92)),
+        *(("its-season-18-es-pdf", p) for p in range(88, 92)),
+    ]
+    assert [s["swc"] for s in mission["gameSizes"]] == [3, 4, 5, 6, 7, 8]
+    objectives = {o["id"]: o for o in mission["objectives"]}
+    assert {
+        key: (o["maximumPoints"], o["awards"][0]["objectivePoints"])
+        for key, o in objectives.items()
+    } == {
+        "extracted-civilians": (4, 1),
+        "extracted-enemy-hvts": (2, 1),
+        "classified-objectives": (4, 2),
+    }
+    assert sum(o["maximumPoints"] for o in objectives.values()) == 10
+    assert all(o["timing"] == "end-of-game" for o in objectives.values())
+    assert all(o["awards"][0]["condition"]["kind"] == "reviewed-prose"
+               for o in objectives.values())
+    rules = {r["id"]: " ".join(r["paragraphs"]) for r in mission["rules"]}
+    assert "Four Civilians" in rules["civilians"]
+    assert "two HVTs" in rules["multiple-hvts"]
+    assert "first Game Round" in rules["activate-extraction-console"]
+    assert "CivEvacing" in rules["activate-extraction-console"]
+    assert "one of the Civilians or enemy HVTs" in rules["activate-extraction-console"]
+    assert "Normal WIP Roll" in rules["activate-extraction-console"]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert "third and subsequent" in rules["operational-learning"]
+    assert [e["id"] for e in mission["endConditions"]] == ["round-limit", "retreat"]
+    assert {i["id"] for i in mission["sourceIssues"]} == {
+        "classified-points-bilingual",
+        "activation-first-round-bilingual",
+        "reactivation-english-omission",
+    }
+    assert all(i["status"] == "needs-verification" for i in mission["sourceIssues"])
+    for key, w, h, d, off, topY, consoleY in (
+        ("150-points", 24, 32, 8, 4, 12, 19),
+        ("200-250-points", 32, 48, 12, 4, 16, 29),
+        ("300-400-points", 48, 48, 12, 8, 16, 29),
+    ):
+        geometry = configurations[key]
+        assert geometry["table"] == {"width": w, "height": h, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == d
+        assert elements["deployment-b"]["y1"] == h - d
+        assert {
+            e["id"]: (e["markerType"], e["x"], e["y"])
+            for e in elements.values() if e["kind"] == "marker"
+        } == {
+            "civilian-left-top": ("civilian", 6, topY),
+            "civilian-right-top": ("civilian", w - 6, topY),
+            "civilian-left-bottom": ("civilian", 6, h - d - 4),
+            "civilian-right-bottom": ("civilian", w - 6, h - d - 4),
+            "console-left": ("console", w / 2 - off, h / 2),
+            "console-right": ("console", w / 2 + off, h / 2),
+        }
+        rulers = {a["id"]: a for a in geometry["annotations"]}
+        assert (rulers["console-left-from-left"]["x1"],
+                rulers["console-left-from-left"]["x2"]) == (0, w / 2 - off)
+        assert rulers["civilian-right-from-right"]["x1"] == w - 6
+        assert rulers["civilian-right-from-right"]["x2"] == w
+        assert rulers["civilian-upper-from-top"]["y2"] == topY
+        assert rulers["console-left-from-left"]["y1"] == consoleY
+        assert rulers["console-left-from-left"]["y2"] == consoleY
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
+            assert svg.count('data-marker-type="civilian" data-physical-size="unspecified"') == 4
+            assert svg.count('data-physical-size="unspecified"') == 4
+            assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 2
+            assert 'id="civilian-upper-from-top"' in svg
+            assert 'id="console-left-from-left"' in svg
+
+
+@pytest.mark.parametrize("mutation", ["civilian-outside", "console-outside"])
+def test_evacuation_rejects_invalid_marker_positions(mutation: str) -> None:
+    record = deepcopy(_records()["scenario:evacuation"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    target = "civilian-left-top" if mutation == "civilian-outside" else "console-right"
+    next(e for e in geometry["elements"] if e["id"] == target)["x"] = 100
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]
