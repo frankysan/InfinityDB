@@ -38,6 +38,10 @@ def _raster_friendly_svg(svg: str, colors: dict[str, str], *, theme: str, width:
                          "stroke-width": ".09"},
         "scoring": {"fill": colors["--color-scenario-map-scoring"],
                     "fill-opacity": ".65", "stroke": colors["--color-scenario-map-scoring-edge"]},
+        "no-deploy": {"fill": "#744647" if theme == "dark" else "#f0c6c6",
+                      "fill-opacity": ".72",
+                      "stroke": "#d5a7a7" if theme == "dark" else "#aa7777",
+                      "stroke-width": ".09"},
         # MuPDF does not implement SVG patterns; show the underlying red zone.
         # The browser renders the source-backed diagonal hatch in the SVG itself.
         "exclusion": {"fill": colors["--color-scenario-map-deployment-b"],

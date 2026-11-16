@@ -54,7 +54,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
             "crossing-lines", "double-bind", "the-dig", "annihilation",
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
             "b-pong", "akial-interference", "evacuation", "neutralization",
-            "provisioning", "area-of-interest", "data-harvest",
+            "provisioning", "area-of-interest", "data-harvest", "last-launch",
         ]),
     ):
         status, _, payload = _json(
@@ -72,7 +72,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 16
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 17
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -742,6 +742,78 @@ def test_data_harvest_six_sizes_designated_zones_and_revision_isolation(
 
     assert _json(
         app, "/api/scenarios/data-harvest?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+def test_last_launch_six_sizes_tower_scanners_and_historical_isolation(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:last-launch", "2026.09.01",
+    )) is None
+    for points, width, height, depth, offset in (
+        (150, 24, 32, 8, 4),
+        (200, 32, 48, 12, 8),
+        (250, 32, 48, 12, 8),
+        (300, 48, 48, 12, 8),
+        (350, 48, 48, 12, 8),
+        (400, 48, 48, 12, 8),
+    ):
+        uri = (
+            f"/api/scenarios/last-launch?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == points // 50
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {el["id"]: el for el in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        tower = elements["launching-tower"]
+        assert tower["style"] == "no-deploy"
+        assert (tower["x1"], tower["y1"], tower["x2"], tower["y2"]) == (
+            width / 2 - 4, height / 2 - 4, width / 2 + 4, height / 2 + 4,
+        )
+        assert {e["id"] for e in elements.values() if e["kind"] == "marker"} == {
+            "id-scanner-left", "id-scanner-right", "id-checker",
+        }
+        assert {m["marker_type"]: (m["count"], m["diameter_mm"])
+                for m in item["placement"]["marker_dimensions"]} == {
+            "tech-coffin": (2, 40), "console": (1, 40),
+        }
+        assert [(elements[key]["x"], elements[key]["y"]) for key in (
+            "id-scanner-left", "id-checker", "id-scanner-right",
+        )] == [(offset, height / 2), (width / 2, height / 2),
+              (width - offset, height / 2)]
+        assert [citation["page"] for citation in item["citations"]] == [
+            *range(115, 121), *range(116, 122),
+        ]
+        assert {o["id"]: o["maximumPoints"] for o in item["objectives"]} == {
+            "extract-more-army-points": 2, "extract-more-specialists": 2,
+            "kill-specialists-comparison": 2, "dominate-launching-tower": 1,
+            "classified-objectives": 3,
+        }
+        assert len(item["source_issues"]) == 3
+        assert [end["id"] for end in item["end_conditions"]] == ["round-limit"]
+        svg_uri = uri.replace(
+            "/api/scenarios/last-launch?", "/api/scenarios/last-launch/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
+        assert svg_status == 200
+        assert b'class="no-deploy"' in svg
+        assert svg.count(b'data-marker-type="tech-coffin" data-diameter-mm="40"') == 2
+        assert svg.count(b'data-marker-type="console" data-diameter-mm="40"') == 1
+        for length in (depth, 8, offset, width / 2):
+            assert f'data-distance-inches="{length:g}"'.encode() in svg
+
+    assert _json(
+        app, "/api/scenarios/last-launch?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 

@@ -1393,6 +1393,130 @@ def test_data_harvest_invalid_geometry_or_score_fails_closed(mutation: str) -> N
     with pytest.raises(ScenarioDefinitionError):
         parse_scenario_definition_record(record)
 
+
+def test_last_launch_extraction_tower_and_bilingual_source_geometry() -> None:
+    record = _records()["scenario:last-launch"]
+    mission, configurations = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *(("its-season-18-en-pdf", p) for p in range(115, 121)),
+        *(("its-season-18-es-pdf", p) for p in range(116, 122)),
+    ]
+    assert [g["swc"] for g in mission["gameSizes"]] == [3, 4, 5, 6, 7, 8]
+    objectives = {o["id"]: o for o in mission["objectives"]}
+    assert {key: item["maximumPoints"] for key, item in objectives.items()} == {
+        "extract-more-army-points": 2,
+        "extract-more-specialists": 2,
+        "kill-specialists-comparison": 2,
+        "dominate-launching-tower": 1,
+        "classified-objectives": 3,
+    }
+    assert sum(item["maximumPoints"] for item in objectives.values()) == 10
+    assert [award["objectivePoints"] for award in
+            objectives["kill-specialists-comparison"]["awards"]] == [2, 1]
+    assert objectives["kill-specialists-comparison"]["aggregation"] == "exclusive"
+    assert objectives["classified-objectives"]["aggregation"] == "cumulative"
+    assert objectives["classified-objectives"]["awards"][0]["objectivePoints"] == 1
+    assert all(o["timing"] == "end-of-game" for o in objectives.values())
+
+    rules = {r["id"]: " ".join(r["paragraphs"]) for r in mission["rules"]}
+    assert "[[distance:8:inch]]" in rules["deployment-and-launching-tower"]
+    assert "[[distance:20:cm]]" in rules["deployment-and-launching-tower"]
+    assert "infinitely high" in rules["deployment-and-launching-tower"]
+    assert "Four Wide Gates" in rules["deployment-and-launching-tower"]
+    assert "Normal WIP Roll" in rules["download-id"]
+    assert "without a Roll" in rules["swap-id"]
+    assert "at most one ID Token" in rules["swap-id"]
+    assert "more than half of its base" in rules["dominate-launching-tower"]
+    assert "Shasvastii" in rules["dominate-launching-tower"]
+    assert "20 Victory Points" in rules["dominate-launching-tower"]
+    assert "40 mm ID Checker" in rules["id-checker"]
+    assert "Coordinated Order" in rules["extract-identified-trooper"]
+    assert "Peripherals inside the Launching Tower" in rules["extract-identified-trooper"]
+    assert "Loss of Lieutenant" in rules["extract-identified-trooper"]
+    assert "Open Information" in rules["extract-identified-trooper"]
+    assert "never considered Killed" in rules["killing"]
+    assert "Retreat!" in rules["no-quarter"]
+    assert "20 extra points" in rules["baggage-extracted"]
+    assert [end["id"] for end in mission["endConditions"]] == ["round-limit"]
+    assert {issue["id"] for issue in mission["sourceIssues"]} == {
+        "tower-dimensions-bilingual",
+        "gate-access-bilingual",
+        "peripheral-extraction-points-bilingual",
+    }
+    assert all(issue["status"] == "needs-verification" for issue in mission["sourceIssues"])
+
+    for configuration, width, height, depth, scanner_offset in (
+        ("150-points", 24, 32, 8, 4),
+        ("200-250-points", 32, 48, 12, 8),
+        ("300-400-points", 48, 48, 12, 8),
+    ):
+        geometry = configurations[configuration]
+        elements = {element["id"]: element for element in geometry["elements"]}
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        room = elements["launching-tower"]
+        assert room["kind"] == "rectangle"
+        assert room["style"] == "no-deploy"
+        assert (room["x1"], room["y1"], room["x2"], room["y2"]) == (
+            width / 2 - 4, height / 2 - 4, width / 2 + 4, height / 2 + 4,
+        )
+        assert {el["id"] for el in elements.values() if el["kind"] == "marker"} == {
+            "id-scanner-left", "id-scanner-right", "id-checker",
+        }
+        assert [(elements[key]["x"], elements[key]["y"]) for key in (
+            "id-scanner-left", "id-checker", "id-scanner-right",
+        )] == [
+            (scanner_offset, height / 2),
+            (width / 2, height / 2),
+            (width - scanner_offset, height / 2),
+        ]
+        assert elements["id-scanner-left"]["markerType"] == "tech-coffin"
+        assert elements["id-scanner-right"]["markerType"] == "tech-coffin"
+        assert elements["id-checker"]["markerType"] == "console"
+        annotations = {annotation["id"]: annotation
+                       for annotation in geometry["annotations"]}
+        assert annotations["launching-tower-width"] == {
+            "id": "launching-tower-width", "kind": "dimension",
+            "target": "launching-tower", "axis": "x", "side": "end", "offset": .4,
+        }
+        assert annotations["scanner-right-from-edge"]["x1"] == width - scanner_offset
+        assert not any(e["kind"] == "circle" for e in elements.values())
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
+            assert '.no-deploy{' in svg
+            assert 'class="no-deploy"' in svg
+            assert svg.count('data-marker-type="tech-coffin" data-diameter-mm="40"') == 2
+            assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 1
+            for length in (8, depth, width / 2, scanner_offset):
+                assert f'data-distance-inches="{length:g}"' in svg
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ("missing-deployment", "invalid-tower", "off-table-scanner", "invalid-kill-award"),
+)
+def test_last_launch_invalid_scoring_or_geometry_fails_closed(mutation: str) -> None:
+    record = deepcopy(_records()["scenario:last-launch"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    if mutation == "missing-deployment":
+        geometry["elements"] = [e for e in geometry["elements"]
+                                if e["id"] != "deployment-a"]
+    elif mutation == "invalid-tower":
+        next(e for e in geometry["elements"] if e["id"] == "launching-tower")[
+            "x2"
+        ] = -1
+    elif mutation == "off-table-scanner":
+        next(e for e in geometry["elements"] if e["id"] == "id-scanner-left")[
+            "x"
+        ] = -10
+    else:
+        record["facts"]["mission"]["objectives"][2]["awards"][0][
+            "objectivePoints"
+        ] = 4
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

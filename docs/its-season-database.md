@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (sixteen reviewed hotfix missions).
+`its-18@2026.09.11` (seventeen reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Sixteen missions are published with independent revision selection:
+Seventeen missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -190,8 +190,22 @@ Sixteen missions are published with independent revision selection:
   activation, neutralization, specialist restrictions and Retreat! ending.
   Two bilingual source issues preserve base-versus-Silhouette contact
   for extraction and neutralization (EN/ES pp. 67–71).
+- **Last Launch:** Two 40 mm ID Scanners along the centerline, one central
+  40 mm ID Checker and an 8-inch-square Launching Tower shown as a distinct
+  No Deployment Zone, with open Wide Gates described in the mission rules.
+  Three source-backed map configurations cover all six Army Point sizes;
+  the tower is central, its Scanners have exact lateral placements, and
+  the Deployment Zones use 8-/12-inch depths. Scoring compares extracted
+  Army Points (2 OP), extracted Specialists (2 OP), killed Specialists
+  (2 OP for more, or 1 OP for a tie), Tower Domination (1 OP), and three
+  Classified Objectives (3 OP). Downloading/transferring ID Tokens,
+  extracting Troopers and eligible Peripherals, Victory Points,
+  Baggage/Shasvastii, Loss of Lieutenant, No Quarter and the three-round
+  end condition are documented. Three source discrepancies preserve the
+  English/Spanish tower-size, gate-access and Peripheral-point wording
+  (EN pp. 115–120; ES pp. 116–121).
 
-All sixteen missions share the existing geometry parser, model and SVG
+All seventeen missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of

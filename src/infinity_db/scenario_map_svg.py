@@ -34,6 +34,7 @@ _RENDERABLE_ELEMENT_STYLES = frozenset(
         "deployment-a",
         "deployment-b",
         "scoring",
+        "no-deploy",
         "exclusion",
         "influence",
         "sector",
@@ -77,6 +78,9 @@ font-family:sans-serif;font-size:var(--scenario-map-label-size,1.4px);font-weigh
 
 # Optional ITS-only styling is omitted from historical Core and Battleground
 # SVGs to preserve their frozen byte-level publication identity.
+_NO_DEPLOY_CSS = """.no-deploy{fill:#f0c6c6;fill-opacity:.72;stroke:#aa7777;stroke-width:.09}
+svg[data-theme="dark"] .no-deploy{fill:#744647;stroke:#d5a7a7}
+"""
 _EXCLUSION_CSS = """.exclusion{fill:url(#scenario-exclusion-hatch);
 stroke:var(--color-scenario-map-deployment-b-edge,#dc2626);stroke-width:.09}
 """
@@ -599,7 +603,8 @@ def render_scenario_map_svg(
         for element in geometry.elements
     )
     extra_style = (
-        (_EXCLUSION_CSS if has_exclusion else "")
+        (_NO_DEPLOY_CSS if "no-deploy" in styles else "")
+        + (_EXCLUSION_CSS if has_exclusion else "")
         + (_SPECIAL_ZONE_CSS if has_special_zones else "")
         + (_ANTENNA_TECH_MARKER_CSS if has_tech_coffin or has_akial_antenna else "")
         + (_BEACON_MARKER_CSS if has_beacons else "")
