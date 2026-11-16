@@ -197,37 +197,42 @@ def _browser_jobs(run_id: int = 200) -> list[dict[str, object]]:
 
 
 def _source_jobs(run_id: int = 101, *, focused: bool = False):
-    names = release_ci.SOURCE_FULL_JOBS
-    jobs = [
-        {
+    jobs = []
+    for index, name in enumerate(release_ci.SOURCE_FULL_JOBS):
+        if name in release_ci.SOURCE_PINNED_JOBS:
+            step = (
+                "Reuse validated determinism baseline"
+                if focused else "Build canonical deterministic-output manifest"
+            )
+        elif name == "Cross-platform deterministic outputs":
+            step = (
+                "Reuse validated deterministic baseline"
+                if focused else "Compare artifact hashes"
+            )
+        else:
+            step = "Reuse validated Source baseline" if focused else "Run source checks"
+        jobs.append({
             "id": 301 + index,
             "run_id": run_id,
             "name": name,
             "status": "completed",
             "conclusion": "success",
-            "steps": [{
-                "name": (
-                    "Reuse validated deterministic baseline"
-                    if name == "Cross-platform deterministic outputs"
-                    else "Reuse validated Source baseline"
-                ),
-                "conclusion": "success",
-            }] if focused else [],
-        }
-        for index, name in enumerate(names)
-    ]
-    if focused:
-        jobs.append({
-            "id": 309,
-            "run_id": run_id,
-            "name": release_ci.SOURCE_FAST_JOB,
-            "status": "completed",
-            "conclusion": "success",
-            "steps": [{
-                "name": "Run changed tests with verified baseline",
-                "conclusion": "success",
-            }],
+            "steps": [{"name": step, "conclusion": "success"}],
         })
+    jobs.append({
+        "id": 309,
+        "run_id": run_id,
+        "name": release_ci.SOURCE_FAST_JOB,
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [{
+            "name": (
+                "Run changed tests with verified baseline"
+                if focused else "Run focused release checks before full matrix"
+            ),
+            "conclusion": "success",
+        }],
+    })
     return jobs
 
 
@@ -251,6 +256,34 @@ def test_source_evidence_requires_full_matrix_or_proven_focused_run() -> None:
         broken = [*full[:-1], dict(full[-1], conclusion="failure")]
         release_ci.verify_source_jobs(
             {"jobs": broken, "total_count": len(broken)}, run_id=101
+        )
+
+
+def test_source_evidence_checks_every_pinned_determinism_job() -> None:
+    jobs = _source_jobs()
+    for name in release_ci.SOURCE_PINNED_JOBS:
+        missing = [job for job in jobs if job["name"] != name]
+        with pytest.raises(release_ci.ReleaseEvidenceError, match="missing"):
+            release_ci.verify_source_jobs(
+                {"jobs": missing, "total_count": len(missing)}, run_id=101
+            )
+        broken = [
+            dict(job, steps=[]) if job["name"] == name else job
+            for job in jobs
+        ]
+        with pytest.raises(release_ci.ReleaseEvidenceError, match="did not run checks"):
+            release_ci.verify_source_jobs(
+                {"jobs": broken, "total_count": len(broken)}, run_id=101
+            )
+
+    focused = _source_jobs(focused=True)
+    broken_reuse = [
+        dict(job, steps=[]) if job["name"] == release_ci.SOURCE_PINNED_JOBS[0] else job
+        for job in focused
+    ]
+    with pytest.raises(release_ci.ReleaseEvidenceError, match="mixed full and reused"):
+        release_ci.verify_source_jobs(
+            {"jobs": broken_reuse, "total_count": len(broken_reuse)}, run_id=101
         )
 
 
