@@ -58,7 +58,7 @@ def _preferred_chart_sources(connection: sqlite3.Connection) -> dict[int, sqlite
     Application Army identity already owns source-alias selection. Fireteams remain
     Army-local, so the application projection uses one preferred source chart rather
     than merging source aliases into a synthetic chart. Non-selected source charts
-    remain losslessly available in ``infinity.raw.db``.
+    remain losslessly available in ``army.raw.db``.
     """
 
     candidates: dict[int, list[sqlite3.Row]] = defaultdict(list)

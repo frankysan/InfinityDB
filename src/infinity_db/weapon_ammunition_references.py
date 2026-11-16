@@ -21,7 +21,7 @@ DEFAULT_MAPPING_PATH = maintained_config_path("catalogs", "weapon-ammunition-ref
 def load_ammunition_reference_map(
     path: Path = DEFAULT_MAPPING_PATH,
 ) -> dict[int, dict[str, Any]]:
-    """Validate a closed, explicit map without parsing source ammunition notation."""
+    """Load the maintained source mapping; runtime v16 reads SQLite instead."""
     document = json.loads(path.read_text(encoding="utf-8"))
     if (
         not isinstance(document, dict)
@@ -30,7 +30,13 @@ def load_ammunition_reference_map(
         or set(document) != {"format", "version", "sourceEntries"}
     ):
         raise ValueError("Unsupported weapon ammunition reference config")
-    entries = document["sourceEntries"]
+    return validate_ammunition_reference_entries(document["sourceEntries"])
+
+
+def validate_ammunition_reference_entries(
+    entries: dict[str, Any],
+) -> dict[int, dict[str, Any]]:
+    """Validate exact authored segments/components from a file or SQL read model."""
     if not isinstance(entries, dict) or not entries:
         raise ValueError("Weapon ammunition reference config requires sourceEntries")
     mapping: dict[int, dict[str, Any]] = {}
@@ -101,7 +107,10 @@ class WeaponAmmunitionReferences:
     """Resolve approved metadata ammunition references against the published rules DB."""
 
     def __init__(self, rules_database: RulesDatabase) -> None:
-        self._mapping = load_ammunition_reference_map()
+        embedded = rules_database.ammunition_references_payload()
+        self._mapping = (
+            embedded if embedded is not None else load_ammunition_reference_map()
+        )
         self._resolved: dict[int, list[dict[str, Any]]] = {}
         self._compositions: dict[int, dict[str, Any]] = {}
         self._effects: dict[int, list[dict[str, Any]]] = {}

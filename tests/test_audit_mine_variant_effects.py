@@ -28,8 +28,8 @@ def _review() -> dict[str, Any]:
 @pytest.fixture(scope="module")
 def weaponry_app() -> Callable:
     return create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
 
@@ -51,7 +51,7 @@ def test_mine_source_profile_and_effect_owners_remain_distinct(
     assert ("weapon:para-mine" in rules) == (entry["slug"] == "para-mine")
     assert "weapon:chest-mine" not in rules
 
-    with sqlite3.connect(ROOT / "data/generated/rules.db") as database:
+    with sqlite3.connect(ROOT / "data/generated/rules_n5.db") as database:
         available = {
             row[0]
             for row in database.execute("SELECT id FROM records")
@@ -104,7 +104,7 @@ def test_non_lethal_does_not_erase_mine_saving_rolls(weaponry_app: Callable) -> 
         assert profile["saving_num"] == expected_count
         assert profile["saving"] not in ("", "-", None)
 
-    with sqlite3.connect(ROOT / "data/generated/rules.db") as database:
+    with sqlite3.connect(ROOT / "data/generated/rules_n5.db") as database:
         summary = database.execute(
             "SELECT summary FROM records WHERE id = ?", ("trait:non-lethal",)
         ).fetchone()[0]
@@ -150,19 +150,16 @@ def test_chest_mine_does_not_inherit_variant_mine_references(
 
 @pytest.mark.parametrize("entry", _review()["variants"], ids=lambda item: item["slug"])
 def test_variant_source_effects_and_geometry_are_pinned(
-    weaponry_app: Callable, entry: dict[str, Any]
+    weaponry_app: Callable, entry: dict[str, Any], pinned_n53_core_pdf: Path,
 ) -> None:
     """Do not conflate chart mechanics, imported object geometry, or rule owners."""
     pdf = pytest.importorskip("pymupdf")
-    from tools.audit_weaponry_family_clauses import _normalized_text
+    from tools.research.audit_weaponry_family_clauses import _normalized_text
 
-    source = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
-    assert hashlib.sha256(source.read_bytes()).hexdigest() == (
+    assert hashlib.sha256(pinned_n53_core_pdf.read_bytes()).hexdigest() == (
         _review()["sources"]["corePdfSha256"]
     )
-    with pdf.open(source) as document:
+    with pdf.open(pinned_n53_core_pdf) as document:
         chart = _normalized_text(
             document[_review()["sources"]["weaponChartPrintedPage"] - 1].get_text()
         )

@@ -35,7 +35,7 @@ def _database_snapshot_sha256(database_path: Path) -> str:
     value = meta.get("snapshotArchiveSha256") if isinstance(meta, dict) else None
     if not isinstance(value, str) or _SHA256_RE.fullmatch(value) is None:
         raise DeploymentProvenanceError(
-            "Runtime infinity.db has no validated snapshotArchiveSha256. Rebuild it from the "
+            "Runtime army.db has no validated snapshotArchiveSha256. Rebuild it from the "
             "same Army ZIP snapshot used for the tracked symbol publication."
         )
     return value
@@ -70,7 +70,7 @@ def validate_database_symbol_provenance(
     actual = _database_snapshot_sha256(database_path)
     if actual != expected:
         raise DeploymentProvenanceError(
-            "Runtime infinity.db snapshotArchiveSha256 does not match tracked symbol "
+            "Runtime army.db snapshotArchiveSha256 does not match tracked symbol "
             "publication sourceSnapshot.armyArtifact.sha256. Rebuild the database from the "
             "exact Army ZIP used for symbol publication, or republish symbols for this database "
             "snapshot."

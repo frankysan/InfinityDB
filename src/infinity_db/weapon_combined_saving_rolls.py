@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_army_data.project_resources import maintained_config_path
+from infinity_db.rules_database import RulesDatabase
 
 DEFAULT_MAPPING_PATH = maintained_config_path("catalogs", "weapon-combined-saving-rolls.json")
 
@@ -70,8 +71,17 @@ def load_combined_saving_roll_map(
 class WeaponCombinedSavingRolls:
     """Project only exact pinned Army profile signatures onto the Weapon API."""
 
-    def __init__(self) -> None:
-        self._mapping = load_combined_saving_roll_map()
+    def __init__(self, rules_database: RulesDatabase | None = None) -> None:
+        embedded = (
+            rules_database.combined_saving_rolls_payload()
+            if rules_database is not None else None
+        )
+        if embedded is not None:
+            self._mapping = embedded
+        else:
+            # Pre-v15 releases and standalone source-only checks still use
+            # maintained JSON; v15 never loads the runtime JSON adapter.
+            self._mapping = load_combined_saving_roll_map()
 
     def for_profile(self, profile: dict[str, Any]) -> dict[str, Any] | None:
         source_id = profile.get("id")

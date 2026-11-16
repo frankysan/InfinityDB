@@ -24,8 +24,8 @@ from infinity_db.web.app import create_app
 from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_PATH = ROOT / "data/generated/infinity.db"
-RULES_PATH = ROOT / "data/generated/rules.db"
+ARMY_PATH = ROOT / "data/generated/army.db"
+RULES_PATH = ROOT / "data/generated/rules_n5.db"
 
 
 def _services():
@@ -263,7 +263,7 @@ def test_weapon_property_reviewed_examples_have_current_citations_and_routes() -
 
 
 def test_weapon_property_example_resolves_numeric_army_links(tmp_path: Path) -> None:
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     shutil.copyfile(RULES_PATH, rules_path)
     with sqlite3.connect(rules_path) as connection:
         result = connection.execute(
@@ -324,7 +324,7 @@ def test_weapon_property_example_resolves_numeric_army_links(tmp_path: Path) -> 
 def test_weapon_property_example_filters_stale_weapon_slug(
     tmp_path: Path, valid_ref: str,
 ) -> None:
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     shutil.copyfile(RULES_PATH, rules_path)
     with sqlite3.connect(rules_path) as connection:
         result = connection.execute(
@@ -472,7 +472,7 @@ def test_rules_build_rejects_unknown_weapon_property_reference(tmp_path: Path) -
     replacement["records"][0]["summary"] += " [[weapon-property:unknown]]"
     documents[0] = path, replacement
     with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
-        export_rules_database(documents, tmp_path / "invalid-rules.db", finalize=False)
+        export_rules_database(documents, tmp_path / "invalid-rules_n5.db", finalize=False)
 
 
 def test_n_em_property_reuses_both_rules_without_inferred_rolls() -> None:
@@ -577,7 +577,7 @@ def test_armed_turret_emitter_source_discrepancy_remains_visible(tmp_path: Path)
     assert emitter == (14, "BTS/2", "2")
 
     # Use the edited curated source, not a stale generated release database.
-    rules_path = tmp_path / "rules.db"
+    rules_path = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(ROOT / "data/curated"), rules_path)
     record = RulesDatabase(rules_path).composed_record("weapon:armed-turret")
     assert record is not None

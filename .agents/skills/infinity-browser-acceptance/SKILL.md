@@ -25,21 +25,20 @@ make frontend acceptance a substitute for backend or data validation.
 2. State the observable behavior and acceptance conditions. Include relevant states, navigation
    paths, content lengths, input/error states, and representative narrow and wide viewports.
    Consider keyboard use, focus, semantic markup, contrast, and touch behavior where applicable.
-3. Specify missing browser assertions and reusable fixtures as VD; only
-   author/review them in the dedicated design phase **without running tests**.
-   Existing-test reruns and designed tests execute under VR. Reuse the
-   browser harness and keep backend-owned semantics separate from DOM checks.
-4. Follow the [canonical queue scheduling and retirement rules](../../../docs/validation-queue.md#queue-rules)
-   at task start and closeout. Record selectors, viewport/theme coverage,
-   browser prerequisites, tested revision and required asset/source evidence.
-   Immediate browser checks require a documented correctness-critical reason.
-5. During due VR work, follow the [pinned Linux test handoff](../../../docs/testing.md#parallel-windows-development-and-linux-validation),
-   including explicit safe Git preparation and skip review. A Linux full-suite
-   run in progress uniquely permits independent Windows development; a
-   focused or partial job does not.
-6. Report actual viewports, interactions, check stages, immediate results,
-   and outstanding VR acceptance. Do not conflate focused UI tests with the
-   final release browser gate.
+3. Implement missing assertions and reusable fixtures alongside the UI
+   change, then run the relevant focused browser tests on the available
+   authorized host. Reuse the browser harness; keep backend-owned semantics
+   separate from DOM checks.
+4. Use the [deferred-validation queue](../../../docs/validation-queue.md#queue-rules)
+   only when a concrete required check cannot yet be designed or executed.
+   Record the missing selector, viewport/theme coverage, revision, prerequisites
+   and resumption trigger; there is no mandatory separate design phase.
+5. When a pinned Linux job is useful, follow the
+   [Linux validation protocol](../../../docs/testing.md#parallel-windows-development-and-linux-validation).
+   Independent Windows work can continue during a focused **or** full run
+   only when the worker checkout and mutable inputs are isolated.
+6. Report viewports, interactions, actual results, relevant skips and any
+   genuinely deferred acceptance. Focused UI tests are not the final release gate.
 
 ## References
 

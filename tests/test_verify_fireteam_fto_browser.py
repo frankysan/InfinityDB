@@ -31,8 +31,8 @@ def test_live_fireteam_fto_is_scoped_to_verified_member_options() -> None:
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[1]
-    army_db = root / "data/generated/infinity.db"
-    rules_db = root / "data/generated/rules.db"
+    army_db = root / "data/generated/army.db"
+    rules_db = root / "data/generated/rules_n5.db"
     database = Database(army_db)
 
     selection = None

@@ -215,7 +215,7 @@ def test_audit_detects_nested_delivery_and_respects_contextual_target_identity(
     assert _report(database_path, origins=("weapon:pitcher",))["ambiguous"]
 
 def test_pinned_reviewed_delivery_includes_have_no_unsupported_transitive_paths() -> None:
-    path = ROOT / "data/generated/infinity.db"
+    path = ROOT / "data/generated/army.db"
     if not path.is_file():
         import pytest
         pytest.skip("Pinned Army release database missing")

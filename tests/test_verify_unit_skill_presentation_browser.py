@@ -16,9 +16,8 @@ from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 import pytest
 
 from infinity_db.web import create_app
-from tools.browser_wsgi_transport import route_browser_page
-from tools.verify_non_skill_army_browser import CASES, WIDTHS
-from tools.verify_unit_skill_presentation_browser import (
+from tools.browser.verify_non_skill_army_browser import CASES, WIDTHS
+from tools.browser.verify_unit_skill_presentation_browser import (
     DEFAULT_SLUGS,
     DOM_SNAPSHOT,
     OPTIONAL_FLAGS,
@@ -31,6 +30,7 @@ from tools.verify_unit_skill_presentation_browser import (
     expected_items,
     verify,
 )
+from tools.browser_wsgi_transport import route_browser_page
 
 
 def _item(
@@ -252,9 +252,9 @@ def test_reinforcement_parentage_is_developer_mode_only() -> None:
     sync_playwright = playwright_api.sync_playwright
 
     root = Path(__file__).resolve().parents[1]
-    database = root / "data/generated/infinity.db"
+    database = root / "data/generated/army.db"
     app = create_app(
-        database, rules_database_path=root / "data/generated/rules.db",
+        database, rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -366,7 +366,7 @@ def test_reinforcement_parentage_is_developer_mode_only() -> None:
 
 def test_source_backed_relationship_cohort_is_distinct() -> None:
     root = Path(__file__).resolve().parents[1]
-    cohort = _relationship_cohort(root / "data/generated/infinity.db")
+    cohort = _relationship_cohort(root / "data/generated/army.db")
     assert len(cohort) == len(set(cohort)) == 4
 
 
@@ -376,8 +376,8 @@ def test_live_chromium_contextual_relationship_cohort() -> None:
     pytest.importorskip("playwright.sync_api")
     root = Path(__file__).resolve().parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -394,7 +394,7 @@ def test_live_chromium_contextual_relationship_cohort() -> None:
     thread = Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        slugs = _relationship_cohort(root / "data/generated/infinity.db")
+        slugs = _relationship_cohort(root / "data/generated/army.db")
         try:
             evidence = verify(
                 f"http://127.0.0.1:{server.server_port}",
@@ -408,14 +408,15 @@ def test_live_chromium_contextual_relationship_cohort() -> None:
             raise
         assert evidence["passed"] == evidence["total"] == 2 * len(slugs), (
             slugs,
-            [item for item in evidence["results"] if item["status"] != "passed"],
+            [(item["unit"], item["width"], item.get("error"))
+             for item in evidence["results"] if item["status"] != "passed"],
         )
         totals = {
             key: sum(item["counts"][key] for item in evidence["results"])
             for key in ("includes", "peripherals", "controllerTargets")
         }
         assert totals["includes"] > 0, (slugs, totals)
-        with sqlite3.connect(root / "data/generated/infinity.db") as db:
+        with sqlite3.connect(root / "data/generated/army.db") as db:
             peripheral_counts = {
                 table: db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
                 for table in (
@@ -445,8 +446,8 @@ def test_live_chromium_spec_ops_source_charts() -> None:
     playwright_module = pytest.importorskip("playwright.sync_api")
     root = Path(__file__).resolve().parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -563,8 +564,21 @@ def test_live_chromium_spec_ops_source_charts() -> None:
                                     pytrace=False,
                                 )
                             assert chart.locator(".source-choice-chart").count() == 1
-                            assert chart.locator("summary").first.inner_text().endswith(
-                                f"Source Unit #{source_id}"
+                            source_id_label = chart.locator(
+                                ".source-choice-chart summary .developer-only"
+                            )
+                            assert source_id_label.inner_text().strip() == (
+                                f"· Source Unit #{source_id}"
+                            )
+                            assert not source_id_label.is_visible()
+                            assert "Army source version" not in chart.inner_text()
+                            page.evaluate(
+                                "() => document.documentElement.dataset.developerMode = 'true'"
+                            )
+                            assert source_id_label.is_visible()
+                            assert "Army source version" in chart.inner_text()
+                            page.evaluate(
+                                "() => document.documentElement.dataset.developerMode = 'false'"
                             )
                             assert chart.locator(".source-choice-list li").count() == total
                             assert chart.locator("a[href^='/skills/']").count() > 0
@@ -574,7 +588,7 @@ def test_live_chromium_spec_ops_source_charts() -> None:
                             assert chart.locator(
                                 "a[href='/skills/request-specball']"
                             ).count() == 1
-                            assert "Army source version" in chart.inner_text()
+                            assert "Army source version" not in chart.inner_text()
                             assert page.evaluate(
                                 "document.documentElement.scrollWidth <= window.innerWidth + 1"
                             ), (slug, width)
@@ -590,7 +604,7 @@ def test_live_chromium_spec_ops_source_charts() -> None:
 
 def test_optional_mode_source_selectors_are_nonempty() -> None:
     root = Path(__file__).resolve().parents[1]
-    path = root / "data/generated/infinity.db"
+    path = root / "data/generated/army.db"
     assert _optional_source_candidates(path, "specops")
     assert _optional_source_candidates(path, "reinforcement")
     with pytest.raises(ValueError, match="Unsupported source selector"):
@@ -599,7 +613,7 @@ def test_optional_mode_source_selectors_are_nonempty() -> None:
 
 def test_complex_unit_cohort_has_nonempty_published_profile_variants() -> None:
     root = Path(__file__).resolve().parents[1]
-    slugs = _complex_unit_cases(root / "data/generated/infinity.db")
+    slugs = _complex_unit_cases(root / "data/generated/army.db")
     assert len(slugs) == len(set(slugs)) == 3
     assert all(slug not in ("", None) for slug in slugs)
 
@@ -613,8 +627,8 @@ def test_live_chromium_unit_detail_matrix_when_available(matrix: str) -> None:
     pytest.importorskip("playwright.sync_api")
     root = Path(__file__).resolve().parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -648,24 +662,26 @@ def test_live_chromium_unit_detail_matrix_when_available(matrix: str) -> None:
         if matrix == "core_default":
             result = verify_case(base_url, slugs=DEFAULT_SLUGS, channel="chrome")
             assert result["passed"] == result["total"] == len(WIDTHS) * len(DEFAULT_SLUGS), (
-                [entry for entry in result["results"] if entry["status"] != "passed"]
+                [(entry["unit"], entry["width"], entry.get("error"))
+                 for entry in result["results"] if entry["status"] != "passed"]
             )
             return
 
         if matrix == "core_rich":
-            rich_slugs = _complex_unit_cases(root / "data/generated/infinity.db")
+            rich_slugs = _complex_unit_cases(root / "data/generated/army.db")
             rich_widths = (*WIDTHS, 768)
             rich = verify_case(
                 base_url, slugs=rich_slugs, channel="chrome", widths=rich_widths,
             )
             assert rich["passed"] == rich["total"] == len(rich_widths) * len(rich_slugs), (
                 rich_slugs,
-                [entry for entry in rich["results"] if entry["status"] != "passed"],
+                [(entry["unit"], entry["width"], entry.get("error"))
+                 for entry in rich["results"] if entry["status"] != "passed"],
             )
             return
 
         if matrix == "distance":
-            source_db = root / "data/generated/infinity.db"
+            source_db = root / "data/generated/army.db"
             with sqlite3.connect(source_db) as db:
                 distance_slugs = tuple(row[0] for row in db.execute(
                     "SELECT DISTINCT lu.slug FROM profile_payload_skill_extras AS x "
@@ -739,7 +755,7 @@ def test_live_chromium_unit_detail_matrix_when_available(matrix: str) -> None:
 
         # The source corpus, rather than a hardcoded display name or an
         # already-filtered API response, selects these optional-mode cases.
-        source_db = root / "data/generated/infinity.db"
+        source_db = root / "data/generated/army.db"
         base_url = f"http://127.0.0.1:{server.server_port}"
         specops_slug = _source_backed_optional_case(base_url, source_db, "specops")
         reinforcement_slug = _source_backed_optional_case(
@@ -916,8 +932,12 @@ def test_contextual_relationship_rows_fail_closed_on_missing_links_and_targets()
     }
     rows = [
         _row("Includes", "Heavy Option ×2", href="#loadout-101-42"),
-        _row("Peripherals", "Servant ×2 (Peripheral (Servant))"),
-        _row("Controller access", "Peripheral (Servant): Servant Unit", href="/units/servant"),
+        _row("Attached peripherals", "Servant ×2 (Peripheral (Servant))"),
+        _row(
+            "Selectable peripherals",
+            "Peripheral (Servant): Servant Unit — not automatically included",
+            href="/units/servant",
+        ),
     ]
     rows[2]["links"][0]["text"] = "Servant Unit"
     assert assert_relationship_rows(
@@ -927,13 +947,38 @@ def test_contextual_relationship_rows_fail_closed_on_missing_links_and_targets()
         (rows, set(), "Include target missing"),
         ([_row("Includes", "Heavy Option ×2", href="#loadout-999-42"), *rows[1:]],
          {"loadout-101-42"}, "missing Include link"),
-        ([rows[0], _row("Peripherals", "Other"), rows[2]],
+        ([rows[0], _row("Attached peripherals", "Other"), rows[2]],
          {"loadout-101-42"}, "missing Peripheral"),
-        ([rows[0], rows[1], _row("Controller access", "Other")],
+        ([rows[0], rows[1], _row("Selectable peripherals", "Other — not automatically included")],
          {"loadout-101-42"}, "missing Controller access type"),
     ):
         with pytest.raises(AssertionError, match=error):
             assert_relationship_rows(altered_rows, source, "101", anchors, "fixture")
+
+
+def test_included_peripheral_is_one_linked_row_not_two_source_rows() -> None:
+    source = {
+        "includes": [{
+            "loadout_payload_id": 72, "name": "KISS! (Repeater)", "quantity": 1,
+        }],
+        "peripherals": [{
+            "id": "peripheral:kiss-repeater", "name": "KISS! (Repeater)",
+            "quantity": 1, "type_label": "Synchronized",
+        }],
+    }
+    row = _row(
+        "Included peripherals", "KISS! (Repeater)",
+        href="#loadout-101-72",
+    )
+    row["text"] += " (Synchronized)"
+    assert assert_relationship_rows(
+        [row], source, "101", {"loadout-101-72"}, "bit-and-kiss",
+    ) == {"includes": 1, "peripherals": 1, "controllerTargets": 0}
+    with pytest.raises(AssertionError, match="unexpected or missing"):
+        assert_relationship_rows(
+            [row, _row("Attached peripherals", "KISS! (Repeater)")],
+            source, "101", {"loadout-101-72"}, "duplicated",
+        )
 
 
 def test_source_only_peripheral_has_no_inferred_type_in_browser() -> None:
@@ -943,11 +988,11 @@ def test_source_only_peripheral_has_no_inferred_type_in_browser() -> None:
         ]
     }
     assert assert_relationship_rows(
-        [_row("Peripherals", "Auxiliary ×2")], source, "101", set(), "source-only"
+        [_row("Attached peripherals", "Auxiliary ×2")], source, "101", set(), "source-only"
     )["peripherals"] == 1
     with pytest.raises(AssertionError, match="unreviewed type"):
         assert_relationship_rows(
-            [_row("Peripherals", "Auxiliary ×2 (—)")],
+            [_row("Attached peripherals", "Auxiliary ×2 (—)")],
             source, "101", set(), "source-only",
         )
 

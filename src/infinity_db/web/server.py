@@ -6,7 +6,9 @@ from socket import AF_INET, SOCK_STREAM, socket
 from socketserver import ThreadingMixIn
 from wsgiref.simple_server import WSGIServer, make_server
 
-from .app import create_app
+from infinity_db.database_set import select_database_directory
+
+from .app import create_app_from_database_set
 
 
 class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
@@ -29,16 +31,14 @@ def _ensure_port_is_available(host: str, port: int) -> None:
 
 
 def serve(
-    database_path: Path | None = None, *, host: str = "0.0.0.0", port: int = 8000,
+    db_dir: Path | None = None, *, host: str = "0.0.0.0", port: int = 8000,
 ) -> None:
     _ensure_port_is_available(host, port)
-    if database_path is None:
-        from infinity_db.checkout_runtime import select_checkout_database
-
-        database_path = select_checkout_database()
-    app = create_app(database_path)
+    selected = select_database_directory(db_dir)
+    app = create_app_from_database_set(selected)
     with make_server(host, port, app, server_class=ThreadingWSGIServer) as server:
-        print(f"InfinityDB database: {database_path}", flush=True)
+        print(f"InfinityDB database directory: {selected}", flush=True)
+        print(f"Snapshot revision: {app.snapshot_revision}", flush=True)
         print(f"InfinityDB: http://{host}:{server.server_port}", flush=True)
         print("Press Ctrl+C to stop.", flush=True)
         server.serve_forever()

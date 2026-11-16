@@ -22,7 +22,10 @@ class EquipmentCatalog:
     def __init__(self, database: Database, rules_database: RulesDatabase | None) -> None:
         self.database = database
         self.rules_database = rules_database
-        self._encodings = load_equipment_presentation_config()
+        embedded = database.equipment_presentation_encodings()
+        self._encodings = (
+            embedded if embedded is not None else load_equipment_presentation_config()
+        )
 
     def _records_by_slug(self) -> dict[str, dict[str, Any]]:
         if self.rules_database is None:
@@ -171,6 +174,36 @@ class EquipmentCatalog:
         if encoding is None:
             return None
         return self.database.logical_unit_ids_for_characteristic(encoding.characteristic)
+
+    def presentation_equipment_characteristic_ids(self) -> dict[str, int]:
+        """Map presentation-only Equipment slugs to source Characteristic IDs."""
+
+        result: dict[str, int] = {}
+        for encoding in self._encodings:
+            source_id = self.characteristic_filter_id_for_equipment(encoding.equipment_id)
+            if source_id is not None:
+                result[encoding.equipment_id] = source_id
+        return result
+
+    def characteristic_filter_id_for_equipment(self, item_ref: int | str) -> int | None:
+        """Return the source Characteristic backing presentation-only Equipment."""
+
+        if not isinstance(item_ref, str):
+            return None
+        if self.database.application_catalog_id("equipment", item_ref) is not None:
+            return None
+        encoding = self._encoding_by_slug().get(item_ref)
+        if encoding is None:
+            return None
+        characteristic = encoding.characteristic.casefold()
+        return next(
+            (
+                int(item["id"])
+                for item in self.database.list_unit_filter_values()["characteristics"]
+                if item["name"].casefold() == characteristic
+            ),
+            None,
+        )
 
     def enrich_unit(self, unit: dict[str, Any]) -> dict[str, Any]:
         """Link presentation characteristics to their canonical Equipment identity."""

@@ -20,7 +20,9 @@ export async function getJson(path, signal) {
     } catch {
       // Preserve the status-based message when an intermediary returns non-JSON.
     }
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 }

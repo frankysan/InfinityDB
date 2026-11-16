@@ -4,8 +4,9 @@ import {
   unitAdvancedFiltersOpen,
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
+import { createUnitMultiSelect, normalizeMultiSelection, parseMultiSelection } from "./unit-multiselect.js";
 import { readShareState, writeShareState } from "./share-state.js";
-import { createPanelSwitcher } from "./view-components.js";
+import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const PAGE_SIZE = 50;
 const number = new Intl.NumberFormat();
@@ -15,7 +16,8 @@ const elements = {
   skill: byId("skill-filter"), specialist: byId("specialist-filter"),
   equipment: byId("equipment-filter"), weapon: byId("weapon-filter"),
   troopType: byId("troop-type-filter"), classification: byId("classification-filter"),
-  characteristic: byId("characteristic-filter"),
+  characteristic: byId("characteristic-filter"), matchingScope: byId("matching-scope-filter"),
+  matchingScopeDescription: byId("matching-scope-description"),
   ava: byId("ava-filter"), avaMin: byId("ava-min-filter"), avaMax: byId("ava-max-filter"),
   avaMinValue: byId("ava-min-value"), avaMaxValue: byId("ava-max-value"),
   points: byId("points-filter"), pointsMin: byId("points-min-filter"), pointsMax: byId("points-max-filter"),
@@ -38,6 +40,42 @@ const elements = {
   next: [byId("next-page-top"), byId("next-page-bottom")],
   sort: document.querySelector("#table-container th"),
 };
+
+const AND_FILTER_KEYS = [
+  ["skillId", "skill"], ["equipmentId", "equipment"], ["weaponId", "weapon"],
+  ["troopType", "troop_type"], ["classification", "classification"],
+  ["characteristic", "characteristic"],
+];
+const ALL_AND_FILTERS = AND_FILTER_KEYS.map(([, key]) => key).join(",");
+const MATCHING_SCOPE_DESCRIPTIONS = {
+  profile: "All AND selections must occur on one Trooper profile and its compatible loadout.",
+  loadout: "Selections may occur on different profiles in one loadout or an explicitly included model. Alternate states need not be active together.",
+  unit: "Selections may occur across the logical Unit’s alternative configurations. Eligible but unselected Peripherals do not contribute.",
+  "": "This shared link retains the previous matching behavior. Choose a scope to use the new semantics.",
+};
+function renderMatchingScope() {
+  const legacy = elements.matchingScope.querySelector('option[value=""]');
+  if (!state.matchingScope && !legacy) {
+    elements.matchingScope.prepend(new Option("Legacy shared-link matching", ""));
+  } else if (state.matchingScope && legacy) {
+    legacy.remove();
+  }
+  elements.matchingScope.value = state.matchingScope;
+  elements.matchingScopeDescription.textContent = MATCHING_SCOPE_DESCRIPTIONS[state.matchingScope];
+}
+const normalizeAndFilters = (value) => AND_FILTER_KEYS
+  .map(([, key]) => key).filter((key) => value.split(",").includes(key)).join(",");
+
+const multiControls = Object.fromEntries([
+  ["skillId", elements.skill, "Skills"],
+  ["equipmentId", elements.equipment, "Equipment"],
+  ["weaponId", elements.weapon, "Weapons"],
+  ["troopType", elements.troopType, "Troop types"],
+  ["classification", elements.classification, "Classifications"],
+  ["characteristic", elements.characteristic, "Characteristics"],
+].map(([stateKey, element, label]) => [
+  stateKey, createUnitMultiSelect(element, label, applyFilters),
+]));
 
 const numericRangeControls = {
   ava: {
@@ -131,7 +169,7 @@ function renderOptionalUnitContext() {
     : "";
   context.textContent = differences.length
     ? `${correction}View differs from Settings: ${differences.join("; ")}.`
-    : `${correction}View matches optional-unit Settings.`;
+    : `${correction}View matches optional-unit Settings in the Settings menu.`;
 }
 
 function hasActiveFilters() {
@@ -141,11 +179,16 @@ function hasActiveFilters() {
     || state.ava || state.avaMin || state.avaMax
     || state.points || state.pointsMin || state.pointsMax
     || state.swc || state.swcMin || state.swcMax
-    || optionalUnitPreferenceDifferences().length > 0;
+    || optionalUnitPreferenceDifferences().length > 0
+    || state.andFilters !== ALL_AND_FILTERS || state.matchingScope !== "profile";
 }
 
 function domainFilterIdentifier(value) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? value : "";
+}
+
+function domainMultiFilterIdentifiers(value) {
+  return parseMultiSelection(value).join(",");
 }
 
 function integerFilterValue(value, { max = Number.MAX_SAFE_INTEGER } = {}) {
@@ -286,7 +329,7 @@ function updateNumericRangeFromInput(control, changed) {
 }
 
 function readLocation() {
-  const { params } = readShareState("units");
+  const { params, source } = readShareState("units");
   const optionalUnits = readOptionalUnitLocation(params);
   const offset = Number(params.get("offset") || 0);
   const armyId = params.get("army_id") || "";
@@ -313,14 +356,21 @@ function readLocation() {
   return {
     armyId: domainFilterIdentifier(armyId),
     declaredFactionId: /^\d+$/.test(declaredFactionId) ? declaredFactionId : "",
-    skillId: domainFilterIdentifier(skillId),
+    skillId: domainMultiFilterIdentifiers(skillId),
     specialist: ["standard", "domination", "supplies", "firefight"].includes(specialist)
-      ? specialist : "",
-    equipmentId: domainFilterIdentifier(equipmentId),
-    weaponId: domainFilterIdentifier(weaponId),
-    troopType: domainFilterIdentifier(troopType),
-    classification: domainFilterIdentifier(classification),
-    characteristic: domainFilterIdentifier(characteristic),
+      ? "standard" : "",
+    equipmentId: domainMultiFilterIdentifiers(equipmentId),
+    weaponId: domainMultiFilterIdentifiers(weaponId),
+    troopType: domainMultiFilterIdentifiers(troopType),
+    classification: domainMultiFilterIdentifiers(classification),
+    characteristic: domainMultiFilterIdentifiers(characteristic),
+    matchingScope: params.has("matching_scope")
+      ? (["profile", "loadout", "unit"].includes(params.get("matching_scope"))
+        ? params.get("matching_scope") : "profile")
+      : source === "none" ? "profile" : "",
+    andFilters: params.has("and_filters")
+      ? normalizeAndFilters(params.get("and_filters") || "")
+      : source === "none" ? ALL_AND_FILTERS : "",
     ava: avaExact,
     avaMin: avaExact ? "" : integerFilterValue(avaMin, { max: 99 }),
     avaMax: avaExact ? "" : integerFilterValue(avaMax, { max: 99 }),
@@ -353,6 +403,8 @@ function writeLocation(replace = false) {
   if (state.troopType) params.set("troop_type", state.troopType);
   if (state.classification) params.set("classification", state.classification);
   if (state.characteristic) params.set("characteristic", state.characteristic);
+  if (state.andFilters) params.set("and_filters", state.andFilters);
+  if (state.matchingScope) params.set("matching_scope", state.matchingScope);
   if (state.ava) params.set("ava", state.ava);
   if (state.avaMin) params.set("ava_min", state.avaMin);
   if (state.avaMax) params.set("ava_max", state.avaMax);
@@ -372,13 +424,12 @@ function writeLocation(replace = false) {
 function syncFilters() {
   elements.army.value = state.armyId;
   elements.search.value = state.search;
-  elements.skill.value = state.skillId;
+  renderMatchingScope();
+  for (const [key, control] of Object.entries(multiControls)) control.setValue(state[key]);
+  for (const [key, name] of AND_FILTER_KEYS) {
+    multiControls[key].setMode(state.andFilters.split(",").includes(name) ? "and" : "or");
+  }
   elements.specialist.value = state.specialist;
-  elements.equipment.value = state.equipmentId;
-  elements.weapon.value = state.weaponId;
-  elements.troopType.value = state.troopType;
-  elements.classification.value = state.classification;
-  elements.characteristic.value = state.characteristic;
   elements.extended.checked = state.extended;
   elements.ava.value = state.ava;
   elements.points.value = state.points;
@@ -466,26 +517,14 @@ function catalogFilterValue(item) {
 }
 
 function normalizeCatalogFilterState(items, stateKey) {
-  const current = state[stateKey];
-  if (!current || !/^\d+$/.test(current)) return false;
-  const item = items.find((candidate) => (
-    String(candidate.id) === current
-    || candidate.source_ids?.some((sourceId) => String(sourceId) === current)
-  ));
-  if (!item) return false;
-  const replacement = catalogFilterValue(item);
-  if (replacement === current) return false;
+  const replacement = normalizeMultiSelection(state[stateKey], items);
+  if (replacement === state[stateKey]) return false;
   state[stateKey] = replacement;
   return true;
 }
 
 function normalizeUnitFilterState(items, stateKey) {
-  const current = state[stateKey];
-  if (!current || !/^\d+$/.test(current)) return false;
-  const item = items.find((candidate) => String(candidate.id) === current);
-  if (!item?.slug || item.slug === current) return false;
-  state[stateKey] = item.slug;
-  return true;
+  return normalizeCatalogFilterState(items, stateKey);
 }
 
 function populateCatalogFilter(element, items, label, displayName = (item) => item.name) {
@@ -542,6 +581,14 @@ function renderDeclaredMembershipContext(data) {
 }
 
 function renderUnits(data) {
+  for (const [key, catalog] of [
+    ["skillId", "skills"], ["equipmentId", "equipment"], ["weaponId", "weapons"],
+    ["troopType", "troop_types"], ["classification", "classifications"],
+    ["characteristic", "characteristics"],
+  ]) {
+    multiControls[key].setBaselineCounts(data.baseline_usage_counts?.[catalog] ?? null);
+    multiControls[key].setCounts(data.prospective_counts?.[catalog] ?? data.usage_counts?.[catalog]);
+  }
   renderUnitRows(elements.list, data.items, { extended: state.extended });
   renderAvailabilitySummary(data);
   renderDeclaredMembershipContext(data);
@@ -579,10 +626,8 @@ async function load() {
   const signal = controller.signal;
   const currentRequest = ++requestNumber;
   showPanel(elements.loading);
-  elements.unitCount.textContent = "—";
-  elements.unitCountShown.replaceChildren();
-  elements.unitCountFiltered.replaceChildren();
-  elements.unitCountFilteredTotal.textContent = "";
+  for (const key of Object.keys(multiControls)) multiControls[key].setCounts(null);
+  elements.unitCount.setAttribute("aria-busy", "true");
   elements.summary.textContent = "Loading units…";
   try {
     if (!armiesLoaded) {
@@ -602,12 +647,20 @@ async function load() {
       populateCatalogFilter(elements.skill, skills.items, "Skills");
       populateCatalogFilter(elements.equipment, equipment.items, "Equipment");
       populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
+      multiControls.skillId.setItems(skills.items);
+      multiControls.equipmentId.setItems(equipment.items.map((item) => ({
+        ...item, hidden: ["cube", "cube-2"].includes(item.slug),
+      })));
+      multiControls.weaponId.setItems(weapons.items);
       populateCatalogFilter(
         elements.troopType, unitFilters.troop_types, "Troop types",
         (item) => item.display_name || item.name,
       );
       populateCatalogFilter(elements.classification, unitFilters.classifications, "Classifications");
       populateCatalogFilter(elements.characteristic, unitFilters.characteristics, "Characteristics");
+      multiControls.troopType.setItems(unitFilters.troop_types, (item) => item.display_name || item.name);
+      multiControls.classification.setItems(unitFilters.classifications);
+      multiControls.characteristic.setItems(unitFilters.characteristics);
       populateNumericFilter("ava", unitFilters.numeric?.ava);
       populateNumericFilter("points", unitFilters.numeric?.points);
       populateNumericFilter("swc", unitFilters.numeric?.swc);
@@ -624,11 +677,15 @@ async function load() {
       return load();
     }
     renderUnits(data);
+    elements.unitCount.setAttribute("aria-busy", "false");
   } catch (error) {
     if (signal.aborted || currentRequest !== requestNumber) return;
+    elements.unitCount.setAttribute("aria-busy", "false");
+    for (const key of Object.keys(multiControls)) multiControls[key].setCounts(undefined);
     elements.errorMessage.textContent = error instanceof TypeError
       ? "Could not reach InfinityDB. Check your connection and try again."
-      : error.message || "Something went wrong. Please try again.";
+      : collectionLoadMessage(error, "units");
+    console.error("Could not load Unit explorer", error);
     elements.summary.textContent = "Unable to load units";
     showPanel(elements.error);
   }
@@ -638,10 +695,13 @@ function applyFilters() {
   clearTimeout(searchTimer);
   const next = {
     armyId: elements.army.value, search: elements.search.value.trim(),
-    skillId: elements.skill.value, specialist: elements.specialist.value,
-    equipmentId: elements.equipment.value, weaponId: elements.weapon.value,
-    troopType: elements.troopType.value, classification: elements.classification.value,
-    characteristic: elements.characteristic.value,
+    skillId: multiControls.skillId.value(), specialist: elements.specialist.value,
+    equipmentId: multiControls.equipmentId.value(), weaponId: multiControls.weaponId.value(),
+    troopType: multiControls.troopType.value(), classification: multiControls.classification.value(),
+    characteristic: multiControls.characteristic.value(),
+    matchingScope: elements.matchingScope.value,
+    andFilters: AND_FILTER_KEYS.filter(([key]) => multiControls[key].mode() === "and")
+      .map(([, name]) => name).join(","),
     ava: avaExactFilterValue(elements.ava.value),
     avaMin: numericRangeStateValue(
       "ava", numericRangeControls.ava, elements.avaMin,
@@ -676,6 +736,7 @@ function applyFilters() {
     ...state, ...next, offset: 0, optionalUnitInvalid: false,
   };
   elements.clear.disabled = !hasActiveFilters();
+  renderMatchingScope();
   renderOptionalUnitContext();
   writeLocation();
   load();
@@ -686,7 +747,8 @@ function clearFilters() {
   state = {
     ...state, armyId: "", declaredFactionId: "", search: "", offset: 0,
     skillId: "", specialist: "", equipmentId: "", weaponId: "",
-    troopType: "", classification: "", characteristic: "",
+    troopType: "", classification: "", characteristic: "", andFilters: ALL_AND_FILTERS,
+    matchingScope: "profile",
     ava: "", avaMin: "", avaMax: "", points: "", pointsMin: "", pointsMax: "",
     swc: "", swcMin: "", swcMax: "",
     ...optionalUnitFilters(),
@@ -724,6 +786,7 @@ function resetNumericRangeAndApply(control) {
 
 elements.filters.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); });
 elements.army.addEventListener("change", applyFilters);
+elements.matchingScope.addEventListener("change", applyFilters);
 for (const filter of [
   elements.skill, elements.specialist, elements.equipment, elements.weapon,
   elements.troopType, elements.classification, elements.characteristic,

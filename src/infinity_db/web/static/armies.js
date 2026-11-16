@@ -1,7 +1,7 @@
 import { getArmies } from "./api.js";
 import { shareStateHref } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
-import { createPanelSwitcher } from "./view-components.js";
+import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
@@ -193,7 +193,8 @@ async function initialize() {
     render(payload.items || []);
   } catch (error) {
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || "Could not load the Army overview.";
+    elements.errorMessage.textContent = collectionLoadMessage(error, "Army overview");
+    console.error("Could not load Army overview", error);
     show(elements.error);
   }
 }

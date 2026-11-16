@@ -160,6 +160,67 @@ function extendedProfilesRow(unit, columnCount) {
   return row;
 }
 
+function matchDescription(context) {
+  const profile = context.profile_name || "";
+  const loadout = context.loadout_name || "";
+  if (profile.toLocaleLowerCase() === loadout.toLocaleLowerCase()) return profile;
+  return [profile, loadout].filter(Boolean).join(" · ");
+}
+
+function matchingContexts(unit) {
+  const evidence = unit.matching_contexts;
+  if (!evidence?.examples?.length) return null;
+  const details = document.createElement("details");
+  details.className = "unit-match-contexts";
+  // The enclosing table row is navigable; this disclosure must remain independent.
+  details.addEventListener("click", (event) => event.stopPropagation());
+  const summary = document.createElement("summary");
+  const sharedName = evidence.total === evidence.examples.length
+    && evidence.examples.every((context) => (
+      matchDescription(context) === matchDescription(evidence.examples[0])
+    ));
+  const count = `${evidence.total} `
+    + (evidence.total === 1 ? "configuration" : "distinct configurations");
+  summary.textContent = sharedName
+    ? `Matched: ${matchDescription(evidence.examples[0])} · ${count}`
+    : `Matched: ${count}`;
+  details.append(summary);
+  const list = document.createElement("ul");
+  for (const context of evidence.examples) {
+    const item = document.createElement("li");
+    if (!sharedName) {
+      const title = document.createElement("span");
+      title.className = "unit-match-context-name";
+      title.textContent = matchDescription(context);
+      item.append(title);
+    }
+    const parts = [];
+    if (context.points != null) parts.push(`${context.points} pts`);
+    if (context.swc != null) parts.push(`${context.swc} SWC`);
+    for (const category of ["weapons", "equipment", "skills"]) {
+      const names = (context.highlights || [])
+        .filter((entry) => entry.category === category)
+        .map((entry) => entry.name);
+      if (names.length) parts.push(`${category[0].toUpperCase() + category.slice(1)}: ${names.join(", ")}`);
+    }
+    if (parts.length) {
+      const description = document.createElement("span");
+      description.className = "unit-match-context-details";
+      description.textContent = parts.join(" · ");
+      item.append(description);
+    }
+    list.append(item);
+  }
+  const remainder = evidence.total - evidence.examples.length;
+  if (remainder > 0) {
+    const remaining = document.createElement("li");
+    remaining.textContent = `${remainder} more matching configurations`;
+    list.append(remaining);
+  }
+  details.append(list);
+  return details;
+}
+
 /** Render catalog unit records with the shared Unit explorer presentation. */
 export function renderUnitRows(container, units, { extended = false } = {}) {
   const fragment = document.createDocumentFragment();
@@ -169,7 +230,7 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
     const faction = unit.display_faction?.slug;
     if (faction) row.classList.add(`unit-row--faction-${faction}`);
     row.addEventListener("click", (event) => {
-      if (!event.target.closest("a")) {
+      if (!event.target.closest("a, .unit-match-contexts")) {
         const url = `/units/${unit.public_slug || unit.id}`;
         window.infinityNavigate ? window.infinityNavigate(url) : window.location.assign(url);
       }
@@ -199,6 +260,8 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
     }
     nameContent.append(unitSymbol(unit.symbol_path), nameLink);
     nameCell.append(nameContent);
+    const matches = matchingContexts(unit);
+    if (matches) nameCell.append(matches);
     const armyCell = document.createElement("td");
     armyCell.className = "table-column--descriptor";
     const armyList = document.createElement("div");

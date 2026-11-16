@@ -295,18 +295,6 @@
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
-            "id": "its-season-18-en-pdf",
-            "kind": "pdf",
-            "title": "ITS Season 18: Overheat (English)",
-            "version": "2026.09.01",
-            "publishedDate": "2026-09-01",
-            "localPath": "data/pdf/its/its-18-rules-v2026.09.01-en.pdf",
-            "sha256": "9e16874924112e62d51acf78d622f5c0cf6196064cc36f003b515de9dc448baf",
-            "pageCount": 132,
-            "authority": "primary",
-            "url": "https://experience.corvusbelli.com/en/infinity/its-rules"
-        },
-        {
             "id": "wiki-en-20260926-200832",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
@@ -24093,8 +24081,7 @@
                     "Wounds and applicable States are shared between the Initial and Enhanced Profiles."
                 ],
                 "restrictions": [
-                    "An Army List cannot include more than one Trooper with Infinity Spec-Ops.",
-                    "ITS Season 18 prohibits ordinary Spec-Ops in official tournaments; the optional TEAM-OPS Extra does not permit this Special Skill. This season-specific restriction does not remove the core N5.3 [[skill:request-specball|Request SpecBall]] rules."
+                    "An Army List cannot include more than one Trooper with Infinity Spec-Ops."
                 ]
             },
             "labelIds": [
@@ -24115,16 +24102,6 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 98,
                     "section": "Infinity Spec-Ops"
-                },
-                {
-                    "sourceId": "its-season-18-en-pdf",
-                    "page": 26,
-                    "section": "Spec-Ops"
-                },
-                {
-                    "sourceId": "its-season-18-en-pdf",
-                    "page": 28,
-                    "section": "Team-Ops"
                 }
             ],
             "relations": [
@@ -24180,8 +24157,7 @@
                     "This is a single SpecBall drop for the Spec-Ops profile change, not [[skill:request-speedball|Request Speedball]], which calls two different Tokens under its own conditions."
                 ],
                 "sourceNotes": [
-                    "**English printing discrepancy:** The English N5.3 p. 98 says 'Requesting a Speedball' in the SpecBall Effects introduction. Spanish N5.3 p. 98 instead says 'Solicitar un SpecBall.' The procedure that follows concerns one SpecBall, so the two separate Skill procedures must not be conflated.",
-                    "**ITS applicability:** ITS Season 18 p. 26 forbids ordinary Spec-Ops at official tournaments. Its optional TEAM-OPS Extra (p. 28) is separate and does not permit the Spec-Ops Skill; Request Tacball does not substitute for this core SpecBall procedure."
+                    "**English printing discrepancy:** The English N5.3 p. 98 says 'Requesting a Speedball' in the SpecBall Effects introduction. Spanish N5.3 p. 98 instead says 'Solicitar un SpecBall.' The procedure that follows concerns one SpecBall, so the two separate Skill procedures must not be conflated."
                 ]
             },
             "labelIds": [
@@ -24197,16 +24173,6 @@
                     "sourceId": "n5-core-v5.3-es-pdf",
                     "page": 98,
                     "section": "Solicitar SpecBall"
-                },
-                {
-                    "sourceId": "its-season-18-en-pdf",
-                    "page": 26,
-                    "section": "Spec-Ops"
-                },
-                {
-                    "sourceId": "its-season-18-en-pdf",
-                    "page": 28,
-                    "section": "Team-Ops"
                 }
             ],
             "review": {

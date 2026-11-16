@@ -10,7 +10,6 @@ from infinity_db.database.repository import Database, accent_insensitive_key
 from infinity_db.domain_references import public_slug_for_reference, rule_record_public_reference
 from infinity_db.domain_slugs import route_slug_from_typed_domain_id
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.trait_wiki_references import load_trait_wiki_references
 
 _SIGNED_MODIFIER = re.compile(r"^(?P<base>.+?)\s*\((?P<modifier>[+-]\d+)\)$")
 
@@ -51,7 +50,18 @@ class TraitCatalog:
     def __init__(self, database: Database, rules_database: RulesDatabase | None) -> None:
         self.database = database
         self.rules_database = rules_database
-        self._wiki_references = load_trait_wiki_references()
+        embedded = (
+            rules_database.trait_wiki_links_payload()
+            if rules_database is not None else None
+        )
+        if embedded is not None:
+            self._wiki_references = embedded
+        else:
+            # Existing v10–v13 releases retain their packaged mapping until
+            # the coordinated P2.6 cutover; v14 never imports this loader.
+            from infinity_db.trait_wiki_references import load_trait_wiki_references
+
+            self._wiki_references = load_trait_wiki_references()
         self._records: list[dict[str, Any]] | None = None
         self._exact: dict[str, dict[str, Any]] | None = None
         self._prefixes: list[tuple[str, dict[str, Any]]] | None = None

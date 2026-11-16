@@ -3,7 +3,7 @@ import { appendMaintainedText } from "./maintained-text.js";
 import { rulesCitationList } from "./rules-reference.js";
 import { silhouetteReferenceSet } from "./silhouette-diagrams.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
-import { createPanelSwitcher } from "./view-components.js";
+import { createPanelSwitcher, referenceLoadMessage } from "./view-components.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -132,7 +132,8 @@ async function load() {
     render(payload.items);
   } catch (error) {
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || "Please try again.";
+    elements.errorMessage.textContent = referenceLoadMessage(error, "glossary");
+    console.error("Could not load glossary", error);
     show(elements.error);
   }
 }

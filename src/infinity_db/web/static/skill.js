@@ -6,7 +6,7 @@ import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
-import { tableViewport } from "./view-components.js";
+import { referenceLoadMessage, tableViewport } from "./view-components.js";
 import { exactVariantRuleIds, exactVariantUsageSection } from "./variant-usage.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
@@ -358,7 +358,8 @@ if (!skillId) {
   }).catch((error) => {
     if (error.name === "AbortError") return;
     name.firstChild.textContent = "Skill unavailable";
-    status.textContent = error.message || "Could not load this skill.";
+    status.textContent = referenceLoadMessage(error, "Skill");
+    console.error("Could not load Skill detail", error);
   });
 }
 window.addEventListener("optionalunitschange", () => {

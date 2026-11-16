@@ -6,13 +6,13 @@ from typing import cast
 
 import pytest
 
-from tools import pytest_startup_profile
-from tools.pytest_startup_profile import (
+from tools.testing import pytest_startup_profile
+from tools.testing.pytest_startup_profile import (
     XdistStartupProfile,
     _runner_launch_timestamp,
     incompatible_loadgroup_versions,
 )
-from tools.test_sections import load_test_sections, section_for_module
+from tools.testing.test_sections import load_test_sections, section_for_module
 
 
 @pytest.mark.parametrize(
@@ -68,7 +68,7 @@ def test_test_section_markers_are_stable_and_named_from_sections() -> None:
     assert sections["web"].marker == "section_web"
     assert section_for_module("test_database", sections) == sections["model"]
     assert section_for_module("test_web", sections) == sections["web"]
-    assert section_for_module("test_symbol_manifest", sections) == sections["assets"]
+    assert section_for_module("test_symbol_publication", sections) == sections["assets"]
 
 
 def test_xdist_startup_timing_tracks_ready_collection_and_first_test() -> None:

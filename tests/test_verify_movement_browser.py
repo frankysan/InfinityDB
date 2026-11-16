@@ -3,16 +3,19 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
 import pytest
 
+from infinity_db.database_set import validate_database_set
 from infinity_db.web import create_app
 from tools.browser_wsgi_transport import route_browser_page
-from tools.promote_movement_reference import ARMY, ROOT, RULES
-from tools.release_rules_export import load_release_deployed_objects
 
+ROOT = Path(__file__).resolve().parents[1]
+ARMY = Path("data/generated/army.db")
+RULES = Path("data/generated/rules_n5.db")
 ORIGIN = "http://infinitydb-movement.test"
 
 
@@ -411,10 +414,8 @@ def test_shared_movement_geometry_cover_and_terrain_family_browser_acceptance(
     chrome: Any, width: int,
 ) -> None:
     """V1S-033E integrates the four published rule families and ordinary search."""
-    published = load_release_deployed_objects(
-        ROOT / "data/generated/deployed-objects.json", ROOT / ARMY, ROOT / RULES,
-    )
-    assert published is not None  # Only the exact release-matched artifacts qualify.
+    selected_set = validate_database_set(ROOT / "data/generated")
+    assert selected_set["deployedObjects"] > 0  # Current matched embedded projection.
     app = create_app(ROOT / ARMY, rules_database_path=ROOT / RULES)
     page = chrome.new_page(viewport={"width": width, "height": 900})
     route_browser_page(page, app, ORIGIN)

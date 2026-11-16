@@ -3,9 +3,9 @@
 **Project domain:** Project infrastructure
 
 This document owns **local check procedures, focused test selection, phased
-execution and retained dated validation evidence**. The older 1.0 acceptance
-entries below apply to their stated revisions and artifacts; they are not
-current TODO items or proof of post-deployment success. Hosted workflow
+execution and retained dated validation evidence**. Dated acceptance
+entries apply only to their recorded revisions and artifacts; they are not
+current TODO items or proof of a later release or deployment. Hosted workflow
 requirements belong in [CI](ci.md), release approval and production
 verification in [releasing](releasing.md).
 
@@ -16,6 +16,120 @@ asset policy, worker selection and optional reporting.
 The type-check stage explicitly passes the runner's interpreter to Pyright for dependency
 resolution, so invoking the virtual-environment Python works without first activating that
 environment in the shell.
+
+## Unit Explorer Peripheral attachment and option review — 2026-11-15
+
+The pinned `JSON 20260929-114335.zip` Army snapshot contains 58 Army
+sources, 279 Peripheral filter definitions and 818 profile/loadout
+Peripheral attachments. No Peripheral filter definition supplies a structured
+Skills, Equipment, Weapons or Characteristics payload. The exact-name
+Skill/Equipment/Weapon suffix audit found only three missing capability
+occurrences: the reviewed KISS! (Repeater) Equipment 63 additions.
+
+The materialized A/C/B scope fixture verifies that included Peripheral
+capabilities remain separate from their Controller; profile/loadout
+Includes contribute at Same loadout, whereas enabled Unit-option properties
+and their uniquely resolved Include targets contribute only at Anywhere in
+Unit. Disabled option attachments are excluded, and targets
+belonging to another source Unit or ambiguously repeated in one Army/Unit
+cannot supply properties. Alternate source profiles remain separate at
+Same profile, while Same loadout combines only one group's selected loadout.
+The reviewed identity contract independently retains 56 embedded
+entities, 279 Army-local mappings, 17 Unit-backed source mappings, and four
+Controller access pools. A Unit-backed Peripheral remains a distinct logical
+Unit; access-pool eligibility does not transfer its Skills to the Controller.
+The source `compatible` and `habilities` fields are still opaque; no
+Army/group compatibility or extra abilities are inferred from them.
+Focused verification passed 16 scoped-filter, 22 Peripheral identity and
+18 Peripheral relationship tests. The fixture and snapshot-bound audit
+establish conservative filter behavior, not complete list-building legality
+or missing upstream semantic data.
+
+## Unit Explorer filter performance — 2026-11-15
+
+Windows development checkout based on `cd688672`, with the scoped Unit-option
+correction present, using `data/generated/army.db` (9,175,040 bytes). The
+`tools.performance.benchmark_runtime` cases ran 3 independent cold and 6
+identical cached samples per case. Median cold scoped AND/prospective-count
+queries were 1,069 ms (profile), 1,166 ms (loadout), 1,097 ms (unit).
+With the scoped index prebuilt by a different filter request, a fresh,
+uncached query took 226 ms, 243 ms and 214 ms respectively. Identical-query
+cache timings are not representative of changing selections. This is
+focused local performance evidence, not the v1.1.0 release gate.
+
+## Tooling/workspace cleanup L7 closeout — 2026-11-14
+
+**Accepted revision:** `1063096f51a3050594039cba84b1515d90a4ff0b`
+on `dev/tooling-workspace-cleanup`. The exact-SHA hosted workflows all passed:
+[Source checks](https://github.com/frankysan/InfinityDB/actions/runs/43620863274)
+(Windows, macOS, Ubuntu, Python 3.11/3.14, and Ubuntu 24.04/26.04 pinned
+determinism), [Installed wheel smoke](https://github.com/frankysan/InfinityDB/actions/runs/43620863263),
+and [Deployment smoke test](https://github.com/frankysan/InfinityDB/actions/runs/43620863358).
+The superseded 1.0 review evidence reference edits were reverted before
+acceptance because that validation manifest is included in the pinned
+runtime source-input fingerprint.
+
+Local focused checks at the same revision passed: source-review tests
+**23/23**, documentation stage and Git whitespace check; full
+`tools.verify_deployment_assets` validated **808/808** published SVGs,
+**807/807** browser-referenced SVGs, and reviewed source/publication parity;
+the ephemeral checkout server and offline runtime-semantic comparison
+both passed **41/41** pinned routes against the complete Army/Rules/ITS set.
+These checks establish cleanup integration, not a new release or deployment.
+
+Legitimate placement exceptions remain: ordinary test/OS/virtualenv scratch,
+external producer/Syncthing staging, host-specific secrets and the deployed
+`metrics_history` persistent volume. Historical ignored-source remnants and
+separately reviewed raw evidence are not silently deleted. Current paths are
+owned by [architecture](architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
+and [data guidance](../data/README.md#current-paths-and-behavior).
+
+## Complete-set release-candidate browser verifier
+
+`tools.verify_release_candidate_browser` compares an explicit release version,
+the static fingerprint and the **complete Army/Rules/ITS database identity**
+against the selected server before and after representative Unit-detail browser
+cases. It validates the selected directory through the same complete-set
+validator as serving, including embedded publications, schemas, integrity and
+matched build/source provenance. A missing or invalid ITS database blocks the
+gate before network/browser work. Changes to the local selected set or static
+fingerprint during the check also block acceptance.
+
+Use one `--db-dir` containing the three runtime databases; its default is the
+checkout's `data/generated/`. The former individual `--army-db`/`--rules-db`
+selectors and two-path Python API are retired for this gate. Other research
+tools and explicit low-level fixture APIs retain their independently documented
+contracts. An alternate directory never falls back to the checkout's databases.
+
+For an already-running candidate, replace the version, origin and `RUN_ID`
+with its pinned values:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_release_candidate_browser --db-dir data/generated --base-url http://127.0.0.1:8000 --expected-version VERSION --channel chrome --json-output local/validation/project-infrastructure/release-candidate/RUN_ID/acceptance.json
+```
+
+The optional JSON receipt is written only on success. Its selected file must
+be new: the verifier rejects an existing file or symlink **before** runtime
+and browser work, and uses exclusive creation after postflight checks to
+prevent an intervening writer from truncating earlier evidence. Select a
+fresh `local/validation/` run-ID directory for every attempt, keeping
+accepted receipts and failed/incomplete diagnostics separate. If filesystem
+writing fails, CLI acceptance is blocked; any partially created **new**
+receipt requires inspection rather than reuse. Omitting `--json-output`
+still runs the verification without writing a receipt. Existing explicit
+legacy output paths are not migrated or deleted.
+
+Retain successful receipts with the pinned candidate evidence while
+acceptance is open. This command starts no server,
+build, acquisition or deployment. Complete-set identity plus selected Unit
+cases does not establish whole-reference completeness, all browser surfaces or
+post-deployment acceptance. The nested preflight and postflight `status` values
+are `exact-runtime-revision-match-not-source-completeness`; they describe the
+selected complete runtime revision, not a two-database pair.
+
+Focused regressions live in `tests/test_verify_release_candidate_browser.py`,
+including missing/invalid/mismatched ITS inputs, ITS-only byte changes, local
+drift and real loopback Chromium preflight/DOM/postflight acceptance.
 
 ## 1.0.1 release preparation
 
@@ -97,15 +211,21 @@ checks before commit. Exact-SHA hosted Source/Wheel/Deployment/Cross-browser
 acceptance, release dating, tagging and deployment remain separate release
 checklist obligations.
 
-## Focused release validation after a verified baseline
+## Release-specific validation after a development baseline
 
-Finalize README, version and changelog metadata **before** the release PR.
-For subsequent documentation or independent-test changes, run
-`python -m tools.release_metadata`, Ruff and the affected pytest selectors
-before considering full validation. The hosted Source workflow independently
-requires a green four-workflow baseline; without it, the complete Source
-matrix runs. This does not exempt the exact-SHA browser, wheel or deployment
-gates. See [the CI policy](ci.md#risk-based-source-validation).
+During development, focused tests remain appropriate for narrow changes.
+For release preparation, however, [the release checklist](releasing.md#mandatory-pre-merge-release-sign-off)
+now requires a **local full-suite pass with required assets** and an
+**isolated running Docker deployment** before merge, in addition to
+the normal lint/type/docs/build and metadata checks. Hosted Source
+matrix reuse, installed-wheel smoke and container smoke remain independent
+checks, not substitutes for those local release gates.
+
+Finalize README, version and changelog metadata **before** the release PR;
+validate them with `python -m tools.ci.release_metadata`. If a late change
+affects runtime or tests, obtain fresh relevant local evidence and repeat
+the mandatory release gates for that corrected candidate.
+See [the CI policy](ci.md#risk-based-source-validation).
 
 ## Agent coordination safety acceptance
 
@@ -194,22 +314,23 @@ On Linux/macOS use `.venv/bin/python` instead.
 
 ## Read-only development status
 
-At a task boundary, use the small repository-local status command instead of
-manually repeating unrelated inventory and monitoring queries:
+When useful, inspect development status with the optional read-only
+repository-local command instead of repeating unrelated inventory queries:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.dev_status
-.\.venv\Scripts\python.exe -m tools.dev_status --json
+.\.venv\Scripts\python.exe -m tools.dev.dev_status
+.\.venv\Scripts\python.exe -m tools.dev.dev_status --json
 ```
 
 On Linux/macOS use `.venv/bin/python`. `--offline` skips both network/monitor
 lookups, returning local Git, V1S and VD/VR data only. This command **never
 writes Git state, selects or retires work, starts tests, synchronizes checkouts,
 or dispatches CI**. It reads current `docs/TODO.md` through the maintained
-V1S parser and reads the active queue/thresholds from
+V1S parser and reads active deferred checks from
 `docs/validation-queue.md`. The reported next actionable V1S is only
-advisory; no active agent assignment is stored, and the explicit V1S selection
-gate still applies. A read-only report does not drain a due validation queue.
+advisory; no active agent assignment is stored. Queue counts and oldest-item
+ages are informational: they do not create validation deadlines or initiate
+test execution.
 
 When online, the command checks the existing Windows MCP monitor's loopback
 `/api/status` endpoint (default port 8766; override with `--monitor-port`).
@@ -259,7 +380,7 @@ profiles retain their existing Python/data-only stage sets.
 
 The documentation stage first runs the lockfile-pinned `markdownlint-cli2` dependency
 with the project's `.markdownlint.json` rules, excluding local material,
-dependencies and reports. It then runs `tools.check_doc_links` with the
+dependencies and reports. It then runs `tools.ci.check_doc_links` with the
 same Python interpreter as the check runner to validate relative Markdown
 paths and heading anchors across **all Git-tracked Markdown files**, including
 nested references, plus new `docs/*.md` drafts before staging. Without Git
@@ -268,7 +389,7 @@ The link checker excludes ignored private files, does not access external
 URLs, validate application routes or substitute for browser acceptance;
 it checks ordinary inline links and reference definitions, not arbitrary
 embedded HTML. Its file count can differ from Markdownlint's glob selection.
-The final docs-stage command, `tools.check_v1_backlog`, checks only the
+The final docs-stage command, `tools.ci.check_v1_backlog`, checks only the
 tracked V1S register's static structure. It needs no Git history or ignored
 inputs, and it does **not** automatically choose a task or approve closeout.
 Install the Markdownlint dependency **explicitly** before `docs` or `--all`:
@@ -289,15 +410,17 @@ build step is part of the application's runtime or packaging.
 
 ## V1S backlog checks
 
-The static V1S register check is part of the regular `docs` stage. The
-completed 1.0 development register currently has **zero active V1S entries**;
-do not run a task-selection command with a null ID. Only if a numbered task is
-reopened, run the following selection check. It examines every earlier open ID
-across workstreams and fails unexplained skips:
+The historical V1S check remains part of the regular `docs` stage. With
+no active V1S entries, the old register heading need not remain in TODO;
+unscoped V1S task declarations still fail validation. If a numbered V1S
+task is reopened, restore the `Pre-planned 1.0 execution slices` heading
+before adding it. Do not run task selection with a null ID. The selection
+check examines every earlier open ID across workstreams and fails
+unexplained skips:
 
 ```powershell
-$taskId = (.\.venv\Scripts\python.exe -m tools.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --select $taskId
+$taskId = (.\.venv\Scripts\python.exe -m tools.dev.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable
+.\.venv\Scripts\python.exe -m tools.ci.check_v1_backlog --select $taskId
 ```
 
 A user-directed priority exception is permitted **only** when the selected
@@ -317,9 +440,9 @@ acceptance evidence in the eventual commit. After committing, audit the
 introducing history from a deliberately chosen ancestor revision:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --base HEAD --target-state index
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --base HEAD --target-state worktree
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --base HEAD~1 --enforce-closeout
+.\.venv\Scripts\python.exe -m tools.ci.check_v1_backlog --base HEAD --target-state index
+.\.venv\Scripts\python.exe -m tools.ci.check_v1_backlog --base HEAD --target-state worktree
+.\.venv\Scripts\python.exe -m tools.ci.check_v1_backlog --base HEAD~1 --enforce-closeout
 ```
 
 The `HEAD~1` example checks only the most recent first-parent commit; use
@@ -371,7 +494,7 @@ To catch undeclared dependencies and reliance on ignored local evidence before
 committing, use the isolated mode after staging the intended candidate:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/ci_preflight.py --isolated -- -n auto
+.\.venv\Scripts\python.exe tools/ci/ci_preflight.py --isolated -- -n auto
 ```
 
 `tools/run_checks.py --all` and `--profile all` include this isolated validation
@@ -408,7 +531,7 @@ declaration when a developer already has that package installed.
 For a quick packaging/untracked check without repeating pytest or installing dependencies:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/ci_preflight.py --skip-pytest
+.\.venv\Scripts\python.exe tools/ci/ci_preflight.py --skip-pytest
 ```
 
 `--skip-wheel` omits the wheel audit and installed-wheel smoke; combining the skip switches exercises
@@ -449,15 +572,18 @@ python tools\run_checks.py --stage lint src/infinity_db/web tests/test_web.py
 python tools\run_checks.py --stage type
 ```
 
-The Phase 1 V1S backlog checker is a separate offline structural check; it does
-not yet perform Git-history closeout or task-selection validation:
+The backlog checker runs as part of the `docs` stage. It validates the
+active TODO's checkboxes and optional task IDs; when an explicit Git base
+is supplied, it also detects removed open tasks and can enforce numbered
+V1S closeout evidence. The historical V1S selection/retirement workflow
+is described in [V1S backlog checks](#v1s-backlog-checks).
+Run it independently when inspecting a proposed backlog edit:
 
 ```powershell
-python -m tools.check_v1_backlog
+python -m tools.ci.check_v1_backlog
 ```
 
-It reads the designated execution-slice section from `docs/TODO.md` without
-requiring Git. Use `--todo PATH` to inspect another Markdown backlog file.
+Use `--todo PATH` to inspect another Markdown backlog file.
 
 Positional targets are passed to pytest/Ruff for their respective stages. The `docs` stage
 always checks the configured Markdown set; `docs`, `type`, `build`, `rules`, and `preflight` ignore positional
@@ -465,9 +591,9 @@ targets. The runner accepts its documented options and test paths/node IDs, not 
 pytest flags. For keyword selection or other pytest-specific options, invoke pytest directly.
 
 **Check-report safety:** `--report` without a filename writes a timestamped
-transcript under `reports/`. Prefer placing test selectors **before**
-`--report`, or use `--report=reports/filename.txt` for an explicit
-output file. The runner also recognizes a Python test target immediately
+transcript under `local/reports/checks/`. Prefer placing test selectors
+**before** `--report`, or use
+`--report=local/reports/checks/filename.txt` for an explicit output file. The runner also recognizes a Python test target immediately
 following a bare `--report`, preserving it as a test selector instead of
 opening it as the destination. Reports cannot overwrite Python/source
 files or any Git-tracked file. This protection addresses a 2026-11-02
@@ -500,82 +626,2064 @@ python -m pyright
 
 Do not report Ruff/Pyright as run when those tools are unavailable in the active environment.
 
+### P1 migration semantic baseline
+
+The snapshot-pinned semantic baseline established during P1.3 is a focused,
+offline 41-route comparison for Army/Rules database restructuring.
+Use `python -m tools.runtime_semantic_baseline --check --identical-artifacts`
+for the current tracked DBs, or specify `--army-db` and `--rules-db`
+without `--identical-artifacts` to compare a rebuilt database set.
+It protects JSON source/citation semantics and Battleground SVG geometry
+but is **not** a visual browser or Docker acceptance test.
+Run `tests/test_runtime_semantic_baseline.py` for its guardrail tests.
+
+For a complete embedded candidate, use the shared startup factory through:
+
+```powershell
+.venv\Scripts\python.exe -m tools.runtime_semantic_baseline --check --db-dir local/complete-dbs --route-alias "/static/restrictions-reference.json=>/api/restrictions/chart"
+```
+
+`--db-dir` requires current complete projections and recorded matched build
+provenance before probing routes. It cannot be combined with individual database
+paths or initial baseline capture, and never selects a different directory on
+failure. The route alias is the reviewed static-to-API Restrictions migration;
+the pinned response/geometry assertions still apply. This does not change normal
+serving defaults or establish visual-browser, Docker or release acceptance.
+
+### Selected runtime database-set validation
+
+**Project domains:** Data processing, Project infrastructure
+
+`infinity-db database-health --db-dir PATH --json` checks one explicit
+supported runtime directory with full SQLite integrity and either
+embedded source-paired facts or older matched JSON publications. The
+[data lifecycle](../data/README.md) owns the current two-/three-/four-file contract and the limits of this check. The command operates offline,
+does not require a raw archive, and reports unhealthy/missing data without
+creating files or selecting another runtime directory.
+
+The complete builder and `create_app_from_database_set` call the same validator
+with `require_complete=True`. Their additional gate requires Army v31, Rules v17
+and recorded matched build provenance. `tests/test_database_set_builder.py`
+checks current complete startup, exact selected paths and rejection of partial
+schemas/unrecorded provenance, while retaining all unchanged-output and
+interrupted-build recovery checks. `tests/test_database_set.py` additionally
+checks that complete startup rejects a transitional set and never creates a
+missing selected directory. The ordinary health CLI retains the supported-layout
+profile until the coordinated default cutover.
+
+Run `tests/test_database_set.py` for selected-directory health, unchanged
+input bytes, missing/corrupt artifacts, unsupported schema/application IDs,
+stale publications, embedded Army mismatch and incompatible CLI selections.
+`tests/test_app_cli.py` retains the individual Army/raw health contract;
+`tests/test_deployed_object_storage.py` covers source-built v10 candidates,
+checkout publication and Docker-bundle assembly using the shared verifier.
+These focused checks do not establish actual Docker, Linux or hosted CI
+acceptance or the final SQLite-only cutover.
+
+`tests/test_database_set_builder.py` exercises input identity, source/code
+changes, matched/tampered provenance, repeatable selected outputs, preservation
+of unrelated files, source overwrite rejection, pre-publication failures,
+interrupted mixed-set rejection and rerun recovery. Its orchestration fixtures
+stand in for the Army/Rules generation phases using shipped runtime data;
+normalization/export semantics remain covered by the existing CLI/curated tests.
+
+**2026-11-09 initial v10 Windows acceptance:** Two real offline complete builds from the
+pinned Army ZIP SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`
+produced identical bytes for all four runtime artifacts and matched shared
+provenance. The rebuilt set passed all 41 P1.3 semantic baseline paths.
+Its 116 source warnings matched the existing anomaly baseline; these were not
+newly accepted source changes. This is local current-format build evidence,
+not cross-platform byte acceptance, an actual Docker run or hosted approval.
+
+**Rules v11 embedding:** `tests/test_variant_usage_storage.py` round-trips all
+151 committed groups and 10,923 exact source rows, including equivalent TAGCom
+spellings, ordered extras and source-only shared-option exclusions. It checks
+API/ETag parity, missing/corrupt tables, invalid reviewed coordinates, duplicate
+source identities, Army mismatch and export failure preservation. The six
+`tests/test_verify_embedded_variant_usage_browser.py` cases reuse the existing
+Skill/Equipment Developer Mode journey at 1440/390/320 px, retaining API/DOM,
+page-error, failed-request, Unit-link and overflow assertions against v11 fixtures
+without variant JSON. These are direct browser checks, not visual or source meaning changes.
+The full-publication comparison uses the tracked v10 pair as migration evidence;
+retire that fixture dependency with the legacy path while preserving the relevant
+typed identity, source-parity and fail-closed assertions.
+
+The earlier complete-build acceptance compared repeated three-file v11 outputs,
+ran schema-aware health and bundle checks, and reused all 41 semantic baseline
+paths. P2.3 now emits two-file v12 outputs, with reviewed Weapon Chart citations
+embedded in Rules. `tests/test_weapon_profile_storage.py` verifies all 62 reviewed
+Weapons/69 exact profile modes against the existing publication, current PDF
+metadata, selected Army profile fingerprints, corrupted rows and absent sidecars.
+`tests/test_database_set_builder.py` covers source-binding, two-file publication,
+reproducibility and failed/interrupted replacement. Normal tracked v10 release
+regressions remain separate. Actual Docker, Linux and exact-SHA hosted acceptance
+remain separate and are not inferred from local focused checks.
+
+**2026-11-09 P2.3 Windows local verification (pre-commit):** Weapon storage
+10/10, two-file builder and HTTP citation read 16/16, v11 variant storage
+13/13, Weapon API 196/196, selected database-set 20/20, Rules database
+166/166 and legacy Weapon publication 19/19. Ruff, canonical Pyright,
+documentation and `git diff --check` passed. The real source-ZIP export,
+independent-platform reproducibility, Docker, Linux and exact-SHA hosted CI
+were not established by this batch. The builder regression uses shipped
+release-database fixtures, not a fresh Army normalization and source build.
+
+**2026-11-09 P2.3 real source-ZIP acceptance (Windows):** The opt-in
+`tools.data.verify_complete_database_build` diagnostic rebuilt the same immutable
+`data/raw/JSON 20260929-114335.zip` twice (archive SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`).
+Both runs performed lossless normalization, all 73 source validation checks
+(116 known baseline warnings), full v12 database-set health, matched build
+provenance, 62 exact reviewed Weapon identities/69 cited profiles, 151 variant
+groups, matched historical v10 citation semantics and live Weapon/variant HTTP
+reads. Byte-level hashes were **identical** between independent runs:
+`infinity.db` =
+`a2607403e924d02a36f72da88a7d65300e8a2de354365044ff46ca2a7c171fa6`;
+`rules.db` =
+`e06e24c22f1c8b82fe8f4be4c628df8c12b5fe95261349775d84c1b9ac055998`.
+Build-set ID:
+`f7615d25cd8590b4498c7493cdebf382593d1377861bbd8f48f905fbc63e5af2`.
+The two output directories and intermediate raw data were temporary under
+ignored `local/`; no tracked release artifacts were replaced. Re-run the
+opt-in diagnostic with
+`python -m tools.data.verify_complete_database_build "data/raw/JSON 20260929-114335.zip" --sha256 f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`.
+The historical citation builder and new maintained builder produced identical
+tracked publication bytes. These are Windows local checks, not cross-platform
+byte reproducibility, Docker, browser or hosted CI acceptance.
+
+**2026-11-09 P2.4 first slice, Restrictions chart (Windows local):**
+`tests/test_restriction_chart_storage.py` validates all six chart rows and
+14 separately normalized constraints, 4 ordered typed qualifiers, current
+source metadata, original JSON semantics and HTTP responses, v10 compatibility,
+absent/modified chart failure and no packaged-JSON reads for v13. The
+`tests/test_game_mode_source_table.py` browser checks exercise the
+new chart API at three viewport widths, including a simulated 503.
+The pinned `tests/test_runtime_semantic_baseline.py` continues to check
+original v10 artifacts and all migration baseline paths; its one authorized
+`/static/api.js` marker substitution recognizes the static-JSON to API
+fetch transition without weakening source or payload comparisons.
+
+The pinned source archive `JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+was independently built twice using `tools.data.verify_complete_database_build`
+into isolated ignored directories. Both complete v13/compatibility-15
+two-file outputs passed 73 Army normalization checks (116 known
+baseline warnings), full selected-set health, source/provenance matching,
+151 exact variant groups, 62 reviewed Weapons/69 chart citations and
+six chart rows. The returned chart API payload exactly matched the maintained historical
+chart JSON, and all 41 pinned runtime baseline routes passed in each build.
+The final source-collection mismatch rejection also passed its focused
+regression. Byte-identical output hashes were `infinity.db` =
+`9c53611e0e09898002c705e175e8c2b11f567b77ae15b4b8edb47b48c0a061ef`
+and `rules.db` =
+`abcf8a8cd21c9f891bcb450471c217791562224ea47844c12950d785bdd2093d`.
+Build-set ID:
+`4d7d6af4ff9ea95d04dd35eda4def7e5045b8ad63dd41499932dc599063ac921`.
+This proves local Windows reproducibility, not independent Linux,
+Docker or final default-serving cutover acceptance.
+
+**2026-11-09 P2.4 second slice, Trait Wiki links (Windows local):**
+`tests/test_trait_wiki_storage.py` (13/13) exercises the complete
+33-link relational publication, exact v10/v14 Trait detail API parity,
+absence of packaged JSON loader calls on v14, source ID/name/URL
+validation and missing/corrupted row/fingerprint failures.
+`tests/test_database_set_builder.py` (16/16) covers repeatable v14
+two-file publication and failed/partial destination isolation. The
+existing Trait Wiki reference suite passed 22/22, Rules database
+regressions 166/166 and v10 selected-set validation 20/20; Ruff,
+canonical Pyright (0 errors), documentation checks and `git diff --check`
+passed.
+
+The same pinned Army source ZIP and metadata were built twice through
+`tools.data.verify_complete_database_build`. Both opt-in Rules v14
+(compatibility 16) sets passed 73 Army normalization checks (116 known
+source warnings), full selected database-set validation, 151 variant
+groups, 62 reviewed Weapons/69 profile citations, 6 Restrictions chart
+rows, and all 33 reviewed Trait Wiki API links. Every one of the
+41 pinned P1.3 semantic baseline routes passed in **both** runs.
+The two independent complete builds were byte-identical:
+`infinity.db` =
+`fe8741e831782dd7c13c8ab7b5fbaced27d15eb50862f01947cd8a9a6ad5215a`;
+`rules.db` =
+`ae4e5888c4407a9dce4243be1f0941cc3bdb9e47e25f97703c2b96b8d5975fb0`.
+Build-set ID:
+`5ce9b54936df6ee29fb49d6d9e1ad9dce4d789b9112ee640828e479b982c4285`.
+No tracked generated database was changed. These runs prove Windows
+source-build reproducibility, not Linux, Docker or P2.6 serving cutover.
+
+**2026-11-09 P2.4 third slice, Combined Saving Roll profiles (Windows local):**
+`tests/test_combined_saving_roll_storage.py` (18/18) verifies six exact
+source-mode signatures on three Plasma Weapons, full Rules v15
+relational round trip, source PDF/Army pairing and content fingerprint,
+v10/v15 API parity for the Plasma and Feuerbach details, no packaged
+JSON read on v15, and rejection of missing, conflicting and malformed
+profiles. The standalone maintained JSON loader remains supported
+for source review and v10 compatibility. Existing `test_database_set_builder.py`
+passed 16/16, `test_database_set.py` 20/20,
+`test_rules_database.py` 166/166, the Plasma Critical suite 4/4,
+and the focused CatalogRules combined-roll projection 1/1.
+Ruff, canonical Pyright (zero errors/warnings), documentation and
+Git diff checks passed.
+
+The pinned immutable Army archive
+`JSON 20260929-114335.zip` SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`
+was rebuilt independently **twice** with stable source bytes.
+Both complete Rules v15/compatibility-17 two-file outputs passed
+73 source normalization checks (116 known baseline source warnings),
+selected-set integrity and provenance, 151 variant groups, 62 reviewed
+Weapons/69 profile citations, six Restrictions chart rows,
+33 reviewed Trait Wiki links and six exact Combined Saving Roll modes.
+Both passed all 41 pinned P1.3 runtime routes. The byte-identical hashes
+were `infinity.db` =
+`31d9d3c7f14ed89367f1c94311e54add1af9e3c9761aad7ffb6932e18f185761`,
+`rules.db` =
+`44bebcbf3bd5f70ec5ccf8b736605f446daec2e6cd96fe52a9948a2474627aad`.
+Build-set ID:
+`756d6a67d781ccc5565a7312b4988fd8eff87b6e1386c941bd1ddc30af1040d4`.
+A prior run whose code inputs were edited between attempts was
+correctly rejected by the byte-equality gate; it is not counted as
+reproducibility evidence. The stable repeatability run above passed.
+No tracked generated files were changed; this establishes local
+Windows opt-in acceptance, not Linux/Docker or P2.6 cutover.
+
+**2026-11-09 P2.4 fourth slice, reviewed Ammunition links (Windows local):**
+`tests/test_ammunition_reference_storage.py` (17/17) validates all
+16 Army Ammunition ID/name pairs, 11 base links, five ordered combined
+compositions (10 component relationships), exact v10/v16 HTTP
+and resolver parity, v16 serving without JSON loader calls, and
+fail-closed missing/malformed/mixed-source relational rows.
+`tests/test_database_set_builder.py` passed 16/16 after correcting
+the v16 validator's Windows SQLite connection lifetime;
+`tests/test_ammunition_publication_parity.py` passed 8/8,
+`tests/test_rules_database.py` passed 166/166 and
+`tests/test_database_set.py` passed 20/20.
+Ruff, canonical Pyright (0 errors, 0 warnings), documentation and
+Git diff checks also passed.
+
+Two complete isolated builds of immutable source archive
+`JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+each passed 73 Army normalization checks (116 known baseline source
+warnings), provenance and database-set health, 151 exact variant
+groups, 62 reviewed Weapons/69 profile citations, six Restrictions
+chart rows, 33 Trait Wiki links, six Combined Saving Roll profiles
+and 16 Ammunition link identities. All 41 pinned runtime baseline
+routes passed in both builds. The complete v16/compatibility-18
+two-file SQLite outputs were byte-identical:
+`infinity.db` =
+`2f3eaf2b42271f6b8e824dcdcb9459f0eab84190442af355e713144b25b47a74`;
+`rules.db` =
+`3f21f9b4650ff37addd2786cb503399b8ef9434719f0373bc2633fa8931a9486`.
+Build-set ID:
+`d9b7276fd78bde74e32a61621a1139576e8fd12314f2be53f20c0f9f4990a83d`.
+The current tracked v10 release artifacts were not modified; these
+results establish the opt-in Windows path, not Linux/Docker or
+P2.6 serving cutover acceptance.
+
+**2026-11-09 P2.4 fifth slice, reviewed Weapon Properties (Windows local):**
+`tests/test_weapon_property_storage.py` (17/17) validates all 12
+reviewed property definitions, ordered current-rule origins, exact
+nullable mode/source signatures, ordered original Trait strings,
+v10/v17 Glossary/search/Weapon HTTP parity with v17 JSON reads disabled,
+and fail-closed source/Army/profile/fingerprint corruption. The
+existing `tests/test_weapon_properties.py` passed 26/26,
+`tests/test_database_set_builder.py` 16/16,
+`tests/test_rules_database.py` 166/166, and
+`tests/test_database_set.py` 20/20. Ruff, canonical Pyright
+(zero errors/warnings), documentation checks and `git diff --check`
+passed.
+
+Two independent complete opt-in builds from pinned
+`JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced Rules v17 (compatibility 19) paired with the selected Army.
+Both passed 73 Army source normalization checks (116 known baseline
+warnings), selected-set health and provenance, 151 variant groups,
+62 reviewed Weapons/69 citations, six Restrictions chart rows,
+33 Trait Wiki links, six Combined Saving Roll profiles,
+16 Ammunition references and 12 Weapon Properties. All 41 pinned
+P1.3 runtime routes passed in both builds. The sets were
+byte-identical:
+`infinity.db` =
+`884219134b942e2ad389f5bab0ad0ebeba0464bcd4f29e3f96ba2125eca21076`,
+`rules.db` =
+`0feb0994c0d81860f119c6d81eedd5822232ec639da4d2aeba57e3632952e862`.
+Build-set ID:
+`94a51879eab0aba64e60a349cb1da036fda1f46f40a3289094fe9adcb796c9d1`.
+No tracked release databases were modified. This accepts the Windows
+opt-in path, not Linux/Docker or P2.6 default serving cutover.
+
+**2026-11-09 P2.4 sixth slice, Equipment presentation encodings (Windows local):**
+`tests/test_equipment_presentation_storage.py` (12/12)
+covers Cube/Cube 2.0 source characteristic mappings, Army v27
+SQLite read-model parity with v26, no maintained JSON read in
+v27 EquipmentCatalog, matching v27 Army/raw export generation,
+published content checksum and rejection of missing, duplicate,
+unrecognized or corrupted sources. The existing
+`tests/test_equipment_config.py` passed 2/2,
+`tests/test_database_set_builder.py` 16/16,
+`tests/test_database_set.py` 20/20, and the focused Cube
+HTTP/Unit-characteristic regression 1/1. Ruff, canonical Pyright
+(zero errors/warnings), documentation and Git diff checks passed.
+
+Two independent complete opt-in builds of the pinned immutable
+`JSON 20260929-114335.zip` source (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+each passed 73 Army normalization checks (116 known baseline
+warnings), the paired Army v27/compatibility-36 and Rules v17
+integrity/provenance checks, 151 variant groups, 62 reviewed
+Weapons/69 citations, six Restrictions chart rows, 33 Trait
+Wiki links, six Combined Saving Roll profiles, 16 Ammunition
+references, 12 Weapon Properties and two Equipment presentation
+encodings. All 41 pinned P1.3 runtime routes passed in both
+builds. The outputs were byte-identical:
+`infinity.db` =
+`c12a77d5ef9b67aefd16ae4e70ebd1cc4931f99322d5054d60edb74d997c7cd4`,
+`rules.db` =
+`8406bd463988072150c0f5224aea036ac33717bbffddbfbebd2b85cfb09230ed`.
+Build-set ID:
+`132848a42efa935fc6f10f919375dd72a169033f177e0117ee3e42621305f8a9`.
+No tracked release database files were modified. This accepts
+the local Windows opt-in path, not Linux/Docker or the P2.6
+serving/name cutover.
+
+**2026-11-09 P2.4 seventh slice, Army Skill source classifications (Windows local):**
+`tests/test_skill_classification_storage.py` passed 15/15,
+checking six exact reviewed Army source identities, numeric-or-slug
+compatibility, composite Skill catalog resolution, JSON-free v28
+SkillCatalog and Unit-detail presentation, Army/raw pairing, and
+fail-closed missing/duplicate/drifted identity, source and fingerprint
+checks. `tests/test_database_set_builder.py` passed 16/16,
+`tests/test_database_set.py` passed 20/20, and
+`tests/test_skill_config.py` passed 3/3, and
+`tests/test_app_cli.py` passed 22/22, including the database-health
+unsupported-schema regression. The v28 source identity helper passed canonical Pyright with
+zero errors and warnings; Ruff and documentation checks passed.
+
+Two independent, complete opt-in builds of pinned
+`JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced a paired Army v28/compatibility-37 and Rules v17 set.
+Both passed 73 Army normalization checks (116 known source warnings),
+selected-set integrity and provenance, 151 variant groups,
+62 Weapons/69 citations, six Restrictions rows, 33 Trait Wiki
+links, six Combined Saving Roll profiles, 16 Ammunition references,
+12 Weapon Properties, two Equipment presentation encodings
+and six reviewed Skill source classifications. All 41 pinned
+P1.3 runtime routes passed in each build. The two results were
+byte-identical: `infinity.db` SHA-256
+`5d76383a0ae16039476f335ab093edca523acc7e740cb38c9f2d6aefa5c1a558`,
+`rules.db` SHA-256
+`3626a0e0e13991444ae438b15c0662c300df2b62c8c12a1d9e4fabee7411a524`.
+Build-set ID:
+`1462b5b1f9ce4223bbdef7e399728623a71b88c44bb61acd694900a39ad26234`.
+The tracked v10 release files were untouched; Linux, Docker
+and P2.6 serving cutover remain separate acceptance gates.
+
+**2026-11-09 P2.4 eighth slice, Unit Explorer filter semantics (Windows local):**
+`tests/test_unit_filter_storage.py` passed 19/19, covering source-bound
+rows/reasons/order, paired health and compatibility, unchanged source facts,
+numeric/slug filter equivalence, combined/contextual membership, filter-choice
+HTTP parity without maintained JSON, invalid-input isolation and corrupt-data
+rejection. The related builder/set,
+Equipment/Skill storage, CLI, Skill configuration and existing database/web
+filter regressions passed another 95 tests (114 distinct focused tests total).
+Canonical Pyright reported zero errors/warnings; Ruff, documentation links/lint
+and Git whitespace checks passed.
+
+Two independent complete builds of pinned `JSON 20260929-114335.zip`
+(SHA-256 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced Army v29/compatibility 38 with Rules v17. Each passed
+73 normalization checks (116 known source warnings), selected-set integrity
+and provenance, all existing reviewed projection inventories, the two hidden
+characteristics and one ordered classification membership. Both passed all
+41 pinned P1.3 routes plus the classification/filter-values HTTP probes.
+The outputs were byte-identical: `infinity.db` SHA-256
+`5d8266ff043cb0e4efd0b8cf3d9a3ec786c92da6d27a98bfc068d2b97046923a`;
+`rules.db` SHA-256
+`aa854498cd4f0c4ef4b1f0997af9a740eb1067acf32b64c288efd64666e58ac5`.
+Build-set ID:
+`68d20bc8669a67a2cdf535b06d166c49fdfb8536aa9d3b6c3e6b6772d2171695`.
+Tracked release databases and default serving remain unchanged. This is local
+Windows opt-in acceptance; Linux, Docker and P2.6 cutover remain separate.
+
+**2026-11-09 P2.4 ninth slice, Army overview and historical identities (Windows local):**
+`tests/test_army_reference_storage.py` passed 26/26 across the focused
+storage and runtime-audit runs. These checks cover all 58 summaries, both
+historical identities, exact source digests/order, explicit parent identity,
+non-playability, API/search parity without authored JSON, invalid-input
+isolation, corrupt-row rejection and read-only runtime tracing. Related
+builder/set, Unit-filter, CLI, domain-slug and existing Army/API/search
+regressions passed another 92 tests. Seven runtime/separation audit tests
+also passed after adding probes for the current Skill, Unit-filter and Army
+reference readers (125 distinct focused tests total). This repairs the stale
+method inventory that failed Source run `42688197310` at `9b0630e5`; it does
+not relabel that failed hosted run as successful. Canonical Pyright,
+Ruff and documentation checks passed.
+
+Two independent complete builds of pinned `JSON 20260929-114335.zip`
+(SHA-256 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced Army v30/compatibility 39 with Rules v17. Each passed all
+73 normalization checks (116 known source warnings), selected-set health
+and provenance, existing projection inventories, 58 authored Army summaries
+and two historical identities. Both passed all 41 pinned P1.3 runtime routes
+plus exact Army-summary, historical non-playability and search-link checks.
+The two outputs were byte-identical: `infinity.db` SHA-256
+`f9aa1bbfd7eea4e3e146a9eafa4ca58cac6dd822249ed9e2ed0f46f9f8e2749f`;
+`rules.db` SHA-256
+`cbab3ccb272663921434eb24a24c23bfac44ca086885f3c575b5bf202e0af9f4`.
+Build-set ID:
+`aeeccb45b53710da1e067245682e1e66d77d74a8a3322aae7dd1b6207e10ba1d`.
+Tracked release databases and default serving remain unchanged; Linux,
+Docker and final cutover require their separate acceptance.
+
+**2026-11-09 P2.4 final slice, symbol mappings and cache identity (Windows local):**
+`tests/test_symbol_path_storage.py` passed 18/18 across storage and Chromium
+runs: all 2,019 keys/808 asset hashes round-trip exactly, paired health and
+source binding remain strict, invalid paths/assets and corrupt rows fail
+closed, a fresh subprocess starts v31 with manifest reads forbidden, and
+two selected projections keep independent HTML/module cache versions.
+The v31 Army overview also loaded in Chrome at 390 and 1280 pixels with
+matching version metadata, loaded symbols, no page/request/HTTP errors
+and no horizontal overflow. Related builder/set/audit, legacy symbol,
+candidate-identity, full web/API, CLI and reference regressions passed
+another 495 distinct cases (513 total). Canonical Pyright, Ruff and
+documentation checks passed. The preceding `848657a3` Source run
+`42690711332`, wheel run `42690711054` and deployment run `42690711307`
+all completed successfully; they validate that earlier SHA only.
+
+Two independent complete builds of pinned `JSON 20260929-114335.zip`
+(SHA-256 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced Army v31/compatibility 40 and Rules v17. Each passed
+73 normalization checks (116 known source warnings), selected-set health,
+provenance and all existing reviewed inventories, plus exact embedded symbol
+parity and actual hashes for all 808 SVGs. Both passed all 41 pinned P1.3
+routes. The resulting SQLite files were byte-identical:
+`infinity.db` SHA-256
+`385ed6d7c5df165ea8783c16fb9f6fd74b072aa90eee6af5ed6a9881edd47f14`;
+`rules.db` SHA-256
+`3e026d291a257cb4df202dd40b7baa94c68b4d403a4fb707baaa2b006bd0732c`.
+Build-set ID:
+`18514ab77a5295223432bb3c3a35aac7bba4fa70bd3deeeba118e23975c4544d`.
+P2.4 materialization is accepted at this opt-in Windows boundary. Tracked
+release files and default artifact selection were not changed; Linux,
+Docker and final serving cutover remain separate acceptance.
+
+**2026-11-09 installed-wheel compatibility correction after P2.4:**
+The v31 asset check initially rejected the deliberately asset-free legacy
+installation in hosted wheel run `42693677485` at `88d307ec`.
+Older manifest-backed Army schemas again permit absent SVGs while rejecting
+present but incorrect bytes; embedded v31 publications remain strict about
+both missing and corrupt assets. Ten focused asset/isolation tests passed.
+A freshly built wheel was installed offline into a disposable Windows
+environment outside the checkout; both normal and asset-free runtime modes
+passed, including installed CLI/configuration/database and HTTP probes.
+Ruff, Pyright and documentation checks passed. The failed hosted run remains
+failed; replacement-SHA hosted acceptance is separate.
+
+**2026-11-09 P2.5 first slice, embedded-only serving and image assembly:**
+The focused deployed-object/storage/database-set, deployment-script,
+two-file bundle, browser, web/API and CLI cohorts passed 432 distinct
+hermetic cases. Negative legacy input checks retained the output sentinel;
+current embedded-source binding, reviewed attributes/delivery provenance,
+all-object API behavior and Chromium navigation remained covered. Historical
+image-only assertions were removed; release-note and source-citation failure
+checks remain on the supported image path. Ruff and canonical Pyright passed.
+
+The Windows Docker Desktop Linux engine built a disposable image from the
+unchanged tracked v10 database set. Image ID:
+`sha256:e4ea3d816a82182a6260530b916c930691e9ca355a82894a269167cd3c627051`.
+The revised `verify-container-image.sh --published-assets` passed embedded
+database-set checks, complete packaged SVG/provenance validation, non-root
+read-only production startup and HTTP reference/citation/variant/release-note
+probes. The temporary container was removed by the verifier. This validates
+the current tracked-set image path, not the future P2.6 names/defaults or an
+opt-in v31 image. Shell syntax and documentation checks passed. No deployment
+was performed. Legacy build/migration commands and the standalone JSON verifier
+remain unfinished P2.5 work.
+
+**2026-11-09 P2.5 second slice, CI/preflight selected-set verification:**
+Source CI, cross-browser CI and clean-export preflight now call the read-only
+`database-health --db-dir data/generated` check in place of the historical
+deployed-object JSON build/check pair. Focused preflight, workflow and database-set
+tests passed **174 cases** with **one skipped**. Ruff, canonical Pyright (0
+errors), documentation lint/links/backlog and Git whitespace checks passed;
+the tracked runtime artifact/provenance verifier passed with SVG checks disabled.
+A direct Pyright invocation without the repository's required `--pythonpath`
+failed on missing environment imports; the canonical type stage passed.
+This is local Windows acceptance only, not hosted CI or an integrated Docker test.
+The remaining historical builder/migration interfaces are separate P2.5 work.
+
+**2026-11-09 P2.5 third slice, retired standalone deployed-object CLI:**
+The v8/v9 stage, promote and refresh dispatch plus loose JSON build/check CLI
+were removed. A direct module invocation now fails with an explicit retirement
+message; the programmatic source projection/serializer remains temporarily
+reachable for historical tests and unretired one-use tools. The current embedded
+source builder and read path were not changed. Focused deployed-object
+publication and storage suites passed **22 tests** (13 and 9 respectively),
+including the rejection/no-output regression, source identity/provenance and
+current v10 candidate/serving checks. Ruff, canonical Pyright (0 errors),
+documentation lint/links/backlog and Git whitespace checks passed. The tracked
+runtime provenance/artifact check passed with SVG validation disabled.
+This is local Windows acceptance; full hosted CI and final Docker/name cutover
+are separate integration checks.
+
+**2026-11-09 P2.5 fourth slice, embedded-only variant source builds:**
+The maintained variant source projection rejects Rules databases without
+source-matched embedded deployed objects even when a legacy JSON sidecar is
+present. Complete-set and maintained candidate/variant builders no longer
+supply that sidecar argument; a temporarily ignored optional argument keeps
+retirement-stage one-use callers importable. The source snapshot no longer
+conditionally hashes the legacy publication. Focused variant-usage tests
+passed **98 cases** including negative sidecar/output-preservation checks.
+The complete database-set builder suite passed **16 cases** on the initial
+candidate; after removing an unreachable legacy-only digest expression,
+the representative repeatable complete-build case passed again.
+The targeted v10 variant-publication storage test also passed.
+Ruff, canonical Pyright (0 errors), documentation checks, Git whitespace
+checks and tracked runtime provenance verification passed (SVG checks disabled).
+No tracked publication, deployment or final filename/default was changed.
+
+**2026-11-09 P2.5 fifth slice, retired historical terrain staging commands:**
+The standalone `stage_promoted_terrain_artifacts` and
+`verify_staged_release_pair` module entrypoints now fail explicitly instead
+of staging/validating legacy Rules/JSON release pairs. Their imported
+historical helpers remain temporarily available for the planned atomic
+tool/test deletion; no runtime or source-projection path was changed.
+Both CLI smoke invocations returned the expected retirement errors.
+Focused staging/helper regressions passed **11 tests** across
+`test_promoted_terrain_artifacts` (3),
+`test_verify_staged_release_pair` (5) and
+`test_legacy_staging_schema_guards` (3). Ruff, canonical Pyright (0 errors),
+documentation lint/links/backlog and Git whitespace checks passed.
+The plan records the five-file removal group, associated test-section
+registry updates and independently maintained source/integrity guards.
+This is command retirement, **not** physical helper/test file removal;
+no Docker or deployment validation was run for this slice.
+
+**2026-11-09 P2.5 sixth slice, physical legacy staging deletion:**
+At commit `15a2ed23`, the two superseded terrain staging/verification
+tools and their three historical test modules were physically deleted
+together with their three `config/testing/test-sections.json` entries.
+No active build, CLI, CI or deployment consumer required the removed tools.
+The old runnable reproduction instructions were replaced with historical
+provenance and a reference to Git history. Current maintained regressions
+on the synchronized Windows checkout passed **60 cases**:
+test-section discovery (15), Restrictions chart storage/API (15),
+selected database-set health (20), deployed-object storage/build/serving (9)
+and core Rules export provenance (1). Ruff, canonical Pyright (0 errors),
+documentation lint/links/backlog, Git whitespace and tracked runtime
+artifact/provenance verification passed (SVG checks disabled). The removal
+commit's hosted installed-wheel and deployment-smoke runs passed; Source
+checks were still in progress when reviewed. No full suite, direct Docker
+run or deployment was performed as part of this slice.
+
+**2026-11-09 P2.5 seventh slice, retired pre-promotion terrain proposal:**
+At `4dbbb0d3`, the maintained source audit started requiring both
+accepted Special Terrain / Access Width rules and their N5.3 citations;
+negative tests prove that removing both rule records or changing the
+Access Width source page fails closed. At `7330c310`, the one-use
+terrain reference stager, staging-only tests, and superseded proposal JSON
+were deleted together with the single test-section registry entry.
+The authoritative accepted definitions and exact source examples remain
+in curated Rules and its maintained tests, not a second proposal source.
+Post-deletion focused validation passed **56 tests**: source/PDF/API
+(20), test-section registry (15), selected database-set health (20)
+and core Rules export provenance (1). Ruff, canonical Pyright (0
+errors), docs lint/links/backlog, Git whitespace and tracked runtime
+artifact/provenance checks passed (SVG validation disabled).
+No direct Docker or full suite run was performed.
+
+**2026-11-10 P2.5 eighth slice, v9 profile/summary promoters:**
+Commit `dab737d1` deleted the completed Hackable and paragraph-layout
+v9 promotion modules without touching current curated Rules or release
+artifacts. Their retained assertions are independently covered by
+the bilingual Hackable PDF pin/source tests, fresh Rules export and
+published profile-help API, and curated long-summary paragraph test.
+The historical paragraph-only V1S-082 commands were removed from the
+maintained testing instructions. No staging-only test modules or
+test-section entries were attached to either retired module.
+Focused tests on the deletion commit: **5 passed** (Hackable EN/ES PDF
+pins, fresh Rules export/API, long-summary paragraphs and profile-help
+list). Ruff, canonical Pyright (0 errors), documentation lint/links/backlog,
+Git whitespace and tracked runtime provenance passed (SVG checks disabled).
+No full suite, direct Docker run or deployment was performed.
+
+**2026-11-10 P2.5 ninth slice, logical SQLite rebuild comparison:**
+`same_logical_rules_contents` now belongs to
+`infinity_db.sqlite_comparison`, independent of legacy v9 source
+promotion or JSON publication. It reads SQLite files in read-only mode,
+compares identity/encoding/page-size pragmas, exact schema objects and
+the multiset of every table's rows (including optimizer statistics),
+and returns false for missing or invalid files without creating them.
+`tests/test_rules_rebuild_logical_equality.py` tests the maintained
+contract directly, including cross-host header and row-order variance,
+schema drift, changed data and missing/invalid files. An older v9-only
+Lieutenant comparison case was retired because its useful insertion
+order invariant is now covered here. The legacy exporter re-exports
+the comparator temporarily for historical callers; it does not own
+this validation contract. Focused Windows checks passed **7 tests**:
+logical comparison (4), source-variant selection (1), the current
+selected-PDF pin/export invariant (1) and repeatable complete database-set
+build (1). Ruff, canonical Pyright (0 errors), docs lint/links/backlog and
+Git whitespace checks passed. No full suite, direct Docker run or
+deployment was performed.
+
+**2026-11-10 P2.5 tenth slice, standalone turn and Immunity staging:**
+The Game Sequence/Order Pool source test no longer imports the v9
+paired-publication promoter. It now checks bilingual PDF hashes,
+exact curated source identity/scope/citations, ordered turn and Order
+Pool semantics, SRC-031 disclosure, and current Rules/API/search parity.
+The former v9 paired-publication rebuild test was removed.
+The Plasma/Immunity staging script is superseded by independently
+maintained pinned source, Army Weapon, Rules and API tests for Enhanced
+and Critical cases. Focused tests passed **27 cases**: Game Sequence/Order
+Pool (5), Plasma Combined Saving Roll (3), Plasma Critical (4) and
+test-section registry (15). Ruff, canonical Pyright (0 errors),
+docs lint/links/backlog, Git whitespace and tracked runtime artifact
+provenance checks passed (SVG excluded). No full suite or direct
+Docker run was performed, and no deployment occurred.
+
+**2026-11-10 P2.5 eleventh slice, Cover/terrain-condition promoters:**
+The old v9 Rules/loose-object paired-publication and repeated-promotion
+tests were removed from `tests/test_cover_publication.py` and
+`tests/test_terrain_condition_publication.py`. Both suites now own exact
+accepted PDF citation sets, curated rule identities, role and current N5
+scope. Their remaining tests enforce reviewed Cover/Climb/Jump/Climbing
+Plus and Difficult Terrain/Saturation/Terrain semantics, pinned N5.3
+source evidence, composed Rules database parity, and public API, search
+and FAQ behavior. These remain current-purpose tests independent of the
+deleted migration entrypoints. Deterministic rebuilding and selected
+database-set integrity remain covered by the maintained builder/health
+suites; no historical loose-JSON interface was retained for its own test.
+Focused Windows validation passed **43 tests**: Cover (4), terrain
+conditions (3), test-section registry (15), complete selected-set
+repeatable build (1), and selected-set health/fail-closed behavior (20).
+Ruff, canonical Pyright (0 errors), docs lint/links/backlog, Git
+whitespace, and tracked runtime artifact/provenance checks passed
+(SVG verification excluded). No full suite, Docker run, or deployment
+was performed.
+
+**2026-11-10 P2.5 twelfth slice, ARO/movement/geometry v9 promoters:**
+The three accepted source and API suites now own their N5.3 citation
+tables and canonical record checks (identity, N5 scope, definition role),
+without importing historical v9 promoters. Their staged-pair rebuild and
+rollback-only tests were removed; equivalent current-purpose database
+set and logical SQLite comparison tests remain maintained separately.
+The shared responsive Chromium acceptance fixture now calls
+`validate_database_set` for embedded deployed objects before navigating
+the ARO/movement/geometry/Cover/Terrain family; no loose
+`deployed-objects.json` fallback is needed. Historical code and original
+publication evidence remain recoverable through Git history.
+Focused Windows validation passed **49 cases**: ARO (4), movement (3),
+geometry (4), shared responsive Chromium acceptance across three
+viewports (3), selected database-set health (20) and test-section
+registry (15). Ruff, canonical Pyright (0 errors), docs lint/links/backlog,
+Git whitespace and tracked runtime artifact/provenance checks passed
+(SVG validation excluded). The full suite, direct Docker validation and
+deployment were not performed.
+
+**2026-11-10 P2.5 thirteenth slice, source-variant v9 reviewers:**
+The five one-use Lieutenant, Terrain, Camouflage, Combat Jump and
+Infiltration source review/promote wrappers have been retired. Their
+`test_*_review_gate_*` cases reran the completed v9
+Rules/loose-deployed-object matched-publication rebuild verification,
+not independent current data semantics. The maintained
+`tests/test_audit_source_variant_inputs.py` continues to verify
+individual pinned Army source occurrence signatures, raw owner scope,
+approved typed extra effects, unresolved qualifiers (including
+Infiltration bare ReRoll and Religious Troop Total), and negative
+semantic mutations. No independent source finding was deleted.
+`infinity_db.sqlite_comparison` and `infinity_db.database_set`
+separately own current rebuild-equivalence and selected-set integrity;
+historical tool code is recoverable from Git.
+Focused Windows validation passed **138 tests**: the entire maintained
+source-variant module (99), read-only logical SQLite rebuild comparison
+(4), current selected database-set integrity/fail-closed behavior (20)
+and test-section registry (15). Ruff, canonical Pyright (0 errors),
+docs lint/links/backlog, Git whitespace and tracked runtime artifact/
+provenance verification passed (SVG excluded). No full suite, direct
+Docker test or deployment was performed.
+
+**2026-11-10 P2.5 fourteenth slice, Commlink v9 staging retirement:**
+The one-use Commlink paired-release stager and its synthetic pre-promotion
+rollback/tamper tests were retired. The optional Reinforcements annex
+test now uses a fresh current-format Rules export and checks three
+annex records plus Commlink's reviewed +1/+2 effects against active
+Rules. Maintained source-inventory, N4-origin authority boundaries,
+exact Army loadout provenance and curated fail-closed variant grammar
+remain independent of v9 promotion machinery. Historical command
+examples were converted to dated evidence, not runnable instructions.
+Focused validation passed **63 tests**: optional annex (4), Commlink
+source/fresh export (2), Reinforcements applicability (16), database-set
+health (20), test registry (15), and invalid Commlink variants (6).
+Ruff, canonical Pyright (0 errors), docs lint/links/backlog, Git
+whitespace and tracked runtime artifact/provenance checks passed
+(SVG validation excluded). No full suite, direct Docker test or
+deployment was performed.
+
+**2026-11-10 P2.5 fifteenth slice, citation migration stagers:**
+The 14 N5.3 source/manifest citations and four Hacking Device p.58
+citations are already accepted; their one-use v9 paired-publication
+stagers and stage/rollback-only tests were retired. The maintained
+14-citation audit now requires 0 pending / 14 migrated, preserving
+cross-manifest ownership, exact reviewed pages and pinned English PDF
+checks. The independent device/program chart audit now requires all
+four accepted p.58 citations and verifies the exact citation rows
+in the current Rules database. Restrictions are verified through
+relational chart storage and complete selected-set builds rather than
+an incomplete isolated Rules export or old v9 promotion gate.
+Focused Windows checks passed **51 tests**: 14-citation source audit
+(4), Hacking Device source/chart/Rules parity (11), Restrictions
+storage (15), selected-set health (20), repeatable complete builder
+(1). Ruff, canonical Pyright (0 errors), docs lint/links/backlog,
+Git whitespace and tracked runtime artifact/provenance checks passed
+(SVG excluded). No full suite, direct Docker run or deployment occurred.
+
+**2026-11-10 P2.5 sixteenth slice, v9 Restrictions transition retirement:**
+The completed v9 Restrictions/source-pin/variant metadata migration
+checker matrix and synthetic source-delta fixtures were retired along
+with the one-use `tools/restrictions_v9_release` stager/promoter.
+Maintained source variants now compare independently reviewed Lieutenant,
+Terrain, Combat Jump and Camouflage effects using fresh
+`export_rules_database` results and the currently selected Rules DB.
+The surviving `test_restriction_storage_candidate.py` cases protect
+supported v8/v9 reader and explicit CLI compatibility, plus reviewed
+PDF pin export. Relational Restrictions and complete database-set tests
+own ongoing integrity. Historical publication-rollback tests are no
+longer current development obligations; Git retains the old migration
+implementation. Focused Windows validation passed **170 tests**:
+source-variant semantics (99), Restrictions CLI/reader and PDF pins (17),
+relational Restrictions storage (15), selected database-set integrity
+(20), SQLite logical rebuild comparison (4), and test-section registry
+(15). Ruff, canonical Pyright (0 errors), docs lint/links/backlog,
+Git whitespace and tracked runtime artifact/provenance checks passed
+(SVG excluded). No full suite, direct Docker run or deployment occurred.
+
+**2026-11-10 P2.5 seventeenth slice, database-backed research boundaries:**
+Core-scenario and terrain/scenery audits now read explicitly selected embedded
+deployed objects and report Army/Rules file hashes. Their legacy JSON adapters
+are retired, and Pheroware citation parity uses canonical Rules export.
+Focused Windows validation passed **233 tests, zero skips** across
+`test_core_scenario_object_boundary.py`, `test_terrain_scenery_source_gaps.py`
+and `test_weaponry_catalog_api.py` (33.15 seconds). This includes independent
+database locations/names, CLI selection, malformed adjacent JSON, exact hash
+reporting, nonmutation, and rejection of missing files, v8 models, corrupt
+Rules, missing embedded tables and mismatched Army bytes. Existing source PDF,
+geometry, scoring, terrain-cell, citation and API checks also passed. Ruff,
+focused Pyright (0 errors), docs lint/links/backlog and Git whitespace passed.
+No full suite, Linux, Docker or hosted acceptance is implied.
+
+**2026-11-10 P2.5 eighteenth slice, completed release diagnostics:**
+Removed the one-use v9-to-v10 promotion path and its schema-preserving
+export/rebuild diagnostics, plus the physically retained Restrictions v9
+transition module whose callers/tests had already been retired. Current
+candidate build/check, checkout assembly and complete-set validation remain.
+The maintained logical SQLite comparator owns cross-host semantic comparison;
+frozen source evidence and hashes remain in the source audit and Git history.
+Focused Windows validation passed **223 tests, zero skips**: 109 storage,
+candidate/checkout, complete-builder, database-set, Restrictions compatibility,
+logical-comparison and deployment-script tests (168.44 seconds), followed by
+114 current source-variant and section-registry tests (43.32 seconds). Ruff,
+focused Pyright (0 errors), CLI help, docs lint/links/backlog, Git whitespace
+and tracked runtime artifact/provenance verification passed (SVG excluded).
+Current code/config/workflows have no imports of the retired modules.
+No full suite, Linux, Docker or hosted acceptance is implied. This internal
+migration-tool retirement needs no release-note entry.
+
+**2026-11-10 P2.5 nineteenth slice, retired deployed-object JSON adapters:**
+Removed the standalone JSON loader and publisher adapter after migrating all
+source/storage/browser consumers. Source-model, occurrence/reverse-use and
+embedded-release parity checks remain; the browser fixture now uses only
+matched databases. The shared storage guard retains valid object/source,
+attribute/provenance, delivery and Unit/Include context checks at insertion
+and read time. It rejects a self-referential Rules hash before staging.
+Focused Windows validation passed **96 distinct tests, zero skips**: 60 current
+source, storage, Restrictions, database-set and API/browser cases (95.18 seconds),
+seven additional embedded-row tampering cases (4.25 seconds), and 29 complete-build,
+variant-storage and section-registry cases (35.74 seconds). Chromium retained
+navigation, missing-value, request/page-error and overflow checks at
+1440/390/320 px. Ruff, focused Pyright (0 errors), docs lint/links/backlog,
+Git whitespace and tracked runtime artifact/provenance checks passed
+(SVG excluded). No full suite, Linux, Docker or hosted acceptance is implied.
+This internal adapter retirement needs no separate release-note entry.
+
+**2026-11-10 P2.5 twentieth slice and transition closeout:**
+Retired explicit v8/v9 Rules CLI builds and v1 exact-variant publications.
+Current builds preserve reviewed Restrictions/deployed objects, tracked-file
+write refusal and checkout assembly; all variant consumers use the v2-only
+loader without a deployed-object sidecar argument. Low-level source-semantic
+fixtures retain their independent exporter/read-model checks. Wheel smoke
+creates its controlled Rules fixture through the installed canonical API,
+preserving isolated CLI, configuration, normal and asset-free runtime coverage.
+Focused Windows validation passed **287 tests, zero skips**: 161 variant/source,
+CLI, Rules, wheel-isolation and variant-browser cases (62.03 seconds), followed
+by 94 storage, actual candidate/checkout assembly, database-set, deployment-script
+and section-registry cases (81.77 seconds), plus 32 release-note/metadata
+regressions (1.10 seconds). Source/browser checks retain every
+published group's canonical ownership, stale-pair refusal, Developer mode,
+request/page errors and overflow assertions at 1440/390/320 px. Rejection tests
+cover v1 and legacy fingerprint inputs without modifying files.
+An offline-built wheel (`1.0.1`, SHA-256
+`0a146f05b064b6ce1a2fcd92fe3064b6de5768248993f8b53ca59317edf0c20f`)
+passed normal and asset-free installed runtime smoke in a disposable environment
+outside the checkout. This is development packaging evidence, not publication.
+Ruff, focused Pyright (0 errors), docs lint/links/backlog, Git whitespace and
+tracked runtime artifact/provenance verification passed (SVG excluded).
+The finalized-release metadata command still rejects the pending 1.1.0
+heading and package-version difference, with exactly the same two errors as
+the starting revision; it is not a passed release gate or a new regression.
+This closes the bounded P2.5 transition; P2.6/P2.7/P2.8 retain filename/default
+cutover, assembly removal and final local/container integration acceptance.
+No full suite, Linux, hosted or release acceptance is implied.
+
+**2026-11-10 P2.6 preparation, shared complete-set startup:**
+The complete builder and application factory now share the validator's complete
+mode, requiring Army v31/Rules v17 and recorded matched provenance. The parity
+tool's `--db-dir` checks the selected set through this factory, rejecting mixed
+selectors, transitional/partial schemas, missing directories and unrecorded
+provenance without selecting fallback files or creating outputs.
+Focused Windows validation passed **49 tests, zero skips** across
+`test_database_set.py`, `test_database_set_builder.py` and
+`test_runtime_semantic_baseline.py` (101.57 seconds), including actual application
+composition, repeatable fixture builds, unchanged-output failure and interrupted
+replacement recovery. Ruff, focused Pyright (0 errors), docs lint/links/backlog,
+Git whitespace and tracked artifact/provenance checks passed (SVG excluded).
+A fresh offline build of pinned `JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+passed 73 normalization checks with the existing 116 source warnings. Its complete
+set passed shared validation and all **41 pinned semantic/HTML/SVG probes** through
+`--db-dir`, with the reviewed Restrictions static-to-API route alias.
+Build-set ID:
+`ba3dd0533872b8773a4fdbd209e99a6cce005759d273af18be1d4c7480a48baa`.
+The ignored alternate output had `infinity.db` SHA-256
+`111c134d8d8760c09157b7ceb713400510c68c6ae07803ad930ccab0d94cad4f`
+and `rules.db` SHA-256
+`989013625357d6d2762e48ca4b6ee39880997109e7d814fcc345f153da7c4dc7`.
+This was one real source build and focused startup/parity acceptance before
+the coordinated P2.6 cutover. It is retained as historical preparation evidence;
+it is not a cross-platform determinism result.
+
+**2026-11-10 P2.6 filename/default and shared serving cutover:**
+The default complete builder, CLI/WSGI directory selection, tracked
+`army.db`/`rules_n5.db`, Docker packaging, deployment scripts, CI and
+cache identity now use the same validated two-file set without filename
+or environment aliases. The source ZIP
+`JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`)
+produced **two byte-identical complete builds**, each with 41 pinned API,
+HTML and scenario geometry probes and all reviewed inventories intact.
+The tracked Army/Rules database hashes match the resulting
+`63b090d1e580`/`99650884f196` prefixes exactly. Full deployment-asset
+verification passed: **808/808** SVGs and **808/808** browser references,
+with embedded runtime data and source checks valid.
+
+**120 focused tests passed** across database-set, builder, CLI, deployment,
+release-scope and P1 semantic-baseline modules. Nine optional variant-browser
+cases were skipped because their ignored pinned raw archive was unavailable;
+they are not browser acceptance evidence. Ruff, Pyright (zero errors),
+documentation lint/links/backlog and Git whitespace passed. This completes
+the bounded P2.6 data/entrypoint cutover on `dev/v1.1.0`; it is not a full
+suite, Linux, hosted, independent local-server or Docker acceptance result.
+P2.7 owns residual publication-ceremony cleanup and P2.8 owns the final
+local/container integration check.
+
+**2026-11-10 P2.7 first slice, loose publication retirement:**
+The variant candidate tool no longer publishes JSON; source inspection requires
+an explicit paired `--raw-db`. The Weapon utility is now a read-only checker
+of the embedded Rules projection against maintained source reviews. The
+deployment validator rejects missing/mismatched embedded variants and Weapon
+citations without sidecar fallback. The determinism manifest hashes reviewed
+Weapon citation meaning in memory, rather than creating JSON output from
+the unrelated tracked release pair. Its normal fixture build and manifest
+generation passed; no tracked runtime databases were rebuilt or changed.
+
+Focused Windows validation: **183 passed, 2 skipped** across
+`test_variant_usage.py` (100 pass, 2 skip),
+`test_weapon_profile_publication.py` (24 pass),
+`test_verify_deployment_assets.py` (13 pass),
+`test_deployment_scripts.py` (43 pass), and
+`test_compare_determinism_manifests.py` (3 pass).
+Full deployment-asset verification passed with **808/808** published SVGs
+and browser references. Ruff, Pyright (zero errors), documentation
+lint/links/backlog and Git whitespace checks passed. This is focused
+tool/source/deployment integration evidence, not a full suite,
+independent Linux/Docker image, hosted CI or P2.8 acceptance.
+
+**2026-11-10 P2.7 second slice, runtime fallback removal:**
+The runtime no longer reads `variant-usage.json` or
+`weapon-profile-sources.json`, even for explicit low-level database
+fixtures. The selected-set validator rejects former v10/v11 JSON-dependent
+layouts, while v12–v16 two-file relational fixtures remain inspectable
+outside complete serving. Public runtime startup continues to require the
+current v31/v17 pair with shared provenance. API cache identity and
+release-candidate/baseline tooling hash the same canonical inventory of the
+selected database filenames and bytes. Obsolete file-loader tests have
+been removed or replaced with embedded source/corruption checks.
+
+Two independent full source-ZIP builds retained every reviewed inventory,
+passed 41 pinned API/geometry probes each, and produced byte-identical
+`army.db` and `rules_n5.db` outputs (expected SHA-256:
+`e306700aa2ea02729b25a82edb732bba74465daf7fadb09191c10f346d7e7dfe`
+and `26b27d6e4b2394d2535817e5b0e153d16dd98b42e864149ce67922164929f8f5`
+respectively). The regenerated tracked artifacts match both exact SHA-256
+hashes. `tools.verify_deployment_assets` passed with 808/808 SVGs and
+browser references, current source-input freshness and embedded citation
+matching. The isolated acceptance tool did not publish the results;
+`infinity-db build` regenerated the tracked pair. This completes P2.7;
+P2.8 remains separate local/Docker acceptance.
+
+Focused Windows results: **220 passed, 2 skipped** across database-set
+(18), variant-usage (98 pass/2 skip), variant storage (13), Weapon citation
+(14), deployed objects (12), complete builder (17), release-candidate
+browser (16), source-reference baseline (1), P1 semantic baseline (10),
+and CLI (21). Ruff and Pyright (zero errors) passed. This is not an
+independent Linux, deployed Docker, full-suite or hosted acceptance result.
+
+**2026-11-10 P2.8 local checkout and actual Docker hosting acceptance:**
+The complete P2.7 pair was built from pinned Army ZIP and was already
+byte-matched to the tracked artifacts. `tools.verify_checkout_server`
+launched the actual checkout CLI server on loopback (both normal default
+selection and explicit `--db-dir data/generated`), checked HTTP health
+and exact snapshot identity, and verified **41/41** pinned representative
+API/citation/HTML/JS/SVG responses in each mode. Both subprocesses were
+stopped after acceptance. Snapshot:
+`21e7ef4bb29739c006b7f17942140f9927fa8aeb1ec61b3af6e504a17a2c2925`.
+
+An actual image built with Docker Desktop Linux engine **29.9.2** from the
+same checked-out source and tracked pair passed the `tools.preview_runtime_image`
+immutable file-set check (exactly `army.db` and `rules_n5.db`), embedded
+reference checks (17 deployed objects, 151 variant groups, 69 Weapon
+citations), health startup under read-only/container restrictions and
+**41/41** pinned HTTP routes, including Battleground map SVG geometry.
+The disposable container and image were removed. Source/deployment
+verification passed **808/808** SVG assets and browser references.
+A leftover ignored `data/generated/deployed-objects.json` is not used
+by checkout runtime and is absent from the actual image. Neither hosting
+path depends on JSON sidecars.
+
+Repeat the acceptance from the repository root with:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_checkout_server
+.\.venv\Scripts\python.exe -m tools.verify_checkout_server --db-dir data/generated
+.\.venv\Scripts\python.exe -m tools.preview_runtime_image --source-dir data/generated --tag infinity-db:preview-local
+```
+
+**P2 exit accepted** on commit
+`52e0a4c5b99cf4c7db3ab2a72252970f124fd64c` (before documentation
+closeout). The P2.8 checks are integration/semantic acceptance on Windows
+plus its local Docker Linux engine, not a full project suite, independent
+Linux-dev worker run, hosted CI, deployment, or manual visual-browser test.
+
+**2026-11-10 P3.2 standalone ITS database — focused pre-commit evidence:**
+The independent `tools.build_its_season` builder and
+`src/infinity_db/its_season_database.py` produce a schema-v1 ITS 18
+SQLite artifact under ignored `data/work/its/`, while the current
+`data/generated/` two-file serving contract remains unchanged. The
+source and official PDF are SHA-bound, the builder/parser modules are
+fingerprinted, and N5 compatibility `5.3` is explicit. The new database
+contains Battleground, all three authored geometry configurations and all
+three citations. Its canonical content SHA-256 matches the existing
+`rules_n5.db` publication. Repeated builds are byte-identical.
+
+The focused `tests/test_its_season_database.py` suite covers schema,
+source/compatibility provenance, exact season-revision selection, corrupt
+record/geometry refusal, invalid source preserving the prior artifact,
+read-only checking, and refusal to publish under `data/generated/`.
+The existing Scenario catalog regression remains green (**43 passed**),
+with **13/13** new ITS tests passed. Ruff, Pyright and documentation checks
+pass. The source-bound Army/Rules pair was regenerated from pinned inputs;
+`tools.verify_deployment_assets` now passes, including **808/808** published
+SVGs, **808/808** browser references and embedded source/citation checks.
+No new ITS DB is authoritative for web serving, and no full-suite/hosted/Docker
+P3 acceptance is claimed.
+
+**2026-11-10 P3.3 ITS 18 pilot and source-policy ownership — focused
+pre-commit evidence:** `tools.verify_its_pilot_parity` builds `its_18.db`
+from the maintained ITS Season 18 source in an ignored temporary directory,
+selects `scenario:battleground` under `its-18@2026.09.01`, and compares
+the standalone scenario through the shared ScenarioCatalog and
+`_enrich_scenario_api_item` against the existing two-file WSGI runtime.
+**6/6 full JSON scenario details** and **24/24 exact SVG byte strings**
+matched, covering all 150–400 Army Point selections, light/dark themes and
+inch/centimetre rendering. A negative test changes source-authored mission
+copy and confirms parity fails. Publication digest remains
+`2dd4ab5c9f7c83bcdc4f94e156f29c4b6c2d9e34770a03da85e8886f4c0d5b31`.
+
+Three source-cited ITS 18 policy records for Spec-Ops (official tournaments),
+TEAM-OPS and optional Reinforcements now occupy dedicated ITS schema-v2
+tables rather than the generic N5 Rules catalog. Read-only integrity,
+scoped selection, malformed applicability, citation corruption and
+absence from core Rules are covered by focused tests. The existing
+Rules interaction audit and standalone Rules build pass.
+
+The tracked Army/Rules pair was regenerated from pinned inputs after these
+maintained source changes. The complete `tools.verify_deployment_assets`
+gate now passes **808/808** published SVGs and **808/808** browser references,
+with embedded runtime data and reviewed citations source-matched. Final
+focused evidence: **17/17** ITS database tests, **2/2** P3.3 parity tests,
+**43/43** existing Scenario catalog tests; Ruff, Pyright, Rules audit/build,
+docs and Git whitespace checks passed. P3.4 owns actual cross-DB serving;
+this is an independent candidate/publication comparison, **not** a deployed
+three-database runtime test or a complete browser/CI release gate.
+
+**2026-11-10 P3.4 first registry slice — validated but not yet served:**
+The backend `PublicationRegistry` now validates exact ITS season identity and
+core revision against the current N5 scenario publication, checks ITS policy
+targets and external mission dependencies against composed N5 records, and
+requires typed owner/revision selection without fallback or default policy
+application. The existing two-file `ScenarioCatalog` and HTTP paths remain
+unchanged; packaging `its_18.db` awaits the coordinated cutover.
+
+Focused checks: **10/10** new registry tests, **43/43** Scenario catalog
+tests, **17/17** ITS builder/selection tests and **166/166** Rules database
+tests. Ruff, canonical Pyright, documentation/link checks and Git whitespace
+checks passed. The updated MCP integrated build regenerated the source-bound
+`army.db`/`rules_n5.db` pair (build set
+`4117851f06cd81862878d257de912d3a5a489ac2c974f31aa4fc1560a42ce800`);
+deployment assets passed **808/808** SVGs and browser references. A real
+checkout CLI server passed **41/41** pinned HTTP paths and health using the
+regenerated pair; the P3.3 parity verifier still passed **6/6** API JSON and
+**24/24** byte-identical SVG comparisons. This is local validation, not a
+three-database hosted/Docker/CI acceptance or a full suite.
+
+**2026-11-10 P3.4 explicit HTTP candidate — focused acceptance:** The
+`create_app(..., season_databases={...})` fixture registers an independent
+ITS 18 database. Its six Battleground JSON responses and 24 SVG variants
+match the existing HTTP implementation exactly; the N5 default, explicit
+collection selection and fail-closed absent season/revision remain unchanged.
+The runtime snapshot/ETag differs when the ITS database is registered.
+`ScenarioCatalog` and the new registry remain separately testable.
+This does **not** validate the still-pending automatic three-file serving,
+Docker image, or release artifacts.
+
+**2026-11-10 P3.4 integrated three-file serving candidate:**
+The normal `infinity-db build` generated Army v31, Rules v17 and ITS v2
+(build set `f97eb0a1aee25d768736c2feeb213af26dfb02349aac68acd2cbfffd21e649e0`).
+The complete validator now requires all three, binds ITS source identity to
+the Army/Rules build manifest, checks season/core compatibility and typed
+cross-domain references, and hashes the full set for runtime caches. The
+ordinary checkout CLI and Docker runtime use the strict three-file factory.
+Focused results: database-set **22/22**, builder **18/18**, deployment
+scripts **45/45**, publication registry **13/13**, checkout HTTP **41/41**,
+Docker preview HTTP **41/41** plus a direct ITS-owned Battleground probe,
+and 808/808 SVG and browser-reference asset verification. Pyright, Ruff,
+documentation checks and Git whitespace checks passed. The initial Docker
+build failed
+because `.dockerignore` omitted `its_18.db`; after correction, the clean
+disposable image built and passed. No hosted three-file CI acceptance yet.
+The first publication required a one-time local `git add`/`git commit`
+because the MCP restricted newly tracked binary database files. The complete
+set was committed as `1b8d527de61d0751e7387b7b0d9e62013cf86ff0` and
+synchronized with GitHub. Hosted wheel and deployment smoke passed; the
+Ubuntu 3.11 Source matrix failed on retired CLI/Rules fixture assumptions
+and two deployment-asset season fixture stubs. A focused season-stub correction
+is included in the following P3.4 cleanup. Overall hosted Source CI remains
+unaccepted until the separate full-suite fixture migration is addressed.
+
+**2026-11-10 P3.4 ITS publication ownership retirement (development checkout):**
+The normal three-database build completed with build-set
+`29ead25e1ab15370d05c976fa2b5b9ad5a5094051f325ff54d5ce006e8c9d23a`.
+The N5 Rules exporter now excludes ITS-owned collections and the strict
+complete-set validator rejects a shadow ITS collection in Rules. A frozen
+pre-cutover digest guards six Battleground API JSON payloads and 24 SVG
+byte streams. Registry tests passed **14/14**, scenario catalog **43/43**,
+scenario API **95 passed / 4 skipped**, Rules database **166/166**,
+strict database set **23/23**, complete-set builder **18/18**,
+ITS database **17/17**, standalone ITS parity **2/2** and deployment-asset
+fixtures **13/13**; both modified Rules-only historical report assertions
+passed. Deployment source and asset verification passed 808/808 SVG assets
+and 808/808 browser references. Real checkout CLI and disposable Docker
+image parity each passed 41/41 pinned paths; the Docker image was removed.
+The complete historical
+report module had two unrelated local failures when optional research tests
+encountered a stale ignored `data/generated/army.raw.db` sibling; they are
+not serving inputs and were not changed. Hosted full Source matrix is still
+failing older standalone Rules-v8 and retired CLI fixture expectations; do
+not treat this section as a hosted-CI pass.
+
+**2026-11-10 P3.4 explicit ITS context presentation (development checkout):**
+The complete Army/Rules/ITS build passed after removing ITS-only Spec-Ops
+and TEAM-OPS text/citations from the N5 core records (build set
+`1c41a5c1491860fa596041c04c1a6a1913bd9a633bfda445b3ac693de15aab9b`).
+The season policy API requires an exact season/revision, reveals available
+contexts without applying any, and serves policies with citation descriptors
+only after an explicit context choice. The ITS scenario page adds a
+no-selection default and prevents stale async responses from applying after
+selection changes/navigation. FAQ source/supersession tests use the complete
+runtime for HTTP while retaining synthetic FAQ resolver coverage.
+Results: curated **671/671**, registry/policy API **26/26**, FAQ
+**79 passed / 1 skipped**, scenario API/JS lifecycle **96 passed /
+4 skipped**, public SpecBall route **1/1**, Pyright **0 errors**, Ruff
+and docs/links green. Source-bound assets passed **808/808** published
+SVGs and **808/808** browser references; checkout and actual disposable
+Docker each passed **41/41** pinned routes, with immutable image
+validation and cleanup. Hosted full Source CI from the prior pinned SHA
+remains red on legacy fixture expectations; hosted acceptance of this new
+revision has not yet occurred.
+
+**2026-11-10 P3.4 FAQ isolation and marker provenance closeout (development
+checkout):** The complete Army/Rules/ITS build passed (build set
+`5bbefd9253bcf82347a3175928070d0fa7f8a17bee1c885b165033f69fe73e95`).
+Exact N5 FAQ applicability now excludes a core-scenario-scoped ruling
+from same-ID ITS missions; general N5 FAQ remains available for valid
+registered ITS selection, and the HTTP API rejects unknown season/revision
+or nonmember mission by returning no rulings. Scenario marker-size source
+citation metadata now resolves through the registered ITS 18 source
+descriptor, retaining the pinned external fallback only for isolated
+Rules-only or future no-ITS-18 configurations; missing metadata in a
+registered ITS 18 file fails closed. No N5 scenario geometry or content
+was changed.
+
+Focused checks: FAQ selection and HTTP **80 passed / 1 skipped**,
+registry/HTTP/source provenance **29/29**, scenario HTTP and browser
+**96 passed / 4 skipped**. Ruff passed, Pyright reported **0 errors**,
+documentation/links/backlog and Git whitespace checks passed. Rebuilt
+runtime source and asset validation passed **808/808** published SVGs
+and **808/808** browser references. Real checkout and disposable
+immutable Docker image each passed **41/41** pinned HTTP paths; Docker
+container and image were cleaned up. These are local results only;
+full hosted Source CI is separately required and unresolved on prior SHAs.
+
+**2026-11-10 P3.5 synthetic multi-season isolation (development checkout):**
+The ITS builder/inspector now validates a season owner selected from its
+curated source rather than fixing the owner to ITS 18. The production build
+remains an explicit three-file set and has been regenerated under build-set
+`8f79b69519aacb5bbaa78b486e0609d8d77ee74f9b5ad37b3346cdd87a2ec390`.
+A temporary, non-published synthetic ITS 17 SQLite database reuses the
+`scenario:battleground` slug but has distinct publication revision,
+review-source descriptor, facts and policy. Five focused multi-season tests
+pass: exact owner/revision HTTP and registry resolution across multiple
+Army Point configurations, N5 default stability, independent SVG/Season 18
+parity, scoped FAQ/policies and official-vs-synthetic citations, separate
+ETags/cache identities, rejection of invalid references and mismatched
+registration, and no implicit release registration of extra files.
+This does not claim authentic ITS 17 rules or content coverage.
+
+Focused results: synthetic multiseason **5/5**, ITS builder/database **17/17**,
+publication registry **29/29**, strict selected database set **23/23**,
+scenario API **96 passed / 4 skipped**; Pyright **0 errors**,
+Ruff and docs/links/backlog and Git whitespace checks passed.
+Source-bound asset validation verified **808/808** published SVGs and
+**808/808** browser references. The real checkout and ephemeral Docker
+image each passed **41/41** pinned HTTP paths, including health/geometry;
+image/container cleaned up. This dated local result preceded the hosted
+Source acceptance recorded below.
+
+**2026-11-10 P3 hosted acceptance:** On exact commit
+`09f91f442f82abba4df76641ef7ad688402673d4`, GitHub Actions
+**Source checks** run 1081, **Installed wheel smoke** run 1078 and
+**Deployment smoke test** run 1099 all completed successfully. This
+closes P3 hosted acceptance on that SHA, without implying hosted
+approval of later P4 or P5 changes.
+
+**2026-11-10 P4 reference failure copy and representative browser acceptance
+(local development worktree based on `9b2a693a39e32ed4d48ed697596d625b71ce08be`):**
+The shared display helper selects not-found versus temporarily unavailable
+messages without echoing server diagnostics. Node transport/copy harness:
+**1 passed**; simulated 404/503 reference-page browser acceptance across five
+page families, both themes and 1440/390/320 widths: **10 passed**. Accessible
+status/alert regions were checked, but no human screen-reader test was
+performed. Representative soft-navigation keyboard focus and announcements:
+**2 passed**; ITS 18 map as a saveable `img` SVG with theme/unit switching:
+**4 passed**; cited rule/FAQ source lines: **4 passed**; accuracy notice
+touch/keyboard, responsive and theme behavior: **10 passed**.
+These are focused local tests of the changed surface, not full-suite or hosted
+CI acceptance. Catalog/overview/scenario error-copy audit remains open.
+
+**2026-11-10 P4 broader error-state pass (local development checkout based on
+`eca905fda8b4e9752a137a16c9d4b51927aaa8e7`):**
+The shared collection-load copy now covers Army overview, catalogs,
+Unit Explorer/details, Fireteams, search, skill modifiers, Orders/AROs
+and scenarios. Browser failure injection, including 404/503 API responses,
+400 unsupported contexts, ordinary theme/mobile layouts and accessible alert
+or status roles: **36 passed**; Fireteam invalid-Army chart: **1 passed**;
+ordinary scenario keyboard navigation at 1440/390/320: **3 passed**;
+Node transport/display-copy regression: **1 passed**. The locally
+repaired 2/3/4 Chromium scheduling registries pass **4 targeted
+checks** (1 two-lane + 3 experimental lane configurations).
+No human screen-reader test or full hosted acceptance is implied.
+
+**Hosted CI follow-up:** Source checks run 1084 on
+`eca905fda8b4e9752a137a16c9d4b51927aaa8e7` failed in Ubuntu
+Python 3.11 with five browser-scheduling coverage checks: the new
+`test_reference_player_errors_browser` module was included in
+`test-sections.json` but not in the explicit lane maps. The other
+4,432 tests in that job passed (1,288 skipped), and the other three
+Source jobs and both smoke workflows passed. A local lane-map repair
+is part of the next commit; independent hosted CI acceptance remains
+required.
+
+**2026-11-10 P4 editorial and CI test repair (local development checkout
+based on `db81adcc4bd3b379f765744e6c00147eb3399c33`):**
+Source-chart raw Unit identifiers and source-version metadata moved to
+Developer Mode; the chart content and uninterpreted `q` parameters remain
+visible. The existing 30-Unit/three-viewport Chromium acceptance
+`test_live_chromium_spec_ops_source_charts` passed **1/1** (90 page/viewport
+checks), including visibility in both display modes. The repaired
+shared-table import/usage assertion passed **1/1**. Ruff, Markdown
+and link checks passed. This is local validation, not human screen-reader
+or exact-SHA hosted acceptance.
+
+**Hosted CI follow-up:** Source checks run 1085 at
+`db81adcc4bd3b379f765744e6c00147eb3399c33` failed on
+Ubuntu Python 3.11 with **one** `test_secondary_tables_use_shared_semantic_layout`
+assertion expecting a literal one-symbol import. The production
+`catalog-detail.js` had correctly added `referenceLoadMessage` to the
+`tableViewport` import. The other **4,436 tests passed** (1,315 skipped);
+all other Source jobs and both smoke workflows passed. The assertion
+now checks that `tableViewport` is imported from the shared module
+and used, independent of other imported names; a new hosted run is
+needed for acceptance.
+
+**2026-11-11 P4.5 acceptance:** The release owner explicitly accepted
+the P4.5 representative user-flow/accessibility checkpoint after the
+focused desktop/mobile, light/dark, keyboard/focus, citations, alerts and
+saveable SVG checks documented above. This is an owner acceptance; it
+does not assert that an additional manual screen-reader session was
+performed. P4 hosted Source checks, installed-wheel smoke and deployment
+smoke all passed on `d12aa0706723a62f147a7b7ff901cc68b0a905d1`.
+P4 is closed; P5 and P6 remain active.
+
+### P5.7 matched-input symbol processor parity
+
+**Project domains:** Acquisition, Data processing, Project infrastructure
+
+**2026-11-11, Windows development checkout, tools at
+`1db66f797fcd8b7ea21942ea2182ba5681ee45e7`:** The historical-output
+comparison recorded **73 failures / 807 canonical assets**. A byte/hash
+trace accounted for every failed asset: 52 had changed effective override
+inputs despite matching recorded upstream hashes; 21 had identical converted
+inputs but different compressed outputs. The historical compressor used
+resvg **0.48.1**, while the external run used **0.49.0**. This was not a
+matched-input/toolchain processor comparison. The failed report remains
+preserved; neither its thresholds nor its result were changed.
+
+The earlier readiness audit found **1,101** legacy archive identities and
+**808** canonical SVGs; **29** override-sourced assets lacked verified
+original upstream bytes in that archive. The external producer subsequently
+acquired a new raw snapshot with its own provenance rather than treating those
+overridden bytes as upstream originals.
+
+Rebuilt the existing in-tree pipeline through **compression only**, using
+`tools.build_symbols` with isolated data root
+`local/p5-matched-legacy-20261111`, the explicit four-file raw-symbol handoff,
+the same pinned Army archive and the external run's override tree. No network
+acquisition or application publication occurred. Preflight passed **1,101 SVGs /
+zero parse errors**; font audit passed **142 available / zero missing**;
+duplicate detection passed **807 canonical / 294 redundant / zero render
+errors**; text conversion passed **107 converted / 700 carried forward**;
+balanced compression passed **807 assets**. Tools were Inkscape **1.4.4**,
+resvg **0.49.0** and SVGO **4.1.0**.
+
+Both builds have identical effective bytes for all **1,101** source identities,
+including **106** direct/propagated overrides, and exactly the same complete
+canonical mapping. The matched effective ZIP SHA-256 is
+`13474b43eb16e8c3be7bc54d378347a98266fca8745bc2a8e6323fdf79a52f23`.
+The external compressed ZIP SHA-256 is
+`18c761f5dbbcc800de365bb15c12569dbd05e29be1329f2e0d252d6100ce50a5`.
+Compressed bytes match for **806/807** assets. The sole byte difference is
+`Microgramma D` versus `Microgramma D Extended` in a leftover `font-family`
+attribute on path-only artwork for `units/knauf-outlaw-sniper-1-1.svg`.
+
+The **committed** `tools.compare_symbol_pipeline_parity` implementation at the
+revision above, with strict equal canonical path sets, passed **807/807, zero
+failures**. resvg rendered every asset at **32/64 CSS pixels, DPR 1/2**;
+black/white background comparisons reported **maximum RMS 0 and changed-pixel
+fraction 0**. Thresholds remained RMS **0.01**, changed fraction **0.01** and
+pixel delta **8**. The independent processed-artifact verifier also passed
+**807 canonical assets / 1,101 source identities**; hermetic raw/processed
+handoff tests passed **16/16, zero skips**.
+
+Private evidence is retained under `local/`: the historical input trace,
+isolated rebuild inputs/logs/reports, `p5-matched-production-inputs-20261111.json`
+and `p5-matched-production-raster-parity-20261111.json`. The final raster report
+SHA-256 is `c931b6870cf0ad1b1fc75563e8bf783408864e3bed3cd11e846f0a0834de780d`.
+These local files are dated evidence, not clean-checkout dependencies.
+
+**Acceptance boundary:** This passes processor equivalence on matched inputs.
+It does not accept artwork changes against the tracked release, semantic
+publication or actual browser/Docker behavior. The complete duplicate mapping
+resolves `units/shasvastii-seed-soldiers-1-2.svg` to
+`units/shasvastii-seed-soldiers-1-1.svg`; its application publication still
+needed verification at this checkpoint. The later cutover and processor
+retirement are recorded below. Tracked SVGs, databases and publication
+manifest were unchanged by this comparison. No full Linux, hosted-CI or
+release acceptance is implied.
+
+### P5.7 external semantic publication candidate
+
+**Project domains:** Data processing, Project infrastructure
+
+**2026-11-11, Windows development checkout based on `4891a1ef`:**
+`tools.prepare_symbol_publication` prepared the production external handoff
+under ignored `local/p5-external-symbol-publication-verified-20261111`.
+Raw/effective provenance and override decisions, current Army source/lookup
+approval, preflight/font/duplicate receipts and CSVs, conversion source hashes,
+conversion coverage and compressed member integrity all passed. The explicit
+producer font-alias file was required: the in-tree alias JSON has equivalent
+content but different bytes and was correctly rejected against the receipt.
+No renderer, converter, acquisition or tracked-artifact replacement ran.
+
+The candidate maps **1,101 source identities** to **807 published SVGs**.
+Comparison with the tracked publication found no missing or added keys among
+the source mapping and all five browser mappings: **60 Army**, **918 Unit**,
+**1,033 profile-logo**, **8 profile-identity** and **9 static-symbol** keys.
+Both Seed Soldier source identities resolve to
+`units/combined-army/512-shasvastii-seed-soldiers.svg`. This consolidation is the
+only changed source mapping and profile-logo mapping. Every candidate SVG hash
+was checked against its manifest. A repeat preparation produced byte-identical
+publication and evidence files; publication manifest SHA-256:
+`acb3a2384fc985db59df429ce45daba413452cf1956534a0b1c24d5daebc3948`.
+
+The focused candidate, existing semantic publisher, raw/effective/duplicate/
+processed handoff, source-plan and test-registry cohort passed **86/86, zero
+skips**. Candidate tests cover disconnected source/stage hashes, altered
+canonical assignments, exact alias-file binding, unapproved lookup plans,
+existing-output preservation, input mutation and installation rollback.
+
+Private comparison evidence is retained in
+`local/p5-external-symbol-publication-comparison-20261111.json`. The candidate
+has **118 changed SVG hashes**, **one removed filename**, and no added filenames
+against the tracked release. That inventory is not visual or old-URL acceptance.
+At candidate preparation, artwork/URL review, promotion, rebuilt SQLite mappings,
+browser/local/Docker checks and in-tree processor retirement remained open.
+That preparation did not change tracked SVGs, the manifest or runtime databases.
+
+### P5.7 override provenance classification
+
+**2026-11-11, Windows development checkout based on `35a069d8`:**
+The now-retired P5-specific offline audit verified pinned
+historical/candidate manifests, effective archive members, original source
+identities, exact duplicate assignments, override donors/current files and
+publication output hashes. This audit requires the retired in-tree build and
+matched-input evidence; it is not a general classifier for future external-only
+publications.
+
+The historical selection JSON uses `format: "InfinityDB symbol provenance inputs"`,
+`formatVersion: 1`, an `overrideRoot` and a `files` mapping of role to
+`{"path": "...", "sha256": "..."}`. Relative paths resolve from the working
+directory. Its required roles were:
+
+- `comparison`, `current_manifest`, `candidate_manifest`, `candidate_evidence`;
+- `historical_build`, `historical_archive`, `historical_compression`,
+  `baseline_audit`, `matched_inputs`;
+- `effective_report`, `effective_archive`, `raw_archive`, `duplicate_receipt`,
+  `override_lookups`, `candidate_compressed`.
+
+Optional `override_notes` and `legacy_tree_notes` pinned the then-current notes
+files. The audit retained repeated override declarations and their line numbers;
+they describe intent, not verified historical edits. The audit hashed the
+selected files, checked their connections and effective bytes, and left
+unsupported attribution unresolved; matched-input parity was corroborated by
+identity, not rerun. The saved selector's current-manifest path now contains the
+promoted manifest. Its original bytes are in Git at
+`35a069d8:data/manifests/symbol-publication.json`; a replay must explicitly
+select those hash-matched bytes and will have a different selection fingerprint.
+
+Private selectors and output are
+`local/p5-symbol-provenance-inputs-with-notes-20261111.json` and
+`local/p5-symbol-provenance-final-20261111.json`.
+All **118 changed assets / 154 related source identities** are covered; 25
+assets have multiple source identities. The verified canonical causes are
+**1 changed applied override** (Morat), **56 newly applied overrides** (53
+direct, 3 propagated), **61 processing-only differences** (57 upstream inputs,
+4 unchanged overrides), and **0 upstream changes, removed overrides or
+unresolved causes**. The unchanged historical overrides are Onyx, Peripheral,
+Impetuous and Lieutenant. Newly applied overrides do not establish historical
+file edits, and processing-only does not mean compression-only or visual
+equivalence. Related aliases retain their own methods/hashes and destinations.
+The removed Seed Soldier filename was still unresolved compatibility work at
+this audit; the later cutover preserved it.
+
+The earlier unclassified review displayed **118 pairs** (4 Army,
+1 Characteristic, 2 Order, 11 Peripheral and 100 Unit) and passed Chrome
+checks at 1440/390/320 widths. Its private receipt is
+`local/p5-symbol-artwork-browser-validation.json`; browser test exports were
+not artwork approvals.
+
+The then-focused cohort passed **84 tests, zero skips**, including six
+real-Chrome fixture cases at 1440/390/320 pixels, with and without provenance.
+Assertions covered direct/propagated overrides, unchanged overrides, alias remapping, ambiguous
+canonical selection, drift/disconnected evidence, note declarations, report
+coverage/hash consistency, local output integrity and atomic decision imports.
+Ruff and focused Pyright passed. The documentation stage also passed. The
+classifier-specific tests were retired with the historical generator; current
+artwork-review and symbol-handoff tests retain their separate contracts.
+
+The actual production page
+`local/p5-symbol-artwork-review-classified-20261111.html` rendered
+**118/118 pairs** in Chrome at **1440/390/320 x 900**. Cause filters returned
+**1/56/61** assets; combined category filters, declared-note search, overlay,
+JSON export/import after reload and stale-provenance rejection passed.
+There were no page/request/HTTP errors, external requests or horizontal overflow.
+Screenshots were visually inspected; the private browser receipt is
+`local/p5-symbol-provenance-browser-validation.json`. At this audit, all
+artwork decisions remained unreviewed. These checks did not establish artwork
+approval, sole visual causality, compression-only equivalence, application
+publication or Docker/Linux/hosted-CI/release acceptance. Production SVGs,
+manifests, databases and parity thresholds were unchanged.
+
+### P5.7 accepted symbol publication cutover
+
+**2026-11-11, Windows development checkout based on `e70195cd`:**
+The user approved all 118 changed artworks. No artwork review was repeated.
+Promotion selected `local/p5-accepted-cutover-20261111/promotion-inputs.json`
+and a fresh transaction under the same directory. The
+[current promotion lifecycle](../data/README.md#accepted-external-symbol-publication-promotion)
+owns the operation and interrupted-transaction recovery.
+
+Promotion reverified the approved candidate's complete raw/effective/stage/
+processed receipt chain and reproduced its manifest/evidence byte-for-byte.
+It copied approved compressed SVG bytes and added the maintained exact-byte
+Seed Soldier compatibility alias, without acquisition, conversion or compression.
+The publication contains **807 canonical SVGs / 808 URLs** and **10,001,525 bytes**.
+All 1,101 source mapping keys and all browser mapping keys remain represented.
+The generated category directories and manifest have persistent verified backups
+under `local/p5-accepted-cutover-20261111/publication/`.
+
+| Artifact | SHA-256 |
+| --- | --- |
+| Previous symbol manifest | `92a27c349c6ac23d81de138ee7bff5d196f0f83caa5846417ebd1d89427a3eb5` |
+| Approved candidate manifest | `acb3a2384fc985db59df429ce45daba413452cf1956534a0b1c24d5daebc3948` |
+| Promoted symbol manifest | `a88c7ead46cb2b68c67deece21af1e2f0a072a3c7a44a8b319ae32f64fc10d17` |
+| Seed Soldier alias and canonical SVG | `cdaca8ef8ee6494f7e1a539610d7ca1d8384e7b585d4e5d45a96935092961c74` |
+| `army.db` | `0bfe048c7224cfe5b4c62c3ff9a3e9999b1a7e7d6374b0c19917c7f976400b39` |
+| `rules_n5.db` | `a0aa4d7b46d561f840808bd526b4d4d9b6a66a9418d66d1dbb6b2c0b15989e76` |
+| `its_18.db` (unchanged) | `e88eb6e9934443f762d8f143efcfd8cdf300636424b3a55c78df569ea43d2b94` |
+
+The complete offline build from `JSON 20260929-114335.zip` retained mandatory
+lossless verification (**73 normalization checks passed; 116 existing source
+warnings matched their baseline**), then built/validated Army v31/compatibility 40,
+Rules v17 and ITS v2. Build-set ID:
+`0523e4b394247d0dafa03d91c2c391afb5c07d33c35665750aa728c67cb1b7d1`.
+Full three-file SQLite integrity and source/build pairing passed. Army embeds
+**2,019 mappings / 808 published hashes** with the promoted manifest digest.
+Deployment artifact verification passed **808/808 published / 807/807
+browser-referenced SVGs**, including the compatibility URL's hash.
+
+Focused regression command:
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --assets required --test-workers 0 tests/test_promote_symbol_publication.py tests/test_prepare_symbol_publication.py tests/test_asset_validation.py tests/test_symbol_catalog.py tests/test_symbol_path_storage.py tests/test_verify_deployment_assets.py tests/test_test_sections.py
+```
+
+This passed **97 tests, zero skips**. New assertions cover input drift,
+compatibility hash/chain rejection, preservation of unrelated files, failures
+at multiple directory/manifest replacement points, final validation/journal
+failure, keyboard interruption, persistent recovery and concurrent-writer refusal.
+Ruff, focused Pyright and the documentation stage passed.
+The release-note/metadata cohort also passed **32 tests, zero skips**.
+
+Actual checkout and isolated Docker HTTP/Chrome checks passed at **1440/390/320
+x 900**: normal Army and Seed Soldier pages, every published SVG rendered,
+all **808 HTTP body hashes**, and a **200 image/svg+xml** response at the old
+Seed Soldier URL with approved canonical bytes. The final image gallery used
+batches of 16, **zero retries**, and retained page/request/HTTP error and overflow
+assertions. An initial unbounded checkout probe had one failed HTTP transfer
+in its private Windows WSGI server; the failure is preserved under
+`local/p5-accepted-cutover-20261111/checkout-browser-failure.json` and does
+not count as passing. The bounded final collector had no such errors; it is
+rendering/integrity evidence, not a load-capacity measurement.
+
+Both checkout and Docker passed the existing **41-route semantic baseline**.
+Docker image construction passed; installed assets matched all 808 embedded
+hashes, the image ran as non-root with exactly the required three runtime
+databases, and Gunicorn started with a read-only root filesystem, temporary
+`/tmp` and `no-new-privileges`. Health, reference APIs and actual browser checks
+passed before stopping the disposable container. Evidence/logs/screenshots and
+runtime recovery copies are under ignored `local/p5-accepted-cutover-20261111/`.
+No production deployment, release tag, full Linux suite or hosted acceptance
+is implied. At this cutover, in-tree processor retirement and P6 integrated/release
+acceptance remained separate open work; the processor was subsequently retired.
+
+### P5.8 legacy symbol processor retirement
+
+**2026-11-12, Windows development checkout based on `976a88d0`:** The
+external candidate was independently prepared again from the accepted handoff.
+Its manifest, evidence and all **807 SVG hashes** matched the P5.7 candidate
+exactly; it retained **1,101 source mappings**. No artwork was promoted.
+
+An isolated source copy had the same **194 recorded build inputs**, no `tools`
+directory and no external producer checkout. With external network connections
+and symbol/tool imports blocked, the actual `infinity-db build --compact`
+completed from the pinned Army ZIP into a disposable database directory:
+lossless reconstruction and **73 checks** passed, with **116 warnings** matching
+the existing anomaly baseline. The new build-set ID was
+`80284497f5074d29ea3b32db582ee5225bd0112fa9b4f39b6b95be376297673c`.
+The full deployment verifier passed against this disposable set with
+**808/808 published SVGs and 807/807 browser references**. The actual isolated
+`infinity-db serve` returned a healthy response and the old Seed Soldier URL
+with its approved SVG hash; its process was stopped.
+
+The unchanged tracked database set passed `database-health`; the
+`verify_deployment_assets()` content check also passed all **808/808** assets.
+Those checks do **not** establish checkout source freshness. The tracked
+`python -m tools.verify_deployment_assets --skip-svg` exited **1** because the
+database records removed symbol inputs and the former `pyproject.toml`.
+The owner chose to remove those inputs without rebuilding the approved runtime
+set. Full tracked freshness remains blocked in
+[VR-0148](validation-queue.md#pending-deferred-execution).
+
+Focused publication, asset, database and packaging regression command:
+
+```powershell
+.\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --test-workers 0 `
+  tests\test_symbol_publication.py tests\test_symbol_source.py `
+  tests\test_export_symbol_source_plan.py tests\test_prepare_symbol_publication.py `
+  tests\test_promote_symbol_publication.py tests\test_verify_raw_symbol_handoff.py `
+  tests\test_verify_effective_symbol_handoff.py tests\test_verify_symbol_duplicate_handoff.py `
+  tests\test_verify_processed_symbol_handoff.py `
+  tests\test_asset_validation.py tests\test_symbol_catalog.py tests\test_symbol_path_storage.py `
+  tests\test_verify_deployment_assets.py tests\test_database_set.py tests\test_database_set_builder.py `
+  tests\test_deployment_scripts.py tests\test_installed_wheel_smoke.py tests\test_project_resources.py `
+  tests\test_cli.py tests\test_app_cli.py tests\test_runtime_import_boundary.py tests\test_test_sections.py
+```
+
+This passed **302 tests, zero skips** with unrelated staged parity work present.
+After flattening the retained semantic test fixtures, the publication,
+test-section and development-status cohort passed **52 tests, zero skips**.
+The browser-font and packaging cohort then passed **46 tests, zero skips**;
+all nine browser font faces also completed a disposable TTF/WOFF2 round-trip.
+An isolated export of the retirement-only index, excluding the unrelated
+staged and unstaged parity changes, passed **196 tests, zero skips** across
+the retained publication, handoff, asset and packaging checks.
+The full Ruff, documentation and Pyright stages passed. A disposable Docker
+preview of the unchanged tracked set built and started without the external
+repository, then passed its health check and **41-route semantic baseline**;
+its owned container and image were removed.
+
+The complete protected inventory matched the pre-retirement baseline: **842**
+static SVGs, **108** override SVGs, the publication manifest and all three
+runtime databases, with no added, missing or changed hashes. No production
+deployment, hosted acceptance or refreshed tracked database is implied.
+
+### P5.8 source-freshness closeout and P6.1 provenance boundary
+
+**2026-11-12, `dev/v1.1.0`:** VR-0148 was resolved when the complete
+tracked runtime set was refreshed at `5edb6a97`; the full
+`tools.verify_deployment_assets` gate subsequently passed. The separate
+P6.1 Restrictions Chart API change (`5772efc9`) removed the fallback to
+packaged static JSON: without Rules SQLite the API now fails closed (503).
+The public historical static URL remains available pending separate review.
+The chart and game-mode cohorts passed **31 tests**; the full selected
+three-database semantic baseline and checkout-server acceptance each
+passed **41/41** pinned routes.
+
+The first P6 build-provenance refinement (`ab9c074b`) excludes
+`src/infinity_db/web/` Python sources from the database-generating input
+envelope while keeping build/model code and maintained inputs fingerprinted.
+One complete rebuild from `JSON 20260929-114335.zip` produced build-set ID
+`7e7065ed30b9d68a922bf52705410344ed497db354b894f51b78cd7caf66c09a`.
+Only `army.db` and `rules_n5.db` changed; `its_18.db` was unchanged.
+On this committed revision, full deployment-asset verification exited **0**:
+**808/808** published SVGs, **807/807** browser references, with source
+freshness, embedded data and reviewed citations source-matched. The
+**41-route** offline semantic baseline passed again.
+
+Focused P6 provenance tests passed **2/2**; database-set tests passed
+**23/23** and deployment verifier tests **13/13**. Ruff, targeted Pyright,
+documentation/link checks and `git diff --check` passed. A broader
+`test_database_set_builder.py` run was cancelled after approximately
+135 seconds to avoid duplicating expensive real builds; it is **not**
+counted as passed. Full source CI, hosted CI, release acceptance and
+production deployment are separate and remain unclaimed.
+
+### P6.3 — Current three-database Docker preview acceptance (2026-11-12)
+
+At `75e8e08ce48a71d567a2de6c3a91c3e9cebfd0fc`, the tracked
+`tools.preview_runtime_image` built and started an isolated image
+using Docker Desktop Linux engine **29.9.2** and the exact
+`data/generated/` set. The image contained exactly `army.db`,
+`rules_n5.db` and `its_18.db`. Its immutable-artifact checks
+passed (17 deployed objects, 151 variant groups, 69 Weapon citation
+records); the read-only container became healthy, selected ITS 18
+Battleground at 300 Army Points, and passed **41/41** pinned semantic
+HTTP probes. The preview's container and image were removed and its
+selected database hashes remained unchanged.
+
+The preview job completed with exit code **0** in **58.77 seconds**,
+including image build, install, startup, probes and cleanup. This
+measures this one local run, not a before/after speed improvement.
+The source-freshness and static SVG release verifier separately passed
+at `ab9c074b`. No production deployment, hosted CI, full suite,
+release or tag is implied.
+
+### P6.3 — Full Windows test run and focused failure closeout (2026-11-12)
+
+At `fc138678`, the full Windows source test suite with available published
+assets completed in **1184.07 seconds**: **5604 passed, 4 failed,
+121 skipped**. Three failures came from optional source audits finding a
+stale ignored `data/generated/army.raw.db` alongside the refreshed tracked
+`army.db`; the fourth came from the deterministic-I/O scan inspecting an
+untracked retired P5 helper. The full run is recorded as **failed**, not
+accepted.
+
+The focused correction at `56c8629d` requires a matching Army/raw
+export generation before running optional local source audits. Missing or
+different-generation ignored source data causes a documented skip;
+malformed or invalid matched data still fails. The deterministic-I/O
+policy scans Git-tracked source files instead of untracked one-off
+diagnostics. Follow-up test modules passed: reference baseline **62 passed,
+2 skipped**; source presentation **11 passed, 1 skipped**; deterministic
+I/O **4 passed**. Targeted Ruff and Git whitespace checks passed.
+Targeted Pyright on the pytest modules could not resolve `pytest` in
+the selected type-check environment; this is not reported as a passing
+type check. The full suite was **not rerun** on the correction.
+At the time of that focused correction, hosted CI and final P6.3 acceptance
+were still pending; the subsequent accepted result is recorded below.
+
+### P6.3 — Hosted Source acceptance and restructuring closeout (2026-11-12)
+
+For PR [#28](https://github.com/frankysan/InfinityDB/pull/28), the
+exact head `7108744f06d299a6346ca5fc82ec788eb0c1f356` passed all three
+required hosted workflows:
+
+- [Source checks run 43190382965](https://github.com/frankysan/InfinityDB/actions/runs/43190382965):
+  fast validation, complete Ubuntu/Python 3.11 source checks,
+  Ubuntu/Python 3.14, Windows/Python 3.11 and macOS/Python 3.11
+  cross-platform checks, plus deterministic output comparison — all PASS.
+- [Installed wheel run 43190382817](https://github.com/frankysan/InfinityDB/actions/runs/43190382817):
+  installed-package checks outside the checkout — PASS.
+- [Deployment smoke run 43190382959](https://github.com/frankysan/InfinityDB/actions/runs/43190382959):
+  verified tracked database/artwork publication, built the production
+  image and passed container startup — PASS.
+
+This supersedes the prior local Windows test failure as the integrated
+development acceptance decision, without changing that historical
+failed test receipt. The focused fixes and their separate green
+regressions are recorded immediately above. The dated P6.4 measurements
+at the 2026-11-12 milestone were **146 to 123** tracked Python modules
+under `tools/` (23 fewer), with seven shell scripts, five workflows and
+two installed CLIs unchanged. The serving contract changed from four
+required files (two SQLite databases plus JSON sidecars) to three SQLite
+databases. Observed runs took 46.48 seconds for a complete pinned rebuild,
+58.77 seconds for Docker/41-route acceptance, and 1184.07 seconds for
+full Windows tests. No speedup is claimed without a comparable baseline.
+The developer-facing architectural and operational contracts are
+maintained in [architecture](architecture.md), [data model](data-model.md),
+[data lifecycle](../data/README.md), [CI](ci.md) and [release process](releasing.md).
+This is **development-phase** acceptance only: the PR remains draft,
+and merging, tagging, final release evidence, deployment and
+post-deployment checks require their own explicit approval.
+
 ## Phased development and validation
 
-Ordinary v1.0 work separates **implementation**, **test design (VD)**, and
-**test execution (VR)** to avoid running a regression suite after every small
-change. The [active validation queue](validation-queue.md#queue-rules) is the
-**sole authority** for counts, trigger thresholds, age limits, drain order,
-dependencies, status changes, and retirement. In particular, check it at
-each task boundary; do not reproduce its numeric thresholds in agent skills
-or secondary documentation.
+**Normal workflow:** orient to the task and checkout, implement one coherent
+change, run the relevant focused checks, review/deliver the diff, and report
+actual results. Tests may be designed, written and executed during the same
+implementation pass. Choose checks by actual behavior and risk, not by a
+per-edit validation quota. This is the canonical short development lifecycle.
 
-- **Implementation:** record concrete missing assertions as VD and each
-  distinct changed behavior needing deferred verification as VR. Existing
-  tests needing only reruns require VR, not VD. Immediate non-test lint,
-  documentation, type, and structural checks remain appropriate. Execute
-  a test immediately only for an explicitly documented safety-critical
-  correctness, security, schema, migration, provenance or publication gate
-  that cannot safely wait; record what ran and its outcome.
-- **Design (VD):** author or revise tests and review selectors/fixtures
-  statically. Do **not** execute any tests, including sanity or focused tests.
-  Link the resulting selectors to the dependent VR.
-- **Execution (VR):** start with the smallest sufficient set of deferred
-  affected-behavior, cross-layer, browser and integrity tests on the pinned
-  revision. Run cumulative checks **only when independently required** by an
-  explicitly named risk/gate or the final release checklist, not because the
-  queue reached its execution threshold. Verify actual results, source/asset
-  coverage and skips; reuse compatible runs and reconcile each VR separately.
-  A dispatched, failed, blocked or required-skipped job is not a pass.
+- **Ordinary changes:** run appropriate new or existing focused regressions
+  plus lint/type/docs/data checks when relevant. For documentation-only edits,
+  documentation checks suffice unless the change affects executable examples
+  or behavior. Fix failed checks before claiming acceptance.
+- **Immediate gates:** security, schema/data integrity, source authority and
+  publication changes require their relevant correctness checks now. Report a
+  blocker when a required check cannot run; do not label it passed.
+- **Genuinely deferred checks:** record a concrete VD only if required test
+  design is blocked; record VR only for required execution that cannot yet run
+  (unavailable host/assets, dependent integration state, etc.). Specify the
+  tested contract, owner, revision/inputs and resumption trigger. Do **not**
+  create queue items for work fully tested in the current task.
+- **Batching:** related changes can share a focused impact test run on a
+  compatible revision. Full suites run for independently identified cumulative,
+  integration or release risks, not because the queue reached a count.
+- **Pending acceptance:** a task with an outstanding *required* check is not
+  fully verified. A separately owned hosted CI/release gate remains pending
+  without requiring routine development to reproduce the release gate.
+  Never claim dispatch, a failed/skipped check or an older SHA as success.
 
-A bounded change with successful immediate checks is **implemented, pending
-validation** while VD/VR obligations remain. The queue never waives hosted
-[CI](ci.md), [release acceptance](releasing.md), or required immediate
-integrity gates. The Linux full-suite parallel-development exception and
-explicit Git handoff are specified below, under
-[parallel Windows development and Linux validation](#parallel-windows-development-and-linux-validation).
+The [deferred-validation queue](validation-queue.md#queue-rules) is the single
+register for open VD/VR items and their triggers. It has **no numeric
+thresholds, automatic seven-day deadline or mandatory drain-to-zero cycle**.
+Review it when a prerequisite becomes available, before relevant
+merge/release acceptance, or when scheduling a deliberate compatible batch.
+Independent development can proceed while tests run in a different pinned
+checkout with no shared mutable inputs; see
+[parallel Windows and Linux validation](#parallel-windows-development-and-linux-validation).
 
-**Coherent implementation batches:** Prefer a bounded, reviewable group of
-related edits sharing an affected source family, behavior contract or
-publication artifact over a separate investigation/commit/checkpoint for each
-minor edit. Check the V1S selection gate and due VD/VR work before the batch;
-recheck at task boundaries and whenever a mandatory or age/threshold gate
-becomes due. Register each independently changed behavior's VR and each
-missing test-design requirement's VD; several files or assertions for one
-behavior do not require several VRs. Reconcile the owning TODO items and
-commit the coherent batch without mixing unrelated agents' edits. Batching
-never postpones an immediate safety gate, a due queue drain or a required
-V1S closeout; do not grow a batch merely to reach a validation threshold.
+**Coherent change batches:** prefer a reviewable group of related changes over
+a separate administrative cycle for each edit. Preserve unrelated changes,
+address cross-layer consumers, and make a single meaningful validation and
+commit where appropriate. Do not use batching to postpone a known critical
+correctness check or to hide outstanding acceptance.
+
+### Optional catalog-navigation browser report evidence
+
+Five independent optional browser commands—`verify_ammunition_browser`,
+`verify_general_rules_browser`, `verify_labels_browser`,
+`verify_states_browser` and `verify_traits_catalog_browser`—use a
+common non-overwriting report helper under `tools/browser/`. Each continues
+to check its own curated catalog identities and returns nonzero when
+a browser observation fails; stdout-only runs remain available.
+
+For example, give the selected command a **new** run-specific
+`--output` destination:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.browser.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/catalog-navigation/RUN_ID/labels.json
+```
+
+Replace `RUN_ID` with a UTC run identifier and short checkout revision.
+The filename may not already exist, even on a repeated manual invocation:
+it is checked before source discovery or Playwright launch, and JSON is
+written with exclusive creation after verification. Existing explicit
+legacy output locations are supported as paths but never overwritten.
+The helper retains each original report's sorted, indented UTF-8/LF
+format, including a report of failed browser observations; it never
+turns a failed check into acceptance. Parent directories are created
+only when the selected new report is ready to be written. An interrupted
+write may leave **new partial evidence** requiring inspection; report
+creation is not a multi-file transaction. These optional catalog checks
+are not substitutes for the complete-set release-candidate browser gate.
+The other specialized browser commands retain independent report
+contracts pending their own L2 acceptance and test coverage.
+
+### Optional Hacking Programs and non-Skill Army browser receipts
+
+The Hacking Programs and non-Skill Army browser verifiers now use the
+same **new-file-only** JSON receipt contract as the catalog-navigation
+commands above. Their independent source checks and browser assertions
+are unchanged; failed observations still generate JSON when requested
+and still exit nonzero. The preflight rejects an existing output
+(including a dangling symlink) before any browser or local server starts,
+and exclusive creation protects earlier evidence from a later collision.
+
+Use new, domain-scoped `local/validation/browser/` paths for each run.
+For example, from the checkout root:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.browser.verify_hacking_programs_browser --self-host --output local/validation/browser/hacking-programs/RUN_ID/hacking-programs.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/non-skill-army/RUN_ID/non-skill-army.json
+```
+
+Replace `RUN_ID` with a unique UTC run identifier and checkout revision.
+Hacking Programs retains `--self-host` for its own temporary loopback WSGI
+server, which must not be combined with a non-default `--base-url`.
+Non-Skill Army continues to require an independently running server.
+Both also retain `--headed` and stdout-only use. The optional report
+is not a substitute for hosted release acceptance, a source-parity
+review, or a live multi-engine browser matrix. Existing evidence and
+historical explicit paths are not migrated or overwritten, and a new
+receipt interrupted during writing requires inspection before reuse.
+
+### Optional Unit Skill and rule-fragment browser receipts
+
+`verify_unit_skill_presentation_browser` and
+`verify_rule_fragment_browser` also use the shared new-file-only
+`--output` contract. For each browser run, select a fresh
+`local/validation/browser/` directory scoped to the command and
+candidate revision, for example:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.browser.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/unit-skill-presentation/RUN_ID/unit-skill.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_rule_fragment_browser --self-host --output local/validation/browser/rule-fragments/RUN_ID/fragments.json
+```
+
+Replace `RUN_ID` with a new UTC timestamp plus short checkout SHA.
+Both commands now reject an occupied or symlink output before any
+browser activity and exclusively create canonical sorted, indented
+UTF-8/LF JSON after verification. Historical explicit paths remain
+valid names, but cannot be overwritten. Failures in individual
+observations still produce an optional failed report and nonzero exit;
+without `--output`, summary-only operation remains unchanged.
+
+Unit Skill Presentation retains repeatable `--slug`, `--width`
+and `--exclude-optional` selections, `--distance-unit`, `--headed`
+and `--channel`. Rule Fragment retains `--self-host` on a temporary
+loopback WSGI app, mutually exclusive with non-default `--base-url`,
+and its actual Weapon/Glossary deep-link checks. An interrupted new
+file may be partially written, so receipts must be inspected before
+acceptance. Neither command replaces complete release/browser gates,
+and this report change does not alter browser selectors or source
+fixtures.
+
+### Optional Structured Skill Charts and Trait Wiki browser receipts
+
+The final two optional browser CLI verifiers,
+`verify_structured_skill_charts_browser` and
+`verify_trait_wiki_browser`, use the same new-file-only `--output`
+contract. Their JSON output is an immutable *run receipt*, not a
+replacement for any cached source file. For example:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.browser.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/validation/browser/structured-skill-charts/RUN_ID/charts.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/research/traits/official-snapshot.html --output local/validation/browser/trait-wiki/RUN_ID/trait-wiki.json
+```
+
+Replace `RUN_ID` with a new UTC timestamp plus checkout revision;
+replace the `--wiki-html` example path with the actual retained,
+official Traits HTML snapshot. Do not copy private saved HTML into a
+report or tracked repository path. The Trait Wiki verifier still
+reads `--wiki-html` with UTF-8 BOM support, audits its references
+before launching the browser, and intercepts the official Wiki URL
+with the supplied HTML; it does not download or modify that source.
+The `--output` preflight now runs before even reading the saved
+HTML and rejects existing files, symlinks, and the input file itself
+if accidentally selected as the output destination.
+
+Both verifiers preserve their original source/DOM checks, `--headed`,
+`--base-url`, stdout-only operation, JSON serialization, and nonzero
+exit when observations fail. Fresh output parent directories are
+created only when writing. Publication uses exclusive creation, but
+a crash can leave an incomplete *new* receipt needing inspection.
+Historical paths remain valid explicit names only when unoccupied.
+These optional runs are not substitutes for the hosted browser or
+release acceptance gates.
+
+### Source and Weapon audit JSON/Markdown run receipts
+
+Eight maintained source-reconciliation commands now share a
+**new-file-only** report contract: `audit_1_0_reference_inputs`,
+`audit_weapon_chart_profiles`, `audit_weapon_definition_gaps`,
+`audit_weapon_trait_cross_sources`, `audit_weapon_traits_prose`,
+`audit_weaponry_family_clauses`,
+`audit_wiki_weapon_chart_names`, and
+`audit_auxiliary_silhouette_provenance`. Their existing required
+and optional `--json-output` / `--markdown-output` flags, current
+JSON/Markdown bytes and optional JSON stdout remain unchanged.
+
+For example, run the pinned Weapon Chart audit with the actual
+reviewed PDF path substituted for `PINNED_N5_PDF`:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.research.audit_weapon_chart_profiles --core-pdf PINNED_N5_PDF --json-output local/research/weapon-source-audits/RUN_ID/chart-profile.json --markdown-output local/research/weapon-source-audits/RUN_ID/chart-profile.md
+```
+
+Replace `RUN_ID` with a fresh UTC timestamp and source/checkout
+SHA. Both output destinations are validated *together before*
+opening any saved PDF, Wiki history, curated review, Army database
+or other source. Existing files, dangling symlinks, and identical
+or equivalent JSON/Markdown destinations fail closed. JSON/Markdown
+publication uses exclusive file creation, so a later collision
+cannot truncate earlier evidence. A source file accidentally chosen
+as an output path is likewise protected by the existing-file
+check. These commands do not publish or move source input bytes.
+
+Do not reuse a prior output path. Keep report receipts separate
+from original `local/research/` inputs and from tracked reviewed
+source material. A process interruption can still leave a
+partially written *new* report; multiple outputs are not a single
+transaction, so inspect the pair before accepting it. Historical
+explicit output paths remain supported only when unoccupied.
+Neither source authority, original audit semantics nor hosted
+release acceptance is changed by this report-writing safeguard.
+
+### Single-output semantic and runtime audit JSON receipts
+
+Fourteen maintained `audit_*` commands that accept an optional
+`--output` JSON path also use
+`tools.research.report_output` to preserve existing evidence.
+They cover Army/faction, physical database separation, enrichment
+coverage, Fireteam, loadout, normalization links, peripheral,
+profile, relationship, runtime database surface, semantic
+deduplication, source presentation, Trait Wiki anchors and logical
+Unit semantics. Unlike the multi-output Weapon audits, each of
+these commands accepts only one report destination.
+
+Use a unique run-specific path under `local/validation/` for
+application/database investigations, and `local/research/` when
+auditing retained third-party sources, for example:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.data.audit_unit_semantics data/generated/army.db --output local/validation/data-model/unit-semantics/RUN_ID/unit-semantics.json
+.\.venv\Scripts\python.exe -m tools.research.audit_trait_wiki_anchors SAVED_TRAITS_HTML --output local/research/trait-wiki-audits/RUN_ID/anchors.json
+```
+
+Replace `RUN_ID` with a fresh UTC timestamp and short revision
+identifier; replace `SAVED_TRAITS_HTML` with the actual saved
+official HTML path. All chosen report files are checked before
+reading the respective database or Wiki input, including existing
+files and dangling symlinks. The writer exclusively creates UTF-8/LF
+JSON, preserving each command's own serialization, summary, stdout
+fallback and audit failure codes. It does not alter or publish the
+input database, archived Wiki HTML or curated review bytes.
+
+A fresh report from a failing semantic gate is still evidence, not
+an accepted result. A crash may leave a partial *new* receipt.
+Existing ignored report locations remain valid explicit names
+only if unoccupied; no historical report is moved or deleted.
+The separate `audit_rules_interactions` CLI has a deliberate
+`--refresh-catalog-scope` source-maintenance mode and is reviewed
+under a different publication/receipt contract below.
+
+### Specialized audits: maintained checklist, PDF deltas, Restrictions candidates
+
+These three retained tools have **different output lifecycles** and
+must not all receive a blanket overwrite prohibition.
+
+`audit_rules_interactions --output` still intentionally **regenerates**
+the maintained Markdown checklist (including the tracked
+`docs/rules-interaction-checklist.md`). Its existing
+`--check-output` reads and checks that document without modifying
+it; `--refresh-catalog-scope` intentionally updates the maintained
+catalog scope with an explicitly paired Army/Rules database. Neither
+operation was reclassified as ordinary run evidence. For a **fresh,
+non-overwriting** optional audit receipt, use the separate
+`--receipt-output` flag:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.data.audit_rules_interactions --check-output docs/rules-interaction-checklist.md --require-release 1.0.0 --receipt-output local/validation/rules-interactions/RUN_ID/interaction-review.md
+```
+
+`--receipt-output` is incompatible with `--output`,
+`--refresh-catalog-scope` or `--report-catalog-scope-drift`.
+It *can* accompany read-only checklist checking and release
+acceptance gates; a failing gate can still produce review evidence.
+Existing destinations, symlinks and selected source-file aliases
+fail before any audit or catalog refresh. `--output` continues to
+replace the selected checklist intentionally, but refuses
+destinations that alias the input policy, catalog scope or
+any curated rule source; it should not be used for append-only
+run receipts.
+
+The pinned PDF revision audit now creates a fresh report by default beneath
+`local/audits/pdf-revision-deltas/<UTC-run-id>-<pair-scope>/report.json`.
+Run `--pairs faq-en faq-es` to select a specific scope, or supply an
+explicit `--output` path for a reviewed experiment:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.research.audit_pdf_revision_deltas --pairs faq-en faq-es
+.\.venv\Scripts\python.exe -m tools.research.audit_pdf_revision_deltas --pairs faq-en faq-es --output local/research/pdf-revision-deltas/RUN_ID/deltas.json
+```
+
+Both paths must be new files under ignored `local/`. Existing files and
+symlinks fail **before PDF extraction or pin loading**, and the write uses
+exclusive creation. The retired 2026-11-06 pathname remains an explicit
+`--output` choice only, not a reusable default.
+
+`audit_restrictions_source_chart --output` is an explicitly
+requested *candidate publication*, not a replaceable tracked
+artifact or an ordinary diagnostic report. It already requires a
+previously unused path **under ignored `local/`**; the final byte
+write now also uses exclusive creation to reject a destination
+claimed during source projection:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --output local/research/restrictions/RUN_ID/restrictions-candidate.json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --check-publication
+```
+
+Those two options are mutually exclusive in a single invocation.
+The existing Restrictions Chart read-only publication check and
+underlying negative-condition interpretation are unchanged.
+For all three tools, replace `RUN_ID` with a fresh UTC timestamp
+and short checkout/source revision. Keep ignored run evidence
+distinct from original private PDFs, curated files and tracked
+published references. Exclusive creation prevents overwrites,
+but an interruption can leave incomplete *new* output.
+No old report or source document is automatically moved or deleted.
+
+### Deployed-object receipts, Variant Usage candidates, and symbol export plans
+
+These related outputs are **not interchangeable** even though each
+is a JSON file:
+
+- `audit_deployed_object_inventory --json-output` is run
+  **evidence**: choose a fresh ignored destination such as
+  `local/validation/deployed-objects/RUN_ID/inventory.json`.
+  The requested file is checked before reading Army and curated
+  sources, then created exclusively with the original UTF-8/LF
+  serialization. Without `--json-output`, JSON goes to stdout.
+- `build_variant_usage --output` creates a **review candidate**,
+  not published runtime data. It preflights the destination
+  before the (potentially expensive) source projection, stages
+  complete JSON in an exclusive sibling `.json.tmp` file, and
+  installs the final candidate without replacing another run.
+  The preferred categorized path is
+  `local/candidates/variant-usage/variant-usage-*.json` (for example
+  `local/candidates/variant-usage/variant-usage-20261114T090000Z-SHA.json`).
+  The original strict root-level `local/variant-usage-*.json` name remains
+  available for explicit compatibility. Eleven historical candidate and
+  validation files are preserved in `local/candidates/variant-usage/legacy/`.
+  `--check` remains read-only and mutually exclusive with output.
+- `export_symbol_source_plan` and
+  `export_symbol_override_lookups` produce **pinned source
+  decisions** for another repository, not mutable audit reports.
+  Their shared `write_source_plan` remains idempotent when an
+  already-published plan has exactly matching bytes; mismatched
+  or symlink destinations fail. New plan publication is now
+  atomic and no-clobber, using a same-directory staged file
+  and hard-link creation. A concurrent producer can publish
+  equal bytes without changing the first file, but cannot
+  replace different provenance decisions. Choose distinct,
+  source-identified paths under
+  `local/research/symbol-source-plans/RUN_ID/` when retaining
+  these handoff exports. Invoke both exporters as modules
+  (`python -m tools.symbols.export_symbol_source_plan` or
+  `python -m tools.symbols.export_symbol_override_lookups`),
+  rather than directly executing their `tools/symbols/*.py` files.
+  The deployed-object and Variant Usage CLIs also retain
+  their existing direct-script launch paths.
+
+A fresh receipt or candidate is not approval to republish
+original source files. Never move or delete original input
+archives, tracked curated reviews or historical reports as
+part of output creation. A stale fixed `.tmp` file from an
+interrupted symbol/Variant Usage export is not overwritten;
+inspect its ownership before cleaning it up. Same-directory
+hard-link creation requires filesystem support; an unsupported
+filesystem fails without replacing the final artifact.
+
+**Work-tree ZIPs are different again:** `tools.dev.create_work_archive`
+uses content-fingerprinted default names and safely reuses
+identical default archives, but an explicitly supplied
+`--output` remains an **intentional replaceable destination**.
+Select a new path for backups that must be retained; this
+batch does not silently change the work-archive CLI contract.
+Similarly, symbol publication candidates use fresh output
+directories, while explicitly promoted tracked publications
+have their own validation and replacement lifecycle. Build
+scratch, persistent SQLite state and append-only metrics
+are outside the immutable receipt contract.
 
 ### Portable cross-browser critical-journey cohort (v1.0 gate)
 
 **Project domains:** Web frontend, Project infrastructure
 
-Use `python -m tools.run_cross_browser_compatibility --engine chromium` for
+Use `python -m tools.browser.run_cross_browser_compatibility --engine chromium` for
 an explicitly selected local engine; `firefox`, `webkit` and `msedge` are
 also supported. Install `playwright==1.64.1` and that engine using
 `python -m playwright install <engine>` first (on Linux CI the matching OS
 libraries are installed with `--with-deps`). The helper runs the dedicated
 `tests/test_cross_browser_compatibility.py` cohort with one engine, exits
-nonzero on failed/missing browser setup and writes JUnit and failure traces
-under ignored `local/cross-browser-compatibility/`. The ordinary source
-suite does not require Playwright and skips this opt-in module without an
-engine. The authoritative mandatory hosted matrix and exact-SHA evidence
-contract are in [CI](ci.md#cross-browser-release-compatibility-gate).
-A successful local cohort never replaces hosted acceptance, and the 81-page
-Unit matrix is not multiplied across browser engines.
+nonzero on failed/missing browser setup and stores its JUnit report and
+failure screenshot/Playwright trace files together under a fresh
+`local/validation/project-infrastructure/cross-browser/<UTC-run-id>-<short-SHA>/<engine>/`
+directory. The output directory is created exclusively before pytest starts;
+an existing directory fails without modifying previous evidence. Use
+`--output-dir local/validation/project-infrastructure/cross-browser/<RUN_ID>/<engine>`
+to select another fresh directory under `local/validation/`. The runner
+requires a resolvable checkout Git HEAD SHA for its automatic directory
+and passes the same output directory to its test module. The HEAD label does
+not certify that a local worktree is clean; only separately verified
+exact-SHA acceptance can do that. Run the module via this runner rather
+than setting only the browser engine environment variable.
+Hosted CI uploads the `local/validation/project-infrastructure/cross-browser/`
+tree, preserving the same JUnit and failure traces on both successful and
+failed runs. Previously retained `local/cross-browser-compatibility/`
+artifacts remain unchanged and are not treated as current run output.
+
+The ordinary source suite does not require Playwright and skips this
+opt-in module without an engine. The hosted matrix is
+[optional for v1.1+, mandatory for v1.0.x](ci.md#cross-browser-release-compatibility-gate).
+A successful local cohort cannot replace any selected hosted gate, and the
+81-page Unit matrix is not multiplied across browser engines.
 
 ### Focused-first VR execution
 
-**Default: no full-suite run for an ordinary task or VD/VR drain.** A VD
-pass designs tests and executes none. When VR becomes due, run a **small,
-risk-based impact set first**; fix and rerun failures at that scope. Execute
-the complete suite only at an explicitly required cumulative/release gate
-(such as V1S-090), or when an identified cross-cutting change cannot be
-adequately bounded by focused tests. Record the exact reason before dispatch.
-The numeric VR threshold determines **when** to validate, not **how many**
-tests to run. A full-suite pass is not needed to close an ordinary VR when
-its applicable selectors and integrity checks have passed.
+**Default: focused tests during normal implementation.** For a newly
+written test, run it immediately when practical. For deferred VR execution,
+run a **small, risk-based impact set first** and fix failures at that scope.
+Execute the complete suite only for a separately identified cumulative,
+integration or release gate, or when cross-cutting risk cannot be bounded by
+focused tests. Record the reason for any full-suite dispatch. The presence
+or number of queued VRs does not itself justify a broad run.
 
 Build the impact set from **all modified inputs and their consumers**, not
 only the new test files. Check broad contracts affected by each changed
@@ -641,7 +2749,7 @@ On the unchanged frozen source/database pair at `3c8b16018f914fc1ee69fe769216a7c
 All **808/808** processed SVGs were required. Published cross-domain API/page
 destinations, Glossary references, Weapon local fragments and cited context
 were covered without a new source-wide inventory. The previously accepted
-[V1S-082 routing census](v1.0-source-coverage-audit.md#v1s-082-maintained-reference-routing-census-2026-11-07)
+[V1S-082 routing census](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-maintained-reference-routing-census-2026-11-07)
 and [V1S-083 disclosure regressions](#known-source-disclosure-acceptance-v1s-083--vr-0137)
 remain applicable to the unchanged published data and browser consumers.
 
@@ -649,7 +2757,7 @@ The Weapon fragment verifier gained a `--self-host` mode for the tracked
 Army/rules pair, removing the need for a separately running development server.
 Its new ephemeral-server regression and existing unit tests passed **12/12**.
 A separate real Chromium invocation of
-`tools.verify_rule_fragment_browser --self-host` passed **69/69** checks at
+`tools.browser.verify_rule_fragment_browser --self-host` passed **69/69** checks at
 1440/390/320 px in 248 seconds, following soft-navigation, source-backed
 rule cards, Glossary-to-Weapon fragments and fresh deep links. The full
 JSON report is under ignored `local/audits/v1s086-rule-fragments.json`.
@@ -669,7 +2777,7 @@ gates passed against the unchanged V1S-084 release pair:
 - Source occupancy inspected **70 tables / 441 fields** using the matched
   raw sibling. **0/39** potentially unrepresented fields were populated;
   zero confirmed gap families and two existing scope decisions were retained.
-- `tools.report_reference_baseline --army-archive` verified the pinned
+- `tools.research.report_reference_baseline --army-archive` verified the pinned
   September 29 ZIP hash, all **58** source files, **4,137** Unit membership
   occurrences, **4,748** groups, **5,020** profiles and **12,993** loadout
   options, plus the published references, extras, Includes, Peripherals,
@@ -689,8 +2797,8 @@ gates passed against the unchanged V1S-084 release pair:
 Use the **explicit 1.0 scope**, independently of the historical checklist:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_rules_interactions --catalog-scope data/curated/rules-interactions/catalog-scope-1.0.0.json --database data/generated/infinity.db --rules-database data/generated/rules.db --require-primary-release 1.0.0 --require-release 1.0.0
-.venv\Scripts\python.exe -m tools.audit_rules_interactions --check-output docs/rules-interaction-checklist.md
+.venv\Scripts\python.exe -m tools.data.audit_rules_interactions --catalog-scope data/curated/rules-interactions/catalog-scope-1.0.0.json --database data/generated/infinity.db --rules-database data/generated/rules.db --require-primary-release 1.0.0 --require-release 1.0.0
+.venv\Scripts\python.exe -m tools.data.audit_rules_interactions --check-output docs/rules-interaction-checklist.md
 ```
 
 The default historical 0.7 scope intentionally has a different denominator
@@ -719,7 +2827,7 @@ pragmas matched, but **1,594 bytes** differed. Its hash was
 versus tracked
 `90d600a5b7b0425ee590ef90891481433e179d4e96f4a7b1dbf26edfde672ca9`.
 Both had 336 × 4096-byte pages. This is logical-equivalence evidence under
-the [cross-host policy](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04),
+the [cross-host policy](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04),
 not cross-host byte parity or permission to replace a shipped artifact.
 
 Ignored `local/v1s085-*` reports retain the baseline/input/occupancy evidence,
@@ -752,9 +2860,9 @@ Database health required and validated the raw sibling; each staged app loaded
 the matched publications. The complete processed symbol set and its source
 binding passed against each staged pair: **808/808** published and
 browser-referenced SVGs. No active artifact needed replacement, and their
-hashes remained unchanged after acceptance. The
-[data-model artifact record](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted)
-owns the published fingerprints.
+hashes remained unchanged after acceptance. The historical artifact fingerprints belong to the pinned test and
+Git evidence; the [data model](data-model.md#restriction-persistence-and-version-aware-api)
+owns the supported schema and source contract.
 
 With `INFINITYDB_RELEASE_FAQ_PARITY=1`, a two-worker Windows batch using
 `tools.run_checks --stage test --assets required` passed **54 tests with zero
@@ -852,7 +2960,7 @@ requiring exactly one source note, the Deployable review date and baseline
 locator counts. The immediate CI/publication-integrity repair passed **117
 tests** in the reviewed Windows worktree based on that SHA. The seven exact
 targets were `tests/test_deployed_object_citation_migrations.py`,
-`tests/test_deployed_object_non_catalog_queue.py`,
+the then-existing `tests/test_deployed_object_non_catalog_queue.py` (now retired),
 `tests/test_rules_database.py::test_rea038_direct_recovery_contact_does_not_inherit_allied_gate`,
 `tests/test_silent_immunity_source_scope.py`,
 `tests/test_source_coverage_dispositions.py`,
@@ -883,7 +2991,7 @@ source/record declarations; it does not read source text, resolve cross-source
 differences, require multiple citations or approve browser routes.
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.report_reference_baseline --audit-current-citation-minimum
+.\.venv\Scripts\python.exe -m tools.research.report_reference_baseline --audit-current-citation-minimum
 ```
 
 The standalone check exits nonzero for any missing applicable current
@@ -1095,7 +3203,7 @@ and the rules database SHA-256 was
 The source-pinned audit confirmed 173 detected profile and Trait rows,
 including both early page-188 rows and separately matched Uragan modes;
 its differences remain disclosed in the
-[coverage audit](v1.0-source-coverage-audit.md#v1s-082-weapon-chart-early-row-correction-2026-11-07).
+[coverage audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-weapon-chart-early-row-correction-2026-11-07).
 Ruff, targeted Pyright and documentation checks passed. The dedicated MCP
 Linux worker was unavailable; Windows evidence does not establish Linux,
 hosted CI or final-candidate acceptance.
@@ -1182,40 +3290,24 @@ not hosted CI or final-candidate acceptance.
 
 ### Validation batch planning
 
-After due VD prerequisites have been **designed and statically reviewed, not
-executed**, plan shared VR execution before starting any jobs:
+When several checks genuinely remain deferred, group compatible work instead
+of launching a separate job for every queue entry:
 
-1. Inventory all **due**, ready-to-run VRs and their individual required
-   selectors, cumulative checks, intended revision, source/asset versions,
-   target host and runner options. Keep blocked or incomplete prerequisites
-   open; no dispatch can satisfy them.
-2. Partition by compatible **verified testing state**: one pinned commit
-   containing the intended implementation and test designs, host, source/asset
-   and ignored-publication identity, dependencies, and runner/browser options.
-   A newer revision does not automatically validate an older VR when its
-   affected behavior or artifacts changed. Separate Windows-only evidence,
-   different fixture/asset requirements and mutually incompatible options.
-3. For each compatible group, deduplicate the exact **impact-based focused
-   selectors** across all relevant layers and run them first in one pinned
-   asynchronous job. Triage any failure there before considering wider runs.
-   Only append a separately required cumulative gate if its independent
-   necessity and exact scope are documented; a shared VR batch alone does
-   not justify a full-suite launch. Keep per-VR selector/prerequisite
-   mappings in the existing queue and job evidence, not another register.
-4. Once the job terminates, verify exact HEAD, actual collected/selected tests,
-   exit status, skips and their reasons, fixture/asset coverage, and browser
-   evidence **for each VR separately**. Record the shared job ID and relevant
-   result against each VR; retire only satisfied entries. A partial pass,
-   skipped required case or mismatched SHA leaves that obligation open. Recount
-   and drain according to the canonical queue before unrelated implementation.
+1. Identify the outstanding selectors, missing prerequisites, owning changes
+   and intended revisions/asset state. Do not silently accept blockers.
+2. Group by compatible *pinned* commit, test inputs, runner/browser options and
+   host. Reuse the smallest sufficient cross-layer focused test set.
+3. Execute one compatible batch, inspect failures/skips and expand only when a
+   separately justified cumulative or release gate requires it.
+4. Associate the terminal results with each affected obligation. Close only
+   those checks proven green for their intended revision. Record unresolved
+   work and its concrete next trigger; no threshold-driven recount or full
+   drain is required.
 
-For the first pilot, compare the planned number of per-VR jobs against actual
-shared launches, unique/repeated selectors, source/worker preparation time,
-wall time and any failures requiring reruns. Keep detailed timing under
-ignored `local/`; report a concise result at the VR closeout. Preserve all
-[CI](ci.md) and [release](releasing.md) gates independently. The queue owns
-whether work is due; this procedure changes only **dispatch grouping**, not
-its thresholds, drain ordering or individual acceptance requirements.
+Long logs and timings belong under ignored `local/` when useful. CI and
+release acceptance have separate owners. Independent work may continue in
+another checkout while an isolated job runs; never mutate the test checkout
+or inputs being tested.
 
 **Parallel work while a test job runs:** An asynchronous test job does not
 require the agent to idle. Continue with read-only audits, source inspection,
@@ -1244,7 +3336,7 @@ on `7712190e` (10 passed, 2 skips), and the complete suite now passes on
 the subsequent exact Git revision. Skips include opt-in migration checks,
 local-only missing sources and Windows-only checks; they are **not**
 independent hosted/frozen-candidate acceptance. See the
-[source-coverage audit](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-remaining-p-173-glossary-terms-2026-11-06)
+[source-coverage audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-remaining-p-173-glossary-terms-2026-11-06)
 for the evidence change and publication hashes.
 
 **2026-11-05 full-assets post-checker regression:**
@@ -1451,7 +3543,7 @@ both modules in every lane layout and reviews that one bounded route;
 query/path-specific labels remain refused. As an immediate CI-correctness
 and metrics-privacy gate, Windows ran `tools/run_checks.py --stage test
 --stage lint tests/test_browser_test_capacity.py tests/test_metrics_history.py
-tools/browser_test_capacity.py tools/metrics_history.py --assets required`:
+tools/testing/browser_test_capacity.py tools/operations/metrics_history.py --assets required`:
 **48 passed, zero skips/failures**, Ruff passed, and all **808/808** published
 and browser-referenced SVGs were available. Tests cover accepted aggregate
 variant-usage counters and refusal of query values and path suffixes.
@@ -1470,17 +3562,15 @@ and Ruff after this transport change. Hosted confirmation remains required;
 local success does not prove the hosted timeout's underlying cause. This is an
 internal test-infrastructure change and needs no release-note entry.
 
-**Full-suite parallelism exception: run on Linux, develop on Windows.**
-Only while a **full test suite** is actively running against a pinned
-revision in the separate `linux-dev` MCP checkout may the agent continue
-other independent Windows implementation during a due VR drain. Focused,
-module, browser-subset and other partial Linux runs do **not** grant this
-exception. Never treat dispatch or a pending job as VR completion. Poll at
-meaningful work boundaries, triage actionable failures, and return to
-draining VR when the full-suite run finishes.
-Linux-only checks may naturally execute on Linux. Avoid scheduling duplicate
-full suites on Windows just because development has advanced during a Linux
-run; respect the active validation queue and mandatory release gates.
+**Isolated Linux validation may run alongside independent Windows work.**
+Focused, browser-subset, partial and full-suite tests can all run against a
+pinned, separate `linux-dev` checkout while unrelated Windows development
+continues. This is safe only when test inputs and generated artifacts are not
+shared or mutated; it does **not** allow moving the worker's HEAD during a
+running job. A test result validates only the exact revision and inputs
+actually tested, not newer Windows work. Dispatch is never acceptance.
+Reserve full suites for explicit cumulative/release gates rather than using
+them merely to permit parallel development.
 
 The Windows MCP `local` checkout, the interactive `devbox` checkout, and the
 `mcpworker` checkout at `/srv/mcp-worker/workspaces/InfinityDB` are **three
@@ -1493,30 +3583,25 @@ source snapshot/database identity where relevant, and final pass/fail/skip
 counts. A Linux result validates only the state it tested, never newer
 Windows changes or a different Linux checkout.
 
-A practical handoff is **complete VD design without tests -> enter VR drain
--> prepare a pinned revision and relevant assets -> run the union of focused
-impact selectors -> resolve failures -> retire satisfied VRs**. Run a
-separate full Linux suite only for an explicitly due cumulative/release gate;
-then the narrow independent-Windows-development exception applies while that
-full suite actually runs. Focused VR jobs stay within the dedicated drain.
-The no-mutation rule above still applies to
-*the Linux test checkout and any shared inputs its jobs actually consume*;
-never edit that checkout or swap tracked databases during its test run.
+For truly deferred execution, select the intended revision and relevant
+assets, run compatible focused selectors together, inspect failures and close
+only satisfied obligations. Run a full suite only for an independently
+required cumulative/release gate. Never modify the testing checkout or
+shared inputs while any job is running.
 
 **Autonomous commits and due-validation Git handoff are agent-initiated,
 not automatic background mirroring.** After required immediate safety
 and static checks pass, inspect the working diff, stage only task-related
 files, create a coherent conventional Git commit, and fast-forward push
 the intended development branch through separate bounded operations.
-Record the SHA and any unrun VD/VR tests. Continue with the next clearly
-identifiable open task **only when the strict VD/VR drain loop allows it**
-or a full Linux suite is actually running; avoid manufacturing tasks
-to keep the process running. These actions are authorized
+Record the SHA and any genuinely deferred VD/VR checks. Independent work may
+continue if the test checkout and inputs are isolated; do not manufacture
+tasks merely to keep the process running. These actions are authorized
 by the user's standing InfinityDB development workflow, but they do
 not authorize force/reset/rebase, destructive checkout changes,
 releases, deployment, or publication of new acquired content.
 
-Once the queue triggers execution, inspect the committed Windows
+When a test is assigned to the Linux worker, inspect the committed Windows
 revision and dedicated MCP worker checkout; use separate, bounded
 Git operations to fetch and fast-forward the worker's matching branch
 to the intended revision. Never silently fetch/checkout a different
@@ -1549,71 +3634,30 @@ post-push monitoring is independent of queued local VD/VR checks.
 Only a mandatory release/merge acceptance gate requires waiting
 for terminal CI results.
 
-**Queued Linux dispatch protocol (VD/VR):** Follow the
-[strict drain loop](validation-queue.md#queue-rules) first; a dispatch
-does not itself lower the VR count.
+**Deferred Linux execution (only when needed):**
 
-1. At **task start**, inspect [the active queue](validation-queue.md)
-   and perform the strict VD/VR drain if any threshold is due, before
-   ordinary implementation. At **implementation closeout**, register
-   every concrete missing test design as VD and each distinct change
-   awaiting execution as VR, with linked selectors, revision, input/asset
-   requirements and outstanding gates. Most focused regressions should
-   enter VD rather than being written and executed during implementation;
-   only named immediate safety exceptions bypass that separation.
-   Record separately which immediate checks actually ran. Update
-   next-unused-ID counters; do not maintain another pending-test list.
-2. Apply the queue's current [thresholds, prerequisite-design rule,
-   overdue-item handling and drain order](validation-queue.md#queue-rules).
-   Design all required VD tests **without executing any tests** before
-   their dependent VR runs. Group compatible VR selectors only where
-   revision and coverage match, and reconcile each result individually.
-   Failed/blocked items remain open; an unsafe Git handoff is a blocker,
-   never permission to skip due validation.
-3. Select the intended committed/frozen revision and verify that the
-   **MCP Linux worker checkout** (not the interactive `devbox` checkout)
-   has exactly that HEAD and required dependencies/source inputs. If it
-   does not, run separate safe Git fetch and fast-forward operations
-   against the worker's matching branch **as part of the authorized
-   due-validation handoff**, verifying the target SHA. If this refuses,
-   record `Linux checkout not prepared` and the exact blocker in the
-   VR entry; do not force or reset the checkout. Neither
-   `start_test_job` nor file transfer is Git synchronization. Staged
-   Syncthing assets must be activated separately when needed. **Before
-   the full suite, verify the schema-specific matched runtime artifacts.**
-   Current v10 Rules embed deployed objects; validate them against the
-   tracked Army database. Only legacy v8/v9 checkouts generate
-   `data/generated/deployed-objects.json` with
-   `tools.build_deployed_object_publication` and run its `--check` verification.
-   A matching Git HEAD does not supply that ignored legacy publication.
-   When exact-variant or Weapon-profile publications are present, also verify
-   their paired build checks before dispatch. Fingerprint curated inputs from
-   the bytes that Git actually publishes; Windows CRLF working copies must
-   not produce a different source pin from the repository's LF blob.
-   Verify browser dependencies and the expected source-evidence coverage
-   separately. Do not dispatch an unmatched or incomplete checkout and
-   call it equivalent.
-4. Start asynchronous MCP pytest jobs via `start_test_job` using
-   `worker="linux-dev"` and `expected_commit=<full 40-character SHA>`.
-   For runner profiles containing tests, use `start_script_job` with
-   the tracked `tools.run_checks` module, the same worker/commit pin,
-   and appropriate timeout. Record job ID and intended selectors in each
-   affected VR item or ignored evidence. Only for an **actively running
-   full-suite Linux job**, continue independent Windows implementation;
-   retain and return to the open VR drain when it finishes. For focused
-   or partial jobs, keep processing the VR queue rather than starting
-   unrelated implementation. Do not mutate the Linux checkout or shared
-   test inputs. Inspect `list_script_jobs` after reconnecting and poll
-   at meaningful boundaries or actionable failures.
-5. Before retiring a VR, verify the **actual** worker revision, exit code,
-   report, pass/fail/skip counts, and required source/asset coverage.
-   Unexpected browser or source-data skips are gaps, not a green
-   acceptance. A failure stays open and links the implementation fix in
-   TODO. Record concise durable outcome in `docs/testing.md` or the
-   release evidence owner, retire each passing VR immediately and each VD when its test design
-    is complete without execution,
-   and advance queue counters without reusing IDs. Windows-only checks,
-   hosted CI and final release acceptance remain distinct.
+1. Identify a real pending check, its revision, selectors and required assets.
+   The queue has no count-based execution trigger; a prerequisite becoming
+   available or a relevant integration/release gate is sufficient reason.
+2. Prepare the dedicated `linux-dev` MCP worker checkout using separate,
+   non-destructive fetch/fast-forward operations, then verify exact HEAD and
+   relevant dependencies/source inputs. Never silently move the interactive
+   `devbox` checkout, reset/rebase, or change a checkout with active jobs.
+   A missing required source artifact or unsafe Git handoff is a blocker.
+3. Verify schema-specific matched runtime artifacts where the test depends
+   on them (including embedded deployed objects in v10 Rules, matched
+   variant/Weapon-profile publications, source identities and browser assets).
+   Do not mistake a matching Git SHA for evidence that ignored data is present.
+4. Dispatch with `start_test_job` or `start_script_job` using
+   `worker="linux-dev"`, `expected_commit=<full SHA>` and the smallest
+   relevant selectors. Record the job ID and intended coverage. Independent
+   Windows work may continue during a **focused or full** run when it cannot
+   mutate this worker's checkout or shared inputs. A dispatch is not a pass.
+5. Verify terminal status, actual SHA, failures, skips and source/asset coverage.
+   Retire satisfied queued work; keep failed, blocked or unrun verification
+   open with a concrete next trigger. Hosted CI and release acceptance remain
+   independent. Poll existing jobs after reconnecting rather than launching
+   duplicates.
 
 **Workspace MCP execution:** The connected MCP server requires test workloads
 to use its asynchronous job interface. Use `start_test_job` for ordinary
@@ -1965,15 +4009,12 @@ release-pair promotion; matched deployed-object publication
 and normal-mode acceptance are still required.
 
 **2026-11-03 Commlink v9 staging and subsequent promotion (VR-0037):**
-By default, `tools.stage_commlink_v9_candidate` accepts a **new**
-`--destination local/<candidate-directory>` and does not modify the
-tracked release pair. From repository root on Windows:
-
-```powershell
-.\.venv\Scripts\python.exe -m tools.stage_commlink_v9_candidate --destination local/commlink-v9-candidate-NEXT
-```
-
-Use a previously unused directory name. The command refuses destinations outside the
+The historical `tools.stage_commlink_v9_candidate` accepted a new
+ignored `local/` destination and staged a matching v9 Rules and loose
+deployed-object JSON pair without modifying the release. The one-use
+script was retired in P2.5; the original command remains in Git
+history, **not as a runnable development instruction**.
+The procedure refused destinations outside the
 ignored `local/` directory, preexisting destinations, dirty
 tracked release artifacts, mismatched source/publication pairs,
 unreviewed source records, unexpected database changes or
@@ -2008,13 +4049,8 @@ Windows regression exposed an SQLite handle held by the staging
 exporter; explicit connection closure fixed that before promotion.
 The disposable promotion, tamper-rejection and injected-failure
 rollback suite passed **6/6**; the separate release-storage module
-passed **530/530**. Under explicit authorization, the command
-
-```powershell
-.\\.venv\\Scripts\\python.exe -m tools.stage_commlink_v9_candidate --destination local/commlink-v9-candidate-20261103 --promote-staged
-```
-
-promoted tracked `data/generated/rules.db` and refreshed its matched,
+passed **530/530**. Under explicit authorization, that now-retired
+command promoted tracked `data/generated/rules.db` and refreshed its matched,
 Git-ignored `data/generated/deployed-objects.json`. Verified recovery
 copies are retained under ignored `local/commlink-v9-recovery-tscycrly/`.
 Before SHA-256:
@@ -2316,7 +4352,8 @@ the published FAQ answer. Three pinned FAQ PDF hashes verified on Windows.
 The guarded read-only candidate checked the exact v9 single-record
 delta, all 223 raw owners and unchanged unrelated deployed-object data.
 The variant was promoted using the rollback-capable matched-v9 path;
-`tools.review_camouflage_variant` now verifies the published pair.
+`tools.review_camouflage_variant` verified the published pair at the time
+(the one-use reviewer has since been retired under P2.5).
 Five negative mutation cases reject widened use counts, changed
 consumption conditions and invented extras. Windows source-variant
 module **89/89**, curated collection module **670/670**, and rules
@@ -2353,7 +4390,7 @@ The reviewed typed effect metadata is closed to exactly the six
 source signatures; six negative mutation tests reject invented
 modifiers, PH values, Explosion-use/attack changes and extras.
 
-The read-only `tools.review_combat_jump_variant` verifies the
+The historical read-only `tools.review_combat_jump_variant` verified the
 pinned source PDF, 211 direct occurrences, all qualified raw
 owners, exact single-record schema-v9 delta, and matched
 deployed-object publication invariance. The rollback-capable
@@ -2405,8 +4442,10 @@ normal PH-3 Infiltration Roll. The pinned Skill source-47 inventory has
 five carry bare `ReRoll` without the explicit PH=X required by the
 printed reroll rule, and 194 carry neither. Only the five fixed-PH
 signatures are typed. The original source-47 owner/ID assertion,
-negative combination/type tests and exact new read-only reviewer
-`python -m tools.review_infiltration_ph_variant` protect those bounds.
+negative combination/type tests and the then-current read-only reviewer
+`python -m tools.review_infiltration_ph_variant` protected those bounds.
+The original reviewer has been retired; current source and type checks
+retain this contract.
 Its guarded `--promote` updated the tracked v9 rules database and
 matched ignored deployed-object publication with a local rollback;
 Windows read-only regeneration exactly matches the promoted rules SHA-256
@@ -2628,13 +4667,13 @@ on the same host within the same run**, not across hosts or reboots.
 This instrumentation does not change slot admission, test isolation or
 scheduling and does not require running a permanent monitor.
 
-The tracked offline analyzer `tools.analyze_chromium_timeline` reconstructs
+The tracked offline analyzer `tools.performance.analyze_chromium_timeline` reconstructs
 concurrent admission requests and held slots from completed, timestamped
 JSONL records. Run it after an instrumented benchmark, e.g. from the
 repository root on `devbox`:
 
 ```bash
-./.venv/bin/python -m tools.analyze_chromium_timeline local/benchmarks/chromium-RUN --slots 4
+./.venv/bin/python -m tools.performance.analyze_chromium_timeline local/benchmarks/chromium-RUN --slots 4
 ```
 
 Use the actual `local/benchmarks/chromium-*/` path printed by the runner.
@@ -2742,7 +4781,7 @@ separately.
 
 Pytest's native `setup` duration includes time blocked acquiring a Chromium
 slot. This is **waiting**, not active fixture initialization; the two numbers
-must not be added. InfinityDB's `tools.pytest_startup_profile` plugin now
+must not be added. InfinityDB's `tools.testing.pytest_startup_profile` plugin now
 records Chromium-slot acquisition waits during setup and transfers their
 durations through pytest's `user_properties` to the xdist controller. For
 significant waits (at least 50 ms), the final console report displays:
@@ -3315,7 +5354,7 @@ earlier full-load failure and does not justify promoting
 four Chromium slots as the default.
 
 **2026-11-03 bounded CPU/RAM sampling for Chromium benchmarks (VR-0024):**
-A new `tools.sample_test_host_resources` module runs **alongside**,
+A new `tools.performance.sample_test_host_resources` module runs **alongside**,
 but never launches or modifies, independently scheduled test jobs.
 It records one JSONL metadata header, timestamped host CPU-busy
 and physical-memory-usage samples, and a final summary in a new
@@ -3329,11 +5368,11 @@ from other workloads as well as the test run. Use a unique filename
 and start the sampler just before a comparable test job:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.sample_test_host_resources --output local/benchmarks/host-load-windows-2slot.jsonl --duration-seconds 780 --interval-seconds 5
+.\.venv\Scripts\python.exe -m tools.performance.sample_test_host_resources --output local/benchmarks/host-load-windows-2slot.jsonl --duration-seconds 780 --interval-seconds 5
 ```
 
 On Linux, use
-`./.venv/bin/python -m tools.sample_test_host_resources --output local/benchmarks/host-load-linux-2slot.jsonl --duration-seconds 780 --interval-seconds 5`.
+`./.venv/bin/python -m tools.performance.sample_test_host_resources --output local/benchmarks/host-load-linux-2slot.jsonl --duration-seconds 780 --interval-seconds 5`.
 The module refuses absolute/escaping paths, overwrites and
 unbounded sampling configurations; the source/test schema is
 portable, while native measurements support Windows and Linux.
@@ -3445,12 +5484,12 @@ Linux CPU **35.58%/100%**, RAM **21.07%/25.66%**.
 Whole-capture means still include post-test time.
 
 To align captures with the real test duration, the new read-only
-`tools.analyze_test_host_resources` calculates overlap-weighted
+`tools.performance.analyze_test_host_resources` calculates overlap-weighted
 CPU/RAM percentages using sample intervals and refuses incomplete
 or malformed captures. For example on Windows:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.analyze_test_host_resources --input local/benchmarks/host-load-full-windows-20261103-fixed.jsonl --test-start 2026-11-03T08:55:33+01:00 --duration-seconds 538.37
+.\.venv\Scripts\python.exe -m tools.performance.analyze_test_host_resources --input local/benchmarks/host-load-full-windows-20261103-fixed.jsonl --test-start 2026-11-03T08:55:33+01:00 --duration-seconds 538.37
 ```
 
 Windows test-window coverage was **100%** across 109 intervals;
@@ -3550,7 +5589,7 @@ The existing two-slot Windows limit remains appropriate.
 **Host-specific capacity decision (2026-11-03):** The dedicated Linux
 MCP worker may opt into the *validated* four-slot, four-lane, eight-worker
 Scenario FAQ A/D split profile, while Windows retains two slots.
-`tools.browser_test_host_profile` stores a strict, ignored
+`tools.performance.browser_test_host_profile` stores a strict, ignored
 `local/browser-test-profile.json` marker on the Linux worker only.
 The maintained `tools.run_checks --stage test` adopts that profile
 when no worker, distribution, slot, lane, split or browser-reuse
@@ -3561,9 +5600,9 @@ profile does **not** change clean CI, Windows, standalone direct
 a Git change. Enable/check/disable on Linux with:
 
 ```bash
-python -m tools.browser_test_host_profile enable
-python -m tools.browser_test_host_profile status
-python -m tools.browser_test_host_profile disable
+python -m tools.performance.browser_test_host_profile enable
+python -m tools.performance.browser_test_host_profile status
+python -m tools.performance.browser_test_host_profile disable
 ```
 
 **Host-profile acceptance (VR-0049 retired):** At pinned
@@ -3630,13 +5669,13 @@ intermittent Windows Glossary/Spec-Ops full-load visibility
 timeouts, the Scenario FAQ browser lifecycle/long tail,
 pooled-versus-fresh browser comparisons, and optional source
 PDF/staging parity. They are tracked in
-[the Post-1.0 backlog](TODO.md#performance-storage-and-build-tooling),
+[the active backlog](TODO.md#performance-storage-and-build-tooling),
 not as an open VR-0023 acceptance gate. The validated Linux
 four-slot and Windows two-slot limits remain unchanged; no
 production browser or CI configuration changes.
 
 **Docker host readiness:** the fixed, read-only
-`python -m tools.probe_docker_test_host` probe found the Docker CLI and
+`python -m tools.performance.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version
 and engine-info queries failed (exit 1, unclassified by the probe).
 The Linux container engine is **not yet verified as usable** from the
@@ -3668,7 +5707,7 @@ configuration even when an aborted request still resolves. Responsive grid
 contracts are also checked in the web suite. Scenario browser visual review was
 user-confirmed on 2026-10-08; later bounded Chromium interaction acceptance is
 documented under [four-core-scenario acceptance](#10-four-core-scenario-browser-acceptance).
-Neither run replaces [final candidate acceptance](TODO.md#final-10-acceptance).
+Neither run replaces [final candidate acceptance](releasing.md#development-freeze-and-release-only-handoff).
 
 ## Silhouette manual browser acceptance
 
@@ -3710,9 +5749,9 @@ occurrence counts.
 Inspect a specific source family without dumping the entire inventory:
 
 ```powershell
-python -m tools.audit_source_variant_inputs --catalog skills `
+python -m tools.data.audit_source_variant_inputs --catalog skills `
     --source-id 74 --source-id 263 --source-id 271
-python -m tools.audit_source_variant_inputs --catalog equipment --source-id 169
+python -m tools.data.audit_source_variant_inputs --catalog equipment --source-id 169
 ```
 
 The first command selects Super-Jump, Jump and Climb; the second selects
@@ -3722,7 +5761,7 @@ explicitly. To inspect only the remaining unresolved source IDs without
 truncating the console response, use:
 
 ```powershell
-python -m tools.audit_source_variant_inputs --catalog skills --unresolved-only --brief
+python -m tools.data.audit_source_variant_inputs --catalog skills --unresolved-only --brief
 ```
 
 `--unresolved-only` filters the displayed items without changing the
@@ -3924,7 +5963,7 @@ Device Plus extra `344` (`UPGRADE: SR-1`, two occurrences)
 remains open because it lacks a program target.
 
 **Read-only exact source-owner provenance (2026-11-01):**
-`tools.audit_source_variant_inputs` accepts
+`tools.data.audit_source_variant_inputs` accepts
 `--catalog equipment --source-id 101 --owner-extra-id 344`
 to inspect only direct raw Army relationship owners. The
 `occurrenceOwners` result includes original owner type,
@@ -4236,7 +6275,7 @@ verifier; the user confirmed that run. Both reports are bounded
 checkout-specific browser evidence, not CI browser tests or proof of
 whole-catalog source-to-browser completeness.
 
-The maintained optional verifier `tools.verify_non_skill_army_browser`
+The maintained optional verifier `tools.browser.verify_non_skill_army_browser`
 repeats the seven real-browser cases at those three widths. It checks
 the client-rendered general profile, published API buckets, the correct
 Equipment/Training/Attribute-override table rows, valid Equipment
@@ -4247,7 +6286,7 @@ running for the **same checkout and databases**, run from the repository
 root in PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/audits/non-skill-army-browser/current.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/audits/non-skill-army-browser/current.json
 ```
 
 The optional verifier requires Playwright with Chromium installed and
@@ -4326,7 +6365,7 @@ For the frozen local candidate, serve the tracked database pair in an ephemeral
 WSGI app and run the full-width and mobile-width Chromium check:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_rule_fragment_browser --self-host --output local/audits/weapon-rule-fragments-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_rule_fragment_browser --self-host --output local/audits/weapon-rule-fragments-browser.json
 ```
 
 For an existing development or deployed server, use `--base-url URL`
@@ -4382,6 +6421,151 @@ the ignored raw Army archive and not a live Chromium acceptance run.
 The original responsive/browser investigation remains dated evidence;
 the final 1.0 gate still requires validation against the final source
 pair, served revision and normal player-visible pages.
+
+## Snapshot provenance publication
+
+The [snapshot provenance contract](../data/README.md#snapshot-provenance-contract)
+is exercised offline by `tests/test_snapshot_manifest_publication.py` and
+`tests/test_snapshot_provenance.py`. The former covers byte-exact replay,
+CRLF conflicts, exclusive staging, competing manifest publication,
+transaction ownership, symlink refusal and unsupported hard links. The
+latter also covers historical formats, content hashes and portable
+producer/consumer copies. No external producer package or live acquisition
+is required by InfinityDB's normal test suite.
+
+`tests/test_army_snapshot_source.py` adds the stricter explicitly selected
+Army ZIP/manifest identity checks. `tests/test_database_set_builder.py`
+checks equivalent legacy/local input layouts through complete set generation
+and rejects source/manifest drift before publication. Run these four modules
+as a focused acquisition/build batch when changing that handoff.
+
+Each standalone producer owns its acquisition-level rollback tests and full
+offline suite. The [historical R2 acceptance record](https://github.com/frankysan/InfinityDB/blob/1063096f51a3050594039cba84b1515d90a4ff0b/docs/tooling-and-local-path-cleanup-plan.md#twentieth-bounded-l2-checkpoint--r2-snapshot-producer-publication-alignment-2026-11-13)
+pins producer revisions and Windows/Linux byte-conformance evidence; those
+results do not turn local fixture checks into current hosted/release acceptance.
+
+`tests/test_activate_synced_assets.py` independently exercises the configured
+staged-asset layouts in disposable directories: legacy/local pair parity,
+read-only verification/preview, explicit apply, historical provenance,
+path/schema/hash rejection, duplicate selection, symlinks, inaccessible inputs
+and destination conflicts. It also verifies explicit local-file destinations
+for PDFs and overrides under `local/data/`, while preserving the legacy
+default and current Syncthing staging folders. Mixed-layout file requests,
+receiver-path confusion and conflicting destination bytes fail closed.
+Real source synchronization, receiver ACLs and backup/restore acceptance
+are separate from these hermetic fixtures; see
+the [activation runbook](syncthing-assets.md#explicit-snapshot-layouts).
+
+`tests/test_research_source_paths.py` covers explicit physical PDF selection
+with unchanged provenance labels: exact hash checks, missing selected inputs
+without fallback, path/policy rejection, symlink/reparse-point refusal and
+unreadable sources. The source-evidence and Reinforcements applicability suites
+also compare complete historical source reports and current/historical authority
+outcomes across layouts using synthetic PDFs. Real pinned-source tests retain
+their explicit missing-source skips on clean checkouts. These fixtures do not
+authorize copying private PDFs or changing their recorded paths; see the
+[research binding contract](../data/curated/README.md#explicit-physical-pdf-bindings-for-research).
+
+Pinned-source pytest fixtures now default to the `local` physical layout;
+`--reference-pdf-layout legacy` remains available for deliberate legacy
+fixture checks. Archive-based Wiki acceptance tests also look up immutable
+ZIPs under `local/data/wiki/` without changing their provenance labels.
+
+The `--source-layout` flag for `tools.research.report_reference_baseline` and
+`tools.audit_pdf_revision_deltas` changes only physical PDF lookup;
+their CLI defaults now use `local` and explicit `legacy` remains supported.
+Baseline source groups retain original source labels and reported identities;
+local PDF verification requires one published SHA-256 and rejects mismatches.
+The delta audit uses pinned PDF hashes and verifies selected bytes before
+extracting text; neither tool searches the other layout on missing sources.
+Focused regressions are in `test_report_reference_baseline.py` and
+`test_specialized_audit_receipts.py`, including synthetic PDF equivalence,
+no fallback, source-pinning failure and unchanged report serialization.
+The reference-baseline suite additionally exercises explicit legacy/local
+binding for the five bilingual Visibility Zone term clauses, preserving their
+existing review disposition and failing before PDF parsing on a bad hash.
+The three shared Basic Attack, Hacking follow-up and Template reference
+source-acceptance tests support the explicit test-only
+`--reference-pdf-layout legacy|local` selector (default: `legacy`). It
+selects only canonical Core/FAQ `data/pdf/...` source labels through the
+common pinned SHA-256 resolver. The selected physical files can reside under
+`data/pdf/` or `local/data/pdf/` without changing citation or test semantics.
+Missing selected PDFs still skip their source-only checks; present mismatched,
+linked, unreadable or unsafe selected inputs fail rather than falling back to
+another layout. The pinned Wiki ZIP and runtime/API/browser assertions are
+unchanged. For example, with the venv active, run the bounded source check:
+
+```powershell
+python -m pytest tests/test_template_reference.py::test_template_conditions_match_pinned_pdf_wiki_and_faq -q --reference-pdf-layout local
+```
+
+Hermetic regression cases in `test_combat_attack_reference.py` cover both
+physical selections, hash changes, missing-local-with-legacy-present, invalid
+layouts and page extraction from a synthetic PDF. The Hacking Program
+statistics source tests also use `--reference-pdf-layout` for their exact
+Core N5.3 PDF via the pinned resolver directly, without loading optional
+PyMuPDF at test collection time. Their independently pinned Army archive
+remains at its existing source path, and
+`tools.audit_hacking_program_statistics_chart` retains its caller-supplied
+`--pdf` input. Their additional hermetic
+regression rejects altered selected bytes, missing local sources despite an
+available legacy PDF, unsupported layouts and drift in the statistics manifest
+pin. On either layout a supplied wrong PDF fails rather than becoming a skip.
+The five Core N5.3 source-only tests for Ammunition identity,
+Smoke/Eclipse visibility opposition, Cover/vertical movement, ARO/Deployment,
+and Command Tokens use the shared `pinned_n53_core_pdf` fixture. This fixture
+uses the same `--reference-pdf-layout legacy|local` selection and the pinned
+resolver, skips only absent selected PDFs, and fails closed on wrong hashes,
+unsafe paths or links. Each owning test retains its own exact N5.3 SHA-256
+assertion, source clause/page checks and separate runtime/API assertions; the
+Cover test still checks the pinned Wiki archive when available. It does not
+load optional PDF readers at test collection time or redirect other tests.
+
+The weapon-chart research source-only cases also use the same pinned N5.3
+Core fixture in `test_audit_weapon_chart_profiles.py`,
+`test_audit_weapon_traits_prose.py`, and
+`test_audit_mine_variant_effects.py`. The first two still call their existing
+audit functions with an explicit selected PDF and verify the exact pinned
+hash, extracted-row counts, comparison classifications and unresolved
+discrepancies. The Mine suite still checks seven chart/effect excerpts and
+the independent reviewed `corePdfSha256` manifest pin before comparing Army
+object geometry and maintained rule ownership. This is **test input**
+selection, not a change to those audit tools or an acceptance of deferred
+source discrepancies. As with other consumers, a missing selected PDF skips
+only source-dependent cases; a present wrong or linked source fails closed.
+
+The multi-revision source checks in `test_application_rule_references.py`
+and `test_silent_immunity_source_scope.py` use the test-only
+`pinned_pdf_sources` fixture for separately pinned N5.2 English, N5.3
+English/Spanish and FAQ v0.0/v0.1 English/Spanish PDFs. The fixture accepts
+canonical source labels mapped to their independent SHA-256 values, checks
+**every supplied member** using the explicit `--reference-pdf-layout`
+selection, then skips the source-only test if any member is missing. An
+unavailable bilingual sibling therefore never hides a supplied corrupt
+revision. Language-specific clauses, historical differences, FAQ term
+inventory, and independently validated runtime/API results remain as before.
+The Reinforcements applicability test now uses the same fixture for its
+two historical N4 PDFs and current N5 Core/ITS18 references; the owning
+auditor still receives its own `source_layout` argument and **does not**
+authorize N4 procedures as N5. Its separately maintained manifest and source
+identity checks are unchanged. Hermetic multi-source cases in
+`test_research_source_paths.py` validate hash mismatch before missing-source
+skips, both physical layouts and no alternative-layout fallback.
+
+The 16 `test_immunity_*.py` modules with a source-only N5.3 English Core
+PDF prerequisite now use `pinned_n53_core_pdf`. Their individual SHA-256
+assertions and rule-page checks for AP/DA/T2 criticals, BTS and E/M
+exceptions, combined saving rolls, printed Missile/Monofilament/Plasma/
+Flash Pulse examples, and Oblivion are unchanged. These checks remain
+separate from curated/API validation, and a missing selected PDF skips
+only the source-only case. No unresolved immunity interaction has been
+turned into an inferred ruling, and no weapon/profile source identities
+have been changed.
+
+The global `require_source_files` fixture retains its previous meaning for
+other suites. Further tests still bound to `data/pdf/` keep their original
+skip semantics until reviewed individually; no global path redirection or
+source-only skip can establish publication approval.
 
 ## Maintained snapshot-note validation
 
@@ -4496,17 +6680,49 @@ canonical finalized path.
 
 ## Reports
 
-Use `--report` to retain the complete check transcript:
+Use `--report` to retain the complete check transcript. Without an explicit
+path the runner creates `local/reports/checks/CHECKS YYYYMMDD-HHMMSS.txt`.
+A further categorized destination is useful for retained run evidence:
 
 ```powershell
-# reports/CHECKS YYYYMMDD-HHMMSS.txt
+# Current default, available only when this timestamped file is unused
 python tools\run_checks.py --profile code --report
 
-# explicit destination
-python tools\run_checks.py --all --report reports\release-checks.txt
+# Recommended: substitute a fresh UTC run ID and short checkout SHA
+python tools\run_checks.py --all --report local/validation/project-infrastructure/checks/RUN_ID/checks.txt
 ```
 
-Generated reports are local evidence and are normally ignored by Git.
+The runner now refuses an occupied transcript path (including a
+symlink) **before running any requested check stage**, while the
+final `open("x")` also prevents a concurrent check from truncating
+earlier evidence. Collision and report-path errors return runner
+error status **2**, not an artificial test failure status **1**.
+The `--report PATH` / `--report=PATH` syntax, timestamped filename
+format, stdout streaming and summary/error semantics remain supported.
+A repeated command using the same second's default filename must
+choose a fresh explicit destination instead of overwriting it.
+
+Generated reports are ignored local evidence, not canonical test
+results. An interrupted new transcript can be partial and should
+be inspected; previous logs are never deleted or replaced. No
+existing file in root `reports/` was moved by this change.
+
+The installed `infinity-db validate-peripheral-identities` command
+has a separate optional coverage JSON receipt. When providing
+`--database` and `--output`, select a fresh destination:
+
+```powershell
+infinity-db validate-peripheral-identities --database data/generated/army.db --output local/validation/peripheral-identities/RUN_ID/coverage.json
+```
+
+It now rejects occupied or symlink outputs before loading the
+reviewed identity input and writes UTF-8/LF JSON through exclusive
+creation. Its original data checks and status (success=0,
+failed source mapping or output error=1) are unchanged. Without
+`--output`, it does not generate a report; without a database,
+`--output` remains invalid. Rendering standalone scenario-map
+SVGs is a separate intentional export/re-render contract,
+not an immutable review receipt.
 
 ## Exit status
 
@@ -4546,13 +6762,34 @@ tools below for representative query-performance comparisons.
 Available benchmark and capacity tools include:
 
 ```powershell
-python tools\benchmark_runtime.py --help
-python tools\compare_runtime_benchmarks.py --help
-python tools\benchmark_test_workers.py --help
-python tools\capacity_test.py --help
-python tools\deployment_resources.py --help
-python tools\deployment_alerts.py --help
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_runtime --help
+.\.venv\Scripts\python.exe -m tools.performance.compare_runtime_benchmarks --help
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_test_workers --help
+python -m tools.performance.capacity_test --help
+python -m tools.operations.deployment_resources --help
+python -m tools.operations.deployment_alerts --help
 ```
+
+**Test-worker benchmark report contract.** `tools.performance.benchmark_test_workers`
+runs real test jobs and always writes one JSON measurement receipt.
+For new runs, supply a unique, domain-scoped ignored destination:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_test_workers --workers 0 4 --repeat 2 --report local/performance/test-workers/RUN_ID/worker-comparison.json
+```
+
+Replace `RUN_ID` with a UTC timestamp plus short checkout SHA.
+The selected `--report` path is checked **before** any test subprocess
+starts, and the receipt is created exclusively even if another process
+claims the path while the benchmark runs. Existing files or symlinks
+fail without starting expensive repetitions; select another run ID
+instead of overwriting accepted measurements. The legacy default
+`reports/TEST-WORKERS <timestamp>.json` remains supported for callers
+without `--report`, but now also refuses collisions. Success or
+failed test repetitions still produce the original UTF-8/LF JSON
+report and preserve the existing benchmark success/failure exit code.
+An interrupted new report may be partial and should be inspected;
+no old reports are moved, deleted, or silently republished.
 
 Use runtime benchmarks for repository/query performance and the worker benchmark for deciding whether
 a different local pytest worker setting is warranted. `capacity_test.py` is deliberately HTTP-level:
@@ -4580,8 +6817,20 @@ operational policy there rather than maintaining a second copy in this test refe
 
 `deployment_alerts.py` evaluates a fresh resource report together with bounded aggregate metrics and
 health samples, producing monitoring-friendly OK/warning/critical/unknown exit codes without retaining
-endpoint URLs or user/request identity data. Generated benchmark/capacity/resource/alert reports belong
-in ignored report/audit storage unless a specific result is needed as release evidence.
+endpoint URLs or user/request identity data. Four operational report commands
+(`capacity_test`, `deployment_resources`, `deployment_diagnostics`,
+`deployment_alerts`) share the maintained
+`tools.operations.receipt_output` new-file-only JSON contract. Give
+each `--output` a fresh `local/performance/http-capacity/` or
+`local/operations/deployment/` run-specific path; occupied paths,
+including symlinks, fail before collection, and exclusive file
+creation protects an already-completed report during a race.
+Successful and failed measurements still retain their original JSON
+and exit statuses. Source resource receipts must never be reused
+as output paths. For matching commands, outputs and exception codes,
+see [deployment guidance](deployment.md#repeatable-http-capacity-scenario).
+An interrupted new receipt may be partial; no historical report
+is renamed, removed or auto-overwritten.
 
 Live-metrics tests pin the generation timing contract before retained history exists: one shared
 generation-start timestamp is created with the preloaded request registry, only completed instrumented
@@ -4644,9 +6893,9 @@ Start the local server in one PowerShell window:
 Run the needed verifier from a second repository-root PowerShell window:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_ammunition_browser --base-url http://127.0.0.1:8000 --output local/audits/ammunition-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/audits/labels-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_general_rules_browser --base-url http://127.0.0.1:8000 --output local/audits/general-rules-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_ammunition_browser --base-url http://127.0.0.1:8000 --output local/audits/ammunition-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/audits/labels-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_general_rules_browser --base-url http://127.0.0.1:8000 --output local/audits/general-rules-browser.json
 ```
 
 **Historical acceptance, 2026-10-19:** Ammunition 33/33, Labels 72/72,
@@ -4691,9 +6940,9 @@ With the current checkout's development server running on
 verifier from the repository root in PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_states_browser --base-url http://127.0.0.1:8000 --output local/audits/states-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --base-url http://127.0.0.1:8000 --output local/audits/hacking-programs-browser.json
-.\.venv\Scripts\python.exe -m tools.verify_traits_catalog_browser --base-url http://127.0.0.1:8000 --output local/audits/traits-catalog-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_states_browser --base-url http://127.0.0.1:8000 --output local/audits/states-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_hacking_programs_browser --base-url http://127.0.0.1:8000 --output local/audits/hacking-programs-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_traits_catalog_browser --base-url http://127.0.0.1:8000 --output local/audits/traits-catalog-browser.json
 ```
 
 **Historical browser acceptance, 2026-10-19:** States 72/72,
@@ -4718,7 +6967,7 @@ local Army database, follows reviewed destinations and rejects JavaScript errors
 incomplete loading and horizontal overflow. With the matching development server running:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
 ```
 
 **Historical acceptance:** successive 9/9 runs on 2026-10-19/20 covered the
@@ -4793,7 +7042,7 @@ The read-only validator checks the tracked
 current Core/Hacking curated records and declared source fingerprints:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.source_coverage_dispositions
+.\.venv\Scripts\python.exe -m tools.research.source_coverage_dispositions
 ```
 
 Each review has one stable clause key, exact source identity/page/member and
@@ -4814,38 +7063,32 @@ remains authoritative for missing or deferred regressions.
 
 ### Paragraph-only rules-summary refresh
 
-For a reviewed v9 summary that differs from its released record **only
-by paragraph whitespace**, use
-`tools.refresh_reference_summary_layout` rather than manually overwriting
-`rules.db`. The default command is a read-only double-export and matched
-publication integrity check; `--promote` replaces the rules database,
-deployed-object and variant-usage publications together under rollback
-protection. It rejects any change to other records, target facts,
-typed Restrictions, identities, or publication content other than the
-required fingerprints. Source-derived wording changes require their
-own reviewed migration; this tool cannot approve them.
+The v9 one-use `tools.refresh_reference_summary_layout` command was
+retired during P2.5 (commit `dab737d1`). Its 2026-11-06 V1S-082
+migration checked a paragraph-only change to `rule:loss-of-lieutenant`
+while preserving the other 498 composed records and storing recovery
+copies under ignored `local/`. That procedure and its three-file JSON
+publication contract are historical evidence, recoverable from Git
+history, not supported build instructions.
 
-```powershell
-.\.venv\Scripts\python.exe -m tools.refresh_reference_summary_layout rule:loss-of-lieutenant
-.\.venv\Scripts\python.exe -m tools.refresh_reference_summary_layout rule:loss-of-lieutenant --promote
-```
-
-The 2026-11-06 V1S-082 use of this gate retained 498 unchanged
-composed records and recovery copies under ignored `local/`. After
-promotion verify both dependent publications and run the required
-source/API/normal-browser regressions at the matched commit; the
-promoter's success is an artifact-integrity check, not a VR/CI pass.
+For a new reviewed summary-layout correction, edit the owning curated
+Rules source and use the current complete database-set build and
+`infinity-db database-health --db-dir` validation. Review the diff for
+semantic changes; use focused curated text, Rules export, API, and
+browser tests as applicable. Existing paragraph-length checks protect
+readability. Neither a rebuild nor whitespace equivalence constitutes
+approval of new source-derived wording.
 
 ### Frozen explanation-inventory reconciliation (V1-A08)
 
-The original October 9 [367-record explanation inventory](rules-explanation-audit-1.0-inventory.md)
+The original October 9 [367-record explanation inventory](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0-inventory.md)
 remains historical evidence: 304 selected clause comparisons (D) and 63
 screening-only rows (S), **neither of which is full-record approval**. To
 reconcile its exact identities against the *current* N5 Core/Hacking curated
 collections without overwriting the original audit, run:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --json-output local/audits/v1-current-explanation-inventory.json --markdown-output local/audits/v1-current-explanation-inventory.md
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --reconcile-explanation-inventory --json-output local/audits/v1-current-explanation-inventory.json --markdown-output local/audits/v1-current-explanation-inventory.md
 ```
 
 The report pins the frozen appendix's SHA-256, validates current curated
@@ -5050,7 +7293,7 @@ permissions, individual variants and full normal-browser explanation
 acceptance remain separate work. Generate ignored review evidence with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --reconcile-declarations --verify-declaration-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json-output local/audits/v1-declaration-migration-reviewed.json --markdown-output local/audits/v1-declaration-migration-reviewed.md
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --reconcile-explanation-inventory --reconcile-declarations --verify-declaration-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json-output local/audits/v1-declaration-migration-reviewed.json --markdown-output local/audits/v1-declaration-migration-reviewed.md
 ```
 
 For the **three numerical Army replacement Skills**, a separate
@@ -5065,7 +7308,7 @@ Without the private Army ZIP this optional audit cannot claim source
 closure. Produce an ignored report with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --verify-numeric-army-archive "data/raw/JSON 20260929-114335.zip" --json-output local/audits/v1-numeric-attribute-replacements.json --markdown-output local/audits/v1-numeric-attribute-replacements.md
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --reconcile-explanation-inventory --verify-numeric-army-archive "data/raw/JSON 20260929-114335.zip" --json-output local/audits/v1-numeric-attribute-replacements.json --markdown-output local/audits/v1-numeric-attribute-replacements.md
 ```
 
 The historical source identities occur twice for Polaris Bearpode
@@ -5089,7 +7332,7 @@ and the selected printed clause text. Reproduce its ignored JSON/Markdown
 evidence with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --audit-conditional-declarations --verify-conditional-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json-output local/audits/v1-conditional-declaration-evidence.json --markdown-output local/audits/v1-conditional-declaration-evidence.md
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --reconcile-explanation-inventory --audit-conditional-declarations --verify-conditional-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json-output local/audits/v1-conditional-declaration-evidence.json --markdown-output local/audits/v1-conditional-declaration-evidence.md
 ```
 
 The ten entries cover Order declaration/Resolution timing, Look Out!,
@@ -5231,13 +7474,13 @@ browser acceptance remain under [the TODO](TODO.md) and
 `tests/test_report_reference_baseline.py` covers identity counts,
 malformed/duplicate historical rows, fingerprint drift and report output.
 
-The offline `tools/report_reference_baseline.py` command inventories the published Army
+The offline `tools/research/report_reference_baseline.py` command inventories the published Army
 source snapshot identity, rules collections and source citations, and row counts by
 canonical family. Scenario membership evidence is separated by source collection,
-revision and publication identity: the current published rules database has
-four N5 core scenarios and a distinct ITS Season 18 Battleground pilot.
-The aggregate five memberships must **not** be described as five core missions
-or counted as evidence of 1.0 scenario browser completeness.
+revision and publication identity: the current Rules database has four N5 core
+scenario memberships. The ITS Season 18 Battleground pilot is in the separate
+ITS database, outside this two-database report. Neither count establishes
+scenario browser completeness.
 
 Each category now also includes an optional `routeHint` (browser/API discovery
 surfaces and presentation mode) derived from the published application-domain
@@ -5247,36 +7490,43 @@ points*, not mappings of every source record or verified player-facing evidence;
 `apiReadPath`, `browserEntryPoint`, and all fact/relationship/presentation
 review fields remain pending. Where domain ownership or publication is ambiguous,
 the route hint is null rather than a guessed destination.
-Generate ignored review artifacts from the repository root:
+Generate ignored review artifacts from the repository root, replacing `RUN_ID`:
 
 ```powershell
-python tools/report_reference_baseline.py --json-output reports/1.0-baseline.json --markdown-output docs/audits/1.0-baseline.md
+.\.venv\Scripts\python.exe -m tools.research.report_reference_baseline --json-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.json --markdown-output local/validation/project-infrastructure/reference-baseline/RUN_ID/baseline.md
 ```
 
-To ensure the **running development/release server** uses the exact Army and
-rules database bytes and applicable Weapon-profile publication inventoried
-from this checkout, add
+Use a new, run-specific directory for every attempt. All selected report
+outputs—baseline JSON, Markdown, current citation minimum JSON, explanation
+reconciliation, review batch plans and review pilots—must be new files.
+The command checks every selected destination for existing files or symlinks
+and rejects duplicate resolved paths before collecting evidence. Each writer
+uses exclusive file creation, protecting earlier reports if a collision
+appears during the audit. The individual writes are not an atomic multi-file
+transaction: an interrupted attempt can leave new partial evidence for
+inspection; do not delete accepted earlier reports to reuse names. Historical
+explicit `local/audits/` destinations remain supported as paths, but
+pre-existing artifacts at those destinations are never overwritten.
+
+For a server using exactly the inventoried Army and Rules databases, add
 `--verify-server http://127.0.0.1:8000` (substitute the actual server origin).
-The check queries the served `/api/version` response and requires its
-`snapshot_revision` to equal the SHA-256 of
-`"<Army database SHA-256>:<rules database SHA-256>:<Weapon-profile publication SHA-256 or none>"`,
-the runtime's snapshot identity. The baseline validates a co-located
-publication against the database pair before fingerprinting it; a missing
-or independently located publication contributes `none`. On mismatch it
-exits nonzero **before writing
-baseline outputs**; a successful run records `servedSnapshot` in JSON.
-The server option is opt-in and never starts, deploys, or modifies a server.
-It checks runtime identity, not static assets, processed symbols, PDF/Wiki
-bytes, browser correctness or full source completeness; these require
-independent checks. Rerun against the final candidate and deployment, not
-only a local development server.
+The check compares `/api/version` with the runtime snapshot identity computed
+from the two selected database filenames and SHA-256 hashes. The reporter also
+validates Weapon citations embedded in the Rules database. On mismatch it exits
+nonzero **before writing baseline outputs**; success records `servedSnapshot`
+in JSON. The opt-in check never starts, deploys or modifies a server. It does
+not verify static assets, PDF/Wiki bytes, browser correctness or source
+completeness. A server using the complete Army/Rules/ITS set has a different
+identity and cannot pass this two-database check; use the
+[complete-set release verifier](#complete-set-release-candidate-browser-verifier)
+for that candidate.
 
 Optionally pass `--army-archive <path>` to verify the exact Army ZIP SHA-256 against
-the one embedded in `infinity.db`. With the pinned source ZIP available, the
+the one embedded in `army.db`. With the pinned source ZIP available, the
 baseline checks each source faction/list ID, filename, source-file SHA-256,
 version and Army/reinforcement kind against the published `army_lists` rows.
 It also checks every source Unit occurrence and its original list position
-against `infinity.db::army_units`, matches the source-version counts,
+against `army.db::army_units`, matches the source-version counts,
 and rejects unexpected JSON documents, duplicate Unit IDs or source-file
 count mismatches. The September 29 archive has **59 JSON documents**:
 58 Army-list source files plus one `metadata.json` document; these counts
@@ -5285,11 +7535,11 @@ including the source-provenance and Unit-occurrence counts. It fails closed
 on source identity, provenance or Unit-membership mismatches. It also
 requires the validated application/raw database export pair and verifies
 all source profile-group identities, positions, categories and text fields
-against published `infinity.db::profile_groups`. Every nested source
+against published `army.db::profile_groups`. Every nested source
 profile's identity, position and core attribute fields, and each loadout's
 identity, position, name, Points, SWC, miniature count and disabled flag,
-are compared with `infinity.raw.db::profiles` and
-`infinity.raw.db::loadout_options` respectively. These two tables
+are compared with `army.raw.db::profiles` and
+`army.raw.db::loadout_options` respectively. These two tables
 are intentionally **not** in the published application database.
 The optional audit also compares every source profile/loadout Skill,
 Equipment and Weapon occurrence against the corresponding reusable
@@ -5376,7 +7626,7 @@ all combined-source variants, or browser acceptance. The existing
 parity for global Unit options, Orders and expanded Includes.
 
 The normal Unit detail **browser acceptance** is available through
-`tools.verify_unit_skill_presentation_browser`. It compares each rendered
+`tools.browser.verify_unit_skill_presentation_browser`. It compares each rendered
 General Profile and each army-local profile/loadout section with the normal
 `/api/units/<slug>` response: exact row category, item name, linked
 Skill/Equipment/Weapon destination, quantity and rendered Extras.
@@ -5418,7 +7668,7 @@ The separate CLI defaults to seven Units × three widths (**21 pages**).
 To check an already running candidate server and save ignored evidence:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json
 ```
 
 Use `--exclude-optional teamops` (repeat for multiple flags),
@@ -5916,7 +8166,7 @@ when it exists locally and skips when it is absent. Example for
 the present input:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/report_reference_baseline.py --army-archive "data/raw/JSON 20260929-114335.zip" --verify-server http://127.0.0.1:8000 --json-output local/audits/1.0-baseline-pair.json --markdown-output local/audits/1.0-baseline-pair.md
+.\.venv\Scripts\python.exe tools/research/report_reference_baseline.py --army-archive "data/raw/JSON 20260929-114335.zip" --verify-server http://127.0.0.1:8000 --json-output local/audits/1.0-baseline-pair.json --markdown-output local/audits/1.0-baseline-pair.md
 ```
 
 Missing ignored PDFs/wiki snapshots are explicitly
@@ -5946,7 +8196,7 @@ matched in the 2026-10-28 local review. This gate complements, but
 does not replace, question coverage, scenario applicability or browser
 verification.
 
-The separate read-only `tools/audit_1_0_reference_inputs.py` command
+The separate read-only `tools/research/audit_1_0_reference_inputs.py` command
 cross-checks supplied **source bytes** with the existing enrichment report,
 the current curated Wiki citation archive and historical Wiki revisions. These
 inputs are explicit and never downloaded automatically. Keep evidence output in
@@ -5954,7 +8204,7 @@ the ignored `local/` workspace:
 
 ```powershell
 .venv\Scripts\python.exe -m infinity_db build-rules --output local/audits/1.0-rules-current.db
-.venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5.3-en.pdf" --faq-pdf "data/pdf/faq/n5-faq-v0.1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
+.venv\Scripts\python.exe -m tools.research.audit_1_0_reference_inputs --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5.3-en.pdf" --faq-pdf "data/pdf/faq/n5-faq-v0.1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
 ```
 
 All 12 PDF source declarations now carry maintained SHA-256 pins for six
@@ -6034,7 +8284,7 @@ The 2026-10-15 source-evidence rerun found **113/113** exact
 historical Wiki revisions, **82/82** English snapshot references across 70
 pages, and **2/2** Spanish snapshot references across two pages. The
 shipped Army database's source archive hash was also matched with the
-pinned locally available Army ZIP by `tools/report_reference_baseline.py`.
+pinned locally available Army ZIP by `tools/research/report_reference_baseline.py`.
 Detailed hashes and inventories remain under ignored `local/audits/`.
 The former 83-gap/15-pending result is superseded: Repeater/Cube links
 were reconciled and the maintained interaction ledger now has zero pending
@@ -6075,14 +8325,14 @@ procedures against the exact candidate and retain new execution logs privately.
 
 ## 1.0 Weapon Trait archived-Wiki cross-reference
 
-`tools/audit_weapon_trait_cross_sources.py` is an **offline, read-only**
+`tools/research/audit_weapon_trait_cross_sources.py` is an **offline, read-only**
 source-reconciliation tool, not part of normal builds or CI. It requires the
 pinned v5.3 PDF and the exact archived Wiki history ZIP in addition to the
 shipped generated databases. It fails closed if the nine maintained review
 identities or the PDF/Wiki payload hashes no longer match.
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_weapon_trait_cross_sources --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --wiki-history "C:\path\to\WIKI-en-history.zip" --json-output docs/audits/weapon-trait-cross-source.json --markdown-output docs/audits/weapon-trait-cross-source.md
+.\.venv\Scripts\python.exe -m tools.research.audit_weapon_trait_cross_sources --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --wiki-history "C:\path\to\WIKI-en-history.zip" --json-output docs/audits/weapon-trait-cross-source.json --markdown-output docs/audits/weapon-trait-cross-source.md
 ```
 
 This compares **Traits**, not all weapon-profile values or rules prose; the
@@ -6093,7 +8343,7 @@ remains manual and source-specific.
 
 ## 1.0 Weapon Chart partial evidence audit
 
-The read-only `tools/audit_weapon_chart_profiles.py` compares the printed N5 v5.3
+The read-only `tools/research/audit_weapon_chart_profiles.py` compares the printed N5 v5.3
 Weapon Chart to the shipped Army metadata. Its PDF layout reader reconstructs
 wrapped names and two-line Plasma saving cells, selects a unique explicit or
 mode-less profile, and keeps Disco Ball's auxiliary object profile separate from
@@ -6106,7 +8356,7 @@ offline audit additionally requires PyMuPDF (`python -m pip install pymupdf`);
 normal CI and tests do not need that optional dependency. Run from the repository root:
 
 ```powershell
-.venv\Scripts\python.exe tools/audit_weapon_chart_profiles.py --core-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --army-db data/generated/infinity.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
+.venv\Scripts\python.exe -m tools.research.audit_weapon_chart_profiles --core-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --army-db data/generated/army.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
 ```
 
 The output includes the source PDF SHA-256, raw compared fields, range-band
@@ -6121,11 +8371,11 @@ Katyusha MRL prints unsigned `3` where Army has `+3`. The separate Disco Ball
 object's attributes match. The
 [early-row regression](#v1s-082-weapon-chart-early-row-regression-vr-0133)
 records the tested revision and source pins.
-The [V1S-070 source review](v1.0-source-coverage-audit.md#weapon-profile-and-multimode-chart-review-v1s-070-2026-11-05)
+The [V1S-070 source review](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#weapon-profile-and-multimode-chart-review-v1s-070-2026-11-05)
 records the existing source dispositions for Kobra and Katyusha; the Kobra
 correction request remains open under SRC-021. This is still partial evidence:
 the V1S-072 acceptance now covers the full published profile storage/API/browser
-projection (see the [acceptance evidence](v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05)),
+projection (see the [acceptance evidence](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05)),
 while remaining auxiliary/equipment discovery and special-weapon prose semantics
 stay under their separate 1.0 tasks. The chart report also records the exact Army
 database SHA-256 so it can be safely combined with enrichment evidence from the
@@ -6139,7 +8389,7 @@ all input hashes. It requires the locally retained source archives, PyMuPDF,
 and the generated Army database (none are added to Git):
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/infinity.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
+.venv\Scripts\python.exe -m tools.research.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/army.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
 ```
 
 The output reports source values, **not** a gameplay ruling or permission to
@@ -6151,7 +8401,7 @@ Before creating a distinct deployed-object/reverse-use model, generate the
 read-only source/profile and curated-rule *candidate* inventory:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_inventory --army-db data/generated/infinity.db --curated-source data/curated/rules/n5-core-v5.3.json --json-output local/audits/deployed-object-inventory.json
+.venv\Scripts\python.exe -m tools.data.audit_deployed_object_inventory --army-db data/generated/army.db --curated-source data/curated/rules/n5-core-v5.3.json --json-output local/audits/deployed-object-inventory.json
 ```
 
 The report matches the 14 pinned supplementary Weapon Chart profiles using
@@ -6162,14 +8412,9 @@ and p. 187 lists its attack profile, but it is not one of the 14 separate
 four-attribute auxiliary chart entries. Do not discard it or treat that
 exclusion as a missing source value.
 
-Independently cross-check the **N5.3 p. 74 Deployable Profiles quick-reference
-table**, which is outside the pp. 176–188 Weapon Chart extractor:
-
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_quick_profiles
-```
-
-The read-only PDF audit extracts **13 printed rows**, including two FastPanda
+A completed independent cross-check of the **N5.3 p. 74 Deployable
+Profiles quick-reference table** (outside the pp. 176–188 Weapon Chart
+extractor) confirmed **13 printed rows**, including two FastPanda
 spellings (`FAST PANDA` and `FASTPANDA`) and two Madtraps rows. Their
 source selectors resolve to **10 distinct reviewed object identities**.
 The `MINES` row is a shared family, **not** an eleventh generic Mine
@@ -6181,9 +8426,10 @@ edge. It visibly retains **Armed Turret's S1 quick-reference versus S2
 detailed-profile conflict**, and also exposes Dazer's existing S0/S1
 source dispute even though p. 74 agrees with S0. An unmatched row or
 unreviewed value fails closed. PyMuPDF and the pinned local English PDF
-are required; the synthetic parser tests do not require them.
-`tests/test_deployed_object_quick_profiles.py` additionally verifies the
-real table when both local PDF and Army database are present.
+were required for the completed PDF comparison. The one-use tool and
+parser tests are retired; `tests/test_deployed_object_reference.py` retains
+current reviewed selector, identity and explicit source-dispute assertions.
+The historical PDF extraction remains reproducible from Git history.
 
 `config/validation/deployed-object-delivery-reviews.json` pins **28
 audit-only delivery paths** across the 17 reviewed object identities. They
@@ -6222,26 +8468,22 @@ State Token rather than an independently targetable Deployable. The current
 19 reviewed delivery-origin records count as covered candidates, not
 unreviewed objects.
 
-The current curated-summary scan finds 24 matching definitions; the 12
-candidate decisions and 19 delivery-origin records (which overlap) account
-for all 24, leaving no unreviewed candidate. A second read-only audit also
-searches structured **Requirements, Effects,
+The pinned curated-summary scan found 24 matching definitions; the 12
+candidate decisions and 19 delivery-origin records (which overlap) accounted
+for all 24, leaving no unreviewed candidate. The now-retired detailed-keyword
+investigation additionally searched structured **Requirements, Effects,
 Restrictions, Clarifications, and source notes** for Deployable/Token/Scenery
-Element mentions that may be absent from summaries:
+Element mentions absent from summaries.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_detail_queue
-.venv\Scripts\python.exe -m tools.audit_deployed_object_detail_queue --json
-```
-
-This scan found one previously unreviewed detail-only record, **Cube 2.0**
+It found one previously unreviewed detail-only record, **Cube 2.0**
 (N5.3 p. 121). Its Command Token recovery reroll concerns a spent game
 resource, not a separate deployed model. The decision is source-pinned in
 `config/validation/deployed-object-candidate-reviews.json` as automatic
 Equipment, with no manufactured object attributes. The full detailed-rule
-keyword queue now has no unreviewed Weapon/Equipment definition; its
-regression test fails if a new match lacks a reviewed decision or delivery
-origin. Neither scan is **an exhaustive N5.3 game-object inventory**:
+keyword queue had no unreviewed Weapon/Equipment definition at that source
+revision. The maintained source-domain clause inventory and candidate-review
+validation supersede the completed one-use discovery test. Neither scan is
+**an exhaustive N5.3 game-object inventory**:
 different wording, sources outside maintained Weapon/Equipment definitions,
 Army/Unit/loadout semantics, and edition changes still need reconciliation.
 
@@ -6295,13 +8537,11 @@ definitions; closed lexical queues cannot establish overall source-table,
 Army/Unit/loadout or gameplay completeness. No new identities, attributes
 or delivery links are inferred.
 
-The second remaining inventory question is *delivery coverage for the objects
-already identified*, independently of keyword discovery. Run:
-
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_delivery_coverage
-.venv\Scripts\python.exe -m tools.audit_deployed_object_delivery_coverage --json
-```
+The completed delivery-coverage audit examined the objects already
+identified, independently of keyword discovery. The continuing validation
+runs through `tools.data.audit_deployed_object_inventory`,
+`tests/test_deployed_object_reference.py` and
+`tests/test_deployed_object_storage.py` rather than the retired queue command.
 
 The pinned review has **17 reviewed object identities and 28 approved
 delivery paths**, with no uncovered origin for an object in that bounded
@@ -6310,39 +8550,36 @@ separate Place Deployable and WIP-based Intuitive Attack methods (N5.3 pp.
 49, 74, 82); FastPanda uses Perimeter placement (pp. 82, 186), and Armed
 Turret uses a reviewed-only curated Trooper profile rather than an invented
 Army four-stat profile (pp. 70, 74). Its S1/S2 conflict remains visible.
-The report provides exact source-ID-based catalog aliases only as
-**candidates to investigate**: a source alias does not prove delivery mechanics,
+The historical audit reported exact source-ID-based catalog aliases only as
+**candidates to investigate**: an alias does not prove delivery mechanics,
 mode or Unit/Army roster legality. Mine Dispenser's subtype remains separately
-unresolved. `tests/test_deployed_object_delivery_coverage.py` guards these
-boundaries and verifies that aliases cannot become inferred delivery edges.
+unresolved. Current source projection and embedded-database tests preserve
+reviewed delivery relationships without inventing source-alias ownership.
 
 The Weapon/Equipment candidate validator rejects mismatched profile shapes,
 exact Army profile selectors/attributes, lost source clauses/citations, and
 invented missing-attribute values. Source text and alternative Silhouette
 values remain unchanged; no canonical object or carrier IDs are created.
 
-### Non-catalog game-element discovery
+### Non-catalog game-element review evidence
 
 Weapon/Equipment definition scans do not examine Skills, generic rules,
-Traits, terminology or States. Audit their own definition summaries and
-structured detail fields without turning keyword mentions into object IDs:
-
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_non_catalog_queue
-.venv\Scripts\python.exe -m tools.audit_deployed_object_non_catalog_queue --json
-```
+Traits, terminology or States. A completed keyword review examined their
+definition summaries and structured details without turning mentions into
+object IDs. Its one-use discovery command is retired; it is not an ongoing
+source-completeness gate.
 
 The separate `config/validation/deployed-object-non-catalog-reviews.json`
 manifest pins **61 source-reviewed definitions** in this bounded keyword scan,
-with no unreviewed candidates. Access Width gate Tokens label scenery
-openings (p. 145); Army Retreat Tokens indicate existing Trooper conditions
+which had no unreviewed candidates at completion. Access Width gate Tokens
+label scenery openings (p. 145); Army Retreat Tokens indicate existing Trooper conditions
 (p. 146); Combat Group affiliation identifies the group of an existing
 deployed Weapon or Equipment Marker (p. 10). None creates an additional
 deployed-object profile or delivery permission.
 Six earlier decisions initially had PDF-only evidence recorded in the
 audit manifest. Their verified N5.3 citations have since been migrated to
 maintained rules records and synchronized with the rules database/publication;
-the audit now reports no missing maintained N5.3 citations.
+all 61 had a maintained N5.3 citation at command retirement.
 The original three Skill decisions distinguish `skill:place-deployable`
 (delivery action, p. 82), `skill:minelayer` (deployment method, p. 102)
 and `skill:request-speedball` (support State Tokens, p. 84). Additional
@@ -6419,34 +8656,30 @@ These six definitions now have **maintained N5.3 PDF citations** in the
 curated rules and regenerated `rules.db`. Their former
 `citationStatus: pdf-verified-manifest-only` and `pdfExcerpt` fields
 were retired as part of the coordinated promotion, which also refreshed
-the deployed-object publication fingerprint. The audit continues to
-verify exact source pages and summary/detail evidence. Its
-`reviewedPdfOnly` and `missingMaintainedN5Citation` reports are now empty.
+the deployed-object publication fingerprint. The retained regression continues
+to verify exact source pages and summary/detail evidence.
 
 The decisions were manually compared with pinned English N5.3 pages.
-The audit validator pins source citations already in maintained definitions
-or explicit transitional PDF-only review evidence, plus curated summary
-and detail evidence; it does **not** parse the PDF in CI. No new ARM/BTS/STR/S
-value, Army carrier, delivery edge or runtime object is inferred.
+The regression checks source citations in maintained definitions and curated
+summary and detail evidence; it does **not** parse the PDF in CI. It pins the
+reviewed identity/classification pairs independently of JSON formatting;
+rebaseline those pins only after a source review of the changed decisions.
+No new ARM/BTS/STR/S value, Army carrier, delivery edge or runtime object is inferred.
 Summary-only glossary/trait reviews remain valid only while they lack
-detailed source fields. All 61 keyword-matching definitions are classified,
-but the scan covers neither unmentioned terms nor other source domains and
-is **not** a complete N5.3 object inventory.
-`tests/test_deployed_object_non_catalog_queue.py` checks these boundaries.
+detailed source fields. The 61 reviewed definitions remain classified,
+but the historical scan covered neither unmentioned terms nor other source
+domains and is **not** a complete N5.3 object inventory.
+`tests/test_source_conflict_publication.py` checks the retained review boundaries.
 
-### Expanded non-catalog battlefield-element discovery
+### Expanded non-catalog battlefield-element review evidence
 
-The current 61-definition queue excludes other relevant wording, including
-Consoles, Supply Boxes, Disco Balls, and Marker/decoy representations. Run a
-separate, read-only pass over Skill/Rule/Trait/Term/State definitions:
+The original review excluded other relevant wording, including Consoles,
+Supply Boxes, Disco Balls, and Marker/decoy representations. A separate
+completed pass reviewed Skill/Rule/Trait/Term/State definitions; its one-use
+discovery command is also retired.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_expanded_queue
-.venv\Scripts\python.exe -m tools.audit_deployed_object_expanded_queue --json
-```
-
-The expanded audit excludes all 61 candidates from the original scan rather
-than recounting them. It identifies **28 additional definitions, all
+The expanded audit excluded all 61 candidates from the original scan rather
+than recounting them. It identified **28 additional definitions, all
 classified** in `config/validation/deployed-object-expanded-reviews.json`,
 with no PDF-only decisions or missing maintained N5.3 citations. N5.3 pp. 151
 and 153 establish that Domination's four Consoles and Supplies' three Supply
@@ -6494,18 +8727,17 @@ The five previously PDF-only records—`state:decoy`,
 and `skill:explode`—now have their verified N5.3 source pages
 in the maintained curated definitions and regenerated `rules.db`.
 Temporary `pdfExcerpt` and `citationStatus` metadata has been
-retired. The expanded audit's `reviewedPdfOnly` and
-`missingMaintainedN5Citation` reports are now empty. CI still
-validates the curated citations, not the ignored source PDF.
+retired. The retained regression validates the curated citations, not the
+ignored source PDF.
 
-This expanded scan is deliberately bounded to named objectives/devices
+This expanded scan was deliberately bounded to named objectives/devices
 and Marker/decoy wording, not all N5.3 prose, source tables, or possible
-game elements. The manifest and validator reject unsupported IDs,
-lost detail clauses, stale citations or inferred object profiles. No
+game elements. The retained manifest and regression reject changed reviewed
+identity/classification pairs, lost evidence, stale citations or inferred object
+profiles; they do not discover new keyword matches. No
 production database, published object count, Unit ownership or approved
 delivery path is changed.
-`tests/test_deployed_object_expanded_queue.py` checks the discovery and
-fail-closed review boundaries.
+`tests/test_source_conflict_publication.py` checks these review boundaries.
 
 ### N5.3 Hacking Device Programs source chart
 
@@ -6518,33 +8750,27 @@ the four source rows, their printed Program-column order, and the
 fact that this is a device access matrix rather than Unit ownership,
 a deployed object, or an additional Program identity.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart
-.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
-```
-
 The four devices grant **4 / 6 / 2 / 4** Programs, respectively
 (Hacking Device, Hacking Device Plus, Killer Hacking Device, EVO
 Hacking Device), for **11 distinct Program definitions** in the
-union. The audit checks exact maintained Equipment access-link
-sets and matching canonical Hacking Program records. The optional
-`--pdf` mode verifies the printed device table's four Program
-assignments separately from the preceding Program statistics table.
-Missing, duplicated or incorrectly assigned Programs, changed source
-scope, and missing canonical records fail closed. CI does not require
-the ignored local PDF.
+union. The current-path regression test validates exact approved
+source rows, Equipment access-link sets, canonical Program records,
+four direct N5.3 p. 58 citations and the published `rules_n5.db`
+citations. Missing, duplicated or incorrectly assigned Programs and
+changed source scope fail closed:
 
-The four Equipment facts agree with the N5.3 chart. On 2026-10-30,
-the four p. 58 citations were staged, verified and **promoted together**
-with the matching `rules.db` and deployed-object publication. The checked-out
-source now retains both the existing wiki citations and direct N5.3 citations,
-without changing its 4/6/2/4 Program assignments. The checkout audit reports
-`missingMaintainedN53ChartCitations: []`.
-The audit's `missingMaintainedN53ChartCitations` report allows
-either all four missing or none missing and fails closed on partial
-migration, duplicate N5.3 source citations or incorrect page.
-`tests/test_hacking_device_program_source_chart.py` covers these
-boundaries and the four source-backed Program sets.
+```powershell
+.\\.venv\Scripts\python.exe -m pytest tests/test_hacking_device_program_source_chart.py -q
+```
+
+The independent Program statistics chart on the same page has its
+own Army-data verification. The old fixed-source Device-chart audit
+CLI and its optional PDF text parser were retired in P5.1 after the
+2026-10-30 source and publication review. Its migration-only
+allowance for all four citations being absent is no longer applicable:
+current tests require all four accepted citations. The original
+printed-chart inspection is preserved in this dated review and Git
+history; a future PDF change belongs to source-revision intake.
 
 #### Stage and promote the four N5.3 p. 58 Equipment citations
 
@@ -6557,21 +8783,16 @@ and existing Equipment facts. Because the tracked rules database
 changes, the dependent deployed-object publication was rebuilt and
 promoted **in the same batch**.
 
-From the repository root, after committing the staging tool/tests
-and with unchanged curated source and Army database:
-
-```powershell
-& .\.venv\Scripts\python.exe -m tools.stage_hacking_device_chart_citations --output-dir local/hacking-device-citations-n53 --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
-```
-
-The command refuses an existing staging directory and writes
-`staging-report.json` with the original source and Army SHA-256,
-the verified PDF SHA-256, four migrated IDs, and three artifact
-hashes. It **never changes the tracked checkout**. The isolated
-regression `tests/test_hacking_device_chart_citation_staging.py`
-builds and validates the same three artifacts under a temporary
-directory, compares the published 17 object records byte-for-byte
-and checks all tracked inputs remain unchanged.
+This was a one-time staging and promotion procedure. The old command
+and `tests/test_hacking_device_chart_citation_staging.py` were retired
+during P2.5; they can be recovered from Git history, **not run as a
+current build or release workflow**. The original stage refused an
+existing directory and wrote `staging-report.json` with the original
+source and Army SHA-256, verified PDF SHA-256, four migrated IDs, and
+three artifact hashes. It did not change the tracked checkout.
+The retired staging-only test module built and validated the three
+artifacts in a temporary directory, compared 17 object records
+byte-for-byte and checked the tracked inputs remained unchanged.
 
 **Staging and promotion verified 2026-10-30, HEAD `5e4647c`.**
 Before promotion, the live input hashes matched the staging report: curated source
@@ -6716,8 +8937,8 @@ the four-device Program entitlement chart and does not authorize additional
 Equipment, Unit carrier or deployed-object identities.
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --json
-.venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --archive "data/raw/JSON 20260929-114335.zip" --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.venv\Scripts\python.exe -m tools.research.audit_hacking_program_statistics_chart --json
+.venv\Scripts\python.exe -m tools.research.audit_hacking_program_statistics_chart --archive "data/raw/JSON 20260929-114335.zip" --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 ```
 
 The offline default checks the exact source rows against the published
@@ -6748,13 +8969,13 @@ Army's source-derived `—` while adding a brief note to consult the
 Program's individual requirements/effects rather than interpreting a
 missing Troop Type as no valid target. The source regression verifies the
 printed chart key and program-specific clauses; the maintained
-`tools.verify_hacking_programs_browser` acceptance checks the conditional
+`tools.browser.verify_hacking_programs_browser` acceptance checks the conditional
 note alongside all original Army stat cells at 1440/390/320 px.
 
 For repeatable localhost browser acceptance without an external server:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --self-host --output local/hacking-program-target-scope-browser-20261030.json
+.venv\Scripts\python.exe -m tools.browser.verify_hacking_programs_browser --self-host --output local/hacking-program-target-scope-browser-20261030.json
 ```
 
 The self-host mode launches a disposable loopback WSGI server using the
@@ -6772,19 +8993,20 @@ conditions and 14 prohibited actions/eligibility choices. The read-only
 `config/validation/restrictions-source-chart.json` records each source
 subject, negative action, reference target and scope without materializing
 runtime relationships or assigning invented Troop Type identities.
-The audit cross-checks the relevant existing curated records and highlights
+The maintained validator cross-checks existing curated records and flags
 missing or insufficiently scoped typed relationships:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --json
-.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --json
 ```
 
-The optional PDF check requires PyMuPDF, verifies the pinned source SHA-256
-and matches all six ordered printed restrictions between the chart headings.
-The default runs offline from the maintained manifest and curated JSON.
-Regression tests are in `tests/test_game_mode_source_table.py` with the
-other independent N5.3 source-table audits.
+The current command runs offline from the reviewed manifest and curated JSON.
+The one-use p. 194 PDF text extractor was retired in P5.1: the 2026-10-30
+source review remains recorded below and the pinned source SHA-256 stays
+in the manifest and regression tests. For new revisions, perform new source
+intake rather than running a fixed-geometry historical parser.
+Current source, projection and rendering regression tests live in
+`tests/test_game_mode_source_table.py`.
 
 **Reviewed 2026-10-30:** all six source lines match, with 14 separately
 identified restrictions. TAG, VH and REM are source Troop Type selectors,
@@ -6807,8 +9029,8 @@ plain text. The JSON must match the deterministic source projection
 byte-for-byte:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --check-publication --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
-.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --output local/restrictions-reference-staged.json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --check-publication --json
+.\.venv\Scripts\python.exe -m tools.research.audit_restrictions_source_chart --output local/restrictions-reference-staged.json
 ```
 
 The second command stages replacement bytes under the ignored `local/`
@@ -6986,45 +9208,38 @@ tests actual matched v8/v9 publication payloads, while
 `tests/test_deployment_scripts.py::test_deployment_smoke_builds_and_exercises_v8_rollback_image`
 pins the sequence and isolation of the CI image gates.
 The local promotion and remaining hosted acceptance are recorded in
-[the data model](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
+[the data model](data-model.md#restriction-persistence-and-version-aware-api).
 Normal tests never write to the tracked runtime database.
 
 ### N5.3 Silhouette Templates source and browser geometry
 
 The English N5.3 **Silhouette Templates** table (printed p. 18)
-defines ten representations: SX, S0 and S1–S8.
-`config/validation/silhouette-template-source-table.json` pins
-the base width and template height in millimetres for each source row.
-An independent read-only audit compares these source rows against the
-eight fixed dimensions in the browser's
-`src/infinity_db/web/static/silhouette-diagrams.js` and the canonical
-`attribute:s`/Prone State references:
+defines ten representations: SX, S0 and S1–S8. The retained
+`config/validation/silhouette-template-source-table.json` pins each
+source row's base width and height, the dynamic Prone/SX base-width
+rule, and the S1–S8-only diagram policy.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_silhouette_template_source_table
-.venv\Scripts\python.exe -m tools.audit_silhouette_template_source_table --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
-```
+The current-path acceptance in
+`tests/test_web.py::test_silhouette_source_geometry_matches_browser_renderer`
+checks these reviewed values against the actual S1–S8 browser
+dimensions, and also pins `attribute:s` and Prone State source ownership.
+`test_silhouette_diagrams_use_shared_scale_and_player_surfaces`
+independently checks shared scaling, S0/SX explanatory copy,
+reference/previews, SVG viewBoxes, delivery and theme behavior.
 
-**S0** has a fixed 25 mm base and 3 mm height. **SX** is the
-3 mm high representation for a Trooper in Prone State; the base
-width depends on the Trooper's original Silhouette Attribute and
-must not be flattened to a universal 25 mm base or another permanent
-Unit value. The existing UI displays S1–S8 at a shared scale with
-source-backed SVGs and provides explicit text for S0/SX, which have
-no supplied reference SVGs. Neither is an independently deployed
-Weapon/Equipment identity.
+**S0** has a fixed 25 mm base and 3 mm height. **SX** is 3 mm
+high for a Prone Trooper, with base width inherited from the Trooper's
+original Silhouette Attribute. It must not become a fixed 25 mm base or
+a permanent Unit/Profile attribute. There are eight supplied SVG diagrams,
+S1–S8. Neither S0 nor SX has its own source diagram, and neither
+defines a deployed Weapon/Equipment object.
 
-The source audit rejects changed table dimensions/order, an invented
-fixed SX base, missing/changed S1–S8 diagram sizes, absent SVGs,
-broken display-mode safeguards or missing maintained attribute
-references. Optional `--pdf` checks the exact printed table and
-Prone footnote using the local pinned English N5.3 PDF. The audit
-does not require the ignored PDF during CI and does not rewrite
-the application, publish profile attributes, or modify generated
-artifacts. The separate UI regression still verifies the existing
-diagram component and SVG delivery.
-`tests/test_silhouette_template_source_table.py` pins the source
-rows, browser geometry, negative drift cases, and local PDF evidence.
+The completed one-off `audit_silhouette_template_source_table`
+CLI and its PDF-parser-only tests were retired in P5.1. Its original
+pinned N5.3 p.18 extraction and negative-drift evidence remain in Git
+history. The current source manifest and maintained browser regressions
+enforce the released geometry without a separate historical
+source-investigation application.
 
 ### V1S-089 Silhouette manual visual acceptance preflight
 
@@ -7081,11 +9296,11 @@ recommended-play reference, not an authoritative scenario forces/setup
 contract. Its six named modes provide Army Points, baseline SWC,
 recommended table size, Deployment Zone dimensions, and nominal duration.
 The independent N5.3 Retreat! and advisory table-size sources remain on
-pp. 146–147. Audit the same Army Points keys across both source tables:
+pp. 146–147. Verify the same Army Points keys against the current Rules
+source and database with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_game_mode_source_table
-.venv\Scripts\python.exe -m tools.audit_game_mode_source_table --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.\.venv\Scripts\python.exe -m pytest tests/test_game_mode_source_table.py -q
 ```
 
 The read-only manifest
@@ -7101,17 +9316,16 @@ Source-review semantics preserve baseline SWC rather than conflating
 profile-specific bonuses, and the indicated game duration is in
 minutes, not a limit of Game Rounds.
 
-The audit rejects changed values, schemas, sources, row order,
-Army Points/SWC alignment, and divergence from the separate
-Retreat!/table-size manifest. Optional local-PDF verification checks
-the printed p. 6 headings and source words, uses positional cell
-alignment for Army Points/SWC/minutes and the table/Deployment
-dimensions, and reports its PDF SHA-256. The ignored PDF is not
-required by CI. The reviewed `rule:game-modes` definition now publishes
+The current tests reject changed values, schemas, sources, row order,
+Army Points/SWC alignment and divergence from the separate Retreat!/
+table-size manifest. The reviewed `rule:game-modes` definition publishes
 these six rows at `/rules/game-modes` and `/api/rules/game-modes`, using
 `facts.gameSetupTable.rows` as the structured normal-player source.
-The audit compares **every published value** to both pinned manifests
-and fails closed on changed data, source pages or advisory scope.
+Tests compare **every published value** against both reviewed manifests
+and the current `rules_n5.db`, failing on changed data, source pages or
+advisory scope. The one-use positional PDF extraction for p. 6 was
+retired in P5.1 after its source review; the evidence remains in this
+dated record and Git history. Revisions require new source intake.
 The browser uses the shared horizontally scrollable reference-table
 primitive. Normal player search reaches the same record. Scenarios,
 Army List legality, Unit attributes, and live session state remain
@@ -7124,11 +9338,11 @@ N5.3 prints a **Retreat! threshold table** on p. 146 and separate
 **advisory table-size recommendations** on p. 147. The maintained
 Trooper `state:retreat` (p. 170) and `term:victory-points` (p. 173)
 do not themselves represent the army-wide threshold or generic table
-layout. Review the read-only inventory with:
+layout. The retired fixed-source audit's continuing invariants are checked
+with the current Game Modes source and publication tests:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_standard_game_reference_tables
-.venv\Scripts\python.exe -m tools.audit_standard_game_reference_tables --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.\.venv\Scripts\python.exe -m pytest tests/test_game_mode_source_table.py -q
 ```
 
 The audit pins six Army Points rows in
@@ -7146,44 +9360,44 @@ The source explicitly identifies table setup guidance as advisory, not
 mandatory. These dimensions must not override authoritative
 scenario-scoped geometry or deployment rules.
 
-The source audit fails closed on changed row values, threshold
-rounding, page provenance, scope, missing maintained Retreat!/VP
-identities, or newly introduced canonical reference records requiring
-review. With `--pdf`, it checks both pages in the locally pinned
-English N5.3 PDF, including positional alignment of Army Points and
-survivor thresholds across the printed two-column table. Without the
-ignored PDF, the manifest and maintained-boundary checks remain
-available in CI. It does not publish scenario data, infer surviving
-Troopers from an Army loadout, evaluate game state, or add any deployed
-object. `tests/test_standard_game_reference_tables.py` covers source
-rows, rounding, negative drift and the optional PDF extraction.
+The current Game Modes tests pin the independent source rows, threshold
+rounding, page provenance, scope, maintained Retreat!/VP identities and
+absence of invented canonical threshold/table-size records. The completed
+p. 146–147 positional PDF extraction is recorded in the 2026-11-03
+review above and preserved in Git history, not run in ongoing CI. These
+source fixtures do not publish scenario data, infer surviving Troopers
+from an Army loadout, evaluate game state or add deployed objects.
 
 ### Terrain and Scenery Structures source gaps
 
 The optional N5.3 terrain chapter (pp. 143–145) contains a separate source
 table and two physical access labels outside the Weapon Chart and scenario
 object inventories. Its suggested combinations are not new canonical terrain
-Types or deployed Weapon/Equipment profiles. Audit the source boundary with:
+Types or deployed Weapon/Equipment profiles. The original fixed-source
+PDF investigation is complete and its standalone CLI was retired in P5.1.
+Current-data regression coverage runs with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps
-.venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
+.\.venv\Scripts\python.exe -m pytest tests/test_terrain_scenery_source_gaps.py -q
 ```
 
-The audit pins **five Terrain Types** (Aquatic, Desert, Mountain, Jungle,
-Zero-G), **18 printed suggestion/example labels** (retaining the source's
-`Artic Plains` spelling), and **two Scenery Access Width Tokens** (`Narrow
-Gate` / `Wide Gate`). The `skill:terrain` reference exists;
-standalone Special Terrain and Access Width reference definitions are
-now **promoted** as N5.3 general rules. The subsequent maintained-text
-review and coordinated binary refresh are complete (see below).
-Gate Token labels do not have separate canonical definitions.
-The audit accepts both the original two-gap state and the fully
-published two-rule state but rejects partial migration or unsupported
-definitions. Its optional `--pdf` mode verifies source headings, names and
-Narrow Gate eligibility against the local English N5.3 source. Without
-the ignored PDF, it still checks maintained and published domain boundaries;
-it does not claim to have re-extracted the PDF.
+Current tests pin **five Terrain Types** (Aquatic, Desert, Mountain, Jungle,
+Zero-G), **18 reviewed example labels** (retaining the printed `Artic
+Plains` spelling), and **two Access Width labels** (`Narrow Gate` /
+`Wide Gate`). The accepted `skill:terrain`, `rule:special-terrain` and
+`rule:access-width` definitions are maintained with N5.3 citations.
+Gate labels have no separate canonical identities. The tests check exact
+source ownership, selected nuanced example cells, schema fail-closure and
+current Rules database/API/search parity. PDF text-extraction findings are
+retained as dated review evidence, not an ongoing PDF parser requirement.
+
+The terrain tests and maintained core-scenario audit read deployed objects
+directly from validated Rules SQLite, bound to the selected Army bytes.
+The core-scenario audit still supports `--army-database PATH
+--rules-database PATH` for alternate files, independently of their
+locations or names. Its report includes `armyDatabaseSha256` and
+`rulesDatabaseSha256`. Tests reject missing, incompatible or mismatched
+embedded models, with no loose `deployed-objects.json` recovery path.
 
 Special Terrain zones are game-table/session configurations, with a Terrain
 Type and at least one other characteristic (Difficult Terrain, Saturation
@@ -7191,76 +9405,47 @@ or Visibility Conditions). The table's 18 example rows illustrate possible
 combinations, not 18 distinct terrain Types. Access Width is a scenery
 restriction; the Narrow/Wide Gate Tokens label access points rather than
 deployable devices, and the applicable Silhouette/Prone restrictions cannot
-be inferred from an Army loadout. The audit fails on unexpected promotion
-of these names into the 17-object Weapon/Equipment publication or new
-maintained source identities requiring re-review. The source-gap
-audit itself does not add attributes, source carriers or runtime records.
-The semantics are already reviewed in `docs/rules-semantics.md` and
-`docs/rules-research.md`. `tests/test_terrain_scenery_source_gaps.py`
-guards the boundary, including a local-only test of the pinned PDF.
+be inferred from an Army loadout. Current tests reject unexpected presence
+of these names in the 17-object Weapon/Equipment publication, absent
+accepted rule identities, wrong source ownership or invented gate terms.
+The source review did not add attributes, source carriers or object identities.
+Its findings remain in `docs/rules-semantics.md` and
+`docs/rules-research.md`; the retired PDF scanner remains in Git history.
 
 Two source-backed `basic-rule` definitions were promoted together with
 their generated artifacts: `rule:special-terrain` (p. 143) and
 `rule:access-width` (p. 145). They specify optional table scope, terrain
 Types and characteristics, scenery Access Width precedence and the
 Silhouette X/Prone restriction, without creating extra object identities.
-The original one-time staging and promotion procedure was:
+The original one-time staging and three-file promotion are complete.
+The pre-promotion staging script, its tests and proposal JSON were retired
+in P2.5 at `7330c310`: their exact historical content is available in
+Git history, not as current instructions. Current terrain source and publication tests reject missing accepted
+definitions or citations. The curated Rules definitions are authoritative.
 
-```powershell
-.venv\Scripts\python.exe -m tools.stage_terrain_scenery_references --output-dir local/terrain-scenery-references-n53 --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
-```
-
-The original staging and three-file promotion are complete. The first
-post-promotion rules check revealed two missing interaction-review entries
+The first post-promotion rules check revealed two missing interaction-review entries
 and reviewed maintained-text aliases. Those reviews are now recorded:
 the interaction checklist has **200/200 supporting identities**, Prone
 State references use canonical links, and the ordinary Terrain noun is
 pinned separately from the `skill:terrain` identity with exact
 passage hashes. The rules build now passes.
 
-The final two-binary refresh **was completed and verified** to pair the
-post-promotion source corrections with a matching `rules.db` and
-`deployed-objects.json` fingerprint. The following is the archived
-reproduction procedure; it requires a new, unused output directory
-if the original local staging directory still exists:
+The final historical two-binary refresh **was completed and verified**
+to match the promoted terrain/scenery source corrections with `rules.db`
+and `deployed-objects.json`. The archived staging report, source hash,
+release baseline, schema, Restrictions and deployed-object pair
+fingerprints were checked at the time. No deployment was performed by
+that migration procedure.
 
-```powershell
-& .\.venv\Scripts\python.exe -m tools.stage_promoted_terrain_artifacts --output-dir local/terrain-scenery-refresh-n53
-```
-
-The original `local/terrain-scenery-refresh-n53/staging-report.json`
-and promoted binary hashes were verified during the historical refresh.
-An older ignored staging directory is **not** automatically a safe source
-for a new promotion: its source, active release baseline or schema may
-have changed. Rebuild into a fresh directory, then use the read-only
-freshness gate before reviewing any manual promotion:
-
-```powershell
-$stage = "local/terrain-scenery-refresh-n53-new"
-& .\.venv\Scripts\python.exe -m tools.stage_promoted_terrain_artifacts --output-dir $stage
-& .\.venv\Scripts\python.exe -m tools.verify_staged_release_pair --stage $stage
-```
-
-The verifier also accepts new output from
-`tools.stage_deployed_object_citation_migration` and
-`tools.stage_terrain_scenery_references`. It requires the staging report
-to identify the original active `rules.db` and `deployed-objects.json`
-hashes, then checks that neither release baseline nor curated source
-changed. It verifies both staged hashes, schema version, reviewed
-Restrictions and deployed-object pair integrity. Reports created before
-the baseline-hash fields existed fail closed; retain them only as historical
-evidence. No staging tool or verifier applies the candidate automatically.
-After separately reviewed promotion, run the publication check and rules
-stage against the newly paired tracked binaries.
-
-The refreshed binary pair must be committed together with the curated
-source and corresponding review policy/checklist changes. No deployment
-has occurred. The regression
-`tests/test_promoted_terrain_artifacts.py` checks that an isolated rebuild
-does not modify tracked inputs and, when the ignored staging report is
-present, verifies its source hash and exact binary equality against the
-promoted files. The published `rules.db` fingerprint is checked even
-without local staging artifacts.
+**Historical procedure retired in P2.5:** the standalone terrain
+stager, staged-pair freshness verifier and their staging-only tests
+were deleted in commit `15a2ed23`. Their old commands and assertions
+remain available through Git history, not as live instructions.
+Do not reuse ignored historical staging directories: their source
+or release baseline may differ. The current path builds the selected
+database set and validates it with `infinity-db database-health --db-dir`.
+The maintained source, schema, embedded Restrictions and provenance
+checks are described in the current P2.5 acceptance record above.
 
 ### Core scenario-object source-domain boundary
 
@@ -7271,9 +9456,12 @@ pp. 149–156) against maintained scenario geometry, scoped rules and Skills,
 scoring references, and the published deployed-object identities:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_core_scenario_objects
-.venv\Scripts\python.exe -m tools.audit_core_scenario_objects --json
+.venv\Scripts\python.exe -m tools.data.audit_core_scenario_objects
+.venv\Scripts\python.exe -m tools.data.audit_core_scenario_objects --json
 ```
+
+Alternate database selection and input hashes follow the
+[terrain/scenery audit contract](#terrain-and-scenery-structures-source-gaps).
 
 Annihilation and Firefight have no scenario-object Marker instances.
 Domination (pp. 151–152) places exactly **four Consoles** across all three
@@ -7294,101 +9482,49 @@ game-object inventory and must not create Army carriers or delivery paths.
 `tests/test_core_scenario_object_boundary.py` exercises the fail-closed
 publication and provenance boundary.
 
-### N5.3 citation migration verification
+### Reviewed N5.3 citation publication parity
 
-The **14 independently verified N5.3 PDF citations** are now present in
-maintained rules and the regenerated `rules.db`: six non-catalog, five
-expanded, and three Weapon/Equipment source-domain citations. The review
-manifests no longer carry temporary PDF-only status/excerpt fields. Verify
-their coordinated post-migration state with:
+Fourteen previously verified N5.3 PDF citations are now **maintained source
+citations**, not pending migration inputs: six from non-catalog game-element
+reviews, five from expanded reviews and three from Weapon/Equipment source-domain
+reviews. They are published in `data/generated/rules_n5.db`. Their reviewed
+manifest decisions no longer carry temporary `citationStatus` or
+`pdfExcerpt` fields.
 
-```powershell
-.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations
-.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations --json --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
-```
+The current acceptance test
+`tests/test_source_conflict_publication.py::test_reviewed_n53_citations_match_sources_and_rules_database`
+checks the exact 14 source pages in the review manifests, curated rule
+definitions and the published Rules database; it rejects duplicated or
+out-of-sync citations and reintroduction of temporary migration metadata.
+The separate non-catalog, expanded and source-domain review validators still
+check classification, wording and source-review boundaries. None of these
+reviews authorizes additional deployed objects, delivery edges or Unit carriers.
 
-The read-only preflight verifies all three manifests and all 14 exact
-`sourceId: n5-core-v5.3-pdf` citations. It reports **0 pending / 14
-migrated** and rejects partial, duplicate, or stale migrations. `--pdf`
-also verifies source excerpts against the local English N5.3 PDF and
-reports its SHA-256; this requires PyMuPDF. Normal CI validation does
-not require the ignored PDF. The curated citations specify verified
-pages without adding unverified section labels.
-
-The migration was first built in an isolated staging directory, using
-the following command **from the pre-migration checkout**. This command
-requires the 14 citations to be pending and is not rerunnable from
-the already migrated working tree:
-
-```powershell
-.venv\Scripts\python.exe -m tools.stage_deployed_object_citation_migration --output-dir local/citation-migration-n53 --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
-```
-
-The exclusive staging directory contains a citation-only edit to the
-maintained N5.3 curated JSON, the three reviewed manifests with only temporary
-`citationStatus` and `pdfExcerpt` fields removed, a freshly built
-`data/generated/rules.db`, the matching fingerprinted
-`data/generated/deployed-objects.json`, and `migration-report.json`.
-All 14 migrated records are validated through their post-migration
-review contracts before staging, and the object publication must retain
-17 reviewed identities. The source/manifest changes preserve existing
-formatting. The stage command refuses to overwrite an existing directory,
-write inside a source/generated input directory, or run on a partially
-migrated checkout. It uses the existing pinned Army database but does not
-rebuild it. Staging tests compare the original curated files, both tracked
-generated artifacts and all three manifests byte-for-byte before/after.
-
-The six staged files were subsequently promoted together. For an
-independent replay from a pre-migration checkout, inspect the staging
-report and copy all six paths in one review batch:
-
-```powershell
-$stage = "local/citation-migration-n53"
-$paths = @(
-    "data/curated/rules/n5-core-v5.3.json"
-    "config/validation/deployed-object-non-catalog-reviews.json"
-    "config/validation/deployed-object-expanded-reviews.json"
-    "config/validation/deployed-object-source-domain-clause-reviews.json"
-    "data/generated/rules.db"
-    "data/generated/deployed-objects.json"
-)
-foreach ($path in $paths) {
-    Copy-Item -LiteralPath (Join-Path $stage $path) -Destination $path
-}
-.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations --json
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
-```
-
-The promoted `rules.db` and deployed-object publication were checked
-against the staging report's exact SHA-256 fingerprints, and the focused
-audit and publication regressions passed. The audit exception maps
-remain as transition guards, but the maintained citations replace
-their PDF-only manifest metadata. Never publish the curated text alone
-without its matching `rules.db` and derived publication. The migration
-adds no object identities, delivery edges, or Unit carriers.
-`tests/test_deployed_object_citation_migrations.py` verifies pending and
-migrated states, source drift, optional PDF excerpts, and (when the local
-staging report exists) byte-for-byte equality of all six promoted files.
+The completed staging/promotion tools and migration preflight are retired.
+Their one-use commands, older `rules.db` / loose JSON artifacts and historical
+migration fingerprints remain in Git history, **not** in current build
+instructions. Use the maintained offline database-set build and validation
+workflow for any future curation/publication change.
 
 ### Deployed-object release publication
 
-The read-only inventory is for review; ordinary web requests must not read
-the raw curated source files. In a development/release checkout, after
-building both matching databases, compile the reviewed reference payload:
+The read-only inventory is for source review; web requests use the embedded
+Rules model. The standalone deployed-object JSON builder, reader and legacy
+publication fixtures are retired. Validate a selected complete database set with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
+infinity-db database-health --db-dir data/generated
 ```
 
-The builder writes deterministic `data/generated/deployed-objects.json` with
-the source and rules review evidence, direct Army profile/loadout occurrences,
-source-wide Unit options, and explicit one-level included loadout occurrences
-for reviewed delivery sources, along with the **exact** current
-`infinity.db`/`rules.db` SHA-256 fingerprints. Changes to either database
-require regenerating and revalidating the publication. The corresponding
-`tests/test_deployed_object_publication.py` tests prove deterministic bytes
-and rejection of corrupt, duplicate, stale or unsupported values. When
+`infinity_db.deployed_object_builder` owns the deterministic reviewed model;
+Rules SQLite stores it with the selected Army fingerprint and source/review
+evidence. `tests/test_deployed_object_publication.py` checks deterministic
+source reconstruction against the actual embedded release, exact subtypes,
+reviewed delivery edges and direct/Include occurrence identity. Its negative
+model cases reject malformed evidence before storage creates any tables.
+`tests/test_deployed_object_storage.py` checks exact relational round trips,
+Army pairing and rejection of tampered evidence/source selectors and Unit
+ownership after reading stored rows. When
 `data/generated/infinity.raw.db` is available alongside the published Army
 database, two additional local-only tests compare every reviewed origin's
 published direct and one-level Include reverse-use rows against independent
@@ -7403,8 +9539,8 @@ reusable Weapon templates from Unit ownership, and guards all three source
 Include selector shapes against drift. New source context types must be
 reviewed rather than automatically promoted to reverse Unit uses.
 `tests/test_verify_deployed_object_publication_browser.py` exercises the
-real API and Chromium at 1440/390 px with an isolated, freshly generated
-publication. There are 17 reviewed entries, not the entire game-object corpus;
+real API and Chromium at 1440/390/320 px with an isolated, matched database
+pair and no deployed-object JSON. There are 17 reviewed entries, not the entire game-object corpus;
 Mine Dispenser's subtype remains unresolved. The reverse-usage projection
 includes only exact source occurrences linked to reviewed delivery origins.
 Unit-wide options retain an unknown Army context; one-level Include targets
@@ -7419,15 +9555,12 @@ same-context payload and cycle are handled explicitly. This is a source-drift
 gate, **not** a claim that other unreviewed delivery sources or missing objects
 cannot have additional uses.
 
-The release deployment command generates and verifies this ignored publication
-from the checked-out pinned database pair before building the Docker image.
-The Docker image must contain the publication beside both databases. The image
-smoke test verifies the publication against the actual installed database
-hashes, its 17 reviewed entries and unresolved delivery, and the HTTP/API
-browser entry point. Deployment-smoke CI generates the same deterministic
-artifact from the tracked sources before Docker build. Passing the isolated
-browser test alone is not proof of hosted availability; final hosted acceptance
-and the separate Unit/loadout reverse-usage work remain open.
+Image assembly and deployment-smoke CI validate the selected database set and
+its embedded model rather than generating or packaging deployed-object JSON.
+Current v10 images still require matched variant and Weapon-profile JSON;
+the opt-in complete build embeds those projections as documented in the
+[data lifecycle](../data/README.md). Browser success alone does not establish
+hosted, container or final-release acceptance.
 
 For the older Wiki Weapon Chart name inventory, use the read-only
 explicit-alias audit. It preserves repeated alternative tables and reports
@@ -7435,19 +9568,19 @@ unresolved identities independently from source-profile value differences.
 The pinned Wiki and Army files are private, not committed:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_wiki_weapon_chart_names --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --army-db data/generated/infinity.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
+.venv\Scripts\python.exe -m tools.research.audit_wiki_weapon_chart_names --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --army-db data/generated/army.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
 ```
 
 A name alias is not a new Weapon rule or corrected Weapon Chart profile.
 Different-valued alternative rows remain separately reviewable.
 
-To reconcile unresolved Weapon rule enrichment without inventing definitions,
-combine the existing enrichment and chart reports in a separate deterministic
-source-to-reference triage:
+To reconcile unresolved Weapon rule enrichment without inventing definitions
+during source revision research, combine the existing enrichment and chart
+reports in a deterministic source-to-reference triage. This is not a release gate:
 
 ```powershell
-.venv\Scripts\python.exe tools/audit_enrichment_coverage.py data/generated/infinity.db --rules data/generated/rules.db --output local/audits/weapon-enrichment.json
-.venv\Scripts\python.exe tools/audit_weapon_definition_gaps.py --army-db data/generated/infinity.db --enrichment local/audits/weapon-enrichment.json --chart local/audits/weapon-chart.json --json-output local/audits/weapon-triage.json --markdown-output local/audits/weapon-triage.md
+.venv\Scripts\python.exe -m tools.data.audit_enrichment_coverage data/generated/army.db --rules data/generated/rules_n5.db --output local/audits/weapon-enrichment.json
+.venv\Scripts\python.exe -m tools.research.audit_weapon_definition_gaps --army-db data/generated/army.db --enrichment local/audits/weapon-enrichment.json --chart local/audits/weapon-chart.json --json-output local/audits/weapon-triage.json --markdown-output local/audits/weapon-triage.md
 ```
 
 **Current-input regression (2026-10-31):** the triage now retains historical
@@ -7461,33 +9594,28 @@ output includes `resolvedSharedReviews` and `resolvedSharedReviewCount` so those
 two approvals remain auditable without counting them as missing definitions. This
 is triage evidence, not whole-Weapon or v1.0 completeness acceptance. The original
 baseline failure, reproduction and resolution remain documented in
-[V1-A05](v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions).
+[V1-A05](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions).
 
-The release-paired Weapon-profile citation publication is generated and checked
-from the tracked Army/rules databases and reviewed decisions, without reading
-the PDF or acquiring sources:
+The reviewed Weapon-profile citations are embedded in `rules_n5.db`.
+Verify that its source-paired rows still match the authored decisions without
+reading the PDF, generating loose JSON or acquiring sources:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.build_weapon_profile_publication
-.\.venv\Scripts\python.exe -m tools.build_weapon_profile_publication --check
+.\.venv\Scripts\python.exe -m tools.data.build_weapon_profile_publication
 ```
 
-The check requires exact generated bytes, current PDF metadata and profile/mode
-fingerprints. `tools.verify_deployment_assets.py` also invokes it before
-packaging; source and browser regressions remain separate evidence.
+The read-only check requires exact embedded citation identities, current PDF
+metadata and profile/mode fingerprints. `tools.verify_deployment_assets`
+reuses the check before packaging. Source and browser regressions remain
+separate evidence.
 
-For the opt-in **1.0 enrichment source-triage assessment**, add
-`--assess-release 1.0.0` to the triage command. It cross-checks the same pinned
-Army/rules fingerprints and current enrichment gap identities with the source-
-reviewed Weapon results, preserving the historical policy's blocker count only as
-historical context. `releaseAssessment.pending` lists all remaining unreviewed
-catalog/link gaps; source-reviewed shared Weapon omissions and explicitly accepted
-historical citations do not become missing definitions. For a nonzero exit until
-this bounded assessment has no pending gaps, use `--require-release 1.0.0` instead.
-The October 31 source pair reports **one pending Skill (Commlink)** despite zero
-historical-policy blockers. The strict gate therefore intentionally exits 1. This
-assessment does not replace the separate 1.0 primary-interaction gate, annex
-source-applicability review, whole-source explanation review, or browser acceptance.
+The historical v1.0.0-specific `--assess-release` and
+`--require-release` branches were retired in P5.2: they judged the already
+completed 1.0 milestone, not ongoing Weapon source reconciliation. The dated
+result, including Commlink's then-pending status, remains in
+[v1.0 source coverage audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md).
+The generic Weapon triage and current reviewed source/definition assertions
+remain available.
 
 The triage rejects mismatched Army database hashes, incomplete/deferred chart
 alignment, and invalid coverage or PDF report identities. It reports separate
@@ -7508,8 +9636,8 @@ local and Git-ignored.
 
 ## 1.0 Weapon Traits and special-weapon source inventory
 
-`tools/audit_weapon_traits_prose.py` uses the same optional N5 v5.3 PDF and
-generated Army database, plus `rules.db`, to compare positionally reconstructed
+`tools/research/audit_weapon_traits_prose.py` uses the same optional N5 v5.3 PDF and
+generated Army database, plus `rules_n5.db`, to compare positionally reconstructed
 Traits against raw Army `metadata_weapons.properties`. The offline check keeps
 printed wording, mode identities, source page, and Army properties in each report.
 It also indexes 12 named special-weapon prose sections on pp. 68–74 against
@@ -7517,7 +9645,7 @@ named curated Weapon definitions, without treating a missing dedicated Weapon
 record as proof that no gameplay rule representation exists.
 
 ```powershell
-python tools/audit_weapon_traits_prose.py --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
+python -m tools.research.audit_weapon_traits_prose --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
 ```
 
 The corrected N5 v5.3 audit yields 147 literal Trait-list matches, 16 reviewed
@@ -8092,7 +10220,7 @@ Spanish Immunity revision 3677 separately retains the failed-save
 Stunned result. The exact historical alternative chart revision
 3988 was independently verified in S21's Wiki history archive
 (timestamp 2026-08-27T14:21:00Z; SHA-256 recorded in the
-[source manifest](rules-explanation-audit-1.0-sources.md)).
+[source manifest](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0-sources.md)).
 This remains an **unresolved external publication conflict**, not
 authority to modify the source Army profile.
 The weapon's source notes/citations expose the disagreement.
@@ -8143,8 +10271,8 @@ without horizontal clipping. Two 320 px Ammunition pages triggered the
 they were explicitly allowed as known independent UI exceptions.
 
 The source audit, exact Wiki revision hashes and timestamps are
-recorded in [the rules-explanation audit](rules-explanation-audit-1.0.md)
-and [source manifest](rules-explanation-audit-1.0-sources.md).
+recorded in [the rules-explanation audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0.md)
+and [source manifest](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/rules-explanation-audit-1.0-sources.md).
 Private PDF/HTML extractions, 320 px screenshots and browser results
 remain in `local/audits/` and `local/audits/rea028-browser/`.
 No raw source archives, new universal rule evaluator, or guessed
@@ -9151,12 +11279,14 @@ Ammunition, Saving Roll count, Traits, and
 derived evidence. The JS and Chromium renderer
 at 1440/390/320 px verifies the twelfth case,
 mode exclusion, source label and links, with
-no horizontal overflow. The existing rollback-
-aware `tools/stage_immunity_plasma_saving_roll.py`
-rebuilds and promotes the synchronized DB and
-deployed-object publication, retaining all 17
-reviewed objects. This is not an attack evaluator
-or a universal Weapon Trait ruling.
+no horizontal overflow. The original rollback-aware
+Plasma/Immunity staging step retained all 17 reviewed deployed objects;
+its one-use command is retired under P2.5. Current
+source and API checks live in
+`tests/test_immunity_combined_saving_roll_example.py`
+and `tests/test_immunity_plasma_critical.py`.
+This is not an attack evaluator or a universal
+Weapon Trait ruling.
 
 **Monofilament / printed Immunity (ARM) Example 2, 2026-10-30:**
 `tests/test_immunity_monofilament_example.py` pins N5.3
@@ -9168,10 +11298,12 @@ not inherit a calculated Immunity outcome. Curated mutation
 tests fail closed on changed Weapon, category, source Traits,
 roll counts and death-State behavior. The JS renderer and
 Chromium at 1440/390/320 px verify the eleventh case,
-source label, semantic links and no overflow. The existing
-rollback-aware `tools/stage_immunity_plasma_saving_roll.py`
-promotes the synchronized database/publication pair; all
-17 reviewed deployed objects remain unchanged.
+source label, semantic links and no overflow. The
+historical rollback-aware staging procedure
+promoted a synchronized database/publication pair;
+all 17 reviewed deployed objects remained unchanged.
+The one-use staging script is retired; current source,
+curated and API tests remain authoritative.
 
 **AP+T2 CC Weapon / partial Immunity (AP), 2026-10-30:**
 `tests/test_immunity_ap_t2_cc.py` checks the pinned English
@@ -9345,11 +11477,12 @@ rewrites the artifact.
 Run this gate against the tracked release artifact, and repeat it against
 the final frozen release candidate. It never rebuilds the artifact. The
 normal `build-rules` export now produces a v10 candidate at ignored
-`local/rules-standalone.db`. Explicit `--legacy-v8`/`--legacy-v9` flags
-are available for compatibility testing. All CLI modes reject direct writes to
+`local/rules-standalone.db`; the obsolete `--legacy-v8`/`--legacy-v9` CLI modes
+are retired. Low-level semantic fixtures are not release build modes.
+All CLI builds reject direct writes to
 the tracked rules database. The prepared 1.0.1 tracked release uses v10;
 its schema-specific publication contract is in
-[the data-model contract](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
+[the data-model contract](data-model.md#restriction-persistence-and-version-aware-api).
 Normal development checks skip this release-only gate:
 
 ```powershell
@@ -9366,16 +11499,10 @@ Current v10 Rules embed deployed objects. Verify the matched four-file
 runtime set with `tools.build_v10_runtime_candidate --check` and
 `tools.verify_deployment_assets`, following the
 [release checklist](releasing.md#4-run-local-release-validation).
-For legacy v8/v9 only, the tracked rules DB hash also anchors ignored
-`data/generated/deployed-objects.json`; regenerate and verify it whenever
-the legacy release workflow calls for a rebuild. Its guarded paired-promotion
-workflow preserves both artifacts; application startup rejects a mismatched
-pair. For a standalone legacy publication rebuild, run:
-
-```powershell
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
-```
+Historical v8/v9 releases used a separate deployed-object JSON fingerprint;
+their builder/reader and promotion commands are retired. Use their retained
+release artifacts for historical inspection. Current startup never enables
+an object catalog from adjacent legacy JSON.
 
 Then opt in with `INFINITYDB_RELEASE_FAQ_PARITY=1` for the tracked
 FAQ browser cases in `tests/test_verify_scenario_faq_browser.py`:
@@ -9662,7 +11789,7 @@ historical 367-record D/S denominator is not changed. Reproduce the
 selected bilingual-source and identity audit with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --audit-visibility-zones --verify-visibility-pdfs --json-output local/audits/v1-visibility-zone-reconciliation.json --markdown-output local/audits/v1-visibility-zone-reconciliation.md
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --reconcile-explanation-inventory --audit-visibility-zones --verify-visibility-pdfs --json-output local/audits/v1-visibility-zone-reconciliation.json --markdown-output local/audits/v1-visibility-zone-reconciliation.md
 ```
 
 The audit rejects changed identities, curated clauses, citation pages,
@@ -9715,7 +11842,7 @@ Repeater's current reference now cites the Hacking Area page in the verified
 English Wiki snapshot alongside the N5.3 rulebook and Repeater page. The
 mechanics and imported Army Equipment values were not changed.
 
-The `tools/audit_enrichment_coverage.py` baseline now uses the same
+The `tools/data/audit_enrichment_coverage.py` baseline now uses the same
 `EquipmentCatalog` as the published `/api/equipment` endpoints, covering Army
 Equipment, profile-symbol-encoded Cube/Cube 2.0 and curated-only Firewall.
 The rebuilt current-rules/Army enrichment audit reported **0 release blockers**
@@ -9792,7 +11919,7 @@ For subsequent Army snapshot reviews, the source-presentation audit has an opt-i
 fail-closed occupancy gate:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/audit_source_presentation.py data/generated/infinity.db --require-no-occupied-gaps --output local/audits/source-presentation.json
+.\.venv\Scripts\python.exe -m tools.data.audit_source_presentation data/generated/army.db --require-no-occupied-gaps --output local/audits/source-presentation.json
 ```
 
 This gate passes only when a checksum-matched raw source database is available
@@ -10270,7 +12397,7 @@ public Trait detail pages scroll correctly in a browser. Legacy MediaWiki
 encoding matters: Suppressive Fire (SF) uses `.28SF.29`, not a
 display-name-derived fragment.
 
-`tools/audit_trait_wiki_anchors.py` reads a saved HTML response from the
+`tools/research/audit_trait_wiki_anchors.py` reads a saved HTML response from the
 official `https://infinitythewiki.com/Traits` page. It checks every mapped
 fragment against the page's actual heading `id` and its rendered text,
 reporting missing fragments and wrong-heading matches separately. The
@@ -10289,7 +12416,7 @@ To run the source check explicitly from the repository root in PowerShell:
 
 ```powershell
 Invoke-WebRequest -Uri "https://infinitythewiki.com/Traits" -OutFile "local/audits/traits-current.html"
-.\.venv\Scripts\python.exe tools/audit_trait_wiki_anchors.py local/audits/traits-current.html --inventory-unmapped --output local/audits/trait-wiki-anchors.json
+.\.venv\Scripts\python.exe -m tools.research.audit_trait_wiki_anchors local/audits/traits-current.html --inventory-unmapped --output local/audits/trait-wiki-anchors.json
 ```
 
 Keep the HTML and report under ignored `local/audits`, with a capture
@@ -10310,7 +12437,7 @@ previous Trait Wiki link was placed exclusively in the developer-only
 sets its reviewed URL and reveals it when `wiki` is available; the
 developer-only source metadata on other catalog pages is unchanged.
 
-`tools/verify_trait_wiki_browser.py` is an optional browser acceptance
+`tools/browser/verify_trait_wiki_browser.py` is an optional browser acceptance
 check. With a running local InfinityDB application and an existing official
 Traits HTML snapshot, it visits all 33 `/traits/{slug}` routes in a clean
 Chromium context with Developer Mode off; each page must render the visible
@@ -10335,7 +12462,7 @@ test suite:
 ```powershell
 .\.venv\Scripts\python.exe -m pip install playwright
 .\.venv\Scripts\python.exe -m playwright install chromium
-.\.venv\Scripts\python.exe -m tools.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/audits/traits-current.html --output local/audits/trait-wiki-browser.json
+.\.venv\Scripts\python.exe -m tools.browser.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/audits/traits-current.html --output local/audits/trait-wiki-browser.json
 ```
 
 If all routes report HTTP 404, the verifier is reaching the wrong/stale

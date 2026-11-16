@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 
 from infinity_army_data.normalize import normalize_master, validate_normalized
 from infinity_db.database import export_database
-from tools.audit_runtime_database_surface import (
+from tools.data.audit_runtime_database_surface import (
     CANONICAL,
     CONTEXTUAL,
     NO_ISSUE,
     SOURCE,
+    _parser,
     audit_database,
     discover_runtime_database_methods,
 )
@@ -17,7 +19,13 @@ from tools.audit_runtime_database_surface import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def _runtime_database(tmp_path: Path) -> Path:
+def test_default_project_root_tracks_module_relocation() -> None:
+    assert _parser().parse_args(["army.db"]).project_root == ROOT
+
+
+def _runtime_database(
+    tmp_path: Path, *, normalized_output: Path | None = None,
+) -> Path:
     nested = {
         "skills": [{"id": 11, "extra": [41]}],
         "equip": [{"id": 21, "extra": [42]}],
@@ -115,8 +123,12 @@ def _runtime_database(tmp_path: Path) -> Path:
     }
     normalized = normalize_master(master)
     validate_normalized(normalized)
-    path = tmp_path / "infinity.db"
-    export_database(normalized, path)
+    path = tmp_path / "army.db"
+    export_database(normalized, path, include_raw=True)
+    if normalized_output is not None:
+        normalized_output.write_text(
+            json.dumps(normalized, ensure_ascii=False), encoding="utf-8",
+        )
     return path
 
 
@@ -129,7 +141,7 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     report = audit_database(_runtime_database(tmp_path), project_root=ROOT)
 
     assert report["summary"] == {
-        "surfaceCount": 42,
+        "surfaceCount": 46,
         "runtimeTableCount": 83,
         "runtimeFieldCount": 394,
         "tableWithOpenIssueCount": 0,
@@ -241,6 +253,8 @@ def test_runtime_surface_audit_is_deterministic_and_read_only(tmp_path: Path) ->
 
 def test_runtime_method_discovery_matches_current_runtime_helpers() -> None:
     assert discover_runtime_database_methods(ROOT) == {
+        "symbol_publication",
+        "army_reference_data",
         "application_catalog_id",
         "application_domain_id",
         "application_slug",
@@ -261,6 +275,8 @@ def test_runtime_method_discovery_matches_current_runtime_helpers() -> None:
         "list_unit_filter_values",
         "list_units",
         "skill_source_ids",
+        "skill_source_classifications",
+        "unit_filter_semantics",
         "snapshot_downloaded_on",
         "source_data_changed_on",
         "trait_usage_index",

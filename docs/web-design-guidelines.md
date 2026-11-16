@@ -15,6 +15,13 @@ that entry point and contains no component rules.
 
 ## Design principles
 
+Unit-detail relationship rows must distinguish an **included Peripheral**
+(source-backed attachment with one exact Include target), an **attached
+Peripheral** whose target is not uniquely linkable, and an **eligible but
+unselected Peripheral** in a Controller access pool. Do not show duplicate
+Include/Peripheral rows for the same exact source target, or collapse an
+included Peripheral's separate Trooper profile and loadouts.
+
 ### Prefer reusable structures over page-local styling
 
 Recurring UI behavior should be represented by shared primitives with explicit semantics. A new page should normally compose existing structures before adding new ones. When two pages solve the same presentation problem differently, first determine whether the difference is meaningful; otherwise consolidate them.
@@ -72,6 +79,27 @@ visible under **Properties** without assigning an unverified domain. Preserve
 source order within each heading and avoid duplicating a `State:` prefix under a
 States heading.
 
+Army's N5.3 Weapon Chart markers `[*]`, `[**]` and `[***]` denote
+Weaponry, Ammunition, and Skills/Equipment rule sections, respectively.
+Display markers separately from Traits. **A unique related rule is not
+proof of the footnote's destination.** Link only when a pinned, reviewed
+publication/row/mode identifies the exact rule and that target is routable
+from the published API; otherwise show the legend category and leave the
+exact target unverified.
+
+The reviewed N5.3 chart subset covers E/M Carbine (p. 176), E/M CC
+Weapon (p. 177, combined N+E/M), Blitzen and Smoke/E/M/Eclipse Grenades
+(p. 178), Smoke/E/M Grenade Launchers (p. 179), seven named Mines
+and **Chest Mine CC Mode only** (p. 181), Deactivator Equipment (p. 186)
+and Sepsitor Plus (p. 187). The combined E/M CC marker links to E/M
+Ammunition, not an invented combined-Ammunition rule. Do not apply the
+Chest Mine CC mapping to its BS Mode, whose Army marker stays unlinked.
+Deactivator's `[***]` marker links to `equipment:deactivator`, never an
+inferred Weapon. Show Army and PDF markers separately on disagreement
+(SRC-013/014). Split combined labels such as `NON-LETHAL [**]` for display,
+retaining the raw source in the API and Developer Mode. Never infer
+missing gameplay Traits or agreement between publications.
+
 **Glossary term previews.** Where curated rules prose names a reviewed Visibility Zone
 variant, use a typed `term:` link to its Game term definition. The shared inline
 reference preview provides the explanation on hover, keyboard focus, or touch,
@@ -104,11 +132,11 @@ references, with theme tokens and a second cue beyond color:
   merely because its values differ from a maintained summary. Display a
   specific authoritative revision/change only when a verified publication
   record identifies it.
-- **InfinityDB-maintained reference:** the shared Rule card labels curated
-  summaries, requirements and effects as an **InfinityDB-maintained reference**,
-  explicitly pointing to citations for source wording. This label identifies
-  editorial ownership, **not** a claim that the rules are unofficial or
-  mechanically different.
+- **InfinityDB-maintained reference:** shared Rule cards present curated
+  summaries, requirements and effects alongside a concise **Sources** line.
+  The project-wide accuracy/independence notice explains editorial ownership;
+  do not repeat a maintenance disclaimer on every card or suggest that its
+  gameplay meaning differs from cited official rules.
 - **Explanations, examples and reviewed interpretations:** keep gameplay
   requirements/effects at body size. Distinguish explanations under
   **Clarifications and examples**, with an explicit InfinityDB-reviewed
@@ -132,9 +160,9 @@ references, with theme tokens and a second cue beyond color:
   visible uncertainty labels. Do not silently select a winner or hide
   material gameplay ambiguity in Developer Mode.
 
-The shared renderer owns the first four presentation roles, and the
-source-reviewed FAQ renderer owns the last two. This is a provenance
-**presentation contract**; it does not authorize invented source
+The shared Rule renderer owns curated explanations, source context and rule
+citations; the FAQ renderer owns source-dated rulings and conflict warnings.
+This **provenance presentation contract** does not authorize invented source
 classifications or complete an audit of every Army statline, scenario
 discrepancy, or possible historical update. Maintain the source-model
 boundaries in [data-model.md](data-model.md) and test both light/dark,
@@ -209,6 +237,24 @@ When a layout problem appears, first look for unnecessary width, spacing, wrappe
 
 An exception should exist because the information has different requirements, not because the current cascade makes the common structure inconvenient to reuse.
 
+### Readable reference loading failures
+
+For Skill, Equipment, Hacking Program, General Rule and Unit detail pages,
+distinguish a missing reference (HTTP 404) from a temporary loading failure.
+Catalogs, Army overview, Unit Explorer, Fireteams, search, skill modifiers,
+Orders/AROs and scenarios use shared collection-loading feedback. Neither
+route may display raw server errors, schema diagnostics or storage messages;
+log technical details to the developer console instead.
+
+Preserve specific player decisions separately: unsupported Army or scenario
+selection, unavailable publication/revision, and unsupported Army Points
+are not interchangeable with a network failure. Do not claim a game size is
+unsupported solely because an API request returned HTTP 400. Use the actual
+selected scenario's supported values when validating sizes. Error panels use
+an accessible alert role; existing detail/Orders status regions retain their
+polite status role. Do not hide material source disagreements under generic
+load-failure copy.
+
 ### Standalone source charts and contextual links
 
 Full source tables, such as the N5.3 Restrictions chart, belong on their
@@ -223,18 +269,60 @@ also Developer Mode only; ordinary rules, variants and their citations
 stay visible. The chart is
 a finite source reference, not a general action-legality evaluator.
 
+### Spec-Ops source choices and technical identity
+
+The Unit detail page lists source-defined Spec-Ops/TEAM-OPS and SpecBall
+choices without implying that an option has already been selected or is
+legal for every Army List. The chart's player label is its source name.
+Show raw source Unit IDs and Army source-version diagnostics in Developer
+Mode only, retaining them in the API. Keep source chart entries,
+compound choices, Skill links, and literal `q` source notation visible:
+`q` must not be rewritten as an unverified stat modifier or final value.
+Keep a clear warning that the chart is a choice inventory, not a
+configured Army List.
+
 ### Specialist Troops filtering is contextual
 
-The Unit Explorer exposes an optional Specialist Troops selector with an
-**InfinityDB Standard** baseline and explicitly named reviewed scenarios.
-Filtering shows Units that have at least one qualifying Skill occurrence
-across their source profiles, loadouts or Unit options. Explain that this
-does not certify every profile or Army context and that the selected
-scenario governs qualification. Chain of Command (Non Specialist) is
-not a qualifying occurrence through that Skill; other qualifying Skills
-remain valid. Link to the reviewed General Rule instead of embedding
-a separate Skill list in presentation code. Keep the selector compatible
-with other advanced filters, pagination, reset, and versioned share URLs.
+The Unit Explorer exposes an optional Specialist Troops selector with
+**Standard set** (InfinityDB's reviewed reference) as its only current
+non-empty choice. Reviewed Domination, Supplies, and Firefight currently
+return the same candidate Unit set, so duplicate options are omitted.
+A focused test guards this equivalence; if scenarios diverge, show each
+functionally distinct choice. Existing scenario-specific API queries remain
+supported, and equivalent older Unit Explorer links display Standard set.
+
+Filtering shows Units with at least one qualifying Skill occurrence across
+source profiles, loadouts or Unit options. This does not certify each
+profile or Army context; actual status depends on scenario rules and the
+chosen profile. Chain of Command (Non Specialist) does not qualify through
+that Skill, while other qualifying Skills remain valid. Link to the reviewed
+General Rule rather than embedding a separate Skill list in UI code.
+
+### Unit Explorer categorical filter controls
+
+Provide the six categorical filters as consistent searchable multi-select
+disclosures with independent, always-operable AND/OR switches, clear selected
+chips and accessible **prospective matching-Unit** counts. Keep AND/OR labels
+adjacent to each switch; fresh views default to AND. A separate global scope
+selector offers **Same profile** (fresh default), **Same loadout** and
+**Anywhere in Unit** in narrow-to-broad order. Explain that Included models
+can contribute only through source-backed links, that profile alternatives
+are not necessarily active together, and that matching is reference discovery,
+not a list-building or active-game-state legality claim. Historical shared
+links without a scope show a labelled legacy compatibility setting until
+changed. Switching scope updates the result and all count labels in one
+request and persists through sharing, navigation and Back/Forward.
+The [data model](data-model.md#context-coherent-filtering) owns the query
+and share-state contract.
+
+An individual Clear button resets both its selections and option search.
+Hide choices with no Settings-adjusted, scope-aware baseline presence;
+visually de-emphasize currently zero-prospective-match choices without
+disabling them. A selected option's count always equals the current total.
+Reserve a scrollbar
+gutter for count labels, and retain the last displayed numbers while the
+next request loads instead of flashing placeholders. Keep option labels,
+counts, search, keyboard focus and chips usable at narrow widths.
 
 ### Optimize for lookup, comparison, and scanning
 

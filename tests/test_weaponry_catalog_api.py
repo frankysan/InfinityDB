@@ -10,26 +10,26 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
 from wsgiref.util import setup_testing_defaults
 
 import pytest
+from storage_fixture_support import weapon_publication
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase, export_rules_database
-from infinity_db.web import create_app
-from tools.release_rules_export import export_release_rules
+from infinity_db.web import create_app, create_app_from_database_set
 
 
 @pytest.fixture(scope="module")
 def weaponry_app() -> Callable:
     root = Path(__file__).resolve().parents[1]
     return create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
 
@@ -67,10 +67,8 @@ def test_reviewed_profile_chart_citations_reach_exact_api_profiles(
     weaponry_app: Callable,
 ) -> None:
     root = Path(__file__).resolve().parents[1]
-    publication = json.loads(
-        (root / "data/generated/weapon-profile-sources.json").read_text(encoding="utf-8")
-    )
-    database = Database(root / "data/generated/infinity.db")
+    publication = weapon_publication()
+    database = Database(root / "data/generated/army.db")
     source = publication["source"]
     assert len(publication["weapons"]) == 62
     for weapon in publication["weapons"]:
@@ -132,13 +130,13 @@ def test_chart_citations_preserve_numeric_slug_and_mode_parity(
         assert citations == {"Antimaterial Mode": 183, "AP Mode": 183, "Shock Mode": 183}
 
 
-def test_missing_or_mixed_weapon_profile_publication_is_explicit(
+def test_embedded_weapon_citations_work_without_sidecars_or_colocation(
     tmp_path: Path,
 ) -> None:
     root = Path(__file__).resolve().parents[1]
-    army = root / "data/generated/infinity.db"
-    rules = root / "data/generated/rules.db"
-    local_army, local_rules = tmp_path / "infinity.db", tmp_path / "rules.db"
+    army = root / "data/generated/army.db"
+    rules = root / "data/generated/rules_n5.db"
+    local_army, local_rules = tmp_path / "army.db", tmp_path / "rules_n5.db"
     shutil.copyfile(army, local_army)
     shutil.copyfile(rules, local_rules)
     for app in (
@@ -146,25 +144,23 @@ def test_missing_or_mixed_weapon_profile_publication_is_explicit(
         create_app(army, rules_database_path=local_rules),
     ):
         payload = _weapon_detail(app, "rifle")
-        assert payload["profile_citations_available"] is False
-        assert all(profile["profile_citations"] == [] for profile in payload["profiles"])
+        assert payload["profile_citations_available"] is True
+        assert all(profile["profile_citations"] for profile in payload["profiles"])
         assert all(
-            profile["profile_citations"] == []
+            profile["profile_citations"]
             for variant in payload["weapon_variants"] for profile in variant["profiles"]
         )
 
 
-def test_stale_colocated_weapon_profile_publication_fails_startup(tmp_path: Path) -> None:
+def test_corrupt_embedded_weapon_publication_fails_startup(tmp_path: Path) -> None:
+    import sqlite3
     root = Path(__file__).resolve().parents[1]
-    for filename in ("infinity.db", "rules.db"):
+    for filename in ("army.db", "rules_n5.db"):
         shutil.copyfile(root / "data/generated" / filename, tmp_path / filename)
-    document = json.loads(
-        (root / "data/generated/weapon-profile-sources.json").read_text(encoding="utf-8")
-    )
-    document["sourceSnapshot"]["rulesDatabaseSha256"] = "0" * 64
-    (tmp_path / "weapon-profile-sources.json").write_text(json.dumps(document), encoding="utf-8")
-    with pytest.raises(ValueError, match="does not match release databases"):
-        create_app(tmp_path / "infinity.db", rules_database_path=tmp_path / "rules.db")
+    with sqlite3.connect(tmp_path / "rules_n5.db") as connection:
+        connection.execute("UPDATE weapon_chart_profile_metadata SET content_sha256=?", ("0" * 64,))
+    with pytest.raises(ValueError, match="fingerprint differs"):
+        create_app(tmp_path / "army.db", rules_database_path=tmp_path / "rules_n5.db")
 
 
 def test_unreviewed_profile_does_not_inherit_chart_or_ammunition_citation(
@@ -172,8 +168,11 @@ def test_unreviewed_profile_does_not_inherit_chart_or_ammunition_citation(
 ) -> None:
     payload = _weapon_detail(weaponry_app, "ap-mine")
     assert payload["profile_citations_available"] is True
-    assert all(profile["profile_citations"] == [] for profile in payload["profiles"])
+    # The chart publication covers reviewed exact profiles; it does not
+    # attribute an unrelated chart row to this unreviewed Mine profile.
+    assert all(not profile["profile_citations"] for profile in payload["profiles"])
     assert "weapon:mines" in _weapon_rules(payload)
+    # Ammunition effects still retain their independently reviewed citations.
     assert any(effect["citations"] for effect in payload["profiles"][0]["ammunition_effects"])
 
 
@@ -436,12 +435,11 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
     assert profiles[203]["burst"] == "1"
 
 
-def test_pheroware_chart_heading_matches_pinned_n53_pdf() -> None:
+def test_pheroware_chart_heading_matches_pinned_n53_pdf(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pdf = pytest.importorskip("pymupdf")
-    root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    if not source.exists():
-        pytest.skip("Pinned N5.3 PDF unavailable")
+    source = pinned_n53_core_pdf
     assert hashlib.sha256(source.read_bytes()).hexdigest() == (
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
     )
@@ -478,9 +476,9 @@ def test_pheroware_citations_match_curated_fresh_and_published_rules(
             for citation in authored[identity]["citations"]
         ] == [locator]
 
-    fresh_path = tmp_path / "fresh-rules.db"
-    export_release_rules(documents, fresh_path)
-    for path in (fresh_path, root / "data/generated/rules.db"):
+    fresh_path = tmp_path / "fresh-rules_n5.db"
+    export_rules_database(documents, fresh_path)
+    for path in (fresh_path, root / "data/generated/rules_n5.db"):
         database = RulesDatabase(path)
         database.validate()
         for identity, locator in expected.items():
@@ -2203,7 +2201,7 @@ def test_sepsitor_weaponry_rules_keep_distinct_army_profiles(
 
 
 def test_cube_two_references_both_sepsitor_variants() -> None:
-    db = RulesDatabase(Path(__file__).resolve().parents[1] / "data/generated/rules.db")
+    db = RulesDatabase(Path(__file__).resolve().parents[1] / "data/generated/rules_n5.db")
     record = db.composed_record("equipment:cube-2")
     assert record is not None
     links = {
@@ -2236,13 +2234,20 @@ def test_ammunition_metadata_links_are_reviewed_base_types(
         ]
 
 
-def test_esx04_ap_t2_cc_row_in_bilingual_current_n53_charts() -> None:
+def test_esx04_ap_t2_cc_row_in_bilingual_current_n53_charts(
+    pinned_pdf_sources: Callable[[Mapping[str, str]], dict[str, Path]],
+) -> None:
     pdf = pytest.importorskip("pymupdf")
-    root = Path(__file__).resolve().parents[1]
-    english = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    spanish = root / "data/pdf/rules/n5-rules-v5.3-es.pdf"
-    if not english.exists() or not spanish.exists():
-        pytest.skip("Pinned bilingual N5.3 rulebook PDFs unavailable")
+    sources = pinned_pdf_sources({
+        "data/pdf/rules/n5-rules-v5.3-en.pdf": (
+            "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+        ),
+        "data/pdf/rules/n5-rules-v5.3-es.pdf": (
+            "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"
+        ),
+    })
+    english = sources["data/pdf/rules/n5-rules-v5.3-en.pdf"]
+    spanish = sources["data/pdf/rules/n5-rules-v5.3-es.pdf"]
     with pdf.open(english) as book:
         en_chart = " ".join(book[176].get_text().split())
     with pdf.open(spanish) as book:
@@ -2667,17 +2672,10 @@ def test_remaining_multimode_shared_reviews_preserve_exact_profiles(
         ]
 
 @pytest.fixture(scope="module")
-def source_discrepancy_app(tmp_path_factory: pytest.TempPathFactory) -> Callable:
-    """Exercise the current curated corpus, not an older generated rules.db."""
+def source_discrepancy_app() -> Callable:
+    """Exercise the source-bound complete Rules/Army/ITS runtime."""
     root = Path(__file__).resolve().parents[1]
-    output = tmp_path_factory.mktemp("weapon-discrepancy-rules") / "rules.db"
-    export_rules_database(
-        load_curated_directory(root / "data/curated"), output, finalize=False,
-    )
-    RulesDatabase(output).validate()
-    return create_app(
-        root / "data/generated/infinity.db", rules_database_path=output,
-    )
+    return create_app_from_database_set(root / "data/generated")
 
 
 @pytest.mark.parametrize(
@@ -3207,12 +3205,10 @@ def test_deactivator_api_keeps_same_order_device_trigger_families_separate(
 
 
 @pytest.fixture(scope="module")
-def mixed_weapons_app(tmp_path_factory: pytest.TempPathFactory) -> Callable:
-    """A fresh curated rules build, not the previously generated deployment snapshot."""
+def mixed_weapons_app() -> Callable:
+    """The published mixed-mode projection needs embedded source-matched citations."""
     root = Path(__file__).resolve().parents[1]
-    rules_path = tmp_path_factory.mktemp("mixed-weapons") / "rules.db"
-    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
-    return create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    return create_app_from_database_set(root / "data/generated")
 
 
 def test_mixed_weapons_shared_modes_and_source_provenance(
@@ -3337,18 +3333,14 @@ def test_modifiers_explained_player_reference_and_mixed_weapon_navigation(
     assert "Vorpal" in family["summary"]
 
 
-def test_modifiers_explained_pinned_page75_scope() -> None:
-    import hashlib
-
+def test_modifiers_explained_pinned_page75_scope(
+    pinned_n53_core_pdf: Path,
+) -> None:
     pymupdf = pytest.importorskip("pymupdf")
-
-    pdf = Path(__file__).resolve().parents[1] / (
-        "data/pdf/rules/n5-rules-v5.3-en.pdf"
-    )
-    if not pdf.exists():
-        pytest.skip("Pinned official N5.3 PDF unavailable")
+    pdf = pinned_n53_core_pdf
     expected = json.loads(
-        (pdf.parents[3] / "config/validation/weaponry-family-clauses.json")
+        (Path(__file__).resolve().parents[1] /
+         "config/validation/weaponry-family-clauses.json")
         .read_text(encoding="utf8")
     )["corePdfSha256"]
     assert hashlib.sha256(pdf.read_bytes()).hexdigest() == expected

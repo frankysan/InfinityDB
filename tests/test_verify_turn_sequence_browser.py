@@ -18,8 +18,8 @@ ORIGIN = "http://infinitydb-turn-sequence.test"
 @pytest.fixture(scope="module")
 def release_app() -> Callable[..., Any]:
     return create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
 

@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from tools.release_validation_scope import ChangeScope, classify_paths, plan_validation
+from tools.ci.release_validation_scope import ChangeScope, classify_paths, plan_validation
 
 
 def test_only_documentation_or_independent_tests_can_reuse_source_evidence(
     monkeypatch,
 ) -> None:
     monkeypatch.setattr(
-        "tools.release_validation_scope.baseline_is_valid",
+        "tools.ci.release_validation_scope.baseline_is_valid",
         lambda repository, sha, token: True,
     )
     scope = plan_validation(
@@ -18,7 +18,7 @@ def test_only_documentation_or_independent_tests_can_reuse_source_evidence(
     )
     assert scope.full is False
     assert "tests/test_release_notes.py" in scope.test_targets
-    assert "tests/test_release_metadata.py" in scope.test_targets
+    assert "tests/test_release_metadata.py" not in scope.test_targets
     assert "tests/test_web.py::test_changes_page_renders_canonical_release_history" in (
         scope.test_targets
     )
@@ -28,7 +28,7 @@ def test_runtime_build_ci_or_shared_test_changes_fail_closed() -> None:
     for paths in (
         [],
         ["src/infinity_db/web/static/page-navigation.js"],
-        ["data/generated/rules.db"],
+        ["data/generated/rules_n5.db"],
         ["pyproject.toml"],
         [".github/workflows/source-checks.yml"],
         ["tests/conftest.py"],
@@ -40,7 +40,7 @@ def test_runtime_build_ci_or_shared_test_changes_fail_closed() -> None:
 
 def test_missing_green_baseline_forces_full_validation(monkeypatch) -> None:
     monkeypatch.setattr(
-        "tools.release_validation_scope.baseline_is_valid",
+        "tools.ci.release_validation_scope.baseline_is_valid",
         lambda repository, sha, token: False,
     )
     assert plan_validation(
@@ -48,8 +48,8 @@ def test_missing_green_baseline_forces_full_validation(monkeypatch) -> None:
     ) == ChangeScope(True, "baseline has no complete hosted release evidence", ())
 
 
-def test_docs_only_still_runs_release_metadata_and_history_checks() -> None:
+def test_docs_only_runs_history_checks_without_finalized_release_gate() -> None:
     scope = classify_paths(["docs/architecture.md"])
     assert scope.full is False
     assert "tests/test_release_notes.py" in scope.test_targets
-    assert "tests/test_release_metadata.py" in scope.test_targets
+    assert "tests/test_release_metadata.py" not in scope.test_targets

@@ -71,7 +71,9 @@ function entry(object) {
     const source = document.createElement("p");
     source.className = "detail-copy";
     const href = sourceHref(profile.catalog, profile.sourceId);
-    source.append("Source profile: ");
+    const kind = profile.catalog === "weapon" ? "Weapon"
+      : profile.catalog === "equipment" ? "Equipment" : "Source";
+    source.append(`${kind} profile: `);
     if (href) {
       source.append(labelledLink(
         `${profile.name}${profile.mode ? ` — ${profile.mode}` : ""}`,
@@ -85,17 +87,23 @@ function entry(object) {
     const [domain, slug] = object.originRuleId.split(":", 2);
     const source = document.createElement("p");
     source.className = "detail-copy";
-    source.append("Reviewed rules: ");
+    source.append("Related rule: ");
     const href = sourceHref(domain, slug);
     if (href) source.append(labelledLink(object.name, href));
-    else source.append(object.originRuleId);
+    else {
+      source.append("Rule reference unavailable");
+      const diagnostic = document.createElement("span");
+      diagnostic.className = "developer-only";
+      diagnostic.textContent = ` (${object.originRuleId})`;
+      source.append(diagnostic);
+    }
     section.append(source);
   }
 
   if (object.deliverySources.length) {
     const heading = document.createElement("h4");
     heading.className = "weapon-data-heading";
-    heading.textContent = "Reviewed delivery sources";
+    heading.textContent = "Delivery methods";
     section.append(heading);
     const uses = document.createElement("ul");
     for (const delivery of object.deliverySources) {
@@ -103,7 +111,13 @@ function entry(object) {
       const li = document.createElement("li");
       const href = sourceHref(domain, slug);
       if (href) li.append(labelledLink(slug.replace(/-/g, " "), href));
-      else li.append(delivery.recordId);
+      else {
+        li.append("Unlinked source");
+        const diagnostic = document.createElement("span");
+        diagnostic.className = "developer-only";
+        diagnostic.textContent = ` (${delivery.recordId})`;
+        li.append(diagnostic);
+      }
       li.append(` — ${delivery.method}`);
       uses.append(li);
     }
@@ -118,17 +132,17 @@ function armyUsesSection(object) {
   if (!uses.length) {
     const note = document.createElement("p");
     note.className = "detail-copy";
-    note.textContent = "No exact Unit usage has been established for this reviewed delivery. This does not mean no Unit can use the object.";
+    note.textContent = "No specific Unit uses are listed for this object. This does not mean no Unit can use it.";
     return note;
   }
   const details = document.createElement("details");
   details.className = "deployed-object-unit-uses";
   const summary = document.createElement("summary");
-  summary.textContent = `Source-backed Unit uses (${uses.length} occurrences)`;
+  summary.textContent = `Unit uses (${uses.length} listed)`;
   details.append(summary);
   const description = document.createElement("p");
   description.className = "detail-copy";
-  description.textContent = "Source items are tied to the indicated Army profile/loadout, included loadout, or Unit-wide option. Unit-wide options have no inferred Army affiliation. Unresolved Mine subtypes are not assigned.";
+  description.textContent = "Listed uses come from Army profiles, loadouts, included loadouts, or Unit-wide options. A Unit-wide option does not imply a particular Army, and unspecified Mine subtypes are not assigned.";
   details.append(description);
   // Large Army datasets should not materialize every list item before users
   // choose to inspect the reverse provenance.
@@ -149,7 +163,11 @@ function armyUsesSection(object) {
           : use.kind.endsWith("-include")
             ? `${use.armyName}; ${use.kind === "profile-include" ? "profile" : "loadout"} ${use.contextName} includes ${use.targetName}`
             : `${use.armyName}; ${use.kind} ${use.contextName}`;
-      item.append(` — ${context}; ${use.originRecordId} (${use.method})`);
+      item.append(` — ${context} (${use.method})`);
+      const diagnostic = document.createElement("span");
+      diagnostic.className = "developer-only deployed-use-source-id";
+      diagnostic.textContent = ` · Source ID: ${use.originRecordId}`;
+      item.append(diagnostic);
       list.append(item);
     }
     details.append(list);
@@ -171,10 +189,10 @@ async function load() {
   try {
     const result = await getCatalogItems("deployed-objects");
     for (const object of result.items) list.append(entry(object));
-    count.textContent = `${result.items.length} reviewed`;
+    count.textContent = `${result.items.length} profiles`;
     if (result.unresolved_deliveries?.length) {
       unresolved.hidden = false;
-      unresolved.textContent = "Some delivery identities remain unresolved (including Mine Dispenser's loadout-specific Mine subtype). These are not assigned to a generic deployed object.";
+      unresolved.textContent = "Some delivery methods cannot be linked to a specific deployed object. For example, Mine Dispenser's Mine subtype depends on its loadout.";
     }
     loading.hidden = true;
     list.hidden = false;
@@ -182,7 +200,8 @@ async function load() {
   } catch (reason) {
     loading.hidden = true;
     error.hidden = false;
-    error.textContent = reason?.message || "The deployed-object reference is unavailable.";
+    error.textContent = "Unable to load deployed objects. Please try again later.";
+    console.error("Unable to load deployed objects", reason);
     count.textContent = "Unavailable";
   }
 }

@@ -12,8 +12,8 @@ from typing import Any
 import pytest
 
 from infinity_db.web import create_app
-from tools.browser_test_metrics import launch_timed_chromium
 from tools.browser_wsgi_transport import route_browser_page
+from tools.testing.browser_test_metrics import launch_timed_chromium
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-accessible-navigation.test"
@@ -22,8 +22,8 @@ ORIGIN = "http://infinitydb-accessible-navigation.test"
 @pytest.fixture(scope="module")
 def app() -> Any:
     return create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
 
 

@@ -3,9 +3,11 @@
 **Project domain:** Data processing
 
 `data/curated/` contains source-controlled, human-reviewed information derived
-from external sources. Curated material is distinct from immutable external
-inputs under `data/raw/`, `data/wiki/`, and `data/pdf/`, and from generated
-provenance under `data/manifests/`.
+from external sources. Curated material is distinct from immutable physical
+research inputs under `local/data/raw/`, `local/data/wiki/`, and
+`local/data/pdf/`, and from the tracked publication manifest under
+`data/manifests/`. Source citations may still use canonical `data/pdf/`
+labels, independently of their physical `local/data/pdf/` layout.
 
 ## Current curated data
 
@@ -17,9 +19,20 @@ provenance under `data/manifests/`.
   `army-overview.json` contains short editorial gameplay summaries keyed by public Army slug;
   the copy is synthesized from current Army/rules data with external faction background used only
   as secondary context, and is kept separate from source-derived identity semantics.
+  Current complete builds embed these summaries and the explicitly authored
+  `legacy-armies.json` identities in Army v31, retaining the Army v30 schema
+  contract. Serving reads the selected SQLite projection; earlier schemas and
+  source-only tools retain the JSON adapters. The
+  [data model](../../docs/data-model.md#army-overview-and-historical-identities-in-army-v30)
+  owns identity, parentage and provenance safeguards.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
   endpoints that cannot be resolved from the current Army snapshot alone.
+  `loadout-capabilities.json` separately records reviewed, additive
+  source-omitted loadout capabilities with exact source coordinates and
+  catalogue identities. The Army build validates each fact against its
+  pinned snapshot, publishes the resulting read model in database metadata,
+  and never rewrites source payloads or infers arbitrary facts from names.
 - `enrichment-coverage/` contains maintained release-scope classifications consumed by
   the rules-enrichment coverage audit; these decisions classify audit gaps without becoming
   runtime game semantics.
@@ -263,14 +276,14 @@ rules-only relation targets that already support an exposed item are classified 
 `catalogGapCodes` records reviewed release-scope decisions that apply to one gap kind across a
 whole catalog. More-specific item or relation `overrides` record reviewed exceptions with a
 reason and take precedence over catalog-level decisions. Item/relation overrides must match a gap
-in the selected `infinity.db` + `rules.db` pair; stale or mistyped overrides fail the audit instead
+in the selected `army.db` + `rules_n5.db` pair; stale or mistyped overrides fail the audit instead
 of silently surviving after the underlying data changes.
 
 The published 0.10.0 scope classified missing Weapon rule definitions as `later-product-work`
 and deferred Commlink to its separately scoped Reinforcements Extra work. These retained
 classifications describe that release's reviewed scope; they do not waive the 1.0 completeness
-gate. Reassess them against the pinned 1.0 inputs as tracked in
-[the backlog](../../docs/TODO.md#source-inventory-and-gap-batches).
+gate. The bounded review against the pinned 1.0 inputs is preserved in
+[the source-coverage audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md).
 Other defects in those catalogs, including stale citations, ambiguous mappings, unresolved links,
 or unreviewed rules, retain their normal conservative classification and can still block the
 release under review. The policy is release-planning metadata only; it must not be consumed as rules
@@ -320,8 +333,8 @@ When the Army/application catalog snapshot changes, validate or refresh the main
 scope against the generated databases:
 
 ```powershell
-python tools/audit_rules_interactions.py --database data/generated/infinity.db --rules-database data/generated/rules.db
-python tools/audit_rules_interactions.py --database data/generated/infinity.db --rules-database data/generated/rules.db --refresh-catalog-scope --output docs/rules-interaction-checklist.md
+python tools/audit_rules_interactions.py --database data/generated/army.db --rules-database data/generated/rules_n5.db
+python tools/audit_rules_interactions.py --database data/generated/army.db --rules-database data/generated/rules_n5.db --refresh-catalog-scope --output docs/rules-interaction-checklist.md
 ```
 
 A release gate may be inspected explicitly with `--require-release <version>`. Pending
@@ -370,7 +383,7 @@ During mapping review, validate it against the exact generated Army snapshot and
 deterministic coverage/review queue with:
 
 ```powershell
-infinity-db validate-peripheral-identities --database data/generated/infinity.db --output "reports/PERIPHERAL IDENTITY COVERAGE.json"
+infinity-db validate-peripheral-identities --database data/generated/army.db --output "local/audits/peripheral-identities/coverage.json"
 ```
 
 The snapshot-bound pass requires the database SHA-256 provenance to match exactly one
@@ -417,27 +430,27 @@ code consumes the persisted field and does not reload this curated file.
 remain useful for player-facing reference but have no current N5 Army list. These
 entries are not normalization aliases and are never promoted into selectable
 `application_armies`. The Army overview loads them as explicit non-playable legacy
-references, while symbol discovery uses their historical logo URLs so maintained
-`image_overrides/factions` assets pass through the normal symbol processing and
-publication pipeline.
+references, while the exported symbol source plan includes their historical logo
+URLs for the external producer and InfinityDB's verified publication.
 
 ## Curated rules reference data
 
-This directory is the handoff from local wiki/PDF research to rules-data
-ingestion. Developers and agents may read reference material in `data/wiki/`
-and `data/pdf/`, then write concise, human-reviewed facts under
-`data/curated/rules/`. The application and its build pipeline never read those
-raw reference trees directly.
+This directory is the handoff from local Wiki/PDF research to rules-data
+ingestion. Developers and agents read physical research inputs under
+`local/data/wiki/` and `local/data/pdf/`, then write concise, human-reviewed
+facts under `data/curated/rules/`. Normal application and runtime builds do not
+read those raw research trees directly. Canonical `data/wiki/` and `data/pdf/`
+source citation labels remain unchanged.
 
 ### Available reference families
 
 The local reference corpus may include:
 
-- N5 core rules revisions under `data/pdf/rules/`.
-- N5 FAQ revisions under `data/pdf/faq/`.
-- ITS seasons under `data/pdf/its/` and `data/pdf/legacy/`.
-- Wiki research snapshots under `data/wiki/`; the current downloader writes
-  `WIKI-<language> YYYYMMDD-HHMMSS.zip` archives.
+- N5 core rules revisions under `local/data/pdf/rules/`.
+- N5 FAQ revisions under `local/data/pdf/faq/`.
+- ITS seasons under `local/data/pdf/its/` and `local/data/pdf/legacy/`.
+- Wiki research snapshots under `local/data/wiki/`; the standalone Wiki
+  acquisition producer writes `WIKI-<language> YYYYMMDD-HHMMSS.zip` archives.
 
 Core rules can provide curated skills, equipment, weapons, ammunition, traits,
 states, attributes, timing, modifiers, deployment, hacking, fireteams, and
@@ -483,6 +496,70 @@ one current collection, its name and description must agree exactly. Rules expor
 unresolved current Label references and conflicting current Label definitions, while
 historical collections remain self-contained.
 
+### Explicit physical PDF bindings for research
+
+The recorded `localPath` is a provenance label retained in curated JSON and
+generated `sources.local_path` rows. Changing a research file's physical
+location must not silently rewrite that label, its SHA-256, source ID,
+edition, authority, URL, version or printed-page citations.
+
+The research-only `tools.research.source_paths.pinned_pdf_path` helper uses
+[validated path policy](../../config/operations/research-source-layouts.json)
+to resolve a canonical `data/pdf/...` label against one explicitly selected
+physical layout. `legacy` selects `data/pdf/...` and remains the default;
+`local` selects the corresponding `local/data/pdf/...`. Every supplied source
+requires its existing exact SHA-256. There is no sibling-root search, implicit
+fallback, source discovery, copy or publication. Unsafe labels, links/reparse
+points, unreadable files, invalid policy and hash conflicts fail closed.
+Historical missing inputs can remain explicitly not supplied; they cannot
+become verified merely because an alternative root contains a matching file.
+
+Integrated readers include `verify_reinforcements_inputs` in the
+source-evidence auditor (optional `source_layout` API keyword) and
+`tools.audit_reinforcements_applicability` (`--source-layout legacy|local`).
+The latter applies the selected layout to both historical annex PDFs and its
+current Core/ITS reference PDFs, preserving the same applicability report.
+`tools.report_reference_baseline` and `tools.audit_pdf_revision_deltas` also
+accept `--source-layout legacy|local` for PDF evidence. The reporter keeps
+its existing legacy-status semantics; when `local` is explicitly selected,
+its canonical PDF groups require one valid published SHA-256, reject conflicting
+or altered bytes, and mark absent selected PDFs missing rather than falling
+back to legacy files. Non-PDF source groups, published database selection,
+JSON source identities and Markdown labels remain unchanged. The revision-delta
+audit resolves every selected original PDF from its existing private hash
+inventory, verifies it before extraction and again against extracted bytes,
+and preserves unchanged pair names/page references in its reports. The
+reference reporter's opt-in bilingual Visibility Zone clause verification
+uses the same explicit selector and pinned source labels. Its other optional
+`--verify-declaration-pdf` and `--verify-conditional-pdf` arguments remain
+caller-selected paths with independent SHA-256 checks, not implicit lookups.
+The Hacking Program statistics auditor also accepts an explicit `--pdf`
+source path and verifies its manifest pin; no automatic path selection was
+added to that caller-owned input. The Basic Attack, Hacking follow-up,
+Template and Hacking Program statistics source-acceptance tests accept the
+explicit test-only `--reference-pdf-layout legacy|local` selection for pinned
+Core/FAQ PDFs. The statistics suite additionally checks the unchanged
+canonical Core hash before resolving its PDF. This does not relocate the
+pinned Army archive or test Wiki ZIP, turn source-only skips into approvals,
+or alter browser/runtime validation. The five separate Core N5.3 source-only
+tests for Ammunition, visibility opposition, Cover, ARO/Deployment and Command
+Tokens now use the shared `pinned_n53_core_pdf` fixture with that same
+explicit physical layout selector and original hash/clauses. The N5.3
+weapon-chart, trait-prose and Mine variant source-only reconciliation tests
+now reuse this selection without changing their audit input APIs or their
+reviewed discrepancies. The multi-revision application/label and
+Silent/Immunity acceptance cases, plus the Reinforcements N4/N5/ITS
+applicability source test, select their own independently pinned PDF
+labels via `pinned_pdf_sources`. This does not blend editions or FAQ
+revisions or grant historical N4 rules N5 authority; mismatched sources
+fail even if another required source is missing. The 16 immunity evidence
+modules with fixed N5.3 Core prerequisites now use `pinned_n53_core_pdf`,
+keeping their independent hash/page assertions and curated/API outcomes.
+Other direct readers and test prerequisites retain their individual path
+contracts.
+Normal rules builds still do not open research PDFs. Override lookup paths
+belong to the external symbol producer and are independent of these PDF labels.
+
 Do not bulk-copy PDF or wiki text, images, or page markup. Keep core rules,
 FAQs/errata, and ITS seasons in separate collections so versions cannot be
 blended accidentally.
@@ -491,7 +568,7 @@ Every record declares `composition.role` as `definition` or `supplement`. Across
 current collections, each semantic record ID has exactly one definition; supplements
 retain their own scope, facts, citations, relations, and publication provenance rather
 than being field-merged by load order. Related concepts use typed one-way `relations`;
-reverse navigation is derived by `rules.db`.
+reverse navigation is derived by `rules_n5.db`.
 
 ### Dated FAQ ruling authoring contract (published subset)
 
@@ -667,9 +744,9 @@ checks that the source identity, chart page, profile fingerprint, absence of sou
 and full reviewed ammunition-link coverage still match. Any drift reopens
 review rather than silently preserving acceptance. These approvals concern
 Weapon-specific explanation needs, **not** gameplay resolution or release-wide
-browser acceptance. `tools.build_weapon_profile_publication` separately
-materializes the profile-only chart locators for the matched release pair;
-the browser does not read this curation file.
+browser acceptance. The complete Rules database build embeds the reviewed
+profile-only chart locators. Source verification compares those citations
+with this file; the browser does not read the curation input.
 
 Ammunition definitions may additionally publish reviewed, **non-executable**
 `facts.ammunitionResolution` operations. This is a bounded typed-effects pilot; the
@@ -859,8 +936,12 @@ Shared prose participates in the full semantic maintained-text syntax, target, a
 audits, including objective/ending payloads in the component library. No plain-reference exception
 is broadened for the new model. The rules builder consumes curated format v23.
 Its base schema/compatibility is 8/10. The normal CLI builds v10/12 with
-Restrictions and embedded deployed objects; explicit compatibility builds retain
-v8/10 and v9/11. The prepared 1.0.1 tracked release uses v10/12, while the
+Restrictions and embedded deployed objects; obsolete v8/v9 CLI modes are retired.
+Low-level base reference exports remain useful for controlled semantic fixtures,
+not complete runtime publication. Complete `build --db-dir` exports v11/13 with relational exact
+variant usage linked to the existing reviewed definitions; it does not change
+curated format v23. The [data model](../../docs/data-model.md#rule-variant-usage-api)
+owns that projection and its source safeguards. The prepared 1.0.1 tracked release uses v10/12, while the
 tagged 1.0.0 release used v9/11. Verify the matched tracked artifact rather
 than assuming a fresh base export has identical release bytes.
 
@@ -873,7 +954,7 @@ Weapon records may use `facts.specialProfile` for rulebook-defined deployable
 profiles that are not fully represented by Army weapon metadata. The special
 profile stores ordered stat name/value pairs, equipment, skills, and a CC weapon;
 the application composes it into the existing weapon-reference API only when a
-validated `rules.db` is available.
+validated `rules_n5.db` is available.
 
 Full Skill definitions own their declaration/action categories directly through an
 ordered, non-empty `facts.typeIds` array referencing the canonical `skillTypes`

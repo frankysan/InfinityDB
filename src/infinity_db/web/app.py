@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from collections.abc import Mapping
 from hashlib import file_digest, sha256
 from http import HTTPStatus
 from pathlib import Path
@@ -12,15 +13,15 @@ from typing import Any
 
 from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
-from infinity_db.deployed_object_publication import load_deployed_object_publication
+from infinity_db.publication_registry import PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.snapshot_revision import runtime_snapshot_revision
-from infinity_db.variant_usage_reference import load_variant_usage_publication
+from infinity_db.snapshot_revision import database_set_snapshot_revision
+from infinity_db.symbol_catalog import SymbolCatalog
+from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 from infinity_db.web.api_handler import ApiHandler
 from infinity_db.web.metrics import RequestMetrics
-from infinity_db.web.presentation import ASSETS, STATIC_ASSET_REVISION, PresentationHandler
-from infinity_db.web.presentation import STATIC_ASSET_VERSION as STATIC_ASSET_VERSION
+from infinity_db.web.presentation import ASSETS, PresentationHandler, static_asset_revision
 from infinity_db.web.response import WebResponse
 from infinity_db.web.routes import metric_route
 
@@ -57,11 +58,15 @@ def _etag_matches(header: str | None, etag: str) -> bool:
 class Application:
     """Top-level WSGI dispatch and observability around focused route handlers."""
 
-    def __init__(self, database_path: Path, rules_database_path: Path | None = None) -> None:
+    def __init__(
+        self, database_path: Path, rules_database_path: Path | None = None,
+        *, runtime_fingerprints: dict[str, str] | None = None,
+        season_databases: Mapping[str, Path] | None = None,
+    ) -> None:
         self.database = Database(database_path)
         self.database.validate()
         self.rules_database: RulesDatabase | None = None
-        candidate_rules_path = rules_database_path or Path(database_path).with_name("rules.db")
+        candidate_rules_path = rules_database_path or Path(database_path).with_name("rules_n5.db")
         if rules_database_path is not None:
             rules_database = RulesDatabase(candidate_rules_path)
             rules_database.validate()
@@ -74,6 +79,13 @@ class Application:
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.warning("Ignoring invalid rules database: %s", candidate_rules_path)
 
+        if season_databases and self.rules_database is None:
+            raise ValueError("ITS season registration requires a validated N5 Rules database")
+        self.publication_registry = (
+            PublicationRegistry(self.rules_database, season_databases)
+            if season_databases and self.rules_database is not None else None
+        )
+
         self.source_data_changed_on = self.database.source_data_changed_on()
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
@@ -83,66 +95,51 @@ class Application:
         )
         self.variant_usage: dict[str, Any] | None = None
         self.variant_usage_revision: str | None = None
-        # The publication belongs to a co-located *release database pair*.
-        # An explicitly supplied rules database in another directory is an
-        # independent test/development source, not the release rules.db.
-        # Never auto-attach its neighbour's publication to that mixed pair.
         rules_path = self.rules_database.path if self.rules_database is not None else None
         self.deployed_objects = (
             self.rules_database.deployed_objects_payload(self.database.path)
             if self.rules_database is not None else None
         )
-        # v10 can be previewed from an independent staging directory because
-        # the embedded model verifies its Army hash; legacy publications
-        # remain restricted to a co-located release database pair.
-        if (
-            rules_path is None
-            or rules_path.resolve().parent == self.database.path.resolve().parent
-        ):
-            deployed_objects_path = self.database.path.with_name("deployed-objects.json")
-            if self.deployed_objects is None:
-                # Read-only fallback for v8/v9 release images.
-                self.deployed_objects = load_deployed_object_publication(
-                    deployed_objects_path, self.database.path, rules_path,
-                )
-            variant_usage_path = self.database.path.with_name("variant-usage.json")
-            self.variant_usage = load_variant_usage_publication(
-                variant_usage_path,
-                self.database.path,
-                rules_path,
-                deployed_objects_path,
-            )
-            self.variant_usage_revision = (
-                _snapshot_revision(variant_usage_path)
-                if self.variant_usage is not None
-                else None
-            )
-        self.weapon_profile_citations, weapon_profile_revision = (
+        self.variant_usage, self.variant_usage_revision = load_runtime_variant_usage(
+            self.database.path, rules_path,
+        )
+        self.weapon_profile_citations, _ = (
             load_runtime_weapon_profile_publication(self.database.path, rules_path)
         )
-        if (
-            rules_path is None
-            or rules_path.resolve().parent != self.database.path.resolve().parent
-        ):
-            self.variant_usage = None
-            self.variant_usage_revision = None
-        self.snapshot_revision = runtime_snapshot_revision(
-            _snapshot_revision(self.database.path), rules_revision, weapon_profile_revision,
+        fingerprints = {self.database.path.name: _snapshot_revision(self.database.path)}
+        if rules_revision is not None:
+            fingerprints[candidate_rules_path.name] = rules_revision
+        if self.publication_registry is not None:
+            for season_id, manifest in self.publication_registry.season_manifest().items():
+                filename = f"{season_id.replace('-', '_')}.db"
+                if filename in fingerprints:
+                    raise ValueError(f"Duplicate runtime database filename: {filename}")
+                fingerprints[filename] = manifest["sha256"]
+        if runtime_fingerprints is not None and self.publication_registry is not None:
+            if fingerprints != runtime_fingerprints:
+                raise ValueError("Registered ITS database fingerprints differ from selected set")
+        self.snapshot_revision = database_set_snapshot_revision(
+            runtime_fingerprints if runtime_fingerprints is not None else fingerprints
         )
+        symbols = SymbolCatalog(publication=self.database.symbol_publication())
+        static_revision = static_asset_revision(symbols)
         self.presentation = PresentationHandler(
             source_data_changed_on=self.source_data_changed_on,
             snapshot_downloaded_on=self.snapshot_downloaded_on,
             snapshot_revision=self.snapshot_revision,
+            static_revision=static_revision,
         )
         self.api = ApiHandler(
             self.database,
             self.rules_database,
-            static_revision=STATIC_ASSET_REVISION,
+            static_revision=static_revision,
+            symbol_catalog=symbols,
             snapshot_revision=self.snapshot_revision,
             deployed_objects=self.deployed_objects,
             variant_usage=self.variant_usage,
             variant_usage_revision=self.variant_usage_revision,
             weapon_profile_citations=self.weapon_profile_citations,
+            publication_registry=self.publication_registry,
         )
         # Preserve the existing Application service attributes while request ownership moves
         # behind the API handler. They remain internal compatibility aliases, not dispatch logic.
@@ -305,7 +302,33 @@ class Application:
         return [] if method == "HEAD" else [body]
 
 
-def create_app(database_path: Path, rules_database_path: Path | None = None) -> Application:
-    """Create the app after verifying the database, without starting a server."""
+def create_app(
+    database_path: Path, rules_database_path: Path | None = None,
+    *, season_databases: Mapping[str, Path] | None = None,
+) -> Application:
+    """Create the app with optionally registered, explicitly selected ITS files."""
 
-    return Application(database_path, rules_database_path)
+    return Application(
+        database_path, rules_database_path, season_databases=season_databases,
+    )
+
+
+def create_app_from_database_set(directory: Path) -> Application:
+    """Open exactly one complete embedded set after shared, read-only validation."""
+    from infinity_db.database_set import (
+        ARMY_DATABASE_FILENAME,
+        RULES_DATABASE_FILENAME,
+        SEASON_DATABASE_SOURCES,
+        validate_database_set,
+    )
+
+    selected = Path(directory).resolve()
+    report = validate_database_set(selected, require_complete=True)
+    return Application(
+        selected / ARMY_DATABASE_FILENAME, selected / RULES_DATABASE_FILENAME,
+        runtime_fingerprints=report["sha256"],
+        season_databases={
+            season: selected / filename
+            for season, (filename, _source) in SEASON_DATABASE_SOURCES.items()
+        },
+    )

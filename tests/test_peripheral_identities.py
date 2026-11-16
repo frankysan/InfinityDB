@@ -306,7 +306,7 @@ def test_peripheral_identity_default_path_is_source_controlled() -> None:
 
 
 def _coverage_database(tmp_path: Path, *, snapshot_sha256: str = "a" * 64) -> Path:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     connection = sqlite3.connect(path)
     try:
         connection.execute(

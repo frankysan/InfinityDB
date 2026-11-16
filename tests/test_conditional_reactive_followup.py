@@ -20,8 +20,8 @@ from infinity_db.web import create_app
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "config/validation/conditional-reactive-followup-v1.json"
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
-ARMY_DB = ROOT / "data/generated/infinity.db"
-RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_DB = ROOT / "data/generated/army.db"
+RULES_DB = ROOT / "data/generated/rules_n5.db"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 # Exact review owners and depth; heading evidence must not become
 # purported full printed-clause proof by editing the manifest.
@@ -177,11 +177,11 @@ def test_followup_reactive_clauses_match_curated_and_published_api() -> None:
         assert status == "200 OK" and b"<html" in html.lower(), detail
 
 
-def test_followup_reactive_clauses_retain_exact_pinned_source_pages() -> None:
+def test_followup_reactive_clauses_retain_exact_pinned_source_pages(
+    pinned_n53_core_pdf: Path,
+) -> None:
     entries = _review_rows(_manifest())
-    pdf = ROOT / _manifest()["source"]["path"]
-    if not pdf.is_file():
-        pytest.skip("Pinned N5.3 English source PDF unavailable")
+    pdf = pinned_n53_core_pdf
     pymupdf = pytest.importorskip("pymupdf")
     assert hashlib.sha256(pdf.read_bytes()).hexdigest() == PIN
     with pymupdf.open(pdf) as document:

@@ -14,6 +14,10 @@ Use these documents when deciding how the project works now:
   runtime/browser/deployment architecture, and accepted design direction.
 - `data-model.md` — current source/application identities, semantic provenance, persistence,
   query semantics, and generated-database contracts.
+- [its-season-database.md](its-season-database.md) — ITS Season 18 schema,
+  season-source binding, builder and selected publication contract.
+- [season-publication-ownership.md](season-publication-ownership.md) — current
+  N5/FAQ/ITS authority boundary, cross-domain references and version selection.
 - `application-domains.md` — canonical player-facing domain ownership and publication capabilities.
 - `web-design-guidelines.md` — target browser design and language contract, including reusable
   surfaces, tables, controls, responsive behavior, typography, accessibility, and theming. It states
@@ -23,13 +27,15 @@ Use these documents when deciding how the project works now:
   lifecycle.
 - `data/curated/README.md` — authored/curated data schemas and review contracts.
 - `testing.md` — local validation commands, test selectors, worker and asset
-  policies, plus dated 1.0 acceptance results. Historical runs are evidence for
-  their pinned inputs, not current-release approval.
-- [multi-agent-workspaces.md](multi-agent-workspaces.md) — optional coordination, enabled only
-  by explicit user request; its checkout roles, claims and serialized integration apply within
-  that requested scope, rather than to ordinary development by default.
-- `validation-queue.md` — canonical VD/VR scheduling and active deferred-validation
-  register (design/execution thresholds, dependencies, drain and retirement); not an implementation backlog.
+  policies, plus explicitly dated development and release-candidate evidence.
+  Historical runs validate their recorded revisions, not a later release.
+- [multi-agent-workspaces.md](multi-agent-workspaces.md) — legacy optional coordination
+  contract, currently branch-pinned to `dev/v1.0.0` in its implementing tools.
+  It must be adapted before use on the current branch; ordinary work does not
+  require it.
+- `validation-queue.md` — active register for genuinely deferred test design
+  or execution (owner, prerequisites, resumption trigger and outcome); no
+  mandatory per-edit entries or numeric thresholds.
 - `ci.md` — hosted CI workflows and repository-level validation policy.
 - `deployment.md` — production install/update/rollback/operations contract.
 - `server-migration.md` — moving released or development environments between hosts.
@@ -47,13 +53,12 @@ domain-specific actions, not second copies of operational thresholds or rules.
 `AGENTS.local.md` is private, machine/user-specific guidance and must not
 override tracked project policy.
 
-## Active strategic plans
+## Diagram notation
 
-- [restructuring-plan.md](restructuring-plan.md) — proposed phased simplification of
-  developer workflow, SQLite runtime data, source-family databases, player-facing
-  presentation, tooling and repository structure. It maps dependencies and
-  acceptance criteria but does not override current behavior or duplicate the
-  live implementation backlog in `TODO.md`.
+Prefer fenced `mermaid` blocks for charts, graphs and diagrams in Markdown
+documentation when Mermaid can clearly express the content. Use this for
+architecture flows, dependency graphs and similar relationships instead of
+ASCII art, keeping labels readable in both source and rendered form.
 
 ## Maintained evidence and research
 
@@ -68,24 +73,24 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   `TODO.md` tracks only the remaining follow-up work.
 - `n5-source-history.md` — N5 official update-post index, historical Army evidence, and
   cross-source reconciliation procedure; an index, not a verified completeness ledger.
-- [v1.0-source-coverage-audit.md](v1.0-source-coverage-audit.md) — dated 2026-10-31
-  baseline evidence with subsequent source, browser, artifact and local candidate
-  acceptance records. It preserves the reviewed 1.0 input scope without implying
-  exhaustive whole-source coverage. Historical snapshots in this file are not
-  current task status; `releasing.md` owns release handoff and `TODO.md`
-  owns post-1.0 development.
-- [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — dated
-  source/interaction assessment with implementation follow-ups and remaining
-  source conflicts. Its linked inventory, N5.3 reconciliation and source manifest
-  retain unique finding IDs, exact source hashes/revisions and unresolved
-  publication discrepancies; they remain **frozen baseline evidence**, not a
-  current defects list or a requirement for exhaustive post-1.0 source review.
-  Keep unique source/provenance evidence while it supports unresolved questions;
-  use `TODO.md` for current work and `rules-semantics.md` for reviewed meaning.
 - `rules-interaction-checklist.md` — generated cross-release interaction-review ledger. Regenerate
-  it with `tools/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
+  it with `tools/data/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
   original review/defer decision and are evidence provenance, not the active roadmap; use `TODO.md`
   for current milestone planning.
+
+Other retained, **bounded source/implementation evidence** has a distinct
+purpose: the [FAQ v0.1 applicability inventory](faq-v0.1-scope-inventory.md)
+pins reviewed question and scope decisions. It is not a second backlog,
+release checklist or current schema owner; consult the [data model](data-model.md),
+[data lifecycle](../data/README.md), and
+[source clarification register](official-source-clarifications.md) for
+maintained behavior.
+
+The completed 1.0 source-coverage audit and four rules-explanation audit files
+were retired to Git history at the `add2280` baseline. A compact 367-record
+identity fixture remains under `config/validation/` for the actively used
+baseline comparison. Use the maintained source-history, clarification and
+semantic registers for current meaning.
 
 Completed audit/closeout documents are **not** permanent reference documentation by default. Once
 an audit closes, move lasting contracts into the canonical owner above, record user/operator-visible
@@ -96,66 +101,63 @@ only when it contains unique rationale that still guides active work.
 
 **Project domain:** Project infrastructure
 
-A one-use tool is a script written for a bounded migration, investigation, recovery or publication
-step rather than an ongoing supported command. An audit may likewise be a dated investigation or
-frozen acceptance record rather than maintained guidance. Names such as `stage_*`, `promote_*`
-and `audit_*` are **candidates for review**, not proof that a file is disposable. Do not classify
-reusable source validators, release gates or helpers as one-use solely from their names or age.
+Use this policy for bounded tools, plans, reports, audits and generated
+evidence. A name such as `stage_*`, `promote_*` or `audit_*`, or an old
+version/date, is not proof that the item is disposable. Prefer a maintained
+existing command when the operation will recur.
 
-**Plan retirement when creating one-use work.** State the purpose, owning TODO/source-review ID,
-expected artifacts/evidence, and the event after which the tool or report can be retired. Put
-one-off output, backup files and execution logs under ignored `local/`; avoid making permanent
-build, CI, runtime or release commands depend on them. Prefer extending an existing maintained
-tool over accumulating a new wrapper when the operation is expected to recur.
+At creation, identify the domain, owner, purpose, expected artifacts,
+source/revision scope and completion or retirement trigger. Categorize
+temporary output in ignored `local/`; do not make builds, CI, runtime
+or release procedures depend on private execution logs.
 
-**Review at bounded task closeout**, after successful publication/acceptance of the intended
-artifact, or during a deliberate repository-hygiene pass. Use this order:
+At task closeout, a deliberate cleanup or an accepted publication:
 
-1. **Establish completion and provenance.** Identify the last purpose and exact input/output
-   revisions or source hashes where material; verify the corresponding acceptance, rollback or
-   release obligation is closed. An older successful stage does not retire a tool still needed
-   for an open migration, reproducible source comparison or release-matched publication.
-2. **Check consumers, not just direct imports.** Search the tracked tree for imports, module
-   invocations and command strings, tests/fixtures, CI workflows, scripts, package entry points,
-   generated-file recipes, agent skills, TODO items, source audits and documentation links.
-   Check indirect/shared helpers and externally documented operator procedures. If a dependency
-   or intended future invocation remains, retain or replace it before retiring the file.
-3. **Preserve lasting knowledge.** Transfer accepted semantics, source discrepancies, unresolved
-   decisions, reproducibility requirements and current procedures to their canonical owners.
-   Keep stable finding IDs and source-version/hash evidence that an open reconciliation relies on.
-   A large frozen baseline can remain tracked while it is needed for acceptance, but it must be
-   labeled historical rather than maintained current state.
-4. **Choose the smallest safe disposition:**
-   - **Retain** if the command/audit is active, a reusable validator, an imported helper, the
-     canonical generator, or necessary to satisfy an open release/validation/source gate.
-   - **Extract and replace** if a one-use entry point contains reusable logic: move that logic to
-     a maintained module, update its consumers/tests and then retire only the obsolete wrapper.
-   - **Move evidence to `local/provenance/`** if unique raw findings, private inputs, recovery
-     material or replay instructions justify a local copy. Record source revision, purpose and
-     limits of the evidence. Since `local/` is ignored, such copies are **not shared Git
-     provenance** and cannot be required by a clean checkout.
-   - **Delete from the tracked tree** if the work is complete, references are cleared and
-     its content is already recoverable from Git history or canonical records. Do not copy
-     every obsolete script into `local/` by default; that would create a second archive.
-5. **Close out atomically.** Remove or replace stale command examples, links and imports in
-   the same change. State the retired paths, disposition, acceptance/replacement evidence and
-   any local-only archive location in the commit message or canonical closeout. Run relevant
-   dependency tests and the `docs` stage (including link checks), inspect the full diff and
-   confirm the intended release/CI path does not depend on ignored material. Respect the
-   [VD/VR queue](validation-queue.md) for deferred test work; never equate retirement with
-   acceptance of an unrelated pending gate.
+1. **Confirm independent purpose and consumers.** Check the owning task,
+   current imports/entry points, tests, CI, packaging, source readers,
+   operator procedures and links. Historical-only tests or obsolete
+   staging dependencies do not justify retaining an obsolete implementation.
+   Preserve tests of continuing source, parity, compatibility and
+   deterministic-publication invariants when replacing their old producer.
+2. **Preserve lasting meaning.** Transfer accepted semantics,
+   source discrepancies, unresolved work, supported procedures and
+   reproducibility requirements to their canonical
+   [documentation owners](#canonical-current-state-documents). Keep
+   stable source identities, revisions, hashes and reviewed provenance
+   needed by open research or publication acceptance.
+3. **Choose the smallest useful disposition:**
+   - **Retain** actively supported operations, open research or unique
+     source/acceptance evidence in their appropriate tracked owner.
+   - **Extract and replace** reusable validators/parsers or current
+     policy embedded in a one-use wrapper or historical narrative.
+   - **Rename/relocate** still-useful material whose path obscures its
+     purpose, preserving source identity and updating consumers together.
+   - **Retire** superseded tracked tools, plans, reports and audits to
+     Git history after transferring any open findings and removing
+     obsolete entry points, tests and links. Do not create a second
+     `archive/` or completed-task registry in the tracked tree.
+   - **Preserve private evidence** in categorized `local/` only when
+     unique research, recovery, source or legal/provenance needs justify
+     retention. Ignored copies cannot replace shared Git-backed evidence.
+4. **Validate the change proportionally.** Run checks for surviving
+   behavior, the documentation/link stage, and Git diff/consumer review.
+   State retired paths, preserved evidence and remaining dependencies in
+   the commit or canonical closeout. Use the
+   [validation queue](validation-queue.md) only for genuinely deferred tests.
 
-A one-use audit **report** follows the same procedure: first reconcile its actionable findings
-with `TODO.md`, `official-source-clarifications.md` or other appropriate owners; then delete the
-superseded narrative or preserve only genuinely unique evidence. Audit findings are not closed
-merely because a newer report exists. Do not rewrite or discard immutable upstream snapshots,
-license/provenance obligations, or reviewed historical evidence required by the
-[data lifecycle](../data/README.md). Prefer explicit retention with a reason over uncertain loss.
+Do not silently delete immutable upstream inputs, published artifacts,
+source-referenced files, backups or unique ignored/private evidence.
+Uncertain deletion requires separate review and authorization; age,
+filename or a completed producer task is insufficient.
+
+Tool and workspace cleanup completed on 2026-11-14. The detailed historical
+execution record remains in Git history; current conventions belong to
+[architecture](architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
+and the [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-prospective).
 
 ## Planning and history
 
 - `TODO.md` — only work that is still unimplemented or intentionally deferred.
-- [workflow-improvement-review-2026-11-04.md](workflow-improvement-review-2026-11-04.md) — dated review of task, validation, CI and tooling workflow improvements; recommendations, not an active task ledger.
 - `CHANGELOG.md` — concise release outcomes and upgrade consequences.
 - `AI_CONTEXT.md` — compact agent-oriented index of non-obvious current invariants and pointers to
   canonical documentation. It is not a second architecture or data-model specification.
@@ -208,9 +210,10 @@ Complete the handoff at the same time as the work:
    obligations in the validation queue, source evidence in its maintained owner,
    and run logs, hashes and intermediate counts out of TODO.
 
-Apply this to subtasks at every depth during each change's closeout, not only at
-release preparation. Git history retains retired details; do not create another
-completed-task archive or append new status reports to completed entries.
+When a change modifies a tracked backlog task, reconcile the affected subtree
+at closeout rather than postponing it to release preparation. Unrelated edits
+do not require full-backlog or historical-V1S review. Git history retains
+retired details; do not create a second completed-task archive.
 
 **Make retirement auditable:** when removing numbered `V1S-*` entries, include
 *every retired ID* in the same Git commit's subject or body (for example,
@@ -222,13 +225,26 @@ Do not retire an open implementation or ruling requirement just because its
 bounded source review or related focused test passed; explicitly retain and
 re-scope the remainder under its existing task or correct independent owner.
 
-Before beginning the next task, reconcile the just-worked task and any touched
-parent against `TODO.md`, the [VD/VR queue](validation-queue.md), current
-documentation and the inspected diff. Retire fully finished work **in that
-closeout commit**; leave partial/blocked work unchecked with a concrete
-remaining action or dependency. For autonomous work selection, follow the
-[V1S checkpoint](TODO.md#v1s-work-selection-and-handoff); numeric gaps alone
-are not evidence of skipped or completed work.
+For a completed backlog item, reconcile its affected parent with the actual
+diff, required acceptance and any concrete [deferred checks](validation-queue.md).
+Retire finished work in that commit; leave incomplete work open with a specific
+remaining dependency. Invoke the [V1S checkpoint](testing.md#v1s-backlog-checks)
+only for reopened numbered V1S work. Do not turn routine unrelated development
+into an administrative full-backlog or queue review.
+
+Current `TODO.md` checkboxes are checked by the existing docs stage:
+duplicate **leading, explicitly supplied** task IDs and open descendants
+of checked parents are errors; IDs are optional. When the worktree changes
+or a Git base is supplied, removed open tasks produce advisory `BKL003`
+warnings. Unnumbered descriptions are matched conservatively so ordinary
+rewrites are less likely to trigger false alarms. A warning asks the
+maintainer to verify completion, supersession or transfer using the same
+commit and canonical evidence; it is not a separate acceptance gate.
+
+The Git-based `TODO.md` workflow remains the sole task register. Defer
+GitHub Issues/Projects unless concrete cross-repository coordination,
+dependency tracking or agent handoff problems justify the additional
+overhead; do not create a parallel register or automatic status sync.
 
 ## Private local workspace
 
@@ -237,9 +253,9 @@ server-specific operational notes, command output, screenshots, diagnostics, and
 material. For example, `local/audits/` and `local/operations/` can hold private findings without
 placing them in public project documentation.
 
-Existing ignored locations such as `docs/audits/` and `reports/` remain supported for compatibility.
-New private operational evidence should be kept under `local/`. No build, test, CI, runtime, or
-release step may depend on its contents.
+Historical evidence previously written to `docs/audits/` or root `reports/`
+belongs under `local/archive/` or a categorized `local/` report directory.
+No build, test, CI, runtime, or release step may depend on private evidence.
 
 A normal audit therefore has three steps:
 

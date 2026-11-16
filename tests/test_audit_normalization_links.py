@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.database.schema import create_schema
-from tools.audit_normalization_links import (
+from tools.data.audit_normalization_links import (
     FILTER_CATALOG_LINKS,
     NormalizationLinkAuditError,
     audit_database,
@@ -25,7 +25,7 @@ def _insert(connection: sqlite3.Connection, table: str, **values: object) -> Non
 
 
 def _fixture_database(tmp_path: Path) -> Path:
-    path = tmp_path / "infinity.db"
+    path = tmp_path / "army.db"
     connection = sqlite3.connect(path)
     try:
         create_schema(connection, {})

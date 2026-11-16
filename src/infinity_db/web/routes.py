@@ -89,6 +89,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/api/version",
         "/api/faq-rulings",
         "/api/restrictions",
+        "/api/restrictions/chart",
         "/api/variant-usage",
         "/api/armies",
         "/api/units",
@@ -111,6 +112,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/api/search",
         "/api/glossary",
         "/api/scenarios",
+        "/api/season-policies",
     }
 )
 _METRIC_PARAMETERIZED_PATHS: tuple[tuple[Pattern[str], str], ...] = (

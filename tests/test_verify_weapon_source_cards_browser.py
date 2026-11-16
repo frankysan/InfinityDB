@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from collections import defaultdict
 from collections.abc import Iterator
@@ -18,8 +19,8 @@ import pytest
 
 from infinity_db.weapon_properties import WeaponProperties
 from infinity_db.web import create_app
-from tools.browser_test_metrics import launch_timed_chromium
 from tools.browser_wsgi_transport import route_browser_page
+from tools.testing.browser_test_metrics import launch_timed_chromium
 
 
 class _ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -35,8 +36,8 @@ class _QuietHandler(WSGIRequestHandler):
 def weapon_app() -> Any:
     root = Path(__file__).resolve().parents[1]
     return create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
 
 
@@ -247,8 +248,8 @@ def test_unroutable_weapon_property_example_shows_source_section_in_browser(
 ) -> None:
     root = Path(__file__).resolve().parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
     rules = app.rules_database
     assert rules is not None
@@ -709,6 +710,13 @@ def _expected_weapon_trait_groups(profile: dict[str, Any]) -> dict[str, str]:
             continue
 
         source_label = reference.get("label") or ""
+        # Weapon Chart [*], [**] and [***] are footnote notation, not
+        # actual Weapon properties; the frontend strips those markers.
+        normalized_label = re.sub(r"\[\*{1,3}\]", "", source_label).strip()
+        if normalized_label != source_label:
+            if not normalized_label:
+                continue
+            source_alias = True
         state_references = reference.get("state_references") or []
         public_reference = reference.get("public_reference") or {}
         if public_reference.get("catalog") == "labels":
@@ -728,7 +736,9 @@ def _expected_weapon_trait_groups(profile: dict[str, Any]) -> dict[str, str]:
             label = " / ".join(state["label"] for state in state_references)
         else:
             label = (
-                reference.get("name") if source_alias else reference.get("label")
+                (reference.get("name") if slug else normalized_label)
+                if normalized_label != source_label
+                else reference.get("name") if source_alias else reference.get("label")
             ) or reference.get("name") or ""
             if group == "States" and label.casefold().startswith("state:"):
                 label = label.split(":", 1)[1].strip()
@@ -847,7 +857,7 @@ def test_published_weapon_profiles_preserve_source_metadata(
     root = Path(__file__).resolve().parents[1]
     source_rows: dict[tuple[int, str | None], list[dict[str, Any]]] = defaultdict(list)
     with sqlite3.connect(
-        f"{(root / 'data/generated/infinity.db').resolve().as_uri()}?mode=ro",
+        f"{(root / 'data/generated/army.db').resolve().as_uri()}?mode=ro",
         uri=True,
     ) as connection:
         connection.row_factory = sqlite3.Row

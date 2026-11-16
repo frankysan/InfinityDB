@@ -1,0 +1,53 @@
+{
+  "format": "InfinityDB reviewed loadout capabilities",
+  "formatVersion": 1,
+  "snapshotArchiveSha256": "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75",
+  "sourceArchive": "JSON 20260929-114335.zip",
+  "facts": [
+    {
+      "armyId": 601,
+      "unitId": 965,
+      "groupId": 2,
+      "optionId": 3,
+      "loadoutName": "KISS! (Repeater)",
+      "catalog": "equipment",
+      "itemId": 63,
+      "itemName": "Repeater",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-15",
+        "reason": "The selected KISS! variant is explicitly labelled (Repeater), but its Army loadout has no corresponding Equipment entry. The connected alternate KISS! loadout instead carries Deployable Repeater (111). Preserve Repeater (63) on KISS!'s specific loadout without inferring it from arbitrary names."
+      }
+    },
+    {
+      "armyId": 604,
+      "unitId": 965,
+      "groupId": 2,
+      "optionId": 3,
+      "loadoutName": "KISS! (Repeater)",
+      "catalog": "equipment",
+      "itemId": 63,
+      "itemName": "Repeater",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-15",
+        "reason": "The selected KISS! variant is explicitly labelled (Repeater), but its Army loadout has no corresponding Equipment entry. The connected alternate KISS! loadout instead carries Deployable Repeater (111). Preserve Repeater (63) on KISS!'s specific loadout without inferring it from arbitrary names."
+      }
+    },
+    {
+      "armyId": 605,
+      "unitId": 965,
+      "groupId": 2,
+      "optionId": 3,
+      "loadoutName": "KISS! (Repeater)",
+      "catalog": "equipment",
+      "itemId": 63,
+      "itemName": "Repeater",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-15",
+        "reason": "The selected KISS! variant is explicitly labelled (Repeater), but its Army loadout has no corresponding Equipment entry. The connected alternate KISS! loadout instead carries Deployable Repeater (111). Preserve Repeater (63) on KISS!'s specific loadout without inferring it from arbitrary names."
+      }
+    }
+  ]
+}

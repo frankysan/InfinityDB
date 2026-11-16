@@ -22,10 +22,20 @@ from infinity_db.web import create_app
 ENGINE = os.environ.get("INFINITYDB_CROSS_BROWSER_ENGINE", "")
 ENGINES = ("chromium", "firefox", "webkit", "msedge")
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACTS = ROOT / "local/cross-browser-compatibility"
+REPORT_DIR = os.environ.get("INFINITYDB_CROSS_BROWSER_ARTIFACT_DIR", "")
+ARTIFACTS = (ROOT / REPORT_DIR).resolve() if REPORT_DIR else ROOT / "local/validation"
 
 if ENGINE and ENGINE not in ENGINES:
     raise ValueError(f"Unsupported cross-browser engine: {ENGINE!r}")
+if ENGINE and (
+    not REPORT_DIR
+    or not ARTIFACTS.is_relative_to(ROOT / "local/validation")
+    or not ARTIFACTS.is_dir()
+):
+    raise ValueError(
+        "Selected cross-browser test requires a fresh local/validation/ artifact "
+        "directory; run it through tools.browser.run_cross_browser_compatibility"
+    )
 
 pytestmark = pytest.mark.skipif(
     not ENGINE, reason="Cross-browser pilot requires an explicitly selected engine"
@@ -48,8 +58,8 @@ class _QuietHandler(WSGIRequestHandler):
 def origin() -> Iterator[str]:
     """Serve the exact tracked release-pair inputs, not a fresh curated export."""
     app = create_app(
-        ROOT / "data/generated/infinity.db",
-        rules_database_path=ROOT / "data/generated/rules.db",
+        ROOT / "data/generated/army.db",
+        rules_database_path=ROOT / "data/generated/rules_n5.db",
     )
     server = make_server(
         "127.0.0.1", 0, app,
@@ -119,6 +129,24 @@ def _exercise(page: Any, origin: str, journey: str) -> None:
         page.goto(f"{origin}/units/dragoes", wait_until="domcontentloaded")
         page.locator("#unit-content").wait_for(state="visible")
         page.locator(".general-profile").first.wait_for(state="attached")
+    elif journey == "matches":
+        page.goto(
+            f"{origin}/units?skill_id=berserk&matching_scope=loadout",
+            wait_until="domcontentloaded",
+        )
+        summary = page.locator(".unit-match-contexts summary").first
+        summary.wait_for(state="visible")
+        original_url = page.url
+        if page.viewport_size["width"] <= 390:
+            summary.tap()
+        else:
+            summary.click()
+        assert summary.locator("xpath=..").get_attribute("open") is not None
+        assert page.url == original_url
+        summary.focus()
+        summary.press("Enter")
+        assert summary.locator("xpath=..").get_attribute("open") is None
+        assert page.url == original_url
     elif journey == "scenario":
         page.goto(
             f"{origin}/scenarios/domination?army_points=150",
@@ -168,7 +196,7 @@ def _exercise(page: Any, origin: str, journey: str) -> None:
 
 @pytest.mark.parametrize("width", (1440, 390))
 @pytest.mark.parametrize(
-    "journey", ("navigation", "rule", "fragment", "unit", "scenario", "faq", "notice")
+    "journey", ("navigation", "rule", "fragment", "unit", "matches", "scenario", "faq", "notice")
 )
 def test_critical_browser_journey(browser: Any, origin: str, width: int, journey: str) -> None:
     """Reuse one portable browser contract for all four CI engine/platform jobs."""

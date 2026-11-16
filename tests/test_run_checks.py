@@ -27,7 +27,7 @@ run_checks = load_run_checks()
 
 
 def load_ci_preflight():
-    path = Path(__file__).resolve().parents[1] / "tools" / "ci_preflight.py"
+    path = Path(__file__).resolve().parents[1] / "tools" / "ci" / "ci_preflight.py"
     spec = importlib.util.spec_from_file_location("infinitydb_ci_preflight", path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -104,7 +104,7 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
     assert stages[4].command == (
         sys.executable,
         "-m",
-        "infinity_db",
+        "infinity_army_data",
         "build",
         str(Path("data/raw/example.zip")),
         "--output-dir",
@@ -206,12 +206,12 @@ def test_skip_summary_is_opt_in_for_test_and_isolated_preflight() -> None:
     ("stages", "targets", "sections", "choice", "expected"),
     (
         (("test",), [], (), None, True),
-        (("test",), ["tests/test_api.py"], (), None, False),
+        (("test",), ["tests/test_army_snapshot_source.py"], (), None, False),
         (("test",), [], ("browser",), None, False),
         (("preflight",), [], (), None, False),
         (("test", "preflight"), [], (), None, True),
         (("test",), [], (), False, False),
-        (("test",), ["tests/test_api.py"], (), True, True),
+        (("test",), ["tests/test_army_snapshot_source.py"], (), True, True),
     ),
 )
 def test_skip_summary_auto_enables_only_unfiltered_full_suite(
@@ -494,6 +494,7 @@ def test_report_without_path_uses_timestamped_repository_filename() -> None:
     started_at = datetime.fromisoformat("2026-09-17T14:05:06+02:00")
 
     assert args.report is True
+    assert run_checks.REPORT_DIRECTORY == run_checks.REPO_ROOT / "local/reports/checks"
     assert run_checks.resolve_report_path(args.report, started_at) == (
         run_checks.REPORT_DIRECTORY / "CHECKS 20260917-140506.txt"
     )
@@ -568,6 +569,92 @@ def test_reporter_tees_output_to_console_and_file(
 
     assert capsys.readouterr().out == "hello\nworld"
     assert report_path.read_text(encoding="utf-8") == "hello\nworld"
+
+
+def test_reporter_refuses_existing_transcript_without_truncation(
+    tmp_path: Path,
+) -> None:
+    report_path = tmp_path / "reports" / "checks.txt"
+    report_path.parent.mkdir()
+    before = b"Retained test evidence from an earlier run\n"
+    report_path.write_bytes(before)
+
+    with pytest.raises(FileExistsError, match="already exists"):
+        run_checks.Reporter(report_path)
+    assert report_path.read_bytes() == before
+
+
+def test_reporter_refuses_output_symlink_before_file_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    report_path = tmp_path / "reports" / "dangling.txt"
+    original_is_symlink = Path.is_symlink
+    monkeypatch.setattr(
+        Path, "is_symlink",
+        lambda path: path == report_path or original_is_symlink(path),
+    )
+    with pytest.raises(ValueError, match="symlink"):
+        run_checks.Reporter(report_path)
+    assert not report_path.exists()
+
+
+def test_reporter_refuses_late_collision_after_validation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    report_path = tmp_path / "reports" / "late.txt"
+    prior = b"another check run claimed the transcript\n"
+    original_open = Path.open
+
+    def competing_open(
+        path: Path, mode: str = "r", buffering: int = -1,
+        encoding: str | None = None, errors: str | None = None,
+        newline: str | None = None,
+    ):
+        if path == report_path and mode == "x":
+            path.write_bytes(prior)
+        return original_open(
+            path, mode, buffering=buffering,
+            encoding=encoding, errors=errors, newline=newline,
+        )
+
+    monkeypatch.setattr(Path, "open", competing_open)
+    with pytest.raises(FileExistsError):
+        run_checks.Reporter(report_path)
+    assert report_path.read_bytes() == prior
+
+
+def test_run_checks_collision_blocks_stages_and_returns_runner_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    report_path = tmp_path / "reports" / "accepted.txt"
+    report_path.parent.mkdir()
+    prior = b"Earlier acceptance transcript\n"
+    report_path.write_bytes(prior)
+    monkeypatch.setattr(
+        run_checks, "run_stage",
+        lambda *_args, **_kwargs: pytest.fail("Collision must block all stages"),
+    )
+    assert run_checks.main([
+        "--stage", "lint", "--report", str(report_path),
+    ]) == run_checks.EXIT_RUNNER_ERROR
+    assert "already exists" in capsys.readouterr().err
+    assert report_path.read_bytes() == prior
+
+
+def test_default_check_transcript_filename_refuses_same_second_collision(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    started = datetime.fromisoformat("2026-11-13T10:00:00+01:00")
+    monkeypatch.setattr(run_checks, "REPORT_DIRECTORY", tmp_path)
+    report_path = run_checks.resolve_report_path(True, started)
+    assert report_path is not None
+    with run_checks.Reporter(report_path) as reporter:
+        reporter.write("first invocation")
+    before = report_path.read_bytes()
+    with pytest.raises(FileExistsError):
+        run_checks.Reporter(run_checks.resolve_report_path(True, started))
+    assert report_path.read_bytes() == before
 
 
 def test_run_stage_streams_output_and_reports_failure(
@@ -651,8 +738,8 @@ def test_docs_stage_runs_markdownlint_before_local_link_validation(
     assert result.status == "PASS"
     assert commands == [
         ("npm", "run", "lint:docs"),
-        (sys.executable, "-m", "tools.check_doc_links"),
-        (sys.executable, "-m", "tools.check_v1_backlog"),
+        (sys.executable, "-m", "tools.ci.check_doc_links"),
+        (sys.executable, "-m", "tools.ci.check_v1_backlog"),
     ]
 
 
@@ -672,7 +759,7 @@ def test_docs_stage_fails_after_static_backlog_rejection(
 
     def fake_popen(command, **kwargs):
         commands.append(tuple(command))
-        return FakeProcess(1 if command[-1] == "tools.check_v1_backlog" else 0)
+        return FakeProcess(1 if command[-1] == "tools.ci.check_v1_backlog" else 0)
 
     monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
     with run_checks.Reporter() as reporter:
@@ -682,7 +769,7 @@ def test_docs_stage_fails_after_static_backlog_rejection(
     assert result.status == "FAIL"
     assert result.returncode == 1
     assert len(commands) == 3
-    assert commands[-1] == (sys.executable, "-m", "tools.check_v1_backlog")
+    assert commands[-1] == (sys.executable, "-m", "tools.ci.check_v1_backlog")
 
 
 def test_rules_stage_runs_interaction_audit_before_database_build(
@@ -709,7 +796,7 @@ def test_rules_stage_runs_interaction_audit_before_database_build(
 
     assert result.status == "PASS"
     assert commands[0] == (
-        sys.executable, "-m", "tools.audit_rules_interactions",
+        sys.executable, "-m", "tools.data.audit_rules_interactions",
         "--check-output", "docs/rules-interaction-checklist.md",
         "--require-release", "1.0.0",
     )
@@ -751,11 +838,11 @@ def test_opt_in_source_occupancy_gate_runs_before_rules_review_and_build(
     assert result.status == "PASS"
     assert commands == [
         (
-            sys.executable, "-m", "tools.audit_source_presentation",
-            "data/generated/infinity.db", "--require-no-occupied-gaps",
+            sys.executable, "-m", "tools.data.audit_source_presentation",
+            "data/generated/army.db", "--require-no-occupied-gaps",
         ),
         (
-            sys.executable, "-m", "tools.audit_rules_interactions",
+            sys.executable, "-m", "tools.data.audit_rules_interactions",
             "--check-output", "docs/rules-interaction-checklist.md",
             "--require-release", "1.0.0",
         ),
@@ -807,7 +894,7 @@ def test_source_occupancy_failure_blocks_rules_review_and_build(
     assert result.status == "FAIL"
     assert result.returncode == 1
     assert len(commands) == 1
-    assert commands[0][2] == "tools.audit_source_presentation"
+    assert commands[0][2] == "tools.data.audit_source_presentation"
 
 
 def test_rules_stage_stops_before_build_when_review_audit_fails(
@@ -835,7 +922,7 @@ def test_rules_stage_stops_before_build_when_review_audit_fails(
     assert result.status == "FAIL"
     assert result.returncode == 2
     assert len(commands) == 1
-    assert commands[0][2] == "tools.audit_rules_interactions"
+    assert commands[0][2] == "tools.data.audit_rules_interactions"
 
 
 def test_build_source_without_build_stage_is_configuration_error(
@@ -963,7 +1050,7 @@ def test_ci_preflight_stage_runs_isolated_full_index_despite_local_targets(
     assert stage.name == "preflight"
     assert stage.command == (
         sys.executable,
-        str(Path(__file__).resolve().parents[1] / "tools" / "ci_preflight.py"),
+        str(Path(__file__).resolve().parents[1] / "tools" / "ci" / "ci_preflight.py"),
         "--isolated", "--assets", "required" if include_assets else "off",
         "--", "-n", "auto", "--dist", "worksteal",
         "-m", "full_assets or not full_assets" if include_assets else "not full_assets", "-q",
@@ -1228,7 +1315,7 @@ def test_isolated_preflight_checks_only_declared_environment_and_preserves_failu
     def run(command, *, cwd, env):
         assert cwd == tmp_path / "checkout"
         assert not {"PYTHONHOME", "GIT_INDEX_FILE", "PYTEST_ADDOPTS"} & env.keys()
-        if command[2] == "tools.build_deployed_object_publication":
+        if command[2] == "infinity_db":
             assert env["PYTHONPATH"] == str(tmp_path / "checkout/src")
         else:
             assert "PYTHONPATH" not in env
@@ -1243,15 +1330,14 @@ def test_isolated_preflight_checks_only_declared_environment_and_preserves_failu
     assert calls[1][1:] == ["-m", "pip", "install", "-e", ".[dev,symbols]"]
     assert calls[1][0] != sys.executable
     assert calls[2][1:] == [
-        "-m", "tools.build_deployed_object_publication", "--when-legacy",
+        "-m", "infinity_db", "database-health", "--db-dir", "data/generated",
     ]
-    assert calls[3][-2:] == ["--check", "--when-legacy"]
-    assert calls[4][1:] == ["-m", "tools.verify_deployment_assets"]
-    assert calls[5][1:] == ["-m", "tools.run_checks", "--stage", "lint"]
-    assert calls[6][1:] == [
+    assert calls[3][1:] == ["-m", "tools.verify_deployment_assets"]
+    assert calls[4][1:] == ["-m", "tools.run_checks", "--stage", "lint"]
+    assert calls[5][1:] == [
         "-m", "pytest", "-q", "-m", "full_assets or not full_assets", "-n", "2",
     ]
-    assert calls[7][1:] == ["-m", "pyright", "--pythonpath", calls[1][0]]
+    assert calls[6][1:] == ["-m", "pyright", "--pythonpath", calls[1][0]]
 
 
 @pytest.mark.parametrize("module,message", [
@@ -1271,8 +1357,8 @@ def test_indexed_artifact_and_lint_failures_propagate_even_with_svg_checks_off(
     assert ci_preflight.check_export(
         tmp_path, tmp_path / "venv", [], include_full_assets=False,
     ) == [message]
-    assert calls[4][-1] == "--skip-svg"
-    assert calls[6][-2:] == ["-m", "not full_assets"]
+    assert calls[3][-1] == "--skip-svg"
+    assert calls[5][-2:] == ["-m", "not full_assets"]
 
 
 @pytest.mark.parametrize("wheel_fails", [False, True])
@@ -1304,8 +1390,8 @@ def test_isolated_preflight_runs_built_wheel_smoke_only_after_successful_wheel_a
         assert "installed-wheel CLI/runtime smoke failed" in output
 
 
-@pytest.mark.parametrize("failed_step", ["venv", "pip", "tools.build_deployed_object_publication"])
-def test_isolated_preflight_stops_when_environment_or_publication_is_unusable(
+@pytest.mark.parametrize("failed_step", ["venv", "pip", "infinity_db"])
+def test_isolated_preflight_stops_when_environment_or_database_set_is_unusable(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failed_step: str,
 ) -> None:
     calls = []
@@ -1320,7 +1406,7 @@ def test_isolated_preflight_stops_when_environment_or_publication_is_unusable(
     assert all(command[2] not in {"pytest", "pyright"} for command in calls)
 
 
-def test_preflight_prepares_publication_before_using_current_environment(
+def test_preflight_validates_selected_set_before_using_current_environment(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = []
@@ -1328,10 +1414,7 @@ def test_preflight_prepares_publication_before_using_current_environment(
         calls.append(command) or SimpleNamespace(returncode=0)
     ))
     assert ci_preflight.check_export(tmp_path, None, ["--collect-only"]) == []
-    assert [command[2] for command in calls] == [
-        "tools.build_deployed_object_publication", "tools.build_deployed_object_publication",
-        "pytest",
-    ]
+    assert [command[2] for command in calls] == ["infinity_db", "pytest"]
     assert calls[-1][0] == sys.executable
 
 
@@ -1348,7 +1431,7 @@ def test_local_source_guard_skips_missing_but_not_present_invalid_bytes(
 def test_fixture_build_stage_never_replaces_runtime_database(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    runtime_database = tmp_path / "data" / "generated" / "infinity.db"
+    runtime_database = tmp_path / "data" / "generated" / "army.db"
     runtime_database.parent.mkdir(parents=True)
     runtime_database.write_bytes(b"real-production-database")
     fixture = Path(__file__).resolve().parent / "fixtures" / "deployment-smoke"

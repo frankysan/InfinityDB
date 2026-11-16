@@ -41,7 +41,7 @@ PDF, and source-symbol archives outside the public repository by project policy.
 The processed graphical publication used by InfinityDB is tracked in the public
 repository and may be included in wheels, Docker images, releases, deployment
 packages, or other non-commercial InfinityDB distributions under that permission.
-The generated runtime databases `data/generated/infinity.db` and `rules.db` are tracked
+The generated runtime databases `data/generated/army.db` and `rules_n5.db` are tracked
 and may be redistributed as part of the non-commercial InfinityDB application/release. They
 contain or derive from Corvus Belli game data and are not relicensed under InfinityDB's MIT
 License. The local terminal symbol-build manifest, raw snapshots, wiki/PDF/source-symbol
@@ -49,10 +49,12 @@ archives, and other acquisition/provenance inputs remain ignored local build/res
 
 ## Infinity Wiki and rules documents
 
-The optional wiki research material under `data/wiki/` and user-supplied rules
-documents under `data/pdf/` are ignored by Git and are not part of the normal
-application package or Docker runtime image. Their text, images, and other contents must
-not be redistributed as MIT-licensed project material.
+Optional wiki research material under `local/data/wiki/` and user-supplied
+rules documents under `local/data/pdf/` are ignored by Git and are not
+part of the normal application package or Docker runtime image. Historical
+canonical `data/pdf/` citation labels do not indicate a current physical
+research directory. Their text, images and other contents must not be
+redistributed as MIT-licensed project material.
 
 Curated facts retain provenance appropriate to the source contract. PDF-derived
 facts use document edition/version/date and printed-page citations. Archived

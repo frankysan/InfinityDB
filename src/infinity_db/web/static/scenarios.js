@@ -1,6 +1,6 @@
 import { getScenarios } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
-import { createPanelSwitcher } from "./view-components.js";
+import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -130,7 +130,10 @@ async function initialize() {
     show(elements.grid);
   } catch (error) {
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || "Could not load scenarios.";
+    elements.errorMessage.textContent = error.status === 400
+      ? "This scenario collection or revision is not supported. Open Scenarios to choose another collection."
+      : collectionLoadMessage(error, "scenarios");
+    console.error("Could not load scenarios", error);
     show(elements.error);
   }
 }

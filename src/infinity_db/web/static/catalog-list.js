@@ -1,7 +1,7 @@
 import { getCatalogItems } from "./api.js";
 import { readCatalogSearchQuery, replaceCatalogSearchQuery } from "./catalog-search-state.js";
 import { skillCategoryBadge } from "./skill-categories.js";
-import { createPanelSwitcher } from "./view-components.js";
+import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const page = document.body.dataset.catalog;
 const title = page === "traits" ? "traits" : page;
@@ -114,7 +114,8 @@ async function load() {
     render();
   } catch (error) {
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || `Could not load ${title}.`;
+    elements.errorMessage.textContent = collectionLoadMessage(error, title);
+    console.error("Could not load catalog", error);
     show(elements.error);
   }
 }

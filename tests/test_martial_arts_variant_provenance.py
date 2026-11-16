@@ -18,9 +18,9 @@ from infinity_db.skill_catalog import SkillCatalog
 pytestmark = pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_DB = ROOT / "data/generated/infinity.db"
-RAW_DB = ROOT / "data/generated/infinity.raw.db"
-RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_DB = ROOT / "data/generated/army.db"
+RAW_DB = ROOT / "data/work/build/army.raw.db"
+RULES_DB = ROOT / "data/generated/rules_n5.db"
 
 # Reviewed source IDs and printed chart values, N5.3 EN p. 100.
 SOURCE_LEVELS = {19: 1, 20: 2, 21: 3, 22: 4, 23: 5}

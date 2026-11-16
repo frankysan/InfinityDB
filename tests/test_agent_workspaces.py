@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.agent_workspaces import WorkspaceError, create, guard
+from tools.dev.agent_workspaces import WorkspaceError, create, guard
 
 
 def _git(root: Path, *args: str) -> str:

@@ -3,6 +3,7 @@ import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { rulesCitationList, rulesReferenceSection } from "./rules-reference.js";
 import { shareStateHref } from "./share-state.js";
+import { referenceLoadMessage } from "./view-components.js";
 
 const { catalog, singular, summaryHeading } = document.body.dataset;
 const itemId = window.location.pathname.split("/").pop();
@@ -258,5 +259,6 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
 }).catch((error) => {
   if (error.name === "AbortError") return;
   name.firstChild.textContent = `${singular} unavailable`;
-  status.textContent = error.message || "Could not load this reference item.";
+  status.textContent = referenceLoadMessage(error, singular.toLowerCase());
+  console.error("Could not load reference detail", error);
 });

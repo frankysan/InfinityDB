@@ -7,7 +7,7 @@ from subprocess import CompletedProcess
 
 import pytest
 
-from tools.check_doc_links import _anchors, check_links, default_paths
+from tools.ci.check_doc_links import _anchors, check_links, default_paths
 
 
 def test_heading_anchors_preserve_punctuation_spacing_and_duplicates() -> None:
@@ -80,7 +80,7 @@ def test_default_paths_include_tracked_nested_markdown_but_not_ignored(
         "[broken](missing.md)\n", encoding="utf-8",
     )
     monkeypatch.setattr(
-        "tools.check_doc_links.subprocess.run",
+        "tools.ci.check_doc_links.subprocess.run",
         lambda *args, **kwargs: CompletedProcess(
             args=[], returncode=0,
             stdout=b"docs/README.md\0extras/README.md\0",
@@ -100,7 +100,7 @@ def test_default_paths_work_without_git(
     def unavailable(*args: object, **kwargs: object) -> None:
         raise FileNotFoundError("git unavailable")
 
-    monkeypatch.setattr("tools.check_doc_links.subprocess.run", unavailable)
+    monkeypatch.setattr("tools.ci.check_doc_links.subprocess.run", unavailable)
     assert default_paths(tmp_path) == [tmp_path / "docs/new.md"]
 
 

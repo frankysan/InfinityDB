@@ -5,8 +5,9 @@ import { appendMaintainedText } from "./maintained-text.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
-import { tableViewport } from "./view-components.js";
+import { referenceLoadMessage, tableViewport } from "./view-components.js";
 import { exactVariantRuleIds, exactVariantUsageSection } from "./variant-usage.js";
+import { weaponFootnotesForProfile, withoutWeaponFootnotes } from "./weapon-footnotes.js";
 import {
   gameplayVariantRules,
   levelEffectsSection,
@@ -201,22 +202,24 @@ function weaponAmmunitionEffects(profile) {
 }
 
 function groupWeaponProperties(references) {
-  // Army has one source property bucket, but N5 publishes separate rule domains.
+  // Army mixes Traits, labels, State names and chart footnote notation.
   const groups = { Traits: [], Labels: [], States: [], Properties: [] };
   for (const reference of references) {
-    const catalogName = reference.public_reference?.catalog;
+    const property = withoutWeaponFootnotes(reference);
+    if (!property) continue;
+    const catalogName = property.public_reference?.catalog;
     if (catalogName === "labels") {
-      groups.Labels.push(reference);
+      groups.Labels.push(property);
     } else if (
       catalogName === "states"
-      || reference.state_references?.length
-      || /^state:/i.test(reference.label || "")
+      || property.state_references?.length
+      || /^state:/i.test(property.label || "")
     ) {
-      groups.States.push(reference);
-    } else if (reference.slug) {
-      groups.Traits.push(reference);
+      groups.States.push(property);
+    } else if (property.slug) {
+      groups.Traits.push(property);
     } else {
-      groups.Properties.push(reference);
+      groups.Properties.push(property);
     }
   }
   return groups;
@@ -276,6 +279,48 @@ function weaponTraitLinks(traits, showStatePrefix = true) {
     }
   }
   return fragment;
+}
+
+function weaponFootnoteRow(profile, weaponRules, weaponSlug) {
+  const footnotes = weaponFootnotesForProfile(profile, weaponRules, weaponSlug, catalog);
+  if (!footnotes.length) return null;
+  const row = document.createElement("div");
+  row.className = "weapon-data-row weapon-source-footnotes";
+  const heading = document.createElement("h5");
+  heading.className = "weapon-data-heading";
+  heading.textContent = "Source footnotes";
+  const value = document.createElement("p");
+  value.className = "weapon-data-value";
+  for (const [index, footnote] of footnotes.entries()) {
+    if (index) value.append(" · ");
+    value.append(`${footnote.source}: `);
+    const node = document.createElement(footnote.target ? "a" : "span");
+    node.textContent = footnote.marker;
+    node.title = `${footnote.source} ${footnote.marker}: ${footnote.category} rules`;
+    if (footnote.target) {
+      node.href = footnote.target.href;
+      node.setAttribute("aria-label",
+        `${footnote.marker}: ${footnote.category} — ${footnote.target.label}`);
+    }
+    value.append(node, ` ${footnote.category}`);
+    if (footnote.unresolved) {
+      const detail = document.createElement("span");
+      detail.className = "developer-only";
+      detail.textContent = " (exact target not verified)";
+      value.append(detail);
+    }
+    if (footnote.mismatch) {
+      value.append(" (source discrepancy)");
+      if (footnote.issue) {
+        const issue = document.createElement("span");
+        issue.className = "developer-only";
+        issue.textContent = ` (${footnote.issue})`;
+        value.append(issue);
+      }
+    }
+  }
+  row.append(heading, value);
+  return row;
 }
 
 function traitDescription(description) {
@@ -359,7 +404,7 @@ function specialWeaponProfile(profile) {
   return card;
 }
 
-function weaponVariants(variants, profileCitationsAvailable = null) {
+function weaponVariants(variants, profileCitationsAvailable = null, weaponRules = [], weaponSlug = null) {
   const section = document.createElement("section");
   section.className = "weapon-variants";
   const rangeBands = canonicalWeaponRangeBands;
@@ -484,6 +529,10 @@ function weaponVariants(variants, profileCitationsAvailable = null) {
         propertiesText.append(weaponTraitLinks(properties, heading !== "States"));
         propertiesRow.append(propertiesHeading, propertiesText);
         card.append(propertiesRow);
+      }
+      if (catalog === "weapons" || (catalog === "equipment" && weaponSlug === "deactivator")) {
+        const footnotes = weaponFootnoteRow(profile, weaponRules, weaponSlug);
+        if (footnotes) card.append(footnotes);
       }
       if (profile.rules?.length) {
         card.append(rulesReferenceSection(profile.rules, "Mode rules"));
@@ -646,7 +695,7 @@ function render(item) {
   });
   const levelEffects = levelEffectsSection(item.rules);
   const profiles = catalog === "weapons" && item.weapon_variants?.length
-    ? weaponVariants(item.weapon_variants, item.profile_citations_available) : null;
+    ? weaponVariants(item.weapon_variants, item.profile_citations_available, item.rules || [], item.slug) : null;
   // Named Mines need their specific Weapon Chart profile before the long
   // shared family reference. Chest Mine does not use that family rule.
   const mineFamily = catalog === "weapons"
@@ -667,7 +716,7 @@ function render(item) {
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),
     ...(!mineFamily && profiles ? [profiles] : []),
     ...(catalog === "equipment" && item.profiles?.length
-      ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])] : []),
+      ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }], null, item.rules || [], item.slug)] : []),
     ...(catalog === "equipment" && item.hacking_programs?.length
       ? [hackingProgramsSection(item.hacking_programs)] : []),
     ...(catalog === "equipment" && exactUsage
@@ -749,7 +798,8 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
 }).catch((error) => {
   if (error.name === "AbortError") return;
   name.firstChild.textContent = "Item unavailable";
-  status.textContent = error.message || "Could not load this item.";
+  status.textContent = referenceLoadMessage(error, "item");
+  console.error("Could not load catalog detail", error);
 });
 window.addEventListener("optionalunitschange", () => {
   if (!currentItem) return;

@@ -26,8 +26,8 @@ def test_maintained_text_batch_preserves_reference_tokens_and_order() -> None:
     from infinity_db.rules_database import RulesDatabase
 
     root = Path(__file__).resolve().parents[1]
-    db = Database(root / "data/generated/infinity.db")
-    rules = RulesDatabase(root / "data/generated/rules.db")
+    db = Database(root / "data/generated/army.db")
+    rules = RulesDatabase(root / "data/generated/rules_n5.db")
     values = (
         "Use [[skill:jump]] or [[skill:dodge]].",
         "See [[skill:jump]] again.",
@@ -157,7 +157,7 @@ def test_rules_database_rejects_unresolved_maintained_text_reference(tmp_path: P
     documents[0] = (document_path, document)
 
     with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
-        export_rules_database(documents, tmp_path / "rules.db", finalize=False)
+        export_rules_database(documents, tmp_path / "rules_n5.db", finalize=False)
 
 
 def test_project_maintained_text_link_coverage_is_complete() -> None:
@@ -192,7 +192,7 @@ def test_rules_database_rejects_new_unlinked_semantic_reference(tmp_path: Path) 
     with pytest.raises(
         ValueError, match="(?:unmarked semantic references|semantic-link coverage changed)"
     ):
-        export_rules_database(documents, tmp_path / "rules.db", finalize=False)
+        export_rules_database(documents, tmp_path / "rules_n5.db", finalize=False)
 
 
 def test_visibility_zone_phrases_in_curated_rules_are_linked() -> None:
@@ -536,7 +536,7 @@ def test_scenario_mission_prose_participates_in_shared_reference_validation(
         target = target[segment]
     target[path[-1]] = "Use [[skill:not-a-current-skill]]."
     with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
-        export_rules_database(documents, tmp_path / "rules.db", finalize=False)
+        export_rules_database(documents, tmp_path / "rules_n5.db", finalize=False)
 
 
 def test_scenario_mission_prose_cannot_bypass_reviewed_link_coverage() -> None:
@@ -568,7 +568,7 @@ def test_domination_minimum_vp_end_prose_uses_shared_reference_validation(tmp_pa
     record = next(record for record in core["records"] if record["id"] == "scenario:domination")
     record["facts"]["mission"]["endConditions"][1]["condition"]["text"] += " [[skill:not-current]]"
     with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
-        export_rules_database(documents, tmp_path / "rules.db", finalize=False)
+        export_rules_database(documents, tmp_path / "rules_n5.db", finalize=False)
 
 
 def test_scenario_source_issue_uses_shared_distance_validation() -> None:
@@ -598,4 +598,4 @@ def test_firefight_objective_titles_use_shared_reference_validation(tmp_path: Pa
     record = next(r for r in core["records"] if r["id"] == "scenario:firefight")
     record["facts"]["mission"]["objectives"][2]["name"] = "More [[skill:not-current]] killed"
     with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
-        export_rules_database(documents, tmp_path / "rules.db", finalize=False)
+        export_rules_database(documents, tmp_path / "rules_n5.db", finalize=False)

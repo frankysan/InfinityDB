@@ -1,5 +1,6 @@
 import { getOrdersAros } from "./api.js";
 import { writeHistoryUrl } from "./share-state.js";
+import { collectionLoadMessage } from "./view-components.js";
 
 const state = document.getElementById("matrix-state");
 const target = document.getElementById("matrix-sections");
@@ -144,7 +145,10 @@ async function load() {
   } catch (error) {
     if (signal.aborted) return;
     target.setAttribute("aria-busy", "false");
-    state.textContent = error.message || "Could not load Orders and AROs.";
+    state.textContent = selection && error.status === 400
+      ? "This scenario is not supported by the Orders and AROs reference. Choose another."
+      : collectionLoadMessage(error, "Orders and AROs");
+    console.error("Could not load Orders and AROs", error);
     count.textContent = "Unavailable";
   } finally {
     if (!signal.aborted) scenarioSelect.disabled = false;

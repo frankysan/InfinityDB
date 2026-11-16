@@ -112,7 +112,7 @@ are reference facts, not target validation, roster legality or an effects engine
 Sources: pinned English N5.3 p. 174, Spanish N5.3 p. 181, English N5.2 p. 173,
 and the archived English Wiki `Labels` revision 4067. Exact hashes and the
 bounded review disposition are maintained in the
-[coverage audit](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-label-definitions-2026-11-06).
+[coverage audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-label-definitions-2026-11-06).
 
 ### RS-BR-BASE-002 — Game States are transient, cumulative game conditions
 
@@ -2364,7 +2364,7 @@ independently against each target. One Dodge Roll is compared separately against
 each incoming Impact Template Attack. Targetless and Speculative Attack retain
 their expressly scoped placement exceptions.
 
-The [V1S-034 follow-up](v1.0-source-coverage-audit.md#template-and-base-ammunition-follow-up-v1s-034-2026-11-04)
+The [V1S-034 follow-up](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#template-and-base-ammunition-follow-up-v1s-034-2026-11-04)
 records exact source members and pending source/API/browser acceptance.
 
 Sources:
@@ -2429,7 +2429,7 @@ Wiki member citations. The pinned September 26 Wiki agrees: Ballistic Skills
 revision 4094, CC Attack revision 3953 and Close Combat revision 4023. The
 last preserves the older “more than two” wording separately from the N5.3
 “two or more” update; the current explanation follows the latter. The
-[source review](v1.0-source-coverage-audit.md#basic-attack-and-close-combat-follow-up-v1s-034-2026-11-04)
+[source review](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#basic-attack-and-close-combat-follow-up-v1s-034-2026-11-04)
 owns evidence and outstanding acceptance.
 
 ### RS-CM-HACK-001 — Hacking Device variants grant explicit Program sets
@@ -2617,7 +2617,7 @@ The maintained Program records now cite their primary N5.3 pp. 59–61 sections.
 Supportware's general conditions are on p. 55, with its use/cancellation example
 on p. 60; Repeater is on p. 56. These corrections preserve source identity,
 the Program statistics and existing scoped relationships. The
-[V1S-035 review](v1.0-source-coverage-audit.md#hacking-firewall-and-supportware-follow-up-v1s-035-2026-11-04)
+[V1S-035 review](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#hacking-firewall-and-supportware-follow-up-v1s-035-2026-11-04)
 owns the exact source inventory and outstanding acceptance.
 
 ### RS-CM-HACK-004 — Hacking Programs have a dedicated typed profile schema
@@ -4665,11 +4665,10 @@ Short, Long, and ARO while identifying whether the action comes from Common/
 Special Skills, Hacking, or Equipment. Declaration category and owning catalog
 domain are therefore independent axes.
 
-The N5 declaration-category reconciliation is complete. The independently pinned
-N5.3 p. 191 source audit now verifies all **57 printed rows** (3 Basic Short, 15 Long,
+The N5 declaration-category reconciliation is complete. The pinned N5.3
+p. 191 source review verifies all **57 printed rows** (3 Basic Short, 15 Long,
 23 Short, 16 ARO) against **42 existing canonical owners**, including all 19
-Hacking Program declaration occurrences independently checked against Army
-metadata. The PDF-backed source Type is not always the canonical owning kind:
+Hacking Program declaration occurrences cross-checked against Army metadata. The PDF-backed source Type is not always the canonical owning kind:
 the Equipment-labelled Activate Disco Ball is a Skill, and Look Out! shares the
 canonical Look Out identity. Neither case creates a new deployed object.
 
@@ -4688,9 +4687,12 @@ the rules DB fingerprint in the 17-object publication; reviewed deployed-object
 identities and delivery paths are unchanged. Promotion retains a recovery
 backup and checks the entire 57-row source projection after replacement.
 
-The complete source-table audit in
+The pinned source table in
 `config/validation/orders-aro-object-adjacent-source-review.json` remains
-an independent validation reference, not a second runtime chart. The matrix is
+the independent reference for the current declaration-matrix publication
+test, not a second runtime chart. The one-use PDF/audit command was retired
+in P5.1 after the accepted source-to-runtime parity checks moved into
+`tests/test_hacking_program_publication.py`. The matrix is
 scoped to unmodified N5 core declarations: it excludes scenario/season overlays,
 Reinforcements phase actions, automatic/passive categories, and Deployment-only
 categories. It does not calculate whether a declaration is currently legal.
@@ -4794,8 +4796,10 @@ Unit Profile restrictions research question without creating a live legality eng
 
 **N5.3 p. 194 source audit (2026-10-30):**
 `config/validation/restrictions-source-chart.json` pins all **six** printed
-subject rows and **14** explicit negative conditions, independently checked
-against the pinned PDF by `tools.audit_restrictions_source_chart`. The
+subject rows and **14** explicit negative conditions. Their source wording
+was checked against the pinned PDF during the completed 2026-10-30 audit;
+the maintained validator now checks the accepted manifest, curated facts and
+published projection without retaining the one-use PDF parser. The
 source selectors for TAG, VH, and REM have no canonical Troop Type identity in
 the current rules registry. Existing `equipment:motorcycle`, `skill:aerial`,
 `training:irregular`, `skill:cautious-movement` and `skill:lieutenant`
@@ -4975,7 +4979,7 @@ identify N4. A fresh check of the [official Wiki annex](https://infinitythewiki.
 detailed rules as originating in N4; no edition-identified N5 annex or
 explicit unchanged-adoption ruling was established in this review.
 Failure to find one does **not** establish that no such source exists.
-The read-only `tools.audit_reinforcements_applicability` check at
+The read-only `tools.research.audit_reinforcements_applicability` check at
 `ba057539` exited 0 with two current references and two historical
 annex PDFs, explicitly reporting N5 procedural publication as
 `BLOCKED`. This is source/applicability evidence, not an acceptance
@@ -4987,7 +4991,7 @@ open for a publisher ruling or new primary publication, and keep
 V1S-041 / final release gates open for matched Section, Commlink and
 ordinary-browser acceptance **at the time of this source decision**.
 No new deferred VD/VR tests are generated by this documentation-only decision.
-The later [V1S-041 frozen-pair browser acceptance](v1.0-source-coverage-audit.md#v1s-041-frozen-pair-optional-reinforcements-browser-acceptance-2026-11-07)
+The later [V1S-041 frozen-pair browser acceptance](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#v1s-041-frozen-pair-optional-reinforcements-browser-acceptance-2026-11-07)
 closes that browser gate without establishing N5-native authority.
 
 Sources:

@@ -1,0 +1,10 @@
+{
+  "format": "InfinityDB research source layouts",
+  "formatVersion": 1,
+  "scope": "explicit-read-only-pdf-binding-no-source-migration",
+  "sourceLabelPrefix": "data/pdf",
+  "layouts": {
+    "legacy": "data/pdf",
+    "local": "local/data/pdf"
+  }
+}

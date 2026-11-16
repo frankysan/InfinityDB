@@ -21,8 +21,8 @@ from infinity_db.skill_config import load_skill_source_config
 from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_DB = ROOT / "data/generated/infinity.db"
-RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_DB = ROOT / "data/generated/army.db"
+RULES_DB = ROOT / "data/generated/rules_n5.db"
 
 REFERENCE_FIELDS = (
     ("skills", "skill_extras"),
@@ -222,6 +222,33 @@ def test_presentation_shared_identity_preserves_quantities_and_extra_variants() 
     assert _common_presentation_items([], "weapons") == []
 
 
+def _expected_common_extra_bases(
+    loadouts: list[dict[str, Any]], field: str,
+) -> list[dict[str, Any]]:
+    """Independently derive General's extra-free presentation of varied loadouts."""
+    if len(loadouts) < 2:
+        return []
+    bases: list[dict[str, Any]] = []
+    considered: set[tuple[Any, Any]] = set()
+    for first in loadouts[0][field]:
+        base_key = _presentation_item_key(first)[:2]
+        if base_key in considered:
+            continue
+        considered.add(base_key)
+        variants_per_loadout = [
+            {
+                _presentation_item_key(item)[2]
+                for item in loadout[field]
+                if _presentation_item_key(item)[:2] == base_key
+            }
+            for loadout in loadouts
+        ]
+        if (all(variants_per_loadout)
+                and len({frozenset(values) for values in variants_per_loadout}) > 1):
+            bases.append({**first, "extras": []})
+    return bases
+
+
 def _source_general_skills(
     profiles: list[dict[str, Any]], loadouts: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -237,6 +264,11 @@ def _source_general_skills(
             if identity not in shared:
                 shared.append(identity)
                 raw.append(skill)
+    for item in _expected_common_extra_bases(loadouts, "skills"):
+        key = _presentation_item_key(item)
+        if key not in shared:
+            shared.append(key)
+            raw.append(item)
     return raw
 
 
@@ -513,7 +545,13 @@ def test_multi_source_general_profiles_preserve_army_differences() -> None:
                         classifications, classified,
                         (slug, army["id"], profile["group_id"], "profile"),
                     )
-                expected = _common_presentation_items(matching_loadouts, "weapons")
+                expected = list(dict.fromkeys([
+                    *_common_presentation_items(matching_loadouts, "weapons"),
+                    *(
+                        _presentation_item_key(item)
+                        for item in _expected_common_extra_bases(matching_loadouts, "weapons")
+                    ),
+                ]))
                 actual = [
                     _presentation_item_key(item)
                     for item in general["shared_items"]["weapons"]

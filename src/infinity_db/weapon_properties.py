@@ -54,9 +54,16 @@ def load_weapon_properties(path: Path = DEFAULT_PROPERTIES_PATH) -> list[dict[st
         or not document["properties"]
     ):
         raise ValueError("Invalid Weapon Properties configuration")
+    return validate_weapon_property_entries(document["properties"])
+
+
+def validate_weapon_property_entries(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Validate authored property definitions after JSON or relational reconstruction."""
+    if not isinstance(entries, list) or not entries:
+        raise ValueError("Invalid Weapon Properties mapping")
     ids: set[str] = set()
     profiles: set[tuple[str, int, str | None]] = set()
-    for entry in document["properties"]:
+    for entry in entries:
         if (
             not isinstance(entry, dict)
             or set(entry) != {"id", "name", "summary", "origins", "profiles"}
@@ -116,7 +123,7 @@ def load_weapon_properties(path: Path = DEFAULT_PROPERTIES_PATH) -> list[dict[st
             if marker in profiles:
                 raise ValueError(f"Duplicate Weapon Property profile {marker!r}")
             profiles.add(marker)
-    return document["properties"]
+    return entries
 
 
 class WeaponProperties:
@@ -130,7 +137,13 @@ class WeaponProperties:
         self._profiles: dict[
             tuple[int, str | None], list[tuple[dict[str, Any], dict[str, Any]]]
         ] = {}
-        for entry in load_weapon_properties(path):
+        embedded = (
+            rules_database.weapon_properties_payload()
+            if path == DEFAULT_PROPERTIES_PATH else None
+        )
+        for entry in (
+            embedded if embedded is not None else load_weapon_properties(path)
+        ):
             origins = []
             complete = True
             for origin in entry["origins"]:

@@ -1,16 +1,28 @@
 """Isolation and destructive-operation boundaries of installed-wheel acceptance."""
 
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
 
-from tools.installed_wheel_smoke import (
+from tools.ci.installed_wheel_smoke import (
     SYMBOL_DIRECTORIES,
     clean_environment,
     remove_symbol_assets,
     smoke_wheel,
     verify_runtime,
 )
+
+
+def test_isolated_wheel_smoke_script_still_runs_without_import_path() -> None:
+    root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [sys.executable, "-I", str(root / "tools/ci/installed_wheel_smoke.py"), "--help"],
+        cwd=root, capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--work-dir" in result.stdout
 
 
 def test_smoke_rejects_workspaces_inside_source_checkout(tmp_path: Path) -> None:

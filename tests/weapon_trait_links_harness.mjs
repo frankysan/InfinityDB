@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import vm from "node:vm";
+import { withoutWeaponFootnotes } from "../src/infinity_db/web/static/weapon-footnotes.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const code = readFileSync(path.join(root, "src/infinity_db/web/static/catalog-detail.js"), "utf8");
@@ -21,7 +22,7 @@ const document = {
 };
 const { render, groupProperties, renderAmmo } = vm.runInNewContext(
   `${code.slice(start, end)}\n({ render: weaponTraitLinks, groupProperties: groupWeaponProperties, renderAmmo: appendWeaponAmmunition })`,
-  { document, encodeURIComponent, text: (value) => value == null ? "—" : String(value) },
+  { document, encodeURIComponent, text: (value) => value == null ? "—" : String(value), withoutWeaponFootnotes },
 );
 const output = render([
   { label: "Comms. Attack", name: "Comms Attack", slug: null,

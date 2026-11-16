@@ -51,7 +51,7 @@ class HackingProgramCatalog:
 
     Army's structured ``hack`` metadata remains authoritative for profile fields,
     targets, declaration types, baseline Device associations, and Upgrade-extra
-    provenance. ``rules.db`` contributes reviewed semantic summaries and typed
+    provenance. ``rules_n5.db`` contributes reviewed semantic summaries and typed
     cross-rule relationships without duplicating that source matrix.
     """
 

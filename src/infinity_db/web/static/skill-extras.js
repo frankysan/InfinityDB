@@ -1,6 +1,6 @@
 import { getSkillExtras } from "./api.js";
 import { formatSkillDistanceExtra } from "./distance.js";
-import { createPanelSwitcher } from "./view-components.js";
+import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -56,7 +56,8 @@ async function load() {
     show(elements.table);
   } catch (error) {
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || "Could not load skill modifiers.";
+    elements.errorMessage.textContent = collectionLoadMessage(error, "skill modifiers");
+    console.error("Could not load skill modifiers", error);
     show(elements.error);
   }
 }

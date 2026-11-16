@@ -53,8 +53,8 @@ RELATION_ROUTE_CATALOGS = (
 def relation_destinations() -> tuple[Any, dict[tuple[str, str], set[str]]]:
     """Collect the full published relation inventory once per pytest worker."""
     root = Path(__file__).resolve().parents[1]
-    army_path = root / "data/generated/infinity.db"
-    rules_path = root / "data/generated/rules.db"
+    army_path = root / "data/generated/army.db"
+    rules_path = root / "data/generated/rules_n5.db"
     database = Database(army_path)
     rules = RulesDatabase(rules_path)
     app = create_app(army_path, rules_database_path=rules_path)
@@ -111,8 +111,8 @@ def test_published_cross_domain_relation_catalog_destinations_resolve(
 
 def test_embedded_glossary_entries_target_their_client_generated_anchors() -> None:
     root = Path(__file__).resolve().parents[1]
-    army_path = root / "data/generated/infinity.db"
-    rules_path = root / "data/generated/rules.db"
+    army_path = root / "data/generated/army.db"
+    rules_path = root / "data/generated/rules_n5.db"
     app = create_app(army_path, rules_database_path=rules_path)
     status, body = _get(app, "/api/glossary")
     assert status == "200 OK"
@@ -136,8 +136,8 @@ def test_embedded_glossary_entries_target_their_client_generated_anchors() -> No
 
 def test_glossary_weapon_family_fragments_have_a_real_host_rule_card() -> None:
     root = Path(__file__).resolve().parents[1]
-    army_path = root / "data/generated/infinity.db"
-    rules_path = root / "data/generated/rules.db"
+    army_path = root / "data/generated/army.db"
+    rules_path = root / "data/generated/rules_n5.db"
     app = create_app(army_path, rules_database_path=rules_path)
     status, body = _get(app, "/api/glossary")
     assert status == "200 OK"
@@ -187,8 +187,8 @@ def _local_rule_fragments(value: Any) -> list[str]:
 def test_all_published_weapon_local_fragments_match_hosted_cards() -> None:
     root = Path(__file__).resolve().parents[1]
     app = create_app(
-        root / "data/generated/infinity.db",
-        rules_database_path=root / "data/generated/rules.db",
+        root / "data/generated/army.db",
+        rules_database_path=root / "data/generated/rules_n5.db",
     )
     status, body = _get(app, "/api/weapons")
     assert status == "200 OK"

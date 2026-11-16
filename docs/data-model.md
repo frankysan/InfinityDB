@@ -8,8 +8,14 @@ and which invariants runtime queries rely on. Historical audit counts, release b
 migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this current-state
 contract.
 
-Unless explicitly marked otherwise, statements below describe the 1.0
-repository model. **Dated source-variant review notes** record the findings
+The complete serving runtime uses Army v31 in `army.db`, Rules v17 in
+`rules_n5.db` and ITS schema v2 in `its_18.db`. Structured references,
+source/citation identity and symbol mappings are embedded. Serving requires
+all three, validates the source-compatible ITS publication against the matched
+Army/Rules build and does not read build JSON.
+The [data lifecycle](../data/README.md) owns current build/serve paths.
+Earlier schema/publication migration descriptions below are historical where
+they explicitly identify an older version. **Dated source-variant review notes** record the findings
 and state of an earlier migration step, not the present implementation status;
 the maintained publication, API and browser contracts take precedence.
 Release/CI status belongs to [releasing](releasing.md) and [CI](ci.md),
@@ -19,30 +25,38 @@ not this data-model specification.
 
 Army-derived data flows through three conceptual layers:
 
-```text
-immutable Army snapshot
-        ↓
-lossless merged/master representation
-        ↓
-validated normalized source model
-        ↓
-SQLite export
-        ├─ infinity.db      canonical application/runtime data
-        └─ infinity.raw.db  lossless normalized source/audit archive
+```mermaid
+flowchart TD
+    snapshot["Immutable Army snapshot"]
+    master["Lossless merged/master representation"]
+    normalized["Validated normalized source model"]
+    export["SQLite export"]
+    runtime["army.db<br/>Canonical application/runtime data"]
+    archive["Optional legacy army.raw.db<br/>Lossless audit export"]
+
+    snapshot --> master
+    master --> normalized
+    normalized --> export
+    export --> runtime
+    export -.->|explicit --with-raw| archive
 ```
 
 Curated rules data follows a separate path:
 
-```text
-reviewed data/curated/rules/*.json
-        ↓
-validation/composition
-        ↓
-rules.db
+```mermaid
+flowchart TD
+    curated["Reviewed data/curated/rules/*.json"]
+    validation["Validation/composition"]
+    database["rules_n5.db"]
+
+    curated --> validation
+    validation --> database
 ```
 
-The two runtime databases are intentionally separate because Army data and reviewed rules knowledge
-have different sources, provenance, and update cadence.
+The Army and N5 Rules databases remain separate because their sources,
+provenance and update cadences differ. Independently published ITS season
+data resides in `its_18.db`, with explicit revision and N5 compatibility
+validation at serving time.
 
 **Optional legacy-source annexes:** The `reinforcements-extra-n4-reference`
 collection is deliberately separate from `n5-core-v5.3`. Its three
@@ -108,30 +122,56 @@ condition or sentinel field is needed for the current profile model. Any future
 structured status must follow a source-reviewed distinction; display punctuation
 alone is not evidence for new semantics.
 
-For reviewed profile-only Weapons, the build materializes the corresponding
-Weapon Chart citations in `data/generated/weapon-profile-sources.json`. It
-pins both runtime databases, the reviewed decision file, the current primary
-PDF identity and its SHA-256, each Weapon's canonical identity and complete
-Army profile fingerprint, and every exact source ID/mode and chart page.
-The loader verifies the co-located database pair, current PDF metadata,
-profile fingerprints and complete mode sets without reading curation or raw
-sources. A present but mismatched publication fails startup; an absent or
-independently supplied mixed-pair publication exposes
-`profile_citations_available: false`. Each Weapon profile has a
+For reviewed profile-only Weapons, complete builds embed Weapon Chart
+citations (introduced in Rules v12/compatibility 14 and retained in current v17). The relational
+`weapon_chart_profile_citations` table is keyed by exact Weapon/source-profile ID
+and a non-null mode key (`''` for an unqualified mode, `mode:<name>` otherwise);
+read projections restore the original nullable mode. A source-FK-backed metadata
+row pins the current primary PDF identity, page range, reviewed decision SHA-256,
+selected Army byte identity and complete 62-Weapon/69-profile inventory. Each
+Weapon also retains its canonical slug/name and complete Army profile fingerprint.
+The embedded reader validates source/page integrity, a deterministic content
+digest, exact profile fingerprints and complete modes against the selected Army.
+It does not read curation or the original JSON at runtime. The tracked
+complete v17 Rules publication requires these embedded citations; the old loose
+`weapon-profile-sources.json` is not a serving dependency. A mismatched
+embedded source is rejected. Explicit low-level historical fixtures can still
+report `profile_citations_available: false` for absent citations. Each Weapon profile has a
 `profile_citations` list: an empty list means no reviewed profile-chart
 citation was attached, not that no shared rule has a source. The browser
 shows the chart citation or an explicit unavailable notice when the
 publication is missing. This is a locator for the corresponding chart
 entry, not a claim that Army and print values agree or an Ammunition rule.
-The API snapshot revision is the SHA-256 of the colon-separated Army
-database, rules database and attached Weapon-profile publication SHA-256
-values. An unavailable rules database or publication contributes `none`;
-an independently located rules database does not attach a neighboring
-Weapon-profile publication. Release identity tools use the same validated
-attachment and revision calculation, so cache validators and exact-candidate
-checks change when reviewed locator bytes change.
+For normal complete-set serving, the API snapshot revision hashes a
+canonical, sorted inventory of active database filenames and their exact
+SHA-256 digests, with a domain separator. It therefore changes whenever
+`army.db`, `rules_n5.db` or `its_18.db` changes. Explicit low-level historical fixtures
+may supply an independent publication hash; those do not establish another
+operator-facing runtime-set contract.
 
 ### Deployed-object read-model and artifact-gated browser reference
+
+Current serving reads deployed objects only from their embedded Rules
+projection (v10 or later), bound to the selected Army database. Adjacent
+`deployed-objects.json` files are ignored, including beside older standalone
+Rules databases; they cannot enable a catalog or recover a damaged projection.
+Image assembly requires a complete supported database set and rejects v8/v9
+inputs before changing the destination. The standalone deployed-object JSON
+publication/migration CLI is retired. Variant-usage source builds now require
+source-matched deployed objects embedded in the selected Rules database;
+even a present loose JSON publication cannot restore a missing model.
+The core-scenario and terrain/scenery boundary audits likewise read this
+embedded model from explicitly selected Army and Rules paths; their reports
+pin the actual database bytes, without synthesizing a JSON publication or
+guessing sibling files. The standalone JSON reader and projection adapter
+are retired. Source tests use the maintained deployed-object builder, storage
+tests round-trip that model directly, and browser fixtures need only the matched
+databases. Storage applies a shared model guard before inserting rows and after
+reading them: source/review fingerprints, exact object/source identities,
+attribute evidence, reviewed delivery edges and direct/Include Unit ownership
+must remain valid. A model containing its own Rules-file hash is rejected
+before staging rather than silently dropping that field. No schema or
+source-meaning change is required.
 
 `infinity_db.deployed_object_reference.project_deployed_references` consumes
 the validated N5.3 deployed-object audit and produces a **pure, read-only**
@@ -174,27 +214,23 @@ same-context payloads and cycles are detected rather than silently accepted.
 Consequently no recursive relations are projected for this snapshot; any new
 matches require preserving the full Include path before publishing them.
 Unresolved Mine Dispenser subtypes remain unassigned. Objects lacking exact
-matches are not claimed to have zero possible users. The read-only
-`tools.audit_deployed_object_detail_queue` scan covers deployable, token and
-scenery mentions in maintained Weapon/Equipment definition detail fields,
-not just summaries. Its only initially unreviewed detail-only finding,
-Cube 2.0's Command Token recovery reroll, is source-backed and classified
-as automatic Equipment rather than a deployed object; the resulting
-review manifest remains distinct from new object/delivery publication.
-The separate read-only `tools.audit_deployed_object_delivery_coverage`
-compares the 17 published reviewed object identities against their *approved*
-delivery origins. All 17 currently have reviewed origins (28 approved delivery
-paths in the pinned review); this closes the bounded published-object delivery
-queue, **not** the inventory of all possible deployed objects. WildParrot
-distinguishes ordinary Place Deployable from Intuitive Attack with a WIP Roll.
-Armed Turret has no separate Army auxiliary-profile selector: its approved
-delivery path targets the exact reviewed curated object by `originRuleId`,
-retaining its S1/S2 Silhouette conflict. Mine Dispenser has neither an exact
-reviewed target profile nor a reviewed-only object and remains unresolved.
-The audit reports exact Army source-catalog aliases as investigation leads,
-**not** evidence of a delivery method, legal roster carrier or equivalence
-between distinct Weapon modes. Missing delivery edges are evidence gaps,
-not claims that an object cannot be deployed.
+matches are not claimed to have zero possible users. The completed detailed-keyword audit found Cube 2.0's Command Token recovery
+reroll (N5.3 p. 121), classified in
+`config/validation/deployed-object-candidate-reviews.json` as automatic
+Equipment, not a placed battlefield Token or an independent object.
+The maintained `tools.data.audit_deployed_object_inventory` checks candidate
+decisions and reviews additional clauses in all 106 curated Weapon/Equipment
+definitions. The projection and storage tests verify the 17 published
+reviewed object identities and their approved delivery origins. All 17 have
+reviewed origins (28 approved delivery paths in the pinned review); that
+closes the bounded published-object delivery queue, **not** an inventory
+of all possible deployed objects. WildParrot distinguishes Place Deployable
+from WIP-based Intuitive Attack; Armed Turret uses the reviewed curated
+object by `originRuleId` and retains the S1/S2 dispute. Mine Dispenser
+has no exact resolved subtype and remains an unresolved delivery.
+Source-catalog aliases alone cannot establish delivery methods, carrier
+legality or equivalence between Weapon modes. Missing evidence is not proof
+an object cannot be deployed.
 
 The source-schema review distinguishes direct source Unit ownership from
 catalog availability and reusable metadata. Army-local `profile_*` and
@@ -218,37 +254,24 @@ It does not read raw Army archives or curated/review files on requests.
 The `/api/deployed-objects` catalog, exact-ID endpoint and browser page
 publish the same reviewed identities, attributes and delivery links.
 
-For legacy v8/v9 images, `tools.build_deployed_object_publication` compiles the
-validated review and current Army/rules database pair to deterministic
-`deployed-objects.json` once during release preparation. Every published object
+Every published object
 must carry an explicit `unitUses` list (which may be empty when no exact uses
-are established); an omitted list is invalid, not a claim of zero uses. The
-runtime loader checks the artifact's Army and rules database SHA-256 hashes and
-structural attribute/identity provenance. It does **not** access the raw normalized Army
-snapshot, curated JSON, or review files on requests. When the artifact is
-present, `/api/deployed-objects` and the `/deployed-objects` browser page
-publish its reviewed identities, attributes and delivery source links.
-`/api/deployed-objects/{id}` returns one exact reviewed identity.
-When the legacy publication is absent, the API returns 503
-rather than reconstructing source assertions from raw tables; a mismatched
-artifact fails closed on startup. Auto-discovery applies only to a
-**co-located legacy Army/rules database pair**: an explicitly supplied legacy rules database
-from another directory is an independent source, so the application does not
-attach a release publication from beside the Army database. The deployed-object
-API returns 503 in that mixed-source configuration. A mismatched publication
-beside a co-located release pair still fails closed on startup.
+are established); an omitted list is invalid, not a claim of zero uses.
+Without an embedded deployed-object model, the API returns 503 rather than
+reconstructing assertions or attaching a loose sidecar. A mismatched embedded
+Army binding fails closed on startup. Independently staged Rules databases
+remain supported through that exact binding rather than directory proximity.
 
-Legacy release packaging generates this deterministic, Git-ignored publication from
-the tracked database pair and reviewed source files immediately before the
-Docker build. The image copies it beside both databases; its startup smoke
-test verifies source-pair hashes, 17 reviewed objects, the unresolved Mine
-Dispenser origin and the HTTP/browser entry points. Hosted release packaging passed on commit `9c9a09f` (2026-10-22);
-repeat against the final release candidate. The selected snapshot's source,
+The deterministic JSON serializer and verifier remain source/build-side
+adapters pending retirement of their historical migration consumers. Their
+output is not an image input. Current container checks verify the embedded
+17 reviewed objects, unresolved Mine Dispenser origin, source binding and
+HTTP/browser entry points. The selected snapshot's source,
 full-depth Include and reverse-use reviews and three-width object browser
 acceptance are complete; their evidence is in the
-[source audit](v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05).
+[source audit](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05).
 Repeat those reviews after source changes. Final frozen-input source-wide and
-release-matched acceptance remain v1.0 gates.
+release-matched acceptance remain separate from focused development checks.
 Do not describe these delivery origins or partial reverse uses as proof of
 complete Unit ownership, Army List legality or an exhaustive N5.3 model.
 Weapon Ammunition navigation is a reviewed *projection*, not executable Ammunition
@@ -757,6 +780,16 @@ profile identities, classifications, characteristics, or other contextual facts 
 Source profile IDs/names remain available as provenance even when multiple occurrences share one
 application payload identity.
 
+For presentation, when every loadout compatible with a General-profile identity
+carries the same Skill, Equipment or Weapon with the same quantity but differing
+extras, General displays its **base item without extras**. The base is a
+display-only common denominator, not an assertion that the Army source publishes
+a separate no-extra occurrence. Loadouts with only that base do not repeat it;
+loadouts with actual extras retain their exact variants. An item absent from any
+applicable loadout, or present with different quantities, is not promoted.
+Existing identical-extra shared variants retain their own identity. Source
+profile/loadout payloads, relationship semantics and filtering remain unchanged.
+
 ### Unit and General-profile symbols
 
 Every published logical Unit has exactly one effective graphical symbol. A General profile inherits
@@ -812,11 +845,13 @@ The cross-Army index answers **which Units can field a reviewed
 Skill/Equipment variant**. It is a read-only projection of existing identity,
 payload and occurrence relationships, not a second source of Skill definitions,
 a loadout builder, or a record of randomized game results. The verified exact
-source-row projection has an API and normal Skill/Equipment browser consumers;
-its byte-exact release publication is tracked and is required in current images.
-The ignored candidate and tracked publication have separate contracts
+source-row projection has an API and normal Skill/Equipment browser consumers.
+Current complete builds embed the projection in Rules v17 (introduced in
+v11). The old byte-exact JSON serving publication belongs to the historical
+v10 compatibility contract; the selected runtime reads the embedded model.
+Dated pre-publication evidence and older artifact contracts are documented
 below. Exact-SHA hosted release acceptance belongs in
-[releasing](releasing.md#5-land-the-release-commit-verify-hosted-ci-and-tag).
+[releasing](releasing.md#5-approve-the-candidate-merge-verify-main-and-tag).
 
 **Rule identity and variant identity.** The primary grouping key is the
 published canonical rules identity (for example `skill:martial-arts`),
@@ -1219,7 +1254,7 @@ without an `appliesTo`, a fabricated program ID,
 or a modified published rules artifact.
 
 The read-only, exact-owner diagnostic
-`python -m tools.audit_source_variant_inputs --catalog equipment
+`python -m tools.data.audit_source_variant_inputs --catalog equipment
 --source-id 101 --owner-extra-id 344` reports this
 `occurrenceOwners` evidence alongside the ordinary
 source-signature audit. It reads the ignored pinned raw
@@ -1239,10 +1274,10 @@ Keep the two raw occurrences unresolved and do not add a
 generic Saving Roll effect without official confirmation.
 
 **Remaining source-parameter inventory (pinned Army source and current
-generated rules database):** `tools/audit_source_variant_inputs.py` produces a
+generated rules database):** `tools/data/audit_source_variant_inputs.py` produces a
 deterministic, read-only JSON inventory from `infinity.db`,
 `infinity.raw.db` and `rules.db`
-(`python -m tools.audit_source_variant_inputs`). It inspects exact
+(`python -m tools.data.audit_source_variant_inputs`). It inspects exact
 source IDs, direct profile/loadout/Unit-option relationship rows,
 ordered extra IDs/types/values, raw occurrence values and reviewed
 source-variant mappings. For targeted reviews, pass `--catalog skills`
@@ -2373,7 +2408,7 @@ profile-versus-loadout and unresolved-variant fixtures before publishing.
 
 **Project domain:** Data processing
 
-The candidate builder (`tools.build_variant_usage`) validates direct source
+The candidate builder (`tools.data.build_variant_usage`) validates direct source
 rows and typed signatures against the matched local Army/rules publication.
 `variant_usage_includes.py` also compares every retained raw Include with
 its materialized edge, preserving multiplicity, quantity, raw fields and
@@ -2415,25 +2450,59 @@ The intermediate candidate remains ignored and is not a runtime artifact.
 The reviewed public publication is separately tracked as
 `data/generated/variant-usage.json`; it is built with `--publish` from a
 matched local raw/database/source pair and checked with `--check-publication`
-before staging. See the [candidate evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
+before staging. See the [candidate evidence](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
 
 #### Rule-variant usage API
 
-`tools.build_variant_usage --publish` derives the byte-exact, tracked
-`data/generated/variant-usage.json` read model from the same source-verified
-candidate. Regeneration needs the ignored, pinned raw Army archive; release
-hosts and source CI validate the committed bytes and their matched provenance
-without rebuilding the publication. It contains only exact reviewed variant groups and their direct
-source occurrences; unresolved signatures, family-only membership, Include
-paths and Peripheral relationships are not presented as direct usage.
-`--check-publication` compares the complete generated bytes against current
-inputs. Raw SQLite file bytes can differ across platforms even for the same
-validated Army export pair. Their byte hash stays in the local candidate's
-diagnostic source snapshot but is excluded from the portable public publication;
-the Army archive and export-pair fingerprints are preserved. At runtime, the
-co-located Army/rules database hashes and deployed-object publication hash
-must match; stale or malformed artifacts fail closed. When no matched
-publication exists, `/api/variant-usage` returns `503`.
+Rules v11 (compatibility revision 13) supplies the exact public read model
+from SQLite. The API shape, canonical `variantKey`, set counts, source paths,
+reviewed extras and Developer Mode presentation are unchanged. It never reads
+or falls back to `variant-usage.json`; stale adjacent JSON is ignored. v11
+also supports an explicitly selected Rules file outside the Army directory,
+provided the embedded source fingerprint and export generation match.
+
+`variant_usage_groups` stores the canonical identity, collection/record foreign
+key, counts, and typed coordinates into that existing reviewed variant definition.
+`variant_usage_source_rows` has globally unique `(catalog, owner_kind, occurrence_id)`,
+ordered group membership, source/application Army and Unit identities, explicit
+profile/loadout/shared-option paths, payload context and the exact reviewed
+parameter/extra/combination coordinates. `variant_usage_extras` preserves each
+row's ordered source positions, IDs, types and raw values. Shared Unit options
+retain their unverified compatibility source and contribute zero direct Army,
+Unit and profile/loadout totals. Includes and Peripheral context remain outside
+direct usage; unresolved/family-only rows remain build diagnostics.
+
+The new tables contain no opaque usage-payload/effect JSON. Meanings remain owned
+by the existing canonical Rules definitions in `records.variant_json`, which
+is pre-existing rule-model serialization debt rather than a second usage model.
+Reads use the resolved coordinates, not a new source-interpretation pass; they
+reconstruct and verify the canonical signature. Equivalent reviewed TAGCom
+spellings can share a semantic group while keeping their distinct exact source
+coordinates and extras. Missing, negative, out-of-range or mismatched references
+fail validation instead of silently selecting another definition.
+
+`variant_usage_metadata` records the Army archive/file/export-pair SHA-256 values,
+logical content fingerprint and exact group/row inventory. It never stores the
+Rules database's own final file hash. The API adds that hash after opening the
+completed file, and variant/API cache validators change with Rules bytes. Startup
+and database-set health check typed relationships, counts and fingerprints;
+missing or damaged v11 data cannot fall back to a sidecar. The offline builder
+uses a temporary v10 Rules model for source projection and then exports the
+final v11 model within its disposable work directory.
+
+**Legacy v9/v10 loose publication retired:**
+
+Earlier versions generated a release-paired `variant-usage.json` through
+`tools.build_variant_usage --publish` and checked its bytes separately.
+The normal complete build now embeds the v2 reviewed-variant read model in
+`rules_n5.db`; deployment and the public API require those source-matched
+relational rows, not a JSON sidecar. The standalone variant tool retains
+source-only candidate diagnostics under ignored `local/`, with an explicit
+`--raw-db` path, but no longer
+offers `--publish` or `--check-publication`. Raw archive fingerprints
+remain source evidence; they are not a second runtime artifact contract.
+Unknown, stale or malformed embedded facts fail closed, and without a
+valid read model `/api/variant-usage` returns `503`.
 
 The API requires one canonical `record_id` such as
 `skill:doctor` or `equipment:medikit`. It returns only that record's exact
@@ -2479,7 +2548,7 @@ as provenance. Include traversal and Peripheral access describe context,
 verified compatible Army contexts remain source-only. Deterministic ordering,
 source-pair fingerprints, fail-closed exclusions, and the published API/
 browser contract are specified in the implemented sections above and
-[variant-source evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
+[variant-source evidence](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
 The dated V1S-062 design-only workplan is retained in Git history, not
 presented as unfinished implementation.
 
@@ -2498,8 +2567,9 @@ Neither entry changes a Unit Attribute, grants a Regular Order to a
 Combat Group's Order Pool, assumes both extras co-occur or implements
 roster legality. Source counts and the closed validation grammar are
 guarded by `tests/test_audit_source_variant_inputs.py`; the published
-schema-v9 rules/publication pair was refreshed via
-`tools.review_lieutenant_variant`. The current source audit reports
+schema-v9 rules/publication pair was historically refreshed using the
+now-retired `tools.review_lieutenant_variant` procedure. The current
+source audit reports
 **21 reviewed-extra / 13 unresolved Skill source IDs**. This metadata
 is not a published cross-Army Unit usage index.
 
@@ -2572,15 +2642,16 @@ Repeatable API/browser verification belongs to
 
 ### Reviewed Restrictions Chart projection
 
-**Current.** The N5.3 p. 194 Restrictions Chart has one reviewed
-source-only manifest at
-`config/validation/restrictions-source-chart.json`. Its six ordered
-subjects and 14 negative conditions are projected reproducibly to
-`src/infinity_db/web/static/restrictions-reference.json` by
-`tools.audit_restrictions_source_chart`. The packaged JSON is the
-runtime read model for the dedicated
-[General Rules Restrictions chart](/rules/restrictions); the browser
-does not inspect maintained configuration or infer rules semantics.
+The N5.3 p. 194 Restrictions Chart has one reviewed source manifest
+at `config/validation/restrictions-source-chart.json`. Its six ordered
+subjects and 14 negative conditions are compiled into relational
+`restriction_chart_rows` and related tables by the complete Rules
+database builder. The current Rules v17 runtime serves
+`GET /api/restrictions/chart` from SQLite, not from the maintained
+source JSON. The former
+`src/infinity_db/web/static/restrictions-reference.json` remains
+packaged for legacy pre-v13 compatibility and as a checked build input.
+Neither serving path infers action legality.
 
 Each condition retains a source action and scope, player-readable
 description, optional exact destination link and original
@@ -2637,9 +2708,297 @@ edges retain source-qualified display labels. No unsupported
 generic edge, Troop Type record or ladder Skill was added, and no
 Unit/profile permissions are inferred.
 
-### Restriction persistence and version-aware API (v9 locally promoted)
+### Embedded chart projection in Rules v13
 
-**Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**
+Rules v13/compatibility 15 embeds the source-reviewed educational chart
+in ordered `restriction_chart_rows` and
+`restriction_chart_conditions` tables, with a separate ordered
+`restriction_chart_qualifiers` key/value table and
+`restriction_chart_metadata` record for the current primary PDF
+and deterministic payload fingerprint. The build checks that every
+chart condition corresponds exactly to one of the 14 stored normalized
+`restriction_constraints` by source subject/action, scope, target,
+operation and qualifiers; it validates source PDF identity, URL, page
+and SHA. The two models intentionally remain separate: display labels,
+source order, qualified explanations and navigation are not rules
+evaluation semantics.
+
+`RulesDatabase.restriction_chart_payload()` and
+`GET /api/restrictions/chart` reconstruct the former JSON read model
+without a runtime file read in v13. Invalid/missing relational rows,
+provenance or fingerprints fail closed. The current Rules v17 runtime uses the relational projection; its former
+static JSON serving path was retired in the completed cutover. The standard
+`/api/restrictions` contract and absence-of-legality guarantee remain unchanged.
+
+### Reviewed Trait Wiki links in Rules v14
+
+`config/catalogs/trait-wiki-references.json` is editable maintained
+source curation. The Rules v14/compatibility-16 schema first materialized
+its 33 exact canonical `trait:<slug>` identities into relational
+`trait_source_links`: source collection ID and existing Trait record ID,
+stable position, reviewed display name and the exact observed Wiki
+`/Traits#fragment` URL. Composite foreign keys link each row to its
+current Rules record. `trait_wiki_metadata` stores the maintained
+format/version, complete row count and deterministic content fingerprint.
+
+At build and read time, the complete link set must match **all current
+canonical Traits**, names and valid HTTPS Wiki fragments. Missing,
+ambiguous, mismatched and altered source links fail closed; a link is a
+reviewed locator, not an independently authored Trait definition or a
+claim about live upstream Wiki availability. The exact source JSON
+and builder-input hash remain provenance; no runtime link inference
+from slugs, names or unverified URL transformations is introduced.
+
+`TraitCatalog` reads `RulesDatabase.trait_wiki_links_payload()`
+from the current Rules database rather than packaged maintained JSON.
+The public `/api/traits` listing and detail shape, `wiki` fields,
+canonical identifiers and browser links remain unchanged. Historical
+schema adapters are separate source/fixture compatibility paths.
+
+### Exact Combined Saving Roll annotations in Rules v15
+
+The editable `config/catalogs/weapon-combined-saving-rolls.json`
+retains the three source-reviewed Plasma weapons and six exact
+Weapon-profile/mode annotations. Rules v15 (compatibility 17) embeds
+them in `weapon_combined_saving_roll_profiles`, keyed by
+`(weapon_id, mode)`. Each row retains the authored name, mode order,
+source Ammunition ID/string, Saving Roll text and count string;
+`combined_saving_roll_metadata` pins the selected Army database SHA,
+current N5.3 core PDF source ID/SHA, printed page 67, and the
+reviewed Critical extra-ARM-roll fact. The content fingerprint
+verifies the complete mode inventory.
+
+The build validates that all six exact source signatures match the
+selected Army Weapon catalog, without deriving any rule from punctuation.
+Source-only and unexplained Weapon modes do not acquire an annotation.
+The read model preserves the pre-v15 signature dictionary and existing
+`combined_saving_roll` API payload. `CatalogRules` reads the persisted
+annotations from the selected Rules database; historical source-only
+paths retain their validated JSON adapter. This is a reviewed
+reference annotation **not** an executable saving-roll calculator,
+Ammunition composition parser or generic Critical rule expansion.
+
+### Reviewed Ammunition identities and composition links in Rules v16
+
+`config/catalogs/weapon-ammunition-references.json` remains the
+editable reviewed source map. The Rules v16/compatibility-18
+schema embeds its 16 exact Army Ammunition source ID/name pairs
+in `weapon_ammunition_links`; ordered
+`weapon_ammunition_segments` retain literal display text and
+optional links to N5 `ammunition:<slug>` records, while
+`weapon_ammunition_components` holds the ten separately reviewed,
+ordered relationships for the five combined identities. Composite
+foreign keys bind all linked IDs to their existing N5 rule
+records; source-collection context, selected Army SHA, primary N5
+source identity and SHA, row counts, map format/version, and a
+deterministic fingerprint live in
+`weapon_ammunition_reference_metadata`.
+
+Build and read checks require the complete exact mapping,
+current canonical target kinds, reproducible segment spelling/order,
+and matching Army metadata ID/name pairs. They deliberately **do
+not** parse the `+` separator into gameplay effects, compute
+Saving Rolls or use Weapon names to infer source identifiers.
+The `WeaponAmmunitionReferences` resolver reads the same mapping
+from SQLite in v16 and returns unchanged `ammunition_parts`,
+`ammunition_effects` and `ammunition_composition` API fields.
+Pre-v16 archived releases and explicit source-only review tools continue
+to use their matching maintained JSON adapter; the current runtime reads
+the embedded projection.
+
+### Reviewed Weapon Properties in Rules v17
+
+The authored `config/catalogs/weapon-properties.json` retains
+12 distinct application-owned Weapon Properties; these do **not**
+become official N5 Ammunition, Traits or Skills. The current Rules
+v17/compatibility-19 export stores their exact slug, name, summary
+and authored order in `weapon_properties`. Ordered
+`weapon_property_origins` retain domain, role, optional current
+canonical rule-record foreign key and optional exact source-section
+string; they do not infer references from source text.
+
+`weapon_property_profiles` preserves each reviewed exact Army
+Weapon ID, nullable mode, name, Ammunition source ID/name, Saving
+Roll field and count. Ordered `weapon_property_profile_traits`
+retain the unmodified printed Trait strings, including annotation
+markers, without reinterpreting them. A non-null `mode_key`
+distinguishes NULL from named modes for unique source signatures.
+`weapon_property_metadata` binds the selected Army database SHA,
+current N5.3 primary PDF source identity/SHA, row counts,
+maintained format/version and a fingerprint of the complete
+ordered source publication. Relational records keep canonical-rule
+and source collection ownership explicit.
+
+Build and read validation check the reviewed inventory,
+current rule origins, source-profile/mode identities and the
+exact selected Army Weapon fields; mismatched, missing or corrupted
+source facts fail closed. The `WeaponProperties` resolver reads
+SQLite for v17, preserving its existing exact-match guard,
+Glossary/search links, origin previews and Weapon detail payload.
+Historical schemas and explicit source-review calls keep the
+validated JSON adapter; current serving uses the v17 SQLite projection.
+
+### Equipment presentation encodings in Army v27
+
+The editable `config/catalogs/equipment-presentation-encodings.json`
+retains two reviewed Cube/Cube 2.0 characteristic mappings.
+The current Army v31 runtime retains the presentation tables first
+introduced in Army v27/compatibility 36, without altering
+the narrow Army importer.
+`equipment_presentation_encodings` stores the exact canonical
+Equipment slug, ordered position, source characteristic ID/name
+and authored reason. Each characteristic ID is a local foreign
+key to the selected Army's `characteristics` catalog and the
+name must resolve uniquely, case-insensitively.
+`equipment_presentation_metadata` records the maintained source
+digest, source format/version, exact export-generation identity,
+row count and full content fingerprint.
+
+The published Army database includes these rows in its content checksum.
+Optional standalone paired exports retain matching raw/application
+generation metadata; the normal complete build emits no raw sibling.
+Archived v26/compatibility-35 Army fixtures remain independently
+readable under their version contract.
+
+`EquipmentCatalog` reads v27 encodings from the selected Army
+SQLite file without a runtime JSON lookup. On legacy v26 it
+retains the validated source adapter. Equipment pages and canonical rules references retain their source
+identities. Cube and Cube 2.0 appear under the Characteristics filter,
+not in the Equipment filter menu; historical Equipment-encoded filter URLs
+retain compatibility. No Equipment identity is synthesized from characteristic
+spelling, and source-review mismatches fail closed.
+
+### Reviewed Army Skill source classifications in Army v28
+
+The editable `config/catalogs/skill-source-classifications.json`
+retains six reviewed exceptions for Army's skill-like source bucket:
+Bangbomb, BTS=3, GizmoKit, Infinity Team-Ops, MediKit and
+Regular. These are source classifications, **not** newly created
+N5 canonical Skills. The Army v28/compatibility 37 schema first embedded these
+classifications; the current v31 runtime retains them.
+`skill_source_classifications` stores each exact numeric or
+slug source reference, explicit reference kind, ordered position,
+resolved application Skill identity, reviewed classification
+(`equipment`, `attribute-override`, `source-marker`, or
+`training`) and author reason. A composite foreign key targets
+`application_catalog_items` with catalog `skills`; the
+read-time resolver checks the original source reference still
+resolves uniquely without inferring an N5 rule definition.
+
+`skill_source_classification_metadata` binds the reviewed
+configuration digest, format/version, six-row count, content
+fingerprint and paired Army export generation. The published-content checksum includes these relational rows;
+explicit standalone raw-pair exports retain matching generation metadata.
+Older importer/fixture schemas have their own compatibility contract.
+
+`SkillCatalog` reads v28 classifications from Army SQLite.
+The Unit-detail presentation backend receives the same selected
+database projection instead of re-opening maintained JSON; direct
+source-only tools and older v26/v27 snapshots retain the
+validated JSON adapter. The API continues to show the original
+training/equipment/attribute/source-marker classifications and
+preserves exact source Skill identity semantics.
+
+### Unit Explorer filter semantics in Army v29
+
+The Army v29/compatibility 38 schema introduced the selected
+filter metadata used by current v31, built from the editable
+`config/catalogs/unit-filter-semantics.json` build input.
+`hidden_unit_characteristics` retains the two normalized slugs,
+source characteristic IDs, authored reasons and source ordering.
+`source_classification_memberships` retains the combined source
+classification, category ID, order and reason; ordered child rows
+in `source_classification_matches` retain each component filter
+slug and category ID. Foreign keys and the shared filter-vocabulary
+slug resolver reject missing, ambiguous or drifted source identities.
+These overlays do not rewrite source characteristics or categories.
+
+`unit_filter_metadata` binds source digest, format/version,
+Army export generation, row counts and full content fingerprint.
+The published-content checksum covers all four tables; optional paired
+raw exports retain matching generation and compatibility metadata.
+Repository classification filtering and `/api/unit-filters`
+presentation use the selected SQLite projection. Numeric/slug
+compatibility, hidden choices, combined membership and contextual
+numeric filtering retain their existing results. Corrupt v29 data
+fails closed; earlier schemas and source-only presentation tools
+retain the validated maintained-JSON adapter.
+
+### Army overview and historical identities in Army v30
+
+The Army v30/compatibility 39 schema introduced the 58 summaries
+retained in the current v31 runtime from
+`data/curated/identities/army-overview.json` and the two identities from
+`data/curated/identities/legacy-armies.json`. The JSON files remain editable
+build inputs; the summaries are InfinityDB editorial copy rather than official
+rules or newly inferred Army identities.
+
+`army_overview_text` is keyed by public Army slug and text role (`summary`),
+retaining authored order and exact text. Each row references either the
+existing current `application_armies` identity or an explicit historical
+identity through foreign keys. Current slugs resolve through the central
+application registry; all non-grouping current Armies and the authored legacy
+identities must be covered exactly once.
+
+`legacy_army_identities` is keyed by source context and explicit historical ID,
+with unique API ID/slug, original position, name, role, group ID/name/slug,
+logo locator and review reason. The context references
+`army_reference_metadata`, which names the authored legacy format/version
+and exact source digest. This identifies the curated evidence, not an
+unverified historical Army archive or edition. Parent information must match
+an existing current identity in all three fields; no parent is inferred from
+ID ranges or names. Historical IDs/slugs cannot collide with current Armies,
+and the historical records do not enter the playable application catalog.
+No aliases or current-identity replacement links are invented.
+
+`army_reference_metadata` also binds overview format/version/digest, Army
+export generation, both row counts and a full ordered content fingerprint.
+The published checksum covers all three tables; optional raw-pair
+exports retain matching generation metadata. `/api/armies` and legacy-aware
+search consume the database projection without reading either authored JSON
+file. Existing summary text, grouping, non-playability and search links remain
+unchanged. Corrupt or mismatched data fails closed; earlier schemas and
+source-review tools retain the validated JSON adapters.
+
+### Published symbol mappings in Army v31
+
+The current complete build publishes **Army v31/compatibility 40**. `published_symbol_paths` stores all 2,019 exact
+mapping keys, unique by mapping kind and identity: 60 faction/source IDs,
+918 Unit slugs, 1,033 source profile-logo URLs and eight semantic profile
+identities. These retain the existing source lookup namespaces; they are
+not inferred canonical Army/Unit identities. Their foreign keys reference
+`published_symbol_assets`, which stores paths and hashes for all 808 SVGs
+in the publication, including assets not selected by those four maps.
+
+`symbol_path_metadata` binds publication format/version, exact manifest
+digest, Army archive SHA, paired export generation, row counts and the full
+mapping/asset fingerprint. Build-time checks require the publication's named
+Army archive to match the selected database and verify every published SVG's
+actual bytes. Paths must be canonical relative SVG paths in the supported
+asset namespaces; traversal, Windows separators and unpublished targets fail
+closed. The v31 published checksum includes all three tables; the optional raw
+export retains matching compatibility/checksum metadata when explicitly requested.
+
+`SymbolCatalog` consumes this projection at v31; earlier schemas and explicit
+source tools retain the manifest adapter. Unit/Army/profile symbol selection,
+semantic-profile precedence, contextual ambiguity and existing API fields are
+unchanged. Other manifest fields remain build/graphical-publication evidence.
+The manifest is no longer read when importing or starting a v31 application.
+
+Browser HTML, version responses, module imports and cache headers share one
+per-application static revision derived from the selected mapping fingerprint
+and actual packaged static/SVG bytes. Published SVG hashes are verified against
+that immutable package inventory, cached once per process. Different selected
+mapping projections receive different versions without changing an existing
+application's responses. The optional legacy static JSON route uses a short
+cache lifetime and does not participate in the asset fingerprint. Release
+candidate checks compute the same revision from the candidate's selected Army
+database rather than a process-global default publication.
+
+### Restriction persistence and version-aware API
+
+The separate Restrictions schema was introduced in Rules v9 and is
+retained in the current Rules v17 runtime.
 `src/infinity_db/restriction_storage.py` defines a separate `restriction_constraints` SQLite table without
 rewriting `record_relations` or its API. The table retains source ID,
 printed page, pinned PDF fingerprint, source-order position, source
@@ -2664,69 +3023,47 @@ v8/compatibility-10 database, the endpoint returns
 fabricating a complete restriction set from generic relations.
 On v9/compatibility-11, it reads only the materialized table, with
 `available: true`. Zero matches never establishes legality.
-The **current browser still consumes the static Restrictions
-publication**; it does not require the new endpoint.
+The browser now uses the distinct `/api/restrictions/chart` endpoint
+for the six-row reference; this `/api/restrictions` endpoint continues
+to expose fourteen normalized conditions separately.
 
 `RulesDatabase.validate()` accepts the exact schema / compatibility pairs
-**(8, 10)**, **(9, 11)**, and **(10, 12)**. The prepared 1.0.1 release uses
-the tracked v10/compatibility-12 artifact. For v9 and v10,
-it validates the fourteen Restrictions constraints, negative polarity,
-qualifiers, and provenance. v10 additionally verifies normalized
-deployed-object structures, source-review fingerprints and foreign-key
-integrity. Invalid combinations fail closed.
+**(8, 10)**, **(9, 11)**, **(10, 12)**, **(11, 13)**,
+**(12, 14)**, **(13, 15)**, **(14, 16)**, **(15, 17)**,
+**(16, 18)** and **(17, 19)**. The current v1.1.0 runtime uses
+v17/compatibility-19; the earlier v1.0.1 release used
+v10/compatibility-12. From v9 onward the validator checks fourteen
+Restrictions constraints, negative polarity, qualifiers and provenance;
+v10 adds normalized deployed objects, v11 embedded exact variant
+usage, v12 reviewed Weapon citations, v13 the relational chart and
+v14 the source-reviewed Trait Wiki links, v15 the exact
+Combined Saving Roll signatures, v16 reviewed Ammunition links
+and v17 relational Weapon Properties.
+Invalid combinations, missing rows and corrupted provenance fail closed.
 
-Shared release staging preserves the active supported schema. For v10 it
-rebuilds the reviewed embedded object model from the pinned Army and curated
-inputs, retaining Restrictions. Audit and staging comparisons can serialize
-that embedded model in memory with a transient rules-file fingerprint;
-they do not require or regenerate an adjacent legacy JSON file for v10.
-Legacy v8/v9 comparisons continue to use the exact publication bytes.
+The one-use schema-preserving release exporter and v9-to-v10 parity/rebuild
+diagnostic are retired after the completed migration. General logical SQLite
+comparison is maintained in `infinity_db.sqlite_comparison`; current database-set
+validation owns source binding, integrity and publication completeness. Neither
+requires replaying an old schema transition or synthesizing deployed-object JSON.
 
-Normal `build-rules` now creates a **v10/compatibility-12** candidate under
-ignored `local/rules-standalone.db`, using the tracked Restrictions chart,
-reviewed deployed-object source evidence and pinned Army database. The v10
-build places identities, attributes, attribute evidence, delivery paths,
-unresolved paths, and exact Unit uses in relational tables within rules.db.
-It records the source Army database fingerprint without embedding the
-rules database's own hash, which would be self-referential.
+Normal `infinity-db build` creates Army v31 and Rules v17 together in the
+selected complete directory. Rules embeds object identities, attributes and
+evidence, delivery paths, unresolved paths and exact Unit uses, recording the
+required Army fingerprint without a self-referential Rules hash. Other embedded
+projections and shared build provenance are validated before replacement.
 
-Explicit `--legacy-v8` and `--legacy-v9` preserve older standalone
-builders. All CLI modes reject writes directly to tracked
-`data/generated/rules.db`. The v10 development artifacts were promoted together
-on 2026-11-08; the tagged 1.0.0 v9/JSON release remains available for rollback.
-`python -m tools.build_v10_runtime_candidate` stages the full pinned
-four-file runtime set in ignored `local/v10-candidate/`, including v2
-`variant-usage.json` without a deployed-object publication fingerprint and
-matching reviewed Weapon-profile citations. `--check` rederives the publication
-inputs and checks their bytes and database provenance. `tools.prepare_runtime_bundle`
-copies the source-verified four-file v10 (or five-file legacy v9) set into
-ignored `data/runtime/` for Docker packaging. This is image-build preparation,
-not runtime migration or multi-file publication locking.
+The narrow `build-rules` developer command retains a standalone v10 export under
+ignored `local/work/build/rules-standalone.db`; it cannot overwrite the tracked
+Rules file and does not assemble a serving directory. Legacy CLI schema modes,
+checkout assembly, v10 candidate publication and Docker bundle-copy wrappers
+are retired. Current serving requires the complete schemas; low-level fixture
+export remains explicit. Historical v9/v10 release state is preserved in Git.
 
-The v9 build is byte-deterministic in tests, and read-only HTTP
-checks confirm both v8-unavailable and v9-available responses,
-filtering, backward-compatible Skills/Equipment responses, and
-unchanged legacy relations. The application also accepts the original
-v8 snapshot as a rollback source.
-
-**Historical v1.0.0 development artifacts (2026-11-07):**
-
-The guarded staging workflow preserved the **v9/compatibility-11** schema,
-all 14 reviewed Restrictions and all 17 deployed objects. The rules
-database SHA-256 is
-`90d600a5b7b0425ee590ef90891481433e179d4e96f4a7b1dbf26edfde672ca9`;
-its matching deployed-object publication SHA-256 is
-`cdcb794f18df52890b1ba5b908f525aa59235c55307854a28f81996927f9a723`,
-and the exact-variant usage publication SHA-256 is
-`da26a4e299031ab419c56f59c2333994bfc8d62147671752aaf2c3f2e3fc32ee`.
-The matched Weapon-profile citation publication SHA-256 is
-`ad3123832c5d777d91739ed6897182f6191ba1985f094f72114d49969ad86db1`.
-The V1S-083 source-context publication changed nine reference owners,
-preserving the other 490 records and all dependent payloads apart from pins.
-The original v8 pair remains available in ignored local recovery storage.
-These historical hashes identify development artifacts before the v10 promotion;
-they are not the current 1.0.1 artifact identities. Local promotion does not
-establish hosted or deployed acceptance.
+Low-level source fixtures retain deterministic reference export, additive
+Restrictions responses, filtering and unchanged legacy relations. They do not
+establish support for rebuilding or serving a historical release set. Rollback
+uses the matching retained release artifacts and image.
 
 **Legacy relationship consumer review:** the reviewed Motorcycle →
 Jump and Irregular → Lieutenant graph edges are retained as
@@ -2744,27 +3081,6 @@ projection tests verify this backward-compatible structural
 contract. The 14 typed source restrictions, not these generic
 graph edges, remain the source of conditional semantics; the seven
 source-only/unrepresentable generic edges are not manufactured.
-
-**Reviewed PDF source pins (2026-10-30):** All 12 PDF source declarations
-in the historical v9 database received reviewed byte fingerprints for six
-documents: English/Spanish N5.3 core, English/Spanish FAQ v0.1, historical
-English FAQ v0.0 and English ITS Season 18. After the English core refresh,
-a guarded paired refresh permitted only the nine remaining NULL-to-hash
-cells. Every other stored row and the complete database schema, including
-indexes, remained identical, as did typed Restrictions and reviewed objects.
-Two independent exports were byte-identical. The rules SHA-256 is
-`983aa2d86220120fc9fce9b50ba4a1ba00c600ee052d904517e20de49383a18a`;
-the matching ignored publication SHA-256 is
-`d6d67811a6a14f5a03976d13e656f46829f14be18594ead8efcc620fce0fe670`.
-These historical fingerprints include the subsequent Surprise Attack
-occurrence-metadata refresh and 2026-10-31 source-reference additions.
-The paired v9 rebuild restores the fourteen typed Restrictions after an
-ordinary v8 rebuild replaced the release database; legacy relations and
-reviewed deployed-object content remain unchanged.
-The original matched v9 pair is retained under ignored `local/`; the retained
-local audit evidence records its recovery location. The publication changes only
-its rules-database and curated-source fingerprints. This is local provenance
-acceptance, separate from final release and hosted deployment gates.
 
 The API, schema and rollback contract remains covered by
 `tests/test_restriction_storage_candidate.py` with both
@@ -2790,7 +3106,7 @@ availability, so duplicate source representations do not inflate player-facing t
 
 ## Context-coherent filtering
 
-Profile/loadout-sensitive filters must be satisfied in one compatible occurrence context.
+Legacy queries that omit `matching_scope` keep the previous profile-group/loadout coherence model.
 
 - AVA belongs to an Army/profile occurrence.
 - Points and SWC belong to loadout occurrences.
@@ -2799,9 +3115,147 @@ Profile/loadout-sensitive filters must be satisfied in one compatible occurrence
 - Loadout-local Weapons/Equipment/Skills stay with the loadout.
 - Unit-option facts remain Unit-wide when the source does not attach them to a profile group.
 
-When AVA/Points/SWC participates in a query, another selected profile/loadout criterion cannot be
-satisfied by an unrelated option elsewhere on the same logical Unit. This prevents semantically
-impossible cross-option matches.
+With the legacy matcher, AVA/Points/SWC constrains an Army/profile-group/loadout context rather than
+an unrelated alternative option. Explicit new matching scopes are defined below.
+
+An explicit `matching_scope` selects one of three nested source-backed
+contexts, independently of each categorical AND/OR switch:
+
+- `profile` (**Same profile**, fresh-view default): all AND criteria must occur
+  on one exact Army/source-Unit/group/profile occurrence and its compatible
+  selected loadout. Alternative profiles and unrelated models do not combine.
+- `loadout` (**Same loadout**): criteria may occur on constituent source profiles
+  and their one selected loadout, plus exact `profile_occurrence_includes` and
+  `loadout_occurrence_includes` targets. Transmutation states in that loadout
+  may collectively satisfy a reference query without implying simultaneous
+  active-game-state abilities.
+- `unit` (**Anywhere in Unit**): criteria may occur across alternative
+  configurations and reviewed source representations of the same logical Unit.
+  Source Unit-option properties and `unit_option_include_targets` contribute
+  only at this broadest scope, and only from non-disabled Unit options.
+  Another logical Unit never contributes.
+
+An Include edge is resolved to a unique loadout occurrence in the same Army
+and source Unit. Missing/ambiguous targets and cycles fail closed. Source
+`profile_peripherals`/`option_peripherals` records establish attachments,
+but embedded Peripheral identities alone do not publish property payloads;
+their Skills cannot be inferred from names or eligible Controller targets.
+`application_peripheral_controller_access` describes available choices, not
+automatic inclusions. Aggregating properties never transfers ownership
+from an included Peripheral to its Controller.
+
+Disabled loadout occurrences remain available as unique Include targets, but
+are not independently selectable root contexts in A/C/B. A group with only
+disabled loadouts does not generate a synthetic root; a profile-only group
+with no loadouts retains its normal profile context. Such Units remain
+visible without filters, without inventing selectable configurations.
+
+The Army 2026-09-29 snapshot has one reviewed omission: Unit #965
+KISS! (Repeater) loadout option 3 has no source Equipment array, while
+its name identifies Repeater (source Equipment 63). Its alternative
+KISS! loadout instead explicitly carries Deployable Repeater (111).
+The authored, snapshot-hash-bound additions in
+`data/curated/relationships/loadout-capabilities.json` are checked
+against exact Army/source-Unit/group/option coordinates, loadout name,
+catalog name and absence from source payload at build time. Only the
+three KISS! (Repeater) occurrences in Combined Army, Onyx and Next Wave
+are currently reviewed. Complete builds project validated facts into
+`__infinity_metadata.reviewedLoadoutCapabilities`, with a curated
+content SHA-256 and count, leaving immutable Army source payloads
+untouched. Runtime Unit detail and the explicit A/C/B evaluator read
+only this database projection; the facts stay owned by KISS's selected
+loadout and may contribute to Bit only through its exact Includes edge.
+Other snapshot hashes do not inherit the correction. No arbitrary
+source-name substring creates a Skill or Equipment fact.
+
+With explicit scopes, numeric restrictions are applied to eligible contexts
+before evaluating categorical requirements. Under `unit`, a qualifying
+numeric occurrence can coexist with other categorical alternatives of
+that same logical Unit, but cannot make a different Unit eligible.
+
+Fresh Unit Explorer views default to `matching_scope=profile` and **AND within
+each categorical filter** and **AND between filters**. Each of six categorical
+filters has its own independent AND/OR switch. AND requires all selected
+choices in one evaluated context at the chosen scope; OR requires any of its
+choices, without double-counting Units. Different categories still combine
+with AND. Shared URLs without `matching_scope` retain the legacy matcher and
+show a compatibility selector until an explicit scope is chosen. Historical
+links without `and_filters` retain legacy OR-within-category selection. Sorting,
+pagination and extended presentation do not affect matching.
+
+When an explicit `profile` or `loadout` scope is filtered, returned page
+items can include `matching_contexts: {total, source_matches, examples}`.
+The disclosure groups matching source occurrences with the same profile/loadout
+names, cost and named Skills/Equipment/Weapons. `source_matches` preserves
+the original occurrence count; `total` counts the grouped summaries.
+Up to five examples show Points, SWC and at most three distinguishing catalog
+items, preferring one each of Weapons, Equipment and Skills. Capabilities
+shared by all matching summaries are omitted unless only one summary exists.
+Names are resolved through the published catalog, not inferred from loadout
+text or unreviewed extras. This is a concise comparison, not an exhaustive
+loadout inventory or a claim that alternate profiles are simultaneously usable.
+Broad `unit` scope and legacy requests omit the field rather than assigning
+one configuration to a match assembled across alternatives.
+
+The `/api/units` parameters `skill_id`, `equipment_id`, `weapon_id`,
+`troop_type`, `classification` and `characteristic` accept one legacy
+slug/numeric ID or up to 16 comma-separated selections. The API normalizes
+and deduplicates identifiers in deterministic order and rejects repeated
+query keys and malformed identifiers. Unknown values continue to fail closed.
+The optional `and_filters` parameter accepts comma-separated category names:
+`skill`, `equipment`, `weapon`, `troop_type`, `classification`, and
+`characteristic`; omitted categories use OR. The new `matching_scope` parameter
+accepts `profile`, `loadout`, or `unit`; omission preserves legacy behavior.
+Share-state v1 appends the new field after `and_filters`, keeping all historical
+field indices and tokens valid without a version bump. An application catalog
+choice may match through any of its valid source IDs, but distinct AND
+choices must share the selected matching scope. NOT/exclusion is unsupported.
+
+Presentation-encoded Equipment selections resolve through their source
+Characteristics and respect the same profile-group/loadout context in combined
+queries. **Cube and Cube 2.0 are not selectable from the Equipment filter menu**;
+their choices remain in Characteristics, and their existing catalog routes and
+historical filter URLs remain compatible. Unknown mixed identifiers fail closed.
+
+The optional `/api/units?counts=1` response retains `usage_counts` and
+`baseline_usage_counts`. When `matching_scope` is explicit it also exposes
+`prospective_counts`; all maps contain `skills`, `equipment`, `weapons`,
+`troop_types`, `classifications`, and `characteristics`, keyed by application
+item ID, vocabulary ID, or encoded-Equipment slug. Every count represents
+**distinct logical Units**, not profiles, loadouts or included models.
+
+`usage_counts` retains its legacy **source-usage within the currently matching
+population** interpretation, including the prior context-specific and raw
+Unit-wide behavior. It is not the number of results after selecting an option;
+existing API callers remain compatible. `prospective_counts` drives the scoped
+player-facing menus. An **unselected** option has exactly the result `total`
+after selecting it under current AND/OR and matching scope; a **selected**
+option displays the current `total`. Both result membership and prospective
+counts use one shared scope evaluator and an indexed source occurrence graph,
+not separate database queries for each menu option.
+
+`baseline_usage_counts` ignores discovery filters, Army selection and search,
+but retains the optional-unit Settings flags (Mercenaries, Spec-Ops, Team
+Operations, Reinforcements). With an explicit matching scope, the baseline is
+computed using that scope's prospective counts, including source-backed
+Includes. Without a scope, the legacy raw usage baseline is unchanged.
+Options absent from the baseline are hidden unless already selected; baseline
+options with zero current prospective matches remain selectable and dimmed.
+Unlisted count keys mean zero. Count extensions are opt-in; API clients without
+`counts=1` retain their previous response shape.
+
+Unit Explorer keeps the last displayed matching-Unit and per-option numbers
+visible while an updated request is pending; accessible loading/error states
+remain available. Each categorical filter's Clear button resets both selected
+items and that filter's local option search. Option lists reserve a scrollbar
+gutter so the usage count column remains unobstructed.
+
+The Specialist Troops selector exposes `Standard set` as the single currently
+distinct candidate set. Reviewed Domination, Supplies and Firefight candidate
+sets are identical on the current snapshot; a regression test guards this
+assumption. The API still accepts their context keys, and older UI URLs
+normalize these equivalent choices to Standard set. Actual Specialist status
+remains determined by the chosen scenario and profile.
 
 Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
 the source facts. A combined source Classification can participate in more than one public
@@ -2840,7 +3294,7 @@ in one pinned snapshot does not justify permanently excluding their semantics.
 
 ### Source-field occupancy and publication limits
 
-`tools/audit_source_presentation.py` assigns a presentation/scope policy to
+`tools/data/audit_source_presentation.py` assigns a presentation/scope policy to
 every normalized source field, while its paired-raw-database inspection checks
 whether potential gaps actually contain values. The 2026-10-15 pinned
 Army-source assessment covered **70 source tables and 441 fields**. Of these,
@@ -2900,6 +3354,19 @@ name.
 
 Runtime Unit detail consumes the materialized application relationships and never opens the curated
 Peripheral JSON directly.
+
+In Unit-detail presentation, a unique exact name-and-quantity match between a
+source `Includes` target and an attached Peripheral is displayed only once as
+**Included peripherals**, linked to that target loadout (for example, KISS!
+(Repeater) on Bit). Other Include targets remain under **Includes**; Peripheral
+attachments without an unambiguous Include target remain under **Attached
+peripherals**. Controller eligibility appears separately as **Selectable
+peripherals — available to select, not automatically included**. No
+attachment, subtype, selected loadout, or requirement is inferred from an
+access pool or a partial name match. The separate profile group of an
+included Peripheral remains visible because its stats and loadouts belong
+to that Trooper. Original source occurrences and API relationship collections
+remain unchanged.
 
 ## Fireteams
 
@@ -3548,7 +4015,7 @@ the four Core missions. Browser selection state uses the common versioned
 share-state token; legacy explicit `army_points` input remains readable.
 Broader geometry/element vocabularies remain post-1.0 work. The
 [Core scenario browser acceptance](testing.md#frozen-pair-four-scenario-interactions-v1s-045)
-is recorded separately from the [remaining release gates](TODO.md#final-10-acceptance);
+is recorded separately from the [release checklist](releasing.md#development-freeze-and-release-only-handoff);
 known source discrepancies retain their disclosed scope.
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
@@ -3772,10 +4239,70 @@ finalization. A SQLite connection context manager does not itself begin a transa
 DDL; the rules schema script starts its transaction internally because `executescript` commits any
 previously pending transaction.
 
+The complete Rules builder still constructs its initial v8 relational schema
+and adds the reviewed embedded projections through v9–v17 as build-time
+stages. These stages are used to produce the current v17 publication, not
+an invitation to serve a historical database in place of a complete set.
+Normal checkout/Docker serving requires the validated current Rules v17
+publication together with matched Army v31 and ITS 18 v2; separately
+selected non-complete databases are only for explicit inspection or
+targeted fixtures. The [runtime target contract](architecture.md#runtime-targets)
+owns operational selection.
+
+### Shared runtime build-input provenance
+
+**Project domains:** Data processing, Project infrastructure
+
+The complete runtime builder records `database_set_build` in both Army
+metadata (including its build-only raw sibling) and Rules metadata. This is
+additive build provenance in the existing metadata tables, not new gameplay
+facts or a mandatory schema migration for older tracked sets.
+
+The version-1 record contains `formatVersion`, `buildSetId`, `family` and
+`manifest`. Rules additionally requires `requiredArmyExportPairSha256` matching
+the selected Army's existing `export_pair_sha256`. Families are currently
+`army` and `rules-n5`; ITS 18 is now published independently in
+`its_18.db` and checked against the selected Army/Rules set.
+
+`buildSetId` is SHA-256 of the domain prefix `InfinityDB database-set build v1`
+followed by a null byte and the canonical UTF-8 JSON input manifest (sorted
+object keys, no whitespace, preserved Unicode, no non-finite numbers).
+The manifest declares its format/version, selected families, `builderRevision`,
+Army archive and API-metadata basenames/exact SHA-256 values, and repository-relative
+input file digests. `builderRevision` hashes the sorted source-code path/digest
+map; it is a code-content identity, not a Git commit or an output-file hash.
+Source-code digests use LF bytes under the repository's text policy, so an
+older Windows CRLF checkout does not create a different builder identity.
+Army archive/API metadata and maintained-input file digests remain byte-exact.
+
+The current input envelope conservatively includes JSON under `config/catalogs`,
+`config/identity`, `config/validation`, `config/symbols` and `data/curated`
+(excluding the reserved `example.json` template), the symbol-publication manifest,
+static Restrictions chart, `pyproject.toml`, and package Python sources outside
+`src/infinity_db/web/`. The web layer is excluded because it serves already-built
+data rather than contributing to database generation; build/model code remains
+source-pinned. Declaring a file does not promote
+unimplemented review knowledge into game semantics or make research PDFs/Wiki
+archives implicit inputs. Absolute host/output paths, temporary filenames, Git
+state, wall-clock timestamps and final database hashes are excluded.
+
+The ID is computed before output creation. Army export fingerprints include
+the shared metadata; Rules binds that export generation and its normal embedded
+model binds the completed Army bytes in one direction. Neither database embeds
+its own final byte digest. The shared set validator rejects altered/unsupported
+records, different IDs, missing family provenance, wrong Army generations and
+archive/API-metadata identities that disagree with the selected Army metadata.
+Older standalone fixtures without a record may still be inspected as
+`not-recorded` in explicit non-complete validation; complete serving requires
+the current source-bound set. Runtime health does not compare the manifest with
+current working-tree files; the builder rechecks declared inputs before
+publication. Release/source-freshness validation runs in the
+[release process](releasing.md) and [deployment verifier](ci.md#deployment-smoke).
+
 ## Snapshot provenance
 
-Army, wiki, and symbol acquisition uses generated snapshot provenance records described in
-`data/README.md`.
+Army, wiki, and externally produced symbol snapshots use generated provenance
+records described in `data/README.md`.
 
 The current provenance model distinguishes:
 
@@ -3787,7 +4314,7 @@ The current provenance model distinguishes:
 
 `data/README.md` owns the current provenance-format version and compatibility rules.
 
-Acquisition time answers when InfinityDB downloaded the snapshot. `source.dataChangedOn` answers when
+Acquisition time answers when the producer downloaded the snapshot. `source.dataChangedOn` answers when
 the contained Army source data most recently reports changing. Those dates must not be substituted
 for each other.
 
@@ -3818,15 +4345,16 @@ Current build validation rejects normalized Army data without valid required met
 ## Application query model
 
 Runtime repositories query canonical/materialized application structures and compose contextual
-source detail as needed. They must not infer semantics from raw IDs or reach into `infinity.raw.db`.
+source detail as needed. They must not infer semantics from raw IDs or reach into the optional
+legacy `army.raw.db` source archive.
 
 Examples:
 
 - Unit lists operate on logical Unit identity and materialized Army availability.
 - Unit detail returns one logical Unit with source/Army/profile/loadout context preserved.
 - catalog filters resolve canonical application identity and match all materialized source members.
-- rules-backed States and other rules-only concepts are read from `rules.db`; their presence does
-  not imply mutable in-game state in `infinity.db`.
+- rules-backed States and other rules-only concepts are read from `rules_n5.db`; their presence does
+  not imply mutable in-game state in `army.db`.
 - search and Glossary project canonical domain identities rather than creating another identity
   namespace.
 
@@ -3837,20 +4365,20 @@ The HTTP/browser layer may change presentation without changing these semantic o
 Current semantic contracts are executable through focused audit tools rather than copied as
 historical inventories into this document. Important examples include:
 
-- `tools/audit_database_separation.py` — application/raw table boundary;
-- `tools/audit_runtime_database_surface.py` — runtime repository access boundary;
-- `tools/audit_unit_semantics.py` — logical Unit/source semantics;
-- `tools/audit_profile_semantics.py` and `tools/audit_loadout_semantics.py` — profile/loadout payload
+- `tools/data/audit_database_separation.py` — application/raw table boundary;
+- `tools/data/audit_runtime_database_surface.py` — runtime repository access boundary;
+- `tools/data/audit_unit_semantics.py` — logical Unit/source semantics;
+- `tools/data/audit_profile_semantics.py` and `tools/data/audit_loadout_semantics.py` — profile/loadout payload
   boundaries;
-- `tools/audit_army_faction_semantics.py` — Army/grouping/faction semantics;
-- `tools/audit_peripheral_semantics.py` — Peripheral mappings/access pools;
-- `tools/audit_relationship_semantics.py` — source/application relationship interpretation;
-- `tools/audit_fireteam_semantics.py` — Fireteam chart semantics;
-- `tools/audit_source_presentation.py` — source-to-player-presentation coverage;
-- `tools/audit_semantic_deduplication.py` — canonicalization evidence;
-- `tools/audit_enrichment_coverage.py` and `tools/audit_rules_interactions.py` — rules/reference
+- `tools/data/audit_army_faction_semantics.py` — Army/grouping/faction semantics;
+- `tools/data/audit_peripheral_semantics.py` — Peripheral mappings/access pools;
+- `tools/data/audit_relationship_semantics.py` — source/application relationship interpretation;
+- `tools/data/audit_fireteam_semantics.py` — Fireteam chart semantics;
+- `tools/data/audit_source_presentation.py` — source-to-player-presentation coverage;
+- `tools/data/audit_semantic_deduplication.py` — canonicalization evidence;
+- `tools/data/audit_enrichment_coverage.py` and `tools/data/audit_rules_interactions.py` — rules/reference
   coverage and interaction review; and
-- `tools/audit_maintained_text_links.py` — maintained-prose semantic-link completeness.
+- `tools/data/audit_maintained_text_links.py` — maintained-prose semantic-link completeness.
 
 Generated reports and one-off audit measurements belong under ignored report/audit workspaces. Only
 durable semantic conclusions belong in this document.

@@ -30,6 +30,6 @@ jobs:
 
       - name: Validate installed wheel outside checkout
         run: >-
-          python tools/installed_wheel_smoke.py
+          python tools/ci/installed_wheel_smoke.py
           --wheel "$RUNNER_TEMP"/wheelhouse/*.whl
           --work-dir "$RUNNER_TEMP/wheel-smoke"

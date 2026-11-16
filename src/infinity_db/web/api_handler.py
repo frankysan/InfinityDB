@@ -16,7 +16,6 @@ from infinity_db.army_overview import (
     army_overview_group,
     army_overview_out_of_catalog,
 )
-from infinity_db.army_overview_copy import load_army_overview_copy
 from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
@@ -29,17 +28,17 @@ from infinity_db.domain_references import (
     enrich_rule_relation_references,
     rule_record_public_reference,
 )
-from infinity_db.domain_slugs import require_domain_slug
+from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
 from infinity_db.glossary_catalog import GlossaryCatalog
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
-from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.maintained_text_references import (
     enrich_maintained_text_references,
     maintained_text_tokens,
     maintained_text_tokens_batch,
 )
+from infinity_db.publication_registry import PublicationReference, PublicationRegistry
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.scenario_catalog import ScenarioCatalog
@@ -346,6 +345,28 @@ def _domain_filter_identifier(params: dict, key: str) -> int | str | None:
         raise ValueError("This filter selection is invalid.") from exc
 
 
+def _unit_filter_selection(
+    params: dict[str, list[str]], key: str
+) -> int | str | tuple[int | str, ...] | None:
+    """Parse a single legacy identifier or up to 16 OR-selected identifiers."""
+
+    raw = params.get(key, [""])[0]
+    if not raw:
+        return None
+    values = raw.split(",")
+    if len(raw) > 1024 or len(values) > 16 or any(not value for value in values):
+        raise ValueError("This filter selection is invalid.")
+    selected = tuple(
+        item
+        for value in values
+        if (item := _domain_filter_identifier({key: [value]}, key)) is not None
+    )
+    if len(selected) != len(values):
+        raise ValueError("This filter selection is invalid.")
+    ordered = tuple(sorted(set(selected), key=str))
+    return ordered[0] if len(ordered) == 1 else ordered
+
+
 def _validated_query_params(query: str, allowed: set[str]) -> dict[str, list[str]]:
     params = parse_qs(query, keep_blank_values=True, max_num_fields=40)
     unknown = sorted(set(params) - allowed)
@@ -400,6 +421,9 @@ def _unit_query(query: str) -> dict:
             "reinforcement",
             "order",
             "extended",
+            "counts",
+            "and_filters",
+            "matching_scope",
             "cache_bust",
         }:
             raise ValueError(f"Unknown query parameter: {key}")
@@ -438,17 +462,31 @@ def _unit_query(query: str) -> dict:
     except ValueError as exc:
         raise ValueError("This filter selection is invalid.") from exc
 
+    and_filters = params.get("and_filters", [""])[0]
+    allowed_and = {
+        "skill", "equipment", "weapon", "troop_type", "classification", "characteristic",
+    }
+    and_keys = and_filters.split(",") if and_filters else []
+    if len(and_filters) > 128 or any(key not in allowed_and for key in and_keys):
+        raise ValueError("Invalid AND filter selection")
+    if len(and_keys) != len(set(and_keys)):
+        raise ValueError("Duplicate AND filter selection")
+    matching_scope = params.get("matching_scope", [""])[0]
+    if matching_scope not in {"", "profile", "loadout", "unit"}:
+        raise ValueError("Invalid matching scope")
     return {
+        "and_filters": tuple(sorted(and_keys)),
+        "matching_scope": matching_scope or None,
         "army_id": _domain_filter_identifier(params, "army_id"),
         "declared_faction_id": declared_faction_id,
         "search": search,
-        "skill_id": _domain_filter_identifier(params, "skill_id"),
+        "skill_id": _unit_filter_selection(params, "skill_id"),
         "specialist": specialist,
-        "equipment_id": _domain_filter_identifier(params, "equipment_id"),
-        "weapon_id": _domain_filter_identifier(params, "weapon_id"),
-        "troop_type": _domain_filter_identifier(params, "troop_type"),
-        "classification": _domain_filter_identifier(params, "classification"),
-        "characteristic": _domain_filter_identifier(params, "characteristic"),
+        "equipment_id": _unit_filter_selection(params, "equipment_id"),
+        "weapon_id": _unit_filter_selection(params, "weapon_id"),
+        "troop_type": _unit_filter_selection(params, "troop_type"),
+        "classification": _unit_filter_selection(params, "classification"),
+        "characteristic": _unit_filter_selection(params, "characteristic"),
         "ava": ava,
         "ava_min": ava_min,
         "ava_max": ava_max,
@@ -466,6 +504,7 @@ def _unit_query(query: str) -> dict:
         "reinforcement": _flag(params, "reinforcement"),
         "descending": order == "desc",
         "extended": _flag(params, "extended"),
+        "include_usage_counts": _flag(params, "counts"),
     }
 
 
@@ -479,10 +518,12 @@ class ApiHandler:
         *,
         static_revision: str,
         snapshot_revision: str,
+        symbol_catalog: SymbolCatalog,
         deployed_objects: dict[str, Any] | None = None,
         variant_usage: dict[str, Any] | None = None,
         variant_usage_revision: str | None = None,
         weapon_profile_citations: ProfileCitations | None = None,
+        publication_registry: PublicationRegistry | None = None,
     ) -> None:
         self.database = database
         self.rules_database = rules_database
@@ -504,10 +545,10 @@ class ApiHandler:
         self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
         self.label_catalog = LabelCatalog(rules_database)
         self.general_rules_catalog = RulesRecordCatalog(rules_database, "rules")
-        self.scenario_catalog = ScenarioCatalog(rules_database)
+        self.scenario_catalog = ScenarioCatalog(rules_database, publication_registry)
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
         self._glossary_items_cache: list[dict[str, Any]] | None = None
-        self.legacy_armies = load_legacy_armies()
+        self.army_overview_summaries, self.legacy_armies = database.army_reference_data()
         self.search_catalog = SearchCatalog(
             database,
             self.skill_catalog,
@@ -522,8 +563,7 @@ class ApiHandler:
             self.legacy_armies,
         )
         self.catalog_rules = CatalogRules(rules_database, database=database)
-        self.symbol_catalog = SymbolCatalog()
-        self.army_overview_summaries = load_army_overview_copy()
+        self.symbol_catalog = symbol_catalog
         self.fireteam_rules_reference = fireteam_reference(rules_database)
         if self.fireteam_rules_reference is not None:
             self.fireteam_rules_reference = enrich_maintained_text_references(
@@ -579,6 +619,25 @@ class ApiHandler:
                 LOGGER.exception("Could not project scoped Orders/AROs")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The Orders/AROs reference is unavailable."}
+        elif path == "/api/restrictions/chart":
+            cache_control = API_CACHE_CONTROL
+            try:
+                _validated_query_params(query_string, {"cache_bust"})
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                if self.rules_database is None:
+                    raise ValueError("Restrictions chart requires a Rules database")
+                payload = self.rules_database.restriction_chart_payload()
+                if payload is None:
+                    raise ValueError("Restrictions chart is unavailable in selected Rules data")
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Restrictions chart")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "Restrictions chart is unavailable."}
         elif path == "/api/restrictions":
             cache_control = API_CACHE_CONTROL
             try:
@@ -610,6 +669,72 @@ class ApiHandler:
                 LOGGER.exception("Could not read Restrictions reference")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "Restrictions reference is unavailable. Please try again."}
+        elif path == "/api/season-policies":
+            cache_control = API_CACHE_CONTROL
+            try:
+                params = _validated_query_params(
+                    query_string,
+                    {"season_id", "season_revision", "context", "target_id", "cache_bust"},
+                )
+                for key in ("season_id", "season_revision"):
+                    if key not in params or not params[key][0]:
+                        raise ValueError(f"Provide {key} exactly once")
+                season_id, revision = params["season_id"][0], params["season_revision"][0]
+                require_domain_slug(season_id, context="ITS policy season")
+                if revision.strip() != revision:
+                    raise ValueError("ITS policy selection requires an exact season revision")
+                context = params.get("context", [None])[0]
+                if context is not None:
+                    require_domain_slug(context, context="ITS play context")
+                target_id = params.get("target_id", [None])[0]
+                if target_id is not None:
+                    if context is None:
+                        raise ValueError("Provide context when filtering by target_id")
+                    kind = target_id.partition(":")[0]
+                    if kind not in {"skill", "rule"}:
+                        raise ValueError("ITS policy target must be a Skill or Rule identity")
+                    validate_typed_domain_id(
+                        target_id, expected_domain=kind, context="ITS policy target",
+                    )
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                registry = self.scenario_catalog.publication_registry
+                contexts = (
+                    registry.season_contexts(season_id=season_id, revision=revision)
+                    if registry is not None else []
+                )
+                resolved = (
+                    registry.season_policies(
+                        season_id=season_id, revision=revision,
+                        context=context, target_id=target_id,
+                    )
+                    if registry is not None and context is not None else []
+                )
+                payload = {
+                    "selection": {
+                        "season_id": season_id, "season_revision": revision,
+                        "context": context, "target_id": target_id,
+                    },
+                    "contexts": contexts,
+                    "items": [
+                        {
+                            **entry["policy"],
+                            "target": {
+                                **entry["policy"]["target"],
+                                "name": entry["target"]["name"],
+                            },
+                        }
+                        for entry in resolved
+                    ],
+                }
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read ITS season policies")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "ITS season policies are unavailable. Please try again."}
         elif path == "/api/faq-rulings":
             cache_control = API_CACHE_CONTROL
             try:
@@ -643,16 +768,33 @@ class ApiHandler:
                     cache_control=cache_control,
                 )
             try:
+                registry = self.scenario_catalog.publication_registry
+                selected_season = context.get("season_id")
+                selected_revision = context.get("season_revision")
+                selected_scenario = context.get("scenario_id")
+                valid_selection = (
+                    selected_season is None
+                    or (
+                        registry is not None
+                        and registry.has_season(selected_season, selected_revision or "")
+                        and (
+                            selected_scenario is None
+                            or registry.resolve(PublicationReference(
+                                selected_season, selected_scenario, selected_revision,
+                            )) is not None
+                        )
+                    )
+                )
                 items = (
                     self.rules_database.faq_rulings_for_topic(
                         context["topic_id"],
                         rules_revision=context["rules_revision"],
                         as_of=context["as_of"],
-                        season_id=context.get("season_id"),
-                        season_revision=context.get("season_revision"),
-                        scenario_id=context.get("scenario_id"),
+                        season_id=selected_season,
+                        season_revision=selected_revision,
+                        scenario_id=selected_scenario,
                     )
-                    if self.rules_database is not None else []
+                    if self.rules_database is not None and valid_selection else []
                 )
                 payload = {"context": context, "items": items}
             except (OSError, ValueError, sqlite3.Error):
@@ -1323,7 +1465,8 @@ class ApiHandler:
             cache_control = API_CACHE_CONTROL
             try:
                 payload = enrich_unit_filter_presentation(
-                    self.database.list_unit_filter_values()
+                    self.database.list_unit_filter_values(),
+                    filter_semantics=self.database.unit_filter_semantics(),
                 )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit filter values")
@@ -1337,12 +1480,40 @@ class ApiHandler:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
             else:
+                equipment_selection = query.get("equipment_id")
                 try:
-                    logical_unit_ids = self.equipment_catalog.logical_unit_ids_for_filter(
-                        query.get("equipment_id")
-                    )
-                    if logical_unit_ids is not None:
-                        query["equipment_id"] = None
+                    logical_unit_ids = None
+                    if isinstance(equipment_selection, tuple):
+                        encoded = {
+                            ref: self.equipment_catalog.characteristic_filter_id_for_equipment(ref)
+                            for ref in equipment_selection
+                            if self.equipment_catalog.logical_unit_ids_for_filter(ref) is not None
+                        }
+                        if encoded:
+                            if any(value is None for value in encoded.values()):
+                                raise ValueError(
+                                    "Equipment filter cannot resolve its Characteristic"
+                                )
+                            query["_equipment_characteristic_ids"] = tuple(
+                                sorted(
+                                    value for value in set(encoded.values()) if value is not None
+                                )
+                            )
+                            ordinary = tuple(
+                                ref for ref in equipment_selection if ref not in encoded
+                            )
+                            query["equipment_id"] = (
+                                ordinary if len(ordinary) > 1
+                                else ordinary[0] if ordinary else None
+                            )
+                    else:
+                        logical_unit_ids = self.equipment_catalog.logical_unit_ids_for_filter(
+                            equipment_selection
+                            if isinstance(equipment_selection, (int, str))
+                            else None
+                        )
+                        if logical_unit_ids is not None:
+                            query["equipment_id"] = None
                     specialist = query.pop("specialist")
                     if specialist:
                         if self.rules_database is None:
@@ -1357,6 +1528,58 @@ class ApiHandler:
                     if logical_unit_ids is not None:
                         query["_logical_unit_ids"] = frozenset(logical_unit_ids)
                     payload = self.database.list_units(**query)
+                    if "usage_counts" in payload:
+                        encoded_ids = (
+                            self.equipment_catalog.presentation_equipment_characteristic_ids()
+                        )
+
+                        def public_counts(source: dict[str, dict[str, int]]) -> dict:
+                            counts = {
+                                catalog: dict(values) for catalog, values in source.items()
+                                if catalog != "equipment_characteristics"
+                            }
+                            characteristics = source["equipment_characteristics"]
+                            for slug, source_id in encoded_ids.items():
+                                if str(source_id) in characteristics:
+                                    counts["equipment"][slug] = characteristics[str(source_id)]
+                            return counts
+
+                        def public_prospective(source: dict[str, dict[str, int]]) -> dict:
+                            counts = {catalog: dict(values) for catalog, values in source.items()}
+                            for slug, source_id in encoded_ids.items():
+                                key = f"characteristic:{source_id}"
+                                counts["equipment"][slug] = counts["equipment"].get(key, 0)
+                            counts["equipment"] = {
+                                key: count for key, count in counts["equipment"].items()
+                                if not key.startswith("characteristic:")
+                            }
+                            return counts
+
+                        baseline = self.database.list_units(
+                            limit=1, include_usage_counts=True,
+                            matching_scope=query["matching_scope"],
+                            **{key: query[key] for key in (
+                                "mercs", "specops", "teamops", "reinforcement"
+                            )},
+                        )
+                        if "prospective_counts" in payload:
+                            payload["prospective_counts"] = public_prospective(
+                                payload["prospective_counts"]
+                            )
+                        payload = {
+                            **payload,
+                            "usage_counts": public_counts(payload["usage_counts"]),
+                            "baseline_usage_counts": (
+                                public_counts(baseline["usage_counts"])
+                                if query["matching_scope"] is None
+                                else {
+                                    catalog: {key: value for key, value in counts.items() if value}
+                                    for catalog, counts in public_prospective(
+                                        baseline["prospective_counts"]
+                                    ).items()
+                                }
+                            ),
+                        }
                     payload = {
                         **payload,
                         "items": enrich_unit_items(self.database, payload["items"]),
@@ -1401,6 +1624,7 @@ class ApiHandler:
                         payload,
                         optional_filters=optional_filters,
                         requested_army=requested_army,
+                        source_skill_classifications=self.database.skill_source_classifications(),
                     )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND

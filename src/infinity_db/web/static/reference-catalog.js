@@ -1,6 +1,6 @@
 import { getCatalogItems } from "./api.js";
 import { readCatalogSearchQuery, replaceCatalogSearchQuery } from "./catalog-search-state.js";
-import { createPanelSwitcher } from "./view-components.js";
+import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const { catalog, singular, plural } = document.body.dataset;
 const pageController = new AbortController();
@@ -67,7 +67,8 @@ async function load() {
     render();
   } catch (error) {
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || `Could not load ${plural}.`;
+    elements.errorMessage.textContent = collectionLoadMessage(error, plural);
+    console.error("Could not load reference catalog", error);
     show(elements.error);
   }
 }

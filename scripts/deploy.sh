@@ -128,20 +128,9 @@ start_metrics_history() {
   fi
 }
 
-# Only legacy rules databases require an adjacent deployed-object JSON.
-if "$python" -c 'import sqlite3,sys; sys.exit(sqlite3.connect("data/generated/rules.db").execute("PRAGMA user_version").fetchone()[0] != 10)' 2>/dev/null; then
-  echo "Using normalized v10 deployed objects from rules.db."
-else
-  echo "Generating release-paired legacy deployed-object reference publication..."
-  "$python" -m tools.build_deployed_object_publication
-  "$python" -m tools.build_deployed_object_publication --check
-fi
-
-# The variant-usage publication is an immutable tracked release artifact.
-# Its generating raw archive is intentionally absent from deployment hosts.
-echo "Validating tracked runtime databases and release publications..."
+# All runtime structured facts are embedded; source ZIPs stay off the deploy host.
+echo "Validating tracked runtime databases and published SVGs..."
 "$python" tools/verify_deployment_assets.py
-"$python" -m tools.prepare_runtime_bundle
 
 display_version="$("$python" -c 'import infinity_db; print(infinity_db.__display_version__)')"
 echo "Building application image infinity-db:$IMAGE_TAG (display $display_version)..."

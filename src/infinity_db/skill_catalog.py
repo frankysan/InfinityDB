@@ -76,7 +76,10 @@ class SkillCatalog:
             return self._excluded_rules_catalog_ids
         excluded: set[int] = set()
         if self.rules_database is not None:
-            for classification in load_skill_source_config():
+            for classification in (
+                self.database.skill_source_classifications()
+                or load_skill_source_config()
+            ):
                 application_id = self.database.application_catalog_id(
                     "skills", classification.skill_ref
                 )

@@ -3,7 +3,7 @@ import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { fireteamsIncludeWildcards } from "./preferences.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
-import { createPanelSwitcher, tableViewport } from "./view-components.js";
+import { collectionLoadMessage, createPanelSwitcher, tableViewport } from "./view-components.js";
 
 const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
@@ -560,7 +560,10 @@ async function loadChart(value) {
     renderChart(await getFireteamChart(value, requestController.signal));
   } catch (error) {
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || "Could not load the Fireteam chart.";
+    elements.errorMessage.textContent = error.status === 400
+      ? "This Fireteam chart selection is not supported. Choose another Army."
+      : collectionLoadMessage(error, "Fireteam chart");
+    console.error("Could not load Fireteam chart", error);
     show(elements.error);
   }
 }
@@ -595,7 +598,8 @@ async function initialize() {
     else renderOverview();
   } catch (error) {
     if (error.name === "AbortError") return;
-    elements.errorMessage.textContent = error.message || "Could not load Fireteam Armies.";
+    elements.errorMessage.textContent = collectionLoadMessage(error, "Fireteam armies");
+    console.error("Could not load Fireteam armies", error);
     show(elements.error);
   }
 }

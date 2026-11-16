@@ -1,10 +1,9 @@
 # InfinityDB backlog
 
-This is the working development backlog. The 1.0.0 implementation baseline is
-complete; remaining entries concern **post-1.0** work. Merge, exact-main-SHA
-CI, tagging, deployment and post-deployment verification belong to the
-[release checklist](releasing.md), not to open development tasks. Their
-handoff does not mean those operations have already succeeded.
+This file tracks unfinished development work, including maintenance, research
+and product expansion. Merge, exact-main-SHA CI, tagging, deployment and
+post-deployment verification belong to the [release checklist](releasing.md),
+not to the development backlog.
 
 This file does not define current application behavior. Current behavior belongs in
 the relevant reference documentation; lasting design direction belongs in
@@ -21,67 +20,13 @@ New or materially revised work items use the canonical project-domain labels
 defined in `docs/project-domains.md`; section-level domain declarations may be used
 when all contained work shares the same owner.
 
-## 1.0.0 — reference baseline
+Use these links to jump directly to a workstream:
 
-**Project domain:** Project infrastructure
+- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
+- **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
+- **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
-Version **1.0.0** is the current player-reference baseline described in the
-[README](../README.md), [data model](data-model.md) and
-[changelog](CHANGELOG.md). Its bounded source/browser acceptance is recorded in
-the [1.0 source-coverage audit](v1.0-source-coverage-audit.md) and
-[testing evidence](testing.md#cumulative-candidate-acceptance-v1s-090--vr-0142).
-Final hosted CI, tagging, deployment and production verification are
-**release operations** under [releasing.md](releasing.md), not open
-implementation items or evidence that a deployment check has already passed.
-
-### Pre-planned 1.0 execution slices
-
-The development register has **no open V1S tasks**. This historical heading
-remains for the Git-aware backlog checker; individual closeouts are in Git
-history, not maintained as a second task ledger.
-
-#### V1S work selection and handoff
-
-When numbered V1S work is reopened, follow the
-[selection and closeout commands](testing.md#v1s-backlog-checks) and
-[backlog retirement contract](README.md#backlog-completion-and-retirement).
-New optional features belong below, under post-1.0.
-
-### Source inventory and gap batches
-
-The bounded 1.0 Army/rules/source and publication reviews are retained in the
-[source audit](v1.0-source-coverage-audit.md). Exhaustive source discovery,
-publisher reconciliation and ITS hotfix adoption are post-1.0 research, not
-missing 1.0 features.
-
-### Rules and reference completeness
-
-The current-source citation minimum, known limitations and normal-browser
-coverage are governed by [the 1.0 release definition](releasing.md#version-10-data-completeness-gate)
-and [the data model](data-model.md), with dated verification in
-[testing](testing.md).
-
-### Final 1.0 acceptance
-
-Former **V1S-093–095** are transferred, **not marked completed**, to the
-[release-only handoff](releasing.md#development-freeze-and-release-only-handoff).
-Operator approval, exact-main-SHA hosted CI, tag, deployment and production
-checks retain their separate evidence and acceptance conditions.
-
-## Post-1.0 — maintenance and product expansion
-
-These items are intentionally outside the 1.0 completeness gate. They may move earlier
-only when required to fix correctness, reproducibility, or release reliability.
-
-### Major simplification and restructuring
-
-**Project domains:** Project infrastructure, Data processing, Acquisition, Web backend, Web frontend, Deployment
-
-- [ ] Execute the [phased restructuring plan](restructuring-plan.md), starting with
-  simpler agent/validation rules (P0) and a dependency inventory (P1) before
-  changing the runtime data path. The plan owns step ordering, decisions and
-  exit criteria; record individual implementation work here only when actionable,
-  without copying the complete roadmap into a second task ledger.
+## Active development
 
 ### External source clarifications
 
@@ -91,16 +36,15 @@ only when required to fix correctness, reproducibility, or release reliability.
   [SRC register](official-source-clarifications.md), including
   SRC-002 and SRC-030; record dated official responses under their
   stable IDs and open implementation tasks only when needed.
-  Unanswered questions do not block 1.0 when the player-facing
-  uncertainty is accurately disclosed.
+  Preserve unresolved uncertainty in player-facing material until
+  authoritative clarification is available.
 - [ ] **Optional comprehensive source reconciliation:** Expand the historical
-  source-family planner and clause-disposition evidence only if useful after
-  1.0. Inventory additional official PDF/Wiki/Army source concepts and
-  language/revision discrepancies, review uncataloged clauses and decide
-  whether any discovered facts should enter the maintained reference.
-  This research and publisher follow-up are expressly **not v1.0 gates**;
-  retain existing reproducible source evidence without turning every
-  unreviewed page or unresolved SRC issue into a missing release feature.
+  source-family planner and clause-disposition evidence when useful. Inventory
+  additional official PDF/Wiki/Army source concepts and language/revision
+  discrepancies, review uncataloged clauses and decide whether any discovered
+  facts should enter the maintained reference. Retain reproducible source
+  evidence without treating every unreviewed page or unresolved SRC issue as
+  an implementation requirement.
 
 ### Source notation and rule references
 
@@ -112,13 +56,24 @@ only when required to fix correctness, reproducibility, or release reliability.
   rule section (e.g. Mines or Sepsitor), preserving any mismatched
   notation from Army and the PDF. Consider tooltips or short explanations and
   a direct Glossary/rules link; retain raw provenance and explicit unresolved
-  mappings. Do not require this richer display for 1.0 completeness.
+  mappings.
+
+  Implemented subset: markers are separated from Traits without changing
+  Army data, including combined labels. Reviewed mappings cover seven named
+  Mines and Chest Mine CC Mode (p. 181); E/M Carbine (p. 176); E/M CC Weapon
+  (p. 177, combined N+E/M); Blitzen and Smoke/E/M/Eclipse Grenades (p. 178);
+  Smoke/E/M Grenade Launchers (p. 179); Deactivator Equipment (p. 186);
+  and Sepsitor Plus (p. 187). Exact mode/catalog scope is preserved,
+  including Chest Mine BS Mode's unresolved Army marker. SRC-013/014
+  differences remain visible. Chromium acceptance covers reviewed pages
+  at 1440/390/320 px, light/dark, keyboard and touch. Remaining: other
+  chart rows/modes and publisher clarification of unresolved mismatches.
 
 ### Per-reference change history
 
 - [ ] **Data processing + Web backend + Web frontend:** Add optional
   **historical FAQ edition replay and source-date/season selection**,
-  separate from the 1.0 current-reference API. Independently curate
+  separate from the current-reference API. Independently curate
   v0.0-selected historical ruling contributions and evidence for
   compatibility with the appropriate historical N5 revision(s);
   validate historical topic/Scenario identities, effective windows,
@@ -159,30 +114,13 @@ only when required to fix correctness, reproducibility, or release reliability.
   ITS Season 18 p. 26 prohibits ordinary Spec-Ops in official tournaments;
   its separate TEAM-OPS Extra is on p. 28. This deferred customization task
   does not make the published core Skills ITS-only or require a configurator
-  for 1.0. Review any source-chart exclusions through the existing 1.0 inventory.
+  for core reference publication. Review source-chart exclusions against
+  the maintained source evidence.
 
 - [ ] **Data processing + Web backend + Web frontend:** Revisit loadout `disabled` and
   `minis` only when a reviewed source contract or roster-builder use establishes their
   player-facing meaning. Until then retain the source values without inferring either
   current availability or a miniature-count rule.
-
-### Unit Explorer discovery
-
-- [ ] **Web backend + Web frontend:** Add contextual usage counts to the
-  Skills, Equipment, and Weapons filter dropdowns. Count distinct logical
-  Units in the complete currently filtered population, retaining every active
-  filter, including the selection in the counted dropdown, Army context, and
-  optional availability. Preserve the existing
-  [profile/loadout matching semantics](data-model.md#context-coherent-filtering).
-  Counts describe usage within that population, not hypothetical totals obtained
-  by replacing or removing a filter, and are independent of pagination, sorting,
-  and extended view. Compute counts in batches, keep them synchronized with
-  displayed results, and validate accessible presentation, loading/cancellation
-  behavior, semantic correctness, and representative performance.
-  **Strictly post-1.0:** this accepted feature does not expand the 1.0 release
-  gate. Multi-selection and per-filter AND/OR/NOT remain separate proposed
-  extensions. Server-response/count caching is a measured implementation option,
-  not a prerequisite or an accepted infrastructure commitment.
 
 ### Routing and long-term compatibility
 
@@ -217,80 +155,45 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 **Project domain:** Project infrastructure
 
-- [ ] **Optional; explicit user request only:** Complete tool-independent
-  multi-agent workspace coordination. The
-  [checkout and claim protocol](multi-agent-workspaces.md#activation-and-default-workflow)
-  is disabled by default and is **not a v1.0 completeness gate**.
-  Deferred: further coordination infrastructure work is outside ordinary
-  autonomous development; authority: user; revisit: only when the user explicitly
-  requests that work. Existing tools and acceptance evidence do not activate it.
-  Worktrees, local/global claims, dual-registry pinned fast-forward integration
-  and MCP named-checkout pytest/non-test checks are implemented. The real
-  coordination ref is initialized; its version-2 transition preserves existing
-  claims and requires each older client to update explicitly. See
-  [focused safety acceptance](testing.md#agent-coordination-safety-acceptance).
-  [Inspected integration recovery](multi-agent-workspaces.md#inspected-integration-recovery)
-  now settles interrupted metadata while retaining claims and reservations.
-  - [ ] After explicitly updating its coordination client, exercise a
-    non-destructive real claim/status round trip from an owned Linux development
-    checkout. Preserve the independent interactive checkout and pinned test
-    checkout; disposable-clone race tests do not satisfy this operational gate.
-    Blocked: the live Linux probe read version 2 and rejected a Windows-owned
-    scope, but its metadata push was rejected; authority: integration owner;
-    retry: after authorized remote write access/policy verification. The remote
-    registry and existing claims stayed unchanged.
-  - [ ] Implement inspected abandoned-task recovery and ownership-transfer
-    tooling, including disconnected owners, task reassignment and cross-machine
-    handoff. Preserve the documented inspection/idle-job requirements; never
-    expire claims or assume an unresponsive owner's checkout can be overwritten.
-  - [ ] Complete MCP named-checkout Git operations and the remote worker
-    allowlist without broadening validation-checkout write privileges.
-  - [ ] Add read-only workspace/claim/integration status to the monitor and
-    verify race/refusal behavior on actual Linux before unattended use.
+- [ ] **Optional; explicit user request only:** Complete remaining
+  multi-agent coordination; the [checkout/claim protocol](multi-agent-workspaces.md#activation-and-default-workflow)
+  stays disabled by default. Implemented worktrees, claims, integration and
+  recovery are documented there; see [focused acceptance](testing.md#agent-coordination-safety-acceptance).
+  - [ ] Verify an owned Linux checkout's real claim/status round trip after
+    authorized remote metadata-push access is restored. Keep interactive
+    and pinned test checkouts independent; the earlier registry push was
+    rejected without changing the existing remote claims.
+  - [ ] Add inspected abandoned-task recovery, ownership transfer and
+    cross-machine handoff; never auto-expire claims or overwrite an owner.
+  - [ ] Complete named-checkout MCP Git operations and the remote worker
+    allowlist without adding write access to validation checkouts.
+  - [ ] Surface read-only workspace/claim/integration status in the monitor
+    and verify real Linux refusal/race behavior before unattended use.
 
 ### Performance, storage, and build tooling
 
-- [ ] **Finish v10 rules-data release acceptance (post-1.0):** The matched
-  v10 artifact set was promoted to tracked `data/generated/` in development
-  on 2026-11-08. It contains 17 normalized deployed objects (one unresolved
-  delivery), 151 exact-variant groups (v2), reviewed citations for 62 Weapons,
-  and the unchanged pinned Army database. The read-only v9→v10 common-table
-  parity audit passed: only schema metadata and Battleground map annotations/
-  labels changed among existing records; seven normalized deployed-object
-  tables were added. Checkout hosting and release image packaging are
-  independently supported. The *previous tagged production release* remains
-  v9; there has been no deployment or new release tag.
-  - [ ] Obtain terminal hosted Source, Deployment, Wheel and Cross-browser
-    acceptance for the exact promoted-artifact SHA; confirm the release image
-    against the tracked four-file set. Local tracked-image build, startup,
-    provenance, deployed-object, variant and Weapon API smoke passed
-    2026-11-08, and the disposable image/container were removed.
-  - [ ] After hosted acceptance, audit and retire superseded v9 promotion
-    helpers (preserving any remaining v8/v9 compatibility consumers). Keep
-    the immutable-image release model simple: no live replacement locks,
-    in-container regeneration or multi-file runtime transaction machinery.
+- [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
+  v10 Rules set receives the applicable release-candidate acceptance.
+  The current set includes 17 normalized deployed objects (one unresolved
+  delivery), 151 exact-variant groups and 62 reviewed Weapon citations.
+  [Releasing](releasing.md) owns exact-SHA Source, Wheel, Deployment and
+  matched four-file image evidence; [cross-browser checks](ci.md#cross-browser-release-compatibility-gate)
+  are opt-in for v1.1+ when browser risk warrants them.
+  Preserve independent v8/v9 compatibility consumers, and keep immutable
+  images free of live replacement locks or in-container regeneration.
 
-- [ ] **Post-1.0 infrastructure research — deferred:** Continue the
-  [Chromium lifecycle and concurrency investigation](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)
-  as maintenance research beyond the 1.0 baseline. The v1.0 instrumentation
-  gates (VR-0023/24) are complete; Linux uses its validated four-slot profile, Windows retains
-  two slots, and clean CI is unchanged. Raw captures stay in ignored
-  `local/benchmarks/`.
-  - [ ] Diagnose intermittent full-load Windows Glossary and Spec-Ops
-    chart visibility timeouts using the existing failure-only API/DOM
-    diagnostics; passing isolated runs do not establish their cause.
-  - [ ] Profile the Scenario FAQ long tail, fresh browser contexts
-    versus pooled-browser reuse, and CPU/RAM behavior under sustained
-    parallel load; revisit alternate capacities only with repeated
-    stable evidence on a dedicated host.
-  - [ ] Revisit exact cross-host optional source-PDF/staging coverage
-    if equivalent source-byte audit coverage becomes a requirement;
-    platform-only and missing ignored-source skips must remain labeled,
-    not silently treated as equal test coverage.
-  - [ ] Consider a pinned Playwright container only after verifying a
-    Linux test container engine, separate from production Compose.
-    None of these investigations blocks the v1.0 release unless new
-    evidence reveals a release-critical defect.
+- [ ] **Deferred browser test-performance investigation:** Use the existing
+  [Chromium benchmarks](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)
+  and failure-only API/DOM diagnostics. Linux four-slot and Windows two-slot
+  settings remain unchanged unless repeated evidence supports a change.
+  - [ ] Reproduce intermittent full-load Windows Glossary/Spec-Ops
+    chart-visibility timeouts; isolated passing tests do not explain them.
+  - [ ] Measure Scenario FAQ tail latency, fresh versus pooled contexts,
+    and CPU/RAM under sustained parallel load before adjusting capacity.
+  - [ ] Review cross-host optional PDF/staging source-byte coverage only if
+    needed; label host-only and missing-source skips explicitly.
+  - [ ] Consider a pinned Playwright test container only after verifying a
+    suitable Linux test container engine, separate from production Compose.
 
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a
@@ -319,60 +222,36 @@ only when required to fix correctness, reproducibility, or release reliability.
   or an in-memory hand-off that skips only the duplicate build-path pass; the
   standalone `export` command must retain full untrusted-input validation.
 
-- [ ] Evaluate artifact-level deduplication for development builds. `normalized.json` and
-  `infinity.raw.db` intentionally retain overlapping lossless source structure today; measure
-  the duplication on a controlled build, then decide whether post-export workflows need both
-  or whether one should be documented as a regenerable/transient artifact.
+- [ ] **Retire the remaining explicit raw-SQLite interfaces** once independent
+  research and source-audit consumers no longer need them. Complete runtime
+  builds and default standalone exports already omit `army.raw.db`; verified
+  normalized input replaces the legacy sibling for maintained source audits.
+  Rawless v2 determinism and the independent native-platform checks are
+  documented in [CI](ci.md#cross-platform-deterministic-outputs) and the
+  [data lifecycle](../data/README.md).
+  - [ ] Review the remaining opt-in paired-export, pair-health, source-row
+    inspection and programmatic `include_raw=True` contracts. Retire only
+    those without independent consumers, preserving source-only row fidelity,
+    absent-versus-null values, exact occurrence/Extra relationships and
+    fail-closed provenance. Keep useful compatibility/parity paths until
+    focused replacement tests and complete-set build checks pass.
+  - [ ] Decide whether any legacy ignored `data/generated/army.raw.db`
+    contains unique evidence worth retaining. It is not a current matched
+    runtime pair and must not be silently deleted; a separately reviewed
+    disposition suffices without reopening the completed workspace cleanup.
 
-### Army snapshot and symbol-pipeline maintenance
+### Army snapshot maintenance
 
-Remaining pipeline work covers maintenance, selective refactoring, richer diagnostics/performance
-work, and external-tool portability. It is outside the 1.0 application-data gate. The implemented
-pipeline and artifact lifecycle are described in [data guidance](../data/README.md).
+The implemented artifact lifecycle is described in [data guidance](../data/README.md).
 
 - [ ] Let future snapshot-comparison tooling write structured generated diff
   data/reports under manifest/report paths while curated snapshot notes remain
   the human interpretation of those results.
 
-- [ ] Refactor legacy/standalone stage CLIs around the integrated pipeline only where doing so
-  removes duplicated contracts or platform handling.
-  - [ ] Resolve the standalone symbol-downloader input mismatch. The maintained integrated build
-    requires an immutable raw Army ZIP, while the downloader help still advertises discovery-only
-    directory/master inputs that are not supported consistently end to end. Either implement that
-    discovery-only contract deliberately or remove it from the CLI/documentation.
-  - [ ] Consolidate shared executable discovery, native/project-relative path conversion, atomic
-    writes, and subprocess invocation where conversion/compression/orchestration still duplicate
-    those rules.
-  - [ ] Split additional `snapshot`, `discovery`, `manifest`, `downloader`, `audit`, `deduplicate`,
-    `convert`, `compress`, or `publish` helpers only when the split reduces duplication rather than
-    adding ceremony.
-
-- [ ] Evaluate content-addressed incremental reuse only after measuring the current full rebuild.
-  If worthwhile, derive cache keys from the pinned snapshot/source SVG hashes plus processor/tool
-  versions, font-alias configuration, duplicate-render settings, conversion settings, and
-  compression profile/settings. Do not weaken the current manifest/hash validation or immutable
-  raw-symbol snapshot boundary to gain incremental speed.
-
-- [ ] Finish symbol-pipeline reporting for machine-to-machine comparison.
-  - [ ] Add one compact machine-readable build-summary artifact with per-stage and total runtime so
-    repeated builds can be compared without scraping the verbose log or individual reports.
-  - [ ] Add separate discovery/unknown-reference CSV outputs only if future audit tooling needs
-    row-oriented data beyond the build manifest and current JSON/CSV stage reports.
-
-- [ ] Extend the remaining regression and portability coverage for the integrated Army/symbol
-  pipeline.
-  - [ ] Add explicit fixtures for empty-text cleanup and a small set of troublesome real-world SVG
-    conversion cases that should remain stable across tool upgrades.
-  - [ ] **Acquisition:** Extend native external-tool integration coverage across Windows, Ubuntu/Linux, and macOS,
-    especially executable discovery (`.exe`/`.cmd`), subprocess arguments, and real
-    Inkscape/`resvg`/SVGO invocation. Hermetic source/pipeline coverage already runs across all three
-    operating systems in required CI; external-tool tests may remain conditional when those
-    executables are unavailable.
-
 ### ITS, scenarios, and game tools
 
 - [ ] Build a versioned ITS reference library from material under
-  `data/pdf/its/` and `data/pdf/legacy/`, keeping the current season distinct
+  `local/data/pdf/its/` and `local/data/pdf/legacy/`, keeping the current season distinct
   from archived seasons.
   - [ ] Keep season content isolated by season and effective date. A user choosing
     a prior event must see its matching scenario, objectives, extras, and FAQ
@@ -386,8 +265,7 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
     audit the published Battleground pilot without silently rewriting historical
     2026.09.01 play. The initial [bilingual PDF delta
     intake](n5-source-history.md#pdf-revision-difference-intake-2026-11-06)
-    is evidence triage, not semantic acceptance. This is **post-1.0**, not
-    a core-rule release blocker.
+    is evidence triage, not semantic acceptance.
   The official Army app/site remains authoritative for list legality;
   InfinityDB labels its snapshot/date and does not claim tournament validation.
   - [ ] Publish ITS-only FAQ clarifications after verifying each exact
@@ -399,7 +277,7 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
 
 - [ ] Extend the existing core-scenario foundation with remaining ITS scenario
   list/detail coverage backed by versioned seasonal data; retain the already
-  published Season 18 Battleground pilot without treating it as a 1.0 gate.
+  published Season 18 Battleground pilot.
   - [ ] Curate the remaining Season 18 mission identities and complete
     source-backed definitions under the reviewed selected 2026.09.11 hotfix
     identity once its source promotion is accepted; retain
@@ -420,7 +298,7 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
   - [ ] Scenario pages should expose the selected season prominently and link
     season-specific terms to the relevant rules/state references.
 
-- [ ] **Data processing + Web frontend:** Extend the 1.0 core-scenario SVG renderer for ITS
+- [ ] **Data processing + Web frontend:** Extend the existing core-scenario SVG renderer for ITS
   geometry after the seasonal scenario data is curated. Reuse the same versioned geometry model and
   rendering engine rather than creating an ITS-only map format.
   - [ ] Add ITS-required geometry only when supported by curated scenario evidence, including
@@ -432,7 +310,7 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
   A future geometry editor/preview must reuse the scenario creator below and
   the shared schema/renderer, not introduce an ITS-only browser format.
 
-- [ ] **Data processing + Web frontend:** Build a **post-1.0 scenario creator/editor**
+- [ ] **Data processing + Web frontend:** Build a **scenario creator/editor**
   using the canonical scenario component model and map renderer, with no server-side
   user-content storage (see `docs/data-model.md`).
   - [ ] Start from a blank scenario or copy/modify a published scenario without
@@ -448,7 +326,7 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
   - [ ] Reuse schema validation, renderer and reference resolvers; test composition,
     conflicting overlays, source-version compatibility, untrusted text, and offline
     round trips with self-contained URLs and portable file import/export.
-  The editor remains post-1.0, independent of core-scenario release acceptance.
+  Player-authored scenarios must not alter authoritative published scenarios or their acceptance.
 
 - [ ] **Web backend + Web frontend:** Add an interactive Fireteam builder within a
   selected Army context. Build compositions from the canonical Fireteam projection and general

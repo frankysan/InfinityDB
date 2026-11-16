@@ -84,10 +84,7 @@ const note = article.children.find((node) => node.className === "rules-source-no
 assert.ok(note);
 assert.equal(note.textContent, "Source context: Army retains Throwing Weapon.");
 assert.equal(note.children[0].className, "rules-provenance-label");
-assert.ok(article.children.some((node) => (
-  node.className === "rules-card-provenance"
-  && node.textContent.includes("InfinityDB-maintained reference")
-)));
+assert.ok(!article.children.some((node) => node.className === "rules-card-provenance"));
 assert.ok(note.children.some((node) => node.className === "maintained-reference-wrap"));
 assert.ok(article.children.indexOf(note) > article.children.indexOf(paragraphs[2]));
 

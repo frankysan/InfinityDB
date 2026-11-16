@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.check_v1_backlog_ci import choose_ci_range, main
+from tools.ci.check_v1_backlog_ci import choose_ci_range, main
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -117,6 +117,20 @@ def test_ci_push_adoption_merge_audits_full_feature_history(
     report = capsys.readouterr().out
     assert f"integrated as {merged[:12]}" in report
     assert ("V1S CI retirement: PASS" if attributed else "V1B005") in report
+
+
+def test_ci_push_after_register_retirement_is_not_pre_adoption(tmp_path: Path) -> None:
+    root, adoption = _repository(tmp_path)
+    retired = _new_commit(root, "TODO.md", "# Backlog\n## Active development\n",
+                          "docs: retire empty historical register")
+    latest = _new_commit(root, "notes.md", "Maintenance notes.\n", "docs: notes")
+    result = choose_ci_range(
+        "push", {"before": retired, "after": latest},
+        latest, repository=root, adoption_base=adoption,
+    )
+    assert (result.base, result.target, result.origin) == (
+        retired, latest, "push",
+    )
 
 
 def test_ci_push_adoption_merge_refuses_unreviewed_merge_resolution(
@@ -322,9 +336,36 @@ def test_ci_source_workflow_checks_history_with_full_checkout() -> None:
         encoding="utf-8",
     )
     assert "fetch-depth: 0" in workflow
-    assert "python -m tools.check_v1_backlog_ci" in workflow
-    assert (
-        "if: needs.fast-validation.outputs.full == 'true' && matrix.check_args == '--all'"
-        in workflow
-    )
+    assert "python -m tools.ci.check_v1_backlog_ci" in workflow
+    assert "if: needs.fast-validation.outputs.full == 'true' && matrix.primary" in workflow
+    assert "matrix.check_args == '--all'" not in workflow
     assert "backlog_base:" in workflow
+
+
+def test_ci_warns_about_removed_open_active_task(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    root, adoption = _repository(tmp_path)
+    before = _new_commit(
+        root, "TODO.md",
+        _todo(1, 2, 3) + "## Active development\n- [ ] TASK-101: Still needed.\n",
+        "docs: register current active task",
+    )
+    after = _new_commit(
+        root, "TODO.md", _todo(1, 2, 3) + "## Active development\n",
+        "docs: remove current active task",
+    )
+    event_path = tmp_path / "active-removal.json"
+    event_path.write_text(
+        json.dumps({"before": before, "after": after}), encoding="utf-8",
+    )
+    environment = {
+        "GITHUB_EVENT_NAME": "push",
+        "GITHUB_SHA": after,
+        "GITHUB_EVENT_PATH": str(event_path),
+    }
+    assert main(environment, repository=root, adoption_base=adoption) == 0
+    output = capsys.readouterr().out
+    assert "BKL003" in output
+    assert "TASK-101" in output
+    assert "0 errors, 1 warnings" in output

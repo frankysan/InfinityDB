@@ -29,12 +29,12 @@ tracked project policy and its canonical documents take precedence.
   generated assets between them merely because SSH is available. Follow
   the explicit, safe handoff and revision-pinning rules in
   [`docs/testing.md`](../docs/testing.md) when validation is due.
-- Follow [`docs/validation-queue.md`](../docs/validation-queue.md) at task
-  boundaries. Prefer the documented asynchronous MCP Linux worker for due
-  long-running tests when available; do not launch competing ad hoc full
-  suites over interactive SSH or treat dispatch as acceptance. Work on
-  Windows during a Linux suite only within the documented concurrency
-  exception.
+- Use [`docs/validation-queue.md`](../docs/validation-queue.md) only when
+  a concrete test obligation is deferred; normal edits run focused checks
+  directly. Prefer the asynchronous MCP Linux worker for longer tests.
+  Do not launch competing suites over interactive SSH or treat dispatch as
+  acceptance. Independent Windows work may continue during focused or full
+  Linux jobs if test checkouts and mutable inputs are isolated.
 - Keep terminal command approvals enabled. Request approval for privileged,
   destructive, security-sensitive, or otherwise separately authorized
   operations. Instructions never grant tool permissions by themselves.

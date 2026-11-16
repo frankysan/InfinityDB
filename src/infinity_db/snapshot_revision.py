@@ -1,17 +1,15 @@
-"""Shared identity for the runtime database pair and Weapon-profile publication."""
+"""Shared content identity for the selected runtime SQLite database set."""
 
 from __future__ import annotations
 
+import json
+from collections.abc import Mapping
 from hashlib import sha256
 
 
-def runtime_snapshot_revision(
-    army_sha256: str, rules_sha256: str | None, weapon_profile_sha256: str | None,
-) -> str:
-    """Combine the exact runtime artifact fingerprints, including absent publications."""
-    parts = (
-        army_sha256,
-        rules_sha256 if rules_sha256 is not None else "none",
-        weapon_profile_sha256 if weapon_profile_sha256 is not None else "none",
-    )
-    return sha256(":".join(parts).encode("ascii")).hexdigest()
+def database_set_snapshot_revision(fingerprints: Mapping[str, str]) -> str:
+    """Bind cache identity to sorted active filenames and exact database bytes."""
+    if not fingerprints:
+        raise ValueError("Runtime database fingerprints are required")
+    value = json.dumps(sorted(fingerprints.items()), separators=(",", ":"), ensure_ascii=True)
+    return sha256(b"InfinityDB runtime database set v1\x00" + value.encode("ascii")).hexdigest()

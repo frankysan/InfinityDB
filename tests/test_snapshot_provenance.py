@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+import infinity_db.snapshot_provenance as provenance
 from infinity_db.snapshot_provenance import (
     SNAPSHOT_MANIFEST_FORMAT,
     SNAPSHOT_MANIFEST_VERSION,
@@ -155,6 +156,54 @@ def test_manifest_archive_label_is_not_authoritative_identity(tmp_path: Path) ->
     assert document["snapshot"]["archive"]["sha256"] == sha256_file(renamed)
 
 
+@pytest.mark.parametrize(
+    ("snapshot_type", "source_url"),
+    [
+        ("army", "https://api.corvusbelli.com/army"),
+        ("wiki", "https://infinitythewiki.com/"),
+        ("symbols", "https://assets.corvusbelli.net/army/img/"),
+    ],
+)
+def test_snapshot_pair_survives_external_repository_handoff(
+    tmp_path: Path,
+    snapshot_type: str,
+    source_url: str,
+) -> None:
+    producer = tmp_path / "producer"
+    archive = producer / "snapshots" / "captured.zip"
+    _write_archive(archive, b"immutable external snapshot")
+    manifest = write_snapshot_manifest(
+        archive,
+        producer / "manifests",
+        snapshot_type=snapshot_type,
+        acquired_at=ACQUIRED_AT,
+        source_url=source_url,
+        document_count=1,
+        project_root=producer,
+        source_data_changed_on=(
+            date(2026, 9, 3) if snapshot_type == "army" else None
+        ),
+    )
+
+    consumer = tmp_path / "independent-checkout"
+    consumer.mkdir()
+    received_archive = consumer / "input.zip"
+    received_manifest = consumer / "source.json"
+    received_archive.write_bytes(archive.read_bytes())
+    received_manifest.write_bytes(manifest.read_bytes())
+
+    verified = load_snapshot_manifest(received_manifest, archive=received_archive)
+    assert verified["snapshot"]["archive"]["path"] == "snapshots/captured.zip"
+    assert verified["snapshot"]["archive"]["sha256"] == sha256_file(received_archive)
+    assert verified["snapshot"]["contentSha256"] == snapshot_content_sha256(
+        received_archive
+    )
+
+    _write_archive(received_archive, b"changed in transit")
+    with pytest.raises(SnapshotProvenanceError, match="SHA-256 mismatch"):
+        load_snapshot_manifest(received_manifest, archive=received_archive)
+
+
 def test_manifest_is_archive_labeled_and_not_rewritten_with_different_provenance(
     tmp_path: Path,
 ) -> None:
@@ -197,6 +246,93 @@ def test_manifest_is_archive_labeled_and_not_rewritten_with_different_provenance
             document_count=1,
             project_root=tmp_path,
         )
+
+
+@pytest.mark.parametrize("same_content", (True, False))
+def test_snapshot_manifest_concurrent_publication_does_not_replace_provenance(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, same_content: bool,
+) -> None:
+    archive = tmp_path / "snapshot.zip"
+    _write_archive(archive, b"source snapshot")
+    manifests = tmp_path / "manifests"
+    target = manifests / "snapshot.json"
+    expected = provenance.build_snapshot_manifest(
+        archive, snapshot_type="army", acquired_at=ACQUIRED_AT,
+        source_url="https://api.corvusbelli.com/army", document_count=1,
+        project_root=tmp_path, source_data_changed_on=date(2026, 9, 3),
+    )
+    canonical = (
+        json.dumps(expected, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+    ).encode("utf-8")
+    competing = canonical if same_content else b"accepted different acquisition metadata\n"
+    original_link = provenance.os.link
+
+    def competing_link(source: Path, destination: Path) -> None:
+        assert destination == target
+        destination.write_bytes(competing)
+        original_link(source, destination)
+
+    monkeypatch.setattr(provenance.os, "link", competing_link)
+    if same_content:
+        assert write_snapshot_manifest(
+            archive, manifests, snapshot_type="army",
+            acquired_at=ACQUIRED_AT, source_url="https://api.corvusbelli.com/army",
+            document_count=1, project_root=tmp_path,
+            source_data_changed_on=date(2026, 9, 3),
+        ) == target
+    else:
+        with pytest.raises(SnapshotProvenanceError, match="different content"):
+            write_snapshot_manifest(
+                archive, manifests, snapshot_type="army",
+                acquired_at=ACQUIRED_AT,
+                source_url="https://api.corvusbelli.com/army",
+                document_count=1, project_root=tmp_path,
+                source_data_changed_on=date(2026, 9, 3),
+            )
+    assert target.read_bytes() == competing
+    assert not (manifests / "snapshot.json.tmp").exists()
+
+
+def test_snapshot_manifest_preserves_existing_staging_from_other_writer(
+    tmp_path: Path,
+) -> None:
+    archive = tmp_path / "snapshot.zip"
+    _write_archive(archive, b"source snapshot")
+    manifests = tmp_path / "manifests"
+    manifests.mkdir()
+    staging = manifests / "snapshot.json.tmp"
+    previous = b"another writer's incomplete staging"
+    staging.write_bytes(previous)
+    with pytest.raises(SnapshotProvenanceError, match="staging already exists"):
+        write_snapshot_manifest(
+            archive, manifests, snapshot_type="army",
+            acquired_at=ACQUIRED_AT, source_url="https://api.corvusbelli.com/army",
+            document_count=1, project_root=tmp_path,
+            source_data_changed_on=date(2026, 9, 3),
+        )
+    assert staging.read_bytes() == previous
+    assert not (manifests / "snapshot.json").exists()
+
+
+def test_snapshot_manifest_rejects_symlink_without_writing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive = tmp_path / "snapshot.zip"
+    _write_archive(archive, b"source snapshot")
+    target = tmp_path / "manifests" / "snapshot.json"
+    original_is_symlink = Path.is_symlink
+    monkeypatch.setattr(
+        Path, "is_symlink",
+        lambda path: path == target or original_is_symlink(path),
+    )
+    with pytest.raises(SnapshotProvenanceError, match="symlink"):
+        write_snapshot_manifest(
+            archive, target.parent, snapshot_type="army",
+            acquired_at=ACQUIRED_AT, source_url="https://api.corvusbelli.com/army",
+            document_count=1, project_root=tmp_path,
+            source_data_changed_on=date(2026, 9, 3),
+        )
+    assert not target.exists()
 
 
 def test_external_paths_are_not_persisted_as_machine_specific_paths(tmp_path: Path) -> None:

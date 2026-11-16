@@ -62,6 +62,7 @@ from .peripheral_relationships import validate_peripheral_relationships
 from .publication import PUBLISHED_CONTENT_SHA256_KEY, published_content_sha256
 from .relation_constraints import validate_relation_constraints
 from .relation_group_dependencies import validate_relation_group_dependencies
+from .reviewed_loadout_capabilities import published_reviewed_loadout_capabilities
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -72,6 +73,8 @@ from .schema import (
     SCHEMA_VERSION,
     quote,
 )
+from .unit_filter_matching import MatchContext, matches_selected
+from .unit_filter_matching import evaluate as evaluate_unit_filter_contexts
 
 SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
@@ -93,6 +96,7 @@ SOURCE_UNIT_NAMES_CTE = (
 )
 AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
 SWC_EXACT_RE = re.compile(r"(?:\+)?(?:0|[1-9]\d*)(?:\.\d+)?|-")
+UnitFilterSelection = int | str | tuple[int | str, ...] | None
 
 
 class ArmySelectionError(ValueError):
@@ -890,10 +894,69 @@ class Database:
         with self._connect() as connection:
             application_id = connection.execute("PRAGMA application_id").fetchone()[0]
             version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if application_id != APPLICATION_ID or version != SCHEMA_VERSION:
+            from infinity_db.army_reference_storage import (
+                ARMY_COMPATIBILITY_VERSION as REFERENCE_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.army_reference_storage import (
+                ARMY_SCHEMA_VERSION as REFERENCE_SCHEMA_VERSION,
+            )
+            from infinity_db.army_reference_storage import (
+                ARMY_V30_PUBLISHED_TABLES,
+                read_army_reference_data,
+            )
+            from infinity_db.equipment_presentation_storage import (
+                ARMY_COMPATIBILITY_VERSION,
+                ARMY_SCHEMA_VERSION,
+                ARMY_V27_PUBLISHED_TABLES,
+                read_equipment_encodings,
+            )
+            from infinity_db.skill_classification_storage import (
+                ARMY_COMPATIBILITY_VERSION as SKILL_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.skill_classification_storage import (
+                ARMY_SCHEMA_VERSION as SKILL_SCHEMA_VERSION,
+            )
+            from infinity_db.skill_classification_storage import (
+                ARMY_V28_PUBLISHED_TABLES,
+                read_skill_classifications,
+            )
+            from infinity_db.symbol_path_storage import (
+                ARMY_COMPATIBILITY_VERSION as SYMBOL_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.symbol_path_storage import (
+                ARMY_SCHEMA_VERSION as SYMBOL_SCHEMA_VERSION,
+            )
+            from infinity_db.symbol_path_storage import (
+                ARMY_V31_PUBLISHED_TABLES,
+                read_symbol_publication,
+            )
+            from infinity_db.unit_filter_storage import (
+                ARMY_COMPATIBILITY_VERSION as FILTER_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.unit_filter_storage import (
+                ARMY_SCHEMA_VERSION as FILTER_SCHEMA_VERSION,
+            )
+            from infinity_db.unit_filter_storage import (
+                ARMY_V29_PUBLISHED_TABLES,
+                read_unit_filter_semantics,
+            )
+
+            if application_id != APPLICATION_ID or version not in {
+                SCHEMA_VERSION, ARMY_SCHEMA_VERSION, SKILL_SCHEMA_VERSION, FILTER_SCHEMA_VERSION,
+                REFERENCE_SCHEMA_VERSION,
+                SYMBOL_SCHEMA_VERSION,
+            }:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
+            if source_consistency and version != SCHEMA_VERSION:
+                raise ValueError("Source consistency requires the base Army export schema")
             required_tables = (
-                DATABASE_TABLES if source_consistency else PUBLISHED_DATABASE_TABLES
+                DATABASE_TABLES if source_consistency else
+                ARMY_V31_PUBLISHED_TABLES if version == SYMBOL_SCHEMA_VERSION else
+                ARMY_V30_PUBLISHED_TABLES if version == REFERENCE_SCHEMA_VERSION else
+                ARMY_V29_PUBLISHED_TABLES if version == FILTER_SCHEMA_VERSION else
+                ARMY_V28_PUBLISHED_TABLES if version == SKILL_SCHEMA_VERSION else
+                ARMY_V27_PUBLISHED_TABLES if version == ARMY_SCHEMA_VERSION else
+                PUBLISHED_DATABASE_TABLES
             )
             for name, definition in required_tables.items():
                 columns = {
@@ -924,18 +987,38 @@ class Database:
                 )
             except (json.JSONDecodeError, TypeError) as exc:
                 raise ValueError("Database has invalid compatibility metadata") from exc
-            if compatibility_version != DATABASE_COMPATIBILITY_VERSION:
+            expected_compatibility = (
+                SYMBOL_COMPATIBILITY_VERSION if version == SYMBOL_SCHEMA_VERSION
+                else REFERENCE_COMPATIBILITY_VERSION if version == REFERENCE_SCHEMA_VERSION
+                else FILTER_COMPATIBILITY_VERSION if version == FILTER_SCHEMA_VERSION
+                else SKILL_COMPATIBILITY_VERSION if version == SKILL_SCHEMA_VERSION
+                else ARMY_COMPATIBILITY_VERSION if version == ARMY_SCHEMA_VERSION
+                else DATABASE_COMPATIBILITY_VERSION
+            )
+            if compatibility_version != expected_compatibility:
                 raise ValueError(
                     "Database compatibility revision does not match this application; "
                     "rebuild the database"
                 )
+            if version >= ARMY_SCHEMA_VERSION:
+                read_equipment_encodings(connection)
+            if version >= SKILL_SCHEMA_VERSION:
+                read_skill_classifications(connection)
+            if version >= FILTER_SCHEMA_VERSION:
+                read_unit_filter_semantics(connection)
+            if version >= REFERENCE_SCHEMA_VERSION:
+                read_army_reference_data(connection)
+            if version >= SYMBOL_SCHEMA_VERSION:
+                read_symbol_publication(connection)
             identity_config = identity_config_from_connection(connection)
             validate_application_army_integrity(connection)
             validate_application_fireteam_integrity(connection)
             if source_consistency:
                 validate_application_armies(connection, identity_config)
                 validate_application_fireteams(connection)
-            validate_application_catalogs(connection, identity_config)
+            validate_application_catalogs(
+                connection, identity_config, source_consistency=source_consistency,
+            )
             validate_application_domain_slugs(connection)
             source_unit_count = connection.execute(
                 "SELECT COUNT(*) FROM units WHERE source_defined = 1"
@@ -1087,7 +1170,10 @@ class Database:
             if (
                 not isinstance(expected_checksum, str)
                 or len(expected_checksum) != 64
-                or published_content_sha256(connection) != expected_checksum
+                or published_content_sha256(
+                    connection, definitions=required_tables
+                    if not source_consistency else PUBLISHED_DATABASE_TABLES,
+                ) != expected_checksum
             ):
                 raise ValueError(
                     "Database published application content does not match its validated checksum; "
@@ -1098,6 +1184,62 @@ class Database:
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Database contains broken foreign keys")
+
+    def symbol_publication(self):
+        """Read v31 runtime symbol mappings; earlier schemas retain the manifest adapter."""
+        from infinity_db.symbol_path_storage import ARMY_SCHEMA_VERSION, read_symbol_publication
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < ARMY_SCHEMA_VERSION:
+                return None
+            return read_symbol_publication(connection)
+
+    def army_reference_data(self):
+        """Read v30 editorial/historical data; older schemas use the authored adapters."""
+        from infinity_db.army_overview_copy import load_army_overview_copy
+        from infinity_db.army_reference_storage import ARMY_SCHEMA_VERSION, read_army_reference_data
+        from infinity_db.legacy_armies import load_legacy_armies
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] >= ARMY_SCHEMA_VERSION:
+                return read_army_reference_data(connection)
+        return load_army_overview_copy(), load_legacy_armies()
+
+    def unit_filter_semantics(self):
+        """Read v29 overlays from SQLite; earlier exports use the validated JSON adapter."""
+        from infinity_db.unit_filter_storage import (
+            ARMY_SCHEMA_VERSION,
+            read_unit_filter_semantics,
+        )
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] >= ARMY_SCHEMA_VERSION:
+                return read_unit_filter_semantics(connection)
+        return load_unit_filter_config()
+
+    def skill_source_classifications(self):
+        """Read v28 reviewed Army source classifications without a maintained JSON file."""
+        from infinity_db.skill_classification_storage import (
+            ARMY_SCHEMA_VERSION,
+            read_skill_classifications,
+        )
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < ARMY_SCHEMA_VERSION:
+                return None
+            return read_skill_classifications(connection)
+
+    def equipment_presentation_encodings(self):
+        """Read v27 authored characteristic mappings; v26 uses the maintained adapter."""
+        from infinity_db.equipment_presentation_storage import (
+            ARMY_SCHEMA_VERSION,
+            read_equipment_encodings,
+        )
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < ARMY_SCHEMA_VERSION:
+                return None
+            return read_equipment_encodings(connection)
 
     def source_data_changed_on(self) -> date | None:
         """Return the latest date encoded by the Army source revisions."""
@@ -1953,6 +2095,10 @@ class Database:
                 "FROM uses "
                 "ORDER BY uses.source, uses.occurrence_key, uses.extra_position"
             ).fetchall()
+            reviewed_usage = [
+                fact for fact in published_reviewed_loadout_capabilities(connection)
+                if fact["catalog"] == catalog
+            ]
         occurrences: dict[tuple[str, str], dict[str, Any]] = {}
         for row in usage_rows:
             application_id = graph["source_to_item"].get(row["item_id"])
@@ -1964,6 +2110,17 @@ class Database:
             )
             if row["extra_id"] is not None:
                 occurrence["extras"].append(row["extra_id"])
+        for fact in reviewed_usage:
+            application_id = graph["source_to_item"].get(fact["item_id"])
+            if application_id is None:
+                continue
+            occurrence_key = (
+                f'{fact["army_id"]}:{fact["unit_id"]}:'
+                f'{fact["group_id"]}:{fact["option_id"]}:{fact["item_id"]}'
+            )
+            occurrences[("reviewed_loadout", occurrence_key)] = {
+                "item_id": application_id, "unit_id": fact["unit_id"], "extras": [],
+            }
         displayed_unit_ids = {
             source_id: unit["id"]
             for source_id, unit in self._visible_unit_items_by_source(
@@ -2159,7 +2316,7 @@ class Database:
         by_slug = {str(item["slug"]): item for item in items}
         selected = by_id[item_id]
         source_ids = {item_id}
-        for membership in load_unit_filter_config().classification_memberships:
+        for membership in self.unit_filter_semantics().classification_memberships:
             if selected["slug"] not in membership.matches:
                 continue
             source = by_slug.get(membership.source_classification)
@@ -2216,6 +2373,19 @@ class Database:
         return frozenset(int(row["logical_unit_id"]) for row in rows)
 
     @staticmethod
+    def _selected_filter_refs(value: UnitFilterSelection) -> tuple[int | str, ...]:
+        """Normalize direct caller input while retaining the legacy scalar API."""
+
+        if value is None:
+            return ()
+        selected = value if isinstance(value, tuple) else (value,)
+        if not selected or len(selected) > 16 or any(
+            type(item) not in (int, str) for item in selected
+        ):
+            raise ValueError("Unit filter selections must have 1 to 16 integer or slug IDs")
+        return selected
+
+    @staticmethod
     def _validate_exact_range(
         name: str,
         exact: int | str | None,
@@ -2257,9 +2427,10 @@ class Database:
         *,
         army_id: int | None,
         rule_source_ids: Mapping[str, tuple[int, ...]],
-        troop_type_id: int | None,
-        classification_ids: tuple[int, ...] | None,
-        characteristic_id: int | None,
+        troop_type_ids: tuple[int, ...],
+        classification_ids: tuple[int, ...],
+        characteristic_ids: tuple[int, ...],
+        equipment_characteristic_ids: tuple[int, ...],
         ava: int | str | None,
         ava_min: int | None,
         ava_max: int | None,
@@ -2269,8 +2440,11 @@ class Database:
         swc: str | None,
         swc_min: float | None,
         swc_max: float | None,
-    ) -> dict[int, frozenset[tuple[int, int, int]]]:
-        """Return matching source Army/profile-group contexts for numeric filters.
+        force_loadout_context: bool = False,
+        include_loadout_id: bool = False,
+        and_requirements: tuple[tuple[str, tuple[int, ...]], ...] = (),
+    ) -> dict[int, frozenset[tuple[int, ...]]]:
+        """Return matching source Army/profile-group contexts for coherent filters.
 
         Once a contextual numeric constraint is present, categorical and catalog
         filters are evaluated against the same Army/profile-group/loadout context.
@@ -2279,15 +2453,22 @@ class Database:
         because the source model does not attach them to a profile group.
         """
 
-        has_loadout_filter = any(
+        has_numeric_loadout_filter = any(
             value is not None
             for value in (points, points_min, points_max, swc, swc_min, swc_max)
         )
-        base = "lpo" if has_loadout_filter else "ppo"
+        has_loadout_filter = has_numeric_loadout_filter or force_loadout_context
+        base = "lpo" if has_numeric_loadout_filter else "ppo"
         table = (
             "loadout_payload_occurrences"
-            if has_loadout_filter
+            if has_numeric_loadout_filter
             else "profile_payload_occurrences"
+        )
+        loadout_join = (
+            "LEFT JOIN loadout_payload_occurrences AS lpo "
+            "ON lpo.army_id = ppo.army_id AND lpo.unit_id = ppo.unit_id "
+            "AND lpo.group_id = ppo.group_id "
+            if force_loadout_context and not has_numeric_loadout_filter else ""
         )
         where: list[str] = []
         parameters: list[Any] = []
@@ -2364,7 +2545,7 @@ class Database:
 
         if ava is not None or ava_min is not None or ava_max is not None:
             condition, values = ava_condition("ap")
-            if has_loadout_filter:
+            if has_numeric_loadout_filter:
                 where.append(
                     "EXISTS (SELECT 1 FROM profile_payload_occurrences AS ap "
                     "WHERE ap.army_id = lpo.army_id AND ap.unit_id = lpo.unit_id "
@@ -2384,9 +2565,10 @@ class Database:
                 f"AND fp.group_id = {base}.group_id AND {predicate})"
             )
 
-        if troop_type_id is not None:
-            where.append(same_group_profile("fpp.type_id = ?"))
-            parameters.append(troop_type_id)
+        if troop_type_ids:
+            placeholders = ", ".join("?" for _ in troop_type_ids)
+            where.append(same_group_profile(f"fpp.type_id IN ({placeholders})"))
+            parameters.extend(troop_type_ids)
         if classification_ids:
             placeholders = ", ".join("?" for _ in classification_ids)
             where.append(
@@ -2396,20 +2578,22 @@ class Database:
                 f"AND fg.category_id IN ({placeholders}))"
             )
             parameters.extend(classification_ids)
-        if characteristic_id is not None:
+        if characteristic_ids:
+            placeholders = ", ".join("?" for _ in characteristic_ids)
             profile_clause = (
                 "EXISTS (SELECT 1 FROM profile_payload_occurrences AS cp "
                 "JOIN profile_payload_characteristics AS cpc "
                 "ON cpc.profile_payload_id = cp.profile_payload_id "
                 f"WHERE cp.army_id = {base}.army_id AND cp.unit_id = {base}.unit_id "
-                f"AND cp.group_id = {base}.group_id AND cpc.characteristic_id = ?)"
+                f"AND cp.group_id = {base}.group_id "
+                f"AND cpc.characteristic_id IN ({placeholders}))"
             )
-            parameters.append(characteristic_id)
+            parameters.extend(characteristic_ids)
             if has_loadout_filter:
                 loadout_clause = (
                     "EXISTS (SELECT 1 FROM loadout_payload_characteristics AS cl "
                     "WHERE cl.loadout_payload_id = lpo.loadout_payload_id "
-                    "AND cl.characteristic_id = ?)"
+                    f"AND cl.characteristic_id IN ({placeholders}))"
                 )
             else:
                 loadout_clause = (
@@ -2417,61 +2601,157 @@ class Database:
                     "JOIN loadout_payload_characteristics AS cl "
                     "ON cl.loadout_payload_id = clo.loadout_payload_id "
                     "WHERE clo.army_id = ppo.army_id AND clo.unit_id = ppo.unit_id "
-                    "AND clo.group_id = ppo.group_id AND cl.characteristic_id = ?)"
+                    "AND clo.group_id = ppo.group_id "
+                    f"AND cl.characteristic_id IN ({placeholders}))"
                 )
-            parameters.append(characteristic_id)
+            parameters.extend(characteristic_ids)
             where.append(f"({profile_clause} OR {loadout_clause})")
 
         for catalog, source_ids in rule_source_ids.items():
-            if not source_ids:
+            alternatives: list[str] = []
+            if source_ids:
+                placeholders = ", ".join("?" for _ in source_ids)
+                profile_clause = (
+                    "EXISTS (SELECT 1 FROM profile_payload_occurrences AS rp "
+                    f"JOIN profile_payload_{catalog} AS ri "
+                    "ON ri.profile_payload_id = rp.profile_payload_id "
+                    f"WHERE rp.army_id = {base}.army_id AND rp.unit_id = {base}.unit_id "
+                    f"AND rp.group_id = {base}.group_id AND ri.item_id IN ({placeholders}))"
+                )
+                parameters.extend(source_ids)
+                if has_loadout_filter:
+                    loadout_clause = (
+                        f"EXISTS (SELECT 1 FROM loadout_payload_{catalog} AS li "
+                        "WHERE li.loadout_payload_id = lpo.loadout_payload_id "
+                        f"AND li.item_id IN ({placeholders}))"
+                    )
+                else:
+                    loadout_clause = (
+                        "EXISTS (SELECT 1 FROM loadout_payload_occurrences AS rl "
+                        f"JOIN loadout_payload_{catalog} AS li "
+                        "ON li.loadout_payload_id = rl.loadout_payload_id "
+                        "WHERE rl.army_id = ppo.army_id AND rl.unit_id = ppo.unit_id "
+                        "AND rl.group_id = ppo.group_id "
+                        f"AND li.item_id IN ({placeholders}))"
+                    )
+                parameters.extend(source_ids)
+                option_clause = (
+                    f"EXISTS (SELECT 1 FROM unit_option_{catalog} AS ui "
+                    f"WHERE ui.unit_id = {base}.unit_id AND ui.item_id IN ({placeholders}))"
+                )
+                parameters.extend(source_ids)
+                alternatives.append(f"({profile_clause} OR {loadout_clause} OR {option_clause})")
+            if catalog == "equipment" and equipment_characteristic_ids:
+                placeholders = ", ".join("?" for _ in equipment_characteristic_ids)
+                profile_clause = (
+                    "EXISTS (SELECT 1 FROM profile_payload_occurrences AS cp "
+                    "JOIN profile_payload_characteristics AS cpc "
+                    "ON cpc.profile_payload_id = cp.profile_payload_id "
+                    f"WHERE cp.army_id = {base}.army_id AND cp.unit_id = {base}.unit_id "
+                    f"AND cp.group_id = {base}.group_id "
+                    f"AND cpc.characteristic_id IN ({placeholders}))"
+                )
+                parameters.extend(equipment_characteristic_ids)
+                if has_loadout_filter:
+                    loadout_clause = (
+                        "EXISTS (SELECT 1 FROM loadout_payload_characteristics AS cl "
+                        "WHERE cl.loadout_payload_id = lpo.loadout_payload_id "
+                        f"AND cl.characteristic_id IN ({placeholders}))"
+                    )
+                else:
+                    loadout_clause = (
+                        "EXISTS (SELECT 1 FROM loadout_payload_occurrences AS clp "
+                        "JOIN loadout_payload_characteristics AS cl "
+                        "ON cl.loadout_payload_id = clp.loadout_payload_id "
+                        "WHERE clp.army_id = ppo.army_id AND clp.unit_id = ppo.unit_id "
+                        "AND clp.group_id = ppo.group_id "
+                        f"AND cl.characteristic_id IN ({placeholders}))"
+                    )
+                parameters.extend(equipment_characteristic_ids)
+                alternatives.append(f"({profile_clause} OR {loadout_clause})")
+            if not alternatives:
                 return {}
-            placeholders = ", ".join("?" for _ in source_ids)
-            profile_clause = (
-                "EXISTS (SELECT 1 FROM profile_payload_occurrences AS rp "
-                f"JOIN profile_payload_{catalog} AS ri "
-                "ON ri.profile_payload_id = rp.profile_payload_id "
-                f"WHERE rp.army_id = {base}.army_id AND rp.unit_id = {base}.unit_id "
-                f"AND rp.group_id = {base}.group_id AND ri.item_id IN ({placeholders}))"
-            )
-            parameters.extend(source_ids)
-            if has_loadout_filter:
-                loadout_clause = (
-                    f"EXISTS (SELECT 1 FROM loadout_payload_{catalog} AS li "
-                    "WHERE li.loadout_payload_id = lpo.loadout_payload_id "
-                    f"AND li.item_id IN ({placeholders}))"
-                )
-            else:
-                loadout_clause = (
-                    "EXISTS (SELECT 1 FROM loadout_payload_occurrences AS rl "
-                    f"JOIN loadout_payload_{catalog} AS li "
-                    "ON li.loadout_payload_id = rl.loadout_payload_id "
-                    "WHERE rl.army_id = ppo.army_id AND rl.unit_id = ppo.unit_id "
-                    "AND rl.group_id = ppo.group_id "
-                    f"AND li.item_id IN ({placeholders}))"
-                )
-            parameters.extend(source_ids)
-            option_clause = (
-                f"EXISTS (SELECT 1 FROM unit_option_{catalog} AS ui "
-                f"WHERE ui.unit_id = {base}.unit_id AND ui.item_id IN ({placeholders}))"
-            )
-            parameters.extend(source_ids)
-            where.append(f"({profile_clause} OR {loadout_clause} OR {option_clause})")
+            where.append("(" + " OR ".join(alternatives) + ")")
 
+        for category, source_ids in and_requirements:
+            if not source_ids:
+                where.append("0")
+                continue
+            placeholders = ", ".join("?" for _ in source_ids)
+            if category in {"skills", "equipment", "weapons", "equipment_characteristics", "characteristics"}:
+                characteristic = category in {"equipment_characteristics", "characteristics"}
+                suffix = "characteristics" if characteristic else category
+                field = "characteristic_id" if characteristic else "item_id"
+                profile_clause = (
+                    "EXISTS (SELECT 1 FROM profile_payload_occurrences AS rp "
+                    f"JOIN profile_payload_{suffix} AS ri "
+                    "ON ri.profile_payload_id = rp.profile_payload_id "
+                    f"WHERE rp.army_id = {base}.army_id AND rp.unit_id = {base}.unit_id "
+                    f"AND rp.group_id = {base}.group_id "
+                    f"AND ri.{field} IN ({placeholders}))"
+                )
+                parameters.extend(source_ids)
+                if has_loadout_filter:
+                    loadout_clause = (
+                        f"EXISTS (SELECT 1 FROM loadout_payload_{suffix} AS li "
+                        "WHERE li.loadout_payload_id = lpo.loadout_payload_id "
+                        f"AND li.{field} IN ({placeholders}))"
+                    )
+                else:
+                    loadout_clause = (
+                        "EXISTS (SELECT 1 FROM loadout_payload_occurrences AS rl "
+                        f"JOIN loadout_payload_{suffix} AS li "
+                        "ON li.loadout_payload_id = rl.loadout_payload_id "
+                        "WHERE rl.army_id = ppo.army_id AND rl.unit_id = ppo.unit_id "
+                        "AND rl.group_id = ppo.group_id "
+                        f"AND li.{field} IN ({placeholders}))"
+                    )
+                parameters.extend(source_ids)
+                clauses = [profile_clause, loadout_clause]
+                if not characteristic:
+                    clauses.append(
+                        f"EXISTS (SELECT 1 FROM unit_option_{suffix} AS ui "
+                        f"WHERE ui.unit_id = {base}.unit_id AND ui.item_id IN ({placeholders}))"
+                    )
+                    parameters.extend(source_ids)
+                where.append("(" + " OR ".join(clauses) + ")")
+            elif category == "troop_types":
+                where.append(same_group_profile(f"fpp.type_id IN ({placeholders})"))
+                parameters.extend(source_ids)
+            elif category == "classifications":
+                where.append(
+                    "EXISTS (SELECT 1 FROM profile_groups AS fg "
+                    f"WHERE fg.army_id = {base}.army_id AND fg.unit_id = {base}.unit_id "
+                    f"AND fg.group_id = {base}.group_id "
+                    f"AND fg.category_id IN ({placeholders}))"
+                )
+                parameters.extend(source_ids)
+            else:
+                raise ValueError(f"Unsupported AND filter category: {category}")
+
+        loadout_column = (
+            ", lpo.loadout_payload_id AS matching_loadout_id "
+            if include_loadout_id and has_loadout_filter else ""
+        )
         query = (
             "SELECT DISTINCT lus.logical_unit_id, "
             f"{base}.unit_id, {base}.army_id, {base}.group_id "
-            f"FROM {table} AS {base} "
-            f"JOIN logical_unit_sources AS lus ON lus.source_unit_id = {base}.unit_id"
+            + loadout_column
+            + f"FROM {table} AS {base} "
+            + loadout_join
+            + f"JOIN logical_unit_sources AS lus ON lus.source_unit_id = {base}.unit_id"
         )
         if where:
             query += " WHERE " + " AND ".join(where)
         with self._connect() as connection:
             rows = connection.execute(query, parameters).fetchall()
-        contexts: dict[int, set[tuple[int, int, int]]] = defaultdict(set)
+        contexts: dict[int, set[tuple[int, ...]]] = defaultdict(set)
         for row in rows:
-            contexts[int(row["logical_unit_id"])].add(
-                (int(row["unit_id"]), int(row["army_id"]), int(row["group_id"]))
-            )
+            key = (int(row["unit_id"]), int(row["army_id"]), int(row["group_id"]))
+            if include_loadout_id:
+                loadout_id = row["matching_loadout_id"] if has_loadout_filter else None
+                key += (int(loadout_id) if loadout_id is not None else 0,)
+            contexts[int(row["logical_unit_id"])].add(key)
         return {logical_id: frozenset(items) for logical_id, items in contexts.items()}
 
     @instance_lru_cache(maxsize=1)
@@ -2621,6 +2901,10 @@ class Database:
                 "unit_sort_key(u.unit_name), u.unit_id",
                 source_ids * 3,
             ).fetchall()
+            reviewed_usage = [
+                fact for fact in published_reviewed_loadout_capabilities(connection)
+                if fact["catalog"] == catalog and fact["item_id"] in source_ids
+            ]
             if catalog == "weapons":
                 profile_filter = (
                     f"m.id IN ({placeholders}) AND (m.type IS NULL OR m.type != 'EQUIPMENT')"
@@ -2651,6 +2935,16 @@ class Database:
             )
             if row["extra_id"] is not None:
                 occurrence["extras"].append({"id": row["extra_id"], "name": row["extra_name"]})
+        for fact in reviewed_usage:
+            occurrence_key = (
+                fact["army_id"], fact["unit_id"], fact["group_id"],
+                fact["option_id"], fact["item_id"],
+            )
+            occurrences[("reviewed_loadout", occurrence_key)] = {
+                "item_id": fact["item_id"],
+                "unit": {"id": fact["unit_id"], "name": ""},
+                "extras": [],
+            }
         units_by_source = self._visible_unit_items_by_source(frozenset(AVAILABILITY_FLAGS))
         item_names = graph["source_names_by_item"][application_item_id]
         variants: dict[tuple[Any, tuple[tuple[Any, Any], ...]], dict[str, Any]] = {}
@@ -2835,18 +3129,452 @@ class Database:
             "variants": [variant for variant in variants.values() if variant["units"]],
         }
 
+    @instance_lru_cache(maxsize=1)
+    def _scoped_unit_filter_contexts(self) -> dict[str, tuple[MatchContext, ...]]:
+        """Index source-owned properties once; never infer Controller attachment.
+
+        A profile group identifies compatible selectable loadouts but can contain
+        multiple alternate Trooper profiles. Exact source occurrence keys retain
+        that distinction. An Include contributes only through its explicit target
+        payload, and only if that target resolves uniquely in the same source
+        Army and Unit. Source-attached embedded Peripherals without a published
+        property payload contribute no invented Skills or Equipment.
+        """
+        with self._connect() as connection:
+            source_to_logical = {
+                int(row[0]): int(row[1]) for row in connection.execute(
+                    "SELECT source_unit_id, logical_unit_id FROM logical_unit_sources"
+                )
+            }
+            catalog_ids = {
+                (str(row[0]), int(row[1])): int(row[2])
+                for row in connection.execute(
+                    "SELECT catalog, source_item_id, application_item_id "
+                    "FROM application_catalog_sources"
+                )
+            }
+            public_classifications: dict[int, set[int]] = defaultdict(set)
+            for item in self.list_unit_filter_values()["classifications"]:
+                for source_id in self._classification_filter_source_ids(int(item["id"])):
+                    public_classifications[source_id].add(int(item["id"]))
+
+            profile_payload_props: dict[int, set[tuple[str, int]]] = defaultdict(set)
+            loadout_payload_props: dict[int, set[tuple[str, int]]] = defaultdict(set)
+            for level, payloads in (
+                ("profile", profile_payload_props),
+                ("loadout", loadout_payload_props),
+            ):
+                for catalog in ("skills", "equipment", "weapons", "characteristics"):
+                    field = "characteristic_id" if catalog == "characteristics" else "item_id"
+                    for payload_id, source_id in connection.execute(
+                        f"SELECT {level}_payload_id, {field} "
+                        f"FROM {level}_payload_{catalog}"
+                    ):
+                        if source_id is None:
+                            continue
+                        if catalog == "characteristics":
+                            payloads[int(payload_id)].add(("characteristics", int(source_id)))
+                            payloads[int(payload_id)].add(
+                                ("equipment_characteristics", int(source_id))
+                            )
+                        else:
+                            public_id = catalog_ids.get((catalog, int(source_id)))
+                            if public_id is not None:
+                                payloads[int(payload_id)].add((catalog, public_id))
+
+            reviewed_loadout_props: dict[
+                tuple[int, int, int, int], set[tuple[str, int]]
+            ] = defaultdict(set)
+            for row in published_reviewed_loadout_capabilities(connection):
+                public_id = catalog_ids.get((str(row["catalog"]), int(row["item_id"])))
+                if public_id is not None:
+                    key = (
+                        int(row["army_id"]), int(row["unit_id"]),
+                        int(row["group_id"]), int(row["option_id"]),
+                    )
+                    reviewed_loadout_props[key].add((str(row["catalog"]), public_id))
+
+            groups: dict[tuple[int, int, int], list[tuple[int, frozenset, int]]] = defaultdict(list)
+            for row in connection.execute(
+                "SELECT p.army_id, p.unit_id, p.group_id, p.profile_id, "
+                "p.profile_payload_id, p.ava, pp.type_id, pg.category_id "
+                "FROM profile_payload_occurrences AS p "
+                "JOIN profile_payloads AS pp ON pp.id = p.profile_payload_id "
+                "JOIN profile_groups AS pg ON pg.army_id = p.army_id "
+                "AND pg.unit_id = p.unit_id AND pg.group_id = p.group_id"
+            ):
+                properties = set(profile_payload_props[int(row["profile_payload_id"])])
+                if row["type_id"] is not None:
+                    properties.add(("troop_types", int(row["type_id"])))
+                if row["category_id"] is not None:
+                    properties.update(
+                        ("classifications", public_id)
+                        for public_id in public_classifications[int(row["category_id"])]
+                    )
+                key = (int(row["army_id"]), int(row["unit_id"]), int(row["group_id"]))
+                groups[key].append((
+                    int(row["profile_id"]), frozenset(properties),
+                    int(row["ava"]) if row["ava"] is not None else -1,
+                ))
+
+            loadouts: dict[tuple[int, int, int, int], tuple[int, frozenset, int | None, str | None]] = {}
+            options_by_group: dict[tuple[int, int, int], list[tuple[int, int, int, int]]] = defaultdict(list)
+            groups_with_options: set[tuple[int, int, int]] = set()
+            target_index: dict[tuple[int, int, int], list[tuple[int, int, int, int]]] = defaultdict(list)
+            for row in connection.execute(
+                "SELECT o.army_id, o.unit_id, o.group_id, o.option_id, "
+                "o.loadout_payload_id, o.points, o.swc, p.disabled "
+                "FROM loadout_payload_occurrences AS o "
+                "JOIN loadout_payloads AS p ON p.id = o.loadout_payload_id"
+            ):
+                army, unit, group, option = (
+                    int(row["army_id"]), int(row["unit_id"]),
+                    int(row["group_id"]), int(row["option_id"]),
+                )
+                payload_id = int(row["loadout_payload_id"])
+                key = (army, unit, group, option)
+                groups_with_options.add(key[:3])
+                if not row["disabled"]:
+                    options_by_group[key[:3]].append(key)
+                loadouts[key] = (
+                    payload_id, frozenset(
+                        loadout_payload_props[payload_id] | reviewed_loadout_props[key]
+                    ),
+                    int(row["points"]) if row["points"] is not None else None,
+                    str(row["swc"]) if row["swc"] is not None else None,
+                )
+                target_index[(army, unit, payload_id)].append(key)
+
+            # Source Includes are keyed by their exact parent, never by a
+            # globally reused payload ID or a Controller's eligible target pool.
+            profile_includes: dict[tuple[int, int, int, int], list[int]] = defaultdict(list)
+            loadout_includes: dict[tuple[int, int, int, int], list[int]] = defaultdict(list)
+            for table, parent_column, destination in (
+                ("profile_occurrence_includes", "profile_id", profile_includes),
+                ("loadout_occurrence_includes", "option_id", loadout_includes),
+            ):
+                for row in connection.execute(
+                    f"SELECT army_id, unit_id, group_id, {parent_column}, "
+                    f"target_loadout_payload_id FROM {table}"
+                ):
+                    key = (
+                        int(row["army_id"]), int(row["unit_id"]),
+                        int(row["group_id"]), int(row[parent_column]),
+                    )
+                    destination[key].append(int(row["target_loadout_payload_id"]))
+
+            unit_option_includes: dict[tuple[int, int], list[int]] = defaultdict(list)
+            for unit_id, target_army_id, target_payload_id in connection.execute(
+                "SELECT t.unit_id, t.target_army_id, t.target_loadout_payload_id "
+                "FROM unit_option_include_targets AS t "
+                "JOIN unit_options AS o ON o.unit_id = t.unit_id "
+                "AND o.option_id = t.option_id "
+                "WHERE COALESCE(o.disabled, 0) = 0"
+            ):
+                unit_option_includes[(int(unit_id), int(target_army_id))].append(
+                    int(target_payload_id)
+                )
+            unit_option_props: dict[int, set[tuple[str, int]]] = defaultdict(set)
+            for catalog in ("skills", "equipment", "weapons"):
+                for unit_id, source_id in connection.execute(
+                    f"SELECT v.unit_id, v.item_id FROM unit_option_{catalog} AS v "
+                    "JOIN unit_options AS o ON o.unit_id = v.unit_id "
+                    "AND o.option_id = v.option_id "
+                    "WHERE COALESCE(o.disabled, 0) = 0"
+                ):
+                    if source_id is None:
+                        continue
+                    public_id = catalog_ids.get((catalog, int(source_id)))
+                    if public_id is not None:
+                        unit_option_props[int(unit_id)].add((catalog, public_id))
+
+        group_properties = {
+            key: frozenset().union(*(properties for _, properties, _ in profiles))
+            for key, profiles in groups.items()
+        }
+
+        def include_properties(
+            parent: tuple[int, int, int, int],
+            payload_ids: Iterable[int],
+            seen: frozenset[tuple[int, int, int, int]],
+        ) -> frozenset[tuple[str, int]]:
+            combined: set[tuple[str, int]] = set()
+            for payload_id in payload_ids:
+                targets = target_index.get((parent[0], parent[1], payload_id), ())
+                if len(targets) != 1 or targets[0] in seen:
+                    continue  # ambiguous target or cycle: fail closed
+                target = targets[0]
+                combined.update(loadouts[target][1])
+                combined.update(group_properties.get(target[:3], ()))
+                combined.update(include_properties(
+                    target, loadout_includes.get(target, ()), seen | {target}
+                ))
+                for profile_id, _, _ in groups.get(target[:3], ()):
+                    child = (*target[:3], profile_id)
+                    combined.update(include_properties(
+                        child, profile_includes.get(child, ()), seen | {target}
+                    ))
+            return frozenset(combined)
+
+        unit_option_include_props: dict[tuple[int, int], frozenset[tuple[str, int]]] = {}
+        for (unit, army), target_payload_ids in unit_option_includes.items():
+            unit_option_include_props[(unit, army)] = include_properties(
+                (army, unit, 0, 0), target_payload_ids, frozenset(),
+            )
+
+        profile_contexts: list[MatchContext] = []
+        loadout_contexts: list[MatchContext] = []
+        unit_contexts: list[MatchContext] = []
+        for group_key, profiles in groups.items():
+            army, unit, group = group_key
+            logical_id = source_to_logical.get(unit)
+            if logical_id is None:
+                continue
+            options = [
+                (key, loadouts[key]) for key in options_by_group.get(group_key, ())
+            ]
+            if not options and group_key not in groups_with_options:
+                # Profile-only groups have no loadout, but disabled-only
+                # groups cannot be selected as independent configurations.
+                options = [((*group_key, 0), (0, frozenset(), None, None))]
+            for loadout_key, (_payload, loadout_props, points, swc) in options:
+                option = loadout_key[3] or None
+                for profile_id, props, ava in profiles:
+                    profile_contexts.append(MatchContext(
+                        logical_id, unit, army, group, option, profile_id,
+                        props | loadout_props, (ava,), points, swc,
+                    ))
+                included = set(include_properties(
+                    loadout_key, loadout_includes.get(loadout_key, ()),
+                    frozenset({loadout_key}),
+                ))
+                for profile_id, _, _ in profiles:
+                    parent = (*group_key, profile_id)
+                    included.update(include_properties(
+                        parent, profile_includes.get(parent, ()),
+                        frozenset({loadout_key}),
+                    ))
+                combined = group_properties[group_key] | loadout_props | frozenset(included)
+                context = MatchContext(
+                    logical_id, unit, army, group, option, None, combined,
+                    tuple(ava for _, _, ava in profiles), points, swc,
+                )
+                loadout_contexts.append(context)
+                unit_contexts.append(context)
+            option_properties = (
+                frozenset(unit_option_props[unit])
+                | unit_option_include_props.get((unit, army), frozenset())
+            )
+            if option_properties:
+                unit_contexts.append(MatchContext(
+                    logical_id, unit, army, group, None, None, option_properties,
+                ))
+        return {
+            "profile": tuple(profile_contexts),
+            "loadout": tuple(loadout_contexts),
+            "unit": tuple(unit_contexts),
+        }
+
+    @staticmethod
+    def _scoped_numeric_match(
+        context: MatchContext, *,
+        ava: int | str | None, ava_min: int | None, ava_max: int | None,
+        points: int | None, points_min: int | None, points_max: int | None,
+        swc: str | None, swc_min: float | None, swc_max: float | None,
+    ) -> bool:
+        if ava is not None or ava_min is not None or ava_max is not None:
+            if not any(
+                (value >= 100 if ava == "total" else ava is None or value == ava)
+                and (ava_min is None or value >= ava_min)
+                and (ava_max is None or value <= ava_max)
+                for value in context.ava_values if value >= 0
+            ):
+                return False
+        if points is not None and context.points != points:
+            return False
+        if points_min is not None and (context.points is None or context.points < points_min):
+            return False
+        if points_max is not None and (context.points is None or context.points > points_max):
+            return False
+        if swc is not None:
+            actual = context.swc
+            if actual is None:
+                return False
+            if actual != swc:
+                if (swc == "-" or swc.startswith("+")
+                    or actual == "-" or actual.startswith("+")):
+                    return False
+                try:
+                    if Decimal(actual) != Decimal(swc):
+                        return False
+                except InvalidOperation:
+                    return False
+        if swc_min is not None or swc_max is not None:
+            value = context.swc
+            if value is None or value.startswith("+") or value == "-":
+                return False
+            try:
+                number = float(value)
+            except ValueError:
+                return False
+            if (swc_min is not None and number < swc_min) or (
+                swc_max is not None and number > swc_max
+            ):
+                return False
+        return True
+
+    def _unit_filter_usage_counts(
+        self, eligible: set[tuple[int, int, int, int | None, int | None]]
+    ) -> dict[str, dict[str, int]]:
+        """Batch distinct logical-Unit usage within visible matching source contexts."""
+
+        catalogs = ("skills", "equipment", "weapons")
+        result: dict[str, dict[str, int]] = {
+            **{catalog: {} for catalog in catalogs},
+            "equipment_characteristics": {},
+            "troop_types": {},
+            "classifications": {},
+            "characteristics": {},
+        }
+        if not eligible:
+            return result
+
+        predicates = {
+            "profile": (
+                "ppo.army_id = e.army_id AND ppo.unit_id = e.unit_id "
+                "AND (e.group_id IS NULL OR ppo.group_id = e.group_id)"
+            ),
+            "loadout": (
+                "lpo.army_id = e.army_id AND lpo.unit_id = e.unit_id "
+                "AND (e.group_id IS NULL OR lpo.group_id = e.group_id) "
+                "AND (e.loadout_id IS NULL OR lpo.loadout_payload_id = e.loadout_id)"
+            ),
+        }
+        sources: list[str] = []
+        for catalog in catalogs:
+            for level, occurrence, payload in (
+                ("profile", "ppo", "profile"),
+                ("loadout", "lpo", "loadout"),
+            ):
+                sources.append(
+                    f"SELECT '{catalog}' AS catalog, i.item_id, e.logical_id "
+                    "FROM eligible AS e "
+                    f"JOIN {payload}_payload_occurrences AS {occurrence} "
+                    f"ON {predicates[level]} "
+                    f"JOIN {payload}_payload_{catalog} AS i "
+                    f"ON i.{payload}_payload_id = {occurrence}.{payload}_payload_id"
+                )
+            sources.append(
+                f"SELECT '{catalog}' AS catalog, i.item_id, e.logical_id "
+                "FROM eligible AS e "
+                f"JOIN unit_option_{catalog} AS i ON i.unit_id = e.unit_id"
+            )
+        sources.append(
+            "SELECT 'troop_types' AS catalog, pp.type_id AS item_id, e.logical_id "
+            "FROM eligible AS e JOIN profile_payload_occurrences AS ppo "
+            f"ON {predicates['profile']} "
+            "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
+            "WHERE pp.type_id IS NOT NULL"
+        )
+        sources.append(
+            "SELECT 'classifications' AS catalog, cm.public_id AS item_id, e.logical_id "
+            "FROM eligible AS e JOIN profile_groups AS fg "
+            "ON fg.army_id = e.army_id AND fg.unit_id = e.unit_id "
+            "AND (e.group_id IS NULL OR fg.group_id = e.group_id) "
+            "JOIN classification_aliases AS cm ON cm.source_id = fg.category_id"
+        )
+        for level, occurrence, payload in (
+            ("profile", "ppo", "profile"),
+            ("loadout", "lpo", "loadout"),
+        ):
+            sources.append(
+                "SELECT 'equipment_characteristics' AS catalog, "
+                "i.characteristic_id AS item_id, e.logical_id "
+                "FROM eligible AS e "
+                f"JOIN {payload}_payload_occurrences AS {occurrence} "
+                f"ON {predicates[level]} "
+                f"JOIN {payload}_payload_characteristics AS i "
+                f"ON i.{payload}_payload_id = {occurrence}.{payload}_payload_id"
+            )
+        for level, occurrence, payload in (
+            ("profile", "ppo", "profile"),
+            ("loadout", "lpo", "loadout"),
+        ):
+            sources.append(
+                "SELECT 'characteristics' AS catalog, "
+                "i.characteristic_id AS item_id, e.logical_id "
+                "FROM eligible AS e "
+                f"JOIN {payload}_payload_occurrences AS {occurrence} "
+                f"ON {predicates[level]} "
+                f"JOIN {payload}_payload_characteristics AS i "
+                f"ON i.{payload}_payload_id = {occurrence}.{payload}_payload_id"
+            )
+        sql = (
+            "WITH uses AS (" + " UNION ALL ".join(sources) + ") "
+            "SELECT u.catalog, COALESCE(acs.application_item_id, u.item_id) AS item_id, "
+            "COUNT(DISTINCT u.logical_id) AS unit_count "
+            "FROM uses AS u LEFT JOIN application_catalog_sources AS acs "
+            "ON acs.catalog = u.catalog AND acs.source_item_id = u.item_id "
+            "GROUP BY u.catalog, COALESCE(acs.application_item_id, u.item_id)"
+        )
+        classification_aliases = [
+            (source_id, int(item["id"]))
+            for item in self.list_unit_filter_values()["classifications"]
+            for source_id in self._classification_filter_source_ids(int(item["id"]))
+        ]
+        with self._connect() as connection:
+            connection.execute(
+                "CREATE TEMP TABLE classification_aliases "
+                "(source_id INTEGER, public_id INTEGER)"
+            )
+            connection.executemany(
+                "INSERT INTO classification_aliases VALUES (?, ?)", classification_aliases,
+            )
+            connection.execute(
+                "CREATE INDEX classification_alias_lookup ON "
+                "classification_aliases (source_id)"
+            )
+            connection.execute(
+                "CREATE TEMP TABLE eligible (logical_id INTEGER, unit_id INTEGER, "
+                "army_id INTEGER, group_id INTEGER, loadout_id INTEGER)"
+            )
+            connection.executemany(
+                "INSERT INTO eligible VALUES (?, ?, ?, ?, ?)", eligible,
+            )
+            # Non-contextual Unit matching considers every merged source record,
+            # not only source occurrences with currently visible Army entries.
+            # Preserve exact Army/group/loadout scope for contextual filters.
+            connection.execute(
+                "INSERT INTO eligible (logical_id, unit_id, army_id, group_id, loadout_id) "
+                "SELECT DISTINCT e.logical_id, lus.source_unit_id, "
+                "COALESCE(source.army_id, e.army_id), NULL, NULL "
+                "FROM (SELECT DISTINCT logical_id, army_id FROM eligible "
+                "WHERE group_id IS NULL) AS e "
+                "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = e.logical_id "
+                "LEFT JOIN (SELECT unit_id, army_id FROM profile_payload_occurrences "
+                "UNION SELECT unit_id, army_id FROM loadout_payload_occurrences) AS source "
+                "ON source.unit_id = lus.source_unit_id"
+            )
+            connection.execute(
+                "CREATE INDEX eligible_occurrence ON "
+                "eligible (unit_id, army_id, group_id, loadout_id)"
+            )
+            for row in connection.execute(sql):
+                result[row["catalog"]][str(row["item_id"])] = int(row["unit_count"])
+        return result
+
     @instance_lru_cache(maxsize=128)
     def list_units(
         self,
         army_id: int | str | None = None,
         declared_faction_id: int | None = None,
         search: str = "",
-        skill_id: int | str | None = None,
-        equipment_id: int | str | None = None,
-        weapon_id: int | str | None = None,
-        troop_type: int | str | None = None,
-        classification: int | str | None = None,
-        characteristic: int | str | None = None,
+        skill_id: UnitFilterSelection = None,
+        equipment_id: UnitFilterSelection = None,
+        weapon_id: UnitFilterSelection = None,
+        troop_type: UnitFilterSelection = None,
+        classification: UnitFilterSelection = None,
+        characteristic: UnitFilterSelection = None,
         ava: int | str | None = None,
         ava_min: int | None = None,
         ava_max: int | None = None,
@@ -2866,7 +3594,13 @@ class Database:
         extended: bool = False,
         _unbounded: bool = False,
         _logical_unit_ids: frozenset[int] | None = None,
+        _equipment_characteristic_ids: tuple[int, ...] = (),
+        include_usage_counts: bool = False,
+        and_filters: tuple[str, ...] = (),
+        matching_scope: str | None = None,
     ) -> dict[str, Any]:
+        if matching_scope is not None and matching_scope not in {"profile", "loadout", "unit"}:
+            raise ValueError("Invalid matching scope")
         unresolved_army_filter = False
         if army_id is not None:
             resolved_army_id = self.application_army_id(army_id)
@@ -2885,42 +3619,116 @@ class Database:
             raise ValueError(
                 "declared_faction_id must be a nonnegative SQLite signed 64-bit integer"
             )
-        rule_filters: dict[str, int | None] = {}
-        for catalog, item_ref in {
-            "skills": skill_id,
-            "equipment": equipment_id,
-            "weapons": weapon_id,
-        }.items():
-            if item_ref is not None:
-                rule_filters[catalog] = self.application_catalog_id(catalog, item_ref)
-        unit_filter_refs = {
-            "troop_types": troop_type,
-            "classifications": classification,
-            "characteristics": characteristic,
+        if (
+            not isinstance(_equipment_characteristic_ids, tuple)
+            or len(_equipment_characteristic_ids) > 16
+            or any(type(item) is not int or item < 0 for item in _equipment_characteristic_ids)
+        ):
+            raise ValueError("_equipment_characteristic_ids must contain up to 16 nonnegative IDs")
+        allowed_and_filters = {
+            "skill", "equipment", "weapon", "troop_type", "classification", "characteristic",
         }
-        troop_type_filter_id = (
-            self._unit_filter_source_id("troop_types", troop_type)
-            if troop_type is not None
-            else None
+        if (
+            not isinstance(and_filters, tuple)
+            or any(type(key) is not str or key not in allowed_and_filters for key in and_filters)
+        ):
+            raise ValueError("Invalid AND filter selection")
+        selected_catalog_refs = {
+            "skills": self._selected_filter_refs(skill_id),
+            "equipment": self._selected_filter_refs(equipment_id),
+            "weapons": self._selected_filter_refs(weapon_id),
+        }
+        rule_filters = {
+            catalog: tuple(self.application_catalog_id(catalog, ref) for ref in refs)
+            for catalog, refs in selected_catalog_refs.items()
+            if refs
+        }
+        unit_filter_refs = {
+            "troop_types": self._selected_filter_refs(troop_type),
+            "classifications": self._selected_filter_refs(classification),
+            "characteristics": self._selected_filter_refs(characteristic),
+        }
+        troop_type_filter_ids = tuple(sorted({
+            item_id
+            for ref in unit_filter_refs["troop_types"]
+            if (item_id := self._unit_filter_source_id("troop_types", ref)) is not None
+        }))
+        classification_filter_ids = tuple(sorted({
+            item_id
+            for ref in unit_filter_refs["classifications"]
+            for item_id in self._classification_filter_source_ids(ref)
+        }))
+        characteristic_filter_ids = tuple(sorted({
+            item_id
+            for ref in unit_filter_refs["characteristics"]
+            if (item_id := self._unit_filter_source_id("characteristics", ref)) is not None
+        }))
+        and_requirements: list[tuple[str, tuple[int, ...]]] = []
+        for public_name, catalog in (
+            ("skill", "skills"), ("equipment", "equipment"), ("weapon", "weapons"),
+        ):
+            refs = selected_catalog_refs[catalog]
+            selected_count = len(refs) + (
+                len(_equipment_characteristic_ids) if catalog == "equipment" else 0
+            )
+            if public_name not in and_filters or selected_count < 2:
+                continue
+            catalog_graph = self._application_catalog_graph(catalog)
+            for ref in refs:
+                item_id = self.application_catalog_id(catalog, ref)
+                sources = catalog_graph["source_ids_by_item"].get(item_id, ()) if item_id is not None else ()
+                and_requirements.append((catalog, tuple(sources)))
+            if catalog == "equipment":
+                and_requirements.extend(
+                    ("equipment_characteristics", (source_id,))
+                    for source_id in _equipment_characteristic_ids
+                )
+        for public_name, catalog in (
+            ("troop_type", "troop_types"),
+            ("classification", "classifications"),
+            ("characteristic", "characteristics"),
+        ):
+            refs = unit_filter_refs[catalog]
+            if public_name not in and_filters or len(refs) < 2:
+                continue
+            for ref in refs:
+                if catalog == "classifications":
+                    sources = self._classification_filter_source_ids(ref)
+                else:
+                    source = self._unit_filter_source_id(catalog, ref)
+                    sources = (source,) if source is not None else ()
+                and_requirements.append((catalog, tuple(sources)))
+        categorical_selections = (
+            selected_catalog_refs["skills"],
+            (*selected_catalog_refs["equipment"], *_equipment_characteristic_ids),
+            selected_catalog_refs["weapons"],
+            *unit_filter_refs.values(),
         )
-        classification_filter_ids = (
-            self._classification_filter_source_ids(classification)
-            if classification is not None
-            else None
+        has_multi_selection = any(len(refs) > 1 for refs in categorical_selections)
+        force_multi_context = bool(and_requirements) or (
+            has_multi_selection and (
+                sum(bool(refs) for refs in categorical_selections) > 1 or army_id is not None
+            )
         )
-        characteristic_filter_id = (
-            self._unit_filter_source_id("characteristics", characteristic)
-            if characteristic is not None
-            else None
-        )
+        equipment_overlay_units = frozenset().union(*(
+            self._logical_unit_ids_for_unit_filter("characteristics", source_id)
+            for source_id in _equipment_characteristic_ids
+        ))
         logical_unit_filters = []
+        if any(item_id is None for ids in rule_filters.values() for item_id in ids):
+            logical_unit_filters.append(frozenset())
         if _logical_unit_ids is not None:
             logical_unit_filters.append(_logical_unit_ids)
-        for public_name, item_ref in unit_filter_refs.items():
-            if item_ref is not None:
-                logical_unit_filters.append(
-                    self._logical_unit_ids_for_unit_filter(public_name, item_ref)
-                )
+        for public_name, refs in unit_filter_refs.items() if matching_scope is None else ():
+            if not refs:
+                continue
+            if any(self._unit_filter_source_id(public_name, ref) is None for ref in refs):
+                logical_unit_filters.append(frozenset())
+            else:
+                logical_unit_filters.append(frozenset().union(*(
+                    self._logical_unit_ids_for_unit_filter(public_name, ref)
+                    for ref in refs
+                )))
 
         if ava is not None:
             if isinstance(ava, str):
@@ -2957,6 +3765,8 @@ class Database:
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
             raise ValueError("_unbounded must be a boolean")
+        if type(include_usage_counts) is not bool:
+            raise ValueError("include_usage_counts must be a boolean")
         if _logical_unit_ids is not None and (
             not isinstance(_logical_unit_ids, frozenset)
             or any(type(unit_id) is not int for unit_id in _logical_unit_ids)
@@ -2983,16 +3793,22 @@ class Database:
         }
         matching_sources_by_rule: dict[str, set[int]] = {}
         rule_source_ids: dict[str, tuple[int, ...]] = {}
-        if rule_filters:
+        if _equipment_characteristic_ids:
+            rule_filters.setdefault("equipment", ())
+        if rule_filters and matching_scope is None:
             with self._connect() as connection:
-                for catalog, application_id in rule_filters.items():
+                for catalog, application_ids in rule_filters.items():
                     catalog_graph = self._application_catalog_graph(catalog)
                     source_ids = (
                         ()
-                        if application_id is None
-                        else catalog_graph["source_ids_by_item"].get(application_id, ())
+                        if any(item_id is None for item_id in application_ids)
+                        else tuple(sorted({
+                            source_id
+                            for item_id in application_ids
+                            for source_id in catalog_graph["source_ids_by_item"].get(item_id, ())
+                        }))
                     )
-                    rule_source_ids[catalog] = tuple(source_ids)
+                    rule_source_ids[catalog] = source_ids
                     if not source_ids:
                         matching_sources_by_rule[catalog] = set()
                         continue
@@ -3015,9 +3831,10 @@ class Database:
             self._contextual_unit_filter_matches(
                 army_id=army_id,
                 rule_source_ids=rule_source_ids,
-                troop_type_id=troop_type_filter_id,
+                troop_type_ids=troop_type_filter_ids,
                 classification_ids=classification_filter_ids,
-                characteristic_id=characteristic_filter_id,
+                characteristic_ids=characteristic_filter_ids,
+                equipment_characteristic_ids=_equipment_characteristic_ids,
                 ava=ava,
                 ava_min=ava_min,
                 ava_max=ava_max,
@@ -3027,8 +3844,11 @@ class Database:
                 swc=swc,
                 swc_min=swc_min,
                 swc_max=swc_max,
+                force_loadout_context=force_multi_context,
+                include_loadout_id=include_usage_counts,
+                and_requirements=tuple(and_requirements),
             )
-            if has_numeric_filters
+            if matching_scope is None and (has_numeric_filters or force_multi_context)
             else None
         )
         graph = self._unit_graph()
@@ -3054,8 +3874,11 @@ class Database:
             if any(group["id"] not in allowed for allowed in logical_unit_filters):
                 continue
             if any(
-                not set(group["source_ids"]).intersection(source_ids)
-                for source_ids in matching_sources_by_rule.values()
+                not (
+                    set(group["source_ids"]).intersection(source_ids)
+                    or (catalog == "equipment" and group["id"] in equipment_overlay_units)
+                )
+                for catalog, source_ids in matching_sources_by_rule.items()
             ):
                 continue
             if search:
@@ -3081,7 +3904,7 @@ class Database:
                     continue
                 matching_occurrence_keys = frozenset(
                     (source_id, source_army_id)
-                    for source_id, source_army_id, _group_id in contexts
+                    for source_id, source_army_id, *_rest in contexts
                 )
 
             requirements = minimal_availability_requirements(
@@ -3104,6 +3927,155 @@ class Database:
                 declared_faction_ids_by_unit,
             )
             grouped.append({**group, "armies": visible_armies})
+        prospective_counts: dict[str, dict[str, int]] | None = None
+        if matching_scope is not None:
+            # The legacy SQL matcher stays in place for URLs/API clients without
+            # a scope. Explicit scoped requests use one evidence-backed context
+            # index for both result membership and prospective counts.
+            selected: dict[str, tuple[frozenset[tuple[str, int]], ...]] = {}
+            selected_keys: dict[str, set[str]] = {
+                name: set() for name in (
+                    "skills", "equipment", "weapons", "troop_types",
+                    "classifications", "characteristics",
+                )
+            }
+            for catalog in ("skills", "equipment", "weapons"):
+                choices = []
+                for ref in selected_catalog_refs[catalog]:
+                    item_id = self.application_catalog_id(catalog, ref)
+                    choices.append(frozenset({(catalog, item_id)}) if item_id is not None else frozenset())
+                    if item_id is not None:
+                        selected_keys[catalog].add(str(item_id))
+                if catalog == "equipment":
+                    for source_id in _equipment_characteristic_ids:
+                        choices.append(frozenset({("equipment_characteristics", source_id)}))
+                        selected_keys[catalog].add(f"characteristic:{source_id}")
+                selected[catalog] = tuple(choices)
+            for catalog in ("troop_types", "classifications", "characteristics"):
+                choices = []
+                for ref in unit_filter_refs[catalog]:
+                    item_id = self._unit_filter_source_id(catalog, ref)
+                    choices.append(frozenset({(catalog, item_id)}) if item_id is not None else frozenset())
+                    if item_id is not None:
+                        selected_keys[catalog].add(str(item_id))
+                selected[catalog] = tuple(choices)
+            scope_modes = frozenset(
+                catalog for catalog, public in (
+                    ("skills", "skill"), ("equipment", "equipment"), ("weapons", "weapon"),
+                    ("troop_types", "troop_type"), ("classifications", "classification"),
+                    ("characteristics", "characteristic"),
+                ) if public in and_filters
+            )
+            allowed_occurrences: set[tuple[int, int, int]] = set()
+            for group in grouped:
+                for occurrence in group["army_occurrences"]:
+                    if army_id is not None and occurrence["id"] != army_id:
+                        continue
+                    source_id = occurrence["source_id"]
+                    if not army_required_flags(
+                        occurrence, group, canonical_factions[source_id],
+                        declared_faction_ids_by_unit[source_id],
+                    ) <= selected_flags:
+                        continue
+                    allowed_occurrences.add((
+                        group["id"], source_id, occurrence["source_army_id"],
+                    ))
+            candidates = [
+                context
+                for context in self._scoped_unit_filter_contexts()[matching_scope]
+                if (context.logical_id, context.source_unit_id, context.source_army_id)
+                in allowed_occurrences
+            ]
+            numeric_params = {
+                "ava": ava, "ava_min": ava_min, "ava_max": ava_max,
+                "points": points, "points_min": points_min, "points_max": points_max,
+                "swc": swc, "swc_min": swc_min, "swc_max": swc_max,
+            }
+            if has_numeric_filters:
+                numeric_eligible = {
+                    context.logical_id for context in candidates
+                    if self._scoped_numeric_match(context, **numeric_params)
+                }
+                candidates = [
+                    context for context in candidates
+                    if context.logical_id in numeric_eligible
+                    and (
+                        matching_scope == "unit"
+                        or self._scoped_numeric_match(context, **numeric_params)
+                    )
+                ]
+            scoped_matches, prospective_counts = evaluate_unit_filter_contexts(
+                candidates, selected, scope_modes, matching_scope,
+            )
+            if has_numeric_filters or any(selected.values()):
+                matching_requirements = []
+                filtered_groups = []
+                for group in grouped:
+                    contexts = scoped_matches.get(group["id"])
+                    if not contexts:
+                        continue
+                    occurrence_keys = frozenset(
+                        (source, army) for source, army, _ in contexts
+                    )
+                    requirements = minimal_availability_requirements(
+                        group, canonical_factions, declared_faction_ids_by_unit,
+                        army_id, occurrence_keys,
+                    )
+                    if not requirements:
+                        continue
+                    matching_requirements.append(requirements)
+                    filtered_groups.append(group)
+                grouped = filtered_groups
+            if include_usage_counts:
+                for catalog, counts in prospective_counts.items():
+                    base = counts.pop("__or_base__", 0)
+                    if catalog in {"skills", "equipment", "weapons"}:
+                        option_keys = {
+                            str(item["id"]) for item in self.list_catalog_items(catalog)
+                        }
+                    else:
+                        option_keys = {
+                            str(item["id"]) for item in self.list_unit_filter_values()[catalog]
+                        }
+                    if catalog == "equipment":
+                        option_keys.update(
+                            f"characteristic:{item['id']}"
+                            for item in self.list_unit_filter_values()["characteristics"]
+                        )
+                    option_keys.update(selected_keys[catalog])
+                    prospective_counts[catalog] = {
+                        key: (
+                            len(scoped_matches) if key in selected_keys[catalog]
+                            else counts.get(key, 0) + base
+                        )
+                        for key in option_keys
+                    }
+            else:
+                prospective_counts = None
+        if include_usage_counts:
+            eligible_contexts: set[tuple[int, int, int, int | None, int | None]] = set()
+            for group in grouped:
+                for occurrence in group["army_occurrences"]:
+                    if army_id is not None and occurrence["id"] != army_id:
+                        continue
+                    source_id = occurrence["source_id"]
+                    source_army_id = occurrence["source_army_id"]
+                    required = army_required_flags(
+                        occurrence, group, canonical_factions[source_id],
+                        declared_faction_ids_by_unit[source_id],
+                    )
+                    if not required <= selected_flags:
+                        continue
+                    if contextual_matches is None:
+                        eligible_contexts.add((group["id"], source_id, source_army_id, None, None))
+                    else:
+                        for context in contextual_matches.get(group["id"], ()):
+                            if context[:2] != (source_id, source_army_id):
+                                continue
+                            eligible_contexts.add((
+                                group["id"], source_id, source_army_id, context[2],
+                                context[3] or None,
+                            ))
         grouped.sort(
             key=lambda group: (unit_sort_key(group["name"]), group["id"]),
             reverse=descending,
@@ -3151,6 +4123,22 @@ class Database:
                     profiles.append({**profile, "availability": availability})
                 item["profiles"] = profiles
 
+        if (
+            matching_scope in {"profile", "loadout"}
+            and (any(selected.values()) or has_numeric_filters)
+            and items
+        ):
+            visible_ids = {item["id"] for item in items}
+            matched = [
+                context for context in candidates
+                if context.logical_id in visible_ids
+                and matches_selected(context.properties, selected, scope_modes)
+            ]
+            evidence = self._unit_list_matching_context_labels(matched, army_names)
+            for item in items:
+                if item["id"] in evidence:
+                    item["matching_contexts"] = evidence[item["id"]]
+
         summary = availability_summary(matching_requirements, selected_flags)
         result = {
             "items": items,
@@ -3159,6 +4147,10 @@ class Database:
             "offset": offset,
             "availability": summary,
         }
+        if include_usage_counts:
+            result["usage_counts"] = self._unit_filter_usage_counts(eligible_contexts)
+            if prospective_counts is not None:
+                result["prospective_counts"] = prospective_counts
         if declared_faction_id is not None:
             application_armies = self._application_army_graph()
             application_id = application_armies["source_to_application"].get(
@@ -3177,6 +4169,134 @@ class Database:
                     identity is not None
                     and application_id in application_armies["source_list_ids"]
                 ),
+            }
+        return result
+
+    def _unit_list_matching_context_labels(
+        self, contexts: list[MatchContext], army_names: Mapping[int, str],
+    ) -> dict[int, dict[str, Any]]:
+        """Summarize matching source occurrences by distinct player-visible kit."""
+        if not contexts:
+            return {}
+        source_units = sorted({item.source_unit_id for item in contexts})
+        placeholders = ", ".join("?" for _ in source_units)
+        with self._connect() as connection:
+            profiles = {
+                (int(row["army_id"]), int(row["unit_id"]), int(row["group_id"]),
+                 int(row["occurrence_id"])): str(row["name"] or "")
+                for row in connection.execute(
+                    "SELECT o.army_id, o.unit_id, o.group_id, o.profile_id AS occurrence_id, "
+                    "p.name FROM profile_payload_occurrences AS o "
+                    "JOIN profile_payloads AS p ON p.id = o.profile_payload_id "
+                    f"WHERE o.unit_id IN ({placeholders})", source_units,
+                )
+            }
+            loadouts = {
+                (int(row["army_id"]), int(row["unit_id"]), int(row["group_id"]),
+                 int(row["occurrence_id"])): str(row["name"] or "")
+                for row in connection.execute(
+                    "SELECT o.army_id, o.unit_id, o.group_id, o.option_id AS occurrence_id, "
+                    "p.name FROM loadout_payload_occurrences AS o "
+                    "JOIN loadout_payloads AS p ON p.id = o.loadout_payload_id "
+                    f"WHERE o.unit_id IN ({placeholders})", source_units,
+                )
+            }
+        # Resolve public catalog names, not raw source IDs or inferred extras.
+        catalog_names = {
+            catalog: {
+                int(row["id"]): str(row["name"])
+                for row in self._application_catalog_graph(catalog)["items"].values()
+            }
+            for catalog in ("weapons", "equipment", "skills")
+        }
+        by_unit: dict[int, dict[tuple[Any, ...], dict[str, Any]]] = defaultdict(dict)
+        source_counts: dict[int, int] = defaultdict(int)
+        for item in sorted(
+            contexts,
+            key=lambda c: (c.logical_id, c.source_army_id, c.source_unit_id,
+                           c.group_id, c.option_id or 0, c.profile_id or 0),
+        ):
+            base = (item.source_army_id, item.source_unit_id, item.group_id)
+            profile_name = (
+                profiles.get((*base, item.profile_id), "")
+                if item.profile_id is not None else ""
+            )
+            loadout_name = (
+                loadouts.get((*base, item.option_id), "")
+                if item.option_id is not None else ""
+            )
+            if not profile_name and not loadout_name:
+                continue
+            source_counts[item.logical_id] += 1
+            properties = tuple(sorted(
+                (catalog, catalog_names[catalog][value])
+                for catalog, value in item.properties
+                if catalog in catalog_names and value in catalog_names[catalog]
+            ))
+            # Collapse source occurrences with the same displayed names, costs
+            # and catalog capabilities, without claiming their unlisted extras
+            # or list-building constraints are necessarily interchangeable.
+            signature = (
+                profile_name.casefold(), loadout_name.casefold(),
+                item.points, item.swc, properties,
+            )
+            options = by_unit[item.logical_id]
+            if signature not in options:
+                options[signature] = {
+                    "profile_name": profile_name,
+                    "loadout_name": loadout_name,
+                    "army_name": army_names.get(item.source_army_id, ""),
+                    "points": item.points,
+                    "swc": item.swc,
+                    "_properties": properties,
+                    "armies": [],
+                }
+            army_name = army_names.get(item.source_army_id, "")
+            if army_name and army_name not in options[signature]["armies"]:
+                options[signature]["armies"].append(army_name)
+
+        result: dict[int, dict[str, Any]] = {}
+        for logical_id, unique in by_unit.items():
+            options = list(unique.values())
+            counts: dict[tuple[str, str], int] = defaultdict(int)
+            for option in options:
+                for token in option["_properties"]:
+                    counts[token] += 1
+            for option in options:
+                # Prefer distinctive weapons, equipment and skills; avoid
+                # repeating capabilities shared by every matching option.
+                properties = option.pop("_properties")
+                varying = [
+                    token for token in properties if counts[token] < len(options)
+                ]
+                if not varying and len(options) == 1:
+                    # A single match has no comparison set; show its headline
+                    # kit instead of an empty disclosure.
+                    varying = list(properties)
+                varying.sort(key=lambda token: (counts[token], token[1].casefold()))
+                # Prefer one salient difference per domain before filling
+                # remaining space; otherwise Weapons drown out Skills.
+                featured = []
+                for catalog in ("weapons", "equipment", "skills"):
+                    first = next((token for token in varying if token[0] == catalog), None)
+                    if first is not None:
+                        featured.append(first)
+                featured.extend(token for token in varying if token not in featured)
+                option["highlights"] = [
+                    {"category": catalog, "name": name}
+                    for catalog, name in featured[:3]
+                ]
+            options.sort(key=lambda option: (
+                option["points"] is None,
+                option["points"] if option["points"] is not None else 0,
+                option["swc"] or "",
+                option["profile_name"].casefold(),
+                option["loadout_name"].casefold(),
+            ))
+            result[logical_id] = {
+                "total": len(options),
+                "source_matches": source_counts[logical_id],
+                "examples": options[:5],
             }
         return result
 
@@ -4004,6 +5124,23 @@ class Database:
                                 "extras": extras_by_occurrence.get(occurrence_key, []),
                             },
                         )
+            for reviewed in published_reviewed_loadout_capabilities(connection):
+                loadout_key = loadout_keys_by_source.get((
+                    reviewed["unit_id"], reviewed["army_id"],
+                    reviewed["group_id"], reviewed["option_id"],
+                ))
+                loadout_item = loadout_items.get(loadout_key) if loadout_key is not None else None
+                if loadout_item is not None:
+                    append_unique_item(
+                        loadout_item[reviewed["catalog"]],
+                        {
+                            "id": reviewed["item_id"],
+                            "name": reviewed["name"],
+                            "quantity": 1,
+                            "extras": [],
+                            "reviewed": True,
+                        },
+                    )
             loadout_peripheral_rows = connection.execute(
                 "SELECT p.unit_id, p.army_id, p.group_id, p.option_id, "
                 "a.entity_id, COALESCE(e.name, s.source_name) AS name, "

@@ -232,7 +232,7 @@ def test_symbol_catalog_leaves_unpublished_fixture_unit_unenriched(tmp_path: Pat
 
 
 def test_tracked_publication_covers_every_runtime_logical_unit() -> None:
-    database = Path(__file__).parents[1] / "data" / "generated" / "infinity.db"
+    database = Path(__file__).parents[1] / "data" / "generated" / "army.db"
     catalog = SymbolCatalog()
     with sqlite3.connect(database) as connection:
         slugs = [

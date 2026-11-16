@@ -18,11 +18,10 @@ hand those parts to the appropriate workflow after the source semantics are clea
 
 ## Procedure
 
-1. For autonomous "next task" work, apply the
-   [V1S selection checkpoint](../../../docs/TODO.md#v1s-work-selection-and-handoff)
-   before choosing a convenient source family: check earlier open tasks,
-   record justified blockers/priority exceptions and report what was bypassed.
-   Then identify the exact question, game edition, source scope and affected
+1. Select autonomous work from the [active backlog](../../../docs/TODO.md).
+   Only when a numbered V1S task is reopened, apply the
+   [historical selection checkpoint](../../../docs/testing.md#v1s-backlog-checks)
+   and record justified blockers or priority exceptions. Then identify the exact question, game edition, source scope and affected
    InfinityDB identity. Distinguish an Army profile/mode from a parent weapon
    or similarly named record.
 2. Establish the applicable pinned sources before interpreting them. Keep source version,
@@ -48,15 +47,16 @@ hand those parts to the appropriate workflow after the source semantics are clea
 7. Report the supported conclusion, unresolved conflicts, source citations, and essential
    focused validation. Do not turn a reviewed descriptive fact into an executable game mechanic
    or infer legality from a source relationship.
-8. Check the [canonical VD/VR queue](../../../docs/validation-queue.md#queue-rules)
-   at entry and closeout. For a changed maintained source or regression
-   contract, register missing assertions as VD and deferred source-audit or
-   cumulative execution as VR; pure read-only review needs no artificial
-   queue entry. Author tests only in VD without running them, and execute
-   due VR work through the [pinned Linux protocol](../../../docs/testing.md#parallel-windows-development-and-linux-validation).
-   Before moving to the next source, reconcile the reviewed V1S entry:
-   retire a fully evidenced review or keep its unresolved action/authority
-   open. Completing source review does not resolve an unknown upstream effect.
+8. When a maintained source or regression contract changes, design and run
+   the relevant focused checks during the implementation pass where possible.
+   Use the [deferred-validation queue](../../../docs/validation-queue.md#queue-rules)
+   only for concrete work blocked by an unavailable prerequisite; VD and VR
+   are not mandatory separate phases. A pinned
+   [Linux run](../../../docs/testing.md#parallel-windows-development-and-linux-validation)
+   is optional when its environment or isolation is needed. Reconcile the
+   owning backlog task only when its implementation and required acceptance
+   are complete; an unresolved upstream question remains open even after
+   its available evidence has been reviewed.
 
 ## References
 
