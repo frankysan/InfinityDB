@@ -157,20 +157,31 @@ def test_double_bind_selected_main_objective_hotfix_and_antenna_areas() -> None:
         assert svg.count('data-region-shape="circle"') == 3
         assert 'class="exclusion"' in svg
         assert 'class="influence"' in svg
-        assert svg.count('class="measurement placement-ruler"') == 2
+        assert svg.count('class="measurement placement-ruler"') == 3
         rulers = {
             annotation["id"]: annotation for annotation in geometry["annotations"]
             if annotation["kind"] == "ruler"
         }
-        assert set(rulers) == {"antenna-middle-from-left", "antenna-right-from-right"}
+        assert set(rulers) == {
+            "antenna-middle-from-left", "antenna-right-from-right",
+            "exclusion-from-center",
+        }
         assert rulers["antenna-middle-from-left"]["x2"] == geometry["table"]["width"] / 2
         assert rulers["antenna-right-from-right"]["x1"] == geometry["table"]["width"] * 3 / 4
         elements = {item["id"]: item for item in geometry["elements"]}
         exclusion_bottom = elements["exclusion-zone"]["y2"]
         deployment_start = elements["deployment-b"]["y1"]
-        for ruler in rulers.values():
+        for ruler_id in ("antenna-middle-from-left", "antenna-right-from-right"):
+            ruler = rulers[ruler_id]
             assert ruler["y1"] == ruler["y2"] == exclusion_bottom + 2.5
             assert exclusion_bottom < ruler["y1"] < deployment_start
+        center_ruler = rulers["exclusion-from-center"]
+        center = geometry["table"]["height"] / 2
+        assert center_ruler["x1"] == center_ruler["x2"] == geometry["table"]["width"] - 3
+        assert center_ruler["y1"] == center
+        assert center_ruler["y2"] == exclusion_bottom == center + 4
+        assert 'id="exclusion-from-center" class="measurement placement-ruler"' in svg
+        assert 'data-distance-inches="4"' in svg
         assert (
             f'data-distance-inches="{geometry["table"]["width"] / 2:g}"' in svg
         )
