@@ -1,0 +1,2045 @@
+{
+  "format": "InfinityDB curated reference",
+  "formatVersion": 23,
+  "collection": {
+    "id": "its-season-18-2026.09.11",
+    "title": "ITS Season 18: Overheat — September hotfix mission curation",
+    "domain": "its",
+    "status": "current",
+    "effectiveFrom": "2026-09-24",
+    "authority": "primary"
+  },
+  "scenarioCollection": {
+    "id": "its-18",
+    "title": "ITS Season 18: Overheat",
+    "revision": "2026.09.11",
+    "members": [
+      {
+        "scenarioId": "scenario:annihilation"
+      },
+      {
+        "scenarioId": "scenario:battleground"
+      }
+    ]
+  },
+  "vocabularySources": {
+    "skillTypes": [],
+    "labels": []
+  },
+  "skillTypes": [],
+  "labels": [],
+  "sources": [
+    {
+      "id": "its-season-18-en-pdf",
+      "kind": "pdf",
+      "title": "ITS Season 18: Overheat (English, September hotfix)",
+      "version": "2026.09.11",
+      "publishedDate": "2026-09-24",
+      "localPath": "data/pdf/its/its-18-rules-v2026.09.11-en.pdf",
+      "pageCount": 142,
+      "sha256": "d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f",
+      "authority": "primary",
+      "url": "https://experience.corvusbelli.com/en/infinity/its-rules"
+    },
+    {
+      "id": "its-season-18-es-pdf",
+      "kind": "pdf",
+      "title": "ITS Season 18: Overheat (Spanish, September hotfix)",
+      "version": "2026.09.11",
+      "publishedDate": "2026-09-24",
+      "localPath": "data/pdf/its/its-18-rules-v2026.09.11-es.pdf",
+      "pageCount": 147,
+      "sha256": "df7398f8bc99927dc30c86cf5625cb08f8f38db9f3bbba685223c9c4981fa94d",
+      "authority": "primary",
+      "url": "https://experience.corvusbelli.com/es/infinity/its-rules"
+    }
+  ],
+  "seasonPolicies": [
+    {
+      "id": "its18-spec-ops-tournament",
+      "title": "ITS 18: Spec-Ops Tournament Restriction",
+      "target": {
+        "domain": "rules-n5",
+        "recordId": "skill:infinity-spec-ops"
+      },
+      "applicability": {
+        "seasonId": "its-18",
+        "revision": "2026.09.11",
+        "context": "official-tournament"
+      },
+      "effect": {
+        "kind": "prohibited",
+        "text": "ITS Season 18 does not permit ordinary Infinity Spec-Ops in official tournaments. The N5.3 Skill and Request SpecBall remain valid core rules outside that event restriction."
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 27,
+          "section": "Spec-Ops"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    },
+    {
+      "id": "its18-team-ops-spec-ops",
+      "title": "ITS 18: TEAM-OPS Spec-Ops Restriction",
+      "target": {
+        "domain": "rules-n5",
+        "recordId": "skill:infinity-spec-ops"
+      },
+      "applicability": {
+        "seasonId": "its-18",
+        "revision": "2026.09.11",
+        "context": "team-ops-extra"
+      },
+      "effect": {
+        "kind": "prohibited",
+        "text": "TEAM-OPS is a separate optional ITS Season 18 Extra. It does not permit Infinity Spec-Ops, and Request Tacball does not replace the core Request SpecBall procedure."
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 29,
+          "section": "Team-Ops"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    },
+    {
+      "id": "its18-reinforcements-availability",
+      "title": "ITS 18: Reinforcements Extra Availability",
+      "target": {
+        "domain": "rules-n5",
+        "recordId": "rule:reinforcements-extra"
+      },
+      "applicability": {
+        "seasonId": "its-18",
+        "revision": "2026.09.11",
+        "context": "reinforcements-extra"
+      },
+      "effect": {
+        "kind": "optional-availability",
+        "text": "ITS Season 18 offers Reinforcements as an optional Extra, not as a rule for all N5 games. Its availability here does not independently certify unchanged N4-origin Reinforcements procedures as newly published N5 mechanics."
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 28,
+          "section": "Reinforcements"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    }
+  ],
+  "records": [
+    {
+      "id": "scenario:annihilation",
+      "kind": "scenario",
+      "name": "Annihilation",
+      "summary": "Season 18 Direct Action mission, suitable for Reinforcements: score by enemy Army Points killed, surviving Victory Points and the enemy Lieutenant eliminated. Retreat! does not apply.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Side A"
+            },
+            {
+              "id": "side-b",
+              "name": "Side B"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "destroy-forces",
+              "name": "Enemy Army Points Killed",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 4,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 40,
+                    "maximum": 75
+                  }
+                },
+                {
+                  "armyPoints": [
+                    200
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 50,
+                    "maximum": 100
+                  }
+                },
+                {
+                  "armyPoints": [
+                    250
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 65,
+                    "maximum": 125
+                  }
+                },
+                {
+                  "armyPoints": [
+                    300
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 75,
+                    "maximum": 150
+                  }
+                },
+                {
+                  "armyPoints": [
+                    350
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 85,
+                    "maximum": 175
+                  }
+                },
+                {
+                  "armyPoints": [
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 100,
+                    "maximum": 200
+                  }
+                },
+                {
+                  "armyPoints": [
+                    150
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 76,
+                    "maximum": 125
+                  }
+                },
+                {
+                  "armyPoints": [
+                    200
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 101,
+                    "maximum": 150
+                  }
+                },
+                {
+                  "armyPoints": [
+                    250
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 126,
+                    "maximum": 200
+                  }
+                },
+                {
+                  "armyPoints": [
+                    300
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 151,
+                    "maximum": 250
+                  }
+                },
+                {
+                  "armyPoints": [
+                    350
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 176,
+                    "maximum": 274
+                  }
+                },
+                {
+                  "armyPoints": [
+                    400
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 201,
+                    "maximum": 300
+                  }
+                },
+                {
+                  "armyPoints": [
+                    150
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 126,
+                    "maximum": null
+                  }
+                },
+                {
+                  "armyPoints": [
+                    200
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 151,
+                    "maximum": null
+                  }
+                },
+                {
+                  "armyPoints": [
+                    250
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 201,
+                    "maximum": null
+                  }
+                },
+                {
+                  "armyPoints": [
+                    300
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 251,
+                    "maximum": null
+                  }
+                },
+                {
+                  "armyPoints": [
+                    350
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 276,
+                    "maximum": null
+                  }
+                },
+                {
+                  "armyPoints": [
+                    400
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "enemy-army-points-killed",
+                    "minimum": 301,
+                    "maximum": null
+                  }
+                }
+              ]
+            },
+            {
+              "id": "preserve-forces",
+              "name": "Surviving Victory Points",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 4,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 40,
+                    "maximum": 75
+                  }
+                },
+                {
+                  "armyPoints": [
+                    200
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 50,
+                    "maximum": 100
+                  }
+                },
+                {
+                  "armyPoints": [
+                    250
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 65,
+                    "maximum": 125
+                  }
+                },
+                {
+                  "armyPoints": [
+                    300
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 75,
+                    "maximum": 150
+                  }
+                },
+                {
+                  "armyPoints": [
+                    350
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 85,
+                    "maximum": 175
+                  }
+                },
+                {
+                  "armyPoints": [
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 100,
+                    "maximum": 200
+                  }
+                },
+                {
+                  "armyPoints": [
+                    150
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 76,
+                    "maximum": 125
+                  }
+                },
+                {
+                  "armyPoints": [
+                    200
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 101,
+                    "maximum": 150
+                  }
+                },
+                {
+                  "armyPoints": [
+                    250
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 126,
+                    "maximum": 200
+                  }
+                },
+                {
+                  "armyPoints": [
+                    300
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 151,
+                    "maximum": 250
+                  }
+                },
+                {
+                  "armyPoints": [
+                    350
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 176,
+                    "maximum": 274
+                  }
+                },
+                {
+                  "armyPoints": [
+                    400
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 201,
+                    "maximum": 300
+                  }
+                },
+                {
+                  "armyPoints": [
+                    150
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 126,
+                    "maximum": null
+                  }
+                },
+                {
+                  "armyPoints": [
+                    200
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 151,
+                    "maximum": null
+                  }
+                },
+                {
+                  "armyPoints": [
+                    250
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 201,
+                    "maximum": null
+                  }
+                },
+                {
+                  "armyPoints": [
+                    300
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 251,
+                    "maximum": null
+                  }
+                },
+                {
+                  "armyPoints": [
+                    350
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 276,
+                    "maximum": null
+                  }
+                },
+                {
+                  "armyPoints": [
+                    400
+                  ],
+                  "objectivePoints": 4,
+                  "condition": {
+                    "kind": "numeric-range",
+                    "metric": "surviving-victory-points",
+                    "minimum": 301,
+                    "maximum": null
+                  }
+                }
+              ]
+            },
+            {
+              "id": "eliminate-lieutenant",
+              "name": "Eliminate the enemy Lieutenant",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill the enemy [[skill:lieutenant]]."
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "killing",
+              "name": "Killing",
+              "paragraphs": [
+                "An enemy Trooper counts as Killed after entering [[state:dead]] or if it is in a Null [[trait:state|State]] at the end of the game.",
+                "A Trooper not deployed on the table as a Model or Marker by the end of the game also counts as Killed by the adversary."
+              ]
+            },
+            {
+              "id": "no-quarter",
+              "name": "No Quarter",
+              "paragraphs": [
+                "The Retreat! rules do not apply in this scenario."
+              ]
+            },
+            {
+              "id": "hvt-and-classified-deck",
+              "name": "HVT and Classified Deck not used",
+              "paragraphs": [
+                "Players do not deploy an HVT Model or use the Classified Deck. The Secure HVT rule does not apply."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            }
+          ],
+          "sourceIssues": [
+            {
+              "id": "350-point-destroy-forces-gap",
+              "armyPoints": [
+                350
+              ],
+              "objectiveId": "destroy-forces",
+              "status": "needs-verification",
+              "description": "Both September hotfix PDFs print 176–274 for the 3-point band and more than 275 for the 4-point band, leaving exactly 275 points without a printed award. Preserve the source gap pending official clarification; do not infer a corrected boundary."
+            },
+            {
+              "id": "350-point-preserve-forces-gap",
+              "armyPoints": [
+                350
+              ],
+              "objectiveId": "preserve-forces",
+              "status": "needs-verification",
+              "description": "Both September hotfix PDFs print 176–274 for the 3-point band and more than 275 for the 4-point band, leaving exactly 275 points without a printed award. Preserve the source gap pending official clarification; do not infer a corrected boundary."
+            },
+            {
+              "id": "400-point-preserve-forces-bilingual-threshold",
+              "armyPoints": [
+                400
+              ],
+              "objectiveId": "preserve-forces",
+              "status": "needs-verification",
+              "description": "English 2026.09.11 p. 126 awards 4 Objective Points for more than 300 surviving Victory Points. Spanish p. 132 prints more than 30; preserve the English source value and record the bilingual discrepancy rather than interpreting the Spanish overlap as a second scoring rule."
+            }
+          ]
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Annihilation",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 8
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 24,
+                  "y2": 32
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": {
+                    "anchor": "center"
+                  },
+                  "x2": {
+                    "anchor": "right"
+                  },
+                  "y2": {
+                    "anchor": "center"
+                  }
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 4.55,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 28.55,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Annihilation",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 32,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 32,
+                  "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": {
+                    "anchor": "center"
+                  },
+                  "x2": {
+                    "anchor": "right"
+                  },
+                  "y2": {
+                    "anchor": "center"
+                  }
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.55,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 42.55,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Annihilation",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 48,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 48,
+                  "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": {
+                    "anchor": "center"
+                  },
+                  "x2": {
+                    "anchor": "right"
+                  },
+                  "y2": {
+                    "anchor": "center"
+                  }
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.55,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 42.55,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 125,
+          "section": "Annihilation — mission identity and Reinforcements suitability"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 126,
+          "section": "Annihilation — Objective Points table"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 127,
+          "section": "Annihilation — deployment and special rules"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 128,
+          "section": "Annihilation — end of mission"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 132,
+          "section": "Aniquilación — cross-language Objective Points table"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    },
+    {
+      "id": "scenario:battleground",
+      "kind": "scenario",
+      "name": "Battleground",
+      "summary": "Season 18 Direct Action mission: dominate three Zones of Operations at the end of the game. No Classified Objectives or HVT are used.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Side A"
+            },
+            {
+              "id": "side-b",
+              "name": "Side B"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "near-sector-a",
+              "name": "Nearest Sector (Side A)",
+              "sideIds": [
+                "side-a"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "dominated-region-comparison",
+                    "elementIds": [
+                      "sector-near-a"
+                    ],
+                    "comparison": "greater",
+                    "minimum": 1
+                  }
+                }
+              ]
+            },
+            {
+              "id": "near-sector-b",
+              "name": "Nearest Sector (Side B)",
+              "sideIds": [
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "dominated-region-comparison",
+                    "elementIds": [
+                      "sector-near-b"
+                    ],
+                    "comparison": "greater",
+                    "minimum": 1
+                  }
+                }
+              ]
+            },
+            {
+              "id": "central-sector",
+              "name": "Central Sector",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "dominated-region-comparison",
+                    "elementIds": [
+                      "sector-center"
+                    ],
+                    "comparison": "greater",
+                    "minimum": 1
+                  }
+                }
+              ]
+            },
+            {
+              "id": "far-sector-a",
+              "name": "Farthest Sector (Side A)",
+              "sideIds": [
+                "side-a"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 5,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 5,
+                  "condition": {
+                    "kind": "dominated-region-comparison",
+                    "elementIds": [
+                      "sector-near-b"
+                    ],
+                    "comparison": "greater",
+                    "minimum": 1
+                  }
+                }
+              ]
+            },
+            {
+              "id": "far-sector-b",
+              "name": "Farthest Sector (Side B)",
+              "sideIds": [
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 5,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 5,
+                  "condition": {
+                    "kind": "dominated-region-comparison",
+                    "elementIds": [
+                      "sector-near-a"
+                    ],
+                    "comparison": "greater",
+                    "minimum": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "sectors",
+              "name": "Sectors (ZO)",
+              "paragraphs": [
+                "Three Sectors are identified only when the game has finished, not before. Each is a Zone of Operations spanning the table width. The central Sector straddles the table centre; the other two are on opposite sides.",
+                "In 150-point games, each Sector is [[distance:4:inch]] deep, with the outer Sectors positioned [[distance:2:inch]] from the central line. In 200-400-point games, each Sector is [[distance:8:inch]] deep, with the outer Sectors positioned [[distance:4:inch]] from the central line.",
+                "The displayed map locates the end-of-game scoring areas for reference; it does not instruct players to mark the areas before the game ends."
+              ]
+            },
+            {
+              "id": "dominate-zo",
+              "name": "Dominate a Zone of Operations",
+              "paragraphs": [
+                "A player Dominates a Sector when they have more Victory Points of eligible Troopers inside it than their opponent. Models, Trooper Markers, Proxies and [[skill:peripheral|Peripheral]] Troops count; Troopers in a Null [[trait:state|State]], equipment Tokens and fake Holoechoes do not.",
+                "More than half of a Trooper's base must lie inside the Sector for it to count toward Dominating that Zone of Operations."
+              ]
+            },
+            {
+              "id": "shasvastii",
+              "name": "Embryo eligibility",
+              "paragraphs": [
+                "Troopers possessing [[skill:shasvastii|Shasvastii]] count toward Domination while in [[state:unconscious|Unconscious]] or any non-Null [[trait:state|State]]."
+              ]
+            },
+            {
+              "id": "baggage",
+              "name": "Bonus for equipped Troopers",
+              "paragraphs": [
+                "[[equipment:baggage|Baggage]] grants an additional 20 Victory Points toward Dominating the Sector when its Trooper is inside that Sector and is in a non-Null [[trait:state|State]]."
+              ]
+            },
+            {
+              "id": "killing",
+              "name": "Killing",
+              "paragraphs": [
+                "Troopers count as Killed if they enter [[state:dead|Dead State]], are in a Null [[trait:state|State]] when the game ends, or were not deployed on the table as a Model or Marker by the end of the game."
+              ]
+            },
+            {
+              "id": "hvt-and-classified-deck",
+              "name": "HVT and Classified Deck not used",
+              "paragraphs": [
+                "Players do not deploy an HVT Model or use the Classified Deck. The Secure HVT rule does not apply."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            }
+          ],
+          "sourceIssues": []
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Battleground",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "sector-near-a",
+                  "kind": "rectangle",
+                  "style": "scoring",
+                  "x1": 0,
+                  "y1": 10,
+                  "x2": 24,
+                  "y2": 14
+                },
+                {
+                  "id": "sector-center",
+                  "kind": "rectangle",
+                  "style": "scoring",
+                  "x1": 0,
+                  "y1": 14,
+                  "x2": 24,
+                  "y2": 18
+                },
+                {
+                  "id": "sector-near-b",
+                  "kind": "rectangle",
+                  "style": "scoring",
+                  "x1": 0,
+                  "y1": 18,
+                  "x2": 24,
+                  "y2": 22
+                },
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 8
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 24,
+                  "y2": 32
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": {
+                    "anchor": "center"
+                  },
+                  "x2": {
+                    "anchor": "right"
+                  },
+                  "y2": {
+                    "anchor": "center"
+                  }
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 4.55,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "sector-near-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 12.55,
+                  "text": "A: 2 OP · B: 5 OP"
+                },
+                {
+                  "id": "sector-center-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 15.15,
+                  "text": "Central Sector · 3 OP"
+                },
+                {
+                  "id": "sector-near-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 20.55,
+                  "text": "A: 5 OP · B: 2 OP"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 28.55,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-a-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-a",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-center-depth",
+                  "kind": "dimension",
+                  "target": "sector-center",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-b-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-b",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Battleground",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "sector-near-a",
+                  "kind": "rectangle",
+                  "style": "scoring",
+                  "x1": 0,
+                  "y1": 12,
+                  "x2": 32,
+                  "y2": 20
+                },
+                {
+                  "id": "sector-center",
+                  "kind": "rectangle",
+                  "style": "scoring",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 32,
+                  "y2": 28
+                },
+                {
+                  "id": "sector-near-b",
+                  "kind": "rectangle",
+                  "style": "scoring",
+                  "x1": 0,
+                  "y1": 28,
+                  "x2": 32,
+                  "y2": 36
+                },
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 32,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 32,
+                  "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": {
+                    "anchor": "center"
+                  },
+                  "x2": {
+                    "anchor": "right"
+                  },
+                  "y2": {
+                    "anchor": "center"
+                  }
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.55,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "sector-near-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 16.55,
+                  "text": "A: 2 OP · B: 5 OP"
+                },
+                {
+                  "id": "sector-center-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 23.15,
+                  "text": "Central Sector · 3 OP"
+                },
+                {
+                  "id": "sector-near-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 32.55,
+                  "text": "A: 5 OP · B: 2 OP"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 42.55,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-a-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-a",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-center-depth",
+                  "kind": "dimension",
+                  "target": "sector-center",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-b-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-b",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Battleground",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "sector-near-a",
+                  "kind": "rectangle",
+                  "style": "scoring",
+                  "x1": 0,
+                  "y1": 12,
+                  "x2": 48,
+                  "y2": 20
+                },
+                {
+                  "id": "sector-center",
+                  "kind": "rectangle",
+                  "style": "scoring",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 48,
+                  "y2": 28
+                },
+                {
+                  "id": "sector-near-b",
+                  "kind": "rectangle",
+                  "style": "scoring",
+                  "x1": 0,
+                  "y1": 28,
+                  "x2": 48,
+                  "y2": 36
+                },
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 48,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 48,
+                  "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": {
+                    "anchor": "center"
+                  },
+                  "x2": {
+                    "anchor": "right"
+                  },
+                  "y2": {
+                    "anchor": "center"
+                  }
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.55,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "sector-near-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 16.55,
+                  "text": "A: 2 OP · B: 5 OP"
+                },
+                {
+                  "id": "sector-center-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 23.15,
+                  "text": "Central Sector · 3 OP"
+                },
+                {
+                  "id": "sector-near-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 32.55,
+                  "text": "A: 5 OP · B: 2 OP"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 42.55,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-a-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-a",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-center-depth",
+                  "kind": "dimension",
+                  "target": "sector-center",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "sector-near-b-depth",
+                  "kind": "dimension",
+                  "target": "sector-near-b",
+                  "axis": "y",
+                  "side": "start",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 129,
+          "section": "Battleground"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 130,
+          "section": "Sectors and Dominate ZO"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 131,
+          "section": "End of the Mission"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    }
+  ]
+}

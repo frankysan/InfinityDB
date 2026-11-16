@@ -31,6 +31,48 @@ developer entry point in `tools/data/build_its_season.py`.
   These are source-cited event policies, **not** new N5 core Rule definitions.
   There is no ITS-authored FAQ publication in the curated set.
 
+### Staged 2026.09.11 hotfix curation (not yet served)
+
+The independent curated input
+`data/curated/its/n5-its-season-18-2026.09.11.json` retains the existing
+`2026.09.01` collection unchanged. It is not included by the production Rules
+curation scan or the selected `its_18.db` build. The current player-facing
+revision therefore remains `its-18@2026.09.01`.
+
+The staged source binds English 2026.09.11 (142 pages,
+`d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
+and Spanish 2026.09.11 (147 pages,
+`df7398f8bc99927dc30c86cf5625cb08f8f38db9f3bbba685223c9c4981fa94d`).
+The source files identify revision **2026.09.11**; September 24, 2026 is
+the documented hotfix announcement/availability date used for this collection,
+not a claim that every clause took effect individually on September 11.
+
+Two missions are currently authored for isolated validation:
+
+- **Battleground:** Preserves the existing three scoring and geometry
+  configurations with citations rebased to hotfix pp. 129–131.
+- **Annihilation:** Adds six Army-Points scoring configurations, three
+  deployment geometries, enemy-kill/survival/Lieutenant scoring, No Quarter,
+  HVT/Classified exclusion, and the three-round end condition. English
+  pp. 125–128 and Spanish pp. 131–133 supply the review evidence. The
+  shared geometry model is reused; this is not a second SVG renderer.
+
+The Annihilation source-issues array explicitly retains the **350-point**
+gap printed in both languages: 3 OP for 176–274 and 4 OP for greater than
+275 leaves 275 unassigned. The English 400-point surviving-VP threshold
+is greater than **300**, while Spanish p. 132 prints greater than **30**.
+This bilingual discrepancy is also recorded without treating the overlapping
+Spanish threshold as a valid second scoring rule.
+
+The three event policies remain explicitly selected, with hotfix page
+references 27 (Spec-Ops), 28 (Reinforcements), and 29 (TEAM-OPS).
+`tests/test_its_hotfix_scenarios.py` exercises both source revisions,
+the staged database, scenario geometry, scoring bands, issue retention,
+source citations and policy rebasing. Promotion to the serving set still
+requires revision-aware publication and reconciliation of The Dig, Double
+Bind and Crossing Lines; no current, historical or tournament context
+is silently replaced.
+
 ## Schema v2 and read contract
 
 The database has a distinct SQLite application ID (`0x49445331`) and

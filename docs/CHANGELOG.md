@@ -10,6 +10,15 @@ are not retroactively relabeled.
 
 ## [1.2.0] - Unreleased
 
+### Added
+
+- **Data processing:** Staged a source-pinned ITS Season 18 September hotfix
+  collection separately from the selected historical runtime. Added the reviewed
+  Annihilation mission's typed scoring, standard deployment maps, bilingual
+  citations and explicit unresolved source-value issues; rebased Battleground
+  and event-policy citations to the hotfix. The 2026.09.01 player publication
+  remains unchanged pending revision-aware integration.
+
 ## [1.1.0] - 2026-11-15
 
 ### Player summary

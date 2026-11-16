@@ -332,6 +332,13 @@ scenario maps and their relevant context. Preserve the existing Battleground
 pilot and historical revision identities. Season 17 and Season 16 Part II
 remain later scope; do not claim complete Season 18 coverage before it is verified.
 
+**First curation batch (2026-11-16):** A separate, isolated 2026.09.11
+collection now contains Battleground and Annihilation with bilingual source
+pins, scenario geometry, six-size scoring and exact source-issue flags.
+The 2026.09.01 runtime remains authoritative until versioned multi-revision
+serving and remaining hotfix missions are accepted. See
+[ITS season database](its-season-database.md#staged-20260911-hotfix-curation-not-yet-served).
+
 - [ ] Build a versioned ITS reference library from material under
   `local/data/pdf/its/` and `local/data/pdf/legacy/`, keeping the current season distinct
   from archived seasons.
