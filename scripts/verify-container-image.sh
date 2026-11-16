@@ -27,6 +27,26 @@ fi
 
 docker image inspect "$image" >/dev/null
 
+# A published release image must embed the release identity from its image tag.
+case "$image" in
+  infinity-db:app-v*)
+    release_version="${image#infinity-db:app-v}"
+    docker run --rm --entrypoint python "$image" -c '
+import os
+import sys
+from infinity_db import __display_version__, __version__
+
+expected = sys.argv[1]
+baked = os.environ.get("INFINITY_DB_DISPLAY_VERSION")
+if __version__ != expected or __display_version__ != expected or baked != expected:
+    raise SystemExit(
+        f"Release image identity mismatch: tag={expected!r}, "
+        f"package={__version__!r}, display={__display_version__!r}, env={baked!r}"
+    )
+' "$release_version"
+    ;;
+esac
+
 # Validate the immutable runtime-data contract without starting the service.
 docker run --rm --entrypoint python "$image" -c '
 import os
@@ -208,6 +228,7 @@ import json
 import os
 from urllib.request import urlopen
 
+from infinity_db import __version__
 from infinity_db.web.release_notes import render_current_release_notes_html
 
 with urlopen("http://127.0.0.1:8000/api/armies", timeout=3) as response:
@@ -290,8 +311,8 @@ if (
 
 with urlopen("http://127.0.0.1:8000/api/version", timeout=3) as response:
     version = json.load(response)
-if not version.get("version") or not version.get("snapshot_revision"):
-    raise SystemExit("/api/version returned incomplete runtime identity")
+if version.get("version") != __version__ or not version.get("snapshot_revision") or not version.get("static_revision"):
+    raise SystemExit("/api/version does not match the installed package or lacks runtime identity")
 
 expected_display_version = os.environ.get("INFINITY_DB_DISPLAY_VERSION", "").strip()
 if expected_display_version:

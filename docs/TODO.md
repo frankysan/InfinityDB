@@ -215,6 +215,11 @@ Use these links to jump directly to a workstream:
     the changed content invalidates the relevant evidence.
   - [ ] Validate these focused improvements with release-evidence, version
     and deployment-script regression tests, Ruff and appropriate hosted CI.
+    The implementation on `dev/v1.2.0` includes tag-derived display identity,
+    nonfatal/reference-aware pruning, pre-merge evidence checking, a shared
+    deployment HTTP probe, and updated release instructions. Focused Windows
+    tests and static checks passed; Linux pruning behavior, the tagged Docker
+    image path and hosted CI remain to be verified before closeout.
     Keep detailed acceptance procedures in `docs/releasing.md` and
     `docs/deployment.md`, not duplicated in this backlog.
 

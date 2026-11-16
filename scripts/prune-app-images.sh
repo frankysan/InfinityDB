@@ -45,8 +45,19 @@ prune_repository() {
   ' |
   while IFS= read -r image; do
     [ -n "$image" ] || continue
+    # Includes stopped containers and isolated test stacks, not just this Compose project.
+    if ! references="$(docker ps --all --quiet --filter "ancestor=$image")"; then
+      echo "WARNING: Cannot inspect references for $image; keeping tag." >&2
+      continue
+    fi
+    if [ -n "$references" ]; then
+      echo "Retaining $description image tag referenced by a container: $image"
+      continue
+    fi
     echo "Removing old $description image tag: $image"
-    docker image rm "$image"
+    if ! docker image rm "$image"; then
+      echo "WARNING: Could not remove $image; keeping it for later cleanup." >&2
+    fi
   done
 }
 
