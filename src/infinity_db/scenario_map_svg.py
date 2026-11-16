@@ -102,6 +102,12 @@ svg[data-theme="dark"] .objective#beacon-a{fill:#ed8388;stroke:#f5b6b9}
 svg[data-theme="dark"] .objective#beacon-b{fill:#77c4ef;stroke:#c4eafd}
 svg[data-theme="dark"] .objective[data-marker-type="console"]{fill:#6aa968;stroke:#b7ebb0}
 """
+_TRACKING_BEACON_CSS = """\
+.objective[data-marker-type="tracking-beacon"]{fill:#5f8ecc;stroke:#24568f}
+.objective[data-marker-type="console"]{fill:#84ca7a;stroke:#377735}
+svg[data-theme="dark"] .objective[data-marker-type="tracking-beacon"]{fill:#75b9ec;stroke:#c6e9ff}
+svg[data-theme="dark"] .objective[data-marker-type="console"]{fill:#6aa968;stroke:#b7ebb0}
+"""
 _UPLINK_MARKER_CSS = """.objective[data-marker-type="antenna"]{fill:#f7c86a;stroke:#b97b09}
 .objective[data-marker-type="tech-coffin"]{fill:#a99ac5;stroke:#6d4d91}
 svg[data-theme="dark"] .objective[data-marker-type="antenna"]{fill:#97741e;stroke:#efd18d}
@@ -201,16 +207,20 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
         y = _resolved(geometry, element.y, "y")
         marker_type = escape(element.marker_type, quote=True)
         diameter_mm = marker_diameter_mm(element.marker_type)
-        if diameter_mm is None and element.marker_type != "beacon":
+        if diameter_mm is None and element.marker_type not in {"beacon", "tracking-beacon"}:
             raise ScenarioMapRenderError(
                 "scenario SVG renderer v1 has no canonical marker metadata for "
                 f"marker type {element.marker_type!r}"
             )
         if diameter_mm is None:
-            # Schematic point: the Hardlock source gives a position but no token size.
+            # Schematic: Hardlock omits size; B-Pong's two language sources disagree.
+            size_status = (
+                "conflicting-sources" if element.marker_type == "tracking-beacon"
+                else "unspecified"
+            )
             return (
-                f'<circle id="{element_id}" class="{style}" data-marker-type="beacon" '
-                f'data-physical-size="unspecified" cx="{_number(x)}" '
+                f'<circle id="{element_id}" class="{style}" data-marker-type="{marker_type}" '
+                f'data-physical-size="{size_status}" cx="{_number(x)}" '
                 f'cy="{_number(y)}" r=".3"/>'
             )
         radius = marker_radius_inches(element.marker_type)
@@ -498,7 +508,7 @@ def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
         if (
             isinstance(element, MarkerElement)
             and marker_diameter_mm(element.marker_type) is None
-            and element.marker_type != "beacon"
+            and element.marker_type not in {"beacon", "tracking-beacon"}
         ):
             raise ScenarioMapRenderError(
                 "scenario SVG renderer v1 has no canonical marker metadata for "
@@ -560,6 +570,10 @@ def render_scenario_map_svg(
     has_exclusion = "exclusion" in styles
     has_special_zones = bool(styles & {"influence", "sector", "sector-center"})
     has_rulers = any(isinstance(a, RulerAnnotation) for a in geometry.annotations)
+    has_tracking_beacon = any(
+        isinstance(element, MarkerElement) and element.marker_type == "tracking-beacon"
+        for element in geometry.elements
+    )
     has_beacons = any(
         isinstance(element, MarkerElement) and element.marker_type == "beacon"
         for element in geometry.elements
@@ -573,6 +587,7 @@ def render_scenario_map_svg(
         + (_SPECIAL_ZONE_CSS if has_special_zones else "")
         + (_UPLINK_MARKER_CSS if has_tech_coffin else "")
         + (_BEACON_MARKER_CSS if has_beacons else "")
+        + (_TRACKING_BEACON_CSS if has_tracking_beacon else "")
         + (_RULER_CSS if has_rulers else "")
     )
     defs = _EXCLUSION_DEFS if has_exclusion else ""

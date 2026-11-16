@@ -691,6 +691,100 @@ def test_hardlock_rejects_missing_or_incorrect_activated_console(mutation: str) 
         parse_scenario_definition_record(record)
 
 
+
+def test_b_pong_scoring_geometry_and_source_disagreements() -> None:
+    record = _records()["scenario:b-pong"]
+    mission, configurations = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *(("its-season-18-en-pdf", p) for p in range(59, 63)),
+        *(("its-season-18-es-pdf", p) for p in range(58, 63)),
+    ]
+    assert [size["swc"] for size in mission["gameSizes"]] == [3, 4, 5, 6, 7, 8]
+    objectives = {item["id"]: item for item in mission["objectives"]}
+    assert {key: item["maximumPoints"] for key, item in objectives.items()} == {
+        "beacon-in-enemy-half": 2,
+        "control-tracking-beacon": 3,
+        "control-any-console": 3,
+        "classified-objectives": 2,
+    }
+    for key, elements in (
+        ("control-tracking-beacon", ["tracking-beacon"]),
+        ("control-any-console", ["console-left", "console-right"]),
+    ):
+        item = objectives[key]
+        assert item["timing"] == "end-of-round"
+        assert item["maximumPointsPerRound"] == 1
+        assert item["awards"][0]["condition"] == {
+            "kind": "element-status-any", "elementIds": elements, "status": "controlled",
+        }
+    assert mission["endConditions"] == [{
+        "id": "round-limit", "checkAt": "end-of-round",
+        "finishAt": "end-of-round",
+        "condition": {"kind": "round-limit", "rounds": 3},
+    }]
+    rules = {r["id"]: " ".join(r["paragraphs"]) for r in mission["rules"]}
+    assert "previous position" in rules["relocate-tracking-beacon"]
+    assert "no Roll required" in rules["relocate-tracking-beacon"]
+    assert "Magnetize" in rules["activate-console"]
+    assert "Retreat!" in rules["no-quarter"]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert len(mission["sourceIssues"]) == 5
+    assert {i["id"] for i in mission["sourceIssues"]} == {
+        "beacon-bilingual-diameter", "relocate-bilingual-origin",
+        "beacon-control-bilingual-timing", "console-requirements-bilingual",
+        "magnetize-distance-bilingual",
+    }
+    for key, width, height, depth, exclusion in (
+        ("150-points", 24, 32, 12, 2),
+        ("200-250-points", 32, 48, 16, 4),
+        ("300-400-points", 48, 48, 16, 4),
+    ):
+        geometry = configurations[key]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert (elements["exclusion-zone"]["y1"], elements["exclusion-zone"]["y2"]) == (
+            height / 2 - exclusion, height / 2 + exclusion,
+        )
+        assert {
+            e["id"]: (e["markerType"], e["x"], e["y"])
+            for e in elements.values() if e["kind"] == "marker"
+        } == {
+            "tracking-beacon": ("tracking-beacon", width / 2, height / 2),
+            "console-left": ("console", width / 4, height / 2),
+            "console-right": ("console", 3 * width / 4, height / 2),
+        }
+        rulers = {r["id"]: r for r in geometry["annotations"]}
+        assert rulers["exclusion-a-radius"]["y1"] == height / 2 - exclusion
+        assert rulers["exclusion-b-radius"]["y2"] == height / 2 + exclusion
+        assert rulers["beacon-from-left"]["x2"] == width / 2
+        assert rulers["right-console-from-right"]["x1"] == width * 3 / 4
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
+            assert 'data-physical-size="conflicting-sources"' in svg
+            assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 2
+            assert 'id="scenario-exclusion-hatch"' in svg
+            assert f'data-distance-inches="{exclusion}"' in svg
+
+
+@pytest.mark.parametrize("mutation", ["missing", "non-marker", "duplicate", "bad-status"])
+def test_b_pong_any_control_fails_closed(mutation: str) -> None:
+    record = deepcopy(_records()["scenario:b-pong"])
+    condition = record["facts"]["mission"]["objectives"][2]["awards"][0]["condition"]
+    if mutation == "missing":
+        elements = record["facts"]["configurations"][0]["geometry"]["elements"]
+        elements[:] = [e for e in elements if e["id"] != "console-left"]
+    elif mutation == "non-marker":
+        condition["elementIds"][0] = "exclusion-zone"
+    elif mutation == "duplicate":
+        condition["elementIds"].append("console-left")
+    else:
+        condition["status"] = "unknown"
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

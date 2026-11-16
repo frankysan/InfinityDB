@@ -207,7 +207,8 @@ function mapCard(item) {
     for (const marker of markers) {
       const row = document.createElement("li");
       row.textContent = marker.diameter_mm == null
-        ? `${marker.count} × ${marker.name} — physical size not specified`
+        ? `${marker.count} × ${marker.name} — ${marker.size_status === "source-conflict"
+          ? "conflicting physical sizes in official sources" : "physical size not specified"}`
         : `${marker.count} × ${marker.name} — ${marker.diameter_mm} mm diameter`;
       list.append(row);
     }
@@ -219,7 +220,7 @@ function mapCard(item) {
       note.append(rulesCitationNode(measured.citation));
     }
     if (schematic) {
-      note.append(" Beacon symbols indicate placement only; the source does not specify their diameter.");
+      note.append(" Beacon symbols indicate placement only. See mission rules and source issues for physical-size limitations.");
     }
     dimensions.append(title, list, note);
     figure.append(dimensions);
@@ -261,6 +262,15 @@ function conditionNode(condition) {
         ? `Dominate more ${label} than the opponent`
         : `Dominate the same number of ${label} as the opponent${condition.minimum ? ` (at least ${condition.minimum})` : ""}`;
     }
+    return node;
+  }
+  if (kind === "element-status-any") {
+    const ids = condition.elementIds || [];
+    node.textContent = ids.every((id) => id.startsWith("console-"))
+      ? "Control at least one Console"
+      : ids.length === 1 && ids[0] === "tracking-beacon"
+        ? "Control the Tracking Beacon"
+        : `Control at least one of ${ids.length} scenario elements`;
     return node;
   }
   if (kind === "element-status-count") {

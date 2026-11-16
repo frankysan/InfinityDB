@@ -85,6 +85,14 @@ class ElementStatusComparison:
     comparison: str
 
 
+@dataclass(frozen=True, slots=True)
+class ElementStatusAny:
+    """One award when at least one named objective has the specified state."""
+
+    element_ids: tuple[str, ...]
+    status: str
+
+
 ScenarioScoreCondition = (
     NumericRangeCondition
     | MetricComparison
@@ -92,6 +100,7 @@ ScenarioScoreCondition = (
     | DominatedRegionComparison
     | ElementStatusCount
     | ElementStatusComparison
+    | ElementStatusAny
 )
 
 
@@ -278,6 +287,7 @@ def _condition(value: Any, context: str) -> ScenarioScoreCondition:
         "dominated-region-comparison",
         "element-status-count",
         "element-status-comparison",
+        "element-status-any",
     }:
         required = {"kind", "elementIds"}
         required.add("comparison" if kind == "dominated-region-comparison" else "status")
@@ -295,13 +305,15 @@ def _condition(value: Any, context: str) -> ScenarioScoreCondition:
         )
         if len(set(elements)) != len(elements):
             raise ScenarioMissionError(f"{context}.elementIds contains duplicate references")
-        if kind in {"element-status-count", "element-status-comparison"}:
+        if kind in {"element-status-count", "element-status-comparison", "element-status-any"}:
             status = _choice(
                 raw["status"], {"hacked", "controlled", "activated", "destroyed"},
                 f"{context}.status",
             )
             if kind == "element-status-count":
                 return ElementStatusCount(elements, status)
+            if kind == "element-status-any":
+                return ElementStatusAny(elements, status)
             comparison = _choice(raw["comparison"], {"greater", "all"}, f"{context}.comparison")
             return ElementStatusComparison(elements, status, comparison)
         comparison = _choice(raw["comparison"], {"equal", "greater"}, f"{context}.comparison")
@@ -321,7 +333,8 @@ def _validate_score_geometry(
     context: str,
 ) -> None:
     if not isinstance(
-        condition, (DominatedRegionComparison, ElementStatusCount, ElementStatusComparison)
+        condition,
+        (DominatedRegionComparison, ElementStatusCount, ElementStatusComparison, ElementStatusAny),
     ):
         return
     expected = (
@@ -340,7 +353,10 @@ def _validate_score_geometry(
                     f"in configuration {configuration.id!r}"
                 )
             if (
-                isinstance(condition, (ElementStatusCount, ElementStatusComparison))
+                isinstance(
+                    condition,
+                    (ElementStatusCount, ElementStatusComparison, ElementStatusAny),
+                )
                 and condition.status in {"activated", "destroyed"}
                 and isinstance(element, MarkerElement)
                 and not (

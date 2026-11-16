@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (nine reviewed hotfix missions).
+`its-18@2026.09.11` (ten reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Nine missions are published with independent revision selection:
+Ten missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -106,8 +106,20 @@ Nine missions are published with independent revision selection:
   The source does not state a physical Beacon diameter, so those two markers
   are schematic; Consoles remain 40 mm. Differences in the Spanish/English
   pickup wording are recorded, not inferred away (EN pp. 49–52, ES pp. 127–130).
+- **B-Pong:** A mobile Tracking Beacon initially at table center, two Consoles
+  at quarter-width positions, symmetric 2-/4-inch Exclusion half-widths and
+  12-/16-inch Deployment Zones. The mission scores Beacon Control and Control
+  of at least one Console at each round end (3 OP maximum each), getting the
+  Beacon entirely into the opponent's half (2 OP), and two Classified
+  Objectives (2 OP). Shared typed `element-status-any` represents the
+  one-point-per-round minimum-one condition without rewarding both Consoles.
+  The map's schematic Tracking Beacon carries no asserted physical diameter:
+  English p. 60 prints 40 mm while Spanish p. 59 prints 25 mm. Repositioning
+  origins, activation restrictions, scoring timing and Magnetize wording are
+  preserved as five explicit bilingual source issues (EN pp. 59–62,
+  ES pp. 58–62). No Quarter removes Retreat! without changing other missions.
 
-All nine missions share the existing geometry parser, model and SVG
+All ten missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of

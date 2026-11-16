@@ -70,12 +70,19 @@ def _raster_friendly_svg(svg: str, colors: dict[str, str], *, theme: str, width:
     markers = [element for element in root.iter() if element.get("data-marker-type")]
     has_beacons = any(element.get("data-marker-type") == "beacon"
                       for element in markers)
+    has_tracking_beacon = any(element.get("data-marker-type") == "tracking-beacon"
+                              for element in markers)
     has_tech_coffin = any(element.get("data-marker-type") == "tech-coffin"
                           for element in markers)
     for element in root.iter():
         for klass in element.get("class", "").split():
             element.attrib.update(palette.get(klass, {}))
-        if has_beacons and element.get("data-marker-type") == "console":
+        if has_tracking_beacon and element.get("data-marker-type") == "tracking-beacon":
+            element.attrib.update({
+                "fill": "#75b9ec" if theme == "dark" else "#5f8ecc",
+                "stroke": "#c6e9ff" if theme == "dark" else "#24568f",
+            })
+        if (has_beacons or has_tracking_beacon) and element.get("data-marker-type") == "console":
             element.attrib.update({
                 "fill": "#6aa968" if theme == "dark" else "#84ca7a",
                 "stroke": "#b7ebb0" if theme == "dark" else "#377735",

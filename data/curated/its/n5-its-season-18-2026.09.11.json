@@ -40,6 +40,9 @@
       },
       {
         "scenarioId": "scenario:hardlock"
+      },
+      {
+        "scenarioId": "scenario:b-pong"
       }
     ]
   },
@@ -8089,6 +8092,944 @@
           "sourceId": "its-season-18-es-pdf",
           "page": 130,
           "section": "Hardlock"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    },
+    {
+      "id": "scenario:b-pong",
+      "kind": "scenario",
+      "name": "B-Pong",
+      "summary": "ITS Season 18 mission suitable for Reinforcements. Relocate the central Tracking Beacon toward the opponent's table half, Control it and at least one Console each Game Round, and complete Classified Objectives.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Side A"
+            },
+            {
+              "id": "side-b",
+              "name": "Side B"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "beacon-in-enemy-half",
+              "name": "Tracking Beacon in Enemy Half",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, the entire Tracking Beacon is inside the opponent's half of the table. The initial center position does not qualify."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "control-tracking-beacon",
+              "name": "Control the Tracking Beacon",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-round",
+              "aggregation": "cumulative",
+              "maximumPoints": 3,
+              "maximumPointsPerRound": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "element-status-any",
+                    "elementIds": [
+                      "tracking-beacon"
+                    ],
+                    "status": "controlled"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "control-any-console",
+              "name": "Control at Least One Console",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-round",
+              "aggregation": "cumulative",
+              "maximumPoints": 3,
+              "maximumPointsPerRound": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "element-status-any",
+                    "elementIds": [
+                      "console-left",
+                      "console-right"
+                    ],
+                    "status": "controlled"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "classified-objectives",
+              "name": "Classified Objectives",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "cumulative",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "For each of your two completed Classified Objectives, score 1 Objective Point (up to 2)."
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "forces-and-exclusion",
+              "name": "Forces, Deployment, and Exclusion Zone",
+              "paragraphs": [
+                "Both players deploy in opposing table-edge Deployment Zones: [[distance:12:inch]] deep in 150-point games and [[distance:16:inch]] deep in 200–400-point games. Table dimensions for each game size are shown on the map.",
+                "The Exclusion Zone extends [[distance:2:inch]] either side of the centerline at 150 points, and [[distance:4:inch]] either side at 200–400 points. Airborne Deployment and Superior Deployment cannot be used to deploy within it.",
+                "The map shows the Tracking Beacon's initial table-center location; once play begins it can be relocated by the mission's special actions. Two Consoles start on the centerline at one-quarter and three-quarters of table width."
+              ]
+            },
+            {
+              "id": "tracking-beacon-representation",
+              "name": "Tracking Beacon",
+              "paragraphs": [
+                "One Tracking Beacon begins at the table center and is represented by a Beacon Token or scenery. The English source specifies a 40 mm diameter; the Spanish source says 25 mm. This source conflict is unresolved, so the map marks its center schematically rather than claiming a physical footprint.",
+                "Tracking Beacon Control requires a Model, not a Marker, in Silhouette contact and no enemy Troopers in contact; Models in a Null State do not count. English specifies that this is checked at the end of each Game Round."
+              ]
+            },
+            {
+              "id": "relocate-tracking-beacon",
+              "name": "Relocate the Tracking Beacon",
+              "paragraphs": [
+                "Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with the Tracking Beacon may declare this action only once per Game Round. Spend one Short Skill, no Roll required, to place the Beacon anywhere within [[distance:4:inch]] of its previous position (English source).",
+                "The Spanish source instead specifies a position within [[distance:10:cm]] of the Trooper declaring the Order; preserve that different measurement origin as a source issue."
+              ]
+            },
+            {
+              "id": "beacon-movement",
+              "name": "Tracking Beacon Movement",
+              "paragraphs": [
+                "The Beacon's destination must be fully supported by a nonvertical surface. An unobstructed traversable path must connect its starting and ending positions; impassable walls, sealed rooms and gaps too small for its diameter prevent relocation.",
+                "Place the Tracking Beacon in its new position at the Conclusion of the Order. Its movement is not restricted to the initial map center."
+              ]
+            },
+            {
+              "id": "activate-console",
+              "name": "Activate Console",
+              "paragraphs": [
+                "Attack, Scenario Short Skill. An in-contact Specialist Troop makes a Normal WIP Roll to Activate a Console. An unsuccessful attempt may be repeated with another Short Skill.",
+                "The English source requires that the Tracking Beacon not be in Silhouette contact with a Trooper, and permits each Specialist Troop only one successful Console activation per Game Round; the Spanish activation entry omits those qualifiers.",
+                "After a successful activation choose one effect: Nudge the Tracking Beacon to a position within [[distance:2:inch]] of its current position, or Magnetize it up to [[distance:6:inch]] directly toward the table center without passing the center (English source). The Spanish wording specifies a movement of [[distance:15:cm]] toward the center rather than 'within' that distance."
+              ]
+            },
+            {
+              "id": "control-console",
+              "name": "Control a Console",
+              "paragraphs": [
+                "At the end of each Game Round, a Console is Controlled when a player is the only player with at least one non-Null Trooper as a Model (not a Marker) in Silhouette contact with it. Any opposing Troopers in contact prevent Control.",
+                "Controlling either or both Consoles scores just 1 Objective Point per Game Round. Activation itself does not count as Control."
+              ]
+            },
+            {
+              "id": "specialist-troops",
+              "name": "Specialist Troops",
+              "paragraphs": [
+                "Only Hackers, Doctors, Engineers, Forward Observers, Paramedics, or Troopers with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] are Specialist Troops for this mission.",
+                "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models for tasks reserved for Specialist Troops."
+              ]
+            },
+            {
+              "id": "no-quarter",
+              "name": "No Quarter",
+              "paragraphs": [
+                "Retreat! rules do not apply in B-Pong. The mission lasts all three Game Rounds."
+              ]
+            },
+            {
+              "id": "classified-objectives",
+              "name": "Classified Objectives",
+              "paragraphs": [
+                "Each player has two Classified Objectives, each worth 1 Objective Point when completed."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            }
+          ],
+          "sourceIssues": [
+            {
+              "id": "beacon-bilingual-diameter",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "control-tracking-beacon",
+              "status": "needs-verification",
+              "description": "EN p. 60 specifies a 40 mm Tracking Beacon; ES p. 59 specifies 25 mm for the same token/scenery. The source conflict prevents assigning an authoritative physical diameter; the map symbol is schematic."
+            },
+            {
+              "id": "relocate-bilingual-origin",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "beacon-in-enemy-half",
+              "status": "needs-verification",
+              "description": "EN p. 60 permits placing the Beacon within [[distance:4:inch]] of its previous position; ES p. 59 measures [[distance:10:cm]] from the Specialist Trooper declaring the Order. The relocation measurement origin differs."
+            },
+            {
+              "id": "beacon-control-bilingual-timing",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "control-tracking-beacon",
+              "status": "needs-verification",
+              "description": "EN pp. 59, 61 explicitly award Beacon Control at the end of each Game Round. ES p. 58 objective also says end of round, but ES p. 60 Control definition says end of the game. The round-scoring objective is preserved without silently resolving the inconsistency."
+            },
+            {
+              "id": "console-requirements-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "control-any-console",
+              "status": "needs-verification",
+              "description": "EN p. 61 requires that the Tracking Beacon not touch a Trooper and limits each Specialist Troop to one successful Console activation per round; ES p. 61 omits both restrictions."
+            },
+            {
+              "id": "magnetize-distance-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "control-any-console",
+              "status": "needs-verification",
+              "description": "EN p. 61 allows placing the Beacon within [[distance:6:inch]] of its present position toward the center, without crossing the center; ES p. 61 says to move it [[distance:15:cm]] toward the center. The source wording differs on whether the move is a maximum or fixed distance."
+            }
+          ]
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "B-Pong",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 24,
+                  "y2": 32
+                },
+                {
+                  "id": "exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 14,
+                  "x2": 24,
+                  "y2": 18
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 16,
+                  "x2": 24,
+                  "y2": 16
+                },
+                {
+                  "id": "console-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 6,
+                  "y": 16
+                },
+                {
+                  "id": "tracking-beacon",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tracking-beacon",
+                  "x": 12,
+                  "y": 16
+                },
+                {
+                  "id": "console-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 18,
+                  "y": 16
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.5,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 26.5,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.85
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.85
+                },
+                {
+                  "id": "exclusion-a-radius",
+                  "kind": "ruler",
+                  "x1": 1.4,
+                  "y1": 14,
+                  "x2": 1.4,
+                  "y2": 16,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-b-radius",
+                  "kind": "ruler",
+                  "x1": 1.4,
+                  "y1": 16,
+                  "x2": 1.4,
+                  "y2": 18,
+                  "offset": 0
+                },
+                {
+                  "id": "beacon-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 23,
+                  "x2": 12,
+                  "y2": 23,
+                  "offset": 0
+                },
+                {
+                  "id": "right-console-from-right",
+                  "kind": "ruler",
+                  "x1": 18,
+                  "y1": 23,
+                  "x2": 24,
+                  "y2": 23,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "B-Pong",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 32,
+                  "y2": 16
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 32,
+                  "x2": 32,
+                  "y2": 48
+                },
+                {
+                  "id": "exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 32,
+                  "y2": 28
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 32,
+                  "y2": 24
+                },
+                {
+                  "id": "console-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 8,
+                  "y": 24
+                },
+                {
+                  "id": "tracking-beacon",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tracking-beacon",
+                  "x": 16,
+                  "y": 24
+                },
+                {
+                  "id": "console-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 24,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 8.5,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 40.5,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.85
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.85
+                },
+                {
+                  "id": "exclusion-a-radius",
+                  "kind": "ruler",
+                  "x1": 1.4,
+                  "y1": 20,
+                  "x2": 1.4,
+                  "y2": 24,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-b-radius",
+                  "kind": "ruler",
+                  "x1": 1.4,
+                  "y1": 24,
+                  "x2": 1.4,
+                  "y2": 28,
+                  "offset": 0
+                },
+                {
+                  "id": "beacon-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 35,
+                  "x2": 16,
+                  "y2": 35,
+                  "offset": 0
+                },
+                {
+                  "id": "right-console-from-right",
+                  "kind": "ruler",
+                  "x1": 24,
+                  "y1": 35,
+                  "x2": 32,
+                  "y2": 35,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "B-Pong",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 48,
+                  "y2": 16
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 32,
+                  "x2": 48,
+                  "y2": 48
+                },
+                {
+                  "id": "exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 48,
+                  "y2": 28
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 48,
+                  "y2": 24
+                },
+                {
+                  "id": "console-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 12,
+                  "y": 24
+                },
+                {
+                  "id": "tracking-beacon",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tracking-beacon",
+                  "x": 24,
+                  "y": 24
+                },
+                {
+                  "id": "console-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 36,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 8.5,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 40.5,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.85
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.85
+                },
+                {
+                  "id": "exclusion-a-radius",
+                  "kind": "ruler",
+                  "x1": 1.4,
+                  "y1": 20,
+                  "x2": 1.4,
+                  "y2": 24,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-b-radius",
+                  "kind": "ruler",
+                  "x1": 1.4,
+                  "y1": 24,
+                  "x2": 1.4,
+                  "y2": 28,
+                  "offset": 0
+                },
+                {
+                  "id": "beacon-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 35,
+                  "x2": 24,
+                  "y2": 35,
+                  "offset": 0
+                },
+                {
+                  "id": "right-console-from-right",
+                  "kind": "ruler",
+                  "x1": 36,
+                  "y1": 35,
+                  "x2": 48,
+                  "y2": 35,
+                  "offset": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 59,
+          "section": "B-Pong"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 60,
+          "section": "B-Pong"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 61,
+          "section": "B-Pong"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 62,
+          "section": "B-Pong"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 58,
+          "section": "B-Pong"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 59,
+          "section": "B-Pong"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 60,
+          "section": "B-Pong"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 61,
+          "section": "B-Pong"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 62,
+          "section": "B-Pong"
         }
       ],
       "review": {

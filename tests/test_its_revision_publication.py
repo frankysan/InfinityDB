@@ -53,6 +53,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         ("2026.09.11", [
             "crossing-lines", "double-bind", "the-dig", "annihilation",
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
+            "b-pong",
         ]),
     ):
         status, _, payload = _json(
@@ -70,7 +71,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 9
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 10
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -311,6 +312,62 @@ def test_hardlock_is_only_in_hotfix_with_beacon_and_console_positions(two_revisi
 
     assert _json(
         app, "/api/scenarios/hardlock?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+
+def test_b_pong_api_all_game_sizes_and_historical_isolation(two_revisions) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:b-pong", "2026.09.01",
+    )) is None
+    for points, width, height, depth, exclusion in (
+        (150, 24, 32, 12, 2), (200, 32, 48, 16, 4),
+        (250, 32, 48, 16, 4), (300, 48, 48, 16, 4),
+        (350, 48, 48, 16, 4), (400, 48, 48, 16, 4),
+    ):
+        url = (
+            f"/api/scenarios/b-pong?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, url)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == {
+            150: 3, 200: 4, 250: 5, 300: 6, 350: 7, 400: 8,
+        }[points]
+        elements = {e["id"]: e for e in item["placement"]["geometry"]["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert elements["exclusion-zone"]["y1"] == height / 2 - exclusion
+        assert elements["exclusion-zone"]["y2"] == height / 2 + exclusion
+        assert elements["tracking-beacon"]["x"] == width / 2
+        assert elements["tracking-beacon"]["y"] == height / 2
+        assert elements["console-left"]["x"] == width / 4
+        assert elements["console-right"]["x"] == width * 3 / 4
+        markers = {m["marker_type"]: m for m in item["placement"]["marker_dimensions"]}
+        assert markers["tracking-beacon"]["diameter_mm"] is None
+        assert markers["tracking-beacon"]["size_status"] == "source-conflict"
+        assert markers["tracking-beacon"]["citation"] is None
+        assert markers["console"]["diameter_mm"] == 40
+        assert [c["page"] for c in item["citations"]] == [
+            59, 60, 61, 62, 58, 59, 60, 61, 62,
+        ]
+        assert len(item["source_issues"]) == 5
+        assert sum(o["maximumPoints"] for o in item["objectives"]) == 10
+        svg_url = url.replace(
+            "/api/scenarios/b-pong?", "/api/scenarios/b-pong/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_url)
+        assert svg_status == 200
+        assert b'data-physical-size="conflicting-sources"' in svg
+        assert svg.count(b'data-marker-type="console" data-diameter-mm="40"') == 2
+        assert b'id="scenario-exclusion-hatch"' in svg
+
+    assert _json(
+        app, "/api/scenarios/b-pong?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 

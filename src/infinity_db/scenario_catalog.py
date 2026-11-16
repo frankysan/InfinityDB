@@ -86,6 +86,7 @@ _MARKER_LABELS = {
     "tech-coffin": "Tech-Coffin Token",
     "hyperthermal-tech": "Hyperthermal Tech Token",
     "beacon": "Beacon Token",
+    "tracking-beacon": "Tracking Beacon Token",
 }
 
 
@@ -102,15 +103,19 @@ def _marker_dimensions(
     for marker_type, count in counts.items():
         diameter = marker_diameter_mm(marker_type)
         label = _MARKER_LABELS.get(marker_type)
-        if label is None or (diameter is None and marker_type != "beacon"):
+        if label is None or (diameter is None and marker_type not in {"beacon", "tracking-beacon"}):
             raise ValueError(f"Missing reviewed marker dimensions for {marker_type!r}")
-        result.append({
+        entry = {
             "marker_type": marker_type,
             "name": label,
             "count": count,
             "diameter_mm": diameter,
             "citation": dict(source_citation) if diameter is not None else None,
-        })
+        }
+        if marker_type == "tracking-beacon":
+            # EN p. 60: 40 mm; ES p. 59: 25 mm. No agreed physical footprint.
+            entry["size_status"] = "source-conflict"
+        result.append(entry)
     return result
 
 
