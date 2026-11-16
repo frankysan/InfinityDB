@@ -11,7 +11,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from .domain_slugs import require_domain_slug, validate_typed_domain_id
-from .scenario_geometry import MarkerElement, RectangleElement
+from .scenario_geometry import (
+    CircleRegionElement,
+    MarkerElement,
+    QuarterCircleElement,
+    RectangleElement,
+)
 
 if TYPE_CHECKING:
     from .scenario_definition import ScenarioConfiguration
@@ -141,6 +146,21 @@ class ScenarioSourceIssue:
 
 
 @dataclass(frozen=True, slots=True)
+class ScenarioObjectiveSet:
+    id: str
+    name: str
+    objective_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioObjectiveSelection:
+    first_chooser: str
+    selection_timing: str
+    distinct_sets_required: bool
+    sets: tuple[ScenarioObjectiveSet, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class ScenarioMission:
     sides: tuple[ScenarioSide, ...]
     game_sizes: tuple[ScenarioGameSize, ...]
@@ -149,6 +169,7 @@ class ScenarioMission:
     end_conditions: tuple[ScenarioEndCondition, ...]
     source_issues: tuple[ScenarioSourceIssue, ...]
     skill_ids: tuple[str, ...] = ()
+    objective_selection: ScenarioObjectiveSelection | None = None
 
 
 def _object(value: Any, required: set[str], optional: set[str], context: str) -> dict[str, Any]:
@@ -275,7 +296,10 @@ def _condition(value: Any, context: str) -> ScenarioScoreCondition:
         if len(set(elements)) != len(elements):
             raise ScenarioMissionError(f"{context}.elementIds contains duplicate references")
         if kind in {"element-status-count", "element-status-comparison"}:
-            status = _choice(raw["status"], {"hacked", "controlled"}, f"{context}.status")
+            status = _choice(
+                raw["status"], {"hacked", "controlled", "activated", "destroyed"},
+                f"{context}.status",
+            )
             if kind == "element-status-count":
                 return ElementStatusCount(elements, status)
             comparison = _choice(raw["comparison"], {"greater", "all"}, f"{context}.comparison")
@@ -301,7 +325,8 @@ def _validate_score_geometry(
     ):
         return
     expected = (
-        RectangleElement if isinstance(condition, DominatedRegionComparison) else MarkerElement
+        (RectangleElement, CircleRegionElement)
+        if isinstance(condition, DominatedRegionComparison) else MarkerElement
     )
     for configuration in configurations:
         if not set(points).intersection(configuration.army_points):
@@ -314,6 +339,16 @@ def _validate_score_geometry(
                     f"{context} references missing or incompatible scoring element {identifier!r} "
                     f"in configuration {configuration.id!r}"
                 )
+            if (
+                isinstance(condition, (ElementStatusCount, ElementStatusComparison))
+                and condition.status in {"activated", "destroyed"}
+                and isinstance(element, MarkerElement)
+                and element.marker_type != "antenna"
+            ):
+                raise ScenarioMissionError(
+                    f"{context} status {condition.status!r} requires an Antenna marker, "
+                    f"not {element.marker_type!r}"
+                )
 
 
 def parse_scenario_mission(
@@ -325,7 +360,7 @@ def parse_scenario_mission(
     raw = _object(
         value,
         {"sides", "gameSizes", "objectives", "rules", "endConditions", "sourceIssues"},
-        {"skills"},
+        {"skills", "objectiveSelection"},
         context,
     )
     side_ids: set[str] = set()
@@ -365,7 +400,7 @@ def parse_scenario_mission(
         regions = {
             element.id
             for element in config.geometry.elements
-            if isinstance(element, RectangleElement)
+            if isinstance(element, (RectangleElement, QuarterCircleElement))
         }
         deployments: list[ScenarioDeployment] = []
         deployed_sides: set[str] = set()
@@ -447,6 +482,58 @@ def parse_scenario_mission(
             ScenarioObjective(
                 identifier, name, references, timing, aggregation, maximum, tuple(awards), per_round
             )
+        )
+
+    objective_selection = None
+    if "objectiveSelection" in raw:
+        selection = _object(
+            raw["objectiveSelection"],
+            {"firstChooser", "selectionTiming", "distinctSetsRequired", "sets"},
+            set(), f"{context}.objectiveSelection",
+        )
+        chooser = _choice(
+            selection["firstChooser"], {"player-who-chose-deployment"},
+            f"{context}.objectiveSelection.firstChooser",
+        )
+        timing = _choice(
+            selection["selectionTiming"], {"when-deployment-is-chosen"},
+            f"{context}.objectiveSelection.selectionTiming",
+        )
+        if selection["distinctSetsRequired"] is not True:
+            raise ScenarioMissionError(
+                f"{context}.objectiveSelection requires distinct sets for both players"
+            )
+        sets: list[ScenarioObjectiveSet] = []
+        set_ids: set[str] = set()
+        assigned_objectives: set[str] = set()
+        for index, item in enumerate(
+            _array(selection["sets"], f"{context}.objectiveSelection.sets")
+        ):
+            ctx = f"{context}.objectiveSelection.sets[{index}]"
+            objective_set = _object(
+                item, {"id", "name", "objectiveIds"}, set(), ctx,
+            )
+            identifier = _slug(objective_set["id"], f"{ctx}.id")
+            _unique(identifier, set_ids, ctx)
+            references = _references(
+                objective_set["objectiveIds"], objective_ids, f"{ctx}.objectiveIds",
+            )
+            if assigned_objectives.intersection(references):
+                raise ScenarioMissionError(
+                    f"{ctx} reuses an objective across mutually exclusive sets"
+                )
+            assigned_objectives.update(references)
+            sets.append(
+                ScenarioObjectiveSet(
+                    identifier, _text(objective_set["name"], f"{ctx}.name"), references,
+                )
+            )
+        if len(sets) < 2:
+            raise ScenarioMissionError(
+                f"{context}.objectiveSelection requires at least two distinct sets"
+            )
+        objective_selection = ScenarioObjectiveSelection(
+            chooser, timing, True, tuple(sets),
         )
 
     rules: list[ScenarioRule] = []
@@ -640,4 +727,5 @@ def parse_scenario_mission(
         tuple(ends),
         tuple(issues),
         skill_ids,
+        objective_selection,
     )

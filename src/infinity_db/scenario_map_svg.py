@@ -10,10 +10,12 @@ from typing import Literal
 
 from .scenario_geometry import (
     AreaSizeAnnotation,
+    CircleRegionElement,
     Coordinate,
     ElementEdgeDistanceAnnotation,
     LineElement,
     MarkerElement,
+    QuarterCircleElement,
     RectangleElement,
     ScenarioAnnotation,
     ScenarioElement,
@@ -30,6 +32,7 @@ _RENDERABLE_ELEMENT_STYLES = frozenset(
         "deployment-a",
         "deployment-b",
         "scoring",
+        "exclusion",
         "objective",
         "guide",
         "measurement",
@@ -53,6 +56,9 @@ stroke:var(--color-scenario-map-deployment-a-edge,#2563eb);stroke-width:.09}
 stroke:var(--color-scenario-map-deployment-b-edge,#dc2626);stroke-width:.09}
 .scoring{fill:var(--color-scenario-map-scoring,#e5e7eb);fill-opacity:.65;
 stroke:var(--color-scenario-map-scoring-edge,#6b7280);stroke-width:.07}
+.exclusion{fill:var(--color-scenario-map-scoring,#e5e7eb);fill-opacity:.25;
+stroke:var(--color-scenario-map-scoring-edge,#6b7280);stroke-width:.07;
+stroke-dasharray:.35 .2}
 .objective{fill:var(--color-scenario-map-marker,#fffefa);
 stroke:var(--color-scenario-map-outline,#203b35);stroke-width:.1}
 .guide{fill:none;stroke:var(--color-scenario-map-guide,#65716b);
@@ -107,6 +113,39 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
         return (
             f'<rect id="{element_id}" class="{style}" x="{_number(x1)}" y="{_number(y1)}" '
             f'width="{_number(x2 - x1)}" height="{_number(y2 - y1)}"/>'
+        )
+
+    if isinstance(element, CircleRegionElement):
+        x = _resolved(geometry, element.x, "x")
+        y = _resolved(geometry, element.y, "y")
+        return (
+            f'<circle id="{element_id}" class="{style}" data-region-shape="circle" '
+            f'cx="{_number(x)}" cy="{_number(y)}" r="{_number(element.radius)}"/>'
+        )
+
+    if isinstance(element, QuarterCircleElement):
+        radius = _number(element.radius)
+        width = _number(geometry.table.width)
+        height = _number(geometry.table.height)
+        x_end = _number(geometry.table.width - element.radius)
+        y_end = _number(geometry.table.height - element.radius)
+        segments = {
+            "top-left": f"M0 0 L{radius} 0 A{radius} {radius} 0 0 1 0 {radius} Z",
+            "top-right": (
+                f"M{width} 0 L{x_end} 0 A{radius} {radius} 0 0 0 {width} {radius} Z"
+            ),
+            "bottom-left": (
+                f"M0 {height} L0 {y_end} A{radius} {radius} 0 0 1 {radius} {height} Z"
+            ),
+            "bottom-right": (
+                f"M{width} {height} L{width} {y_end} "
+                f"A{radius} {radius} 0 0 0 {x_end} {height} Z"
+            ),
+        }
+        return (
+            f'<path id="{element_id}" class="{style}" data-region-shape="quarter-circle" '
+            f'data-corner="{element.corner}" data-radius-inches="{radius}" '
+            f'd="{segments[element.corner]}"/>'
         )
 
     if isinstance(element, LineElement):

@@ -82,6 +82,8 @@ _MARKER_SIZE_CITATION = {
 _MARKER_LABELS = {
     "console": "Console A Marker",
     "supply-box": "Supply Box Marker",
+    "antenna": "Transmission Antenna Token",
+    "hyperthermal-tech": "Hyperthermal Tech Token",
 }
 
 

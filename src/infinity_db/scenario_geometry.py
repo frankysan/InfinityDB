@@ -15,6 +15,8 @@ _MM_PER_INCH = 25.4
 _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "console": 40.0,
     "supply-box": 25.0,
+    "antenna": 40.0,
+    "hyperthermal-tech": 25.0,
 }
 
 _ELEMENT_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -64,6 +66,23 @@ class LineElement:
 
 
 @dataclass(frozen=True, slots=True)
+class CircleRegionElement:
+    id: str
+    style: str
+    x: Coordinate
+    y: Coordinate
+    radius: float
+
+
+@dataclass(frozen=True, slots=True)
+class QuarterCircleElement:
+    id: str
+    style: str
+    corner: Literal["top-left", "top-right", "bottom-left", "bottom-right"]
+    radius: float
+
+
+@dataclass(frozen=True, slots=True)
 class MarkerElement:
     id: str
     style: str
@@ -82,7 +101,10 @@ class LabelElement:
     align: Literal["start", "middle", "end"]
 
 
-ScenarioElement: TypeAlias = RectangleElement | LineElement | MarkerElement | LabelElement
+ScenarioElement: TypeAlias = (
+    RectangleElement | LineElement | CircleRegionElement | QuarterCircleElement
+    | MarkerElement | LabelElement
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -251,6 +273,28 @@ def _parse_element(value: Any, index: int) -> ScenarioElement:
             y2=_coordinate(raw.get("y2"), "y", f"{context}.y2"),
         )
 
+    if kind == "circle":
+        _only_keys(raw, common_required | {"x", "y", "radius"}, set(), context)
+        return CircleRegionElement(
+            id=_element_id(raw["id"], f"{context}.id"),
+            style=_style(raw["style"], f"{context}.style"),
+            x=_coordinate(raw["x"], "x", f"{context}.x"),
+            y=_coordinate(raw["y"], "y", f"{context}.y"),
+            radius=_positive_number(raw["radius"], f"{context}.radius"),
+        )
+
+    if kind == "quarter-circle":
+        _only_keys(raw, common_required | {"corner", "radius"}, set(), context)
+        corner = raw["corner"]
+        if corner not in {"top-left", "top-right", "bottom-left", "bottom-right"}:
+            raise ScenarioGeometryError(f"{context}.corner is not a table corner")
+        return QuarterCircleElement(
+            id=_element_id(raw["id"], f"{context}.id"),
+            style=_style(raw["style"], f"{context}.style"),
+            corner=corner,
+            radius=_positive_number(raw["radius"], f"{context}.radius"),
+        )
+
     if kind == "marker":
         required = common_required | {"markerType", "x", "y"}
         _only_keys(raw, required, set(), context)
@@ -280,7 +324,8 @@ def _parse_element(value: Any, index: int) -> ScenarioElement:
         )
 
     raise ScenarioGeometryError(
-        f"{context}.kind must be one of ['label', 'line', 'marker', 'rectangle']"
+        f"{context}.kind must be one of "
+        "['circle', 'label', 'line', 'marker', 'quarter-circle', 'rectangle']"
     )
 
 
@@ -420,6 +465,17 @@ def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
                 raise ScenarioGeometryError(
                     f"{context} rectangle must resolve to positive width and height"
                 )
+        elif isinstance(element, CircleRegionElement):
+            x = resolved(element.x, "x", f"{context}.x")
+            y = resolved(element.y, "y", f"{context}.y")
+            if (
+                x - element.radius < 0 or x + element.radius > table.width
+                or y - element.radius < 0 or y + element.radius > table.height
+            ):
+                raise ScenarioGeometryError(f"{context} circular region extends outside table")
+        elif isinstance(element, QuarterCircleElement):
+            if element.radius > min(table.width, table.height):
+                raise ScenarioGeometryError(f"{context} quarter-circle extends outside table")
         elif isinstance(element, MarkerElement):
             resolved(element.x, "x", f"{context}.x")
             resolved(element.y, "y", f"{context}.y")

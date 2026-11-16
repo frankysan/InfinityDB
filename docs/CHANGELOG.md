@@ -16,8 +16,12 @@ are not retroactively relabeled.
   collection separately from the selected historical runtime. Added the reviewed
   Annihilation mission's typed scoring, standard deployment maps, bilingual
   citations and explicit unresolved source-value issues; rebased Battleground
-  and event-policy citations to the hotfix. The 2026.09.01 player publication
-  remains unchanged pending revision-aware integration.
+  and event-policy citations to the hotfix. Added curated Crossing Lines,
+  Double Bind and The Dig with reviewed September hotfix semantics, six-size
+  mission scoring, source-backed split/circular/corner deployment geometry,
+  and typed exclusive Main Objective sets. The shared map renderer now
+  supports circular regions and corner quarter-circles. The 2026.09.01 player
+  publication remains unchanged pending revision-aware integration.
 
 ## [1.1.0] - 2026-11-15
 

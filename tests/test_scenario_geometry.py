@@ -9,6 +9,7 @@ from infinity_db.scenario_geometry import (
     SCENARIO_GEOMETRY_VERSION,
     AnchorCoordinate,
     AreaSizeAnnotation,
+    CircleRegionElement,
     DimensionAnnotation,
     ElementEdgeDistanceAnnotation,
     LabelElement,
@@ -308,13 +309,13 @@ def test_geometry_v1_accepts_future_style_and_marker_identities_without_renderin
     assert parsed_marker.marker_type == "future-objective"
 
 
-def test_geometry_v1_rejects_future_region_kind_instead_of_approximating_it() -> None:
+def test_geometry_v1_accepts_reviewed_circular_regions_and_rejects_unknown_shapes() -> None:
     document = _document()
     elements = document["elements"]
     assert isinstance(elements, list)
     elements.append(
         {
-            "id": "future-hazard",
+            "id": "scoring-region",
             "kind": "circle",
             "style": "scoring",
             "x": {"anchor": "center"},
@@ -322,7 +323,12 @@ def test_geometry_v1_rejects_future_region_kind_instead_of_approximating_it() ->
             "radius": 4,
         }
     )
+    geometry = parse_scenario_geometry(document)
+    region = geometry.elements[-1]
+    assert isinstance(region, CircleRegionElement)
+    assert region.radius == 4
 
+    elements[-1]["kind"] = "polygon"
     with pytest.raises(ScenarioGeometryError, match="kind must be one of"):
         parse_scenario_geometry(document)
 

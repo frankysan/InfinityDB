@@ -47,15 +47,33 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Two missions are currently authored for isolated validation:
+Five missions are currently authored for isolated validation:
 
+- **Crossing Lines:** Four deployment areas per map (two per player),
+  two Dead Zones, two Antennas, scoring at the end of rounds and at game
+  end, and the hotfix's explicit HVT/Classified exclusion (EN/ES pp. 63–66).
+- **Double Bind:** Three Antennas, their Circular Template Zones of
+  Influence, 4-inch central Exclusion Zone and typed, mutually exclusive
+  Main Objective sets (Encryption, Sabotage and Secure Vector). The
+  hotfix's selection timing, Antenna damage ceiling and Engineer/GizmoKit
+  permission are preserved (EN/ES pp. 72–77). The player-facing
+  choice controls remain a publication requirement.
+- **The Dig:** Opposite corner quarter-circle Deployment Zones, three
+  diagonal Consoles, six player-placed Hyperthermal Tech Tokens, typed
+  scoring, Operational Learning and classified context. The 150-point
+  4-inch placement spacing, opponent's choice of analyzed Tech, ownership
+  Tokens and Analyze/Neutralize restrictions match the hotfix
+  (EN/ES pp. 78–82).
+- **Annihilation:** Six Army-Points scoring configurations, three
+  deployment geometries, enemy-kill/survival/Lieutenant scoring, No Quarter,
+  HVT/Classified exclusion and the three-round end condition (EN
+  pp. 125–128 and ES pp. 131–133).
 - **Battleground:** Preserves the existing three scoring and geometry
   configurations with citations rebased to hotfix pp. 129–131.
-- **Annihilation:** Adds six Army-Points scoring configurations, three
-  deployment geometries, enemy-kill/survival/Lieutenant scoring, No Quarter,
-  HVT/Classified exclusion, and the three-round end condition. English
-  pp. 125–128 and Spanish pp. 131–133 supply the review evidence. The
-  shared geometry model is reused; this is not a second SVG renderer.
+
+All five missions share the existing geometry parser, model and SVG
+renderer. The additive circle and corner-quarter-circle geometry shapes
+are source-backed, not mission-specific markup.
 
 The Annihilation source-issues array explicitly retains the **350-point**
 gap printed in both languages: 3 OP for 176–274 and 4 OP for greater than
@@ -68,10 +86,12 @@ The three event policies remain explicitly selected, with hotfix page
 references 27 (Spec-Ops), 28 (Reinforcements), and 29 (TEAM-OPS).
 `tests/test_its_hotfix_scenarios.py` exercises both source revisions,
 the staged database, scenario geometry, scoring bands, issue retention,
-source citations and policy rebasing. Promotion to the serving set still
-requires revision-aware publication and reconciliation of The Dig, Double
-Bind and Crossing Lines; no current, historical or tournament context
-is silently replaced.
+source citations and policy rebasing. The three new mission definitions
+also have focused source-version, geometry and semantic tests. Promotion
+to the serving set still requires multi-revision registration, verifying
+the visual maps against their pinned diagrams, and player-facing choice
+presentation for Double Bind; no historical or tournament context is
+silently replaced.
 
 ## Schema v2 and read contract
 
