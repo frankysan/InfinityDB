@@ -332,12 +332,12 @@ scenario maps and their relevant context. Preserve the existing Battleground
 pilot and historical revision identities. Season 17 and Season 16 Part II
 remain later scope; do not claim complete Season 18 coverage before it is verified.
 
-**Published 2026.09.11 hotfix coverage (2026-11-16):** Fifteen reviewed
+**Published 2026.09.11 hotfix coverage (2026-11-16):** Sixteen reviewed
 missions now have source-cited scoring, rules and game-size maps; the original
 2026.09.01 Battleground remains independently selectable. The browser exposes
 exact-revision selection, typed objectives, and Double Bind's alternative Main
 Objective sets. Map zoning and placement rulers have been reviewed in both
-source languages. Five hotfix missions remain unpublished; in-browser visual
+source languages. Four hotfix missions remain unpublished; in-browser visual
 acceptance at relevant breakpoints is still open. See the
 [ITS season database](its-season-database.md#published-20260911-hotfix-curation).
 
@@ -375,9 +375,9 @@ acceptance at relevant breakpoints is still open. See the
     `its-18@2026.09.01` for historically scoped results. Extend typed
     geometry, scoring and card/classified choices only where each mission
     needs them. Unpublished missions must fail closed.
-    Fifteen reviewed hotfix missions are published, most recently Area of Interest.
-    Corporate Appropriation, Data-Harvest, Outbreak, Critical Intervention
-    and Last Launch remain excluded until source review.
+    Sixteen reviewed hotfix missions are published, most recently Data-Harvest.
+    Corporate Appropriation, Outbreak, Critical Intervention and Last Launch
+    remain excluded until source review.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
     season launched under N5) and ITS Season 16 Part II (the N5-compatible
     revision), at minimum their scenario definitions and maps. Keep original

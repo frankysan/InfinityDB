@@ -3998,7 +3998,7 @@ yet a historical compositional detail/map API.
 
 **Current publication boundary:** The selected Scenario collections are
 `n5-core@5.3` (four Core missions), `its-18@2026.09.01` (the historical
-Battleground pilot), and `its-18@2026.09.11` (fifteen separately reviewed
+Battleground pilot), and `its-18@2026.09.11` (sixteen separately reviewed
 September-hotfix missions). Each ITS publication supports six Army Points
 sizes (150/200/250/300/350/400) with source-cited maps and scoring. The
 original Battleground retains its own three-Sector mission semantics and
@@ -4008,7 +4008,7 @@ unqualified catalog remains the four N5 Core missions. Unknown pairs yield
 empty results or HTTP 404, rather than silently falling back to Core.
 
 This partial Season 18 coverage does not imply a complete ITS mission library,
-historical-season UI, Classified Deck, or general tournament tooling. Five
+historical-season UI, Classified Deck, or general tournament tooling. Four
 other hotfix missions are still unpublished.
 Browser selection state uses the common versioned share-state token; legacy
 explicit `army_points` input remains readable. The

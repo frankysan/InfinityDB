@@ -54,7 +54,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
             "crossing-lines", "double-bind", "the-dig", "annihilation",
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
             "b-pong", "akial-interference", "evacuation", "neutralization",
-            "provisioning", "area-of-interest",
+            "provisioning", "area-of-interest", "data-harvest",
         ]),
     ):
         status, _, payload = _json(
@@ -72,7 +72,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 15
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 16
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -675,6 +675,73 @@ def test_area_of_interest_six_sizes_center_antenna_and_revision_isolation(
 
     assert _json(
         app, "/api/scenarios/area-of-interest?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+def test_data_harvest_six_sizes_designated_zones_and_revision_isolation(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:data-harvest", "2026.09.01",
+    )) is None
+    for points, width, height, depth in (
+        (150, 24, 32, 8),
+        (200, 32, 48, 12),
+        (250, 32, 48, 12),
+        (300, 48, 48, 12),
+        (350, 48, 48, 12),
+        (400, 48, 48, 12),
+    ):
+        uri = (
+            f"/api/scenarios/data-harvest?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == points // 50
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {el["id"]: el for el in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert {el["id"] for el in elements.values() if el["kind"] == "marker"} == {
+            "coffin-left", "coffin-center", "coffin-right",
+        }
+        assert {m["marker_type"]: (m["count"], m["diameter_mm"])
+                for m in item["placement"]["marker_dimensions"]} == {
+            "tech-coffin": (3, 40),
+        }
+        assert [(el["x"], el["y"]) for el in (
+            elements["coffin-left"], elements["coffin-center"], elements["coffin-right"],
+        )] == [(4, height / 2), (width / 2, height / 2),
+              (width - 4, height / 2)]
+        assert not any(el["kind"] == "circle" for el in elements.values())
+        assert [c["page"] for c in item["citations"]] == [
+            *range(67, 72), *range(67, 72),
+        ]
+        assert {o["id"]: o["maximumPoints"] for o in item["objectives"]} == {
+            "active-inside-enemy-deployment": 2,
+            "active-in-enemy-half-each-round": 3,
+            "prevent-enemy-active": 2,
+            "active-in-both-and-prevent": 1,
+            "classified-objectives": 2,
+        }
+        assert len(item["source_issues"]) == 2
+        svg_uri = uri.replace(
+            "/api/scenarios/data-harvest?", "/api/scenarios/data-harvest/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
+        assert svg_status == 200
+        assert svg.count(b'data-marker-type="tech-coffin" data-diameter-mm="40"') == 3
+        for length in (depth, width / 2, 4):
+            assert f'data-distance-inches="{length:g}"'.encode() in svg
+
+    assert _json(
+        app, "/api/scenarios/data-harvest?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 

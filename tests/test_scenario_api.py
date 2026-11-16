@@ -249,7 +249,7 @@ def test_scenario_list_api_exposes_current_publications_without_selecting_game_s
         },
         {
             "id": "its-18", "revision": "2026.09.11",
-            "title": "ITS Season 18: Overheat", "scenario_count": 15,
+            "title": "ITS Season 18: Overheat", "scenario_count": 16,
         },
     ]
     items = payload["items"]

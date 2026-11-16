@@ -1277,6 +1277,122 @@ def test_area_of_interest_malformed_definition_fails_closed(mutation: str) -> No
     with pytest.raises(ScenarioDefinitionError):
         parse_scenario_definition_record(record)
 
+
+def test_data_harvest_six_tokens_scoring_placement_and_source_provenance() -> None:
+    record = _records()["scenario:data-harvest"]
+    mission, configurations = _parts(record)
+    assert [c["page"] for c in record["citations"]] == [
+        *range(67, 72), *range(67, 72),
+    ]
+    assert [c["sourceId"] for c in record["citations"]] == [
+        *("its-season-18-en-pdf" for _ in range(5)),
+        *("its-season-18-es-pdf" for _ in range(5)),
+    ]
+    assert [g["swc"] for g in mission["gameSizes"]] == [3, 4, 5, 6, 7, 8]
+    objectives = {o["id"]: o for o in mission["objectives"]}
+    assert {key: item["maximumPoints"] for key, item in objectives.items()} == {
+        "active-inside-enemy-deployment": 2,
+        "active-in-enemy-half-each-round": 3,
+        "prevent-enemy-active": 2,
+        "active-in-both-and-prevent": 1,
+        "classified-objectives": 2,
+    }
+    assert sum(item["maximumPoints"] for item in objectives.values()) == 10
+    assert objectives["active-in-enemy-half-each-round"]["timing"] == "end-of-round"
+    assert objectives["active-in-enemy-half-each-round"]["aggregation"] == "cumulative"
+    assert objectives["active-in-enemy-half-each-round"]["awards"][0]["objectivePoints"] == 1
+    assert all(item["timing"] == "end-of-game" for key, item in objectives.items()
+               if key != "active-in-enemy-half-each-round")
+    assert objectives["classified-objectives"]["aggregation"] == "cumulative"
+    assert objectives["classified-objectives"]["awards"][0]["objectivePoints"] == 1
+
+    rules = {r["id"]: " ".join(r["paragraphs"]) for r in mission["rules"]}
+    assert "six total" in rules["deployment-and-tech-coffins"]
+    assert "25 mm Token" in rules["deployment-and-tech-coffins"]
+    assert "[[distance:4:inch]]" in rules["deployment-and-tech-coffins"]
+    assert "Normal WIP Roll" in rules["extract-data-harvester"]
+    assert "both of its Data-Harvesters" in rules["extract-data-harvester"]
+    assert "without a Roll" in rules["pickup-data-harvester"]
+    assert "up to two with Baggage" in rules["common-data-harvester-rules"]
+    assert "completely inside" in rules["common-data-harvester-rules"]
+    assert "becomes Active" in rules["common-data-harvester-rules"]
+    assert "Deactivator" in rules["neutralize-data-harvester"]
+    assert "Normal WIP Roll" in rules["neutralize-data-harvester"]
+    assert "One must be completely within the enemy Deployment Zone" in (
+        rules["player-placed-designated-zones"]
+    )
+    assert "The player who kept Deployment places" in (
+        rules["player-placed-designated-zones"]
+    )
+    assert "none has a fixed" in rules["player-placed-designated-zones"]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert [end["id"] for end in mission["endConditions"]] == ["round-limit", "retreat"]
+    assert {issue["id"] for issue in mission["sourceIssues"]} == {
+        "extract-contact-bilingual", "neutralize-contact-bilingual",
+    }
+    assert all(issue["status"] == "needs-verification" for issue in mission["sourceIssues"])
+
+    for configuration, width, height, depth in (
+        ("150-points", 24, 32, 8),
+        ("200-250-points", 32, 48, 12),
+        ("300-400-points", 48, 48, 12),
+    ):
+        geometry = configurations[configuration]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {el["id"]: el for el in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert elements["table-center-line"]["y1"] == height / 2
+        assert {el["id"] for el in elements.values() if el["kind"] == "marker"} == {
+            "coffin-left", "coffin-center", "coffin-right",
+        }
+        assert [(elements[key]["x"], elements[key]["y"]) for key in (
+            "coffin-left", "coffin-center", "coffin-right",
+        )] == [(4, height / 2), (width / 2, height / 2), (width - 4, height / 2)]
+        assert {el["markerType"] for el in elements.values()
+                if el["kind"] == "marker"} == {"tech-coffin"}
+        assert not any(el["kind"] == "circle" for el in elements.values())
+        annotations = {annotation["id"]: annotation
+                       for annotation in geometry["annotations"]}
+        assert set(annotations) == {
+            "deployment-b-depth", "coffin-center-from-left", "coffin-right-from-edge",
+        }
+        assert annotations["deployment-b-depth"]["y1"] == height - depth
+        assert annotations["coffin-center-from-left"]["x2"] == width / 2
+        assert annotations["coffin-right-from-edge"]["x1"] == width - 4
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
+            assert svg.count('data-marker-type="tech-coffin" data-diameter-mm="40"') == 3
+            for length in (depth, width / 2, 4):
+                assert f'data-distance-inches="{length:g}"' in svg
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ("missing-deployment", "negative-depth", "off-table-coffin", "excess-round-score"),
+)
+def test_data_harvest_invalid_geometry_or_score_fails_closed(mutation: str) -> None:
+    record = deepcopy(_records()["scenario:data-harvest"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    if mutation == "missing-deployment":
+        geometry["elements"] = [
+            el for el in geometry["elements"] if el["id"] != "deployment-a"
+        ]
+    elif mutation == "negative-depth":
+        next(el for el in geometry["elements"] if el["id"] == "deployment-a")[
+            "y2"
+        ] = -1
+    elif mutation == "off-table-coffin":
+        next(el for el in geometry["elements"] if el["id"] == "coffin-right")[
+            "x"
+        ] = 100
+    else:
+        record["facts"]["mission"]["objectives"][1]["awards"][0][
+            "objectivePoints"
+        ] = 4
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

@@ -58,6 +58,9 @@
       },
       {
         "scenarioId": "scenario:area-of-interest"
+      },
+      {
+        "scenarioId": "scenario:data-harvest"
       }
     ]
   },
@@ -13185,6 +13188,805 @@
           "sourceId": "its-season-18-es-pdf",
           "page": 126,
           "section": "Área de Interés"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    },
+    {
+      "id": "scenario:data-harvest",
+      "kind": "scenario",
+      "name": "Data-Harvest",
+      "summary": "Extract six Data-Harvesters from three Tech-Coffins, activate them in player-placed enemy-side Designated Zones, and neutralize enemy Harvesters.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Side A"
+            },
+            {
+              "id": "side-b",
+              "name": "Side B"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "active-inside-enemy-deployment",
+              "name": "Active Data-Harvester in Enemy Deployment",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, have at least one Active Data-Harvester in your own Designated Zone that is completely within the opponent's Deployment Zone."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "active-in-enemy-half-each-round",
+              "name": "Active Data-Harvester in Enemy Half",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-round",
+              "aggregation": "cumulative",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At the end of each Game Round, have one or more Active Data-Harvesters in either of your two Designated Zones in the enemy half of the table. Score at most 1 Objective Point per round, up to 3 total."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "prevent-enemy-active",
+              "name": "Prevent Enemy Active Data-Harvesters",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, your opponent has no Active Data-Harvester in either of the opponent's own Designated Zones."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "active-in-both-and-prevent",
+              "name": "Both Zones Active; Enemy None",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, have at least one Active Data-Harvester in each of your two Designated Zones while the opponent has no Active Data-Harvester in either of their two Designated Zones."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "classified-objectives",
+              "name": "Classified Objectives",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "cumulative",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Each of the two completed Classified Objectives is worth 1 Objective Point, to a maximum of 2."
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "deployment-and-tech-coffins",
+              "name": "Deployment and Tech-Coffins",
+              "paragraphs": [
+                "Both players deploy on opposite sides of the table with game-size-specific Deployment Zone depths shown on the three source maps. Troopers may not deploy in Silhouette contact with any Tech-Coffin.",
+                "There are exactly three 40 mm Tech-Coffins on the table centerline: one at its midpoint and one [[distance:4:inch]] in from each lateral table edge. Each Tech-Coffin starts with two Inactive Data-Harvesters, for six total. Each Data-Harvester is represented by a 25 mm Token when Extracted; the map fixes only the Tech-Coffin positions, not player-placed Designated Zones."
+              ]
+            },
+            {
+              "id": "extract-data-harvester",
+              "name": "Extract Data-Harvester (Short Skill)",
+              "paragraphs": [
+                "Only Specialist Troops may declare this Attack, Scenario Short Skill while in contact with a Tech-Coffin. On a successful Normal WIP Roll they Extract one Inactive Data-Harvester, pick it up and place its Token next to the Trooper. A failed attempt may be repeated with another Short Skill.",
+                "Remove the Tech-Coffin once both of its Data-Harvesters have been Extracted. English p. 68 specifies base contact to Extract; Spanish p. 68 specifies Silhouette contact. The difference is recorded rather than silently reconciled."
+              ]
+            },
+            {
+              "id": "pickup-data-harvester",
+              "name": "Pick Up Data-Harvester (Short Skill)",
+              "paragraphs": [
+                "A Trooper in Silhouette contact with an uncarried Inactive Data-Harvester, or with an allied Trooper in Normal State carrying one, may pick up the Inactive Data-Harvester using one Short Skill without a Roll. Place the carried Token in Silhouette contact with the carrier."
+              ]
+            },
+            {
+              "id": "common-data-harvester-rules",
+              "name": "Common Data-Harvester Rules",
+              "paragraphs": [
+                "Each Model may carry one Data-Harvester, or up to two with Baggage. Only Models, not Markers, may carry a Data-Harvester. Keep the Token on the table in Silhouette contact with its carrier until it is Neutralized.",
+                "A Model in or entering a Null State drops an Inactive Data-Harvester, moving the Token just outside Silhouette contact. Data-Harvester Tokens do not obstruct Movement or Line of Fire.",
+                "A Trooper carrying an Inactive Data-Harvester may deposit it completely inside one of that player's own Designated Zones with one Short Skill and no Roll. It becomes Active there."
+              ]
+            },
+            {
+              "id": "neutralize-data-harvester",
+              "name": "Neutralize Data-Harvester (Short Skill)",
+              "paragraphs": [
+                "Only a Trooper with Engineer, Hacker or a Deactivator may attempt this Attack, Scenario Short Skill while in contact with an Active Data-Harvester. Success on a Normal WIP Roll Neutralizes it; remove the Token from the table. A failed Roll may be retried, spending another Short Skill.",
+                "English p. 70 requires base contact with the Active Data-Harvester; Spanish p. 70 uses Silhouette contact. The sources are kept distinct."
+              ]
+            },
+            {
+              "id": "player-placed-designated-zones",
+              "name": "Player-Placed Designated Zones",
+              "paragraphs": [
+                "Each player places two Circular Templates representing that player's Designated Zones on surfaces large enough for the Templates before the Deployment Phase. One must be completely within the enemy Deployment Zone, and the other must be outside that Deployment Zone but completely within the enemy half of the table.",
+                "The player who kept Deployment places their two Templates first. The four Zones belong to their respective players, and none has a fixed, source-defined map position. The sources do not add a non-overlap rule between player-placed Designated Zones."
+              ]
+            },
+            {
+              "id": "specialist-troops",
+              "name": "Specialist Troops",
+              "paragraphs": [
+                "Hackers, Doctors, Engineers, Forward Observers, Paramedics and Troopers with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] count as Specialist Troops.",
+                "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models to perform Specialist-only tasks."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            },
+            {
+              "id": "retreat",
+              "checkAt": "tactical-phase",
+              "finishAt": "end-of-player-turn",
+              "condition": {
+                "kind": "reviewed-prose",
+                "text": "If a player starts their Active Turn in Retreat!, the mission ends at the end of that Player Turn."
+              }
+            }
+          ],
+          "sourceIssues": [
+            {
+              "id": "extract-contact-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "active-inside-enemy-deployment",
+              "status": "needs-verification",
+              "description": "English p. 68 requires base contact to Extract an Inactive Data-Harvester from a Tech-Coffin; Spanish p. 68 says Silhouette contact. Both retain the Specialist-only WIP Roll."
+            },
+            {
+              "id": "neutralize-contact-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "prevent-enemy-active",
+              "status": "needs-verification",
+              "description": "English p. 70 requires base contact to Neutralize an Active Data-Harvester; Spanish p. 70 says Silhouette contact. Both allow Engineer, Hacker or Deactivator and require a WIP Roll."
+            }
+          ]
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Data-Harvest",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 8
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 24,
+                  "y2": 32
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 16,
+                  "x2": 24,
+                  "y2": 16
+                },
+                {
+                  "id": "coffin-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 4,
+                  "y": 16
+                },
+                {
+                  "id": "coffin-center",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 12,
+                  "y": 16
+                },
+                {
+                  "id": "coffin-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 20,
+                  "y": 16
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 12,
+                  "y": 4,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 12,
+                  "y": 28,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "ruler",
+                  "x1": 0.8,
+                  "y1": 24,
+                  "x2": 0.8,
+                  "y2": 32,
+                  "offset": 0
+                },
+                {
+                  "id": "coffin-center-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 30.9,
+                  "x2": 12,
+                  "y2": 30.9,
+                  "offset": 0
+                },
+                {
+                  "id": "coffin-right-from-edge",
+                  "kind": "ruler",
+                  "x1": 20,
+                  "y1": 30.9,
+                  "x2": 24,
+                  "y2": 30.9,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Data-Harvest",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 32,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 32,
+                  "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 32,
+                  "y2": 24
+                },
+                {
+                  "id": "coffin-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 4,
+                  "y": 24
+                },
+                {
+                  "id": "coffin-center",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 16,
+                  "y": 24
+                },
+                {
+                  "id": "coffin-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 28,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 16,
+                  "y": 6,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 16,
+                  "y": 42,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "ruler",
+                  "x1": 0.8,
+                  "y1": 36,
+                  "x2": 0.8,
+                  "y2": 48,
+                  "offset": 0
+                },
+                {
+                  "id": "coffin-center-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 46.9,
+                  "x2": 16,
+                  "y2": 46.9,
+                  "offset": 0
+                },
+                {
+                  "id": "coffin-right-from-edge",
+                  "kind": "ruler",
+                  "x1": 28,
+                  "y1": 46.9,
+                  "x2": 32,
+                  "y2": 46.9,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Data-Harvest",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 48,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 48,
+                  "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 48,
+                  "y2": 24
+                },
+                {
+                  "id": "coffin-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 4,
+                  "y": 24
+                },
+                {
+                  "id": "coffin-center",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 24,
+                  "y": 24
+                },
+                {
+                  "id": "coffin-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "tech-coffin",
+                  "x": 44,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 24,
+                  "y": 6,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 24,
+                  "y": 42,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "ruler",
+                  "x1": 0.8,
+                  "y1": 36,
+                  "x2": 0.8,
+                  "y2": 48,
+                  "offset": 0
+                },
+                {
+                  "id": "coffin-center-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 46.9,
+                  "x2": 24,
+                  "y2": 46.9,
+                  "offset": 0
+                },
+                {
+                  "id": "coffin-right-from-edge",
+                  "kind": "ruler",
+                  "x1": 44,
+                  "y1": 46.9,
+                  "x2": 48,
+                  "y2": 46.9,
+                  "offset": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 67,
+          "section": "Data-Harvest"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 68,
+          "section": "Data-Harvest"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 69,
+          "section": "Data-Harvest"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 70,
+          "section": "Data-Harvest"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 71,
+          "section": "Data-Harvest"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 67,
+          "section": "Data-Harvest"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 68,
+          "section": "Data-Harvest"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 69,
+          "section": "Data-Harvest"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 70,
+          "section": "Data-Harvest"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 71,
+          "section": "Data-Harvest"
         }
       ],
       "review": {
