@@ -37,12 +37,13 @@ def _has_commits_after_version_tag(repository: Path) -> bool:
 
 
 def _source_checkout_has_unreleased_changes() -> bool:
-    """Return whether the source checkout differs from its release tag."""
+    """Detect tracked changes or commits after the release tag, not local files."""
     repository = _repository_root()
     if repository is None:
         return False
 
-    status = _git_output(repository, "status", "--porcelain")
+    # Deployments can retain untracked files beside an exact release checkout.
+    status = _git_output(repository, "status", "--porcelain", "--untracked-files=no")
     if status is None:
         return False
     if status:
