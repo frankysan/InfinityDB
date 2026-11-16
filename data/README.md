@@ -66,6 +66,18 @@ the retired source roots.
   Human Sphere snapshot ZIPs, including history variants. The two unique
   expanded mirrors live under `local/data/wiki-extracted/`, which is not
   synchronized.
+
+  The independently acquired Wiki snapshots dated 2026-11-16 retain their
+  exact ZIPs, v3 manifests and detailed inventories in
+  `local/data/manifests/snapshots/inventories/`. English current/history contain
+  711 pages and 2,801 oldid revisions; Spanish contain 930 pages and 2,655
+  revisions. Current pages use portable `.html` members (including nested and
+  Unicode-suffixed paths); Spanish pages are under `es/`. The inventories
+  identify source URLs and archive members, while `_history/index.json` owns
+  oldid resolution. Do not derive paths from titles or mix snapshots across
+  naming schemes. Existing curated citations remain pinned to their original
+  English/Spanish ZIP names, member paths and SHA-256 values; new acquisitions
+  are research evidence, not automatically promoted rules or runtime inputs.
 - `local/data/pdf/` — physical research PDFs and the preserved
   `rules/sources.txt` revision index. Canonical `data/pdf/` source labels
   remain unchanged in curated provenance.

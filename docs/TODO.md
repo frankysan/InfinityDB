@@ -45,6 +45,9 @@ Use these links to jump directly to a workstream:
   facts should enter the maintained reference. Retain reproducible source
   evidence without treating every unreviewed page or unresolved SRC issue as
   an implementation requirement.
+  The verified English/Spanish Wiki snapshots and histories from 2026-11-16
+  are available for explicit edition/revision comparison; their portable
+  member names do not replace the older curated citations without review.
 
 ### Source notation and rule references
 
