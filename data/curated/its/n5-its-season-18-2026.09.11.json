@@ -67,6 +67,9 @@
       },
       {
         "scenarioId": "scenario:corporate-appropriation"
+      },
+      {
+        "scenarioId": "scenario:outbreak"
       }
     ]
   },
@@ -15880,6 +15883,736 @@
           "sourceId": "its-season-18-es-pdf",
           "page": 57,
           "section": "Apropiación Corporativa"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-17"
+      }
+    },
+    {
+      "id": "scenario:outbreak",
+      "kind": "scenario",
+      "name": "Outbreak",
+      "summary": "Scan, stabilize, CivEvac and secure infected Civilians; the Alpha Infected is fixed at table center while four others and Stabilization Zones are placed by players.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Side A"
+            },
+            {
+              "id": "side-b",
+              "name": "Side B"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "scan-infected",
+              "name": "Scan Infected",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "cumulative",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Score 1 Objective Point for each different Infected you have Scanned by game end, to a maximum of 3. Both players may Scan the same Infected, but each player may Scan it only once."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "stabilize-more-infected",
+              "name": "Stabilize More Infected",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, have Stabilized more Infected than your opponent. An Infected already Stabilized by one player cannot subsequently be Stabilized by the other."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "civevac-more-stabilized",
+              "name": "CivEvac More Stabilized Infected",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, be CivEvacing more Stabilized Infected than your opponent."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "civevac-stabilized-alpha",
+              "name": "CivEvac Stabilized Alpha Infected",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, be CivEvacing the Stabilized Alpha Infected."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "secure-infected",
+              "name": "Secure at Least One Infected",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, Secure at least one Infected that you have Stabilized or are CivEvacing, with no enemy non-Null Trooper within its Zone of Control."
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "infected-placement",
+              "name": "Infected Placement",
+              "paragraphs": [
+                "Five Infected Civilians participate; the Alpha Infected is fixed at the table center. Before the Deployment Phase, each player places two further Infected entirely within the opponent's half of the table. Their locations are chosen by players, not pre-marked on the map.",
+                "Each player-placed Infected must be at least [[distance:4:inch]] outside the enemy Deployment Zone and at least [[distance:8:inch]] from all other Infected. They cannot be placed inside or atop scenery or buildings and must be in an accessible location.",
+                "The player who kept Deployment places both of their Infected first. A Trooper may CivEvac at most one Infected at a time. Infected are represented by suitable Infinity/Infinity Bootleg Models, normally HVT or Civilian miniatures.",
+                "It is not permitted to deploy in Silhouette contact with an Infected. The English and Spanish distance conventions differ slightly: [[distance:4:inch]] / [[distance:8:inch]] versus [[distance:10:cm]] / [[distance:20:cm]]."
+              ]
+            },
+            {
+              "id": "corner-deployment",
+              "name": "Corner Deployment Zones",
+              "paragraphs": [
+                "Side A and Side B deploy in opposite table corners in quarter-circle Deployment Zones whose radius depends on the number of Army Points. The diagram uses top-right for Side A and bottom-left for Side B."
+              ]
+            },
+            {
+              "id": "stabilization-zones",
+              "name": "Player-Placed Stabilization Zones",
+              "paragraphs": [
+                "There are two Circular Template Stabilization Zones, one placed by each player. After placing the Infected and before deployment, each player places one Template totally inside their own Deployment Zone on a surface large enough for the full Template.",
+                "The player who kept Deployment places the first Stabilization Zone. Its precise position is not specified by the published map and is not invented here.",
+                "At the end of each Player Turn, an Infected being CivEvaced is Stabilized if both the Infected and their CivEvacing Trooper are totally inside a Stabilization Zone. Mark which player Stabilized the Infected with a Player A or B Token.",
+                "An Infected already Stabilized by one player cannot be Stabilized by the other, including by a Stabilization Zone."
+              ]
+            },
+            {
+              "id": "stabilize-infected",
+              "name": "Stabilize Infected (Short Skill)",
+              "paragraphs": [
+                "Only a Trooper with Doctor, Paramedic or Specialist Operative may use this Attack, Scenario Short Skill while in Silhouette contact with an Infected or an allied Trooper CivEvacing one.",
+                "Make a Normal WIP Roll to Stabilize an Infected. On success, mark it with the player's Token. Failed Rolls can be retried using additional Short Skills; an Infected already Stabilized by the opponent cannot be Stabilized again."
+              ]
+            },
+            {
+              "id": "scan-infected",
+              "name": "Scan Infected (Short Skill)",
+              "paragraphs": [
+                "Only a Trooper with Doctor, Paramedic or Specialist Operative may Scan an Infected or Stabilized Infected that is within the Trooper's Line of Fire and Zone of Control, regardless of whether it is being CivEvaced.",
+                "Declare an Attack, Scenario Short Skill and make a Normal WIP Roll. Failed Rolls may be retried with further Short Skills. Each player may Scan any given Infected only once; the other player can independently Scan the same Infected."
+              ]
+            },
+            {
+              "id": "doctor-paramedic-bonus",
+              "name": "Doctor and Paramedic Bonus",
+              "paragraphs": [
+                "Troopers with Doctor or Paramedic receive +1SD to the WIP Rolls required to Stabilize, Scan or perform CivEvac on an Infected. The source does not grant this bonus to Specialist Operatives without one of those Skills."
+              ]
+            },
+            {
+              "id": "secure-infected",
+              "name": "Secure Infected",
+              "paragraphs": [
+                "At game end, an Infected that you Stabilized or that one of your Troopers is CivEvacing is Secured if its Zone of Control contains no enemy Trooper in a non-Null State."
+              ]
+            },
+            {
+              "id": "no-hvt-classified",
+              "name": "No HVT or Classified Deck",
+              "paragraphs": [
+                "No player deploys an HVT. The HVT Model and Secure HVT rules do not apply; the Classified Deck is not used and this scenario has no Classified Objectives."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            },
+            {
+              "id": "retreat",
+              "checkAt": "tactical-phase",
+              "finishAt": "end-of-player-turn",
+              "condition": {
+                "kind": "reviewed-prose",
+                "text": "If a player begins an Active Turn in Retreat!, the game ends at the end of that Player Turn."
+              }
+            }
+          ],
+          "sourceIssues": [
+            {
+              "id": "infected-placement-distance-bilingual",
+              "status": "needs-verification",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "secure-infected",
+              "description": "EN p.84 uses minimum [[distance:4:inch]] outside the enemy Deployment Zone and [[distance:8:inch]] between Infected; ES p.84 prints [[distance:10:cm]] and [[distance:20:cm]]. The metric values differ slightly from exact inch conversions, so both are disclosed rather than silently unified."
+            }
+          ]
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Outbreak",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "quarter-circle",
+                  "style": "deployment-a",
+                  "corner": "top-right",
+                  "radius": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "quarter-circle",
+                  "style": "deployment-b",
+                  "corner": "bottom-left",
+                  "radius": 12
+                },
+                {
+                  "id": "table-diagonal",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 32
+                },
+                {
+                  "id": "alpha-infected",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 12,
+                  "y": 16
+                },
+                {
+                  "id": "alpha-infected-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 12,
+                  "y": 14.2,
+                  "text": "Alpha Infected"
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 18,
+                  "y": 4,
+                  "text": "Deployment\nZone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 6,
+                  "y": 28,
+                  "text": "Deployment\nZone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-radius",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 30.9,
+                  "x2": 12,
+                  "y2": 30.9,
+                  "offset": 0
+                },
+                {
+                  "id": "alpha-center-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 16,
+                  "x2": 12,
+                  "y2": 16,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Outbreak",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "quarter-circle",
+                  "style": "deployment-a",
+                  "corner": "top-right",
+                  "radius": 20
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "quarter-circle",
+                  "style": "deployment-b",
+                  "corner": "bottom-left",
+                  "radius": 20
+                },
+                {
+                  "id": "table-diagonal",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 32,
+                  "y2": 48
+                },
+                {
+                  "id": "alpha-infected",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 16,
+                  "y": 24
+                },
+                {
+                  "id": "alpha-infected-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 16,
+                  "y": 22.2,
+                  "text": "Alpha Infected"
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 22,
+                  "y": 6.666666666666667,
+                  "text": "Deployment\nZone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 10,
+                  "y": 41.333333333333336,
+                  "text": "Deployment\nZone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-radius",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 46.9,
+                  "x2": 20,
+                  "y2": 46.9,
+                  "offset": 0
+                },
+                {
+                  "id": "alpha-center-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 16,
+                  "y2": 24,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Outbreak",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "quarter-circle",
+                  "style": "deployment-a",
+                  "corner": "top-right",
+                  "radius": 24
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "quarter-circle",
+                  "style": "deployment-b",
+                  "corner": "bottom-left",
+                  "radius": 24
+                },
+                {
+                  "id": "table-diagonal",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 48,
+                  "y2": 48
+                },
+                {
+                  "id": "alpha-infected",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "civilian",
+                  "x": 24,
+                  "y": 24
+                },
+                {
+                  "id": "alpha-infected-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 24,
+                  "y": 22.2,
+                  "text": "Alpha Infected"
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 36,
+                  "y": 8,
+                  "text": "Deployment\nZone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 12,
+                  "y": 40,
+                  "text": "Deployment\nZone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-radius",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 46.9,
+                  "x2": 24,
+                  "y2": 46.9,
+                  "offset": 0
+                },
+                {
+                  "id": "alpha-center-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 24,
+                  "y2": 24,
+                  "offset": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 83,
+          "section": "Outbreak"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 84,
+          "section": "Outbreak"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 85,
+          "section": "Outbreak"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 86,
+          "section": "Outbreak"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 87,
+          "section": "Outbreak"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 83,
+          "section": "Estallido"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 84,
+          "section": "Estallido"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 85,
+          "section": "Estallido"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 86,
+          "section": "Estallido"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 87,
+          "section": "Estallido"
         }
       ],
       "review": {

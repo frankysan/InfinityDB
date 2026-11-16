@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (eighteen reviewed hotfix missions).
+`its-18@2026.09.11` (nineteen reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Eighteen missions are published with independent revision selection:
+Nineteen missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -219,8 +219,23 @@ Eighteen missions are published with independent revision selection:
   Three bilingual differences remain explicit: targeting restrictions,
   ADS CC MODs, and capture disqualification when contacting enemy
   Models (EN pp. 53–58; ES pp. 52–57).
+- **Outbreak:** Five Infected Civilians, including one fixed Alpha Infected
+  at table center. Each player places two other Infected in the opposing
+  half before deployment and one Circular Template Stabilization Zone
+  inside their own Deployment Zone. Their exact player-selected
+  positions are not invented on the map. Three corner-quarter-circle
+  configurations cover all six game sizes; Side A is top-right, Side B
+  bottom-left, with radii of 12, 20 or 24 inches. Scoring: up to 3 OP
+  from Scans, 2 OP for Stabilizing more Infected, 2 OP for CivEvacing
+  more Stabilized Infected, 2 OP for CivEvacing the Stabilized Alpha,
+  and 1 OP for Securing an Infected. There are no Classified Objectives.
+  The rules include ownership of Stabilization, per-player Scan limits,
+  end-of-turn zones, the Doctor/Paramedic +1SD bonus, CivEvac, HVT
+  exclusion and both mission endings. English 4-/8-inch versus Spanish
+  10-/20-cm minimum placement distances are preserved as a bilingual
+  source issue (EN/ES pp. 83–87).
 
-All eighteen missions share the existing geometry parser, model and SVG
+All nineteen missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of

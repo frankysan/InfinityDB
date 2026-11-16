@@ -1640,6 +1640,105 @@ def test_corporate_appropriation_invalid_geometry_or_scoring_fails_closed(
     with pytest.raises(ScenarioDefinitionError):
         parse_scenario_definition_record(record)
 
+
+def test_outbreak_corner_deployment_alpha_and_player_placed_infected() -> None:
+    record = _records()["scenario:outbreak"]
+    mission, configurations = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *(("its-season-18-en-pdf", p) for p in range(83, 88)),
+        *(("its-season-18-es-pdf", p) for p in range(83, 88)),
+    ]
+    assert {o["id"]: o["maximumPoints"] for o in mission["objectives"]} == {
+        "scan-infected": 3, "stabilize-more-infected": 2,
+        "civevac-more-stabilized": 2, "civevac-stabilized-alpha": 2,
+        "secure-infected": 1,
+    }
+    assert sum(o["maximumPoints"] for o in mission["objectives"]) == 10
+    assert all(o["timing"] == "end-of-game" for o in mission["objectives"])
+    assert mission["objectives"][0]["aggregation"] == "cumulative"
+    assert mission["objectives"][0]["awards"][0]["objectivePoints"] == 1
+    assert len(mission["objectives"]) == 5  # No Classified objectives
+    assert [e["id"] for e in mission["endConditions"]] == ["round-limit", "retreat"]
+    rules = {r["id"]: " ".join(r["paragraphs"]) for r in mission["rules"]}
+    assert "Five Infected Civilians" in rules["infected-placement"]
+    assert "Alpha Infected is fixed at the table center" in rules["infected-placement"]
+    assert "[[distance:4:inch]]" in rules["infected-placement"]
+    assert "[[distance:8:inch]]" in rules["infected-placement"]
+    assert "[[distance:10:cm]]" in rules["infected-placement"]
+    assert "[[distance:20:cm]]" in rules["infected-placement"]
+    assert "at most one Infected" in rules["infected-placement"]
+    assert "one placed by each player" in rules["stabilization-zones"]
+    assert "After placing the Infected" in rules["stabilization-zones"]
+    assert "end of each Player Turn" in rules["stabilization-zones"]
+    assert "cannot be Stabilized by the other" in rules["stabilization-zones"]
+    assert "Normal WIP Roll" in rules["stabilize-infected"]
+    assert "Line of Fire and Zone of Control" in rules["scan-infected"]
+    assert "only once" in rules["scan-infected"]
+    assert "+1SD" in rules["doctor-paramedic-bonus"]
+    assert "no enemy Trooper in a non-Null State" in rules["secure-infected"]
+    assert "no Classified Objectives" in rules["no-hvt-classified"]
+    assert {e["id"] for e in mission["sourceIssues"]} == {
+        "infected-placement-distance-bilingual",
+    }
+    assert mission["sourceIssues"][0]["status"] == "needs-verification"
+    for configuration, width, height, radius in (
+        ("150-points", 24, 32, 12),
+        ("200-250-points", 32, 48, 20),
+        ("300-400-points", 48, 48, 24),
+    ):
+        geometry = configurations[configuration]
+        elements = {el["id"]: el for el in geometry["elements"]}
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        assert {elements[key]["corner"] for key in ("deployment-a", "deployment-b")} == {
+            "top-right", "bottom-left",
+        }
+        assert {elements[key]["radius"] for key in ("deployment-a", "deployment-b")} == {
+            radius,
+        }
+        assert {el["id"] for el in elements.values() if el["kind"] == "marker"} == {
+            "alpha-infected",
+        }
+        assert elements["alpha-infected"]["markerType"] == "civilian"
+        assert (elements["alpha-infected"]["x"], elements["alpha-infected"]["y"]) == (
+            width / 2, height / 2,
+        )
+        assert not any(el["kind"] == "circle" for el in elements.values())
+        rulers = {a["id"]: a for a in geometry["annotations"]}
+        assert rulers["deployment-b-radius"]["x2"] == radius
+        assert rulers["alpha-center-from-left"]["x2"] == width / 2
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
+            assert svg.count('data-region-shape="quarter-circle"') == 2
+            assert svg.count('data-marker-type="civilian" data-physical-size="unspecified"') == 1
+            assert f'data-distance-inches="{radius:g}"' in svg
+            assert f'data-distance-inches="{width / 2:g}"' in svg
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ("missing-deployment", "invalid-radius", "off-table-alpha", "excess-scan-award"),
+)
+def test_outbreak_invalid_geometry_or_scoring_fails_closed(mutation: str) -> None:
+    record = deepcopy(_records()["scenario:outbreak"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    if mutation == "missing-deployment":
+        geometry["elements"] = [e for e in geometry["elements"]
+                                if e["id"] != "deployment-b"]
+    elif mutation == "invalid-radius":
+        next(e for e in geometry["elements"] if e["id"] == "deployment-b")[
+            "radius"
+        ] = -1
+    elif mutation == "off-table-alpha":
+        next(e for e in geometry["elements"] if e["id"] == "alpha-infected")[
+            "x"
+        ] = 100
+    else:
+        record["facts"]["mission"]["objectives"][0]["awards"][0][
+            "objectivePoints"
+        ] = 4
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

@@ -55,7 +55,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
             "b-pong", "akial-interference", "evacuation", "neutralization",
             "provisioning", "area-of-interest", "data-harvest", "last-launch",
-            "corporate-appropriation",
+            "corporate-appropriation", "outbreak",
         ]),
     ):
         status, _, payload = _json(
@@ -73,7 +73,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 18
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 19
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -890,6 +890,69 @@ def test_corporate_appropriation_prototype_panoply_six_sizes_and_revision_isolat
 
     assert _json(
         app, "/api/scenarios/corporate-appropriation?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+def test_outbreak_alpha_stabilization_six_sizes_and_revision_isolation(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:outbreak", "2026.09.01",
+    )) is None
+    for points, width, height, radius in (
+        (150, 24, 32, 12), (200, 32, 48, 20), (250, 32, 48, 20),
+        (300, 48, 48, 24), (350, 48, 48, 24), (400, 48, 48, 24),
+    ):
+        uri = (
+            f"/api/scenarios/outbreak?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == points // 50
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {el["id"]: el for el in geometry["elements"]}
+        assert elements["deployment-a"]["corner"] == "top-right"
+        assert elements["deployment-b"]["corner"] == "bottom-left"
+        assert elements["deployment-a"]["radius"] == radius
+        assert elements["deployment-b"]["radius"] == radius
+        assert {e["id"] for e in elements.values() if e["kind"] == "marker"} == {
+            "alpha-infected",
+        }
+        assert elements["alpha-infected"]["markerType"] == "civilian"
+        assert (elements["alpha-infected"]["x"], elements["alpha-infected"]["y"]) == (
+            width / 2, height / 2,
+        )
+        assert {m["marker_type"]: (m["count"], m["diameter_mm"])
+                for m in item["placement"]["marker_dimensions"]} == {
+            "civilian": (1, None),
+        }
+        assert [c["page"] for c in item["citations"]] == [
+            *range(83, 88), *range(83, 88),
+        ]
+        assert {o["id"]: o["maximumPoints"] for o in item["objectives"]} == {
+            "scan-infected": 3, "stabilize-more-infected": 2,
+            "civevac-more-stabilized": 2, "civevac-stabilized-alpha": 2,
+            "secure-infected": 1,
+        }
+        assert len(item["source_issues"]) == 1
+        svg_uri = uri.replace(
+            "/api/scenarios/outbreak?", "/api/scenarios/outbreak/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
+        assert svg_status == 200
+        assert svg.count(b'data-region-shape="quarter-circle"') == 2
+        assert svg.count(b'data-marker-type="civilian" data-physical-size="unspecified"') == 1
+        assert f'data-distance-inches="{radius:g}"'.encode() in svg
+        assert f'data-distance-inches="{width / 2:g}"'.encode() in svg
+
+    assert _json(
+        app, "/api/scenarios/outbreak?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 
