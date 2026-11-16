@@ -72,7 +72,7 @@ if hasattr(os, "geteuid") and os.geteuid() == 0:
 data_dir = Path("/app/data")
 report = validate_database_set(data_dir, require_complete=True)
 if set(report["sha256"]) != COMPLETE_RUNTIME_FILES:
-    raise SystemExit("Image is missing one of the three required runtime databases")
+    raise SystemExit("Image is missing a required runtime database")
 rules = RulesDatabase(data_dir / "rules_n5.db")
 rules.validate()
 restrictions = rules.restrictions_payload()

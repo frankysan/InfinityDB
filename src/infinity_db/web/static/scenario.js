@@ -25,6 +25,7 @@ const summaryController = new AbortController();
 let detailController = null;
 let summary = null;
 let selectedPlayContext = "";
+let selectedMainObjectiveSet = "";
 const slug = decodeURIComponent(window.location.pathname.split("/").filter(Boolean).at(-1) || "");
 const initialShare = readShareState("scenario");
 const selectedPublication = {
@@ -304,10 +305,81 @@ function objectiveCard(objective) {
 }
 
 function objectivesSection(item) {
-  const grid = document.createElement("div");
-  grid.className = "scenario-objective-grid";
-  grid.append(...(item.objectives || []).map(objectiveCard));
-  return section("Objectives", grid);
+  const objectives = item.objectives || [];
+  const selection = item.objective_selection;
+  if (!selection) {
+    const grid = document.createElement("div");
+    grid.className = "scenario-objective-grid";
+    grid.append(...objectives.map(objectiveCard));
+    return section("Objectives", grid);
+  }
+
+  const wrapper = section("Objectives");
+  const explanation = document.createElement("p");
+  explanation.className = "detail-copy";
+  explanation.textContent = "Each player chooses a different Main Objective. "
+    + "The player who chose Deployment selects first, when choosing Deployment; "
+    + "the opponent then chooses one of the remaining sets. "
+    + "Secondary and Classified Objectives apply regardless of the selected set.";
+  wrapper.append(explanation);
+
+  const label = document.createElement("label");
+  label.className = "scenario-objective-choice";
+  label.textContent = "View Main Objective ";
+  const select = document.createElement("select");
+  select.id = "scenario-main-objective-set";
+  const all = document.createElement("option");
+  all.value = "";
+  all.textContent = "Compare all three sets";
+  select.append(all);
+  for (const group of selection.sets) {
+    const option = document.createElement("option");
+    option.value = group.id;
+    option.textContent = group.name;
+    select.append(option);
+  }
+  select.value = selection.sets.some((group) => group.id === selectedMainObjectiveSet)
+    ? selectedMainObjectiveSet : "";
+  label.append(select);
+  wrapper.append(label);
+
+  const byId = new Map(objectives.map((objective) => [objective.id, objective]));
+  const selectedIds = new Set(selection.sets.flatMap((group) => group.objectiveIds));
+  const mainGroups = document.createElement("div");
+  mainGroups.className = "scenario-objective-sets";
+  for (const group of selection.sets) {
+    const region = document.createElement("section");
+    region.className = "scenario-objective-set";
+    region.dataset.objectiveSet = group.id;
+    const heading = document.createElement("h3");
+    heading.textContent = group.name;
+    const grid = document.createElement("div");
+    grid.className = "scenario-objective-grid";
+    grid.append(...group.objectiveIds.map((id) => objectiveCard(byId.get(id))));
+    region.append(heading, grid);
+    mainGroups.append(region);
+  }
+  const updateGroups = () => {
+    selectedMainObjectiveSet = select.value;
+    for (const region of mainGroups.children) {
+      region.hidden = !!select.value && region.dataset.objectiveSet !== select.value;
+    }
+  };
+  select.addEventListener("change", updateGroups);
+  updateGroups();
+  wrapper.append(mainGroups);
+
+  const other = objectives.filter((objective) => !selectedIds.has(objective.id));
+  if (other.length) {
+    const heading = document.createElement("h3");
+    heading.className = "scenario-secondary-heading";
+    heading.textContent = "Secondary and Classified Objectives";
+    const grid = document.createElement("div");
+    grid.className = "scenario-objective-grid";
+    grid.append(...other.map(objectiveCard));
+    wrapper.append(heading, grid);
+  }
+  return wrapper;
 }
 
 function inlineScenarioRuleArticle(inclusion) {

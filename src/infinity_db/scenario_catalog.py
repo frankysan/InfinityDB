@@ -123,15 +123,16 @@ class ScenarioCatalog:
         self.publication_registry = publication_registry
         self._records_cache: list[tuple[dict[str, Any], dict[str, Any]]] | None = None
 
-    def _marker_size_source(self) -> dict[str, Any]:
+    def _marker_size_source(self, revision: str | None = None) -> dict[str, Any]:
         """Source attribution for shared marker sizes, not mission ownership."""
         if self.publication_registry is not None:
             citation = self.publication_registry.source_citation(
                 season_id="its-18", source_id="its-season-18-en-pdf", page=17,
+                revision=revision,
             )
             if citation is not None:
                 return citation
-            if self.publication_registry.has_season("its-18", "2026.09.01"):
+            if self.publication_registry.has_season("its-18", revision or "2026.09.01"):
                 raise ValueError("Registered ITS 18 marker size source is unavailable")
         # Isolated Rules-only research fixtures (or a future set without ITS 18)
         # retain the pinned external measurement provenance.
@@ -358,10 +359,16 @@ class ScenarioCatalog:
                 "configuration_army_points": deepcopy(configuration_points),
                 "geometry": deepcopy(configuration["geometry"]),
                 "marker_dimensions": _marker_dimensions(
-                    configuration["geometry"], self._marker_size_source(),
+                    configuration["geometry"],
+                    self._marker_size_source(
+                        str(publication["revision"])
+                        if publication["collection"] == "its-18" else None
+                    ),
                 ),
             },
             "objectives": objectives,
+            **({"objective_selection": deepcopy(mission["objectiveSelection"])}
+               if "objectiveSelection" in mission else {}),
             "special_rules": special_rules,
             "skills": deepcopy(reference["skills"]),
             "end_conditions": deepcopy(mission["endConditions"]),

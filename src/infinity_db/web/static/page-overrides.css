@@ -1090,6 +1090,45 @@ svg.scenario-map .label {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
 }
 
+.scenario-objective-choice {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  margin: 12px 0 20px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.scenario-objective-choice select {
+  width: min(100%, 320px);
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
+  font: inherit;
+}
+
+.scenario-objective-sets {
+  display: grid;
+  gap: 20px;
+}
+
+.scenario-objective-set[hidden] {
+  display: none;
+}
+
+.scenario-objective-set > h3,
+.scenario-secondary-heading {
+  margin: 0 0 10px;
+  font-size: var(--font-size-base);
+}
+
+.scenario-secondary-heading {
+  margin-top: 24px;
+}
+
 .scenario-objective > .surface-titlebar h3 {
   margin: 0;
   font-size: var(--font-size-base);

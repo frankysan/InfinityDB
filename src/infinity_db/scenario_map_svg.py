@@ -56,9 +56,6 @@ stroke:var(--color-scenario-map-deployment-a-edge,#2563eb);stroke-width:.09}
 stroke:var(--color-scenario-map-deployment-b-edge,#dc2626);stroke-width:.09}
 .scoring{fill:var(--color-scenario-map-scoring,#e5e7eb);fill-opacity:.65;
 stroke:var(--color-scenario-map-scoring-edge,#6b7280);stroke-width:.07}
-.exclusion{fill:var(--color-scenario-map-scoring,#e5e7eb);fill-opacity:.25;
-stroke:var(--color-scenario-map-scoring-edge,#6b7280);stroke-width:.07;
-stroke-dasharray:.35 .2}
 .objective{fill:var(--color-scenario-map-marker,#fffefa);
 stroke:var(--color-scenario-map-outline,#203b35);stroke-width:.1}
 .guide{fill:none;stroke:var(--color-scenario-map-guide,#65716b);
@@ -71,6 +68,13 @@ font-family:sans-serif;font-size:var(--scenario-map-measure-size,1.1px);font-wei
 paint-order:stroke;stroke:var(--color-scenario-map-text-halo,#fffefa);stroke-width:.055;stroke-linejoin:round}
 .label{fill:var(--color-scenario-map-text,#203b35);
 font-family:sans-serif;font-size:var(--scenario-map-label-size,1.4px);font-weight:600}
+"""
+
+# Optional ITS-only styling is omitted from historical Core and Battleground
+# SVGs to preserve their frozen byte-level publication identity.
+_EXCLUSION_CSS = """.exclusion{fill:var(--color-scenario-map-scoring,#e5e7eb);fill-opacity:.25;
+stroke:var(--color-scenario-map-scoring-edge,#6b7280);stroke-width:.07;
+stroke-dasharray:.35 .2}
 """
 
 
@@ -459,6 +463,10 @@ def render_scenario_map_svg(
     )
     if annotations:
         annotations += "\n"
+    extra_style = (
+        _EXCLUSION_CSS
+        if any(element.style == "exclusion" for element in geometry.elements) else ""
+    )
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
@@ -468,7 +476,7 @@ def render_scenario_map_svg(
         f'--scenario-map-measure-size:{_number(1.1 * text_scale)}px;'
         f'{_theme_style(theme)}">\n'
         f'<title id="map-title">{title}</title>\n'
-        f'<style>{_STYLE_CSS}</style>\n'
+        f'<style>{_STYLE_CSS}{extra_style}</style>\n'
         f'<rect class="table" x="0" y="0" width="{width}" height="{height}"/>\n'
         f"{elements}"
         f"{annotations}"

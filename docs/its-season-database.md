@@ -2,7 +2,8 @@
 
 **Project domain:** Data processing
 
-Schema v2 participates in the complete three-file build and serving set.
+Schema v2 participates in the complete four-file build and serving set: Army,
+Rules, and two separately selected ITS Season 18 revisions.
 This page owns the ITS database format, selection and build contract;
 release acceptance belongs in [releasing](releasing.md).
 
@@ -31,13 +32,15 @@ developer entry point in `tools/data/build_its_season.py`.
   These are source-cited event policies, **not** new N5 core Rule definitions.
   There is no ITS-authored FAQ publication in the curated set.
 
-### Staged 2026.09.11 hotfix curation (not yet served)
+### Published 2026.09.11 hotfix curation
 
 The independent curated input
-`data/curated/its/n5-its-season-18-2026.09.11.json` retains the existing
-`2026.09.01` collection unchanged. It is not included by the production Rules
-curation scan or the selected `its_18.db` build. The current player-facing
-revision therefore remains `its-18@2026.09.01`.
+`data/curated/its/n5-its-season-18-2026.09.11.json` is published
+into `its_18_2026.09.11.db`. The original `2026.09.01` input and
+`its_18.db` remain unchanged in mission semantics and independently selectable.
+The Rules exporter imports neither ITS-owned source. The public scenario selector
+lists `its-18@2026.09.01` (historical Battleground) and
+`its-18@2026.09.11` (five reviewed hotfix missions).
 
 The staged source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -56,8 +59,8 @@ Five missions are currently authored for isolated validation:
   Influence, 4-inch central Exclusion Zone and typed, mutually exclusive
   Main Objective sets (Encryption, Sabotage and Secure Vector). The
   hotfix's selection timing, Antenna damage ceiling and Engineer/GizmoKit
-  permission are preserved (EN/ES pp. 72–77). The player-facing
-  choice controls remain a publication requirement.
+  permission are preserved (EN/ES pp. 72–77). The player-facing viewer
+  separates the alternative sets from Secondary and Classified scoring.
 - **The Dig:** Opposite corner quarter-circle Deployment Zones, three
   diagonal Consoles, six player-placed Hyperthermal Tech Tokens, typed
   scoring, Operational Learning and classified context. The 150-point
@@ -87,11 +90,11 @@ references 27 (Spec-Ops), 28 (Reinforcements), and 29 (TEAM-OPS).
 `tests/test_its_hotfix_scenarios.py` exercises both source revisions,
 the staged database, scenario geometry, scoring bands, issue retention,
 source citations and policy rebasing. The three new mission definitions
-also have focused source-version, geometry and semantic tests. Promotion
-to the serving set still requires multi-revision registration, verifying
-the visual maps against their pinned diagrams, and player-facing choice
-presentation for Double Bind; no historical or tournament context is
-silently replaced.
+also have focused source-version, geometry and semantic tests. The published
+revision-aware registry, exact selectors, and Double Bind set selection have
+separate API/browser tests. Visual comparison of all new rendered maps with
+their pinned source diagrams remains a release-acceptance check; no historical
+or tournament context is silently replaced.
 
 ## Schema v2 and read contract
 
@@ -153,7 +156,8 @@ From the repository root, with the project virtual environment:
 The standalone developer tool still defaults to the ignored
 `local/work/its/its_18.db` and cannot overwrite the tracked runtime artifact.
 Use `infinity-db build --compact` to regenerate the complete
-`army.db` / `rules_n5.db` / `its_18.db` set. The builder first validates
+`army.db` / `rules_n5.db` / `its_18.db` /
+`its_18_2026.09.11.db` set. The builder first validates
 all three outputs and their cross-publication references, then replaces the
 selected files. A changed or invalid source before replacement preserves
 the previous outputs. Identical builds produce byte-identical SQLite data.
@@ -180,8 +184,10 @@ manifest exposes publication identity and SHA, not physical paths.
 
 `ScenarioCatalog` uses the registry for ITS-owned publications, while
 N5 core missions continue to use Rules. The complete-set factory registers
-`its-18` from the selected `its_18.db` and validates the full three-file
-set. Both local `serve` and production WSGI/Docker use this same factory;
+`its-18` from `its_18.db` and `its-18@2026.09.11` from
+`its_18_2026.09.11.db`, validates the four-file set, and resolves
+both through exact `(season, revision)` selection. The version-qualified
+internal registration key never leaks into public collection identifiers. Both local `serve` and production WSGI/Docker use this same factory;
 the runtime cache fingerprint includes all three exact file hashes.
 The HTTP API retains its existing collection/revision selectors; unknown
 seasons/revisions never fall back to core. The internal explicit
@@ -200,17 +206,18 @@ by their registered season and revision, not by slug alone. An absent or
 mismatched owner, missing N5 target, stale revision, unregistered source
 or altered source/geometry fails closed.
 
-**The production release is still intentionally three files:**
-`army.db`, `rules_n5.db`, `its_18.db`. It does not autodiscover
-additional files in the selected directory. Adding an actual future season
-requires its own reviewed source, explicit release registration, recorded
-build input and packaging; the synthetic test database is never published.
+**The production release intentionally uses four files:**
+`army.db`, `rules_n5.db`, `its_18.db` and
+`its_18_2026.09.11.db`. The selected set does not autodiscover
+additional files. Adding another season or revision requires its own
+reviewed source, explicit registration, recorded build input and packaging;
+the synthetic ITS 17 test database is never published.
 
 ## Migration boundary
 
 The Rules exporter excludes ITS-owned curated collections, so Battleground
 and its scenario membership now exist in `its_18.db` only. The selected
-three-file runtime resolves its publication through the registry. A pinned
+four-file runtime resolves both season revisions through the registry. A pinned
 pre-cutover digest independently guards six Battleground JSON payloads and
 24 SVG maps; the isolated ITS reader remains comparable to the real HTTP
 response without retaining a second Rules-owned record. N5 scenario facts,
@@ -238,7 +245,7 @@ reused scenario ID, while rules-wide N5 FAQ applies to a valid selected
 season. Exact season/revision/mission selection fails closed when unregistered.
 No ITS-authored FAQ is inferred. Changing maintained `src/` or curated files
 changes the complete build fingerprint;
-regenerate the three-file release set before source-bound deployment
+regenerate the four-file release set before source-bound deployment
 checks or merge.
 
 For the ownership and scope exceptions (Spec-Ops, TEAM-OPS,

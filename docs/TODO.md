@@ -332,14 +332,14 @@ scenario maps and their relevant context. Preserve the existing Battleground
 pilot and historical revision identities. Season 17 and Season 16 Part II
 remain later scope; do not claim complete Season 18 coverage before it is verified.
 
-**Curated 2026.09.11 hotfix work (2026-11-16):** The isolated collection
-now contains Battleground, Annihilation, Crossing Lines, Double Bind and
-The Dig, with bilingual source pins, typed objectives, updated hotfix clauses
-and shared-map geometries for each game size. Double Bind retains its
-exclusive Main Objective choice as typed data. The 2026.09.01 runtime
-remains authoritative; additional missions, multi-revision serving,
-player-facing objective-choice UI and final visual-map acceptance remain
-open. See [ITS season database](its-season-database.md#staged-20260911-hotfix-curation-not-yet-served).
+**Curated and published 2026.09.11 hotfix work (2026-11-16):** Both the
+historical 2026.09.01 Battleground and the September hotfix with Battleground,
+Annihilation, Crossing Lines, Double Bind and The Dig now have distinct
+selected database revisions. The browser exposes exact-revision selection,
+typed objectives, game-size maps and Double Bind's exclusive Main Objective
+choices. Additional Season 18 missions and final source-diagram visual
+acceptance remain open. See
+[ITS season database](its-season-database.md#published-20260911-hotfix-curation).
 
 - [ ] Build a versioned ITS reference library from material under
   `local/data/pdf/its/` and `local/data/pdf/legacy/`, keeping the current season distinct

@@ -194,12 +194,11 @@ def build_manifest(
             load_curated_directory(project_root / "data/curated/rules"),
             generated / "rules_n5.db",
         )
+        from infinity_db.database_set import SEASON_DATABASE_SOURCES
         from infinity_db.its_season_database import build_its_database
 
-        build_its_database(
-            project_root / "data/curated/rules/n5-its-season-18-2026.09.01.json",
-            generated / "its_18.db",
-        )
+        for filename, source in SEASON_DATABASE_SOURCES.values():
+            build_its_database(project_root / source, generated / filename)
         fixture_files = sorted(path for path in fixture.rglob("*") if path.is_file())
         snapshot = create_timestamped_archive(
             fixture_files,
@@ -219,7 +218,7 @@ def build_manifest(
                 "normalized-validation.json",
                 "normalized.json",
                 "rules_n5.db",
-                "its_18.db",
+                *(filename for filename, _ in SEASON_DATABASE_SOURCES.values()),
             )
         }
         artifacts["archives/snapshot.zip"] = sha256_file(snapshot)
@@ -246,7 +245,9 @@ def build_manifest(
             diagnostics = {
                 "sqlite": {
                     name: _sqlite_diagnostics(generated / name)
-                    for name in ("army.db", "rules_n5.db", "its_18.db")
+                    for name in ("army.db", "rules_n5.db", *(
+                        filename for filename, _ in SEASON_DATABASE_SOURCES.values()
+                    ))
                 },
                 "archives": {
                     "snapshot.zip": _zip_diagnostics(snapshot),

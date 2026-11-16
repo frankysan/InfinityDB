@@ -154,12 +154,15 @@ the retired source roots.
 - `curated/snapshot-notes/` — source-controlled, human-authored descriptions,
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
-- `generated/` — the three tracked runtime databases: `army.db`
+- `generated/` — four tracked runtime databases: `army.db`
   (Army v31/compatibility 40), `rules_n5.db` (Rules v17), and
-  `its_18.db` (ITS v2). Exact variants, reviewed Weapon citations,
+  `its_18.db` (ITS v2, September 1) alongside
+  `its_18_2026.09.11.db` (ITS v2, September hotfix). Exact variants,
+  reviewed Weapon citations,
   deployed objects, Restrictions, and symbol mappings remain embedded in
-  Army/Rules. The ITS database owns Season 18 Battleground and scoped
-  tournament/Extra policies; it is selected by exact season and revision.
+  Army/Rules. The historical ITS database retains Battleground, while the
+  hotfix database adds five reviewed missions. Each stores independently
+  versioned tournament/Extra policies, selected by exact season and revision.
   See [ITS season database](../docs/its-season-database.md).
   The old filenames and required JSON publications are retired.
 
@@ -203,7 +206,7 @@ repositories now create new ZIPs and provenance in their **own** ignored
 can use `tools.data.import_acquisition_snapshot` for verified ZIP/manifest
 pairs. Four Syncthing sender source paths use `local/data/` while Linux
 staging roots and the optional image-overrides sender remain unchanged.
-The deployed three-file runtime set is unaffected. Current
+The published runtime set is unaffected by those historical acquisition migrations. Current
 symbol-publication pins and other maintained inputs must still match.
 
 Default output is `data/generated/`; `--db-dir PATH` selects a
@@ -220,7 +223,7 @@ Army v27–v31 overlays use the same verified normalized source without opening
 or updating the temporary raw SQLite sibling. The standalone export and
 raw-pair inspection interfaces remain supported.
 The builder validates all
-three runtime databases, cross-domain references and source/build provenance,
+four runtime databases, cross-domain references and source/build provenance,
 checks that its inputs remain unchanged, then replaces the selected set and
 discards intermediates.
 Generation/validation failure before replacement preserves destination bytes.
@@ -232,7 +235,7 @@ Normal serving opens only that completed directory. Precedence is explicit
 to the working directory. WSGI requires the environment setting. The retired
 individual-database variables are rejected. There is no automatic checkout
 bundle selection or older-file fallback. Docker copies the same tracked
-three-file set into its image. The cache revision hashes sorted active filenames and
+four-file set into its image. The cache revision hashes sorted active filenames and
 their exact file hashes.
 
 `infinity-army build --output-dir PATH` retains the source JSON pipeline;
@@ -250,8 +253,9 @@ exist for independent development commands; they are not serving dependencies.
 
 **Selected runtime health:** `infinity-db database-health --db-dir PATH`
 validates exactly the selected directory through the shared
-`infinity_db.database_set` validator. Startup and directory health require `army.db`, `rules_n5.db`
-and `its_18.db`, Army v31 / Rules v17 / ITS v2, with matched provenance
+`infinity_db.database_set` validator. Startup and directory health require
+`army.db`, `rules_n5.db`, `its_18.db` and `its_18_2026.09.11.db`,
+Army v31 / Rules v17 / ITS v2, with matched provenance
 and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;
 they do not establish an operator-facing alternate selection contract.
@@ -290,7 +294,7 @@ transitional fixtures when explicitly requested by development code.
 the selected three-database set, without selecting environment paths or discovering
 another directory. The semantic-baseline tool's `--db-dir` exercises this factory.
 
-The current three-file runtime layout embeds Army v31 Equipment presentation
+The current four-file runtime layout embeds Army v31 Equipment presentation
 encodings, reviewed Skill source classifications, Unit filter semantics,
 Army overview text, legacy identities and symbol mappings/hashes,
 plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
@@ -943,7 +947,7 @@ request.
   --expected-current-sha256 CURRENT_SHA256 --expected-candidate-sha256 CANDIDATE_SHA256
 ```
 
-Promotion replaces graphical publication only. Rebuild the **complete three-file**
+Promotion replaces graphical publication only. Rebuild the **complete four-file**
 Army/Rules/ITS set using the accepted manifest, validate embedded hashes/mappings
 and deployment assets, then resume serving. Do not patch only the Army SQLite
 rows or serve a mixed database/publication set. The

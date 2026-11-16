@@ -2,7 +2,8 @@
 
 **Project domains:** Data processing, Web backend, Web frontend
 
-The selected runtime registers ITS 18 only. The phased P3 implementation
+The selected runtime registers two independently selected revisions of ITS 18.
+Other seasons remain unregistered. The phased P3 implementation
 and its exact-SHA acceptance results remain in Git history and
 [testing evidence](testing.md), not in this ownership contract.
 
@@ -15,7 +16,8 @@ serve as a migration checklist or release-acceptance record.
 
 The complete build loads reviewed curated Rules and ITS sources, but the
 Rules exporter accepts only N5-owned collections. ITS-authored publications
-are built independently into `its_18.db` using the same selected source
+are built independently into `its_18.db` (September 1) and
+`its_18_2026.09.11.db` (September hotfix) using the same selected source
 envelope. Their current authority is:
 
 - `n5-core-v5.3.json` — `core-rules`, `n5-core-v5.3`, effective
@@ -38,10 +40,15 @@ envelope. Their current authority is:
   objective/scoring rules and geometry. Its scenario set is
   `its-18@2026.09.01`, with source `its-season-18-en-pdf`,
   printed pages 121–123.
+- `n5-its-season-18-2026.09.11.json` — separately reviewed hotfix
+  curation, effective 2026-09-24 and selected by `its-18@2026.09.11`.
+  Contains Battleground, Annihilation, Crossing Lines, Double Bind and The
+  Dig; preserves their mission-specific scoring, geometry, citations,
+  event policies and unresolved source discrepancies.
 
-The selected `rules_n5.db` owns N5/FAQ/annex data, while
-`its_18.db` alone stores ITS Battleground and its season policies.
-Both preserve source authority, revision, citation and content digest.
+The selected `rules_n5.db` owns N5/FAQ/annex data. The two ITS databases
+own their exact authored mission/revision sets independently. A shared
+scenario slug does not merge records or replace historical citations.
 
 ## Ownership decisions
 
@@ -54,10 +61,11 @@ Both preserve source authority, revision, citation and content digest.
    FAQ authority. Scenario-specific `applicability.scenarioIds` does **not**
    change ownership. In particular, the Supplies marker-state and
    Annihilation Ancillary rulings stay N5 FAQ-owned.
-3. **ITS seasons:** `its_18.db` owns **all currently authored ITS 18** mission
-   definitions, their geometry and game-size configurations, scenario-set
-   membership, season Extras and tournament constraints, and rulings whose
-   *publishing authority* is ITS 18. Other seasons get independent ownership;
+3. **ITS seasons:** each registered ITS revision owns its own mission
+   definitions, geometry, game-size configurations, scenario membership,
+   Extras and tournament constraints. `its_18.db` preserves the
+   September 1 Battleground; `its_18_2026.09.11.db` owns five reviewed
+   hotfix missions. Other seasons get independent ownership;
    no current ITS 18 record is silently treated as timeless N5 core.
 4. **Optional/historical annexes:** The N4-origin Reinforcements reference
    remains separately qualified N5-context reference material until its
@@ -90,7 +98,7 @@ explicit context-scoped relation resolved at read time.
 - **Spec-Ops:** `n5-core-v5.3.json` now retains only the N5.3
   Special Skills, the core SpecBall procedure and its bilingual
   source discrepancy. ITS 18 official-tournament and TEAM-OPS restrictions
-  are owned by `its_18.db`, surfaced only after exact play-context selection
+  are owned by the selected ITS revision, surfaced only after exact play-context selection
   from the ITS scenario page or policy API. Their season citations no longer
   appear as if they were default N5 Skill restrictions.
 - **Reinforcements Extra:** The separate N4-origin annex cites ITS 18 page 27
@@ -105,10 +113,11 @@ explicit context-scoped relation resolved at read time.
   configurations without ITS 18 retain the pinned historical citation,
   while an incomplete registered ITS 18 source fails closed. The resulting
   marker sizes and public citation shape remain unchanged.
-- **Battleground:** `its_18.db` owns `scenario:battleground`, its full
-  definition, all 150–400 Army Point configurations, scoring, SVG geometry,
-  collection `its-18@2026.09.01`, and PDF pages 121–123. Its original
-  reviewed game semantics are preserved.
+- **Battleground:** `its_18.db` owns historical `scenario:battleground`,
+  including all 150–400 Army Point configurations, SVG geometry, scoring
+  and PDF pp. 121–123. The hotfix separately republishes the same mission
+  slug with its own revised PDF citations (pp. 129–131).
+  Neither revision substitutes for the other.
 - **Core scenarios:** The four `n5-core@5.3` missions and their reusable
   N5 component definitions remain in `rules_n5.db`. A later ITS season may
   independently publish a mission with the same typed scenario ID; do not

@@ -196,7 +196,9 @@ def smoke_wheel(wheel: Path, source: Path, work: Path, *, require_assets: bool) 
     ))], inputs)
     runtime = inputs / "runtime"
     runtime.mkdir()
-    for name in ("army.db", "rules_n5.db", "its_18.db"):
+    from infinity_db.database_set import COMPLETE_RUNTIME_FILES
+
+    for name in sorted(COMPLETE_RUNTIME_FILES):
         shutil.copyfile(source / "data/generated" / name, runtime / name)
     for mode in ("normal", "asset-free"):
         run([

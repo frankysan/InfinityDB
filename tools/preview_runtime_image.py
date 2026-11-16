@@ -11,7 +11,7 @@ import time
 import uuid
 from pathlib import Path
 
-from infinity_db.database_set import validate_database_set
+from infinity_db.database_set import COMPLETE_RUNTIME_FILES, validate_database_set
 from tools.runtime_semantic_baseline import DEFAULT_BASELINE, capture, check
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,7 +22,7 @@ from infinity_db.web import create_app_from_database_set
 from infinity_db.database_set import validate_database_set
 d = Path('/app/data')
 report = validate_database_set(d, require_complete=True)
-assert set(report['sha256']) == {'army.db', 'rules_n5.db', 'its_18.db'}
+assert set(report['sha256']) == {'army.db', 'rules_n5.db', 'its_18.db', 'its_18_2026.09.11.db'}
 assert {p.name for p in d.iterdir()} == set(report['sha256'])
 app = create_app_from_database_set(d)
 assert len(app.deployed_objects['objects']) == 17
@@ -58,7 +58,7 @@ def _copy_build_context(context: Path, selected: Path) -> None:
             shutil.copyfile(source, destination)
     output = context / "data/generated"
     output.mkdir(parents=True, exist_ok=True)
-    for name in ("army.db", "rules_n5.db", "its_18.db"):
+    for name in sorted(COMPLETE_RUNTIME_FILES):
         shutil.copyfile(selected / name, output / name)
 
 

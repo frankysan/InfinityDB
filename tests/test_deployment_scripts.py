@@ -252,9 +252,9 @@ def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     gitignore = _read(".gitignore")
     attributes = _read(".gitattributes")
 
-    # The three published databases are tracked directly, without ignore negations.
+    # The four published databases are tracked directly, without ignore negations.
     assert "data/generated/*" not in gitignore.splitlines()
-    for name in ("army.db", "rules_n5.db", "its_18.db"):
+    for name in ("army.db", "rules_n5.db", "its_18.db", "its_18_2026.09.11.db"):
         assert (ROOT / "data/generated" / name).is_file()
         assert f"data/generated/{name} binary" in attributes
 
@@ -607,10 +607,10 @@ def test_container_symbol_route_smoke_uses_embedded_database_publication() -> No
     assert "maintained_manifest_path" not in route_probe
 
 
-def test_install_and_docker_require_the_complete_three_database_set() -> None:
+def test_install_and_docker_require_the_complete_four_database_set() -> None:
     install = _read("scripts/install-or-update.sh")
     docker = _read("Dockerfile")
-    for name in ("army.db", "rules_n5.db", "its_18.db"):
+    for name in ("army.db", "rules_n5.db", "its_18.db", "its_18_2026.09.11.db"):
         assert f"prepare_tracked_release_file data/generated/{name}" in install
         assert f"[ -f data/generated/{name} ] || fail" in install
         assert f"data/generated/{name} /app/data/{name}" in docker

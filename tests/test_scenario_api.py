@@ -247,6 +247,10 @@ def test_scenario_list_api_exposes_current_publications_without_selecting_game_s
             "id": "its-18", "revision": "2026.09.01",
             "title": "ITS Season 18: Overheat", "scenario_count": 1,
         },
+        {
+            "id": "its-18", "revision": "2026.09.11",
+            "title": "ITS Season 18: Overheat", "scenario_count": 5,
+        },
     ]
     items = payload["items"]
     assert [item["slug"] for item in items] == [
@@ -926,6 +930,26 @@ def test_scenario_its_context_opt_in_never_applies_on_default_or_stale_selection
     assert "scenario ITS context selection: passed" in completed.stdout
 
 
+def test_scenario_main_objective_set_selection_keeps_secondary_scoring_visible() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable for scenario Main Objective selection")
+    root = Path(__file__).parents[1]
+    completed = subprocess.run(
+        [
+            node,
+            str(root / "tests" / "scenario_objective_harness.cjs"),
+            str(root / "src" / "infinity_db" / "web" / "static" / "scenario.js"),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert "scenario Main Objective selection: passed" in completed.stdout
+
+
 def test_scenario_grid_can_shrink_to_narrow_viewports(scenario_app: Application) -> None:
     status, _, stylesheet = request(scenario_app, "/static/page-overrides.css")
     assert status == 200
@@ -1123,6 +1147,7 @@ def test_scenario_api_accepts_explicit_collection_revision_without_implicit_its_
     assert [item["slug"] for item in season_payload["items"]] == ["battleground"]
     assert [(row["id"], row["revision"]) for row in season_payload["collections"]] == [
         ("n5-core", "5.3"), ("its-18", "2026.09.01"),
+        ("its-18", "2026.09.11"),
     ]
     for query in (
         "collection=its-17&revision=2025.09.01",

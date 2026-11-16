@@ -92,6 +92,7 @@
         "test_its_season_database",
         "test_its_hotfix_scenarios",
         "test_its_hotfix_reviewed_missions",
+        "test_its_revision_publication",
         "test_its_multiseason",
         "test_publication_registry",
         "test_interim_reference_consistency",

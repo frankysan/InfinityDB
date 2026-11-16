@@ -270,15 +270,15 @@ def test_unregistered_extra_season_does_not_extend_release_implicitly(
 
     selected = tmp_path / "selected"
     selected.mkdir()
-    for name in ("army.db", "rules_n5.db", "its_18.db"):
+    for name in database_set.COMPLETE_RUNTIME_FILES:
         shutil.copyfile(RELEASE / name, selected / name)
     shutil.copyfile(second, selected / "its_17.db")
     # An extra file is not a registration. The shipped runtime keeps its
-    # explicit three-file allowlist; adding a second season requires a new
+    # explicit four-file allowlist; adding another season requires a new
     # build manifest and explicit registration, not an opportunistic scan.
     report = validate_database_set(selected, require_complete=True)
-    assert set(report["sha256"]) == {"army.db", "rules_n5.db", "its_18.db"}
-    assert set(report["seasons"]) == {"its-18"}
+    assert set(report["sha256"]) == database_set.COMPLETE_RUNTIME_FILES
+    assert set(report["seasons"]) == {"its-18", "its-18@2026.09.11"}
     monkeypatch = pytest.MonkeyPatch()
     try:
         monkeypatch.setitem(database_set.SEASON_DATABASE_SOURCES, "its-17", (
