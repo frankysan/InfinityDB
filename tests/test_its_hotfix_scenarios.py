@@ -33,6 +33,7 @@ def test_hotfix_is_independent_and_retains_historical_source() -> None:
     assert [entry["scenarioId"] for entry in current["scenarioCollection"]["members"]] == [
         "scenario:crossing-lines", "scenario:double-bind", "scenario:the-dig",
         "scenario:annihilation", "scenario:battleground", "scenario:cutthroat",
+        "scenario:superiority",
     ]
     assert {s["id"]: s["sha256"] for s in current["sources"]} == {
         "its-season-18-en-pdf": (
@@ -51,6 +52,7 @@ def test_hotfix_annihilation_exact_score_bands_and_geometry(tmp_path: Path) -> N
     assert [item["id"] for item in report["scenarios"]] == [
         "scenario:crossing-lines", "scenario:double-bind", "scenario:the-dig",
         "scenario:annihilation", "scenario:battleground", "scenario:cutthroat",
+        "scenario:superiority",
     ]
     assert inspect_its_database(output, source=HOTFIX)["sha256"] == report["sha256"]
     assert select_its_scenario(

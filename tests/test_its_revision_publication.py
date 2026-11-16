@@ -52,7 +52,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         ("2026.09.01", ["battleground"]),
         ("2026.09.11", [
             "crossing-lines", "double-bind", "the-dig", "annihilation",
-            "battleground", "cutthroat",
+            "battleground", "cutthroat", "superiority",
         ]),
     ):
         status, _, payload = _json(
@@ -70,7 +70,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 6
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 7
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -150,6 +150,49 @@ def test_cutthroat_serves_six_game_sizes_only_in_the_hotfix_revision(two_revisio
         "&collection=its-18&revision=2026.09.01",
     )
     assert status == 404
+
+
+def test_superiority_is_published_only_in_the_hotfix_with_source_matched_maps(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:superiority", "2026.09.01",
+    )) is None
+    for points, width, depth in (
+        (150, 24, 8), (200, 32, 12), (250, 32, 12),
+        (300, 48, 12), (350, 48, 12), (400, 48, 12),
+    ):
+        uri = (
+            f"/api/scenarios/superiority?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["placement"]["geometry"]["table"]["width"] == width
+        zones = {e["id"]: e for e in item["placement"]["geometry"]["elements"]}
+        assert zones["deployment-a"]["y2"] == depth
+        assert {name for name in zones if name.startswith("console-q")} == {
+            "console-q1", "console-q2", "console-q3", "console-q4",
+        }
+        assert len(item["objectives"]) == 2
+        assert [source["page"] for source in item["citations"]] == [
+            135, 136, 137, 138, 140, 141, 142, 143,
+        ]
+        assert [issue["id"] for issue in item["source_issues"]] == [
+            "shasvastii-bilingual-zo-status",
+        ]
+        map_uri = uri.replace(
+            "/api/scenarios/superiority?", "/api/scenarios/superiority/map.svg?",
+        )
+        assert wsgi_response(app, ORIGIN + map_uri)[0] == 200
+
+    assert _json(
+        app, "/api/scenarios/superiority?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
 
 
 def test_mislabeled_revision_and_duplicate_registration_fail_closed(tmp_path: Path) -> None:

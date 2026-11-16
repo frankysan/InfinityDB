@@ -370,6 +370,113 @@ def test_cutthroat_lieutenant_objectives_killing_and_deployment_are_source_pinne
         assert f'data-distance-inches="{depth}"' in svg
 
 
+def test_superiority_four_quadrants_four_consoles_and_bilingual_special_rules() -> None:
+    record = _records()["scenario:superiority"]
+    mission, configs = _parts(record)
+    assert [(citation["sourceId"], citation["page"]) for citation in record["citations"]] == [
+        *((("its-season-18-en-pdf", page)) for page in range(135, 139)),
+        *((("its-season-18-es-pdf", page)) for page in range(140, 144)),
+    ]
+    objectives = {item["id"]: item for item in mission["objectives"]}
+    assert {id: item["maximumPoints"] for id, item in objectives.items()} == {
+        "dominate-more-quadrants": 6,
+        "hack-consoles": 4,
+    }
+    quadrants = objectives["dominate-more-quadrants"]
+    assert quadrants["timing"] == "end-of-round"
+    assert quadrants["aggregation"] == "exclusive"
+    assert quadrants["maximumPointsPerRound"] == 2
+    assert quadrants["awards"] == [{
+        "armyPoints": list(SIZES),
+        "objectivePoints": 2,
+        "condition": {
+            "kind": "dominated-region-comparison",
+            "elementIds": ["quadrant-1", "quadrant-2", "quadrant-3", "quadrant-4"],
+            "comparison": "greater",
+        },
+    }]
+    consoles = objectives["hack-consoles"]
+    assert consoles["timing"] == "end-of-game"
+    assert consoles["aggregation"] == "cumulative"
+    assert consoles["awards"] == [{
+        "armyPoints": list(SIZES),
+        "objectivePoints": 1,
+        "condition": {
+            "kind": "element-status-count",
+            "elementIds": ["console-q1", "console-q2", "console-q3", "console-q4"],
+            "status": "hacked",
+        },
+    }]
+    rules = {rule["id"]: " ".join(rule["paragraphs"]) for rule in mission["rules"]}
+    assert "more than half" in rules["quadrants-zo"]
+    assert "Proxies and Peripherals" in rules["quadrants-zo"]
+    assert "Shasvastii-Embryo" in rules["shasvastii"]
+    assert "20 Victory Points" in rules["baggage"]
+    assert "40 mm" in rules["consoles"]
+    assert "Both players then count" in rules["hack-consoles"]
+    assert "Normal WIP Roll" in rules["hack-consoles"]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert "+3 and +1SD" in rules["operational-learning"]
+    assert "resets after success" in rules["operational-learning"]
+    assert "Classified Deck" in rules["hvt-and-classified-deck"]
+    assert [item["id"] for item in mission["endConditions"]] == ["round-limit", "retreat"]
+    assert mission["endConditions"][0]["condition"] == {"kind": "round-limit", "rounds": 3}
+    assert "Retreat!" in mission["endConditions"][1]["condition"]["text"]
+    assert mission["sourceIssues"] == [{
+        "id": "shasvastii-bilingual-zo-status",
+        "armyPoints": list(SIZES),
+        "objectiveId": "dominate-more-quadrants",
+        "status": "needs-verification",
+        "description": mission["sourceIssues"][0]["description"],
+    }]
+    assert "English" in mission["sourceIssues"][0]["description"]
+    assert "Spanish" in mission["sourceIssues"][0]["description"]
+
+    for config_id, width, height, depth in (
+        ("150-points", 24, 32, 8),
+        ("200-250-points", 32, 48, 12),
+        ("300-400-points", 48, 48, 12),
+    ):
+        geometry = configs[config_id]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {element["id"]: element for element in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == {"anchor": "bottom", "offset": -depth}
+        assert len([element for element in elements.values()
+                    if element["kind"] == "marker"]) == 4
+        for index in range(1, 5):
+            quadrant = elements[f"quadrant-{index}"]
+            console = elements[f"console-q{index}"]
+            x1 = 0 if index % 2 else width / 2
+            x2 = width / 2 if index % 2 else {"anchor": "right"}
+            y1 = depth if index < 3 else height / 2
+            y2 = height / 2 if index < 3 else height - depth
+            assert (quadrant["x1"], quadrant["x2"], quadrant["y1"], quadrant["y2"]) == (
+                x1, x2, y1, y2,
+            )
+            assert console["markerType"] == "console"
+            assert (console["x"], console["y"]) == (
+                width / 4 if index % 2 else width * 3 / 4,
+                (y1 + y2) / 2,
+            )
+        assert {a["id"] for a in geometry["annotations"]} == {
+            "deployment-a-depth", "deployment-b-depth",
+        }
+        svg = render_scenario_map_svg(parse_scenario_geometry(geometry))
+        assert svg.count('data-reference="center"') == 8
+        assert f'data-distance-inches="{depth}"' in svg
+
+
+def test_superiority_rejects_missing_scoring_quadrant() -> None:
+    record = deepcopy(_records()["scenario:superiority"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    geometry["elements"] = [
+        element for element in geometry["elements"] if element["id"] != "quadrant-4"
+    ]
+    with pytest.raises(ScenarioDefinitionError, match="missing or incompatible scoring element"):
+        parse_scenario_definition_record(record)
+
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

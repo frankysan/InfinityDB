@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (six reviewed hotfix missions).
+`its-18@2026.09.11` (seven reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Six missions are published with independent revision selection:
+Seven missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -80,8 +80,18 @@ Six missions are published with independent revision selection:
   and ES pp. 137–139. The missing Spanish former-Lieutenant Killing
   clarification and an undefined Key Ops reference in both languages are
   preserved as source issues rather than inferred mechanics.
+- **Superiority:** Four central scoring Quadrants, four Consoles, two
+  end-of-round Objective Points for dominating more Quadrants (up to six),
+  and one end-of-game Objective Point per Hacked Console (up to four).
+  Both players can Hack and score the same Console. The mission includes
+  its own Specialist Troops and Operational Learning rules, HVT/Classified
+  exclusion, the three-round limit and Retreat! ending. Reuses the reviewed
+  symmetric 8-/12-inch deployment depths and quarter-centered Consoles from
+  core Domination without borrowing core scoring; EN pp. 135–138,
+  ES pp. 140–143. The English/Spanish Shasvastii ZO-status wording
+  discrepancy remains explicitly flagged.
 
-All six missions share the existing geometry parser, model and SVG
+All seven missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of
