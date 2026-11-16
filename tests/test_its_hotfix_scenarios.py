@@ -1,7 +1,6 @@
-"""Exact-source acceptance for staged ITS 18 September hotfix missions.
+"""Exact-source acceptance for the separately published ITS 18 September hotfix.
 
-The new collection remains isolated from the selected 2026.09.01 runtime until
-multi-revision publication is integrated. These tests do not change serving data.
+The historical September 1 selection remains independent of the hotfix.
 """
 from pathlib import Path
 
@@ -33,7 +32,7 @@ def test_hotfix_is_independent_and_retains_historical_source() -> None:
     assert current["scenarioCollection"]["revision"] == "2026.09.11"
     assert [entry["scenarioId"] for entry in current["scenarioCollection"]["members"]] == [
         "scenario:crossing-lines", "scenario:double-bind", "scenario:the-dig",
-        "scenario:annihilation", "scenario:battleground",
+        "scenario:annihilation", "scenario:battleground", "scenario:cutthroat",
     ]
     assert {s["id"]: s["sha256"] for s in current["sources"]} == {
         "its-season-18-en-pdf": (
@@ -51,7 +50,7 @@ def test_hotfix_annihilation_exact_score_bands_and_geometry(tmp_path: Path) -> N
     assert report["inputIdentity"]["seasonRevision"] == "2026.09.11"
     assert [item["id"] for item in report["scenarios"]] == [
         "scenario:crossing-lines", "scenario:double-bind", "scenario:the-dig",
-        "scenario:annihilation", "scenario:battleground",
+        "scenario:annihilation", "scenario:battleground", "scenario:cutthroat",
     ]
     assert inspect_its_database(output, source=HOTFIX)["sha256"] == report["sha256"]
     assert select_its_scenario(

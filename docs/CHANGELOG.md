@@ -12,7 +12,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Added five source-cited ITS Season 18 missions from the September hotfix
+- Added six source-cited ITS Season 18 missions from the September hotfix
   revision, with game-size maps and scoring. The original September 1
   Battleground publication remains separately selectable.
 - Double Bind now distinguishes its three alternative Main Objective sets;
@@ -24,7 +24,7 @@ are not retroactively relabeled.
 - **Data processing + Web backend + Web frontend:** Published the September
   2026 ITS Season 18 hotfix as a separately selected season revision, alongside
   the preserved September 1 Battleground. Added Crossing Lines, Double Bind,
-  The Dig and Annihilation, with reviewed source citations, scoring, geometry,
+  The Dig, Annihilation and Cutthroat, with reviewed source citations, scoring, geometry,
   special rules and source discrepancies; retained Battleground in both versions.
   Double Bind exposes mutually exclusive Main Objective sets in the scenario
   viewer, and the shared map renderer supports circular and corner deployment

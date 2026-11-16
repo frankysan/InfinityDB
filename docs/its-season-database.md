@@ -40,9 +40,9 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (five reviewed hotfix missions).
+`its-18@2026.09.11` (six reviewed hotfix missions).
 
-The staged source binds English 2026.09.11 (142 pages,
+The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
 and Spanish 2026.09.11 (147 pages,
 `df7398f8bc99927dc30c86cf5625cb08f8f38db9f3bbba685223c9c4981fa94d`).
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Five missions are published with independent revision selection:
+Six missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -73,8 +73,15 @@ Five missions are published with independent revision selection:
   pp. 125–128 and ES pp. 131–133).
 - **Battleground:** Preserves the existing three scoring and geometry
   configurations with citations rebased to hotfix pp. 129–131.
+- **Cutthroat:** Six-size, Lieutenant-focused Direct Action scoring, Open
+  Information Lieutenants, no Loss of Lieutenant, compulsory on-table
+  replacements, No Quarter and the three-round limit. Source-backed 12-inch
+  (150-point) and 16-inch (200–400-point) deployment depths; EN pp. 132–134
+  and ES pp. 137–139. The missing Spanish former-Lieutenant Killing
+  clarification and an undefined Key Ops reference in both languages are
+  preserved as source issues rather than inferred mechanics.
 
-All five missions share the existing geometry parser, model and SVG
+All six missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of
@@ -96,7 +103,7 @@ The three event policies remain explicitly selected, with hotfix page
 references 27 (Spec-Ops), 28 (Reinforcements), and 29 (TEAM-OPS).
 `tests/test_its_hotfix_scenarios.py` exercises both source revisions,
 the staged database, scenario geometry, scoring bands, issue retention,
-source citations and policy rebasing. The three new mission definitions
+source citations and policy rebasing. The additional mission definitions
 also have focused source-version, geometry and semantic tests. The published
 revision-aware registry, exact selectors, and Double Bind set selection have
 separate API/browser tests. Source page comparisons and local light/dark previews are supported by

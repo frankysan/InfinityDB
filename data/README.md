@@ -161,7 +161,7 @@ the retired source roots.
   reviewed Weapon citations,
   deployed objects, Restrictions, and symbol mappings remain embedded in
   Army/Rules. The historical ITS database retains Battleground, while the
-  hotfix database adds five reviewed missions. Each stores independently
+  hotfix database adds six reviewed missions. Each stores independently
   versioned tournament/Extra policies, selected by exact season and revision.
   See [ITS season database](../docs/its-season-database.md).
   The old filenames and required JSON publications are retired.

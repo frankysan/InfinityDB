@@ -295,6 +295,81 @@ def test_battleground_hotfix_sectors_are_distinguishable_from_generic_scoring() 
         assert 'svg[data-theme="dark"] .sector' in svg
 
 
+def test_cutthroat_lieutenant_objectives_killing_and_deployment_are_source_pinned() -> None:
+    record = _records()["scenario:cutthroat"]
+    mission, configs = _parts(record)
+    assert [(item["sourceId"], item["page"]) for item in record["citations"]] == [
+        ("its-season-18-en-pdf", 132),
+        ("its-season-18-en-pdf", 133),
+        ("its-season-18-en-pdf", 134),
+        ("its-season-18-es-pdf", 137),
+        ("its-season-18-es-pdf", 138),
+        ("its-season-18-es-pdf", 139),
+    ]
+    objectives = {obj["id"]: obj for obj in mission["objectives"]}
+    assert {name: obj["maximumPoints"] for name, obj in objectives.items()} == {
+        "kill-more-army-points": 3,
+        "kill-same-lieutenants": 2,
+        "kill-more-lieutenants": 3,
+        "kill-more-with-lieutenants": 4,
+    }
+    for name, metric in (
+        ("kill-more-army-points", "enemy-army-points-killed"),
+        ("kill-more-lieutenants", "enemy-lieutenants-killed"),
+    ):
+        condition = objectives[name]["awards"][0]["condition"]
+        assert condition == {
+            "kind": "metric-comparison", "metric": metric, "comparison": "greater",
+        }
+    assert "at least one enemy Lieutenant" in (
+        objectives["kill-same-lieutenants"]["awards"][0]["condition"]["text"]
+    )
+    assert "any of your" in (
+        objectives["kill-more-with-lieutenants"]["awards"][0]["condition"]["text"]
+    )
+    for obj in objectives.values():
+        assert obj["timing"] == "end-of-game"
+        assert obj["awards"][0]["armyPoints"] == list(SIZES)
+
+    rules = {rule["id"]: " ".join(rule["paragraphs"]) for rule in mission["rules"]}
+    for fragment in (
+        "Loss of Lieutenant", "Open Information", "Hidden Deployment", "Tactical Phase",
+        "Isolated", "without spending an Order",
+    ):
+        assert fragment in rules["reinforced-tactical-link"]
+    assert "at any time" in rules["killing"]
+    assert "Retreat!" in rules["no-quarter"]
+    assert "Classified Deck" in rules["hvt-and-classified-deck"]
+    assert mission["endConditions"] == [{
+        "id": "round-limit", "checkAt": "end-of-round",
+        "finishAt": "end-of-round", "condition": {"kind": "round-limit", "rounds": 3},
+    }]
+    issues = {issue["id"]: issue for issue in mission["sourceIssues"]}
+    assert set(issues) == {
+        "lieutenant-kill-bilingual-definition", "key-ops-without-designation",
+    }
+    assert "Spanish p. 138" in issues["lieutenant-kill-bilingual-definition"]["description"]
+    assert "no Key Ops selection" in issues["key-ops-without-designation"]["description"]
+    assert all(issue["armyPoints"] == list(SIZES) for issue in issues.values())
+
+    for config_id, depth in (
+        ("150-points", 12), ("200-250-points", 16), ("300-400-points", 16),
+    ):
+        geometry = configs[config_id]
+        elements = {element["id"]: element for element in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == geometry["table"]["height"] - depth
+        assert elements["deployment-a-label"]["y"] == depth / 2 + .55
+        assert elements["deployment-b-label"]["y"] == (
+            geometry["table"]["height"] - depth / 2 + .55
+        )
+        assert {item["target"] for item in geometry["annotations"]} == {
+            "deployment-a", "deployment-b",
+        }
+        svg = render_scenario_map_svg(parse_scenario_geometry(geometry))
+        assert f'data-distance-inches="{depth}"' in svg
+
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

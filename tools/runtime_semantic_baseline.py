@@ -309,8 +309,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
     parser.add_argument("--army-db", type=Path)
     parser.add_argument("--rules-db", type=Path)
-    parser.add_argument("--db-dir", type=Path,
-                        help="check one complete embedded set through shared application startup")
+    parser.add_argument(
+        "--db-dir", type=Path,
+        help="select one complete embedded set for an offline check or fresh capture",
+    )
     parser.add_argument("--identical-artifacts", action="store_true",
                         help="also require exact source database and publication bytes")
     parser.add_argument(
@@ -320,8 +322,6 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.db_dir is not None and (args.army_db is not None or args.rules_db is not None):
         parser.error("--db-dir cannot be combined with --army-db or --rules-db")
-    if args.db_dir is not None and args.capture:
-        parser.error("--db-dir checks candidates; initial capture uses the reviewed release pair")
     if args.capture and (args.identical_artifacts or args.route_alias):
         parser.error("--identical-artifacts and --route-alias apply to --check")
     aliases: dict[str, str] = {}
@@ -354,8 +354,10 @@ def main(argv: list[str] | None = None) -> int:
             rules = args.rules_db or ROOT / "data/generated/rules_n5.db"
             app = create_app(army, rules)
         identity = _artifact_identity(army, rules)
-        if args.capture and len(identity) != 4:
-            raise BaselineError("Initial baseline needs both sidecars and the symbol manifest")
+        if args.capture and args.db_dir is None and len(identity) != 4:
+            raise BaselineError(
+                "Initial source-pair baseline needs both sidecars and the symbol manifest"
+            )
         observed = capture(app, paths=paths, artifacts=identity, route_aliases=aliases)
         if args.capture:
             args.baseline.parent.mkdir(parents=True, exist_ok=True)

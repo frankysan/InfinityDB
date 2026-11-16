@@ -628,13 +628,21 @@ Do not report Ruff/Pyright as run when those tools are unavailable in the active
 
 ### P1 migration semantic baseline
 
-The snapshot-pinned semantic baseline established during P1.3 is a focused,
-offline 41-route comparison for Army/Rules database restructuring.
-Use `python -m tools.runtime_semantic_baseline --check --identical-artifacts`
-for the current tracked DBs, or specify `--army-db` and `--rules-db`
-without `--identical-artifacts` to compare a rebuilt database set.
-It protects JSON source/citation semantics and Battleground SVG geometry
-but is **not** a visual browser or Docker acceptance test.
+The snapshot-pinned semantic baseline established during P1.3 remains
+immutable at `tests/fixtures/runtime-semantic-baseline-v1.json`. The
+current six-mission ITS and catalogue publication is pinned separately
+at `tests/fixtures/runtime-semantic-baseline-v1.2.json`: all 41
+original routes remain covered, and the regression test permits exactly six
+reviewed migrations (Skills, Equipment Repeater usage, Scenario list,
+historical ITS collection listing, one Weapon profile, and the Restrictions
+API JavaScript marker). All other P1 route digests must still match the
+original fixture. Use
+`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2.json`
+for the current selected four-file runtime; `--identical-artifacts` additionally
+requires byte-identical artifact metadata. A future baseline may be freshly
+captured with `--capture --db-dir` to a **new** path, never overwriting the
+reviewed fixtures. This protects source/citation semantics and historical
+Battleground SVG geometry, but does **not** replace browser or Docker acceptance.
 Run `tests/test_runtime_semantic_baseline.py` for its guardrail tests.
 
 For a complete embedded candidate, use the shared startup factory through:

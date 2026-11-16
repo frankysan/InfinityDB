@@ -51,7 +51,8 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
     for revision, expected_ids in (
         ("2026.09.01", ["battleground"]),
         ("2026.09.11", [
-            "crossing-lines", "double-bind", "the-dig", "annihilation", "battleground",
+            "crossing-lines", "double-bind", "the-dig", "annihilation",
+            "battleground", "cutthroat",
         ]),
     ):
         status, _, payload = _json(
@@ -69,7 +70,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 5
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 6
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -120,6 +121,35 @@ def test_battleground_and_policies_bind_correct_edition_sources(two_revisions) -
         season_id="its-18", source_id="its-season-18-en-pdf",
         revision="2026.09.11", page=17,
     )["source_version"] == "2026.09.11"
+
+
+def test_cutthroat_serves_six_game_sizes_only_in_the_hotfix_revision(two_revisions) -> None:
+    _registry, app = two_revisions
+    for points, deployment_depth in ((150, 12), (200, 16), (300, 16), (400, 16)):
+        uri = (
+            f"/api/scenarios/cutthroat?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["selected_army_points"] == points
+        zones = {e["id"]: e for e in item["placement"]["geometry"]["elements"]}
+        assert zones["deployment-a"]["y2"] == deployment_depth
+        assert len(item["objectives"]) == 4
+        assert {issue["id"] for issue in item["source_issues"]} == {
+            "lieutenant-kill-bilingual-definition", "key-ops-without-designation",
+        }
+        map_uri = uri.replace(
+            "/api/scenarios/cutthroat?", "/api/scenarios/cutthroat/map.svg?",
+        )
+        assert wsgi_response(app, ORIGIN + map_uri)[0] == 200
+
+    status, _, _ = _json(
+        app, "/api/scenarios/cutthroat?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )
+    assert status == 404
 
 
 def test_mislabeled_revision_and_duplicate_registration_fail_closed(tmp_path: Path) -> None:

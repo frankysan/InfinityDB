@@ -71,7 +71,7 @@ its application metrics.
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Provides selectable historical and September-hotfix ITS Season 18 scenario
   publications, including Battleground, Annihilation, Crossing Lines,
-  Double Bind and The Dig, with game-size deployment maps, scoring,
+  Double Bind, The Dig and Cutthroat, with game-size deployment maps, scoring,
   reviewed source citations, and explicit Double Bind Main Objective choices.
   Season 18 mission coverage remains partial.
 - Includes global search and a federated Glossary across player-facing reference domains, with

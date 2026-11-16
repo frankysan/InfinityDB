@@ -64,7 +64,7 @@ scenario slug does not merge records or replace historical citations.
 3. **ITS seasons:** each registered ITS revision owns its own mission
    definitions, geometry, game-size configurations, scenario membership,
    Extras and tournament constraints. `its_18.db` preserves the
-   September 1 Battleground; `its_18_2026.09.11.db` owns five reviewed
+   September 1 Battleground; `its_18_2026.09.11.db` owns six reviewed
    hotfix missions. Other seasons get independent ownership;
    no current ITS 18 record is silently treated as timeless N5 core.
 4. **Optional/historical annexes:** The N4-origin Reinforcements reference
