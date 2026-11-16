@@ -170,6 +170,54 @@ Use these links to jump directly to a workstream:
   - [ ] Surface read-only workspace/claim/integration status in the monitor
     and verify real Linux refusal/race behavior before unattended use.
 
+### Release and deployment robustness
+
+**Project domain:** Project infrastructure
+
+- [ ] **Prevent recurrence of v1.1.0 release-process failures** without adding
+  another release-management system or routine full-suite gates. The 2026-11-16
+  release passed application/data/CI validation, but exposed late checklist
+  corrections, release-evidence/CI drift, noncritical image-pruning failure
+  and an incorrect production `1.1.0+dev` footer.
+  - [ ] **Make production version identity deterministic.** For a verified
+    release-tag checkout, derive and bake the version from the tag/package
+    identity rather than server worktree status; retain `+dev` for real
+    development builds. [PR #31](https://github.com/frankysan/InfinityDB/pull/31)
+    addresses the immediate untracked-file misclassification. Assert that
+    the built image/footer and deployed public footer agree with the release
+    tag and `/api/version`, alongside existing snapshot/static revision checks.
+  - [ ] **Make image retention cleanup non-fatal.** The v1.1.0 deploy tried
+    to remove an old `app-test-*` metrics-history image still referenced by
+    a test container. Skip and report tags used by *any* container (including
+    stopped or isolated-test containers); do not force-remove them, disturb
+    production/test stacks or fail an otherwise healthy deployment because
+    pruning could not complete. Keep the supported test-stack stop command
+    in the release procedure.
+  - [ ] **Prevent CI/evidence contract drift.** The release-evidence collector
+    rejected the green Source run because its expected matrix omitted both
+    pinned-determinism jobs; the immediate fix was [PR #30](https://github.com/frankysan/InfinityDB/pull/30).
+    Add a focused contract test against the maintained workflow job definitions,
+    including required successful build/reuse steps. Exercise candidate release
+    evidence after its hosted checks pass but *before* merge; still recollect
+    evidence on the exact final `main` SHA before tagging.
+  - [ ] **Consolidate isolated Docker acceptance probes.** Earlier
+    `releasing.md` commands used the wrong Caddy host and health port;
+    corrected to `localhost:8080/api/version` and the loopback metrics
+    listener `127.0.0.1:8081/health`. Reuse one small executable smoke
+    check for version, health, metrics and representative routes instead of
+    copying commands between documents.
+  - [ ] **Freeze release-facing content before costly acceptance.** Complete
+    changelog/README, version metadata, deployment instructions and release
+    tooling, then run cheap metadata/docs/tooling checks before the mandatory
+    full local suite and isolated Docker test. Preserve exact-SHA post-merge
+    CI and any selected cross-browser jobs; the additional browser dispatch
+    on the merge SHA is expected, not a failure. Avoid redundant reruns unless
+    the changed content invalidates the relevant evidence.
+  - [ ] Validate these focused improvements with release-evidence, version
+    and deployment-script regression tests, Ruff and appropriate hosted CI.
+    Keep detailed acceptance procedures in `docs/releasing.md` and
+    `docs/deployment.md`, not duplicated in this backlog.
+
 ### Performance, storage, and build tooling
 
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
