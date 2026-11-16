@@ -140,6 +140,13 @@ mismatched provenance blocks this implicit build; it never falls back to
 `data/raw/` or downloads data. An explicit source ZIP remains supported;
 `--snapshot-manifest` pins its provenance. Explicit `--metadata` retains
 the legacy unpinned metadata override behavior.
+When rebuilding the existing published runtime set solely to update maintained
+build inputs (such as a version bump), run
+`python -m tools.data.rebuild_runtime_set --use-recorded-source`.
+This selects the exact Army ZIP/manifest pair recorded by the current
+`data/generated/army.db`, verifies the archive hash, and refuses missing
+sources instead of silently selecting a newer snapshot.
+
 For an R1 source-pinned build, supply **both** the exact ZIP and its
 version-3 provenance manifest, optionally choosing a separate complete
 database-set output directory:
