@@ -183,9 +183,13 @@ Use these links to jump directly to a workstream:
     release-tag checkout, derive and bake the version from the tag/package
     identity rather than server worktree status; retain `+dev` for real
     development builds. [PR #31](https://github.com/frankysan/InfinityDB/pull/31)
-    addresses the immediate untracked-file misclassification. Assert that
-    the built image/footer and deployed public footer agree with the release
-    tag and `/api/version`, alongside existing snapshot/static revision checks.
+    proposes changing source-checkout Git status handling, but that module
+    participates in the tracked runtime-database input fingerprint. Do not
+    merge that source-level change alone: it needs a matching database rebuild
+    during release preparation. The production build instead now pins display
+    identity to the exact tag/package version in `scripts/deploy.sh`.
+    Assert that the built image/footer and deployed public footer agree with
+    the release tag and `/api/version`, alongside snapshot/static revisions.
   - [ ] **Make image retention cleanup non-fatal.** The v1.1.0 deploy tried
     to remove an old `app-test-*` metrics-history image still referenced by
     a test container. Skip and report tags used by *any* container (including
