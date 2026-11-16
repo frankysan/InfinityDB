@@ -55,6 +55,9 @@
       },
       {
         "scenarioId": "scenario:provisioning"
+      },
+      {
+        "scenarioId": "scenario:area-of-interest"
       }
     ]
   },
@@ -12484,6 +12487,704 @@
           "sourceId": "its-season-18-es-pdf",
           "page": 115,
           "section": "Reabastecimiento"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    },
+    {
+      "id": "scenario:area-of-interest",
+      "kind": "scenario",
+      "name": "Area of Interest",
+      "summary": "Dominate player-placed Areas of Interest each round and at game end while competing to Activate the central Communication Antenna.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Side A"
+            },
+            {
+              "id": "side-b",
+              "name": "Side B"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "dominate-areas",
+              "name": "Dominate Areas of Interest",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "cumulative",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At the end of the game, score 1 Objective Point for each of the three player-placed Areas of Interest you Dominate, up to 3 Objective Points. The Special Area also counts as one of these three Areas."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "dominate-special-area",
+              "name": "Dominate Special Area of Interest",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-round",
+              "aggregation": "cumulative",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At the end of each Game Round, score 1 Objective Point if you Dominate the player-designated Special Area of Interest, up to 3 Objective Points across three Game Rounds."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "activate-antenna",
+              "name": "Activate Communication Antenna",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-round",
+              "aggregation": "cumulative",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At the end of each Game Round, score 1 Objective Point if the center Communication Antenna is Activated for you, up to 3 Objective Points across three Game Rounds."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "classified-objective",
+              "name": "Classified Objective",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Complete your one Classified Objective for 1 Objective Point if you chose to use the selected card as a Classified Objective rather than as an INTELCOM Card."
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "deployment",
+              "name": "Deployment and Initial Placement",
+              "paragraphs": [
+                "Both sides deploy in opposite corner quarter-circle Deployment Zones sized for the game. No Trooper may deploy inside an Area of Interest or in Silhouette contact with the central Communication Antenna.",
+                "Three Areas of Interest are positioned by players before Deployment, not fixed on the published map. Their Circular Templates must be on suitable surfaces, wholly outside Deployment Zones, and must not overlap."
+              ]
+            },
+            {
+              "id": "communication-antenna",
+              "name": "Communication Antenna",
+              "paragraphs": [
+                "A single 40 mm Communication Antenna (Transmission Antenna) is placed at the table center, as shown on the map. Player A and Player B Tokens may indicate which player currently has it Activated.",
+                "The Antenna may be Activated repeatedly by either player; activating it for your player replaces the opponent's activation."
+              ]
+            },
+            {
+              "id": "activate-communication-antenna",
+              "name": "Activate Communication Antenna (Short Skill)",
+              "paragraphs": [
+                "Only Specialist Troops in Silhouette contact with the Communication Antenna may declare this Attack, Scenario Short Skill. Normally Activation requires no Roll.",
+                "When an enemy Hacker is inside any Area of Interest, one eligible enemy Hacker may oppose the Activation with an ARO, turning it into a Face to Face WIP Roll. The Spanish text requires choosing one enemy Hacker, whereas English states that one can declare the ARO. A failed attempt may be repeated with another Short Skill.",
+                "At the end of each Game Round the player whose Activation is current earns 1 Objective Point."
+              ]
+            },
+            {
+              "id": "player-placed-areas",
+              "name": "Player-Placed Areas of Interest",
+              "paragraphs": [
+                "There are three Circular Template Areas of Interest (Zones of Operations); one is the Special Area of Interest. They are not pre-positioned map elements.",
+                "Before Deployment and in Initiative order, the first-turn player places one ordinary Area and the Special Area, designating the Special Area at placement. The second-turn player places the remaining ordinary Area.",
+                "Each Area must fit on a surface at least as large as its Circular Template, completely outside every Deployment Zone, without overlapping any other Area of Interest."
+              ]
+            },
+            {
+              "id": "dominate-zones",
+              "name": "Dominate Zones of Operations",
+              "paragraphs": [
+                "A player Dominates an Area of Interest when they have more Victory Points from eligible Troops inside that Area than their opponent. More than half of a Trooper's base must lie within the Area.",
+                "Eligible Troops include Models, Markers representing Troopers, Proxies, and Peripherals. Troops in Null States, fake Holoechoes, weapons or equipment Tokens, and Tokens not representing Troops do not count.",
+                "Troops with Shasvastii count while Unconscious or in any non-Null State. Troops with Baggage provide an additional 20 Victory Points to Dominating an Area while in a non-Null State.",
+                "At game end, earn 1 Objective Point per Area Dominated, maximum 3; each Game Round, Dominate the Special Area for another 1 Objective Point."
+              ]
+            },
+            {
+              "id": "specialist-troops",
+              "name": "Specialist Troops",
+              "paragraphs": [
+                "Hackers, Doctors, Engineers, Forward Observers, Paramedics, and Troops with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] are Specialist Troops.",
+                "Hackers, Doctors, and Engineers cannot use Repeaters or Peripheral (Servant) Models to perform Specialist-only tasks."
+              ]
+            },
+            {
+              "id": "intelcom",
+              "name": "INTELCOM Card (Support and Control)",
+              "paragraphs": [
+                "Before the game and after choosing the first Classified Objective, each player decides whether the selected card is their Classified Objective or an INTELCOM Card. Both players roll a die; the higher roller announces that choice first. The card's contents remain Private Information.",
+                "At game-end scoring, in Initiative order, a player using INTELCOM in Support and Control Mode may add that card's numeric value to their Victory Points in one chosen Area of Interest, provided they have at least one non-Null Trooper inside that Area.",
+                "This changes Victory Points for determining Area Domination, not Objective Points directly. English places this choice at the end of the last Game Round, while Spanish explicitly says at the end of the third Game Round."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            },
+            {
+              "id": "retreat",
+              "checkAt": "tactical-phase",
+              "finishAt": "end-of-player-turn",
+              "condition": {
+                "kind": "reviewed-prose",
+                "text": "If a player begins their Active Turn in Retreat!, this mission ends at the end of that Player Turn."
+              }
+            }
+          ],
+          "sourceIssues": [
+            {
+              "id": "enemy-hacker-aro-modal-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "activate-antenna",
+              "status": "needs-verification",
+              "description": "EN p. 122 says an enemy Hacker in any Area of Interest can declare an opposing ARO; ES p. 123 says the enemy must choose one Hacker for the ARO. Whether this is optional or mandatory differs between the languages."
+            },
+            {
+              "id": "intelcom-third-vs-last-round",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "dominate-areas",
+              "status": "needs-verification",
+              "description": "EN p. 124 permits INTELCOM Support and Control at the end of the last Game Round, while ES p. 125 specifies the end of the third Game Round. If Retreat! ends the game earlier, these timings may diverge."
+            },
+            {
+              "id": "antenna-diameter-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "activate-antenna",
+              "status": "needs-verification",
+              "description": "EN p. 122 specifies a 40 mm Communication Antenna marker/scenery footprint; ES p. 123 refers only to scenery of a similar diameter, without repeating the 40 mm measurement. The English dimension is retained as explicit source provenance."
+            }
+          ]
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Area of Interest",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "quarter-circle",
+                  "style": "deployment-a",
+                  "corner": "top-left",
+                  "radius": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "quarter-circle",
+                  "style": "deployment-b",
+                  "corner": "bottom-right",
+                  "radius": 12
+                },
+                {
+                  "id": "table-diagonal",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 32,
+                  "x2": 24,
+                  "y2": 0
+                },
+                {
+                  "id": "communication-antenna",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 12,
+                  "y": 16
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 4.2,
+                  "y": 4.4,
+                  "text": "Deployment\nZone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 19.5,
+                  "y": 27.4,
+                  "text": "Deployment\nZone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-corner-radius",
+                  "kind": "ruler",
+                  "x1": 12,
+                  "y1": 30.2,
+                  "x2": 24,
+                  "y2": 30.2,
+                  "offset": 0
+                },
+                {
+                  "id": "antenna-center-from-top",
+                  "kind": "ruler",
+                  "x1": 14,
+                  "y1": 0,
+                  "x2": 14,
+                  "y2": 16,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Area of Interest",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "quarter-circle",
+                  "style": "deployment-a",
+                  "corner": "top-left",
+                  "radius": 20
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "quarter-circle",
+                  "style": "deployment-b",
+                  "corner": "bottom-right",
+                  "radius": 20
+                },
+                {
+                  "id": "table-diagonal",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 48,
+                  "x2": 32,
+                  "y2": 0
+                },
+                {
+                  "id": "communication-antenna",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 16,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 7.5,
+                  "y": 7.3,
+                  "text": "Deployment\nZone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 25.2,
+                  "y": 40.3,
+                  "text": "Deployment\nZone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-corner-radius",
+                  "kind": "ruler",
+                  "x1": 12,
+                  "y1": 46.2,
+                  "x2": 32,
+                  "y2": 46.2,
+                  "offset": 0
+                },
+                {
+                  "id": "antenna-center-from-top",
+                  "kind": "ruler",
+                  "x1": 18,
+                  "y1": 0,
+                  "x2": 18,
+                  "y2": 24,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Area of Interest",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "quarter-circle",
+                  "style": "deployment-a",
+                  "corner": "top-left",
+                  "radius": 24
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "quarter-circle",
+                  "style": "deployment-b",
+                  "corner": "bottom-right",
+                  "radius": 24
+                },
+                {
+                  "id": "table-diagonal",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 48,
+                  "x2": 48,
+                  "y2": 0
+                },
+                {
+                  "id": "communication-antenna",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 24,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 10.5,
+                  "y": 8.8,
+                  "text": "Deployment\nZone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 37.5,
+                  "y": 39.4,
+                  "text": "Deployment\nZone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-corner-radius",
+                  "kind": "ruler",
+                  "x1": 24,
+                  "y1": 46.2,
+                  "x2": 48,
+                  "y2": 46.2,
+                  "offset": 0
+                },
+                {
+                  "id": "antenna-center-from-top",
+                  "kind": "ruler",
+                  "x1": 26,
+                  "y1": 0,
+                  "x2": 26,
+                  "y2": 24,
+                  "offset": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 121,
+          "section": "Area of Interest"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 122,
+          "section": "Area of Interest"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 123,
+          "section": "Area of Interest"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 124,
+          "section": "Area of Interest"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 122,
+          "section": "Área de Interés"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 123,
+          "section": "Área de Interés"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 124,
+          "section": "Área de Interés"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 125,
+          "section": "Área de Interés"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 126,
+          "section": "Área de Interés"
         }
       ],
       "review": {

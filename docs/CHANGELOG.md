@@ -12,7 +12,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Added fourteen source-cited ITS Season 18 missions from the September hotfix
+- Added fifteen source-cited ITS Season 18 missions from the September hotfix
   revision, with game-size maps and scoring. The original September 1
   Battleground publication remains separately selectable.
 - Double Bind now distinguishes its three alternative Main Objective sets;
@@ -25,8 +25,9 @@ are not retroactively relabeled.
   2026 ITS Season 18 hotfix as a separately selected season revision, alongside
   the preserved September 1 Battleground. Added Crossing Lines, Double Bind,
   The Dig, Annihilation, Cutthroat, Superiority, Uplink Center, Hardlock and
-  B-Pong, Akial Interference, Evacuation, Neutralization and Provisioning, with reviewed
-  source citations, scoring, geometry, special rules and source discrepancies;
+  B-Pong, Akial Interference, Evacuation, Neutralization, Provisioning and
+  Area of Interest, with reviewed source citations, scoring, geometry,
+  special rules and source discrepancies;
   retained Battleground in both versions.
   Double Bind exposes mutually exclusive Main Objective sets in the scenario
   viewer, and the shared map renderer supports circular and corner deployment
@@ -46,7 +47,10 @@ are not retroactively relabeled.
   Tech-Coffins holding four Supply Boxes, player-placed Safe Areas, and
   end-game Control scoring, with bilingual pickup and Token-disposition
   differences and source-language Reinforcements suitability explicitly recorded.
-  This expands partial Season 18 coverage, not the
+  Area of Interest adds three player-placed Zones of Operations, a central
+  Communication Antenna with round-based activation scoring, and INTELCOM
+  Support and Control. English/Spanish ARO and end-round wording differences
+  remain disclosed. This expands partial Season 18 coverage, not the
   complete mission set.
 
 ## [1.1.0] - 2026-11-15

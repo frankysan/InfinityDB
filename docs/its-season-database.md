@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (fourteen reviewed hotfix missions).
+`its-18@2026.09.11` (fifteen reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Fourteen missions are published with independent revision selection:
+Fifteen missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -163,8 +163,20 @@ Fourteen missions are published with independent revision selection:
   Five bilingual discrepancies about emptied Coffins, pickup scope,
   fully-inside deposition, extraction contact and Reinforcements suitability
   are retained (EN pp. 110–114; ES pp. 110–115).
+- **Area of Interest:** One 40 mm Communication Antenna at the table
+  center and corner quarter-circle Deployment Zones for all six game
+  sizes. Three player-placed Circular Template Areas of Interest, including
+  one Special Area, must lie entirely outside Deployment Zones and must not
+  overlap; the map does not invent their positions. Score up to 3 OP for
+  Dominating Areas at game end, 3 OP for Dominating the Special Area at
+  round ends, 3 OP for holding the Activated Antenna at round ends and
+  1 Classified OP. The mission defines opposing enemy-Hacker AROs,
+  domination rules for Shasvastii and Baggage, and INTELCOM Support and
+  Control. Three bilingual issues preserve differences concerning Hacker
+  ARO obligation, INTELCOM timing and the antenna's physical diameter
+  (EN pp. 121–124; ES pp. 122–126).
 
-All fourteen missions share the existing geometry parser, model and SVG
+All fifteen missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of

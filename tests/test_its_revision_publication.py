@@ -54,7 +54,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
             "crossing-lines", "double-bind", "the-dig", "annihilation",
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
             "b-pong", "akial-interference", "evacuation", "neutralization",
-            "provisioning",
+            "provisioning", "area-of-interest",
         ]),
     ):
         status, _, payload = _json(
@@ -72,7 +72,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 14
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 15
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -614,6 +614,67 @@ def test_provisioning_six_sizes_safe_areas_and_revision_isolation(two_revisions)
 
     assert _json(
         app, "/api/scenarios/provisioning?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+def test_area_of_interest_six_sizes_center_antenna_and_revision_isolation(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:area-of-interest", "2026.09.01",
+    )) is None
+    for points, width, height, radius in (
+        (150, 24, 32, 12),
+        (200, 32, 48, 20),
+        (250, 32, 48, 20),
+        (300, 48, 48, 24),
+        (350, 48, 48, 24),
+        (400, 48, 48, 24),
+    ):
+        uri = (
+            f"/api/scenarios/area-of-interest?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == points // 50
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert {elements[id]["radius"] for id in (
+            "deployment-a", "deployment-b",
+        )} == {radius}
+        assert {e["id"] for e in elements.values() if e["kind"] == "marker"} == {
+            "communication-antenna",
+        }
+        assert not any(e["kind"] == "circle" for e in elements.values())
+        assert {m["marker_type"]: (m["count"], m["diameter_mm"])
+                for m in item["placement"]["marker_dimensions"]} == {
+            "antenna": (1, 40),
+        }
+        assert [c["page"] for c in item["citations"]] == [
+            *range(121, 125), *range(122, 127),
+        ]
+        assert {o["id"]: o["maximumPoints"] for o in item["objectives"]} == {
+            "dominate-areas": 3, "dominate-special-area": 3,
+            "activate-antenna": 3, "classified-objective": 1,
+        }
+        assert len(item["source_issues"]) == 3
+        svg_uri = uri.replace(
+            "/api/scenarios/area-of-interest?", "/api/scenarios/area-of-interest/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
+        assert svg_status == 200
+        assert svg.count(b'data-marker-type="antenna" data-diameter-mm="40"') == 1
+        assert f'data-distance-inches="{radius}"'.encode() in svg
+        assert f'data-distance-inches="{height / 2:g}"'.encode() in svg
+
+    assert _json(
+        app, "/api/scenarios/area-of-interest?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 

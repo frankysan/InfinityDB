@@ -1170,6 +1170,113 @@ def test_provisioning_malformed_definition_fails_closed(mutation: str) -> None:
     with pytest.raises(ScenarioDefinitionError):
         parse_scenario_definition_record(record)
 
+
+def test_area_of_interest_round_scoring_placement_and_bilingual_intelcom() -> None:
+    record = _records()["scenario:area-of-interest"]
+    mission, configurations = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *(( "its-season-18-en-pdf", p) for p in range(121, 125)),
+        *(( "its-season-18-es-pdf", p) for p in range(122, 127)),
+    ]
+    assert [size["swc"] for size in mission["gameSizes"]] == [3, 4, 5, 6, 7, 8]
+    objectives = {obj["id"]: obj for obj in mission["objectives"]}
+    assert {id: obj["maximumPoints"] for id, obj in objectives.items()} == {
+        "dominate-areas": 3,
+        "dominate-special-area": 3,
+        "activate-antenna": 3,
+        "classified-objective": 1,
+    }
+    assert sum(obj["maximumPoints"] for obj in objectives.values()) == 10
+    assert objectives["dominate-areas"]["timing"] == "end-of-game"
+    assert {objectives[id]["timing"] for id in (
+        "dominate-special-area", "activate-antenna",
+    )} == {"end-of-round"}
+    assert {objectives[id]["aggregation"] for id in (
+        "dominate-special-area", "activate-antenna",
+    )} == {"cumulative"}
+    rules = {rule["id"]: " ".join(rule["paragraphs"]) for rule in mission["rules"]}
+    assert "first-turn player places" in rules["player-placed-areas"]
+    assert "Special Area" in rules["player-placed-areas"]
+    assert "completely outside" in rules["player-placed-areas"]
+    assert "without overlapping" in rules["player-placed-areas"]
+    assert "more Victory Points" in rules["dominate-zones"]
+    assert "More than half" in rules["dominate-zones"]
+    assert "Shasvastii" in rules["dominate-zones"]
+    assert "additional 20 Victory Points" in rules["dominate-zones"]
+    assert "one eligible enemy Hacker" in rules["activate-communication-antenna"]
+    assert "Face to Face WIP Roll" in rules["activate-communication-antenna"]
+    assert "INTELCOM" in rules["intelcom"]
+    assert "Initiative order" in rules["intelcom"]
+    assert "Private Information" in rules["intelcom"]
+    assert {issue["id"] for issue in mission["sourceIssues"]} == {
+        "enemy-hacker-aro-modal-bilingual",
+        "intelcom-third-vs-last-round",
+        "antenna-diameter-bilingual",
+    }
+    assert all(issue["status"] == "needs-verification" for issue in mission["sourceIssues"])
+    assert [e["id"] for e in mission["endConditions"]] == [
+        "round-limit", "retreat",
+    ]
+
+    for key, width, height, radius in (
+        ("150-points", 24, 32, 12),
+        ("200-250-points", 32, 48, 20),
+        ("300-400-points", 48, 48, 24),
+    ):
+        geometry = configurations[key]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert {elements[id]["corner"] for id in (
+            "deployment-a", "deployment-b",
+        )} == {"top-left", "bottom-right"}
+        assert elements["deployment-a"]["radius"] == radius
+        assert elements["deployment-b"]["radius"] == radius
+        assert not any(e["kind"] in ("circle", "zone") for e in elements.values())
+        marker = elements["communication-antenna"]
+        assert marker["kind"] == "marker"
+        assert marker["markerType"] == "antenna"
+        assert (marker["x"], marker["y"]) == (width / 2, height / 2)
+        assert [e["id"] for e in elements.values() if e["kind"] == "marker"] == [
+            "communication-antenna",
+        ]
+        rulers = {a["id"]: a for a in geometry["annotations"]}
+        assert set(rulers) == {"deployment-corner-radius", "antenna-center-from-top"}
+        assert rulers["antenna-center-from-top"]["y2"] == height / 2
+        assert rulers["deployment-corner-radius"]["x1"] == width - radius
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
+            assert svg.count('data-region-shape="quarter-circle"') == 2
+            assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 1
+            assert f'data-distance-inches="{radius}"' in svg
+            assert f'data-distance-inches="{height / 2:g}"' in svg
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["missing-deployment", "invalid-radius", "antenna-off-table", "invalid-round-award"],
+)
+def test_area_of_interest_malformed_definition_fails_closed(mutation: str) -> None:
+    record = deepcopy(_records()["scenario:area-of-interest"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    if mutation == "missing-deployment":
+        geometry["elements"] = [
+            e for e in geometry["elements"] if e["id"] != "deployment-b"
+        ]
+    elif mutation == "invalid-radius":
+        next(e for e in geometry["elements"] if e["id"] == "deployment-a")[
+            "radius"
+        ] = -1
+    elif mutation == "antenna-off-table":
+        next(e for e in geometry["elements"] if e["id"] == "communication-antenna")[
+            "x"
+        ] = 100
+    else:
+        record["facts"]["mission"]["objectives"][1]["awards"][0][
+            "objectivePoints"
+        ] = 4
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]
