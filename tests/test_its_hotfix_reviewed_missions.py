@@ -95,6 +95,21 @@ def test_crossing_lines_split_deployment_and_hvt_hotfix() -> None:
         assert elements["antenna-left"]["x"] == w / 4
         assert elements["antenna-right"]["x"] == 3 * w / 4
         assert elements["antenna-left"]["y"] == h / 2
+        depths = {
+            item["target"]: item
+            for item in config["annotations"]
+            if item["kind"] == "dimension"
+        }
+        assert set(depths) == {
+            "deployment-a-rear", "dead-zone-a", "deployment-b-forward",
+            "deployment-a-forward", "dead-zone-b", "deployment-b-rear",
+        }
+        assert all(item["axis"] == "y" and item["offset"] == 2.2
+                   for item in depths.values())
+        for target, annotation in depths.items():
+            height = elements[target]["y2"] - elements[target]["y1"]
+            assert f'id="{annotation["id"]}" class="measurement"' in svg
+            assert f'data-distance-inches="{height:g}"' in svg
     assert configs["150-points"]["elements"][0]["y1"] == 8
     assert configs["200-250-points"]["elements"][0]["y1"] == 12
 
@@ -150,6 +165,12 @@ def test_double_bind_selected_main_objective_hotfix_and_antenna_areas() -> None:
         assert set(rulers) == {"antenna-middle-from-left", "antenna-right-from-right"}
         assert rulers["antenna-middle-from-left"]["x2"] == geometry["table"]["width"] / 2
         assert rulers["antenna-right-from-right"]["x1"] == geometry["table"]["width"] * 3 / 4
+        elements = {item["id"]: item for item in geometry["elements"]}
+        exclusion_bottom = elements["exclusion-zone"]["y2"]
+        deployment_start = elements["deployment-b"]["y1"]
+        for ruler in rulers.values():
+            assert ruler["y1"] == ruler["y2"] == exclusion_bottom + 2.5
+            assert exclusion_bottom < ruler["y1"] < deployment_start
         assert (
             f'data-distance-inches="{geometry["table"]["width"] / 2:g}"' in svg
         )
@@ -231,7 +252,10 @@ def test_the_dig_150_point_spacing_analysis_token_ownership_and_corner_geometry(
             "console-to-console", "deployment-corner-radius", "console-center-from-top",
         }
         assert rulers["deployment-corner-radius"]["x2"] == expected_radius
-        assert rulers["console-center-from-top"]["y2"] == parsed.table.height / 2
+        vertical_ruler = rulers["console-center-from-top"]
+        assert vertical_ruler["y1"] == 0
+        assert vertical_ruler["y2"] == y1
+        assert vertical_ruler["x1"] == vertical_ruler["x2"] == x1 - 2
         assert math.isclose(
             math.hypot(
                 rulers["console-to-console"]["x2"] - rulers["console-to-console"]["x1"],

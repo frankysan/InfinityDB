@@ -310,6 +310,38 @@
                   "axis": "y",
                   "side": "end",
                   "offset": 2.2
+                },
+                {
+                  "id": "dead-zone-a-depth",
+                  "kind": "dimension",
+                  "target": "dead-zone-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "deployment-b-forward-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b-forward",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "deployment-a-forward-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a-forward",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "dead-zone-b-depth",
+                  "kind": "dimension",
+                  "target": "dead-zone-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
                 }
               ]
             }
@@ -455,6 +487,38 @@
                   "id": "deployment-b-rear-depth",
                   "kind": "dimension",
                   "target": "deployment-b-rear",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "dead-zone-a-depth",
+                  "kind": "dimension",
+                  "target": "dead-zone-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "deployment-b-forward-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b-forward",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "deployment-a-forward-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a-forward",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "dead-zone-b-depth",
+                  "kind": "dimension",
+                  "target": "dead-zone-b",
                   "axis": "y",
                   "side": "end",
                   "offset": 2.2
@@ -604,6 +668,38 @@
                   "id": "deployment-b-rear-depth",
                   "kind": "dimension",
                   "target": "deployment-b-rear",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "dead-zone-a-depth",
+                  "kind": "dimension",
+                  "target": "dead-zone-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "deployment-b-forward-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b-forward",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "deployment-a-forward-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a-forward",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 2.2
+                },
+                {
+                  "id": "dead-zone-b-depth",
+                  "kind": "dimension",
+                  "target": "dead-zone-b",
                   "axis": "y",
                   "side": "end",
                   "offset": 2.2
@@ -1147,18 +1243,18 @@
                   "id": "antenna-middle-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 30.4,
+                  "y1": 22.5,
                   "x2": 12,
-                  "y2": 30.4,
+                  "y2": 22.5,
                   "offset": 0
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 18,
-                  "y1": 30.4,
+                  "y1": 22.5,
                   "x2": 24,
-                  "y2": 30.4,
+                  "y2": 22.5,
                   "offset": 0
                 }
               ]
@@ -1302,18 +1398,18 @@
                   "id": "antenna-middle-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 46.4,
+                  "y1": 30.5,
                   "x2": 16,
-                  "y2": 46.4,
+                  "y2": 30.5,
                   "offset": 0
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 24,
-                  "y1": 46.4,
+                  "y1": 30.5,
                   "x2": 32,
-                  "y2": 46.4,
+                  "y2": 30.5,
                   "offset": 0
                 }
               ]
@@ -1458,18 +1554,18 @@
                   "id": "antenna-middle-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 46.4,
+                  "y1": 30.5,
                   "x2": 24,
-                  "y2": 46.4,
+                  "y2": 30.5,
                   "offset": 0
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 36,
-                  "y1": 46.4,
+                  "y1": 30.5,
                   "x2": 48,
-                  "y2": 46.4,
+                  "y2": 30.5,
                   "offset": 0
                 }
               ]
@@ -2117,9 +2213,9 @@
                 {
                   "id": "console-center-from-top",
                   "kind": "ruler",
-                  "x1": 2,
+                  "x1": 10,
                   "y1": 0,
-                  "x2": 2,
+                  "x2": 10,
                   "y2": 16,
                   "offset": 0
                 }
@@ -2228,9 +2324,9 @@
                 {
                   "id": "console-center-from-top",
                   "kind": "ruler",
-                  "x1": 2,
+                  "x1": 14,
                   "y1": 0,
-                  "x2": 2,
+                  "x2": 14,
                   "y2": 24,
                   "offset": 0
                 }
@@ -2340,9 +2436,9 @@
                 {
                   "id": "console-center-from-top",
                   "kind": "ruler",
-                  "x1": 2,
+                  "x1": 22,
                   "y1": 0,
-                  "x2": 2,
+                  "x2": 22,
                   "y2": 24,
                   "offset": 0
                 }
