@@ -785,6 +785,83 @@ def test_b_pong_any_control_fails_closed(mutation: str) -> None:
         parse_scenario_definition_record(record)
 
 
+
+def test_akial_interference_classified_scoring_and_center_antenna() -> None:
+    record = _records()["scenario:akial-interference"]
+    mission, configs = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *(("its-season-18-en-pdf", p) for p in range(92, 97)),
+        *(("its-season-18-es-pdf", p) for p in range(92, 97)),
+    ]
+    assert [s["swc"] for s in mission["gameSizes"]] == [3, 4, 5, 6, 7, 8]
+    objs = {o["id"]: o for o in mission["objectives"]}
+    assert {name: o["maximumPoints"] for name, o in objs.items()} == {
+        "common-classified": 6, "more-classified": 1,
+        "classified-every-round": 1, "private-classified": 2,
+    }
+    assert all(o["timing"] == "end-of-game" for o in objs.values())
+    assert all(o["awards"][0]["condition"]["kind"] == "reviewed-prose"
+               for o in objs.values())
+    assert objs["common-classified"]["awards"][0]["objectivePoints"] == 1
+    assert objs["private-classified"]["awards"][0]["objectivePoints"] == 2
+    assert "each of the three Game Rounds" in (
+        objs["classified-every-round"]["awards"][0]["condition"]["text"]
+    )
+    assert "later canceled" in objs["classified-every-round"]["awards"][0]["condition"]["text"]
+    rules = {r["id"]: " ".join(r["paragraphs"]) for r in mission["rules"]}
+    assert "first Game Round" in rules["common-classified"]
+    assert "Rounds 2 and 3" in rules["common-classified"]
+    assert "revealed in any Game Round" in rules["signal-redundancy"]
+    assert "four HVTs" in rules["multiple-hvts"]
+    assert "Secure HVT does not apply" in rules["multiple-hvts"]
+    assert "cross, gear, globe, reticle" in rules["emit-akial-interference"]
+    assert "Common Classified Objective" in rules["filter-signal"]
+    assert "Private Classified Objective cannot" in rules["private-classified"]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert [e["id"] for e in mission["endConditions"]] == ["round-limit", "retreat"]
+    assert {i["id"] for i in mission["sourceIssues"]} == {
+        "emit-once-per-round-vs-retries",
+    }
+    assert mission["sourceIssues"][0]["objectiveId"] == "common-classified"
+    for key, width, height, depth in (
+        ("150-points", 24, 32, 8),
+        ("200-250-points", 32, 48, 12),
+        ("300-400-points", 48, 48, 12),
+    ):
+        geo = configs[key]
+        assert geo["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geo["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert {
+            e["id"] for e in geo["elements"] if e["kind"] == "marker"
+        } == {"akial-antenna"}
+        assert {
+            field: elements["akial-antenna"][field] for field in ("markerType", "x", "y")
+        } == {"markerType": "antenna", "x": width / 2, "y": height / 2}
+        rulers = {a["id"]: a for a in geo["annotations"]}
+        assert rulers["deployment-a-depth"]["target"] == "deployment-a"
+        assert rulers["deployment-b-depth"]["target"] == "deployment-b"
+        ruler = rulers["antenna-from-right"]
+        assert (ruler["x1"], ruler["x2"]) == (width / 2, width)
+        assert ruler["y1"] == ruler["y2"] == height / 2 + (4 if width == 24 else 6)
+        assert ruler["y2"] < height - depth  # no ruler overlaps Deployment Zone B
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geo), theme=theme)
+            assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 1
+            assert 'id="antenna-from-right"' in svg
+            assert f'data-distance-inches="{width / 2:g}"' in svg
+            assert "antenna" in svg
+
+
+def test_akial_interference_rejects_antenna_outside_table() -> None:
+    record = deepcopy(_records()["scenario:akial-interference"])
+    geo = record["facts"]["configurations"][0]["geometry"]
+    next(e for e in geo["elements"] if e["id"] == "akial-antenna")["x"] = 100
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

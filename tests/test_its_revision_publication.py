@@ -53,7 +53,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         ("2026.09.11", [
             "crossing-lines", "double-bind", "the-dig", "annihilation",
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
-            "b-pong",
+            "b-pong", "akial-interference",
         ]),
     ):
         status, _, payload = _json(
@@ -71,7 +71,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 10
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 11
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -368,6 +368,62 @@ def test_b_pong_api_all_game_sizes_and_historical_isolation(two_revisions) -> No
 
     assert _json(
         app, "/api/scenarios/b-pong?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+
+def test_akial_interference_api_six_sizes_sources_and_historical_isolation(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:akial-interference", "2026.09.01",
+    )) is None
+    for points, width, height, depth in (
+        (150, 24, 32, 8), (200, 32, 48, 12), (250, 32, 48, 12),
+        (300, 48, 48, 12), (350, 48, 48, 12), (400, 48, 48, 12),
+    ):
+        uri = (
+            f"/api/scenarios/akial-interference?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == points / 50
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        antenna = elements["akial-antenna"]
+        assert (antenna["x"], antenna["y"]) == (width / 2, height / 2)
+        assert len(item["placement"]["marker_dimensions"]) == 1
+        assert {
+            m["marker_type"]: (m["count"], m["diameter_mm"])
+            for m in item["placement"]["marker_dimensions"]
+        } == {"antenna": (1, 40)}
+        assert [c["page"] for c in item["citations"]] == [92, 93, 94, 95, 96] * 2
+        assert {o["id"]: o["maximumPoints"] for o in item["objectives"]} == {
+            "common-classified": 6, "more-classified": 1,
+            "classified-every-round": 1, "private-classified": 2,
+        }
+        assert [i["id"] for i in item["source_issues"]] == [
+            "emit-once-per-round-vs-retries",
+        ]
+        svg_uri = uri.replace(
+            "/api/scenarios/akial-interference?",
+            "/api/scenarios/akial-interference/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
+        assert svg_status == 200
+        assert svg.count(b'data-marker-type="antenna" data-diameter-mm="40"') == 1
+        assert b'id="antenna-from-right"' in svg
+
+    assert _json(
+        app, "/api/scenarios/akial-interference?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 

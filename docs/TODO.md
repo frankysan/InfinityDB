@@ -377,8 +377,8 @@ additional Season 18 missions remain open. See
     `its-18@2026.09.01` for historically scoped results. Extend typed
     geometry, scoring and card/classified choices only where each mission
     needs them. Unpublished missions must fail closed.
-    Ten reviewed hotfix missions are currently published, including Hardlock and
-    B-Pong; remaining missions stay excluded until their source-backed
+    Eleven reviewed hotfix missions are currently published, including Hardlock,
+    B-Pong and Akial Interference; remaining missions stay excluded until their source-backed
     definitions are reviewed.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
     season launched under N5) and ITS Season 16 Part II (the N5-compatible

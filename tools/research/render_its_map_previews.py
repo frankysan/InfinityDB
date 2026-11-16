@@ -72,6 +72,7 @@ def _raster_friendly_svg(svg: str, colors: dict[str, str], *, theme: str, width:
                       for element in markers)
     has_tracking_beacon = any(element.get("data-marker-type") == "tracking-beacon"
                               for element in markers)
+    has_akial_antenna = any(element.get("id") == "akial-antenna" for element in markers)
     has_tech_coffin = any(element.get("data-marker-type") == "tech-coffin"
                           for element in markers)
     for element in root.iter():
@@ -95,7 +96,9 @@ def _raster_friendly_svg(svg: str, colors: dict[str, str], *, theme: str, width:
                 "stroke": ("#f5b6b9" if is_a else "#c4eafd") if theme == "dark"
                           else ("#8f1520" if is_a else "#15577c"),
             })
-        if has_tech_coffin and element.get("data-marker-type") in {"antenna", "tech-coffin"}:
+        if (has_tech_coffin or has_akial_antenna) and element.get("data-marker-type") in {
+            "antenna", "tech-coffin",
+        }:
             role = element.get("data-marker-type")
             if role == "antenna":
                 element.attrib.update({

@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (ten reviewed hotfix missions).
+`its-18@2026.09.11` (eleven reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Ten missions are published with independent revision selection:
+Eleven missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -118,8 +118,20 @@ Ten missions are published with independent revision selection:
   origins, activation restrictions, scoring timing and Magnetize wording are
   preserved as five explicit bilingual source issues (EN pp. 59–62,
   ES pp. 58–62). No Quarter removes Retreat! without changing other missions.
+- **Akial Interference:** One 40 mm Akial Antenna on the table centerline,
+  source-matched 8-/12-inch opposite-edge Deployment Zones and center-placement
+  rulers for all six game sizes. Score up to six Common Classified Objectives,
+  one point for completing more Classified Objectives at game end, one total
+  point for completing at least one in each of the three Game Rounds (even if
+  subsequently canceled), and two points for one Private Classified Objective.
+  Rules capture round-by-round public Common cards, private selection, matching
+  card redundancy, four HVTs per player, Secure HVT exclusion, Emits/Filters,
+  Specialist Troops, three-round ending and Retreat! termination. The competing
+  p. 95 clauses about one Emit per Trooper per round and retrying failed WIP
+  Rolls are recorded as a source issue, not reconciled by inference. Sources:
+  EN pp. 92–96 and ES pp. 92–96. The original publication is unchanged.
 
-All ten missions share the existing geometry parser, model and SVG
+All eleven missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of

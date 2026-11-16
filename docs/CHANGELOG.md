@@ -12,7 +12,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Added ten source-cited ITS Season 18 missions from the September hotfix
+- Added eleven source-cited ITS Season 18 missions from the September hotfix
   revision, with game-size maps and scoring. The original September 1
   Battleground publication remains separately selectable.
 - Double Bind now distinguishes its three alternative Main Objective sets;
@@ -25,7 +25,7 @@ are not retroactively relabeled.
   2026 ITS Season 18 hotfix as a separately selected season revision, alongside
   the preserved September 1 Battleground. Added Crossing Lines, Double Bind,
   The Dig, Annihilation, Cutthroat, Superiority, Uplink Center, Hardlock and
-  B-Pong, with reviewed source citations, scoring, geometry,
+  B-Pong and Akial Interference, with reviewed source citations, scoring, geometry,
   special rules and source discrepancies; retained Battleground in both versions.
   Double Bind exposes mutually exclusive Main Objective sets in the scenario
   viewer, and the shared map renderer supports circular and corner deployment
@@ -34,6 +34,9 @@ are not retroactively relabeled.
   labels are corrected, and antenna/Console/deployment-radius placement
   rulers are now visible. B-Pong distinguishes the Tracking Beacon from
   Consoles and records conflicting bilingual marker-size and movement rules.
+  Akial Interference documents the shared/private Classified Objective workflow,
+  Emission and Signal Filtering at its central Antenna, and source ambiguity
+  about failed attempts versus per-round activation limits.
   This expands partial Season 18 coverage, not the
   complete mission set.
 

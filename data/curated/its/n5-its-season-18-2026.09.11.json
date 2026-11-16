@@ -43,6 +43,9 @@
       },
       {
         "scenarioId": "scenario:b-pong"
+      },
+      {
+        "scenarioId": "scenario:akial-interference"
       }
     ]
   },
@@ -9030,6 +9033,740 @@
           "sourceId": "its-season-18-es-pdf",
           "page": 62,
           "section": "B-Pong"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-16"
+      }
+    },
+    {
+      "id": "scenario:akial-interference",
+      "kind": "scenario",
+      "name": "Akial Interference",
+      "summary": "ITS Season 18 mission suitable for Reinforcements. Accomplish and protect Common Classified Objectives, use the central Akial Antenna to cancel or refresh cards, and score a private Classified Objective.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Side A"
+            },
+            {
+              "id": "side-b",
+              "name": "Side B"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "common-classified",
+              "name": "Complete Common Classified Objectives",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "cumulative",
+              "maximumPoints": 6,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Score 1 Objective Point for each Common Classified Objective you have accomplished that has not been canceled by Akial Interference, up to 6 points."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "more-classified",
+              "name": "Complete More Classified Objectives",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At the end of the game, have accomplished more Classified Objectives than your opponent; only accomplishments still valid under the mission's Akial Interference rules count for the final score."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "classified-every-round",
+              "name": "Complete a Classified Objective in Every Round",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Have accomplished at least one Classified Objective in each of the three Game Rounds. This is 1 Objective Point total, even if a qualifying objective was later canceled by Akial Interference."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "private-classified",
+              "name": "Private Classified Objective",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Complete your single Private Classified Objective for 2 Objective Points. This card cannot be canceled or spent to Emit Akial Interference."
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "deployment",
+              "name": "Forces and Deployment",
+              "paragraphs": [
+                "Both sides deploy at opposite table edges in the three published table-size configurations. The Deployment Zone depth is [[distance:8:inch]] at 150 Army Points and [[distance:12:inch]] at 200–400 Army Points.",
+                "It is not permitted to deploy in Silhouette contact with the central Akial Antenna or any HVT. HVT locations are selected by players under normal HVT deployment rules; no fixed HVT coordinates appear on the official maps."
+              ]
+            },
+            {
+              "id": "common-classified",
+              "name": "Common Classified Objectives",
+              "paragraphs": [
+                "Both players share two public Common Classified Objectives in each Game Round, one initially selected from each player's Classified Deck. In the first Game Round, each player shuffles their deck in front of the opponent, draws two cards and selects one Private Classified Objective and one Common Classified Objective. Both Common cards are revealed simultaneously.",
+                "At the beginning of Rounds 2 and 3, discard current Common Classified cards that neither player accomplished, and move accomplished cards aside to preserve each player's completed record. Each player then draws two cards, chooses one as the new Common Classified Objective and discards the other.",
+                "Common Classified Objectives that normally say 'at the end of the game' or 'during the game' may be accomplished at the end of any Player Turn, but only after they have been drawn as Common cards. Both players can accomplish the same Common card in the same Round. When a deck is empty, reshuffle its discard pile.",
+                "Use Player A and Player B Tokens to distinguish which player accomplished each Common card. Only accomplished Common cards count towards the final Common Classified score, and previously accomplished cards can become invalid when canceled by Akial Interference."
+              ]
+            },
+            {
+              "id": "private-classified",
+              "name": "Private Classified Objective",
+              "paragraphs": [
+                "Each player has one Private Classified Objective chosen from their initial draw. Its identity is Private Information. A Private Classified Objective cannot be used to Emit Akial Interference and cannot be canceled by the effect. Completing it is worth 2 Objective Points."
+              ]
+            },
+            {
+              "id": "signal-redundancy",
+              "name": "Signal Redundancy",
+              "paragraphs": [
+                "If, when Common Classified Objectives are revealed in any Game Round, both have the same name, the player with the first Player Turn draws another card and adds it as an extra Common Classified Objective.",
+                "Two cards with the same name, Common or Private, may both be accomplished in the same Player Turn only when they have different targets or different Troopers accomplish them."
+              ]
+            },
+            {
+              "id": "multiple-hvts",
+              "name": "Multiple HVTs and Secure HVT",
+              "paragraphs": [
+                "Each player deploys four HVTs under the standard HVT deployment rules. Each HVT may be used for only one Classified Objective. When an objective targeting an HVT is completed, remove that HVT Model from the table.",
+                "Secure HVT does not apply in Akial Interference."
+              ]
+            },
+            {
+              "id": "akial-antenna",
+              "name": "Akial Antenna",
+              "paragraphs": [
+                "One Akial Antenna starts at the exact center of the table. Represent it with a Transmission Antenna Token or a scenery piece with a 40 mm physical diameter.",
+                "This Antenna is the contact target for the two Akial scenario Skills; it is not itself a scoring objective."
+              ]
+            },
+            {
+              "id": "emit-akial-interference",
+              "name": "Emit Akial Interference",
+              "paragraphs": [
+                "Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with the Akial Antenna may declare Emit Akial Interference if their player has accomplished a Common Classified Objective bearing one of the four pictured symbols (cross, gear, globe, reticle; see EN/ES p. 95). Each qualifying completed Common card may be selected only once for this Skill.",
+                "Spend one Short Skill and make a Normal WIP Roll. The source permits failed Rolls to be retried by spending more Short Skills, but also states that each Specialist Troop may only Emit Akial Interference once per Game Round; the attempted-versus-successful limit is not explicitly reconciled.",
+                "After success, the player may cancel an opponent's accomplished Common Classified Objective if it shares a symbol with a Common Classified Objective previously accomplished by the player. The opponent no longer counts that completion. If neither player has accomplished the chosen card, discard it.",
+                "Only accomplished Common Classified Objectives contribute to the Common score total or can be selected for Emit Akial Interference. Private Classified Objectives are excluded."
+              ]
+            },
+            {
+              "id": "filter-signal",
+              "name": "Filter the Signal",
+              "paragraphs": [
+                "Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with the Akial Antenna may Filter the Signal without making a Roll.",
+                "Choose one of the current Common Classified Objective cards. If either player has accomplished it, move the card to the accomplished area and retain that result. Otherwise, discard it. Draw one replacement card from the player's own Classified Deck."
+              ]
+            },
+            {
+              "id": "specialist-troops",
+              "name": "Specialist Troops",
+              "paragraphs": [
+                "Only Hackers, Doctors, Engineers, Forward Observers, Paramedics and Troopers with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] count as Specialist Troops for this mission.",
+                "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models for mission tasks reserved for Specialist Troops."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            },
+            {
+              "id": "retreat",
+              "checkAt": "tactical-phase",
+              "finishAt": "end-of-player-turn",
+              "condition": {
+                "kind": "reviewed-prose",
+                "text": "If either player starts their Active Turn in a Retreat! situation, the game ends at the end of that Player Turn."
+              }
+            }
+          ],
+          "sourceIssues": [
+            {
+              "id": "emit-once-per-round-vs-retries",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "common-classified",
+              "status": "needs-verification",
+              "description": "EN/ES p. 95 both limit each Specialist Troop to Emit Akial Interference once per Game Round while allowing repeated failed WIP attempts. The text does not explicitly establish whether the once-per-round restriction counts attempts or successful emissions; no automatic rule is inferred."
+            }
+          ]
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Akial Interference",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 8
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 24,
+                  "y2": 32
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 16,
+                  "x2": 24,
+                  "y2": 16
+                },
+                {
+                  "id": "akial-antenna",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 12,
+                  "y": 16
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 4.4,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 28.4,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "antenna-from-right",
+                  "kind": "ruler",
+                  "x1": 12,
+                  "y1": 20,
+                  "x2": 24,
+                  "y2": 20,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Akial Interference",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 32,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 32,
+                  "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 32,
+                  "y2": 24
+                },
+                {
+                  "id": "akial-antenna",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 16,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.4,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 42.4,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "antenna-from-right",
+                  "kind": "ruler",
+                  "x1": 16,
+                  "y1": 30,
+                  "x2": 32,
+                  "y2": 30,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Akial Interference",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 48,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 48,
+                  "y2": 48
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 48,
+                  "y2": 24
+                },
+                {
+                  "id": "akial-antenna",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 24,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 6.4,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": {
+                    "anchor": "center"
+                  },
+                  "y": 42.4,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-a-depth",
+                  "kind": "dimension",
+                  "target": "deployment-a",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "dimension",
+                  "target": "deployment-b",
+                  "axis": "y",
+                  "side": "end",
+                  "offset": 0.8
+                },
+                {
+                  "id": "antenna-from-right",
+                  "kind": "ruler",
+                  "x1": 24,
+                  "y1": 30,
+                  "x2": 48,
+                  "y2": 30,
+                  "offset": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 92,
+          "section": "Akial Interference"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 93,
+          "section": "Akial Interference"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 94,
+          "section": "Akial Interference"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 95,
+          "section": "Akial Interference"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 96,
+          "section": "Akial Interference"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 92,
+          "section": "Interferencia Akial"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 93,
+          "section": "Interferencia Akial"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 94,
+          "section": "Interferencia Akial"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 95,
+          "section": "Interferencia Akial"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 96,
+          "section": "Interferencia Akial"
         }
       ],
       "review": {

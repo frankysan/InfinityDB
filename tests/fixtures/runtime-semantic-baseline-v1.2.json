@@ -80,12 +80,12 @@
     {
       "kind": "json",
       "path": "/api/scenarios",
-      "semanticSha256": "35b7f228277fef3086e7e1f61a980ccf2f94bc1c975996b70219046df4c3bbe4"
+      "semanticSha256": "54582b00bc023d5e475ea4ccb24c1e6001706a707dc4353bf2a9a0f3159dfafb"
     },
     {
       "kind": "json",
       "path": "/api/scenarios?collection=its-18&revision=2026.09.01",
-      "semanticSha256": "828b86452967fdfc45cb710b2400cca750dd79a45890d8639b222cfb9d8650cd"
+      "semanticSha256": "fa9ea63853f6a5c7afa57770c51cd578a36aa53e5859b6a2795e3d951113387c"
     },
     {
       "kind": "json",

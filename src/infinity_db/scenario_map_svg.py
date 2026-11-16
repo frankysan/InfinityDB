@@ -108,7 +108,7 @@ _TRACKING_BEACON_CSS = """\
 svg[data-theme="dark"] .objective[data-marker-type="tracking-beacon"]{fill:#75b9ec;stroke:#c6e9ff}
 svg[data-theme="dark"] .objective[data-marker-type="console"]{fill:#6aa968;stroke:#b7ebb0}
 """
-_UPLINK_MARKER_CSS = """.objective[data-marker-type="antenna"]{fill:#f7c86a;stroke:#b97b09}
+_ANTENNA_TECH_MARKER_CSS = """.objective[data-marker-type="antenna"]{fill:#f7c86a;stroke:#b97b09}
 .objective[data-marker-type="tech-coffin"]{fill:#a99ac5;stroke:#6d4d91}
 svg[data-theme="dark"] .objective[data-marker-type="antenna"]{fill:#97741e;stroke:#efd18d}
 svg[data-theme="dark"] .objective[data-marker-type="tech-coffin"]{fill:#725991;stroke:#dec9f1}
@@ -578,6 +578,10 @@ def render_scenario_map_svg(
         isinstance(element, MarkerElement) and element.marker_type == "beacon"
         for element in geometry.elements
     )
+    has_akial_antenna = any(
+        isinstance(element, MarkerElement) and element.id == "akial-antenna"
+        for element in geometry.elements
+    )
     has_tech_coffin = any(
         isinstance(element, MarkerElement) and element.marker_type == "tech-coffin"
         for element in geometry.elements
@@ -585,7 +589,7 @@ def render_scenario_map_svg(
     extra_style = (
         (_EXCLUSION_CSS if has_exclusion else "")
         + (_SPECIAL_ZONE_CSS if has_special_zones else "")
-        + (_UPLINK_MARKER_CSS if has_tech_coffin else "")
+        + (_ANTENNA_TECH_MARKER_CSS if has_tech_coffin or has_akial_antenna else "")
         + (_BEACON_MARKER_CSS if has_beacons else "")
         + (_TRACKING_BEACON_CSS if has_tracking_beacon else "")
         + (_RULER_CSS if has_rulers else "")
