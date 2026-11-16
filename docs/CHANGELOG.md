@@ -12,7 +12,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Added seventeen source-cited ITS Season 18 missions from the September hotfix
+- Added eighteen source-cited ITS Season 18 missions from the September hotfix
   revision, with game-size maps and scoring. The original September 1
   Battleground publication remains separately selectable.
 - Double Bind now distinguishes its three alternative Main Objective sets;
@@ -26,7 +26,8 @@ are not retroactively relabeled.
   the preserved September 1 Battleground. Added Crossing Lines, Double Bind,
   The Dig, Annihilation, Cutthroat, Superiority, Uplink Center, Hardlock and
   B-Pong, Akial Interference, Evacuation, Neutralization, Provisioning and
-  Area of Interest, Data-Harvest and Last Launch, with reviewed source citations, scoring, geometry,
+  Area of Interest, Data-Harvest, Last Launch and Corporate Appropriation,
+  with reviewed source citations, scoring, geometry,
   special rules and source discrepancies;
   retained Battleground in both versions.
   Double Bind exposes mutually exclusive Main Objective sets in the scenario
@@ -55,8 +56,10 @@ are not retroactively relabeled.
   Zones, and per-round/at-game-end activation and neutralization scoring.
   Last Launch adds ID Scanners and Checker, an 8-inch Launching Tower with
   highlighted No Deployment area, Trooper extraction, specialist comparisons,
-  and No Quarter. This expands partial Season 18 coverage, not the
-  complete mission set.
+  and No Quarter. Corporate Appropriation adds paired Prototypes and Panoplies,
+  exclusive own-Prototype scoring, the ADS profile, Panoply Chart, and
+  physical marker dimensions. This expands partial Season 18 coverage,
+  not the complete mission set.
 
 ## [1.1.0] - 2026-11-15
 

@@ -85,6 +85,8 @@ _MARKER_LABELS = {
     "antenna": "Transmission Antenna Token",
     "tech-coffin": "Tech-Coffin Token",
     "hyperthermal-tech": "Hyperthermal Tech Token",
+    "prototype": "Prototype (Objective Token)",
+    "panoply": "Panoply (Objective Token)",
     "beacon": "Beacon Token",
     "tracking-beacon": "Tracking Beacon Token",
     "civilian": "Civilian Model or Token",
@@ -137,8 +139,11 @@ class ScenarioCatalog:
     def _marker_size_source(self, revision: str | None = None) -> dict[str, Any]:
         """Source attribution for shared marker sizes, not mission ownership."""
         if self.publication_registry is not None:
+            # The September hotfix moved the shared token diameter chart
+            # from p.17 to p.18; keep historical citations version-pinned.
+            chart_page = 18 if revision == "2026.09.11" else 17
             citation = self.publication_registry.source_citation(
-                season_id="its-18", source_id="its-season-18-en-pdf", page=17,
+                season_id="its-18", source_id="its-season-18-en-pdf", page=chart_page,
                 revision=revision,
             )
             if citation is not None:

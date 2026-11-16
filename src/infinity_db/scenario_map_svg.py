@@ -117,6 +117,12 @@ _ANTENNA_TECH_MARKER_CSS = """.objective[data-marker-type="antenna"]{fill:#f7c86
 svg[data-theme="dark"] .objective[data-marker-type="antenna"]{fill:#97741e;stroke:#efd18d}
 svg[data-theme="dark"] .objective[data-marker-type="tech-coffin"]{fill:#725991;stroke:#dec9f1}
 """
+_PROTOTYPE_PANOPLY_CSS = """\
+.objective[data-marker-type="prototype"]{fill:#da79a6;stroke:#a33e70}
+.objective[data-marker-type="panoply"]{fill:#64b7c0;stroke:#25757c}
+svg[data-theme="dark"] .objective[data-marker-type="prototype"]{fill:#a85988;stroke:#f2adce}
+svg[data-theme="dark"] .objective[data-marker-type="panoply"]{fill:#468b99;stroke:#b0e5ed}
+"""
 _EVACUATION_MARKER_CSS = """\
 .objective[data-marker-type="civilian"]{fill:#74c9e6;stroke:#237ca7}
 .objective[data-marker-type="console"]{fill:#84ca7a;stroke:#377735}
@@ -602,6 +608,11 @@ def render_scenario_map_svg(
         isinstance(element, MarkerElement) and element.marker_type == "tech-coffin"
         for element in geometry.elements
     )
+    has_prototype_panoply = any(
+        isinstance(element, MarkerElement)
+        and element.marker_type in {"prototype", "panoply"}
+        for element in geometry.elements
+    )
     extra_style = (
         (_NO_DEPLOY_CSS if "no-deploy" in styles else "")
         + (_EXCLUSION_CSS if has_exclusion else "")
@@ -610,6 +621,7 @@ def render_scenario_map_svg(
         + (_BEACON_MARKER_CSS if has_beacons else "")
         + (_TRACKING_BEACON_CSS if has_tracking_beacon else "")
         + (_EVACUATION_MARKER_CSS if has_civilians else "")
+        + (_PROTOTYPE_PANOPLY_CSS if has_prototype_panoply else "")
         + (_RULER_CSS if has_rulers else "")
     )
     defs = _EXCLUSION_DEFS if has_exclusion else ""

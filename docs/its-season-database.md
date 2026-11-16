@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (seventeen reviewed hotfix missions).
+`its-18@2026.09.11` (eighteen reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Seventeen missions are published with independent revision selection:
+Eighteen missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -204,8 +204,23 @@ Seventeen missions are published with independent revision selection:
   end condition are documented. Three source discrepancies preserve the
   English/Spanish tower-size, gate-access and Peripheral-point wording
   (EN pp. 115–120; ES pp. 116–121).
+- **Corporate Appropriation:** Two fixed 40 mm Prototypes at quarter-width
+  centerline positions, two 40 mm Panoplies at the Deployment Zone inner
+  edges, and a central striped 4-inch-per-side Exclusion Zone. All six
+  game sizes use the 8-/12-inch Deployment Zone depths and three source
+  map configurations. Opponents capture each other's Prototypes or
+  destroy their own; the 3 OP Destroyed-own-Prototype outcome is
+  mutually exclusive with the 1 OP intact-and-uncaptured outcome. Other
+  awards cover capturing the enemy Prototype (2 OP, plus 1 OP if home),
+  more Panoply acquisitions (1 OP), and three Classified Objectives
+  (3 OP). The curation includes the ARM/BTS/STR/ADS defense Profile,
+  Anti-materiel/D-Charge restrictions, carrying and dropping, the
+  complete D20 Panoply Chart, and both three-round/Retreat! endings.
+  Three bilingual differences remain explicit: targeting restrictions,
+  ADS CC MODs, and capture disqualification when contacting enemy
+  Models (EN pp. 53–58; ES pp. 52–57).
 
-All seventeen missions share the existing geometry parser, model and SVG
+All eighteen missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of

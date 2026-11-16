@@ -1517,6 +1517,129 @@ def test_last_launch_invalid_scoring_or_geometry_fails_closed(mutation: str) -> 
     with pytest.raises(ScenarioDefinitionError):
         parse_scenario_definition_record(record)
 
+
+def test_corporate_appropriation_prototype_outcomes_panoplies_and_geometry() -> None:
+    record = _records()["scenario:corporate-appropriation"]
+    mission, configurations = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *(("its-season-18-en-pdf", p) for p in range(53, 59)),
+        *(("its-season-18-es-pdf", p) for p in range(52, 58)),
+    ]
+    objectives = {item["id"]: item for item in mission["objectives"]}
+    assert {key: value["maximumPoints"] for key, value in objectives.items()} == {
+        "capture-enemy-prototype": 2,
+        "bring-enemy-prototype-home": 1,
+        "own-prototype-outcome": 3,
+        "more-panoply-gear": 1,
+        "classified-objectives": 3,
+    }
+    assert sum(item["maximumPoints"] for item in objectives.values()) == 10
+    assert [award["objectivePoints"] for award in
+            objectives["own-prototype-outcome"]["awards"]] == [3, 1]
+    assert objectives["own-prototype-outcome"]["aggregation"] == "exclusive"
+    assert objectives["classified-objectives"]["aggregation"] == "cumulative"
+    assert objectives["classified-objectives"]["awards"][0]["objectivePoints"] == 1
+    assert all(item["timing"] == "end-of-game" for item in objectives.values())
+    assert [size["swc"] for size in mission["gameSizes"]] == [3, 4, 5, 6, 7, 8]
+
+    rules = {item["id"]: " ".join(item["paragraphs"]) for item in mission["rules"]}
+    assert "[[distance:4:inch]]" in rules["forces-exclusion"]
+    assert "second Turn" in rules["prototype-profile"]
+    assert "ARM 6, BTS 6, STR 3" in rules["prototype-profile"]
+    assert "Fixed CC Roll = 8" in rules["prototype-profile"]
+    assert "Face to Face" in rules["automated-defense-system"]
+    assert "Stun Ammunition" in rules["automated-defense-system"]
+    assert "PS 5" in rules["automated-defense-system"]
+    assert "Anti-materiel Trait" in rules["destroy-prototypes"]
+    assert "first Game Round" in rules["destroy-prototypes"]
+    assert "without a Roll" in rules["pick-up-prototype"]
+    assert "unless possessing Baggage" in rules["common-prototype-rules"]
+    assert "non-Null Model" in rules["capture-prototype"]
+    assert "Booty Troops" in rules["panoplies"]
+    assert "Unloaded State" in rules["panoplies"]
+    assert "20: TAG" in rules["panoply-chart"]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert [end["id"] for end in mission["endConditions"]] == [
+        "round-limit", "retreat",
+    ]
+    assert {issue["id"] for issue in mission["sourceIssues"]} == {
+        "prototype-targeting-bilingual", "ads-mod-bilingual",
+        "captured-contact-bilingual",
+    }
+    assert all(issue["status"] == "needs-verification" for issue in mission["sourceIssues"])
+
+    for configuration, width, height, depth in (
+        ("150-points", 24, 32, 8),
+        ("200-250-points", 32, 48, 12),
+        ("300-400-points", 48, 48, 12),
+    ):
+        geometry = configurations[configuration]
+        elements = {element["id"]: element for element in geometry["elements"]}
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert elements["exclusion-zone"] == {
+            "id": "exclusion-zone", "kind": "rectangle", "style": "exclusion",
+            "x1": 0, "y1": height / 2 - 4, "x2": width, "y2": height / 2 + 4,
+        }
+        assert {e["id"] for e in elements.values() if e["kind"] == "marker"} == {
+            "prototype-left", "prototype-right", "panoply-a", "panoply-b",
+        }
+        assert [(elements[key]["x"], elements[key]["y"]) for key in (
+            "prototype-left", "prototype-right", "panoply-a", "panoply-b",
+        )] == [
+            (width / 4, height / 2), (width * 3 / 4, height / 2),
+            (width / 2, depth), (width / 2, height - depth),
+        ]
+        assert {elements[key]["markerType"] for key in (
+            "prototype-left", "prototype-right",
+        )} == {"prototype"}
+        assert {elements[key]["markerType"] for key in (
+            "panoply-a", "panoply-b",
+        )} == {"panoply"}
+        annotations = {a["id"]: a for a in geometry["annotations"]}
+        assert annotations["exclusion-half-width"]["y1"] == height / 2 - 4
+        assert annotations["prototype-left-from-edge"]["x2"] == width / 4
+        assert annotations["prototype-right-from-edge"]["x1"] == width * 3 / 4
+        assert annotations["deployment-b-depth"]["y1"] == height - depth
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
+            assert svg.count('data-marker-type="prototype" data-diameter-mm="40"') == 2
+            assert svg.count('data-marker-type="panoply" data-diameter-mm="40"') == 2
+            assert 'id="exclusion-zone" class="exclusion"' in svg
+            assert "scenario-exclusion-hatch" in svg
+            for length in (4, width / 4, depth):
+                assert f'data-distance-inches="{length:g}"' in svg
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ("off-table-prototype", "off-table-panoply", "invalid-exclusion", "invalid-own-outcome"),
+)
+def test_corporate_appropriation_invalid_geometry_or_scoring_fails_closed(
+    mutation: str,
+) -> None:
+    record = deepcopy(_records()["scenario:corporate-appropriation"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    if mutation == "off-table-prototype":
+        next(e for e in geometry["elements"] if e["id"] == "prototype-left")[
+            "x"
+        ] = -10
+    elif mutation == "off-table-panoply":
+        next(e for e in geometry["elements"] if e["id"] == "panoply-a")[
+            "x"
+        ] = 60
+    elif mutation == "invalid-exclusion":
+        next(e for e in geometry["elements"] if e["id"] == "exclusion-zone")[
+            "y2"
+        ] = -1
+    else:
+        record["facts"]["mission"]["objectives"][2]["awards"][0][
+            "objectivePoints"
+        ] = 4
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

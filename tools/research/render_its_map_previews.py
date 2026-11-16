@@ -83,6 +83,14 @@ def _raster_friendly_svg(svg: str, colors: dict[str, str], *, theme: str, width:
     for element in root.iter():
         for klass in element.get("class", "").split():
             element.attrib.update(palette.get(klass, {}))
+        if element.get("data-marker-type") in {"prototype", "panoply"}:
+            prototype = element.get("data-marker-type") == "prototype"
+            element.attrib.update({
+                "fill": ("#a85988" if prototype else "#468b99") if theme == "dark"
+                        else ("#da79a6" if prototype else "#64b7c0"),
+                "stroke": ("#f2adce" if prototype else "#b0e5ed") if theme == "dark"
+                          else ("#a33e70" if prototype else "#25757c"),
+            })
         if has_civilians and element.get("data-marker-type") == "civilian":
             element.attrib.update({
                 "fill": "#83d5eb" if theme == "dark" else "#74c9e6",

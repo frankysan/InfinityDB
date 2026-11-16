@@ -21,6 +21,8 @@ _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "antenna": 40.0,
     "tech-coffin": 40.0,
     "hyperthermal-tech": 25.0,
+    "prototype": 40.0,
+    "panoply": 40.0,
 }
 
 _ELEMENT_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")

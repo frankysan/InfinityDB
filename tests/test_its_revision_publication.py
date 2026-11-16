@@ -55,6 +55,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
             "b-pong", "akial-interference", "evacuation", "neutralization",
             "provisioning", "area-of-interest", "data-harvest", "last-launch",
+            "corporate-appropriation",
         ]),
     ):
         status, _, payload = _json(
@@ -72,7 +73,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 17
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 18
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -814,6 +815,81 @@ def test_last_launch_six_sizes_tower_scanners_and_historical_isolation(
 
     assert _json(
         app, "/api/scenarios/last-launch?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+def test_corporate_appropriation_prototype_panoply_six_sizes_and_revision_isolation(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:corporate-appropriation", "2026.09.01",
+    )) is None
+    for points, width, height, depth in (
+        (150, 24, 32, 8),
+        (200, 32, 48, 12),
+        (250, 32, 48, 12),
+        (300, 48, 48, 12),
+        (350, 48, 48, 12),
+        (400, 48, 48, 12),
+    ):
+        uri = (
+            f"/api/scenarios/corporate-appropriation?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == points // 50
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {el["id"]: el for el in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert elements["exclusion-zone"]["y1"] == height / 2 - 4
+        assert elements["exclusion-zone"]["y2"] == height / 2 + 4
+        assert {e["id"] for e in elements.values() if e["kind"] == "marker"} == {
+            "prototype-left", "prototype-right", "panoply-a", "panoply-b",
+        }
+        assert {m["marker_type"]: (m["count"], m["diameter_mm"])
+                for m in item["placement"]["marker_dimensions"]} == {
+            "prototype": (2, 40), "panoply": (2, 40),
+        }
+        assert all(
+            marker["citation"]["page"] == 18
+            for marker in item["placement"]["marker_dimensions"]
+        )
+        assert [(elements[key]["x"], elements[key]["y"]) for key in (
+            "prototype-left", "prototype-right", "panoply-a", "panoply-b",
+        )] == [
+            (width / 4, height / 2), (width * 3 / 4, height / 2),
+            (width / 2, depth), (width / 2, height - depth),
+        ]
+        assert [(c["page"]) for c in item["citations"]] == [
+            *range(53, 59), *range(52, 58),
+        ]
+        assert {o["id"]: o["maximumPoints"] for o in item["objectives"]} == {
+            "capture-enemy-prototype": 2, "bring-enemy-prototype-home": 1,
+            "own-prototype-outcome": 3, "more-panoply-gear": 1,
+            "classified-objectives": 3,
+        }
+        assert len(item["source_issues"]) == 3
+        svg_uri = uri.replace(
+            "/api/scenarios/corporate-appropriation?",
+            "/api/scenarios/corporate-appropriation/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
+        assert svg_status == 200
+        assert b'id="exclusion-zone" class="exclusion"' in svg
+        assert svg.count(b'data-marker-type="prototype" data-diameter-mm="40"') == 2
+        assert svg.count(b'data-marker-type="panoply" data-diameter-mm="40"') == 2
+        for length in (depth, 4, width / 4):
+            assert f'data-distance-inches="{length:g}"'.encode() in svg
+
+    assert _json(
+        app, "/api/scenarios/corporate-appropriation?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 

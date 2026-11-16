@@ -64,6 +64,9 @@
       },
       {
         "scenarioId": "scenario:last-launch"
+      },
+      {
+        "scenarioId": "scenario:corporate-appropriation"
       }
     ]
   },
@@ -14938,6 +14941,950 @@
       "review": {
         "status": "reviewed",
         "reviewedOn": "2026-11-16"
+      }
+    },
+    {
+      "id": "scenario:corporate-appropriation",
+      "kind": "scenario",
+      "name": "Corporate Appropriation",
+      "summary": "Capture or destroy opposing Prototypes, loot two Panoplies and complete three Classified Objectives under an automated Prototype defense system.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Side A"
+            },
+            {
+              "id": "side-b",
+              "name": "Side B"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "capture-enemy-prototype",
+              "name": "Capture Enemy Prototype",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, capture the enemy Prototype: have a non-Null Model, not a Marker, carrying it without Silhouette contact with an enemy non-Null Model."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "bring-enemy-prototype-home",
+              "name": "Capture Enemy Prototype in Deployment",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "In addition to the 2-point Capture objective, at game end have the enemy Prototype Captured by a qualifying Model inside your own Deployment Zone."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "own-prototype-outcome",
+              "name": "Own Prototype Outcome",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end your own Prototype is Destroyed. This is the alternative 3-point outcome for your own Prototype, rather than the 1-point non-captured and non-destroyed award."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, your own Prototype has neither been Destroyed nor Captured by the enemy. This 1-point award is exclusive of the 3-point Destroyed outcome."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "more-panoply-gear",
+              "name": "Acquire More Panoply Items",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, your Troops have obtained more weapons or pieces of equipment from the two Panoplies than the opponent."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "classified-objectives",
+              "name": "Classified Objectives",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "cumulative",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Each completed Classified Objective is worth one point; three Classified Objectives per player, up to 3 points."
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "forces-exclusion",
+              "name": "Forces, Deployment and Exclusion",
+              "paragraphs": [
+                "Players deploy along opposite table edges within the source's game-size-specific Deployment Zones. A central Exclusion Zone spans [[distance:4:inch]] on either side of the table's central horizontal line; Airborne Deployment (AD) and Superior Deployment cannot be used to deploy inside it.",
+                "The two Prototypes are fixed on the centerline at quarter-width points; the two Panoplies lie on the inner edges of Deployment Zones at table mid-width."
+              ]
+            },
+            {
+              "id": "prototype-profile",
+              "name": "Prototype Profile",
+              "paragraphs": [
+                "There are two Prototypes, one belonging to each player, represented by 40 mm Objective Tokens or scenery. Before deployment, the player taking the second Turn decides which physical Prototype belongs to which player.",
+                "Each Prototype has ARM 6, BTS 6, STR 3 and Silhouette 3 (S 3); MOV, CC, BS, PH, WIP, AVA and points/SWC have no printed numerical values. Its Special Skills are Fixed CC Roll = 8 and GizmoKit (PH = 9). Prototypes can be targeted.",
+                "Spanish p. 53 adds that an Attack may target a Prototype only when that Attack does not affect any other enemy or allied Trooper; this qualification is not present in English p. 54."
+              ]
+            },
+            {
+              "id": "automated-defense-system",
+              "name": "Automated Defense System (ADS)",
+              "paragraphs": [
+                "A CC Attack against a Prototype automatically triggers a defending ADS CC Attack with a fixed Roll of 8. The CC Attack is always Face to Face; English p. 55 forbids any attacker CC Attribute MOD, whereas Spanish p. 54 forbids positive MODs only.",
+                "If the ADS roll of 8 succeeds, the attacker suffers a Stun Ammunition hit with PS 5, requiring one BTS Saving Roll. Immunity (Enhanced) and Immunity (BTS) do not protect against this hit."
+              ]
+            },
+            {
+              "id": "destroy-prototypes",
+              "name": "Destroy Prototypes",
+              "paragraphs": [
+                "Prototypes can be damaged only by CC Attacks with the Anti-materiel Trait or by D-Charges. A Prototype is Destroyed and removed once Wounds taken reach its STR 3. The Engineer Special Skill or GizmoKit may be used on Prototypes.",
+                "No Attacks against Prototypes can be declared during the first Game Round, except Pick Up Prototype."
+              ]
+            },
+            {
+              "id": "pick-up-prototype",
+              "name": "Pick Up Enemy Prototype (Short Skill)",
+              "paragraphs": [
+                "Any Trooper in Silhouette contact with an unattended enemy Prototype Token, or an allied Trooper in Normal State carrying that enemy Prototype, can pick it up with one Attack, Scenario Short Skill without a Roll.",
+                "A Trooper may only pick up the enemy Prototype and must obey the Common Rules of Prototypes."
+              ]
+            },
+            {
+              "id": "common-prototype-rules",
+              "name": "Common Rules of Prototypes",
+              "paragraphs": [
+                "A Trooper carrying a Prototype cannot declare Move as the second Basic Short Skill of an Order, unless possessing Baggage. Only Models, never Markers (Camouflage, Impersonation or Holoecho), can carry Prototypes.",
+                "A carried Prototype Token always remains on the table and in Silhouette contact with its carrier. A carrier entering or in a Null State drops the Prototype just outside contact. Prototype Tokens do not block movement or Line of Fire."
+              ]
+            },
+            {
+              "id": "capture-prototype",
+              "name": "Capturing Enemy Prototype",
+              "paragraphs": [
+                "At game end, a player Captures the enemy Prototype by having a non-Null Model (not a Marker) carrying it, with no Silhouette contact with an opposing Model in a non-Null State.",
+                "English p. 56 limits enemy contact to non-Null Models; Spanish p. 55 uses broader enemy Trooper contact language and separately excludes Null-state Models. Both are preserved without silently broadening or narrowing the condition."
+              ]
+            },
+            {
+              "id": "panoplies",
+              "name": "Panoplies",
+              "paragraphs": [
+                "There are two 40 mm Panoplies represented by Objective Tokens or scenery. One is on each side of the table, on the Deployment Zone boundary at the table's lateral center.",
+                "A Trooper in Silhouette contact with a Panoply may spend one Attack, Scenario Short Skill. On a successful Normal WIP Roll, take D-Charges or roll on the Panoply Chart for a different weapon or item. Booty Troops and Troops with an applicable Skill need no WIP Roll.",
+                "After a successful acquisition the same Trooper cannot use that Panoply again. A rolled item already possessed can be rerolled. A Trooper in contact may instead spend one Short Skill to cancel their Unloaded State."
+              ]
+            },
+            {
+              "id": "panoply-chart",
+              "name": "Panoply Chart (D20)",
+              "paragraphs": [
+                "1–2: +1 ARM. 3–4: Light Flamethrower. 5–6: Grenades. 7–8: DA CC Weapon. 9: Multispectral Visor L1. 10: EXP CC Weapon.",
+                "11: Adhesive Launcher Rifle. 12: TAG—Immunity (AP); other Troop Types—+2 ARM. 13: Panzerfaust. 14: Monofilament CC Weapon. 15: MOV 8-4.",
+                "16: TAG—BS Attack (Shock); other Troop Types—MULTI Rifle. 17: MULTI Sniper Rifle. 18: TAG—Immunity (ARM); other Troop Types—+4 ARM. 19: Mimetism (-6). 20: TAG—BS Attack (+1B); other Troop Types—HMG.",
+                "The English and Spanish chart results are equivalent in concept, subject to the sources' normal unit conventions."
+              ]
+            },
+            {
+              "id": "specialist-troops",
+              "name": "Specialist Troops",
+              "paragraphs": [
+                "Only Hackers, Doctors, Engineers, Forward Observers, Paramedics and Troops with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] are Specialist Troops.",
+                "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models for Specialist-only tasks."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            },
+            {
+              "id": "retreat",
+              "checkAt": "tactical-phase",
+              "finishAt": "end-of-player-turn",
+              "condition": {
+                "kind": "reviewed-prose",
+                "text": "If a player begins an Active Turn in Retreat!, the game ends at the end of that Player Turn."
+              }
+            }
+          ],
+          "sourceIssues": [
+            {
+              "id": "prototype-targeting-bilingual",
+              "status": "needs-verification",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "own-prototype-outcome",
+              "description": "Spanish p.53 expressly forbids targeting a Prototype with an Attack affecting another allied or enemy Trooper; English p.54 says only that Prototypes can be targeted."
+            },
+            {
+              "id": "ads-mod-bilingual",
+              "status": "needs-verification",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "own-prototype-outcome",
+              "description": "English p.55 forbids any MODs to the attacker's CC Attribute against a Prototype; Spanish p.54 forbids positive CC Attribute MODs only."
+            },
+            {
+              "id": "captured-contact-bilingual",
+              "status": "needs-verification",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "capture-enemy-prototype",
+              "description": "English p.56 disqualifies capture while the carrier is in Silhouette contact with an enemy non-Null Model; Spanish p.55 has broader contact-with-enemy wording and excludes Null-state Models separately."
+            }
+          ]
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Corporate Appropriation",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 8
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 24,
+                  "y2": 32
+                },
+                {
+                  "id": "exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 12,
+                  "x2": 24,
+                  "y2": 20
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 16,
+                  "x2": 24,
+                  "y2": 16
+                },
+                {
+                  "id": "prototype-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "prototype",
+                  "x": 6,
+                  "y": 16
+                },
+                {
+                  "id": "prototype-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "prototype",
+                  "x": 18,
+                  "y": 16
+                },
+                {
+                  "id": "panoply-a",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "panoply",
+                  "x": 12,
+                  "y": 8
+                },
+                {
+                  "id": "panoply-b",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "panoply",
+                  "x": 12,
+                  "y": 24
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 12,
+                  "y": 4,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 12,
+                  "y": 28,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "ruler",
+                  "x1": 0.8,
+                  "y1": 24,
+                  "x2": 0.8,
+                  "y2": 32,
+                  "offset": 0
+                },
+                {
+                  "id": "prototype-left-from-edge",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 31.05,
+                  "x2": 6,
+                  "y2": 31.05,
+                  "offset": 0
+                },
+                {
+                  "id": "prototype-right-from-edge",
+                  "kind": "ruler",
+                  "x1": 18,
+                  "y1": 31.05,
+                  "x2": 24,
+                  "y2": 31.05,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-half-width",
+                  "kind": "ruler",
+                  "x1": 1.2,
+                  "y1": 12,
+                  "x2": 1.2,
+                  "y2": 16,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Corporate Appropriation",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 32,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 32,
+                  "y2": 48
+                },
+                {
+                  "id": "exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 32,
+                  "y2": 28
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 32,
+                  "y2": 24
+                },
+                {
+                  "id": "prototype-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "prototype",
+                  "x": 8,
+                  "y": 24
+                },
+                {
+                  "id": "prototype-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "prototype",
+                  "x": 24,
+                  "y": 24
+                },
+                {
+                  "id": "panoply-a",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "panoply",
+                  "x": 16,
+                  "y": 12
+                },
+                {
+                  "id": "panoply-b",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "panoply",
+                  "x": 16,
+                  "y": 36
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 16,
+                  "y": 6,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 16,
+                  "y": 42,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "ruler",
+                  "x1": 0.8,
+                  "y1": 36,
+                  "x2": 0.8,
+                  "y2": 48,
+                  "offset": 0
+                },
+                {
+                  "id": "prototype-left-from-edge",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 47.05,
+                  "x2": 8,
+                  "y2": 47.05,
+                  "offset": 0
+                },
+                {
+                  "id": "prototype-right-from-edge",
+                  "kind": "ruler",
+                  "x1": 24,
+                  "y1": 47.05,
+                  "x2": 32,
+                  "y2": 47.05,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-half-width",
+                  "kind": "ruler",
+                  "x1": 1.2,
+                  "y1": 20,
+                  "x2": 1.2,
+                  "y2": 24,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Corporate Appropriation",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 48,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 48,
+                  "y2": 48
+                },
+                {
+                  "id": "exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 48,
+                  "y2": 28
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 48,
+                  "y2": 24
+                },
+                {
+                  "id": "prototype-left",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "prototype",
+                  "x": 12,
+                  "y": 24
+                },
+                {
+                  "id": "prototype-right",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "prototype",
+                  "x": 36,
+                  "y": 24
+                },
+                {
+                  "id": "panoply-a",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "panoply",
+                  "x": 24,
+                  "y": 12
+                },
+                {
+                  "id": "panoply-b",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "panoply",
+                  "x": 24,
+                  "y": 36
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 24,
+                  "y": 6,
+                  "text": "Deployment Zone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 24,
+                  "y": 42,
+                  "text": "Deployment Zone B"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "ruler",
+                  "x1": 0.8,
+                  "y1": 36,
+                  "x2": 0.8,
+                  "y2": 48,
+                  "offset": 0
+                },
+                {
+                  "id": "prototype-left-from-edge",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 47.05,
+                  "x2": 12,
+                  "y2": 47.05,
+                  "offset": 0
+                },
+                {
+                  "id": "prototype-right-from-edge",
+                  "kind": "ruler",
+                  "x1": 36,
+                  "y1": 47.05,
+                  "x2": 48,
+                  "y2": 47.05,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-half-width",
+                  "kind": "ruler",
+                  "x1": 1.2,
+                  "y1": 20,
+                  "x2": 1.2,
+                  "y2": 24,
+                  "offset": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 53,
+          "section": "Corporate Appropriation"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 54,
+          "section": "Corporate Appropriation"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 55,
+          "section": "Corporate Appropriation"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 56,
+          "section": "Corporate Appropriation"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 57,
+          "section": "Corporate Appropriation"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 58,
+          "section": "Corporate Appropriation"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 52,
+          "section": "Apropiación Corporativa"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 53,
+          "section": "Apropiación Corporativa"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 54,
+          "section": "Apropiación Corporativa"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 55,
+          "section": "Apropiación Corporativa"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 56,
+          "section": "Apropiación Corporativa"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 57,
+          "section": "Apropiación Corporativa"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-17"
       }
     }
   ]
