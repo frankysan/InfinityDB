@@ -54,6 +54,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
             "crossing-lines", "double-bind", "the-dig", "annihilation",
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
             "b-pong", "akial-interference", "evacuation", "neutralization",
+            "provisioning",
         ]),
     ):
         status, _, payload = _json(
@@ -71,7 +72,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 13
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 14
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -553,6 +554,68 @@ def test_neutralization_six_sizes_controlled_antennas_and_revision_isolation(
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 
+
+
+def test_provisioning_six_sizes_safe_areas_and_revision_isolation(two_revisions) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:provisioning", "2026.09.01",
+    )) is None
+    for points, width, height, radius, spacing in (
+        (150, 24, 32, 12, 8),
+        (200, 32, 48, 20, 12),
+        (250, 32, 48, 20, 12),
+        (300, 48, 48, 24, 16),
+        (350, 48, 48, 24, 16),
+        (400, 48, 48, 24, 16),
+    ):
+        uri = (
+            f"/api/scenarios/provisioning?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == points // 50
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert {elements[id]["radius"] for id in ("deployment-a", "deployment-b")} == {
+            radius
+        }
+        assert {e["id"] for e in elements.values() if e["kind"] == "marker"} == {
+            "coffin-upper", "coffin-center", "coffin-lower",
+        }
+        assert not any(e["kind"] == "circle" for e in elements.values())
+        assert {m["marker_type"]: (m["count"], m["diameter_mm"])
+                for m in item["placement"]["marker_dimensions"]} == {
+            "tech-coffin": (3, 40),
+        }
+        ruler = next(a for a in geometry["annotations"]
+                     if a["id"] == "coffin-center-to-lower")
+        assert ruler["x1"] == width / 2
+        assert ruler["y1"] == height / 2
+        assert [c["page"] for c in item["citations"]] == [
+            110, 111, 112, 113, 114, 110, 111, 112, 113, 114, 115,
+        ]
+        assert {o["id"]: o["maximumPoints"] for o in item["objectives"]} == {
+            "control-supply-boxes": 4, "safe-area-comparison": 3,
+            "opponent-empty-safe-area": 2, "classified-objective": 1,
+        }
+        assert len(item["source_issues"]) == 5
+        svg_uri = uri.replace(
+            "/api/scenarios/provisioning?", "/api/scenarios/provisioning/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
+        assert svg_status == 200
+        assert svg.count(b'data-marker-type="tech-coffin" data-diameter-mm="40"') == 3
+        assert f'data-distance-inches="{spacing}"'.encode() in svg
+
+    assert _json(
+        app, "/api/scenarios/provisioning?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
 
 def test_mislabeled_revision_and_duplicate_registration_fail_closed(tmp_path: Path) -> None:
     hotfix = tmp_path / "hotfix.db"

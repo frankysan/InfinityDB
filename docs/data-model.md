@@ -3996,26 +3996,22 @@ currently exposes only modeled **current** publications; the existing
 `RulesDatabase.resolve_scenario_publication` historical membership lookup is not
 yet a historical compositional detail/map API.
 
-**Current publication boundary:** There are two current curated Scenario
-collections: `n5-core@5.3` (four Core missions) and
-`its-18@2026.09.01` (one reviewed ITS Season 18: Overheat mission,
-**Battleground**). The ITS mission is published through the same
-collection-aware catalog/detail and SVG map projection, using six supported
-Army Points sizes (150/200/250/300/350/400), a three-Sector end-of-game
-geometry/scoring model, and the English ITS source's printed pp. 121–123.
-`GET /api/scenarios?collection=its-18&revision=2026.09.01` returns
-Battleground; the default unqualified catalog remains the four N5 Core
-missions. Unknown exact collection/revision pairs remain empty or not found,
-rather than silently returning Core content.
+**Current publication boundary:** The selected Scenario collections are
+`n5-core@5.3` (four Core missions), `its-18@2026.09.01` (the historical
+Battleground pilot), and `its-18@2026.09.11` (fourteen separately reviewed
+September-hotfix missions). Each ITS publication supports six Army Points
+sizes (150/200/250/300/350/400) with source-cited maps and scoring. The
+original Battleground retains its own three-Sector mission semantics and
+English source citations from pp. 121–123; hotfix missions do not overwrite it.
+An exact collection/revision pair selects its own membership. The default
+unqualified catalog remains the four N5 Core missions. Unknown pairs yield
+empty results or HTTP 404, rather than silently falling back to Core.
 
-Other Season 18 missions, including Crossing Lines, Akial Interference
-and Area of Interest, are **not** published as selectable/renderable scenario
-definitions. This bounded ITS publication does not imply a complete
-Season 18 library, historical-season UI, Classified Deck, or general
-tournament tooling, and does not expand the mandatory 1.0 scope beyond
-the four Core missions. Browser selection state uses the common versioned
-share-state token; legacy explicit `army_points` input remains readable.
-Broader geometry/element vocabularies remain post-1.0 work. The
+This partial Season 18 coverage does not imply a complete ITS mission library,
+historical-season UI, Classified Deck, or general tournament tooling. Area of
+Interest and the other remaining hotfix missions are still unpublished.
+Browser selection state uses the common versioned share-state token; legacy
+explicit `army_points` input remains readable. The
 [Core scenario browser acceptance](testing.md#frozen-pair-four-scenario-interactions-v1s-045)
 is recorded separately from the [release checklist](releasing.md#development-freeze-and-release-only-handoff);
 known source discrepancies retain their disclosed scope.

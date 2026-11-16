@@ -332,15 +332,13 @@ scenario maps and their relevant context. Preserve the existing Battleground
 pilot and historical revision identities. Season 17 and Season 16 Part II
 remain later scope; do not claim complete Season 18 coverage before it is verified.
 
-**Curated and published 2026.09.11 hotfix work (2026-11-16):** Both the
-historical 2026.09.01 Battleground and the September hotfix with Battleground,
-Annihilation, Crossing Lines, Double Bind, The Dig, Cutthroat, Superiority
-and Uplink Center now have distinct selected database revisions. The browser exposes exact-revision selection,
-typed objectives, game-size maps and Double Bind's exclusive Main Objective
-choices. Source-backed Exclusion/Influence/Sector styling and the
-Crossing Lines, Double Bind and The Dig map-label/placement-ruler fixes
-are implemented; in-browser visual acceptance at relevant breakpoints and
-additional Season 18 missions remain open. See
+**Published 2026.09.11 hotfix coverage (2026-11-16):** Fourteen reviewed
+missions now have source-cited scoring, rules and game-size maps; the original
+2026.09.01 Battleground remains independently selectable. The browser exposes
+exact-revision selection, typed objectives, and Double Bind's alternative Main
+Objective sets. Map zoning and placement rulers have been reviewed in both
+source languages. Six hotfix missions remain unpublished; in-browser visual
+acceptance at relevant breakpoints is still open. See the
 [ITS season database](its-season-database.md#published-20260911-hotfix-curation).
 
 - [ ] Build a versioned ITS reference library from material under
@@ -377,9 +375,9 @@ additional Season 18 missions remain open. See
     `its-18@2026.09.01` for historically scoped results. Extend typed
     geometry, scoring and card/classified choices only where each mission
     needs them. Unpublished missions must fail closed.
-    Thirteen reviewed hotfix missions are currently published, including Hardlock,
-    B-Pong, Akial Interference, Evacuation and Neutralization; remaining missions
-    stay excluded until their source-backed definitions are reviewed.
+    Fourteen reviewed hotfix missions are published, most recently Provisioning.
+    Corporate Appropriation, Data-Harvest, Outbreak, Critical Intervention,
+    Last Launch and Area of Interest remain excluded until source review.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
     season launched under N5) and ITS Season 16 Part II (the N5-compatible
     revision), at minimum their scenario definitions and maps. Keep original

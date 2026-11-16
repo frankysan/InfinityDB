@@ -1056,6 +1056,120 @@ def test_neutralization_invalid_scoring_or_circle_fails_closed(mutation: str) ->
         parse_scenario_definition_record(record)
 
 
+
+def test_provisioning_safe_area_scoring_and_source_map_geometry() -> None:
+    record = _records()["scenario:provisioning"]
+    mission, configurations = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *(( "its-season-18-en-pdf", p) for p in range(110, 115)),
+        *(( "its-season-18-es-pdf", p) for p in range(110, 116)),
+    ]
+    assert [s["swc"] for s in mission["gameSizes"]] == [3, 4, 5, 6, 7, 8]
+    objectives = {o["id"]: o for o in mission["objectives"]}
+    assert {key: obj["maximumPoints"] for key, obj in objectives.items()} == {
+        "control-supply-boxes": 4,
+        "safe-area-comparison": 3,
+        "opponent-empty-safe-area": 2,
+        "classified-objective": 1,
+    }
+    assert sum(o["maximumPoints"] for o in objectives.values()) == 10
+    assert objectives["control-supply-boxes"]["aggregation"] == "cumulative"
+    comparison = objectives["safe-area-comparison"]
+    assert comparison["aggregation"] == "exclusive"
+    assert [a["objectivePoints"] for a in comparison["awards"]] == [3, 1]
+    assert "at least one" in comparison["awards"][1]["condition"]["text"]
+    assert all(obj["timing"] == "end-of-game" for obj in objectives.values())
+
+    rules = {r["id"]: " ".join(r["paragraphs"]) for r in mission["rules"]}
+    assert "central Tech-Coffin contains two" in rules["deployment-and-tech-coffins"]
+    assert "Normal WIP Roll" in rules["extract-supply-boxes"]
+    assert "Normal WIP-3 Roll" in rules["pickup-supply-boxes"]
+    assert "two with" in rules["common-supply-box-rules"]
+    assert "not a Marker" in rules["control-supply-boxes"]
+    assert "wholly outside" in rules["safe-areas"]
+    assert "player-placed" in rules["safe-areas"]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert "+1 Success Die" in rules["operational-learning"]
+    assert {issue["id"] for issue in mission["sourceIssues"]} == {
+        "emptied-coffin-disposition-bilingual",
+        "safe-area-pickup-bilingual-scope",
+        "safe-area-deposit-position-bilingual",
+        "reinforcements-suitability-bilingual",
+        "extract-contact-bilingual",
+    }
+    assert all(issue["status"] == "needs-verification" for issue in mission["sourceIssues"])
+    assert [c["id"] for c in mission["endConditions"]] == ["round-limit", "retreat"]
+
+    for key, width, height, radius, spacing in (
+        ("150-points", 24, 32, 12, 8),
+        ("200-250-points", 32, 48, 20, 12),
+        ("300-400-points", 48, 48, 24, 16),
+    ):
+        geometry = configurations[key]
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        for identifier, corner in (
+            ("deployment-a", "top-right"), ("deployment-b", "bottom-left"),
+        ):
+            zone = elements[identifier]
+            assert zone["kind"] == "quarter-circle"
+            assert zone["corner"] == corner
+            assert zone["radius"] == radius
+        assert not any(e["kind"] == "circle" for e in elements.values())
+        center_x, center_y = width / 2, height / 2
+        diagonal = math.hypot(center_x, center_y)
+        delta_x = spacing * center_x / diagonal
+        delta_y = spacing * center_y / diagonal
+        expected = {
+            "coffin-upper": (center_x - delta_x, center_y - delta_y),
+            "coffin-center": (center_x, center_y),
+            "coffin-lower": (center_x + delta_x, center_y + delta_y),
+        }
+        assert {e["id"] for e in elements.values() if e["kind"] == "marker"} == set(
+            expected
+        )
+        for identifier, (x, y) in expected.items():
+            element = elements[identifier]
+            assert element["markerType"] == "tech-coffin"
+            assert element["x"] == pytest.approx(x, abs=1e-6)
+            assert element["y"] == pytest.approx(y, abs=1e-6)
+        assert {a["id"] for a in geometry["annotations"]} == {
+            "coffin-center-to-lower", "deployment-corner-radius",
+        }
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
+            assert svg.count('data-marker-type="tech-coffin" data-diameter-mm="40"') == 3
+            assert f'data-distance-inches="{spacing}"' in svg
+            assert f'data-distance-inches="{radius}"' in svg
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["missing-deployment", "incorrect-coffin-kind", "coffin-off-table",
+     "invalid-safe-area-award"],
+)
+def test_provisioning_malformed_definition_fails_closed(mutation: str) -> None:
+    record = deepcopy(_records()["scenario:provisioning"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    if mutation == "missing-deployment":
+        geometry["elements"] = [
+            e for e in geometry["elements"] if e["id"] != "deployment-a"
+        ]
+    elif mutation == "incorrect-coffin-kind":
+        next(e for e in geometry["elements"] if e["id"] == "coffin-center")[
+            "kind"
+        ] = "line"
+    elif mutation == "coffin-off-table":
+        next(e for e in geometry["elements"] if e["id"] == "coffin-center")[
+            "x"
+        ] = 100
+    else:
+        record["facts"]["mission"]["objectives"][1]["awards"][0][
+            "objectivePoints"
+        ] = 4
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (thirteen reviewed hotfix missions).
+`its-18@2026.09.11` (fourteen reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Thirteen missions are published with independent revision selection:
+Fourteen missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -152,8 +152,19 @@ Thirteen missions are published with independent revision selection:
   Antenna Control. The source does not define the number of Techs extractable
   per Box; the Spanish rules also omit an English Marker State prohibition.
   Both remain explicit source issues (EN/ES pp. 105–109).
+- **Provisioning:** Three 40 mm Tech-Coffins on the table diagonal, at
+  source-backed 8-/12-/16-inch center spacing for three game-size maps,
+  with corner quarter-circle Deployment Zones. The central Coffin holds two
+  Supply Boxes and the other two hold one each. Players place two Circular
+  Template Safe Areas outside Deployment Zones, so those positions are not
+  invented on the map. Game-end scoring awards up to 4 OP for controlled Boxes,
+  3 OP for the greater Safe Area count (or 1 OP for a nonzero tie), 2 OP if the
+  opponent controls no Boxes in their Safe Area, and 1 Classified OP.
+  Five bilingual discrepancies about emptied Coffins, pickup scope,
+  fully-inside deposition, extraction contact and Reinforcements suitability
+  are retained (EN pp. 110–114; ES pp. 110–115).
 
-All thirteen missions share the existing geometry parser, model and SVG
+All fourteen missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of
