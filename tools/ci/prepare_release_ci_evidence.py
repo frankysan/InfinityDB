@@ -50,11 +50,16 @@ CROSS_BROWSER_JOBS = (
     "windows-latest / msedge",
 )
 SOURCE_FAST_JOB = "Fast validation and scope"
+SOURCE_PINNED_JOBS = (
+    "Pinned determinism / ubuntu-24.04",
+    "Pinned determinism / ubuntu-26.04",
+)
 SOURCE_FULL_JOBS = (
     "ubuntu-latest / Python 3.11",
     "windows-latest / Python 3.11",
     "macos-latest / Python 3.11",
     "ubuntu-latest / Python 3.14",
+    *SOURCE_PINNED_JOBS,
     "Cross-platform deterministic outputs",
 )
 
@@ -248,9 +253,13 @@ def verify_source_jobs(payload: dict[str, Any], *, run_id: int) -> dict[str, str
     reuse = [
         passed_step(
             by_name[name],
-            "Reuse validated deterministic baseline"
-            if name == "Cross-platform deterministic outputs"
-            else "Reuse validated Source baseline",
+            "Reuse validated determinism baseline"
+            if name in SOURCE_PINNED_JOBS
+            else (
+                "Reuse validated deterministic baseline"
+                if name == "Cross-platform deterministic outputs"
+                else "Reuse validated Source baseline"
+            ),
         )
         for name in SOURCE_FULL_JOBS
     ]
@@ -264,8 +273,13 @@ def verify_source_jobs(payload: dict[str, Any], *, run_id: int) -> dict[str, str
         raise ReleaseEvidenceError("Source matrix mixed full and reused jobs")
     for name in SOURCE_FULL_JOBS:
         expected_step = (
-            "Compare artifact hashes"
-            if name == "Cross-platform deterministic outputs" else "Run source checks"
+            "Build canonical deterministic-output manifest"
+            if name in SOURCE_PINNED_JOBS
+            else (
+                "Compare artifact hashes"
+                if name == "Cross-platform deterministic outputs"
+                else "Run source checks"
+            )
         )
         if not passed_step(by_name[name], expected_step):
             raise ReleaseEvidenceError(f"Full Source job {name!r} did not run checks")
