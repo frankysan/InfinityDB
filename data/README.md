@@ -75,9 +75,27 @@ the retired source roots.
   Unicode-suffixed paths); Spanish pages are under `es/`. The inventories
   identify source URLs and archive members, while `_history/index.json` owns
   oldid resolution. Do not derive paths from titles or mix snapshots across
-  naming schemes. Existing curated citations remain pinned to their original
-  English/Spanish ZIP names, member paths and SHA-256 values; new acquisitions
-  are research evidence, not automatically promoted rules or runtime inputs.
+  naming schemes.
+  New verified Wiki captures are intended to supersede older active captures
+  of the same language. Re-pin curated source declarations, exact member
+  citations and supported tools/tests against the latest acquired ZIP and
+  inventory before retiring older files. A new member path or matching heading
+  alone does not prove unchanged rules semantics: require exact source mapping
+  and review changed content or missing locators. Preserve historical `oldid`
+  URL identities, confirming they resolve in the replacement history archive.
+  Older captures remain available until the migrated publication and source
+  consumers pass acceptance; dated historical reports can retain their
+  original source identities as historical evidence, not active dependencies.
+
+  For each replacement, run `tools.research.audit_wiki_snapshot_migration`
+  with `--en-current`, `--en-history`, `--es-current` and `--es-history`
+  set to the acquired ZIP stems (without `.zip`). Review its JSON mapping and
+  generated Git patch; a changed/missing revision or heading prevents a patch.
+  Apply the checked patch, rebuild and validate the affected publication.
+  Before retiring old files, compare their current/history pairs against the
+  replacements using `tools.research.audit_wiki_archive_retirement`. Require
+  zero missing older revision IDs and no historical page-identity conflicts;
+  the comparison does not prove identical archived HTML bytes or static assets.
 - `local/data/pdf/` — physical research PDFs and the preserved
   `rules/sources.txt` revision index. Canonical `data/pdf/` source labels
   remain unchanged in curated provenance.

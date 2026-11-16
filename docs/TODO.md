@@ -47,7 +47,23 @@ Use these links to jump directly to a workstream:
   an implementation requirement.
   The verified English/Spanish Wiki snapshots and histories from 2026-11-16
   are available for explicit edition/revision comparison; their portable
-  member names do not replace the older curated citations without review.
+  member names were migrated into curated N5.3 after exact URL, heading,
+  and source revision identity verification.
+
+- [ ] **Acquisition + Data processing:** Retire the September/October 2026
+  Wiki ZIPs and their snapshot manifests once this migration is accepted.
+  - Completed: Repinned 109 current-page citations (unchanged MediaWiki revision
+    IDs and headings) and verified 116 curated `oldid` references. Migrated
+    active research readers, pinned tests and current documentation; rebuilt
+    the runtime database set. Retirement comparison found **zero missing**
+    older current-page/historical revision IDs or history page-name conflicts
+    in either language; the November 16 archives are revision-level supersets.
+  - Remaining: Final focused validation and a deliberate local cleanup of the
+    four old ZIPs, corresponding old manifests, and the superseded English
+    extracted history mirror. Preserve dated reports
+    as historical evidence; never silently delete or re-label their source
+    provenance. Future captures use the parameterized migration and retirement
+    comparison tools without introducing new hard-coded source-version logic.
 
 ### Source notation and rule references
 

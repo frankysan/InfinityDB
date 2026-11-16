@@ -81,7 +81,7 @@ def test_pitcher_places_repeater_without_a_saving_roll(app: Callable) -> None:
             "trait:disposable-x", "skill:speculative-attack"} == {
         relation["record_id"] for relation in rule["relations"]
     }
-    assert {"n5-core-v5.3-pdf", "wiki-en-20260926-200832"} <= {
+    assert {"n5-core-v5.3-pdf", "wiki-en-20261116-075926"} <= {
         c["source_id"] for c in rule["citations"]
     }
     assert {
@@ -137,8 +137,8 @@ def test_mine_dispenser_uses_drop_bears_bs_placement_not_damage(
     }
     assert {("n5-core-v5.3-pdf", page) for page in (71, 72, 181)} <= citations(rule)
     assert any(
-        c["source_id"] == "wiki-en-20260926-200832"
-        and c["member"] == "Mine_Dispenser" for c in rule["citations"]
+        c["source_id"] == "wiki-en-20261116-075926"
+        and c["member"] == "Mine_Dispenser.html" for c in rule["citations"]
     )
     assert "savingNum=1" in " ".join(rule["facts"]["sourceNotes"])
     assert "[[weapon:shock-mine|Shock Mine]] subtype" in " ".join(

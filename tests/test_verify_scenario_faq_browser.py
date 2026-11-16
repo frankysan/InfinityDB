@@ -1623,8 +1623,8 @@ def test_label_vocabulary_sources_in_normal_browser(
         assert page.locator("html").get_attribute("data-theme") == theme
         text = citations.inner_text()
         assert "Label vocabulary sources:" in text
-        assert "Infinity Wiki snapshot (English) v20260926-200832, Labels" in text
-        assert "archived member Labels; link opens source site" in text
+        assert "Infinity Wiki snapshot (English) v20261116-075926, Labels" in text
+        assert "archived member Labels.html; link opens source site" in text
         assert "N5 Core Rules v5.3, p. 174" in text
         assert page.get_by_text(
             "These sources describe the Label vocabulary as a whole; "

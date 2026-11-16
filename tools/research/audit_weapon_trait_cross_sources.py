@@ -25,6 +25,7 @@ if __package__:
         audit_traits_and_prose,
     )
     from .report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from .wiki_archive_members import resolve_page_member
 else:  # Support direct execution from tools/research/.
     from audit_weapon_traits_prose import (
         _review_policy,
@@ -33,6 +34,7 @@ else:  # Support direct execution from tools/research/.
         audit_traits_and_prose,
     )
     from report_output import require_new_audit_outputs, write_audit_text_or_exit
+    from wiki_archive_members import resolve_page_member
 
 REVIEW_PATH = Path("config/validation/weapon-trait-wiki-review.json")
 WIKI_MEMBER = "Weapon_Chart"
@@ -218,7 +220,7 @@ def audit_cross_sources(
     pdf_hash = hashlib.sha256(pdf.read_bytes()).hexdigest()
     mapping = _load_review(review_path, pdf_hash)
     with zipfile.ZipFile(wiki_archive) as archive:
-        payload = archive.read(WIKI_MEMBER)
+        payload = archive.read(resolve_page_member(archive, WIKI_MEMBER))
     pinned = json.loads(review_path.read_text(encoding="utf-8"))
     if hashlib.sha256(payload).hexdigest() != pinned["wikiMemberSha256"]:
         raise WeaponTraitWikiError("Wiki chart payload differs from reviewed revision")

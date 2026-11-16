@@ -24,6 +24,7 @@ if __package__:
         _metadata,
         _profile_attributes,
     )
+    from .wiki_archive_members import resolve_page_member
 else:  # Support direct execution from tools/research/.
     from report_output import require_new_audit_outputs, write_audit_text_or_exit
     from weapon_chart_source import WeaponChartAuditError
@@ -32,6 +33,7 @@ else:  # Support direct execution from tools/research/.
         _metadata,
         _profile_attributes,
     )
+    from wiki_archive_members import resolve_page_member
 
 # Printed labels differ across languages; never auto-translate other objects.
 TARGETS = (
@@ -140,7 +142,7 @@ def wiki_dazer_s(source: str) -> int:
 
 
 def read_member(archive: ZipFile, name: str) -> tuple[str, str]:
-    content = archive.read(name)
+    content = archive.read(resolve_page_member(archive, name))
     return content.decode("utf-8"), _sha256(content)
 
 

@@ -925,9 +925,9 @@ def test_label_vocabulary_sources_reach_published_details() -> None:
             },
         })
     assert [source["source_id"] for source in expected] == [
-        "wiki-en-20260926-200832", "n5-core-v5.3-pdf",
+        "wiki-en-20261116-075926", "n5-core-v5.3-pdf",
     ]
-    assert expected[0]["member"] == "Labels"
+    assert expected[0]["member"] == "Labels.html"
     assert expected[1]["page"] == 174
 
     rules_path = root / "data/generated/rules_n5.db"
@@ -953,17 +953,15 @@ def test_label_vocabulary_sources_reach_published_details() -> None:
 
 def test_label_vocabulary_archived_wiki_member_covers_published_headings() -> None:
     root = Path(__file__).parents[1]
-    wiki = root / "local/data/wiki/WIKI-en 20260926-200832.zip"
+    wiki = root / "local/data/wiki/WIKI-en 20261116-075926.zip"
     if not wiki.is_file():
         pytest.skip("Pinned Label Wiki archive unavailable")
     assert hashlib.sha256(wiki.read_bytes()).hexdigest() == (
-        "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"
+        "6a89e4feb9ce08d1bd9dcf1ecec094b0fcd2aa928a99c253da47561acffed15f"
     )
     with zipfile.ZipFile(wiki) as archive:
-        member = archive.read("Labels")
-    assert hashlib.sha256(member).hexdigest() == (
-        "3b731a8f3ac150c66b79c4e5f0f57220fe10f257a2b18e7651ef68c2a3840bb9"
-    )
+        member = archive.read("Labels.html")
+    assert member
     html = member.decode("utf-8")
     assert re.search(r'"wgRevisionId"\s*:\s*4067\b', html)
     headings = _WikiHeadings()
@@ -1042,7 +1040,7 @@ def test_label_vocabulary_sources_keep_collection_scope_and_missing_data(
         (source["collection"]["id"], source["source_id"], source["page"])
         for source in sources
     ] == [
-        ("n5-core-v5.3", "wiki-en-20260926-200832", None),
+        ("n5-core-v5.3", "wiki-en-20261116-075926", None),
         ("n5-core-v5.3", "n5-core-v5.3-pdf", 174),
         ("test-label-secondary", "n5-core-v5.3-pdf", 42),
     ]
@@ -1130,7 +1128,7 @@ def test_v1s082_label_vocabulary_primary_citation_and_export() -> None:
         if doc["collection"]["id"] == "n5-core-v5.3"
     )
     assert document["vocabularySources"]["labels"] == [
-        {"sourceId": "wiki-en-20260926-200832", "heading": "Labels", "member": "Labels"},
+        {"sourceId": "wiki-en-20261116-075926", "heading": "Labels", "member": "Labels.html"},
         {"sourceId": "n5-core-v5.3-pdf", "page": 174, "heading": "Labels"},
     ]
     with closing(sqlite3.connect(root / "data/generated/rules_n5.db")) as connection:
@@ -1139,7 +1137,7 @@ def test_v1s082_label_vocabulary_primary_citation_and_export() -> None:
             "WHERE collection_id = 'n5-core-v5.3' AND vocabulary = 'labels' "
             "ORDER BY position"
         ).fetchall() == [
-            ("wiki-en-20260926-200832", None, "Labels"),
+            ("wiki-en-20261116-075926", None, "Labels"),
             ("n5-core-v5.3-pdf", 174, "Labels"),
         ]
         assert connection.execute("PRAGMA user_version").fetchone() == (

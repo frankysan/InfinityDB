@@ -31,16 +31,16 @@
     "vocabularySources": {
         "skillTypes": [
             {
-                "sourceId": "wiki-en-20260926-200832",
+                "sourceId": "wiki-en-20261116-075926",
                 "heading": "Common and Special Skills in Infinity",
-                "member": "Skills_and_Equipment_Module"
+                "member": "Skills_and_Equipment_Module__u_eee698f3fd7e.html"
             }
         ],
         "labels": [
             {
-                "sourceId": "wiki-en-20260926-200832",
+                "sourceId": "wiki-en-20261116-075926",
                 "heading": "Labels",
-                "member": "Labels"
+                "member": "Labels.html"
             },
             {
                 "sourceId": "n5-core-v5.3-pdf",
@@ -295,28 +295,28 @@
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
-            "id": "wiki-en-20260926-200832",
+            "id": "wiki-en-20261116-075926",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
-            "version": "20260926-200832",
-            "acquiredAt": "2026-09-26T20:08:32+02:00",
-            "localPath": "data/wiki/WIKI-en 20260926-200832.zip",
-            "sha256": "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987",
+            "version": "20261116-075926",
+            "acquiredAt": "2026-11-16T07:59:26+01:00",
+            "localPath": "data/wiki/WIKI-en 20261116-075926.zip",
+            "sha256": "6a89e4feb9ce08d1bd9dcf1ecec094b0fcd2aa928a99c253da47561acffed15f",
             "language": "en",
-            "documentCount": 812,
+            "documentCount": 932,
             "url": "https://infinitythewiki.com/",
             "authority": "secondary"
         },
         {
-            "id": "wiki-es-20261009-211304",
+            "id": "wiki-es-20261116-092640",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (Spanish)",
-            "version": "20261009-211304",
-            "acquiredAt": "2026-10-09T21:13:04+02:00",
-            "localPath": "data/wiki/WIKI-es 20261009-211304.zip",
-            "sha256": "8e4d40f0ad60d9a42c276f90a07253d8bcdbb61ed7839506cf9f91b7c8270be4",
+            "version": "20261116-092640",
+            "acquiredAt": "2026-11-16T09:26:40+01:00",
+            "localPath": "data/wiki/WIKI-es 20261116-092640.zip",
+            "sha256": "f51337a595ba3ee282daa6faeddceb1a3e443351fb84889eca73d22434a2e83f",
             "language": "es",
-            "documentCount": 786,
+            "documentCount": 1146,
             "url": "https://infinitythewiki.com/es/",
             "authority": "secondary"
         },
@@ -2518,14 +2518,14 @@
                     "section": "Camouflaged State"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Camouflaged State",
-                    "member": "Camouflaged_State"
+                    "member": "Camouflaged_State.html"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Marker",
-                    "member": "Labels"
+                    "member": "Labels.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -2603,14 +2603,14 @@
                     "section": "Camouflage"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Camouflage",
-                    "member": "Camouflage"
+                    "member": "Camouflage.html"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Optional",
-                    "member": "Labels"
+                    "member": "Labels.html"
                 }
             ],
             "review": {
@@ -2720,9 +2720,9 @@
                     "section": "Discover"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Discover",
-                    "member": "Discover"
+                    "member": "Discover.html"
                 }
             ],
             "review": {
@@ -3466,8 +3466,8 @@
                     "section": "Direct Template examples and Important notes"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Direct_Template_Weapons",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Direct_Template_Weapons.html",
                     "heading": "Direct Template Weapons"
                 },
                 {
@@ -3616,8 +3616,8 @@
                     "section": "Impact Template example and Blast Focus"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Impact_Template_Weapons",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Impact_Template_Weapons.html",
                     "heading": "Impact Template Weapons"
                 }
             ],
@@ -4625,13 +4625,13 @@
                     "section": "Perfiles Posicionables: Torreta Artillada"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Armed_Turret",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Armed_Turret.html",
                     "heading": "Armed Turret Profile"
                 },
                 {
-                    "sourceId": "wiki-es-20261009-211304",
-                    "member": "es/Torreta_Artillada",
+                    "sourceId": "wiki-es-20261116-092640",
+                    "member": "es/Torreta_Artillada.html",
                     "heading": "Perfil de Torreta Artillada"
                 },
                 {
@@ -4729,8 +4729,8 @@
               "section": "Weapon Chart: Marksman Rifles"
             },
             {
-              "sourceId": "wiki-en-20260926-200832",
-              "member": "Weapon_Chart",
+              "sourceId": "wiki-en-20261116-075926",
+              "member": "Weapon_Chart.html",
               "heading": "MARKSMAN RIFLES"
             }
           ],
@@ -4796,8 +4796,8 @@
               "section": "Weapon Chart: MULTI Marksman Rifle"
             },
             {
-              "sourceId": "wiki-en-20260926-200832",
-              "member": "Weapon_Chart",
+              "sourceId": "wiki-en-20261116-075926",
+              "member": "Weapon_Chart.html",
               "heading": "MARKSMAN RIFLES"
             }
           ],
@@ -5356,8 +5356,8 @@
               "section": "Weapon Chart: Pitcher"
             },
             {
-              "sourceId": "wiki-en-20260926-200832",
-              "member": "Pitcher",
+              "sourceId": "wiki-en-20261116-075926",
+              "member": "Pitcher.html",
               "heading": "Pitcher"
             },
             {
@@ -5462,8 +5462,8 @@
               "section": "Weapon Chart: Mine Dispenser"
             },
             {
-              "sourceId": "wiki-en-20260926-200832",
-              "member": "Mine_Dispenser",
+              "sourceId": "wiki-en-20261116-075926",
+              "member": "Mine_Dispenser.html",
               "heading": "Mine Dispenser"
             }
           ],
@@ -7338,8 +7338,8 @@
                     "section": "Weapon Chart: Flamethrowers"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Weapon_Chart",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Weapon_Chart.html",
                     "heading": "FLAMETHROWERS"
                 }
             ],
@@ -8024,8 +8024,8 @@
                     "section": "Activate Disco Ball"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Activate_Disco_Ball",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Activate_Disco_Ball.html",
                     "heading": "Activate Disco Ball"
                 }
             ],
@@ -8088,8 +8088,8 @@
                     "section": "Weapon Chart: D-Charges"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "D-Charges",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "D-Charges.html",
                     "heading": "D-Charges"
                 }
             ],
@@ -8179,8 +8179,8 @@
                     "section": "Weapon Chart: Disco Baller"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Disco_Baller",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Disco_Baller.html",
                     "heading": "Disco Baller"
                 }
             ],
@@ -8226,8 +8226,8 @@
                     "section": "SymbioBomb"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "SymbioBomb",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "SymbioBomb__u_1d28ae8c0c0e.html",
                     "heading": "SymbioBomb"
                 }
             ],
@@ -11962,18 +11962,18 @@
                     "section": "Range"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Combat_Module",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Combat_Module.html",
                     "heading": "Burst (B)"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "BS_Attack",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "BS_Attack__u_b2c521893186.html",
                     "heading": "BS Attack"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Ballistic_Skills",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Ballistic_Skills.html",
                     "heading": "BS Attack Into a Close Combat"
                 }
             ],
@@ -12173,13 +12173,13 @@
                     "section": "Close Combat with Multiple Troopers; Other CC Restrictions"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "CC_Attack",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "CC_Attack__u_5725fb250d98.html",
                     "heading": "Coup de Grâce"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Close_Combat",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Close_Combat.html",
                     "heading": "Close Combat With Multiple Troopers"
                 }
             ],
@@ -12288,9 +12288,9 @@
                     "section": "Cube / Cube 2.0"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Cube",
-                    "member": "Cube"
+                    "member": "Cube.html"
                 }
             ],
             "review": {
@@ -12352,9 +12352,9 @@
                     "section": "Cube / Cube 2.0"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Cube",
-                    "member": "Cube"
+                    "member": "Cube.html"
                 }
             ],
             "review": {
@@ -12398,9 +12398,9 @@
                     "section": "TinBot"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "TinBot",
-                    "member": "TinBot"
+                    "member": "TinBot__u_645b224b443d.html"
                 }
             ],
             "review": {
@@ -12438,9 +12438,9 @@
                     "section": "TinBot"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "TinBot",
-                    "member": "TinBot"
+                    "member": "TinBot__u_645b224b443d.html"
                 }
             ],
             "review": {
@@ -12516,9 +12516,9 @@
                     "section": "TinBot"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "TinBot",
-                    "member": "TinBot"
+                    "member": "TinBot__u_645b224b443d.html"
                 }
             ],
             "review": {
@@ -12570,9 +12570,9 @@
                     "section": "TinBot"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "TinBot",
-                    "member": "TinBot"
+                    "member": "TinBot__u_645b224b443d.html"
                 }
             ],
             "review": {
@@ -12624,9 +12624,9 @@
                     "section": "TinBot"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "TinBot",
-                    "member": "TinBot"
+                    "member": "TinBot__u_645b224b443d.html"
                 }
             ],
             "review": {
@@ -12695,9 +12695,9 @@
                     "section": "TinBot"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "TinBot",
-                    "member": "TinBot"
+                    "member": "TinBot__u_645b224b443d.html"
                 }
             ],
             "review": {
@@ -12777,9 +12777,9 @@
                     "section": "TinBot"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "TinBot",
-                    "member": "TinBot"
+                    "member": "TinBot__u_645b224b443d.html"
                 }
             ],
             "review": {
@@ -13694,8 +13694,8 @@
                     "section": "Baggage"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Baggage",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Baggage.html",
                     "heading": "Baggage"
                 }
             ],
@@ -13939,9 +13939,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Non-Hackable",
-                    "member": "Non-Hackable"
+                    "member": "Non-Hackable.html"
                 }
             ],
             "review": {
@@ -14204,13 +14204,13 @@
                     "section": "Modificadores (MOD) Detallados: Esquivar (BLI+3)"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Template_Modifiers-explained",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Template_Modifiers-explained__u_2c86ebf26d96.html",
                     "heading": "Dodge (ARM+3): May 2026"
                 },
                 {
-                    "sourceId": "wiki-es-20261009-211304",
-                    "member": "es/Plantilla_Modifiers-explained",
+                    "sourceId": "wiki-es-20261116-092640",
+                    "member": "es/Plantilla_Modifiers-explained__u_e581ed330fd9.html",
                     "heading": "Esquivar (BLI+3): mayo 2026"
                 }
             ],
@@ -14604,8 +14604,8 @@
                     "section": "Alert!"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Alert",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Alert.html",
                     "heading": "Alert"
                 }
             ],
@@ -14688,8 +14688,8 @@
                     "section": "Climb Examples 1-3: stopping, hanging and Cover"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Climb",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Climb.html",
                     "heading": "Climb"
                 }
             ],
@@ -14732,8 +14732,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Idle",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Idle.html",
                     "heading": "Idle"
                 }
             ],
@@ -14785,8 +14785,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Intuitive_Attack",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Intuitive_Attack.html",
                     "heading": "Intuitive Attack"
                 },
                 {
@@ -14866,8 +14866,8 @@
                     "section": "Jump"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Jump",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Jump.html",
                     "heading": "Jump"
                 }
             ],
@@ -14934,8 +14934,8 @@
                     "section": "Move examples and General Movement Rules"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Move",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Move.html",
                     "heading": "Move"
                 }
             ],
@@ -14989,8 +14989,8 @@
                     "section": "Look Out!"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Look_Out",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Look_Out.html",
                     "heading": "Look Out"
                 }
             ],
@@ -15051,8 +15051,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Place_Deployable",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Place_Deployable.html",
                     "heading": "Place Deployable"
                 },
                 {
@@ -15129,8 +15129,8 @@
                     "section": "Baggage"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Reload",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Reload.html",
                     "heading": "Reload"
                 }
             ],
@@ -15177,8 +15177,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Request_Speedball",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Request_Speedball.html",
                     "heading": "Request Speedball"
                 },
                 {
@@ -15249,8 +15249,8 @@
                     "section": "Speculative Attack"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Speculative_Attack",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Speculative_Attack.html",
                     "heading": "Speculative Attack"
                 }
             ],
@@ -15312,8 +15312,8 @@
                     "section": "Suppressive Fire State"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Suppressive_Fire",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Suppressive_Fire.html",
                     "heading": "Suppressive Fire"
                 }
             ],
@@ -15785,8 +15785,8 @@
             "labelIds": [],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Unloaded_State",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Unloaded_State.html",
                     "heading": "Unloaded State"
                 },
                 {
@@ -16003,8 +16003,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Biometric_Visor",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Biometric_Visor.html",
                     "heading": "Biometric Visor"
                 }
             ],
@@ -16069,8 +16069,8 @@
                         "section": "Dazer chart profile discrepancy"
                     },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Dazer",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Dazer.html",
                     "heading": "Dazer"
                 }
             ],
@@ -16169,8 +16169,8 @@
                     "section": "Deployable Cover persistent scenery effect"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Deactivator",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Deactivator.html",
                     "heading": "Deactivator"
                 }
             ],
@@ -16251,8 +16251,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Deployable_Cover",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Deployable_Cover.html",
                     "heading": "Deployable Cover"
                 },
                 {
@@ -16310,13 +16310,13 @@
                     "section": "Repeater"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Repeater",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Repeater.html",
                     "heading": "Repeater"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Hacking_Area",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Hacking_Area.html",
                     "heading": "Hacking Area"
                 }
             ],
@@ -16367,8 +16367,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Deployable_Repeater",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Deployable_Repeater.html",
                     "heading": "Deployable Repeater"
                 },
                 {
@@ -16461,8 +16461,8 @@
                     "section": "FastPanda chart profile"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "FastPanda",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "FastPanda__u_f2be95f08a32.html",
                     "heading": "FastPanda"
                 }
             ],
@@ -16521,8 +16521,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "AI_Motorcycle",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "AI_Motorcycle__u_78923cc4aad1.html",
                     "heading": "AI Motorcycle"
                 }
             ],
@@ -16580,8 +16580,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Bangbomb",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Bangbomb.html",
                     "heading": "Bangbomb"
                 },
                 {
@@ -16672,8 +16672,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "ECM",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "ECM__u_09783b97f63c.html",
                     "heading": "ECM"
                 }
             ],
@@ -16712,8 +16712,8 @@
                     "heading": "ECM"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "ECM",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "ECM__u_09783b97f63c.html",
                     "heading": "ECM"
                 }
             ],
@@ -16810,8 +16810,8 @@
                     "heading": "ECM"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "ECM",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "ECM__u_09783b97f63c.html",
                     "heading": "ECM"
                 }
             ],
@@ -16899,8 +16899,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Transmutation",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Transmutation.html",
                     "heading": "Transmutation (Escape System-X)"
                 },
                 {
@@ -16946,8 +16946,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Hacking_Device",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Hacking_Device.html",
                     "heading": "EVO Hacking Device"
                 },
                 {
@@ -17032,8 +17032,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "GizmoKit",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "GizmoKit__u_fd8a8fae8ac5.html",
                     "heading": "GizmoKit"
                 },
                 {
@@ -17179,8 +17179,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Hacking_Device",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Hacking_Device.html",
                     "heading": "Hacking Device"
                 },
                 {
@@ -17438,8 +17438,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Hacking_Device",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Hacking_Device.html",
                     "heading": "Hacking Device Plus"
                 },
                 {
@@ -17559,8 +17559,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "HoloMask",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "HoloMask__u_8b57603816d8.html",
                     "heading": "HoloMask"
                 },
                 {
@@ -17614,8 +17614,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Holoprojector",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Holoprojector.html",
                     "heading": "Holoprojector"
                 },
                 {
@@ -17667,8 +17667,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Hacking_Device",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Hacking_Device.html",
                     "heading": "Killer Hacking Device"
                 },
                 {
@@ -17849,8 +17849,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "MediKit",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "MediKit__u_80feb82444a6.html",
                     "heading": "MediKit"
                 },
                 {
@@ -18015,8 +18015,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Motorcycle",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Motorcycle.html",
                     "heading": "Motorcycle"
                 }
             ],
@@ -18069,8 +18069,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "SymbioMate",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "SymbioMate__u_4077a7a3c0ca.html",
                     "heading": "SymbioMate"
                 }
             ],
@@ -24041,8 +24041,8 @@
                     "section": "G: Jumper"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "G__Jumper",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "G__Jumper__u_26b3d82e8ac7.html",
                     "heading": "G: Jumper"
                 }
             ],
@@ -25260,9 +25260,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Normal (N) Ammunition",
-                    "member": "Normal_(N)_Ammunition"
+                    "member": "Normal_(N)_Ammunition.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -25318,9 +25318,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Armor Piercing (AP) Ammunition",
-                    "member": "Armor_Piercing_(AP)_Ammunition"
+                    "member": "Armor_Piercing_(AP)_Ammunition__u_56c9a6ad3c28.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -25360,9 +25360,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Double Action (DA) Ammunition",
-                    "member": "Double_Action_(DA)_Ammunition"
+                    "member": "Double_Action_(DA)_Ammunition__u_47a6a20b80e1.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -25391,9 +25391,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Eclipse Ammunition",
-                    "member": "Eclipse_Ammunition"
+                    "member": "Eclipse_Ammunition.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -25501,9 +25501,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Electromagnetic (E/M) Ammunition",
-                    "member": "Electromagnetic_(E/M)_Ammunition"
+                    "member": "Electromagnetic_(E/M)_Ammunition.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -25557,9 +25557,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Explosive (EXP) Ammunition",
-                    "member": "Explosive_(EXP)_Ammunition"
+                    "member": "Explosive_(EXP)_Ammunition__u_344241278263.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -25614,9 +25614,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Paralysis (PARA) Ammunition",
-                    "member": "Paralysis_(PARA)_Ammunition"
+                    "member": "Paralysis_(PARA)_Ammunition__u_ad6380509599.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -25656,9 +25656,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Shock Ammunition",
-                    "member": "Shock_Ammunition"
+                    "member": "Shock_Ammunition.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -25724,9 +25724,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Smoke Ammunition",
-                    "member": "Smoke_Ammunition"
+                    "member": "Smoke_Ammunition.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -25793,9 +25793,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "Stun Ammunition",
-                    "member": "Stun_Ammunition"
+                    "member": "Stun_Ammunition.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -25872,9 +25872,9 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
+                    "sourceId": "wiki-en-20261116-075926",
                     "heading": "T2 Ammunition",
-                    "member": "T2_Ammunition"
+                    "member": "T2_Ammunition.html"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -29209,8 +29209,8 @@
                     "section": "Vertical Measurement and Sibylla explains"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Moving_and_Measuring",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Moving_and_Measuring__u_774220fd25df.html",
                     "heading": "Moving and Measuring"
                 }
             ],
@@ -29265,8 +29265,8 @@
                     "section": "Movement and Obstacles; Vaulting on or off Surface"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "General_Movement_Rules",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "General_Movement_Rules.html",
                     "heading": "General Movement Rules"
                 }
             ],
@@ -29326,8 +29326,8 @@
                     "section": "Line of Fire exceptions and game aids"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Line_of_Fire",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Line_of_Fire__u_856aac4edc42.html",
                     "heading": "Line of Fire"
                 }
             ],
@@ -29372,8 +29372,8 @@
                     "section": "Zone of Control and AROs; route measurement advice"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Zone_of_Control",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Zone_of_Control__u_4f886ecfea39.html",
                     "heading": "Zone of Control"
                 }
             ],
@@ -29425,8 +29425,8 @@
                     "section": "Interacting with Zones diagram"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Zones,_Bases_and_Silhouettes",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Zones,_Bases_and_Silhouettes__u_042c4854e53a.html",
                     "heading": "Zones, Bases and Silhouettes"
                 }
             ],
@@ -29478,8 +29478,8 @@
                     "section": "Coherency, Coherency Check and Breaking Coherency"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Coherency",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Coherency.html",
                     "heading": "Coherency"
                 }
             ],
@@ -29529,8 +29529,8 @@
                     "section": "Distance between Two Miniatures diagram"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Distances_and_Measurements",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Distances_and_Measurements__u_d25764376eaa.html",
                     "heading": "Distances and Measurements"
                 }
             ],
@@ -29584,8 +29584,8 @@
                     "section": "Replacing Game Elements; Matching and Different Diameters"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Replacing_Game_Elements",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Replacing_Game_Elements.html",
                     "heading": "Replacing Game Elements"
                 }
             ],
@@ -29757,8 +29757,8 @@
                     "section": "Cover and Game Situations diagrams"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Cover",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Cover.html",
                     "heading": "Cover"
                 }
             ],
@@ -29824,8 +29824,8 @@
                     "section": "Template Weapons, Scenery Elements and Total Cover"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Template_Weapons_and_Equipment",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Template_Weapons_and_Equipment__u_e837c862dd39.html",
                     "heading": "Template Weapons and Equipment"
                 }
             ],

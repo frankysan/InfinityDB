@@ -79,12 +79,21 @@ RULES_DB = ROOT / "data/generated/rules_n5.db"
         ({"id": "reinforcements-annex-wiki-n4", "kind": "wiki",
           "version": "N4 Annex / oldid 3614",
           "url": "https://example.org/n4"}, "n5-core-v5.3", False),
-        ({"id": "wiki-en-20260926-200832", "kind": "wiki",
-          "version": "20260926-200832",
+        ({"id": "wiki-en-20261116-075926", "kind": "wiki",
+          "version": "20261116-075926",
           "url": "https://example.org/wiki"}, "n5-hacking-programs-v5.3", False),
-        ({"id": "wiki-en-20260926-200832", "kind": "wiki",
-          "version": "20260926-200832", "sha256": "a" * 64,
-          "url": "https://example.org/wiki"}, "n5-hacking-programs-v5.3", True),
+        ({"id": "wiki-en-20261116-075926", "kind": "wiki",
+          "version": "20261116-075926", "language": "en",
+          "localPath": "data/wiki/WIKI-en 20261116-075926.zip",
+          "sha256": "a" * 64}, "n5-hacking-programs-v5.3", True),
+        ({"id": "wiki-es-20261116-092640", "kind": "wiki",
+          "version": "20261116-092640", "language": "es",
+          "localPath": "data/wiki/WIKI-es 20261116-092640.zip",
+          "sha256": "b" * 64}, "n5-core-v5.3", True),
+        ({"id": "wiki-en-20261116-075926", "kind": "wiki",
+          "version": "20260926-200832", "language": "en",
+          "localPath": "data/wiki/WIKI-en 20261116-075926.zip",
+          "sha256": "a" * 64}, "n5-core-v5.3", False),
     ],
 )
 def test_current_citation_minimum_rejects_historical_or_unpinned_sources(
@@ -254,9 +263,9 @@ def test_source_page_identity_requires_addressable_locator() -> None:
         "wiki-hacking-oldid-12345", "revision",
     )
     assert _source_page_identity(
-        "wiki-en-20260926-200832", None, "Camouflaged_State",
-    ) == ("wiki-en-20260926-200832", "member:Camouflaged_State")
-    assert _source_page_identity("wiki-en-20260926-200832", None) is None
+        "wiki-en-20261116-075926", None, "Camouflaged_State.html",
+    ) == ("wiki-en-20261116-075926", "member:Camouflaged_State.html")
+    assert _source_page_identity("wiki-en-20261116-075926", None) is None
     assert _source_page_identity("n5-rules-v5.3-en", True) is None
 
 
@@ -281,7 +290,7 @@ def test_v1s082_fixed_pilot_selection_is_valid_fail_closed_and_unapproved(
     assert summary["sourcePageOpensPotentiallyReusable"] == 27
     camouflaged = next(record for record in pilot["records"] if record["id"] == "state:camouflaged")
     assert any(
-        citation.get("member") == "Camouflaged_State"
+        citation.get("member") == "Camouflaged_State.html"
         for citation in camouflaged["citations"]
     )
     assert all(
@@ -317,8 +326,8 @@ def test_v1s082_pilot_suppresses_page_metrics_when_wiki_member_is_missing() -> N
             if record["id"] != "state:camouflaged":
                 continue
             for citation in record["citations"]:
-                if (citation.get("sourceId") == "wiki-en-20260926-200832"
-                        and citation.get("member") == "Camouflaged_State"):
+                if (citation.get("sourceId") == "wiki-en-20261116-075926"
+                        and citation.get("member") == "Camouflaged_State.html"):
                     citation.pop("member")
                     member_removed = True
         return document
@@ -332,7 +341,7 @@ def test_v1s082_pilot_suppresses_page_metrics_when_wiki_member_is_missing() -> N
     assert summary["sourcePageIdentityComplete"] is False
     assert summary["unresolvedSourcePageIdentityLocators"] == 1
     assert summary["unresolvedSourcePageIdentitySources"] == [
-        "wiki-en-20260926-200832",
+        "wiki-en-20261116-075926",
     ]
     assert summary["uniqueSelectedSourcePages"] is None
     assert summary["sourcePageOpensPotentiallyReusable"] is None

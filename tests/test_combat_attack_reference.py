@@ -23,6 +23,7 @@ from reference_acceptance_support import (
 from test_verify_ammunition_publication_browser import browser as browser
 
 from tools.research.source_paths import SourcePathError
+from tools.research.wiki_archive_members import resolve_page_member
 
 
 def test_reference_source_prerequisite_requires_selected_layout_and_pin(
@@ -90,7 +91,7 @@ def test_basic_attacks_match_pinned_pdf_and_archived_wiki(
         for member, revision in {"Combat_Module": 4030, "BS_Attack": 4004,
                                  "Ballistic_Skills": 4094, "CC_Attack": 3953,
                                  "Close_Combat": 4023}.items():
-            html = archive.read(member).decode("utf-8")
+            html = archive.read(resolve_page_member(archive, member)).decode("utf-8")
             assert re.search(r'"wgRevisionId"\s*:\s*' + str(revision), html)
 
 

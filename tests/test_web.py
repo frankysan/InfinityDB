@@ -4963,7 +4963,7 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     shock = json.loads(body)
     assert shock["slug"] == "shock"
     assert shock["rules"][0]["id"] == "ammunition:shock"
-    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20260926-200832"
+    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20261116-075926"
 
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200

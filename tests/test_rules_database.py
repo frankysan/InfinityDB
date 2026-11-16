@@ -654,19 +654,19 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert example_count == 0
         assert connection.execute(
             "SELECT member, page FROM vocabulary_sources WHERE vocabulary = 'skillTypes'"
-        ).fetchone() == ("Skills_and_Equipment_Module", None)
+        ).fetchone() == ("Skills_and_Equipment_Module__u_eee698f3fd7e.html", None)
         assert connection.execute(
             "SELECT member, page FROM vocabulary_sources WHERE vocabulary = 'labels'"
-        ).fetchone() == ("Labels", None)
+        ).fetchone() == ("Labels.html", None)
         assert connection.execute(
             "SELECT local_path, sha256, acquired_at, language, document_count, url "
-            "FROM sources WHERE id = 'wiki-en-20260926-200832'"
+            "FROM sources WHERE id = 'wiki-en-20261116-075926'"
         ).fetchone() == (
-            "data/wiki/WIKI-en 20260926-200832.zip",
-            "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987",
-            "2026-09-26T20:08:32+02:00",
+            "data/wiki/WIKI-en 20261116-075926.zip",
+            "6a89e4feb9ce08d1bd9dcf1ecec094b0fcd2aa928a99c253da47561acffed15f",
+            "2026-11-16T07:59:26+01:00",
             "en",
-            812,
+            932,
             "https://infinitythewiki.com/",
         )
         assert connection.execute(
@@ -1225,9 +1225,9 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     archived = next(
         citation
         for citation in camouflaged["citations"]
-        if citation["source_id"] == "wiki-en-20260926-200832"
+        if citation["source_id"] == "wiki-en-20261116-075926"
     )
-    assert archived["member"] == "Camouflaged_State"
+    assert archived["member"] == "Camouflaged_State.html"
     assert archived["source_url"] == "https://infinitythewiki.com/"
 
 
@@ -3362,8 +3362,12 @@ def test_rea042_published_dodge_arm_modifier_is_not_dodge_ph_bonus(
     }
     assert ("n5-core-v5.3-pdf", 75, None) in sources
     assert ("n5-core-v5.3-es-pdf", 75, None) in sources
-    assert ("wiki-en-20260926-200832", None, "Template_Modifiers-explained") in sources
-    assert ("wiki-es-20261009-211304", None, "es/Plantilla_Modifiers-explained") in sources
+    assert (
+        "wiki-en-20261116-075926", None, "Template_Modifiers-explained__u_2c86ebf26d96.html"
+    ) in sources
+    assert (
+        "wiki-es-20261116-092640", None, "es/Plantilla_Modifiers-explained__u_e581ed330fd9.html"
+    ) in sources
     assert "[[state:immobilized-a]]" in effects or "[[state:immobilized-a]]" in clarifications
 
 

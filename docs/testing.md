@@ -8204,7 +8204,7 @@ the ignored `local/` workspace:
 
 ```powershell
 .venv\Scripts\python.exe -m infinity_db build-rules --output local/audits/1.0-rules-current.db
-.venv\Scripts\python.exe -m tools.research.audit_1_0_reference_inputs --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5.3-en.pdf" --faq-pdf "data/pdf/faq/n5-faq-v0.1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
+.venv\Scripts\python.exe -m tools.research.audit_1_0_reference_inputs --rules-db local/audits/1.0-rules-current.db --wiki-history "local/data/wiki/WIKI-en-history 20261116-090844.zip" --wiki-history-es "local/data/wiki/WIKI-es-history 20261116-101038.zip" --wiki-snapshot "local/data/wiki/WIKI-en 20261116-075926.zip" --wiki-snapshot-es "local/data/wiki/WIKI-es 20261116-092640.zip" --core-pdf "local/data/pdf/rules/n5-rules-v5.3-en.pdf" --faq-pdf "local/data/pdf/faq/n5-faq-v0.1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
 ```
 
 All 12 PDF source declarations now carry maintained SHA-256 pins for six
@@ -8389,7 +8389,7 @@ all input hashes. It requires the locally retained source archives, PyMuPDF,
 and the generated Army database (none are added to Git):
 
 ```powershell
-.venv\Scripts\python.exe -m tools.research.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/army.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
+.venv\Scripts\python.exe -m tools.research.audit_auxiliary_silhouette_provenance --pdf-en local/data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es local/data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "local/data/wiki/WIKI-en 20261116-075926.zip" --wiki-es "local/data/wiki/WIKI-es 20261116-092640.zip" --army-db data/generated/army.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
 ```
 
 The output reports source values, **not** a gameplay ruling or permission to
@@ -9568,7 +9568,7 @@ unresolved identities independently from source-profile value differences.
 The pinned Wiki and Army files are private, not committed:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.research.audit_wiki_weapon_chart_names --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --army-db data/generated/army.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
+.venv\Scripts\python.exe -m tools.research.audit_wiki_weapon_chart_names --wiki-en "local/data/wiki/WIKI-en 20261116-075926.zip" --army-db data/generated/army.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
 ```
 
 A name alias is not a new Weapon rule or corrected Weapon Chart profile.

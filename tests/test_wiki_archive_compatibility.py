@@ -63,9 +63,7 @@ def test_copied_wiki_snapshot_pair_integrity(
             for info in archive.infolist():
                 record = expected[info.filename]
                 assert record["size"] == info.file_size
-                with archive.open(info) as stream:
-                    digest = hashlib.file_digest(stream, "sha256").hexdigest()
-                assert record["sha256"] == digest
+                assert record["sha256"] == hashlib.sha256(archive.read(info)).hexdigest()
 
         pages = [record for record in records if record["kind"] == "current-page"]
         assert len(pages) == expected_pages
@@ -135,36 +133,34 @@ def test_real_wiki_history_reader_and_extracted_mirror(
             assert service[0]["currentPath"] not in revision_paths
 
 
-@pytest.mark.parametrize(
-    ("language", "source_id", "legacy_member"),
-    (
-        ("en", "wiki-en-20260926-200832", "Labels"),
-        ("es", "wiki-es-20261009-211304", "es/Esquivar"),
-    ),
-)
-def test_existing_curated_wiki_pins_are_not_redirected(
-    language: str, source_id: str, legacy_member: str,
+@pytest.mark.parametrize("language,current,history,expected_pages,expected_revisions", ACQUISITIONS)
+def test_curated_wiki_sources_use_latest_archives(
+    language: str, current: str, history: str, expected_pages: int, expected_revisions: int,
 ) -> None:
-    curated = json.loads(
-        (ROOT / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
-    )
-    sources = [source for source in curated["sources"] if source["id"] == source_id]
-    assert len(sources) == 1
-    source = sources[0]
-    assert source["language"] == language
-    legacy = ROOT / "local/data/wiki" / Path(source["localPath"]).name
-    if not legacy.is_file():
-        pytest.skip("Pinned legacy Wiki ZIP is unavailable")
-    assert hashlib.sha256(legacy.read_bytes()).hexdigest() == source["sha256"]
-    with zipfile.ZipFile(legacy) as archive:
-        assert legacy_member in archive.namelist()
-    current = next(item[1] for item in ACQUISITIONS if item[0] == language)
-    new_zip = _paths(current)[0]
-    if not new_zip.is_file():
-        pytest.skip("New Wiki ZIP is unavailable")
-    assert hashlib.sha256(new_zip.read_bytes()).hexdigest() != source["sha256"]
-    with zipfile.ZipFile(new_zip) as archive:
-        assert legacy_member not in archive.namelist()
+    expected_id = "wiki-" + language + "-" + current.split(" ", 1)[1]
+    for filename in ("n5-core-v5.3.json", "n5-hacking-programs-v5.3.json"):
+        curated = json.loads(
+            (ROOT / "data/curated/rules" / filename).read_text(encoding="utf-8")
+        )
+        sources = [
+            item for item in curated["sources"]
+            if item.get("kind") == "wiki" and item.get("localPath")
+            and item.get("language") == language
+        ]
+        if filename == "n5-hacking-programs-v5.3.json" and language == "es":
+            assert sources == []
+            continue
+        assert len(sources) == 1
+        source = sources[0]
+        assert source["id"] == expected_id
+        assert source["localPath"] == "data/wiki/" + current + ".zip"
+        archive, manifest, inventory = _paths(current)
+        if all(p.is_file() for p in (archive, manifest, inventory)):
+            provenance = load_snapshot_manifest(manifest, archive=archive)
+            assert source["sha256"] == provenance["snapshot"]["archive"]["sha256"]
+            assert source["documentCount"] == provenance["snapshot"]["documentCount"]
+
+
 
 
 def test_portable_html_citation_requires_exact_member_and_snapshot(tmp_path: Path) -> None:
@@ -205,3 +201,74 @@ def test_portable_html_citation_requires_exact_member_and_snapshot(tmp_path: Pat
             verify_curated_wiki_snapshot(
                 snapshot, archive, [{**source, "id": "old-source"}], [reference],
             )
+
+
+def test_portable_member_resolution_is_unique_and_fail_closed(tmp_path: Path) -> None:
+    from tools.research.wiki_archive_members import resolve_page_member
+
+    archive_path = tmp_path / "member-names.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        for name in (
+            "Weapon_Chart", "Weapon_Chart.html",
+            "es/Tabla_de_Armas__u_111111111111.html",
+            "es/Arma__u_222222222222.html",
+            "es/Arma__u_333333333333.html",
+        ):
+            archive.writestr(name, "source")
+    with zipfile.ZipFile(archive_path) as archive:
+        assert resolve_page_member(archive, "Weapon_Chart") == "Weapon_Chart"
+        assert resolve_page_member(archive, "Weapon_Chart.html") == "Weapon_Chart.html"
+        assert resolve_page_member(archive, "es/Tabla_de_Armas") == (
+            "es/Tabla_de_Armas__u_111111111111.html"
+        )
+        with pytest.raises(KeyError, match="2 portable candidates"):
+            resolve_page_member(archive, "es/Arma")
+        with pytest.raises(KeyError, match="0 portable candidates"):
+            resolve_page_member(archive, "missing")
+
+
+def test_real_spanish_weapon_chart_member_resolves_without_legacy_archive() -> None:
+    from tools.research.wiki_archive_members import resolve_page_member
+
+    archive, _, _ = _paths("WIKI-es 20261116-092640")
+    if not archive.is_file():
+        pytest.skip("Latest Spanish Wiki archive unavailable")
+    with zipfile.ZipFile(archive) as current:
+        member = resolve_page_member(current, "es/Tabla_de_Armas")
+        assert member == "es/Tabla_de_Armas__u_2b949dfeffeb.html"
+        assert b"wgRevisionId" in current.read(member)
+
+def test_retirement_requires_full_revision_coverage(tmp_path: Path) -> None:
+    from tools.research.audit_wiki_archive_retirement import compare
+
+    old_current = tmp_path / "old-current.zip"
+    new_current = tmp_path / "new-current.zip"
+    old_history = tmp_path / "old-history.zip"
+    new_history = tmp_path / "new-history.zip"
+
+    def page(revision: int) -> str:
+        return (
+            '<html><script>RLCONF={"wgPageName":"Example",'
+            f'"wgRevisionId":{revision}' + "}</script></html>"
+        )
+
+    def create(path: Path, members: dict[str, int]) -> None:
+        with zipfile.ZipFile(path, "w") as archive:
+            for name, revision in members.items():
+                archive.writestr(name, page(revision))
+
+    create(old_current, {"Example": 10})
+    create(new_current, {"Example.html": 11})
+    create(old_history, {"_history/oldid/9.html": 9})
+    create(new_history, {"_history/oldid/9.html": 9, "_history/oldid/10.html": 10})
+    assert compare(old_current, new_current, old_history, new_history)[
+        "revisionCoverageComplete"
+    ]
+    create(new_history, {"_history/oldid/9.html": 9})
+    missing_current = compare(old_current, new_current, old_history, new_history)
+    assert missing_current["missingCurrentRevisionIds"] == [10]
+    assert not missing_current["revisionCoverageComplete"]
+    create(new_history, {"_history/oldid/10.html": 10})
+    missing_history = compare(old_current, new_current, old_history, new_history)
+    assert missing_history["missingHistoryOldids"] == [9]
+    assert not missing_history["revisionCoverageComplete"]

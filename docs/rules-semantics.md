@@ -1840,8 +1840,8 @@ See REA-045 in `docs/rules-explanation-audit-1.0.md`.
 
 Sources: N5.3 English pp. 70, 186; Spanish p. 195; captured official Army
 metadata from 2026-09-10 through 2026-09-29; English Wiki capture
-`WIKI-en 20260926-200832` (Weapon Chart, Armed Turret, E/M Ammunition);
-Spanish Wiki capture `WIKI-es 20261009-211304` (Tabla de Armas);
+`WIKI-en 20261116-075926` (Weapon Chart, Armed Turret, E/M Ammunition);
+Spanish Wiki capture `WIKI-es 20261116-092640` (Tabla de Armas);
 English/Spanish N5 FAQ v0.1.
 
 ### RS-SE-ROLL-001 — Skill-to-Skill roll effects use `modifies-rolls-for`
@@ -2824,7 +2824,7 @@ pages <https://infinitythewiki.com/Combined_Ammunition>,
 <https://infinitythewiki.com/Ammunition_Summary_Chart>.
 
 Sources: N5 v5.3 Ammunition definitions, curated Wiki snapshot
-`wiki-en-20260926-200832` (Normal, Shock, Stun, Smoke, Eclipse); current N5.3
+`wiki-en-20261116-075926` (Normal, Shock, Stun, Smoke, Eclipse); current N5.3
 Wiki pages <https://infinitythewiki.com/N>,
 <https://infinitythewiki.com/SHOCK>,
 <https://infinitythewiki.com/Stun_Ammunition>,
@@ -3352,7 +3352,7 @@ Attribute override for individual Weapon profiles from either wording.
 
 Sources:
 
-- Curated Wiki snapshot `wiki-en-20260926-200832`: AP, DA, E/M, EXP, PARA,
+- Curated Wiki snapshot `wiki-en-20261116-075926`: AP, DA, E/M, EXP, PARA,
   and T2 Ammunition.
 - Current N5.3 Wiki: <https://infinitythewiki.com/EXP>,
   <https://infinitythewiki.com/Paralysis_(PARA)_Ammunition>, and
