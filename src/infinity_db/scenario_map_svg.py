@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 from functools import lru_cache
 from html import escape
@@ -17,6 +18,7 @@ from .scenario_geometry import (
     MarkerElement,
     QuarterCircleElement,
     RectangleElement,
+    RulerAnnotation,
     ScenarioAnnotation,
     ScenarioElement,
     ScenarioGeometry,
@@ -33,6 +35,9 @@ _RENDERABLE_ELEMENT_STYLES = frozenset(
         "deployment-b",
         "scoring",
         "exclusion",
+        "influence",
+        "sector",
+        "sector-center",
         "objective",
         "guide",
         "measurement",
@@ -72,9 +77,26 @@ font-family:sans-serif;font-size:var(--scenario-map-label-size,1.4px);font-weigh
 
 # Optional ITS-only styling is omitted from historical Core and Battleground
 # SVGs to preserve their frozen byte-level publication identity.
-_EXCLUSION_CSS = """.exclusion{fill:var(--color-scenario-map-scoring,#e5e7eb);fill-opacity:.25;
-stroke:var(--color-scenario-map-scoring-edge,#6b7280);stroke-width:.07;
-stroke-dasharray:.35 .2}
+_EXCLUSION_CSS = """.exclusion{fill:url(#scenario-exclusion-hatch);
+stroke:var(--color-scenario-map-deployment-b-edge,#dc2626);stroke-width:.09}
+"""
+_EXCLUSION_DEFS = """<defs><pattern id="scenario-exclusion-hatch"
+patternUnits="userSpaceOnUse" width="1.1" height="1.1" patternTransform="rotate(-45)">
+<rect width="1.1" height="1.1" fill="var(--color-scenario-map-deployment-b,#fee2e2)"
+fill-opacity=".7"/>
+<line x1=".2" y1="0" x2=".2" y2="1.1"
+stroke="var(--color-scenario-map-deployment-b-edge,#dc2626)" stroke-width=".28"
+stroke-opacity=".48"/></pattern></defs>
+"""
+_SPECIAL_ZONE_CSS = """.influence{fill:#d4c7f1;fill-opacity:.8;stroke:#7463a8;stroke-width:.10}
+.sector{fill:#b9c995;fill-opacity:.85;stroke:#667e47;stroke-width:.08}
+.sector-center{fill:#eee7b7;fill-opacity:.85;stroke:#9e9855;stroke-width:.08}
+svg[data-theme="dark"] .influence{fill:#51476b;stroke:#c0adf0}
+svg[data-theme="dark"] .sector{fill:#4b5b3e;stroke:#a6c083}
+svg[data-theme="dark"] .sector-center{fill:#6c6444;stroke:#d2c88b}
+"""
+_RULER_CSS = """.placement-ruler{stroke-width:.11}
+.placement-ruler line{stroke-width:.11;stroke-dasharray:none}
 """
 
 
@@ -182,6 +204,19 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
 
     x = _resolved(geometry, element.x, "x")
     y = _resolved(geometry, element.y, "y")
+    if "\n" in element.text:
+        parts = element.text.split("\n")
+        spans = "".join(
+            f'<tspan x="{_number(x)}" dy="{"-.45" if index == 0 else "1.1"}em">'
+            f'{escape(part)}</tspan>'
+            for index, part in enumerate(parts)
+        )
+        accessible_label = escape(element.text.replace(chr(10), " "), quote=True)
+        return (
+            f'<text id="{element_id}" class="{style}" x="{_number(x)}" y="{_number(y)}" '
+            f'text-anchor="{element.align}" aria-label="{accessible_label}">'
+            f'{spans}</text>'
+        )
     return (
         f'<text id="{element_id}" class="{style}" x="{_number(x)}" y="{_number(y)}" '
         f'text-anchor="{element.align}">{escape(element.text)}</text>'
@@ -207,6 +242,42 @@ def _measurement_text(value: float, distance_unit: Literal["in", "cm"]) -> str:
     return f"{_number(value)}″"
 
 
+def _render_ruler(
+    geometry: ScenarioGeometry, ruler: RulerAnnotation,
+    text_scale: float, distance_unit: Literal["in", "cm"],
+) -> str:
+    """Draw an exact, unit-convertible placement guide without adding map geometry."""
+    x1 = _resolved(geometry, ruler.x1, "x")
+    y1 = _resolved(geometry, ruler.y1, "y")
+    x2 = _resolved(geometry, ruler.x2, "x")
+    y2 = _resolved(geometry, ruler.y2, "y")
+    length = math.hypot(x2 - x1, y2 - y1)
+    nx, ny = -(y2 - y1) / length, (x2 - x1) / length
+    x1 += ruler.offset * nx
+    y1 += ruler.offset * ny
+    x2 += ruler.offset * nx
+    y2 += ruler.offset * ny
+    tick = .25 * text_scale
+    label_x = (x1 + x2) / 2 - .95 * text_scale * nx
+    label_y = (y1 + y2) / 2 - .95 * text_scale * ny + .27 * text_scale
+    ruler_id = escape(ruler.id, quote=True)
+    display_distance = round(length, 3)
+    return (
+        f'<g id="{ruler_id}" class="measurement placement-ruler" '
+        f'data-distance-inches="{_number(display_distance)}" data-ruler-reference="positions">'
+        f'<line x1="{_number(x1)}" y1="{_number(y1)}" '
+        f'x2="{_number(x2)}" y2="{_number(y2)}"/>'
+        f'<line x1="{_number(x1 - tick * nx)}" y1="{_number(y1 - tick * ny)}" '
+        f'x2="{_number(x1 + tick * nx)}" y2="{_number(y1 + tick * ny)}"/>'
+        f'<line x1="{_number(x2 - tick * nx)}" y1="{_number(y2 - tick * ny)}" '
+        f'x2="{_number(x2 + tick * nx)}" y2="{_number(y2 + tick * ny)}"/>'
+        f'<text class="dimension-label" x="{_number(label_x)}" '
+        f'y="{_number(label_y)}" text-anchor="middle" '
+        f'data-distance-inches="{_number(display_distance)}">'
+        f'{_measurement_text(display_distance, distance_unit)}</text></g>'
+    )
+
+
 def _render_annotation(
     geometry: ScenarioGeometry,
     annotation: ScenarioAnnotation,
@@ -215,6 +286,8 @@ def _render_annotation(
     text_scale: float,
     distance_unit: Literal["in", "cm"],
 ) -> str:
+    if isinstance(annotation, RulerAnnotation):
+        return _render_ruler(geometry, annotation, text_scale, distance_unit)
     annotation_id = escape(annotation.id, quote=True)
     target_id = escape(annotation.target, quote=True)
 
@@ -463,10 +536,16 @@ def render_scenario_map_svg(
     )
     if annotations:
         annotations += "\n"
+    styles = {element.style for element in geometry.elements}
+    has_exclusion = "exclusion" in styles
+    has_special_zones = bool(styles & {"influence", "sector", "sector-center"})
+    has_rulers = any(isinstance(a, RulerAnnotation) for a in geometry.annotations)
     extra_style = (
-        _EXCLUSION_CSS
-        if any(element.style == "exclusion" for element in geometry.elements) else ""
+        (_EXCLUSION_CSS if has_exclusion else "")
+        + (_SPECIAL_ZONE_CSS if has_special_zones else "")
+        + (_RULER_CSS if has_rulers else "")
     )
+    defs = _EXCLUSION_DEFS if has_exclusion else ""
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
@@ -477,6 +556,7 @@ def render_scenario_map_svg(
         f'{_theme_style(theme)}">\n'
         f'<title id="map-title">{title}</title>\n'
         f'<style>{_STYLE_CSS}{extra_style}</style>\n'
+        f'{defs}'
         f'<rect class="table" x="0" y="0" width="{width}" height="{height}"/>\n'
         f"{elements}"
         f"{annotations}"

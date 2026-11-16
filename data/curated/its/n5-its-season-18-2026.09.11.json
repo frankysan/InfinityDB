@@ -185,7 +185,7 @@
                 {
                   "id": "dead-zone-a",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "exclusion",
                   "x1": 0,
                   "y1": 8,
                   "x2": 24,
@@ -194,7 +194,7 @@
                 {
                   "id": "dead-zone-b",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "exclusion",
                   "x1": 0,
                   "y1": 20,
                   "x2": 24,
@@ -265,7 +265,7 @@
                   "id": "deployment-a-rear-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 24,
+                  "x": 12,
                   "y": 4,
                   "text": "Deployment Zone A"
                 },
@@ -273,7 +273,7 @@
                   "id": "deployment-b-rear-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 24,
+                  "x": 12,
                   "y": 28,
                   "text": "Deployment Zone B"
                 },
@@ -283,7 +283,7 @@
                   "style": "label",
                   "x": 12,
                   "y": 18.2,
-                  "text": "Zone A"
+                  "text": "Deployment Zone A"
                 },
                 {
                   "id": "deployment-b-forward-label",
@@ -291,7 +291,7 @@
                   "style": "label",
                   "x": 12,
                   "y": 14.2,
-                  "text": "Zone B"
+                  "text": "Deployment Zone B"
                 }
               ],
               "annotations": [
@@ -301,7 +301,7 @@
                   "target": "deployment-a-rear",
                   "axis": "y",
                   "side": "end",
-                  "offset": 0.8
+                  "offset": 2.2
                 },
                 {
                   "id": "deployment-b-rear-depth",
@@ -309,7 +309,7 @@
                   "target": "deployment-b-rear",
                   "axis": "y",
                   "side": "end",
-                  "offset": 0.8
+                  "offset": 2.2
                 }
               ]
             }
@@ -333,7 +333,7 @@
                 {
                   "id": "dead-zone-a",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "exclusion",
                   "x1": 0,
                   "y1": 12,
                   "x2": 32,
@@ -342,7 +342,7 @@
                 {
                   "id": "dead-zone-b",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "exclusion",
                   "x1": 0,
                   "y1": 28,
                   "x2": 32,
@@ -413,7 +413,7 @@
                   "id": "deployment-a-rear-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 32,
+                  "x": 16,
                   "y": 6,
                   "text": "Deployment Zone A"
                 },
@@ -421,7 +421,7 @@
                   "id": "deployment-b-rear-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 32,
+                  "x": 16,
                   "y": 42,
                   "text": "Deployment Zone B"
                 },
@@ -431,7 +431,7 @@
                   "style": "label",
                   "x": 16,
                   "y": 26.2,
-                  "text": "Zone A"
+                  "text": "Deployment Zone A"
                 },
                 {
                   "id": "deployment-b-forward-label",
@@ -439,7 +439,7 @@
                   "style": "label",
                   "x": 16,
                   "y": 22.2,
-                  "text": "Zone B"
+                  "text": "Deployment Zone B"
                 }
               ],
               "annotations": [
@@ -449,7 +449,7 @@
                   "target": "deployment-a-rear",
                   "axis": "y",
                   "side": "end",
-                  "offset": 0.8
+                  "offset": 2.2
                 },
                 {
                   "id": "deployment-b-rear-depth",
@@ -457,7 +457,7 @@
                   "target": "deployment-b-rear",
                   "axis": "y",
                   "side": "end",
-                  "offset": 0.8
+                  "offset": 2.2
                 }
               ]
             }
@@ -482,7 +482,7 @@
                 {
                   "id": "dead-zone-a",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "exclusion",
                   "x1": 0,
                   "y1": 12,
                   "x2": 48,
@@ -491,7 +491,7 @@
                 {
                   "id": "dead-zone-b",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "exclusion",
                   "x1": 0,
                   "y1": 28,
                   "x2": 48,
@@ -562,7 +562,7 @@
                   "id": "deployment-a-rear-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 48,
+                  "x": 24,
                   "y": 6,
                   "text": "Deployment Zone A"
                 },
@@ -570,7 +570,7 @@
                   "id": "deployment-b-rear-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 48,
+                  "x": 24,
                   "y": 42,
                   "text": "Deployment Zone B"
                 },
@@ -580,7 +580,7 @@
                   "style": "label",
                   "x": 24,
                   "y": 26.2,
-                  "text": "Zone A"
+                  "text": "Deployment Zone A"
                 },
                 {
                   "id": "deployment-b-forward-label",
@@ -588,7 +588,7 @@
                   "style": "label",
                   "x": 24,
                   "y": 22.2,
-                  "text": "Zone B"
+                  "text": "Deployment Zone B"
                 }
               ],
               "annotations": [
@@ -598,7 +598,7 @@
                   "target": "deployment-a-rear",
                   "axis": "y",
                   "side": "end",
-                  "offset": 0.8
+                  "offset": 2.2
                 },
                 {
                   "id": "deployment-b-rear-depth",
@@ -606,7 +606,7 @@
                   "target": "deployment-b-rear",
                   "axis": "y",
                   "side": "end",
-                  "offset": 0.8
+                  "offset": 2.2
                 }
               ]
             }
@@ -1037,7 +1037,7 @@
                 {
                   "id": "zone-of-influence-1",
                   "kind": "circle",
-                  "style": "scoring",
+                  "style": "influence",
                   "x": 6,
                   "y": 16,
                   "radius": 2.5
@@ -1045,7 +1045,7 @@
                 {
                   "id": "zone-of-influence-2",
                   "kind": "circle",
-                  "style": "scoring",
+                  "style": "influence",
                   "x": 12,
                   "y": 16,
                   "radius": 2.5
@@ -1053,7 +1053,7 @@
                 {
                   "id": "zone-of-influence-3",
                   "kind": "circle",
-                  "style": "scoring",
+                  "style": "influence",
                   "x": 18,
                   "y": 16,
                   "radius": 2.5
@@ -1122,7 +1122,7 @@
                   "kind": "label",
                   "style": "label",
                   "x": 12,
-                  "y": 28,
+                  "y": 26.4,
                   "text": "Deployment Zone B"
                 }
               ],
@@ -1142,6 +1142,24 @@
                   "axis": "y",
                   "side": "end",
                   "offset": 0.8
+                },
+                {
+                  "id": "antenna-middle-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 30.4,
+                  "x2": 12,
+                  "y2": 30.4,
+                  "offset": 0
+                },
+                {
+                  "id": "antenna-right-from-right",
+                  "kind": "ruler",
+                  "x1": 18,
+                  "y1": 30.4,
+                  "x2": 24,
+                  "y2": 30.4,
+                  "offset": 0
                 }
               ]
             }
@@ -1174,7 +1192,7 @@
                 {
                   "id": "zone-of-influence-1",
                   "kind": "circle",
-                  "style": "scoring",
+                  "style": "influence",
                   "x": 8,
                   "y": 24,
                   "radius": 2.5
@@ -1182,7 +1200,7 @@
                 {
                   "id": "zone-of-influence-2",
                   "kind": "circle",
-                  "style": "scoring",
+                  "style": "influence",
                   "x": 16,
                   "y": 24,
                   "radius": 2.5
@@ -1190,7 +1208,7 @@
                 {
                   "id": "zone-of-influence-3",
                   "kind": "circle",
-                  "style": "scoring",
+                  "style": "influence",
                   "x": 24,
                   "y": 24,
                   "radius": 2.5
@@ -1279,6 +1297,24 @@
                   "axis": "y",
                   "side": "end",
                   "offset": 0.8
+                },
+                {
+                  "id": "antenna-middle-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 46.4,
+                  "x2": 16,
+                  "y2": 46.4,
+                  "offset": 0
+                },
+                {
+                  "id": "antenna-right-from-right",
+                  "kind": "ruler",
+                  "x1": 24,
+                  "y1": 46.4,
+                  "x2": 32,
+                  "y2": 46.4,
+                  "offset": 0
                 }
               ]
             }
@@ -1312,7 +1348,7 @@
                 {
                   "id": "zone-of-influence-1",
                   "kind": "circle",
-                  "style": "scoring",
+                  "style": "influence",
                   "x": 12,
                   "y": 24,
                   "radius": 2.5
@@ -1320,7 +1356,7 @@
                 {
                   "id": "zone-of-influence-2",
                   "kind": "circle",
-                  "style": "scoring",
+                  "style": "influence",
                   "x": 24,
                   "y": 24,
                   "radius": 2.5
@@ -1328,7 +1364,7 @@
                 {
                   "id": "zone-of-influence-3",
                   "kind": "circle",
-                  "style": "scoring",
+                  "style": "influence",
                   "x": 36,
                   "y": 24,
                   "radius": 2.5
@@ -1417,6 +1453,24 @@
                   "axis": "y",
                   "side": "end",
                   "offset": 0.8
+                },
+                {
+                  "id": "antenna-middle-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 46.4,
+                  "x2": 24,
+                  "y2": 46.4,
+                  "offset": 0
+                },
+                {
+                  "id": "antenna-right-from-right",
+                  "kind": "ruler",
+                  "x1": 36,
+                  "y1": 46.4,
+                  "x2": 48,
+                  "y2": 46.4,
+                  "offset": 0
                 }
               ]
             }
@@ -1557,17 +1611,25 @@
               {
                 "id": "encryption",
                 "name": "Encryption",
-                "objectiveIds": ["encryption-one", "encryption-two"]
+                "objectiveIds": [
+                  "encryption-one",
+                  "encryption-two"
+                ]
               },
               {
                 "id": "sabotage",
                 "name": "Sabotage",
-                "objectiveIds": ["sabotage"]
+                "objectiveIds": [
+                  "sabotage"
+                ]
               },
               {
                 "id": "secure-vector",
                 "name": "Secure Vector",
-                "objectiveIds": ["secure-vector-one", "secure-vector-two"]
+                "objectiveIds": [
+                  "secure-vector-one",
+                  "secure-vector-two"
+                ]
               }
             ]
           },
@@ -2020,20 +2082,48 @@
                   "id": "deployment-a-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 18.96,
-                  "y": 5.04,
-                  "text": "Deployment Zone A"
+                  "x": 18.84,
+                  "y": 4.4399999999999995,
+                  "text": "Deployment\nZone A"
                 },
                 {
                   "id": "deployment-b-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 5.04,
-                  "y": 27.560000000000002,
-                  "text": "Deployment Zone B"
+                  "x": 5.16,
+                  "y": 25.4,
+                  "text": "Deployment\nZone B"
                 }
               ],
-              "annotations": []
+              "annotations": [
+                {
+                  "id": "console-to-console",
+                  "kind": "ruler",
+                  "x1": 12,
+                  "y1": 16,
+                  "x2": 16.8,
+                  "y2": 22.4,
+                  "offset": 1.6
+                },
+                {
+                  "id": "deployment-corner-radius",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 30.2,
+                  "x2": 12,
+                  "y2": 30.2,
+                  "offset": 0
+                },
+                {
+                  "id": "console-center-from-top",
+                  "kind": "ruler",
+                  "x1": 2,
+                  "y1": 0,
+                  "x2": 2,
+                  "y2": 16,
+                  "offset": 0
+                }
+              ]
             }
           },
           {
@@ -2103,20 +2193,48 @@
                   "id": "deployment-a-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 23.6,
-                  "y": 8.4,
-                  "text": "Deployment Zone A"
+                  "x": 23.4,
+                  "y": 7.4,
+                  "text": "Deployment\nZone A"
                 },
                 {
                   "id": "deployment-b-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 8.4,
-                  "y": 40.6,
-                  "text": "Deployment Zone B"
+                  "x": 8.6,
+                  "y": 37,
+                  "text": "Deployment\nZone B"
                 }
               ],
-              "annotations": []
+              "annotations": [
+                {
+                  "id": "console-to-console",
+                  "kind": "ruler",
+                  "x1": 16,
+                  "y1": 24,
+                  "x2": 22.656402,
+                  "y2": 33.984604,
+                  "offset": 1.6
+                },
+                {
+                  "id": "deployment-corner-radius",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 46.2,
+                  "x2": 20,
+                  "y2": 46.2,
+                  "offset": 0
+                },
+                {
+                  "id": "console-center-from-top",
+                  "kind": "ruler",
+                  "x1": 2,
+                  "y1": 0,
+                  "x2": 2,
+                  "y2": 24,
+                  "offset": 0
+                }
+              ]
             }
           },
           {
@@ -2187,20 +2305,48 @@
                   "id": "deployment-a-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 37.92,
-                  "y": 10.08,
-                  "text": "Deployment Zone A"
+                  "x": 37.68,
+                  "y": 8.879999999999999,
+                  "text": "Deployment\nZone A"
                 },
                 {
                   "id": "deployment-b-label",
                   "kind": "label",
                   "style": "label",
-                  "x": 10.08,
-                  "y": 39.120000000000005,
-                  "text": "Deployment Zone B"
+                  "x": 10.32,
+                  "y": 34.8,
+                  "text": "Deployment\nZone B"
                 }
               ],
-              "annotations": []
+              "annotations": [
+                {
+                  "id": "console-to-console",
+                  "kind": "ruler",
+                  "x1": 24,
+                  "y1": 24,
+                  "x2": 35.313708,
+                  "y2": 35.313708,
+                  "offset": 1.6
+                },
+                {
+                  "id": "deployment-corner-radius",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 46.2,
+                  "x2": 24,
+                  "y2": 46.2,
+                  "offset": 0
+                },
+                {
+                  "id": "console-center-from-top",
+                  "kind": "ruler",
+                  "x1": 2,
+                  "y1": 0,
+                  "x2": 2,
+                  "y2": 24,
+                  "offset": 0
+                }
+              ]
             }
           }
         ],
@@ -3957,7 +4103,7 @@
                 {
                   "id": "sector-near-a",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "sector",
                   "x1": 0,
                   "y1": 10,
                   "x2": 24,
@@ -3966,7 +4112,7 @@
                 {
                   "id": "sector-center",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "sector-center",
                   "x1": 0,
                   "y1": 14,
                   "x2": 24,
@@ -3975,7 +4121,7 @@
                 {
                   "id": "sector-near-b",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "sector",
                   "x1": 0,
                   "y1": 18,
                   "x2": 24,
@@ -4128,7 +4274,7 @@
                 {
                   "id": "sector-near-a",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "sector",
                   "x1": 0,
                   "y1": 12,
                   "x2": 32,
@@ -4137,7 +4283,7 @@
                 {
                   "id": "sector-center",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "sector-center",
                   "x1": 0,
                   "y1": 20,
                   "x2": 32,
@@ -4146,7 +4292,7 @@
                 {
                   "id": "sector-near-b",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "sector",
                   "x1": 0,
                   "y1": 28,
                   "x2": 32,
@@ -4300,7 +4446,7 @@
                 {
                   "id": "sector-near-a",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "sector",
                   "x1": 0,
                   "y1": 12,
                   "x2": 48,
@@ -4309,7 +4455,7 @@
                 {
                   "id": "sector-center",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "sector-center",
                   "x1": 0,
                   "y1": 20,
                   "x2": 48,
@@ -4318,7 +4464,7 @@
                 {
                   "id": "sector-near-b",
                   "kind": "rectangle",
-                  "style": "scoring",
+                  "style": "sector",
                   "x1": 0,
                   "y1": 28,
                   "x2": 48,

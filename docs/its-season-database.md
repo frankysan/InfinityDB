@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Five missions are currently authored for isolated validation:
+Five missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -75,8 +75,15 @@ Five missions are currently authored for isolated validation:
   configurations with citations rebased to hotfix pp. 129–131.
 
 All five missions share the existing geometry parser, model and SVG
-renderer. The additive circle and corner-quarter-circle geometry shapes
-are source-backed, not mission-specific markup.
+renderer. Source-backed circles, corner-quarter-circles and unit-convertible
+placement rulers are reusable geometry primitives, not mission-specific markup.
+The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of
+Influence and olive Battleground Sectors. Crossing Lines' four Deployment Zone
+labels are centered, while The Dig uses two-line labels in its corner zones.
+Double Bind's Antenna ruler intervals and The Dig's Console interval, centerline
+and deployment-radius measurements follow the printed diagrams. Hyperthermal
+Tech Tokens remain player-placed, so the map does not invent their coordinates;
+their 4-inch/8-inch clearance is retained in mission rules.
 
 The Annihilation source-issues array explicitly retains the **350-point**
 gap printed in both languages: 3 OP for 176–274 and 4 OP for greater than
@@ -92,9 +99,13 @@ the staged database, scenario geometry, scoring bands, issue retention,
 source citations and policy rebasing. The three new mission definitions
 also have focused source-version, geometry and semantic tests. The published
 revision-aware registry, exact selectors, and Double Bind set selection have
-separate API/browser tests. Visual comparison of all new rendered maps with
-their pinned source diagrams remains a release-acceptance check; no historical
-or tournament context is silently replaced.
+separate API/browser tests. Source page comparisons and local light/dark previews are supported by
+`python -m tools.research.render_its_map_previews --config 300-400-points`,
+which writes only under ignored `local/work/its/map-previews/`. The PNG
+rasterization tool approximates Exclusion hatching because MuPDF does not
+support its SVG pattern; the shipped SVG retains that pattern. Final in-browser
+visual review at relevant breakpoints remains a release-acceptance check;
+no historical or tournament context is silently replaced.
 
 ## Schema v2 and read contract
 

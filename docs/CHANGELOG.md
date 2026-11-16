@@ -28,7 +28,11 @@ are not retroactively relabeled.
   special rules and source discrepancies; retained Battleground in both versions.
   Double Bind exposes mutually exclusive Main Objective sets in the scenario
   viewer, and the shared map renderer supports circular and corner deployment
-  geometry. This expands partial Season 18 coverage, not the complete mission set.
+  geometry. Exclusion Zones have diagonal hatching, Antenna Zones of Influence
+  and Battleground Sectors have distinct colors, misplaced Deployment Zone
+  labels are corrected, and antenna/Console/deployment-radius placement
+  rulers are now visible. This expands partial Season 18 coverage, not the
+  complete mission set.
 
 ## [1.1.0] - 2026-11-15
 

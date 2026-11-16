@@ -309,6 +309,23 @@ def test_geometry_v1_accepts_future_style_and_marker_identities_without_renderin
     assert parsed_marker.marker_type == "future-objective"
 
 
+@pytest.mark.parametrize(
+    ("x1", "y1", "x2", "y2", "offset", "message"),
+    [(4, 4, 4, 4, 0, "distinct endpoints"),
+     (0, 4, 12, 4, -5, "outside table")],
+)
+def test_placement_ruler_rejects_invalid_measurements(
+    x1: int, y1: int, x2: int, y2: int, offset: int, message: str,
+) -> None:
+    document = _document()
+    document["annotations"] = [{
+        "id": "source-guide", "kind": "ruler",
+        "x1": x1, "y1": y1, "x2": x2, "y2": y2, "offset": offset,
+    }]
+    with pytest.raises(ScenarioGeometryError, match=message):
+        parse_scenario_geometry(document)
+
+
 def test_geometry_v1_accepts_reviewed_circular_regions_and_rejects_unknown_shapes() -> None:
     document = _document()
     elements = document["elements"]

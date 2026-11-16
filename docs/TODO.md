@@ -337,8 +337,10 @@ historical 2026.09.01 Battleground and the September hotfix with Battleground,
 Annihilation, Crossing Lines, Double Bind and The Dig now have distinct
 selected database revisions. The browser exposes exact-revision selection,
 typed objectives, game-size maps and Double Bind's exclusive Main Objective
-choices. Additional Season 18 missions and final source-diagram visual
-acceptance remain open. See
+choices. Source-backed Exclusion/Influence/Sector styling and the
+Crossing Lines, Double Bind and The Dig map-label/placement-ruler fixes
+are implemented; in-browser visual acceptance at relevant breakpoints and
+additional Season 18 missions remain open. See
 [ITS season database](its-season-database.md#published-20260911-hotfix-curation).
 
 - [ ] Build a versioned ITS reference library from material under

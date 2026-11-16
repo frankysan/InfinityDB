@@ -127,6 +127,18 @@ class AreaSizeAnnotation:
 
 
 @dataclass(frozen=True, slots=True)
+class RulerAnnotation:
+    """Source-pinned distance between two table positions, with a display offset."""
+
+    id: str
+    x1: Coordinate
+    y1: Coordinate
+    x2: Coordinate
+    y2: Coordinate
+    offset: float
+
+
+@dataclass(frozen=True, slots=True)
 class ElementEdgeDistanceAnnotation:
     """Derived clearance from an element boundary to one table edge."""
 
@@ -138,6 +150,7 @@ class ElementEdgeDistanceAnnotation:
 
 ScenarioAnnotation: TypeAlias = (
     DimensionAnnotation | AreaSizeAnnotation | ElementEdgeDistanceAnnotation
+    | RulerAnnotation
 )
 
 
@@ -355,6 +368,17 @@ def _parse_annotation(value: Any, index: int) -> ScenarioAnnotation:
             offset=offset,
         )
 
+    if kind == "ruler":
+        _only_keys(raw, {"id", "kind", "x1", "y1", "x2", "y2"}, {"offset"}, context)
+        return RulerAnnotation(
+            id=_element_id(raw["id"], f"{context}.id"),
+            x1=_coordinate(raw["x1"], "x", f"{context}.x1"),
+            y1=_coordinate(raw["y1"], "y", f"{context}.y1"),
+            x2=_coordinate(raw["x2"], "x", f"{context}.x2"),
+            y2=_coordinate(raw["y2"], "y", f"{context}.y2"),
+            offset=_finite_number(raw.get("offset", 0), f"{context}.offset"),
+        )
+
     if kind == "area-size":
         _only_keys(raw, {"id", "kind", "target"}, set(), context)
         return AreaSizeAnnotation(
@@ -378,7 +402,7 @@ def _parse_annotation(value: Any, index: int) -> ScenarioAnnotation:
 
     raise ScenarioGeometryError(
         f"{context}.kind must be one of "
-        "['area-size', 'dimension', 'element-edge-distance']"
+        "['area-size', 'dimension', 'element-edge-distance', 'ruler']"
     )
 
 
@@ -493,6 +517,23 @@ def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
     elements_by_id = {element.id: element for element in geometry.elements}
     for annotation in geometry.annotations:
         context = f"scenario geometry annotation {annotation.id!r}"
+        if isinstance(annotation, RulerAnnotation):
+            x1 = resolved(annotation.x1, "x", f"{context}.x1")
+            y1 = resolved(annotation.y1, "y", f"{context}.y1")
+            x2 = resolved(annotation.x2, "x", f"{context}.x2")
+            y2 = resolved(annotation.y2, "y", f"{context}.y2")
+            dx, dy = x2 - x1, y2 - y1
+            length = math.hypot(dx, dy)
+            if length < 0.000001:
+                raise ScenarioGeometryError(f"{context} ruler requires distinct endpoints")
+            nx, ny = -dy / length, dx / length
+            for x, y in ((x1, y1), (x2, y2)):
+                if not (0 <= x + annotation.offset * nx <= table.width
+                        and 0 <= y + annotation.offset * ny <= table.height):
+                    raise ScenarioGeometryError(
+                        f"{context} ruler offset moves a measured endpoint outside table"
+                    )
+            continue
         target = elements_by_id.get(annotation.target)
         if target is None:
             raise ScenarioGeometryError(

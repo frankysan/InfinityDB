@@ -70,9 +70,21 @@ def test_crossing_lines_split_deployment_and_hvt_hotfix() -> None:
     for config in configs.values():
         elements = {item["id"]: item for item in config["elements"]}
         assert len([x for x in elements.values() if x.get("markerType") == "antenna"]) == 2
-        assert {x["id"] for x in elements.values() if x["style"] == "scoring"} == {
+        assert {x["id"] for x in elements.values() if x["style"] == "exclusion"} == {
             "dead-zone-a", "dead-zone-b",
         }
+        for label_id, team in (
+            ("deployment-a-rear-label", "A"),
+            ("deployment-b-rear-label", "B"),
+            ("deployment-a-forward-label", "A"),
+            ("deployment-b-forward-label", "B"),
+        ):
+            label = elements[label_id]
+            assert label["x"] == config["table"]["width"] / 2
+            assert label["text"] == f"Deployment Zone {team}"
+        svg = render_scenario_map_svg(parse_scenario_geometry(config))
+        assert svg.count('fill:url(#scenario-exclusion-hatch)') == 1
+        assert 'id="scenario-exclusion-hatch"' in svg
         assert {x["id"] for x in elements.values() if x["style"] == "deployment-a"} == {
             "deployment-a-rear", "deployment-a-forward",
         }
@@ -122,12 +134,25 @@ def test_double_bind_selected_main_objective_hotfix_and_antenna_areas() -> None:
         ]
         assert len(regions) == 3
         assert {region.radius for region in regions} == {2.5}
+        assert {region.style for region in regions} == {"influence"}
         assert {
             el.marker_type for el in parsed.elements if isinstance(el, MarkerElement)
         } == {"antenna"}
         svg = render_scenario_map_svg(parsed)
         assert svg.count('data-region-shape="circle"') == 3
         assert 'class="exclusion"' in svg
+        assert 'class="influence"' in svg
+        assert svg.count('class="measurement placement-ruler"') == 2
+        rulers = {
+            annotation["id"]: annotation for annotation in geometry["annotations"]
+            if annotation["kind"] == "ruler"
+        }
+        assert set(rulers) == {"antenna-middle-from-left", "antenna-right-from-right"}
+        assert rulers["antenna-middle-from-left"]["x2"] == geometry["table"]["width"] / 2
+        assert rulers["antenna-right-from-right"]["x1"] == geometry["table"]["width"] * 3 / 4
+        assert (
+            f'data-distance-inches="{geometry["table"]["width"] / 2:g}"' in svg
+        )
     assert objectives["sabotage"]["awards"][0]["condition"]["status"] == "destroyed"
 
 
@@ -198,6 +223,41 @@ def test_the_dig_150_point_spacing_analysis_token_ownership_and_corner_geometry(
         svg = render_scenario_map_svg(parsed)
         assert svg.count('data-region-shape="quarter-circle"') == 2
         assert svg.count('data-marker-type="console"') == 3
+        assert svg.count('class="measurement placement-ruler"') == 3
+        rulers = {
+            a["id"]: a for a in configs[config_id]["annotations"] if a["kind"] == "ruler"
+        }
+        assert set(rulers) == {
+            "console-to-console", "deployment-corner-radius", "console-center-from-top",
+        }
+        assert rulers["deployment-corner-radius"]["x2"] == expected_radius
+        assert rulers["console-center-from-top"]["y2"] == parsed.table.height / 2
+        assert math.isclose(
+            math.hypot(
+                rulers["console-to-console"]["x2"] - rulers["console-to-console"]["x1"],
+                rulers["console-to-console"]["y2"] - rulers["console-to-console"]["y1"],
+            ), spacing, abs_tol=0.00001,
+        )
+
+
+def test_battleground_hotfix_sectors_are_distinguishable_from_generic_scoring() -> None:
+    record = _records()["scenario:battleground"]
+    for entry in record["facts"]["configurations"]:
+        geometry = entry["geometry"]
+        sectors = {
+            element["id"]: element["style"]
+            for element in geometry["elements"]
+            if element["id"].startswith("sector-") and element["kind"] == "rectangle"
+        }
+        assert sectors == {
+            "sector-near-a": "sector",
+            "sector-center": "sector-center",
+            "sector-near-b": "sector",
+        }
+        svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme="dark")
+        assert 'class="sector"' in svg
+        assert 'class="sector-center"' in svg
+        assert 'svg[data-theme="dark"] .sector' in svg
 
 
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:

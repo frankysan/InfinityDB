@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Literal
 from xml.etree import ElementTree
 
 import pytest
@@ -202,6 +203,35 @@ def test_scenario_map_saves_standalone_with_canonical_theme_palette(theme: str) 
     assert len(entries) >= 10
     for key, color in entries:
         assert f"{key}:{color}" in style
+
+
+@pytest.mark.parametrize(
+    ("distance_unit", "label"),
+    [("in", "12″"), ("cm", "30 cm")],
+)
+def test_source_placement_ruler_is_measured_in_its_rendered_unit(
+    distance_unit: Literal["in", "cm"], label: str,
+) -> None:
+    geometry = parse_scenario_geometry({
+        "format": "InfinityDB scenario geometry",
+        "formatVersion": 1,
+        "title": "Placement guides",
+        "table": {"width": 24, "height": 32, "unit": "in"},
+        "elements": [],
+        "annotations": [
+            {"id": "first-antenna", "kind": "ruler",
+             "x1": 0, "y1": 25, "x2": 12, "y2": 25, "offset": 0},
+        ],
+    })
+    svg = render_scenario_map_svg(geometry, distance_unit=distance_unit)
+    root = ElementTree.fromstring(svg)
+    namespace = {"svg": "http://www.w3.org/2000/svg"}
+    ruler = root.find(".//svg:g[@id='first-antenna']", namespace)
+    assert ruler is not None
+    assert ruler.attrib["data-distance-inches"] == "12"
+    text_node = ruler.find("svg:text", namespace)
+    assert text_node is not None
+    assert text_node.text == label
 
 
 _CORE_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
