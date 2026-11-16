@@ -343,10 +343,14 @@ def _validate_score_geometry(
                 isinstance(condition, (ElementStatusCount, ElementStatusComparison))
                 and condition.status in {"activated", "destroyed"}
                 and isinstance(element, MarkerElement)
-                and element.marker_type != "antenna"
+                and not (
+                    element.marker_type == "antenna"
+                    or (condition.status == "activated" and element.marker_type == "console")
+                )
             ):
                 raise ScenarioMissionError(
-                    f"{context} status {condition.status!r} requires an Antenna marker, "
+                    f"{context} status {condition.status!r} requires an Antenna marker "
+                    "or an Activated Console, "
                     f"not {element.marker_type!r}"
                 )
 

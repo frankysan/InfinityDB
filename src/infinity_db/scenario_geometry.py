@@ -12,6 +12,8 @@ SCENARIO_GEOMETRY_VERSION = 1
 
 _MM_PER_INCH = 25.4
 
+# Marker types without an explicitly published diameter (Hardlock Beacons) are
+# schematic, not entries in the physical-size registry.
 _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "console": 40.0,
     "supply-box": 25.0,

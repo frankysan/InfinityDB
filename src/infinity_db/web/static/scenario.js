@@ -200,19 +200,27 @@ function mapCard(item) {
     const dimensions = document.createElement("div");
     dimensions.className = "scenario-marker-dimensions";
     const title = document.createElement("h3");
-    title.textContent = "Physical marker sizes";
+    const schematic = markers.some((marker) => marker.diameter_mm == null);
+    title.textContent = schematic ? "Objective markers" : "Physical marker sizes";
     const list = document.createElement("ul");
     list.className = "detail-list";
     for (const marker of markers) {
       const row = document.createElement("li");
-      row.textContent = `${marker.count} × ${marker.name} — ${marker.diameter_mm} mm diameter`;
+      row.textContent = marker.diameter_mm == null
+        ? `${marker.count} × ${marker.name} — physical size not specified`
+        : `${marker.count} × ${marker.name} — ${marker.diameter_mm} mm diameter`;
       list.append(row);
     }
     const note = document.createElement("p");
     note.className = "detail-source";
-    note.append("Physical token diameter, not scoring area or map scale · ");
-    // One shared source specifies the available Core marker types.
-    note.append(rulesCitationNode(markers[0].citation));
+    const measured = markers.find((marker) => marker.diameter_mm != null);
+    if (measured?.citation) {
+      note.append("Physical token diameter, not scoring area or map scale · ");
+      note.append(rulesCitationNode(measured.citation));
+    }
+    if (schematic) {
+      note.append(" Beacon symbols indicate placement only; the source does not specify their diameter.");
+    }
     dimensions.append(title, list, note);
     figure.append(dimensions);
   }
@@ -261,6 +269,11 @@ function conditionNode(condition) {
     return node;
   }
   if (kind === "element-status-comparison") {
+    if (condition.status === "activated"
+      && (condition.elementIds || []).every((id) => id.startsWith("console-"))) {
+      node.textContent = "Have more Activated Consoles than the opponent";
+      return node;
+    }
     node.textContent = condition.comparison === "all"
       ? `Control all ${condition.elementIds?.length || ""} scenario elements`.replace("  ", " ")
       : `Control more ${condition.status} scenario elements than the opponent`;

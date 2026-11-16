@@ -377,6 +377,8 @@ additional Season 18 missions remain open. See
     `its-18@2026.09.01` for historically scoped results. Extend typed
     geometry, scoring and card/classified choices only where each mission
     needs them. Unpublished missions must fail closed.
+    Nine reviewed hotfix missions are currently published, including Hardlock;
+    remaining missions stay excluded until their source-backed definitions are reviewed.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
     season launched under N5) and ITS Season 16 Part II (the N5-compatible
     revision), at minimum their scenario definitions and maps. Keep original

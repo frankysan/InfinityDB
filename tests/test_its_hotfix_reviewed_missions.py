@@ -594,6 +594,103 @@ def test_uplink_center_rejects_missing_or_incompatible_scoring_markers(
         parse_scenario_definition_record(record)
 
 
+
+def test_hardlock_beacon_control_console_activation_and_map_geometry() -> None:
+    record = _records()["scenario:hardlock"]
+    mission, configs = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *((("its-season-18-en-pdf", p)) for p in range(49, 53)),
+        *((("its-season-18-es-pdf", p)) for p in range(127, 131)),
+    ]
+    assert {o["id"]: o["maximumPoints"] for o in mission["objectives"]} == {
+        "control-enemy-beacon": 3,
+        "protect-own-beacon": 1,
+        "activate-more-consoles": 2,
+        "activate-each-console": 3,
+        "classified-objective": 1,
+    }
+    objectives = {o["id"]: o for o in mission["objectives"]}
+    rounds = objectives["control-enemy-beacon"]
+    assert rounds["timing"] == "end-of-round"
+    assert rounds["maximumPointsPerRound"] == 1
+    assert rounds["awards"][0]["objectivePoints"] == 1
+    assert objectives["activate-more-consoles"]["awards"][0]["condition"] == {
+        "kind": "element-status-comparison",
+        "elementIds": ["console-left", "console-center", "console-right"],
+        "status": "activated",
+        "comparison": "greater",
+    }
+    assert objectives["activate-each-console"]["awards"][0]["condition"] == {
+        "kind": "element-status-count",
+        "elementIds": ["console-left", "console-center", "console-right"],
+        "status": "activated",
+    }
+    rules = {rule["id"]: " ".join(rule["paragraphs"]) for rule in mission["rules"]}
+    assert "Normal State" in rules["pick-up-beacon"]
+    assert "Activated Console" in rules["pick-up-beacon"]
+    assert "Baggage" in rules["common-rules-of-beacons"]
+    assert "previous player's Activated status is removed" in rules["activate-console"]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert "Classified Deck is used" in rules["classified-objective"]
+    assert [e["id"] for e in mission["endConditions"]] == ["round-limit", "retreat"]
+    assert {issue["id"] for issue in mission["sourceIssues"]} == {
+        "connected-vs-activated-console", "allied-beacon-carrier-normal-state",
+    }
+    assert all("p." in issue["description"] for issue in mission["sourceIssues"])
+
+    for config_id, w, h, depth in (
+        ("150-points", 24, 32, 8),
+        ("200-250-points", 32, 48, 12),
+        ("300-400-points", 48, 48, 12),
+    ):
+        geo = configs[config_id]
+        assert geo["table"] == {"width": w, "height": h, "unit": "in"}
+        elements = {e["id"]: e for e in geo["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == h - depth
+        assert {
+            e["id"]: (e["markerType"], e["x"], e["y"])
+            for e in elements.values() if e["kind"] == "marker"
+        } == {
+            "beacon-a": ("beacon", w / 2, depth),
+            "beacon-b": ("beacon", w / 2, h - depth),
+            "console-left": ("console", w / 4, h / 2),
+            "console-center": ("console", w / 2, h / 2),
+            "console-right": ("console", 3 * w / 4, h / 2),
+        }
+        annotations = {a["id"]: a for a in geo["annotations"]}
+        assert annotations["deployment-a-depth"]["target"] == "deployment-a"
+        assert annotations["deployment-b-depth"]["target"] == "deployment-b"
+        assert annotations["console-center-from-left"]["x2"] == w / 2
+        assert annotations["console-right-from-right"]["x1"] == 3 * w / 4
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geo), theme=theme)
+            assert svg.count('data-marker-type="beacon"') == 2
+            assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 3
+            assert svg.count('data-physical-size="unspecified"') == 2
+            assert '.objective#beacon-a' in svg
+            assert '.objective#beacon-b' in svg
+            assert 'data-distance-inches="' + str(w / 2).removesuffix(".0") + '"' in svg
+
+
+@pytest.mark.parametrize("mutation", ["missing-console", "beacon-as-activated-console"])
+def test_hardlock_rejects_missing_or_incorrect_activated_console(mutation: str) -> None:
+    record = deepcopy(_records()["scenario:hardlock"])
+    if mutation == "missing-console":
+        geometry = record["facts"]["configurations"][0]["geometry"]
+        geometry["elements"] = [
+            e for e in geometry["elements"] if e["id"] != "console-left"
+        ]
+    else:
+        award = record["facts"]["mission"]["objectives"][3]["awards"][0]
+        award["condition"]["elementIds"][0] = "beacon-a"
+    with pytest.raises(
+        ScenarioDefinitionError,
+        match="missing or incompatible scoring element|requires an Antenna marker",
+    ):
+        parse_scenario_definition_record(record)
+
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

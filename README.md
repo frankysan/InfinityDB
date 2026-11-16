@@ -71,7 +71,7 @@ its application metrics.
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Provides selectable historical and September-hotfix ITS Season 18 scenario
   publications, including Battleground, Annihilation, Crossing Lines,
-  Double Bind, The Dig, Cutthroat, Superiority and Uplink Center, with game-size
+  Double Bind, The Dig, Cutthroat, Superiority, Uplink Center and Hardlock, with game-size
   deployment maps, scoring,
   reviewed source citations, and explicit Double Bind Main Objective choices.
   Season 18 mission coverage remains partial.
@@ -98,7 +98,7 @@ its application metrics.
   reference presents 17 reviewed objects in individual cards, retaining disputed
   or unknown attributes and verified delivery/Unit-use context.
 - Includes a browsable **Scenarios** reference with four N5.3 Core missions
-  and a separately selectable ITS Season 18 Battleground pilot. Explicit
+  and independently selectable historical/hotfix ITS Season 18 missions. Explicit
   Army Points selection, structured setup/objectives/scoring, scenario Rules
   and Skills, source-verification notes and deterministic maps all derive
   from maintained scenario definitions. Maps can be saved as standalone SVGs

@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (eight reviewed hotfix missions).
+`its-18@2026.09.11` (nine reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Eight missions are published with independent revision selection:
+Nine missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -99,8 +99,15 @@ Eight missions are published with independent revision selection:
   Covers Specialist Troops, Operational Learning, deployment contact restriction,
   HVT/Classified exclusion, three rounds and Retreat! ending. Source-pinned
   English pp. 139–142 and Spanish pp. 144–147.
+- **Hardlock:** Two owner-specific Beacons at the Deployment Zone inner edges,
+  three reversible-activation Consoles on the centerline and one Classified
+  Objective per player. Three end-of-round Beacon Control points, seven
+  end-of-game points and exact six-size SWC/deployment setup are captured.
+  The source does not state a physical Beacon diameter, so those two markers
+  are schematic; Consoles remain 40 mm. Differences in the Spanish/English
+  pickup wording are recorded, not inferred away (EN pp. 49–52, ES pp. 127–130).
 
-All eight missions share the existing geometry parser, model and SVG
+All nine missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of

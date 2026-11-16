@@ -85,6 +85,7 @@ _MARKER_LABELS = {
     "antenna": "Transmission Antenna Token",
     "tech-coffin": "Tech-Coffin Token",
     "hyperthermal-tech": "Hyperthermal Tech Token",
+    "beacon": "Beacon Token",
 }
 
 
@@ -101,14 +102,14 @@ def _marker_dimensions(
     for marker_type, count in counts.items():
         diameter = marker_diameter_mm(marker_type)
         label = _MARKER_LABELS.get(marker_type)
-        if diameter is None or label is None:
+        if label is None or (diameter is None and marker_type != "beacon"):
             raise ValueError(f"Missing reviewed marker dimensions for {marker_type!r}")
         result.append({
             "marker_type": marker_type,
             "name": label,
             "count": count,
             "diameter_mm": diameter,
-            "citation": dict(source_citation),
+            "citation": dict(source_citation) if diameter is not None else None,
         })
     return result
 

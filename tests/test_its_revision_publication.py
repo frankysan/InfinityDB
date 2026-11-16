@@ -52,7 +52,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         ("2026.09.01", ["battleground"]),
         ("2026.09.11", [
             "crossing-lines", "double-bind", "the-dig", "annihilation",
-            "battleground", "cutthroat", "superiority", "uplink-center",
+            "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
         ]),
     ):
         status, _, payload = _json(
@@ -70,7 +70,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 8
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 9
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -244,6 +244,73 @@ def test_uplink_center_activation_control_and_physical_markers_reach_api(
         assert wsgi_response(app, ORIGIN + map_uri)[0] == 200
     assert _json(
         app, "/api/scenarios/uplink-center?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+
+def test_hardlock_is_only_in_hotfix_with_beacon_and_console_positions(two_revisions) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:hardlock", "2026.09.01",
+    )) is None
+    for points, width, height, depth in (
+        (150, 24, 32, 8), (200, 32, 48, 12), (250, 32, 48, 12),
+        (300, 48, 48, 12), (350, 48, 48, 12), (400, 48, 48, 12),
+    ):
+        uri = (
+            f"/api/scenarios/hardlock?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["selected_army_points"] == points
+        assert {o["id"]: o["maximumPoints"] for o in item["objectives"]} == {
+            "control-enemy-beacon": 3, "protect-own-beacon": 1,
+            "activate-more-consoles": 2, "activate-each-console": 3,
+            "classified-objective": 1,
+        }
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert (elements["beacon-a"]["x"], elements["beacon-a"]["y"]) == (
+            width / 2, depth,
+        )
+        assert (elements["beacon-b"]["x"], elements["beacon-b"]["y"]) == (
+            width / 2, height - depth,
+        )
+        assert {
+            name: (elements[name]["x"], elements[name]["y"])
+            for name in ("console-left", "console-center", "console-right")
+        } == {
+            "console-left": (width / 4, height / 2),
+            "console-center": (width / 2, height / 2),
+            "console-right": (3 * width / 4, height / 2),
+        }
+        assert {
+            m["marker_type"]: (m["count"], m["diameter_mm"])
+            for m in item["placement"]["marker_dimensions"]
+        } == {"beacon": (2, None), "console": (3, 40)}
+        assert [c["page"] for c in item["citations"]] == [
+            49, 50, 51, 52, 127, 128, 129, 130,
+        ]
+        assert {issue["id"] for issue in item["source_issues"]} == {
+            "connected-vs-activated-console", "allied-beacon-carrier-normal-state",
+        }
+        svg_uri = uri.replace(
+            "/api/scenarios/hardlock?", "/api/scenarios/hardlock/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
+        assert svg_status == 200
+        assert svg.count(b'data-marker-type="beacon"') == 2
+        assert svg.count(b'data-marker-type="console" data-diameter-mm="40"') == 3
+        assert b'data-physical-size="unspecified"' in svg
+
+    assert _json(
+        app, "/api/scenarios/hardlock?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 

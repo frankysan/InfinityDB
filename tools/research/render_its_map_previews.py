@@ -68,11 +68,26 @@ def _raster_friendly_svg(svg: str, colors: dict[str, str], *, theme: str, width:
                   "font-size": str(1.4 * text_scale)},
     }
     markers = [element for element in root.iter() if element.get("data-marker-type")]
+    has_beacons = any(element.get("data-marker-type") == "beacon"
+                      for element in markers)
     has_tech_coffin = any(element.get("data-marker-type") == "tech-coffin"
                           for element in markers)
     for element in root.iter():
         for klass in element.get("class", "").split():
             element.attrib.update(palette.get(klass, {}))
+        if has_beacons and element.get("data-marker-type") == "console":
+            element.attrib.update({
+                "fill": "#6aa968" if theme == "dark" else "#84ca7a",
+                "stroke": "#b7ebb0" if theme == "dark" else "#377735",
+            })
+        if has_beacons and element.get("data-marker-type") == "beacon":
+            is_a = element.get("id") == "beacon-a"
+            element.attrib.update({
+                "fill": ("#ed8388" if is_a else "#77c4ef") if theme == "dark"
+                        else ("#cf4047" if is_a else "#278ec4"),
+                "stroke": ("#f5b6b9" if is_a else "#c4eafd") if theme == "dark"
+                          else ("#8f1520" if is_a else "#15577c"),
+            })
         if has_tech_coffin and element.get("data-marker-type") in {"antenna", "tech-coffin"}:
             role = element.get("data-marker-type")
             if role == "antenna":
