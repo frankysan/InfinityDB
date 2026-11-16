@@ -194,11 +194,19 @@ def smoke_wheel(wheel: Path, source: Path, work: Path, *, require_assets: bool) 
         "export_rules_database(load_curated_directory(Path('rules')), "
         "Path('generated/rules_n5.db'))",
     ))], inputs)
+    # Resolve the exact registered runtime set with the installed wheel,
+    # not the checkout interpreter running this stdlib-only orchestrator.
+    run([python, "-I", "-c", "\n".join((
+        "import json",
+        "from pathlib import Path",
+        "from infinity_db.database_set import COMPLETE_RUNTIME_FILES",
+        "Path('runtime-files.json').write_text(",
+        "    json.dumps(sorted(COMPLETE_RUNTIME_FILES)), encoding='utf-8')",
+    ))], inputs)
+    names = json.loads((inputs / "runtime-files.json").read_text(encoding="utf-8"))
     runtime = inputs / "runtime"
     runtime.mkdir()
-    from infinity_db.database_set import COMPLETE_RUNTIME_FILES
-
-    for name in sorted(COMPLETE_RUNTIME_FILES):
+    for name in names:
         shutil.copyfile(source / "data/generated" / name, runtime / name)
     for mode in ("normal", "asset-free"):
         run([
