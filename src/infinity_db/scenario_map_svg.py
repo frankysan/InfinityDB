@@ -95,6 +95,11 @@ svg[data-theme="dark"] .influence{fill:#51476b;stroke:#c0adf0}
 svg[data-theme="dark"] .sector{fill:#4b5b3e;stroke:#a6c083}
 svg[data-theme="dark"] .sector-center{fill:#6c6444;stroke:#d2c88b}
 """
+_UPLINK_MARKER_CSS = """.objective[data-marker-type="antenna"]{fill:#f7c86a;stroke:#b97b09}
+.objective[data-marker-type="tech-coffin"]{fill:#a99ac5;stroke:#6d4d91}
+svg[data-theme="dark"] .objective[data-marker-type="antenna"]{fill:#97741e;stroke:#efd18d}
+svg[data-theme="dark"] .objective[data-marker-type="tech-coffin"]{fill:#725991;stroke:#dec9f1}
+"""
 _RULER_CSS = """.placement-ruler{stroke-width:.11}
 .placement-ruler line{stroke-width:.11;stroke-dasharray:none}
 """
@@ -540,9 +545,14 @@ def render_scenario_map_svg(
     has_exclusion = "exclusion" in styles
     has_special_zones = bool(styles & {"influence", "sector", "sector-center"})
     has_rulers = any(isinstance(a, RulerAnnotation) for a in geometry.annotations)
+    has_tech_coffin = any(
+        isinstance(element, MarkerElement) and element.marker_type == "tech-coffin"
+        for element in geometry.elements
+    )
     extra_style = (
         (_EXCLUSION_CSS if has_exclusion else "")
         + (_SPECIAL_ZONE_CSS if has_special_zones else "")
+        + (_UPLINK_MARKER_CSS if has_tech_coffin else "")
         + (_RULER_CSS if has_rulers else "")
     )
     defs = _EXCLUSION_DEFS if has_exclusion else ""

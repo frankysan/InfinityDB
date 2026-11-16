@@ -411,6 +411,7 @@ def test_parse_scenario_geometry_rejects_duplicate_element_ids() -> None:
 def test_canonical_scenario_marker_diameters_are_available_by_type() -> None:
     assert marker_diameter_mm("console") == 40
     assert marker_diameter_mm("supply-box") == 25
+    assert marker_diameter_mm("tech-coffin") == 40
     assert marker_diameter_mm("future-marker") is None
     assert marker_radius_inches("supply-box") == pytest.approx(25 / 25.4 / 2)
 

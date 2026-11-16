@@ -52,7 +52,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         ("2026.09.01", ["battleground"]),
         ("2026.09.11", [
             "crossing-lines", "double-bind", "the-dig", "annihilation",
-            "battleground", "cutthroat", "superiority",
+            "battleground", "cutthroat", "superiority", "uplink-center",
         ]),
     ):
         status, _, payload = _json(
@@ -70,7 +70,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 7
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 8
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -191,6 +191,59 @@ def test_superiority_is_published_only_in_the_hotfix_with_source_matched_maps(
 
     assert _json(
         app, "/api/scenarios/superiority?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+def test_uplink_center_activation_control_and_physical_markers_reach_api(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:uplink-center", "2026.09.01",
+    )) is None
+    for points, width, height, depth in (
+        (150, 24, 32, 12), (200, 32, 48, 16), (250, 32, 48, 16),
+        (300, 48, 48, 16), (350, 48, 48, 16), (400, 48, 48, 16),
+    ):
+        uri = (
+            f"/api/scenarios/uplink-center?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert elements["antenna-left"]["x"] == width / 4
+        assert elements["tech-coffin"]["x"] == width / 2
+        assert elements["antenna-right"]["x"] == width * 3 / 4
+        assert all(elements[id]["y"] == height / 2 for id in (
+            "antenna-left", "tech-coffin", "antenna-right",
+        ))
+        assert {obj["id"]: obj["maximumPoints"] for obj in item["objectives"]} == {
+            "activate-communication-antennas": 4,
+            "control-communication-antennas": 2,
+            "control-tech-coffin": 3,
+            "active-lieutenant": 1,
+        }
+        assert {
+            marker["marker_type"]: (marker["count"], marker["diameter_mm"])
+            for marker in item["placement"]["marker_dimensions"]
+        } == {"antenna": (2, 40), "tech-coffin": (1, 40)}
+        assert [c["page"] for c in item["citations"]] == [
+            139, 140, 141, 142, 144, 145, 146, 147,
+        ]
+        map_uri = uri.replace(
+            "/api/scenarios/uplink-center?", "/api/scenarios/uplink-center/map.svg?",
+        )
+        assert wsgi_response(app, ORIGIN + map_uri)[0] == 200
+    assert _json(
+        app, "/api/scenarios/uplink-center?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 

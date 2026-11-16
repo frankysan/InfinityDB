@@ -83,6 +83,7 @@ _MARKER_LABELS = {
     "console": "Console A Marker",
     "supply-box": "Supply Box Marker",
     "antenna": "Transmission Antenna Token",
+    "tech-coffin": "Tech-Coffin Token",
     "hyperthermal-tech": "Hyperthermal Tech Token",
 }
 

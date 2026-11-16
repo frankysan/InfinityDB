@@ -334,9 +334,8 @@ remain later scope; do not claim complete Season 18 coverage before it is verifi
 
 **Curated and published 2026.09.11 hotfix work (2026-11-16):** Both the
 historical 2026.09.01 Battleground and the September hotfix with Battleground,
-Annihilation, Crossing Lines, Double Bind, The Dig, Cutthroat and Superiority
-  now have distinct
-selected database revisions. The browser exposes exact-revision selection,
+Annihilation, Crossing Lines, Double Bind, The Dig, Cutthroat, Superiority
+and Uplink Center now have distinct selected database revisions. The browser exposes exact-revision selection,
 typed objectives, game-size maps and Double Bind's exclusive Main Objective
 choices. Source-backed Exclusion/Influence/Sector styling and the
 Crossing Lines, Double Bind and The Dig map-label/placement-ruler fixes

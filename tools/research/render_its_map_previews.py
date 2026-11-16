@@ -67,9 +67,24 @@ def _raster_friendly_svg(svg: str, colors: dict[str, str], *, theme: str, width:
                   "font-family": "sans-serif", "font-weight": "600",
                   "font-size": str(1.4 * text_scale)},
     }
+    markers = [element for element in root.iter() if element.get("data-marker-type")]
+    has_tech_coffin = any(element.get("data-marker-type") == "tech-coffin"
+                          for element in markers)
     for element in root.iter():
         for klass in element.get("class", "").split():
             element.attrib.update(palette.get(klass, {}))
+        if has_tech_coffin and element.get("data-marker-type") in {"antenna", "tech-coffin"}:
+            role = element.get("data-marker-type")
+            if role == "antenna":
+                element.attrib.update({
+                    "fill": "#97741e" if theme == "dark" else "#f7c86a",
+                    "stroke": "#efd18d" if theme == "dark" else "#b97b09",
+                })
+            else:
+                element.attrib.update({
+                    "fill": "#725991" if theme == "dark" else "#a99ac5",
+                    "stroke": "#dec9f1" if theme == "dark" else "#6d4d91",
+                })
     for element in list(root):
         if element.tag.endswith("}style"):
             root.remove(element)

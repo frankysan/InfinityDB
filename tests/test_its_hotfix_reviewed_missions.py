@@ -477,6 +477,123 @@ def test_superiority_rejects_missing_scoring_quadrant() -> None:
         parse_scenario_definition_record(record)
 
 
+def test_uplink_center_objectives_activation_control_and_40mm_tokens() -> None:
+    record = _records()["scenario:uplink-center"]
+    mission, configs = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *((("its-season-18-en-pdf", page)) for page in range(139, 143)),
+        *((("its-season-18-es-pdf", page)) for page in range(144, 148)),
+    ]
+    objectives = {item["id"]: item for item in mission["objectives"]}
+    assert {name: obj["maximumPoints"] for name, obj in objectives.items()} == {
+        "activate-communication-antennas": 4,
+        "control-communication-antennas": 2,
+        "control-tech-coffin": 3,
+        "active-lieutenant": 1,
+    }
+    for name, expected in (
+        ("activate-communication-antennas", ("activated", 2, ["antenna-left", "antenna-right"])),
+        ("control-communication-antennas", ("controlled", 1, ["antenna-left", "antenna-right"])),
+        ("control-tech-coffin", ("controlled", 3, ["tech-coffin"])),
+    ):
+        status, points_each, ids = expected
+        obj = objectives[name]
+        assert obj["aggregation"] == "cumulative"
+        assert obj["timing"] == "end-of-game"
+        assert obj["awards"] == [{
+            "armyPoints": list(SIZES), "objectivePoints": points_each,
+            "condition": {"kind": "element-status-count", "elementIds": ids, "status": status},
+        }]
+    assert objectives["active-lieutenant"]["awards"][0]["condition"]["kind"] == "reviewed-prose"
+    assert "Isolated or Immobilized" in (
+        objectives["active-lieutenant"]["awards"][0]["condition"]["text"]
+    )
+    rules = {item["id"]: " ".join(item["paragraphs"]) for item in mission["rules"]}
+    assert "Neither player may deploy in Silhouette contact" in rules["deployment-and-objectives"]
+    assert "40 mm" in rules["deployment-and-objectives"]
+    assert "stops counting as Activated for the previous player" in (
+        rules["activate-communication-antenna"]
+    )
+    assert "Normal WIP Roll" in rules["activate-communication-antenna"]
+    for control_id in ("control-communication-antenna", "control-tech-coffin"):
+        assert "not a Marker" in rules[control_id]
+        assert "Silhouette contact" in rules[control_id]
+        assert "Null State" in rules[control_id]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert "+3 and +1SD" in rules["operational-learning"]
+    assert "resets after a successful Roll" in rules["operational-learning"]
+    assert "Isolated State" in rules["active-lieutenant"]
+    assert "Classified Deck" in rules["hvt-and-classified-deck"]
+    assert [e["id"] for e in mission["endConditions"]] == ["round-limit", "retreat"]
+    assert mission["endConditions"][0]["condition"] == {"kind": "round-limit", "rounds": 3}
+    assert "Retreat!" in mission["endConditions"][1]["condition"]["text"]
+    assert mission["sourceIssues"] == []
+
+    for config_id, width, height, depth in (
+        ("150-points", 24, 32, 12),
+        ("200-250-points", 32, 48, 16),
+        ("300-400-points", 48, 48, 16),
+    ):
+        geometry = configs[config_id]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {element["id"]: element for element in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert {
+            element["id"]: (element["markerType"], element["x"], element["y"])
+            for element in elements.values() if element["kind"] == "marker"
+        } == {
+            "antenna-left": ("antenna", width / 4, height / 2),
+            "tech-coffin": ("tech-coffin", width / 2, height / 2),
+            "antenna-right": ("antenna", width * 3 / 4, height / 2),
+        }
+        rulers = {
+            annotation["id"]: annotation for annotation in geometry["annotations"]
+            if annotation["kind"] == "ruler"
+        }
+        assert rulers == {
+            "tech-coffin-from-left": {
+                "id": "tech-coffin-from-left", "kind": "ruler",
+                "x1": 0, "y1": height - depth + 2.5,
+                "x2": width / 2, "y2": height - depth + 2.5, "offset": 0,
+            },
+            "antenna-right-from-right": {
+                "id": "antenna-right-from-right", "kind": "ruler",
+                "x1": width * 3 / 4, "y1": height - depth + 2.5,
+                "x2": width, "y2": height - depth + 2.5, "offset": 0,
+            },
+        }
+        svg = render_scenario_map_svg(parse_scenario_geometry(geometry))
+        assert 'data-marker-type="tech-coffin" data-diameter-mm="40"' in svg
+        assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 2
+        assert 'id="tech-coffin-from-left" class="measurement placement-ruler"' in svg
+        assert f'data-distance-inches="{width / 2:g}"' in svg
+        assert f'data-distance-inches="{width / 4:g}"' in svg
+        assert '.objective[data-marker-type="tech-coffin"]' in svg
+        assert 'svg[data-theme="dark"] .objective[data-marker-type="tech-coffin"]' in (
+            render_scenario_map_svg(parse_scenario_geometry(geometry), theme="dark")
+        )
+
+
+@pytest.mark.parametrize("mutation", ["missing-tech-coffin", "activated-tech-coffin"])
+def test_uplink_center_rejects_missing_or_incompatible_scoring_markers(
+    mutation: str,
+) -> None:
+    record = deepcopy(_records()["scenario:uplink-center"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    if mutation == "missing-tech-coffin":
+        geometry["elements"] = [e for e in geometry["elements"] if e["id"] != "tech-coffin"]
+    else:
+        record["facts"]["mission"]["objectives"][0]["awards"][0]["condition"]["elementIds"] = [
+            "tech-coffin",
+        ]
+    with pytest.raises(
+        ScenarioDefinitionError,
+        match="missing or incompatible scoring element|requires an Antenna marker",
+    ):
+        parse_scenario_definition_record(record)
+
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

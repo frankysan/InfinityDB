@@ -16,6 +16,7 @@ _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "console": 40.0,
     "supply-box": 25.0,
     "antenna": 40.0,
+    "tech-coffin": 40.0,
     "hyperthermal-tech": 25.0,
 }
 
