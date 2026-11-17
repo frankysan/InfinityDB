@@ -48,6 +48,10 @@ def test_scenario_skills_listed_with_context_and_source(app):
     }
     assert all(item["categories"][0]["id"] == "short-skill" for item in items
                if item.get("scenario"))
+    assert all(not item["name"].endswith((" (Short Skill)", " (Long Skill)"))
+               for item in items)
+    assert next(item["name"] for item in items
+                if item["slug"] == "its-18-last-launch-download-id") == "Download ID"
 
     for scenario in ("hardlock", "b-pong"):
         status, detail = _get(app, f"/api/skills/its-18-{scenario}-activate-console")
@@ -80,12 +84,39 @@ def test_scenario_actions_use_standard_rule_card_model(app):
     action = next(item for item in payload["special_rules"]
                   if item["id"] == "activate-console")
     assert action["skill"]["id"] == "skill:its-18-hardlock-activate-console"
+    assert action["skill"]["name"] == "Activate Console"
     assert action["skill"]["summary"] == ""
     assert action["skill"]["facts"]["requirements"] == [
         "A Specialist Troop must be in Silhouette contact with a Console.",
     ]
     assert action["skill"]["facts"]["effects"]
     assert action["skill"]["citations"]
+
+
+def test_suffix_is_absent_from_skill_detail_scenario_and_search(app):
+    skill_slug = "its-18-last-launch-download-id"
+    status, detail = _get(app, f"/api/skills/{skill_slug}")
+    assert status == 200
+    assert detail["name"] == "Download ID"
+    assert detail["rules"][0]["name"] == "Download ID"
+    assert detail["rules"][0]["skill_types"][0]["name"] == "Short Skill"
+
+    status, scenario = _get(
+        app, "/api/scenarios/last-launch?collection=its-18&army_points=300",
+    )
+    assert status == 200
+    action = next(
+        rule for rule in scenario["special_rules"] if rule["id"] == "download-id"
+    )
+    assert action["skill"]["name"] == "Download ID"
+    assert action["skill"]["id"] == f"skill:{skill_slug}"
+
+    status, results = _get(app, "/api/search?q=download%20id")
+    assert status == 200
+    assert {
+        result["name"] for result in results["items"]
+        if result["href"] == f"/skills/{skill_slug}"
+    } == {"Download ID (Last Launch)"}
 
 
 def test_reviewed_action_pins_and_distinct_source_ambiguities(app):

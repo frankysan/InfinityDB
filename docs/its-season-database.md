@@ -37,8 +37,10 @@ artifact created from reviewed curated ITS facts. The implementation lives in
 - **Scenario Skills:** Mission rules with `skillTypeIds` and `skillFacts`
   project to standard Skill cards, `/skills` and Search. All 26 reviewed ITS 18
   actions have structured Requirements and Effects, with optional Restrictions,
-  Clarifications and Source context. Original mission paragraphs remain
-  available for provenance and compatibility. Their public IDs include the
+  Clarifications and Source context. Original mission paragraphs and action
+  titles remain available for provenance and compatibility. Public Skill names
+  omit redundant terminal `(Short Skill)` and `(Long Skill)` labels because
+  their typed badges convey that classification. Their public IDs include the
   season and scenario, so same-named actions are not conflated. Optional
   `skillCitations` identify exact source pages only where already supported
   by reviewed action evidence (currently three actions); the others retain

@@ -26,7 +26,8 @@ are not retroactively relabeled.
   `/skills` category, and are searchable with scenario-specific destinations.
   All 26 current ITS actions now have structured Requirements and Effects,
   with source caveats preserved. Core N5 scenario Skills are also listed
-  with their scenario context and exact N5 citations.
+  with their scenario context and exact N5 citations. Redundant Skill-type
+  suffixes are omitted from scenario Skill names; badges identify the type.
 
 ### Added
 

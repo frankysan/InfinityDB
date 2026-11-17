@@ -280,6 +280,10 @@ class ScenarioCatalog:
                     if not skill_types:
                         continue
                     slug = f"{publication['collection']}-{scenario_slug}-{rule['id']}"
+                    # The typed Skill category is displayed separately from its name.
+                    skill_name = rule["name"].removesuffix(" (Short Skill)").removesuffix(
+                        " (Long Skill)"
+                    )
                     citations = []
                     by_source: dict[str, list[int]] = {}
                     mission_pins: set[tuple[str, int]] = set()
@@ -315,7 +319,7 @@ class ScenarioCatalog:
                             if source is None:
                                 raise ValueError(f"Missing ITS Skill source {source_id!r}")
                             if action_pins:
-                                source["section"] = f"{record['name']} — {rule['name']}"
+                                source["section"] = f"{record['name']} — {skill_name}"
                             else:
                                 # An unpinned citation covers the mission, not a skill page.
                                 source["page"] = None
@@ -332,7 +336,7 @@ class ScenarioCatalog:
                     skill_rule = {
                         "id": f"skill:{slug}",
                         "kind": "skill",
-                        "name": rule["name"],
+                        "name": skill_name,
                         "summary": (
                             "" if rule.get("skillFacts")
                             else "\n\n".join(rule["paragraphs"])
@@ -356,7 +360,7 @@ class ScenarioCatalog:
                     items.append({
                         "id": slug,
                         "slug": slug,
-                        "name": rule["name"],
+                        "name": skill_name,
                         "use_count": 0,
                         "category": "Scenario-specific Skills",
                         "categories": categories,
