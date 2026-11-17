@@ -3866,7 +3866,12 @@ unbound actions, duplicate edits, invalid types and unsupported fields fail
 closed. Variant Skill facts stay on the original context-specific Skill route
 and in Search, while unmodified shared facts retain a canonical Skill
 identity; names alone do not authorize consolidation. Generic scenario
-component payload overrides and full build registry integration remain open.
+component payload overrides remain open. Complete-set library registration
+is now opt-in via `SEASON_SHARED_LIBRARY_SOURCES`, with the referenced
+`data/curated/its/shared/*.json` bytes included in the matched build-input
+manifest. Independent season database outputs pin the raw library SHA-256;
+complete-set inspection and deployment checks reject missing, unregistered
+or mismatched libraries without needing that library at request time.
 
 **Remaining accepted direction:** Extend the existing explicit, build-time scenario composition to share
 **curated definitions** across ITS seasons and between scenarios, while

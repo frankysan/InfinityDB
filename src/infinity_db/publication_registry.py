@@ -336,6 +336,9 @@ class PublicationRegistry:
                 "revision": self._season_revisions[season],
                 "sourceCollectionId": report["inputIdentity"]["sourceCollectionId"],
                 "sourceSha256": report["inputIdentity"]["sourceSha256"],
+                **({
+                    "sharedScenarioLibrary": report["inputIdentity"]["sharedScenarioLibrary"]
+                } if "sharedScenarioLibrary" in report["inputIdentity"] else {}),
                 "requiredCoreRulesRevision": self.core_revision,
                 "sha256": report["sha256"],
             }

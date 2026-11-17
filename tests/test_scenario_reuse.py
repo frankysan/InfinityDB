@@ -325,6 +325,106 @@ def test_shared_scenario_membership_preserves_current_and_archived_source_family
     assert selected["record"]["sharedDefinition"]["version"] == "v1"
 
 
+
+def test_complete_set_builder_registers_shared_library_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Registered season builds use pinned library bytes and remain self-contained."""
+    from infinity_db import database_set, database_set_builder
+
+    source, library_path, _, _ = _fixture(tmp_path)
+    root = tmp_path / "checkout"
+    season_relative = "data/curated/its/n5-its-season-17.json"
+    library_relative = "data/curated/its/shared/synthetic-library.json"
+    season_file = root / season_relative
+    shared_file = root / library_relative
+    shared_file.parent.mkdir(parents=True, exist_ok=True)
+    shared_file.write_bytes(library_path.read_bytes().replace(b"\r\n", b"\n"))
+    source["sharedScenarioLibrary"]["sha256"] = hashlib.sha256(
+        shared_file.read_bytes()
+    ).hexdigest()
+    season_file.parent.mkdir(parents=True, exist_ok=True)
+    season_file.write_bytes(
+        (json.dumps(source, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+    )
+    assert b"\r\n" not in shared_file.read_bytes()
+    assert source["sharedScenarioLibrary"]["sha256"] == hashlib.sha256(
+        shared_file.read_bytes().replace(b"\r\n", b"\n")
+    ).hexdigest()
+    registration = {"its-17": ("its_17.db", season_relative)}
+    monkeypatch.setattr(database_set, "SEASON_DATABASE_SOURCES", registration)
+    monkeypatch.setattr(database_set_builder, "SEASON_DATABASE_SOURCES", registration)
+    monkeypatch.setitem(
+        database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-17", library_relative,
+    )
+    stage = tmp_path / "stage"
+    stage.mkdir()
+    database_set_builder._build_registered_seasons(stage, root, "5.3")
+    output = stage / "its_17.db"
+    report = inspect_its_database(
+        output, source=season_file, core_revision="5.3",
+        shared_library=shared_file, require_current_builder=True,
+    )
+    assert report["inputIdentity"]["sharedScenarioLibrary"] == source[
+        "sharedScenarioLibrary"
+    ]
+    assert report["scenarios"][0]["id"] == SCENARIO_ID
+    from infinity_db.publication_registry import PublicationRegistry
+    from infinity_db.rules_database import RulesDatabase
+
+    registry = PublicationRegistry(
+        RulesDatabase(ROOT / "data/generated/rules_n5.db"), {"its-17": output},
+    )
+    assert registry.season_manifest()["its-17"]["sharedScenarioLibrary"] == source[
+        "sharedScenarioLibrary"
+    ]
+    before = output.read_bytes()
+
+    shared_file.write_bytes(shared_file.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="SHA-256"):
+        database_set_builder._build_registered_seasons(stage, root, "5.3")
+    assert output.read_bytes() == before
+
+    shared_file.write_bytes(library_path.read_bytes())
+    monkeypatch.delitem(database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-17")
+    with pytest.raises(ValueError, match="library path is required"):
+        database_set_builder._build_registered_seasons(stage, root, "5.3")
+    assert output.read_bytes() == before
+
+
+@pytest.mark.parametrize("relative", [
+    "../shared.json",
+    "data/curated/its/other.json",
+    "data/curated/its/shared/../library.json",
+    "C:/source/shared.json",
+    "local/data/curated/its/shared/library.json",
+    "data\\curated\\its\\shared\\library.json",
+])
+def test_registered_library_paths_are_restricted(
+    monkeypatch: pytest.MonkeyPatch, relative: str,
+) -> None:
+    from infinity_db import database_set
+
+    monkeypatch.setitem(
+        database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-18", relative,
+    )
+    with pytest.raises(ValueError, match="Invalid shared ITS library source"):
+        database_set.season_shared_library_source("its-18")
+
+
+def test_library_registration_cannot_activate_an_unregistered_season(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db import database_set
+
+    monkeypatch.setitem(
+        database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-17",
+        "data/curated/its/shared/synthetic-library.json",
+    )
+    with pytest.raises(ValueError, match="unknown season"):
+        database_set.season_shared_library_source("its-18")
+
+
 def test_shared_component_versions_and_reference_cycles_are_checked() -> None:
     # The existing resolver remains the only component composition engine.
     document = {

@@ -128,6 +128,22 @@ def test_complete_set_rejects_its_from_a_different_source_build(
         validate_database_set(runtime_set, require_complete=True)
 
 
+def test_complete_set_rejects_unregistered_or_unbound_shared_library(
+    runtime_set: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db import database_set
+
+    relative = "data/curated/its/shared/synthetic-shared.json"
+    monkeypatch.setitem(database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-18", relative)
+    with pytest.raises(ValueError, match="shared library provenance"):
+        validate_database_set(runtime_set, require_complete=True)
+
+    monkeypatch.delitem(database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-18")
+    monkeypatch.setitem(database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-17", relative)
+    with pytest.raises(ValueError, match="unknown season"):
+        validate_database_set(runtime_set, require_complete=True)
+
+
 def test_embedded_objects_must_match_selected_army(runtime_set: Path) -> None:
     with sqlite3.connect(runtime_set / "rules_n5.db") as connection:
         connection.execute(

@@ -416,9 +416,11 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     review/citations and legacy Skill routes. Shared Skills now group by exact
     identity in catalog/Search with fail-closed fact/version comparison. The
     current ITS 18 source and runtime outputs are unchanged.
-    - [ ] Integrate library-backed seasons with the complete-set build.
-      Exact source-family tags and historical projection of imported scenarios
-      now have a synthetic current/archived revision regression test.
+    - [x] Integrate opt-in library-backed seasons with the complete-set build.
+      Explicit per-season library registration, matched input provenance and
+      deployment freshness checks fail closed. Synthetic ITS 17 confirms
+      pinning and standalone output. ITS 18 remains unchanged; exact source-family
+      tags and archived projections of imported scenarios retain regression tests.
     - [ ] Add reviewed narrow overrides for scenario components and Skill
       Requirements/Effects/Restrictions where suitable, rejecting conflicts.
       - [x] Skill prose-array replacements are now scoped to exact scenario

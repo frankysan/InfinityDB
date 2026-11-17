@@ -69,7 +69,9 @@ affected area, observation and evidence, proposed change, and disposition.
   present ITS 18 builds unchanged until then.
 - **Why:** Prevent synthetic reuse capability from being mistaken for a
   deployed, integrated multi-season publication pipeline.
-- **Disposition:** deferred; tracked by [cross-season ITS reuse](TODO.md#its-scenarios-and-game-tools).
+- **Disposition:** implemented as opt-in complete-set registration, matched
+  provenance and deployment freshness checks. Validated using synthetic
+  ITS 17 source and library; actual ITS 17 publication remains separate.
 
 ## AI-0004 — Reconcile stale publication-registry regression expectations
 
@@ -111,8 +113,9 @@ affected area, observation and evidence, proposed change, and disposition.
   one-source-family revision-history contract for future season migrations.
 - **Disposition:** partially addressed: synthetic current and archived source
   projections preserve exact revision tags and references when one scenario
-  is imported. Integrated future library-backed build registration remains
-  [deferred](TODO.md#its-scenarios-and-game-tools).
+  is imported. Optional complete-set library registration and its
+  matched provenance checks are implemented; real ITS 17 curation remains
+  [pending](TODO.md#its-scenarios-and-game-tools).
 
 ## AI-0006 — Reconcile the runtime semantic snapshot with current ITS publication
 

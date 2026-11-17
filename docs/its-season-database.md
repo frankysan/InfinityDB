@@ -95,10 +95,31 @@ and historical field overrides. A synthetic ITS 18 test confirms that both
 2026.09.11 and 2026.09.01 projections preserve the corresponding facts and
 membership ordering.
 
+**Complete-set registration (implemented; opt-in):**
+`SEASON_DATABASE_SOURCES` continues to register each shipped season and its
+curated source. A season that imports shared definitions also explicitly
+registers a library under `SEASON_SHARED_LIBRARY_SOURCES` in
+`src/infinity_db/database_set.py`, using a repository-relative
+`data/curated/its/shared/*.json` path. The complete-set builder passes
+the library to the existing standalone ITS builder. The shared library is
+included in the curated JSON input manifest; complete-set validation verifies
+that the selected season database has the registered library SHA-256 recorded
+in the matched Army/Rules build inputs. Unregistered libraries and missing or
+mismatched pins fail closed. The deployment asset check verifies the actual
+library file and current ITS builder revision. The compiled database still
+serves independently without an on-disk authoring library. New libraries must
+retain byte-stable LF source text across systems, matching the repository
+`.gitattributes` policy and exact library SHA-256 pins.
+
+The current registration is empty: **ITS 18 remains source-local and the only
+registered production season**. A synthetic ITS 17 fixture verifies the
+complete-set builder's registration path, rejection of missing/modified library
+bytes, and independent SQLite output. No current content migration or runtime
+schema change is implied.
+
 This is proven on synthetic single-season, two-season and revision-tagged
-fixtures, **not** reviewed ITS 17 data. Generic component overrides, integrated
-build registration of future library-backed seasons, and real migrations remain
-[unfinished](TODO.md#its-scenarios-and-game-tools); see the
+fixtures, **not** reviewed ITS 17 data. Generic component overrides and
+real migrations remain [unfinished](TODO.md#its-scenarios-and-game-tools); see the
 [canonical data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse).
 
 ### Published 2026.09.11 hotfix curation
