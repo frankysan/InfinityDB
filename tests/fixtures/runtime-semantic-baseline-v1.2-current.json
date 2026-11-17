@@ -1,7 +1,7 @@
 {
   "artifacts": {
-    "armyDbSha256": "11fb5c053de8fc7f41b2fa7373041301e8240895ee2381c12bc43fc38632a0f1",
-    "rulesDbSha256": "9562f689e5761ccfb5074fde4df75bbc8ea48548a552f6194f233df89607cd78",
+    "armyDbSha256": "9a7dcec75d91fc1b99e20cdc52cfa717c4d1aa2041f32c68b09ff53507a68895",
+    "rulesDbSha256": "386d6260d03a34b9be323a81c63f3ef463007a499ccb7444340fcd6ee2dba4b3",
     "symbolPublicationSha256": "a88c7ead46cb2b68c67deece21af1e2f0a072a3c7a44a8b319ae32f64fc10d17"
   },
   "format": "InfinityDB P1 runtime semantic baseline",
@@ -35,7 +35,7 @@
     {
       "kind": "json",
       "path": "/api/skills",
-      "semanticSha256": "3c01b8d476fca8cd131a367809dd6db0863310d4266ba91496d20f4893b4957b"
+      "semanticSha256": "763cecce5ab22eb2ba2412c3ccc6a6ef4538c39e24e79b692a425d03700725c0"
     },
     {
       "kind": "json",

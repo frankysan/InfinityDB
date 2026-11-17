@@ -3856,9 +3856,13 @@ Casevac, and `team-ops-extra` for Team-Ops and Request a Tacball.
 This identifies the *optional* tournament Extra rather than granting an
 unconditional Skill outside that Extra. CivEvac is also referenced by the
 Evacuation and Outbreak scenarios, but is not duplicated in their authored
-Skill action lists. Casevac State (pp. 25–26) is distinct from the Casevac
-Skill; its state rules are currently summarized under the Skill and a separate
-state publication remains on the backlog.
+Skill action lists. Casevac State (pp. 25–26) is published separately as `state:casevac` in the
+ITS season's `records` table. Its State card and the Casevac Skill have
+bidirectional maintained-text links. Activation, simultaneous movement, ARO
+count, template attacks, carried-Trooper limitations and all automatic and
+voluntary cancellation conditions reside in the State facts. Archived ITS 18
+2026.09.01 citations remain p. 24–25; 2026.09.11 uses p. 25–26.
+The State belongs to ITS 18, never to the core Rules database.
 
 **Versioned source-family and scoped override acceptance (synthetic only):**
 A shared scenario imported through a season membership participates in the same

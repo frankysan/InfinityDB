@@ -349,6 +349,10 @@
         "skill:request-tacball": [
           "2026.09.01",
           "2026.09.11"
+        ],
+        "state:casevac": [
+          "2026.09.01",
+          "2026.09.11"
         ]
       },
       "seasonPolicies": {
@@ -367,6 +371,26 @@
       }
     },
     "historicalOverrides": [
+      {
+        "revision": "2026.09.01",
+        "category": "records",
+        "id": "state:casevac",
+        "fields": {
+          "facts.applicability.revision": "2026.09.01",
+          "citations": [
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 24,
+              "section": "Casevac and Casevac State"
+            },
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 25,
+              "section": "Casevac State: Activation, Effects and Cancelation"
+            }
+          ]
+        }
+      },
       {
         "revision": "2026.09.01",
         "category": "records",
@@ -19371,14 +19395,10 @@
           "The carrying Trooper must have PH at least equal to the carried Trooper's PH. A Trooper with Baggage ignores this PH requirement."
         ],
         "effects": [
-          "Successfully declaring Casevac activates Casevac State for the carrier and the allied Trooper.",
-          "While in Casevac State, the player activates both Troopers with one Order or ARO and moves them in Silhouette contact using the carrier's MOV. Only the carrier can declare Orders or AROs.",
-          "The two Troopers provoke one ARO per eligible enemy, and template attacks against either follow the Template Weapons Into Close Combat rule.",
-          "The carried Trooper does not block LoF or provide the +1 B Close Combat MOD. A carrier normally carries at most one Trooper.",
-          "Casevac State ends if the carrier declares a disallowed Skill, is activated in the Impetuous Phase, becomes Immobilized/Null or a Marker, or the carried Trooper recovers. The carrier may voluntarily cancel it by spending a Short Skill without a Roll."
+          "Casevac activates [[state:casevac|Casevac State]] for the carrier and the carried allied Trooper. Its movement, ARO and cancellation effects are defined by that State."
         ],
         "restrictions": [
-          "The carried Trooper cannot perform its own Orders or AROs while Casevac State applies."
+          "The carried Trooper cannot perform its own Orders or AROs while [[state:casevac|Casevac State]] applies."
         ],
         "applicability": {
           "context": "season",
@@ -19505,6 +19525,65 @@
           "sourceId": "its-season-18-en-pdf",
           "page": 31,
           "section": "Request a Tacball: Requirements and Effects"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-17"
+      }
+    },
+    {
+      "id": "state:casevac",
+      "kind": "state",
+      "name": "Casevac State",
+      "aliases": [
+        "Casevac"
+      ],
+      "summary": "ITS Season 18 State entered through [[skill:casevac|Casevac]]: one Trooper carries an allied Stunned, Immobilized or Unconscious Trooper while moving in Silhouette contact.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "state",
+        "requirements": [
+          "Activate the State through [[skill:casevac|Casevac]]: a Model must be in Silhouette contact with an allied Trooper in Stunned, Immobilized (IMM-A or IMM-B) or Unconscious State, and have PH at least equal to the carried Trooper's PH, unless Baggage removes that PH requirement. Scenario rules may change the target requirement."
+        ],
+        "effects": [
+          "The carrier and the carried Trooper activate together with a single Order or ARO and move simultaneously in Silhouette contact, using the carrier's MOV values.",
+          "The carried Trooper cannot declare or perform Orders or AROs; only the carrier declares and performs them.",
+          "Both Troopers provoke only one ARO from each eligible enemy within LoF or ZoC.",
+          "Template Weapon Attacks against either Trooper follow the Template Weapons Into Close Combat rule.",
+          "The carried Trooper does not block LoF and does not provide the +1 B MOD when engaging in Close Combat.",
+          "Casevac State is automatically cancelled if the carrier declares any Skill except Cautious Movement, Climb, Dodge, Jump, Reset or a Short Movement Skill.",
+          "Casevac State also ends if the carrier is activated in the Impetuous Phase, enters an Immobilized or Null State or another canceling State, or becomes a Marker (such as Camouflaged, Impersonation or Holoecho).",
+          "Casevac State automatically ends when the carried Trooper recovers from the Immobilized (IMM-A or IMM-B), Stunned or Unconscious State.",
+          "The carrier can voluntarily cancel Casevac State by spending a Short Skill of an Order, without a Roll."
+        ],
+        "restrictions": [
+          "Unless a Scenario Special Rule says otherwise, a carrier cannot carry more than one Immobilized, Stunned or Unconscious Trooper at a time."
+        ],
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 25,
+          "section": "Casevac and Casevac State"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 26,
+          "section": "Casevac State: Activation, Effects and Cancelation"
         }
       ],
       "review": {

@@ -6,6 +6,7 @@ from copy import deepcopy
 from typing import Any
 
 from infinity_db.domain_slugs import route_slug_from_typed_domain_id
+from infinity_db.publication_registry import PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
 
 
@@ -18,17 +19,35 @@ def _record_slug(record: dict[str, Any]) -> str:
 class StateCatalog:
     """Expose current curated State definitions independently of Army source tables."""
 
-    def __init__(self, rules_database: RulesDatabase | None) -> None:
+    def __init__(
+        self, rules_database: RulesDatabase | None,
+        publication_registry: PublicationRegistry | None = None,
+    ) -> None:
         self.rules_database = rules_database
+        self.publication_registry = publication_registry
         self._records_cache: list[dict[str, Any]] | None = None
 
     def _records(self) -> list[dict[str, Any]]:
         if self._records_cache is None:
-            self._records_cache = (
+            records = (
                 []
                 if self.rules_database is None
                 else self.rules_database.composed_records_by_kind("state")
             )
+            if self.publication_registry is not None:
+                known = {_record_slug(record) for record in records}
+                for entry in self.publication_registry.season_state_entries():
+                    record = deepcopy(entry["record"])
+                    slug = _record_slug(record)
+                    if slug in known:
+                        raise ValueError(f"ITS State identity collides with another State: {slug}")
+                    known.add(slug)
+                    record["citations"] = deepcopy(entry["citations"])
+                    record["season"] = {
+                        "collection": entry["collection"], "revision": entry["revision"],
+                    }
+                    records.append(record)
+            self._records_cache = records
         return self._records_cache
 
     def list_states(self) -> list[dict[str, Any]]:
@@ -39,6 +58,8 @@ class StateCatalog:
                 "slug": _record_slug(record),
                 "name": record["name"],
                 "description": record["summary"],
+                **({"season": deepcopy(record["season"])}
+                   if "season" in record else {}),
             }
             for record in self._records()
         ]
@@ -56,5 +77,7 @@ class StateCatalog:
                 "name": record["name"],
                 "description": record["summary"],
                 "rules": [deepcopy(record)],
+                **({"season": deepcopy(record["season"])}
+                   if "season" in record else {}),
             }
         return None

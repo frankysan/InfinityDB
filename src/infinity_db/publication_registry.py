@@ -143,6 +143,13 @@ class PublicationRegistry:
 
     def season_skill_entries(self) -> list[dict[str, Any]]:
         """Return validated standalone Skills from the selected ITS publications."""
+        return self._season_rule_entries("skill")
+
+    def season_state_entries(self) -> list[dict[str, Any]]:
+        """Return source-cited season States without promoting them to N5 core."""
+        return self._season_rule_entries("state")
+
+    def _season_rule_entries(self, kind: str) -> list[dict[str, Any]]:
         entries: list[dict[str, Any]] = []
         for registered, report in self._season_reports.items():
             identity = report["inputIdentity"]
@@ -151,8 +158,8 @@ class PublicationRegistry:
             with closing(sqlite3.connect(self._season_paths[registered].as_uri() + "?mode=ro",
                                          uri=True)) as connection:
                 for (raw,) in connection.execute(
-                    "SELECT payload_json FROM records WHERE collection_id=? AND kind='skill' "
-                    "ORDER BY id", (identity["sourceCollectionId"],),
+                    "SELECT payload_json FROM records WHERE collection_id=? AND kind=? "
+                    "ORDER BY id", (identity["sourceCollectionId"], kind),
                 ):
                     record = json.loads(raw)
                     citations = []

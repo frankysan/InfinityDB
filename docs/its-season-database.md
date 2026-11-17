@@ -92,7 +92,14 @@ checks record types, counts, citations, content hashes, and season/revision
 applicability; the Skill catalog and Search expose their standard cards.
 The Team-Ops tournament Extra (p. 29) remains distinct from the Special
 Skill, and both Team-Ops and Request a Tacball are scoped to that Extra.
-Casevac State (pp. 25–26) remains a separate pending State reference.
+Casevac State (pp. 25–26) is a separate `kind: state` ITS record, with
+source-cited activation/effects/cancellation conditions and an independent
+`/states/casevac` card. `/skills/casevac` links to that State and the State
+links back to the Skill. Historical 2026.09.01 citations use pp. 24–25.
+The State catalog merges registered ITS States for presentation but never
+writes them into or infers them from the core Rules database. It rejects
+ambiguous route identities; cross-season State deduplication needs separately
+reviewed evidence before a second season reuses the same typed ID.
 
 **Reusable season-level memberships (synthetic cross-season acceptance):**
 A pinned shared library can additionally declare a top-level

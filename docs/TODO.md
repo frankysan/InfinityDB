@@ -437,9 +437,10 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
       resolves a pinned shared-library Skill with season-specific citations,
       review, revision, and optional Extra context; identical definitions
       consolidate in the catalog/Search without inventing scenario IDs.
-    - [ ] Curate Casevac State as its own season-scoped, source-cited State
-      reference linked from Casevac; Skill effects currently summarize it.
-      Maintain the source-specific state lifecycle and cancellation rules.
+    - [x] Curate Casevac State as its own season-scoped, source-cited State
+      with bidirectional links to the Casevac Skill. Preserve all activation,
+      movement, ARO, and automatic/voluntary cancellation rules plus
+      exact current/historical source citations.
     - [ ] Review genuine repeated ITS 17/18 scenario semantics and CivEvac in
       the published Evacuation/Outbreak contexts before moving real definitions.
       Also review interaction with other season-wide Skills such as Casevac,

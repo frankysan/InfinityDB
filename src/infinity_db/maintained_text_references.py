@@ -37,7 +37,9 @@ class _Resolver:
         scenario_id: str | None = None,
         *,
         local_rule_ids: frozenset[str] = frozenset(),
+        additional_records: dict[str, dict[str, Any]] | None = None,
     ) -> None:
+        self.additional_records = additional_records or {}
         self.database = database
         self.rules_database = rules_database
         self.scenario_id = scenario_id
@@ -49,7 +51,7 @@ class _Resolver:
         if record_id not in self.records:
             self.records[record_id] = self.rules_database.composed_record(
                 record_id, include_army_links=True, scenario_id=self.scenario_id
-            )
+            ) or self.additional_records.get(record_id)
         record = self.records[record_id]
         if record is None:
             raise ValueError(f"Maintained-text reference {record_id!r} is not current")
@@ -211,6 +213,7 @@ def enrich_maintained_text_references(
     *,
     scenario_id: str | None = None,
     local_rule_ids: frozenset[str] = frozenset(),
+    additional_records: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Attach resolved inline-text tokens to nested current rules records."""
 
@@ -218,7 +221,8 @@ def enrich_maintained_text_references(
     if rules_database is None:
         return result
     resolver = _Resolver(
-        database, rules_database, scenario_id, local_rule_ids=local_rule_ids
+        database, rules_database, scenario_id, local_rule_ids=local_rule_ids,
+        additional_records=additional_records,
     )
 
     def walk(node: Any) -> None:

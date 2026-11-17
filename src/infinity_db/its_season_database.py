@@ -201,6 +201,39 @@ def _validate_season_skill(
         raise ValueError("ITS season Skill requires reviewed source citations")
 
 
+def _validate_season_state(
+    record: dict[str, Any], *, season_id: str, revision: str,
+) -> None:
+    """A season State is not a core State and never has scenario membership."""
+    from .domain_slugs import validate_typed_domain_id
+
+    validate_typed_domain_id(
+        record["id"], expected_domain="state", context="ITS season State",
+    )
+    facts = record.get("facts")
+    required = {"category", "requirements", "effects", "restrictions", "applicability"}
+    if (not isinstance(facts, dict) or required - set(facts)
+            or set(facts) - (required | {"clarifications"})):
+        raise ValueError("ITS season State requires complete typed State facts")
+    if facts["category"] != "state":
+        raise ValueError("ITS season State must have state category")
+    for field in ("requirements", "effects", "restrictions", "clarifications"):
+        values = facts.get(field, [])
+        if (not isinstance(values, list)
+                or (field == "effects" and not values)
+                or any(not isinstance(value, str) or not value.strip()
+                       or value.strip() != value for value in values)):
+            raise ValueError(f"ITS season State has invalid {field}")
+    if facts["applicability"] != {"context": "season", "revision": revision}:
+        raise ValueError("ITS season State requires exact revision applicability")
+    if record["scope"] != {"game": "N5", "seasons": [season_id]}:
+        raise ValueError("ITS season State must not acquire core or scenario scope")
+    if record["composition"] != {"role": "definition"} or record.get("armyLinks"):
+        raise ValueError("ITS season State cannot redefine an Army record")
+    if not record.get("citations") or record.get("review", {}).get("status") != "reviewed":
+        raise ValueError("ITS season State requires reviewed source citations")
+
+
 def _validate_its_document(document: dict[str, Any], core_revision: str) -> None:
     from .domain_slugs import require_domain_slug
 
@@ -252,6 +285,8 @@ def _validate_its_document(document: dict[str, Any], core_revision: str) -> None
             raise ValueError(f"ITS publication contains out-of-season record {record['id']!r}")
         if record["kind"] == "skill":
             _validate_season_skill(record, season_id=season_id, revision=season["revision"])
+        elif record["kind"] == "state":
+            _validate_season_state(record, season_id=season_id, revision=season["revision"])
         elif record["kind"] != "scenario":
             raise ValueError(f"ITS publication contains unsupported record {record['id']!r}")
 
@@ -500,21 +535,27 @@ def inspect_its_database(
         ).fetchall()
         scenario_rows = [row for row in record_rows if row["kind"] == "scenario"]
         skill_rows = [row for row in record_rows if row["kind"] == "skill"]
+        state_rows = [row for row in record_rows if row["kind"] == "state"]
         if (
             len(scenario_rows) != metadata["scenarioCount"]
-            or len(scenario_rows) + len(skill_rows) != len(record_rows)
+            or len(scenario_rows) + len(skill_rows) + len(state_rows) != len(record_rows)
         ):
             raise ValueError("ITS season has unexpected record kinds or scenario count")
-        for row in skill_rows:
-            skill = json.loads(row["payload_json"])
+        for row in [*skill_rows, *state_rows]:
+            record = json.loads(row["payload_json"])
             if (
-                row["id"] != skill.get("id")
-                or _digest(skill) != row["content_sha256"]
+                row["id"] != record.get("id")
+                or _digest(record) != row["content_sha256"]
             ):
-                raise ValueError("ITS season Skill content does not match stored hash")
-            _validate_season_skill(
-                skill, season_id=identity["seasonId"], revision=identity["seasonRevision"],
-            )
+                raise ValueError("ITS season record content does not match stored hash")
+            if row["kind"] == "skill":
+                _validate_season_skill(
+                    record, season_id=identity["seasonId"], revision=identity["seasonRevision"],
+                )
+            else:
+                _validate_season_state(
+                    record, season_id=identity["seasonId"], revision=identity["seasonRevision"],
+                )
             citation_rows = connection.execute(
                 "SELECT source_id, page, member, heading, section FROM record_citations "
                 "WHERE collection_id=? AND record_id=? ORDER BY position",
@@ -528,14 +569,14 @@ def inspect_its_database(
                     "heading": citation.get("heading"),
                     "section": citation.get("section"),
                 }
-                for citation in skill["citations"]
+                for citation in record["citations"]
             ]
             if [dict(citation) for citation in citation_rows] != authored_citations:
-                raise ValueError("ITS season Skill citation content differs from source")
+                raise ValueError("ITS season record citation content differs from source")
             if any(citation["source_id"] not in {
                 item["id"] for item in identity["sources"]
             } for citation in citation_rows):
-                raise ValueError("ITS season Skill references unknown publication source")
+                raise ValueError("ITS season record references unknown publication source")
         publications = connection.execute(
             "SELECT s.id, s.revision, s.source_collection_id, m.scenario_id, m.position, "
             "r.payload_json, r.content_sha256 FROM scenario_sets AS s "
@@ -654,6 +695,10 @@ def inspect_its_database(
             "skills": [
                 {"id": row["id"], "contentSha256": row["content_sha256"]}
                 for row in skill_rows
+            ],
+            "states": [
+                {"id": row["id"], "contentSha256": row["content_sha256"]}
+                for row in state_rows
             ],
             "policies": policies,
         }

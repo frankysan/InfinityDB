@@ -169,5 +169,24 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Disposition:** implemented for four current ITS 18 standalone Skills
   with revision-specific source citations, catalog/Search publication,
   optional-Extra applicability and synthetically validated cross-season
-  `sharedSeasonSkillBindings`. Casevac State still needs independent
-  curation; tracked in [ITS TODO](TODO.md#its-scenarios-and-game-tools).
+  `sharedSeasonSkillBindings`. Casevac State has now also been published
+  independently with exact page pins and reciprocal Skill links; see
+  [ITS season database](its-season-database.md).
+
+## AI-0008 — Resolve maintained-text references across selected publications
+
+- **Date:** 2026-11-17
+- **Area:** State/Skill catalog and maintained-text reference resolution.
+- **Observation:** Maintained-text references previously looked up every Skill
+  and State in the N5 Rules database, so a valid ITS-owned
+  `[[state:casevac]]` or `[[skill:casevac]]` link would fail during API
+  enrichment even when the selected ITS database published that record.
+- **Implemented:** The maintained-text resolver now accepts an explicit map of
+  registered ITS rule records on relevant Skill/State detail surfaces.
+  It preserves the core resolver's normal behavior and fails closed for
+  missing references. Casevac and Casevac State link bidirectionally.
+- **Potential follow-up:** If additional non-core publications use maintained
+  semantic links in more catalog surfaces, centralize publication-aware
+  resolution with strict owner/revision disambiguation rather than extending
+  each route independently. No extra abstraction is needed for the current
+  one-season use case.

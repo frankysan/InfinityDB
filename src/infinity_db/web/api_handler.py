@@ -538,7 +538,18 @@ class ApiHandler:
             if deployed_objects is not None else {}
         )
         self.trait_catalog = TraitCatalog(database, rules_database)
-        self.state_catalog = StateCatalog(rules_database)
+        self.state_catalog = StateCatalog(rules_database, publication_registry)
+        self._season_rule_records = (
+            {
+                entry["record"]["id"]: entry["record"]
+                for kind in (
+                    publication_registry.season_skill_entries(),
+                    publication_registry.season_state_entries(),
+                )
+                for entry in kind
+            }
+            if publication_registry is not None else {}
+        )
         self.scenario_catalog = ScenarioCatalog(rules_database, publication_registry)
         self.skill_catalog = SkillCatalog(database, rules_database, self.scenario_catalog)
         self.equipment_catalog = EquipmentCatalog(database, rules_database)
@@ -1052,6 +1063,7 @@ class ApiHandler:
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload,
                         scenario_id=(payload.get("scenario") or {}).get("id"),
+                        additional_records=self._season_rule_records,
                     )
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
@@ -1147,7 +1159,8 @@ class ApiHandler:
                 else:
                     payload = enrich_rule_relation_references(self.database, payload)
                     payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
+                        self.database, self.rules_database, payload,
+                        additional_records=self._season_rule_records,
                     )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read state")

@@ -138,5 +138,118 @@ def test_skills_are_source_hashed_and_reject_sqlite_tampering(
             "UPDATE records SET payload_json=? WHERE id='skill:civevac'",
             ('{"id":"skill:civevac"}',),
         )
-    with pytest.raises(ValueError, match="Skill content"):
+    with pytest.raises(ValueError, match="record content"):
+        inspect_its_database(copied)
+
+
+def test_casevac_state_is_published_once_with_reciprocal_skill_links(published) -> None:
+    _, report, app = published
+    assert {row["id"] for row in report["states"]} == {"state:casevac"}
+    status, states = _get(app, "/api/states")
+    assert status == 200
+    casevac, = [entry for entry in states["items"] if entry["slug"] == "casevac"]
+    assert casevac["name"] == "Casevac State"
+    assert casevac["season"] == {"collection": "its-18", "revision": "2026.09.11"}
+
+    status, detail = _get(app, "/api/states/casevac")
+    assert status == 200
+    state = detail["rules"][0]
+    assert state["id"] == "state:casevac"
+    assert state["kind"] == "state"
+    assert state["facts"]["applicability"] == {
+        "context": "season", "revision": "2026.09.11",
+    }
+    assert [pin["page"] for pin in state["citations"]] == [25, 26]
+    assert all(pin["source_version"] == "2026.09.11" for pin in state["citations"])
+    assert any("Impetuous Phase" in effect for effect in state["facts"]["effects"])
+    assert any("Template Weapons Into Close Combat" in effect
+               for effect in state["facts"]["effects"])
+    assert any("Short Skill" in effect and "voluntarily" in effect
+               for effect in state["facts"]["effects"])
+
+    skill_links = [
+        token for group in state["fact_tokens"]["requirements"]
+        for token in group if token["type"] == "reference"
+    ]
+    assert any(token["target"] == "skill:casevac"
+               and token["public_reference"] in (
+                   {"href": "/skills/casevac"}, {"catalog": "skills", "id": "casevac"}
+               )
+               for token in skill_links)
+
+    status, skill = _get(app, "/api/skills/casevac")
+    assert status == 200
+    state_links = [
+        token for group in skill["rules"][0]["fact_tokens"]["effects"]
+        for token in group if token["type"] == "reference"
+    ]
+    assert any(token["target"] == "state:casevac"
+               and token["public_reference"] in (
+                   {"href": "/states/casevac"}, {"catalog": "states", "id": "casevac"}
+               )
+               for token in state_links)
+
+    status, search = _get(app, "/api/search?q=casevac")
+    assert status == 200
+    assert {"/skills/casevac", "/states/casevac"} <= {
+        entry["href"] for entry in search["items"]
+    }
+
+
+def test_casevac_state_has_historical_source_pages_but_only_current_route() -> None:
+    document = load_curated_document(SOURCE)
+    current = project_its_source_family(document)
+    old = project_its_source_family(document, revision="2026.09.01")
+    current_state, = [record for record in current["records"]
+                      if record["id"] == "state:casevac"]
+    historical, = [record for record in old["records"]
+                   if record["id"] == "state:casevac"]
+    assert [c["page"] for c in current_state["citations"]] == [25, 26]
+    assert [c["page"] for c in historical["citations"]] == [24, 25]
+    assert current_state["facts"]["applicability"]["revision"] == "2026.09.11"
+    assert historical["facts"]["applicability"]["revision"] == "2026.09.01"
+    assert current_state["facts"]["effects"] == historical["facts"]["effects"]
+
+
+@pytest.mark.parametrize(("mutation", "message"), [
+    ("context", "applicability"),
+    ("revision", "applicability"),
+    ("missing-effects", "complete typed State facts"),
+    ("empty-effect", "effects"),
+    ("wrong-category", "state category"),
+    ("scenario", "core or scenario scope"),
+])
+def test_invalid_casevac_state_is_not_published(
+    tmp_path: Path, mutation: str, message: str,
+) -> None:
+    source = project_its_source_family(load_curated_document(SOURCE))
+    state = next(item for item in source["records"] if item["id"] == "state:casevac")
+    if mutation == "context":
+        state["facts"]["applicability"]["context"] = "team-ops-extra"
+    elif mutation == "revision":
+        state["facts"]["applicability"]["revision"] = "2026.09.01"
+    elif mutation == "missing-effects":
+        state["facts"].pop("effects")
+    elif mutation == "empty-effect":
+        state["facts"]["effects"][0] = ""
+    elif mutation == "wrong-category":
+        state["facts"]["category"] = "skill"
+    else:
+        state["scope"]["scenarios"] = ["scenario:evacuation"]
+    file = tmp_path / "invalid-state.json"
+    file.write_text(json.dumps(source, ensure_ascii=False) + "\n", encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        build_its_database(file, tmp_path / "invalid.db")
+
+
+def test_state_sqlite_tampering_is_detected(published, tmp_path: Path) -> None:
+    output, _, _ = published
+    copied = tmp_path / "tampered-state.db"
+    copied.write_bytes(output.read_bytes())
+    with sqlite3.connect(copied) as connection:
+        connection.execute(
+            "UPDATE records SET payload_json=? WHERE id='state:casevac'",
+            ('{"id":"state:casevac"}',),
+        )
+    with pytest.raises(ValueError, match="record content"):
         inspect_its_database(copied)
