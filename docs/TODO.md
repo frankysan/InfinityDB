@@ -22,7 +22,7 @@ when all contained work shares the same owner.
 
 Use these links to jump directly to a workstream:
 
-- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
+- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [Source updates](#source-family-revision-updates), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
 - **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
@@ -87,6 +87,28 @@ Use these links to jump directly to a workstream:
   differences remain visible. Chromium acceptance covers reviewed pages
   at 1440/390/320 px, light/dark, keyboard and touch. Remaining: other
   chart rows/modes and publisher clarification of unresolved mismatches.
+
+### Source-family revision updates
+
+- [ ] **Acquisition + Data processing:** Implement a repeatable, reviewable
+  **Rules / FAQ / ITS revision intake and reconciliation workflow**, building
+  on the current ITS Season 18 source-family and per-fact revision model.
+  - [ ] Preserve each new official release as immutable source evidence with
+    exact revision identity, original bytes, hashes, language, citation
+    locations and trustworthy publication/effective-date provenance. Do not
+    infer publication dates from filenames or PDF metadata alone.
+  - [ ] Compare successive releases by stable fact identity; classify added,
+    modified, removed, unchanged, editorial-only and ambiguous/conflicting
+    facts. Generate deterministic, cited before/after reports for human review,
+    reusing unchanged facts rather than re-curating whole publications.
+  - [ ] Promote only reviewed changes, retaining superseded values, per-fact
+    revision applicability, citations and historical source provenance.
+    Validate current and historical projections, citation integrity, and
+    fail-closed handling of unresolved changes before publishing only the
+    latest applicable facts to players.
+  - [ ] Extend Rules and FAQ incrementally and exercise the same workflow on
+    future ITS revisions; share tooling where actual source-family needs
+    overlap. Historical browsing remains a separate, optional feature.
 
 ### Per-reference change history
 
