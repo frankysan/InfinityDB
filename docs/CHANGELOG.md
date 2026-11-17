@@ -24,6 +24,9 @@ are not retroactively relabeled.
   HVTs each player uses.
 - Scenario-specific Skills share normal Skill cards, appear under their own
   `/skills` category, and are searchable with scenario-specific destinations.
+  All 26 current ITS actions now have structured Requirements and Effects,
+  with source caveats preserved. Core N5 scenario Skills are also listed
+  with their scenario context and exact N5 citations.
 
 ### Added
 

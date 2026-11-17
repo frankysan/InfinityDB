@@ -26,30 +26,31 @@ affected area, observation and evidence, proposed change, and disposition.
 
 - **Date:** 2026-11-17
 - **Area:** `data/curated/its/n5-its-season-18.json`, scenario/Skill read models.
-- **Observation:** The 26 explicitly identified current ITS Short Skills retain
-  source-reviewed requirements, actions, and caveats in mission-rule paragraphs.
-  Standard Skill cards can render this prose and cited mission page ranges, but
-  dedicated Requirements, Effects, Restrictions, and per-action source pins are
-  not yet authored separately.
-- **Proposed change:** During the next substantive ITS source-reconciliation
-  pass, curate structured facts and action-level citations where the published
-  pages support them. Reuse the existing Skill renderer without introducing
-  a parallel mission-card format.
-- **Why:** More scannable player reference cards and more precise provenance.
-- **Disposition:** deferred (not necessary to expose the existing reviewed text
-  as scenario-specific Skills).
+- **Observation:** Twenty-six current ITS Short Skills were initially rendered
+  as prose-only mission cards. The original paragraphs remain in the mission data
+  for compatibility and provenance.
+- **Implemented:** All 26 now have curated Requirements and Effects, with
+  Restrictions, Clarifications, and Source context where applicable. Three
+  actions have exact page pins supported by the existing reviewed source text;
+  other actions retain clearly identified mission-range citations rather than
+  invented action-specific pages. Rendering reuses the standard Skill card.
+- **Why:** Player-facing rules become scannable without losing original clauses
+  or obscuring known bilingual source differences.
+- **Disposition:** implemented for structured facts. Exact pins for additional
+  actions require further source-page verification; do not infer a page.
 
 ## AI-0002 — Check Core scenario Skill publication parity
 
 - **Date:** 2026-11-17
 - **Area:** Core curated rules and `rules_n5.db` generation.
-- **Observation:** Core N5 curated source contains `skill:hack-consoles` and
-  `skill:pick-up-supply-boxes` with category `scenario-skill`, but the
-  currently generated Rules database did not expose `hack-consoles` in the
-  public Skill listing during focused validation.
-- **Proposed change:** Compare the generated Rules database to the current
-  curated source and determine whether source selection, publication status,
-  or artifact freshness explains the missing entry before adjusting the build.
-- **Why:** Core scenario Skills should receive the same catalogue treatment
-  when published.
-- **Disposition:** proposed; precise cause unverified.
+- **Confirmed cause:** `RulesDatabase._compose_records()` intentionally
+  filters scenario-scoped definitions when no scenario ID is supplied. The
+  ordinary Skill catalog used that unscoped query and therefore omitted
+  `skill:hack-consoles` and `skill:pick-up-supply-boxes`. This was not
+  missing source data or a stale Rules database.
+- **Implemented:** The scenario-aware catalog now includes those definitions
+  from their existing Core scenario reference, retaining exact N5.3 citations,
+  scoping, and the existing fail-closed unscoped Rules lookup.
+- **Why:** Core scenario Skills now appear under Scenario-specific Skills and
+  have working detail and Search routes without changing the Rules database.
+- **Disposition:** implemented.

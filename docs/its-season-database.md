@@ -34,11 +34,16 @@ artifact created from reviewed curated ITS facts. The implementation lives in
 - **Public selection:** Choose ITS Season 18; the current 2026.09.11 revision
   resolves automatically. Older explicit revision links fail closed without
   silently displaying replacement facts. Historical browsing remains deferred.
-- **Scenario Skills:** Authored mission rules with explicit `skillTypeIds`
-  project to ordinary Skill cards, `/skills` and Search. Their public IDs include
-  the season and scenario to prevent same-named actions from being conflated;
-  source citations are identified as mission-wide page ranges rather than
-  invented action-specific page pins. No separate ITS Skill source is maintained.
+- **Scenario Skills:** Mission rules with `skillTypeIds` and `skillFacts`
+  project to standard Skill cards, `/skills` and Search. All 26 reviewed ITS 18
+  actions have structured Requirements and Effects, with optional Restrictions,
+  Clarifications and Source context. Original mission paragraphs remain
+  available for provenance and compatibility. Their public IDs include the
+  season and scenario, so same-named actions are not conflated. Optional
+  `skillCitations` identify exact source pages only where already supported
+  by reviewed action evidence (currently three actions); the others retain
+  explicitly mission-wide page ranges. Core N5 scenario Skills are resolved
+  independently from their scoped Rules definitions, not imported into ITS.
 
 ### Published 2026.09.11 hotfix curation
 

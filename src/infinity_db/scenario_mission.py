@@ -132,6 +132,8 @@ class ScenarioRule:
     skill_ids: tuple[str, ...] = ()
     specialist_skill_ids: tuple[str, ...] = ()
     skill_type_ids: tuple[str, ...] = ()
+    skill_facts: dict[str, tuple[str, ...]] | None = None
+    skill_citations: tuple[tuple[str, int], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -563,7 +565,8 @@ def parse_scenario_mission(
         ctx = f"{context}.rules[{index}]"
         rule = _object(
             item, {"id", "name", "paragraphs"},
-            {"definitionId", "skillIds", "specialists", "skillTypeIds"}, ctx,
+            {"definitionId", "skillIds", "specialists", "skillTypeIds",
+             "skillFacts", "skillCitations"}, ctx,
         )
         identifier = _slug(rule["id"], f"{ctx}.id")
         _unique(identifier, rule_ids, ctx)
@@ -590,6 +593,44 @@ def parse_scenario_mission(
         )
         if len(set(skill_types)) != len(skill_types):
             raise ScenarioMissionError(f"{ctx}.skillTypeIds contains duplicate categories")
+        skill_facts: dict[str, tuple[str, ...]] | None = None
+        if "skillFacts" in rule:
+            if not skill_types:
+                raise ScenarioMissionError(f"{ctx}.skillFacts requires skillTypeIds")
+            fields = _object(
+                rule["skillFacts"], {"requirements", "effects"},
+                {"restrictions", "clarifications", "sourceNotes"},
+                f"{ctx}.skillFacts",
+            )
+            skill_facts = {
+                field: tuple(
+                    _text(entry, f"{ctx}.skillFacts.{field}")
+                    for entry in _array(
+                        fields.get(field, []), f"{ctx}.skillFacts.{field}",
+                        allow_empty=field not in {"requirements", "effects"},
+                    )
+                )
+                for field in (
+                    "requirements", "effects", "restrictions", "clarifications", "sourceNotes"
+                )
+            }
+        elif skill_types:
+            raise ScenarioMissionError(f"{ctx}.skillTypeIds requires skillFacts")
+
+        skill_citations: list[tuple[str, int]] = []
+        if "skillCitations" in rule:
+            if not skill_types:
+                raise ScenarioMissionError(f"{ctx}.skillCitations requires skillTypeIds")
+            for citation in _array(rule["skillCitations"], f"{ctx}.skillCitations"):
+                citation = _object(
+                    citation, {"sourceId", "page"}, set(), f"{ctx}.skillCitations"
+                )
+                skill_citations.append((
+                    _slug(citation["sourceId"], f"{ctx}.skillCitations.sourceId"),
+                    _integer(citation["page"], f"{ctx}.skillCitations.page"),
+                ))
+            if len(set(skill_citations)) != len(skill_citations):
+                raise ScenarioMissionError(f"{ctx}.skillCitations has duplicate pins")
         rules.append(
             ScenarioRule(
                 identifier,
@@ -604,6 +645,8 @@ def parse_scenario_mission(
                 defined_skills,
                 qualifiers,
                 skill_types,
+                skill_facts,
+                tuple(skill_citations),
             )
         )
 

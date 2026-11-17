@@ -238,9 +238,43 @@ class ScenarioCatalog:
         if self._scenario_skills_cache is None:
             items: list[dict[str, Any]] = []
             for record, publication in self._records():
-                if publication["collection"] == "n5-core":
-                    continue  # Core scenario Skills already live in the Rules database.
                 scenario_slug = _scenario_slug(record)
+                if publication["collection"] == "n5-core":
+                    if self.rules_database is None:
+                        raise ValueError("Core scenario Skills require the Rules database")
+                    reference = self.rules_database.scenario_reference(str(record["id"]))
+                    if reference is None:
+                        raise ValueError(f"Missing Core scenario {record['id']!r}")
+                    for skill in reference["skills"]:
+                        if skill.get("facts", {}).get("category") != "scenario-skill":
+                            continue
+                        slug = skill["id"].removeprefix("skill:")
+                        items.append({
+                            "id": slug,
+                            "slug": slug,
+                            "name": skill["name"],
+                            "use_count": 0,
+                            "category": "Scenario-specific Skills",
+                            "categories": [
+                                {
+                                    "id": category["id"],
+                                    "name": category.get("category_name", category["name"]),
+                                    "source": None,
+                                    "page": None,
+                                }
+                                for category in skill.get("skill_types", [])
+                            ],
+                            "scenario": {
+                                "id": record["id"],
+                                "slug": scenario_slug,
+                                "name": record["name"],
+                                "collection": publication["collection"],
+                                "revision": publication["revision"],
+                            },
+                            "rules": [deepcopy(skill)],
+                            "variants": [],
+                        })
+                    continue
                 for rule in _mission(record)["rules"]:
                     skill_types = rule.get("skillTypeIds", [])
                     if not skill_types:
@@ -248,30 +282,48 @@ class ScenarioCatalog:
                     slug = f"{publication['collection']}-{scenario_slug}-{rule['id']}"
                     citations = []
                     by_source: dict[str, list[int]] = {}
+                    mission_pins: set[tuple[str, int]] = set()
                     for citation in record.get("citations", []):
                         source_id = citation.get("source_id") or citation.get("sourceId")
                         if isinstance(citation.get("page"), int):
                             by_source.setdefault(source_id, []).append(citation["page"])
+                            mission_pins.add((source_id, citation["page"]))
+                    action_pins = rule.get("skillCitations", [])
+                    if action_pins and any(
+                        (pin["sourceId"], pin["page"]) not in mission_pins
+                        for pin in action_pins
+                    ):
+                        raise ValueError(
+                            f"Scenario Skill {rule['id']!r} cites outside its mission source"
+                        )
+                    if action_pins:
+                        by_source = {}
+                        for pin in action_pins:
+                            by_source.setdefault(pin["sourceId"], []).append(pin["page"])
                     for source_id, pages in by_source.items():
                         if self.publication_registry is None:
                             raise ValueError(
                                 "ITS scenario Skill requires registered source provenance"
                             )
-                        source = self.publication_registry.source_citation(
-                            season_id=publication["collection"],
-                            revision=publication["revision"],
-                            source_id=source_id,
-                            page=min(pages),
-                        )
-                        if source is None:
-                            raise ValueError(f"Missing ITS Skill source {source_id!r}")
-                        # Source pin spans a mission, not an action-specific page.
-                        source["page"] = None
-                        page_range = str(min(pages)) if min(pages) == max(pages) else (
-                            f"{min(pages)}–{max(pages)}"
-                        )
-                        source["section"] = f"{record['name']}, pp. {page_range}"
-                        citations.append(source)
+                        for page in pages if action_pins else [min(pages)]:
+                            source = self.publication_registry.source_citation(
+                                season_id=publication["collection"],
+                                revision=publication["revision"],
+                                source_id=source_id,
+                                page=page,
+                            )
+                            if source is None:
+                                raise ValueError(f"Missing ITS Skill source {source_id!r}")
+                            if action_pins:
+                                source["section"] = f"{record['name']} — {rule['name']}"
+                            else:
+                                # An unpinned citation covers the mission, not a skill page.
+                                source["page"] = None
+                                page_range = str(min(pages)) if min(pages) == max(pages) else (
+                                    f"{min(pages)}–{max(pages)}"
+                                )
+                                source["section"] = f"{record['name']}, pp. {page_range}"
+                            citations.append(source)
                     categories = [
                         {"id": category, "name": "Short Skill" if category == "short-skill"
                          else "Long Skill", "source": None, "page": None}
@@ -281,8 +333,14 @@ class ScenarioCatalog:
                         "id": f"skill:{slug}",
                         "kind": "skill",
                         "name": rule["name"],
-                        "summary": "\n\n".join(rule["paragraphs"]),
-                        "facts": {"category": "scenario-skill"},
+                        "summary": (
+                            "" if rule.get("skillFacts")
+                            else "\n\n".join(rule["paragraphs"])
+                        ),
+                        "facts": {
+                            "category": "scenario-skill",
+                            **deepcopy(rule.get("skillFacts", {})),
+                        },
                         "skill_types": [
                             {"id": category["id"], "name": category["name"]}
                             for category in categories
