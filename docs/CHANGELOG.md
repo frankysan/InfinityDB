@@ -18,6 +18,8 @@ are not retroactively relabeled.
 - Double Bind now distinguishes its three alternative Main Objective sets;
   players can compare them or focus on one while Secondary and Classified
   Objectives stay visible.
+- Scenario lists are alphabetical. ITS tournament and Extra rules have separate
+  cards, and Hardlock shows the official 25 mm Beacon Token diameter.
 
 ### Added
 

@@ -274,7 +274,12 @@ def test_hardlock_is_only_in_hotfix_with_beacon_and_console_positions(two_revisi
         assert {
             m["marker_type"]: (m["count"], m["diameter_mm"])
             for m in item["placement"]["marker_dimensions"]
-        } == {"beacon": (2, None), "console": (3, 40)}
+        } == {"beacon": (2, 25), "console": (3, 40)}
+        beacon = next(
+            m for m in item["placement"]["marker_dimensions"] if m["marker_type"] == "beacon"
+        )
+        assert beacon["citation"]["page"] == 18
+        assert beacon["citation"]["source_version"] == "2026.09.11"
         assert [c["page"] for c in item["citations"]] == [
             49, 50, 51, 52, 127, 128, 129, 130,
         ]
@@ -286,9 +291,8 @@ def test_hardlock_is_only_in_hotfix_with_beacon_and_console_positions(two_revisi
         )
         svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
         assert svg_status == 200
-        assert svg.count(b'data-marker-type="beacon"') == 2
+        assert svg.count(b'data-marker-type="beacon" data-diameter-mm="25"') == 2
         assert svg.count(b'data-marker-type="console" data-diameter-mm="40"') == 3
-        assert b'data-physical-size="unspecified"' in svg
 
     assert _json(
         app, "/api/scenarios/hardlock?army_points=300"

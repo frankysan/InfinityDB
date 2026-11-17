@@ -24,7 +24,6 @@ const pageController = new AbortController();
 const summaryController = new AbortController();
 let detailController = null;
 let summary = null;
-let selectedPlayContext = "";
 let selectedMainObjectiveSet = "";
 const slug = decodeURIComponent(window.location.pathname.split("/").filter(Boolean).at(-1) || "");
 const initialShare = readShareState("scenario");
@@ -512,106 +511,94 @@ function provenanceSection(item) {
   return wrapper;
 }
 
-function seasonPolicySection(item, contexts, controller) {
-  if (!contexts?.length || item.publication?.collection_id === "n5-core") return null;
-  const wrapper = section("ITS tournament and Extra rules");
-  const explanation = document.createElement("p");
-  explanation.className = "detail-copy";
-  explanation.textContent = "These restrictions are not part of the N5 core rules. "
-    + "Select the play context used by your event or optional Extra to view them.";
-  const label = document.createElement("label");
-  label.className = "detail-copy";
-  label.textContent = "Play context ";
-  const select = document.createElement("select");
-  const defaultOption = document.createElement("option");
-  defaultOption.value = "";
-  defaultOption.textContent = "No tournament or Extra selected";
-  select.append(defaultOption);
-  for (const context of contexts) {
-    const option = document.createElement("option");
-    option.value = context;
-    option.textContent = context.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-    select.append(option);
-  }
-  select.value = contexts.includes(selectedPlayContext) ? selectedPlayContext : "";
-  label.append(select);
-  const results = document.createElement("div");
-  results.className = "detail-group";
-  let requestNumber = 0;
-  async function selectContext() {
-    const currentRequest = ++requestNumber;
-    const context = select.value;
-    selectedPlayContext = context;
-    results.replaceChildren();
-    if (!context) return;
-    const message = document.createElement("p");
-    message.className = "detail-source";
-    message.textContent = "Loading selected ITS rules…";
-    results.append(message);
-    try {
-      const payload = await getSeasonPolicies(
-        item.publication.collection_id, item.publication.revision, context, controller.signal,
-      );
-      if (controller.signal.aborted || currentRequest !== requestNumber) return;
-      results.replaceChildren();
-      for (const policy of payload.items || []) {
-        const card = document.createElement("article");
-        card.className = "surface surface--subtle detail-section";
-        const title = document.createElement("h3");
-        title.className = "surface-titlebar surface-titlebar--subtle";
-        title.textContent = policy.title;
-        const effect = document.createElement("p");
-        effect.className = "detail-copy";
-        effect.textContent = policy.effect.text;
-        const target = document.createElement("p");
-        target.className = "detail-copy";
-        const destination = policy.target.recordId.startsWith("skill:") ? "skills" : "rules";
-        const link = document.createElement("a");
-        link.href = `/${destination}/${encodeURIComponent(policy.target.recordId.split(":")[1])}`;
-        link.textContent = policy.target.name;
-        target.append("Applies to: ", link);
-        const source = document.createElement("p");
-        source.className = "detail-source";
-        source.append("Sources: ");
-        for (const [index, citation] of (policy.citations || []).entries()) {
-          if (index) source.append("; ");
-          const label = `${citation.sourceTitle || item.publication.collection_title}`
-            + `, p. ${citation.page} (${citation.section})`;
-          if (!citation.sourceUrl) {
-            source.append(label);
-            continue;
-          }
-          const link = document.createElement("a");
-          link.href = citation.sourceUrl;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          link.textContent = label;
-          source.append(link);
-        }
-        card.append(title, effect, target, source);
-        results.append(card);
-      }
-      if (!(payload.items || []).length) {
-        const none = document.createElement("p");
-        none.className = "detail-copy";
-        none.textContent = "No additional ITS policy is published for this play context.";
-        results.append(none);
-      }
-    } catch (error) {
-      if (controller.signal.aborted || currentRequest !== requestNumber) return;
-      results.replaceChildren();
-      message.textContent = "The selected ITS rules could not be loaded.";
-      results.append(message);
-      console.error("Could not load ITS play-context rules", error);
+function seasonPolicyDetails(policy, publication) {
+  const details = document.createElement("div");
+  const title = document.createElement("h4");
+  title.textContent = policy.title;
+  const effect = document.createElement("p");
+  effect.className = "detail-copy";
+  effect.textContent = policy.effect.text;
+  const target = document.createElement("p");
+  target.className = "detail-copy";
+  const destination = policy.target.recordId.startsWith("skill:") ? "skills" : "rules";
+  const link = document.createElement("a");
+  link.href = `/${destination}/${encodeURIComponent(policy.target.recordId.split(":")[1])}`;
+  link.textContent = policy.target.name;
+  target.append("Applies to: ", link);
+  const source = document.createElement("p");
+  source.className = "detail-source";
+  source.append("Sources: ");
+  for (const [index, citation] of (policy.citations || []).entries()) {
+    if (index) source.append("; ");
+    const label = `${citation.sourceTitle || publication.collection_title}`
+      + `, p. ${citation.page} (${citation.section})`;
+    if (!citation.sourceUrl) {
+      source.append(label);
+      continue;
     }
+    const link = document.createElement("a");
+    link.href = citation.sourceUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = label;
+    source.append(link);
   }
-  select.addEventListener("change", selectContext, { signal: controller.signal });
-  wrapper.append(explanation, label, results);
-  if (select.value) selectContext();
+  details.append(title, effect, target, source);
+  return details;
+}
+
+async function loadSeasonPolicyCards(publication, { signal }, wrapper) {
+  const { collection_id: season, revision } = publication;
+  try {
+    const { contexts = [] } = await getSeasonPolicies(season, revision, "", signal);
+    if (signal.aborted) return;
+    const cards = await Promise.all(contexts.map(async (context) => {
+      const card = document.createElement("article");
+      card.className = "surface surface--subtle detail-section";
+      const title = document.createElement("h3");
+      title.className = "surface-titlebar surface-titlebar--subtle";
+      title.textContent = context === "team-ops-extra" ? "TEAM-OPS Extra"
+        : context.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+      card.append(title);
+      try {
+        const { items = [] } = await getSeasonPolicies(season, revision, context, signal);
+        if (!items.length) return null;
+        card.append(...items.map((policy) => seasonPolicyDetails(policy, publication)));
+      } catch (error) {
+        if (signal.aborted) return null;
+        const message = document.createElement("p");
+        message.className = "detail-copy";
+        message.textContent = "The rules for this play context could not be loaded.";
+        card.append(message);
+        console.error("Could not load ITS play-context rules", error);
+      }
+      return card;
+    }));
+    if (signal.aborted) return;
+    const visibleCards = cards.filter(Boolean);
+    wrapper.append(...visibleCards);
+    wrapper.hidden = !visibleCards.length;
+  } catch (error) {
+    if (signal.aborted) return;
+    const message = document.createElement("p");
+    message.className = "detail-copy";
+    message.textContent = "ITS tournament and Extra rules could not be loaded.";
+    wrapper.append(message);
+    wrapper.hidden = false;
+    console.error("Could not list ITS play contexts", error);
+  }
+}
+
+function seasonPolicySection(item, controller) {
+  const publication = item.publication;
+  if (!publication?.collection_id || publication.collection_id === "n5-core") return null;
+  const wrapper = section("ITS tournament and Extra rules");
+  wrapper.hidden = true;
+  loadSeasonPolicyCards(publication, controller, wrapper);
   return wrapper;
 }
 
-function render(item, faqItems = [], policyContexts = [], controller = null) {
+function render(item, faqItems, controller) {
   updateDocumentIdentity(item);
   const placement = document.createElement("div");
   placement.className = "scenario-setup-grid";
@@ -620,7 +607,7 @@ function render(item, faqItems = [], policyContexts = [], controller = null) {
     section("Setup", placement),
     objectivesSection(item),
     rulesSection(item),
-    controller ? seasonPolicySection(item, policyContexts, controller) : null,
+    seasonPolicySection(item, controller),
     faqRulingsSection(faqItems),
     endSection(item),
     issuesSection(item),
@@ -639,7 +626,7 @@ async function loadDetail(points) {
   elements.status.textContent = `Loading ${points} Army Point setup.`;
   show(elements.status);
   try {
-    const [item, faq, policyOptions] = await Promise.all([
+    const [item, faq] = await Promise.all([
       getScenario(slug, points, controller.signal, selectedPublication),
       fetchReviewedFaqRulings(`scenario:${slug}`, {
         scenarioId: `scenario:${slug}`,
@@ -650,17 +637,9 @@ async function loadDetail(points) {
         if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
         return { items: [] };
       }),
-      selectedPublication.collection && selectedPublication.collection !== "n5-core"
-        ? getSeasonPolicies(
-          selectedPublication.collection, selectedPublication.revision, "", controller.signal,
-        ).catch((error) => {
-          if (error.name !== "AbortError") console.error("Could not list ITS contexts", error);
-          return { contexts: [] };
-        })
-        : Promise.resolve({ contexts: [] }),
     ]);
     if (controller.signal.aborted || pageController.signal.aborted) return;
-    render(item, faq.items || [], policyOptions.contexts || [], controller);
+    render(item, faq.items || [], controller);
   } catch (error) {
     if (controller.signal.aborted || pageController.signal.aborted) return;
     if (error.name === "AbortError") return;

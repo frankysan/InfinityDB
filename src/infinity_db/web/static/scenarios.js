@@ -122,7 +122,7 @@ async function initialize() {
   try {
     const payload = await getScenarios(controller.signal, selection);
     populateCollections(payload.collections || []);
-    const items = payload.items || [];
+    const items = [...(payload.items || [])].sort((a, b) => a.name.localeCompare(b.name, "en"));
     elements.count.textContent = `${items.length} ${items.length === 1 ? "scenario" : "scenarios"}`;
     if (!items.length) return show(elements.empty);
     elements.grid.replaceChildren(...items.map(renderScenario));

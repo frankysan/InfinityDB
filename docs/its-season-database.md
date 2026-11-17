@@ -104,8 +104,8 @@ All twenty missions are published for the current 2026.09.11 revision:
   three reversible-activation Consoles on the centerline and one Classified
   Objective per player. Three end-of-round Beacon Control points, seven
   end-of-game points and exact six-size SWC/deployment setup are captured.
-  The source does not state a physical Beacon diameter, so those two markers
-  are schematic; Consoles remain 40 mm. Differences in the Spanish/English
+  The shared ITS token diameter chart specifies 25 mm Beacons (EN p. 18).
+  Consoles are 40 mm. Differences in the Spanish/English
   pickup wording are recorded, not inferred away (EN pp. 49–52, ES pp. 127–130).
 - **B-Pong:** A mobile Tracking Beacon initially at table center, two Consoles
   at quarter-width positions, symmetric 2-/4-inch Exclusion half-widths and
@@ -427,8 +427,9 @@ returns only the authored available context names and **no applied policies**.
 Selecting an exact play context returns the season-owned effects, target and
 citations, optionally filtered by typed `target_id`. Unknown contexts,
 seasons and revisions return no policies; malformed selectors return 400.
-The ITS scenario page offers a context selector with no selection by default.
-It does not add tournament restrictions to core/free play automatically.
+The ITS scenario page displays the current publication's policies in separate
+cards for official tournaments and each Extra, with each card scoped to its
+own play context. Core scenario pages do not display these cards.
 
 The N5/Spanish SpecBall printing discrepancy stays in the core card, and
 the Reinforcements annex preserves its N4-origin procedural caution.

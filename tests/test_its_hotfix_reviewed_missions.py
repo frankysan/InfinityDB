@@ -665,9 +665,8 @@ def test_hardlock_beacon_control_console_activation_and_map_geometry() -> None:
         assert annotations["console-right-from-right"]["x1"] == 3 * w / 4
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geo), theme=theme)
-            assert svg.count('data-marker-type="beacon"') == 2
+            assert svg.count('data-marker-type="beacon" data-diameter-mm="25"') == 2
             assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 3
-            assert svg.count('data-physical-size="unspecified"') == 2
             assert '.objective#beacon-a' in svg
             assert '.objective#beacon-b' in svg
             assert 'data-distance-inches="' + str(w / 2).removesuffix(".0") + '"' in svg

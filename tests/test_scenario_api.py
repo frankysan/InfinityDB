@@ -900,7 +900,7 @@ def test_scenario_selection_ignores_stale_requests() -> None:
     assert "scenario selection race: passed" in completed.stdout
 
 
-def test_scenario_its_context_opt_in_never_applies_on_default_or_stale_selection() -> None:
+def test_scenario_its_context_cards_show_all_scoped_policies() -> None:
     node = shutil.which("node")
     if node is not None:
         command = [node]
@@ -923,7 +923,7 @@ def test_scenario_its_context_opt_in_never_applies_on_default_or_stale_selection
         timeout=15,
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
-    assert "scenario ITS context selection: passed" in completed.stdout
+    assert "scenario ITS context cards: passed" in completed.stdout
 
 
 def test_scenario_main_objective_set_selection_keeps_secondary_scoring_visible() -> None:

@@ -110,7 +110,7 @@ def _marker_dimensions(
         if label is None or (
             diameter is None
             and marker_type not in {
-                "beacon", "tracking-beacon", "civilian", "defensive-turret",
+                "tracking-beacon", "civilian", "defensive-turret",
             }
         ):
             raise ValueError(f"Missing reviewed marker dimensions for {marker_type!r}")

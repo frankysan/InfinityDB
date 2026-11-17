@@ -101,8 +101,9 @@ explicit context-scoped relation resolved at read time.
 - **Spec-Ops:** `n5-core-v5.3.json` now retains only the N5.3
   Special Skills, the core SpecBall procedure and its bilingual
   source discrepancy. ITS 18 official-tournament and TEAM-OPS restrictions
-  are owned by the selected ITS revision, surfaced only after exact play-context selection
-  from the ITS scenario page or policy API. Their season citations no longer
+  are owned by the selected ITS revision and appear in separate play-context
+  cards on ITS scenario pages. The policy API resolves them by exact context.
+  Their season citations no longer
   appear as if they were default N5 Skill restrictions.
 - **Reinforcements Extra:** The separate N4-origin annex cites ITS 18 page 27
   for optional-mode availability. Retain its provenance and N4 caveat;
