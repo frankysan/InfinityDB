@@ -122,9 +122,10 @@ After the cutover, 49 exact duplicate legacy ZIP/manifest files and
 75 duplicate PDFs were retired; their `local/data/` copies remain
 intact. The four sender paths use the local layout; the optional override
 sender was subsequently redirected to the symbol-tools repository.
-Two unique expanded Wiki/Human-Sphere directories
-were moved to `local/data/wiki-extracted/`, **outside** the ZIP-only
-sender root. They remain local to Windows.
+The expanded Wiki/Human-Sphere research directories live under
+`local/data/wiki-extracted/`, **outside** the ZIP-only sender root.
+They remain local to Windows; the newer 2026-11-17 Human Sphere mirror
+is included.
 Linux checkout activation remains an explicit `--layout local` command;
 this does not trigger builds, Git operations or live acquisition.
 

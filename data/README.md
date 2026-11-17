@@ -63,8 +63,8 @@ the retired source roots.
 - `local/data/raw/army/` — immutable Corvus Belli Army snapshot ZIPs.
   Older raw-symbol ZIPs reside under `local/data/raw/symbols/`.
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
-  Human Sphere snapshot ZIPs, including history variants. The two unique
-  expanded mirrors live under `local/data/wiki-extracted/`, which is not
+  Human Sphere snapshot ZIPs, including history variants. The three expanded
+  research mirrors live under `local/data/wiki-extracted/`, which is not
   synchronized.
 
   The independently acquired Wiki snapshots dated 2026-11-16 retain their
@@ -96,6 +96,15 @@ the retired source roots.
   replacements using `tools.research.audit_wiki_archive_retirement`. Require
   zero missing older revision IDs and no historical page-identity conflicts;
   the comparison does not prove identical archived HTML bytes or static assets.
+  The Human Sphere capture `HUMAN-SPHERE 20261117-002753.zip` has 74,193
+  documents and a detailed inventory; its extracted research mirror is under
+  `local/data/wiki-extracted/`. Human Sphere captures do not have the separate
+  history archives required by the Infinity Wiki retirement comparator.
+  `tools.research.audit_human_sphere_retirement` instead verifies both archive
+  manifests/content hashes, matches captured pages by MediaWiki identity and
+  revision, and reports missing non-page paths. Changed revisions and absent
+  assets require review before retiring older Human Sphere ZIPs; matching
+  revisions alone do not prove identical HTML or historical completeness.
 - `local/data/pdf/` — physical research PDFs and the preserved
   `rules/sources.txt` revision index. Canonical `data/pdf/` source labels
   remain unchanged in curated provenance.
