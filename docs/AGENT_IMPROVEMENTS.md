@@ -54,3 +54,38 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Why:** Core scenario Skills now appear under Scenario-specific Skills and
   have working detail and Search routes without changing the Rules database.
 - **Disposition:** implemented.
+
+## AI-0003 — Integrate library-backed seasons into the complete build registry
+
+- **Date:** 2026-11-17
+- **Area:** `src/infinity_db/database_set.py`, integrated build tooling and ITS authoring.
+- **Observation:** The opt-in ITS builder and standalone developer command
+  accept a pinned shared scenario library, but the complete build registry
+  still has only the unchanged ITS 18 source path. Registering a real
+  library-backed season requires wiring its declared library input and hash
+  through the complete-set build and provenance checks.
+- **Proposed:** Extend season registration with an optional library input
+  when a reviewed ITS 17/18 authoring migration actually needs it; keep
+  present ITS 18 builds unchanged until then.
+- **Why:** Prevent synthetic reuse capability from being mistaken for a
+  deployed, integrated multi-season publication pipeline.
+- **Disposition:** deferred; tracked by [cross-season ITS reuse](TODO.md#its-scenarios-and-game-tools).
+
+## AI-0004 — Reconcile stale publication-registry regression expectations
+
+- **Date:** 2026-11-17
+- **Area:** `tests/test_publication_registry.py` and scenario Skill/marker provenance.
+- **Observation:** Two checks failed in the extended registry suite: deleting the
+  ITS English source now triggers `Missing ITS Skill source` before the older
+  expected marker-diameter error, and the frozen Battleground API/SVG checksum
+  no longer matches. Neither path uses the new opt-in shared scenario library;
+  the source-freeze expectation likely predates recent scenario Skill output.
+  A clean-base comparison was attempted, but its isolated worktree lacked the
+  project virtual environment, so baseline status is not independently proven.
+- **Proposed:** In a separate focused task, verify the current pre-change
+  baseline and update error-order assertions or freeze evidence only when the
+  changed output is established as expected. Never overwrite golden hashes
+  without comparing the actual response differences.
+- **Why:** Keep regression tests meaningful without folding unrelated output
+  changes into cross-season reuse development.
+- **Disposition:** proposed, outside the current implementation scope.

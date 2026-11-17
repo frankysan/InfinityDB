@@ -3807,11 +3807,24 @@ The common deployment rows, standard Annihilation/Firefight geometry, three-roun
 ending, and minimum-VP ending are shared. Domination retains its explicit 350-point 6 SWC override.
 Objective definitions use the same reference mechanism; geometry titles come from the including
 scenario as presentation metadata. Unsupported fields and mismatched component kinds fail closed.
-References are collection-local; cross-collection historical/season selection remains future work.
+Ordinary component references are collection-local; an opt-in pinned library can now import versioned definitions and components into a season during its build. Historical browsing and real cross-season curation remain future work.
 
-### Accepted cross-season scenario and Skill reuse (not yet implemented)
+### Accepted cross-season scenario and Skill reuse
 
-Extend the existing explicit, build-time scenario composition to share
+**Implemented first slice (synthetic fixtures only):** An optional, explicitly supplied
+shared scenario library expands exact `scenario:<id>` + version memberships
+before normal curated validation. The season pins the library SHA-256 and
+supplies its own citations and review, including citations for every imported
+component. Imported components use the existing `ScenarioComponents` resolver,
+now with optional version-pinned references. A limited override allowlist
+covers the scenario summary and individual `playRequirements` counts. The
+compiled scenario carries its library ID, selected definition version and
+original collection/season/source identities in `sharedDefinition`, while its
+published citations and sources remain season-owned. All bytes are materialized
+into the existing SQLite schema v2. Existing ITS 18 curation and runtime
+responses are unchanged; no real ITS 17 or shared Skill data has been migrated.
+
+**Remaining accepted direction:** Extend the existing explicit, build-time scenario composition to share
 **curated definitions** across ITS seasons and between scenarios, while
 preserving independent, fully materialized season databases. A reusable
 definition has a stable typed identity plus an explicitly pinned content

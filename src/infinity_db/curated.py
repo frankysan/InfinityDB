@@ -3171,7 +3171,9 @@ def _validate_terrain_examples(value: object, context: str) -> None:
         names.add(name)
 
 
-def load_curated_document(path: Path) -> dict[str, Any]:
+def load_curated_document(
+    path: Path, *, shared_scenario_library: Path | None = None,
+) -> dict[str, Any]:
     """Load and validate one curated JSON document.
 
     This loader intentionally accepts only the intermediary JSON format. Raw
@@ -3187,6 +3189,9 @@ def load_curated_document(path: Path) -> dict[str, Any]:
 
     if not isinstance(document, dict):
         raise ValueError("Curated source must contain a top-level object")
+    from .scenario_reuse import materialize_shared_scenarios
+
+    document = materialize_shared_scenarios(document, shared_scenario_library)
     if document.get("format") != CURATED_FORMAT:
         raise ValueError(f"Curated source must declare format '{CURATED_FORMAT}'")
     if document.get("formatVersion") != CURATED_FORMAT_VERSION:

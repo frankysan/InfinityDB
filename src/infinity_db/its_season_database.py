@@ -50,6 +50,7 @@ def _builder_revision() -> str:
     """Bind the output to the relevant parser/exporter code, not host paths."""
     modules = (
         "its_season_database.py", "its_source_family.py", "curated.py", "scenario_components.py",
+        "scenario_reuse.py",
         "scenario_definition.py", "scenario_mission.py", "scenario_geometry.py",
         "sqlite_determinism.py",
     )
@@ -73,6 +74,8 @@ def _input_identity(source: Path, document: dict[str, Any], core_revision: str) 
         "requiredCoreRulesRevision": core_revision,
         "builderRevision": _builder_revision(),
         "schemaVersion": ITS_SCHEMA_VERSION,
+        **({"sharedScenarioLibrary": document["sharedScenarioLibrary"]}
+           if "sharedScenarioLibrary" in document else {}),
         "sources": [
             {"id": entry["id"], "sha256": entry.get("sha256")}
             for entry in document["sources"]
@@ -372,7 +375,7 @@ def _populate(
 
 def inspect_its_database(
     path: Path, *, source: Path | None = None, core_revision: str | None = None,
-    require_current_builder: bool = False,
+    require_current_builder: bool = False, shared_library: Path | None = None,
 ) -> dict[str, Any]:
     """Validate the stored publication; optionally require current builder inputs."""
     if not path.is_file():
@@ -422,6 +425,20 @@ def inspect_its_database(
             raise ValueError("ITS database requires a different N5 core revision")
         if source is not None and _file_sha(source) != identity.get("sourceSha256"):
             raise ValueError("ITS source bytes do not match the built database")
+        library_identity = identity.get("sharedScenarioLibrary")
+        if library_identity is not None and (
+            not isinstance(library_identity, dict)
+            or set(library_identity) != {"id", "sha256"}
+            or not isinstance(library_identity["id"], str)
+            or not isinstance(library_identity["sha256"], str)
+            or len(library_identity["sha256"]) != 64
+        ):
+            raise ValueError("Invalid ITS shared scenario library provenance")
+        if shared_library is not None and (
+            library_identity is None
+            or _file_sha(shared_library) != library_identity["sha256"]
+        ):
+            raise ValueError("ITS shared scenario library bytes differ from build provenance")
         source_rows = connection.execute(
             "SELECT id, descriptor_json FROM sources ORDER BY id"
         ).fetchall()
@@ -662,12 +679,15 @@ def select_its_policies(
 
 def build_its_database(
     source: Path, output: Path, *, core_revision: str = DEFAULT_CORE_REVISION,
+    shared_library: Path | None = None,
 ) -> dict[str, Any]:
     """Build/validate in a disposable sibling, then atomically replace the output."""
     source, output = source.resolve(), output.resolve()
     if source == output or output.name in {"army.db", "rules_n5.db"}:
         raise ValueError("ITS output must not replace curated or core runtime artifacts")
-    document = project_its_source_family(load_curated_document(source))
+    document = project_its_source_family(
+        load_curated_document(source, shared_scenario_library=shared_library)
+    )
     _validate_its_document(document, core_revision)
     identity = _input_identity(source, document, core_revision)
     composed = compose_scenario_document(document)
@@ -686,9 +706,11 @@ def build_its_database(
         normalize_sqlite_header(temporary)
         result = inspect_its_database(
             temporary, source=source, core_revision=core_revision,
-            require_current_builder=True,
+            require_current_builder=True, shared_library=shared_library,
         )
-        current_source = project_its_source_family(load_curated_document(source))
+        current_source = project_its_source_family(
+            load_curated_document(source, shared_scenario_library=shared_library)
+        )
         if _input_identity(source, current_source, core_revision) != identity:
             raise ValueError("ITS source changed during build; output retained")
         os.replace(temporary, output)

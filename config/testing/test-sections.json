@@ -97,6 +97,7 @@
         "test_its_revision_publication",
         "test_scenario_skill_catalog",
         "test_its_multiseason",
+        "test_scenario_reuse",
         "test_publication_registry",
         "test_interim_reference_consistency",
         "test_logical_unit_identity",

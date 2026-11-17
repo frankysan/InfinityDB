@@ -72,7 +72,7 @@ class ScenarioComponents:
             entry = _object(
                 entry,
                 {"id", "kind", "payload", "citations", "scenarios"},
-                set(),
+                {"version"},
                 "scenario component",
             )
             kind = entry["kind"]
@@ -83,6 +83,11 @@ class ScenarioComponents:
             )
             if identifier in self.definitions:
                 raise ValueError(f"Duplicate scenario component {identifier!r}")
+            if "version" in entry and (
+                not isinstance(entry["version"], str) or not entry["version"]
+                or entry["version"].strip() != entry["version"]
+            ):
+                raise ValueError(f"Invalid scenario component version for {identifier!r}")
             self._scope(entry["scenarios"], "scenario component.scenarios")
             _array(entry["citations"], f"{identifier}.citations")
             self.definitions[identifier] = entry
@@ -90,7 +95,10 @@ class ScenarioComponents:
         # payloads are validated in their complete scenario context on composition.
         for entry in self.definitions.values():
             for scenario_id in entry["scenarios"]:
-                payload = self.resolve({"ref": entry["id"]}, entry["kind"], scenario_id)
+                reference = {"ref": entry["id"]}
+                if "version" in entry:
+                    reference["version"] = entry["version"]
+                payload = self.resolve(reference, entry["kind"], scenario_id)
                 if entry["kind"] == "geometry":
                     parse_scenario_geometry(payload)
 
@@ -127,7 +135,8 @@ class ScenarioComponents:
         if "ref" not in value:
             return deepcopy(value)
         inclusion = _object(
-            value, {"ref"}, {"gameSizeOverrides"} if kind == "setup" else set(), f"{kind} inclusion"
+            value, {"ref"}, ({"gameSizeOverrides"} if kind == "setup" else set()) | {"version"},
+            f"{kind} inclusion"
         )
         identifier = validate_typed_domain_id(
             inclusion["ref"], expected_domain=kind, context=f"{kind} inclusion.ref"
@@ -139,6 +148,8 @@ class ScenarioComponents:
         entry = self.definitions.get(identifier)
         if entry is None or entry["kind"] != kind:
             raise ValueError(f"Unknown {kind} component {identifier!r}")
+        if inclusion.get("version") != entry.get("version"):
+            raise ValueError(f"Component {identifier!r} requires its exact pinned version")
         if scenario_id not in entry["scenarios"]:
             raise ValueError(f"Component {identifier!r} is not applicable to {scenario_id!r}")
         self.used.add(identifier)

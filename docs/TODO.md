@@ -410,8 +410,12 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     All twenty reviewed hotfix missions now have definitions and six-size maps.
     Unresolved bilingual discrepancies remain explicit source issues;
     visual browser acceptance is tracked separately.
-  - [ ] **Before ITS 17: implement cross-season scenario/Skill reuse.** Follow
-    the [accepted data-model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse-not-yet-implemented):
+  - [ ] **Before ITS 17: finish cross-season scenario/Skill reuse.** The first
+    optional scenario/component library slice is implemented and validated using
+    synthetic ITS 17/18 data: exact versions, library hash, independent season
+    citations/review, narrow field overrides, cycle checks and standalone SQLite
+    output. Existing ITS 18 authoring and public routes are unchanged. Follow
+    the [accepted data-model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse):
     extend the existing build-time component resolver to use stable,
     version-pinned shared scenario and Skill definitions. Represent season
     availability and narrowly reviewed, typed overrides separately from

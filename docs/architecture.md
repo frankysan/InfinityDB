@@ -218,7 +218,7 @@ provenance, collection membership, and cross-domain references are relational; o
 scenario structures remain validated typed payloads. Scenario identity, source revision, and
 collection/season membership remain independent.
 
-**Accepted cross-season reuse direction (not yet implemented):** Maintain a
+**Cross-season reuse (scenario/component build slice implemented; Skill reuse pending):** Maintain a
 stable, versioned canonical definition for each genuinely shared scenario,
 scenario Skill, or component. ITS season membership references an exact
 definition version and retains its own applicable source citations and optional
@@ -238,7 +238,7 @@ publication validation, source provenance and current-revision selection, and
 retain existing scenario/Skill URLs as compatibility aliases when a definition
 becomes shared. Cross-season composition must be in place before curating ITS
 17 against ITS 18. The detailed authoring and override invariants belong in
-[the data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse-not-yet-implemented).
+[the data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse).
 
 Geometry and scoring are maintained semantic data. Core diagrams and reference views are generated
 from that data, with source/season overlays kept distinct from canonical Army or rules facts.

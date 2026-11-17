@@ -96,14 +96,13 @@ specific mission; an ITS ruling may refer to an N5 Skill. The owner is chosen
 from the authored rule/publication's authority, while applicability is an
 explicit context-scoped relation resolved at read time.
 
-**Accepted future extension, not current behavior:** Reuse reviewed scenario
-and Skill *definitions* across seasons through exact version-pinned
-memberships and limited, validated contextual overrides. Season publications
-continue to own their source evidence, applicability and assembled results;
-referencing another definition does not transfer or erase that provenance.
-Resolved records remain self-contained in each season's SQLite artifact.
-The [data-model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse-not-yet-implemented)
-owns the composition contract; ITS 17 migration is blocked on implementing it.
+**Implemented for opt-in scenario/component builds:** A source-pinned shared
+scenario library may provide versioned definitions and components to a season;
+that season still owns its citations, review and assembled publication.
+The compiled artifact remains standalone. No real ITS 17 data has been migrated.
+Cross-scenario and cross-season Skill reuse remains pending. The
+[data-model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse)
+owns the complete contract.
 
 ## Cross-boundary ownership
 
