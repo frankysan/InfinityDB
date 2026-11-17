@@ -218,6 +218,28 @@ provenance, collection membership, and cross-domain references are relational; o
 scenario structures remain validated typed payloads. Scenario identity, source revision, and
 collection/season membership remain independent.
 
+**Accepted cross-season reuse direction (not yet implemented):** Maintain a
+stable, versioned canonical definition for each genuinely shared scenario,
+scenario Skill, or component. ITS season membership references an exact
+definition version and retains its own applicable source citations and optional
+explicit, reviewed field overrides. Different seasons may use the same
+definition without maintaining duplicate curated mechanics; substantial changes
+produce a new definition version, not an implicit update to previous seasons.
+Reuse is selected by typed identity and verified semantic equivalence, never by
+matching display names. General ITS actions such as CivEvac are candidates for
+shared definitions only after source-by-source comparison; context-specific
+requirements and outcomes stay scoped to their scenario or season.
+
+Extend the existing build-time scenario-component composition rather than
+introducing runtime cross-database inheritance. The selected season database
+still materializes its resolved, self-contained scenario and Skill payloads,
+even if that duplicates compiled SQLite bytes. Keep each season's independent
+publication validation, source provenance and current-revision selection, and
+retain existing scenario/Skill URLs as compatibility aliases when a definition
+becomes shared. Cross-season composition must be in place before curating ITS
+17 against ITS 18. The detailed authoring and override invariants belong in
+[the data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse-not-yet-implemented).
+
 Geometry and scoring are maintained semantic data. Core diagrams and reference views are generated
 from that data, with source/season overlays kept distinct from canonical Army or rules facts.
 A **post-1.0 scenario editor** will reuse this component model and renderer for

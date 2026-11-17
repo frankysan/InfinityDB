@@ -3809,6 +3809,51 @@ Objective definitions use the same reference mechanism; geometry titles come fro
 scenario as presentation metadata. Unsupported fields and mismatched component kinds fail closed.
 References are collection-local; cross-collection historical/season selection remains future work.
 
+### Accepted cross-season scenario and Skill reuse (not yet implemented)
+
+Extend the existing explicit, build-time scenario composition to share
+**curated definitions** across ITS seasons and between scenarios, while
+preserving independent, fully materialized season databases. A reusable
+definition has a stable typed identity plus an explicitly pinned content
+version. Availability is a separate membership/applicability relation: a
+season's selected revision may reference a particular scenario definition,
+and a scenario may include reusable Skills or smaller components. Same-name
+actions do not establish semantic identity or authorize reuse. Retain one
+curated definition per genuinely shared mechanic, rather than independently
+maintaining the same rules text in each season's source material.
+
+A membership can apply narrowly scoped, reviewed overrides to explicitly
+identified components and fields (including Skill Requirements, Effects or
+Restrictions where supported). Resolve by stable typed component IDs, not
+list positions or display names. Validate the requested definition version,
+allowed override fields, conflicting edits, reference cycles, scenario/season
+applicability and resolved mission schema at build time; reject unresolved
+references instead of using a newest-version fallback. Small, supported
+variations belong in such overrides. A substantial semantic revision gets a
+new pinned definition version even when the logical scenario ID is unchanged.
+
+Publication membership retains **its own source citations, source revision
+and review evidence**, independently of the source that originally established
+the reusable definition. Shared mechanics are not automatically N5-core rules:
+ITS-specific definitions retain explicit ITS applicability and cannot leak
+into unrelated seasons or Army profile Skills. CivEvac is a first candidate
+for comparing shared ITS mechanics against scenario-specific differences,
+not yet a proven universally identical Skill. Reused actions should appear
+once in the Skill catalog when equivalence is established, with applicability
+links; real variants remain distinct. Preserve existing season-scoped
+scenario and Skill routes when introducing canonical shared identities.
+
+Materialize the complete resolved payload in each season's SQLite artifact,
+including the selected definition version and relevant provenance, so
+publication validation, read APIs and deployment do not depend on another
+season's database at runtime. Authoring should respect the existing
+one-source-family-per-logical-source preference and revision-tagged facts;
+sharing definitions does not combine independent official source histories.
+Only current applicable versions remain player-facing by default.
+The [architecture](architecture.md#scenario-domain) owns the design decision;
+the [ITS TODO](TODO.md#its-scenarios-and-game-tools) tracks implementation
+before adding actual ITS 17 coverage.
+
 **Scenario marker sizes** are a derived, read-only setup projection:
 `placement.marker_dimensions` enumerates only marker types actually present
 in the selected configuration's validated geometry, with occurrence count,

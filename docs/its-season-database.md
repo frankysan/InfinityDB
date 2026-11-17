@@ -47,6 +47,17 @@ artifact created from reviewed curated ITS facts. The implementation lives in
   explicitly mission-wide page ranges. Core N5 scenario Skills are resolved
   independently from their scoped Rules definitions, not imported into ITS.
 
+**Accepted future authoring direction (not implemented in schema v2):**
+Introduce version-pinned shared scenario and Skill definitions, with
+season/scenario availability bindings and narrow reviewed overrides.
+Compile each season's effective records into its own fully validated,
+self-contained SQLite database; do not add runtime dependencies on another
+season's database just to avoid duplicated compiled bytes. Sources and
+citations remain tied to each season's own publication. See the
+[canonical model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse-not-yet-implemented)
+and [implementation backlog](TODO.md#its-scenarios-and-game-tools).
+Introduce this before authoring ITS 17 using repeated ITS 18 material.
+
 ### Published 2026.09.11 hotfix curation
 
 The Rules exporter does not import ITS-owned sources. The unified ITS curation

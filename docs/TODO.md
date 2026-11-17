@@ -410,6 +410,19 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     All twenty reviewed hotfix missions now have definitions and six-size maps.
     Unresolved bilingual discrepancies remain explicit source issues;
     visual browser acceptance is tracked separately.
+  - [ ] **Before ITS 17: implement cross-season scenario/Skill reuse.** Follow
+    the [accepted data-model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse-not-yet-implemented):
+    extend the existing build-time component resolver to use stable,
+    version-pinned shared scenario and Skill definitions. Represent season
+    availability and narrowly reviewed, typed overrides separately from
+    definitions; keep each season's citations and provenance independent.
+    Validate exact identities, compatibility, conflicts and missing targets,
+    then publish self-contained resolved records in each season database.
+    Preserve existing routes; consolidate identical Skills in catalog/Search
+    only after checking semantics. Start with one repeated ITS 17/18 scenario
+    and compare CivEvac across its scenario contexts before broader migration.
+    Do not refactor SQLite into interdependent runtime databases merely to
+    remove duplicate compiled data.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
     season launched under N5) and ITS Season 16 Part II (the N5-compatible
     revision), at minimum their scenario definitions and maps. Keep original
