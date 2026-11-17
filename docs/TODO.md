@@ -326,36 +326,30 @@ The implemented artifact lifecycle is described in [data guidance](../data/READM
 
 ### ITS, scenarios, and game tools
 
-**v1.2.0 priority:** Expand source-cited ITS Season 18 coverage, especially
-reconciling the current hotfix and publishing additional reviewed missions,
-scenario maps and their relevant context. Preserve the existing Battleground
-pilot and historical revision identities. Season 17 and Season 16 Part II
-remain later scope; do not claim complete Season 18 coverage before it is verified.
+**v1.2.0 priority:** Complete source-cited ITS Season 18 publication,
+including browser-level visual review and documented unresolved source
+discrepancies. Season 17 and Season 16 Part II remain later scope.
 
-**Published 2026.09.11 hotfix coverage (2026-11-17):** All twenty
-reviewed missions now have source-cited scoring, rules and game-size maps; the original
-2026.09.01 Battleground remains independently selectable. The browser exposes
-exact-revision selection, typed objectives, and Double Bind's alternative Main
+**Published 2026.09.11 hotfix coverage (2026-11-17):** All twenty reviewed
+missions have source-cited scoring, rules and game-size maps. The player
+selects **ITS Season 18**; the application serves only its current 2026.09.11
+revision. The original 2026.09.01 Battleground evidence remains preserved in
+the curated source-family file, not a separately selectable runtime database.
+The browser exposes typed objectives and Double Bind's alternative Main
 Objective sets. Map zoning and placement rulers have been reviewed in both
-source languages. All twenty hotfix missions are present, with unresolved source
-issues identified explicitly. In-browser visual acceptance at relevant
-breakpoints is still open. See the
+source languages, with unresolved source issues identified explicitly.
+In-browser visual acceptance at relevant breakpoints is still open. See the
 [ITS season database](its-season-database.md#published-20260911-hotfix-curation).
 
-- [ ] **Data processing: consolidate source-family curation.** Implement the
-  [accepted version-tagged fact model](data-model.md#accepted-authoring-direction-one-source-family-version-tagged-facts)
-  and migrate the two ITS Season 18 curated JSON files into one maintained
-  season-family file. Declare the current revision explicitly (currently
-  2026.09.11), and project only its reviewed facts, including
-  mission facts, maps, event policies, source descriptors and citations; reject
-  missing, conflicting or implicitly inherited facts. Update builders, source
-  registration and build provenance together. Prove the current publication
-  preserves existing hotfix behavior before retiring the split inputs.
-  Make the browser select a season rather than an exact revision; do not show
-  older ITS 18 facts or require an older-revision runtime database. Retain
-  historical curation/provenance for a possible later replay feature, without
-  implementing that feature as part of this migration. Handle existing
-  explicit-revision links without silently presenting outdated facts.
+- [x] **Data processing: consolidate source-family curation.** ITS 18 now
+  uses one curated `data/curated/its/n5-its-season-18.json` with reviewed
+  per-fact revision tags and historical field-level overrides. Its explicit
+  current 2026.09.11 projection produces the only registered `its_18.db`.
+  Older explicit-revision links fail closed; the player-facing selector
+  chooses only a season. The original 2026.09.01 provenance and historical
+  Battleground/policy facts remain in the curated file for possible future
+  history browsing. Source-family projection, current-archive build and
+  revision isolation have focused regression coverage.
 
 - [ ] Build a versioned ITS reference library from material under
   `local/data/pdf/its/` and `local/data/pdf/legacy/`, keeping the current season distinct

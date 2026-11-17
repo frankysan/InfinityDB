@@ -51,7 +51,7 @@ function setSelectedArmyPoints(value, { replace = true } = {}) {
     {
       ...(value ? { army_points: String(value) } : {}),
       ...(selectedPublication.collection ? { collection: selectedPublication.collection } : {}),
-      ...(selectedPublication.revision ? { revision: selectedPublication.revision } : {}),
+      // Public share URLs select only the season. Historical revisions are not exposed.
     },
     { replace },
   );
@@ -699,6 +699,11 @@ async function initialize() {
       elements.errorMessage.textContent = "Scenario not found.";
       show(elements.error);
       return;
+    }
+    // Use the server's current revision for exact internal policy/FAQ requests.
+    // An explicitly supplied historical revision is still rejected by the API.
+    if (selectedPublication.collection && !selectedPublication.revision) {
+      selectedPublication.revision = summary.publication?.revision || "";
     }
     updateDocumentIdentity(summary);
     populatePoints(summary);

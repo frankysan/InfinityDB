@@ -93,7 +93,7 @@ def verify_checkout_server(
             its = _get_json(
                 origin,
                 "/api/scenarios/battleground?army_points=300"
-                "&collection=its-18&revision=2026.09.01",
+                "&collection=its-18",
             )
             if (
                 its.get("publication", {}).get("collection_id") != "its-18"

@@ -46,7 +46,7 @@ def test_selected_set_validates_without_build_sources_or_raw_archive(
                  "weapon-profile-sources.json"):
         (runtime_set / name).write_text("invalid", encoding="utf-8")
     result = validate_database_set(Path("selected"), require_complete=True)
-    assert result["layout"] == "v17-four-file"
+    assert result["layout"] == "v17-three-file"
     assert result["integrityCheck"] == "full"
     assert result["schemaVersion"] == 17
     assert result["deployedObjects"] == 17
@@ -56,8 +56,7 @@ def test_selected_set_validates_without_build_sources_or_raw_archive(
     assert result["reviewedWeapons"] > 0
     assert result["sha256"] == before
     assert set(result["sha256"]) == COMPLETE_RUNTIME_FILES
-    assert result["seasons"]["its-18"]["revision"] == "2026.09.01"
-    assert result["seasons"]["its-18@2026.09.11"]["revision"] == "2026.09.11"
+    assert result["seasons"]["its-18"]["revision"] == "2026.09.11"
     assert {k: v for k, v in fingerprints(runtime_set).items() if k in before} == before
 
 
@@ -120,7 +119,7 @@ def test_complete_set_rejects_its_from_a_different_source_build(
 
     source = (
         Path(__file__).resolve().parents[1]
-        / "data/curated/rules/n5-its-season-18-2026.09.01.json"
+        / "data/curated/its/n5-its-season-18.json"
     )
     modified = tmp_path / "same-semantics-different-source.json"
     modified.write_bytes(source.read_bytes() + b"\n")

@@ -28,8 +28,8 @@ def test_current_scenario_collections_are_derived_from_readable_publications(
     assert scenario_catalog.list_collections() == [
         {"id": "n5-core", "revision": "5.3", "title": "N5 Core Scenarios", "scenario_count": 4},
         {
-            "id": "its-18", "revision": "2026.09.01",
-            "title": "ITS Season 18: Overheat", "scenario_count": 1,
+            "id": "its-18", "revision": "2026.09.11",
+            "title": "ITS Season 18: Overheat", "scenario_count": 20,
         },
     ]
     assert ScenarioCatalog(None).list_collections() == []
@@ -207,7 +207,7 @@ def test_its_inspired_asymmetric_objectives_and_split_deployments_project_withou
     source, publication = next(
         (record, metadata)
         for record, metadata in scenario_catalog._records()
-        if record["id"] == "scenario:annihilation"
+        if record["id"] == "scenario:annihilation" and metadata["collection"] == "n5-core"
     )
     synthetic = deepcopy(source)
     mission = synthetic["facts"]["mission"]
@@ -341,15 +341,16 @@ def test_explicit_scenario_collection_revision_selection_isolated_from_core(
         "annihilation", "domination", "supplies", "firefight",
     ]
     current_its = scenario_catalog.list_scenarios(
-        collection="its-18", revision="2026.09.01",
+        collection="its-18", revision="2026.09.11",
     )
-    assert [item["slug"] for item in current_its] == ["battleground"]
+    assert len(current_its) == 20
+    assert "battleground" in [item["slug"] for item in current_its]
     assert current_its[0]["publication"]["source_collection_id"] == (
-        "its-season-18-2026.09.01"
+        "its-season-18-2026.09.11"
     )
     battleground = scenario_catalog.get_scenario(
         "battleground", army_points=300,
-        collection="its-18", revision="2026.09.01",
+        collection="its-18", revision="2026.09.11",
     )
     assert battleground is not None
     assert battleground["publication"]["collection_id"] == "its-18"
@@ -359,7 +360,7 @@ def test_explicit_scenario_collection_revision_selection_isolated_from_core(
         collection="n5-core", revision="5.3",
     ) is None
     assert scenario_catalog.get_scenario(
-        "annihilation", army_points=300,
+        "the-dig", army_points=300,
         collection="its-18", revision="2026.09.01",
     ) is None
     assert scenario_catalog.list_scenarios(
@@ -370,7 +371,6 @@ def test_explicit_scenario_collection_revision_selection_isolated_from_core(
 @pytest.mark.parametrize(
     ("collection", "revision"),
     [
-        ("its-18", None),
         (None, "2026.09.01"),
         ("ITS 18", "2026.09.01"),
         ("its-18", ""),
@@ -419,14 +419,14 @@ def test_battleground_exact_its18_source_sizes_scoring_and_zone_geometry(
     center: int,
 ) -> None:
     item = scenario_catalog.get_scenario(
-        "battleground", army_points=points, collection="its-18", revision="2026.09.01",
+        "battleground", army_points=points, collection="its-18", revision="2026.09.11",
     )
     assert item is not None
     assert item["name"] == "Battleground"
     assert item["publication"]["collection_id"] == "its-18"
-    assert item["publication"]["revision"] == "2026.09.01"
-    assert item["publication"]["source_collection_id"] == "its-season-18-2026.09.01"
-    assert {citation["page"] for citation in item["citations"]} == {121, 122, 123}
+    assert item["publication"]["revision"] == "2026.09.11"
+    assert item["publication"]["source_collection_id"] == "its-season-18-2026.09.11"
+    assert {citation["page"] for citation in item["citations"]} == {129, 130, 131}
     assert {citation["source_id"] for citation in item["citations"]} == {
         "its-season-18-en-pdf",
     }

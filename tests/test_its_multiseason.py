@@ -10,6 +10,7 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.database_set import validate_database_set
 from infinity_db.its_season_database import build_its_database, inspect_its_database
+from infinity_db.its_source_family import project_its_source_family
 from infinity_db.publication_registry import PublicationReference, PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
@@ -17,15 +18,17 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / "data/generated"
-SOURCE_18 = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"
-REVISION_18 = "2026.09.01"
+SOURCE_18 = ROOT / "data/curated/its/n5-its-season-18.json"
+REVISION_18 = "2026.09.11"
 REVISION_17 = "2025.09.01"
 ORIGIN = "http://seasons.test"
 
 
 def _synthetic_source(tmp_path: Path, *, unknown_target: bool = False) -> Path:
     """Clone the maintained *shape*, never assert this is historical ITS 17 content."""
-    document = load_curated_document(SOURCE_18)
+    document = project_its_source_family(
+        load_curated_document(SOURCE_18), revision="2026.09.01",
+    )
     document["collection"].update(
         id="its-season-17-synthetic", title="Synthetic ITS 17 fixture",
         effectiveFrom="2025-09-01",
@@ -121,7 +124,8 @@ def test_duplicate_scenario_slug_is_selected_only_by_owner_and_revision(two_seas
         )
         assert status == 200
         summaries = json.loads(data)["items"]
-        assert [entry["slug"] for entry in summaries] == ["battleground"]
+        assert "battleground" in [entry["slug"] for entry in summaries]
+        assert len(summaries) == (1 if season == "its-17" else 20)
         for points in (150, 300, 400):
             path = (
                 f"/api/scenarios/battleground?army_points={points}"
@@ -200,9 +204,10 @@ def test_season_policy_and_faq_scope_are_independent(two_seasons) -> None:
     for season, revision in (("its-17", REVISION_17), ("its-18", REVISION_18)):
         scope = f"&season_id={season}&season_revision={revision}"
         assert json.loads(_get(app, faq + scope)[2])["items"]  # global N5 ruling
-        assert json.loads(_get(
+        selected = json.loads(_get(
             app, faq + scope + "&scenario_id=scenario%3Aannihilation",
-        )[2])["items"] == []  # not a member of either ITS publication
+        )[2])["items"]
+        assert bool(selected) == (season == "its-18")
     assert json.loads(_get(app, faq + "&season_id=its-17&season_revision=wrong")[2])[
         "items"
     ] == []
@@ -274,11 +279,11 @@ def test_unregistered_extra_season_does_not_extend_release_implicitly(
         shutil.copyfile(RELEASE / name, selected / name)
     shutil.copyfile(second, selected / "its_17.db")
     # An extra file is not a registration. The shipped runtime keeps its
-    # explicit four-file allowlist; adding another season requires a new
+    # explicit three-file allowlist; adding another season requires a new
     # build manifest and explicit registration, not an opportunistic scan.
     report = validate_database_set(selected, require_complete=True)
     assert set(report["sha256"]) == database_set.COMPLETE_RUNTIME_FILES
-    assert set(report["seasons"]) == {"its-18", "its-18@2026.09.11"}
+    assert set(report["seasons"]) == {"its-18"}
     monkeypatch = pytest.MonkeyPatch()
     try:
         monkeypatch.setitem(database_set.SEASON_DATABASE_SOURCES, "its-17", (

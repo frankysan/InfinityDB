@@ -2,55 +2,46 @@
 
 **Project domain:** Data processing
 
-Schema v2 participates in the complete four-file build and serving set: Army,
-Rules, and two separately selected ITS Season 18 revisions.
-This page owns the ITS database format, selection and build contract;
-release acceptance belongs in [releasing](releasing.md).
+Schema v2 participates in the complete three-file build and serving set:
+Army, Rules and the current ITS Season 18 publication. This page owns the ITS
+database format, selection and build contract; release acceptance belongs in
+[releasing](releasing.md).
 
 The ITS season database is an independently validated, deterministic SQLite
-artifact created from the existing reviewed curated ITS collection. The
-implementation lives in `src/infinity_db/its_season_database.py`, with the
-developer entry point in `tools/data/build_its_season.py`.
+artifact created from reviewed curated ITS facts. The implementation lives in
+`src/infinity_db/its_season_database.py` and the revision projector in
+`src/infinity_db/its_source_family.py`, with the developer entry point in
+`tools/data/build_its_season.py`.
 
 ## Current source and scope
 
-- **Input:** `data/curated/rules/n5-its-season-18-2026.09.01.json`
-  (curated document SHA-256:
-  `f002d279f711c5ac27e87cc3e91686beb85ec4e42aa7a740e2cebab1c4b2bbab`).
-- **Collection:** `its-season-18-2026.09.01`; season set
-  `its-18@2026.09.01`; effective 2026-09-01.
-- **Official source:** `its-season-18-en-pdf`, SHA-256
-  `9e16874924112e62d51acf78d622f5c0cf6196064cc36f003b515de9dc448baf`.
+- **Input:** `data/curated/its/n5-its-season-18.json`, one maintained
+  source-family file with explicit per-fact revision tags and field-level
+  historical overrides. The original 2026.09.01 source-file hash
+  (`f002d279f711c5ac27e87cc3e91686beb85ec4e42aa7a740e2cebab1c4b2bbab`)
+  and its reviewed Battleground/policy facts are preserved inside this file.
+- **Current publication:** `its-season-18-2026.09.11`, season `its-18`,
+  effective 2026-09-24 and published in `its_18.db`. **No historical ITS
+  database or player-facing revision selection is maintained.**
 - **Required core revision:** N5 `5.3`, recorded as an explicit compatibility
   declaration. Complete-set validation resolves ITS dependencies against the
-  selected Rules database and checks source identity against the Army/Rules
-  build manifest.
-- **Currently authored:** `scenario:battleground`, three source citations,
-  three geometry configurations spanning 150, 200–250 and 300–400 Army Points;
-  three ITS-owned season policies for Spec-Ops in official tournaments,
-  TEAM-OPS applicability and the optional Reinforcements Extra (pp. 26–28).
-  These are source-cited event policies, **not** new N5 core Rule definitions.
-  There is no ITS-authored FAQ publication in the curated set.
+  selected Rules database and verifies the source identity against the
+  Army/Rules build manifest.
+- **Currently authored:** Twenty reviewed source-cited hotfix missions,
+  six Army Points configurations per mission, and three ITS-owned event policies
+  for Spec-Ops, TEAM-OPS and optional Reinforcements. These policies are
+  **not** new N5 core Rule definitions. There is no ITS-authored FAQ publication.
+- **Public selection:** Choose ITS Season 18; the current 2026.09.11 revision
+  resolves automatically. Older explicit revision links fail closed without
+  silently displaying replacement facts. Historical browsing remains deferred.
 
 ### Published 2026.09.11 hotfix curation
 
-The independent curated input
-`data/curated/its/n5-its-season-18-2026.09.11.json` is published
-into `its_18_2026.09.11.db`. The original `2026.09.01` input and
-`its_18.db` remain unchanged in mission semantics and independently selectable.
-The Rules exporter imports neither ITS-owned source. The public scenario selector
-lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (twenty reviewed hotfix missions).
-
-These two curated inputs are the **current implementation**, not the intended
-long-term authoring layout. The [accepted source-family model](data-model.md#accepted-authoring-direction-one-source-family-version-tagged-facts)
-will store version-tagged facts in one ITS 18 curated file, declare 2026.09.11
-as the current revision, and publish only its applicable facts by default.
-The normal player-facing scenario selection will choose ITS Season 18, **not**
-an individual September revision. The original facts and exact citations
-remain available internally for possible future historical browsing; no
-separately selectable historical publication or selector is required now.
-This latest-only behavior is a planned change, not yet implemented.
+The Rules exporter does not import ITS-owned sources. The unified ITS curation
+tracks English/Spanish 2026.09.11 hotfix facts as current, while keeping
+2026.09.01 Battleground and policy evidence internally for possible future
+historical replay. The player-facing list contains only one ITS Season 18
+collection with all twenty current reviewed missions.
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -60,7 +51,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-All twenty missions are published with independent revision selection:
+All twenty missions are published for the current 2026.09.11 revision:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -362,8 +353,7 @@ From the repository root, with the project virtual environment:
 The standalone developer tool still defaults to the ignored
 `local/work/its/its_18.db` and cannot overwrite the tracked runtime artifact.
 Use `infinity-db build --compact` to regenerate the complete
-`army.db` / `rules_n5.db` / `its_18.db` /
-`its_18_2026.09.11.db` set. The builder first validates
+`army.db` / `rules_n5.db` / `its_18.db` set. The builder validates
 all three outputs and their cross-publication references, then replaces the
 selected files. A changed or invalid source before replacement preserves
 the previous outputs. Identical builds produce byte-identical SQLite data.
@@ -390,13 +380,13 @@ manifest exposes publication identity and SHA, not physical paths.
 
 `ScenarioCatalog` uses the registry for ITS-owned publications, while
 N5 core missions continue to use Rules. The complete-set factory registers
-`its-18` from `its_18.db` and `its-18@2026.09.11` from
-`its_18_2026.09.11.db`, validates the four-file set, and resolves
-both through exact `(season, revision)` selection. The version-qualified
-internal registration key never leaks into public collection identifiers. Both local `serve` and production WSGI/Docker use this same factory;
+`its-18` from the current `its_18.db`, validates the three-file set,
+and resolves an ITS season selection to its sole published revision.
+Both local `serve` and production WSGI/Docker use this same factory;
 the runtime cache fingerprint includes all three exact file hashes.
-The HTTP API retains its existing collection/revision selectors; unknown
-seasons/revisions never fall back to core. The internal explicit
+The HTTP API accepts season-only selection by default and may validate an
+explicit revision in an older link; unregistered revisions never fall back
+to core or silently show current facts. The internal explicit
 `create_app(..., season_databases={"its-18": path})` remains useful for
 isolated parity tests.
 
@@ -412,22 +402,21 @@ by their registered season and revision, not by slug alone. An absent or
 mismatched owner, missing N5 target, stale revision, unregistered source
 or altered source/geometry fails closed.
 
-**The production release intentionally uses four files:**
-`army.db`, `rules_n5.db`, `its_18.db` and
-`its_18_2026.09.11.db`. The selected set does not autodiscover
-additional files. Adding another season or revision requires its own
+**The production release intentionally uses three files:**
+`army.db`, `rules_n5.db` and `its_18.db`. The selected set does not
+autodiscover additional files. Adding another season requires its own
 reviewed source, explicit registration, recorded build input and packaging;
-the synthetic ITS 17 test database is never published.
+a new revision of ITS 18 updates its curated source family and current build.
+The synthetic ITS 17 test database is never published.
 
 ## Migration boundary
 
-The Rules exporter excludes ITS-owned curated collections, so Battleground
-and its scenario membership now exist in `its_18.db` only. The selected
-four-file runtime resolves both season revisions through the registry. A pinned
-pre-cutover digest independently guards six Battleground JSON payloads and
-24 SVG maps; the isolated ITS reader remains comparable to the real HTTP
-response without retaining a second Rules-owned record. N5 scenario facts,
-source attribution and shared renderer behavior remain unchanged.
+The Rules exporter excludes ITS-owned curated collections, so current
+Battleground and its scenario membership exist in `its_18.db` only. The
+three-file runtime publishes the hotfix revision. Historical Battleground
+facts, original citations and source identity remain in the curated family
+but are not served. N5 scenario facts, source attribution and shared renderer
+behavior remain unchanged.
 
 The N5 Spec-Ops and Request SpecBall cards no longer duplicate ITS 18
 tournament and TEAM-OPS restrictions. The season database remains the sole
@@ -444,14 +433,14 @@ It does not add tournament restrictions to core/free play automatically.
 The N5/Spanish SpecBall printing discrepancy stays in the core card, and
 the Reinforcements annex preserves its N4-origin procedural caution.
 Core Scenario marker dimensions remain unchanged; their external ITS 18
-p. 17 citation is resolved against the selected season source descriptor in
+p. 18 citation is resolved against the selected season source descriptor in
 the complete runtime. The N5 FAQ remains N5-owned: source- and
 scenario-scoped rulings cannot leak into an unrelated ITS mission with a
 reused scenario ID, while rules-wide N5 FAQ applies to a valid selected
 season. Exact season/revision/mission selection fails closed when unregistered.
 No ITS-authored FAQ is inferred. Changing maintained `src/` or curated files
 changes the complete build fingerprint;
-regenerate the four-file release set before source-bound deployment
+regenerate the three-file release set before source-bound deployment
 checks or merge.
 
 For the ownership and scope exceptions (Spec-Ops, TEAM-OPS,

@@ -2,7 +2,7 @@
 
 **Project domains:** Data processing, Web backend, Web frontend
 
-The selected runtime registers two independently selected revisions of ITS 18.
+The selected runtime registers one current ITS 18 publication (2026.09.11).
 Other seasons remain unregistered. The phased P3 implementation
 and its exact-SHA acceptance results remain in Git history and
 [testing evidence](testing.md), not in this ownership contract.
@@ -12,22 +12,19 @@ season-scoped ITS publications, including source authority, citation
 ownership, exact selection and cross-domain applicability. It does not
 serve as a migration checklist or release-acceptance record.
 
-**Accepted direction (not yet implemented):** Routine player-facing ITS
-selection will choose a season and automatically use that season's explicitly
-declared current revision. Superseded facts and exact source provenance will
-stay in the single curated source-family file, but historical revisions will
-not be separately selectable or required as normal runtime publications.
-Future history/replay support is deferred. The exact-revision contracts below
-describe the existing implementation until the migration is complete; see
-[the data model](data-model.md#accepted-authoring-direction-one-source-family-version-tagged-facts).
+**Implemented source-family behavior:** Routine player-facing ITS selection
+chooses a season and automatically uses its explicitly declared current
+revision. Superseded facts and exact provenance remain in the single curated
+source-family file, but historical revisions are not separately selectable or
+required as runtime publications. Future history/replay support is deferred;
+see [the data model](data-model.md#accepted-authoring-direction-one-source-family-version-tagged-facts).
 
 ## Existing source and runtime inventory
 
 The complete build loads reviewed curated Rules and ITS sources, but the
-Rules exporter accepts only N5-owned collections. ITS-authored publications
-are built independently into `its_18.db` (September 1) and
-`its_18_2026.09.11.db` (September hotfix) using the same selected source
-envelope. Their current authority is:
+Rules exporter accepts only N5-owned collections. ITS-authored Season 18
+facts project the current revision into `its_18.db`. Their current
+authority is:
 
 - `n5-core-v5.3.json` — `core-rules`, `n5-core-v5.3`, effective
   2026-08-10. Owns canonical N5 rules and four core scenario definitions:
@@ -43,24 +40,18 @@ envelope. Their current authority is:
   N4-origin optional-mode reference in N5 context. It cites N5 and ITS 18
   as evidence for availability, but explicitly does not establish that its
   older mechanics are universally binding in N5 or a given ITS event.
-- `n5-its-season-18-2026.09.01.json` — `its`,
-  `its-season-18-2026.09.01`, effective 2026-09-01. Contains the
-  currently curated **Battleground** mission, its game-size variants,
-  objective/scoring rules and geometry. Its scenario set is
-  `its-18@2026.09.01`, with source `its-season-18-en-pdf`,
-  printed pages 121–123.
-- `n5-its-season-18-2026.09.11.json` — separately reviewed hotfix
-  curation, effective 2026-09-24 and selected by `its-18@2026.09.11`.
-  Contains all twenty reviewed hotfix missions, including Battleground,
-  B-Pong, Akial Interference, Evacuation, Neutralization, Provisioning and
-  Area of Interest, Data-Harvest, Last Launch, Corporate Appropriation,
-  Outbreak and Critical Intervention;
-  preserves mission-specific scoring,
-  geometry, citations, event policies and unresolved source discrepancies.
+- `data/curated/its/n5-its-season-18.json` — `its`, a single
+  source-family file with current collection `its-season-18-2026.09.11`
+  (effective 2026-09-24) and twenty reviewed hotfix missions, including
+  Battleground, B-Pong, Akial Interference, Evacuation, Neutralization,
+  Provisioning, Area of Interest, Data-Harvest, Last Launch, Corporate
+  Appropriation, Outbreak and Critical Intervention. The original
+  2026.09.01 Battleground facts, policies, citations, source descriptors
+  and original file digest are retained as tagged historical evidence.
 
-The selected `rules_n5.db` owns N5/FAQ/annex data. The two ITS databases
-own their exact authored mission/revision sets independently. A shared
-scenario slug does not merge records or replace historical citations.
+The selected `rules_n5.db` owns N5/FAQ/annex data. `its_18.db` owns
+the current ITS 18 mission publication. A shared scenario slug across
+seasons does not merge records; historical source citations remain distinct.
 
 ## Ownership decisions
 
@@ -73,12 +64,12 @@ scenario slug does not merge records or replace historical citations.
    FAQ authority. Scenario-specific `applicability.scenarioIds` does **not**
    change ownership. In particular, the Supplies marker-state and
    Annihilation Ancillary rulings stay N5 FAQ-owned.
-3. **ITS seasons:** each registered ITS revision owns its own mission
+3. **ITS seasons:** each registered ITS season owns its current mission
    definitions, geometry, game-size configurations, scenario membership,
-   Extras and tournament constraints. `its_18.db` preserves the
-   September 1 Battleground; `its_18_2026.09.11.db` owns twenty reviewed
-   hotfix missions. Other seasons get independent ownership;
-   no current ITS 18 record is silently treated as timeless N5 core.
+   Extras and tournament constraints. `its_18.db` publishes twenty
+   reviewed hotfix missions; historical Battleground facts remain in
+   curated revision tags, not a runtime database. Other seasons get
+   independent ownership; no current ITS 18 record is timeless N5 core.
 4. **Optional/historical annexes:** The N4-origin Reinforcements reference
    remains separately qualified N5-context reference material until its
    source-ownership and procedural revision can be independently established.
@@ -119,17 +110,16 @@ explicit context-scoped relation resolved at read time.
   certifying N4 procedures as N5 official rules.
 - **Shared marker references:** In the complete runtime,
   `ScenarioCatalog` resolves the source metadata for marker diameters
-  directly from the registered ITS 18 publication descriptor (p. 17);
+  directly from the registered ITS 18 publication descriptor (p. 18);
   this is **external measurement evidence**, not ownership of the N5
   Domination/Supplies missions. Isolated Rules-only research or future
   configurations without ITS 18 retain the pinned historical citation,
   while an incomplete registered ITS 18 source fails closed. The resulting
   marker sizes and public citation shape remain unchanged.
-- **Battleground:** `its_18.db` owns historical `scenario:battleground`,
-  including all 150–400 Army Point configurations, SVG geometry, scoring
-  and PDF pp. 121–123. The hotfix separately republishes the same mission
-  slug with its own revised PDF citations (pp. 129–131).
-  Neither revision substitutes for the other.
+- **Battleground:** `its_18.db` publishes the current 2026.09.11
+  `scenario:battleground` with source citations on pp. 129–131.
+  Earlier pp. 121–123 citations and original geometry remain tagged in
+  the source-family file for future historical research, not player selection.
 - **Core scenarios:** The four `n5-core@5.3` missions and their reusable
   N5 component definitions remain in `rules_n5.db`. A later ITS season may
   independently publish a mission with the same typed scenario ID; do not

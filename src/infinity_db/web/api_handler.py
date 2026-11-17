@@ -201,15 +201,15 @@ def _enrich_scenario_api_item(
 
 
 def _scenario_selection(params: dict[str, list[str]]) -> tuple[str | None, str | None]:
-    """Require an exact collection/revision pair; never infer the current ITS season."""
+    """Choose a season by default; reject explicit obsolete revision requests."""
     collection = params.get("collection", [None])[0]
     revision = params.get("revision", [None])[0]
-    if (collection is None) != (revision is None):
-        raise ValueError("Provide collection and revision together")
+    if collection is None and revision is not None:
+        raise ValueError("Scenario revision requires a collection")
     if collection is not None:
         require_domain_slug(collection, context="scenario collection")
-        if not revision or revision.strip() != revision:
-            raise ValueError("scenario revision must be a non-empty trimmed string")
+    if revision is not None and (not revision or revision.strip() != revision):
+        raise ValueError("scenario revision must be a non-empty trimmed string")
     return collection, revision
 
 

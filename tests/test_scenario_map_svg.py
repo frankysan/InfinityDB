@@ -8,6 +8,7 @@ from xml.etree import ElementTree
 import pytest
 
 from infinity_db.curated import load_curated_document
+from infinity_db.its_source_family import project_its_source_family
 from infinity_db.scenario_definition import scenario_definition_from_curated_document
 from infinity_db.scenario_geometry import marker_radius_inches, parse_scenario_geometry
 from infinity_db.scenario_map_svg import ScenarioMapRenderError, render_scenario_map_svg
@@ -567,7 +568,7 @@ def test_render_scenario_map_svg_fails_closed_for_unknown_marker_type() -> None:
         render_scenario_map_svg(geometry)
 
 
-_ITS_18_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-its-season-18-2026.09.01.json"
+_ITS_18_RULES = Path(__file__).parents[1] / "data/curated/its/n5-its-season-18.json"
 
 
 @pytest.mark.parametrize(
@@ -582,7 +583,9 @@ _ITS_18_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-its-season-18
 def test_battleground_map_labels_both_sides_and_measures_all_bands(
     configuration_id: str, deployment_depth: int, sector_depth: int, unit: str
 ) -> None:
-    document = load_curated_document(_ITS_18_RULES)
+    document = project_its_source_family(
+        load_curated_document(_ITS_18_RULES), revision="2026.09.01",
+    )
     definition = scenario_definition_from_curated_document(document, "scenario:battleground")
     geometry = next(
         configuration.geometry

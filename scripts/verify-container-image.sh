@@ -300,7 +300,7 @@ if not any(
 
 with urlopen(
     "http://127.0.0.1:8000/api/scenarios/battleground"
-    "?army_points=300&collection=its-18&revision=2026.09.01", timeout=3,
+    "?army_points=300&collection=its-18", timeout=3,
 ) as response:
     battleground = json.load(response)
 if (

@@ -194,6 +194,716 @@
       }
     }
   ],
+  "sourceFamily": {
+    "currentRevision": "2026.09.11",
+    "historicalRevisions": [
+      {
+        "revision": "2026.09.01",
+        "collection": {
+          "id": "its-season-18-2026.09.01",
+          "title": "ITS Season 18: Overheat - Battleground",
+          "domain": "its",
+          "status": "current",
+          "effectiveFrom": "2026-09-01",
+          "authority": "primary"
+        },
+        "scenarioCollection": {
+          "id": "its-18",
+          "title": "ITS Season 18: Overheat",
+          "revision": "2026.09.01",
+          "members": [
+            {
+              "scenarioId": "scenario:battleground"
+            }
+          ]
+        },
+        "sources": [
+          {
+            "id": "its-season-18-en-pdf",
+            "kind": "pdf",
+            "title": "ITS Season 18: Overheat (English)",
+            "version": "2026.09.01",
+            "publishedDate": "2026-09-01",
+            "localPath": "data/pdf/its/its-18-rules-v2026.09.01-en.pdf",
+            "pageCount": 132,
+            "sha256": "9e16874924112e62d51acf78d622f5c0cf6196064cc36f003b515de9dc448baf",
+            "authority": "primary",
+            "url": "https://experience.corvusbelli.com/en/infinity/its-rules"
+          }
+        ],
+        "originalDocumentSha256": "f002d279f711c5ac27e87cc3e91686beb85ec4e42aa7a740e2cebab1c4b2bbab"
+      }
+    ],
+    "factRevisions": {
+      "records": {
+        "scenario:crossing-lines": [
+          "2026.09.11"
+        ],
+        "scenario:double-bind": [
+          "2026.09.11"
+        ],
+        "scenario:the-dig": [
+          "2026.09.11"
+        ],
+        "scenario:annihilation": [
+          "2026.09.11"
+        ],
+        "scenario:battleground": [
+          "2026.09.01",
+          "2026.09.11"
+        ],
+        "scenario:cutthroat": [
+          "2026.09.11"
+        ],
+        "scenario:superiority": [
+          "2026.09.11"
+        ],
+        "scenario:uplink-center": [
+          "2026.09.11"
+        ],
+        "scenario:hardlock": [
+          "2026.09.11"
+        ],
+        "scenario:b-pong": [
+          "2026.09.11"
+        ],
+        "scenario:akial-interference": [
+          "2026.09.11"
+        ],
+        "scenario:evacuation": [
+          "2026.09.11"
+        ],
+        "scenario:neutralization": [
+          "2026.09.11"
+        ],
+        "scenario:provisioning": [
+          "2026.09.11"
+        ],
+        "scenario:area-of-interest": [
+          "2026.09.11"
+        ],
+        "scenario:data-harvest": [
+          "2026.09.11"
+        ],
+        "scenario:last-launch": [
+          "2026.09.11"
+        ],
+        "scenario:corporate-appropriation": [
+          "2026.09.11"
+        ],
+        "scenario:outbreak": [
+          "2026.09.11"
+        ],
+        "scenario:critical-intervention": [
+          "2026.09.11"
+        ]
+      },
+      "seasonPolicies": {
+        "its18-spec-ops-tournament": [
+          "2026.09.01",
+          "2026.09.11"
+        ],
+        "its18-team-ops-spec-ops": [
+          "2026.09.01",
+          "2026.09.11"
+        ],
+        "its18-reinforcements-availability": [
+          "2026.09.01",
+          "2026.09.11"
+        ]
+      }
+    },
+    "historicalOverrides": [
+      {
+        "revision": "2026.09.01",
+        "category": "records",
+        "id": "scenario:battleground",
+        "fields": {
+          "facts.configurations": [
+            {
+              "id": "150-points",
+              "armyPoints": [
+                150
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Battleground",
+                "table": {
+                  "width": 24,
+                  "height": 32,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "sector-near-a",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 10,
+                    "x2": 24,
+                    "y2": 14
+                  },
+                  {
+                    "id": "sector-center",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 14,
+                    "x2": 24,
+                    "y2": 18
+                  },
+                  {
+                    "id": "sector-near-b",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 18,
+                    "x2": 24,
+                    "y2": 22
+                  },
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 24,
+                    "y2": 8
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 24,
+                    "y2": 32
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 4.55,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "sector-near-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 12.55,
+                    "text": "A: 2 OP · B: 5 OP"
+                  },
+                  {
+                    "id": "sector-center-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 15.15,
+                    "text": "Central Sector · 3 OP"
+                  },
+                  {
+                    "id": "sector-near-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 20.55,
+                    "text": "A: 5 OP · B: 2 OP"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 28.55,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "sector-near-a-depth",
+                    "kind": "dimension",
+                    "target": "sector-near-a",
+                    "axis": "y",
+                    "side": "start",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "sector-center-depth",
+                    "kind": "dimension",
+                    "target": "sector-center",
+                    "axis": "y",
+                    "side": "start",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "sector-near-b-depth",
+                    "kind": "dimension",
+                    "target": "sector-near-b",
+                    "axis": "y",
+                    "side": "start",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  }
+                ]
+              }
+            },
+            {
+              "id": "200-250-points",
+              "armyPoints": [
+                200,
+                250
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Battleground",
+                "table": {
+                  "width": 32,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "sector-near-a",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 12,
+                    "x2": 32,
+                    "y2": 20
+                  },
+                  {
+                    "id": "sector-center",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 20,
+                    "x2": 32,
+                    "y2": 28
+                  },
+                  {
+                    "id": "sector-near-b",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 28,
+                    "x2": 32,
+                    "y2": 36
+                  },
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 32,
+                    "y2": 12
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 36,
+                    "x2": 32,
+                    "y2": 48
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 6.55,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "sector-near-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 16.55,
+                    "text": "A: 2 OP · B: 5 OP"
+                  },
+                  {
+                    "id": "sector-center-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 23.15,
+                    "text": "Central Sector · 3 OP"
+                  },
+                  {
+                    "id": "sector-near-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 32.55,
+                    "text": "A: 5 OP · B: 2 OP"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 42.55,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "sector-near-a-depth",
+                    "kind": "dimension",
+                    "target": "sector-near-a",
+                    "axis": "y",
+                    "side": "start",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "sector-center-depth",
+                    "kind": "dimension",
+                    "target": "sector-center",
+                    "axis": "y",
+                    "side": "start",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "sector-near-b-depth",
+                    "kind": "dimension",
+                    "target": "sector-near-b",
+                    "axis": "y",
+                    "side": "start",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  }
+                ]
+              }
+            },
+            {
+              "id": "300-400-points",
+              "armyPoints": [
+                300,
+                350,
+                400
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Battleground",
+                "table": {
+                  "width": 48,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "sector-near-a",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 12,
+                    "x2": 48,
+                    "y2": 20
+                  },
+                  {
+                    "id": "sector-center",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 20,
+                    "x2": 48,
+                    "y2": 28
+                  },
+                  {
+                    "id": "sector-near-b",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 28,
+                    "x2": 48,
+                    "y2": 36
+                  },
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 48,
+                    "y2": 12
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 36,
+                    "x2": 48,
+                    "y2": 48
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 6.55,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "sector-near-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 16.55,
+                    "text": "A: 2 OP · B: 5 OP"
+                  },
+                  {
+                    "id": "sector-center-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 23.15,
+                    "text": "Central Sector · 3 OP"
+                  },
+                  {
+                    "id": "sector-near-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 32.55,
+                    "text": "A: 5 OP · B: 2 OP"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 42.55,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "sector-near-a-depth",
+                    "kind": "dimension",
+                    "target": "sector-near-a",
+                    "axis": "y",
+                    "side": "start",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "sector-center-depth",
+                    "kind": "dimension",
+                    "target": "sector-center",
+                    "axis": "y",
+                    "side": "start",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "sector-near-b-depth",
+                    "kind": "dimension",
+                    "target": "sector-near-b",
+                    "axis": "y",
+                    "side": "start",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  }
+                ]
+              }
+            }
+          ],
+          "citations": [
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 121,
+              "section": "Battleground"
+            },
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 122,
+              "section": "Sectors and Dominate ZO"
+            },
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 123,
+              "section": "End of the Mission"
+            }
+          ],
+          "review.reviewedOn": "2026-10-15"
+        }
+      },
+      {
+        "revision": "2026.09.01",
+        "category": "seasonPolicies",
+        "id": "its18-spec-ops-tournament",
+        "fields": {
+          "applicability.revision": "2026.09.01",
+          "citations": [
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 26,
+              "section": "Spec-Ops"
+            }
+          ],
+          "review.reviewedOn": "2026-11-10"
+        }
+      },
+      {
+        "revision": "2026.09.01",
+        "category": "seasonPolicies",
+        "id": "its18-team-ops-spec-ops",
+        "fields": {
+          "applicability.revision": "2026.09.01",
+          "citations": [
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 28,
+              "section": "Team-Ops"
+            }
+          ],
+          "review.reviewedOn": "2026-11-10"
+        }
+      },
+      {
+        "revision": "2026.09.01",
+        "category": "seasonPolicies",
+        "id": "its18-reinforcements-availability",
+        "fields": {
+          "applicability.revision": "2026.09.01",
+          "citations": [
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 27,
+              "section": "Reinforcements"
+            }
+          ],
+          "review.reviewedOn": "2026-11-10"
+        }
+      }
+    ]
+  },
   "records": [
     {
       "id": "scenario:crossing-lines",

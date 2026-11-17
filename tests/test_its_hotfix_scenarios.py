@@ -1,7 +1,4 @@
-"""Exact-source acceptance for the separately published ITS 18 September hotfix.
-
-The historical September 1 selection remains independent of the hotfix.
-"""
+"""Exact-source acceptance for current ITS 18 and retained historical facts."""
 from pathlib import Path
 
 from infinity_db.curated import load_curated_document
@@ -11,15 +8,16 @@ from infinity_db.its_season_database import (
     select_its_policies,
     select_its_scenario,
 )
+from infinity_db.its_source_family import project_its_source_family
 
 ROOT = Path(__file__).resolve().parents[1]
-HOTFIX = ROOT / "data/curated/its/n5-its-season-18-2026.09.11.json"
-HISTORICAL = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"
+HOTFIX = ROOT / "data/curated/its/n5-its-season-18.json"
 
 
 def test_hotfix_is_independent_and_retains_historical_source() -> None:
-    old = load_curated_document(HISTORICAL)
-    current = load_curated_document(HOTFIX)
+    authored = load_curated_document(HOTFIX)
+    old = project_its_source_family(authored, revision="2026.09.01")
+    current = project_its_source_family(authored)
 
     assert old["scenarioCollection"]["revision"] == "2026.09.01"
     assert [entry["scenarioId"] for entry in old["scenarioCollection"]["members"]] == [

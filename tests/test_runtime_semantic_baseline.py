@@ -151,9 +151,9 @@ def test_reviewed_p1_to_v12_baseline_migration_changes_only_approved_routes() ->
     ]
 
 
-def test_released_data_matches_pinned_v12_semantic_baseline() -> None:
+def test_released_data_matches_pinned_current_its_semantic_baseline() -> None:
     fixture = json.loads(
-        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.json")
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-current.json")
         .read_text(encoding="utf-8")
     )
     army = ROOT / "data/generated/army.db"

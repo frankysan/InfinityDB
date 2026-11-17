@@ -249,7 +249,8 @@ def build_database_set(
         # are atomic; interruption leaves an invalid mixed set, recovered by rerun.
         for name in sorted(COMPLETE_RUNTIME_FILES):
             os.replace(stage / name, target / name)
-        for name in ("variant-usage.json", "weapon-profile-sources.json"):
+        for name in ("variant-usage.json", "weapon-profile-sources.json",
+                     "its_18_2026.09.11.db"):
             obsolete = target / name
             if obsolete.is_file() or obsolete.is_symlink():
                 obsolete.unlink()

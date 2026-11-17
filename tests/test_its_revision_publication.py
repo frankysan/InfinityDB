@@ -14,7 +14,7 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / "data/generated"
-HOTFIX_SOURCE = ROOT / "data/curated/its/n5-its-season-18-2026.09.11.json"
+HOTFIX_SOURCE = ROOT / "data/curated/its/n5-its-season-18.json"
 ORIGIN = "https://revision-test.example"
 
 
@@ -22,10 +22,7 @@ ORIGIN = "https://revision-test.example"
 def two_revisions(tmp_path: Path):
     hotfix = tmp_path / "its_18_2026.09.11.db"
     build_its_database(HOTFIX_SOURCE, hotfix)
-    revisions = {
-        "its-18": RELEASE / "its_18.db",
-        "its-18@2026.09.11": hotfix,
-    }
+    revisions = {"its-18": hotfix}
     rules = RulesDatabase(RELEASE / "rules_n5.db")
     return PublicationRegistry(rules, revisions), create_app(
         RELEASE / "army.db", RELEASE / "rules_n5.db", season_databases=revisions,
@@ -37,50 +34,31 @@ def _json(app, path: str) -> tuple[int, dict, dict]:
     return status, dict(headers), json.loads(data)
 
 
-def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisions) -> None:
+def test_only_current_its_revision_registered_and_no_cross_version_fallback(two_revisions) -> None:
     registry, app = two_revisions
-    assert set(registry.season_manifest()) == {"its-18", "its-18@2026.09.11"}
-    assert registry.has_season("its-18", "2026.09.01")
+    assert set(registry.season_manifest()) == {"its-18"}
+    assert not registry.has_season("its-18", "2026.09.01")
     assert registry.has_season("its-18", "2026.09.11")
     assert not registry.has_season("its-18", "2026.09.12")
     assert registry.resolve(PublicationReference(
         "its-18", "scenario:the-dig", "2026.09.01",
     )) is None
 
-    summaries = {}
-    for revision, expected_ids in (
-        ("2026.09.01", ["battleground"]),
-        ("2026.09.11", [
-            "crossing-lines", "double-bind", "the-dig", "annihilation",
-            "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
-            "b-pong", "akial-interference", "evacuation", "neutralization",
-            "provisioning", "area-of-interest", "data-harvest", "last-launch",
-            "corporate-appropriation", "outbreak", "critical-intervention",
-        ]),
-    ):
-        status, _, payload = _json(
-            app, f"/api/scenarios?collection=its-18&revision={revision}",
-        )
-        assert status == 200
-        summaries[revision] = payload["items"]
-        assert [entry["id"] for entry in payload["items"]] == expected_ids
-        assert all(item["publication"]["revision"] == revision for item in payload["items"])
-
-    assert len(summaries["2026.09.01"]) == 1
-    status, _, payload = _json(app, "/api/scenarios")
+    status, _, payload = _json(app, "/api/scenarios?collection=its-18")
     assert status == 200
-    collections = {
-        (item["id"], item["revision"]): item
-        for item in payload["collections"]
+    assert len(payload["items"]) == 20
+    assert {item["publication"]["revision"] for item in payload["items"]} == {
+        "2026.09.11",
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 20
-    assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
-    assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
+    assert len([c for c in payload["collections"] if c["id"] == "its-18"]) == 1
+    assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.01")[2][
+        "items"
+    ] == []
 
 
 def test_battleground_and_policies_bind_correct_edition_sources(two_revisions) -> None:
     registry, app = two_revisions
-    for revision, pages in (("2026.09.01", [121, 122, 123]), ("2026.09.11", [129, 130, 131])):
+    for revision, pages in (("2026.09.11", [129, 130, 131]),):
         uri = (
             f"/api/scenarios/battleground?army_points=300"
             f"&collection=its-18&revision={revision}"

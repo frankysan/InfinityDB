@@ -114,11 +114,11 @@ read-only application/API and validated database models:
 - **Directly from a checkout (local or self-hosted).** Run
   `infinity-db build --compact`, then `infinity-db serve` from the repository
   root. One offline build produces the complete `data/generated/army.db`,
-  `rules_n5.db`, `its_18.db` and `its_18_2026.09.11.db` set. Serving selects explicit `--db-dir`, then
+  `rules_n5.db` and `its_18.db` set. Serving selects explicit `--db-dir`, then
   `INFINITY_DB_DB_DIR`, then the working-directory-relative default. Production
   WSGI requires that single environment setting. An invalid selected set fails
   closed. Stop the service before rebuilding its selected directory.
-- **Docker for public internet serving.** The image copies those same four
+- **Docker for public internet serving.** The image copies those same three
   tracked databases directly into `/app/data/`, configured with
   `INFINITY_DB_DB_DIR=/app/data`. No host promotion directory, raw archive,
   curation or JSON publication is a serving dependency. Source/release checks
@@ -157,7 +157,7 @@ InfinityDB deliberately separates four kinds of repository data:
 - `data/manifests/` contains publication/provenance state; the tracked symbol publication manifest
   is a release contract, while acquisition/build manifests are normally local generated evidence.
 - `data/generated/` contains the three tracked runtime databases: `army.db`,
-  `rules_n5.db`, `its_18.db` and `its_18_2026.09.11.db`. Structured reference facts and symbol mappings are embedded.
+  `rules_n5.db` and `its_18.db`. Structured reference facts and symbol mappings are embedded.
   SVG/CSS/JS remain ordinary static files. Development intermediates and raw
   exports belong under ignored `local/work/build/`.
 
@@ -369,7 +369,7 @@ model, so generated databases remain replaceable release artifacts.
 
 Complete embedded-set application composition now has one explicit factory,
 `infinity_db.web.create_app_from_database_set`. It uses the shared database-set
-validator's complete mode before opening the selected four-file set.
+validator's complete mode before opening the selected three-file set.
 Current Army/Rules projections, matched recorded provenance and ITS season/core
 source identity are required; incomplete or stale sets fail before application
 creation. The CLI server and production WSGI use this path. The default

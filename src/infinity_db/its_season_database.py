@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from .curated import load_curated_document
+from .its_source_family import project_its_source_family
 from .scenario_components import compose_scenario_document
 from .scenario_definition import parse_scenario_definition_record
 from .sqlite_determinism import (
@@ -48,7 +49,7 @@ def _file_sha(path: Path) -> str:
 def _builder_revision() -> str:
     """Bind the output to the relevant parser/exporter code, not host paths."""
     modules = (
-        "its_season_database.py", "curated.py", "scenario_components.py",
+        "its_season_database.py", "its_source_family.py", "curated.py", "scenario_components.py",
         "scenario_definition.py", "scenario_mission.py", "scenario_geometry.py",
         "sqlite_determinism.py",
     )
@@ -666,7 +667,7 @@ def build_its_database(
     source, output = source.resolve(), output.resolve()
     if source == output or output.name in {"army.db", "rules_n5.db"}:
         raise ValueError("ITS output must not replace curated or core runtime artifacts")
-    document = load_curated_document(source)
+    document = project_its_source_family(load_curated_document(source))
     _validate_its_document(document, core_revision)
     identity = _input_identity(source, document, core_revision)
     composed = compose_scenario_document(document)
@@ -687,7 +688,8 @@ def build_its_database(
             temporary, source=source, core_revision=core_revision,
             require_current_builder=True,
         )
-        if _input_identity(source, load_curated_document(source), core_revision) != identity:
+        current_source = project_its_source_family(load_curated_document(source))
+        if _input_identity(source, current_source, core_revision) != identity:
             raise ValueError("ITS source changed during build; output retained")
         os.replace(temporary, output)
         return result

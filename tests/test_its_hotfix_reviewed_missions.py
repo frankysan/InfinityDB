@@ -28,7 +28,7 @@ from infinity_db.scenario_geometry import (
 from infinity_db.scenario_map_svg import render_scenario_map_svg
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "data/curated/its/n5-its-season-18-2026.09.11.json"
+SOURCE = ROOT / "data/curated/its/n5-its-season-18.json"
 SIZES = (150, 200, 250, 300, 350, 400)
 
 

@@ -56,11 +56,7 @@ EMBEDDED_WEAPON_RUNTIME_FILES = frozenset({ARMY_DATABASE_FILENAME, RULES_DATABAS
 # Explicit release registration; neither source names nor season defaults are
 # inferred from the contents of an operator-selected directory.
 SEASON_DATABASE_SOURCES = {
-    "its-18": ("its_18.db", "data/curated/rules/n5-its-season-18-2026.09.01.json"),
-    "its-18@2026.09.11": (
-        "its_18_2026.09.11.db",
-        "data/curated/its/n5-its-season-18-2026.09.11.json",
-    ),
+    "its-18": ("its_18.db", "data/curated/its/n5-its-season-18.json"),
 }
 COMPLETE_RUNTIME_FILES = EMBEDDED_WEAPON_RUNTIME_FILES | frozenset(
     filename for filename, _source in SEASON_DATABASE_SOURCES.values()
@@ -193,8 +189,7 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
             fingerprints[name] = hashlib.file_digest(stream, "sha256").hexdigest()
     return {
         "layout": (
-            "v17-four-file" if require_complete and len(registered_seasons) == 2
-            else "v17-three-file" if require_complete and registered_seasons
+            "v17-three-file" if require_complete and registered_seasons
             else {
                 12: "v12-two-file", 13: "v13-two-file",
                 14: "v14-two-file", 15: "v15-two-file",

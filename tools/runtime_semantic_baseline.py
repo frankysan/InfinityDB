@@ -45,14 +45,14 @@ API_PATHS = (
     "/api/deployed-objects",
     "/api/glossary",
     "/api/scenarios",
-    "/api/scenarios?collection=its-18&revision=2026.09.01",
+    "/api/scenarios?collection=its-18",
     "/api/search?q=camouflage",
     "/api/faq-rulings?topic_id=skill%3Acamouflage&rules_revision=5.3&as_of=2026-10-15",
     "/api/scenarios/domination?army_points=300",
-    "/api/scenarios/battleground?army_points=300&collection=its-18&revision=2026.09.01",
+    "/api/scenarios/battleground?army_points=300&collection=its-18",
 )
 SVG_PATHS = (
-    "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18&revision=2026.09.01",
+    "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18",
 )
 HTML_PATHS: dict[str, tuple[str, ...]] = {
     "/": ("<html",),

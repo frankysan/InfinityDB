@@ -4,7 +4,7 @@
 
 For public internet serving, InfinityDB deploys an immutable Docker image
 containing the application, processed graphical assets and the complete tracked
-`army.db` / `rules_n5.db` / `its_18.db` / `its_18_2026.09.11.db` set. Structured runtime facts are
+`army.db` / `rules_n5.db` / `its_18.db` set. Structured runtime facts are
 embedded; no JSON publication or raw source archive is required at startup.
 Rollback uses a matching retained image for the older release's data format.
 
@@ -15,7 +15,7 @@ Corvus Belli has explicitly permitted InfinityDB to use and redistribute the gra
 assets used by this non-commercial community project. By project policy, the generated runtime
 databases are likewise distributed only as part of the non-commercial InfinityDB
 application/release and remain outside the MIT License. Raw Army/wiki/PDF/source-symbol archives
-stay outside the public repository; the processed SVG publication and four runtime databases are
+stay outside the public repository; the processed SVG publication and three runtime databases are
 tracked release artifacts. See
 [third-party notices](../THIRD_PARTY_NOTICES.md).
 
@@ -43,7 +43,7 @@ infinity-db serve
 ```
 
 The build validates and replaces the complete `data/generated/` set:
-`army.db`, `rules_n5.db`, `its_18.db` and `its_18_2026.09.11.db`.
+`army.db`, `rules_n5.db` and `its_18.db`.
 Stop the service before rebuilding its selected directory. `serve --db-dir PATH`
 selects another complete set; otherwise `INFINITY_DB_DB_DIR` precedes the default
 `data/generated/` relative to the working directory. Invalid sets fail startup.
@@ -107,7 +107,6 @@ Every deploy requires these release-controlled files to be present in the checko
 data/generated/army.db
 data/generated/rules_n5.db
 data/generated/its_18.db
-data/generated/its_18_2026.09.11.db
 data/manifests/symbol-publication.json
 src/infinity_db/web/static/{armies,characteristics,orders,peripherals,units}/...
 ```
@@ -116,7 +115,7 @@ src/infinity_db/web/static/{armies,characteristics,orders,peripherals,units}/...
 validates the strict complete set, recorded source/build-input freshness, embedded
 Weapon citations against maintained reviews, and the graphical publication's
 paths, hashes and Army source identity. Raw Army/PDF inputs are not needed on the
-server. The image copies the four databases directly into `/app/data/`; no
+server. The image copies the three databases directly into `/app/data/`; no
 `data/runtime/` copy or candidate promotion is required.
 
 The image uses `INFINITY_DB_DB_DIR=/app/data`. Missing, invalid or incompatible
@@ -228,7 +227,7 @@ from the tracked runtime databases and processed publication in the checkout. It
 publication/database snapshot mismatch, packaging omission, corrupted SQLite file, symbol hash
 mismatch, or startup failure is caught against the same artifact model used in production.
 
-The verifier requires `/app/data/` to contain exactly `army.db`, `rules_n5.db`, `its_18.db` and `its_18_2026.09.11.db`, checks the
+The verifier requires `/app/data/` to contain exactly `army.db`, `rules_n5.db` and `its_18.db`, checks the
 configured runtime paths and non-root image user, and starts Gunicorn with a read-only root
 filesystem, `/tmp` tmpfs, and `no-new-privileges`. It waits for the image health check and then
 exercises Army, rules-enriched Skill, and version API endpoints.

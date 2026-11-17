@@ -9,11 +9,10 @@ migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this c
 contract.
 
 The complete serving runtime uses Army v31 in `army.db`, Rules v17 in
-`rules_n5.db` and ITS schema v2 in both `its_18.db` (2026.09.01) and
-`its_18_2026.09.11.db` (September hotfix). Structured references,
-source/citation identity and symbol mappings are embedded. Serving requires
-all four, validates both exact source-compatible ITS publications against the
-matched Army/Rules build and does not read build JSON.
+`rules_n5.db` and ITS schema v2 in `its_18.db` (current revision
+2026.09.11). Structured references, source/citation identity and symbol
+mappings are embedded. Serving requires all three, validates the current ITS
+publication against the matched Army/Rules build and does not read build JSON.
 The [data lifecycle](../data/README.md) owns current build/serve paths.
 Earlier schema/publication migration descriptions below are historical where
 they explicitly identify an older version. **Dated source-variant review notes** record the findings
@@ -55,10 +54,10 @@ flowchart TD
 ```
 
 The Army and N5 Rules databases remain separate because their sources,
-provenance and update cadences differ. Independently published ITS season
-data resides in two independently validated ITS schema v2 databases, one
-per Season 18 revision, with explicit revision and N5 compatibility
-validation at serving time.
+provenance and update cadences differ. The current ITS Season 18 publication
+resides in its own validated schema v2 database, with explicit current revision
+and N5 compatibility validation at serving time. Historical facts stay in the
+curated source family rather than a player-selectable historical database.
 
 ### Accepted authoring direction: one source family, version-tagged facts
 
@@ -90,12 +89,14 @@ independent authorities such as N5 core rules, the N5 FAQ and ITS.
   Historical replay is a separate future capability, not a prerequisite for
   the source-family migration.
 
-This is an **accepted but not yet implemented** curation model. The existing
-ITS 18 curated documents are still split by revision, and the current builder
-consumes one single-revision document at a time. Do not change or remove those
-inputs before the authoring schema, deterministic revision projection and
-current-publication parity tests are implemented together. The migration is tracked
-in [TODO](TODO.md#its-scenarios-and-game-tools).
+This source-family model is implemented for ITS Season 18 by
+`data/curated/its/n5-its-season-18.json` and the deterministic
+`its_source_family` projector. Every current mission and event policy is
+revision-tagged; changed Battleground geometry, citations, review metadata and
+season-policy facts retain historical field overrides. The builder publishes
+only 2026.09.11 into `its_18.db`, while the original 2026.09.01 evidence and
+source-file hash remain preserved in curation. The public scenario selector
+chooses the season without a revision selector. Historical replay remains deferred.
 
 **Optional legacy-source annexes:** The `reinforcements-extra-n4-reference`
 collection is deliberately separate from `n5-core-v5.3`. Its three

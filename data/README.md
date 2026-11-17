@@ -163,17 +163,15 @@ the retired source roots.
 - `curated/snapshot-notes/` — source-controlled, human-authored descriptions,
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
-- `generated/` — four tracked runtime databases: `army.db`
+- `generated/` — three tracked runtime databases: `army.db`
   (Army v31/compatibility 40), `rules_n5.db` (Rules v17), and
-  `its_18.db` (ITS v2, September 1) alongside
-  `its_18_2026.09.11.db` (ITS v2, September hotfix). Exact variants,
-  reviewed Weapon citations,
-  deployed objects, Restrictions, and symbol mappings remain embedded in
-  Army/Rules. The historical ITS database retains Battleground, while the
-  hotfix database adds eight reviewed missions. Each stores independently
-  versioned tournament/Extra policies, selected by exact season and revision.
+  `its_18.db` (ITS v2, current 2026.09.11). Exact variants, reviewed
+  Weapon citations, deployed objects, Restrictions, and symbol mappings
+  remain embedded in Army/Rules. The ITS database publishes twenty reviewed
+  current missions and the source-cited tournament/Extra policies. Historical
+  Battleground facts and source identity remain in
+  `curated/its/n5-its-season-18.json` rather than a second runtime database.
   See [ITS season database](../docs/its-season-database.md).
-  The old filenames and required JSON publications are retired.
 
 **Complete runtime build:** `infinity-db build --compact` selects the latest
 timestamped Army ZIP from `local/data/raw/army/` (not by copy mtime), with
@@ -263,7 +261,7 @@ exist for independent development commands; they are not serving dependencies.
 **Selected runtime health:** `infinity-db database-health --db-dir PATH`
 validates exactly the selected directory through the shared
 `infinity_db.database_set` validator. Startup and directory health require
-`army.db`, `rules_n5.db`, `its_18.db` and `its_18_2026.09.11.db`,
+`army.db`, `rules_n5.db` and `its_18.db`,
 Army v31 / Rules v17 / ITS v2, with matched provenance
 and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;

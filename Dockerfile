@@ -34,7 +34,6 @@ RUN pip install --no-cache-dir ".[server]" \
 COPY --chown=appuser:appuser data/generated/army.db /app/data/army.db
 COPY --chown=appuser:appuser data/generated/rules_n5.db /app/data/rules_n5.db
 COPY --chown=appuser:appuser data/generated/its_18.db /app/data/its_18.db
-COPY --chown=appuser:appuser data/generated/its_18_2026.09.11.db /app/data/its_18_2026.09.11.db
 
 USER appuser
 EXPOSE 8000

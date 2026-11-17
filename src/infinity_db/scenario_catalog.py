@@ -75,9 +75,9 @@ def _supported_army_points(record: dict[str, Any]) -> list[int]:
 _MARKER_SIZE_CITATION = {
     "source_id": "its-season-18-en-pdf",
     "source_title": "ITS Season 18: Overheat (English)",
-    "source_version": "2026.09.01",
+    "source_version": "2026.09.11",
     "source_url": "https://experience.corvusbelli.com/en/infinity/its-rules",
-    "page": 17,
+    "page": 18,
 }
 _MARKER_LABELS = {
     "console": "Console A Marker",
@@ -144,14 +144,14 @@ class ScenarioCatalog:
         if self.publication_registry is not None:
             # The September hotfix moved the shared token diameter chart
             # from p.17 to p.18; keep historical citations version-pinned.
-            chart_page = 18 if revision == "2026.09.11" else 17
+            chart_page = 17 if revision == "2026.09.01" else 18
             citation = self.publication_registry.source_citation(
                 season_id="its-18", source_id="its-season-18-en-pdf", page=chart_page,
                 revision=revision,
             )
             if citation is not None:
                 return citation
-            if self.publication_registry.has_season("its-18", revision or "2026.09.01"):
+            if "its-18" in self.publication_registry.season_manifest():
                 raise ValueError("Registered ITS 18 marker size source is unavailable")
         # Isolated Rules-only research fixtures (or a future set without ITS 18)
         # retain the pinned external measurement provenance.
@@ -200,17 +200,28 @@ class ScenarioCatalog:
         self, *, collection: str | None, revision: str | None
     ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
         """Select one exact published set without falling back to Core or another season."""
-        if (collection is None) != (revision is None):
-            raise ValueError("Scenario collection and revision must be provided together")
+        if collection is None and revision is not None:
+            raise ValueError("Scenario revision requires a collection")
         if collection is not None:
             require_domain_slug(collection, context="scenario collection")
         if revision is not None and (
             not isinstance(revision, str) or not revision.strip() or revision != revision.strip()
         ):
             raise ValueError("scenario revision must be a non-empty trimmed string")
+        records = self._records()
+        if collection is not None and revision is None:
+            # The normal player selection is a season, not a publication date.
+            # Exactly one revision per registered season is currently supported.
+            available = {
+                publication["revision"] for _record, publication in records
+                if publication["collection"] == collection
+            }
+            if len(available) > 1:
+                raise ValueError("Ambiguous current scenario collection revision")
+            revision = next(iter(available), None)
         return [
             (record, publication)
-            for record, publication in self._records()
+            for record, publication in records
             if (
                 publication["collection"] == "n5-core"
                 if collection is None

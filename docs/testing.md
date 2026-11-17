@@ -637,11 +637,11 @@ reviewed migrations (Skills, Equipment Repeater usage, Scenario list,
 historical ITS collection listing, one Weapon profile, and the Restrictions
 API JavaScript marker). All other P1 route digests must still match the
 original fixture. Use
-`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2.json`
-for the current selected four-file runtime; `--identical-artifacts` additionally
+`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2-current.json`
+for the current selected three-file runtime; `--identical-artifacts` additionally
 requires byte-identical artifact metadata. A future baseline may be freshly
 captured with `--capture --db-dir` to a **new** path, never overwriting the
-reviewed fixtures. This protects source/citation semantics and historical
+reviewed fixtures. This protects source/citation semantics and current
 Battleground SVG geometry, but does **not** replace browser or Docker acceptance.
 Run `tests/test_runtime_semantic_baseline.py` for its guardrail tests.
 
@@ -665,7 +665,7 @@ serving defaults or establish visual-browser, Docker or release acceptance.
 `infinity-db database-health --db-dir PATH --json` checks one explicit
 supported runtime directory with full SQLite integrity and either
 embedded source-paired facts or older matched JSON publications. The
-[data lifecycle](../data/README.md) owns the current two-/three-/four-file contract and the limits of this check. The command operates offline,
+[data lifecycle](../data/README.md) owns the current three-file contract and the limits of this check. The command operates offline,
 does not require a raw archive, and reports unhealthy/missing data without
 creating files or selecting another runtime directory.
 
