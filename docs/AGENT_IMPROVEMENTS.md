@@ -106,3 +106,21 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Why:** The synthetic standalone reuse proof does not establish the
   one-source-family revision-history contract for future season migrations.
 - **Disposition:** proposed; tracked by [ITS reuse](TODO.md#its-scenarios-and-game-tools).
+
+## AI-0006 — Reconcile the runtime semantic snapshot with current ITS publication
+
+- **Date:** 2026-11-17
+- **Area:** `tests/fixtures/runtime-semantic-baseline-v1.2-current.json`
+  and `tools/runtime_semantic_baseline.py`.
+- **Observation:** After a validated source-fresh rebuild, the default semantic
+  baseline requests archived `its-18@2026.09.01` Battleground and receives
+  the intentionally fail-closed 404. The separately named v1.2-current
+  baseline reports five differences in Skills and Scenario API responses;
+  their exact cause has not been established. The current database-set and
+  deployment-asset checks pass.
+- **Proposed:** Compare the stored payloads with the current reviewed API
+  responses and the last known accepted revision, then refresh the canonical
+  baseline only for confirmed intentional publication changes.
+- **Why:** Historical and stale baseline snapshots should not create ambiguous
+  failures or motivate unreviewed changes to serving behavior.
+- **Disposition:** proposed; outside the shared Skill and CI repair scope.

@@ -81,7 +81,7 @@ The historical **v1.0.x** release-evidence contract still requires all four.
 External branch-protection/rulesets may need adjustment if they previously
 required this workflow on every PR.
 
-Each job installs Python 3.11.9, **Playwright 1.64.1** and its selected browser,
+Each job installs the latest available Python 3.11 patch, **Playwright 1.64.1** and its selected browser,
 checks the embedded deployed objects matched to the tracked
 Army/Rules/ITS database set and serves that complete set
 using an ephemeral WSGI server. One shared portable cohort runs
