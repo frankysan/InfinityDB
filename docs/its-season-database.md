@@ -42,6 +42,11 @@ The Rules exporter imports neither ITS-owned source. The public scenario selecto
 lists `its-18@2026.09.01` (historical Battleground) and
 `its-18@2026.09.11` (twenty reviewed hotfix missions).
 
+These two curated inputs are the **current implementation**, not the intended
+long-term authoring layout. The [accepted source-family model](data-model.md#accepted-authoring-direction-one-source-family-version-tagged-facts)
+will store version-tagged facts in one ITS 18 curated file while retaining both
+independently selectable runtime publications and their exact citations.
+
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
 and Spanish 2026.09.11 (147 pages,

@@ -60,6 +60,38 @@ data resides in two independently validated ITS schema v2 databases, one
 per Season 18 revision, with explicit revision and N5 compatibility
 validation at serving time.
 
+### Accepted authoring direction: one source family, version-tagged facts
+
+For maintained curation, **prefer one file per logical source family** rather
+than a new curated file for every revision of that source. For example, ITS
+Season 18 is one source family even though its original and September hotfix
+PDFs have different exact byte identities. Source families do not merge
+independent authorities such as N5 core rules, the N5 FAQ and ITS.
+
+- Tag each maintained fact with the exact source revision(s) for which it was
+  reviewed. Use the smallest meaningful fact/field scope; a whole-record tag
+  alone is insufficient when only some mission rules, scoring, geometry or
+  citations change. Retain one shared fact when it is explicitly reviewed for
+  multiple revisions, and distinct tagged variants when its meaning differs.
+- Keep immutable upstream revision files and their source descriptors, dates,
+  languages, hashes and page citations separately identifiable within the
+  curated family. A citation must resolve to evidence from the selected
+  revision, never just the latest PDF.
+- Project the selected revision from that curated file when building a
+  publication. Reject overlapping incompatible variants, unreviewed carry-
+  forward and missing required revision facts; do not infer applicability from
+  file order or recency. Stable logical IDs may be shared across revisions.
+- **Authored file organization is independent of runtime publication
+  selection.** Distinct revision-specific SQLite outputs, provenance checks,
+  API selectors and historical behavior remain valid.
+
+This is an **accepted but not yet implemented** curation model. The existing
+ITS 18 curated documents are still split by revision, and the current builder
+consumes one single-revision document at a time. Do not change or remove those
+inputs before the authoring schema, deterministic revision projection and
+publication-parity tests are implemented together. The migration is tracked
+in [TODO](TODO.md#its-scenarios-and-game-tools).
+
 **Optional legacy-source annexes:** The `reinforcements-extra-n4-reference`
 collection is deliberately separate from `n5-core-v5.3`. Its three
 current-visibility records (`rule:reinforcements-extra`, `skill:commlink`,

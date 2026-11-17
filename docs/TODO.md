@@ -342,6 +342,16 @@ issues identified explicitly. In-browser visual acceptance at relevant
 breakpoints is still open. See the
 [ITS season database](its-season-database.md#published-20260911-hotfix-curation).
 
+- [ ] **Data processing: consolidate source-family curation.** Implement the
+  [accepted version-tagged fact model](data-model.md#accepted-authoring-direction-one-source-family-version-tagged-facts)
+  and migrate the two ITS Season 18 curated JSON files into one maintained
+  season-family file. Selectively project each exact revision, including
+  mission facts, maps, event policies, source descriptors and citations; reject
+  missing, conflicting or implicitly inherited facts. Update builders, source
+  registration and build provenance together. Prove both revision-specific
+  publications preserve current authored behavior before retiring the split
+  inputs. Keep separate runtime databases and historical selectors.
+
 - [ ] Build a versioned ITS reference library from material under
   `local/data/pdf/its/` and `local/data/pdf/legacy/`, keeping the current season distinct
   from archived seasons.
