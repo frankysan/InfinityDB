@@ -930,6 +930,15 @@ html:not([data-developer-mode="true"])
   border-top: 1px solid var(--color-border-subtle);
 }
 
+.scenario-setup-card .scenario-fact {
+  grid-template-columns: minmax(max-content, 1fr) max-content;
+  gap: 12px;
+}
+
+.scenario-setup-card .scenario-fact dd {
+  white-space: nowrap;
+}
+
 .scenario-fact:first-child {
   border-top: 0;
 }
@@ -958,8 +967,6 @@ html:not([data-developer-mode="true"])
 }
 
 .scenario-swc-source-conflict {
-  display: block;
-  margin-top: 4px;
   color: var(--color-status-warning-text);
   font-family: var(--font-family-body);
   font-size: var(--font-size-xs);
@@ -974,6 +981,7 @@ html:not([data-developer-mode="true"])
   margin: 0;
 }
 
+.scenario-setup-note,
 .scenario-map-placement-note {
   margin: 0;
   padding: 10px 16px 12px;

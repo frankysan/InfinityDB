@@ -133,6 +133,7 @@ function setupCard(item) {
   const table = geometry.table || {};
   const tableFact = fact("Table", "—");
   const swcFact = fact("SWC", String(gameSize.swc ?? "—"));
+  card.append(heading, facts);
   const swcIssue = (item.source_issues || []).find(
     (issue) => issue.status === "needs-verification"
       && issue.gameSizeField === "swc"
@@ -144,7 +145,10 @@ function setupCard(item) {
     link.className = "scenario-swc-source-conflict";
     link.href = `#scenario-source-issue-${swcIssue.id}`;
     link.textContent = "Official sources disagree — see source note";
-    swcFact.querySelector("dd")?.append(link);
+    const note = document.createElement("p");
+    note.className = "scenario-setup-note";
+    note.append(link);
+    card.append(note);
   }
   facts.append(
     fact("Army Points", String(item.selected_army_points)),
@@ -156,16 +160,20 @@ function setupCard(item) {
   }
   const requirements = item.setup?.play_requirements;
   if (requirements) {
-    const perPlayer = (count) => count === 0 ? "Not used" : `${count} per player`;
+    const countLabel = (count) => count === 0 ? "Not used" : String(count);
     const shared = requirements.sharedClassifiedObjectivesPerRound;
-    const classified = shared
-      ? `${requirements.classifiedObjectives} private per player + ${shared} shared per round (base)`
-      : perPlayer(requirements.classifiedObjectives);
+    facts.append(fact("Classified Objectives", countLabel(requirements.classifiedObjectives)));
+    if (shared) facts.append(fact("Shared per round", String(shared)));
     facts.append(
-      fact("Classified Objectives", classified),
-      fact("Tactical Objectives", perPlayer(requirements.tacticalObjectives)),
-      fact("HVTs", perPlayer(requirements.hvts)),
+      fact("Tactical Objectives", countLabel(requirements.tacticalObjectives)),
+      fact("HVTs", countLabel(requirements.hvts)),
     );
+    const note = document.createElement("p");
+    note.className = "scenario-setup-note";
+    note.textContent = shared
+      ? "Counts are per player unless marked shared. Shared counts are the starting amount per round."
+      : "Objective and HVT counts are per player.";
+    card.append(note);
   }
   // Table dimensions are derived from canonical inches, not marker footprint metadata.
   const tableValue = tableFact.querySelector("dd");
@@ -175,7 +183,6 @@ function setupCard(item) {
     tableValue.dataset.heightInches = String(table.height);
     tableValue.textContent = `${scenarioDistance(table.width)} × ${scenarioDistance(table.height)}`;
   }
-  card.append(heading, facts);
   return card;
 }
 

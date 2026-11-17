@@ -3490,7 +3490,7 @@ def test_domination_embedded_map_emphasizes_console_center_placement(
         page.close()
 
 
-@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("width", [1440, 770, 390])
 def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:
@@ -3515,7 +3515,7 @@ def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
                 assert conflict.count() == 1
                 assert conflict.locator("dt").inner_text() == "SWC"
                 assert conflict.locator("dd").inner_text().startswith("6")
-                link = conflict.locator("a.scenario-swc-source-conflict")
+                link = setup.locator("a.scenario-swc-source-conflict")
                 assert link.count() == 1
                 assert "Official sources disagree" in link.inner_text()
                 assert link.get_attribute("href") == "#scenario-source-issue-350-point-swc"
@@ -3535,6 +3535,13 @@ def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
             else:
                 assert conflict.count() == 0
                 assert issue.count() == 0
+            assert setup.locator(".scenario-fact dt, .scenario-fact dd").evaluate_all(
+                """cells => cells.every(cell => {
+                  const range = document.createRange();
+                  range.selectNodeContents(cell);
+                  return range.getClientRects().length === 1;
+                })"""
+            ), (width, slug, points)
             assert page.evaluate(
                 "() => document.documentElement.scrollWidth <= innerWidth + 1"
             ), (width, slug, points)
