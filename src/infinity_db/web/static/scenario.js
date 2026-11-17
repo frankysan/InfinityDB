@@ -446,6 +446,14 @@ function rulesSection(item) {
   const cards = [];
   for (const inclusion of item.special_rules || []) {
     if (inclusion.rule) cards.push(rulesReferenceArticle(inclusion.rule, { includeApplicability: false }));
+    else if (inclusion.skill) {
+      const detailsLink = document.createElement("a");
+      detailsLink.href = `/skills/${encodeURIComponent(inclusion.skill.id.replace(/^skill:/, ""))}`;
+      detailsLink.textContent = "Skill details";
+      cards.push(rulesReferenceArticle(inclusion.skill, {
+        includeApplicability: false, headerContent: [detailsLink],
+      }));
+    }
     else cards.push(inlineScenarioRuleArticle(inclusion));
   }
   for (const skill of item.skills || []) cards.push(rulesReferenceArticle(skill, { includeApplicability: false }));

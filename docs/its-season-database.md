@@ -34,6 +34,11 @@ artifact created from reviewed curated ITS facts. The implementation lives in
 - **Public selection:** Choose ITS Season 18; the current 2026.09.11 revision
   resolves automatically. Older explicit revision links fail closed without
   silently displaying replacement facts. Historical browsing remains deferred.
+- **Scenario Skills:** Authored mission rules with explicit `skillTypeIds`
+  project to ordinary Skill cards, `/skills` and Search. Their public IDs include
+  the season and scenario to prevent same-named actions from being conflated;
+  source citations are identified as mission-wide page ranges rather than
+  invented action-specific page pins. No separate ITS Skill source is maintained.
 
 ### Published 2026.09.11 hotfix curation
 

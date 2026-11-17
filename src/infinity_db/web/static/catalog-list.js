@@ -9,8 +9,7 @@ const hasUsage = !["states", "hacking-programs"].includes(page);
 const categoryOrder = {
   "Common Skills": 10,
   "Special Skills": 20,
-  "Scenario Skills": 30,
-  "ITS Scenario Skills": 40,
+  "Scenario-specific Skills": 30,
 };
 const pageController = new AbortController();
 const byId = (id) => document.getElementById(id);
@@ -73,6 +72,12 @@ function render() {
       link.href = `/${page}/${encodeURIComponent(routeId)}`;
       link.textContent = item.name;
       name.append(link);
+      if (page === "skills" && item.scenario) {
+        const context = document.createElement("span");
+        context.className = "detail-source";
+        context.textContent = ` · ${item.scenario.name}`;
+        name.append(context);
+      }
     } else {
       name.textContent = item.name;
     }

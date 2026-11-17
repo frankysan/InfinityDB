@@ -138,6 +138,7 @@ class ScenarioCatalog:
         self.rules_database = rules_database
         self.publication_registry = publication_registry
         self._records_cache: list[tuple[dict[str, Any], dict[str, Any]]] | None = None
+        self._scenario_skills_cache: list[dict[str, Any]] | None = None
 
     def _marker_size_source(self, revision: str | None = None) -> dict[str, Any]:
         """Source attribution for shared marker sizes, not mission ownership."""
@@ -231,6 +232,94 @@ class ScenarioCatalog:
                 )
             )
         ]
+
+    def scenario_skill_items(self) -> list[dict[str, Any]]:
+        """Project explicitly typed ITS actions as normal, scenario-scoped Skills."""
+        if self._scenario_skills_cache is None:
+            items: list[dict[str, Any]] = []
+            for record, publication in self._records():
+                if publication["collection"] == "n5-core":
+                    continue  # Core scenario Skills already live in the Rules database.
+                scenario_slug = _scenario_slug(record)
+                for rule in _mission(record)["rules"]:
+                    skill_types = rule.get("skillTypeIds", [])
+                    if not skill_types:
+                        continue
+                    slug = f"{publication['collection']}-{scenario_slug}-{rule['id']}"
+                    citations = []
+                    by_source: dict[str, list[int]] = {}
+                    for citation in record.get("citations", []):
+                        source_id = citation.get("source_id") or citation.get("sourceId")
+                        if isinstance(citation.get("page"), int):
+                            by_source.setdefault(source_id, []).append(citation["page"])
+                    for source_id, pages in by_source.items():
+                        if self.publication_registry is None:
+                            raise ValueError(
+                                "ITS scenario Skill requires registered source provenance"
+                            )
+                        source = self.publication_registry.source_citation(
+                            season_id=publication["collection"],
+                            revision=publication["revision"],
+                            source_id=source_id,
+                            page=min(pages),
+                        )
+                        if source is None:
+                            raise ValueError(f"Missing ITS Skill source {source_id!r}")
+                        # Source pin spans a mission, not an action-specific page.
+                        source["page"] = None
+                        page_range = str(min(pages)) if min(pages) == max(pages) else (
+                            f"{min(pages)}–{max(pages)}"
+                        )
+                        source["section"] = f"{record['name']}, pp. {page_range}"
+                        citations.append(source)
+                    categories = [
+                        {"id": category, "name": "Short Skill" if category == "short-skill"
+                         else "Long Skill", "source": None, "page": None}
+                        for category in skill_types
+                    ]
+                    skill_rule = {
+                        "id": f"skill:{slug}",
+                        "kind": "skill",
+                        "name": rule["name"],
+                        "summary": "\n\n".join(rule["paragraphs"]),
+                        "facts": {"category": "scenario-skill"},
+                        "skill_types": [
+                            {"id": category["id"], "name": category["name"]}
+                            for category in categories
+                        ],
+                        "scope": {
+                            "game": "N5",
+                            "seasons": [publication["collection"]],
+                            "scenarios": [record["id"]],
+                        },
+                        "applicable_scenarios": [{"id": record["id"], "name": record["name"]}],
+                        "citations": citations,
+                    }
+                    items.append({
+                        "id": slug,
+                        "slug": slug,
+                        "name": rule["name"],
+                        "use_count": 0,
+                        "category": "Scenario-specific Skills",
+                        "categories": categories,
+                        "scenario": {
+                            "id": record["id"],
+                            "slug": scenario_slug,
+                            "name": record["name"],
+                            "collection": publication["collection"],
+                            "revision": publication["revision"],
+                        },
+                        "rules": [skill_rule],
+                        "variants": [],
+                    })
+            self._scenario_skills_cache = items
+        return deepcopy(self._scenario_skills_cache)
+
+    def get_scenario_skill(self, slug: str) -> dict[str, Any] | None:
+        return next(
+            (item for item in self.scenario_skill_items() if item["slug"] == slug),
+            None,
+        )
 
     def list_collections(self) -> list[dict[str, Any]]:
         """Return only current scenario sets with readable published missions."""
@@ -354,8 +443,19 @@ class ScenarioCatalog:
             raise ValueError(f"Scenario {record['id']!r} has no composed rules reference")
         rules_by_id = {str(rule["id"]): rule for rule in reference["rules"]}
         special_rules: list[dict[str, Any]] = []
+        scenario_skills = {
+            item["slug"]: item for item in self.scenario_skill_items()
+            if item["scenario"]["slug"] == slug
+            and item["scenario"]["collection"] == publication["collection"]
+        }
         for inclusion in mission["rules"]:
             item = deepcopy(inclusion)
+            if item.get("skillTypeIds"):
+                skill_slug = f"{publication['collection']}-{slug}-{item['id']}"
+                scenario_skill = scenario_skills.get(skill_slug)
+                if scenario_skill is None:
+                    raise ValueError(f"Missing scenario Skill {skill_slug!r}")
+                item["skill"] = deepcopy(scenario_skill["rules"][0])
             definition_id = item.get("definitionId")
             if definition_id is not None:
                 rule = rules_by_id.get(str(definition_id))

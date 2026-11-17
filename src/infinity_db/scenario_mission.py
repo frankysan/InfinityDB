@@ -131,6 +131,7 @@ class ScenarioRule:
     definition_id: str | None = None
     skill_ids: tuple[str, ...] = ()
     specialist_skill_ids: tuple[str, ...] = ()
+    skill_type_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -561,7 +562,8 @@ def parse_scenario_mission(
     for index, item in enumerate(_array(raw["rules"], f"{context}.rules", allow_empty=True)):
         ctx = f"{context}.rules[{index}]"
         rule = _object(
-            item, {"id", "name", "paragraphs"}, {"definitionId", "skillIds", "specialists"}, ctx
+            item, {"id", "name", "paragraphs"},
+            {"definitionId", "skillIds", "specialists", "skillTypeIds"}, ctx,
         )
         identifier = _slug(rule["id"], f"{ctx}.id")
         _unique(identifier, rule_ids, ctx)
@@ -580,6 +582,14 @@ def parse_scenario_mission(
             validate_typed_domain_id(value, expected_domain="skill", context=ctx)
             for value in _array(specialists.get("anyOfSkills", []), ctx, allow_empty=True)
         )
+        skill_types = tuple(
+            _choice(value, {"short-skill", "long-skill"}, f"{ctx}.skillTypeIds")
+            for value in _array(
+                rule.get("skillTypeIds", []), f"{ctx}.skillTypeIds", allow_empty=True
+            )
+        )
+        if len(set(skill_types)) != len(skill_types):
+            raise ScenarioMissionError(f"{ctx}.skillTypeIds contains duplicate categories")
         rules.append(
             ScenarioRule(
                 identifier,
@@ -593,6 +603,7 @@ def parse_scenario_mission(
                 definition_id,
                 defined_skills,
                 qualifiers,
+                skill_types,
             )
         )
 

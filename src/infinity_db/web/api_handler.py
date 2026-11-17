@@ -539,13 +539,13 @@ class ApiHandler:
         )
         self.trait_catalog = TraitCatalog(database, rules_database)
         self.state_catalog = StateCatalog(rules_database)
-        self.skill_catalog = SkillCatalog(database, rules_database)
+        self.scenario_catalog = ScenarioCatalog(rules_database, publication_registry)
+        self.skill_catalog = SkillCatalog(database, rules_database, self.scenario_catalog)
         self.equipment_catalog = EquipmentCatalog(database, rules_database)
         self.hacking_program_catalog = HackingProgramCatalog(database, rules_database)
         self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
         self.label_catalog = LabelCatalog(rules_database)
         self.general_rules_catalog = RulesRecordCatalog(rules_database, "rules")
-        self.scenario_catalog = ScenarioCatalog(rules_database, publication_registry)
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
         self._glossary_items_cache: list[dict[str, Any]] | None = None
         self.army_overview_summaries, self.legacy_armies = database.army_reference_data()
@@ -1050,7 +1050,8 @@ class ApiHandler:
                     payload = self.symbol_catalog.enrich_nested_units(payload)
                     payload = enrich_rule_relation_references(self.database, payload)
                     payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
+                        self.database, self.rules_database, payload,
+                        scenario_id=(payload.get("scenario") or {}).get("id"),
                     )
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):

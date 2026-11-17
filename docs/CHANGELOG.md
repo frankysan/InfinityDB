@@ -22,6 +22,8 @@ are not retroactively relabeled.
   cards, and Hardlock shows the official 25 mm Beacon Token diameter.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and
   HVTs each player uses.
+- Scenario-specific Skills share normal Skill cards, appear under their own
+  `/skills` category, and are searchable with scenario-specific destinations.
 
 ### Added
 
