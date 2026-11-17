@@ -226,9 +226,16 @@ explicit, reviewed field overrides. Different seasons may use the same
 definition without maintaining duplicate curated mechanics; substantial changes
 produce a new definition version, not an implicit update to previous seasons.
 Reuse is selected by typed identity and verified semantic equivalence, never by
-matching display names. General ITS actions such as CivEvac are candidates for
-shared definitions only after source-by-source comparison; context-specific
-requirements and outcomes stay scoped to their scenario or season.
+matching display names. Distinguish **season-wide ITS Skills** from
+scenario-specific actions: ITS 18 defines CivEvac and Casevac as Common
+Skills, plus Team-Ops and Request a Tacball under the optional Team-Ops Extra.
+The Extra itself is not the same entity as the Team-Ops Special Skill, and
+Casevac State is not a second Skill. Season-wide definitions require a
+season/revision applicability binding even when no scenario references them;
+optional Extras must retain explicit activation scope. General ITS mechanics
+may be reused between seasons only after source-by-source comparison;
+context-specific requirements and outcomes stay scoped to their scenario
+or season.
 
 Extend the existing build-time scenario-component composition rather than
 introducing runtime cross-database inheritance. The selected season database

@@ -80,6 +80,17 @@ catalog and Search, with explicit scenario/season applicability; legacy
 season/scenario Skill routes and cards continue to work. Conflicting facts or
 versions are rejected rather than silently merged.
 
+**Season-wide ITS Skills are not yet covered by scenario Skill bindings.**
+The current 2026.09.11 official source defines CivEvac (pp. 22-23),
+Casevac (p. 25, with Casevac State on pp. 25-26), Team-Ops (p. 30) and
+Request a Tacball (pp. 30-31) outside individual mission descriptions.
+Team-Ops also names the optional tournament Extra on p. 29. The
+`sharedSkillBindings.scenarios` contract is intentionally specific to
+scenario actions and must not be stretched with fictitious scenario IDs.
+The next curation step needs independent season/revision Skill membership
+and optional Extra applicability; then catalog and Search should expose
+each standalone Skill once, with its actual source and scope.
+
 Optional `sharedSkillBindings.overrides` entries use exact
 `{scenarioId, ruleId, field, value}` objects. Only complete prose-array
 replacement of one Skill's Requirements, Effects or Restrictions is supported.

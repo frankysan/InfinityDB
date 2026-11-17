@@ -3844,9 +3844,16 @@ Identical names alone never trigger merging; differing Skill facts, types,
 versions or definition provenance fail closed. Existing ITS 18 records and
 public output are unchanged because none of the 26 actions has been migrated.
 The three repeated action names in current ITS 18 have different structured
-facts. CivEvac occurs as a referenced mechanic in Evacuation and Outbreak,
-not as a standalone curated Skill; its precise published semantics remain a
-research prerequisite before any cross-context migration.
+facts. The **four season-wide Skills** in ITS 18 (2026.09.11) are CivEvac
+(Common Skill, pp. 22-23), Casevac (Common Skill, p. 25), Team-Ops (Special
+Skill, p. 30), and Request a Tacball (Short Skill, pp. 30-31). The Casevac
+State (pp. 25-26) is a distinct state, not a Skill. Team-Ops is also the
+name of an optional tournament Extra (p. 29); its Skill and Request a Tacball
+must retain Extra-specific applicability. CivEvac occurs as a referenced
+mechanic in Evacuation and Outbreak, but none of these four season-wide
+definitions is yet separately curated/published as a Skill. Their published
+Skill types and context must be retained during migration rather than
+deriving identity from scenario action names.
 
 **Versioned source-family and scoped override acceptance (synthetic only):**
 A shared scenario imported through a season membership participates in the same
@@ -3898,12 +3905,18 @@ Publication membership retains **its own source citations, source revision
 and review evidence**, independently of the source that originally established
 the reusable definition. Shared mechanics are not automatically N5-core rules:
 ITS-specific definitions retain explicit ITS applicability and cannot leak
-into unrelated seasons or Army profile Skills. CivEvac is a first candidate
-for comparing shared ITS mechanics against scenario-specific differences,
-not yet a proven universally identical Skill. Reused actions should appear
-once in the Skill catalog when equivalence is established, with applicability
-links; real variants remain distinct. Preserve existing season-scoped
-scenario and Skill routes when introducing canonical shared identities.
+into unrelated seasons or Army profile Skills. **Season-wide Skills** need
+a separate, reviewed season/revision membership independent of a scenario
+action; the present `sharedSkillBindings` contract requires scenario IDs
+and therefore does not yet model their standalone applicability. Optional
+Extras additionally need an explicit activation condition: Team-Ops and
+Request a Tacball must not become unconditional Skills of every ITS mission.
+CivEvac, Casevac, Team-Ops and Request a Tacball are candidates for
+canonical, season-scoped Skill definitions; compare later ITS revisions
+before claiming cross-season equivalence. Reused actions should appear
+once in the Skill catalog when equivalence is established, with
+applicability links; real variants remain distinct. Preserve existing
+season-scoped scenario and Skill routes when introducing canonical identities.
 
 Materialize the complete resolved payload in each season's SQLite artifact,
 including the selected definition version and relevant provenance, so

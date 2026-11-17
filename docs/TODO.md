@@ -427,10 +427,26 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         actions. Intentional variants stay separate in catalog/Search.
       - [ ] Other scenario components still need reviewed, typed overrides
         with a narrow field allowlist.
+    - [ ] Curate and publish the **four globally defined ITS 18 Skills** from
+      the current 2026.09.11 source, separate from scenario-specific actions:
+      CivEvac (pp. 22-23), Casevac (p. 25, with Casevac State on pp. 25-26),
+      Team-Ops (p. 30), and Request a Tacball (pp. 30-31). Preserve the
+      official naming and Skill types. Team-Ops is an optional tournament Extra
+      (p. 29) as well as a Special Skill; the Team-Ops Skill and Request a Tacball
+      apply only when that Extra is selected. Source-cite each standalone Skill
+      and link related states/rules, without duplicating definitions per scenario.
+    - [ ] Extend shared Skill authorship/publication to **season-level Skill
+      bindings**, in addition to the existing scenario-scoped
+      `sharedSkillBindings`. Season-level Skills must appear in the Skill
+      catalog and Search even when no scenario action references them;
+      preserve season/revision/Extra applicability and distinguish the
+      tournament Extra from the Team-Ops Skill. Do not force a fabricated
+      scenario ID or promote ITS Skills to N5 core.
     - [ ] Review genuine repeated ITS 17/18 scenario semantics and CivEvac in
       the published Evacuation/Outbreak contexts before moving real definitions.
-      The three repeated ITS 18 action names have different Skill facts and must
-      not be merged on their names alone.
+      Also review interaction with other season-wide Skills such as Casevac,
+      and preserve optional Team-Ops applicability. The three repeated ITS 18
+      action names have different Skill facts and must not be merged on name alone.
     - [ ] Curate real ITS 17 against this foundation only after evidence review;
       keep each resulting season database independent, with no runtime links.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full

@@ -139,3 +139,32 @@ affected area, observation and evidence, proposed change, and disposition.
   the SVG response) remained unchanged. The current v1.2 fixture was
   refreshed with those five reviewed digests and exact selected database
   identities. Historical v1 and v1.2 source-baseline fixtures were not altered.
+
+## AI-0007 — Publish ITS season-wide Skills without fabricated scenario bindings
+
+- **Date:** 2026-11-17
+- **Area:** ITS curated season source, shared Skill bindings, Skill catalog and Search.
+- **Observation:** The official ITS 18 2026.09.11 publication defines four
+  season-wide Skills outside specific scenario action lists: CivEvac
+  (Common Skill, pp. 22-23), Casevac (Common Skill, p. 25),
+  Team-Ops (Special Skill, p. 30), and Request a Tacball
+  (Short Skill, pp. 30-31). Casevac State (pp. 25-26) is a separate
+  state. Team-Ops additionally names the optional tournament Extra
+  (p. 29), which governs applicability of the Team-Ops Skill and
+  Request a Tacball. The current shared Skill binder requires nonempty
+  scenario IDs, so none of these can be represented correctly by
+  attaching it to an arbitrary scenario. The ITS 18 curated source
+  currently mentions several mechanics without publishing their
+  standalone definitions.
+- **Proposed:** Support exact season/revision Skill memberships independent
+  of scenarios, with optional Extra applicability, versioned source
+  citations and full Requirements/Effects/Restrictions. Publish one
+  canonical card per Skill in catalog/Search; connect only genuine
+  scenario usages. Preserve Casevac State as a separately linked state.
+  Evaluate cross-ITS reuse against actual older documents rather
+  than assuming names imply identical mechanics.
+- **Why:** A season-wide source definition should not be duplicated
+  across missions, hidden because it lacks scenario membership, or
+  presented as an unconditional Skill outside an optional tournament Extra.
+- **Disposition:** tracked by [ITS season-wide Skill work](TODO.md#its-scenarios-and-game-tools);
+  not yet implemented.
