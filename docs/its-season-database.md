@@ -80,16 +80,31 @@ catalog and Search, with explicit scenario/season applicability; legacy
 season/scenario Skill routes and cards continue to work. Conflicting facts or
 versions are rejected rather than silently merged.
 
-**Season-wide ITS Skills are not yet covered by scenario Skill bindings.**
-The current 2026.09.11 official source defines CivEvac (pp. 22-23),
-Casevac (p. 25, with Casevac State on pp. 25-26), Team-Ops (p. 30) and
-Request a Tacball (pp. 30-31) outside individual mission descriptions.
-Team-Ops also names the optional tournament Extra on p. 29. The
-`sharedSkillBindings.scenarios` contract is intentionally specific to
-scenario actions and must not be stretched with fictitious scenario IDs.
-The next curation step needs independent season/revision Skill membership
-and optional Extra applicability; then catalog and Search should expose
-each standalone Skill once, with its actual source and scope.
+**Season-wide ITS Skills (implemented):** ITS 18 2026.09.11 publishes
+CivEvac (Common Basic Short Skill, pp. 22–23), Casevac (Common Short
+Skill, p. 25), Team-Ops (Automatic Special Skill, p. 30) and Request a
+Tacball (Attack Short Skill, pp. 30–31). All four are independent,
+reviewed `kind: skill` records without scenario IDs, stored in the
+existing ITS SQLite `records` table (schema v2). They have explicit
+`facts.applicability: {context, revision}` values and version-tagged
+historical citations for 2026.09.01. The current ITS database validation
+checks record types, counts, citations, content hashes, and season/revision
+applicability; the Skill catalog and Search expose their standard cards.
+The Team-Ops tournament Extra (p. 29) remains distinct from the Special
+Skill, and both Team-Ops and Request a Tacball are scoped to that Extra.
+Casevac State (pp. 25–26) remains a separate pending State reference.
+
+**Reusable season-level memberships (synthetic cross-season acceptance):**
+A pinned shared library can additionally declare a top-level
+`sharedSeasonSkillBindings` array with exact `{id, version, name, summary,
+category, applicability, citations, review}` objects. Unlike
+`sharedSkillBindings.scenarios`, this requires no scenario action. The
+definition's Skill types and structured facts are materialized into a
+season-owned, source-cited Skill record; same-identity equivalence across
+seasons consolidates in catalog/Search only when exact pinned origin and
+facts match. Each season's compiled SQLite still serves independently.
+No published ITS 18 Skill has yet been migrated into a shared library;
+real ITS 17 reuse requires independently reviewed source equivalence.
 
 Optional `sharedSkillBindings.overrides` entries use exact
 `{scenarioId, ruleId, field, value}` objects. Only complete prose-array

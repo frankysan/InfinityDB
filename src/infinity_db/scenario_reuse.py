@@ -152,7 +152,7 @@ def materialize_shared_scenarios(
     """Expand explicit memberships before normal curated and scenario validation."""
     declaration = document.get("sharedScenarioLibrary")
     if declaration is None:
-        if "sharedSkillBindings" in document:
+        if "sharedSkillBindings" in document or "sharedSeasonSkillBindings" in document:
             raise ValueError("Shared Skill bindings require a pinned shared scenario library")
         if library_path is not None:
             raise ValueError("Unreferenced shared scenario library supplied")
@@ -356,6 +356,70 @@ def materialize_shared_scenarios(
             "review": deepcopy(binding["review"]),
         }
         components["definitions"].append(materialized)
+    season_bindings = result.pop("sharedSeasonSkillBindings", [])
+    if not isinstance(season_bindings, list):
+        raise ValueError("Shared season Skill bindings must be an array")
+    for binding in season_bindings:
+        _exact(
+            binding,
+            {"id", "version", "name", "summary", "category", "applicability",
+             "citations", "review"},
+            "shared season Skill membership",
+        )
+        skill_id = validate_typed_domain_id(
+            binding["id"], expected_domain="skill", context="season Skill",
+        )
+        version = _text(binding["version"], "season Skill version")
+        entry = skill_definitions.get((skill_id, version))
+        if entry is None:
+            raise ValueError(f"Unknown pinned season Skill {skill_id!r}")
+        if skill_id in component_ids or skill_id in existing_ids:
+            raise ValueError(f"Conflicting shared season Skill {skill_id!r}")
+        component_ids.add(skill_id)
+        existing_ids.add(skill_id)
+        name = _text(binding["name"], "season Skill name")
+        summary = _text(binding["summary"], "season Skill summary")
+        category = binding["category"]
+        if category not in {"common-skill", "special-skill"}:
+            raise ValueError("Shared season Skill must be Common or Special")
+        applicability = _exact(
+            binding["applicability"], {"context", "revision"},
+            "season Skill applicability",
+        )
+        if (
+            applicability["context"] not in {"season", "team-ops-extra"}
+            or applicability["revision"] != result["scenarioCollection"]["revision"]
+        ):
+            raise ValueError("Shared season Skill applicability must match selected revision")
+        payload = _exact(
+            entry["payload"], {"skillTypeIds", "skillFacts"}, "shared season Skill payload",
+        )
+        facts = payload["skillFacts"]
+        if (
+            not isinstance(facts, dict)
+            or {"requirements", "effects"} - set(facts)
+            or set(facts) - {"requirements", "effects", "restrictions", "clarifications"}
+        ):
+            raise ValueError("Shared season Skill has unsupported facts")
+        materialized = {
+            "id": skill_id, "kind": "skill", "name": name, "summary": summary,
+            "composition": {"role": "definition"},
+            "scope": {"game": "N5", "seasons": [season]},
+            "facts": {
+                "category": category,
+                "typeIds": deepcopy(payload["skillTypeIds"]),
+                **deepcopy(facts),
+                "applicability": deepcopy(applicability),
+                "restrictions": deepcopy(facts.get("restrictions", [])),
+            },
+            "labelIds": [],
+            "citations": _citations(binding["citations"], sources, "season-wide Skill"),
+            "review": deepcopy(_reviewed(binding["review"], "Shared season Skill")),
+            "sharedSkill": {
+                "id": skill_id, "version": version, "origin": deepcopy(entry["origin"]),
+            },
+        }
+        result["records"].append(materialized)
     if not components["definitions"]:
         result.pop("scenarioComponents")
     # Maintain the source family's scenario ordering when definitions are

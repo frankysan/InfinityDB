@@ -141,6 +141,40 @@ class PublicationRegistry:
                             f"{skill_id!r}"
                         )
 
+    def season_skill_entries(self) -> list[dict[str, Any]]:
+        """Return validated standalone Skills from the selected ITS publications."""
+        entries: list[dict[str, Any]] = []
+        for registered, report in self._season_reports.items():
+            identity = report["inputIdentity"]
+            season = identity["seasonId"]
+            sources = self._season_sources[registered]
+            with closing(sqlite3.connect(self._season_paths[registered].as_uri() + "?mode=ro",
+                                         uri=True)) as connection:
+                for (raw,) in connection.execute(
+                    "SELECT payload_json FROM records WHERE collection_id=? AND kind='skill' "
+                    "ORDER BY id", (identity["sourceCollectionId"],),
+                ):
+                    record = json.loads(raw)
+                    citations = []
+                    for pin in record["citations"]:
+                        source = sources[pin["sourceId"]]
+                        citations.append({
+                            "source_id": source["id"],
+                            "source_title": source["title"],
+                            "source_version": source["version"],
+                            "source_url": source.get("url"),
+                            "page": pin.get("page"),
+                            "section": pin.get("section"),
+                        })
+                    entries.append({
+                        "record": record,
+                        "citations": citations,
+                        "collection": season,
+                        "revision": identity["seasonRevision"],
+                    })
+        return entries
+
+
     def _registered_key(self, season_id: str, revision: str) -> str | None:
         """Resolve an exact season/revision; never substitute another revision."""
         explicit = f"{season_id}@{revision}"

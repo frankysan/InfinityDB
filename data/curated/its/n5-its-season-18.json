@@ -80,7 +80,44 @@
     "skillTypes": [],
     "labels": []
   },
-  "skillTypes": [],
+  "skillTypes": [
+    {
+      "id": "automatic",
+      "name": "Automatic Skills",
+      "labels": [
+        "Automatic Skill",
+        "Automatic Skills"
+      ],
+      "descriptions": {
+        "singular": "An Automatic Skill can be employed without expending an Order or ARO.",
+        "plural": "Automatic Skills can be employed without expending an Order or ARO."
+      }
+    },
+    {
+      "id": "basic-short-skill",
+      "name": "Basic Short Skills",
+      "labels": [
+        "Basic Short Skill",
+        "Basic Short Skills"
+      ],
+      "descriptions": {
+        "singular": "A Basic Short Skill expends one Basic Short Skill.",
+        "plural": "Basic Short Skills expend one Basic Short Skill."
+      }
+    },
+    {
+      "id": "short-skill",
+      "name": "Short Skills",
+      "labels": [
+        "Short Skill",
+        "Short Skills"
+      ],
+      "descriptions": {
+        "singular": "A Short Skill expends one Short Skill.",
+        "plural": "Short Skills expend one Short Skill."
+      }
+    }
+  ],
   "labels": [],
   "sources": [
     {
@@ -296,6 +333,22 @@
         ],
         "scenario:critical-intervention": [
           "2026.09.11"
+        ],
+        "skill:civevac": [
+          "2026.09.01",
+          "2026.09.11"
+        ],
+        "skill:casevac": [
+          "2026.09.01",
+          "2026.09.11"
+        ],
+        "skill:team-ops": [
+          "2026.09.01",
+          "2026.09.11"
+        ],
+        "skill:request-tacball": [
+          "2026.09.01",
+          "2026.09.11"
         ]
       },
       "seasonPolicies": {
@@ -314,6 +367,86 @@
       }
     },
     "historicalOverrides": [
+      {
+        "revision": "2026.09.01",
+        "category": "records",
+        "id": "skill:civevac",
+        "fields": {
+          "facts.applicability.revision": "2026.09.01",
+          "citations": [
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 21,
+              "section": "CivEvac"
+            },
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 22,
+              "section": "CivEvac: Requirements and Effects"
+            }
+          ]
+        }
+      },
+      {
+        "revision": "2026.09.01",
+        "category": "records",
+        "id": "skill:casevac",
+        "fields": {
+          "facts.applicability.revision": "2026.09.01",
+          "citations": [
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 24,
+              "section": "Casevac Common Skill"
+            },
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 25,
+              "section": "Casevac State: Activation, Effects and Cancelation"
+            }
+          ]
+        }
+      },
+      {
+        "revision": "2026.09.01",
+        "category": "records",
+        "id": "skill:team-ops",
+        "fields": {
+          "facts.applicability.revision": "2026.09.01",
+          "citations": [
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 28,
+              "section": "Team-Ops Extra"
+            },
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 29,
+              "section": "Team-Ops Special Skill"
+            }
+          ]
+        }
+      },
+      {
+        "revision": "2026.09.01",
+        "category": "records",
+        "id": "skill:request-tacball",
+        "fields": {
+          "facts.applicability.revision": "2026.09.01",
+          "citations": [
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 29,
+              "section": "Request Tacball introduction"
+            },
+            {
+              "sourceId": "its-season-18-en-pdf",
+              "page": 30,
+              "section": "Request a Tacball: Requirements and Effects"
+            }
+          ]
+        }
+      },
       {
         "revision": "2026.09.01",
         "category": "records",
@@ -19148,6 +19281,230 @@
           "sourceId": "its-season-18-es-pdf",
           "page": 104,
           "section": "Intervención Crítica"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-17"
+      }
+    },
+    {
+      "id": "skill:civevac",
+      "kind": "skill",
+      "name": "CivEvac",
+      "summary": "ITS Common Basic Short Skill (Optional, Scenario): take control of a Civilian with a WIP Roll and keep them in Silhouette contact while moving.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "common-skill",
+        "typeIds": [
+          "basic-short-skill"
+        ],
+        "requirements": [
+          "Only a Model can use CivEvac. A Marker declaring CivEvac is automatically revealed.",
+          "The Trooper must be in or reach Silhouette contact with the Civilian. The Civilian cannot have a CivEvac Token or be in Silhouette contact with an enemy Model.",
+          "The Trooper cannot already be CivEvacing two Civilians, possess Impetuous (including through Frenzy), possess Peripheral, be Troop Type REM or VH, perform a Coordinated Order, or be in a Fireteam."
+        ],
+        "effects": [
+          "Pass a WIP+3 Roll to CivEvac the Civilian and place a CivEvac Token. A failed attempt may be retried by spending another Short Skill.",
+          "A CivEvaced Civilian stays in Silhouette contact with the controlling Trooper; position it in contact at the end of each movement. A Trooper may control at most two Civilians.",
+          "The Civilian remains on the table even if its controlling Trooper enters a Null State.",
+          "CivEvac automatically ends at the end of the Order if the controller becomes Isolated, Immobilized or Null, joins a Fireteam, becomes a Marker, or gains Impetuous. Remove the CivEvac Token.",
+          "The controller may voluntarily cancel CivEvac upon activation by an Order or ARO, without a Roll. Leave the Civilian on a horizontal table surface.",
+          "For a Hostile Civilian, the CivEvac WIP Roll does not receive the +3 MOD; identify that Civilian with a Hostile Token."
+        ],
+        "restrictions": [
+          "CivEvac is an Optional, Scenario Common Skill; it is not a free movement or automatic civilian extraction."
+        ],
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 22,
+          "section": "CivEvac"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 23,
+          "section": "CivEvac: Requirements and Effects"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-17"
+      }
+    },
+    {
+      "id": "skill:casevac",
+      "kind": "skill",
+      "name": "Casevac",
+      "summary": "ITS Optional Common Short Skill: carry an allied Stunned, Immobilized or Unconscious Trooper by entering Casevac State.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "common-skill",
+        "typeIds": [
+          "short-skill"
+        ],
+        "requirements": [
+          "Only Models may declare Casevac; declaring it reveals any Marker.",
+          "The bearer must be in Silhouette contact with an allied Trooper in Stunned, Immobilized (IMM-A or IMM-B), or Unconscious State, unless a scenario rule modifies this.",
+          "The carrying Trooper must have PH at least equal to the carried Trooper's PH. A Trooper with Baggage ignores this PH requirement."
+        ],
+        "effects": [
+          "Successfully declaring Casevac activates Casevac State for the carrier and the allied Trooper.",
+          "While in Casevac State, the player activates both Troopers with one Order or ARO and moves them in Silhouette contact using the carrier's MOV. Only the carrier can declare Orders or AROs.",
+          "The two Troopers provoke one ARO per eligible enemy, and template attacks against either follow the Template Weapons Into Close Combat rule.",
+          "The carried Trooper does not block LoF or provide the +1 B Close Combat MOD. A carrier normally carries at most one Trooper.",
+          "Casevac State ends if the carrier declares a disallowed Skill, is activated in the Impetuous Phase, becomes Immobilized/Null or a Marker, or the carried Trooper recovers. The carrier may voluntarily cancel it by spending a Short Skill without a Roll."
+        ],
+        "restrictions": [
+          "The carried Trooper cannot perform its own Orders or AROs while Casevac State applies."
+        ],
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 25,
+          "section": "Casevac Common Skill"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 26,
+          "section": "Casevac State: Activation, Effects and Cancelation"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-17"
+      }
+    },
+    {
+      "id": "skill:team-ops",
+      "kind": "skill",
+      "name": "Team-Ops",
+      "summary": "Automatic Special Skill available only through the optional Team-Ops tournament Extra, allowing customization of a Team-Ops Trooper when creating an Army List.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "special-skill",
+        "typeIds": [
+          "automatic"
+        ],
+        "requirements": [
+          "The tournament Organizer must have selected the optional Team-Ops Extra.",
+          "An Army List using Team-Ops must include all three distinct Team-Ops Units: LI, HI and REM (or equivalents)."
+        ],
+        "effects": [
+          "During Army List creation, customize each Team-Ops Trooper's Unit Profile.",
+          "Select one normal Skill, Weapon or Equipment option, then choose one option from the Team-Ops Chart. Each Team-Ops Trooper must choose a different chart option."
+        ],
+        "restrictions": [
+          "An Army List cannot include more than one Team-Ops group.",
+          "The optional Team-Ops Extra does not allow Infinity Spec-Ops; the group's composition may differ between a player's two tournament lists but cannot change during the tournament."
+        ],
+        "applicability": {
+          "context": "team-ops-extra",
+          "revision": "2026.09.11"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 29,
+          "section": "Team-Ops Extra"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 30,
+          "section": "Team-Ops Special Skill"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-17"
+      }
+    },
+    {
+      "id": "skill:request-tacball",
+      "kind": "skill",
+      "name": "Request a Tacball",
+      "summary": "Optional Attack Short Skill for Team-Ops Troopers in the second Game Round, placing a Tacball support drop without a Roll.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "special-skill",
+        "typeIds": [
+          "short-skill"
+        ],
+        "requirements": [
+          "The requesting Trooper must have the Infinity Team-Ops Special Skill, available under the optional Team-Ops Extra.",
+          "The game must be in its second Game Round."
+        ],
+        "effects": [
+          "Request a Tacball requires no Roll.",
+          "Place a 55 mm Tacball Token in Silhouette contact with any part of the Trooper's route, selecting its support item from the Tacball Chart when placing it.",
+          "At the end of that Order, the requesting Trooper applies the selected item. The Tacball Token remains until the end of the game, destruction or removal; it represents Deployable Equipment."
+        ],
+        "restrictions": [
+          "Tacball chart items are unique and non-transferable.",
+          "Each player may use Request a Tacball only once per game."
+        ],
+        "applicability": {
+          "context": "team-ops-extra",
+          "revision": "2026.09.11"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 30,
+          "section": "Request Tacball introduction"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 31,
+          "section": "Request a Tacball: Requirements and Effects"
         }
       ],
       "review": {

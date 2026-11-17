@@ -56,6 +56,11 @@ def _synthetic_source(tmp_path: Path, *, unknown_target: bool = False) -> Path:
         localPath="tests/fixtures/nonexistent-its17.pdf",
         sha256="ab" * 32, url="https://example.invalid/synthetic-its17",
     )
+    # This fixture exercises scenario collisions only; the real source now
+    # also publishes four independent season-wide Skills.
+    document["records"] = [
+        item for item in document["records"] if item["kind"] == "scenario"
+    ]
     assert len(document["records"]) == 1
     scenario = document["records"][0]
     assert scenario["id"] == "scenario:battleground"

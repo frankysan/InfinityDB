@@ -86,7 +86,13 @@ def test_isolated_its_database_is_deterministic_and_matches_existing_publication
         ).fetchone()[0] == 60
         assert connection.execute("SELECT count(*) FROM season_policies").fetchone()[0] == 3
         assert connection.execute("SELECT count(*) FROM season_policy_citations").fetchone()[0] == 3
-        assert connection.execute("SELECT count(*) FROM records").fetchone()[0] == 20
+        assert connection.execute("SELECT count(*) FROM records").fetchone()[0] == 24
+        assert connection.execute(
+            "SELECT count(*) FROM records WHERE kind='scenario'"
+        ).fetchone()[0] == 20
+        assert connection.execute(
+            "SELECT count(*) FROM records WHERE kind='skill'"
+        ).fetchone()[0] == 4
 
 
 def test_select_its_scenario_requires_exact_season_and_revision(tmp_path: Path) -> None:

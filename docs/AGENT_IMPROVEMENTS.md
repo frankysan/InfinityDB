@@ -166,5 +166,8 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Why:** A season-wide source definition should not be duplicated
   across missions, hidden because it lacks scenario membership, or
   presented as an unconditional Skill outside an optional tournament Extra.
-- **Disposition:** tracked by [ITS season-wide Skill work](TODO.md#its-scenarios-and-game-tools);
-  not yet implemented.
+- **Disposition:** implemented for four current ITS 18 standalone Skills
+  with revision-specific source citations, catalog/Search publication,
+  optional-Extra applicability and synthetically validated cross-season
+  `sharedSeasonSkillBindings`. Casevac State still needs independent
+  curation; tracked in [ITS TODO](TODO.md#its-scenarios-and-game-tools).

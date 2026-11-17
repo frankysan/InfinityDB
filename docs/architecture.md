@@ -232,8 +232,10 @@ Skills, plus Team-Ops and Request a Tacball under the optional Team-Ops Extra.
 The Extra itself is not the same entity as the Team-Ops Special Skill, and
 Casevac State is not a second Skill. Season-wide definitions require a
 season/revision applicability binding even when no scenario references them;
-optional Extras must retain explicit activation scope. General ITS mechanics
-may be reused between seasons only after source-by-source comparison;
+optional Extras retain explicit activation scope. This is now supported by
+the season-scoped Skill records and `sharedSeasonSkillBindings` build-time
+authoring path, without runtime inheritance or scenario-scoped placeholders.
+General ITS mechanics may be reused between seasons only after source-by-source comparison;
 context-specific requirements and outcomes stay scoped to their scenario
 or season.
 

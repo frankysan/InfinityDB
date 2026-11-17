@@ -427,21 +427,19 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         actions. Intentional variants stay separate in catalog/Search.
       - [ ] Other scenario components still need reviewed, typed overrides
         with a narrow field allowlist.
-    - [ ] Curate and publish the **four globally defined ITS 18 Skills** from
-      the current 2026.09.11 source, separate from scenario-specific actions:
-      CivEvac (pp. 22-23), Casevac (p. 25, with Casevac State on pp. 25-26),
-      Team-Ops (p. 30), and Request a Tacball (pp. 30-31). Preserve the
-      official naming and Skill types. Team-Ops is an optional tournament Extra
-      (p. 29) as well as a Special Skill; the Team-Ops Skill and Request a Tacball
-      apply only when that Extra is selected. Source-cite each standalone Skill
-      and link related states/rules, without duplicating definitions per scenario.
-    - [ ] Extend shared Skill authorship/publication to **season-level Skill
-      bindings**, in addition to the existing scenario-scoped
-      `sharedSkillBindings`. Season-level Skills must appear in the Skill
-      catalog and Search even when no scenario action references them;
-      preserve season/revision/Extra applicability and distinguish the
-      tournament Extra from the Team-Ops Skill. Do not force a fabricated
-      scenario ID or promote ITS Skills to N5 core.
+    - [x] Curate and publish four globally defined ITS 18 Skills separately
+      from scenario-specific actions: CivEvac (pp. 22–23), Casevac (p. 25),
+      Team-Ops (p. 30), and Request a Tacball (pp. 30–31). Preserve exact
+      2026.09.11/2026.09.01 citations and season/Extra applicability. Team-Ops
+      is a distinct optional tournament Extra (p. 29) as well as a Special Skill.
+    - [x] Extend shared Skill authorship/publication to **season-level Skill
+      bindings** independent of scenario references. `sharedSeasonSkillBindings`
+      resolves a pinned shared-library Skill with season-specific citations,
+      review, revision, and optional Extra context; identical definitions
+      consolidate in the catalog/Search without inventing scenario IDs.
+    - [ ] Curate Casevac State as its own season-scoped, source-cited State
+      reference linked from Casevac; Skill effects currently summarize it.
+      Maintain the source-specific state lifecycle and cancellation rules.
     - [ ] Review genuine repeated ITS 17/18 scenario semantics and CivEvac in
       the published Evacuation/Outbreak contexts before moving real definitions.
       Also review interaction with other season-wide Skills such as Casevac,

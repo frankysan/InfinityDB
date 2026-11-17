@@ -3841,19 +3841,24 @@ canonical typed identity with the applicable scenario/season bindings and
 combined citation evidence. The original season/scenario Skill URLs continue
 to resolve their context-specific records and work inside scenario cards.
 Identical names alone never trigger merging; differing Skill facts, types,
-versions or definition provenance fail closed. Existing ITS 18 records and
-public output are unchanged because none of the 26 actions has been migrated.
-The three repeated action names in current ITS 18 have different structured
-facts. The **four season-wide Skills** in ITS 18 (2026.09.11) are CivEvac
-(Common Skill, pp. 22-23), Casevac (Common Skill, p. 25), Team-Ops (Special
-Skill, p. 30), and Request a Tacball (Short Skill, pp. 30-31). The Casevac
-State (pp. 25-26) is a distinct state, not a Skill. Team-Ops is also the
-name of an optional tournament Extra (p. 29); its Skill and Request a Tacball
-must retain Extra-specific applicability. CivEvac occurs as a referenced
-mechanic in Evacuation and Outbreak, but none of these four season-wide
-definitions is yet separately curated/published as a Skill. Their published
-Skill types and context must be retained during migration rather than
-deriving identity from scenario action names.
+versions or definition provenance fail closed. None of the 26 scenario action
+Skills has been migrated. The three repeated action names in ITS 18 have
+different structured facts and must not be merged by name.
+
+**Published ITS 18 season-wide Skills:** CivEvac (Common Basic Short Skill,
+pp. 22–23), Casevac (Common Short Skill, p. 25), Team-Ops (Automatic Special
+Skill, p. 30), and Request a Tacball (Attack Short Skill, pp. 30–31) are
+four independent `kind: skill` records in the existing ITS source and season
+SQLite schema v2. Exact source-family facts and revised page citations are
+preserved for 2026.09.01 (one page earlier), while only 2026.09.11 is served.
+Their `facts.applicability: {context, revision}` is `season` for CivEvac and
+Casevac, and `team-ops-extra` for Team-Ops and Request a Tacball.
+This identifies the *optional* tournament Extra rather than granting an
+unconditional Skill outside that Extra. CivEvac is also referenced by the
+Evacuation and Outbreak scenarios, but is not duplicated in their authored
+Skill action lists. Casevac State (pp. 25–26) is distinct from the Casevac
+Skill; its state rules are currently summarized under the Skill and a separate
+state publication remains on the backlog.
 
 **Versioned source-family and scoped override acceptance (synthetic only):**
 A shared scenario imported through a season membership participates in the same
@@ -3905,18 +3910,20 @@ Publication membership retains **its own source citations, source revision
 and review evidence**, independently of the source that originally established
 the reusable definition. Shared mechanics are not automatically N5-core rules:
 ITS-specific definitions retain explicit ITS applicability and cannot leak
-into unrelated seasons or Army profile Skills. **Season-wide Skills** need
-a separate, reviewed season/revision membership independent of a scenario
-action; the present `sharedSkillBindings` contract requires scenario IDs
-and therefore does not yet model their standalone applicability. Optional
-Extras additionally need an explicit activation condition: Team-Ops and
-Request a Tacball must not become unconditional Skills of every ITS mission.
-CivEvac, Casevac, Team-Ops and Request a Tacball are candidates for
-canonical, season-scoped Skill definitions; compare later ITS revisions
-before claiming cross-season equivalence. Reused actions should appear
-once in the Skill catalog when equivalence is established, with
-applicability links; real variants remain distinct. Preserve existing
-season-scoped scenario and Skill routes when introducing canonical identities.
+into unrelated seasons or Army profile Skills. A separate,
+reviewed `sharedSeasonSkillBindings` array now supports exact
+`{id, version, name, summary, category, applicability, citations, review}`
+memberships without scenario IDs. The referenced `skills` library entry
+supplies `skillTypeIds` and `skillFacts`; each season selects a pinned
+definition version and retains its own citations, review, revision and
+`season` or `team-ops-extra` applicability. Optional tournament Extras
+do not make Team-Ops or Request a Tacball unconditional Skills.
+Resolved standalone Skills live in each season's own SQLite `records`
+table and are projected into catalog/Search; exact equivalent pinned Skills
+across seasons consolidate into one canonical identity with independent
+citations. Conflicting or unpinned collisions fail closed. Compare actual
+ITS 17 facts before claiming cross-season equivalence. Existing
+scenario-specific Skill routes remain compatible.
 
 Materialize the complete resolved payload in each season's SQLite artifact,
 including the selected definition version and relevant provenance, so

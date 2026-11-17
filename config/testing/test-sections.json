@@ -91,6 +91,7 @@
         "test_identity_database",
         "test_inspect_raw_archive",
         "test_its_season_database",
+        "test_its_season_skills",
         "test_its_source_family",
         "test_its_hotfix_scenarios",
         "test_its_hotfix_reviewed_missions",

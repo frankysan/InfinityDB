@@ -137,8 +137,9 @@ def project_its_source_family(
     for historical_revision, descriptor in archived.items():
         members = {member["scenarioId"] for member in descriptor["scenarioCollection"]["members"]}
         tagged = {
-            identity for identity, applicable in tags["records"].items()
-            if historical_revision in applicable
+            item["id"] for item in document["records"]
+            if item["kind"] == "scenario"
+            and historical_revision in tags["records"][item["id"]]
         }
         if members != tagged:
             raise ValueError("ITS archived membership differs from revision-tagged facts")

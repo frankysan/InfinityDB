@@ -262,6 +262,67 @@ def _cross_season_fixture(tmp_path: Path):
     return original, alternative, library_path, declared_library
 
 
+def test_shared_season_skill_has_no_fabricated_scenario_binding(tmp_path: Path) -> None:
+    """The same canonical season-wide Skill can belong to two source revisions."""
+    import hashlib
+
+    original, alternate, path, _ = _cross_season_fixture(tmp_path)
+    library = json.loads(path.read_text(encoding="utf-8"))
+    global_id = "skill:its-synthetic-global"
+    definition = deepcopy(library["skills"][0])
+    definition["id"] = global_id
+    definition["payload"] = {
+        "skillTypeIds": ["short-skill"],
+        "skillFacts": {
+            "requirements": ["Synthetic general Skill condition."],
+            "effects": ["Synthetic general Skill effect."],
+            "restrictions": ["Synthetic general Skill restriction."],
+        },
+    }
+    library["skills"].append(definition)
+    path.write_text(json.dumps(library, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    outputs = {}
+    for season, document in (("its-18", original), ("its-17", alternate)):
+        document["sharedScenarioLibrary"]["sha256"] = digest
+        document["sharedSeasonSkillBindings"] = [{
+            "id": global_id, "version": "v1",
+            "name": "Synthetic Global Skill",
+            "summary": "Synthetic season-wide rule, not a mission action.",
+            "category": "common-skill",
+            "applicability": {
+                "context": "season", "revision": document["scenarioCollection"]["revision"],
+            },
+            "citations": [{
+                "sourceId": document["sources"][0]["id"], "page": 30,
+                "section": "Synthetic global Skill",
+            }],
+            "review": {"status": "reviewed", "reviewedOn": "2026-11-17"},
+        }]
+        source = tmp_path / f"{season}-global.json"
+        source.write_text(json.dumps(document, ensure_ascii=False) + "\n", encoding="utf-8")
+        output = tmp_path / f"{season}-global.db"
+        report = build_its_database(source, output, shared_library=path)
+        assert global_id in {row["id"] for row in report["skills"]}
+        outputs[season] = output
+
+    app = create_app(
+        GENERATED / "army.db", GENERATED / "rules_n5.db", season_databases=outputs,
+    )
+    items = _api(app, "/api/skills")["items"]
+    globals_ = [item for item in items if item["slug"] == global_id.removeprefix("skill:")]
+    assert len(globals_) == 1
+    item = globals_[0]
+    assert "scenario" not in item
+    assert item["category"] == "Common Skills"
+    assert {scope["collection"] for scope in item["seasons"]} == {"its-17", "its-18"}
+    assert item["applicability"]["context"] == "season"
+    assert set(item["applicability"]["revisions"]) == {"2025.09.01", "2026.09.11"}
+    assert {pin["source_id"] for pin in item["rules"][0]["citations"]} == {
+        "its-season-18-en-pdf", "synthetic-its17-en-pdf",
+    }
+
+
 def test_skill_library_cross_season_build_and_catalog_dedup(tmp_path: Path) -> None:
     original, alternative, library, pinned = _cross_season_fixture(tmp_path)
     outputs = {}

@@ -465,6 +465,99 @@ class ScenarioCatalog:
                             seen_citations.add(key)
                             merged_rule["citations"].append(deepcopy(citation))
                 published.append(canonical)
+            if self.publication_registry is not None:
+                season_skills: dict[str, dict[str, Any]] = {}
+                for entry in self.publication_registry.season_skill_entries():
+                    record = entry["record"]
+                    slug = record["id"].removeprefix("skill:")
+                    if slug in legacy_slugs or any(
+                        item["slug"] == slug for item in published
+                    ):
+                        raise ValueError(f"ITS season Skill {slug!r} conflicts with a Skill route")
+                    types = [
+                        {
+                            "id": kind,
+                            "name": {
+                                "basic-short-skill": "Basic Short Skill",
+                                "short-skill": "Short Skill",
+                                "automatic": "Automatic Skill",
+                            }[kind],
+                            "source": None,
+                            "page": None,
+                        }
+                        for kind in record["facts"]["typeIds"]
+                    ]
+                    rule = deepcopy(record)
+                    rule["citations"] = deepcopy(entry["citations"])
+                    rule["skill_types"] = [
+                        {"id": kind["id"], "name": kind["name"]} for kind in types
+                    ]
+                    category = ("Common Skills" if record["facts"]["category"] == "common-skill"
+                                else "Special Skills")
+                    season_use = {
+                        "collection": entry["collection"],
+                        "revision": entry["revision"],
+                        "context": record["facts"]["applicability"]["context"],
+                    }
+                    existing = season_skills.get(slug)
+                    if existing is None:
+                        season_skills[slug] = {
+                            "id": slug,
+                            "slug": slug,
+                            "name": record["name"],
+                            "use_count": 0,
+                            "category": category,
+                            "categories": types,
+                            "applicability": deepcopy(record["facts"]["applicability"]),
+                            "seasons": [season_use],
+                            "rules": [rule],
+                            "variants": [],
+                        }
+                        continue
+                    prior_rule = existing["rules"][0]
+                    prior_facts = {
+                        key: value for key, value in prior_rule["facts"].items()
+                        if key != "applicability"
+                    }
+                    new_facts = {
+                        key: value for key, value in rule["facts"].items()
+                        if key != "applicability"
+                    }
+                    if (
+                        not prior_rule.get("sharedSkill")
+                        or prior_rule["sharedSkill"] != rule.get("sharedSkill")
+                        or existing["name"] != record["name"]
+                        or existing["category"] != category
+                        or prior_rule["summary"] != record["summary"]
+                        or prior_rule["skill_types"] != rule["skill_types"]
+                        or prior_facts != new_facts
+                        or existing["applicability"]["context"] != season_use["context"]
+                        or season_use in existing["seasons"]
+                    ):
+                        raise ValueError(
+                            f"Conflicting ITS season Skill facts or unpinned reuse: {slug!r}"
+                        )
+                    existing["seasons"].append(season_use)
+                    existing["applicability"] = {
+                        "context": season_use["context"],
+                        "revisions": [use["revision"] for use in existing["seasons"]],
+                    }
+                    prior_rule["scope"]["seasons"].append(entry["collection"])
+                    prior_rule["facts"]["applicability"] = {
+                        "context": season_use["context"],
+                        "revisions": [use["revision"] for use in existing["seasons"]],
+                    }
+                    seen_pins = {
+                        (cite["source_id"], cite["source_version"], cite["page"],
+                         cite.get("section")) for cite in prior_rule["citations"]
+                    }
+                    for cite in rule["citations"]:
+                        key = (cite["source_id"], cite["source_version"], cite["page"],
+                               cite.get("section"))
+                        if key not in seen_pins:
+                            seen_pins.add(key)
+                            prior_rule["citations"].append(cite)
+                published.extend(season_skills.values())
             self._scenario_skills_cache = published
         return deepcopy(self._scenario_skills_cache)
 

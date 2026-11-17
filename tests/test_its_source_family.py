@@ -20,13 +20,23 @@ def test_historical_facts_are_preserved_exactly_without_separate_authored_file()
     current = project_its_source_family(family)
     historical = project_its_source_family(family, revision=OLDER)
     assert current["scenarioCollection"]["revision"] == CURRENT
-    assert len(current["records"]) == 20
+    assert sum(record["kind"] == "scenario" for record in current["records"]) == 20
+    assert sum(record["kind"] == "skill" for record in current["records"]) == 4
     assert current["collection"]["id"] == "its-season-18-2026.09.11"
-    assert [entry["id"] for entry in historical["records"]] == ["scenario:battleground"]
+    assert [entry["id"] for entry in historical["records"] if entry["kind"] == "scenario"] == [
+        "scenario:battleground"
+    ]
+    assert {entry["id"] for entry in historical["records"] if entry["kind"] == "skill"} == {
+        "skill:civevac", "skill:casevac", "skill:team-ops", "skill:request-tacball",
+    }
     assert historical["scenarioCollection"]["revision"] == OLDER
     assert historical["sources"][0]["version"] == OLDER
     assert [item["page"] for item in historical["records"][0]["citations"]] == [121, 122, 123]
     assert [item["page"] for item in current["records"][4]["citations"]] == [129, 130, 131]
+    assert all(
+        skill["facts"]["applicability"]["revision"] == OLDER
+        for skill in historical["records"] if skill["kind"] == "skill"
+    )
     assert all(
         policy["applicability"]["revision"] == OLDER
         for policy in historical["seasonPolicies"]

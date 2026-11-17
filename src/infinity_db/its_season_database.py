@@ -156,6 +156,51 @@ def _validate_season_policy(
 
 
 
+def _validate_season_skill(
+    record: dict[str, Any], *, season_id: str, revision: str,
+) -> None:
+    """Validate standalone ITS Skills without inventing scenario applicability."""
+    from .domain_slugs import validate_typed_domain_id
+
+    validate_typed_domain_id(
+        record["id"], expected_domain="skill", context="ITS season Skill",
+    )
+    facts = record.get("facts")
+    required = {
+        "category", "typeIds", "requirements", "effects", "restrictions", "applicability",
+    }
+    if (not isinstance(facts, dict) or set(facts) - (required | {"clarifications"})
+            or required - set(facts)):
+        raise ValueError("ITS season Skill requires typed declaration, effects and applicability")
+    if facts["category"] not in {"common-skill", "special-skill"}:
+        raise ValueError("ITS season Skill must be Common or Special, not scenario-scoped")
+    types = facts["typeIds"]
+    if (not isinstance(types, list) or len(types) != 1
+            or types[0] not in {"basic-short-skill", "short-skill", "automatic"}):
+        raise ValueError("ITS season Skill requires one supported declaration category")
+    for field in ("requirements", "effects", "restrictions", "clarifications"):
+        values = facts.get(field, [])
+        if (not isinstance(values, list)
+                or (field == "effects" and not values)
+                or any(not isinstance(value, str) or not value.strip()
+                       or value != value.strip() for value in values)):
+            raise ValueError(f"ITS season Skill has invalid {field}")
+    applicability = facts["applicability"]
+    if (
+        not isinstance(applicability, dict)
+        or set(applicability) != {"context", "revision"}
+        or applicability["revision"] != revision
+        or applicability["context"] not in {"season", "team-ops-extra"}
+    ):
+        raise ValueError("ITS season Skill requires exact current-revision applicability")
+    if record["scope"] != {"game": "N5", "seasons": [season_id]}:
+        raise ValueError("ITS season Skill must not acquire scenario or cross-season scope")
+    if record["composition"] != {"role": "definition"} or record.get("armyLinks"):
+        raise ValueError("ITS season Skill cannot redefine an Army Skill")
+    if not record.get("citations") or record.get("review", {}).get("status") != "reviewed":
+        raise ValueError("ITS season Skill requires reviewed source citations")
+
+
 def _validate_its_document(document: dict[str, Any], core_revision: str) -> None:
     from .domain_slugs import require_domain_slug
 
@@ -205,7 +250,9 @@ def _validate_its_document(document: dict[str, Any], core_revision: str) -> None
         scope = record["scope"]
         if scope.get("game") != "N5" or season_id not in scope.get("seasons", []):
             raise ValueError(f"ITS publication contains out-of-season record {record['id']!r}")
-        if record["kind"] != "scenario":
+        if record["kind"] == "skill":
+            _validate_season_skill(record, season_id=season_id, revision=season["revision"])
+        elif record["kind"] != "scenario":
             raise ValueError(f"ITS publication contains unsupported record {record['id']!r}")
 
 
@@ -448,10 +495,47 @@ def inspect_its_database(
         ]
         if stored_sources != sorted(identity["sources"], key=lambda item: item["id"]):
             raise ValueError("ITS stored source descriptors differ from build provenance")
-        if connection.execute("SELECT count(*) FROM records").fetchone()[0] != (
-            metadata["scenarioCount"]
+        record_rows = connection.execute(
+            "SELECT id, kind, payload_json, content_sha256 FROM records ORDER BY id"
+        ).fetchall()
+        scenario_rows = [row for row in record_rows if row["kind"] == "scenario"]
+        skill_rows = [row for row in record_rows if row["kind"] == "skill"]
+        if (
+            len(scenario_rows) != metadata["scenarioCount"]
+            or len(scenario_rows) + len(skill_rows) != len(record_rows)
         ):
-            raise ValueError("ITS season contains unexpected non-scenario definitions")
+            raise ValueError("ITS season has unexpected record kinds or scenario count")
+        for row in skill_rows:
+            skill = json.loads(row["payload_json"])
+            if (
+                row["id"] != skill.get("id")
+                or _digest(skill) != row["content_sha256"]
+            ):
+                raise ValueError("ITS season Skill content does not match stored hash")
+            _validate_season_skill(
+                skill, season_id=identity["seasonId"], revision=identity["seasonRevision"],
+            )
+            citation_rows = connection.execute(
+                "SELECT source_id, page, member, heading, section FROM record_citations "
+                "WHERE collection_id=? AND record_id=? ORDER BY position",
+                (identity["sourceCollectionId"], row["id"]),
+            ).fetchall()
+            authored_citations = [
+                {
+                    "source_id": citation["sourceId"],
+                    "page": citation.get("page"),
+                    "member": citation.get("member"),
+                    "heading": citation.get("heading"),
+                    "section": citation.get("section"),
+                }
+                for citation in skill["citations"]
+            ]
+            if [dict(citation) for citation in citation_rows] != authored_citations:
+                raise ValueError("ITS season Skill citation content differs from source")
+            if any(citation["source_id"] not in {
+                item["id"] for item in identity["sources"]
+            } for citation in citation_rows):
+                raise ValueError("ITS season Skill references unknown publication source")
         publications = connection.execute(
             "SELECT s.id, s.revision, s.source_collection_id, m.scenario_id, m.position, "
             "r.payload_json, r.content_sha256 FROM scenario_sets AS s "
@@ -567,6 +651,10 @@ def inspect_its_database(
             "buildId": metadata["buildId"],
             "sha256": _file_sha(path),
             "scenarios": scenarios,
+            "skills": [
+                {"id": row["id"], "contentSha256": row["content_sha256"]}
+                for row in skill_rows
+            ],
             "policies": policies,
         }
 
