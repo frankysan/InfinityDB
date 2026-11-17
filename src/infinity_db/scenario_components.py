@@ -213,7 +213,7 @@ class ScenarioComponents:
         facts = _object(
             record["facts"],
             {"definitionVersion", "configurations", "mission"},
-            {"relatedCategories"},
+            {"relatedCategories", "playRequirements"},
             f"{scenario_id}.facts",
         )
         result = deepcopy(record)

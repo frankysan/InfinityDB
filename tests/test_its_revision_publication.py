@@ -235,6 +235,23 @@ def test_hardlock_is_only_in_hotfix_with_beacon_and_console_positions(two_revisi
     assert registry.resolve(PublicationReference(
         "its-18", "scenario:hardlock", "2026.09.01",
     )) is None
+    for slug, classified, hvts, shared in (
+        ("battleground", 0, 0, None),
+        ("hardlock", 1, 1, None),
+        ("b-pong", 2, 1, None),
+        ("evacuation", 2, 2, None),
+        ("akial-interference", 1, 4, 2),
+        ("last-launch", 3, 1, None),
+    ):
+        status, _, item = _json(app, f"/api/scenarios/{slug}?army_points=300&collection=its-18")
+        assert status == 200
+        expected: dict[str, int] = {
+            "classifiedObjectives": classified, "tacticalObjectives": 0, "hvts": hvts,
+        }
+        if shared is not None:
+            expected["sharedClassifiedObjectivesPerRound"] = shared
+        assert item["setup"]["play_requirements"] == expected
+
     for points, width, height, depth in (
         (150, 24, 32, 8), (200, 32, 48, 12), (250, 32, 48, 12),
         (300, 48, 48, 12), (350, 48, 48, 12), (400, 48, 48, 12),

@@ -25908,6 +25908,11 @@
             },
             "facts": {
                 "definitionVersion": 2,
+                "playRequirements": {
+                    "classifiedObjectives": 0,
+                    "tacticalObjectives": 0,
+                    "hvts": 0
+                },
                 "mission": {
                     "setup": {
                         "ref": "setup:minimum-vp",
@@ -26710,6 +26715,11 @@
             },
             "facts": {
                 "definitionVersion": 2,
+                "playRequirements": {
+                    "classifiedObjectives": 0,
+                    "tacticalObjectives": 0,
+                    "hvts": 0
+                },
                 "mission": {
                     "setup": {
                         "ref": "setup:minimum-vp"
@@ -27248,6 +27258,11 @@
             },
             "facts": {
                 "definitionVersion": 2,
+                "playRequirements": {
+                    "classifiedObjectives": 0,
+                    "tacticalObjectives": 0,
+                    "hvts": 0
+                },
                 "mission": {
                     "setup": {
                         "ref": "setup:standard-opposed"
@@ -27356,6 +27371,11 @@
             },
             "facts": {
                 "definitionVersion": 2,
+                "playRequirements": {
+                    "classifiedObjectives": 0,
+                    "tacticalObjectives": 0,
+                    "hvts": 0
+                },
                 "mission": {
                     "setup": {
                         "ref": "setup:standard-opposed"

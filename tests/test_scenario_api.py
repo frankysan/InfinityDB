@@ -288,6 +288,9 @@ def test_scenario_detail_api_requires_and_projects_exact_army_points(
     assert item["selected_army_points"] == 350
     assert item["setup"]["game_size"]["armyPoints"] == 350
     assert item["setup"]["game_size"]["swc"] == 6
+    assert item["setup"]["play_requirements"] == {
+        "classifiedObjectives": 0, "tacticalObjectives": 0, "hvts": 0,
+    }
     assert item["placement"]["configuration_id"] == "300-400-points"
     assert {issue["id"] for issue in item["source_issues"]} == {"350-point-swc"}
 

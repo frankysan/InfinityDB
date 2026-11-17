@@ -97,7 +97,7 @@ def parse_scenario_definition_record(
     _only_keys(
         facts,
         {"definitionVersion", "configurations"},
-        {"relatedCategories", "mission", "componentSources"},
+        {"relatedCategories", "mission", "componentSources", "playRequirements"},
         "scenario record.facts",
     )
     if (
@@ -107,6 +107,19 @@ def parse_scenario_definition_record(
         raise ScenarioDefinitionError(
             f"scenario record.facts.definitionVersion must be {SCENARIO_DEFINITION_VERSION}"
         )
+
+    if "playRequirements" in facts:
+        context = "scenario record.facts.playRequirements"
+        requirements = _object(facts["playRequirements"], context)
+        _only_keys(
+            requirements,
+            {"classifiedObjectives", "tacticalObjectives", "hvts"},
+            {"sharedClassifiedObjectivesPerRound"},
+            context,
+        )
+        for key, count in requirements.items():
+            if type(count) is not int or count < 0:
+                raise ScenarioDefinitionError(f"{context}.{key} must be a non-negative integer")
 
     raw_configurations = facts.get("configurations")
     if not isinstance(raw_configurations, list) or not raw_configurations:

@@ -20,6 +20,8 @@ are not retroactively relabeled.
   Objectives stay visible.
 - Scenario lists are alphabetical. ITS tournament and Extra rules have separate
   cards, and Hardlock shows the official 25 mm Beacon Token diameter.
+- Scenario setup lists how many Classified Objectives, Tactical Objectives, and
+  HVTs each player uses.
 
 ### Added
 

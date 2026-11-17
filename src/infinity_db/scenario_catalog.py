@@ -383,6 +383,8 @@ class ScenarioCatalog:
             "setup": {
                 "sides": deepcopy(mission["sides"]),
                 "game_size": game_size,
+                **({"play_requirements": deepcopy(record["facts"]["playRequirements"])}
+                   if "playRequirements" in record["facts"] else {}),
             },
             "placement": {
                 "configuration_id": configuration_id,

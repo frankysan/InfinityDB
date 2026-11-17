@@ -154,6 +154,19 @@ function setupCard(item) {
   if (gameSize.minimumVictoryPoints != null) {
     facts.append(fact("Minimum Victory Points", String(gameSize.minimumVictoryPoints)));
   }
+  const requirements = item.setup?.play_requirements;
+  if (requirements) {
+    const perPlayer = (count) => count === 0 ? "Not used" : `${count} per player`;
+    const shared = requirements.sharedClassifiedObjectivesPerRound;
+    const classified = shared
+      ? `${requirements.classifiedObjectives} private per player + ${shared} shared per round (base)`
+      : perPlayer(requirements.classifiedObjectives);
+    facts.append(
+      fact("Classified Objectives", classified),
+      fact("Tactical Objectives", perPlayer(requirements.tacticalObjectives)),
+      fact("HVTs", perPlayer(requirements.hvts)),
+    );
+  }
   // Table dimensions are derived from canonical inches, not marker footprint metadata.
   const tableValue = tableFact.querySelector("dd");
   if (tableValue && Number.isFinite(table.width) && Number.isFinite(table.height)) {

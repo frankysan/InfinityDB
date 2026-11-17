@@ -4055,6 +4055,15 @@ explicit `army_points` input remains readable. The
 is recorded separately from the [release checklist](releasing.md#development-freeze-and-release-only-handoff);
 known source discrepancies retain their disclosed scope.
 
+Current scenarios can declare `facts.playRequirements` with non-negative
+per-player counts for `classifiedObjectives`, `tacticalObjectives`, and
+`hvts`. An optional `sharedClassifiedObjectivesPerRound` records the base
+shared count. The detail API projects this as `setup.play_requirements` and
+Forces and table displays zero as “Not used”. Older records without reviewed
+counts omit the summary. Counts are mission facts independent of scoring, with
+the standard ITS HVT and Tactical Objective scope sourced to ITS 18
+2026.09.11 pp. 35–38 and mission-specific counts to their mission sections.
+
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
 `InfinityDB scenario geometry` format version 1, canonical inch table dimensions, ordered unique
 element IDs, and `rectangle`, `line`, `marker`, or `label` elements. Coordinates may be absolute
