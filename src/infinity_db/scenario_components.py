@@ -12,9 +12,9 @@ from typing import Any
 
 from .domain_slugs import validate_typed_domain_id
 from .scenario_geometry import parse_scenario_geometry
-from .scenario_mission import _choice, _condition, _integer
+from .scenario_mission import _choice, _condition, _integer, _text
 
-COMPONENT_KINDS = frozenset({"setup", "geometry", "objective", "end-condition"})
+COMPONENT_KINDS = frozenset({"setup", "geometry", "objective", "end-condition", "skill"})
 
 
 def _object(value: Any, required: set[str], optional: set[str], context: str) -> dict[str, Any]:
@@ -72,7 +72,7 @@ class ScenarioComponents:
             entry = _object(
                 entry,
                 {"id", "kind", "payload", "citations", "scenarios"},
-                {"version"},
+                {"version", "origin", "review"},
                 "scenario component",
             )
             kind = entry["kind"]
@@ -88,8 +88,29 @@ class ScenarioComponents:
                 or entry["version"].strip() != entry["version"]
             ):
                 raise ValueError(f"Invalid scenario component version for {identifier!r}")
+            if "origin" in entry or "review" in entry:
+                if kind != "skill" or not {"version", "origin", "review"} <= entry.keys():
+                    raise ValueError("Only versioned Skills may carry imported provenance")
+                _object(
+                    entry["origin"],
+                    {"sourceCollectionId", "seasonId", "revision", "sourceIds"},
+                    set(), "imported Skill origin",
+                )
+                review = _object(
+                    entry["review"], {"status", "reviewedOn"}, set(),
+                    "imported Skill review",
+                )
+                if review["status"] != "reviewed":
+                    raise ValueError("Imported Skill requires reviewed source evidence")
             self._scope(entry["scenarios"], "scenario component.scenarios")
-            _array(entry["citations"], f"{identifier}.citations")
+            citations = _array(entry["citations"], f"{identifier}.citations")
+            if kind == "skill" and any(
+                not isinstance(citation, dict)
+                or type(citation.get("page")) is not int
+                or citation["page"] <= 0
+                for citation in citations
+            ):
+                raise ValueError("Shared Skill requires exact positive source pages")
             self.definitions[identifier] = entry
         # Validate even unused references, cycles, and geometry. Other component
         # payloads are validated in their complete scenario context on composition.
@@ -154,7 +175,26 @@ class ScenarioComponents:
             raise ValueError(f"Component {identifier!r} is not applicable to {scenario_id!r}")
         self.used.add(identifier)
         result = self.resolve(entry["payload"], kind, scenario_id, (*stack, identifier))
-        if kind == "setup":
+        if kind == "skill":
+            _object(result, {"skillTypeIds", "skillFacts"}, set(), "Skill component")
+            types = _array(result["skillTypeIds"], "Skill component types")
+            if len(set(types)) != len(types):
+                raise ValueError("Skill component has duplicate declaration types")
+            for item in types:
+                _choice(item, {"short-skill", "long-skill"}, "Skill component type")
+            facts = _object(
+                result["skillFacts"], {"requirements", "effects"},
+                {"restrictions", "clarifications", "sourceNotes"}, "Skill component facts",
+            )
+            for field in (
+                "requirements", "effects", "restrictions", "clarifications", "sourceNotes"
+            ):
+                for entry in _array(
+                    facts.get(field, []), f"Skill component {field}",
+                    empty=field not in {"requirements", "effects"},
+                ):
+                    _text(entry, f"Skill component {field} entry")
+        elif kind == "setup":
             _object(result, {"sides", "gameSizes"}, set(), "setup component")
             _array(result["sides"], "setup sides")
             _array(result["gameSizes"], "setup game sizes")
@@ -213,12 +253,46 @@ class ScenarioComponents:
                 rows[point].update(deepcopy(override))
         return result
 
+    def _compose_skill_references(self, record: dict[str, Any]) -> None:
+        """Expand reusable Skill facts without changing legacy scenario action IDs."""
+        mission = record.get("facts", {}).get("mission", {})
+        for rule in mission.get("rules", []):
+            if "skillDefinition" not in rule:
+                continue
+            if "skillFacts" in rule or "skillTypeIds" in rule or "sharedSkill" in rule:
+                raise ValueError("Skill reuse cannot mix a reference with inline Skill facts")
+            ref = _object(
+                rule.pop("skillDefinition"), {"ref", "version"}, set(),
+                "scenario Skill reference",
+            )
+            skill_id = validate_typed_domain_id(
+                ref["ref"], expected_domain="skill", context="scenario Skill reference",
+            )
+            component = self.definitions.get(skill_id)
+            if component is None or "version" not in component:
+                raise ValueError(f"Unknown versioned scenario Skill {skill_id!r}")
+            rule.update(self.resolve(ref, "skill", record["id"]))
+            rule["sharedSkill"] = {
+                "id": skill_id, "version": ref["version"],
+                **({"origin": deepcopy(component["origin"])} if "origin" in component else {}),
+                **({"review": deepcopy(component["review"])} if "review" in component else {}),
+            }
+
     def compose(self, record: dict[str, Any]) -> dict[str, Any]:
-        if (
-            record.get("kind") != "scenario"
-            or record.get("facts", {}).get("definitionVersion") != 2
-        ):
+        if record.get("kind") != "scenario":
             return deepcopy(record)
+        if record.get("facts", {}).get("definitionVersion") != 2:
+            result = deepcopy(record)
+            if result.get("facts", {}).get("definitionVersion") == 1:
+                self.used.clear()
+                self._compose_skill_references(result)
+                if self.used:
+                    result["facts"]["componentSources"] = [
+                        {"id": entry["id"], "citations": deepcopy(entry["citations"])}
+                        for entry in self.definitions.values()
+                        if entry["id"] in self.used
+                    ]
+            return result
         self.used.clear()
         scenario_id = record["id"]
         facts = _object(
@@ -318,6 +392,7 @@ class ScenarioComponents:
                 "sourceIssues": deepcopy(raw["sourceIssues"]),
             },
         }
+        self._compose_skill_references(result)
         result["facts"]["componentSources"] = [
             {"id": entry["id"], "citations": deepcopy(entry["citations"])}
             for entry in self.definitions.values()

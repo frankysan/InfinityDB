@@ -66,8 +66,22 @@ origin metadata separately preserved in the scenario payload. The selected
 library hash joins the build identity. No runtime database or external source
 file lookup is required when serving the result.
 
-This is proven on synthetic two-season fixtures, not reviewed ITS 17 data.
-Cross-scenario Skill reuse, broader component-field overrides, integrated
+An optional `skills` array in that same pinned library holds canonical
+`{id, version, origin, payload, citations, review}` entries. Each Skill
+`payload` contains `skillTypeIds` and `skillFacts`. The season-owned
+`sharedSkillBindings` entries specify `{id, version, scenarios, citations,
+review}`; the corresponding scenario rules use `skillDefinition: {ref,
+version}`. Skill citations and review are independently pinned to the selected
+season, rather than inherited from the originating source. The existing
+`ScenarioComponents` composer materializes them before validation, preserving
+the legacy scenario action IDs and typed `sharedSkill` metadata. Repeated,
+semantically identical Skill definitions project to one canonical Skill in
+catalog and Search, with explicit scenario/season applicability; legacy
+season/scenario Skill routes and cards continue to work. Conflicting facts or
+versions are rejected rather than silently merged.
+
+This is proven on synthetic single-season and two-season fixtures, **not**
+reviewed ITS 17 data. Narrowly reviewed Skill-fact overrides, integrated
 build registration of future library-backed seasons, and real migrations remain
 [unfinished](TODO.md#its-scenarios-and-game-tools); see the
 [canonical data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse).

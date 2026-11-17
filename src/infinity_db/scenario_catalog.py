@@ -139,6 +139,7 @@ class ScenarioCatalog:
         self.publication_registry = publication_registry
         self._records_cache: list[tuple[dict[str, Any], dict[str, Any]]] | None = None
         self._scenario_skills_cache: list[dict[str, Any]] | None = None
+        self._scenario_skill_aliases: dict[str, dict[str, Any]] = {}
 
     def _marker_size_source(self, revision: str | None = None) -> dict[str, Any]:
         """Source attribution for shared marker sizes, not mission ownership."""
@@ -300,6 +301,35 @@ class ScenarioCatalog:
                         raise ValueError(
                             f"Scenario Skill {rule['id']!r} cites outside its mission source"
                         )
+                    if "sharedSkill" in rule:
+                        shared_id = rule["sharedSkill"]["id"]
+                        component_sources = [
+                            component["citations"]
+                            for component in record["facts"].get("componentSources", [])
+                            if component["id"] == shared_id
+                        ]
+                        if len(component_sources) != 1:
+                            raise ValueError(
+                                f"Shared Skill {shared_id!r} requires exact publication citations"
+                            )
+                        bound_pins = [
+                            {"sourceId": citation["sourceId"], "page": citation["page"]}
+                            for citation in component_sources[0]
+                        ]
+                        if action_pins and "origin" in rule["sharedSkill"] and any(
+                            pin not in bound_pins for pin in action_pins
+                        ):
+                            raise ValueError(
+                                f"Shared Skill {shared_id!r} has unbound action citations"
+                            )
+                        if not action_pins and any(
+                            (pin["sourceId"], pin["page"]) not in mission_pins
+                            for pin in bound_pins
+                        ):
+                            raise ValueError(
+                                f"Shared Skill {shared_id!r} cites outside its mission source"
+                            )
+                        action_pins = action_pins or bound_pins
                     if action_pins:
                         by_source = {}
                         for pin in action_pins:
@@ -356,6 +386,8 @@ class ScenarioCatalog:
                         },
                         "applicable_scenarios": [{"id": record["id"], "name": record["name"]}],
                         "citations": citations,
+                        **({"sharedSkill": deepcopy(rule["sharedSkill"])}
+                           if "sharedSkill" in rule else {}),
                     }
                     items.append({
                         "id": slug,
@@ -374,14 +406,73 @@ class ScenarioCatalog:
                         "rules": [skill_rule],
                         "variants": [],
                     })
-            self._scenario_skills_cache = items
+            self._scenario_skill_aliases = {item["slug"]: deepcopy(item) for item in items}
+            shared: dict[str, list[dict[str, Any]]] = {}
+            published: list[dict[str, Any]] = []
+            for item in items:
+                identity = item["rules"][0].get("sharedSkill")
+                if identity is None:
+                    published.append(item)
+                else:
+                    shared.setdefault(identity["id"], []).append(item)
+            legacy_slugs = set(self._scenario_skill_aliases)
+            for identifier, uses in shared.items():
+                slug = identifier.removeprefix("skill:")
+                if slug in legacy_slugs or any(item["slug"] == slug for item in published):
+                    raise ValueError(f"Shared scenario Skill {identifier!r} conflicts with a route")
+                first = uses[0]
+                first_rule = first["rules"][0]
+                version = first_rule["sharedSkill"]["version"]
+                for use in uses[1:]:
+                    rule = use["rules"][0]
+                    if (
+                        rule["sharedSkill"]["version"] != version
+                        or use["name"] != first["name"]
+                        or rule["facts"] != first_rule["facts"]
+                        or rule["skill_types"] != first_rule["skill_types"]
+                        or rule["sharedSkill"].get("origin")
+                        != first_rule["sharedSkill"].get("origin")
+                    ):
+                        raise ValueError(
+                            f"Conflicting facts for pinned shared scenario Skill {identifier!r}"
+                        )
+                canonical = deepcopy(first)
+                canonical["id"] = slug
+                canonical["slug"] = slug
+                canonical.pop("scenario", None)
+                canonical["scenarios"] = [deepcopy(use["scenario"]) for use in uses]
+                canonical["aliases"] = [use["slug"] for use in uses]
+                merged_rule = canonical["rules"][0]
+                merged_rule["id"] = identifier
+                merged_rule["scope"]["seasons"] = list(dict.fromkeys(
+                    use["scenario"]["collection"] for use in uses
+                ))
+                merged_rule["scope"]["scenarios"] = list(dict.fromkeys(
+                    use["scenario"]["id"] for use in uses
+                ))
+                merged_rule["applicable_scenarios"] = [
+                    deepcopy(use["scenario"]) for use in uses
+                ]
+                merged_rule["citations"] = []
+                seen_citations: set[tuple[str, str, str, int | None]] = set()
+                for use in uses:
+                    for citation in use["rules"][0]["citations"]:
+                        key = (
+                            use["scenario"]["collection"], use["scenario"]["revision"],
+                            str(citation["source_id"]), citation.get("page"),
+                        )
+                        if key not in seen_citations:
+                            seen_citations.add(key)
+                            merged_rule["citations"].append(deepcopy(citation))
+                published.append(canonical)
+            self._scenario_skills_cache = published
         return deepcopy(self._scenario_skills_cache)
 
     def get_scenario_skill(self, slug: str) -> dict[str, Any] | None:
-        return next(
-            (item for item in self.scenario_skill_items() if item["slug"] == slug),
-            None,
-        )
+        items = self.scenario_skill_items()
+        if slug in self._scenario_skill_aliases:
+            return deepcopy(self._scenario_skill_aliases[slug])
+        return next((item for item in items if item["slug"] == slug), None)
 
     def list_collections(self) -> list[dict[str, Any]]:
         """Return only current scenario sets with readable published missions."""
@@ -505,16 +596,11 @@ class ScenarioCatalog:
             raise ValueError(f"Scenario {record['id']!r} has no composed rules reference")
         rules_by_id = {str(rule["id"]): rule for rule in reference["rules"]}
         special_rules: list[dict[str, Any]] = []
-        scenario_skills = {
-            item["slug"]: item for item in self.scenario_skill_items()
-            if item["scenario"]["slug"] == slug
-            and item["scenario"]["collection"] == publication["collection"]
-        }
         for inclusion in mission["rules"]:
             item = deepcopy(inclusion)
             if item.get("skillTypeIds"):
                 skill_slug = f"{publication['collection']}-{slug}-{item['id']}"
-                scenario_skill = scenario_skills.get(skill_slug)
+                scenario_skill = self.get_scenario_skill(skill_slug)
                 if scenario_skill is None:
                     raise ValueError(f"Missing scenario Skill {skill_slug!r}")
                 item["skill"] = deepcopy(scenario_skill["rules"][0])

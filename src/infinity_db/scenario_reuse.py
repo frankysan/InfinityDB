@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 from copy import deepcopy
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -43,6 +44,34 @@ def _citations(value: Any, source_ids: set[str], context: str) -> list[dict[str,
         if not isinstance(citation, dict) or citation.get("sourceId") not in source_ids:
             raise ValueError(f"{context} references a source outside its publication")
     return deepcopy(value)
+
+
+def _reviewed(value: Any, context: str) -> dict[str, str]:
+    review = _exact(value, {"status", "reviewedOn"}, context)
+    if review["status"] != "reviewed":
+        raise ValueError(f"{context} requires reviewed evidence")
+    reviewed_on = _text(review["reviewedOn"], f"{context}.reviewedOn")
+    try:
+        if date.fromisoformat(reviewed_on).isoformat() != reviewed_on:
+            raise ValueError("noncanonical date")
+    except ValueError as exc:
+        raise ValueError(f"{context} requires an ISO review date") from exc
+    return review
+
+
+def _origin(value: Any, context: str) -> dict[str, Any]:
+    origin = _exact(
+        value, {"sourceCollectionId", "seasonId", "revision", "sourceIds"}, context,
+    )
+    _text(origin["sourceCollectionId"], f"{context}.sourceCollectionId")
+    require_domain_slug(origin["seasonId"], context=f"{context}.seasonId")
+    _text(origin["revision"], f"{context}.revision")
+    sources = origin["sourceIds"]
+    if (not isinstance(sources, list) or not sources
+            or any(not isinstance(source, str) or not source.strip() for source in sources)
+            or len(set(sources)) != len(sources)):
+        raise ValueError(f"{context} requires distinct source IDs")
+    return origin
 
 
 def _apply_overrides(record: dict[str, Any], entries: Any) -> None:
@@ -81,6 +110,8 @@ def materialize_shared_scenarios(
     """Expand explicit memberships before normal curated and scenario validation."""
     declaration = document.get("sharedScenarioLibrary")
     if declaration is None:
+        if "sharedSkillBindings" in document:
+            raise ValueError("Shared Skill bindings require a pinned shared scenario library")
         if library_path is not None:
             raise ValueError("Unreferenced shared scenario library supplied")
         return document
@@ -96,8 +127,10 @@ def materialize_shared_scenarios(
         library = json.loads(raw.decode("utf-8-sig"))
     except (UnicodeError, json.JSONDecodeError) as exc:
         raise ValueError("Shared scenario library is not valid JSON") from exc
-    _exact(library, {"format", "formatVersion", "id", "definitions"},
-           "shared scenario library")
+    if (not isinstance(library, dict)
+            or set(library) - {"format", "formatVersion", "id", "definitions", "skills"}
+            or {"format", "formatVersion", "id", "definitions"} - set(library)):
+        raise ValueError("Shared scenario library has unsupported fields")
     if library["format"] != LIBRARY_FORMAT or type(library["formatVersion"]) is not int or (
         library["formatVersion"] != 1 or library["id"] != library_id
     ):
@@ -116,19 +149,8 @@ def materialize_shared_scenarios(
         key = (identifier, version)
         if key in definitions:
             raise ValueError(f"Duplicate shared scenario definition {key!r}")
-        origin = _exact(
-            entry["origin"],
-            {"sourceCollectionId", "seasonId", "revision", "sourceIds"},
-            "shared scenario origin",
-        )
-        _text(origin["sourceCollectionId"], "shared scenario origin collection")
-        require_domain_slug(origin["seasonId"], context="shared scenario origin season")
-        _text(origin["revision"], "shared scenario origin revision")
+        origin = _origin(entry["origin"], "shared scenario origin")
         sources = origin["sourceIds"]
-        if (not isinstance(sources, list) or not sources
-                or any(not isinstance(s, str) or not s.strip() for s in sources)
-                or len(set(sources)) != len(sources)):
-            raise ValueError("Shared scenario origin requires distinct source identities")
         record = entry["record"]
         if (not isinstance(record, dict) or record.get("id") != identifier
                 or record.get("kind") != "scenario"
@@ -136,16 +158,18 @@ def materialize_shared_scenarios(
                 or origin["seasonId"] not in record.get("scope", {}).get("seasons", [])):
             raise ValueError("Shared scenario definition has incompatible record identity or scope")
         _citations(record.get("citations"), set(sources), "shared scenario origin")
-        if record.get("review", {}).get("status") != "reviewed":
-            raise ValueError("Shared scenario origin requires reviewed evidence")
+        _reviewed(record.get("review"), "Shared scenario origin")
         if not isinstance(entry["components"], list):
             raise ValueError("Shared scenario components must be an array")
         for component in entry["components"]:
             if not isinstance(component, dict) or "version" not in component:
                 raise ValueError("Shared scenario components require pinned versions")
             _text(component["version"], "shared scenario component version")
+            kind = component.get("kind")
+            if not isinstance(kind, str):
+                raise ValueError("Shared scenario component kind must be a string")
             validate_typed_domain_id(
-                component.get("id"), expected_domain=component.get("kind"),
+                component.get("id"), expected_domain=kind,
                 context="shared scenario component",
             )
             _citations(component.get("citations"), set(sources), "shared component origin")
@@ -182,10 +206,7 @@ def materialize_shared_scenarios(
         record = deepcopy(entry["record"])
         record["scope"]["seasons"] = [season]
         record["citations"] = _citations(binding["citations"], sources, "season scenario")
-        if not isinstance(binding["review"], dict) or (
-            binding["review"].get("status") != "reviewed"
-        ):
-            raise ValueError("Shared scenario season membership requires reviewed evidence")
+        _reviewed(binding["review"], "Shared scenario season membership")
         record["review"] = deepcopy(binding["review"])
         _apply_overrides(record, binding["overrides"])
         record["sharedDefinition"] = {
@@ -216,6 +237,76 @@ def materialize_shared_scenarios(
         result["records"].append(record)
         member.clear()
         member["scenarioId"] = identity
+
+    # Skills are independent reusable components. Season-specific bindings own
+    # applicability, review, and citations; library origin is only provenance.
+    skill_definitions: dict[tuple[str, str], dict[str, Any]] = {}
+    skills = library.get("skills", [])
+    if not isinstance(skills, list):
+        raise ValueError("Shared scenario library Skills must be an array")
+    for entry in skills:
+        _exact(entry, {"id", "version", "origin", "payload", "citations", "review"},
+               "shared Skill definition")
+        skill_id = validate_typed_domain_id(
+            entry["id"], expected_domain="skill", context="shared Skill definition",
+        )
+        version = _text(entry["version"], "shared Skill version")
+        key = (skill_id, version)
+        if key in skill_definitions:
+            raise ValueError(f"Duplicate shared Skill definition {key!r}")
+        origin = _origin(entry["origin"], "shared Skill origin")
+        _citations(entry["citations"], set(origin["sourceIds"]), "shared Skill origin")
+        _reviewed(entry["review"], "Shared Skill origin")
+        if not isinstance(entry["payload"], dict):
+            raise ValueError("Shared Skill payload must be an object")
+        skill_definitions[key] = entry
+
+    bindings = result.pop("sharedSkillBindings", [])
+    if not isinstance(bindings, list):
+        raise ValueError("Shared Skill bindings must be an array")
+    bound_ids: set[str] = set()
+    scenarios = {record["id"]: record for record in result["records"]}
+    for binding in bindings:
+        _exact(binding, {"id", "version", "scenarios", "citations", "review"},
+               "shared Skill binding")
+        skill_id = validate_typed_domain_id(
+            binding["id"], expected_domain="skill", context="shared Skill binding",
+        )
+        version = _text(binding["version"], "shared Skill binding version")
+        entry = skill_definitions.get((skill_id, version))
+        if entry is None:
+            raise ValueError(f"Unknown pinned shared Skill {skill_id!r}")
+        if skill_id in bound_ids or skill_id in component_ids:
+            raise ValueError(f"Conflicting shared Skill binding {skill_id!r}")
+        bound_ids.add(skill_id)
+        component_ids.add(skill_id)
+        available = binding["scenarios"]
+        if (not isinstance(available, list) or not available
+                or any(not isinstance(ref, str) for ref in available)
+                or len(available) != len(set(available))):
+            raise ValueError("Shared Skill scenario applicability must be distinct and nonempty")
+        for ref in available:
+            validate_typed_domain_id(
+                ref, expected_domain="scenario", context="shared Skill scenario applicability",
+            )
+            if ref not in scenarios:
+                raise ValueError(f"Shared Skill references unknown season scenario {ref!r}")
+            uses = [
+                rule for rule in scenarios[ref]["facts"]["mission"]["rules"]
+                if rule.get("skillDefinition") == {"ref": skill_id, "version": version}
+            ]
+            if not uses:
+                raise ValueError(f"Shared Skill binding is unused by scenario {ref!r}")
+        _reviewed(binding["review"], "Shared Skill season membership")
+        materialized = {
+            "id": skill_id, "kind": "skill", "version": version,
+            "payload": deepcopy(entry["payload"]),
+            "scenarios": deepcopy(available),
+            "citations": _citations(binding["citations"], sources, "season Skill"),
+            "origin": deepcopy(entry["origin"]),
+            "review": deepcopy(binding["review"]),
+        }
+        components["definitions"].append(materialized)
     if not components["definitions"]:
         result.pop("scenarioComponents")
     return result

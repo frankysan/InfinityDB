@@ -134,6 +134,7 @@ class ScenarioRule:
     skill_type_ids: tuple[str, ...] = ()
     skill_facts: dict[str, tuple[str, ...]] | None = None
     skill_citations: tuple[tuple[str, int], ...] = ()
+    shared_skill: tuple[str, str] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -566,7 +567,7 @@ def parse_scenario_mission(
         rule = _object(
             item, {"id", "name", "paragraphs"},
             {"definitionId", "skillIds", "specialists", "skillTypeIds",
-             "skillFacts", "skillCitations"}, ctx,
+             "skillFacts", "skillCitations", "sharedSkill"}, ctx,
         )
         identifier = _slug(rule["id"], f"{ctx}.id")
         _unique(identifier, rule_ids, ctx)
@@ -617,6 +618,30 @@ def parse_scenario_mission(
         elif skill_types:
             raise ScenarioMissionError(f"{ctx}.skillTypeIds requires skillFacts")
 
+        shared_skill = None
+        if "sharedSkill" in rule:
+            shared = _object(
+                rule["sharedSkill"], {"id", "version"}, {"origin", "review"},
+                f"{ctx}.sharedSkill",
+            )
+            shared_id = validate_typed_domain_id(
+                shared["id"], expected_domain="skill", context=f"{ctx}.sharedSkill.id",
+            )
+            shared_skill = (shared_id, _text(shared["version"], f"{ctx}.sharedSkill.version"))
+            if "origin" in shared:
+                _object(
+                    shared["origin"],
+                    {"sourceCollectionId", "seasonId", "revision", "sourceIds"}, set(),
+                    f"{ctx}.sharedSkill.origin",
+                )
+            if "review" in shared:
+                _object(
+                    shared["review"], {"status", "reviewedOn"}, set(),
+                    f"{ctx}.sharedSkill.review",
+                )
+            if not skill_types or skill_facts is None:
+                raise ScenarioMissionError(f"{ctx}.sharedSkill requires structured Skill facts")
+
         skill_citations: list[tuple[str, int]] = []
         if "skillCitations" in rule:
             if not skill_types:
@@ -647,6 +672,7 @@ def parse_scenario_mission(
                 skill_types,
                 skill_facts,
                 tuple(skill_citations),
+                shared_skill,
             )
         )
 

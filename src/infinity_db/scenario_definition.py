@@ -68,6 +68,17 @@ def parse_scenario_definition_record(
     """Validate the typed v1 facts of one curated scenario definition record."""
 
     root = _object(record, "scenario record")
+    if isinstance(root.get("facts"), dict) and root["facts"].get("definitionVersion") == 1 and (
+        definitions is not None
+        and any(
+            "skillDefinition" in rule
+            for rule in root["facts"].get("mission", {}).get("rules", [])
+        )
+    ):
+        try:
+            root = compose_scenario_record(root, definitions)
+        except ValueError as exc:
+            raise ScenarioDefinitionError(str(exc)) from exc
     if isinstance(root.get("facts"), dict) and root["facts"].get("definitionVersion") == 2:
         if type(root["facts"]["definitionVersion"]) is not int or definitions is None:
             raise ScenarioDefinitionError(

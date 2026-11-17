@@ -89,3 +89,20 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Why:** Keep regression tests meaningful without folding unrelated output
   changes into cross-season reuse development.
 - **Disposition:** proposed, outside the current implementation scope.
+
+## AI-0005 — Project shared records after source-family revision selection
+
+- **Date:** 2026-11-17
+- **Area:** `its_source_family.py`, `curated.py`, and shared ITS build registration.
+- **Observation:** Current ITS source-family projection requires exact
+  `factRevisions.records` coverage of the record array. Shared scenario
+  definitions are materialized before this check, so a future library-backed
+  source-family migration must define how imported membership records receive
+  applicable revision tags without losing archived source-local facts.
+- **Proposed:** Integrate version-pinned memberships with the source-family
+  projector, separating revision-specific publication bindings from shared
+  authoring definitions while retaining source hashes and historical overrides.
+  Test a current plus archived revision before migrating real ITS 17 data.
+- **Why:** The synthetic standalone reuse proof does not establish the
+  one-source-family revision-history contract for future season migrations.
+- **Disposition:** proposed; tracked by [ITS reuse](TODO.md#its-scenarios-and-game-tools).

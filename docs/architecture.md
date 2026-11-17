@@ -218,7 +218,7 @@ provenance, collection membership, and cross-domain references are relational; o
 scenario structures remain validated typed payloads. Scenario identity, source revision, and
 collection/season membership remain independent.
 
-**Cross-season reuse (scenario/component build slice implemented; Skill reuse pending):** Maintain a
+**Cross-season reuse (scenario/component/Skill build slices implemented for synthetic data):** Maintain a
 stable, versioned canonical definition for each genuinely shared scenario,
 scenario Skill, or component. ITS season membership references an exact
 definition version and retains its own applicable source citations and optional

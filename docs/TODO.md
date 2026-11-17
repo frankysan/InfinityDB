@@ -410,23 +410,22 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     All twenty reviewed hotfix missions now have definitions and six-size maps.
     Unresolved bilingual discrepancies remain explicit source issues;
     visual browser acceptance is tracked separately.
-  - [ ] **Before ITS 17: finish cross-season scenario/Skill reuse.** The first
-    optional scenario/component library slice is implemented and validated using
-    synthetic ITS 17/18 data: exact versions, library hash, independent season
-    citations/review, narrow field overrides, cycle checks and standalone SQLite
-    output. Existing ITS 18 authoring and public routes are unchanged. Follow
-    the [accepted data-model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse):
-    extend the existing build-time component resolver to use stable,
-    version-pinned shared scenario and Skill definitions. Represent season
-    availability and narrowly reviewed, typed overrides separately from
-    definitions; keep each season's citations and provenance independent.
-    Validate exact identities, compatibility, conflicts and missing targets,
-    then publish self-contained resolved records in each season database.
-    Preserve existing routes; consolidate identical Skills in catalog/Search
-    only after checking semantics. Start with one repeated ITS 17/18 scenario
-    and compare CivEvac across its scenario contexts before broader migration.
-    Do not refactor SQLite into interdependent runtime databases merely to
-    remove duplicate compiled data.
+  - [ ] **Before ITS 17: finish cross-season scenario/Skill reuse.** The
+    optional pinned library resolves scenarios, components and shared Skill
+    definitions in synthetic independent ITS 17/18 builds, preserving source
+    review/citations and legacy Skill routes. Shared Skills now group by exact
+    identity in catalog/Search with fail-closed fact/version comparison. The
+    current ITS 18 source and runtime outputs are unchanged.
+    - [ ] Integrate library-backed seasons with the complete-set build and
+      revision-tagged source-family curation; retain historical references.
+    - [ ] Add reviewed narrow overrides for scenario components and Skill
+      Requirements/Effects/Restrictions where suitable, rejecting conflicts.
+    - [ ] Review genuine repeated ITS 17/18 scenario semantics and CivEvac in
+      the published Evacuation/Outbreak contexts before moving real definitions.
+      The three repeated ITS 18 action names have different Skill facts and must
+      not be merged on their names alone.
+    - [ ] Curate real ITS 17 against this foundation only after evidence review;
+      keep each resulting season database independent, with no runtime links.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
     season launched under N5) and ITS Season 16 Part II (the N5-compatible
     revision), at minimum their scenario definitions and maps. Keep original

@@ -3824,6 +3824,30 @@ published citations and sources remain season-owned. All bytes are materialized
 into the existing SQLite schema v2. Existing ITS 18 curation and runtime
 responses are unchanged; no real ITS 17 or shared Skill data has been migrated.
 
+**Implemented shared Skill slice (synthetic fixtures only):**
+`scenarioComponents` now also accepts a versioned `skill` component with
+`skillTypeIds` and structured `skillFacts`. A scenario action uses an exact
+`skillDefinition: {ref, version}` and retains its original scenario-local rule
+ID, name, paragraphs and optional source-page pins. Composition replaces the
+reference with checked Skill facts and `sharedSkill` identity/provenance before
+normal scenario validation. Shared libraries optionally declare reviewed
+`skills` and seasons independently declare `sharedSkillBindings` (version,
+applicable scenario IDs, reviewed source citations). The same library can build
+independent ITS 17/18 fixtures with different publication citations, including
+for a shared Skill; no runtime cross-database resolution is introduced.
+
+For genuinely shared pinned Skills, the Skill catalog and Search list one
+canonical typed identity with the applicable scenario/season bindings and
+combined citation evidence. The original season/scenario Skill URLs continue
+to resolve their context-specific records and work inside scenario cards.
+Identical names alone never trigger merging; differing Skill facts, types,
+versions or definition provenance fail closed. Existing ITS 18 records and
+public output are unchanged because none of the 26 actions has been migrated.
+The three repeated action names in current ITS 18 have different structured
+facts. CivEvac occurs as a referenced mechanic in Evacuation and Outbreak,
+not as a standalone curated Skill; its precise published semantics remain a
+research prerequisite before any cross-context migration.
+
 **Remaining accepted direction:** Extend the existing explicit, build-time scenario composition to share
 **curated definitions** across ITS seasons and between scenarios, while
 preserving independent, fully materialized season databases. A reusable

@@ -96,11 +96,12 @@ specific mission; an ITS ruling may refer to an N5 Skill. The owner is chosen
 from the authored rule/publication's authority, while applicability is an
 explicit context-scoped relation resolved at read time.
 
-**Implemented for opt-in scenario/component builds:** A source-pinned shared
-scenario library may provide versioned definitions and components to a season;
-that season still owns its citations, review and assembled publication.
-The compiled artifact remains standalone. No real ITS 17 data has been migrated.
-Cross-scenario and cross-season Skill reuse remains pending. The
+**Implemented for opt-in scenario/component/Skill builds:** A source-pinned
+shared library may provide exact-version scenario and Skill definitions to
+multiple season publications. Each retains its own citations, review and
+applicability, and materializes a standalone SQLite record. Canonical shared
+Skills appear once in catalog/Search while existing action URLs remain valid.
+Synthetic fixtures prove this; real ITS 17 curation remains pending. The
 [data-model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse)
 owns the complete contract.
 
