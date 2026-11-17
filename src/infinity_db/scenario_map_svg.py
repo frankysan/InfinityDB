@@ -129,6 +129,10 @@ _EVACUATION_MARKER_CSS = """\
 svg[data-theme="dark"] .objective[data-marker-type="civilian"]{fill:#83d5eb;stroke:#b5efff}
 svg[data-theme="dark"] .objective[data-marker-type="console"]{fill:#6aa968;stroke:#b7ebb0}
 """
+_DEFENSIVE_TURRET_CSS = """\
+.objective[data-marker-type="defensive-turret"]{fill:#718096;stroke:#334155}
+svg[data-theme="dark"] .objective[data-marker-type="defensive-turret"]{fill:#64748b;stroke:#cbd5e1}
+"""
 _RULER_CSS = """.placement-ruler{stroke-width:.11}
 .placement-ruler line{stroke-width:.11;stroke-dasharray:none}
 """
@@ -224,7 +228,7 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
         marker_type = escape(element.marker_type, quote=True)
         diameter_mm = marker_diameter_mm(element.marker_type)
         if diameter_mm is None and element.marker_type not in {
-            "beacon", "tracking-beacon", "civilian",
+            "beacon", "tracking-beacon", "civilian", "defensive-turret",
         }:
             raise ScenarioMapRenderError(
                 "scenario SVG renderer v1 has no canonical marker metadata for "
@@ -526,7 +530,9 @@ def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
         if (
             isinstance(element, MarkerElement)
             and marker_diameter_mm(element.marker_type) is None
-            and element.marker_type not in {"beacon", "tracking-beacon", "civilian"}
+            and element.marker_type not in {
+                "beacon", "tracking-beacon", "civilian", "defensive-turret",
+            }
         ):
             raise ScenarioMapRenderError(
                 "scenario SVG renderer v1 has no canonical marker metadata for "
@@ -601,7 +607,12 @@ def render_scenario_map_svg(
         for element in geometry.elements
     )
     has_akial_antenna = any(
-        isinstance(element, MarkerElement) and element.id == "akial-antenna"
+        isinstance(element, MarkerElement)
+        and element.id in {"akial-antenna", "inhibitor-antenna"}
+        for element in geometry.elements
+    )
+    has_defensive_turret = any(
+        isinstance(element, MarkerElement) and element.marker_type == "defensive-turret"
         for element in geometry.elements
     )
     has_tech_coffin = any(
@@ -622,6 +633,7 @@ def render_scenario_map_svg(
         + (_TRACKING_BEACON_CSS if has_tracking_beacon else "")
         + (_EVACUATION_MARKER_CSS if has_civilians else "")
         + (_PROTOTYPE_PANOPLY_CSS if has_prototype_panoply else "")
+        + (_DEFENSIVE_TURRET_CSS if has_defensive_turret else "")
         + (_RULER_CSS if has_rulers else "")
     )
     defs = _EXCLUSION_DEFS if has_exclusion else ""

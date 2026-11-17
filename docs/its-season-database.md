@@ -40,7 +40,7 @@ into `its_18_2026.09.11.db`. The original `2026.09.01` input and
 `its_18.db` remain unchanged in mission semantics and independently selectable.
 The Rules exporter imports neither ITS-owned source. The public scenario selector
 lists `its-18@2026.09.01` (historical Battleground) and
-`its-18@2026.09.11` (nineteen reviewed hotfix missions).
+`its-18@2026.09.11` (twenty reviewed hotfix missions).
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
@@ -50,7 +50,7 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
-Nineteen missions are published with independent revision selection:
+All twenty missions are published with independent revision selection:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
@@ -234,8 +234,32 @@ Nineteen missions are published with independent revision selection:
   exclusion and both mission endings. English 4-/8-inch versus Spanish
   10-/20-cm minimum placement distances are preserved as a bilingual
   source issue (EN/ES pp. 83–87).
+- **Critical Intervention:** Fixed Attacker (first Turn, Side A) and
+  Defender (second Turn, Side B) roles have different Main Objectives;
+  this is not a Double Bind-style selection. Both sides use 8-/12-inch
+  deployment depths, a central 4-inch-per-side Attacker Exclusion Zone
+  and an 8-inch square Server Room, which is normally a No Deployment
+  Zone. Its schematic two Armed Turrets have no published physical
+  diameter; the central 40 mm Data Console and Defender-side 40 mm
+  Inhibitor Antenna have physical marker dimensions. The Defender may
+  spend one additional pre-deployment Command Token to activate the
+  Defense System or deploy up to 65 Army Points in the room. Attacker
+  scoring covers unlocking and extracting the Data Pack, extractor
+  survival and return, Server Room Domination and size-dependent kills;
+  Defender scoring covers preventing both actions, killing the
+  extractor, Domination and a different set of kill thresholds. Both
+  may score one Classified Objective or select an INTELCOM card.
+  **The published Defender awards total 12 OP** while the Attacker
+  awards total 10; both languages agree, and the data does not impose
+  an invented 10-OP cap. The mission includes Turret Profile and
+  reactions, WIP-6 extraction (no -6 when Unlocked), Inhibitor
+  activation, INTELCOM Support and Control, Shasvastii/Baggage,
+  Specialist restrictions and mission endings. Six source issues
+  disclose bilingual room size, Exclusion width, Shasvastii status,
+  STR, INTELCOM point terminology and the 12-OP anomaly
+  (EN/ES pp. 97–104).
 
-All nineteen missions share the existing geometry parser, model and SVG
+All twenty missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.
 The hotfix maps distinguish striped Exclusion Zones, violet Antenna Zones of

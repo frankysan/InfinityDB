@@ -42,9 +42,10 @@ envelope. Their current authority is:
   printed pages 121–123.
 - `n5-its-season-18-2026.09.11.json` — separately reviewed hotfix
   curation, effective 2026-09-24 and selected by `its-18@2026.09.11`.
-  Contains nineteen reviewed hotfix missions, including Battleground,
+  Contains all twenty reviewed hotfix missions, including Battleground,
   B-Pong, Akial Interference, Evacuation, Neutralization, Provisioning and
-  Area of Interest, Data-Harvest, Last Launch, Corporate Appropriation and Outbreak;
+  Area of Interest, Data-Harvest, Last Launch, Corporate Appropriation,
+  Outbreak and Critical Intervention;
   preserves mission-specific scoring,
   geometry, citations, event policies and unresolved source discrepancies.
 
@@ -66,7 +67,7 @@ scenario slug does not merge records or replace historical citations.
 3. **ITS seasons:** each registered ITS revision owns its own mission
    definitions, geometry, game-size configurations, scenario membership,
    Extras and tournament constraints. `its_18.db` preserves the
-   September 1 Battleground; `its_18_2026.09.11.db` owns nineteen reviewed
+   September 1 Battleground; `its_18_2026.09.11.db` owns twenty reviewed
    hotfix missions. Other seasons get independent ownership;
    no current ITS 18 record is silently treated as timeless N5 core.
 4. **Optional/historical annexes:** The N4-origin Reinforcements reference

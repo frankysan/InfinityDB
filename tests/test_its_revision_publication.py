@@ -55,7 +55,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
             "battleground", "cutthroat", "superiority", "uplink-center", "hardlock",
             "b-pong", "akial-interference", "evacuation", "neutralization",
             "provisioning", "area-of-interest", "data-harvest", "last-launch",
-            "corporate-appropriation", "outbreak",
+            "corporate-appropriation", "outbreak", "critical-intervention",
         ]),
     ):
         status, _, payload = _json(
@@ -73,7 +73,7 @@ def test_both_its_revisions_registered_and_no_cross_version_fallback(two_revisio
         (item["id"], item["revision"]): item
         for item in payload["collections"]
     }
-    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 19
+    assert collections[("its-18", "2026.09.11")]["scenario_count"] == 20
     assert collections[("its-18", "2026.09.01")]["scenario_count"] == 1
     assert _json(app, "/api/scenarios?collection=its-18&revision=2026.09.12")[2]["items"] == []
 
@@ -953,6 +953,100 @@ def test_outbreak_alpha_stabilization_six_sizes_and_revision_isolation(
 
     assert _json(
         app, "/api/scenarios/outbreak?army_points=300"
+        "&collection=its-18&revision=2026.09.01",
+    )[0] == 404
+
+
+def test_critical_intervention_six_sizes_fixed_roles_and_historical_isolation(
+    two_revisions,
+) -> None:
+    registry, app = two_revisions
+    assert registry.resolve(PublicationReference(
+        "its-18", "scenario:critical-intervention", "2026.09.01",
+    )) is None
+    for points, width, height, depth, attacker_threshold, defender_threshold in (
+        (150, 24, 32, 8, 40, 75),
+        (200, 32, 48, 12, 50, 100),
+        (250, 32, 48, 12, 65, 125),
+        (300, 48, 48, 12, 75, 150),
+        (350, 48, 48, 12, 85, 175),
+        (400, 48, 48, 12, 100, 200),
+    ):
+        uri = (
+            f"/api/scenarios/critical-intervention?army_points={points}"
+            "&collection=its-18&revision=2026.09.11"
+        )
+        status, _, item = _json(app, uri)
+        assert status == 200
+        assert item["selected_army_points"] == points
+        assert item["publication"]["revision"] == "2026.09.11"
+        assert item["setup"]["game_size"]["swc"] == points // 50
+        assert [side["id"] for side in item["setup"]["sides"]] == [
+            "side-a", "side-b",
+        ]
+        assert "objective_selection" not in item
+        geometry = item["placement"]["geometry"]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {e["id"]: e for e in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert elements["attacker-exclusion-zone"]["y1"] == height / 2 - 4
+        assert elements["attacker-exclusion-zone"]["y2"] == height / 2 + 4
+        assert elements["server-room"]["style"] == "no-deploy"
+        assert (
+            elements["server-room"]["x1"], elements["server-room"]["y1"],
+            elements["server-room"]["x2"], elements["server-room"]["y2"],
+        ) == (
+            width / 2 - 4, height / 2 - 4,
+            width / 2 + 4, height / 2 + 4,
+        )
+        assert {e["id"] for e in elements.values() if e["kind"] == "marker"} == {
+            "turret-a", "turret-b", "data-console", "inhibitor-antenna",
+        }
+        assert {m["marker_type"]: (m["count"], m["diameter_mm"])
+                for m in item["placement"]["marker_dimensions"]} == {
+            "defensive-turret": (2, None),
+            "console": (1, 40),
+            "antenna": (1, 40),
+        }
+        assert [m["citation"]["page"] for m in item["placement"]["marker_dimensions"]
+                if m["diameter_mm"] is not None] == [18, 18]
+        assert [citation["page"] for citation in item["citations"]] == [
+            *range(97, 105), *range(97, 105),
+        ]
+        objectives = {o["id"]: o for o in item["objectives"]}
+        assert sum(o["maximumPoints"] for o in objectives.values()
+                   if "side-a" in o["sideIds"]) == 10
+        assert sum(o["maximumPoints"] for o in objectives.values()
+                   if "side-b" in o["sideIds"]) == 12
+        assert [award["objectivePoints"] for award in
+                objectives["attacker-kill-threshold"]["awards"]] == [1]
+        assert [award["objectivePoints"] for award in
+                objectives["defender-kill-threshold"]["awards"]] == [2]
+        assert f"at least {attacker_threshold} enemy Army Points" in (
+            objectives["attacker-kill-threshold"]["awards"][0]["condition"]["text"]
+        )
+        assert f"at least {defender_threshold} enemy Army Points" in (
+            objectives["defender-kill-threshold"]["awards"][0]["condition"]["text"]
+        )
+        assert len(item["source_issues"]) == 6
+        svg_uri = uri.replace(
+            "/api/scenarios/critical-intervention?",
+            "/api/scenarios/critical-intervention/map.svg?",
+        )
+        svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
+        assert svg_status == 200
+        assert b'class="no-deploy"' in svg
+        assert b'id="attacker-exclusion-zone" class="exclusion"' in svg
+        assert svg.count(b'data-marker-type="defensive-turret" '
+                         b'data-physical-size="unspecified"') == 2
+        assert svg.count(b'data-marker-type="console" data-diameter-mm="40"') == 1
+        assert svg.count(b'data-marker-type="antenna" data-diameter-mm="40"') == 1
+        for distance in (depth, 4, 8, width / 2):
+            assert f'data-distance-inches="{distance:g}"'.encode() in svg
+
+    assert _json(
+        app, "/api/scenarios/critical-intervention?army_points=300"
         "&collection=its-18&revision=2026.09.01",
     )[0] == 404
 

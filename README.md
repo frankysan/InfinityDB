@@ -73,10 +73,11 @@ its application metrics.
   publications, including Battleground, Annihilation, Crossing Lines,
   Double Bind, The Dig, Cutthroat, Superiority, Uplink Center, Hardlock,
   B-Pong, Akial Interference, Evacuation, Neutralization, Provisioning,
-  Area of Interest, Data-Harvest, Last Launch, Corporate Appropriation and Outbreak,
-  with game-size deployment maps, scoring,
+  Area of Interest, Data-Harvest, Last Launch, Corporate Appropriation, Outbreak
+  and Critical Intervention, with game-size deployment maps, scoring,
   reviewed source citations, and explicit Double Bind Main Objective choices.
-  Season 18 mission coverage remains partial.
+  All twenty September-hotfix missions are represented; source discrepancies
+  and browser visual acceptance remain tracked separately.
 - Includes global search and a federated Glossary across player-facing reference domains, with
   canonical Equipment, embedded Attributes, scoped Game terms and searchable Weapon Properties
   (such as Viral, Plasma and combined Ammunition). Weapon Properties link to their underlying

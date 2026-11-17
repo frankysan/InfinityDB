@@ -332,13 +332,14 @@ scenario maps and their relevant context. Preserve the existing Battleground
 pilot and historical revision identities. Season 17 and Season 16 Part II
 remain later scope; do not claim complete Season 18 coverage before it is verified.
 
-**Published 2026.09.11 hotfix coverage (2026-11-17):** Nineteen reviewed
-missions now have source-cited scoring, rules and game-size maps; the original
+**Published 2026.09.11 hotfix coverage (2026-11-17):** All twenty
+reviewed missions now have source-cited scoring, rules and game-size maps; the original
 2026.09.01 Battleground remains independently selectable. The browser exposes
 exact-revision selection, typed objectives, and Double Bind's alternative Main
 Objective sets. Map zoning and placement rulers have been reviewed in both
-source languages. One hotfix mission remains unpublished; in-browser visual
-acceptance at relevant breakpoints is still open. See the
+source languages. All twenty hotfix missions are present, with unresolved source
+issues identified explicitly. In-browser visual acceptance at relevant
+breakpoints is still open. See the
 [ITS season database](its-season-database.md#published-20260911-hotfix-curation).
 
 - [ ] Build a versioned ITS reference library from material under
@@ -369,14 +370,15 @@ acceptance at relevant breakpoints is still open. See the
 - [ ] Extend the existing core-scenario foundation with remaining ITS scenario
   list/detail coverage backed by versioned seasonal data; retain the already
   published Season 18 Battleground pilot.
-  - [ ] Curate the remaining Season 18 mission identities and complete
+  - [x] Curate the remaining Season 18 mission identities and complete
     source-backed definitions under the reviewed selected 2026.09.11 hotfix
     identity once its source promotion is accepted; retain
     `its-18@2026.09.01` for historically scoped results. Extend typed
     geometry, scoring and card/classified choices only where each mission
     needs them. Unpublished missions must fail closed.
-    Nineteen reviewed hotfix missions are published, most recently Outbreak.
-    Critical Intervention remains excluded until source review.
+    All twenty reviewed hotfix missions now have definitions and six-size maps.
+    Unresolved bilingual discrepancies remain explicit source issues;
+    visual browser acceptance is tracked separately.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
     season launched under N5) and ITS Season 16 Part II (the N5-compatible
     revision), at minimum their scenario definitions and maps. Keep original

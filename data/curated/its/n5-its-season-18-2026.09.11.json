@@ -70,6 +70,9 @@
       },
       {
         "scenarioId": "scenario:outbreak"
+      },
+      {
+        "scenarioId": "scenario:critical-intervention"
       }
     ]
   },
@@ -16613,6 +16616,1343 @@
           "sourceId": "its-season-18-es-pdf",
           "page": 87,
           "section": "Estallido"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-17"
+      }
+    },
+    {
+      "id": "scenario:critical-intervention",
+      "kind": "scenario",
+      "name": "Critical Intervention",
+      "summary": "Asymmetric Attacker/Defender mission to unlock and extract a Data Pack, secure the Server Room and overcome an optional automated defensive turret system.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "definitionVersion": 1,
+        "mission": {
+          "sides": [
+            {
+              "id": "side-a",
+              "name": "Attacker (Side A, first Player Turn)"
+            },
+            {
+              "id": "side-b",
+              "name": "Defender (Side B, second Player Turn)"
+            }
+          ],
+          "gameSizes": [
+            {
+              "armyPoints": 150,
+              "swc": 3,
+              "configurationId": "150-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 200,
+              "swc": 4,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 250,
+              "swc": 5,
+              "configurationId": "200-250-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 300,
+              "swc": 6,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 350,
+              "swc": 7,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            },
+            {
+              "armyPoints": 400,
+              "swc": 8,
+              "configurationId": "300-400-points",
+              "deployments": [
+                {
+                  "sideId": "side-a",
+                  "elementIds": [
+                    "deployment-a"
+                  ]
+                },
+                {
+                  "sideId": "side-b",
+                  "elementIds": [
+                    "deployment-b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "attacker-unlock-console",
+              "name": "Attacker: Unlock Data Console",
+              "sideIds": [
+                "side-a"
+              ],
+              "timing": "immediate",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "The Attacker has Unlocked the Data Console using the Inhibitor Antenna."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "attacker-extract-pack",
+              "name": "Attacker: Extract Data Pack",
+              "sideIds": [
+                "side-a"
+              ],
+              "timing": "immediate",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "The Attacker successfully Extracted the Data Pack from the central Data Console."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "attacker-extractor-not-killed",
+              "name": "Attacker: Extractor Survives",
+              "sideIds": [
+                "side-a"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, the Trooper that Extracted the Data Pack is not considered Killed."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "attacker-extractor-home",
+              "name": "Attacker: Extractor Home and Non-Null",
+              "sideIds": [
+                "side-a"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, the Trooper that Extracted the Data Pack is in the Attacker's own Deployment Zone and is in a non-Null State."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "attacker-dominate-room",
+              "name": "Attacker: Dominate Server Room",
+              "sideIds": [
+                "side-a"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, the Attacker Dominates the Server Room Zone of Operations."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "attacker-kill-threshold",
+              "name": "Attacker: Enemy Army Points Killed",
+              "sideIds": [
+                "side-a"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 40 enemy Army Points in a 150-point game."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    200
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 50 enemy Army Points in a 200-point game."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    250
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 65 enemy Army Points in a 250-point game."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    300
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 75 enemy Army Points in a 300-point game."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    350
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 85 enemy Army Points in a 350-point game."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 100 enemy Army Points in a 400-point game."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "defender-prevent-unlock",
+              "name": "Defender: Prevent Console Unlock",
+              "sideIds": [
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Prevent the Attacker from Unlocking the Data Console."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "defender-prevent-extract",
+              "name": "Defender: Prevent Data Pack Extraction",
+              "sideIds": [
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Prevent the Attacker from Extracting the Data Pack."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "defender-kill-extractor",
+              "name": "Defender: Kill Data Pack Extractor",
+              "sideIds": [
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill the Trooper that Extracted the Data Pack. This award applies only if the Attacker Extracted the Pack."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "defender-dominate-room",
+              "name": "Defender: Dominate Server Room",
+              "sideIds": [
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 3,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 3,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "At game end, the Defender Dominates the Server Room Zone of Operations."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "defender-kill-threshold",
+              "name": "Defender: Enemy Army Points Killed",
+              "sideIds": [
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 2,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 75 enemy Army Points in a 150-point game."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    200
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 100 enemy Army Points in a 200-point game."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    250
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 125 enemy Army Points in a 250-point game."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    300
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 150 enemy Army Points in a 300-point game."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    350
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 175 enemy Army Points in a 350-point game."
+                  }
+                },
+                {
+                  "armyPoints": [
+                    400
+                  ],
+                  "objectivePoints": 2,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Kill at least 200 enemy Army Points in a 400-point game."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "classified-objective",
+              "name": "Classified Objective (each player)",
+              "sideIds": [
+                "side-a",
+                "side-b"
+              ],
+              "timing": "end-of-game",
+              "aggregation": "exclusive",
+              "maximumPoints": 1,
+              "awards": [
+                {
+                  "armyPoints": [
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    400
+                  ],
+                  "objectivePoints": 1,
+                  "condition": {
+                    "kind": "reviewed-prose",
+                    "text": "Each player may complete one Classified Objective worth 1 Objective Point; instead they may select that card for INTELCOM Support and Control."
+                  }
+                }
+              ]
+            }
+          ],
+          "rules": [
+            {
+              "id": "attacker-defender",
+              "name": "Attacker and Defender Roles",
+              "paragraphs": [
+                "Two fixed roles apply, not a mutually chosen Main Objective set: the player taking the first Player Turn is the Attacker, and the player taking the second Player Turn is the Defender. Each has distinct Main Objectives; the Classified Objective is common.",
+                "Before Deployment, the Defender may spend one Command Token either to activate the Server Room Defense System, or instead to ignore the Server Room deployment restriction and deploy up to 65 Army Points of Troops from their Army List anywhere within the Server Room. Superior Deployment Skills are not required for that exception.",
+                "This optional Command Token spending is additional to the Strategic Use of Command Tokens. The Defender may select only one of these options with the single Token."
+              ]
+            },
+            {
+              "id": "deployment-and-exclusion",
+              "name": "Deployment and Attacker Exclusion Zone",
+              "paragraphs": [
+                "Both players deploy on opposite edges within the game-size-specific Deployment Zones. The Server Room is a No Deployment area unless the Defender spends the special Command Token on the room-deployment exception.",
+                "A central Exclusion Zone extends [[distance:4:inch]] on either side of the table's central line. Airborne Deployment (AD) or Superior Deployment Skills cannot be used to deploy inside that Zone; the source labels this as the Attacker's Exclusion Zone."
+              ]
+            },
+            {
+              "id": "server-room",
+              "name": "Server Room and Gates",
+              "paragraphs": [
+                "The Server Room is a central [[distance:8:inch]] × [[distance:8:inch]] Zone of Operations (ZO). It is treated as having infinitely high walls completely blocking Line of Fire, with four Wide Gates, one in the center of each wall, open at game start.",
+                "Wide Gate Tokens or comparable scenery represent the Gates. Spanish p.100 explicitly confirms the Gates allow access irrespective of Silhouette Attribute. Neither publication defines a numeric Gate width to plot here; Gates are stated in these rules rather than invented on the SVG.",
+                "The Spanish publication describes the room as [[distance:20:cm]] × [[distance:20:cm]], slightly smaller than the English inches; geometry follows the English source."
+              ]
+            },
+            {
+              "id": "dominate-zone",
+              "name": "Dominate the Server Room ZO",
+              "paragraphs": [
+                "The Server Room is Dominated by the player with more eligible Victory Points inside it. Models and Markers representing Troopers, as well as Proxies and Peripheral Troops, count; Null-state Troops, Mines, Deployable Repeaters, fake Holoechoes and other non-Trooper Tokens do not.",
+                "A Trooper is inside the ZO when more than half their base is inside. Shasvastii Troopers count in Shasvastii-Embryo or non-Null State under English p.100; Spanish p.100 instead specifies Normal or Unconscious.",
+                "Each non-Null Baggage Trooper inside the Server Room adds 20 Victory Points for this Domination comparison."
+              ]
+            },
+            {
+              "id": "defense-system",
+              "name": "Server Room Defense System",
+              "paragraphs": [
+                "Two Armed Turrets (Defensive Turret A/B Tokens, or equivalent scenery/Models of the appropriate Silhouette) occupy separate corners inside the Server Room. Their diagram positions are schematic; no precise turret diameter or center-to-corner clearance is published.",
+                "When the Defense System is active, the Armed Turrets respond with BS Attack or CC Attack to Orders declared by the Attacker's active Models, not Markers, that are in their Line of Fire or Silhouette contact.",
+                "English p.101 lists an Armed Turret profile of CC 5, BS 10, WIP 11, ARM 2, BTS 3, STR 1 and Silhouette 2, with 360° Visor, Total Reaction, Combi Rifle and PARA CC Weapon (-3). MOV and PH have no printed values.",
+                "The Spanish p.101 table prints the STR-equivalent field as a dash, whereas English specifies STR 1. This is a source inconsistency; the English profile is recorded without fabricating a Spanish value."
+              ]
+            },
+            {
+              "id": "data-console",
+              "name": "Data Console",
+              "paragraphs": [
+                "A single 40 mm Data Console is fixed at the center of the Server Room, holding one Data Pack. It uses a Console A Token or scenery of the same diameter."
+              ]
+            },
+            {
+              "id": "extract-data-pack",
+              "name": "Extract Data Pack (Attacker Only)",
+              "paragraphs": [
+                "Only an Attacker Specialist Troop in Silhouette contact with the Data Console may declare the Attack, Scenario Short Skill Extract Data Pack.",
+                "Perform a Normal WIP-6 Roll to Extract the Data Pack, placing a Data Pack Token beside the successful Trooper. If the Data Console has been Unlocked, the Skill uses a Normal WIP Roll without the -6 MOD. Failure may be retried by spending another Short Skill."
+              ]
+            },
+            {
+              "id": "data-pack",
+              "name": "Data Pack Carrier",
+              "paragraphs": [
+                "The Data Pack must be represented with its Token. Its carrier must always be on the table as a Model, never in a Marker State (such as Camouflage or Holoecho).",
+                "If the carrier enters Dead State after Extracting the Data Pack, remove the Data Pack Token. The scenario's objectives refer to the Trooper that Extracted the Pack."
+              ]
+            },
+            {
+              "id": "inhibitor-antenna",
+              "name": "Inhibitor Antenna",
+              "paragraphs": [
+                "One 40 mm Inhibitor Antenna is fixed next to an exterior corner of the Server Room in the Defender's table half, shown below the room's left corner in the source map. It may use a Transmission Antenna Token or equivalent scenery."
+              ]
+            },
+            {
+              "id": "use-inhibitor-antenna",
+              "name": "Use Inhibitor Antenna (Short Skill)",
+              "paragraphs": [
+                "Only a Specialist Troop in Silhouette contact with the Inhibitor Antenna may declare this Attack, Scenario Short Skill. Choose one action: as the Attacker only, Unlock the Data Console; or as either side, activate or deactivate the Server Room Defense System.",
+                "A successful Normal WIP Roll performs the selected action. Failed attempts may be repeated, each spending another Short Skill."
+              ]
+            },
+            {
+              "id": "specialist-troops",
+              "name": "Specialist Troops",
+              "paragraphs": [
+                "Hackers, Doctors, Engineers, Forward Observers, Paramedics and Troopers with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] count as Specialist Troops.",
+                "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models for Specialist-only tasks."
+              ]
+            },
+            {
+              "id": "killing",
+              "name": "Killing",
+              "paragraphs": [
+                "Troopers are considered Killed by the enemy when they enter Dead State, are in a Null State at game end, or were never deployed on the table as a Model or Marker by game end."
+              ]
+            },
+            {
+              "id": "intelcom-support-control",
+              "name": "INTELCOM Card (Support and Control)",
+              "paragraphs": [
+                "Before the game begins, after choosing the initial Classified Objective, each player publicly declares whether that card is used as their Classified Objective or INTELCOM Card. Roll a die; the highest roll announces first. The card's mission text or numeric value remains Private Information.",
+                "At the end of the final Game Round, count points in Initiative order. A player with at least one non-Null Trooper inside the Server Room may use the INTELCOM Card in Support and Control Mode to add its numeric value to the Trooper-point total used for Zone of Operations control.",
+                "English p.103 describes adding the INTELCOM value to Victory Points inside a chosen ZO; Spanish p.104 says Army Points inside a ZO. Both are retained as source wording; no unrelated Zone is invented."
+              ]
+            }
+          ],
+          "endConditions": [
+            {
+              "id": "round-limit",
+              "checkAt": "end-of-round",
+              "finishAt": "end-of-round",
+              "condition": {
+                "kind": "round-limit",
+                "rounds": 3
+              }
+            },
+            {
+              "id": "retreat",
+              "checkAt": "tactical-phase",
+              "finishAt": "end-of-player-turn",
+              "condition": {
+                "kind": "reviewed-prose",
+                "text": "If a player begins their Active Turn in Retreat!, the mission ends at the end of that Player Turn."
+              }
+            }
+          ],
+          "sourceIssues": [
+            {
+              "id": "defender-printed-maximum",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "defender-prevent-extract",
+              "status": "needs-verification",
+              "description": "Both EN pp.97-98 and ES pp.97-98 print a maximum Defender Main Objective total of 11 OP (1+3+2+3+2) plus 1 Classified OP, for 12 OP. The 12 printed OP are preserved and not silently normalized to a 10-point cap."
+            },
+            {
+              "id": "server-room-dimension-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "attacker-dominate-room",
+              "status": "needs-verification",
+              "description": "EN p.99 says [[distance:8:inch]] square for the Server Room, while ES p.99 says [[distance:20:cm]] square. The geometry uses English inches and records the near-equivalence without treating it as exact."
+            },
+            {
+              "id": "defense-turret-str-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "defender-dominate-room",
+              "status": "needs-verification",
+              "description": "EN p.101 prints STR 1 on the Armed Turret Profile. ES p.101 shows a dash in its EST/STR column, not 1. Profile details are retained in rule text without resolving the discrepancy."
+            },
+            {
+              "id": "intelcom-scoring-label-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "attacker-dominate-room",
+              "status": "needs-verification",
+              "description": "EN p.103 adds INTELCOM Support and Control value to Victory Points in the selected ZO. ES p.104 says Puntos de Ejército (Army Points), a terminology mismatch, not evidence of a different printed numeric value."
+            },
+            {
+              "id": "shasvastii-zone-status-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "attacker-dominate-room",
+              "status": "needs-verification",
+              "description": "EN p.100 counts Shasvastii-Embryo or any non-Null State; ES p.100 specifies Normal or Unconscious. Keep each text's status wording distinct."
+            },
+            {
+              "id": "exclusion-distance-bilingual",
+              "armyPoints": [
+                150,
+                200,
+                250,
+                300,
+                350,
+                400
+              ],
+              "objectiveId": "attacker-kill-threshold",
+              "status": "needs-verification",
+              "description": "EN p.98 defines Exclusion half-width [[distance:4:inch]] while ES p.98 uses [[distance:10:cm]] for the same restricted area. They differ slightly in physical measurement."
+            }
+          ]
+        },
+        "configurations": [
+          {
+            "id": "150-points",
+            "armyPoints": [
+              150
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Critical Intervention",
+              "table": {
+                "width": 24,
+                "height": 32,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 24,
+                  "y2": 8
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 24,
+                  "y2": 32
+                },
+                {
+                  "id": "attacker-exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 12,
+                  "x2": 24,
+                  "y2": 20
+                },
+                {
+                  "id": "server-room",
+                  "kind": "rectangle",
+                  "style": "no-deploy",
+                  "x1": 8,
+                  "y1": 12,
+                  "x2": 16,
+                  "y2": 20
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 16,
+                  "x2": 24,
+                  "y2": 16
+                },
+                {
+                  "id": "turret-a",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "defensive-turret",
+                  "x": 8.75,
+                  "y": 12.75
+                },
+                {
+                  "id": "turret-b",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "defensive-turret",
+                  "x": 15.25,
+                  "y": 19.25
+                },
+                {
+                  "id": "data-console",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 12,
+                  "y": 16
+                },
+                {
+                  "id": "inhibitor-antenna",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 8,
+                  "y": 20.65
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 12,
+                  "y": 4,
+                  "text": "Attacker\nZone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 12,
+                  "y": 28,
+                  "text": "Defender\nZone B"
+                },
+                {
+                  "id": "room-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 12,
+                  "y": 13.8,
+                  "text": "Server"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "ruler",
+                  "x1": 0.85,
+                  "y1": 24,
+                  "x2": 0.85,
+                  "y2": 32,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-half-width",
+                  "kind": "ruler",
+                  "x1": 1.15,
+                  "y1": 12,
+                  "x2": 1.15,
+                  "y2": 16,
+                  "offset": 0
+                },
+                {
+                  "id": "server-room-width",
+                  "kind": "dimension",
+                  "target": "server-room",
+                  "axis": "x",
+                  "side": "end",
+                  "offset": 0.35
+                },
+                {
+                  "id": "room-center-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 31.1,
+                  "x2": 12,
+                  "y2": 31.1,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "200-250-points",
+            "armyPoints": [
+              200,
+              250
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Critical Intervention",
+              "table": {
+                "width": 32,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 32,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 32,
+                  "y2": 48
+                },
+                {
+                  "id": "attacker-exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 32,
+                  "y2": 28
+                },
+                {
+                  "id": "server-room",
+                  "kind": "rectangle",
+                  "style": "no-deploy",
+                  "x1": 12,
+                  "y1": 20,
+                  "x2": 20,
+                  "y2": 28
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 32,
+                  "y2": 24
+                },
+                {
+                  "id": "turret-a",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "defensive-turret",
+                  "x": 12.75,
+                  "y": 20.75
+                },
+                {
+                  "id": "turret-b",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "defensive-turret",
+                  "x": 19.25,
+                  "y": 27.25
+                },
+                {
+                  "id": "data-console",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 16,
+                  "y": 24
+                },
+                {
+                  "id": "inhibitor-antenna",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 12,
+                  "y": 28.65
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 16,
+                  "y": 6,
+                  "text": "Attacker\nZone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 16,
+                  "y": 42,
+                  "text": "Defender\nZone B"
+                },
+                {
+                  "id": "room-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 16,
+                  "y": 21.8,
+                  "text": "Server"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "ruler",
+                  "x1": 0.85,
+                  "y1": 36,
+                  "x2": 0.85,
+                  "y2": 48,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-half-width",
+                  "kind": "ruler",
+                  "x1": 1.15,
+                  "y1": 20,
+                  "x2": 1.15,
+                  "y2": 24,
+                  "offset": 0
+                },
+                {
+                  "id": "server-room-width",
+                  "kind": "dimension",
+                  "target": "server-room",
+                  "axis": "x",
+                  "side": "end",
+                  "offset": 0.35
+                },
+                {
+                  "id": "room-center-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 47.1,
+                  "x2": 16,
+                  "y2": 47.1,
+                  "offset": 0
+                }
+              ]
+            }
+          },
+          {
+            "id": "300-400-points",
+            "armyPoints": [
+              300,
+              350,
+              400
+            ],
+            "geometry": {
+              "format": "InfinityDB scenario geometry",
+              "formatVersion": 1,
+              "title": "Critical Intervention",
+              "table": {
+                "width": 48,
+                "height": 48,
+                "unit": "in"
+              },
+              "elements": [
+                {
+                  "id": "deployment-a",
+                  "kind": "rectangle",
+                  "style": "deployment-a",
+                  "x1": 0,
+                  "y1": 0,
+                  "x2": 48,
+                  "y2": 12
+                },
+                {
+                  "id": "deployment-b",
+                  "kind": "rectangle",
+                  "style": "deployment-b",
+                  "x1": 0,
+                  "y1": 36,
+                  "x2": 48,
+                  "y2": 48
+                },
+                {
+                  "id": "attacker-exclusion-zone",
+                  "kind": "rectangle",
+                  "style": "exclusion",
+                  "x1": 0,
+                  "y1": 20,
+                  "x2": 48,
+                  "y2": 28
+                },
+                {
+                  "id": "server-room",
+                  "kind": "rectangle",
+                  "style": "no-deploy",
+                  "x1": 20,
+                  "y1": 20,
+                  "x2": 28,
+                  "y2": 28
+                },
+                {
+                  "id": "table-center-line",
+                  "kind": "line",
+                  "style": "guide",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 48,
+                  "y2": 24
+                },
+                {
+                  "id": "turret-a",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "defensive-turret",
+                  "x": 20.75,
+                  "y": 20.75
+                },
+                {
+                  "id": "turret-b",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "defensive-turret",
+                  "x": 27.25,
+                  "y": 27.25
+                },
+                {
+                  "id": "data-console",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "console",
+                  "x": 24,
+                  "y": 24
+                },
+                {
+                  "id": "inhibitor-antenna",
+                  "kind": "marker",
+                  "style": "objective",
+                  "markerType": "antenna",
+                  "x": 20,
+                  "y": 28.65
+                },
+                {
+                  "id": "deployment-a-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 24,
+                  "y": 6,
+                  "text": "Attacker\nZone A"
+                },
+                {
+                  "id": "deployment-b-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 24,
+                  "y": 42,
+                  "text": "Defender\nZone B"
+                },
+                {
+                  "id": "room-label",
+                  "kind": "label",
+                  "style": "label",
+                  "x": 24,
+                  "y": 21.8,
+                  "text": "Server"
+                }
+              ],
+              "annotations": [
+                {
+                  "id": "deployment-b-depth",
+                  "kind": "ruler",
+                  "x1": 0.85,
+                  "y1": 36,
+                  "x2": 0.85,
+                  "y2": 48,
+                  "offset": 0
+                },
+                {
+                  "id": "exclusion-half-width",
+                  "kind": "ruler",
+                  "x1": 1.15,
+                  "y1": 20,
+                  "x2": 1.15,
+                  "y2": 24,
+                  "offset": 0
+                },
+                {
+                  "id": "server-room-width",
+                  "kind": "dimension",
+                  "target": "server-room",
+                  "axis": "x",
+                  "side": "end",
+                  "offset": 0.35
+                },
+                {
+                  "id": "room-center-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 47.1,
+                  "x2": 24,
+                  "y2": 47.1,
+                  "offset": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 97,
+          "section": "Critical Intervention"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 98,
+          "section": "Critical Intervention"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 99,
+          "section": "Critical Intervention"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 100,
+          "section": "Critical Intervention"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 101,
+          "section": "Critical Intervention"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 102,
+          "section": "Critical Intervention"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 103,
+          "section": "Critical Intervention"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 104,
+          "section": "Critical Intervention"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 97,
+          "section": "Intervención Crítica"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 98,
+          "section": "Intervención Crítica"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 99,
+          "section": "Intervención Crítica"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 100,
+          "section": "Intervención Crítica"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 101,
+          "section": "Intervención Crítica"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 102,
+          "section": "Intervención Crítica"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 103,
+          "section": "Intervención Crítica"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 104,
+          "section": "Intervención Crítica"
         }
       ],
       "review": {

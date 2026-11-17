@@ -1739,6 +1739,161 @@ def test_outbreak_invalid_geometry_or_scoring_fails_closed(mutation: str) -> Non
     with pytest.raises(ScenarioDefinitionError):
         parse_scenario_definition_record(record)
 
+
+def test_critical_intervention_fixed_roles_scoring_turrets_and_bilingual_sources() -> None:
+    record = _records()["scenario:critical-intervention"]
+    mission, configurations = _parts(record)
+    assert [(c["sourceId"], c["page"]) for c in record["citations"]] == [
+        *(("its-season-18-en-pdf", p) for p in range(97, 105)),
+        *(("its-season-18-es-pdf", p) for p in range(97, 105)),
+    ]
+    assert [s["name"] for s in mission["sides"]] == [
+        "Attacker (Side A, first Player Turn)",
+        "Defender (Side B, second Player Turn)",
+    ]
+    assert "objectiveSelection" not in mission  # Roles are fixed by first Turn
+    assert [size["swc"] for size in mission["gameSizes"]] == [3, 4, 5, 6, 7, 8]
+    objectives = {obj["id"]: obj for obj in mission["objectives"]}
+    assert {key: obj["maximumPoints"] for key, obj in objectives.items()} == {
+        "attacker-unlock-console": 1, "attacker-extract-pack": 2,
+        "attacker-extractor-not-killed": 1, "attacker-extractor-home": 2,
+        "attacker-dominate-room": 2, "attacker-kill-threshold": 1,
+        "defender-prevent-unlock": 1, "defender-prevent-extract": 3,
+        "defender-kill-extractor": 2, "defender-dominate-room": 3,
+        "defender-kill-threshold": 2, "classified-objective": 1,
+    }
+    assert sum(obj["maximumPoints"] for obj in objectives.values()
+               if "side-a" in obj["sideIds"]) == 10
+    assert sum(obj["maximumPoints"] for obj in objectives.values()
+               if "side-b" in obj["sideIds"]) == 12
+    assert all(obj["sideIds"] == ["side-a"] for key, obj in objectives.items()
+               if key.startswith("attacker-"))
+    assert all(obj["sideIds"] == ["side-b"] for key, obj in objectives.items()
+               if key.startswith("defender-"))
+    assert objectives["classified-objective"]["sideIds"] == ["side-a", "side-b"]
+    assert [a["armyPoints"] for a in objectives["attacker-kill-threshold"]["awards"]] == [
+        [points] for points in SIZES
+    ]
+    assert [a["armyPoints"] for a in objectives["defender-kill-threshold"]["awards"]] == [
+        [points] for points in SIZES
+    ]
+    for objective_id, points in (
+        ("attacker-kill-threshold", [40, 50, 65, 75, 85, 100]),
+        ("defender-kill-threshold", [75, 100, 125, 150, 175, 200]),
+    ):
+        for award, size, threshold in zip(
+            objectives[objective_id]["awards"], SIZES, points, strict=True,
+        ):
+            assert f"at least {threshold} enemy Army Points" in (
+                award["condition"]["text"]
+            )
+            assert f"{size}-point game" in award["condition"]["text"]
+    rules = {rule["id"]: " ".join(rule["paragraphs"]) for rule in mission["rules"]}
+    assert "first Player Turn" in rules["attacker-defender"]
+    assert "65 Army Points" in rules["attacker-defender"]
+    assert "Command Token" in rules["attacker-defender"]
+    assert "[[distance:4:inch]]" in rules["deployment-and-exclusion"]
+    assert "[[distance:8:inch]]" in rules["server-room"]
+    assert "[[distance:20:cm]]" in rules["server-room"]
+    assert "four Wide Gates" in rules["server-room"]
+    assert "Shasvastii-Embryo" in rules["dominate-zone"]
+    assert "20 Victory Points" in rules["dominate-zone"]
+    assert "STR 1" in rules["defense-system"]
+    assert "Total Reaction" in rules["defense-system"]
+    assert "Combi Rifle" in rules["defense-system"]
+    assert "PARA CC Weapon (-3)" in rules["defense-system"]
+    assert "40 mm Data Console" in rules["data-console"]
+    assert "Normal WIP-6 Roll" in rules["extract-data-pack"]
+    assert "Normal WIP Roll without the -6 MOD" in rules["extract-data-pack"]
+    assert "never in a Marker State" in rules["data-pack"]
+    assert "40 mm Inhibitor Antenna" in rules["inhibitor-antenna"]
+    assert "activate or deactivate" in rules["use-inhibitor-antenna"]
+    assert "Peripheral (Servant)" in rules["specialist-troops"]
+    assert "INTELCOM" in rules["intelcom-support-control"]
+    assert "Private Information" in rules["intelcom-support-control"]
+    assert [end["id"] for end in mission["endConditions"]] == [
+        "round-limit", "retreat",
+    ]
+    assert {issue["id"] for issue in mission["sourceIssues"]} == {
+        "defender-printed-maximum", "server-room-dimension-bilingual",
+        "defense-turret-str-bilingual", "intelcom-scoring-label-bilingual",
+        "shasvastii-zone-status-bilingual", "exclusion-distance-bilingual",
+    }
+    assert all(issue["status"] == "needs-verification" for issue in mission["sourceIssues"])
+
+    for config, width, height, depth in (
+        ("150-points", 24, 32, 8),
+        ("200-250-points", 32, 48, 12),
+        ("300-400-points", 48, 48, 12),
+    ):
+        geometry = configurations[config]
+        assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+        elements = {element["id"]: element for element in geometry["elements"]}
+        assert elements["deployment-a"]["y2"] == depth
+        assert elements["deployment-b"]["y1"] == height - depth
+        assert elements["attacker-exclusion-zone"] == {
+            "id": "attacker-exclusion-zone", "kind": "rectangle", "style": "exclusion",
+            "x1": 0, "y1": height / 2 - 4, "x2": width, "y2": height / 2 + 4,
+        }
+        assert elements["server-room"] == {
+            "id": "server-room", "kind": "rectangle", "style": "no-deploy",
+            "x1": width / 2 - 4, "y1": height / 2 - 4,
+            "x2": width / 2 + 4, "y2": height / 2 + 4,
+        }
+        assert {element["id"] for element in elements.values()
+                if element["kind"] == "marker"} == {
+            "turret-a", "turret-b", "data-console", "inhibitor-antenna",
+        }
+        assert [(elements[key]["x"], elements[key]["y"]) for key in (
+            "turret-a", "turret-b", "data-console", "inhibitor-antenna",
+        )] == [
+            (width / 2 - 3.25, height / 2 - 3.25),
+            (width / 2 + 3.25, height / 2 + 3.25),
+            (width / 2, height / 2),
+            (width / 2 - 4, height / 2 + 4.65),
+        ]
+        assert elements["turret-a"]["markerType"] == "defensive-turret"
+        assert elements["turret-b"]["markerType"] == "defensive-turret"
+        assert elements["data-console"]["markerType"] == "console"
+        assert elements["inhibitor-antenna"]["markerType"] == "antenna"
+        for theme in ("light", "dark"):
+            svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
+            assert 'class="no-deploy"' in svg
+            assert 'id="attacker-exclusion-zone" class="exclusion"' in svg
+            assert svg.count('data-marker-type="defensive-turret" '
+                             'data-physical-size="unspecified"') == 2
+            assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 1
+            assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 1
+            for distance in (depth, 4, 8, width / 2):
+                assert f'data-distance-inches="{distance:g}"' in svg
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ("off-table-turret", "off-table-inhibitor", "inverted-room", "excess-defender-score"),
+)
+def test_critical_intervention_malformed_source_fails_closed(mutation: str) -> None:
+    record = deepcopy(_records()["scenario:critical-intervention"])
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    if mutation == "off-table-turret":
+        next(e for e in geometry["elements"] if e["id"] == "turret-a")[
+            "x"
+        ] = -15
+    elif mutation == "off-table-inhibitor":
+        next(e for e in geometry["elements"] if e["id"] == "inhibitor-antenna")[
+            "y"
+        ] = 100
+    elif mutation == "inverted-room":
+        next(e for e in geometry["elements"] if e["id"] == "server-room")[
+            "x2"
+        ] = -1
+    else:
+        record["facts"]["mission"]["objectives"][7]["awards"][0][
+            "objectivePoints"
+        ] = 4
+    with pytest.raises(ScenarioDefinitionError):
+        parse_scenario_definition_record(record)
+
 def test_new_shapes_fail_closed_and_old_revision_remains_unpublished(tmp_path: Path) -> None:
     doc = _records()["scenario:double-bind"]
     original = doc["facts"]["configurations"][0]["geometry"]

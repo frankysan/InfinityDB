@@ -90,6 +90,7 @@ _MARKER_LABELS = {
     "beacon": "Beacon Token",
     "tracking-beacon": "Tracking Beacon Token",
     "civilian": "Civilian Model or Token",
+    "defensive-turret": "Defensive Turret Model or Token",
 }
 
 
@@ -108,7 +109,9 @@ def _marker_dimensions(
         label = _MARKER_LABELS.get(marker_type)
         if label is None or (
             diameter is None
-            and marker_type not in {"beacon", "tracking-beacon", "civilian"}
+            and marker_type not in {
+                "beacon", "tracking-beacon", "civilian", "defensive-turret",
+            }
         ):
             raise ValueError(f"Missing reviewed marker dimensions for {marker_type!r}")
         entry = {

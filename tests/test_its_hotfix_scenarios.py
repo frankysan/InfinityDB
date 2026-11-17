@@ -37,7 +37,7 @@ def test_hotfix_is_independent_and_retains_historical_source() -> None:
         "scenario:b-pong", "scenario:akial-interference", "scenario:evacuation",
         "scenario:neutralization", "scenario:provisioning", "scenario:area-of-interest",
         "scenario:data-harvest", "scenario:last-launch", "scenario:corporate-appropriation",
-        "scenario:outbreak",
+        "scenario:outbreak", "scenario:critical-intervention",
     ]
     assert {s["id"]: s["sha256"] for s in current["sources"]} == {
         "its-season-18-en-pdf": (
@@ -60,7 +60,7 @@ def test_hotfix_annihilation_exact_score_bands_and_geometry(tmp_path: Path) -> N
         "scenario:b-pong", "scenario:akial-interference", "scenario:evacuation",
         "scenario:neutralization", "scenario:provisioning", "scenario:area-of-interest",
         "scenario:data-harvest", "scenario:last-launch", "scenario:corporate-appropriation",
-        "scenario:outbreak",
+        "scenario:outbreak", "scenario:critical-intervention",
     ]
     assert inspect_its_database(output, source=HOTFIX)["sha256"] == report["sha256"]
     assert select_its_scenario(
