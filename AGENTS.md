@@ -221,6 +221,13 @@ Use the [release-note writing rules](docs/releasing.md#3-prepare-release-notes-a
 for substantive user/operator outcomes; do not add entries for
 internal-only tests, refactors or process updates.
 
+**Record actionable improvement opportunities as they arise.** If you identify
+an improvement to code, tests, tooling, workflows, or agent instructions, record
+it in the [agent improvement log](docs/AGENT_IMPROVEMENTS.md), including when it
+falls outside your current task. Check for duplicates and capture the evidence,
+proposed change, and disposition. Continue the assigned work. Link accepted
+follow-up work to the backlog and mention relevant new entries in the handoff.
+
 Review the actual diff for documentation impact, update public
 `README.md` for user-visible capabilities or setup, and use canonical
 [project-domain labels](docs/project-domains.md) for new/revised
