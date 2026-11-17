@@ -12,6 +12,15 @@ season-scoped ITS publications, including source authority, citation
 ownership, exact selection and cross-domain applicability. It does not
 serve as a migration checklist or release-acceptance record.
 
+**Accepted direction (not yet implemented):** Routine player-facing ITS
+selection will choose a season and automatically use that season's explicitly
+declared current revision. Superseded facts and exact source provenance will
+stay in the single curated source-family file, but historical revisions will
+not be separately selectable or required as normal runtime publications.
+Future history/replay support is deferred. The exact-revision contracts below
+describe the existing implementation until the migration is complete; see
+[the data model](data-model.md#accepted-authoring-direction-one-source-family-version-tagged-facts).
+
 ## Existing source and runtime inventory
 
 The complete build loads reviewed curated Rules and ITS sources, but the

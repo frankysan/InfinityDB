@@ -345,12 +345,17 @@ breakpoints is still open. See the
 - [ ] **Data processing: consolidate source-family curation.** Implement the
   [accepted version-tagged fact model](data-model.md#accepted-authoring-direction-one-source-family-version-tagged-facts)
   and migrate the two ITS Season 18 curated JSON files into one maintained
-  season-family file. Selectively project each exact revision, including
+  season-family file. Declare the current revision explicitly (currently
+  2026.09.11), and project only its reviewed facts, including
   mission facts, maps, event policies, source descriptors and citations; reject
   missing, conflicting or implicitly inherited facts. Update builders, source
-  registration and build provenance together. Prove both revision-specific
-  publications preserve current authored behavior before retiring the split
-  inputs. Keep separate runtime databases and historical selectors.
+  registration and build provenance together. Prove the current publication
+  preserves existing hotfix behavior before retiring the split inputs.
+  Make the browser select a season rather than an exact revision; do not show
+  older ITS 18 facts or require an older-revision runtime database. Retain
+  historical curation/provenance for a possible later replay feature, without
+  implementing that feature as part of this migration. Handle existing
+  explicit-revision links without silently presenting outdated facts.
 
 - [ ] Build a versioned ITS reference library from material under
   `local/data/pdf/its/` and `local/data/pdf/legacy/`, keeping the current season distinct

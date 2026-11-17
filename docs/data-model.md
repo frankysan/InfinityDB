@@ -75,21 +75,26 @@ independent authorities such as N5 core rules, the N5 FAQ and ITS.
   multiple revisions, and distinct tagged variants when its meaning differs.
 - Keep immutable upstream revision files and their source descriptors, dates,
   languages, hashes and page citations separately identifiable within the
-  curated family. A citation must resolve to evidence from the selected
-  revision, never just the latest PDF.
-- Project the selected revision from that curated file when building a
+  curated family. Each current fact's citation must resolve to the revision
+  supporting it; retaining historical evidence does not make it current.
+- Declare the **current revision** explicitly for each source family and
+  project only facts reviewed as applicable to that revision into the normal
   publication. Reject overlapping incompatible variants, unreviewed carry-
-  forward and missing required revision facts; do not infer applicability from
-  file order or recency. Stable logical IDs may be shared across revisions.
-- **Authored file organization is independent of runtime publication
-  selection.** Distinct revision-specific SQLite outputs, provenance checks,
-  API selectors and historical behavior remain valid.
+  forward and missing required current facts; never select a fact merely from
+  file order or the newest-looking timestamp. Stable logical IDs may span revisions.
+- **Player-facing behavior is latest-only.** Within a selected source family or
+  season, show its current revision automatically, not a list of revisions.
+  Preserve version tags, source provenance and superseded facts in curation
+  for possible later historical browsing, but do not require separately
+  selectable historical SQLite publications, API selectors or UI controls.
+  Historical replay is a separate future capability, not a prerequisite for
+  the source-family migration.
 
 This is an **accepted but not yet implemented** curation model. The existing
 ITS 18 curated documents are still split by revision, and the current builder
 consumes one single-revision document at a time. Do not change or remove those
 inputs before the authoring schema, deterministic revision projection and
-publication-parity tests are implemented together. The migration is tracked
+current-publication parity tests are implemented together. The migration is tracked
 in [TODO](TODO.md#its-scenarios-and-game-tools).
 
 **Optional legacy-source annexes:** The `reinforcements-extra-n4-reference`

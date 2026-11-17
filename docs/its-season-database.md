@@ -44,8 +44,13 @@ lists `its-18@2026.09.01` (historical Battleground) and
 
 These two curated inputs are the **current implementation**, not the intended
 long-term authoring layout. The [accepted source-family model](data-model.md#accepted-authoring-direction-one-source-family-version-tagged-facts)
-will store version-tagged facts in one ITS 18 curated file while retaining both
-independently selectable runtime publications and their exact citations.
+will store version-tagged facts in one ITS 18 curated file, declare 2026.09.11
+as the current revision, and publish only its applicable facts by default.
+The normal player-facing scenario selection will choose ITS Season 18, **not**
+an individual September revision. The original facts and exact citations
+remain available internally for possible future historical browsing; no
+separately selectable historical publication or selector is required now.
+This latest-only behavior is a planned change, not yet implemented.
 
 The selected hotfix source binds English 2026.09.11 (142 pages,
 `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f`)
