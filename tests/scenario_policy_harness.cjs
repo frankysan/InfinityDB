@@ -86,13 +86,18 @@ async function run() {
   assert.equal(section.children.length, 3, "Only populated contexts get cards");
   assert.equal(tournament.tag, "article");
   assert.equal(tournament.children[0].textContent, "Official Tournament");
-  assert.equal(tournament.children[1].children[0].textContent, "Tournament restriction");
-  assert.equal(tournament.children[2].children[0].textContent, "Second tournament rule");
+  const tournamentBody = tournament.children[1];
+  assert.equal(tournamentBody.className, "surface-body");
+  assert.equal(tournamentBody.children[0].children[0].textContent, "Tournament restriction");
+  assert.equal(tournamentBody.children[1].children[0].textContent, "Second tournament rule");
   assert.equal(extra.tag, "article");
   assert.equal(extra.children[0].textContent, "TEAM-OPS Extra");
-  assert.equal(extra.children[1].children[0].textContent, "TEAM-OPS restriction");
-  assert.equal(extra.children[1].children[2].children[1].href, "/skills/infinity-spec-ops");
-  assert.match(extra.children[1].children[3].children[1].textContent, /p\. 27/);
+  const extraBody = extra.children[1];
+  assert.equal(extraBody.className, "surface-body");
+  const [extraPolicy] = extraBody.children;
+  assert.equal(extraPolicy.children[0].textContent, "TEAM-OPS restriction");
+  assert.equal(extraPolicy.children[2].children[1].href, "/skills/infinity-spec-ops");
+  assert.match(extraPolicy.children[3].children[1].textContent, /p\. 27/);
 
   context.controller = new AbortController();
   const abandoned = vm.runInContext("seasonPolicySection(item, controller)", context);

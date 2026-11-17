@@ -554,22 +554,24 @@ async function loadSeasonPolicyCards(publication, { signal }, wrapper) {
     if (signal.aborted) return;
     const cards = await Promise.all(contexts.map(async (context) => {
       const card = document.createElement("article");
-      card.className = "surface surface--subtle detail-section";
+      card.className = "surface surface--subtle surface--clipped";
       const title = document.createElement("h3");
       title.className = "surface-titlebar surface-titlebar--subtle";
       title.textContent = context === "team-ops-extra" ? "TEAM-OPS Extra"
         : context.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-      card.append(title);
+      const body = document.createElement("div");
+      body.className = "surface-body";
+      card.append(title, body);
       try {
         const { items = [] } = await getSeasonPolicies(season, revision, context, signal);
         if (!items.length) return null;
-        card.append(...items.map((policy) => seasonPolicyDetails(policy, publication)));
+        body.append(...items.map((policy) => seasonPolicyDetails(policy, publication)));
       } catch (error) {
         if (signal.aborted) return null;
         const message = document.createElement("p");
         message.className = "detail-copy";
         message.textContent = "The rules for this play context could not be loaded.";
-        card.append(message);
+        body.append(message);
         console.error("Could not load ITS play-context rules", error);
       }
       return card;
