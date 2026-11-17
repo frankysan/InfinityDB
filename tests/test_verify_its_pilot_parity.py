@@ -18,7 +18,7 @@ def test_its_pilot_matches_independent_api_and_svg_variants() -> None:
     assert result["svgByteComparisons"] == 24
     assert result["sourceCitations"] == 3
     assert result["publicationSha256"] == (
-        "cbb83be46883c82182cb7494659021f7fdb270fe359077a0178b321304af2bfa"
+        "96f5ffea6e1b00fd22716f2c37d5d11f7aa42904f604e9fc3b213b9928f6ea08"
     )
 
 

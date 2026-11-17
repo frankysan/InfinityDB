@@ -80,8 +80,23 @@ catalog and Search, with explicit scenario/season applicability; legacy
 season/scenario Skill routes and cards continue to work. Conflicting facts or
 versions are rejected rather than silently merged.
 
-This is proven on synthetic single-season and two-season fixtures, **not**
-reviewed ITS 17 data. Narrowly reviewed Skill-fact overrides, integrated
+Optional `sharedSkillBindings.overrides` entries use exact
+`{scenarioId, ruleId, field, value}` objects. Only complete prose-array
+replacement of one Skill's Requirements, Effects or Restrictions is supported.
+Each override is constrained to a declared season/scenario Skill binding and
+inherits that binding's reviewed season-local evidence. The materialized
+`sharedSkill.overriddenFields` identifies intentional variants; these remain
+distinct in catalog and Search rather than being merged with the shared base
+definition. Unchanged actions still consolidate by exact identity.
+
+A source-family file can replace one local scenario record with a shared
+membership while retaining that scenario's exact `factRevisions.records` tag
+and historical field overrides. A synthetic ITS 18 test confirms that both
+2026.09.11 and 2026.09.01 projections preserve the corresponding facts and
+membership ordering.
+
+This is proven on synthetic single-season, two-season and revision-tagged
+fixtures, **not** reviewed ITS 17 data. Generic component overrides, integrated
 build registration of future library-backed seasons, and real migrations remain
 [unfinished](TODO.md#its-scenarios-and-game-tools); see the
 [canonical data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse).

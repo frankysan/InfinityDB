@@ -23,6 +23,9 @@ OVERRIDE_FIELDS = frozenset({
     "facts.playRequirements.hvts",
     "facts.playRequirements.sharedClassifiedObjectivesPerRound",
 })
+SKILL_OVERRIDE_FIELDS = frozenset({
+    "skillFacts.requirements", "skillFacts.effects", "skillFacts.restrictions",
+})
 
 
 def _exact(value: Any, keys: set[str], context: str) -> dict[str, Any]:
@@ -102,6 +105,45 @@ def _apply_overrides(record: dict[str, Any], entries: Any) -> None:
         elif type(value) is not int or value < 0:
             raise ValueError(f"Scenario reuse override {field!r} must be a non-negative integer")
         node[segments[-1]] = deepcopy(value)
+
+
+def _bind_skill_overrides(
+    scenarios: dict[str, dict[str, Any]], available: list[str],
+    skill_id: str, version: str, entries: Any,
+) -> None:
+    """Attach narrowly scoped, reviewed Skill variants to exact scenario actions."""
+    if not isinstance(entries, list):
+        raise ValueError("Shared Skill overrides must be an array")
+    seen: set[tuple[str, str, str]] = set()
+    for entry in entries:
+        _exact(entry, {"scenarioId", "ruleId", "field", "value"}, "shared Skill override")
+        scenario_id = validate_typed_domain_id(
+            entry["scenarioId"], expected_domain="scenario", context="Skill override",
+        )
+        rule_id = require_domain_slug(entry["ruleId"], context="Skill override rule")
+        field = entry["field"]
+        if scenario_id not in available or field not in SKILL_OVERRIDE_FIELDS:
+            raise ValueError("Shared Skill override has unsupported scope or field")
+        key = (scenario_id, rule_id, field)
+        if key in seen:
+            raise ValueError("Conflicting shared Skill overrides for one action field")
+        seen.add(key)
+        values = entry["value"]
+        if (not isinstance(values, list)
+                or (not values and field != "skillFacts.restrictions")):
+            raise ValueError(f"Shared Skill override {field!r} requires an array of prose")
+        for value in values:
+            _text(value, f"shared Skill override {field}")
+        rules = [
+            rule for rule in scenarios[scenario_id]["facts"]["mission"]["rules"]
+            if rule.get("id") == rule_id
+            and rule.get("skillDefinition") == {"ref": skill_id, "version": version}
+        ]
+        if len(rules) != 1:
+            raise ValueError("Shared Skill override references unknown action or Skill")
+        rules[0].setdefault("skillOverrides", []).append({
+            "field": field, "value": deepcopy(values),
+        })
 
 
 def materialize_shared_scenarios(
@@ -267,8 +309,12 @@ def materialize_shared_scenarios(
     bound_ids: set[str] = set()
     scenarios = {record["id"]: record for record in result["records"]}
     for binding in bindings:
-        _exact(binding, {"id", "version", "scenarios", "citations", "review"},
-               "shared Skill binding")
+        fields = {"id", "version", "scenarios", "citations", "review"}
+        if (not isinstance(binding, dict) or fields - binding.keys()
+                or binding.keys() - (fields | {"overrides"})):
+            raise ValueError(
+                "Shared Skill binding requires identity, sources and optional overrides"
+            )
         skill_id = validate_typed_domain_id(
             binding["id"], expected_domain="skill", context="shared Skill binding",
         )
@@ -298,6 +344,9 @@ def materialize_shared_scenarios(
             if not uses:
                 raise ValueError(f"Shared Skill binding is unused by scenario {ref!r}")
         _reviewed(binding["review"], "Shared Skill season membership")
+        _bind_skill_overrides(
+            scenarios, available, skill_id, version, binding.get("overrides", []),
+        )
         materialized = {
             "id": skill_id, "kind": "skill", "version": version,
             "payload": deepcopy(entry["payload"]),
@@ -309,4 +358,19 @@ def materialize_shared_scenarios(
         components["definitions"].append(materialized)
     if not components["definitions"]:
         result.pop("scenarioComponents")
+    # Maintain the source family's scenario ordering when definitions are
+    # replaced by library memberships; append-only imports would otherwise
+    # change current and historical projections.
+    member_order = {
+        member["scenarioId"]: index
+        for index, member in enumerate(result["scenarioCollection"]["members"])
+    }
+    scenario_records = iter(sorted(
+        (record for record in result["records"] if record["kind"] == "scenario"),
+        key=lambda record: member_order.get(record["id"], len(member_order)),
+    ))
+    result["records"] = [
+        next(scenario_records) if record["kind"] == "scenario" else record
+        for record in result["records"]
+    ]
     return result

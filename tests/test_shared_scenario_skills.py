@@ -333,6 +333,91 @@ def test_shared_skill_library_binding_failures(tmp_path: Path, mutation: str, er
     with pytest.raises(ValueError, match=error):
         materialize_shared_scenarios(original, library)
 
+def test_reviewed_skill_overrides_keep_contextual_variants_separate(tmp_path: Path) -> None:
+    original, alternate, library, _ = _cross_season_fixture(tmp_path)
+    alternate["sharedSkillBindings"][0]["overrides"] = [{
+        "scenarioId": "scenario:hardlock",
+        "ruleId": "activate-console",
+        "field": "skillFacts.effects",
+        "value": ["Synthetic ITS 17 scenario effect; not real historical evidence."],
+    }]
+    outputs = {}
+    for season, document in (("its-18", original), ("its-17", alternate)):
+        source = tmp_path / f"{season}-overrides.json"
+        source.write_text(json.dumps(document, ensure_ascii=False) + "\n", encoding="utf-8")
+        database = tmp_path / f"{season}-overrides.db"
+        build_its_database(source, database, shared_library=library)
+        outputs[season] = database
+    app = create_app(
+        GENERATED / "army.db", GENERATED / "rules_n5.db", season_databases=outputs,
+    )
+    items = _api(app, "/api/skills")["items"]
+    canonical, = [item for item in items if item["slug"] == SHARED.removeprefix("skill:")]
+    assert [entry["collection"] for entry in canonical["scenarios"]] == ["its-18"]
+    legacy = "its-17-hardlock-activate-console"
+    variant, = [item for item in items if item["slug"] == legacy]
+    assert variant["rules"][0]["sharedSkill"]["overriddenFields"] == ["skillFacts.effects"]
+    assert variant["rules"][0]["facts"]["effects"] == [
+        "Synthetic ITS 17 scenario effect; not real historical evidence.",
+    ]
+    assert variant["rules"][0]["facts"]["requirements"] == canonical["rules"][0]["facts"][
+        "requirements"
+    ]
+    assert len(canonical["rules"][0]["citations"]) >= 1
+    detail = _api(app, "/api/scenarios/hardlock?collection=its-17&army_points=300")
+    action = next(item for item in detail["special_rules"] if item["id"] == "activate-console")
+    assert action["skill"]["facts"]["effects"] == variant["rules"][0]["facts"]["effects"]
+    search = _api(app, "/api/search?q=activate%20console")["items"]
+    assert any(item["href"] == f"/skills/{legacy}" for item in search)
+    assert any(item["href"] == f"/skills/{canonical['slug']}" for item in search)
+
+
+@pytest.mark.parametrize(("mutation", "message"), [
+    ("bad-field", "unsupported scope or field"),
+    ("bad-scenario", "unsupported scope or field"),
+    ("wrong-action", "unknown action or Skill"),
+    ("wrong-version", "unused by scenario"),
+    ("duplicate-field", "Conflicting shared Skill overrides"),
+    ("empty-effects", "requires an array of prose"),
+    ("invalid-text", "requires non-empty trimmed text"),
+    ("invalid-array", "requires an array of prose"),
+])
+def test_skill_override_bindings_reject_unsafe_edits(
+    tmp_path: Path, mutation: str, message: str,
+) -> None:
+    from infinity_db.scenario_reuse import materialize_shared_scenarios
+
+    original, _, library, _ = _cross_season_fixture(tmp_path)
+    change = {
+        "scenarioId": "scenario:hardlock",
+        "ruleId": "activate-console",
+        "field": "skillFacts.effects",
+        "value": ["Synthetic reviewed effect."],
+    }
+    binding = original["sharedSkillBindings"][0]
+    binding["overrides"] = [change]
+    if mutation == "bad-field":
+        change["field"] = "skillTypeIds"
+    elif mutation == "bad-scenario":
+        change["scenarioId"] = "scenario:b-pong"
+    elif mutation == "wrong-action":
+        change["ruleId"] = "missing"
+    elif mutation == "wrong-version":
+        action = next(r for rec in original["records"] if rec["id"] == "scenario:hardlock"
+                      for r in rec["facts"]["mission"]["rules"] if r["id"] == "activate-console")
+        action["skillDefinition"]["version"] = "v2"
+    elif mutation == "duplicate-field":
+        binding["overrides"].append(deepcopy(change))
+    elif mutation == "empty-effects":
+        change["value"] = []
+    elif mutation == "invalid-text":
+        change["value"] = [" "]
+    else:
+        change["value"] = "not an array"
+    with pytest.raises(ValueError, match=message):
+        materialize_shared_scenarios(original, library)
+
+
 def test_same_identity_requires_identical_compiled_facts(tmp_path: Path) -> None:
     document = _source()
     # A shared Skill cannot declare different effects for two consumers under

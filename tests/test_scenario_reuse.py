@@ -260,6 +260,71 @@ def test_version_pinned_shared_components_compose_in_season_database(tmp_path: P
     with pytest.raises(ValueError, match="Cyclic"):
         build_its_database(source_path, tmp_path / "cyclic.db", shared_library=library_path)
 
+def test_shared_scenario_membership_preserves_current_and_archived_source_family(
+    tmp_path: Path,
+) -> None:
+    """One logical source retains fact tags after a definition moves to a library."""
+    original = load_curated_document(ITS18)
+    scenario_id = "scenario:battleground"
+    record = next(item for item in original["records"] if item["id"] == scenario_id)
+    library = {
+        "format": LIBRARY_FORMAT, "formatVersion": 1,
+        "id": "synthetic-revisioned-scenarios",
+        "definitions": [{
+            "id": scenario_id, "version": "v1",
+            "origin": {
+                "sourceCollectionId": original["collection"]["id"],
+                "seasonId": "its-18",
+                "revision": original["scenarioCollection"]["revision"],
+                "sourceIds": sorted({cite["sourceId"] for cite in record["citations"]}),
+            },
+            "record": deepcopy(record),
+            "components": [],
+        }],
+    }
+    library_path = _write(tmp_path / "source-family-library.json", library)
+    shared = deepcopy(original)
+    shared["records"] = [item for item in shared["records"] if item["id"] != scenario_id]
+    member = next(
+        item for item in shared["scenarioCollection"]["members"]
+        if item["scenarioId"] == scenario_id
+    )
+    member["sharedDefinition"] = {
+        "version": "v1",
+        "citations": deepcopy(record["citations"]),
+        "review": deepcopy(record["review"]),
+        "componentCitations": {},
+        "overrides": [],
+    }
+    shared["sharedScenarioLibrary"] = {
+        "id": library["id"], "sha256": hashlib.sha256(library_path.read_bytes()).hexdigest(),
+    }
+    source_path = _write(tmp_path / "its-family.json", shared)
+    loaded = load_curated_document(source_path, shared_scenario_library=library_path)
+    for revision in ("2026.09.11", "2026.09.01"):
+        expected = project_its_source_family(original, revision=revision)
+        actual = project_its_source_family(loaded, revision=revision)
+        assert [item["id"] for item in actual["records"]] == [
+            item["id"] for item in expected["records"]
+        ]
+        for left, right in zip(actual["records"], expected["records"], strict=True):
+            without_origin = {key: value for key, value in left.items()
+                              if key != "sharedDefinition"}
+            assert without_origin == right
+        assert actual["sources"] == expected["sources"]
+        assert actual["scenarioCollection"] == expected["scenarioCollection"]
+    built = build_its_database(
+        source_path, tmp_path / "revisioned.db", shared_library=library_path,
+    )
+    assert built["scenarios"]
+    selected = select_its_scenario(
+        tmp_path / "revisioned.db", season_id="its-18",
+        revision="2026.09.11", scenario_id=scenario_id,
+    )
+    assert selected is not None
+    assert selected["record"]["sharedDefinition"]["version"] == "v1"
+
+
 def test_shared_component_versions_and_reference_cycles_are_checked() -> None:
     # The existing resolver remains the only component composition engine.
     document = {

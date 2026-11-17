@@ -1,7 +1,7 @@
 {
   "artifacts": {
-    "armyDbSha256": "813894878b2860648ce4ed7ea95fdbccf2fd160d4443bfafac482fe0fa1fc7f7",
-    "rulesDbSha256": "ca82dacf593bfe175e079945dc8c5edf1119d37da3c5437a0e2bd91caf54505a",
+    "armyDbSha256": "174bfe1683695596aaadc716072ec26a8bf4cf947a60265555a8ae7b4ff9eca0",
+    "rulesDbSha256": "91ac02d38df0438b26cd4fa7ca22fd6489073d3306f939354cf796c00858af33",
     "symbolPublicationSha256": "a88c7ead46cb2b68c67deece21af1e2f0a072a3c7a44a8b319ae32f64fc10d17"
   },
   "format": "InfinityDB P1 runtime semantic baseline",
@@ -35,7 +35,7 @@
     {
       "kind": "json",
       "path": "/api/skills",
-      "semanticSha256": "73fd377e955cd65421c97986d4a65b1b509e03a12d553d0888a3c73667d55527"
+      "semanticSha256": "ef9092719d79c2a3cf249bcee98b5c1444176180759049f819ea6048467c73e9"
     },
     {
       "kind": "json",
@@ -80,12 +80,12 @@
     {
       "kind": "json",
       "path": "/api/scenarios",
-      "semanticSha256": "ff6f1c88f31260d6f068fcea77a5bff8f88be5ca108160c9389fa893d2a54579"
+      "semanticSha256": "7e6416fee1ced78e8418a61b10d2316f716e473b2403be5a61130cdf35214950"
     },
     {
       "kind": "json",
       "path": "/api/scenarios?collection=its-18",
-      "semanticSha256": "0db5474955c903da534482b5fe077ad511d7953301c551ad6908c82bfde94f17"
+      "semanticSha256": "3e4321ff99cbf819c172707ede699c1eebbb90eb42ba28817cd58124e6e631fe"
     },
     {
       "kind": "json",
@@ -100,12 +100,12 @@
     {
       "kind": "json",
       "path": "/api/scenarios/domination?army_points=300",
-      "semanticSha256": "59e5c1569da9513f8b1cc3964881ce2dc8dd823f9850220cdd7f3a44a30cb339"
+      "semanticSha256": "9fe7311de48ac68e5358d37d045dcf29dee1bac567c5bc6a7fde0a6dd2348fda"
     },
     {
       "kind": "json",
       "path": "/api/scenarios/battleground?army_points=300&collection=its-18",
-      "semanticSha256": "9931c7bbf80dd3e03c517bec76992dc012caabefce987ff522feb1ffa0a3e212"
+      "semanticSha256": "726270e720472eb6c0ae3f6fe061501daa03b0c7c9cf93cdd92c717e83478661"
     },
     {
       "kind": "json",

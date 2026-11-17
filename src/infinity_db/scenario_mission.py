@@ -621,13 +621,23 @@ def parse_scenario_mission(
         shared_skill = None
         if "sharedSkill" in rule:
             shared = _object(
-                rule["sharedSkill"], {"id", "version"}, {"origin", "review"},
+                rule["sharedSkill"], {"id", "version"},
+                {"origin", "review", "overriddenFields"},
                 f"{ctx}.sharedSkill",
             )
             shared_id = validate_typed_domain_id(
                 shared["id"], expected_domain="skill", context=f"{ctx}.sharedSkill.id",
             )
             shared_skill = (shared_id, _text(shared["version"], f"{ctx}.sharedSkill.version"))
+            if "overriddenFields" in shared:
+                values = _array(
+                    shared["overriddenFields"], f"{ctx}.sharedSkill.overriddenFields",
+                )
+                allowed = {
+                    "skillFacts.requirements", "skillFacts.effects", "skillFacts.restrictions",
+                }
+                if len(set(values)) != len(values) or any(v not in allowed for v in values):
+                    raise ScenarioMissionError(f"{ctx}: invalid shared Skill override fields")
             if "origin" in shared:
                 _object(
                     shared["origin"],

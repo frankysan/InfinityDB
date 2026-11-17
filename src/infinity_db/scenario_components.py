@@ -261,6 +261,9 @@ class ScenarioComponents:
                 continue
             if "skillFacts" in rule or "skillTypeIds" in rule or "sharedSkill" in rule:
                 raise ValueError("Skill reuse cannot mix a reference with inline Skill facts")
+            overrides = rule.pop("skillOverrides", [])
+            if not isinstance(overrides, list):
+                raise ValueError("Scenario Skill overrides must be an array")
             ref = _object(
                 rule.pop("skillDefinition"), {"ref", "version"}, set(),
                 "scenario Skill reference",
@@ -271,11 +274,31 @@ class ScenarioComponents:
             component = self.definitions.get(skill_id)
             if component is None or "version" not in component:
                 raise ValueError(f"Unknown versioned scenario Skill {skill_id!r}")
-            rule.update(self.resolve(ref, "skill", record["id"]))
+            resolved = self.resolve(ref, "skill", record["id"])
+            overridden_fields: list[str] = []
+            for change in overrides:
+                item = _object(
+                    change, {"field", "value"}, set(), "scenario Skill override",
+                )
+                field = item["field"]
+                if field not in {
+                    "skillFacts.requirements", "skillFacts.effects", "skillFacts.restrictions",
+                } or field in overridden_fields:
+                    raise ValueError("Unsupported or conflicting scenario Skill override")
+                values = _array(
+                    item["value"], f"scenario Skill override {field}",
+                    empty=field == "skillFacts.restrictions",
+                )
+                for value in values:
+                    _text(value, f"scenario Skill override {field}")
+                resolved["skillFacts"][field.removeprefix("skillFacts.")] = deepcopy(values)
+                overridden_fields.append(field)
+            rule.update(resolved)
             rule["sharedSkill"] = {
                 "id": skill_id, "version": ref["version"],
                 **({"origin": deepcopy(component["origin"])} if "origin" in component else {}),
                 **({"review": deepcopy(component["review"])} if "review" in component else {}),
+                **({"overriddenFields": overridden_fields} if overridden_fields else {}),
             }
 
     def compose(self, record: dict[str, Any]) -> dict[str, Any]:

@@ -370,7 +370,7 @@ def test_season_policies_api_rejects_incomplete_or_malformed_selection(
     assert "error" in json.loads(payload)
 
 
-def test_registered_its_matches_pinned_pre_cutover_json_and_svg_bytes(
+def test_registered_its_matches_current_reviewed_json_and_svg_bytes(
     registered_http_apps,
 ) -> None:
     import hashlib
@@ -397,9 +397,10 @@ def test_registered_its_matches_pinned_pre_cutover_json_and_svg_bytes(
                 assert status == 200
                 combined.update(len(body).to_bytes(8, "big"))
                 combined.update(body)
-    # Frozen from the pre-cutover Rules-owned Battleground HTTP responses.
-    # Length-prefixed six canonical JSON payloads and 24 SVG byte streams.
+    # Current reviewed ITS 18 after source hotfix and scenario Skill cards.
+    # Length-prefixed six canonical JSON payloads and 24 SVG byte streams;
+    # compare this digest after any intentional public contract change.
     assert combined.hexdigest() == (
-        "890194367030c4e55c9122d320e204ea"
-        "3489a7044b7b87726f83dec0395fdb42"
+        "240ad88a87ceb23afdee797331e5b2ce"
+        "4515a2dd33fe8b0f233dd9c7b589781e"
     )

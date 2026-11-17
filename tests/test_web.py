@@ -2693,7 +2693,8 @@ def test_skill_modifiers_remains_internal_to_the_player_skills_page(app: Callabl
     assert status == 200
     assert b'href="/skill-extras"' not in skills
     assert (
-        b"Browse Common and Special Skills, with rules text and Army usage where available."
+        b"Browse Common, Special, and Scenario-specific Skills, including scenario context, "
+        b"rules text, and Army usage where available."
         in skills
     )
 

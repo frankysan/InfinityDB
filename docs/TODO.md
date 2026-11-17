@@ -416,10 +416,15 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     review/citations and legacy Skill routes. Shared Skills now group by exact
     identity in catalog/Search with fail-closed fact/version comparison. The
     current ITS 18 source and runtime outputs are unchanged.
-    - [ ] Integrate library-backed seasons with the complete-set build and
-      revision-tagged source-family curation; retain historical references.
+    - [ ] Integrate library-backed seasons with the complete-set build.
+      Exact source-family tags and historical projection of imported scenarios
+      now have a synthetic current/archived revision regression test.
     - [ ] Add reviewed narrow overrides for scenario components and Skill
       Requirements/Effects/Restrictions where suitable, rejecting conflicts.
+      - [x] Skill prose-array replacements are now scoped to exact scenario
+        actions. Intentional variants stay separate in catalog/Search.
+      - [ ] Other scenario components still need reviewed, typed overrides
+        with a narrow field allowlist.
     - [ ] Review genuine repeated ITS 17/18 scenario semantics and CivEvac in
       the published Evacuation/Outbreak contexts before moving real definitions.
       The three repeated ITS 18 action names have different Skill facts and must

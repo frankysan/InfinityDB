@@ -88,7 +88,11 @@ affected area, observation and evidence, proposed change, and disposition.
   without comparing the actual response differences.
 - **Why:** Keep regression tests meaningful without folding unrelated output
   changes into cross-season reuse development.
-- **Disposition:** proposed, outside the current implementation scope.
+- **Disposition:** partially addressed. The registered ITS 18 golden digest
+  now reflects the current reviewed scenario action-card output: independent
+  parity passes for six JSON variants and 24 SVG variants. The previously
+  observed marker-source error-order issue did not reproduce in hosted CI;
+  retain the strict source rejection checks.
 
 ## AI-0005 — Project shared records after source-family revision selection
 
@@ -105,7 +109,10 @@ affected area, observation and evidence, proposed change, and disposition.
   Test a current plus archived revision before migrating real ITS 17 data.
 - **Why:** The synthetic standalone reuse proof does not establish the
   one-source-family revision-history contract for future season migrations.
-- **Disposition:** proposed; tracked by [ITS reuse](TODO.md#its-scenarios-and-game-tools).
+- **Disposition:** partially addressed: synthetic current and archived source
+  projections preserve exact revision tags and references when one scenario
+  is imported. Integrated future library-backed build registration remains
+  [deferred](TODO.md#its-scenarios-and-game-tools).
 
 ## AI-0006 — Reconcile the runtime semantic snapshot with current ITS publication
 
@@ -123,4 +130,9 @@ affected area, observation and evidence, proposed change, and disposition.
   baseline only for confirmed intentional publication changes.
 - **Why:** Historical and stale baseline snapshots should not create ambiguous
   failures or motivate unreviewed changes to serving behavior.
-- **Disposition:** proposed; outside the shared Skill and CI repair scope.
+- **Disposition:** addressed for the current ITS 18 publication. A fresh
+  41-path capture was compared field-for-field to the previous snapshot:
+  exactly five Skill/Scenario API digests changed, while 36 paths (including
+  the SVG response) remained unchanged. The current v1.2 fixture was
+  refreshed with those five reviewed digests and exact selected database
+  identities. Historical v1 and v1.2 source-baseline fixtures were not altered.

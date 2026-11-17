@@ -411,7 +411,7 @@ class ScenarioCatalog:
             published: list[dict[str, Any]] = []
             for item in items:
                 identity = item["rules"][0].get("sharedSkill")
-                if identity is None:
+                if identity is None or identity.get("overriddenFields"):
                     published.append(item)
                 else:
                     shared.setdefault(identity["id"], []).append(item)

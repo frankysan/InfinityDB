@@ -3848,6 +3848,26 @@ facts. CivEvac occurs as a referenced mechanic in Evacuation and Outbreak,
 not as a standalone curated Skill; its precise published semantics remain a
 research prerequisite before any cross-context migration.
 
+**Versioned source-family and scoped override acceptance (synthetic only):**
+A shared scenario imported through a season membership participates in the same
+`sourceFamily.factRevisions.records` map as a local scenario. The exact typed
+scenario ID stays tagged by revision, and historical field overrides still
+reconstruct the older projection. The importer preserves the original
+membership ordering. A focused fixture confirms current 2026.09.11 and
+archived 2026.09.01 Battleground output matches the local authored record,
+apart from the new shared-definition provenance.
+
+A `sharedSkillBindings` membership may supply an optional `overrides` array.
+Each item identifies one `scenarioId`, scenario-local `ruleId`, allowlisted
+`skillFacts.requirements`, `skillFacts.effects` or `skillFacts.restrictions`
+field, and a complete replacement `value` array of prose. The binding's
+independent source citations and review apply to those changes. Missing or
+unbound actions, duplicate edits, invalid types and unsupported fields fail
+closed. Variant Skill facts stay on the original context-specific Skill route
+and in Search, while unmodified shared facts retain a canonical Skill
+identity; names alone do not authorize consolidation. Generic scenario
+component payload overrides and full build registry integration remain open.
+
 **Remaining accepted direction:** Extend the existing explicit, build-time scenario composition to share
 **curated definitions** across ITS seasons and between scenarios, while
 preserving independent, fully materialized season databases. A reusable
