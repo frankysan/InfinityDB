@@ -502,6 +502,13 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         the map scoring labels; preserve Key Ops designation/Skills,
         bilingual VH and Shasvastii discrepancies, and exact source
         citations. No ITS 18 publication changes.
+      - [x] Source-review ITS 17 V0.2 Annihilation (EN pp. 81–82,
+        ES pp. 85–87): pin the six-size scoring table and
+        original maps, preserve English 1/3/4 OP survival bands
+        versus Spanish 3/4/4, both 350-point 275-point threshold
+        gaps and the 150-point English mixed-unit deployment
+        typo. Publish the fifth definition only in the isolated
+        historical authoring library, not ITS 18.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish

@@ -35,6 +35,7 @@ def test_reviewed_uplink_membership_is_source_and_version_pinned() -> None:
     assert [item["id"] for item in library["definitions"]] == [
         "scenario:evacuation", "scenario:hardlock", "scenario:uplink-center",
         "scenario:battleground",
+        "scenario:annihilation",
     ]
     entry = library["definitions"][2]
     assert entry["version"] == "its17-v0.2"
@@ -106,7 +107,7 @@ def test_uplink_standalone_sqlite_retains_exact_historical_publication(
 ) -> None:
     out = tmp_path / "its17.db"
     result = build_its_database(SEASON, out, shared_library=SHARED)
-    assert len(result["scenarios"]) == 4
+    assert len(result["scenarios"]) == 5
     assert result["inputIdentity"]["seasonId"] == "its-17"
     selected = select_its_scenario(
         out, season_id="its-17", revision="0.2", scenario_id="scenario:uplink-center",

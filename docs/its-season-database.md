@@ -247,11 +247,11 @@ Focused reviewed comparisons against the pinned ITS 18 English
   the separately reviewed Alpha scoring and Infected spacing
   changes above require separate objective/rule versions.
 
-**Real ITS 17 Evacuation, Hardlock, Uplink Center and Battleground (2026-11-18):**
+**Real ITS 17 source-reviewed scenario authoring (2026-11-18):**
 `data/curated/its/n5-its-season-17.json` is a standalone, **unregistered**
 ITS 17 V0.2 curated season source. It has reviewed
-`scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`
-and `scenario:battleground` memberships pinned to
+`scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`,
+`scenario:battleground` and `scenario:annihilation` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -311,6 +311,23 @@ source issues. Only matching Sector, Domination, Baggage, Killing and
 round-limit rules are carried across. The archived database is still
 unregistered and the current ITS 18 record is unchanged.
 
+Annihilation keeps the source-matched EN V0.2 scoring thresholds
+(ITS 17 **pp. 81–82**, Spanish **pp. 85–87**), 150–400 Army Point
+configurations, Killing, No Quarter and the three-round limit.
+These match the current ITS 18 English definition, but the
+historical source remains separately cited and versioned. The
+ITS 17 **Spanish survival chart awards 3/4/4 OP**, contradicting
+the **English 1/3/4 OP** for identical Victory Point bands.
+The English scoring remains selected with the bilingual
+discrepancy unresolved. Both original languages leave exactly
+**275** at 350 points between the 3- and 4-OP bands, for both
+Killed and surviving points. EN p. 82 also prints a mixed-unit
+150-point Deployment Zone dimension (8 in × 32 cm), while its own
+map and ES p. 86 show the normal full-width 8-inch-deep area.
+The three original maps are retained without inventing a mixed-unit
+deployment. The separate ITS 18 Spanish 400-point threshold
+discrepancy is not retroactively assigned to ITS 17.
+
 Build and check the independent SQLite output without registering it:
 `python -m tools.data.build_its_season --source data/curated/its/n5-its-season-17.json --shared-library data/curated/its/shared/its17-scenarios-v1.json --output local/work/its/its_17_reviewed.db`
 (and add `--check` to inspect the existing result). The authoring
@@ -318,20 +335,22 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 **refuses to overwrite** these human-reviewed JSON files; the one-time
 `tools.research.extend_its17_hardlock` and
 `tools.research.extend_its17_uplink_center` and
-`tools.research.extend_its17_battleground` migrations are not build steps.
+`tools.research.extend_its17_battleground` and
+`tools.research.extend_its17_annihilation` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
 `tests/test_its17_uplink_center_publication.py` and
-`tests/test_its17_battleground_publication.py`. Existing ITS 18
+`tests/test_its17_battleground_publication.py` and
+`tests/test_its17_annihilation_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
-Evacuation, Hardlock, Uplink Center and Battleground missions.
-The accepted migrations therefore reuse complete v1 scenario definitions, without claiming fine-grained
-component or Skill deduplication yet.
+Evacuation, Hardlock, Uplink Center, Battleground and Annihilation
+missions. The accepted migrations reuse complete v1 scenario definitions,
+without claiming fine-grained component or Skill deduplication yet.
 
 The remaining shared-name missions and cross-language parity
 still need targeted review before adding their historical memberships
