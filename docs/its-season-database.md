@@ -165,9 +165,64 @@ ITS 18 CivEvac rule permits **two Civilians** (p. 23). Evacuation
 separate successful Extraction Console action for extraction. These
 contextual rules must not be moved into the globally shared Skill.
 The ITS 18 optional Team-Ops Extra and its two Skills must not be
-assumed applicable to ITS 17. The comparison is partial: full
-scenario/geometry/effect parity and local pinning of ITS 17 evidence
-remain outstanding.
+assumed applicable to ITS 17. The comparison is partial: full scenario/geometry/effect parity
+remains outstanding.
+
+**Pinned original and verified overlap (2026-11-18):** The unmodified
+official ITS 17 English `v1.0.2` download is now preserved as
+`local/data/pdf/its/its-17-rules-v1.0.2-en.pdf` (105 file pages,
+15,286,703 bytes, SHA-256
+`73a184b80535f23499000bb81112d95168c12f970fa14a30050a95ec51cdfe71`).
+Its cover reads **V0.2** despite the URL/filename version. Run
+`python -m tools.research.acquire_its_pdf its-17-en-v1.0.2` to
+acquire or reverify these exact publisher bytes; the file remains
+ignored, not a tracked artifact or a normal build dependency. The
+official ITS 17 table of contents (PDF p. 2) has **16 scenario names
+also present** among ITS 18's 20 published missions. The four
+ITS 18-only names are Double Bind, The Dig, Neutralization and
+Data Harvest. Shared titles establish availability candidates,
+**not** semantic equivalence.
+
+Focused reviewed comparisons against the pinned ITS 18 English
+2026.09.11 original:
+
+- **Evacuation** (ITS 17 pp. 55–58; ITS 18 pp. 88–91):
+  both have 1 OP per Extracted Civilian/enemy HVT and two Classified
+  Objectives worth 2 OP each. Visual review confirms matching
+  150/200–250/300–400-point deployment maps, four fixed Civilians,
+  two Extraction Consoles, and their dimensions/positions. The
+  English Activate Extraction Console action has the same
+  first-Game-Round restriction. **Geometry, setup and mission-action
+  reuse are candidates**, but the season-wide CivEvac Skill must
+  keep its separate historical declaration type and source pins.
+  `tests/test_its_cross_season_source_review.py` locks the reviewed
+  ITS 18 scoring and positions without requiring the local ITS 17
+  PDF in CI.
+- **Battleground** (ITS 17 pp. 83–85; ITS 18 pp. 129–131):
+  ITS 17 awards 1/3/4 OP for near/central/far Sectors and adds
+  Key Ops killing (2 OP) or threatening (1 OP); ITS 18 awards
+  2/3/5 and removes the Key Ops objectives. The 4-/8-inch
+  sector depths and 2-/4-inch center offsets match, making
+  **sector geometry** a candidate, **not** the complete scenario
+  or objective definitions.
+- **Superiority** (ITS 17 pp. 89–92; ITS 18 pp. 135–138):
+  ITS 17 caps Hacked Console scoring at 3 and grants 1 bonus OP
+  for a Dominant Key Ops. ITS 18 contains four Consoles and
+  omits that Key Ops objective. Preserve distinct scoring versions;
+  Quadrant geometry and generic ZO rules are candidates only.
+- **Cutthroat** (ITS 17 pp. 86–88; ITS 18 pp. 132–134):
+  ITS 17 has two Key Ops scoring conditions. ITS 18 instead
+  awards 4 OP for Lieutenant-caused kills and drops those
+  objectives. The remaining Key Ops wording in ITS 18's Killing
+  paragraph is an **existing recorded source issue**, not grounds
+  to restore the historical Key Ops mechanics.
+- **Outbreak** (ITS 17 pp. 68–71; ITS 18 pp. 83–87):
+  the separately reviewed Alpha scoring and Infected spacing
+  changes above require separate objective/rule versions.
+
+The remaining shared-name missions and cross-language parity
+still need targeted review before authoring actual ITS 17 scenario
+memberships or promoting shared production definitions.
 
 Optional `sharedSkillBindings.overrides` entries use exact
 `{scenarioId, ruleId, field, value}` objects. Only complete prose-array

@@ -464,10 +464,19 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         one pinned library to publish separate routes, prioritizing the
         newest season for the unqualified slug. Preserve source-specific
         types and citations; same-version fact drift still fails closed.
+      - [x] Acquire and SHA-pin the official ITS 17 V0.2 English source
+        (105-page v1.0.2 download). Cross-check its 16 recurring
+        scenario names against all 20 ITS 18 missions; compare the
+        Evacuation maps/objectives and the distinct-version Battleground,
+        Superiority, Cutthroat and Outbreak scoring. Add source-reviewed
+        regression for Evacuation geometry and Battleground scoring.
       - [ ] Pin and review the complete ITS 17 source locally, including
         Evacuation/Outbreak scenarios, Casevac State, optional Extras
-        and any reusable geometry/components. Do not merge changed
-        Outbreak objectives into one shared definition version.
+        and any reusable geometry/components. The English original
+        is now pinned; the remaining scenarios and cross-language evidence
+        still need review before migrating actual ITS 17 memberships.
+        Do not merge changed Outbreak objectives into one shared
+        definition version.
     - [ ] Curate real ITS 17 against this foundation only after evidence review;
       keep each resulting season database independent, with no runtime links.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full

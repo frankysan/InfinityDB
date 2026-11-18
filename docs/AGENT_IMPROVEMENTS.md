@@ -251,3 +251,24 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Disposition:** implemented with a per-scenario citation map and
   fail-closed duplicate/version/scope checks, covered by synthetic
   two-scenario SQLite build tests. Real ITS 17/18 parity remains open.
+
+## AI-0012 — Pin official season PDFs before claiming scenario reuse
+
+- **Date:** 2026-11-18
+- **Area:** Cross-season source reconciliation and source evidence lifecycle.
+- **Observation:** ITS 17/18 share 16 mission titles, but Battleground,
+  Superiority, Cutthroat and Outbreak have changed objective semantics.
+  Evacuation's diagrams retain matching geometry even though its source
+  prose and the season-wide CivEvac declaration context differ. Name or
+  text-only matching cannot distinguish these cases reliably.
+- **Proposed:** Preserve original publisher PDF bytes under ignored local
+  source storage with a pinned SHA-256; review both printed missions and
+  map diagrams, then document exactly which *components* can be shared.
+  Do not make CI download the historical source.
+- **Why:** Source revision, scoped gameplay semantics and geometry need
+  independent evidence before a versioned library can safely collapse
+  authoring duplication.
+- **Disposition:** official ITS 17 V0.2/v1.0.2 English original pinned
+  with `tools.research.acquire_its_pdf`; initial five-scenario
+  comparison and targeted curated ITS 18 regressions recorded. Full
+  source comparison and real shared publication remain open.
