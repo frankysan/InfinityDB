@@ -53,6 +53,7 @@ def test_its17_annihilation_membership_is_independently_cited_and_pinned() -> No
         "scenario:corporate-appropriation",
         "scenario:critical-intervention",
         "scenario:outbreak",
+        "scenario:akial-interference",
     ]
     definition = shared["definitions"][4]
     assert definition["version"] == "its17-v0.2"
@@ -158,7 +159,7 @@ def test_its17_annihilation_retains_different_es_scoring_and_source_errors() -> 
 def test_its17_annihilation_build_and_exact_publication_selection(tmp_path: Path) -> None:
     output = tmp_path / "its17.db"
     result = build_its_database(SEASON, output, shared_library=SHARED)
-    assert len(result["scenarios"]) == 15
+    assert len(result["scenarios"]) == 16
     assert result["inputIdentity"]["seasonId"] == "its-17"
     assert result["inputIdentity"]["sharedScenarioLibrary"]["sha256"] == (
         hashlib.sha256(SHARED.read_bytes()).hexdigest()

@@ -37,7 +37,7 @@ def test_its17_crossing_lines_is_independently_source_pinned() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert len(library["definitions"]) == 15
+    assert len(library["definitions"]) == 16
     definition = library["definitions"][11]
     assert definition["id"] == "scenario:crossing-lines"
     assert definition["version"] == "its17-v0.2"
@@ -144,7 +144,7 @@ def test_its17_crossing_lines_keeps_own_bilingual_source_issues() -> None:
 def test_its17_crossing_lines_build_stays_season_local(tmp_path: Path) -> None:
     output = tmp_path / "its_17.db"
     report = build_its_database(SEASON, output, shared_library=SHARED)
-    assert len(report["scenarios"]) == 15
+    assert len(report["scenarios"]) == 16
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         output, source=SEASON, shared_library=SHARED, require_current_builder=True,

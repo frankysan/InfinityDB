@@ -7,6 +7,7 @@ explicit and reviewed prose is retained where executable predicates would guess.
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -215,6 +216,16 @@ def _slug(value: Any, context: str) -> str:
         return require_domain_slug(value, context=context)
     except ValueError as exc:
         raise ScenarioMissionError(str(exc)) from exc
+
+
+def _source_identifier(value: Any, context: str) -> str:
+    """Source IDs may include dotted revisions (e.g. ITS 17 v0.2)."""
+    identifier = _text(value, context)
+    if re.fullmatch(r"[a-z0-9]+(?:[-.][a-z0-9]+)*", identifier) is None:
+        raise ScenarioMissionError(
+            f"{context} must be a lowercase source identifier with valid separators"
+        )
+    return identifier
 
 
 def _integer(value: Any, context: str, *, minimum: int = 1) -> int:
@@ -661,7 +672,7 @@ def parse_scenario_mission(
                     citation, {"sourceId", "page"}, set(), f"{ctx}.skillCitations"
                 )
                 skill_citations.append((
-                    _slug(citation["sourceId"], f"{ctx}.skillCitations.sourceId"),
+                    _source_identifier(citation["sourceId"], f"{ctx}.skillCitations.sourceId"),
                     _integer(citation["page"], f"{ctx}.skillCitations.page"),
                 ))
             if len(set(skill_citations)) != len(skill_citations):

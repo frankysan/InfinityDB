@@ -37,7 +37,7 @@ def test_its17_outbreak_source_identity_and_membership() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert len(library["definitions"]) == 15
+    assert len(library["definitions"]) == 16
     definition = library["definitions"][14]
     assert definition["id"] == "scenario:outbreak"
     assert definition["version"] == "its17-v0.2"
@@ -132,7 +132,7 @@ def test_its17_outbreak_geometry_skills_and_source_differences() -> None:
 def test_its17_outbreak_compiles_without_its18_publication(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     report = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(report["scenarios"]) == 15
+    assert len(report["scenarios"]) == 16
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED, require_current_builder=True,

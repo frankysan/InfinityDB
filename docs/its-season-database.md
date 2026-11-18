@@ -255,8 +255,8 @@ ITS 17 V0.2 curated season source. It has reviewed
 `scenario:superiority`, `scenario:provisioning`,
 `scenario:area-of-interest`, `scenario:last-launch`,
 `scenario:b-pong`, `scenario:crossing-lines`,
-`scenario:corporate-appropriation`, `scenario:critical-intervention`
-and `scenario:outbreak` memberships pinned to
+`scenario:corporate-appropriation`, `scenario:critical-intervention`,
+`scenario:outbreak` and `scenario:akial-interference` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -473,10 +473,26 @@ CivEvac restrictions, Scan/Stabilize Short Skills and no Classified/HVT.
 One bilingual difference remains: placement distances of 4/8 inches
 versus 10/20 cm. ITS 18 scoring remains unchanged.
 
+Akial Interference V0.2 EN pp. **31–35** and ES pp. **58–62**
+confirms the 6 + 1 + 1 + 2 OP scoring, 2 public Common Classified
+Objectives per Round, 1 Private Classified Objective, 4 HVTs per
+player and 3 deployment maps. Historical source explicitly disables
+**both Secure HVT and Secure Treasure**, while retaining HVT Models.
+The one central Akial Antenna uses a Transmission Antenna Token or
+**matching-diameter scenery**, without a fixed 40 mm as in ITS 18.
+Emit Akial Interference and Filter the Signal remain typed Short Skills
+with **ITS 17-local Skill citations**, not inherited ITS 18 citations.
+Both originals allow repeated failed Emit Rolls but also limit each
+Specialist to one Emission per Game Round; the attempts-versus-successes
+ambiguity is recorded without inventing an interpretation.
+Nested Skill citation `sourceId` validation accepts versioned source IDs with
+revision dots (such as `v0.2`) without weakening identifier validation for
+route slugs; malformed source IDs remain rejected by focused tests.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the fifteen
+development artifact is `local/work/its/its_17.db`; it contains the sixteen
 reviewed ITS 17 scenarios and remains separate from the three-file serving
 set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
@@ -502,7 +518,8 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 `tools.research.extend_its17_crossing_lines` and
 `tools.research.extend_its17_corporate_appropriation` and
 `tools.research.extend_its17_critical_intervention` and
-`tools.research.extend_its17_outbreak` migrations are not build steps.
+`tools.research.extend_its17_outbreak` and
+`tools.research.extend_its17_akial_interference` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
@@ -518,7 +535,8 @@ regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_crossing_lines_publication.py` and
 `tests/test_its17_corporate_appropriation_publication.py` and
 `tests/test_its17_critical_intervention_publication.py` and
-`tests/test_its17_outbreak_publication.py`. Existing ITS 18
+`tests/test_its17_outbreak_publication.py` and
+`tests/test_its17_akial_interference_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
@@ -527,7 +545,7 @@ not the inline narrative/Skill facts present in the reviewed
 Evacuation, Hardlock, Uplink Center, Battleground, Annihilation,
 Cutthroat, Superiority, Provisioning, Area of Interest, Last Launch,
 B-Pong, Crossing Lines, Corporate Appropriation, Critical Intervention
-and Outbreak missions.
+Outbreak and Akial Interference missions.
 The accepted migrations reuse complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 

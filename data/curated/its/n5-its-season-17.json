@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (fifteen reviewed scenarios)",
+    "title": "ITS Season 17 Seekers V0.2 (sixteen reviewed scenarios)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -863,6 +863,70 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:akial-interference",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 31,
+              "section": "Akial Interference"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 32,
+              "section": "Akial Interference"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 33,
+              "section": "Akial Interference"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 34,
+              "section": "Akial Interference"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 35,
+              "section": "Akial Interference"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 58,
+              "section": "Interferencia Akial"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 59,
+              "section": "Interferencia Akial"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 60,
+              "section": "Interferencia Akial"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 61,
+              "section": "Interferencia Akial"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 62,
+              "section": "Interferencia Akial"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -939,6 +1003,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "8ab2154751067b3544bf1aba8203f16d3b86ac25a398284d7c9d13001d01c9cf"
+    "sha256": "245ccbab339c2197e3a3fb4e2ccad303950e0fe03bfd49f9ac2bf6047a446599"
   }
 }

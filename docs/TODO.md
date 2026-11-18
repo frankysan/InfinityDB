@@ -581,6 +581,14 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         2 OP CivEvac Alpha award and omitted Stabilize Alpha objective.
         Pin bilingual placement measurements and independently rebuild
         the fifteen-scenario `its_17.db`, without ITS 18 changes.
+      - [x] Source-review ITS 17 V0.2 Akial Interference (EN
+        pp. 31–35, ES pp. 58–62): retain the 10 OP distribution,
+        Common/Private Classified rules, four HVTs per player and
+        three deployment maps. Preserve Secure HVT and Secure
+        Treasure exclusion, token-relative Antenna sizing, two
+        independently cited Short Skills and the unresolved
+        one-Emission-versus-failed-retries source issue. Rebuild
+        isolated sixteen-scenario `its_17.db`; leave ITS 18 unchanged.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish
