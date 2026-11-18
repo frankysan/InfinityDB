@@ -547,6 +547,14 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         Domination, Peripherals and extraction. Preserve relative Token
         diameters and four independently cited bilingual source issues.
         Rebuild isolated ten-scenario `its_17.db`; keep ITS 18 unchanged.
+      - [x] Source-review ITS 17 V0.2 B-Pong (EN pp. 36–39,
+        ES pp. 38–41): verify matching 2 + 3 + 3 + 2 OP scoring, three
+        diagrams and both mission Skills. Both historical languages
+        measure relocation from the Beacon, require free Beacon contact
+        for Console Activation and limit successful activation per round.
+        Preserve relative scenery diameters and bilingual Magnetize /
+        Connected wording issues; rebuild isolated eleven-scenario
+        `its_17.db`, without changing ITS 18.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish

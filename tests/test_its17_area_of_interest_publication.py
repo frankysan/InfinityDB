@@ -42,6 +42,7 @@ def test_its17_area_source_identity_and_bilingual_citations() -> None:
         "scenario:battleground", "scenario:annihilation", "scenario:cutthroat",
         "scenario:superiority", "scenario:provisioning", "scenario:area-of-interest",
         "scenario:last-launch",
+        "scenario:b-pong",
     ]
     definition = library["definitions"][8]
     assert definition["version"] == "its17-v0.2"
@@ -135,7 +136,7 @@ def test_its17_area_historical_antenna_rules_and_source_differences() -> None:
 def test_its17_area_sqlite_remains_season_local(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     result = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(result["scenarios"]) == 10
+    assert len(result["scenarios"]) == 11
     assert result["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED, require_current_builder=True,

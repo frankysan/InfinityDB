@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (ten reviewed scenarios)",
+    "title": "ITS Season 17 Seekers V0.2 (eleven reviewed scenarios)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -553,6 +553,60 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:b-pong",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 36,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 37,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 38,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 39,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 38,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 39,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 40,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 41,
+              "section": "B-Pong"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -629,6 +683,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "ccda4c339faed3df7ae6ba23aa4093dd5ddde94d91526ee935cb8e5bcf06d466"
+    "sha256": "b67f17e764a9b04a8af9c7281edf9f1b0150a7a5155415d7217610a94627c3e8"
   }
 }

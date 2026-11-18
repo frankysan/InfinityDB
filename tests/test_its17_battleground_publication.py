@@ -48,6 +48,7 @@ def test_battleground_has_independent_its17_source_pin() -> None:
         "scenario:provisioning",
         "scenario:area-of-interest",
         "scenario:last-launch",
+        "scenario:b-pong",
     ]
     definition = library["definitions"][3]
     assert definition["version"] == "its17-v0.2"
@@ -177,7 +178,7 @@ def test_battleground_source_differences_and_key_ops_ability_are_retained() -> N
 def test_battleground_standalone_database_and_season_isolation(tmp_path: Path) -> None:
     output = tmp_path / "its17.db"
     result = build_its_database(SEASON, output, shared_library=SHARED)
-    assert len(result["scenarios"]) == 10
+    assert len(result["scenarios"]) == 11
     assert result["inputIdentity"]["seasonId"] == "its-17"
     assert result["inputIdentity"]["sharedScenarioLibrary"]["sha256"] == (
         hashlib.sha256(SHARED.read_bytes()).hexdigest()

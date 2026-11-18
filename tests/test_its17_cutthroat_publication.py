@@ -44,6 +44,7 @@ def test_its17_cutthroat_pinned_membership_and_sources() -> None:
         "scenario:provisioning",
         "scenario:area-of-interest",
         "scenario:last-launch",
+        "scenario:b-pong",
     ]
     definition = library["definitions"][5]
     assert definition["version"] == "its17-v0.2"
@@ -138,7 +139,7 @@ def test_its17_cutthroat_standalone_sqlite_is_season_local(tmp_path: Path) -> No
     output = tmp_path / "its_17.db"
     result = build_its_database(SEASON, output, shared_library=SHARED)
     assert result["inputIdentity"]["seasonId"] == "its-17"
-    assert len(result["scenarios"]) == 10
+    assert len(result["scenarios"]) == 11
     assert inspect_its_database(
         output, source=SEASON, shared_library=SHARED, require_current_builder=True,
     ) == result

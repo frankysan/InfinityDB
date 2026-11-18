@@ -253,7 +253,8 @@ ITS 17 V0.2 curated season source. It has reviewed
 `scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`,
 `scenario:battleground`, `scenario:annihilation`, `scenario:cutthroat`,
 `scenario:superiority`, `scenario:provisioning`,
-`scenario:area-of-interest` and `scenario:last-launch` memberships pinned to
+`scenario:area-of-interest`, `scenario:last-launch` and
+`scenario:b-pong` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -399,10 +400,25 @@ removed Troopers' points while ES uses singular for Peripheral extraction.
 Four independent source issues preserve these differences. The original
 mission has two Tactical Support Options.
 
+B-Pong V0.2 EN pp. **36–39** and ES pp. **38–41** agrees with ITS 18
+on 2 + 3 + 3 + 2 OP scoring, six game sizes/three maps, center Beacon,
+two Consoles at 6/8/12-inch offsets, exclusion zones, the two Short
+Skills and the round limit. Unlike ITS 18, **both** ITS 17 languages
+measure Beacon relocation from its **previous position** and specify
+that Console Activation requires the Beacon not to touch a Trooper and
+limits each successful Specialist Activation to once per round.
+Both historical originals use equal-diameter scenery rather than a
+fixed 40/25 mm. They also agree on end-of-round Beacon Control. The
+remaining bilingual source issues concern EN **up to 6 inches** versus
+ES **15 cm** for Magnetize, and Spanish calling a successful Console
+*Conectada* rather than *Activada*. These remain explicit and are not
+inherited from ITS 18's distinct disagreements. ITS 17 specifies two
+Tactical Support Options in both languages.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the ten
+development artifact is `local/work/its/its_17.db`; it contains the eleven
 reviewed ITS 17 scenarios and remains separate from the three-file serving
 set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
@@ -423,7 +439,8 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 `tools.research.extend_its17_superiority` and
 `tools.research.extend_its17_provisioning` and
 `tools.research.extend_its17_area_of_interest` and
-`tools.research.extend_its17_last_launch` migrations are not build steps.
+`tools.research.extend_its17_last_launch` and
+`tools.research.extend_its17_b_pong` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
@@ -434,14 +451,15 @@ regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_superiority_publication.py` and
 `tests/test_its17_provisioning_publication.py` and
 `tests/test_its17_area_of_interest_publication.py` and
-`tests/test_its17_last_launch_publication.py`. Existing ITS 18
+`tests/test_its17_last_launch_publication.py` and
+`tests/test_its17_b_pong_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
 Evacuation, Hardlock, Uplink Center, Battleground, Annihilation,
-Cutthroat, Superiority, Provisioning, Area of Interest and Last Launch missions.
+Cutthroat, Superiority, Provisioning, Area of Interest, Last Launch and B-Pong missions.
 The accepted migrations reuse complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 

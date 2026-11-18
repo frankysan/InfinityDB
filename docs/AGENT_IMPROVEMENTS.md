@@ -296,3 +296,18 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Disposition:** the ITS 17 V0.2 Evacuation shared definition compiles
   independently with all source-local citations; granular components
   and other ITS 17 mission memberships remain open.
+
+## AI-0014 — Consolidate historical ITS scenario inventory expectations
+
+- **Date:** 2026-11-18
+- **Area:** ITS 17 publication tests and source-verified migration.
+- **Observation:** Adding the eleventh historical mission required changing
+  scenario-count assertions and the identical full membership list in ten
+  existing scenario publication test modules; each module still needs its
+  own source and historical-fact assertions.
+- **Proposed:** Derive the shared expected historical membership/count from
+  one reviewed test fixture, while retaining per-scenario origin, citations,
+  facts, geometry and isolation assertions. Do not weaken the checks by
+  merely comparing the source file to itself.
+- **Disposition:** Future test-maintenance improvement; B-Pong is validated
+  with the current explicit expectations, without a fixture refactor.
