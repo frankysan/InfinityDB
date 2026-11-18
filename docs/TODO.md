@@ -555,6 +555,13 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         Preserve relative scenery diameters and bilingual Magnetize /
         Connected wording issues; rebuild isolated eleven-scenario
         `its_17.db`, without changing ITS 18.
+      - [x] Source-review ITS 17 V0.2 Crossing Lines (EN pp. 51–54,
+        ES pp. 42–45): retain matching 3 + 3 + 2 + 2 OP scoring,
+        three split-deployment maps, central-strip limit, Antenna
+        action and end conditions. Preserve EN/ES central-strip
+        dimension discrepancy, Token type and Shasvastii wording,
+        and the unresolved HVT deployment implication. Rebuild
+        separate twelve-scenario `its_17.db` without ITS 18 changes.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish

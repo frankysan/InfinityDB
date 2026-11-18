@@ -253,8 +253,8 @@ ITS 17 V0.2 curated season source. It has reviewed
 `scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`,
 `scenario:battleground`, `scenario:annihilation`, `scenario:cutthroat`,
 `scenario:superiority`, `scenario:provisioning`,
-`scenario:area-of-interest`, `scenario:last-launch` and
-`scenario:b-pong` memberships pinned to
+`scenario:area-of-interest`, `scenario:last-launch`,
+`scenario:b-pong` and `scenario:crossing-lines` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -415,10 +415,24 @@ ES **15 cm** for Magnetize, and Spanish calling a successful Console
 inherited from ITS 18's distinct disagreements. ITS 17 specifies two
 Tactical Support Options in both languages.
 
+Crossing Lines V0.2 EN pp. **51–54** and ES pp. **42–45** confirms the
+ITS 18 3 + 3 + 2 + 2 OP scoring, split-deployment geometry, central
+75-point deployment cap, 6/8/12-inch Antenna offsets, Activate Antenna
+Short Skill, and third-round/Retreat! endings. Historical Antennas use
+**same-diameter scenery** rather than ITS 18's mandatory 40 mm: EN p. 53
+names Transmission Antenna Tokens while ES p. 44 names Console A Tokens.
+The EN table gives an inconsistent longer central-strip length for
+150/200/250 points; ES p. 42 supports the reused layout's actual table
+widths. EN p. 53 counts Shasvastii-Embryo or other non-Null States whereas
+ES p. 44 says Normal or Unconscious. EN/ES p. 54/45 exclude Secure HVT
+and Secure Treasure, but do **not** expressly exclude HVT Model deployment
+as ITS 18 does; the no-HVT setup count therefore remains provisional.
+These four source issues are recorded with ITS 17 provenance.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the eleven
+development artifact is `local/work/its/its_17.db`; it contains the twelve
 reviewed ITS 17 scenarios and remains separate from the three-file serving
 set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
@@ -440,7 +454,8 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 `tools.research.extend_its17_provisioning` and
 `tools.research.extend_its17_area_of_interest` and
 `tools.research.extend_its17_last_launch` and
-`tools.research.extend_its17_b_pong` migrations are not build steps.
+`tools.research.extend_its17_b_pong` and
+`tools.research.extend_its17_crossing_lines` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
@@ -452,14 +467,16 @@ regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_provisioning_publication.py` and
 `tests/test_its17_area_of_interest_publication.py` and
 `tests/test_its17_last_launch_publication.py` and
-`tests/test_its17_b_pong_publication.py`. Existing ITS 18
+`tests/test_its17_b_pong_publication.py` and
+`tests/test_its17_crossing_lines_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
 Evacuation, Hardlock, Uplink Center, Battleground, Annihilation,
-Cutthroat, Superiority, Provisioning, Area of Interest, Last Launch and B-Pong missions.
+Cutthroat, Superiority, Provisioning, Area of Interest, Last Launch, B-Pong
+and Crossing Lines missions.
 The accepted migrations reuse complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 

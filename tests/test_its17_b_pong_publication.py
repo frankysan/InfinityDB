@@ -37,7 +37,7 @@ def test_its17_b_pong_is_independently_source_pinned() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert len(library["definitions"]) == 11
+    assert len(library["definitions"]) == 12
     definition = library["definitions"][10]
     assert definition["id"] == "scenario:b-pong"
     assert definition["version"] == "its17-v0.2"
@@ -137,7 +137,7 @@ def test_its17_b_pong_preserves_only_original_bilingual_differences() -> None:
 def test_its17_b_pong_compiles_independently(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     report = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(report["scenarios"]) == 11
+    assert len(report["scenarios"]) == 12
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED, require_current_builder=True,

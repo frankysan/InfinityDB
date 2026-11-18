@@ -10092,6 +10092,1039 @@
         }
       },
       "components": []
+    },
+    {
+      "id": "scenario:crossing-lines",
+      "version": "its17-v0.2",
+      "origin": {
+        "sourceCollectionId": "its-season-17-v0.2",
+        "seasonId": "its-17",
+        "revision": "0.2",
+        "sourceIds": [
+          "its-season-17-v0.2-en-pdf",
+          "its-season-17-v0.2-es-pdf"
+        ]
+      },
+      "record": {
+        "id": "scenario:crossing-lines",
+        "kind": "scenario",
+        "name": "Crossing Lines",
+        "summary": "ITS Season 17 Crossing Lines: Dominate both Dead Zones across a split deployment, Activate the two Antennas, and score without Classified Objectives.",
+        "composition": {
+          "role": "definition"
+        },
+        "scope": {
+          "game": "N5",
+          "seasons": [
+            "its-17"
+          ]
+        },
+        "facts": {
+          "definitionVersion": 1,
+          "playRequirements": {
+            "classifiedObjectives": 0,
+            "tacticalObjectives": 0,
+            "hvts": 0
+          },
+          "configurations": [
+            {
+              "id": "150-points",
+              "armyPoints": [
+                150
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Crossing Lines",
+                "table": {
+                  "width": 24,
+                  "height": 32,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "dead-zone-a",
+                    "kind": "rectangle",
+                    "style": "exclusion",
+                    "x1": 0,
+                    "y1": 8,
+                    "x2": 24,
+                    "y2": 12
+                  },
+                  {
+                    "id": "dead-zone-b",
+                    "kind": "rectangle",
+                    "style": "exclusion",
+                    "x1": 0,
+                    "y1": 20,
+                    "x2": 24,
+                    "y2": 24
+                  },
+                  {
+                    "id": "deployment-a-rear",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 24,
+                    "y2": 8
+                  },
+                  {
+                    "id": "deployment-b-forward",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 12,
+                    "x2": 24,
+                    "y2": 16
+                  },
+                  {
+                    "id": "deployment-a-forward",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 16,
+                    "x2": 24,
+                    "y2": 20
+                  },
+                  {
+                    "id": "deployment-b-rear",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 24,
+                    "y2": 32
+                  },
+                  {
+                    "id": "antenna-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 6,
+                    "y": 16
+                  },
+                  {
+                    "id": "antenna-right",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 18,
+                    "y": 16
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": 16,
+                    "x2": 24,
+                    "y2": 16
+                  },
+                  {
+                    "id": "deployment-a-rear-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 12,
+                    "y": 4,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-rear-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 12,
+                    "y": 28,
+                    "text": "Deployment Zone B"
+                  },
+                  {
+                    "id": "deployment-a-forward-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 12,
+                    "y": 18.2,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-forward-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 12,
+                    "y": 14.2,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-rear-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a-rear",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "deployment-b-rear-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b-rear",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "dead-zone-a-depth",
+                    "kind": "dimension",
+                    "target": "dead-zone-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "deployment-b-forward-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b-forward",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "deployment-a-forward-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a-forward",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "dead-zone-b-depth",
+                    "kind": "dimension",
+                    "target": "dead-zone-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  }
+                ]
+              }
+            },
+            {
+              "id": "200-250-points",
+              "armyPoints": [
+                200,
+                250
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Crossing Lines",
+                "table": {
+                  "width": 32,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "dead-zone-a",
+                    "kind": "rectangle",
+                    "style": "exclusion",
+                    "x1": 0,
+                    "y1": 12,
+                    "x2": 32,
+                    "y2": 20
+                  },
+                  {
+                    "id": "dead-zone-b",
+                    "kind": "rectangle",
+                    "style": "exclusion",
+                    "x1": 0,
+                    "y1": 28,
+                    "x2": 32,
+                    "y2": 36
+                  },
+                  {
+                    "id": "deployment-a-rear",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 32,
+                    "y2": 12
+                  },
+                  {
+                    "id": "deployment-b-forward",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 20,
+                    "x2": 32,
+                    "y2": 24
+                  },
+                  {
+                    "id": "deployment-a-forward",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 32,
+                    "y2": 28
+                  },
+                  {
+                    "id": "deployment-b-rear",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 36,
+                    "x2": 32,
+                    "y2": 48
+                  },
+                  {
+                    "id": "antenna-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 8,
+                    "y": 24
+                  },
+                  {
+                    "id": "antenna-right",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 24,
+                    "y": 24
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 32,
+                    "y2": 24
+                  },
+                  {
+                    "id": "deployment-a-rear-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 16,
+                    "y": 6,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-rear-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 16,
+                    "y": 42,
+                    "text": "Deployment Zone B"
+                  },
+                  {
+                    "id": "deployment-a-forward-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 16,
+                    "y": 26.2,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-forward-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 16,
+                    "y": 22.2,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-rear-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a-rear",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "deployment-b-rear-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b-rear",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "dead-zone-a-depth",
+                    "kind": "dimension",
+                    "target": "dead-zone-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "deployment-b-forward-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b-forward",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "deployment-a-forward-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a-forward",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "dead-zone-b-depth",
+                    "kind": "dimension",
+                    "target": "dead-zone-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  }
+                ]
+              }
+            },
+            {
+              "id": "300-400-points",
+              "armyPoints": [
+                300,
+                350,
+                400
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Crossing Lines",
+                "table": {
+                  "width": 48,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "dead-zone-a",
+                    "kind": "rectangle",
+                    "style": "exclusion",
+                    "x1": 0,
+                    "y1": 12,
+                    "x2": 48,
+                    "y2": 20
+                  },
+                  {
+                    "id": "dead-zone-b",
+                    "kind": "rectangle",
+                    "style": "exclusion",
+                    "x1": 0,
+                    "y1": 28,
+                    "x2": 48,
+                    "y2": 36
+                  },
+                  {
+                    "id": "deployment-a-rear",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 48,
+                    "y2": 12
+                  },
+                  {
+                    "id": "deployment-b-forward",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 20,
+                    "x2": 48,
+                    "y2": 24
+                  },
+                  {
+                    "id": "deployment-a-forward",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 48,
+                    "y2": 28
+                  },
+                  {
+                    "id": "deployment-b-rear",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 36,
+                    "x2": 48,
+                    "y2": 48
+                  },
+                  {
+                    "id": "antenna-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 12,
+                    "y": 24
+                  },
+                  {
+                    "id": "antenna-right",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 36,
+                    "y": 24
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 48,
+                    "y2": 24
+                  },
+                  {
+                    "id": "deployment-a-rear-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 24,
+                    "y": 6,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-rear-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 24,
+                    "y": 42,
+                    "text": "Deployment Zone B"
+                  },
+                  {
+                    "id": "deployment-a-forward-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 24,
+                    "y": 26.2,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-forward-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 24,
+                    "y": 22.2,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-rear-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a-rear",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "deployment-b-rear-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b-rear",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "dead-zone-a-depth",
+                    "kind": "dimension",
+                    "target": "dead-zone-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "deployment-b-forward-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b-forward",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "deployment-a-forward-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a-forward",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  },
+                  {
+                    "id": "dead-zone-b-depth",
+                    "kind": "dimension",
+                    "target": "dead-zone-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 2.2
+                  }
+                ]
+              }
+            }
+          ],
+          "mission": {
+            "sides": [
+              {
+                "id": "side-a",
+                "name": "Side A"
+              },
+              {
+                "id": "side-b",
+                "name": "Side B"
+              }
+            ],
+            "gameSizes": [
+              {
+                "armyPoints": 150,
+                "swc": 3,
+                "configurationId": "150-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a-rear",
+                      "deployment-a-forward"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b-rear",
+                      "deployment-b-forward"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 200,
+                "swc": 4,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a-rear",
+                      "deployment-a-forward"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b-rear",
+                      "deployment-b-forward"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 250,
+                "swc": 5,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a-rear",
+                      "deployment-a-forward"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b-rear",
+                      "deployment-b-forward"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 300,
+                "swc": 6,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a-rear",
+                      "deployment-a-forward"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b-rear",
+                      "deployment-b-forward"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 350,
+                "swc": 7,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a-rear",
+                      "deployment-a-forward"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b-rear",
+                      "deployment-b-forward"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 400,
+                "swc": 8,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a-rear",
+                      "deployment-a-forward"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b-rear",
+                      "deployment-b-forward"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "objectives": [
+              {
+                "id": "dominate-dead-zone-a",
+                "name": "Dominate Dead Zone A",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-round",
+                "aggregation": "exclusive",
+                "maximumPoints": 3,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "dominated-region-comparison",
+                      "elementIds": [
+                        "dead-zone-a"
+                      ],
+                      "comparison": "greater",
+                      "minimum": 1
+                    }
+                  }
+                ],
+                "maximumPointsPerRound": 1
+              },
+              {
+                "id": "dominate-dead-zone-b",
+                "name": "Dominate Dead Zone B",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-round",
+                "aggregation": "exclusive",
+                "maximumPoints": 3,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "dominated-region-comparison",
+                      "elementIds": [
+                        "dead-zone-b"
+                      ],
+                      "comparison": "greater",
+                      "minimum": 1
+                    }
+                  }
+                ],
+                "maximumPointsPerRound": 1
+              },
+              {
+                "id": "dominate-both-dead-zones",
+                "name": "Dominate both Dead Zones",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 2,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 2,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "At the end of the game, Dominate both Dead Zones."
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "activate-antennas",
+                "name": "Activated Antennas",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "cumulative",
+                "maximumPoints": 2,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "element-status-count",
+                      "elementIds": [
+                        "antenna-left",
+                        "antenna-right"
+                      ],
+                      "status": "activated"
+                    }
+                  }
+                ]
+              }
+            ],
+            "rules": [
+              {
+                "id": "deployment-and-exclusion",
+                "name": "Deployment and Exclusion Zones",
+                "paragraphs": [
+                  "Each player has a rear Deployment Zone and a second Deployment Zone in the opposing half of the table, inside the central strip. Up to 75 Army Points of Troops can deploy in the central strip. Both forward Zones are [[distance:4:inch]] deep (ES [[distance:10:cm]]).",
+                  "Two Dead Zones between the Deployment Zones are Exclusion Zones. Airborne Deployment and Superior Deployment cannot be used to deploy inside them.",
+                  "No Trooper may deploy in Silhouette contact with an Antenna. Superior Deployment Skills are prohibited except Impersonation."
+                ]
+              },
+              {
+                "id": "dominate-zo",
+                "name": "Dominate a Zone of Operations",
+                "paragraphs": [
+                  "A player Dominates a Zone of Operations if they have more Victory Points of eligible Troopers inside than their opponent.",
+                  "Count Models, Trooper Markers, Proxies and Peripheral Troops in non-Null States. Equipment Tokens and fake Holoechoes do not count; more than half of a Trooper's base must lie within the Zone.",
+                  "ITS 17 EN p. 53 says Shasvastii Troops inside the ZO count while in Shasvastii-Embryo or any non-Null State; ES p. 44 specifies Normal or Unconscious instead. Baggage Troops in non-Null States add 20 Victory Points to Domination."
+                ]
+              },
+              {
+                "id": "activate-antenna",
+                "name": "Activate Antenna",
+                "skillTypeIds": [
+                  "short-skill"
+                ],
+                "skillFacts": {
+                  "requirements": [
+                    "Only Specialist Troops in Silhouette contact with an Antenna may declare Activate Antenna."
+                  ],
+                  "effects": [
+                    "Make a Normal WIP Roll to activate the Antenna for that player. Failed attempts can be retried.",
+                    "The opponent can activate an Antenna again, replacing the previous player's ownership Token."
+                  ],
+                  "restrictions": [],
+                  "clarifications": [],
+                  "sourceNotes": [
+                    "ITS 17 V0.2 EN p. 53 represents Antennas with Transmission Antenna Tokens; ES p. 44 says Console A Tokens. Both say matching-diameter scenery; do not inherit ITS 18's explicit 40 mm requirement."
+                  ]
+                },
+                "paragraphs": [
+                  "Two Antennas are positioned on the centerline, [[distance:6:inch]] / [[distance:8:inch]] / [[distance:12:inch]] from the table edges at 150 / 200–250 / 300–400 points respectively. ITS 17 EN p. 53 requires a Transmission Antenna Token or matching-diameter scenery; ES p. 44 instead specifies a Console A Token or equivalent same-diameter scenery. Neither specifies a fixed 40 mm size.",
+                  "Only Specialist Troops in Silhouette contact with an Antenna may use the Activate Antenna Short Skill: a successful Normal WIP Roll activates it for that player; failed attempts may be retried.",
+                  "An Antenna can be activated by the opponent, replacing the previous player's ownership Token."
+                ]
+              },
+              {
+                "id": "specialist-troops",
+                "name": "Specialist Troops",
+                "paragraphs": [
+                  "Only Hackers, Doctors, Engineers, Forward Observers, Paramedics, Troopers with Chain of Command, and Specialist Operatives qualify as Specialist Troops for this mission.",
+                  "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models for Specialist tasks."
+                ]
+              },
+              {
+                "id": "no-hvt-classified",
+                "name": "Secure HVT and Secure Treasure not used",
+                "paragraphs": [
+                  "There are no Classified Objectives in ITS 17 Crossing Lines. The mission explicitly does not apply Secure HVT or Secure Treasure (EN p. 54 / ES p. 45).",
+                  "Unlike ITS 18, ITS 17 does not explicitly say that the HVT Model must not be deployed or that the Classified Deck is not used. The zero-HVT play-context projection is retained provisionally and this source gap is recorded for verification."
+                ]
+              }
+            ],
+            "endConditions": [
+              {
+                "id": "round-limit",
+                "checkAt": "end-of-round",
+                "finishAt": "end-of-round",
+                "condition": {
+                  "kind": "round-limit",
+                  "rounds": 3
+                }
+              },
+              {
+                "id": "retreat",
+                "checkAt": "tactical-phase",
+                "finishAt": "end-of-player-turn",
+                "condition": {
+                  "kind": "reviewed-prose",
+                  "text": "If a player begins their Active Turn in a Retreat! situation, the mission ends at the end of that Player Turn."
+                }
+              }
+            ],
+            "sourceIssues": [
+              {
+                "id": "its17-crossing-lines-central-strip-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "dominate-dead-zone-a",
+                "status": "needs-verification",
+                "description": "ITS 17 EN pp. 51-52 describe central strips of [[distance:4:inch]] × [[distance:32:inch]] at 150 points and [[distance:4:inch]] × [[distance:48:inch]] at 200/250 points, whereas ES p. 42 describes [[distance:10:cm]] × [[distance:60:cm]] and [[distance:10:cm]] × [[distance:80:cm]] respectively. The English strip length conflicts with table width. Geometry follows the Spanish widths and published layout."
+              },
+              {
+                "id": "its17-crossing-lines-shasvastii-states-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "dominate-dead-zone-a",
+                "status": "needs-verification",
+                "description": "ITS 17 EN p. 53 counts Shasvastii Troops in Shasvastii-Embryo or any non-Null State; ES p. 44 says Normal or Unconscious. The formulations differ."
+              },
+              {
+                "id": "its17-crossing-lines-antenna-token-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "activate-antennas",
+                "status": "needs-verification",
+                "description": "ITS 17 EN p. 53 represents an Antenna with a Transmission Antenna Token; ES p. 44 instead says Console A Token. Both allow scenery matching that Token's diameter without independently fixing a 40 mm size."
+              },
+              {
+                "id": "its17-crossing-lines-hvt-source-gap",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "dominate-both-dead-zones",
+                "status": "needs-verification",
+                "description": "ITS 17 EN p. 54 / ES p. 45 disable Secure HVT and Secure Treasure but do not explicitly prohibit HVT Model deployment. The no-HVT play-context count follows the existing edition's schema and needs source verification; ITS 18's explicit no-HVT/no-Classified-Deck clause cannot be attributed to ITS 17."
+              }
+            ]
+          }
+        },
+        "citations": [
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 51,
+            "section": "Crossing Lines"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 52,
+            "section": "Crossing Lines"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 53,
+            "section": "Crossing Lines"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 54,
+            "section": "Crossing Lines"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 42,
+            "section": "Cruce de Líneas"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 43,
+            "section": "Cruce de Líneas"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 44,
+            "section": "Cruce de Líneas"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 45,
+            "section": "Cruce de Líneas"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-18"
+        }
+      },
+      "components": []
     }
   ]
 }

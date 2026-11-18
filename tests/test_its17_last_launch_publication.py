@@ -37,7 +37,7 @@ def test_its17_last_launch_has_bilingual_pinned_source_membership() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert len(library["definitions"]) == 11
+    assert len(library["definitions"]) == 12
     definition = library["definitions"][9]
     assert definition["id"] == "scenario:last-launch"
     assert definition["version"] == "its17-v0.2"
@@ -146,7 +146,7 @@ def test_its17_last_launch_keeps_historical_diameters_and_bilingual_issues() -> 
 def test_its17_last_launch_sqlite_is_isolated(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     report = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(report["scenarios"]) == 11
+    assert len(report["scenarios"]) == 12
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED, require_current_builder=True,
