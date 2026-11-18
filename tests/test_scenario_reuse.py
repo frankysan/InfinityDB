@@ -260,6 +260,180 @@ def test_version_pinned_shared_components_compose_in_season_database(tmp_path: P
     with pytest.raises(ValueError, match="Cyclic"):
         build_its_database(source_path, tmp_path / "cyclic.db", shared_library=library_path)
 
+def _shared_component_across_scenarios(tmp_path: Path) -> tuple[dict, dict, Path, Path]:
+    """Two synthetic scenario definitions share one versioned, source-cited setup."""
+    source, library_path, _, original = _fixture(tmp_path)
+    library = json.loads(library_path.read_text(encoding="utf-8"))
+    second_id = "scenario:synthetic-neighbor"
+    setup_id = "setup:synthetic-shared-sizes"
+    mission = original["facts"]["mission"]
+    setup = {
+        "id": setup_id,
+        "kind": "setup",
+        "version": "v1",
+        "payload": {
+            "sides": deepcopy(mission["sides"]),
+            "gameSizes": deepcopy(mission["gameSizes"]),
+        },
+        "citations": deepcopy(original["citations"]),
+        "scenarios": [SCENARIO_ID, second_id],
+    }
+    library["components"] = [setup]
+    base = deepcopy(library["definitions"][0])
+    definitions = []
+    for scenario_id in (SCENARIO_ID, second_id):
+        definition = deepcopy(base)
+        definition["id"] = scenario_id
+        record = definition["record"]
+        record["id"] = scenario_id
+        if scenario_id == second_id:
+            record["name"] = "Synthetic neighboring scenario"
+        facts = record["facts"]
+        facts["definitionVersion"] = 2
+        old = facts["mission"]
+        facts["mission"] = {
+            "setup": {"ref": setup_id, "version": "v1"},
+            "objectives": deepcopy(old["objectives"]),
+            "rules": [],
+            "endConditions": deepcopy(old["endConditions"]),
+            "sourceIssues": deepcopy(old["sourceIssues"]),
+        }
+        definition["components"] = [{"ref": setup_id, "version": "v1"}]
+        definitions.append(definition)
+    library["definitions"] = definitions
+
+    base_member = source["scenarioCollection"]["members"][0]
+    base_member["sharedDefinition"]["componentCitations"] = {
+        setup_id: [{
+            "sourceId": "synthetic-its17-pdf",
+            "page": 30,
+            "section": "Synthetic first scenario setup",
+        }],
+    }
+    alternate = deepcopy(base_member)
+    alternate["scenarioId"] = second_id
+    alternate["sharedDefinition"]["overrides"] = []
+    alternate["sharedDefinition"]["componentCitations"][setup_id][0].update(
+        page=31, section="Synthetic second scenario setup",
+    )
+    source["scenarioCollection"]["members"].append(alternate)
+    library_path = _write(library_path, library)
+    source["sharedScenarioLibrary"]["sha256"] = hashlib.sha256(
+        library_path.read_bytes(),
+    ).hexdigest()
+    return source, library, _write(tmp_path / "two-scenarios.json", source), library_path
+
+
+def test_reused_component_has_one_definition_and_per_scenario_citations(
+    tmp_path: Path,
+) -> None:
+    source, library, source_path, library_path = _shared_component_across_scenarios(tmp_path)
+    setup_id = library["components"][0]["id"]
+    assert len(library["components"]) == 1
+    assert all(definition["components"] == [{"ref": setup_id, "version": "v1"}]
+               for definition in library["definitions"])
+    resolved = materialize_shared_scenarios(source, library_path)
+    definitions = resolved["scenarioComponents"]["definitions"]
+    assert len(definitions) == 1
+    assert definitions[0]["scenarios"] == [
+        SCENARIO_ID, "scenario:synthetic-neighbor",
+    ]
+    assert {key: pins[0]["page"] for key, pins
+            in definitions[0]["scenarioCitations"].items()} == {
+        SCENARIO_ID: 30, "scenario:synthetic-neighbor": 31,
+    }
+    output = tmp_path / "its-17-reused-components.db"
+    built = build_its_database(source_path, output, shared_library=library_path)
+    assert {row["id"] for row in built["scenarios"]} == {
+        SCENARIO_ID, "scenario:synthetic-neighbor",
+    }
+    for scenario_id, expected_page in (
+        (SCENARIO_ID, 30), ("scenario:synthetic-neighbor", 31),
+    ):
+        selected = select_its_scenario(
+            output, season_id="its-17", revision=REVISION17,
+            scenario_id=scenario_id,
+        )
+        assert selected is not None
+        record = selected["record"]
+        assert record["facts"]["definitionVersion"] == 1
+        assert record["facts"]["mission"]["gameSizes"] == (
+            library["components"][0]["payload"]["gameSizes"]
+        )
+        assert record["facts"]["componentSources"] == [{
+            "id": setup_id,
+            "citations": [{
+                "sourceId": "synthetic-its17-pdf",
+                "page": expected_page,
+                "section": (
+                    "Synthetic first scenario setup" if expected_page == 30
+                    else "Synthetic second scenario setup"
+                ),
+            }],
+        }]
+    assert build_its_database(
+        source_path, tmp_path / "reused-components-repeat.db",
+        shared_library=library_path,
+    )["sha256"] == built["sha256"]
+
+
+@pytest.mark.parametrize(("mutate", "message"), [
+    (
+        lambda source, library: library["definitions"][1]["components"][0].update(
+            version="v2",
+        ),
+        "Unknown pinned shared component",
+    ),
+    (
+        lambda source, library: library["definitions"][1]["components"].append({
+            **deepcopy(library["components"][0]),
+            "payload": {"sides": [], "gameSizes": []},
+        }),
+        "Conflicting pinned shared component",
+    ),
+    (
+        lambda source, library: library["components"][0].update(
+            scenarios=[SCENARIO_ID],
+        ),
+        "incompatible scenario scope",
+    ),
+    (
+        lambda source, library: source["scenarioCollection"]["members"][1][
+            "sharedDefinition"
+        ].update(componentCitations={}),
+        "must match pinned component identities",
+    ),
+    (
+        lambda source, library: source["scenarioCollection"]["members"][1][
+            "sharedDefinition"
+        ]["componentCitations"]["setup:synthetic-shared-sizes"][0].update(
+            sourceId="its-season-18-en-pdf",
+        ),
+        "outside its publication",
+    ),
+])
+def test_shared_component_reuse_rejects_unsafe_versions_and_sources(
+    tmp_path: Path, mutate, message: str,
+) -> None:
+    source, library, _, library_path = _shared_component_across_scenarios(tmp_path)
+    mutate(source, library)
+    library_path = _write(library_path, library)
+    source["sharedScenarioLibrary"]["sha256"] = hashlib.sha256(
+        library_path.read_bytes(),
+    ).hexdigest()
+    with pytest.raises(ValueError, match=message):
+        materialize_shared_scenarios(source, library_path)
+
+
+def test_shared_component_citation_map_rejects_missing_scenario(tmp_path: Path) -> None:
+    source, _library, _, library_path = _shared_component_across_scenarios(tmp_path)
+    document = materialize_shared_scenarios(source, library_path)
+    definition = document["scenarioComponents"]["definitions"][0]
+    del definition["scenarioCitations"]["scenario:synthetic-neighbor"]
+    with pytest.raises(ValueError, match="exact scenario scope"):
+        ScenarioComponents(document)
+
+
 def test_shared_scenario_membership_preserves_current_and_archived_source_family(
     tmp_path: Path,
 ) -> None:

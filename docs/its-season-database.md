@@ -66,6 +66,22 @@ origin metadata separately preserved in the scenario payload. The selected
 library hash joins the build identity. No runtime database or external source
 file lookup is required when serving the result.
 
+**Cross-scenario components (synthetic acceptance):** That library may
+add a top-level `components` array containing one canonical pinned
+`{id, kind, version, payload, citations, scenarios}` definition for
+each reusable setup, geometry, objective or end condition. Multiple
+scenario definitions reference it with `{ref, version}` entries in
+their `components` lists. Unknown/unused versions, unsupported scopes,
+conflicting same-ID payloads, and same-season local ID collisions fail
+closed. Each season's `sharedDefinition.componentCitations` binds
+its own exact source pages per scenario. Compilation creates one
+season-local component definition with explicit scope but emits
+`componentSources` using only the citing scenario's pages, avoiding
+source leakage between neighboring scenarios. The compiled SQLite
+schema and public mission payloads are unchanged. This capability
+does not by itself establish that any ITS 17/18 components are
+semantically identical; actual reuse awaits source review.
+
 An optional `skills` array in that same pinned library holds canonical
 `{id, version, origin, payload, citations, review}` entries. Each Skill
 `payload` contains `skillTypeIds` and `skillFacts`. The season-owned

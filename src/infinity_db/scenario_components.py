@@ -72,7 +72,7 @@ class ScenarioComponents:
             entry = _object(
                 entry,
                 {"id", "kind", "payload", "citations", "scenarios"},
-                {"version", "origin", "review"},
+                {"version", "origin", "review", "scenarioCitations"},
                 "scenario component",
             )
             kind = entry["kind"]
@@ -103,6 +103,21 @@ class ScenarioComponents:
                 if review["status"] != "reviewed":
                     raise ValueError("Imported Skill requires reviewed source evidence")
             self._scope(entry["scenarios"], "scenario component.scenarios")
+            if "scenarioCitations" in entry:
+                by_scenario = entry["scenarioCitations"]
+                if not isinstance(by_scenario, dict) or set(by_scenario) != set(
+                    entry["scenarios"]
+                ):
+                    raise ValueError("Shared component citations require exact scenario scope")
+                for scenario_id, pins in by_scenario.items():
+                    _array(pins, f"{identifier} citations for {scenario_id}")
+                    if any(
+                        not isinstance(pin, dict)
+                        or not isinstance(pin.get("sourceId"), str)
+                        or type(pin.get("page")) is not int or pin["page"] <= 0
+                        for pin in pins
+                    ):
+                        raise ValueError("Shared component requires exact scenario source pages")
             citations = _array(entry["citations"], f"{identifier}.citations")
             if kind == "skill" and any(
                 not isinstance(citation, dict)
@@ -301,6 +316,19 @@ class ScenarioComponents:
                 **({"overriddenFields": overridden_fields} if overridden_fields else {}),
             }
 
+    def _used_component_sources(self, scenario_id: str) -> list[dict[str, Any]]:
+        """Retain the exact citing scenario, even for shared component definitions."""
+        return [
+            {
+                "id": entry["id"],
+                "citations": deepcopy(
+                    entry.get("scenarioCitations", {}).get(scenario_id, entry["citations"])
+                ),
+            }
+            for entry in self.definitions.values()
+            if entry["id"] in self.used
+        ]
+
     def compose(self, record: dict[str, Any]) -> dict[str, Any]:
         if record.get("kind") != "scenario":
             return deepcopy(record)
@@ -310,11 +338,9 @@ class ScenarioComponents:
                 self.used.clear()
                 self._compose_skill_references(result)
                 if self.used:
-                    result["facts"]["componentSources"] = [
-                        {"id": entry["id"], "citations": deepcopy(entry["citations"])}
-                        for entry in self.definitions.values()
-                        if entry["id"] in self.used
-                    ]
+                    result["facts"]["componentSources"] = self._used_component_sources(
+                        record["id"]
+                    )
             return result
         self.used.clear()
         scenario_id = record["id"]
@@ -416,11 +442,7 @@ class ScenarioComponents:
             },
         }
         self._compose_skill_references(result)
-        result["facts"]["componentSources"] = [
-            {"id": entry["id"], "citations": deepcopy(entry["citations"])}
-            for entry in self.definitions.values()
-            if entry["id"] in self.used
-        ]
+        result["facts"]["componentSources"] = self._used_component_sources(scenario_id)
         return result
 
 

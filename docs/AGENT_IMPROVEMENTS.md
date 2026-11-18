@@ -234,3 +234,20 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Disposition:** applied in `a7289c4` by rebuilding from the recorded Army
   ZIP/manifest and validating the complete set; no additional infrastructure
   is justified for this one missed build step.
+
+## AI-0011 — Preserve scenario-level citations when deduplicating components
+
+- **Date:** 2026-11-18
+- **Area:** ITS shared library composition and component provenance.
+- **Observation:** Before this slice, importing a component with the same
+  typed ID in two scenarios was rejected. Simply merging component
+  definitions and citation arrays would have attributed each scenario's
+  cited source pages to both missions.
+- **Proposed:** Define reusable components once at the library level,
+  pin references by version, and retain the citing scenario's independent
+  source pages in its compiled `componentSources`.
+- **Why:** Content deduplication must not imply source or scope equivalence
+  where independently reviewed mission citations differ.
+- **Disposition:** implemented with a per-scenario citation map and
+  fail-closed duplicate/version/scope checks, covered by synthetic
+  two-scenario SQLite build tests. Real ITS 17/18 parity remains open.

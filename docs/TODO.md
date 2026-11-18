@@ -426,6 +426,11 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
       Requirements/Effects/Restrictions where suitable, rejecting conflicts.
       - [x] Skill prose-array replacements are now scoped to exact scenario
         actions. Intentional variants stay separate in catalog/Search.
+      - [x] Canonical scenario setup, geometry, objective and end-condition
+        components can now be referenced across multiple scenarios in a
+        pinned shared library, with per-scenario publication citations.
+        Synthetic tests cover one definition, two scenarios, isolated
+        source pages, and incompatible same-ID facts.
       - [ ] Other scenario components still need reviewed, typed overrides
         with a narrow field allowlist.
     - [x] Curate and publish four globally defined ITS 18 Skills separately

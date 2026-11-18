@@ -170,7 +170,9 @@ def materialize_shared_scenarios(
     except (UnicodeError, json.JSONDecodeError) as exc:
         raise ValueError("Shared scenario library is not valid JSON") from exc
     if (not isinstance(library, dict)
-            or set(library) - {"format", "formatVersion", "id", "definitions", "skills"}
+            or set(library) - {
+                "format", "formatVersion", "id", "definitions", "components", "skills",
+            }
             or {"format", "formatVersion", "id", "definitions"} - set(library)):
         raise ValueError("Shared scenario library has unsupported fields")
     if library["format"] != LIBRARY_FORMAT or type(library["formatVersion"]) is not int or (
@@ -179,6 +181,42 @@ def materialize_shared_scenarios(
         raise ValueError("Unsupported shared scenario library identity or format")
     if not isinstance(library["definitions"], list):
         raise ValueError("Shared scenario definitions must be an array")
+
+    # One canonical component can be referenced by several scenario definitions.
+    # Every reference pins its exact version; scenario publications own the citations.
+    component_definitions: dict[tuple[str, str], dict[str, Any]] = {}
+    components = library.get("components", [])
+    if not isinstance(components, list):
+        raise ValueError("Shared component definitions must be an array")
+    for component in components:
+        _exact(
+            component, {"id", "kind", "version", "payload", "citations", "scenarios"},
+            "shared component definition",
+        )
+        kind = component["kind"]
+        if kind not in {"setup", "geometry", "objective", "end-condition"}:
+            raise ValueError("Shared component has unsupported kind")
+        identifier = validate_typed_domain_id(
+            component["id"], expected_domain=kind, context="shared component definition",
+        )
+        version = _text(component["version"], "shared component version")
+        key = (identifier, version)
+        if key in component_definitions:
+            raise ValueError(f"Duplicate shared component definition {key!r}")
+        if not isinstance(component["payload"], dict):
+            raise ValueError("Shared component payload must be an object")
+        if not isinstance(component["citations"], list) or not component["citations"]:
+            raise ValueError("Shared component origin requires citations")
+        scenarios = component["scenarios"]
+        if (not isinstance(scenarios, list) or not scenarios
+                or len(scenarios) != len(set(scenarios))):
+            raise ValueError("Shared component requires distinct scenario scope")
+        for scenario_id in scenarios:
+            validate_typed_domain_id(
+                scenario_id, expected_domain="scenario", context="shared component scope",
+            )
+        component_definitions[key] = component
+    referenced_components: dict[tuple[str, str], set[str]] = {}
 
     definitions: dict[tuple[str, str], dict[str, Any]] = {}
     for entry in library["definitions"]:
@@ -203,7 +241,17 @@ def materialize_shared_scenarios(
         _reviewed(record.get("review"), "Shared scenario origin")
         if not isinstance(entry["components"], list):
             raise ValueError("Shared scenario components must be an array")
-        for component in entry["components"]:
+        resolved_components: list[dict[str, Any]] = []
+        for inclusion in entry["components"]:
+            component = inclusion
+            if isinstance(inclusion, dict) and "ref" in inclusion:
+                _exact(inclusion, {"ref", "version"}, "shared component reference")
+                comp_id = inclusion["ref"]
+                comp_version = _text(inclusion["version"], "shared component reference version")
+                component = component_definitions.get((comp_id, comp_version))
+                if component is None:
+                    raise ValueError(f"Unknown pinned shared component {comp_id!r}")
+                referenced_components.setdefault((comp_id, comp_version), set()).add(identifier)
             if not isinstance(component, dict) or "version" not in component:
                 raise ValueError("Shared scenario components require pinned versions")
             _text(component["version"], "shared scenario component version")
@@ -217,7 +265,14 @@ def materialize_shared_scenarios(
             _citations(component.get("citations"), set(sources), "shared component origin")
             if identifier not in component.get("scenarios", []):
                 raise ValueError("Shared scenario component has incompatible scenario scope")
-        definitions[key] = entry
+            resolved_components.append(component)
+        definitions[key] = {**entry, "components": resolved_components}
+
+    if set(referenced_components) != set(component_definitions):
+        raise ValueError("Unreferenced shared component definition")
+    for key, component in component_definitions.items():
+        if referenced_components[key] != set(component["scenarios"]):
+            raise ValueError("Shared component scenario scope does not match its uses")
 
     result = deepcopy(document)
     season = result["scenarioCollection"]["id"]
@@ -227,6 +282,8 @@ def materialize_shared_scenarios(
     if not isinstance(components, dict) or components.get("formatVersion") != 1:
         raise ValueError("Incompatible season scenario component library")
     component_ids = {item["id"] for item in components["definitions"]}
+    imported_components: dict[str, dict[str, Any]] = {}
+    imported_origins: dict[str, dict[str, Any]] = {}
     for member in result["scenarioCollection"]["members"]:
         if "sharedDefinition" not in member:
             continue
@@ -267,14 +324,31 @@ def materialize_shared_scenarios(
                 component["id"], expected_domain=component["kind"],
                 context="shared scenario component",
             )
+            pins = _citations(
+                citation_map[comp_id], sources, f"season component {comp_id}"
+            )
+            previous = imported_components.get(comp_id)
+            if previous is not None:
+                origin = imported_origins[comp_id]
+                if any(
+                    component[field] != origin[field]
+                    for field in ("kind", "version", "payload", "citations")
+                ):
+                    raise ValueError(f"Conflicting pinned shared component {comp_id!r}")
+                if identity in previous["scenarios"]:
+                    raise ValueError(f"Duplicate shared component use in {identity!r}")
+                previous["scenarios"].append(identity)
+                previous["scenarioCitations"][identity] = pins
+                continue
             if comp_id in component_ids:
                 raise ValueError(f"Shared component {comp_id!r} conflicts with a local component")
             component_ids.add(comp_id)
             materialized = deepcopy(component)
             materialized["scenarios"] = [identity]
-            materialized["citations"] = _citations(
-                citation_map[comp_id], sources, f"season component {comp_id}"
-            )
+            materialized["citations"] = pins
+            materialized["scenarioCitations"] = {identity: pins}
+            imported_components[comp_id] = materialized
+            imported_origins[comp_id] = component
             components["definitions"].append(materialized)
         result["records"].append(record)
         member.clear()

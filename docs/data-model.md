@@ -3882,7 +3882,15 @@ unbound actions, duplicate edits, invalid types and unsupported fields fail
 closed. Variant Skill facts stay on the original context-specific Skill route
 and in Search, while unmodified shared facts retain a canonical Skill
 identity; names alone do not authorize consolidation. Generic scenario
-component payload overrides remain open. Complete-set library registration
+component payload overrides remain open. A pinned shared library can now
+also hold one `components` definition for a setup, geometry, objective
+or end condition, referenced from multiple scenarios by exact typed
+ID and version. The season composer coalesces identical definitions
+but retains each member scenario's own `componentCitations` in the
+compiled `componentSources`; a component's source pages never flow
+to another scenario merely because its payload is shared. Incompatible
+same-ID versions/payloads and missing per-scenario citations fail
+closed. Complete-set library registration
 is now opt-in via `SEASON_SHARED_LIBRARY_SOURCES`, with the referenced
 `data/curated/its/shared/*.json` bytes included in the matched build-input
 manifest. Independent season database outputs pin the raw library SHA-256;
