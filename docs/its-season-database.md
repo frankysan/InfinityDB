@@ -251,8 +251,8 @@ Focused reviewed comparisons against the pinned ITS 18 English
 `data/curated/its/n5-its-season-17.json` is a standalone, **unregistered**
 ITS 17 V0.2 curated season source. It has reviewed
 `scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`,
-`scenario:battleground`, `scenario:annihilation` and `scenario:cutthroat`
-memberships pinned to
+`scenario:battleground`, `scenario:annihilation`, `scenario:cutthroat`
+and `scenario:superiority` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -340,10 +340,23 @@ the Spanish omission of VH, its minimum-one-Lieutenant condition for
 the greater-Lieutenant-kills objective, and the omitted historical
 Lieutenant-kill definition remain cited source differences.
 
+Superiority uses the same source-verified four-Quadrant geometry and
+Hack Consoles Short Skill, Specialist Troops, Operational Learning, and
+three-round/Retreat! endings as ITS 18. ITS 17 EN pp. **89–92** and
+ES pp. **94–98** instead cap Hacked Console scoring at **3 OP** (not 4)
+and award **1 OP** for a Dominant Key Ops in a player-dominated Zone
+of Operations at game end, with the Key Ops in a non-Null State.
+This preserves the ten-point mission maximum (6 + 3 + 1). The historic
+Key Ops selection, Dodge (+3), Tactical Awareness and English REM/VH
+restriction are retained. Spanish omits VH, and the Shasvastii
+Unconscious/non-Null versus Normal/Embryo formulations differ, so both
+remain historical source issues. ITS 17 refers to Console A Token
+size rather than independently asserting ITS 18's 40 mm dimension.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the six
+development artifact is `local/work/its/its_17.db`; it contains the seven
 reviewed ITS 17 scenarios and remains separate from the three-file serving
 set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
@@ -360,21 +373,24 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 `tools.research.extend_its17_uplink_center` and
 `tools.research.extend_its17_battleground` and
 `tools.research.extend_its17_annihilation` and
-`tools.research.extend_its17_cutthroat` migrations are not build steps.
+`tools.research.extend_its17_cutthroat` and
+`tools.research.extend_its17_superiority` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
 `tests/test_its17_uplink_center_publication.py` and
 `tests/test_its17_battleground_publication.py` and
 `tests/test_its17_annihilation_publication.py` and
-`tests/test_its17_cutthroat_publication.py`. Existing ITS 18
+`tests/test_its17_cutthroat_publication.py` and
+`tests/test_its17_superiority_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
-Evacuation, Hardlock, Uplink Center, Battleground, Annihilation and Cutthroat
-missions. The accepted migrations reuse complete v1 scenario definitions,
+Evacuation, Hardlock, Uplink Center, Battleground, Annihilation, Cutthroat
+and Superiority missions. The accepted migrations reuse complete v1
+scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 
 The remaining shared-name missions and cross-language parity

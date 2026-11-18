@@ -5469,6 +5469,1118 @@
         }
       },
       "components": []
+    },
+    {
+      "id": "scenario:superiority",
+      "version": "its17-v0.2",
+      "origin": {
+        "sourceCollectionId": "its-season-17-v0.2",
+        "seasonId": "its-17",
+        "revision": "0.2",
+        "sourceIds": [
+          "its-season-17-v0.2-en-pdf",
+          "its-season-17-v0.2-es-pdf"
+        ]
+      },
+      "record": {
+        "id": "scenario:superiority",
+        "kind": "scenario",
+        "name": "Superiority",
+        "summary": "ITS Season 17 Superiority: dominate more Quadrants at each round end, Hack up to three Consoles for points, and have a Dominant Key Ops at game end.",
+        "composition": {
+          "role": "definition"
+        },
+        "scope": {
+          "game": "N5",
+          "seasons": [
+            "its-17"
+          ]
+        },
+        "facts": {
+          "definitionVersion": 1,
+          "playRequirements": {
+            "classifiedObjectives": 0,
+            "tacticalObjectives": 0,
+            "hvts": 0
+          },
+          "mission": {
+            "sides": [
+              {
+                "id": "side-a",
+                "name": "Side A"
+              },
+              {
+                "id": "side-b",
+                "name": "Side B"
+              }
+            ],
+            "gameSizes": [
+              {
+                "armyPoints": 150,
+                "swc": 3,
+                "configurationId": "150-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 200,
+                "swc": 4,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 250,
+                "swc": 5,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 300,
+                "swc": 6,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 350,
+                "swc": 7,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 400,
+                "swc": 8,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "objectives": [
+              {
+                "id": "dominate-more-quadrants",
+                "name": "Dominate more Quadrants each Game Round",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-round",
+                "aggregation": "exclusive",
+                "maximumPoints": 6,
+                "maximumPointsPerRound": 2,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 2,
+                    "condition": {
+                      "kind": "dominated-region-comparison",
+                      "elementIds": [
+                        "quadrant-1",
+                        "quadrant-2",
+                        "quadrant-3",
+                        "quadrant-4"
+                      ],
+                      "comparison": "greater"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "hack-consoles",
+                "name": "Hack Consoles",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "cumulative",
+                "maximumPoints": 3,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "element-status-count",
+                      "elementIds": [
+                        "console-q1",
+                        "console-q2",
+                        "console-q3",
+                        "console-q4"
+                      ],
+                      "status": "hacked"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "dominant-key-ops",
+                "name": "Dominant Key Ops",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 1,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "At game end, have your designated Key Ops in a non-Null State within a Zone of Operations that you Dominate."
+                    }
+                  }
+                ]
+              }
+            ],
+            "rules": [
+              {
+                "id": "quadrants-zo",
+                "name": "Quadrants (ZO)",
+                "paragraphs": [
+                  "At the end of each Game Round, and not before, divide the central part of the table into four Quadrants as shown on the map. Each Quadrant is a Zone of Operations (ZO).",
+                  "A ZO is Dominated by the player with more Victory Points in it. Count Troopers represented by Models or Markers, including Proxies and Peripherals; exclude Troopers in a Null State and Tokens representing weapons, equipment or false Holoechoes.",
+                  "A Trooper is inside a ZO only when more than half its base is inside that area."
+                ]
+              },
+              {
+                "id": "shasvastii",
+                "name": "Shasvastii",
+                "paragraphs": [
+                  "For purposes of Dominating a ZO, the English edition states that Troopers with [[skill:shasvastii|Shasvastii]] count while Unconscious or in any non-Null State. The Spanish edition instead names Normal and Shasvastii-Embryo States. The source difference is noted below."
+                ]
+              },
+              {
+                "id": "baggage",
+                "name": "Baggage",
+                "paragraphs": [
+                  "A Trooper with [[equipment:baggage|Baggage]] inside a ZO adds 20 Victory Points toward Dominating that ZO while it is not in a Null State."
+                ]
+              },
+              {
+                "id": "consoles",
+                "name": "Consoles",
+                "paragraphs": [
+                  "Four Consoles stand in the center of the four Quadrants. Use a Console A Token or a piece of scenery of the same diameter; ITS 17 does not independently specify a numeric diameter."
+                ]
+              },
+              {
+                "id": "hack-consoles",
+                "name": "Hack Consoles",
+                "skillTypeIds": [
+                  "short-skill"
+                ],
+                "skillFacts": {
+                  "requirements": [
+                    "A Specialist Troop must be in Silhouette contact with a Console to declare Hack Consoles."
+                  ],
+                  "effects": [
+                    "Make a Normal WIP Roll to Hack the Console; failed attempts can be repeated by spending another Short Skill.",
+                    "Either player can Hack a Console the opponent has already Hacked. Both then count it as Hacked for their own end-of-game Objective Points. Track each player's success with separate Player Tokens."
+                  ],
+                  "restrictions": [],
+                  "clarifications": [],
+                  "sourceNotes": []
+                },
+                "paragraphs": [
+                  "Hack Consoles is an Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with a Console may make a Normal WIP Roll to Hack it; failed attempts may be repeated by spending another Short Skill.",
+                  "The opposing player may Hack a previously Hacked Console. Both players then count the Console as Hacked for their end-of-game Objective Points; use different Player Tokens to track each player's success."
+                ]
+              },
+              {
+                "id": "specialist-troops",
+                "name": "Specialist Troops",
+                "paragraphs": [
+                  "Only Hackers, Doctors, Engineers, Forward Observers, Paramedics and Troopers with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] count as Specialist Troops for this mission.",
+                  "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models for tasks reserved to Specialist Troops."
+                ]
+              },
+              {
+                "id": "operational-learning",
+                "name": "Operational Learning",
+                "paragraphs": [
+                  "When a Specialist Troop fails a WIP Roll for a Scenario-labelled Skill, its next consecutive Order with the same Skill and target gains +3 to the WIP Roll. The third and subsequent consecutive Orders gain +3 and +1SD; these MODs stack with other applicable Scenario Skill MODs.",
+                  "This sequence resets after success, using a different Skill or target, or spending an Order on another Trooper. Only one sequence per Trooper and per Scenario-labelled Skill may apply at once."
+                ]
+              },
+              {
+                "id": "hvt-and-classified-deck",
+                "name": "HVT and Classified Deck not used",
+                "paragraphs": [
+                  "Players do not deploy an HVT Model, Secure HVT does not apply, and the Classified Deck is not used in this mission."
+                ]
+              },
+              {
+                "id": "key-ops",
+                "name": "Key Ops",
+                "paragraphs": [
+                  "At the end of Deployment, in Initiative order, each player designates a Key Ops from their Army List, deployed and remaining on the table as a Model, not a Marker or in Hidden Deployment.",
+                  "Irregular Troopers and REM or VH Troop Types cannot be designated in the English ITS 17 source. The Spanish version excludes Irregular and REM but does not mention VH.",
+                  "The Key Ops gains [[skill:dodge|Dodge (+3)]] and [[skill:tactical-awareness|Tactical Awareness]]; extra instances do not stack. Identify the Key Ops with a Player A or B Marker."
+                ]
+              },
+              {
+                "id": "dominant-key-ops",
+                "name": "Dominant Key Ops",
+                "paragraphs": [
+                  "A player has a Dominant Key Ops at the end of the game when that Key Ops is in any non-Null State within a Zone of Operations Dominated by that player."
+                ]
+              }
+            ],
+            "endConditions": [
+              {
+                "id": "round-limit",
+                "checkAt": "end-of-round",
+                "finishAt": "end-of-round",
+                "condition": {
+                  "kind": "round-limit",
+                  "rounds": 3
+                }
+              },
+              {
+                "id": "retreat",
+                "checkAt": "tactical-phase",
+                "finishAt": "end-of-player-turn",
+                "condition": {
+                  "kind": "reviewed-prose",
+                  "text": "If a player begins their Active Turn in a Retreat! situation, the mission ends at the end of that Player Turn."
+                }
+              }
+            ],
+            "sourceIssues": [
+              {
+                "id": "its17-shasvastii-en-es-zo-state",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "dominate-more-quadrants",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 EN p. 90 counts Shasvastii Troopers in Unconscious or any non-Null State, whereas ES p. 95 names Normal or Shasvastii Embryo. The English wording is retained; do not silently equate the state sets."
+              },
+              {
+                "id": "its17-key-ops-vh-eligibility-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "dominant-key-ops",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 EN p. 92 excludes Irregular, REM and VH Troopers as Key Ops; ES p. 97 omits VH. Preserve the English exclusion and record the bilingual gap."
+              }
+            ]
+          },
+          "configurations": [
+            {
+              "id": "150-points",
+              "armyPoints": [
+                150
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Superiority",
+                "table": {
+                  "width": 24,
+                  "height": 32,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "quadrant-1",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 8,
+                    "x2": 12,
+                    "y2": 16
+                  },
+                  {
+                    "id": "quadrant-2",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 12,
+                    "y1": 8,
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": 16
+                  },
+                  {
+                    "id": "quadrant-3",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 16,
+                    "x2": 12,
+                    "y2": 24
+                  },
+                  {
+                    "id": "quadrant-4",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 12,
+                    "y1": 16,
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": 24
+                  },
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": 8
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "bottom",
+                      "offset": -8
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "bottom"
+                    }
+                  },
+                  {
+                    "id": "center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 4,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": {
+                      "anchor": "bottom",
+                      "offset": -4
+                    },
+                    "text": "Deployment Zone B"
+                  },
+                  {
+                    "id": "quadrant-divider",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": {
+                      "anchor": "center"
+                    },
+                    "y1": 8,
+                    "x2": {
+                      "anchor": "center"
+                    },
+                    "y2": 24
+                  },
+                  {
+                    "id": "console-q1",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 6,
+                    "y": 12,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-1-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 6,
+                    "y": 10.5,
+                    "text": "Quadrant 1"
+                  },
+                  {
+                    "id": "console-q2",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 18,
+                    "y": 12,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-2-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 18,
+                    "y": 10.5,
+                    "text": "Quadrant 2"
+                  },
+                  {
+                    "id": "console-q3",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 6,
+                    "y": 20,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-3-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 6,
+                    "y": 18.5,
+                    "text": "Quadrant 3"
+                  },
+                  {
+                    "id": "console-q4",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 18,
+                    "y": 20,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-4-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 18,
+                    "y": 18.5,
+                    "text": "Quadrant 4"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "start"
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "start"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "200-250-points",
+              "armyPoints": [
+                200,
+                250
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Superiority",
+                "table": {
+                  "width": 32,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "quadrant-1",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 12,
+                    "x2": 16,
+                    "y2": 24
+                  },
+                  {
+                    "id": "quadrant-2",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 16,
+                    "y1": 12,
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": 24
+                  },
+                  {
+                    "id": "quadrant-3",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 16,
+                    "y2": 36
+                  },
+                  {
+                    "id": "quadrant-4",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 16,
+                    "y1": 24,
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": 36
+                  },
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": 12
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "bottom",
+                      "offset": -12
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "bottom"
+                    }
+                  },
+                  {
+                    "id": "center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 6,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": {
+                      "anchor": "bottom",
+                      "offset": -6
+                    },
+                    "text": "Deployment Zone B"
+                  },
+                  {
+                    "id": "quadrant-divider",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": {
+                      "anchor": "center"
+                    },
+                    "y1": 12,
+                    "x2": {
+                      "anchor": "center"
+                    },
+                    "y2": 36
+                  },
+                  {
+                    "id": "console-q1",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 8,
+                    "y": 18,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-1-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 8,
+                    "y": 16.5,
+                    "text": "Quadrant 1"
+                  },
+                  {
+                    "id": "console-q2",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 24,
+                    "y": 18,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-2-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 24,
+                    "y": 16.5,
+                    "text": "Quadrant 2"
+                  },
+                  {
+                    "id": "console-q3",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 8,
+                    "y": 30,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-3-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 8,
+                    "y": 28.5,
+                    "text": "Quadrant 3"
+                  },
+                  {
+                    "id": "console-q4",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 24,
+                    "y": 30,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-4-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 24,
+                    "y": 28.5,
+                    "text": "Quadrant 4"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "start"
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "start"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "300-400-points",
+              "armyPoints": [
+                300,
+                350,
+                400
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Superiority",
+                "table": {
+                  "width": 48,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "quadrant-1",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 12,
+                    "x2": 24,
+                    "y2": 24
+                  },
+                  {
+                    "id": "quadrant-2",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 24,
+                    "y1": 12,
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": 24
+                  },
+                  {
+                    "id": "quadrant-3",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 24,
+                    "y2": 36
+                  },
+                  {
+                    "id": "quadrant-4",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 24,
+                    "y1": 24,
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": 36
+                  },
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": 12
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "bottom",
+                      "offset": -12
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "bottom"
+                    }
+                  },
+                  {
+                    "id": "center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 6,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": {
+                      "anchor": "bottom",
+                      "offset": -6
+                    },
+                    "text": "Deployment Zone B"
+                  },
+                  {
+                    "id": "quadrant-divider",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": {
+                      "anchor": "center"
+                    },
+                    "y1": 12,
+                    "x2": {
+                      "anchor": "center"
+                    },
+                    "y2": 36
+                  },
+                  {
+                    "id": "console-q1",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 12,
+                    "y": 18,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-1-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 12,
+                    "y": 16.5,
+                    "text": "Quadrant 1"
+                  },
+                  {
+                    "id": "console-q2",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 36,
+                    "y": 18,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-2-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 36,
+                    "y": 16.5,
+                    "text": "Quadrant 2"
+                  },
+                  {
+                    "id": "console-q3",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 12,
+                    "y": 30,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-3-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 12,
+                    "y": 28.5,
+                    "text": "Quadrant 3"
+                  },
+                  {
+                    "id": "console-q4",
+                    "kind": "marker",
+                    "style": "objective",
+                    "x": 36,
+                    "y": 30,
+                    "markerType": "console"
+                  },
+                  {
+                    "id": "quadrant-4-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 36,
+                    "y": 28.5,
+                    "text": "Quadrant 4"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "start"
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "start"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "citations": [
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 89,
+            "section": "Superiority"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 90,
+            "section": "Superiority"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 91,
+            "section": "Superiority"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 92,
+            "section": "Superiority"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 94,
+            "section": "Superioridad"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 95,
+            "section": "Superioridad"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 96,
+            "section": "Superioridad"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 97,
+            "section": "Superioridad"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 98,
+            "section": "Superioridad"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-18"
+        }
+      },
+      "components": []
     }
   ]
 }

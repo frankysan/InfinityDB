@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (six reviewed scenarios)",
+    "title": "ITS Season 17 Seekers V0.2 (seven reviewed scenarios)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -302,6 +302,65 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:superiority",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 89,
+              "section": "Superiority"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 90,
+              "section": "Superiority"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 91,
+              "section": "Superiority"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 92,
+              "section": "Superiority"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 94,
+              "section": "Superioridad"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 95,
+              "section": "Superioridad"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 96,
+              "section": "Superioridad"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 97,
+              "section": "Superioridad"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 98,
+              "section": "Superioridad"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -378,6 +437,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "f64045e313dc61817216088560100518e463a3a890126dc31b906195e2e9ce16"
+    "sha256": "2ff7333c539f4531448e9ce1136f278fc8f285c8abab464c32e387b1e3f25271"
   }
 }

@@ -40,6 +40,7 @@ def test_its17_cutthroat_pinned_membership_and_sources() -> None:
     assert [entry["id"] for entry in library["definitions"]] == [
         "scenario:evacuation", "scenario:hardlock", "scenario:uplink-center",
         "scenario:battleground", "scenario:annihilation", "scenario:cutthroat",
+        "scenario:superiority",
     ]
     definition = library["definitions"][5]
     assert definition["version"] == "its17-v0.2"
@@ -134,7 +135,7 @@ def test_its17_cutthroat_standalone_sqlite_is_season_local(tmp_path: Path) -> No
     output = tmp_path / "its_17.db"
     result = build_its_database(SEASON, output, shared_library=SHARED)
     assert result["inputIdentity"]["seasonId"] == "its-17"
-    assert len(result["scenarios"]) == 6
+    assert len(result["scenarios"]) == 7
     assert inspect_its_database(
         output, source=SEASON, shared_library=SHARED, require_current_builder=True,
     ) == result

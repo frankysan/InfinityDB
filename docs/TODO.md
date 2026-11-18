@@ -520,6 +520,12 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         selection/Skills and English/Spanish Lieutenant and VH differences,
         reuse only matching deployment geometry, and rebuild the separate
         six-scenario `its_17.db` without changing ITS 18.
+      - [x] Review ITS 17 Superiority V0.2 (EN pp. 89–92,
+        ES pp. 94–98): preserve the historic 3-OP Console cap,
+        Dominant Key Ops bonus, selection requirements and language
+        discrepancies, while reusing matching Consoles/Quadrants and
+        Hack Consoles semantics. Rebuild `its_17.db` with seven
+        independent historical scenario records.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish
