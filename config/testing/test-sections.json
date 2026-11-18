@@ -102,6 +102,7 @@
         "test_its17_superiority_publication",
         "test_its17_provisioning_publication",
         "test_its17_area_of_interest_publication",
+        "test_its17_last_launch_publication",
         "test_its_source_family",
         "test_its_hotfix_scenarios",
         "test_its_hotfix_reviewed_missions",

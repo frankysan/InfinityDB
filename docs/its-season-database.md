@@ -252,8 +252,8 @@ Focused reviewed comparisons against the pinned ITS 18 English
 ITS 17 V0.2 curated season source. It has reviewed
 `scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`,
 `scenario:battleground`, `scenario:annihilation`, `scenario:cutthroat`,
-`scenario:superiority`, `scenario:provisioning` and
-`scenario:area-of-interest` memberships pinned to
+`scenario:superiority`, `scenario:provisioning`,
+`scenario:area-of-interest` and `scenario:last-launch` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -386,10 +386,23 @@ INTELCOM at the last Game Round while Spanish specifies the
 third; this remains unresolved if Retreat! ends play earlier.
 These are recorded with independent ITS 17 source citations.
 
+Last Launch matches ITS 18 scoring (2 + 2 + up to 2 + 1 + 3 OP),
+the three table configurations, 4/8-inch Scanner offsets, three ID actions,
+8-inch central Launching Tower, four open Wide Gates, Baggage, No Quarter
+and the third-round ending. ITS 17 V0.2 EN pp. **63–67** and ES pp.
+**75–80** provide eleven historical citations. Both versions specify scenery
+matching the ID Scanner/Checker Token diameter, without the explicit
+40 mm dimension of ITS 18. ITS 17 EN names an 8-inch Tower versus ES 20 cm;
+Spanish alone specifies gate access for any Silhouette; EN Shasvastii
+non-Null wording differs from Spanish Normal/Unconscious; and EN says
+removed Troopers' points while ES uses singular for Peripheral extraction.
+Four independent source issues preserve these differences. The original
+mission has two Tactical Support Options.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the nine
+development artifact is `local/work/its/its_17.db`; it contains the ten
 reviewed ITS 17 scenarios and remains separate from the three-file serving
 set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
@@ -409,7 +422,8 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 `tools.research.extend_its17_cutthroat` and
 `tools.research.extend_its17_superiority` and
 `tools.research.extend_its17_provisioning` and
-`tools.research.extend_its17_area_of_interest` migrations are not build steps.
+`tools.research.extend_its17_area_of_interest` and
+`tools.research.extend_its17_last_launch` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
@@ -419,14 +433,15 @@ regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_cutthroat_publication.py` and
 `tests/test_its17_superiority_publication.py` and
 `tests/test_its17_provisioning_publication.py` and
-`tests/test_its17_area_of_interest_publication.py`. Existing ITS 18
+`tests/test_its17_area_of_interest_publication.py` and
+`tests/test_its17_last_launch_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
 Evacuation, Hardlock, Uplink Center, Battleground, Annihilation,
-Cutthroat, Superiority, Provisioning and Area of Interest missions.
+Cutthroat, Superiority, Provisioning, Area of Interest and Last Launch missions.
 The accepted migrations reuse complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 

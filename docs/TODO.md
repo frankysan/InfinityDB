@@ -541,6 +541,12 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         Shasvastii States, INTELCOM timing and Spanish
         Connected/Activated wording. Rebuild the isolated
         nine-scenario `its_17.db`; do not change ITS 18.
+      - [x] Source-review ITS 17 V0.2 Last Launch (EN pp. 63–67,
+        ES pp. 75–80): verify matching scoring and three diagrams,
+        including 4/8-inch ID Scanner offsets, three ID Skills, Tower
+        Domination, Peripherals and extraction. Preserve relative Token
+        diameters and four independently cited bilingual source issues.
+        Rebuild isolated ten-scenario `its_17.db`; keep ITS 18 unchanged.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish

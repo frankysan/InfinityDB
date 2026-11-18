@@ -8124,6 +8124,1027 @@
         }
       },
       "components": []
+    },
+    {
+      "id": "scenario:last-launch",
+      "version": "its17-v0.2",
+      "origin": {
+        "sourceCollectionId": "its-season-17-v0.2",
+        "seasonId": "its-17",
+        "revision": "0.2",
+        "sourceIds": [
+          "its-season-17-v0.2-en-pdf",
+          "its-season-17-v0.2-es-pdf"
+        ]
+      },
+      "record": {
+        "id": "scenario:last-launch",
+        "kind": "scenario",
+        "name": "Last Launch",
+        "summary": "ITS Season 17 Last Launch: download and transfer IDs, extract identified Troopers from the Launching Tower, and score extracted points, Specialists, Tower Domination and three Classified Objectives.",
+        "composition": {
+          "role": "definition"
+        },
+        "scope": {
+          "game": "N5",
+          "seasons": [
+            "its-17"
+          ]
+        },
+        "facts": {
+          "definitionVersion": 1,
+          "playRequirements": {
+            "classifiedObjectives": 3,
+            "tacticalObjectives": 0,
+            "hvts": 1
+          },
+          "mission": {
+            "sides": [
+              {
+                "id": "side-a",
+                "name": "Side A"
+              },
+              {
+                "id": "side-b",
+                "name": "Side B"
+              }
+            ],
+            "gameSizes": [
+              {
+                "armyPoints": 150,
+                "swc": 3,
+                "configurationId": "150-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 200,
+                "swc": 4,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 250,
+                "swc": 5,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 300,
+                "swc": 6,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 350,
+                "swc": 7,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 400,
+                "swc": 8,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "objectives": [
+              {
+                "id": "extract-more-army-points",
+                "name": "Extract More Army Points",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 2,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 2,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "At game end, your total Extracted Army Points exceeds the opponent's total. Extracted Baggage Troops add 20 points to their contributing total."
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "extract-more-specialists",
+                "name": "Extract More Specialists",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 2,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 2,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "At game end, your number of Extracted Specialist Troops exceeds the opponent's."
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "kill-specialists-comparison",
+                "name": "Kill Specialist Troops",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 2,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 2,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "At game end, the number of the opponent's Specialist Troops you have Killed exceeds the number of your Specialist Troops Killed by the opponent."
+                    }
+                  },
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "At game end, both players have Killed the same number of opposing Specialist Troops. This 1-point tie award is an alternative to the 2-point greater-than award."
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "dominate-launching-tower",
+                "name": "Dominate the Launching Tower",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 1,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "At game end, Dominate the central Launching Tower Zone of Operations by having more eligible Victory Points inside than the opponent."
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "classified-objectives",
+                "name": "Classified Objectives",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "cumulative",
+                "maximumPoints": 3,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "Complete each of your three Classified Objectives for 1 Objective Point each, up to 3."
+                    }
+                  }
+                ]
+              }
+            ],
+            "rules": [
+              {
+                "id": "deployment-and-launching-tower",
+                "name": "Deployment and Launching Tower",
+                "paragraphs": [
+                  "Both sides deploy in opposite edge Deployment Zones of game-size-specific depth, and no Trooper can deploy inside the centrally located Launching Tower.",
+                  "The Launching Tower is a [[distance:8:inch]] × [[distance:8:inch]] Zone of Operations at the table center. Its walls count as infinitely high and completely block Line of Fire. Four Wide Gates are centered in its four walls and start open; the published diagram is schematic and does not specify their opening width.",
+                  "ITS 17 EN p. 65 specifies an [[distance:8:inch]] × [[distance:8:inch]] Launching Tower; ES p. 77 says [[distance:20:cm]] × [[distance:20:cm]]. This small unit difference is preserved as a bilingual source issue."
+                ]
+              },
+              {
+                "id": "id-scanners",
+                "name": "ID Scanners",
+                "paragraphs": [
+                  "Two ID Scanners stand along the table centerline, each [[distance:4:inch]] from the table edge at 150 points and [[distance:8:inch]] otherwise (ES: [[distance:10:cm]] / [[distance:20:cm]]). Represent each with a Tech-Coffin Token or scenery of matching diameter. ITS 17 does not independently specify the 40 mm scenery size of ITS 18."
+                ]
+              },
+              {
+                "id": "download-id",
+                "name": "Download ID (Short Skill)",
+                "skillTypeIds": [
+                  "short-skill"
+                ],
+                "skillFacts": {
+                  "requirements": [
+                    "Only a Specialist Troop in Silhouette contact with an ID Scanner may declare this Skill."
+                  ],
+                  "effects": [
+                    "Make a Normal WIP Roll. On success place an ID Token beside the Trooper. Failed attempts may be repeated by spending another Short Skill."
+                  ],
+                  "restrictions": [],
+                  "clarifications": [],
+                  "sourceNotes": []
+                },
+                "paragraphs": [
+                  "Only a Specialist Troop in Silhouette contact with an ID Scanner may use this Attack, Scenario Short Skill. A Normal WIP Roll downloads an ID on success; place one ID Token beside the Trooper.",
+                  "Each failed attempt can be retried by spending another Short Skill and rolling again."
+                ]
+              },
+              {
+                "id": "swap-id",
+                "name": "Swap ID (Short Skill)",
+                "skillTypeIds": [
+                  "short-skill"
+                ],
+                "skillFacts": {
+                  "requirements": [
+                    "A Trooper must be in Silhouette contact with an allied Trooper carrying an ID Token."
+                  ],
+                  "effects": [
+                    "Spend an Attack, Scenario Short Skill to transfer the ID without a Roll. Place the ID Token beside the recipient."
+                  ],
+                  "restrictions": [
+                    "An ID carrier may not enter or remain in a Marker State. Each Trooper may carry at most one ID Token. Remove the Token if its carrier enters Dead State."
+                  ],
+                  "clarifications": [],
+                  "sourceNotes": []
+                },
+                "paragraphs": [
+                  "A Trooper in Silhouette contact with an allied Trooper carrying an ID Token may declare this Attack, Scenario Short Skill to transfer the ID without a Roll. Place the Token beside the recipient.",
+                  "An ID carrier may not enter or be in a Marker State. Each Trooper may have at most one ID Token. Remove the Token if its carrier enters Dead State."
+                ]
+              },
+              {
+                "id": "launching-tower-gates",
+                "name": "Wide Gates",
+                "paragraphs": [
+                  "The Launching Tower has four Wide Gates centered on its walls, open at the start. ITS 17 ES p. 77 also explicitly requires Wide Gate Tokens or equivalent scenery and allows access regardless of Silhouette; EN p. 65 does not state that extra clause.",
+                  "The map shows the Tower's exterior square and the central ID Checker. Gate locations are described here because the source does not provide a numerical gate width for geometric placement."
+                ]
+              },
+              {
+                "id": "dominate-launching-tower",
+                "name": "Dominate the Launching Tower ZO",
+                "paragraphs": [
+                  "Dominate the Zone of Operations by having more Victory Points from eligible Troops inside the Tower than the opponent. Models, Markers representing Troops, Proxies and Peripherals count; non-Troop Tokens, fake Holoechoes and Troops in Null States do not.",
+                  "A Trooper is inside the Tower if more than half its base lies inside. ITS 17 EN p. 65 counts Shasvastii Troopers in Unconscious or any non-Null State; ES p. 78 names Normal or Unconscious. The difference is unresolved.",
+                  "Each non-Null Baggage Trooper inside the Tower provides an extra 20 Victory Points for this Domination comparison."
+                ]
+              },
+              {
+                "id": "id-checker",
+                "name": "ID Checker",
+                "paragraphs": [
+                  "One ID Checker stands at the center of the Launching Tower. Represent it with a Console A Token or a piece of matching-diameter scenery; ITS 17 does not independently specify a 40 mm diameter."
+                ]
+              },
+              {
+                "id": "extract-identified-trooper",
+                "name": "Extract Identified Trooper (Short Skill)",
+                "skillTypeIds": [
+                  "short-skill"
+                ],
+                "skillFacts": {
+                  "requirements": [
+                    "A Trooper carrying an ID Token must be in Silhouette contact with the central ID Checker."
+                  ],
+                  "effects": [
+                    "Extraction succeeds without a Roll. Remove the Trooper and any of its Peripherals inside the Launching Tower from the table.",
+                    "Add the removed Troopers' points to the player's Extracted Army Points. Extracted Troopers continue contributing Victory Points even if they enter Null or Dead State during that extraction Order.",
+                    "A previously Extracted Lieutenant triggers Loss of Lieutenant during its player's Tactical Phase."
+                  ],
+                  "restrictions": [
+                    "A Trooper participating in a Coordinated Order cannot declare this Skill."
+                  ],
+                  "clarifications": [],
+                  "sourceNotes": [
+                    "ITS 17 EN p. 66 refers to adding the removed Troopers' points (plural, including Peripherals removed inside the Tower), while ES p. 79 says the removed Trooper's cost (singular). Whether Peripheral costs contribute is not explicitly equivalent."
+                  ]
+                },
+                "paragraphs": [
+                  "A Trooper carrying an ID Token and in Silhouette contact with the central ID Checker may declare this Attack, Scenario Short Skill, unless participating in a Coordinated Order. Extraction succeeds without a Roll.",
+                  "Remove the extracting Trooper and any of its Peripherals inside the Launching Tower. Extracted Army Points are Open Information; ITS 17 EN p. 66 refers to the removed Troopers' points, while ES p. 79 refers to the extracting Trooper's points alone. The Peripheral-cost interpretation remains unresolved.",
+                  "Extracted Troops continue contributing to their owner's Victory Points, even if they entered a Null or Dead State during the Order they were Extracted. A previously Extracted Lieutenant triggers the normal Loss of Lieutenant rule during the player's Tactical Phase."
+                ]
+              },
+              {
+                "id": "killing",
+                "name": "Killing",
+                "paragraphs": [
+                  "An opposing Trooper is considered Killed if it enters Dead State, remains in a Null State at game end, or has not been deployed as a Model or Marker by game end.",
+                  "Extracted Troops are never considered Killed by the adversary, even if removed from the table."
+                ]
+              },
+              {
+                "id": "specialist-troops",
+                "name": "Specialist Troops",
+                "paragraphs": [
+                  "Hackers, Doctors, Engineers, Forward Observers, Paramedics and Troopers with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] count as Specialist Troops.",
+                  "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models to perform Specialist-only tasks."
+                ]
+              },
+              {
+                "id": "baggage-extracted",
+                "name": "Baggage and Extracted Points",
+                "paragraphs": [
+                  "Every Extracted Baggage Trooper adds 20 extra points to the total Extracted Army Points, in addition to its own points cost. Non-Null Baggage Troops inside the Tower also add 20 Victory Points for Domination."
+                ]
+              },
+              {
+                "id": "no-quarter",
+                "name": "No Quarter",
+                "paragraphs": [
+                  "Retreat! rules do not apply in this mission. The game ends after the third Game Round, without the usual Retreat! early-ending condition."
+                ]
+              }
+            ],
+            "endConditions": [
+              {
+                "id": "round-limit",
+                "checkAt": "end-of-round",
+                "finishAt": "end-of-round",
+                "condition": {
+                  "kind": "round-limit",
+                  "rounds": 3
+                }
+              }
+            ],
+            "sourceIssues": [
+              {
+                "id": "its17-last-launch-tower-dimensions-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "dominate-launching-tower",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 EN p. 65 specifies an [[distance:8:inch]] × [[distance:8:inch]] Launching Tower; ES p. 77 gives [[distance:20:cm]] × [[distance:20:cm]]. Geometry uses the English dimensions without declaring these exact equivalents."
+              },
+              {
+                "id": "its17-last-launch-gate-access-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "dominate-launching-tower",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 ES p. 77 requires Wide Gate Tokens or similar scenery and explicitly allows any Silhouette to pass. EN p. 65 only states that four Wide Gates start open."
+              },
+              {
+                "id": "its17-last-launch-shasvastii-states-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "dominate-launching-tower",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 EN p. 65 counts Shasvastii Troopers while Unconscious or in any non-Null State; ES p. 78 specifically names Normal or Unconscious."
+              },
+              {
+                "id": "its17-last-launch-peripheral-points-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "extract-more-army-points",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 EN p. 66 adds the removed Troopers' points after extracting a Trooper and its Peripherals inside the Tower; ES p. 79 refers to the removed Trooper's points in the singular. Whether Peripheral points count is not explicitly identical."
+              }
+            ]
+          },
+          "configurations": [
+            {
+              "id": "150-points",
+              "armyPoints": [
+                150
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Last Launch",
+                "table": {
+                  "width": 24,
+                  "height": 32,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 24,
+                    "y2": 8
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 24,
+                    "y2": 32
+                  },
+                  {
+                    "id": "launching-tower",
+                    "kind": "rectangle",
+                    "style": "no-deploy",
+                    "x1": 8,
+                    "y1": 12,
+                    "x2": 16,
+                    "y2": 20
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": 16,
+                    "x2": 24,
+                    "y2": 16
+                  },
+                  {
+                    "id": "id-scanner-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 4,
+                    "y": 16
+                  },
+                  {
+                    "id": "id-scanner-right",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 20,
+                    "y": 16
+                  },
+                  {
+                    "id": "id-checker",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "console",
+                    "x": 12,
+                    "y": 16
+                  },
+                  {
+                    "id": "launching-tower-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 12,
+                    "y": 14.3,
+                    "text": "Tower"
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 12,
+                    "y": 4,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 12,
+                    "y": 28,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "ruler",
+                    "x1": 0.8,
+                    "y1": 24,
+                    "x2": 0.8,
+                    "y2": 32,
+                    "offset": 0
+                  },
+                  {
+                    "id": "id-checker-center-from-left",
+                    "kind": "ruler",
+                    "x1": 0,
+                    "y1": 30.9,
+                    "x2": 12,
+                    "y2": 30.9,
+                    "offset": 0
+                  },
+                  {
+                    "id": "scanner-right-from-edge",
+                    "kind": "ruler",
+                    "x1": 20,
+                    "y1": 30.9,
+                    "x2": 24,
+                    "y2": 30.9,
+                    "offset": 0
+                  },
+                  {
+                    "id": "launching-tower-width",
+                    "kind": "dimension",
+                    "target": "launching-tower",
+                    "axis": "x",
+                    "side": "end",
+                    "offset": 0.4
+                  }
+                ]
+              }
+            },
+            {
+              "id": "200-250-points",
+              "armyPoints": [
+                200,
+                250
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Last Launch",
+                "table": {
+                  "width": 32,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 32,
+                    "y2": 12
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 36,
+                    "x2": 32,
+                    "y2": 48
+                  },
+                  {
+                    "id": "launching-tower",
+                    "kind": "rectangle",
+                    "style": "no-deploy",
+                    "x1": 12,
+                    "y1": 20,
+                    "x2": 20,
+                    "y2": 28
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 32,
+                    "y2": 24
+                  },
+                  {
+                    "id": "id-scanner-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 8,
+                    "y": 24
+                  },
+                  {
+                    "id": "id-scanner-right",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 24,
+                    "y": 24
+                  },
+                  {
+                    "id": "id-checker",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "console",
+                    "x": 16,
+                    "y": 24
+                  },
+                  {
+                    "id": "launching-tower-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 16,
+                    "y": 22.3,
+                    "text": "Tower"
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 16,
+                    "y": 6,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 16,
+                    "y": 42,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "ruler",
+                    "x1": 0.8,
+                    "y1": 36,
+                    "x2": 0.8,
+                    "y2": 48,
+                    "offset": 0
+                  },
+                  {
+                    "id": "id-checker-center-from-left",
+                    "kind": "ruler",
+                    "x1": 0,
+                    "y1": 46.9,
+                    "x2": 16,
+                    "y2": 46.9,
+                    "offset": 0
+                  },
+                  {
+                    "id": "scanner-right-from-edge",
+                    "kind": "ruler",
+                    "x1": 24,
+                    "y1": 46.9,
+                    "x2": 32,
+                    "y2": 46.9,
+                    "offset": 0
+                  },
+                  {
+                    "id": "launching-tower-width",
+                    "kind": "dimension",
+                    "target": "launching-tower",
+                    "axis": "x",
+                    "side": "end",
+                    "offset": 0.4
+                  }
+                ]
+              }
+            },
+            {
+              "id": "300-400-points",
+              "armyPoints": [
+                300,
+                350,
+                400
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Last Launch",
+                "table": {
+                  "width": 48,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 48,
+                    "y2": 12
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 36,
+                    "x2": 48,
+                    "y2": 48
+                  },
+                  {
+                    "id": "launching-tower",
+                    "kind": "rectangle",
+                    "style": "no-deploy",
+                    "x1": 20,
+                    "y1": 20,
+                    "x2": 28,
+                    "y2": 28
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": 24,
+                    "x2": 48,
+                    "y2": 24
+                  },
+                  {
+                    "id": "id-scanner-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 8,
+                    "y": 24
+                  },
+                  {
+                    "id": "id-scanner-right",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 40,
+                    "y": 24
+                  },
+                  {
+                    "id": "id-checker",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "console",
+                    "x": 24,
+                    "y": 24
+                  },
+                  {
+                    "id": "launching-tower-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 24,
+                    "y": 22.3,
+                    "text": "Tower"
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 24,
+                    "y": 6,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 24,
+                    "y": 42,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "ruler",
+                    "x1": 0.8,
+                    "y1": 36,
+                    "x2": 0.8,
+                    "y2": 48,
+                    "offset": 0
+                  },
+                  {
+                    "id": "id-checker-center-from-left",
+                    "kind": "ruler",
+                    "x1": 0,
+                    "y1": 46.9,
+                    "x2": 24,
+                    "y2": 46.9,
+                    "offset": 0
+                  },
+                  {
+                    "id": "scanner-right-from-edge",
+                    "kind": "ruler",
+                    "x1": 40,
+                    "y1": 46.9,
+                    "x2": 48,
+                    "y2": 46.9,
+                    "offset": 0
+                  },
+                  {
+                    "id": "launching-tower-width",
+                    "kind": "dimension",
+                    "target": "launching-tower",
+                    "axis": "x",
+                    "side": "end",
+                    "offset": 0.4
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "citations": [
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 63,
+            "section": "Last Launch"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 64,
+            "section": "Last Launch"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 65,
+            "section": "Last Launch"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 66,
+            "section": "Last Launch"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 67,
+            "section": "Last Launch"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 75,
+            "section": "Último Lanzamiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 76,
+            "section": "Último Lanzamiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 77,
+            "section": "Último Lanzamiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 78,
+            "section": "Último Lanzamiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 79,
+            "section": "Último Lanzamiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 80,
+            "section": "Último Lanzamiento"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-18"
+        }
+      },
+      "components": []
     }
   ]
 }

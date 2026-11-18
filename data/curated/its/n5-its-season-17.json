@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (nine reviewed scenarios)",
+    "title": "ITS Season 17 Seekers V0.2 (ten reviewed scenarios)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -484,6 +484,75 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:last-launch",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 63,
+              "section": "Last Launch"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 64,
+              "section": "Last Launch"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 65,
+              "section": "Last Launch"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 66,
+              "section": "Last Launch"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 67,
+              "section": "Last Launch"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 75,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 76,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 77,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 78,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 79,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 80,
+              "section": "Último Lanzamiento"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -560,6 +629,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "d9997ad6f227ca037de5b9deff799956dba04366e4f13f503dfa6ea541ccbd4f"
+    "sha256": "ccda4c339faed3df7ae6ba23aa4093dd5ddde94d91526ee935cb8e5bcf06d466"
   }
 }
