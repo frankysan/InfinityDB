@@ -5374,8 +5374,16 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
 
     status, _, body = request(rules_app, "/api/states")
     assert status == 200
-    states = {item["id"]: item for item in json.loads(body)["items"]}
-    assert len(states) == 24
+    items = json.loads(body)["items"]
+    states = {item["id"]: item for item in items}
+    assert len(states) == len(items) == 25
+    assert len([item for item in items if "season" not in item]) == 24
+    its_states = {item["id"]: item for item in items if "season" in item}
+    assert set(its_states) == {"casevac"}
+    assert its_states["casevac"]["season"] == {
+        "collection": "its-18", "revision": "2026.09.11",
+    }
+    assert its_states["casevac"]["name"] == "Casevac State"
     assert states["unconscious"]["name"] == "Unconscious State"
     assert states["targeted"]["name"] == "Targeted State"
 

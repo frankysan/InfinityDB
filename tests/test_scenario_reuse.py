@@ -304,10 +304,23 @@ def test_shared_scenario_membership_preserves_current_and_archived_source_family
     for revision in ("2026.09.11", "2026.09.01"):
         expected = project_its_source_family(original, revision=revision)
         actual = project_its_source_family(loaded, revision=revision)
-        assert [item["id"] for item in actual["records"]] == [
-            item["id"] for item in expected["records"]
+        # Shared composition may move a scenario record, but neither scenario
+        # membership nor independent season Skill/State records may change.
+        expected_by_id = {item["id"]: item for item in expected["records"]}
+        actual_by_id = {item["id"]: item for item in actual["records"]}
+        assert len(expected_by_id) == len(expected["records"])
+        assert len(actual_by_id) == len(actual["records"])
+        assert set(actual_by_id) == set(expected_by_id)
+        assert [item for item in actual["records"] if item["kind"] != "scenario"] == [
+            item for item in expected["records"] if item["kind"] != "scenario"
         ]
-        for left, right in zip(actual["records"], expected["records"], strict=True):
+        assert {
+            item["id"] for item in actual["records"] if item["kind"] == "scenario"
+        } == {
+            member["scenarioId"] for member in actual["scenarioCollection"]["members"]
+        }
+        for identity, left in actual_by_id.items():
+            right = expected_by_id[identity]
             without_origin = {key: value for key, value in left.items()
                               if key != "sharedDefinition"}
             assert without_origin == right
