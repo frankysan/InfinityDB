@@ -262,8 +262,11 @@ def _cross_season_fixture(tmp_path: Path):
     return original, alternative, library_path, declared_library
 
 
-def test_shared_season_skill_has_no_fabricated_scenario_binding(tmp_path: Path) -> None:
-    """The same canonical season-wide Skill can belong to two source revisions."""
+@pytest.mark.parametrize("different_type", [False, True])
+def test_shared_season_skill_has_no_fabricated_scenario_binding(
+    tmp_path: Path, different_type: bool,
+) -> None:
+    """Identical seasons consolidate; pinned type variants must not silently merge."""
     import hashlib
 
     original, alternate, path, _ = _cross_season_fixture(tmp_path)
@@ -280,13 +283,32 @@ def test_shared_season_skill_has_no_fabricated_scenario_binding(tmp_path: Path) 
         },
     }
     library["skills"].append(definition)
+    if different_type:
+        # ITS 17/18 use different declaration types for CivEvac and
+        # Casevac. Model the exact historical type without publishing
+        # synthetic facts as a real ITS 17 source.
+        variant = deepcopy(definition)
+        variant["version"] = "v2"
+        variant["payload"]["skillTypeIds"] = ["short-movement-skill"]
+        library["skills"].append(variant)
     path.write_text(json.dumps(library, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     outputs = {}
     for season, document in (("its-18", original), ("its-17", alternate)):
         document["sharedScenarioLibrary"]["sha256"] = digest
+        if different_type and season == "its-17":
+            document["skillTypes"].append({
+                "id": "short-movement-skill",
+                "name": "Short Movement Skills",
+                "labels": ["Short Movement Skill", "Short Movement Skills"],
+                "descriptions": {
+                    "singular": "Historical season Short Movement Skill.",
+                    "plural": "Historical season Short Movement Skills.",
+                },
+            })
         document["sharedSeasonSkillBindings"] = [{
-            "id": global_id, "version": "v1",
+            "id": global_id,
+            "version": "v2" if different_type and season == "its-17" else "v1",
             "name": "Synthetic Global Skill",
             "summary": "Synthetic season-wide rule, not a mission action.",
             "category": "common-skill",
@@ -309,6 +331,23 @@ def test_shared_season_skill_has_no_fabricated_scenario_binding(tmp_path: Path) 
     app = create_app(
         GENERATED / "army.db", GENERATED / "rules_n5.db", season_databases=outputs,
     )
+    if different_type:
+        historical_app = create_app(
+            GENERATED / "army.db", GENERATED / "rules_n5.db",
+            season_databases={"its-17": outputs["its-17"]},
+        )
+        historical = next(
+            item for item in _api(historical_app, "/api/skills")["items"]
+            if item["slug"] == global_id.removeprefix("skill:")
+        )
+        assert historical["categories"][0]["id"] == "short-movement-skill"
+        assert historical["categories"][0]["name"] == "Short Movement Skill"
+        assert historical["seasons"][0]["collection"] == "its-17"
+        with pytest.raises(ValueError, match="Conflicting ITS season Skill facts"):
+            app.scenario_catalog.scenario_skill_items()
+        status, _, _ = wsgi_response(app, "https://reuse.test/api/skills")
+        assert status == 503
+        return
     items = _api(app, "/api/skills")["items"]
     globals_ = [item for item in items if item["slug"] == global_id.removeprefix("skill:")]
     assert len(globals_) == 1

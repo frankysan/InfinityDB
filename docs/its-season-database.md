@@ -113,6 +113,37 @@ facts match. Each season's compiled SQLite still serves independently.
 No published ITS 18 Skill has yet been migrated into a shared library;
 real ITS 17 reuse requires independently reviewed source equivalence.
 
+**Initial ITS 17/18 source comparison (2026-11-18; not an ITS 17 import):**
+The official [ITS 17 English PDF v1.0.2](https://downloads.corvusbelli.com/infinity/organized-play/its-rules-season-17-en-v1.0.2.pdf)
+(labels itself V0.2 and includes Outbreak in its changelog) calls CivEvac
+and Casevac **Short Movement Skills** in the season-wide rules.
+The pinned ITS 18 2026.09.11 English PDF calls CivEvac a **Basic Short
+Skill** (p. 23) and Casevac a **Short Skill** (p. 25). Matching
+Requirements/Effects prose is therefore insufficient for one shared
+Skill definition/version; the declared type is part of its semantics.
+The ITS season Skill validator and catalog now support the historical
+`short-movement-skill` designation, displaying "Short Movement Skill"
+without adding it to the current N5 core declaration matrix. Synthetic
+cross-season tests verify its independent API presentation and reject
+consolidation when pinned definitions have different type IDs. Distinct-
+version route identity still needs resolving before real ITS 17 curation.
+
+ITS 17 Outbreak awards 1 point for Stabilizing the Alpha Infected and
+1 point for CivEvacing the Stabilized Alpha. ITS 18 Outbreak (p. 83)
+omits the standalone Stabilized-Alpha objective and awards 2 points
+for CivEvacing the Stabilized Alpha. This is a changed objective set,
+not merely a point-value override: **do not reuse an identical version**
+of the entire Outbreak scenario. Both publications restrict CivEvac
+to **one Infected** in Outbreak (ITS 18 p. 84), whereas the general
+ITS 18 CivEvac rule permits **two Civilians** (p. 23). Evacuation
+(ITS 18 pp. 88–90) applies the general CivEvac rule but requires a
+separate successful Extraction Console action for extraction. These
+contextual rules must not be moved into the globally shared Skill.
+The ITS 18 optional Team-Ops Extra and its two Skills must not be
+assumed applicable to ITS 17. The comparison is partial: full
+scenario/geometry/effect parity and local pinning of ITS 17 evidence
+remain outstanding.
+
 Optional `sharedSkillBindings.overrides` entries use exact
 `{scenarioId, ruleId, field, value}` objects. Only complete prose-array
 replacement of one Skill's Requirements, Effects or Restrictions is supported.

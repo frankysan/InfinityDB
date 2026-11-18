@@ -190,3 +190,28 @@ affected area, observation and evidence, proposed change, and disposition.
   resolution with strict owner/revision disambiguation rather than extending
   each route independently. No extra abstraction is needed for the current
   one-season use case.
+
+## AI-0009 — Model historical ITS Skill declarations without implicit equivalence
+
+- **Date:** 2026-11-18
+- **Area:** ITS source curation, season Skill type vocabulary and cross-season Skill catalog.
+- **Observation:** Official ITS 17 V0.2 labels CivEvac and Casevac as
+  Short Movement Skills, but ITS 18 2026.09.11 labels them Basic Short
+  Skill and Short Skill respectively. The current ITS type validator
+  supports the latter classifications, not the historical label. ITS 17
+  Outbreak also changes objectives/point values relative to ITS 18.
+- **Proposed:** Before real ITS 17 publication, represent the original
+  Skill category faithfully, resolve distinct-version public Skill
+  identities without treating common names as semantic equivalence, and
+  select reusable scenario components by verified facts rather than name.
+  Do not collapse the differently scored Outbreak objective lists.
+- **Why:** Importing ITS 17 through the ITS 18 type vocabulary would
+  silently change the older source; reusing its newer Skill version would
+  misstate published movement/action semantics.
+- **Disposition:** partially implemented: historical `short-movement-skill`
+  validates and displays through the ITS-only season Skill path without
+  modifying the N5 core matrix. Synthetic cross-season type-variant
+  consolidation rejection and current ITS 18 CivEvac scenario exceptions
+  have regression coverage. Resolving distinct-version public routes and
+  full source-reviewed ITS 17 curation remain open under
+  [ITS scenarios and game tools](TODO.md#its-scenarios-and-game-tools).

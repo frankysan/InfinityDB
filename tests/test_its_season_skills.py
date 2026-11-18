@@ -75,6 +75,26 @@ def test_four_season_skills_keep_types_and_optional_extra_scope(published) -> No
         assert any(item["href"] == f"/skills/{slug}" for item in search["items"])
 
 
+def test_civevac_capacity_is_scenario_scoped_not_a_global_rewrite() -> None:
+    """Outbreak's one-Infected exception must not replace general CivEvac."""
+    document = project_its_source_family(load_curated_document(SOURCE))
+    records = {record["id"]: record for record in document["records"]}
+    general = records["skill:civevac"]
+    assert general["facts"]["applicability"]["context"] == "season"
+    assert any("at most two Civilians" in effect
+               for effect in general["facts"]["effects"])
+
+    outbreak_rules = records["scenario:outbreak"]["facts"]["mission"]["rules"]
+    infected = next(rule for rule in outbreak_rules if rule["id"] == "infected-placement")
+    assert any("at most one Infected" in text for text in infected["paragraphs"])
+
+    evacuation_rules = records["scenario:evacuation"]["facts"]["mission"]["rules"]
+    civilians = next(rule for rule in evacuation_rules if rule["id"] == "civilians")
+    assert any("applicable CivEvac rules" in text for text in civilians["paragraphs"])
+    assert all("at most one Infected" not in text
+               for rule in evacuation_rules for text in rule["paragraphs"])
+
+
 def test_historical_skill_page_pins_are_revision_specific() -> None:
     document = load_curated_document(SOURCE)
     current = project_its_source_family(document)

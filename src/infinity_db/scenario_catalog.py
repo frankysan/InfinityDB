@@ -480,6 +480,7 @@ class ScenarioCatalog:
                             "name": {
                                 "basic-short-skill": "Basic Short Skill",
                                 "short-skill": "Short Skill",
+                                "short-movement-skill": "Short Movement Skill",
                                 "automatic": "Automatic Skill",
                             }[kind],
                             "source": None,

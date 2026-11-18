@@ -176,7 +176,9 @@ def _validate_season_skill(
         raise ValueError("ITS season Skill must be Common or Special, not scenario-scoped")
     types = facts["typeIds"]
     if (not isinstance(types, list) or len(types) != 1
-            or types[0] not in {"basic-short-skill", "short-skill", "automatic"}):
+            or types[0] not in {
+                "basic-short-skill", "short-skill", "short-movement-skill", "automatic",
+            }):
         raise ValueError("ITS season Skill requires one supported declaration category")
     for field in ("requirements", "effects", "restrictions", "clarifications"):
         values = facts.get(field, [])

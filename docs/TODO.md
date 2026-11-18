@@ -446,6 +446,19 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
       Also review interaction with other season-wide Skills such as Casevac,
       and preserve optional Team-Ops applicability. The three repeated ITS 18
       action names have different Skill facts and must not be merged on name alone.
+      - [x] Initial official ITS 17 v0.2/v1.0.2 comparison: CivEvac and Casevac
+        have different declared Skill types from ITS 18; Outbreak changes
+        Alpha scoring and objective membership. ITS-only historical
+        `short-movement-skill` type support and synthetic cross-season
+        non-consolidation tests now preserve source semantics. An ITS 18
+        regression protects Outbreak's one-Infected CivEvac exception
+        separately from the global two-Civilian maximum. Source review
+        findings are recorded in docs/its-season-database.md.
+      - [ ] Pin and review the complete ITS 17 source locally, including
+        Evacuation/Outbreak scenarios, distinct-version Skill routes,
+        Casevac State, optional Extras and any reusable geometry/components.
+        Do not merge
+        changed Outbreak objectives into one shared definition version.
     - [ ] Curate real ITS 17 against this foundation only after evidence review;
       keep each resulting season database independent, with no runtime links.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
