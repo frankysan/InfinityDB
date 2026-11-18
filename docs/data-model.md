@@ -3925,8 +3925,11 @@ do not make Team-Ops or Request a Tacball unconditional Skills.
 Resolved standalone Skills live in each season's own SQLite `records`
 table and are projected into catalog/Search; exact equivalent pinned Skills
 across seasons consolidate into one canonical identity with independent
-citations. Conflicting or unpinned collisions fail closed. Compare actual
-ITS 17 facts before claiming cross-season equivalence. Existing
+citations. Conflicting or unpinned same-version collisions fail closed. An
+explicit different pinned version from the same reviewed origin gets a
+season-qualified route instead, while the newest season retains the
+unqualified slug and both retain their own facts/citations. Compare
+actual ITS 17 facts before claiming cross-season equivalence. Existing
 scenario-specific Skill routes remain compatible.
 
 Materialize the complete resolved payload in each season's SQLite artifact,

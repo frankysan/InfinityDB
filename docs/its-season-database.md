@@ -124,16 +124,25 @@ Skill definition/version; the declared type is part of its semantics.
 The ITS season Skill validator and catalog now support the historical
 `short-movement-skill` designation, displaying "Short Movement Skill"
 without adding it to the current N5 core declaration matrix. Synthetic
-cross-season tests verify its independent API presentation and reject
-consolidation when pinned definitions have different type IDs. Distinct-
-version route identity still needs resolving before real ITS 17 curation.
+cross-season tests verify its independent API presentation. When one
+canonical Skill has distinct, explicitly pinned definition versions from
+the same reviewed library origin, the newest season retains the established
+unqualified `/skills/<slug>` route and older versions get season-qualified
+`/skills/its-17-<slug>` routes, with their own typed facts, applicability
+and citations. Registration order does not change route choice. Equivalent
+same-version facts still consolidate; changes under the same pinned
+version or unpinned identity collisions fail closed. No real ITS 17
+publication or historical revision browsing is activated.
 
 ITS 17 Outbreak awards 1 point for Stabilizing the Alpha Infected and
 1 point for CivEvacing the Stabilized Alpha. ITS 18 Outbreak (p. 83)
 omits the standalone Stabilized-Alpha objective and awards 2 points
 for CivEvacing the Stabilized Alpha. This is a changed objective set,
 not merely a point-value override: **do not reuse an identical version**
-of the entire Outbreak scenario. Both publications restrict CivEvac
+of the entire Outbreak scenario. ITS 17 also requires player-placed
+Infected to be 8 inches apart *from each other*, while ITS 18 p. 84
+says *from all other Infected*; this changed placement scope needs its
+own reviewed rule/component version. Both publications restrict CivEvac
 to **one Infected** in Outbreak (ITS 18 p. 84), whereas the general
 ITS 18 CivEvac rule permits **two Civilians** (p. 23). Evacuation
 (ITS 18 pp. 88–90) applies the general CivEvac rule but requires a

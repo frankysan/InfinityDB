@@ -467,7 +467,17 @@ class ScenarioCatalog:
                 published.append(canonical)
             if self.publication_registry is not None:
                 season_skills: dict[str, dict[str, Any]] = {}
-                for entry in self.publication_registry.season_skill_entries():
+                by_identity: dict[str, list[dict[str, Any]]] = {}
+
+                def season_sort_key(entry: dict[str, Any]) -> tuple[int, str]:
+                    number = entry["collection"].removeprefix("its-")
+                    return (int(number) if number.isdecimal() else -1, entry["revision"])
+
+                # The newest season retains the established unqualified route.
+                for entry in sorted(
+                    self.publication_registry.season_skill_entries(),
+                    key=season_sort_key, reverse=True,
+                ):
                     record = entry["record"]
                     slug = record["id"].removeprefix("skill:")
                     if slug in legacy_slugs or any(
@@ -500,11 +510,43 @@ class ScenarioCatalog:
                         "revision": entry["revision"],
                         "context": record["facts"]["applicability"]["context"],
                     }
-                    existing = season_skills.get(slug)
+                    groups = by_identity.setdefault(slug, [])
+                    if any(use["collection"] == season_use["collection"]
+                           for group in groups for use in group["seasons"]):
+                        raise ValueError(
+                            f"Conflicting ITS season Skill registration: {slug!r}"
+                        )
+                    existing = next(
+                        (group for group in groups
+                         if group["rules"][0].get("sharedSkill") == rule.get("sharedSkill")),
+                        None,
+                    )
                     if existing is None:
-                        season_skills[slug] = {
-                            "id": slug,
-                            "slug": slug,
+                        if groups:
+                            previous = groups[0]["rules"][0].get("sharedSkill")
+                            shared = rule.get("sharedSkill")
+                            if (
+                                not previous or not shared
+                                or previous["id"] != shared["id"]
+                                or previous["origin"] != shared["origin"]
+                                or previous["version"] == shared["version"]
+                            ):
+                                raise ValueError(
+                                    "Conflicting ITS season Skill facts or unpinned reuse: "
+                                    f"{slug!r}"
+                                )
+                        # A different pinned version gets its own season route.
+                        # Never silently replace the latest season's Skill facts.
+                        route = slug if not groups else f"{entry['collection']}-{slug}"
+                        if route in legacy_slugs or route in season_skills or any(
+                            item["slug"] == route for item in published
+                        ):
+                            raise ValueError(
+                                f"ITS season Skill {route!r} conflicts with a Skill route"
+                            )
+                        item = {
+                            "id": route,
+                            "slug": route,
                             "name": record["name"],
                             "use_count": 0,
                             "category": category,
@@ -514,6 +556,8 @@ class ScenarioCatalog:
                             "rules": [rule],
                             "variants": [],
                         }
+                        season_skills[route] = item
+                        groups.append(item)
                         continue
                     prior_rule = existing["rules"][0]
                     prior_facts = {
@@ -526,7 +570,6 @@ class ScenarioCatalog:
                     }
                     if (
                         not prior_rule.get("sharedSkill")
-                        or prior_rule["sharedSkill"] != rule.get("sharedSkill")
                         or existing["name"] != record["name"]
                         or existing["category"] != category
                         or prior_rule["summary"] != record["summary"]

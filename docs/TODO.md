@@ -415,7 +415,8 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     definitions in synthetic independent ITS 17/18 builds, preserving source
     review/citations and legacy Skill routes. Shared Skills now group by exact
     identity in catalog/Search with fail-closed fact/version comparison. The
-    current ITS 18 source and runtime outputs are unchanged.
+    current ITS 18 curated facts and public semantics are unchanged; tracked
+    runtime databases were rebuilt for fingerprinted builder changes.
     - [x] Integrate opt-in library-backed seasons with the complete-set build.
       Explicit per-season library registration, matched input provenance and
       deployment freshness checks fail closed. Synthetic ITS 17 confirms
@@ -454,11 +455,14 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         regression protects Outbreak's one-Infected CivEvac exception
         separately from the global two-Civilian maximum. Source review
         findings are recorded in docs/its-season-database.md.
+      - [x] Permit reviewed, differently versioned season-wide Skills from
+        one pinned library to publish separate routes, prioritizing the
+        newest season for the unqualified slug. Preserve source-specific
+        types and citations; same-version fact drift still fails closed.
       - [ ] Pin and review the complete ITS 17 source locally, including
-        Evacuation/Outbreak scenarios, distinct-version Skill routes,
-        Casevac State, optional Extras and any reusable geometry/components.
-        Do not merge
-        changed Outbreak objectives into one shared definition version.
+        Evacuation/Outbreak scenarios, Casevac State, optional Extras
+        and any reusable geometry/components. Do not merge changed
+        Outbreak objectives into one shared definition version.
     - [ ] Curate real ITS 17 against this foundation only after evidence review;
       keep each resulting season database independent, with no runtime links.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full

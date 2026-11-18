@@ -210,8 +210,27 @@ affected area, observation and evidence, proposed change, and disposition.
   misstate published movement/action semantics.
 - **Disposition:** partially implemented: historical `short-movement-skill`
   validates and displays through the ITS-only season Skill path without
-  modifying the N5 core matrix. Synthetic cross-season type-variant
-  consolidation rejection and current ITS 18 CivEvac scenario exceptions
-  have regression coverage. Resolving distinct-version public routes and
-  full source-reviewed ITS 17 curation remain open under
+  modifying the N5 core matrix. Synthetic cross-season type variants now
+  publish season-qualified routes while same-version facts still fail
+  closed on disagreement; the current ITS 18 CivEvac scenario exception
+  also has regression coverage. Full source-reviewed ITS 17 curation
+  remains open under
   [ITS scenarios and game tools](TODO.md#its-scenarios-and-game-tools).
+
+## AI-0010 — Couple builder edits with the tracked runtime database refresh
+
+- **Date:** 2026-11-18
+- **Area:** Complete-set build provenance and hosted deployment/source checks.
+- **Observation:** Commit `a95d508` changed the ITS builder without rebuilding
+  `data/generated/army.db`, `rules_n5.db` and `its_18.db`. All four
+  hosted native Source legs and deployment smoke rejected the stale source
+  fingerprint, despite focused tests passing.
+- **Proposed:** For changes to a builder fingerprint input, run the
+  source-pinned complete-set rebuild and deployment-asset verification before
+  committing. Treat the three runtime databases as a matched set; do not
+  regenerate unrelated outputs or bypass freshness validation.
+- **Why:** A test-green source edit is not independently deployable while its
+  checked-in runtime artifacts still carry the previous build manifest.
+- **Disposition:** applied in `a7289c4` by rebuilding from the recorded Army
+  ZIP/manifest and validating the complete set; no additional infrastructure
+  is justified for this one missed build step.

@@ -262,11 +262,14 @@ def _cross_season_fixture(tmp_path: Path):
     return original, alternative, library_path, declared_library
 
 
-@pytest.mark.parametrize("different_type", [False, True])
+@pytest.mark.parametrize(
+    ("different_type", "different_summary"),
+    [(False, False), (True, False), (False, True)],
+)
 def test_shared_season_skill_has_no_fabricated_scenario_binding(
-    tmp_path: Path, different_type: bool,
+    tmp_path: Path, different_type: bool, different_summary: bool,
 ) -> None:
-    """Identical seasons consolidate; pinned type variants must not silently merge."""
+    """Identical definitions merge; versioned variants route; conflicts fail closed."""
     import hashlib
 
     original, alternate, path, _ = _cross_season_fixture(tmp_path)
@@ -310,7 +313,11 @@ def test_shared_season_skill_has_no_fabricated_scenario_binding(
             "id": global_id,
             "version": "v2" if different_type and season == "its-17" else "v1",
             "name": "Synthetic Global Skill",
-            "summary": "Synthetic season-wide rule, not a mission action.",
+            "summary": (
+                "Conflicting synthetic summary."
+                if different_summary and season == "its-17"
+                else "Synthetic season-wide rule, not a mission action."
+            ),
             "category": "common-skill",
             "applicability": {
                 "context": "season", "revision": document["scenarioCollection"]["revision"],
@@ -331,6 +338,10 @@ def test_shared_season_skill_has_no_fabricated_scenario_binding(
     app = create_app(
         GENERATED / "army.db", GENERATED / "rules_n5.db", season_databases=outputs,
     )
+    if different_summary:
+        with pytest.raises(ValueError, match="Conflicting ITS season Skill facts"):
+            app.scenario_catalog.scenario_skill_items()
+        return
     if different_type:
         historical_app = create_app(
             GENERATED / "army.db", GENERATED / "rules_n5.db",
@@ -343,10 +354,34 @@ def test_shared_season_skill_has_no_fabricated_scenario_binding(
         assert historical["categories"][0]["id"] == "short-movement-skill"
         assert historical["categories"][0]["name"] == "Short Movement Skill"
         assert historical["seasons"][0]["collection"] == "its-17"
-        with pytest.raises(ValueError, match="Conflicting ITS season Skill facts"):
-            app.scenario_catalog.scenario_skill_items()
-        status, _, _ = wsgi_response(app, "https://reuse.test/api/skills")
-        assert status == 503
+        items = _api(app, "/api/skills")["items"]
+        routes = {item["slug"]: item for item in items if item["name"] == "Synthetic Global Skill"}
+        assert set(routes) == {"its-synthetic-global", "its-17-its-synthetic-global"}
+        assert routes["its-synthetic-global"]["categories"][0]["id"] == "short-skill"
+        assert routes["its-synthetic-global"]["seasons"][0]["collection"] == "its-18"
+        older = routes["its-17-its-synthetic-global"]
+        assert older["categories"][0]["id"] == "short-movement-skill"
+        assert older["seasons"][0]["collection"] == "its-17"
+        assert older["rules"][0]["sharedSkill"]["version"] == "v2"
+        old_detail = _api(app, "/api/skills/its-17-its-synthetic-global")
+        current_detail = _api(app, "/api/skills/its-synthetic-global")
+        assert old_detail["rules"][0]["sharedSkill"]["version"] == "v2"
+        assert old_detail["rules"][0]["facts"]["typeIds"] == ["short-movement-skill"]
+        assert old_detail["rules"][0]["scope"]["seasons"] == ["its-17"]
+        assert current_detail["rules"][0]["sharedSkill"]["version"] == "v1"
+        assert current_detail["rules"][0]["facts"]["typeIds"] == ["short-skill"]
+        assert current_detail["rules"][0]["scope"]["seasons"] == ["its-18"]
+        for selection in (outputs, {"its-17": outputs["its-17"], "its-18": outputs["its-18"]}):
+            selected_app = create_app(
+                GENERATED / "army.db", GENERATED / "rules_n5.db",
+                season_databases=selection,
+            )
+            assert {item["slug"] for item in _api(selected_app, "/api/skills")["items"]
+                    if item["name"] == "Synthetic Global Skill"} == set(routes)
+        search = _api(app, "/api/search?q=synthetic%20global%20skill")["items"]
+        assert {f"/skills/{slug}" for slug in routes} <= {
+            item["href"] for item in search
+        }
         return
     items = _api(app, "/api/skills")["items"]
     globals_ = [item for item in items if item["slug"] == global_id.removeprefix("skill:")]
