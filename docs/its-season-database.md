@@ -328,9 +328,20 @@ The three original maps are retained without inventing a mixed-unit
 deployment. The separate ITS 18 Spanish 400-point threshold
 discrepancy is not retroactively assigned to ITS 17.
 
-Build and check the independent SQLite output without registering it:
-`python -m tools.data.build_its_season --source data/curated/its/n5-its-season-17.json --shared-library data/curated/its/shared/its17-scenarios-v1.json --output local/work/its/its_17_reviewed.db`
-(and add `--check` to inspect the existing result). The authoring
+**ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
+season-specific citation records belong in an independent **`its_17.db`**,
+not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
+development artifact is `local/work/its/its_17.db`; it contains the five
+reviewed ITS 17 scenarios and remains separate from the three-file serving
+set. When ITS 17 is explicitly approved for runtime publication, its tracked
+release artifact will be `data/generated/its_17.db` through the existing
+season-registration/build mechanism, not an embedded projection in another
+database.
+
+Build or check the independent historical SQLite file without registering it:
+`python -m tools.data.build_its_season --source data/curated/its/n5-its-season-17.json --shared-library data/curated/its/shared/its17-scenarios-v1.json --output local/work/its/its_17.db`
+(add `--check` to validate the existing file). After each historical authoring
+batch, rebuild this file from the pinned JSON and library inputs. The authoring
 bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 **refuses to overwrite** these human-reviewed JSON files; the one-time
 `tools.research.extend_its17_hardlock` and

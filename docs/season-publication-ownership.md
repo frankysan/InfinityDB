@@ -50,8 +50,13 @@ authority is:
   and original file digest are retained as tagged historical evidence.
 
 The selected `rules_n5.db` owns N5/FAQ/annex data. `its_18.db` owns
-the current ITS 18 mission publication. A shared scenario slug across
-seasons does not merge records; historical source citations remain distinct.
+the current ITS 18 mission publication. ITS 17's reviewed historical
+scenarios, scoring, geometry and citations are compiled into a separate
+`its_17.db` (`local/work/its/its_17.db` while unregistered; eventually
+`data/generated/its_17.db` when explicitly registered for release). They
+must not be embedded in `rules_n5.db` or `its_18.db`. A shared scenario
+slug across seasons does not merge records; historical source citations
+remain distinct.
 
 ## Ownership decisions
 

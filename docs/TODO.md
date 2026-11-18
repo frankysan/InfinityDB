@@ -509,6 +509,12 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         gaps and the 150-point English mixed-unit deployment
         typo. Publish the fifth definition only in the isolated
         historical authoring library, not ITS 18.
+      - [x] Materialize the reviewed ITS 17 historical authoring
+        source and pinned shared library into a dedicated
+        `local/work/its/its_17.db` SQLite file (five scenarios),
+        independent of `its_18.db` and `rules_n5.db`. Keep runtime
+        registration and `data/generated/its_17.db` publication deferred
+        until the season is ready to ship.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish
