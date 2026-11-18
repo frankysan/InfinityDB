@@ -30,6 +30,7 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
     assert [member["scenarioId"] for member in source["scenarioCollection"]["members"]] == [
         "scenario:evacuation",
         "scenario:hardlock",
+        "scenario:uplink-center",
     ]
     assert source["records"] == []  # Facts are owned by the shared library.
     assert source["sharedScenarioLibrary"]["sha256"] == hashlib.sha256(
@@ -59,6 +60,7 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
     assert [entry["id"] for entry in library["definitions"]] == [
         "scenario:evacuation",
         "scenario:hardlock",
+        "scenario:uplink-center",
     ]
     entry = library["definitions"][0]
     assert entry["origin"] == {
@@ -83,6 +85,7 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
     assert historic["scenarioCollection"]["members"] == [
         {"scenarioId": "scenario:evacuation"},
         {"scenarioId": "scenario:hardlock"},
+        {"scenarioId": "scenario:uplink-center"},
     ]
     record = historic["records"][0]
     assert record["scope"]["seasons"] == ["its-17"]
@@ -117,7 +120,7 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
     )
     assert first["scenarios"][0]["configurationCount"] == 3
     assert first["scenarios"][0]["citations"] == 8
-    assert len(first["scenarios"]) == 2
+    assert len(first["scenarios"]) == 3
     assert first["scenarios"][1]["citations"] == 8
     assert first["skills"] == [] and first["states"] == []
     assert inspect_its_database(

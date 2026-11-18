@@ -486,7 +486,15 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         Beacon/Activate Console, Specialist Troops and endings against
         ITS 18. Preserve the historical Console diameter wording and
         bilingual ambiguities in a second independently pinned
-        definition. The two-mission ITS 17 database remains unregistered.
+        definition. The historical database remains unregistered.
+      - [x] Source-review ITS 17 V0.2 Uplink Center (EN pp. 93–96,
+        ES pp. 99–102) against ITS 18: four scoring objectives,
+        all three geometries, Antenna activation, Tech-Coffin control,
+        Operational Learning and end conditions. Retain historical
+        scenery diameter wording and the ES omission of 350 points
+        from the Antenna placement sentence; the source maps group it
+        with 300/400. Include a third pinned definition and standalone
+        tests without changing ITS 18.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish

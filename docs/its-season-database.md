@@ -247,10 +247,11 @@ Focused reviewed comparisons against the pinned ITS 18 English
   the separately reviewed Alpha scoring and Infected spacing
   changes above require separate objective/rule versions.
 
-**Real ITS 17 Evacuation and Hardlock authoring (2026-11-18):**
+**Real ITS 17 Evacuation, Hardlock and Uplink Center authoring (2026-11-18):**
 `data/curated/its/n5-its-season-17.json` is a standalone, **unregistered**
 ITS 17 V0.2 curated season source. It has reviewed
-`scenario:evacuation` and `scenario:hardlock` memberships pinned to
+`scenario:evacuation`, `scenario:hardlock` and `scenario:uplink-center`
+memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -277,22 +278,37 @@ Activated Console and the Normal State of a transferring Beacon carrier.
 ITS 17's one Tactical Support Option belongs to historical play context,
 not a current ITS 18 rule.
 
+Uplink Center independently matches ITS 18's four scoring conditions,
+12-/16-inch Deployment Zones, three geometry configurations, Communication
+Antenna activation, Tech-Coffin Control, Operational Learning, Active
+Lieutenant and end conditions. ITS 17 EN pp. **93–96** and ES pp. **99–102**
+supply eight season-local citations. The 6/8/12-inch Antenna offsets and
+central Tech-Coffin agree across the printed maps; the original ITS 17 text
+requires Tokens or scenery of matching diameter, without separately
+specifying ITS 18's 40 mm. ITS 17 ES p. 100 omits **350** from the
+300/350/400-point Antenna placement grouping; both source maps and EN p. 94
+include 350. The discrepancy remains source-local rather than inventing a
+fourth configuration. ITS 17's zero Tactical Support Options likewise belong
+to historical play context.
+
 Build and check the independent SQLite output without registering it:
 `python -m tools.data.build_its_season --source data/curated/its/n5-its-season-17.json --shared-library data/curated/its/shared/its17-scenarios-v1.json --output local/work/its/its_17_reviewed.db`
 (and add `--check` to inspect the existing result). The authoring
 bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 **refuses to overwrite** these human-reviewed JSON files; the one-time
-`tools.research.extend_its17_hardlock` migration is also not a build step.
+`tools.research.extend_its17_hardlock` and
+`tools.research.extend_its17_uplink_center` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
-`tests/test_its17_hardlock_publication.py`. Existing ITS 18
+`tests/test_its17_hardlock_publication.py` and
+`tests/test_its17_uplink_center_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
-Evacuation and Hardlock missions. The accepted migrations therefore
-reuse complete v1 scenario definitions, without claiming fine-grained
+Evacuation, Hardlock and Uplink Center missions. The accepted migrations
+therefore reuse complete v1 scenario definitions, without claiming fine-grained
 component or Skill deduplication yet.
 
 The remaining shared-name missions and cross-language parity

@@ -1853,6 +1853,848 @@
         }
       },
       "components": []
+    },
+    {
+      "id": "scenario:uplink-center",
+      "version": "its17-v0.2",
+      "origin": {
+        "sourceCollectionId": "its-season-17-v0.2",
+        "seasonId": "its-17",
+        "revision": "0.2",
+        "sourceIds": [
+          "its-season-17-v0.2-en-pdf",
+          "its-season-17-v0.2-es-pdf"
+        ]
+      },
+      "record": {
+        "id": "scenario:uplink-center",
+        "kind": "scenario",
+        "name": "Uplink Center",
+        "summary": "ITS Season 17 Seekers Uplink Center: Activate and Control the two Communication Antennas, Control the Tech-Coffin and keep an Active Lieutenant.",
+        "composition": {
+          "role": "definition"
+        },
+        "scope": {
+          "game": "N5",
+          "seasons": [
+            "its-17"
+          ]
+        },
+        "facts": {
+          "definitionVersion": 1,
+          "playRequirements": {
+            "classifiedObjectives": 0,
+            "tacticalObjectives": 0,
+            "hvts": 0
+          },
+          "mission": {
+            "sides": [
+              {
+                "id": "side-a",
+                "name": "Side A"
+              },
+              {
+                "id": "side-b",
+                "name": "Side B"
+              }
+            ],
+            "gameSizes": [
+              {
+                "armyPoints": 150,
+                "swc": 3,
+                "configurationId": "150-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 200,
+                "swc": 4,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 250,
+                "swc": 5,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 300,
+                "swc": 6,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 350,
+                "swc": 7,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 400,
+                "swc": 8,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "objectives": [
+              {
+                "id": "activate-communication-antennas",
+                "name": "Activated Communication Antennas",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "cumulative",
+                "maximumPoints": 4,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 2,
+                    "condition": {
+                      "kind": "element-status-count",
+                      "elementIds": [
+                        "antenna-left",
+                        "antenna-right"
+                      ],
+                      "status": "activated"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "control-communication-antennas",
+                "name": "Controlled Communication Antennas",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "cumulative",
+                "maximumPoints": 2,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "element-status-count",
+                      "elementIds": [
+                        "antenna-left",
+                        "antenna-right"
+                      ],
+                      "status": "controlled"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "control-tech-coffin",
+                "name": "Control the Tech-Coffin",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "cumulative",
+                "maximumPoints": 3,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 3,
+                    "condition": {
+                      "kind": "element-status-count",
+                      "elementIds": [
+                        "tech-coffin"
+                      ],
+                      "status": "controlled"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "active-lieutenant",
+                "name": "Active Lieutenant",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 1,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "Have a [[skill:lieutenant|Lieutenant]] who is not in a Null, Isolated or Immobilized State at the end of the game."
+                    }
+                  }
+                ]
+              }
+            ],
+            "rules": [
+              {
+                "id": "deployment-and-objectives",
+                "name": "Deployment and objectives",
+                "paragraphs": [
+                  "Sides A and B deploy on opposite sides of the game table. Neither player may deploy in Silhouette contact with the Tech-Coffin or Communication Antennas.",
+                  "Two Communication Antennas are on the table centerline, [[distance:6:inch]] from the side edges at 150 points, [[distance:8:inch]] at 200/250 points, and [[distance:12:inch]] at 300/350/400 points. The Tech-Coffin is at the table center. Each objective uses its named Token or scenery of the same diameter; the ITS 17 mission does not independently specify a numeric diameter."
+                ]
+              },
+              {
+                "id": "activate-communication-antenna",
+                "name": "Activate Communication Antenna",
+                "skillTypeIds": [
+                  "short-skill"
+                ],
+                "skillFacts": {
+                  "requirements": [
+                    "Only a Specialist Troop in Silhouette contact with a Communication Antenna may declare this Skill."
+                  ],
+                  "effects": [
+                    "Make a Normal WIP Roll to Activate the Antenna. Failed attempts can be repeated by spending another Short Skill.",
+                    "The opponent may Activate an already Activated Antenna. A successful new Activation removes the previous player's Activated status; track the current player with Player Tokens."
+                  ],
+                  "restrictions": [],
+                  "clarifications": [],
+                  "sourceNotes": []
+                },
+                "paragraphs": [
+                  "Activate Communication Antenna is an Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with an Antenna makes a Normal WIP Roll to Activate it. Failed attempts may be repeated, spending a Short Skill each time.",
+                  "The opponent can Activate an already Activated Antenna using the same procedure. When this succeeds, it stops counting as Activated for the previous player. Use Player Tokens to identify which player currently has each Antenna Activated."
+                ]
+              },
+              {
+                "id": "control-communication-antenna",
+                "name": "Control a Communication Antenna",
+                "paragraphs": [
+                  "A player Controls an Antenna at the end of the game when that player alone has at least one non-Null Trooper as a Model, not a Marker, in Silhouette contact with it. Enemy Troopers in Silhouette contact prevent Control; Models in a Null State do not count."
+                ]
+              },
+              {
+                "id": "control-tech-coffin",
+                "name": "Control the Tech-Coffin",
+                "paragraphs": [
+                  "The Tech-Coffin is Controlled at the end of the game when a player alone has at least one non-Null Trooper as a Model, not a Marker, in Silhouette contact with it. Enemy Troopers in Silhouette contact prevent Control; Models in a Null State do not count."
+                ]
+              },
+              {
+                "id": "specialist-troops",
+                "name": "Specialist Troops",
+                "paragraphs": [
+                  "Only Hackers, Doctors, Engineers, Forward Observers, Paramedics, and Troopers with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] count as Specialist Troops for this mission.",
+                  "Hackers, Doctors and Engineers cannot use Repeaters or Peripheral (Servant) Models to perform tasks reserved for Specialist Troops."
+                ]
+              },
+              {
+                "id": "operational-learning",
+                "name": "Operational Learning",
+                "paragraphs": [
+                  "After failing a WIP Roll for a Scenario-labelled Skill, a Specialist Troop gains +3 on the next consecutive Order for the same Skill and target; the third and subsequent consecutive Orders gain +3 and +1SD. These MODs are cumulative with other applicable Scenario MODs.",
+                  "The sequence resets after a successful Roll, a different Skill or target, or an Order spent on another Trooper. Only one active sequence per Trooper and Scenario-labelled Skill is permitted."
+                ]
+              },
+              {
+                "id": "active-lieutenant",
+                "name": "Active Lieutenant",
+                "paragraphs": [
+                  "At the end of the game, a Lieutenant is Active only if they are not in a Null State (such as Unconscious, Dead or Sepsitorized), Isolated State or any Immobilized State."
+                ]
+              },
+              {
+                "id": "hvt-and-classified-deck",
+                "name": "HVT and Classified Deck not used",
+                "paragraphs": [
+                  "HVT Models are not deployed, Secure HVT does not apply, and players do not use the Classified Deck in this mission."
+                ]
+              }
+            ],
+            "endConditions": [
+              {
+                "id": "round-limit",
+                "checkAt": "end-of-round",
+                "finishAt": "end-of-round",
+                "condition": {
+                  "kind": "round-limit",
+                  "rounds": 3
+                }
+              },
+              {
+                "id": "retreat",
+                "checkAt": "tactical-phase",
+                "finishAt": "end-of-player-turn",
+                "condition": {
+                  "kind": "reviewed-prose",
+                  "text": "If either player starts their Active Turn in a Retreat! situation, the game ends at the end of that Player Turn."
+                }
+              }
+            ],
+            "sourceIssues": [
+              {
+                "id": "spanish-antenna-350-placement-omission",
+                "armyPoints": [
+                  350
+                ],
+                "objectiveId": "activate-communication-antennas",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 EN p. 94 explicitly groups 300/350/400-point games for the [[distance:12:inch]] Antenna offset, but ES p. 100 lists only 400/300. Both printed mission maps (EN p. 93, ES p. 99) group 300/350/400 in the same layout. Treat the Spanish sentence as an omission, not an alternate 350-point placement."
+              }
+            ]
+          },
+          "configurations": [
+            {
+              "id": "150-points",
+              "armyPoints": [
+                150
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Uplink Center",
+                "table": {
+                  "width": 24,
+                  "height": 32,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 24,
+                    "y2": 12
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 20,
+                    "x2": 24,
+                    "y2": 32
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "antenna-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 6,
+                    "y": 16
+                  },
+                  {
+                    "id": "tech-coffin",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 12,
+                    "y": 16
+                  },
+                  {
+                    "id": "antenna-right",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 18,
+                    "y": 16
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 6.55,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 26.55,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "tech-coffin-from-left",
+                    "kind": "ruler",
+                    "x1": 0,
+                    "y1": 22.5,
+                    "x2": 12,
+                    "y2": 22.5,
+                    "offset": 0
+                  },
+                  {
+                    "id": "antenna-right-from-right",
+                    "kind": "ruler",
+                    "x1": 18,
+                    "y1": 22.5,
+                    "x2": 24,
+                    "y2": 22.5,
+                    "offset": 0
+                  }
+                ]
+              }
+            },
+            {
+              "id": "200-250-points",
+              "armyPoints": [
+                200,
+                250
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Uplink Center",
+                "table": {
+                  "width": 32,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 32,
+                    "y2": 16
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 32,
+                    "x2": 32,
+                    "y2": 48
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "antenna-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 8,
+                    "y": 24
+                  },
+                  {
+                    "id": "tech-coffin",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 16,
+                    "y": 24
+                  },
+                  {
+                    "id": "antenna-right",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 24,
+                    "y": 24
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 8.55,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 40.55,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "tech-coffin-from-left",
+                    "kind": "ruler",
+                    "x1": 0,
+                    "y1": 34.5,
+                    "x2": 16,
+                    "y2": 34.5,
+                    "offset": 0
+                  },
+                  {
+                    "id": "antenna-right-from-right",
+                    "kind": "ruler",
+                    "x1": 24,
+                    "y1": 34.5,
+                    "x2": 32,
+                    "y2": 34.5,
+                    "offset": 0
+                  }
+                ]
+              }
+            },
+            {
+              "id": "300-400-points",
+              "armyPoints": [
+                300,
+                350,
+                400
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Uplink Center",
+                "table": {
+                  "width": 48,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 48,
+                    "y2": 16
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 32,
+                    "x2": 48,
+                    "y2": 48
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "antenna-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 12,
+                    "y": 24
+                  },
+                  {
+                    "id": "tech-coffin",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 24,
+                    "y": 24
+                  },
+                  {
+                    "id": "antenna-right",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "antenna",
+                    "x": 36,
+                    "y": 24
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 8.55,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 40.55,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "tech-coffin-from-left",
+                    "kind": "ruler",
+                    "x1": 0,
+                    "y1": 34.5,
+                    "x2": 24,
+                    "y2": 34.5,
+                    "offset": 0
+                  },
+                  {
+                    "id": "antenna-right-from-right",
+                    "kind": "ruler",
+                    "x1": 36,
+                    "y1": 34.5,
+                    "x2": 48,
+                    "y2": 34.5,
+                    "offset": 0
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "citations": [
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 93,
+            "section": "Uplink Center"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 94,
+            "section": "Uplink Center"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 95,
+            "section": "Uplink Center"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 96,
+            "section": "Uplink Center"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 99,
+            "section": "Uplink Center"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 100,
+            "section": "Uplink Center"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 101,
+            "section": "Uplink Center"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 102,
+            "section": "Uplink Center"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-18"
+        }
+      },
+      "components": []
     }
   ]
 }

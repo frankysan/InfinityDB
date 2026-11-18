@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (reviewed Evacuation and Hardlock)",
+    "title": "ITS Season 17 Seekers V0.2 (reviewed Evacuation, Hardlock and Uplink Center)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -121,6 +121,60 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:uplink-center",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 93,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 94,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 95,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 96,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 99,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 100,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 101,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 102,
+              "section": "Uplink Center"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -197,6 +251,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "1116824ce589b2e6582998a02c2decc5bc76d5df062a9a7ead734958114a93c7"
+    "sha256": "35723843b503fff1947a5a0e7e8a8ba2d6a6e12ced97a898318fd11dbad6cf44"
   }
 }
