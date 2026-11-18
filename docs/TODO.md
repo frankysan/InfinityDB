@@ -481,6 +481,12 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         citation pages, language ambiguities and original mission
         action/scoring. The standalone three-map database builds
         deterministically; do not register it for serving yet.
+      - [x] Source-review ITS 17 V0.2 Hardlock (EN pp. 59–62,
+        ES pp. 54–57), verifying scoring, all three maps, Pick Up
+        Beacon/Activate Console, Specialist Troops and endings against
+        ITS 18. Preserve the historical Console diameter wording and
+        bilingual ambiguities in a second independently pinned
+        definition. The two-mission ITS 17 database remains unregistered.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish

@@ -16,7 +16,7 @@ from infinity_db.its_season_database import (
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON = ROOT / "data/curated/its/n5-its-season-17.json"
-SHARED = ROOT / "data/curated/its/shared/evacuation-v1.json"
+SHARED = ROOT / "data/curated/its/shared/its17-scenarios-v1.json"
 ITS18 = ROOT / "data/curated/its/n5-its-season-18.json"
 EN = "its-season-17-v0.2-en-pdf"
 ES = "its-season-17-v0.2-es-pdf"
@@ -29,6 +29,7 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
     assert source["scenarioCollection"]["revision"] == "0.2"
     assert [member["scenarioId"] for member in source["scenarioCollection"]["members"]] == [
         "scenario:evacuation",
+        "scenario:hardlock",
     ]
     assert source["records"] == []  # Facts are owned by the shared library.
     assert source["sharedScenarioLibrary"]["sha256"] == hashlib.sha256(
@@ -57,6 +58,7 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
     library = json.loads(SHARED.read_text(encoding="utf-8"))
     assert [entry["id"] for entry in library["definitions"]] == [
         "scenario:evacuation",
+        "scenario:hardlock",
     ]
     entry = library["definitions"][0]
     assert entry["origin"] == {
@@ -80,6 +82,7 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
     historic = load_curated_document(SEASON, shared_scenario_library=SHARED)
     assert historic["scenarioCollection"]["members"] == [
         {"scenarioId": "scenario:evacuation"},
+        {"scenarioId": "scenario:hardlock"},
     ]
     record = historic["records"][0]
     assert record["scope"]["seasons"] == ["its-17"]
@@ -114,6 +117,8 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
     )
     assert first["scenarios"][0]["configurationCount"] == 3
     assert first["scenarios"][0]["citations"] == 8
+    assert len(first["scenarios"]) == 2
+    assert first["scenarios"][1]["citations"] == 8
     assert first["skills"] == [] and first["states"] == []
     assert inspect_its_database(
         output, source=SEASON, shared_library=SHARED, require_current_builder=True,

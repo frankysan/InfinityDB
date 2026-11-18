@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (reviewed Evacuation)",
+    "title": "ITS Season 17 Seekers V0.2 (reviewed Evacuation and Hardlock)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -58,6 +58,60 @@
               "sourceId": "its-season-17-v0.2-es-pdf",
               "page": 53,
               "section": "Evacuación"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:hardlock",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 59,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 60,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 61,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 62,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 54,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 55,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 56,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 57,
+              "section": "Hardlock"
             }
           ],
           "review": {
@@ -142,7 +196,7 @@
   "seasonPolicies": [],
   "records": [],
   "sharedScenarioLibrary": {
-    "id": "its-evacuation",
-    "sha256": "c15eeb8bfc808628956a07f60a9ebd3903cab257c828e6997a8d42eadfcbb78b"
+    "id": "its17-scenarios",
+    "sha256": "1116824ce589b2e6582998a02c2decc5bc76d5df062a9a7ead734958114a93c7"
   }
 }

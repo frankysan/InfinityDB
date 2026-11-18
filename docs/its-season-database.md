@@ -247,15 +247,15 @@ Focused reviewed comparisons against the pinned ITS 18 English
   the separately reviewed Alpha scoring and Infected spacing
   changes above require separate objective/rule versions.
 
-**Real ITS 17 Evacuation authoring slice (2026-11-18):**
+**Real ITS 17 Evacuation and Hardlock authoring (2026-11-18):**
 `data/curated/its/n5-its-season-17.json` is a standalone, **unregistered**
-ITS 17 V0.2 curated season source. It has one reviewed
-`scenario:evacuation` membership pinned to
-`data/curated/its/shared/evacuation-v1.json`, with the source
+ITS 17 V0.2 curated season source. It has reviewed
+`scenario:evacuation` and `scenario:hardlock` memberships pinned to
+`data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
-complete historical scenario definition (format version 1) and the
-season document owns the source-specific membership and citations.
-The original V0.2 English pp. **55–58** and Spanish pp. **50–53**
+complete historical scenario definitions (format version 1) and the
+season document owns the source-specific memberships and citations.
+The original V0.2 Evacuation English pp. **55–58** and Spanish pp. **50–53**
 support its mission, six army sizes / three maps, two Extraction
 Consoles and scoring. Per-language Classified scoring, opening
 activation timing and cross-player Console reactivation ambiguities
@@ -265,21 +265,34 @@ scenery of the same diameter; it does **not** independently specify
 a 40 mm diameter in this mission's text, so the separate ITS 18
 40 mm assertion is not carried into the historical rule prose.
 
+Hardlock independently matches ITS 18's six-size scoring, three geometry
+configurations, two scenario Skills, Specialist Troops and end conditions.
+ITS 17 EN pp. **59–62** and ES pp. **54–57** supply eight season-local
+citations. Its original map and text specify 6/8/12-inch offsets for
+side Consoles and owner-specific Beacons at the Deployment Zone inner
+edges. The ITS 17 mission refers to a Console A Token or equal-diameter
+scenery but does not itself assert ITS 18's explicit 40 mm scenery size.
+Both editions preserve EN/ES differences concerning a Connected versus
+Activated Console and the Normal State of a transferring Beacon carrier.
+ITS 17's one Tactical Support Option belongs to historical play context,
+not a current ITS 18 rule.
+
 Build and check the independent SQLite output without registering it:
-`python -m tools.data.build_its_season --source data/curated/its/n5-its-season-17.json --shared-library data/curated/its/shared/evacuation-v1.json --output local/work/its/its_17_evacuation.db`
+`python -m tools.data.build_its_season --source data/curated/its/n5-its-season-17.json --shared-library data/curated/its/shared/its17-scenarios-v1.json --output local/work/its/its_17_reviewed.db`
 (and add `--check` to inspect the existing result). The authoring
 bootstrap `python -m tools.research.bootstrap_its17_evacuation`
-**refuses to overwrite** these human-reviewed JSON files; it is
-not used by builds. Exact source pins and independent SQLite
-reproducibility have focused regression tests in
-`tests/test_its17_evacuation_publication.py`. Existing ITS 18
+**refuses to overwrite** these human-reviewed JSON files; the one-time
+`tools.research.extend_its17_hardlock` migration is also not a build step.
+Exact source pins and independent SQLite reproducibility have focused
+regression tests in `tests/test_its17_evacuation_publication.py` and
+`tests/test_its17_hardlock_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
-Evacuation mission. The first accepted migration therefore reuses
-the complete v1 scenario definition, without claiming fine-grained
+Evacuation and Hardlock missions. The accepted migrations therefore
+reuse complete v1 scenario definitions, without claiming fine-grained
 component or Skill deduplication yet.
 
 The remaining shared-name missions and cross-language parity
