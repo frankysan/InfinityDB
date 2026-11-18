@@ -43,7 +43,7 @@ def test_its17_corporate_appropriation_has_independent_source_pins() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert len(library["definitions"]) == 14
+    assert len(library["definitions"]) == 15
     definition = library["definitions"][12]
     assert definition["id"] == "scenario:corporate-appropriation"
     assert definition["version"] == "its17-v0.2"
@@ -172,7 +172,7 @@ def test_its17_corporate_appropriation_keeps_historical_source_differences() -> 
 def test_its17_corporate_appropriation_compiles_in_its17_only(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     report = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(report["scenarios"]) == 14
+    assert len(report["scenarios"]) == 15
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED, require_current_builder=True,

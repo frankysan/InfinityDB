@@ -42,6 +42,7 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
         "scenario:crossing-lines",
         "scenario:corporate-appropriation",
         "scenario:critical-intervention",
+        "scenario:outbreak",
     ]
     assert source["records"] == []  # Facts are owned by the shared library.
     assert source["sharedScenarioLibrary"]["sha256"] == hashlib.sha256(
@@ -83,6 +84,7 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
         "scenario:crossing-lines",
         "scenario:corporate-appropriation",
         "scenario:critical-intervention",
+        "scenario:outbreak",
     ]
     entry = library["definitions"][0]
     assert entry["origin"] == {
@@ -119,6 +121,7 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
         {"scenarioId": "scenario:crossing-lines"},
         {"scenarioId": "scenario:corporate-appropriation"},
         {"scenarioId": "scenario:critical-intervention"},
+        {"scenarioId": "scenario:outbreak"},
     ]
     record = historic["records"][0]
     assert record["scope"]["seasons"] == ["its-17"]
@@ -153,7 +156,7 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
     )
     assert first["scenarios"][0]["configurationCount"] == 3
     assert first["scenarios"][0]["citations"] == 8
-    assert len(first["scenarios"]) == 14
+    assert len(first["scenarios"]) == 15
     assert first["scenarios"][1]["citations"] == 8
     assert first["skills"] == [] and first["states"] == []
     assert inspect_its_database(

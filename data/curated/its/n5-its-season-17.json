@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (fourteen reviewed scenarios)",
+    "title": "ITS Season 17 Seekers V0.2 (fifteen reviewed scenarios)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -809,6 +809,60 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:outbreak",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 68,
+              "section": "Outbreak"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 69,
+              "section": "Outbreak"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 70,
+              "section": "Outbreak"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 71,
+              "section": "Outbreak"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 46,
+              "section": "Estallido"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 47,
+              "section": "Estallido"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 48,
+              "section": "Estallido"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 49,
+              "section": "Estallido"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -885,6 +939,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "ace5fdf1071086dc7beda7b99c29670fbcfa3c9f8f16df71718111530f5cf08c"
+    "sha256": "8ab2154751067b3544bf1aba8203f16d3b86ac25a398284d7c9d13001d01c9cf"
   }
 }

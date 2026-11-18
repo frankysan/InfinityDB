@@ -37,7 +37,7 @@ def test_its17_critical_intervention_has_own_bilingual_publication() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert len(library["definitions"]) == 14
+    assert len(library["definitions"]) == 15
     definition = library["definitions"][13]
     assert definition["id"] == "scenario:critical-intervention"
     assert definition["version"] == "its17-v0.2"
@@ -169,7 +169,7 @@ def test_its17_critical_intervention_preserves_historical_differences() -> None:
 def test_its17_critical_intervention_sqlite_stays_isolated(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     report = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(report["scenarios"]) == 14
+    assert len(report["scenarios"]) == 15
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED, require_current_builder=True,

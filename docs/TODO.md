@@ -575,14 +575,20 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         enemy-Model turret reactions, six source-local issues, and
         the unnormalized Defender maximum. Rebuild isolated
         fourteen-scenario `its_17.db`; leave ITS 18 unchanged.
+      - [x] Source-review ITS 17 V0.2 Outbreak (EN pp. 68–71,
+        ES pp. 46–49): retain the historical 1 OP Stabilize Alpha
+        objective and 1 OP CivEvac Alpha award separately from ITS 18's
+        2 OP CivEvac Alpha award and omitted Stabilize Alpha objective.
+        Pin bilingual placement measurements and independently rebuild
+        the fifteen-scenario `its_17.db`, without ITS 18 changes.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish
         V0.0–V0.2 originals are now pinned; revisions' mission changes
         and cross-language differences still need review before
         migrating further ITS 17 memberships.
-        Do not merge changed Outbreak objectives into one shared
-        definition version.
+        The historical Outbreak objective differences are separately
+        curated; do not collapse ITS 17 and ITS 18 definitions.
     - [ ] Curate real ITS 17 against this foundation only after evidence review;
       keep each resulting season database independent, with no runtime links.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full

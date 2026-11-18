@@ -255,8 +255,8 @@ ITS 17 V0.2 curated season source. It has reviewed
 `scenario:superiority`, `scenario:provisioning`,
 `scenario:area-of-interest`, `scenario:last-launch`,
 `scenario:b-pong`, `scenario:crossing-lines`,
-`scenario:corporate-appropriation` and `scenario:critical-intervention`
-memberships pinned to
+`scenario:corporate-appropriation`, `scenario:critical-intervention`
+and `scenario:outbreak` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -461,10 +461,22 @@ Spanish-only Silhouette access wording for the Gates, Shasvastii
 states, Victory Points versus Army Points for INTELCOM, 4-inch/10-cm
 exclusion half-width, and the printed Defender scoring maximum.
 
+Outbreak V0.2 EN pp. **68–71** and ES pp. **46–49** has **different
+objectives** from ITS 18: ITS 17 awards 1 OP for Stabilizing the Alpha
+Infected and 1 OP for CivEvacing the Stabilized Alpha Infected; ITS 18
+drops the former and awards 2 OP for the latter. Both still offer a
+10-OP total. The six ITS 17 objectives have independent historical
+fact text and provenance; no shared cross-season definition is claimed.
+Both originals agree on five Infected, the central Alpha, three
+opposite-corner deployment maps, player-placed Stabilization Zones,
+CivEvac restrictions, Scan/Stabilize Short Skills and no Classified/HVT.
+One bilingual difference remains: placement distances of 4/8 inches
+versus 10/20 cm. ITS 18 scoring remains unchanged.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the fourteen
+development artifact is `local/work/its/its_17.db`; it contains the fifteen
 reviewed ITS 17 scenarios and remains separate from the three-file serving
 set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
@@ -489,7 +501,8 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 `tools.research.extend_its17_b_pong` and
 `tools.research.extend_its17_crossing_lines` and
 `tools.research.extend_its17_corporate_appropriation` and
-`tools.research.extend_its17_critical_intervention` migrations are not build steps.
+`tools.research.extend_its17_critical_intervention` and
+`tools.research.extend_its17_outbreak` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
@@ -504,7 +517,8 @@ regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_b_pong_publication.py` and
 `tests/test_its17_crossing_lines_publication.py` and
 `tests/test_its17_corporate_appropriation_publication.py` and
-`tests/test_its17_critical_intervention_publication.py`. Existing ITS 18
+`tests/test_its17_critical_intervention_publication.py` and
+`tests/test_its17_outbreak_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
@@ -512,8 +526,8 @@ reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
 Evacuation, Hardlock, Uplink Center, Battleground, Annihilation,
 Cutthroat, Superiority, Provisioning, Area of Interest, Last Launch,
-B-Pong, Crossing Lines, Corporate Appropriation and Critical Intervention
-missions.
+B-Pong, Crossing Lines, Corporate Appropriation, Critical Intervention
+and Outbreak missions.
 The accepted migrations reuse complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 
