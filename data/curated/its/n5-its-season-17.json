@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (thirteen reviewed scenarios)",
+    "title": "ITS Season 17 Seekers V0.2 (fourteen reviewed scenarios)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -730,6 +730,85 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:critical-intervention",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 45,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 46,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 47,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 48,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 49,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 50,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 63,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 64,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 65,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 66,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 67,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 68,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 69,
+              "section": "Intervención Crítica"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -806,6 +885,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "488564b143d38be691e95a9ce06ecadab183f7bd90f0ab88d584b1ad410f2061"
+    "sha256": "ace5fdf1071086dc7beda7b99c29670fbcfa3c9f8f16df71718111530f5cf08c"
   }
 }

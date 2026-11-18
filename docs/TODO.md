@@ -568,6 +568,13 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         Skills. Preserve token-relative sizes; track bilingual
         Reinforcements, Capture and Baggage discrepancies. Rebuild
         separate thirteen-scenario `its_17.db`; leave ITS 18 intact.
+      - [x] Source-review ITS 17 V0.2 Critical Intervention (EN
+        pp. 45–50, ES pp. 63–69): retain asymmetric printed scoring,
+        kill thresholds, three maps, turret profile and two typed
+        scenario Skills. Preserve historically token-relative scenery,
+        enemy-Model turret reactions, six source-local issues, and
+        the unnormalized Defender maximum. Rebuild isolated
+        fourteen-scenario `its_17.db`; leave ITS 18 unchanged.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish
