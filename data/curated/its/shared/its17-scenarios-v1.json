@@ -4752,6 +4752,723 @@
         }
       },
       "components": []
+    },
+    {
+      "id": "scenario:cutthroat",
+      "version": "its17-v0.2",
+      "origin": {
+        "sourceCollectionId": "its-season-17-v0.2",
+        "seasonId": "its-17",
+        "revision": "0.2",
+        "sourceIds": [
+          "its-season-17-v0.2-en-pdf",
+          "its-season-17-v0.2-es-pdf"
+        ]
+      },
+      "record": {
+        "id": "scenario:cutthroat",
+        "kind": "scenario",
+        "name": "Cutthroat",
+        "summary": "ITS Season 17 Cutthroat: Kill enemy Army Points and Lieutenants, Kill the enemy Key Ops and exceed their Key Ops' Trooper kills. Reinforced Tactical Link replaces Loss of Lieutenant.",
+        "composition": {
+          "role": "definition"
+        },
+        "scope": {
+          "game": "N5",
+          "seasons": [
+            "its-17"
+          ]
+        },
+        "facts": {
+          "definitionVersion": 1,
+          "playRequirements": {
+            "classifiedObjectives": 0,
+            "tacticalObjectives": 0,
+            "hvts": 0
+          },
+          "mission": {
+            "sides": [
+              {
+                "id": "side-a",
+                "name": "Side A"
+              },
+              {
+                "id": "side-b",
+                "name": "Side B"
+              }
+            ],
+            "gameSizes": [
+              {
+                "armyPoints": 150,
+                "swc": 3,
+                "configurationId": "150-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 200,
+                "swc": 4,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 250,
+                "swc": 5,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 300,
+                "swc": 6,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 350,
+                "swc": 7,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 400,
+                "swc": 8,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "objectives": [
+              {
+                "id": "kill-more-army-points",
+                "name": "Kill more enemy Army Points",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 3,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 3,
+                    "condition": {
+                      "kind": "metric-comparison",
+                      "metric": "enemy-army-points-killed",
+                      "comparison": "greater"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "kill-same-lieutenants",
+                "name": "Kill the same number of enemy Lieutenants",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 2,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 2,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "Kill the same number of enemy [[skill:lieutenant|Lieutenants]] as the opponent, provided this player killed at least one enemy Lieutenant."
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "kill-more-lieutenants",
+                "name": "Kill more enemy Lieutenants",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 3,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 3,
+                    "condition": {
+                      "kind": "metric-comparison",
+                      "metric": "enemy-lieutenants-killed",
+                      "comparison": "greater"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "kill-enemy-key-ops",
+                "name": "Kill the enemy Key Ops",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 1,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "Kill the opposing Key Ops: the selected Trooper is Killed under the mission's Killing criteria."
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "kill-more-with-key-ops",
+                "name": "Key Ops enemy Trooper kills",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 3,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 3,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "Kill more enemy Troopers with your Key Ops than the opposing player kills with theirs. Credit a Key Ops when they cause a Trooper to be in a Null State at game end, or cause Wounds/STR loss during the Order in which that Trooper enters Dead State."
+                    }
+                  }
+                ]
+              }
+            ],
+            "rules": [
+              {
+                "id": "reinforced-tactical-link",
+                "name": "Reinforced Tactical Link",
+                "paragraphs": [
+                  "The [[rule:loss-of-lieutenant|Loss of Lieutenant]] rule does not apply in this mission.",
+                  "The identity of every Lieutenant is Open Information, including which Marker represents them while Camouflaged, Decoyed or using Holoprojector.",
+                  "A Lieutenant must be placed on the game table as a Model or Marker at the beginning of Game Round 1. Hidden Deployment is not permitted for the Lieutenant.",
+                  "During the Tactical Phase of their Active Turn, a player without an eligible Lieutenant because the current Lieutenant is undeployed, Isolated or in a Null State must name a replacement without spending an Order. The new Lieutenant's identity is also Open Information, and the replacement must be on the game table as a Model or Marker."
+                ]
+              },
+              {
+                "id": "key-ops",
+                "name": "Key Ops",
+                "paragraphs": [
+                  "At the end of the Deployment Phase, in Initiative order, each player designates one Key Ops from their Army List. The Trooper must be deployed on the table as a Model, not in Hidden Deployment or Marker State, and must remain a Model.",
+                  "Irregular Troopers and REM or VH Troop Types cannot become Key Ops under the English ITS 17 text; the Spanish source omits the VH restriction.",
+                  "The Key Ops gains [[skill:dodge|Dodge (+3)]] and [[skill:tactical-awareness|Tactical Awareness]], even if not in their Unit Profile. These do not stack with already possessed instances. Identify the Key Ops with the Player A or B Marker."
+                ]
+              },
+              {
+                "id": "killing",
+                "name": "Killing",
+                "paragraphs": [
+                  "An enemy Trooper is considered Killed when it enters Dead State or is in a Null State at the end of the game.",
+                  "A Trooper not deployed on the game table as a Model or Marker by the end of the game counts as Killed by the adversary.",
+                  "The Key Ops counts as Killing a target if they cause it to end in a Null State or cause a loss of Wounds/STR in the Order in which it enters Dead State.",
+                  "A Trooper counts as a Killed Lieutenant if they held the Lieutenant role at any time during the game and enter Dead State or are in a Null State at the end of the game."
+                ]
+              },
+              {
+                "id": "no-quarter",
+                "name": "No Quarter",
+                "paragraphs": [
+                  "The Retreat! rules do not apply in this mission."
+                ]
+              },
+              {
+                "id": "hvt-and-classified-deck",
+                "name": "HVT and Classified Deck not used",
+                "paragraphs": [
+                  "Players do not deploy an HVT Model or use the Classified Deck. The Secure HVT rule does not apply."
+                ]
+              }
+            ],
+            "endConditions": [
+              {
+                "id": "round-limit",
+                "checkAt": "end-of-round",
+                "finishAt": "end-of-round",
+                "condition": {
+                  "kind": "round-limit",
+                  "rounds": 3
+                }
+              }
+            ],
+            "sourceIssues": [
+              {
+                "id": "key-ops-vh-eligibility-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "kill-enemy-key-ops",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 EN p. 87 excludes REM and VH from Key Ops designation, while ES p. 92 excludes REM but omits VH. Retain the English exclusion and flag the disagreement."
+              },
+              {
+                "id": "lieutenant-more-kills-minimum-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "kill-more-lieutenants",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 ES p. 91 adds a condition requiring at least one Lieutenant Killed to the more-Lieutenants objective, which EN p. 86 does not explicitly state. Retain the English objective wording and the language difference."
+              },
+              {
+                "id": "killed-lieutenant-history-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "kill-more-lieutenants",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 EN p. 88 counts Troopers that were Lieutenants at any time as Killed Lieutenants if Dead or Null at game end; ES p. 93 omits that explicit sentence."
+              }
+            ]
+          },
+          "configurations": [
+            {
+              "id": "150-points",
+              "armyPoints": [
+                150
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Cutthroat",
+                "table": {
+                  "width": 24,
+                  "height": 32,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 24,
+                    "y2": 12
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 20,
+                    "x2": 24,
+                    "y2": 32
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 6.55,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 26.55,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  }
+                ]
+              }
+            },
+            {
+              "id": "200-250-points",
+              "armyPoints": [
+                200,
+                250
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Cutthroat",
+                "table": {
+                  "width": 32,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 32,
+                    "y2": 16
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 32,
+                    "x2": 32,
+                    "y2": 48
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 8.55,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 40.55,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  }
+                ]
+              }
+            },
+            {
+              "id": "300-400-points",
+              "armyPoints": [
+                300,
+                350,
+                400
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Cutthroat",
+                "table": {
+                  "width": 48,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 48,
+                    "y2": 16
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "rectangle",
+                    "style": "deployment-b",
+                    "x1": 0,
+                    "y1": 32,
+                    "x2": 48,
+                    "y2": 48
+                  },
+                  {
+                    "id": "table-center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {
+                      "anchor": "center"
+                    },
+                    "x2": {
+                      "anchor": "right"
+                    },
+                    "y2": {
+                      "anchor": "center"
+                    }
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 8.55,
+                    "text": "Deployment Zone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {
+                      "anchor": "center"
+                    },
+                    "y": 40.55,
+                    "text": "Deployment Zone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "deployment-a-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  },
+                  {
+                    "id": "deployment-b-depth",
+                    "kind": "dimension",
+                    "target": "deployment-b",
+                    "axis": "y",
+                    "side": "end",
+                    "offset": 0.8
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "citations": [
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 86,
+            "section": "Cutthroat"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 87,
+            "section": "Cutthroat"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 88,
+            "section": "Cutthroat"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 91,
+            "section": "Degüello"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 92,
+            "section": "Degüello"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 93,
+            "section": "Degüello"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-18"
+        }
+      },
+      "components": []
     }
   ]
 }

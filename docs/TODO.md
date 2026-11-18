@@ -511,10 +511,15 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         historical authoring library, not ITS 18.
       - [x] Materialize the reviewed ITS 17 historical authoring
         source and pinned shared library into a dedicated
-        `local/work/its/its_17.db` SQLite file (five scenarios),
+        `local/work/its/its_17.db` SQLite file (initial five scenarios),
         independent of `its_18.db` and `rules_n5.db`. Keep runtime
         registration and `data/generated/its_17.db` publication deferred
         until the season is ready to ship.
+      - [x] Review ITS 17 Cutthroat V0.2 (EN pp. 86–88,
+        ES pp. 91–93): preserve the two historical Key Ops objectives,
+        selection/Skills and English/Spanish Lieutenant and VH differences,
+        reuse only matching deployment geometry, and rebuild the separate
+        six-scenario `its_17.db` without changing ITS 18.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish

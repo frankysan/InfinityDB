@@ -251,7 +251,8 @@ Focused reviewed comparisons against the pinned ITS 18 English
 `data/curated/its/n5-its-season-17.json` is a standalone, **unregistered**
 ITS 17 V0.2 curated season source. It has reviewed
 `scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`,
-`scenario:battleground` and `scenario:annihilation` memberships pinned to
+`scenario:battleground`, `scenario:annihilation` and `scenario:cutthroat`
+memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -328,10 +329,21 @@ The three original maps are retained without inventing a mixed-unit
 deployment. The separate ITS 18 Spanish 400-point threshold
 discrepancy is not retroactively assigned to ITS 17.
 
+Cutthroat is versioned independently because ITS 17 EN pp. **86–88** and
+ES pp. **91–93** include Key Ops designation and two Key Ops objectives
+(1 OP to Kill the enemy Key Ops; 3 OP for more kills by one's Key Ops),
+where ITS 18 awards 4 OP for more Lieutenant-led Trooper kills instead.
+Both share the three 12-/16-inch Deployment Zone maps and Reinforced
+Tactical Link. Original Key Ops Dodge (+3), Tactical Awareness, REM/VH
+eligibility and Killing attribution remain in the ITS 17 definition;
+the Spanish omission of VH, its minimum-one-Lieutenant condition for
+the greater-Lieutenant-kills objective, and the omitted historical
+Lieutenant-kill definition remain cited source differences.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the five
+development artifact is `local/work/its/its_17.db`; it contains the six
 reviewed ITS 17 scenarios and remains separate from the three-file serving
 set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
@@ -347,19 +359,21 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 `tools.research.extend_its17_hardlock` and
 `tools.research.extend_its17_uplink_center` and
 `tools.research.extend_its17_battleground` and
-`tools.research.extend_its17_annihilation` migrations are not build steps.
+`tools.research.extend_its17_annihilation` and
+`tools.research.extend_its17_cutthroat` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
 `tests/test_its17_uplink_center_publication.py` and
 `tests/test_its17_battleground_publication.py` and
-`tests/test_its17_annihilation_publication.py`. Existing ITS 18
+`tests/test_its17_annihilation_publication.py` and
+`tests/test_its17_cutthroat_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
-Evacuation, Hardlock, Uplink Center, Battleground and Annihilation
+Evacuation, Hardlock, Uplink Center, Battleground, Annihilation and Cutthroat
 missions. The accepted migrations reuse complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 

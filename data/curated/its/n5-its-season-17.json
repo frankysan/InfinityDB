@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (reviewed Evacuation, Hardlock, Uplink Center, Battleground and Annihilation)",
+    "title": "ITS Season 17 Seekers V0.2 (six reviewed scenarios)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -258,6 +258,50 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:cutthroat",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 86,
+              "section": "Cutthroat"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 87,
+              "section": "Cutthroat"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 88,
+              "section": "Cutthroat"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 91,
+              "section": "Degüello"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 92,
+              "section": "Degüello"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 93,
+              "section": "Degüello"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -334,6 +378,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "a201b74bf4e0f1d10a6e9e89f2c0191826df9ef89d8678a669831c68738b6cb6"
+    "sha256": "f64045e313dc61817216088560100518e463a3a890126dc31b906195e2e9ce16"
   }
 }
