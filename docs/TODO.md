@@ -562,6 +562,12 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         dimension discrepancy, Token type and Shasvastii wording,
         and the unresolved HVT deployment implication. Rebuild
         separate twelve-scenario `its_17.db` without ITS 18 changes.
+      - [x] Source-review ITS 17 V0.2 Corporate Appropriation (EN
+        pp. 40–44, ES pp. 32–37): retain source-confirmed Prototype,
+        Panoply and ADS scoring, three geometries and two typed scenario
+        Skills. Preserve token-relative sizes; track bilingual
+        Reinforcements, Capture and Baggage discrepancies. Rebuild
+        separate thirteen-scenario `its_17.db`; leave ITS 18 intact.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish

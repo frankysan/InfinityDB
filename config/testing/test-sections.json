@@ -105,6 +105,7 @@
         "test_its17_last_launch_publication",
         "test_its17_b_pong_publication",
         "test_its17_crossing_lines_publication",
+        "test_its17_corporate_appropriation_publication",
         "test_its_source_family",
         "test_its_hotfix_scenarios",
         "test_its_hotfix_reviewed_missions",

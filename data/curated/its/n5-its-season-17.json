@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (twelve reviewed scenarios)",
+    "title": "ITS Season 17 Seekers V0.2 (thirteen reviewed scenarios)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -661,6 +661,75 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:corporate-appropriation",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 40,
+              "section": "Corporate Appropriation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 41,
+              "section": "Corporate Appropriation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 42,
+              "section": "Corporate Appropriation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 43,
+              "section": "Corporate Appropriation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 44,
+              "section": "Corporate Appropriation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 32,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 33,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 34,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 35,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 36,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 37,
+              "section": "Apropiación Corporativa"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -737,6 +806,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "1679fe8c3bb724fa3448f0ee339370248f0266b83e1ce9c2f231f7ad4b6bb540"
+    "sha256": "488564b143d38be691e95a9ce06ecadab183f7bd90f0ab88d584b1ad410f2061"
   }
 }

@@ -254,7 +254,8 @@ ITS 17 V0.2 curated season source. It has reviewed
 `scenario:battleground`, `scenario:annihilation`, `scenario:cutthroat`,
 `scenario:superiority`, `scenario:provisioning`,
 `scenario:area-of-interest`, `scenario:last-launch`,
-`scenario:b-pong` and `scenario:crossing-lines` memberships pinned to
+`scenario:b-pong`, `scenario:crossing-lines` and
+`scenario:corporate-appropriation` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -429,10 +430,25 @@ and Secure Treasure, but do **not** expressly exclude HVT Model deployment
 as ITS 18 does; the no-HVT setup count therefore remains provisional.
 These four source issues are recorded with ITS 17 provenance.
 
+Corporate Appropriation V0.2 EN pp. **40–44** and ES pp. **32–37**
+confirms the 2 + 1 + (3 or 1) + 1 + 3 OP scoring, three deployment
+configurations, two Prototypes and Panoplies, their fixed positions,
+ADS defense, first-round protection, and three Classified Objectives.
+Historical Prototypes/Panoplies permit Objective Tokens or
+**matching-diameter scenery**, without ITS 18's fixed 40 mm.
+Both ITS 17 languages expressly restrict Prototype-targeting Attacks
+affecting other Troopers and forbid **all** CC Attribute MODs to the
+attacker against ADS; unlike ITS 18, these are not bilingual disputes.
+Pick Up Prototype and Use Panoply are both typed scenario Short Skills.
+Three ITS 17-specific issues remain: **Reinforcements suitability**
+(EN YES / ES NO), the enemy-contact condition for Captured Prototypes,
+and Baggage's classification (EN Special Skill / ES Equipment). The
+latter two are preserved in source-local prose rather than resolved.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the twelve
+development artifact is `local/work/its/its_17.db`; it contains the thirteen
 reviewed ITS 17 scenarios and remains separate from the three-file serving
 set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
@@ -455,7 +471,8 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 `tools.research.extend_its17_area_of_interest` and
 `tools.research.extend_its17_last_launch` and
 `tools.research.extend_its17_b_pong` and
-`tools.research.extend_its17_crossing_lines` migrations are not build steps.
+`tools.research.extend_its17_crossing_lines` and
+`tools.research.extend_its17_corporate_appropriation` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
@@ -468,7 +485,8 @@ regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_area_of_interest_publication.py` and
 `tests/test_its17_last_launch_publication.py` and
 `tests/test_its17_b_pong_publication.py` and
-`tests/test_its17_crossing_lines_publication.py`. Existing ITS 18
+`tests/test_its17_crossing_lines_publication.py` and
+`tests/test_its17_corporate_appropriation_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
@@ -476,7 +494,7 @@ reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
 Evacuation, Hardlock, Uplink Center, Battleground, Annihilation,
 Cutthroat, Superiority, Provisioning, Area of Interest, Last Launch, B-Pong
-and Crossing Lines missions.
+Crossing Lines and Corporate Appropriation missions.
 The accepted migrations reuse complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 

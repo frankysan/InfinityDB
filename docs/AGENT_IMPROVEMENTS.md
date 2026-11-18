@@ -311,3 +311,17 @@ affected area, observation and evidence, proposed change, and disposition.
   merely comparing the source file to itself.
 - **Disposition:** Future test-maintenance improvement; B-Pong is validated
   with the current explicit expectations, without a fixture refactor.
+
+## AI-0015 — Give ITS 18 Use Panoply the standard scenario Skill form
+
+- **Date:** 2026-11-18
+- **Area:** Scenario Skill presentation and cross-season reuse.
+- **Observation:** ITS 18 Corporate Appropriation describes Use Panoply only
+  inside ordinary Panoplies rule prose, although its source explicitly calls
+  it an Attack, Scenario Short Skill. ITS 17 now has a source-reviewed typed
+  `use-panoply` rule with Requirements, Effects and Restrictions.
+- **Proposed:** In a separate ITS 18 source-review batch, represent Use Panoply
+  as a typed Short Skill without changing its semantics, then assess genuine
+  cross-season reuse of the Skill instead of copying narrative text.
+- **Disposition:** Deferred; the current ITS 17 authoring batch does not
+  modify ITS 18 publication.

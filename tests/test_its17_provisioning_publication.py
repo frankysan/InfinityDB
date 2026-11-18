@@ -45,6 +45,7 @@ def test_its17_provisioning_has_independent_source_and_shared_pin() -> None:
         "scenario:last-launch",
         "scenario:b-pong",
         "scenario:crossing-lines",
+        "scenario:corporate-appropriation",
     ]
     definition = library["definitions"][7]
     assert definition["version"] == "its17-v0.2"
@@ -143,7 +144,7 @@ def test_its17_provisioning_does_not_inherit_its18_source_disputes() -> None:
 def test_its17_provisioning_sqlite_stays_separate(tmp_path: Path) -> None:
     output = tmp_path / "its_17.db"
     report = build_its_database(SEASON, output, shared_library=SHARED)
-    assert len(report["scenarios"]) == 12
+    assert len(report["scenarios"]) == 13
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert report["inputIdentity"]["sharedScenarioLibrary"]["sha256"] == (
         hashlib.sha256(SHARED.read_bytes()).hexdigest()

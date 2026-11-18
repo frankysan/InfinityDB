@@ -43,6 +43,7 @@ def test_its17_hardlock_uses_pinned_historical_membership_and_citations() -> Non
         "scenario:last-launch",
         "scenario:b-pong",
         "scenario:crossing-lines",
+        "scenario:corporate-appropriation",
     ]
     definition = shared["definitions"][1]
     assert definition["version"] == "its17-v0.2"
@@ -116,7 +117,7 @@ def test_its17_hardlock_preserves_verified_scoring_geometry_and_source_differenc
 def test_hardlock_standalone_build_stays_season_local(tmp_path: Path) -> None:
     output = tmp_path / "its_17.db"
     result = build_its_database(SEASON, output, shared_library=SHARED)
-    assert len(result["scenarios"]) == 12
+    assert len(result["scenarios"]) == 13
     selected = select_its_scenario(
         output, season_id="its-17", revision="0.2", scenario_id="scenario:hardlock",
     )
