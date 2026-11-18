@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (seven reviewed scenarios)",
+    "title": "ITS Season 17 Seekers V0.2 (eight reviewed scenarios)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -361,6 +361,70 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:provisioning",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 72,
+              "section": "Provisioning"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 73,
+              "section": "Provisioning"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 74,
+              "section": "Provisioning"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 75,
+              "section": "Provisioning"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 76,
+              "section": "Provisioning"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 70,
+              "section": "Reabastecimiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 71,
+              "section": "Reabastecimiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 72,
+              "section": "Reabastecimiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 73,
+              "section": "Reabastecimiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 74,
+              "section": "Reabastecimiento"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -437,6 +501,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "2ff7333c539f4531448e9ce1136f278fc8f285c8abab464c32e387b1e3f25271"
+    "sha256": "77b996df27e6da3ef796a5ad835d7f76be2f2df9dff089a6c5a59a3cd5f56369"
   }
 }

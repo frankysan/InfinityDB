@@ -526,6 +526,13 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         discrepancies, while reusing matching Consoles/Quadrants and
         Hack Consoles semantics. Rebuild `its_17.db` with seven
         independent historical scenario records.
+      - [x] Source-review ITS 17 V0.2 Provisioning (EN pp. 72–76,
+        ES pp. 70–74): preserve 4-box scoring and all three diagrams,
+        restore historical equal-diameter Tech-Coffins, same-language
+        Player Token marking, enemy-Safe-Area pickup limits and
+        wholly-inside deposit requirements. Record EN base contact
+        versus ES Silhouette contact. Build the standalone
+        eight-scenario `its_17.db`, without publishing ITS 17.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish

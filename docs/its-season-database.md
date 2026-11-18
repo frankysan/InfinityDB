@@ -252,7 +252,7 @@ Focused reviewed comparisons against the pinned ITS 18 English
 ITS 17 V0.2 curated season source. It has reviewed
 `scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`,
 `scenario:battleground`, `scenario:annihilation`, `scenario:cutthroat`
-and `scenario:superiority` memberships pinned to
+and `scenario:superiority` plus `scenario:provisioning` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -353,10 +353,26 @@ Unconscious/non-Null versus Normal/Embryo formulations differ, so both
 remain historical source issues. ITS 17 refers to Console A Token
 size rather than independently asserting ITS 18's 40 mm dimension.
 
+Provisioning has independently reviewed ITS 17 V0.2 EN pp. **72–76**
+and ES pp. **70–74**. Its four-box scoring (4 + 3 + 2 + 1 OP),
+three diagonal Tech-Coffins, corner quarter-circle deployments,
+three game-size maps, Safe Areas, Specialist actions and endings
+match the current definition. The original 8/12/16-inch coffin
+spacing is confirmed by both language editions' diagrams. Its
+Tech-Coffin Token scenery has a relative matching diameter,
+without ITS 18's explicit 40 mm. Both historical languages mark
+an emptied coffin with a Player Token (ITS 18 English may instead
+remove its Token), limit Specialist/WIP-3 recovery to the **enemy**
+Safe Area (ITS 18 English says *a* Safe Area), and explicitly place
+a deposited Box wholly inside the Safe Area. Historical EN p. 74
+requires **base contact** to Extract, while ES p. 71 says
+**Silhouette contact**; the source issue remains unresolved. The
+separate ITS 18 bilingual issue set is not copied onto ITS 17.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the seven
+development artifact is `local/work/its/its_17.db`; it contains the eight
 reviewed ITS 17 scenarios and remains separate from the three-file serving
 set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
@@ -374,7 +390,8 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 `tools.research.extend_its17_battleground` and
 `tools.research.extend_its17_annihilation` and
 `tools.research.extend_its17_cutthroat` and
-`tools.research.extend_its17_superiority` migrations are not build steps.
+`tools.research.extend_its17_superiority` and
+`tools.research.extend_its17_provisioning` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
@@ -382,15 +399,16 @@ regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_battleground_publication.py` and
 `tests/test_its17_annihilation_publication.py` and
 `tests/test_its17_cutthroat_publication.py` and
-`tests/test_its17_superiority_publication.py`. Existing ITS 18
+`tests/test_its17_superiority_publication.py` and
+`tests/test_its17_provisioning_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
 Evacuation, Hardlock, Uplink Center, Battleground, Annihilation, Cutthroat
-and Superiority missions. The accepted migrations reuse complete v1
-scenario definitions,
+Superiority and Provisioning missions. The accepted migrations reuse
+complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 
 The remaining shared-name missions and cross-language parity

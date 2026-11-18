@@ -6581,6 +6581,785 @@
         }
       },
       "components": []
+    },
+    {
+      "id": "scenario:provisioning",
+      "version": "its17-v0.2",
+      "origin": {
+        "sourceCollectionId": "its-season-17-v0.2",
+        "seasonId": "its-17",
+        "revision": "0.2",
+        "sourceIds": [
+          "its-season-17-v0.2-en-pdf",
+          "its-season-17-v0.2-es-pdf"
+        ]
+      },
+      "record": {
+        "id": "scenario:provisioning",
+        "kind": "scenario",
+        "name": "Provisioning",
+        "summary": "ITS Season 17 Provisioning: extract four Supply Boxes from three Tech-Coffins, secure player-placed Safe Areas, and score end-game Control with one Classified Objective.",
+        "composition": {
+          "role": "definition"
+        },
+        "scope": {
+          "game": "N5",
+          "seasons": [
+            "its-17"
+          ]
+        },
+        "facts": {
+          "definitionVersion": 1,
+          "playRequirements": {
+            "classifiedObjectives": 1,
+            "tacticalObjectives": 0,
+            "hvts": 1
+          },
+          "mission": {
+            "sides": [
+              {
+                "id": "side-a",
+                "name": "Side A"
+              },
+              {
+                "id": "side-b",
+                "name": "Side B"
+              }
+            ],
+            "gameSizes": [
+              {
+                "armyPoints": 150,
+                "swc": 3,
+                "configurationId": "150-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 200,
+                "swc": 4,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 250,
+                "swc": 5,
+                "configurationId": "200-250-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 300,
+                "swc": 6,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 350,
+                "swc": 7,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "armyPoints": 400,
+                "swc": 8,
+                "configurationId": "300-400-points",
+                "deployments": [
+                  {
+                    "sideId": "side-a",
+                    "elementIds": [
+                      "deployment-a"
+                    ]
+                  },
+                  {
+                    "sideId": "side-b",
+                    "elementIds": [
+                      "deployment-b"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "objectives": [
+              {
+                "id": "control-supply-boxes",
+                "name": "Control Supply Boxes",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "cumulative",
+                "maximumPoints": 4,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "Score 1 Objective Point for each Supply Box Controlled at game end, to a maximum of four. Boxes carried by eligible non-Null Models and Boxes Controlled in a Safe Area count according to this mission's Control rules."
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "safe-area-comparison",
+                "name": "Compare Supply Boxes in Safe Areas",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 3,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 3,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "Control more Supply Boxes in your own Safe Area than the opponent Controls in theirs at game end."
+                    }
+                  },
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "Control the same number of Supply Boxes in each player's own Safe Area at game end, provided at least one Supply Box is Controlled in a Safe Area."
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "opponent-empty-safe-area",
+                "name": "Opponent's Safe Area Empty",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 2,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 2,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "At game end, the opponent Controls no Supply Boxes in their own Safe Area. This objective does not require you to Control a Box in yours."
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "classified-objective",
+                "name": "Classified Objective",
+                "sideIds": [
+                  "side-a",
+                  "side-b"
+                ],
+                "timing": "end-of-game",
+                "aggregation": "exclusive",
+                "maximumPoints": 1,
+                "awards": [
+                  {
+                    "armyPoints": [
+                      150,
+                      200,
+                      250,
+                      300,
+                      350,
+                      400
+                    ],
+                    "objectivePoints": 1,
+                    "condition": {
+                      "kind": "reviewed-prose",
+                      "text": "Complete your one Classified Objective for 1 Objective Point."
+                    }
+                  }
+                ]
+              }
+            ],
+            "rules": [
+              {
+                "id": "deployment-and-tech-coffins",
+                "name": "Deployment and Tech-Coffins",
+                "paragraphs": [
+                  "Both sides deploy in opposite corner quarter-circle Deployment Zones shown on the three game-size maps. A Trooper may not deploy in Silhouette contact with a Tech-Coffin.",
+                  "Three Tech-Coffins lie along the central diagonal, one at the table center and two [[distance:8:inch]] / [[distance:12:inch]] / [[distance:16:inch]] from it in 150 / 200–250 / 300–400-point games. Each outer Tech-Coffin contains one Supply Box and the central one contains two. Use a Tech-Coffin Marker or a scenery piece of equal diameter; the ITS 17 mission does not specify an independent 40 mm size."
+                ]
+              },
+              {
+                "id": "extract-supply-boxes",
+                "name": "Extract Supply Boxes (Short Skill)",
+                "skillTypeIds": [
+                  "short-skill"
+                ],
+                "skillFacts": {
+                  "requirements": [
+                    "A Specialist Troop must be in contact with a Tech-Coffin."
+                  ],
+                  "effects": [
+                    "Make a Normal WIP Roll to Extract one Supply Box. On success place a Supply Box Token beside the Trooper. Failed attempts can be retried with another Short Skill.",
+                    "The central Tech-Coffin contains two Supply Boxes; each outer Tech-Coffin contains one."
+                  ],
+                  "restrictions": [],
+                  "clarifications": [],
+                  "sourceNotes": [
+                    "ITS 17 EN p. 74 requires base contact with a Tech-Coffin, while ES p. 71 requires Silhouette contact. The historical requirement preserves this unresolved language distinction.",
+                    "Both ITS 17 editions require marking a Tech-Coffin with a Player A/B Token once all its Supply Boxes are extracted; neither directs removal of the emptied Tech-Coffin Token."
+                  ]
+                },
+                "paragraphs": [
+                  "A Specialist Troop in contact with a Tech-Coffin can make a Normal WIP Roll to Extract a Supply Box, placing a Supply Box Token beside the Trooper on success. A failed Roll can be retried with another Short Skill.",
+                  "Once all Supply Boxes have been Extracted from a Tech-Coffin, place a Player A or B Token beside it to mark the extraction. Unlike ITS 18 English, the ITS 17 mission does not direct removal of the emptied Tech-Coffin Token."
+                ]
+              },
+              {
+                "id": "pickup-supply-boxes",
+                "name": "Pick Up Supply Boxes (Short Skill)",
+                "paragraphs": [
+                  "A Trooper in Silhouette contact with an uncarried Supply Box, or an allied Trooper in Normal State carrying it, may pick it up without a Roll outside the stricter Safe Area case. The usual Supply Box carrying rules apply.",
+                  "If the Supply Box is in the enemy's Safe Area, only a Specialist Troop may pick it up, requiring a Normal WIP-3 Roll. Both ITS 17 editions specifically name the opposing player's Safe Area; do not apply the broader ITS 18 English 'any Safe Area' wording."
+                ]
+              },
+              {
+                "id": "common-supply-box-rules",
+                "name": "Common Supply Box Rules",
+                "paragraphs": [
+                  "Each Model can carry a maximum of one Supply Box, or two with Baggage. Only Models, not Markers, carry Boxes. Keep each carried Supply Box Token in Silhouette contact with its carrier.",
+                  "If a carrier enters or is in a Null State, it drops its Box slightly out of Silhouette contact. Supply Box Tokens do not block movement or Line of Fire."
+                ]
+              },
+              {
+                "id": "control-supply-boxes",
+                "name": "Control Supply Boxes",
+                "paragraphs": [
+                  "A Supply Box is Controlled at game end if carried by your Model (not a Marker) that is neither in a Null State nor in Silhouette contact with an enemy Model. Boxes deposited in your Safe Area are considered Controlled unless successfully picked up by an enemy Specialist.",
+                  "Score one point per Controlled Supply Box, compare the counts in each player's own Safe Area for the 3-point greater-than or 1-point nonzero-tie award, and gain another 2 points if the opponent Controls no Boxes in their own Safe Area."
+                ]
+              },
+              {
+                "id": "safe-areas",
+                "name": "Player-Placed Safe Areas",
+                "paragraphs": [
+                  "Before Deployment each player places one Circular Template on a surface at least the size of that Template, wholly outside all Deployment Zones and not overlapping the other Safe Area. The player who kept Deployment places first.",
+                  "These are player-placed Circular Templates, not fixed map objects. A Trooper can deposit a Supply Box in their Safe Area with a Short Skill and no Roll, placing the Box completely inside the Safe Area. Both ITS 17 languages require the Box to be wholly inside.",
+                  "Only Specialist Troops may recover a Supply Box from the enemy's Safe Area using Pick Up Supply Boxes and a WIP-3 Roll."
+                ]
+              },
+              {
+                "id": "specialist-troops",
+                "name": "Specialist Troops",
+                "paragraphs": [
+                  "Hackers, Doctors, Engineers, Forward Observers, Paramedics and Troopers with [[skill:chain-of-command|Chain of Command]] or [[skill:specialist-operative|Specialist Operative]] qualify as Specialist Troops.",
+                  "Hackers, Doctors and Engineers may not use Repeaters or Peripheral (Servant) Models for tasks reserved for Specialist Troops."
+                ]
+              },
+              {
+                "id": "operational-learning",
+                "name": "Operational Learning",
+                "paragraphs": [
+                  "A Specialist Troop that fails a WIP Roll for a Scenario-labelled Skill gains +3 WIP on the next consecutive Order attempting the same Skill against the same target; from the third consecutive Order onward it gains +3 WIP and +1 Success Die. Other applicable Scenario Skill MODs still apply.",
+                  "Success, a different Skill or target, a break in consecutive Orders, or spending an Order on a different Trooper resets the sequence. Only one sequence per Trooper and Scenario Skill is active at a time."
+                ]
+              }
+            ],
+            "endConditions": [
+              {
+                "id": "round-limit",
+                "checkAt": "end-of-round",
+                "finishAt": "end-of-round",
+                "condition": {
+                  "kind": "round-limit",
+                  "rounds": 3
+                }
+              },
+              {
+                "id": "retreat",
+                "checkAt": "tactical-phase",
+                "finishAt": "end-of-player-turn",
+                "condition": {
+                  "kind": "reviewed-prose",
+                  "text": "If a player begins their Active Turn in a Retreat! situation, the mission ends at the end of that Player Turn."
+                }
+              }
+            ],
+            "sourceIssues": [
+              {
+                "id": "its17-extract-contact-en-es",
+                "armyPoints": [
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "objectiveId": "control-supply-boxes",
+                "status": "needs-verification",
+                "description": "ITS 17 V0.2 EN p. 74 requires base contact to Extract from a Tech-Coffin; ES p. 71 says Silhouette contact. The terms are not assumed equivalent in the historical record."
+              }
+            ]
+          },
+          "configurations": [
+            {
+              "id": "150-points",
+              "armyPoints": [
+                150
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Provisioning",
+                "table": {
+                  "width": 24,
+                  "height": 32,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "quarter-circle",
+                    "style": "deployment-a",
+                    "corner": "top-right",
+                    "radius": 12
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "quarter-circle",
+                    "style": "deployment-b",
+                    "corner": "bottom-left",
+                    "radius": 12
+                  },
+                  {
+                    "id": "table-diagonal",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 24,
+                    "y2": 32
+                  },
+                  {
+                    "id": "coffin-upper",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 7.2,
+                    "y": 9.6
+                  },
+                  {
+                    "id": "coffin-center",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 12,
+                    "y": 16
+                  },
+                  {
+                    "id": "coffin-lower",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 16.8,
+                    "y": 22.4
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 18.84,
+                    "y": 4.44,
+                    "text": "Deployment\nZone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 5.16,
+                    "y": 25.4,
+                    "text": "Deployment\nZone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "coffin-center-to-lower",
+                    "kind": "ruler",
+                    "x1": 12,
+                    "y1": 16,
+                    "x2": 16.8,
+                    "y2": 22.4,
+                    "offset": 1.6
+                  },
+                  {
+                    "id": "deployment-corner-radius",
+                    "kind": "ruler",
+                    "x1": 0,
+                    "y1": 30.2,
+                    "x2": 12,
+                    "y2": 30.2,
+                    "offset": 0
+                  }
+                ]
+              }
+            },
+            {
+              "id": "200-250-points",
+              "armyPoints": [
+                200,
+                250
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Provisioning",
+                "table": {
+                  "width": 32,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "quarter-circle",
+                    "style": "deployment-a",
+                    "corner": "top-right",
+                    "radius": 20
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "quarter-circle",
+                    "style": "deployment-b",
+                    "corner": "bottom-left",
+                    "radius": 20
+                  },
+                  {
+                    "id": "table-diagonal",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 32,
+                    "y2": 48
+                  },
+                  {
+                    "id": "coffin-upper",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 9.343598,
+                    "y": 14.015396
+                  },
+                  {
+                    "id": "coffin-center",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 16,
+                    "y": 24
+                  },
+                  {
+                    "id": "coffin-lower",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 22.656402,
+                    "y": 33.984604
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 23.4,
+                    "y": 7.4,
+                    "text": "Deployment\nZone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 8.6,
+                    "y": 37,
+                    "text": "Deployment\nZone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "coffin-center-to-lower",
+                    "kind": "ruler",
+                    "x1": 16,
+                    "y1": 24,
+                    "x2": 22.656402,
+                    "y2": 33.984604,
+                    "offset": 1.6
+                  },
+                  {
+                    "id": "deployment-corner-radius",
+                    "kind": "ruler",
+                    "x1": 0,
+                    "y1": 46.2,
+                    "x2": 20,
+                    "y2": 46.2,
+                    "offset": 0
+                  }
+                ]
+              }
+            },
+            {
+              "id": "300-400-points",
+              "armyPoints": [
+                300,
+                350,
+                400
+              ],
+              "geometry": {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Provisioning",
+                "table": {
+                  "width": 48,
+                  "height": 48,
+                  "unit": "in"
+                },
+                "elements": [
+                  {
+                    "id": "deployment-a",
+                    "kind": "quarter-circle",
+                    "style": "deployment-a",
+                    "corner": "top-right",
+                    "radius": 24
+                  },
+                  {
+                    "id": "deployment-b",
+                    "kind": "quarter-circle",
+                    "style": "deployment-b",
+                    "corner": "bottom-left",
+                    "radius": 24
+                  },
+                  {
+                    "id": "table-diagonal",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 48,
+                    "y2": 48
+                  },
+                  {
+                    "id": "coffin-upper",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 12.686292,
+                    "y": 12.686292
+                  },
+                  {
+                    "id": "coffin-center",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 24,
+                    "y": 24
+                  },
+                  {
+                    "id": "coffin-lower",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "tech-coffin",
+                    "x": 35.313708,
+                    "y": 35.313708
+                  },
+                  {
+                    "id": "deployment-a-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 37.68,
+                    "y": 8.88,
+                    "text": "Deployment\nZone A"
+                  },
+                  {
+                    "id": "deployment-b-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": 10.32,
+                    "y": 34.8,
+                    "text": "Deployment\nZone B"
+                  }
+                ],
+                "annotations": [
+                  {
+                    "id": "coffin-center-to-lower",
+                    "kind": "ruler",
+                    "x1": 24,
+                    "y1": 24,
+                    "x2": 35.313708,
+                    "y2": 35.313708,
+                    "offset": 1.6
+                  },
+                  {
+                    "id": "deployment-corner-radius",
+                    "kind": "ruler",
+                    "x1": 0,
+                    "y1": 46.2,
+                    "x2": 24,
+                    "y2": 46.2,
+                    "offset": 0
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "citations": [
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 72,
+            "section": "Provisioning"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 73,
+            "section": "Provisioning"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 74,
+            "section": "Provisioning"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 75,
+            "section": "Provisioning"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 76,
+            "section": "Provisioning"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 70,
+            "section": "Reabastecimiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 71,
+            "section": "Reabastecimiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 72,
+            "section": "Reabastecimiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 73,
+            "section": "Reabastecimiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 74,
+            "section": "Reabastecimiento"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-18"
+        }
+      },
+      "components": []
     }
   ]
 }
