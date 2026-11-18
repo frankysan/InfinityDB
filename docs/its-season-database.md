@@ -247,9 +247,44 @@ Focused reviewed comparisons against the pinned ITS 18 English
   the separately reviewed Alpha scoring and Infected spacing
   changes above require separate objective/rule versions.
 
+**Real ITS 17 Evacuation authoring slice (2026-11-18):**
+`data/curated/its/n5-its-season-17.json` is a standalone, **unregistered**
+ITS 17 V0.2 curated season source. It has one reviewed
+`scenario:evacuation` membership pinned to
+`data/curated/its/shared/evacuation-v1.json`, with the source
+SHA-256 in `sharedScenarioLibrary`. The shared library owns the
+complete historical scenario definition (format version 1) and the
+season document owns the source-specific membership and citations.
+The original V0.2 English pp. **55–58** and Spanish pp. **50–53**
+support its mission, six army sizes / three maps, two Extraction
+Consoles and scoring. Per-language Classified scoring, opening
+activation timing and cross-player Console reactivation ambiguities
+retain historical page references rather than inheriting ITS 18's.
+ITS 17's Console description says to use a Console A Token or
+scenery of the same diameter; it does **not** independently specify
+a 40 mm diameter in this mission's text, so the separate ITS 18
+40 mm assertion is not carried into the historical rule prose.
+
+Build and check the independent SQLite output without registering it:
+`python -m tools.data.build_its_season --source data/curated/its/n5-its-season-17.json --shared-library data/curated/its/shared/evacuation-v1.json --output local/work/its/its_17_evacuation.db`
+(and add `--check` to inspect the existing result). The authoring
+bootstrap `python -m tools.research.bootstrap_its17_evacuation`
+**refuses to overwrite** these human-reviewed JSON files; it is
+not used by builds. Exact source pins and independent SQLite
+reproducibility have focused regression tests in
+`tests/test_its17_evacuation_publication.py`. Existing ITS 18
+curated facts remain unchanged; this ITS 17 season is **not yet
+registered for web publication**. A separate versioned shared
+component extraction can follow after the rule-inclusion format is
+reviewed: the existing typed v2 composer requires rule references,
+not the inline narrative/Skill facts present in the reviewed
+Evacuation mission. The first accepted migration therefore reuses
+the complete v1 scenario definition, without claiming fine-grained
+component or Skill deduplication yet.
+
 The remaining shared-name missions and cross-language parity
-still need targeted review before authoring actual ITS 17 scenario
-memberships or promoting shared production definitions.
+still need targeted review before adding their historical memberships
+or promoting additional shared definitions.
 
 Optional `sharedSkillBindings.overrides` entries use exact
 `{scenarioId, ruleId, field, value}` objects. Only complete prose-array

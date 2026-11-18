@@ -1,0 +1,148 @@
+{
+  "format": "InfinityDB curated reference",
+  "formatVersion": 23,
+  "collection": {
+    "id": "its-season-17-v0.2",
+    "title": "ITS Season 17 Seekers V0.2 (reviewed Evacuation)",
+    "domain": "its",
+    "status": "archived",
+    "effectiveFrom": "2026-03-09",
+    "authority": "primary"
+  },
+  "scenarioCollection": {
+    "id": "its-17",
+    "title": "ITS Season 17 Seekers",
+    "revision": "0.2",
+    "members": [
+      {
+        "scenarioId": "scenario:evacuation",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 55,
+              "section": "Evacuation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 56,
+              "section": "Evacuation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 57,
+              "section": "Evacuation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 58,
+              "section": "Evacuation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 50,
+              "section": "Evacuación"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 51,
+              "section": "Evacuación"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 52,
+              "section": "Evacuación"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 53,
+              "section": "Evacuación"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      }
+    ]
+  },
+  "vocabularySources": {
+    "skillTypes": [],
+    "labels": []
+  },
+  "skillTypes": [
+    {
+      "id": "automatic",
+      "name": "Automatic Skills",
+      "labels": [
+        "Automatic Skill",
+        "Automatic Skills"
+      ],
+      "descriptions": {
+        "singular": "An Automatic Skill can be employed without expending an Order or ARO.",
+        "plural": "Automatic Skills can be employed without expending an Order or ARO."
+      }
+    },
+    {
+      "id": "basic-short-skill",
+      "name": "Basic Short Skills",
+      "labels": [
+        "Basic Short Skill",
+        "Basic Short Skills"
+      ],
+      "descriptions": {
+        "singular": "A Basic Short Skill expends one Basic Short Skill.",
+        "plural": "Basic Short Skills expend one Basic Short Skill."
+      }
+    },
+    {
+      "id": "short-skill",
+      "name": "Short Skills",
+      "labels": [
+        "Short Skill",
+        "Short Skills"
+      ],
+      "descriptions": {
+        "singular": "A Short Skill expends one Short Skill.",
+        "plural": "Short Skills expend one Short Skill."
+      }
+    }
+  ],
+  "labels": [],
+  "sources": [
+    {
+      "id": "its-season-17-v0.2-en-pdf",
+      "kind": "pdf",
+      "title": "ITS 17 Seekers V0.2 (English)",
+      "version": "0.2",
+      "publishedDate": "2026-03-09",
+      "authority": "primary",
+      "pageCount": 105,
+      "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.2-en.pdf",
+      "sha256": "73a184b80535f23499000bb81112d95168c12f970fa14a30050a95ec51cdfe71",
+      "url": "https://downloads.corvusbelli.com/infinity/organized-play/its-rules-season-17-en-v1.0.2.pdf"
+    },
+    {
+      "id": "its-season-17-v0.2-es-pdf",
+      "kind": "pdf",
+      "title": "ITS 17 Seekers V0.2 (Spanish)",
+      "version": "0.2",
+      "publishedDate": "2026-03-09",
+      "authority": "primary",
+      "pageCount": 112,
+      "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.2-es.pdf",
+      "sha256": "d202d7e3373852204b848fa8eee3bbc19000695cec0296c9882e7d0f3a030457",
+      "url": "https://downloads.corvusbelli.com/infinity/organized-play/its-rules-season-17-es-v1.0.2.pdf"
+    }
+  ],
+  "seasonPolicies": [],
+  "records": [],
+  "sharedScenarioLibrary": {
+    "id": "its-evacuation",
+    "sha256": "c15eeb8bfc808628956a07f60a9ebd3903cab257c828e6997a8d42eadfcbb78b"
+  }
+}

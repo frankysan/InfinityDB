@@ -277,3 +277,22 @@ affected area, observation and evidence, proposed change, and disposition.
   classification change has different literal English and Spanish
   labels, so bilingual interpretation and real shared publication
   remain open.
+
+## AI-0013 — Preserve inline scenario rules during staged shared migration
+
+- **Date:** 2026-11-18
+- **Area:** ITS shared authoring and historical publication.
+- **Observation:** The existing component-based mission format v2
+  requires every rule to be a separately registered rule reference,
+  whereas Evacuation's reviewed v1 record contains embedded narrative
+  and typed Scenario Skill facts. A geometry-only extraction therefore
+  cannot be adopted without also migrating rule publication semantics.
+- **Proposed:** Keep verified whole-scenario v1 reuse as the first
+  production authoring slice; promote shared geometry and other
+  typed components only in a separate source-reviewed migration that
+  preserves all original rule text and Skill facts.
+- **Why:** Avoid an unrequested composer or runtime schema change that
+  would silently drop current Scenario Skill coverage.
+- **Disposition:** the ITS 17 V0.2 Evacuation shared definition compiles
+  independently with all source-local citations; granular components
+  and other ITS 17 mission memberships remain open.

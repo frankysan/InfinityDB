@@ -475,12 +475,18 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         tools to the `local/data/pdf/legacy/its_17/` layout. Record V0.1
         Casevac type changes in both languages and V0.2 Outbreak
         introduction as revision-scoped source facts.
+      - [x] Curate a real ITS 17 V0.2 Evacuation membership against
+        reviewed English pp. 55–58 and Spanish pp. 50–53 in a
+        standalone source-pinned shared library. Preserve historical
+        citation pages, language ambiguities and original mission
+        action/scoring. The standalone three-map database builds
+        deterministically; do not register it for serving yet.
       - [ ] Pin and review the complete ITS 17 source locally, including
-        Evacuation/Outbreak scenarios, Casevac State, optional Extras
+        the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish
         V0.0–V0.2 originals are now pinned; revisions' mission changes
         and cross-language differences still need review before
-        migrating actual ITS 17 memberships.
+        migrating further ITS 17 memberships.
         Do not merge changed Outbreak objectives into one shared
         definition version.
     - [ ] Curate real ITS 17 against this foundation only after evidence review;
