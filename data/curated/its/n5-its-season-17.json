@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (eight reviewed scenarios)",
+    "title": "ITS Season 17 Seekers V0.2 (nine reviewed scenarios)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -425,6 +425,65 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:area-of-interest",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 77,
+              "section": "Area of Interest"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 78,
+              "section": "Area of Interest"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 79,
+              "section": "Area of Interest"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 80,
+              "section": "Area of Interest"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 80,
+              "section": "Área de Interés"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 81,
+              "section": "Área de Interés"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 82,
+              "section": "Área de Interés"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 83,
+              "section": "Área de Interés"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 84,
+              "section": "Área de Interés"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -501,6 +560,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "77b996df27e6da3ef796a5ad835d7f76be2f2df9dff089a6c5a59a3cd5f56369"
+    "sha256": "d9997ad6f227ca037de5b9deff799956dba04366e4f13f503dfa6ea541ccbd4f"
   }
 }

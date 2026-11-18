@@ -251,8 +251,9 @@ Focused reviewed comparisons against the pinned ITS 18 English
 `data/curated/its/n5-its-season-17.json` is a standalone, **unregistered**
 ITS 17 V0.2 curated season source. It has reviewed
 `scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`,
-`scenario:battleground`, `scenario:annihilation`, `scenario:cutthroat`
-and `scenario:superiority` plus `scenario:provisioning` memberships pinned to
+`scenario:battleground`, `scenario:annihilation`, `scenario:cutthroat`,
+`scenario:superiority`, `scenario:provisioning` and
+`scenario:area-of-interest` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -369,10 +370,26 @@ requires **base contact** to Extract, while ES p. 71 says
 **Silhouette contact**; the source issue remains unresolved. The
 separate ITS 18 bilingual issue set is not copied onto ITS 17.
 
+Area of Interest is source-reviewed against ITS 17 V0.2 EN pp. **77–80**
+and ES pp. **80–84**. The 3 + 3 + 3 + 1 OP scoring, corner
+quarter-circle deployments (12/20/24-inch radii), one central
+Antenna, three player-placed Circular Template Areas, INTELCOM
+choice and three-round/Retreat! endings match ITS 18. Both
+historical languages specify a Transmission Antenna Token or
+same-diameter scenery, **not** ITS 18 English's explicit 40 mm.
+The ITS 17 editions disagree on Reinforcements suitability
+(**EN YES / ES NO**), enemy Hacker ARO optionality, and the
+Shasvastii state wording (EN Unconscious/any non-Null versus
+ES Normal/Unconscious). The Spanish Antenna text alternates
+*Conectada* and *Activada*. As in ITS 18, English places
+INTELCOM at the last Game Round while Spanish specifies the
+third; this remains unresolved if Retreat! ends play earlier.
+These are recorded with independent ITS 17 source citations.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the eight
+development artifact is `local/work/its/its_17.db`; it contains the nine
 reviewed ITS 17 scenarios and remains separate from the three-file serving
 set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
@@ -391,7 +408,8 @@ bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 `tools.research.extend_its17_annihilation` and
 `tools.research.extend_its17_cutthroat` and
 `tools.research.extend_its17_superiority` and
-`tools.research.extend_its17_provisioning` migrations are not build steps.
+`tools.research.extend_its17_provisioning` and
+`tools.research.extend_its17_area_of_interest` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
@@ -400,15 +418,16 @@ regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_annihilation_publication.py` and
 `tests/test_its17_cutthroat_publication.py` and
 `tests/test_its17_superiority_publication.py` and
-`tests/test_its17_provisioning_publication.py`. Existing ITS 18
+`tests/test_its17_provisioning_publication.py` and
+`tests/test_its17_area_of_interest_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
-Evacuation, Hardlock, Uplink Center, Battleground, Annihilation, Cutthroat
-Superiority and Provisioning missions. The accepted migrations reuse
-complete v1 scenario definitions,
+Evacuation, Hardlock, Uplink Center, Battleground, Annihilation,
+Cutthroat, Superiority, Provisioning and Area of Interest missions.
+The accepted migrations reuse complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 
 The remaining shared-name missions and cross-language parity

@@ -533,6 +533,14 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         wholly-inside deposit requirements. Record EN base contact
         versus ES Silhouette contact. Build the standalone
         eight-scenario `its_17.db`, without publishing ITS 17.
+      - [x] Source-review ITS 17 V0.2 Area of Interest (EN pp. 77–80,
+        ES pp. 80–84): reuse the matching 3 + 3 + 3 + 1 OP
+        scoring and corner-table geometry. Preserve historical
+        Antenna diameter wording and five bilingual source issues:
+        Reinforcements suitability (EN YES / ES NO), Hacker ARO,
+        Shasvastii States, INTELCOM timing and Spanish
+        Connected/Activated wording. Rebuild the isolated
+        nine-scenario `its_17.db`; do not change ITS 18.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish

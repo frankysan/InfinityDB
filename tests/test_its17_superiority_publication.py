@@ -41,6 +41,7 @@ def test_its17_superiority_source_pins_and_membership() -> None:
         "scenario:battleground", "scenario:annihilation", "scenario:cutthroat",
         "scenario:superiority",
         "scenario:provisioning",
+        "scenario:area-of-interest",
     ]
     definition = library["definitions"][6]
     assert definition["version"] == "its17-v0.2"
@@ -136,7 +137,7 @@ def old_facts_geometry(record: dict) -> list[dict]:
 def test_superiority_standalone_sqlite_and_season_isolation(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     report = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(report["scenarios"]) == 8
+    assert len(report["scenarios"]) == 9
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED, require_current_builder=True,
