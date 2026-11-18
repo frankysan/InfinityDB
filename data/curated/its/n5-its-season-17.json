@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-17-v0.2",
-    "title": "ITS Season 17 Seekers V0.2 (reviewed Evacuation, Hardlock and Uplink Center)",
+    "title": "ITS Season 17 Seekers V0.2 (reviewed Evacuation, Hardlock, Uplink Center and Battleground)",
     "domain": "its",
     "status": "archived",
     "effectiveFrom": "2026-03-09",
@@ -175,6 +175,50 @@
           "componentCitations": {},
           "overrides": []
         }
+      },
+      {
+        "scenarioId": "scenario:battleground",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 83,
+              "section": "Battleground"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 84,
+              "section": "Battleground"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 85,
+              "section": "Battleground"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 88,
+              "section": "Campo de Batalla"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 89,
+              "section": "Campo de Batalla"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 90,
+              "section": "Campo de Batalla"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
       }
     ]
   },
@@ -251,6 +295,6 @@
   "records": [],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "35723843b503fff1947a5a0e7e8a8ba2d6a6e12ced97a898318fd11dbad6cf44"
+    "sha256": "3d593b66f882b732a596d4e6e03af0ea0a77d5b49f6d75aa065f04c6bcbdda24"
   }
 }

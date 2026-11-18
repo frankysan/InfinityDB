@@ -96,6 +96,7 @@
         "test_its17_evacuation_publication",
         "test_its17_hardlock_publication",
         "test_its17_uplink_center_publication",
+        "test_its17_battleground_publication",
         "test_its_source_family",
         "test_its_hotfix_scenarios",
         "test_its_hotfix_reviewed_missions",

@@ -247,11 +247,11 @@ Focused reviewed comparisons against the pinned ITS 18 English
   the separately reviewed Alpha scoring and Infected spacing
   changes above require separate objective/rule versions.
 
-**Real ITS 17 Evacuation, Hardlock and Uplink Center authoring (2026-11-18):**
+**Real ITS 17 Evacuation, Hardlock, Uplink Center and Battleground (2026-11-18):**
 `data/curated/its/n5-its-season-17.json` is a standalone, **unregistered**
 ITS 17 V0.2 curated season source. It has reviewed
-`scenario:evacuation`, `scenario:hardlock` and `scenario:uplink-center`
-memberships pinned to
+`scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`
+and `scenario:battleground` memberships pinned to
 `data/curated/its/shared/its17-scenarios-v1.json`, with the source
 SHA-256 in `sharedScenarioLibrary`. The shared library owns the
 complete historical scenario definitions (format version 1) and the
@@ -291,24 +291,46 @@ include 350. The discrepancy remains source-local rather than inventing a
 fourth configuration. ITS 17's zero Tactical Support Options likewise belong
 to historical play context.
 
+Battleground is **not the same scenario definition across seasons**.
+Reviewed ITS 17 V0.2 EN pp. **83–85** / ES pp. **88–90** award
+**1/3/4 OP** for near/central/far Sectors rather than ITS 18's
+**2/3/5 OP**, plus one mutually exclusive Key Ops award: **2 OP** for
+Killing, or **1 OP** for Threatening the opposing Key Ops. One
+`enemy-key-ops` objective with `aggregation=exclusive`,
+`maximumPoints=2` and distinct 2-/1-OP reviewed-prose award
+conditions represents these alternatives without treating them as
+additive or inventing an automatic Key Ops scoring engine. Both
+season maps use identical 4-/8-inch Sector geometry, but the shared
+historical definition substitutes the correct **1/4 OP** map labels
+for each side. ITS 17 adds Key Ops designation (eligible deployed
+Models, no Irregular or REM; English also excludes VH), Dodge (+3),
+Tactical Awareness and Threaten criteria that do not appear in ITS 18.
+The EN/ES **VH exclusion** difference and distinct **Shasvastii
+Unconscious/non-Null versus Normal/Embryo** wording remain explicit
+source issues. Only matching Sector, Domination, Baggage, Killing and
+round-limit rules are carried across. The archived database is still
+unregistered and the current ITS 18 record is unchanged.
+
 Build and check the independent SQLite output without registering it:
 `python -m tools.data.build_its_season --source data/curated/its/n5-its-season-17.json --shared-library data/curated/its/shared/its17-scenarios-v1.json --output local/work/its/its_17_reviewed.db`
 (and add `--check` to inspect the existing result). The authoring
 bootstrap `python -m tools.research.bootstrap_its17_evacuation`
 **refuses to overwrite** these human-reviewed JSON files; the one-time
 `tools.research.extend_its17_hardlock` and
-`tools.research.extend_its17_uplink_center` migrations are not build steps.
+`tools.research.extend_its17_uplink_center` and
+`tools.research.extend_its17_battleground` migrations are not build steps.
 Exact source pins and independent SQLite reproducibility have focused
 regression tests in `tests/test_its17_evacuation_publication.py` and
 `tests/test_its17_hardlock_publication.py` and
-`tests/test_its17_uplink_center_publication.py`. Existing ITS 18
+`tests/test_its17_uplink_center_publication.py` and
+`tests/test_its17_battleground_publication.py`. Existing ITS 18
 curated facts remain unchanged; this ITS 17 season is **not yet
 registered for web publication**. A separate versioned shared
 component extraction can follow after the rule-inclusion format is
 reviewed: the existing typed v2 composer requires rule references,
 not the inline narrative/Skill facts present in the reviewed
-Evacuation, Hardlock and Uplink Center missions. The accepted migrations
-therefore reuse complete v1 scenario definitions, without claiming fine-grained
+Evacuation, Hardlock, Uplink Center and Battleground missions.
+The accepted migrations therefore reuse complete v1 scenario definitions, without claiming fine-grained
 component or Skill deduplication yet.
 
 The remaining shared-name missions and cross-language parity

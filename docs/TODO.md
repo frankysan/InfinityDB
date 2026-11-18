@@ -495,6 +495,13 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         from the Antenna placement sentence; the source maps group it
         with 300/400. Include a third pinned definition and standalone
         tests without changing ITS 18.
+      - [x] Curate ITS 17 V0.2 Battleground (EN pp. 83–85,
+        ES pp. 88–90) as a separate historical definition with
+        1/3/4 OP Sector scoring and exclusive Key Ops 2/1 OP
+        alternatives. Reuse reviewed Sector geometry while updating
+        the map scoring labels; preserve Key Ops designation/Skills,
+        bilingual VH and Shasvastii discrepancies, and exact source
+        citations. No ITS 18 publication changes.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the other scenarios, Casevac State, optional Extras
         and any reusable geometry/components. All six English/Spanish
