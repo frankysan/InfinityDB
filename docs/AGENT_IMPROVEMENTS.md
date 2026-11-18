@@ -268,7 +268,12 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Why:** Source revision, scoped gameplay semantics and geometry need
   independent evidence before a versioned library can safely collapse
   authoring duplication.
-- **Disposition:** official ITS 17 V0.2/v1.0.2 English original pinned
-  with `tools.research.acquire_its_pdf`; initial five-scenario
-  comparison and targeted curated ITS 18 regressions recorded. Full
-  source comparison and real shared publication remain open.
+- **Disposition:** canonical ignored ITS 17 V0.0/V0.1/V0.2 EN/ES
+  originals are now SHA-pinned and checked offline with
+  `tools.research.acquire_its_pdf --verify-set`, retaining backward
+  download-key compatibility. The historical map renderer accepts
+  the same archive layout. Initial five-scenario comparison and
+  targeted curated ITS 18 regressions recorded. V0.1 Casevac's
+  classification change has different literal English and Spanish
+  labels, so bilingual interpretation and real shared publication
+  remain open.

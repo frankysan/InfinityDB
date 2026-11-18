@@ -168,16 +168,43 @@ The ITS 18 optional Team-Ops Extra and its two Skills must not be
 assumed applicable to ITS 17. The comparison is partial: full scenario/geometry/effect parity
 remains outstanding.
 
-**Pinned original and verified overlap (2026-11-18):** The unmodified
-official ITS 17 English `v1.0.2` download is now preserved as
-`local/data/pdf/its/its-17-rules-v1.0.2-en.pdf` (105 file pages,
-15,286,703 bytes, SHA-256
-`73a184b80535f23499000bb81112d95168c12f970fa14a30050a95ec51cdfe71`).
-Its cover reads **V0.2** despite the URL/filename version. Run
-`python -m tools.research.acquire_its_pdf its-17-en-v1.0.2` to
-acquire or reverify these exact publisher bytes; the file remains
-ignored, not a tracked artifact or a normal build dependency. The
-official ITS 17 table of contents (PDF p. 2) has **16 scenario names
+**ITS 17 source revisions and verified overlap (2026-11-18):**
+The canonical ignored archive is now
+`local/data/pdf/legacy/its_17/`, containing the original English and
+Spanish PDFs at **V0.0, V0.1 and V0.2** (six distinct source files).
+`tools.research.acquire_its_pdf.PINNED_REVISIONS` records each exact
+SHA-256, size and PDF page count; run
+`python -m tools.research.acquire_its_pdf --verify-set` to check all
+six locally without network access. PDF pages per edition are
+V0.0 EN 68 / ES 67, V0.1 EN 68 / ES 67, and V0.2 EN 105 / ES 112.
+To inspect a historical diagram, run
+`python -m tools.research.render_its_source_pages its-rules-season-17-v0.2-en.pdf --source-set its17 --pages 55`.
+The older download URL ending `v1.0.2.pdf` resolves to exactly the
+same **V0.2 English** bytes (SHA-256
+`73a184b80535f23499000bb81112d95168c12f970fa14a30050a95ec51cdfe71`)
+as the renamed `its-rules-season-17-v0.2-en.pdf`; this is **not**
+an additional rules revision. The existing acquisition key
+`its-17-en-v1.0.2` remains compatible but now uses this canonical
+destination. No source PDFs are tracked or required by CI.
+
+**Revision-specific scope:** V0.1's English and Spanish changelogs
+explicitly change the Casevac Skill type; on p. 14, English changes
+from **Short Skill** (V0.0) to **Short Movement Skill** (V0.1),
+while Spanish changes from **Habilidad Corta** (V0.0) to
+**Habilidad Corta Básica** (V0.1). V0.2 retains these respective
+labels (EN p. 19 / ES p. 20); the English/Spanish classifications
+are **not literal equivalents** and their intended rule
+equivalence requires review. These type changes must be tagged by
+revision if V0.0/V0.1 facts are ever curated; the existing ITS 17/18
+comparison below applies specifically to **V0.2**, not all ITS 17.
+V0.1 also renames Zone of Interest to Area of Interest and records
+several mission corrections in its changelog. V0.2's changelog
+introduces **Outbreak**, absent from V0.0/V0.1; its mobile layout
+changes PDF pagination and should not be used to backfill older
+source-page citations. No older source revision is separately
+selectable in the application.
+
+The V0.2 ITS 17 table of contents (PDF p. 2) has **16 scenario names
 also present** among ITS 18's 20 published missions. The four
 ITS 18-only names are Double Bind, The Dig, Neutralization and
 Data Harvest. Shared titles establish availability candidates,

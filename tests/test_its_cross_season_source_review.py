@@ -7,9 +7,15 @@ The historical PDF is ignored evidence and is not needed to run these regression
 """
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
+import pymupdf
+import pytest
+
 from infinity_db.curated import load_curated_document
+from tools.research import acquire_its_pdf
+from tools.research.render_its_source_pages import SOURCE_SETS
 
 ROOT = Path(__file__).resolve().parents[1]
 ITS18 = ROOT / "data/curated/its/n5-its-season-18.json"
@@ -92,3 +98,44 @@ def test_battleground_scoring_requires_distinct_its17_scenario_version() -> None
     assert (objectives["near-sector-a"], objectives["central-sector"],
             objectives["far-sector-a"]) != (1, 3, 4)
     # Identical sector dimensions alone are insufficient to reuse whole scenario facts.
+
+
+def test_its17_revision_inventory_uses_canonical_ignored_source_path() -> None:
+    assert set(acquire_its_pdf.PINNED_REVISIONS) == {
+        "v0.0-en", "v0.0-es", "v0.1-en", "v0.1-es", "v0.2-en", "v0.2-es",
+    }
+    assert acquire_its_pdf.DESTINATION == (
+        ROOT / "local/data/pdf/legacy/its_17"
+    )
+    assert SOURCE_SETS["its17"] == acquire_its_pdf.DESTINATION
+    assert acquire_its_pdf.SOURCES["its-17-en-v1.0.2"][1:] == (
+        "its-rules-season-17-v0.2-en.pdf",
+        acquire_its_pdf.PINNED_REVISIONS["v0.2-en"][0],
+    )
+
+
+def test_its17_revision_inventory_verifies_exact_bytes_without_network(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    with pymupdf.open() as pdf:
+        for _ in range(51):
+            pdf.new_page()
+        payload = pdf.tobytes()
+    digest = hashlib.sha256(payload).hexdigest()
+    monkeypatch.setattr(
+        acquire_its_pdf, "PINNED_REVISIONS",
+        {"v0.1-en": (digest, len(payload), 51)},
+    )
+    source = tmp_path / "its-rules-season-17-v0.1-en.pdf"
+    source.write_bytes(payload)
+    assert acquire_its_pdf.verify_revision_set(tmp_path) == [
+        (source.name, digest, len(payload), 51),
+    ]
+    changed = bytearray(payload)
+    changed[0] = ord("X")
+    source.write_bytes(changed)
+    with pytest.raises(ValueError, match="SHA-256"):
+        acquire_its_pdf.verify_revision_set(tmp_path)
+    source.unlink()
+    with pytest.raises(ValueError, match="Missing ITS 17 edition"):
+        acquire_its_pdf.verify_revision_set(tmp_path)

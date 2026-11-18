@@ -470,11 +470,17 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         Evacuation maps/objectives and the distinct-version Battleground,
         Superiority, Cutthroat and Outbreak scoring. Add source-reviewed
         regression for Evacuation geometry and Battleground scoring.
+      - [x] Verify the canonical ignored ITS 17 English/Spanish V0.0,
+        V0.1 and V0.2 PDF set (six originals) and update the source
+        tools to the `local/data/pdf/legacy/its_17/` layout. Record V0.1
+        Casevac type changes in both languages and V0.2 Outbreak
+        introduction as revision-scoped source facts.
       - [ ] Pin and review the complete ITS 17 source locally, including
         Evacuation/Outbreak scenarios, Casevac State, optional Extras
-        and any reusable geometry/components. The English original
-        is now pinned; the remaining scenarios and cross-language evidence
-        still need review before migrating actual ITS 17 memberships.
+        and any reusable geometry/components. All six English/Spanish
+        V0.0–V0.2 originals are now pinned; revisions' mission changes
+        and cross-language differences still need review before
+        migrating actual ITS 17 memberships.
         Do not merge changed Outbreak objectives into one shared
         definition version.
     - [ ] Curate real ITS 17 against this foundation only after evidence review;

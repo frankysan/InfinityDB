@@ -107,7 +107,11 @@ the retired source roots.
   revisions alone do not prove identical HTML or historical completeness.
 - `local/data/pdf/` — physical research PDFs and the preserved
   `rules/sources.txt` revision index. Canonical `data/pdf/` source labels
-  remain unchanged in curated provenance.
+  remain unchanged in curated provenance. ITS 17's six original EN/ES
+  V0.0–V0.2 editions are under `legacy/its_17/` with pinned hashes in
+  `tools/research/acquire_its_pdf.py`; current ITS 18 PDFs remain under
+  `its/`. Do not infer a document revision from the historical ITS 17
+  download URL suffix `v1.0.2` (it contains the document labelled V0.2).
 - The independent Wiki acquisition checkout keeps incomplete crawl work
   under its own `local/work/wiki/`.
 - `local/archive/symbols/` retains historical in-tree symbol work, reports,

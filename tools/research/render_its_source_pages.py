@@ -11,13 +11,20 @@ from pathlib import Path
 import pymupdf
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCES = ROOT / "local/data/pdf/its"
+SOURCE_SETS = {
+    "current": ROOT / "local/data/pdf/its",
+    "its17": ROOT / "local/data/pdf/legacy/its_17",
+}
 DEFAULT_OUTPUT = ROOT / "local/work/its/source-pages"
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("filename", help="PDF basename under local/data/pdf/its")
+    parser.add_argument("filename", help="PDF basename in selected source set")
+    parser.add_argument(
+        "--source-set", choices=sorted(SOURCE_SETS), default="current",
+        help="Select current ITS PDFs or archived ITS 17 revisions",
+    )
     parser.add_argument("--pages", required=True, help="Comma-separated 1-based PDF pages")
     parser.add_argument("--dpi", type=int, default=120)
     parser.add_argument(
@@ -34,9 +41,10 @@ def main(argv: list[str] | None = None) -> int:
         if len(crop) != 4 or not (0 <= crop[0] < crop[2] <= 1 and 0 <= crop[1] < crop[3] <= 1):
             parser.error("--crop must be x0,y0,x1,y1 inside 0..1")
 
-    source = (SOURCES / args.filename).resolve()
-    if source.parent != SOURCES.resolve() or source.suffix.lower() != ".pdf":
-        parser.error("Source must be a PDF in local/data/pdf/its")
+    sources = SOURCE_SETS[args.source_set].resolve()
+    source = (sources / args.filename).resolve()
+    if source.parent != sources or source.suffix.lower() != ".pdf":
+        parser.error(f"Source must be a PDF basename in {sources.relative_to(ROOT)}")
     if not source.is_file():
         parser.error(f"Missing source PDF: {source}")
     if args.dpi < 72 or args.dpi > 200:
