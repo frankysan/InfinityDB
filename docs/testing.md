@@ -628,15 +628,15 @@ Do not report Ruff/Pyright as run when those tools are unavailable in the active
 
 ### P1 migration semantic baseline
 
-The snapshot-pinned semantic baseline established during P1.3 remains
-immutable at `tests/fixtures/runtime-semantic-baseline-v1.json`. The
-current eight-mission ITS and catalogue publication is pinned separately
-at `tests/fixtures/runtime-semantic-baseline-v1.2.json`: all 41
-original routes remain covered, and the regression test permits exactly six
-reviewed migrations (Skills, Equipment Repeater usage, Scenario list,
-historical ITS collection listing, one Weapon profile, and the Restrictions
-API JavaScript marker). All other P1 route digests must still match the
-original fixture. Use
+The P1.3 historical semantic baseline remains immutable at
+`tests/fixtures/runtime-semantic-baseline-v1.json`; the initial v1.2 migration
+snapshot remains at `tests/fixtures/runtime-semantic-baseline-v1.2.json`.
+Their regression test permits exactly six reviewed route migrations. The
+maintained latest-only ITS 17/18 runtime snapshot is
+`tests/fixtures/runtime-semantic-baseline-v1.2-current.json`, with 41 pinned
+routes. `tools.verify_checkout_server` uses this current snapshot by default;
+explicit `--baseline` still permits historical comparisons when appropriate.
+Use
 `python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2-current.json`
 for the current selected three-file runtime; `--identical-artifacts` additionally
 requires byte-identical artifact metadata. A future baseline may be freshly

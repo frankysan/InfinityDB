@@ -1,7 +1,7 @@
 {
   "artifacts": {
-    "armyDbSha256": "9a7dcec75d91fc1b99e20cdc52cfa717c4d1aa2041f32c68b09ff53507a68895",
-    "rulesDbSha256": "386d6260d03a34b9be323a81c63f3ef463007a499ccb7444340fcd6ee2dba4b3",
+    "armyDbSha256": "78e7cdb9cd40f60f5b52e6ea7c554acbb90615fa7d54072110a62c92e7081d0b",
+    "rulesDbSha256": "9a83fb32ba28146174ba5af225bec052c00ae1eeaf83bae01a7efaa9e06fa56a",
     "symbolPublicationSha256": "a88c7ead46cb2b68c67deece21af1e2f0a072a3c7a44a8b319ae32f64fc10d17"
   },
   "format": "InfinityDB P1 runtime semantic baseline",
@@ -35,7 +35,7 @@
     {
       "kind": "json",
       "path": "/api/skills",
-      "semanticSha256": "763cecce5ab22eb2ba2412c3ccc6a6ef4538c39e24e79b692a425d03700725c0"
+      "semanticSha256": "a6f9f0a041f7c60e9c4e471523faac7a1a08bdb6a77481805df303a3b6523a41"
     },
     {
       "kind": "json",
@@ -80,12 +80,12 @@
     {
       "kind": "json",
       "path": "/api/scenarios",
-      "semanticSha256": "7e6416fee1ced78e8418a61b10d2316f716e473b2403be5a61130cdf35214950"
+      "semanticSha256": "7effd0b214715ce6581b07294a35c7f2b388676f9e33648f0599359b4383cc68"
     },
     {
       "kind": "json",
       "path": "/api/scenarios?collection=its-18",
-      "semanticSha256": "3e4321ff99cbf819c172707ede699c1eebbb90eb42ba28817cd58124e6e631fe"
+      "semanticSha256": "0faf440f365a35797d881d4543f6a043c554818e3476ab96e259546506340a55"
     },
     {
       "kind": "json",

@@ -18,6 +18,7 @@ from tools.runtime_semantic_baseline import (
     main,
     semantic_payload,
 )
+from tools.verify_checkout_server import DEFAULT_CHECKOUT_BASELINE
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -152,10 +153,12 @@ def test_reviewed_p1_to_v12_baseline_migration_changes_only_approved_routes() ->
 
 
 def test_released_data_matches_pinned_current_its_semantic_baseline() -> None:
-    fixture = json.loads(
-        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-current.json")
-        .read_text(encoding="utf-8")
-    )
+    assert DEFAULT_CHECKOUT_BASELINE != DEFAULT_BASELINE
+    fixture = json.loads(DEFAULT_CHECKOUT_BASELINE.read_text(encoding="utf-8"))
+    paths = {probe["path"] for probe in fixture["probes"]}
+    assert len(paths) == 41
+    assert "/api/scenarios?collection=its-18" in paths
+    assert not any("revision=2026.09.01" in path for path in paths)
     army = ROOT / "data/generated/army.db"
     rules = ROOT / "data/generated/rules_n5.db"
     app = create_app_from_database_set(ROOT / "data/generated")

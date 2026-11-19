@@ -53,15 +53,3 @@ entries.
 - **Proposed:** Review and publish an ITS 18 typed Skill without changing its
   behavior; assess cross-season reuse only after fact-level comparison.
 - **Disposition:** deferred.
-
-### AI-0016 — Rebaseline the retired-revision runtime snapshot
-
-- **Date:** 2026-11-19
-- **Area:** `tests/fixtures/runtime-semantic-baseline-v1.json` and
-  `tools/verify_checkout_server.py`.
-- **Remaining issue:** The maintained baseline requests retired
-  `its-18@2026.09.01` Battleground and gets an intentional 404 under
-  latest-only serving, preventing the 41-probe comparison.
-- **Proposed:** Review and refresh the snapshot against the accepted
-  latest-only API while keeping explicit rejection tests for retired revisions.
-- **Disposition:** proposed.
