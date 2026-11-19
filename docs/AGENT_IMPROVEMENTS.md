@@ -21,17 +21,6 @@ entries.
 
 ## Open improvements
 
-### AI-0001 — Verify exact page pins for remaining ITS 18 scenario Skills
-
-- **Date:** 2026-11-17
-- **Area:** ITS 18 curated scenario Skill citations.
-- **Remaining issue:** The 26 scenario Short Skills now have structured
-  Requirements/Effects and standard cards, but some still cite the reviewed
-  mission page range rather than the exact action page.
-- **Proposed:** Verify action-level pages against the original source before
-  narrowing those citations; never infer a precise page.
-- **Disposition:** proposed (structured facts and rendering already completed).
-
 ### AI-0015 — Publish ITS 18 Use Panoply as a typed scenario Skill
 
 - **Date:** 2026-11-18

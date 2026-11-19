@@ -126,15 +126,63 @@ def test_reviewed_action_pins_and_distinct_source_ambiguities(app):
     assert any("Silhouette contact" in note
                for note in pinned["rules"][0]["facts"]["sourceNotes"])
 
-    status, mission_wide = _get(app, "/api/skills/its-18-hardlock-activate-console")
+    status, hardlock = _get(app, "/api/skills/its-18-hardlock-activate-console")
     assert status == 200
-    assert all(citation["page"] is None
-               for citation in mission_wide["rules"][0]["citations"])
+    assert [(c["source_id"], c["page"]) for c in hardlock["rules"][0]["citations"]] == [
+        ("its-season-18-en-pdf", 52), ("its-season-18-es-pdf", 129),
+    ]
 
     status, b_pong = _get(app, "/api/skills/its-18-b-pong-activate-console")
     assert status == 200
     assert b_pong["rules"][0]["facts"]["restrictions"]
     assert b_pong["rules"][0]["facts"]["clarifications"]
+
+
+def test_all_its18_scenario_actions_have_exact_bilingual_source_pages(app):
+    # Independently reviewed against the pinned EN/ES 2026.09.11 originals.
+    # Keep this expectation distinct from the curated source and build output.
+    expected = {
+        "its-18-crossing-lines-activate-antenna": (65, 65),
+        "its-18-double-bind-activate-antenna": (75, 75),
+        "its-18-the-dig-analyze-hyperthermal-tech": (80, 80),
+        "its-18-superiority-hack-consoles": (137, 142),
+        "its-18-uplink-center-activate-communication-antenna": (140, 145),
+        "its-18-hardlock-pick-up-beacon": (50, 128),
+        "its-18-hardlock-activate-console": (52, 129),
+        "its-18-b-pong-relocate-tracking-beacon": (60, 59),
+        "its-18-b-pong-activate-console": (61, 61),
+        "its-18-akial-interference-emit-akial-interference": (95, 95),
+        "its-18-akial-interference-filter-signal": (96, 96),
+        "its-18-evacuation-activate-extraction-console": (90, 90),
+        "its-18-neutralization-pick-up-hyperthermal-tech": (107, 107),
+        "its-18-provisioning-extract-supply-boxes": (112, 112),
+        "its-18-area-of-interest-activate-communication-antenna": (122, 123),
+        "its-18-data-harvest-extract-data-harvester": (68, 68),
+        "its-18-data-harvest-pickup-data-harvester": (69, 69),
+        "its-18-data-harvest-neutralize-data-harvester": (70, 70),
+        "its-18-last-launch-download-id": (116, 117),
+        "its-18-last-launch-swap-id": (117, 118),
+        "its-18-last-launch-extract-identified-trooper": (119, 120),
+        "its-18-corporate-appropriation-pick-up-prototype": (55, 55),
+        "its-18-outbreak-stabilize-infected": (85, 85),
+        "its-18-outbreak-scan-infected": (86, 86),
+        "its-18-critical-intervention-extract-data-pack": (101, 102),
+        "its-18-critical-intervention-use-inhibitor-antenna": (102, 103),
+    }
+    status, catalog = _get(app, "/api/skills")
+    assert status == 200
+    published = {
+        item["slug"] for item in catalog["items"]
+        if item.get("scenario") and item["slug"].startswith("its-18-")
+    }
+    assert published == set(expected)
+    for slug, (english_page, spanish_page) in expected.items():
+        status, detail = _get(app, f"/api/skills/{slug}")
+        assert status == 200, slug
+        assert [(c["source_id"], c["page"]) for c in detail["rules"][0]["citations"]] == [
+            ("its-season-18-en-pdf", english_page),
+            ("its-season-18-es-pdf", spanish_page),
+        ], slug
 
 
 @pytest.mark.parametrize("mutation", ["no-requirements", "unexpected-fact", "orphan-facts"])

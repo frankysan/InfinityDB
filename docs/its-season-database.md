@@ -43,9 +43,9 @@ artifact created from reviewed curated ITS facts. The implementation lives in
   omit redundant terminal `(Short Skill)` and `(Long Skill)` labels because
   their typed badges convey that classification. Their public IDs include the
   season and scenario, so same-named actions are not conflated. Optional
-  `skillCitations` identify exact source pages only where already supported
-  by reviewed action evidence (currently three actions); the others retain
-  explicitly mission-wide page ranges. Core N5 scenario Skills are resolved
+  `skillCitations` now pin the exact English and Spanish action pages for
+  all 26 ITS 18 actions, reviewed against the SHA-matched 2026.09.11 source
+  PDFs. Core N5 scenario Skills are resolved
   independently from their scoped Rules definitions, not imported into ITS.
 
 **Implemented optional authoring slice (no deployed migration):** The ITS

@@ -1927,6 +1927,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 65},
+                {"sourceId": "its-season-18-es-pdf", "page": 65}
+              ],
               "paragraphs": [
                 "Two 40 mm Transmission Antennas are placed on the central line at the positions shown in the map.",
                 "Only Specialist Troops in Silhouette contact with an Antenna may use the Activate Antenna Short Skill: a successful Normal WIP Roll activates it for that player; failed attempts may be retried.",
@@ -2950,6 +2954,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 75},
+                {"sourceId": "its-season-18-es-pdf", "page": 75}
+              ],
               "paragraphs": [
                 "Specialist Troops in Silhouette contact with an Antenna can activate it with a Normal WIP Roll. Success sets that player's ownership; the opponent can activate it later to replace ownership.",
                 "A Hacker fully inside the Zone of Influence of a destroyed Antenna can activate the destroyed Antenna with a Normal WIP-3 Roll."
@@ -3704,6 +3712,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 80},
+                {"sourceId": "its-season-18-es-pdf", "page": 80}
+              ],
               "paragraphs": [
                 "Only a Specialist Troop in Silhouette contact with a Console lacking their own Player Token may Analyze Hyperthermal Tech.",
                 "Make a Normal WIP Roll; success marks that Console with the active player's Token and removes any opponent Token on it. Failed attempts can be retried with additional Short Skills.",
@@ -6641,6 +6653,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 137},
+                {"sourceId": "its-season-18-es-pdf", "page": 142}
+              ],
               "paragraphs": [
                 "Hack Consoles is an Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with a Console may make a Normal WIP Roll to Hack it; failed attempts may be repeated by spending another Short Skill.",
                 "The opposing player may Hack a previously Hacked Console. Both players then count the Console as Hacked for their end-of-game Objective Points; use different Player Tokens to track each player's success."
@@ -7706,6 +7722,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 140},
+                {"sourceId": "its-season-18-es-pdf", "page": 145}
+              ],
               "paragraphs": [
                 "Activate Communication Antenna is an Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with an Antenna makes a Normal WIP Roll to Activate it. Failed attempts may be repeated, spending a Short Skill each time.",
                 "The opponent can Activate an already Activated Antenna using the same procedure. When this succeeds, it stops counting as Activated for the previous player. Use Player Tokens to identify which player currently has each Antenna Activated."
@@ -8553,6 +8573,10 @@
                   "The Spanish source calls the prerequisite a Connected Console rather than an Activated Console; the wording remains an unresolved source discrepancy."
                 ]
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 50},
+                {"sourceId": "its-season-18-es-pdf", "page": 128}
+              ],
               "paragraphs": [
                 "Pick Up Beacon is an Attack, Scenario Short Skill, requiring that the player has an Activated Console. The Trooper must also be in Silhouette contact either with a friendly Trooper in Normal State carrying the Enemy Beacon, or with an unaccompanied Enemy Beacon with no opposing non-Null Trooper in contact.",
                 "Spend one Short Skill to pick up the Enemy Beacon without a Roll. Follow the Common Rules of Beacons. The Spanish source calls the prerequisite a Connected Console rather than an Activated Console; see the source issue below."
@@ -8589,6 +8613,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 52},
+                {"sourceId": "its-season-18-es-pdf", "page": 129}
+              ],
               "paragraphs": [
                 "Activate Console is an Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with a Console must succeed on a Normal WIP Roll. Failed attempts can be repeated, spending a Short Skill for each attempt.",
                 "A player may Activate a Console already Activated by the opponent, using the same procedure. The previous player's Activated status is removed. Different Player Tokens can indicate which player currently has each Console Activated."
@@ -9445,6 +9473,10 @@
                 ],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 60},
+                {"sourceId": "its-season-18-es-pdf", "page": 59}
+              ],
               "paragraphs": [
                 "Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with the Tracking Beacon may declare this action only once per Game Round. Spend one Short Skill, no Roll required, to place the Beacon anywhere within [[distance:4:inch]] of its previous position (English source).",
                 "The Spanish source instead specifies a position within [[distance:10:cm]] of the Trooper declaring the Order; preserve that different measurement origin as a source issue."
@@ -9478,6 +9510,10 @@
                 ],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 61},
+                {"sourceId": "its-season-18-es-pdf", "page": 61}
+              ],
               "paragraphs": [
                 "Attack, Scenario Short Skill. An in-contact Specialist Troop makes a Normal WIP Roll to Activate a Console. An unsuccessful attempt may be repeated with another Short Skill.",
                 "The English source requires that the Tracking Beacon not be in Silhouette contact with a Trooper, and permits each Specialist Troop only one successful Console activation per Game Round; the Spanish activation entry omits those qualifiers.",
@@ -10474,6 +10510,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 96},
+                {"sourceId": "its-season-18-es-pdf", "page": 96}
+              ],
               "paragraphs": [
                 "Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with the Akial Antenna may Filter the Signal without making a Roll.",
                 "Choose one of the current Common Classified Objective cards. If either player has accomplished it, move the card to the accomplished area and retain that result. Otherwise, discard it. Draw one replacement card from the player's own Classified Deck."
@@ -11176,6 +11216,10 @@
                 ],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 90},
+                {"sourceId": "its-season-18-es-pdf", "page": 90}
+              ],
               "paragraphs": [
                 "Attack, Scenario Short Skill. Only a Specialist Troop in Silhouette contact with an Extraction Console and CivEvacing at least one Civilian or enemy HVT may declare this Skill.",
                 "The English publication prohibits this Skill in the first Game Round. The Spanish publication instead uses 'primer Turno de Juego'; the different timing term is retained as a source issue.",
@@ -12107,6 +12151,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 107},
+                {"sourceId": "its-season-18-es-pdf", "page": 107}
+              ],
               "paragraphs": [
                 "Attack, Scenario Short Skill. A Trooper in Silhouette contact with an uncarried Hyperthermal Tech or an allied Trooper in Normal State carrying one can pick it up without a Roll, placing the Token in Silhouette contact with the new carrier.",
                 "The Trooper picking it up suffers a Stun Ammunition hit, requiring one Saving Roll against BTS with PS 9. Immunity (Enhanced) and Immunity (BTS) do not apply to this hit. The shared Hyperthermal Tech carrying restrictions still apply."
@@ -13153,6 +13201,10 @@
                   "English removes an emptied Tech-Coffin Token or marks retained scenery with a Player Token; Spanish instructs placing a Player Token on the emptied Tech-Coffin."
                 ]
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 112},
+                {"sourceId": "its-season-18-es-pdf", "page": 112}
+              ],
               "paragraphs": [
                 "A Specialist Troop in contact with a Tech-Coffin can make a Normal WIP Roll to Extract a Supply Box, placing a Supply Box Token beside the Trooper on success. A failed Roll can be retried with another Short Skill.",
                 "The central Tech-Coffin requires two successful extractions to become empty; each outer one requires one. The English source removes an emptied Tech-Coffin Token (or marks a retained scenery piece with a Player Token), while Spanish instructs marking an emptied Tech-Coffin with a Player Token. This bilingual difference is not silently resolved."
@@ -13956,6 +14008,10 @@
                   "The Spanish text requires choosing one enemy Hacker, whereas English says that one can declare the ARO."
                 ]
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 122},
+                {"sourceId": "its-season-18-es-pdf", "page": 123}
+              ],
               "paragraphs": [
                 "Only Specialist Troops in Silhouette contact with the Communication Antenna may declare this Attack, Scenario Short Skill. Normally Activation requires no Roll.",
                 "When an enemy Hacker is inside any Area of Interest, one eligible enemy Hacker may oppose the Activation with an ARO, turning it into a Face to Face WIP Roll. The Spanish text requires choosing one enemy Hacker, whereas English states that one can declare the ARO. A failed attempt may be repeated with another Short Skill.",
@@ -14718,6 +14774,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 69},
+                {"sourceId": "its-season-18-es-pdf", "page": 69}
+              ],
               "paragraphs": [
                 "A Trooper in Silhouette contact with an uncarried Inactive Data-Harvester, or with an allied Trooper in Normal State carrying one, may pick up the Inactive Data-Harvester using one Short Skill without a Roll. Place the carried Token in Silhouette contact with the carrier."
               ]
@@ -15567,6 +15627,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 116},
+                {"sourceId": "its-season-18-es-pdf", "page": 117}
+              ],
               "paragraphs": [
                 "Only a Specialist Troop in Silhouette contact with an ID Scanner may use this Attack, Scenario Short Skill. A Normal WIP Roll downloads an ID on success; place one ID Token beside the Trooper.",
                 "Each failed attempt can be retried by spending another Short Skill and rolling again."
@@ -15589,6 +15653,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 117},
+                {"sourceId": "its-season-18-es-pdf", "page": 118}
+              ],
               "paragraphs": [
                 "A Trooper in Silhouette contact with an allied Trooper carrying an ID Token may declare this Attack, Scenario Short Skill to transfer the ID without a Roll. Place the Token beside the recipient.",
                 "An ID carrier may not enter or be in a Marker State. Each Trooper may have at most one ID Token. Remove the Token if its carrier enters Dead State."
@@ -15637,6 +15705,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 119},
+                {"sourceId": "its-season-18-es-pdf", "page": 120}
+              ],
               "paragraphs": [
                 "A Trooper carrying an ID Token and in Silhouette contact with the central ID Checker may declare this Attack, Scenario Short Skill, unless participating in a Coordinated Order. Extraction succeeds without a Roll.",
                 "Remove the extracting Trooper and any of its Peripherals inside the Launching Tower from the table. Add the relevant removed Troopers' points to the player's Extracted Army Points, which remain Open Information.",
@@ -16576,6 +16648,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 55},
+                {"sourceId": "its-season-18-es-pdf", "page": 55}
+              ],
               "paragraphs": [
                 "Any Trooper in Silhouette contact with an unattended enemy Prototype Token, or an allied Trooper in Normal State carrying that enemy Prototype, can pick it up with one Attack, Scenario Short Skill without a Roll.",
                 "A Trooper may only pick up the enemy Prototype and must obey the Common Rules of Prototypes."
@@ -17518,6 +17594,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 85},
+                {"sourceId": "its-season-18-es-pdf", "page": 85}
+              ],
               "paragraphs": [
                 "Only a Trooper with Doctor, Paramedic or Specialist Operative may use this Attack, Scenario Short Skill while in Silhouette contact with an Infected or an allied Trooper CivEvacing one.",
                 "Make a Normal WIP Roll to Stabilize an Infected. On success, mark it with the player's Token. Failed Rolls can be retried using additional Short Skills; an Infected already Stabilized by the opponent cannot be Stabilized again."
@@ -17540,6 +17620,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 86},
+                {"sourceId": "its-season-18-es-pdf", "page": 86}
+              ],
               "paragraphs": [
                 "Only a Trooper with Doctor, Paramedic or Specialist Operative may Scan an Infected or Stabilized Infected that is within the Trooper's Line of Fire and Zone of Control, regardless of whether it is being CivEvaced.",
                 "Declare an Attack, Scenario Short Skill and make a Normal WIP Roll. Failed Rolls may be retried with further Short Skills. Each player may Scan any given Infected only once; the other player can independently Scan the same Infected."
@@ -18579,6 +18663,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 101},
+                {"sourceId": "its-season-18-es-pdf", "page": 102}
+              ],
               "paragraphs": [
                 "Only an Attacker Specialist Troop in Silhouette contact with the Data Console may declare the Attack, Scenario Short Skill Extract Data Pack.",
                 "Perform a Normal WIP-6 Roll to Extract the Data Pack, placing a Data Pack Token beside the successful Trooper. If the Data Console has been Unlocked, the Skill uses a Normal WIP Roll without the -6 MOD. Failure may be retried by spending another Short Skill."
@@ -18614,6 +18702,10 @@
                 "clarifications": [],
                 "sourceNotes": []
               },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 102},
+                {"sourceId": "its-season-18-es-pdf", "page": 103}
+              ],
               "paragraphs": [
                 "Only a Specialist Troop in Silhouette contact with the Inhibitor Antenna may declare this Attack, Scenario Short Skill. Choose one action: as the Attacker only, Unlock the Data Console; or as either side, activate or deactivate the Server Room Defense System.",
                 "A successful Normal WIP Roll performs the selected action. Failed attempts may be repeated, each spending another Short Skill."
