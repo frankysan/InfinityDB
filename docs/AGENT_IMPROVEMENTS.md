@@ -385,7 +385,7 @@ affected area, observation and evidence, proposed change, and disposition.
   equivalence from an incomplete changelog.
 - **Disposition:** Four ITS 17 adjacent-revision audit pairs are supported.
   Eleven reviewed fact aspects (44 language- and revision-specific
-  observations in the first batch, now 18/72 after further review)
+  observations in the first batch, now 20/86 after further review)
   live in the original ITS 17 curated file's fail-closed
   `historicalEvidence` section, deliberately excluded from runtime
   and full historical projection. Remaining facts still need review.
@@ -402,3 +402,17 @@ affected area, observation and evidence, proposed change, and disposition.
   Preserve language-specific differences and refrain from silently
   applying inconsistent general source tables to scenario configurations.
 - **Disposition:** Implemented and covered by fail-closed tests.
+
+## AI-0020 — Reuse current source pins for historical comparisons
+
+- **Date:** 2026-11-19
+- **Area:** Revision-tagged ITS evidence.
+- **Observation:** Historical comparison facts need citations in both the
+  older revision and the current revision, but the current PDF source
+  descriptors are already owned by the curated publication.
+- **Proposed:** Resolve historical observations against pinned older
+  evidence sources or the original current-publication PDF descriptors.
+  Require edition-matching source IDs and valid pages; do not make a
+  duplicate current-source inventory or accidentally publish review notes.
+- **Disposition:** Implemented in `its_source_family.py` and validated
+  with negative mutation tests; the existing V0.2 projection is unchanged.

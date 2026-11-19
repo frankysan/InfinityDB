@@ -1992,6 +1992,16 @@
             "sourceId": "its-season-17-v0.1-es-pdf",
             "page": 2,
             "value": "not-listed-as-scenario"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 2,
+            "value": "added-as-scenario"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 2,
+            "value": "added-as-scenario"
           }
         ],
         "review": {
@@ -2209,6 +2219,88 @@
             "sourceId": "its-season-17-v0.1-es-pdf",
             "page": 42,
             "value": "token-de-supply-box-solitario"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "uplink-center-150-point-antenna-offset",
+        "recordId": "scenario:uplink-center",
+        "aspect": "communication-antenna-150-point-distance-from-edge",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 61,
+            "value": "4-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 60,
+            "value": "10-cm-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 61,
+            "value": "4-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 60,
+            "value": "10-cm-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 94,
+            "value": "6-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 100,
+            "value": "15-cm-from-table-edge"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "corporate-prototype-collateral-attack-restriction",
+        "recordId": "scenario:corporate-appropriation",
+        "aspect": "prototype-collateral-targeting-restriction",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 28,
+            "value": "collateral-attack-restriction-not-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 22,
+            "value": "collateral-attack-restriction-not-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 28,
+            "value": "collateral-attack-restriction-not-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 22,
+            "value": "collateral-attack-restriction-not-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 41,
+            "value": "cannot-target-if-attack-affects-allied-or-enemy-troopers"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 33,
+            "value": "cannot-target-if-attack-affects-allied-or-enemy-troopers"
           }
         ],
         "review": {

@@ -632,6 +632,14 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         and Provisioning Supply Box pickup phrasing. Expand the same
         review-only evidence to 18 aspects / 72 source observations and
         support season-scoped facts without inventing scenario ownership.
+      - [x] Compare the V0.1→V0.2 Uplink Center 150-point
+        Communication Antenna placement (4→6 in / 10→15 cm) and
+        Corporate Prototype collateral-Attack restriction against
+        all six pinned EN/ES originals. Tag V0.2 observations against
+        existing current source descriptors without duplicating pins;
+        explicitly verify the Outbreak V0.2 introduction. Historical
+        inventory is now 20 reviewed aspects / 86 observations;
+        preserve the V0.2-only SQLite projection.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
         discrepancies, optional Extras (including Resilience Operations)

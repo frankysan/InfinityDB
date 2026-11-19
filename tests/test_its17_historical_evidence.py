@@ -34,13 +34,24 @@ def test_its17_evidence_is_one_source_family_with_exact_pins() -> None:
     evidence = document["historicalEvidence"]
     assert evidence["mode"] == "review-only-not-projected"
     assert len(evidence["sources"]) == 4
-    assert len(evidence["facts"]) == 18
-    assert sum(len(f["observations"]) for f in evidence["facts"]) == 72
+    assert len(evidence["facts"]) == 20
+    assert sum(len(f["observations"]) for f in evidence["facts"]) == 86
     assert [s["revision"] + "-" + s["language"] for s in evidence["sources"]] == [
         "0.0-en", "0.0-es", "0.1-en", "0.1-es",
     ]
     for source in evidence["sources"]:
         edition = f"v{source['revision']}-{source['language']}"
+        sha256, size, pages = PINNED_REVISIONS[edition]
+        assert source["sha256"] == sha256
+        assert source["pageCount"] == pages
+        assert size > 0
+        assert source["localPath"].endswith(f"its-rules-season-17-{edition}.pdf")
+    old_ids = {source["id"] for source in evidence["sources"]}
+    current_ids = {source["id"] for source in document["sources"]}
+    assert old_ids.isdisjoint(current_ids)
+    for source in document["sources"]:
+        language = source["id"].split("-")[-2]
+        edition = f"v{source['version']}-{language}"
         sha256, size, pages = PINNED_REVISIONS[edition]
         assert source["sha256"] == sha256
         assert source["pageCount"] == pages
@@ -90,7 +101,7 @@ def test_historical_conflicts_and_new_constraints_remain_separate_by_edition() -
     ]
     assert values("outbreak-scenario-introduction") == [
         "not-listed-as-scenario",
-    ] * 4
+    ] * 4 + ["added-as-scenario"] * 2
     assert values("tournament-bye-points") == [
         "3-tournament-points", "3-tournament-points",
         "4-tournament-points", "4-tournament-points",
@@ -120,6 +131,16 @@ def test_historical_conflicts_and_new_constraints_remain_separate_by_edition() -
         "unaccompanied-supply-box-token", "token-de-supply-box-solitario",
         "supply-box-not-being-carried", "token-de-supply-box-solitario",
     ]
+    assert values("uplink-center-150-point-antenna-offset") == [
+        "4-inches-from-table-edge", "10-cm-from-table-edge",
+        "4-inches-from-table-edge", "10-cm-from-table-edge",
+        "6-inches-from-table-edge", "15-cm-from-table-edge",
+    ]
+    assert values("corporate-prototype-collateral-attack-restriction") == [
+        "collateral-attack-restriction-not-stated",
+    ] * 4 + [
+        "cannot-target-if-attack-affects-allied-or-enemy-troopers",
+    ] * 2
 
 
 def test_history_does_not_create_older_scenario_routes_or_sqlite_rows(
@@ -164,6 +185,8 @@ def test_history_does_not_create_older_scenario_routes_or_sqlite_rows(
     ("untyped-value", "uniquely source-bound"),
     ("unknown-season", "invalid season target"),
     ("dual-target", "invalid fields"),
+    ("current-source-page", "uniquely source-bound"),
+    ("current-source-owner", "current PDF source is invalid"),
 ])
 def test_historical_evidence_rejects_unreviewed_or_unbound_data(
     mutation: str, message: str,
@@ -201,5 +224,13 @@ def test_historical_evidence_rejects_unreviewed_or_unbound_data(
     elif mutation == "dual-target":
         season_fact = next(f for f in evidence["facts"] if "seasonId" in f)
         season_fact["recordId"] = "scenario:akial-interference"
+    elif mutation == "current-source-page":
+        latest_fact = next(
+            f for f in evidence["facts"]
+            if f["id"] == "uplink-center-150-point-antenna-offset"
+        )
+        latest_fact["observations"][-1]["page"] = 113
+    elif mutation == "current-source-owner":
+        document["sources"][0]["id"] = "its-season-18-v0.2-en-pdf"
     with pytest.raises(ValueError, match=message):
         project_its_source_family(document)

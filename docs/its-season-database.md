@@ -592,9 +592,11 @@ checked, not simply inferred from the automated text diff:
 
 **Earlier-revision evidence curation (2026-11-19):** The same
 `data/curated/its/n5-its-season-17.json` now keeps an optional
-`historicalEvidence` section with **18 reviewed fact aspects and 72
-source observations**, each pinned to an original V0.0/V0.1 English
-or Spanish PDF source ID, revision, page, SHA-256 and record identity.
+`historicalEvidence` section with **20 reviewed fact aspects and 86
+source observations**, each pinned to an original English/Spanish PDF
+source ID, revision, page, SHA-256 and record identity. V0.0/V0.1
+descriptors are stored once in the historical source inventory, while
+V0.2 comparisons reuse the document's existing current PDF descriptors.
 This includes the differences above and the source-reviewed V0.1
 Use Inhibitor Antenna Attacker-only limit (EN p. **33** / ES p.
 **40**), the replacement of Defender-placed Deployable Weapon
@@ -638,10 +640,38 @@ Additional source-reviewed V0.0→V0.1 facts cover:
   recorded as text revision, **not** a verified change in pickup
   eligibility.
 
+**V0.1→V0.2 bilingual comparison (2026-11-19):** Two
+source-confirmed changes are now part of the same review-only evidence:
+
+- **Uplink Center, 150-point Communication Antennas:** The two
+  centerline Antennas are placed **4 in** (ES **10 cm**) from their
+  respective table edges in both V0.0 and V0.1 (EN p. **61**,
+  ES p. **60**). V0.2 moves them to **6 in** (ES **15 cm**)
+  from the edges (EN p. **94**, ES p. **100**). This is a
+  scenario geometry change, not simply V0.2's page reflow.
+  The current V0.2 shared scenario geometry and 150-point
+  publication test already use **6 in**.
+- **Corporate Appropriation Prototype targeting:** V0.0/V0.1
+  allow selecting a Prototype as the target but do not state
+  an explicit restriction for Attacks also affecting Troopers
+  (EN p. **28**, ES p. **22**). V0.2 explicitly prohibits
+  choosing the Prototype as a target if that Attack also
+  affects an allied or enemy Trooper (EN p. **41**,
+  ES p. **33**). The current V0.2 shared scenario rule
+  already records the restriction. Lack of a printed V0.1
+  clause is not curated as permission for collateral attacks.
+- **Outbreak inventory:** Both V0.2 contents/changelogs
+  on p. **2** explicitly add Outbreak / Estallido, completing
+  the previously stored V0.0/V0.1 absence observations.
+
+The review above compares original rule text and source-verified
+numerical geometry. It does **not** establish graphical map parity;
+that remains an independent check for historic page layouts.
+
 The section has `mode: review-only-not-projected`; validation rejects
 out-of-range citations, unpinned or duplicate edition identifiers,
-unknown record/season targets, double-bound observations, and unreviewed
-facts. `project_its_source_family` validates then **excludes** it
+unknown record/season targets, double-bound observations, unreviewed
+facts, and invalid current-publication PDF source identities. `project_its_source_family` validates then **excludes** it
 from the current V0.2 projection, so it does not create older
 scenario records, citations, sources, SQLite rows, API routes,
 or selectable revisions. The historical section is retained in

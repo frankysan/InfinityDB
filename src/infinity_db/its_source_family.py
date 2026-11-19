@@ -64,6 +64,24 @@ def validate_reviewed_revision_evidence(document: dict[str, Any]) -> None:
             raise ValueError("ITS historical evidence source identity or pin is invalid")
         by_source[source["id"]] = source
         editions.add((revision, language))
+    # Current-edition observations reuse authoritative source descriptors
+    # already present in the curated publication; never duplicate their pins
+    # in the historical-only source inventory or publish the observations.
+    for source in document["sources"]:
+        if source.get("kind") != "pdf":
+            continue
+        if (
+            source.get("version") != current
+            or source.get("id") not in {
+                f"its-season-{season_id[4:]}-v{current}-en-pdf",
+                f"its-season-{season_id[4:]}-v{current}-es-pdf",
+            }
+            or source["id"] in by_source
+            or type(source.get("pageCount")) is not int
+            or source["pageCount"] < 1
+        ):
+            raise ValueError("ITS historical evidence current PDF source is invalid")
+        by_source[source["id"]] = source
     records = {record["id"] for record in document["records"]}
     facts = evidence["facts"]
     if not isinstance(facts, list) or not facts:
