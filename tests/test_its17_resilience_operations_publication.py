@@ -112,7 +112,8 @@ def test_tactical_elements_and_glossary_preserve_key_details_and_source_disputes
     assert "20 VP" in glossary["dominate"]
     assert "not being deployed" in glossary["killing"]
     notes = " ".join(facts["sourceNotes"])
-    for mismatch in ("before that Round", "HVT MOV", "failed Beacon repair", "Baggage"):
+    for mismatch in ("V0.0 EN p. 63", "V0.1 EN p. 63", "V0.2 ES p. 104",
+                     "HVT MOV", "failed Beacon repair", "Baggage"):
         assert mismatch in notes
 
 

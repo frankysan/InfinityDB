@@ -216,9 +216,12 @@ def _record() -> dict:
                 "No unavailable card text or derived card-specific points are claimed.",
             ],
             "sourceNotes": [
-                "EN p. 97 describes first card reveal at the beginning of Game Round 1; "
-                "ES p. 104 explicitly places it after Deployment but before that Round. "
-                "The sequence diagrams agree on reveal after Deployment.",
+                "First reveal timing changed in English V0.1: V0.0 EN p. 63 and "
+                "V0.0/V0.1 ES p. 62 place it after Deployment, before Round 1; "
+                "V0.1 EN p. 63 changes to the beginning of Round 1. V0.2 EN p. 97 "
+                "retains the newer timing, while V0.2 ES p. 104 retains the earlier "
+                "timing. The sequence diagrams place reveal after Deployment; "
+                "the bilingual difference remains unresolved.",
                 "EN p. 100 prints normal HVT MOV '--', while ES p. 107 prints 10-10 (cm). "
                 "The conflicting profile is not normalized.",
                 "ES p. 106 explicitly says a failed Beacon repair Roll does not reduce "
@@ -260,7 +263,8 @@ def main() -> int:
         raise ValueError("ITS 17 original source inventory has changed")
     season["records"].append(_record())
     SEASON.write_text(
-        json.dumps(season, ensure_ascii=False, indent=2) + "\n", encoding="utf-8",
+        json.dumps(season, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8", newline="\n",
     )
     print(f"Curated {ID} as a season-local Extra; scenario memberships: {len(members)}")
     return 0

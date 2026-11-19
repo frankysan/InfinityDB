@@ -364,3 +364,25 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Disposition:** The twelve source facts and citations are corrected in
   the current ITS 17 data; a concise authoring-instruction reminder remains
   an optional follow-up.
+
+## AI-0018 — Compare both languages before declaring source revision changes
+
+- **Date:** 2026-11-19
+- **Area:** ITS source-revision research and historical provenance.
+- **Observation:** ITS 17 V0.1 changelogs are not symmetric. English reports
+  Critical Intervention's Reinforcements correction (YES→NO), while Spanish
+  reports the missing Corporate Appropriation Panoply scoring objective. The
+  omitted language already contained the corrected fact in V0.0. The English
+  Resilience Operations V0.1 timing rewrite creates a bilingual discrepancy
+  retained in V0.2 even though V0.2's changelog mentions only Outbreak,
+  reflow and typo correction.
+- **Proposed:** Treat publisher changelogs as candidates; compare pinned
+  source pages in both languages and both revisions before tagging field
+  applicability. Use the offline revision-delta auditor for triage only,
+  especially when PDF layouts differ.
+- **Why:** Prevent backdating a corrected fact, treating a translation
+  discrepancy as a historical rules change or claiming whole-source
+  equivalence from an incomplete changelog.
+- **Disposition:** Four ITS 17 adjacent-revision audit pairs are now
+  supported; a source-pinned reviewed subset is documented in
+  `docs/its-season-database.md`. Broader revision tagging remains open.

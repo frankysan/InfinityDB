@@ -611,6 +611,13 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         season-scoped Rule record and isolated SQLite projection.
         Retain bilingual source inconsistencies and exclude unsupported
         physical-card contents; leave ITS 18 unmodified.
+      - [x] Audit all four adjacent ITS 17 PDF revision pairs offline
+        (V0.0→V0.1 and V0.1→V0.2, EN/ES), using the six original SHA pins.
+        Source-review the Casevac declaration, Critical Intervention
+        Reinforcements, Spanish Corporate scoring, Crossing Lines
+        restriction and Resilience Operations reveal-timing chronology.
+        Record the introduced Outbreak mission and V0.2 page reflow,
+        without assuming the remaining historical facts are identical.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
         discrepancies, optional Extras (including Resilience Operations)

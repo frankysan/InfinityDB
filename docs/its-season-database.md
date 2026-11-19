@@ -541,13 +541,70 @@ voluntary Short Skill cancellation. Each record has four bilingual page
 pins and independent revision applicability. `its_18.db` and the
 current ITS 18 facts remain unchanged.
 
+**ITS 17 earlier-revision source comparison (2026-11-19):** The six
+publisher-original V0.0/V0.1/V0.2 English/Spanish PDFs are SHA-256
+pinned by `tools.research.acquire_its_pdf`, and the existing
+`tools.research.audit_pdf_revision_deltas` now supports all four
+adjacent ITS 17 comparisons with `--pairs its17-v0.0-v0.1-en
+its17-v0.0-v0.1-es its17-v0.1-v0.2-en its17-v0.1-v0.2-es`.
+This offline diagnostic writes a fresh ignored `local/audits/` report;
+its nine-token window matches are **candidates**, not independently
+accepted rules, especially across the V0.2 mobile-page reflow.
+The first four-pair run found 34/38 V0.0→V0.1 candidate spans
+(EN/ES) and 43/50 V0.1→V0.2 candidate spans (EN/ES).
+
+The following concrete original-page differences were independently
+checked, not simply inferred from the automated text diff:
+
+- **Casevac declaration:** V0.0 EN p. **14** labels it *Short Skill*;
+  V0.1 EN p. **14** changes to *Short Movement Skill*. Spanish
+  V0.0 p. **14** labels it *Habilidad Corta*, while V0.1 p. **14**
+  changes to *Habilidad Corta Básica*. These are independently
+  published language-specific categories, not one interchangeable type.
+- **Critical Intervention Reinforcements suitability:** V0.0 EN p.
+  **30** prints **YES** and V0.1 EN p. **30** changes it to **NO**.
+  Both V0.0 and V0.1 ES p. **37** already print **NO**. The English
+  V0.1 changelog calls this out; the Spanish changelog does not.
+- **Corporate Appropriation main scoring:** V0.0 ES p. **21** omits
+  the 1-OP objective for acquiring more Panoply weapons/equipment than
+  the opponent. V0.1 ES p. **21** includes it; the English V0.0 and
+  V0.1 p. **27** already include it. The Spanish V0.1 changelog
+  records this correction, but the English changelog does not.
+  EN **YES** versus ES **NO** for Corporate Appropriation
+  Reinforcements suitability is already present in both editions
+  and remains unresolved in V0.2.
+- **Crossing Lines:** V0.0 EN p. **36** does not contain the
+  *Secure HVT or Secure Treasure Not Used* clause; V0.1 EN p.
+  **36** adds it. Do not project that V0.1 restriction into V0.0.
+- **Resilience Operations first reveal:** V0.0 EN p. **63** and
+  V0.0/V0.1 ES p. **62** place it *after Deployment, before Game
+  Round 1*. V0.1 EN p. **63** changes to *at the beginning
+  of the first Game Round*. That version remains in V0.2 EN p.
+  **97**, but V0.2 ES p. **104** retains the previous wording.
+  The V0.1 English changelog describes a Tactical Objectives
+  wording change, and the V0.2 bilingual conflict is preserved in
+  `rule:resilience-operations` source notes.
+- **V0.2 addition:** The EN/ES V0.2 changelogs on p. **2** state
+  that **Outbreak / Estallido** was added. The original V0.0/V0.1
+  contents each have 15 standard missions; the V0.2 contents have
+  16. V0.2 also reflows the PDF from 68→105 EN and 67→112 ES
+  pages, so printed-page offsets cannot be reused as citations.
+
+This is a **reviewed subset**, not a full claim of unchanged semantics
+for the other historical mission revisions. V0.0/V0.1 remain
+research-only source editions; the current ITS 17 V0.2 source is not
+retroactively tagged as applicable to all older revisions. Further
+older-version field overrides and geometries require source-specific
+review before a `sourceFamily` history projection can be safely
+authored.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
 development artifact is `local/work/its/its_17.db`; it contains the sixteen
 reviewed ITS 17 scenarios plus the independently reviewed season-wide
-CivEvac, Casevac and Casevac State records, and remains separate from the
-three-file serving set. When ITS 17 is explicitly approved for runtime publication, its tracked
+CivEvac, Casevac and Casevac State records and the Resilience Operations
+tournament Extra, and remains separate from the three-file serving set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
 season-registration/build mechanism, not an embedded projection in another
 database.

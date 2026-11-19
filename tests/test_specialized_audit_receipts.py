@@ -25,6 +25,59 @@ def test_pdf_revision_inventory_uses_categorized_research_input() -> None:
     assert pdf_delta.PIN_PATH == ROOT / "local/research/pdf/revision-inventory.json"
 
 
+def test_its17_revision_pairs_use_all_six_offline_publisher_pins(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tools.research.acquire_its_pdf import PINNED_REVISIONS
+
+    monkeypatch.setattr(pdf_delta, "ROOT", tmp_path)
+    pins = tmp_path / "inventory.json"
+    pins.write_text('{"artifacts":[]}', encoding="utf-8")
+    monkeypatch.setattr(pdf_delta, "PIN_PATH", pins)
+    names = [
+        "its17-v0.0-v0.1-en", "its17-v0.0-v0.1-es",
+        "its17-v0.1-v0.2-en", "its17-v0.1-v0.2-es",
+    ]
+    expected = {
+        f"legacy/its_17/its-rules-season-17-{edition}.pdf": sha
+        for edition, (sha, _size, _pages) in PINNED_REVISIONS.items()
+    }
+    examined: dict[str, str] = {}
+
+    def select_source(
+        root: Path, label: str, digest: str, *, layout: str,
+    ) -> Path:
+        assert root == tmp_path
+        assert layout == "local"
+        relative = label.removeprefix("data/pdf/")
+        assert digest == expected[relative]
+        return tmp_path / "local/data/pdf" / relative
+
+    def extracted(
+        relative: str, skip: int, *, source_path: Path | None = None,
+    ) -> pdf_delta.Extracted:
+        assert skip == 2
+        assert source_path == tmp_path / "local/data/pdf" / relative
+        examined[relative] = expected[relative]
+        return pdf_delta.Extracted(
+            path=relative, sha256=expected[relative], pages=68,
+            starts=[0], words=["source", "pin"],
+        )
+
+    monkeypatch.setattr(pdf_delta, "pinned_pdf_path", select_source)
+    monkeypatch.setattr(pdf_delta, "extract", extracted)
+    monkeypatch.setattr(pdf_delta, "summarize", _pdf_result)
+    assert _pdf_main(
+        monkeypatch, "--pairs", *names,
+        "--output", "local/audits/its17-review.json",
+    ) == 0
+    assert examined == expected
+    report = json.loads(
+        (tmp_path / "local/audits/its17-review.json").read_text(encoding="utf-8")
+    )
+    assert [item["pair"] for item in report["pairs"]] == names
+
+
 def _pdf_setup(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> tuple[Path, bytes, list[str]]:
