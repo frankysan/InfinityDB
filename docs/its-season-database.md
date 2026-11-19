@@ -592,7 +592,7 @@ checked, not simply inferred from the automated text diff:
 
 **Earlier-revision evidence curation (2026-11-19):** The same
 `data/curated/its/n5-its-season-17.json` now keeps an optional
-`historicalEvidence` section with **11 reviewed fact aspects and 44
+`historicalEvidence` section with **18 reviewed fact aspects and 72
 source observations**, each pinned to an original V0.0/V0.1 English
 or Spanish PDF source ID, revision, page, SHA-256 and record identity.
 This includes the differences above and the source-reviewed V0.1
@@ -607,9 +607,40 @@ Interference's V0.0 texts exclude only Secure HVT explicitly
 exclusion in both languages. The absence of a printed prohibition
 is **not** curated as permission to perform the action.
 
+Additional source-reviewed V0.0→V0.1 facts cover:
+
+- **Tournament-wide:** A bye changes from **3 to 4 Tournament Points**
+  in both English and Spanish (both p. **8**). In the 350-point
+  Tournament Tier, English p. **9** changes **5 SWC → 7 SWC**;
+  Spanish p. **9** already says **7 CAP** in V0.0 and V0.1.
+  The V0.0 English general table is therefore not treated as
+  proof that every 350-point mission used 5 SWC. These facts are
+  explicitly bound to `seasonId: its-17` rather than incorrectly
+  attributed to a particular scenario.
+- **Akial Interference:** Simultaneously completing a shared Common
+  Classified Objective changes from the same *Player Turn* to the
+  same *Game Round* (EN p. **22**, ES p. **35**).
+- **Corporate Appropriation:** V0.1 explicitly excepts *Pick Up
+  Prototype* from the first-round attack restriction; V0.0 states
+  the prohibition but not the exception (EN p. **28**, ES p.
+  **22**). The accompanying *Controlling* → *Capturing* label
+  correction is preserved as a terminology change, not assumed
+  to change the physical possession requirements.
+- **Crossing Lines:** V0.1 explicitly limits the 75-point Central
+  Strip deployment allowance to the *Deployment Phase*; V0.0
+  does not name the phase (EN p. **35**, ES p. **28**). The 75-point
+  value and antenna placement distances are unchanged in these
+  reviewed paragraphs; absence of the old phase wording is not
+  treated as permission to deploy at other times.
+- **Provisioning:** EN p. **46** changes *unaccompanied SUPPLY BOX
+  Token* to *Supply Box that is not being carried*. ES p. **42**
+  retains *SUPPLY BOX solitario* across both revisions. This is
+  recorded as text revision, **not** a verified change in pickup
+  eligibility.
+
 The section has `mode: review-only-not-projected`; validation rejects
 out-of-range citations, unpinned or duplicate edition identifiers,
-unknown target records, duplicate observations, and unreviewed
+unknown record/season targets, double-bound observations, and unreviewed
 facts. `project_its_source_family` validates then **excludes** it
 from the current V0.2 projection, so it does not create older
 scenario records, citations, sources, SQLite rows, API routes,

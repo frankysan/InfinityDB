@@ -1998,6 +1998,223 @@
           "status": "reviewed",
           "reviewedOn": "2026-11-19"
         }
+      },
+      {
+        "id": "tournament-bye-points",
+        "seasonId": "its-17",
+        "aspect": "bye-award",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 8,
+            "value": "3-tournament-points"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 8,
+            "value": "3-tournament-points"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 8,
+            "value": "4-tournament-points"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 8,
+            "value": "4-tournament-points"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "tournament-350-point-swc",
+        "seasonId": "its-17",
+        "aspect": "army-list-swc-350",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 9,
+            "value": "5-swc"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 9,
+            "value": "7-swc"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 9,
+            "value": "7-swc"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 9,
+            "value": "7-swc"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "akial-common-objective-completion-window",
+        "recordId": "scenario:akial-interference",
+        "aspect": "shared-common-objective-completion-window",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 22,
+            "value": "same-player-turn"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 35,
+            "value": "same-player-turn"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 22,
+            "value": "same-game-round"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 35,
+            "value": "same-game-round"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "corporate-prototype-first-round-attack-exception",
+        "recordId": "scenario:corporate-appropriation",
+        "aspect": "prototype-first-round-attack-restriction",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 28,
+            "value": "no-pick-up-prototype-exception-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 22,
+            "value": "no-pick-up-prototype-exception-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 28,
+            "value": "pick-up-prototype-exception-explicit"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 22,
+            "value": "pick-up-prototype-exception-explicit"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "corporate-prototype-possession-terminology",
+        "recordId": "scenario:corporate-appropriation",
+        "aspect": "prototype-possession-rule-term",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 28,
+            "value": "controlling-enemy-prototype"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 22,
+            "value": "controlar-prototipo-enemigo"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 28,
+            "value": "capturing-enemy-prototype"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 22,
+            "value": "capturar-prototipo-enemigo"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "crossing-lines-central-strip-deployment-timing",
+        "recordId": "scenario:crossing-lines",
+        "aspect": "central-strip-75-point-deployment-timing",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 35,
+            "value": "75-point-limit-phase-unspecified"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 28,
+            "value": "75-point-limit-phase-unspecified"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 35,
+            "value": "75-point-limit-during-deployment-phase"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 28,
+            "value": "75-point-limit-during-deployment-phase"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "provisioning-supply-box-pickup-wording",
+        "recordId": "scenario:provisioning",
+        "aspect": "supply-box-unheld-token-wording",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 46,
+            "value": "unaccompanied-supply-box-token"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 42,
+            "value": "token-de-supply-box-solitario"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 46,
+            "value": "supply-box-not-being-carried"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 42,
+            "value": "token-de-supply-box-solitario"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
       }
     ]
   },

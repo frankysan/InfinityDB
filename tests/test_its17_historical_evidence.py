@@ -34,8 +34,8 @@ def test_its17_evidence_is_one_source_family_with_exact_pins() -> None:
     evidence = document["historicalEvidence"]
     assert evidence["mode"] == "review-only-not-projected"
     assert len(evidence["sources"]) == 4
-    assert len(evidence["facts"]) == 11
-    assert sum(len(f["observations"]) for f in evidence["facts"]) == 44
+    assert len(evidence["facts"]) == 18
+    assert sum(len(f["observations"]) for f in evidence["facts"]) == 72
     assert [s["revision"] + "-" + s["language"] for s in evidence["sources"]] == [
         "0.0-en", "0.0-es", "0.1-en", "0.1-es",
     ]
@@ -46,8 +46,11 @@ def test_its17_evidence_is_one_source_family_with_exact_pins() -> None:
         assert source["pageCount"] == pages
         assert size > 0
         assert source["localPath"].endswith(f"its-rules-season-17-{edition}.pdf")
-    assert {f["recordId"] for f in evidence["facts"]} <= {
+    assert {f["recordId"] for f in evidence["facts"] if "recordId" in f} <= {
         record["id"] for record in document["records"]
+    }
+    assert {f["seasonId"] for f in evidence["facts"] if "seasonId" in f} == {
+        "its-17",
     }
     assert "historicalEvidence" not in project_its_source_family(document)
 
@@ -88,6 +91,35 @@ def test_historical_conflicts_and_new_constraints_remain_separate_by_edition() -
     assert values("outbreak-scenario-introduction") == [
         "not-listed-as-scenario",
     ] * 4
+    assert values("tournament-bye-points") == [
+        "3-tournament-points", "3-tournament-points",
+        "4-tournament-points", "4-tournament-points",
+    ]
+    assert values("tournament-350-point-swc") == [
+        "5-swc", "7-swc", "7-swc", "7-swc",
+    ]
+    assert values("akial-common-objective-completion-window") == [
+        "same-player-turn", "same-player-turn", "same-game-round", "same-game-round",
+    ]
+    assert values("corporate-prototype-first-round-attack-exception") == [
+        "no-pick-up-prototype-exception-stated",
+        "no-pick-up-prototype-exception-stated",
+        "pick-up-prototype-exception-explicit",
+        "pick-up-prototype-exception-explicit",
+    ]
+    assert values("corporate-prototype-possession-terminology") == [
+        "controlling-enemy-prototype", "controlar-prototipo-enemigo",
+        "capturing-enemy-prototype", "capturar-prototipo-enemigo",
+    ]
+    assert values("crossing-lines-central-strip-deployment-timing") == [
+        "75-point-limit-phase-unspecified", "75-point-limit-phase-unspecified",
+        "75-point-limit-during-deployment-phase",
+        "75-point-limit-during-deployment-phase",
+    ]
+    assert values("provisioning-supply-box-pickup-wording") == [
+        "unaccompanied-supply-box-token", "token-de-supply-box-solitario",
+        "supply-box-not-being-carried", "token-de-supply-box-solitario",
+    ]
 
 
 def test_history_does_not_create_older_scenario_routes_or_sqlite_rows(
@@ -130,6 +162,8 @@ def test_history_does_not_create_older_scenario_routes_or_sqlite_rows(
     ("unreviewed-fact", "must be reviewed"),
     ("invalid-review-date", "ISO review date"),
     ("untyped-value", "uniquely source-bound"),
+    ("unknown-season", "invalid season target"),
+    ("dual-target", "invalid fields"),
 ])
 def test_historical_evidence_rejects_unreviewed_or_unbound_data(
     mutation: str, message: str,
@@ -161,5 +195,11 @@ def test_historical_evidence_rejects_unreviewed_or_unbound_data(
         fact["review"]["reviewedOn"] = "tomorrow"
     elif mutation == "untyped-value":
         fact["observations"][0]["value"] = True
+    elif mutation == "unknown-season":
+        season_fact = next(f for f in evidence["facts"] if "seasonId" in f)
+        season_fact["seasonId"] = "its-18"
+    elif mutation == "dual-target":
+        season_fact = next(f for f in evidence["facts"] if "seasonId" in f)
+        season_fact["recordId"] = "scenario:akial-interference"
     with pytest.raises(ValueError, match=message):
         project_its_source_family(document)

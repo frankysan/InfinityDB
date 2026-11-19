@@ -385,6 +385,20 @@ affected area, observation and evidence, proposed change, and disposition.
   equivalence from an incomplete changelog.
 - **Disposition:** Four ITS 17 adjacent-revision audit pairs are supported.
   Eleven reviewed fact aspects (44 language- and revision-specific
-  observations) now live in the original ITS 17 curated file's
-  fail-closed `historicalEvidence` section, deliberately excluded from
-  runtime and full historical projection. Remaining facts still need review.
+  observations in the first batch, now 18/72 after further review)
+  live in the original ITS 17 curated file's fail-closed
+  `historicalEvidence` section, deliberately excluded from runtime
+  and full historical projection. Remaining facts still need review.
+
+## AI-0019 — Keep historical tournament-wide facts season-scoped
+
+- **Date:** 2026-11-19
+- **Area:** ITS historical source evidence.
+- **Observation:** The V0.0/V0.1 bye award and 350-point Tournament Tier
+  SWC correction are global ITS tournament facts, not properties of any
+  one mission or the Resilience Operations Extra.
+- **Proposed:** Historical observations must name their actual source owner;
+  support `seasonId` as an alternative to `recordId`, never both.
+  Preserve language-specific differences and refrain from silently
+  applying inconsistent general source tables to scenario configurations.
+- **Disposition:** Implemented and covered by fail-closed tests.

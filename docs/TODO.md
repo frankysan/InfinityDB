@@ -625,6 +625,13 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         Attacker-only Inhibitor and Armed Turret clarifications and Area of
         Interest's Hacker opposition procedure. Validate fail-closed,
         keep earlier editions unprojected and ITS 18 publication untouched.
+      - [x] Review and tag seven additional V0.0/V0.1 observations
+        (both languages): tournament bye scoring, 350-point tier SWC,
+        Akial shared objective timing, Corporate Prototype protection
+        and ownership terminology, Crossing Lines central-strip timing,
+        and Provisioning Supply Box pickup phrasing. Expand the same
+        review-only evidence to 18 aspects / 72 source observations and
+        support season-scoped facts without inventing scenario ownership.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
         discrepancies, optional Extras (including Resilience Operations)

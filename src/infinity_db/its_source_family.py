@@ -70,23 +70,25 @@ def validate_reviewed_revision_evidence(document: dict[str, Any]) -> None:
         raise ValueError("ITS historical evidence requires reviewed facts")
     seen_facts: set[str] = set()
     for fact in facts:
-        if not isinstance(fact, dict) or set(fact) != {
-            "id", "recordId", "aspect", "observations", "review",
-        }:
+        required = {"id", "aspect", "observations", "review"}
+        if not isinstance(fact, dict) or set(fact) not in (
+            required | {"recordId"}, required | {"seasonId"},
+        ):
             raise ValueError("ITS historical evidence fact has invalid fields")
         identity = require_domain_slug(fact["id"], context="historical fact id")
-        record_id = fact["recordId"]
-        if (
-            identity in seen_facts or not isinstance(record_id, str)
-            or record_id not in records
-            or not isinstance(fact["aspect"], str)
-        ):
+        if identity in seen_facts or not isinstance(fact["aspect"], str):
             raise ValueError("ITS historical evidence fact has invalid target")
         seen_facts.add(identity)
-        kind = record_id.partition(":")[0]
-        validate_typed_domain_id(
-            record_id, expected_domain=kind, context="historical fact record",
-        )
+        if "recordId" in fact:
+            record_id = fact["recordId"]
+            if not isinstance(record_id, str) or record_id not in records:
+                raise ValueError("ITS historical evidence fact has invalid target")
+            kind = record_id.partition(":")[0]
+            validate_typed_domain_id(
+                record_id, expected_domain=kind, context="historical fact record",
+            )
+        elif fact["seasonId"] != season_id:
+            raise ValueError("ITS historical evidence fact has invalid season target")
         require_domain_slug(fact["aspect"], context="historical fact aspect")
         review = fact["review"]
         if not isinstance(review, dict) or set(review) != {"status", "reviewedOn"}:
