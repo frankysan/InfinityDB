@@ -2348,6 +2348,88 @@
           "status": "reviewed",
           "reviewedOn": "2026-11-19"
         }
+      },
+      {
+        "id": "crossing-lines-central-strip-written-table",
+        "recordId": "scenario:crossing-lines",
+        "aspect": "central-strip-150-and-200-250-written-table-size",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 34,
+            "value": "150-4x32in-200-250-4x48in"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 27,
+            "value": "150-10x60cm-200-250-10x80cm"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 34,
+            "value": "150-4x32in-200-250-4x48in"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 27,
+            "value": "150-10x60cm-200-250-10x80cm"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 51,
+            "value": "150-4x32in-200-250-4x48in"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 42,
+            "value": "150-10x60cm-200-250-10x80cm"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "crossing-lines-central-strip-printed-maps",
+        "recordId": "scenario:crossing-lines",
+        "aspect": "central-strip-150-and-200-250-printed-map-size",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 34,
+            "value": "150-4x24in-200-250-4x32in"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 27,
+            "value": "150-10x60cm-200-250-10x80cm"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 34,
+            "value": "150-4x24in-200-250-4x32in"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 27,
+            "value": "150-10x60cm-200-250-10x80cm"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 52,
+            "value": "150-4x24in-200-250-4x32in"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 43,
+            "value": "150-10x60cm-200-250-10x80cm"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
       }
     ]
   },

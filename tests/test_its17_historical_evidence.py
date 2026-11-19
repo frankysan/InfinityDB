@@ -34,8 +34,8 @@ def test_its17_evidence_is_one_source_family_with_exact_pins() -> None:
     evidence = document["historicalEvidence"]
     assert evidence["mode"] == "review-only-not-projected"
     assert len(evidence["sources"]) == 4
-    assert len(evidence["facts"]) == 21
-    assert sum(len(f["observations"]) for f in evidence["facts"]) == 92
+    assert len(evidence["facts"]) == 23
+    assert sum(len(f["observations"]) for f in evidence["facts"]) == 104
     assert [s["revision"] + "-" + s["language"] for s in evidence["sources"]] == [
         "0.0-en", "0.0-es", "0.1-en", "0.1-es",
     ]
@@ -148,6 +148,19 @@ def test_historical_conflicts_and_new_constraints_remain_separate_by_edition() -
     mapped = values("uplink-center-150-point-antenna-map-offset")
     assert written[:4] != mapped[:4]  # V0.0/V0.1 text contradicts its printed map.
     assert written[4:] == mapped[4:]  # V0.2 text matches the unchanged map.
+
+    crossing_table = values("crossing-lines-central-strip-written-table")
+    crossing_maps = values("crossing-lines-central-strip-printed-maps")
+    assert crossing_table == [
+        "150-4x32in-200-250-4x48in",
+        "150-10x60cm-200-250-10x80cm",
+    ] * 3
+    assert crossing_maps == [
+        "150-4x24in-200-250-4x32in",
+        "150-10x60cm-200-250-10x80cm",
+    ] * 3
+    assert all(crossing_table[i] != crossing_maps[i] for i in (0, 2, 4))
+    assert all(crossing_table[i] == crossing_maps[i] for i in (1, 3, 5))
 
 
 def test_history_does_not_create_older_scenario_routes_or_sqlite_rows(

@@ -592,7 +592,7 @@ checked, not simply inferred from the automated text diff:
 
 **Earlier-revision evidence curation (2026-11-19):** The same
 `data/curated/its/n5-its-season-17.json` now keeps an optional
-`historicalEvidence` section with **21 reviewed fact aspects and 92
+`historicalEvidence` section with **23 reviewed fact aspects and 104
 source observations**, each pinned to an original English/Spanish PDF
 source ID, revision, page, SHA-256 and record identity. V0.0/V0.1
 descriptors are stored once in the historical source inventory, while
@@ -672,9 +672,24 @@ printed-map chronology are now part of the same review-only evidence:
   on p. **2** explicitly add Outbreak / Estallido, completing
   the previously stored V0.0/V0.1 absence observations.
 
-The Uplink Center 150-point maps were inspected visually in all six
-publisher-original PDFs. This establishes only that particular map
-comparison; other historic mission diagrams still need independent review.
+**Crossing Lines central-strip source conflict (2026-11-19):** Visual review
+of its original 150-/200–250-point diagrams across all six PDFs confirms
+full-table-width 4-inch strips: **4 × 24 in** and **4 × 32 in** in the
+English maps (V0.0/V0.1 p. **34**, V0.2 p. **52**). Spanish maps show
+**10 × 60 cm** and **10 × 80 cm** (V0.0/V0.1 p. **27**, V0.2 p. **43**).
+However, the **English deployment tables** consistently print **4 × 32 in**
+and **4 × 48 in** for these sizes (V0.0/V0.1 p. **34**, V0.2 p. **51**),
+which exceed the corresponding 24-/32-inch game-table widths. Spanish
+written tables match the maps (V0.0/V0.1 p. **27**, V0.2 p. **42**).
+The mismatch persists through V0.2; it is not a revision-introduced change
+or justification to widen the scenario geometry. The historical evidence
+records separate map and written-table aspects, preserving the English
+source contradiction and Spanish agreement without choosing a new rule.
+Existing V0.2 geometry and ITS 18 publication remain unchanged.
+
+Only Uplink Center and Crossing Lines have been reviewed visually across
+all six ITS 17 editions in this pass; the other historical mission diagrams
+still require independent review.
 
 The section has `mode: review-only-not-projected`; validation rejects
 out-of-range citations, unpinned or duplicate edition identifiers,

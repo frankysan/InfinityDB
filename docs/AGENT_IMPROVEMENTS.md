@@ -385,7 +385,7 @@ affected area, observation and evidence, proposed change, and disposition.
   equivalence from an incomplete changelog.
 - **Disposition:** Four ITS 17 adjacent-revision audit pairs are supported.
   Eleven reviewed fact aspects (44 language- and revision-specific
-  observations in the first batch, now 21/92 after further review)
+  observations in the first batch, now 23/104 after further review)
   live in the original ITS 17 curated file's fail-closed
   `historicalEvidence` section, deliberately excluded from runtime
   and full historical projection. Remaining facts still need review.
@@ -431,5 +431,7 @@ affected area, observation and evidence, proposed change, and disposition.
   language. Preserve contradictions as distinct observations; do not treat
   a wording correction as an automatically changed diagram.
 - **Disposition:** Implemented for Uplink Center with six graphical source
-  pins and a focused regression test. Other historical maps remain in the
+  pins and a focused regression test; Crossing Lines now has twelve more
+  observations proving the persistent English written-table versus map
+  mismatch across V0.0–V0.2. Other historical mission maps remain in the
   existing ITS 17 review backlog; no new research infrastructure needed.

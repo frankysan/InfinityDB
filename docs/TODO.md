@@ -638,13 +638,19 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         all six pinned EN/ES originals. Tag V0.2 observations against
         existing current source descriptors without duplicating pins;
         explicitly verify the Outbreak V0.2 introduction. Historical
-        inventory is now 21 reviewed aspects / 92 observations;
+        inventory was then 21 reviewed aspects / 92 observations;
         preserve the V0.2-only SQLite projection.
       - [x] Visually inspect the Uplink Center 150-point maps in all six
         original PDFs. V0.0/V0.1 diagrams already say 6 in / 15 cm,
         despite their 4 in / 10 cm prose; V0.2 corrects the prose
         without changing graphical placement. Retain separate,
         source-pinned written and graphical observations.
+      - [x] Visually compare Crossing Lines 150-/200–250-point maps
+        and deployment tables in six publisher-original EN/ES PDFs.
+        Record the persistent EN overlong 4 × 32 / 4 × 48 in
+        table entries separately from its correct 4 × 24 / 4 × 32 in
+        diagrams and the consistent ES text/maps. Historical inventory
+        now 23 reviewed aspects / 104 observations; no projection changes.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
         discrepancies, optional Extras (including Resilience Operations)
