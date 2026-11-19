@@ -2,436 +2,66 @@
 
 **Project domain:** Project infrastructure
 
-Record actionable opportunities noticed during implementation, investigation,
-validation, documentation review, or handoff. [TODO.md](TODO.md) tracks accepted
-work. Recording a suggestion leaves the current task scope in place.
+This is a short **inbox of unresolved, actionable improvements**, not an
+implementation history or a second backlog. Git history preserves retired
+entries.
 
-1. Check for an existing entry and update it if applicable. For a new entry,
-   assign the next unused `AI-####` ID and keep the ID stable.
-2. Record the affected files or instructions, the observation and available
-   evidence, the proposed change, why it matters, and its disposition. Mark
-   uncertainty explicitly and keep private evidence out of tracked files.
-3. Use `proposed`, `deferred`, `accepted`, `implemented`, `declined`, or
-   `superseded`. Update the disposition when it changes and link the relevant
-   TODO item, commit, or decision. Retain earlier entries for reference.
-4. Mention relevant new entries in the handoff. If the checkout is read-only,
-   include the proposed entry in the handoff for a later authorized edit.
+1. Before adding an entry, check for an existing owner in the current
+   documentation and [TODO.md](TODO.md). Do not duplicate tracked work.
+2. Record only a concrete next action, affected area, supporting evidence, and
+   its disposition (`proposed` or `deferred`). Keep uncertain findings explicit.
+3. Once implemented, declined, or superseded, **delete the entry in the same
+   commit**. When accepted work is transferred to TODO, remove the entry
+   after preserving its actionable scope there. Transfer lasting decisions to
+   the canonical documentation owner, not an archive of completed log entries.
+4. Mention new unresolved items during handoff. Never reuse an assigned ID:
+   increment the next-ID marker when creating a new entry.
 
-## Entries
+**Next ID:** `AI-0022`
 
-Use one heading per entry with its ID and a short title. Include the date,
-affected area, observation and evidence, proposed change, and disposition.
+## Open improvements
 
-## AI-0001 — Normalize ITS scenario Skill facts
-
-- **Date:** 2026-11-17
-- **Area:** `data/curated/its/n5-its-season-18.json`, scenario/Skill read models.
-- **Observation:** Twenty-six current ITS Short Skills were initially rendered
-  as prose-only mission cards. The original paragraphs remain in the mission data
-  for compatibility and provenance.
-- **Implemented:** All 26 now have curated Requirements and Effects, with
-  Restrictions, Clarifications, and Source context where applicable. Three
-  actions have exact page pins supported by the existing reviewed source text;
-  other actions retain clearly identified mission-range citations rather than
-  invented action-specific pages. Rendering reuses the standard Skill card.
-- **Why:** Player-facing rules become scannable without losing original clauses
-  or obscuring known bilingual source differences.
-- **Disposition:** implemented for structured facts. Exact pins for additional
-  actions require further source-page verification; do not infer a page.
-
-## AI-0002 — Check Core scenario Skill publication parity
+### AI-0001 — Verify exact page pins for remaining ITS 18 scenario Skills
 
 - **Date:** 2026-11-17
-- **Area:** Core curated rules and `rules_n5.db` generation.
-- **Confirmed cause:** `RulesDatabase._compose_records()` intentionally
-  filters scenario-scoped definitions when no scenario ID is supplied. The
-  ordinary Skill catalog used that unscoped query and therefore omitted
-  `skill:hack-consoles` and `skill:pick-up-supply-boxes`. This was not
-  missing source data or a stale Rules database.
-- **Implemented:** The scenario-aware catalog now includes those definitions
-  from their existing Core scenario reference, retaining exact N5.3 citations,
-  scoping, and the existing fail-closed unscoped Rules lookup.
-- **Why:** Core scenario Skills now appear under Scenario-specific Skills and
-  have working detail and Search routes without changing the Rules database.
-- **Disposition:** implemented.
+- **Area:** ITS 18 curated scenario Skill citations.
+- **Remaining issue:** The 26 scenario Short Skills now have structured
+  Requirements/Effects and standard cards, but some still cite the reviewed
+  mission page range rather than the exact action page.
+- **Proposed:** Verify action-level pages against the original source before
+  narrowing those citations; never infer a precise page.
+- **Disposition:** proposed (structured facts and rendering already completed).
 
-## AI-0003 — Integrate library-backed seasons into the complete build registry
-
-- **Date:** 2026-11-17
-- **Area:** `src/infinity_db/database_set.py`, integrated build tooling and ITS authoring.
-- **Observation:** The opt-in ITS builder and standalone developer command
-  accept a pinned shared scenario library, but the complete build registry
-  still has only the unchanged ITS 18 source path. Registering a real
-  library-backed season requires wiring its declared library input and hash
-  through the complete-set build and provenance checks.
-- **Proposed:** Extend season registration with an optional library input
-  when a reviewed ITS 17/18 authoring migration actually needs it; keep
-  present ITS 18 builds unchanged until then.
-- **Why:** Prevent synthetic reuse capability from being mistaken for a
-  deployed, integrated multi-season publication pipeline.
-- **Disposition:** implemented as opt-in complete-set registration, matched
-  provenance and deployment freshness checks. Validated using synthetic
-  ITS 17 source and library; actual ITS 17 publication remains separate.
-
-## AI-0004 — Reconcile stale publication-registry regression expectations
-
-- **Date:** 2026-11-17
-- **Area:** `tests/test_publication_registry.py` and scenario Skill/marker provenance.
-- **Observation:** Two checks failed in the extended registry suite: deleting the
-  ITS English source now triggers `Missing ITS Skill source` before the older
-  expected marker-diameter error, and the frozen Battleground API/SVG checksum
-  no longer matches. Neither path uses the new opt-in shared scenario library;
-  the source-freeze expectation likely predates recent scenario Skill output.
-  A clean-base comparison was attempted, but its isolated worktree lacked the
-  project virtual environment, so baseline status is not independently proven.
-- **Proposed:** In a separate focused task, verify the current pre-change
-  baseline and update error-order assertions or freeze evidence only when the
-  changed output is established as expected. Never overwrite golden hashes
-  without comparing the actual response differences.
-- **Why:** Keep regression tests meaningful without folding unrelated output
-  changes into cross-season reuse development.
-- **Disposition:** partially addressed. The registered ITS 18 golden digest
-  now reflects the current reviewed scenario action-card output: independent
-  parity passes for six JSON variants and 24 SVG variants. The previously
-  observed marker-source error-order issue did not reproduce in hosted CI;
-  retain the strict source rejection checks.
-
-## AI-0005 — Project shared records after source-family revision selection
-
-- **Date:** 2026-11-17
-- **Area:** `its_source_family.py`, `curated.py`, and shared ITS build registration.
-- **Observation:** Current ITS source-family projection requires exact
-  `factRevisions.records` coverage of the record array. Shared scenario
-  definitions are materialized before this check, so a future library-backed
-  source-family migration must define how imported membership records receive
-  applicable revision tags without losing archived source-local facts.
-- **Proposed:** Integrate version-pinned memberships with the source-family
-  projector, separating revision-specific publication bindings from shared
-  authoring definitions while retaining source hashes and historical overrides.
-  Test a current plus archived revision before migrating real ITS 17 data.
-- **Why:** The synthetic standalone reuse proof does not establish the
-  one-source-family revision-history contract for future season migrations.
-- **Disposition:** partially addressed: synthetic current and archived source
-  projections preserve exact revision tags and references when one scenario
-  is imported. Optional complete-set library registration and its
-  matched provenance checks are implemented; real ITS 17 curation remains
-  [pending](TODO.md#its-scenarios-and-game-tools).
-
-## AI-0006 — Reconcile the runtime semantic snapshot with current ITS publication
-
-- **Date:** 2026-11-17
-- **Area:** `tests/fixtures/runtime-semantic-baseline-v1.2-current.json`
-  and `tools/runtime_semantic_baseline.py`.
-- **Observation:** After a validated source-fresh rebuild, the default semantic
-  baseline requests archived `its-18@2026.09.01` Battleground and receives
-  the intentionally fail-closed 404. The separately named v1.2-current
-  baseline reports five differences in Skills and Scenario API responses;
-  their exact cause has not been established. The current database-set and
-  deployment-asset checks pass.
-- **Proposed:** Compare the stored payloads with the current reviewed API
-  responses and the last known accepted revision, then refresh the canonical
-  baseline only for confirmed intentional publication changes.
-- **Why:** Historical and stale baseline snapshots should not create ambiguous
-  failures or motivate unreviewed changes to serving behavior.
-- **Disposition:** addressed for the current ITS 18 publication. A fresh
-  41-path capture was compared field-for-field to the previous snapshot:
-  exactly five Skill/Scenario API digests changed, while 36 paths (including
-  the SVG response) remained unchanged. The current v1.2 fixture was
-  refreshed with those five reviewed digests and exact selected database
-  identities. Historical v1 and v1.2 source-baseline fixtures were not altered.
-
-## AI-0007 — Publish ITS season-wide Skills without fabricated scenario bindings
-
-- **Date:** 2026-11-17
-- **Area:** ITS curated season source, shared Skill bindings, Skill catalog and Search.
-- **Observation:** The official ITS 18 2026.09.11 publication defines four
-  season-wide Skills outside specific scenario action lists: CivEvac
-  (Common Skill, pp. 22-23), Casevac (Common Skill, p. 25),
-  Team-Ops (Special Skill, p. 30), and Request a Tacball
-  (Short Skill, pp. 30-31). Casevac State (pp. 25-26) is a separate
-  state. Team-Ops additionally names the optional tournament Extra
-  (p. 29), which governs applicability of the Team-Ops Skill and
-  Request a Tacball. The current shared Skill binder requires nonempty
-  scenario IDs, so none of these can be represented correctly by
-  attaching it to an arbitrary scenario. The ITS 18 curated source
-  currently mentions several mechanics without publishing their
-  standalone definitions.
-- **Proposed:** Support exact season/revision Skill memberships independent
-  of scenarios, with optional Extra applicability, versioned source
-  citations and full Requirements/Effects/Restrictions. Publish one
-  canonical card per Skill in catalog/Search; connect only genuine
-  scenario usages. Preserve Casevac State as a separately linked state.
-  Evaluate cross-ITS reuse against actual older documents rather
-  than assuming names imply identical mechanics.
-- **Why:** A season-wide source definition should not be duplicated
-  across missions, hidden because it lacks scenario membership, or
-  presented as an unconditional Skill outside an optional tournament Extra.
-- **Disposition:** implemented for four current ITS 18 standalone Skills
-  with revision-specific source citations, catalog/Search publication,
-  optional-Extra applicability and synthetically validated cross-season
-  `sharedSeasonSkillBindings`. Casevac State has now also been published
-  independently with exact page pins and reciprocal Skill links; see
-  [ITS season database](its-season-database.md).
-
-## AI-0008 — Resolve maintained-text references across selected publications
-
-- **Date:** 2026-11-17
-- **Area:** State/Skill catalog and maintained-text reference resolution.
-- **Observation:** Maintained-text references previously looked up every Skill
-  and State in the N5 Rules database, so a valid ITS-owned
-  `[[state:casevac]]` or `[[skill:casevac]]` link would fail during API
-  enrichment even when the selected ITS database published that record.
-- **Implemented:** The maintained-text resolver now accepts an explicit map of
-  registered ITS rule records on relevant Skill/State detail surfaces.
-  It preserves the core resolver's normal behavior and fails closed for
-  missing references. Casevac and Casevac State link bidirectionally.
-- **Potential follow-up:** If additional non-core publications use maintained
-  semantic links in more catalog surfaces, centralize publication-aware
-  resolution with strict owner/revision disambiguation rather than extending
-  each route independently. No extra abstraction is needed for the current
-  one-season use case.
-
-## AI-0009 — Model historical ITS Skill declarations without implicit equivalence
+### AI-0014 — Centralize historical ITS scenario inventory test expectations
 
 - **Date:** 2026-11-18
-- **Area:** ITS source curation, season Skill type vocabulary and cross-season Skill catalog.
-- **Observation:** Official ITS 17 V0.2 labels CivEvac and Casevac as
-  Short Movement Skills, but ITS 18 2026.09.11 labels them Basic Short
-  Skill and Short Skill respectively. The current ITS type validator
-  supports the latter classifications, not the historical label. ITS 17
-  Outbreak also changes objectives/point values relative to ITS 18.
-- **Proposed:** Before real ITS 17 publication, represent the original
-  Skill category faithfully, resolve distinct-version public Skill
-  identities without treating common names as semantic equivalence, and
-  select reusable scenario components by verified facts rather than name.
-  Do not collapse the differently scored Outbreak objective lists.
-- **Why:** Importing ITS 17 through the ITS 18 type vocabulary would
-  silently change the older source; reusing its newer Skill version would
-  misstate published movement/action semantics.
-- **Disposition:** partially implemented: historical `short-movement-skill`
-  validates and displays through the ITS-only season Skill path without
-  modifying the N5 core matrix. Synthetic cross-season type variants now
-  publish season-qualified routes while same-version facts still fail
-  closed on disagreement; the current ITS 18 CivEvac scenario exception
-  also has regression coverage. Full source-reviewed ITS 17 curation
-  remains open under
-  [ITS scenarios and game tools](TODO.md#its-scenarios-and-game-tools).
+- **Area:** ITS 17 scenario publication tests.
+- **Remaining issue:** Each new reviewed mission requires editing duplicated
+  scenario counts and membership lists in multiple tests.
+- **Proposed:** Use one independent, reviewed expected-membership fixture while
+  retaining per-scenario identity, source, geometry, and isolation assertions.
+  Do not derive the expected set from the source being tested.
+- **Disposition:** proposed.
 
-## AI-0010 — Couple builder edits with the tracked runtime database refresh
+### AI-0015 — Publish ITS 18 Use Panoply as a typed scenario Skill
 
 - **Date:** 2026-11-18
-- **Area:** Complete-set build provenance and hosted deployment/source checks.
-- **Observation:** Commit `a95d508` changed the ITS builder without rebuilding
-  `data/generated/army.db`, `rules_n5.db` and `its_18.db`. All four
-  hosted native Source legs and deployment smoke rejected the stale source
-  fingerprint, despite focused tests passing.
-- **Proposed:** For changes to a builder fingerprint input, run the
-  source-pinned complete-set rebuild and deployment-asset verification before
-  committing. Treat the three runtime databases as a matched set; do not
-  regenerate unrelated outputs or bypass freshness validation.
-- **Why:** A test-green source edit is not independently deployable while its
-  checked-in runtime artifacts still carry the previous build manifest.
-- **Disposition:** applied in `a7289c4` by rebuilding from the recorded Army
-  ZIP/manifest and validating the complete set; no additional infrastructure
-  is justified for this one missed build step.
+- **Area:** ITS 18 Corporate Appropriation Skill presentation.
+- **Remaining issue:** ITS 18 still presents Use Panoply in Panoplies prose,
+  though the source identifies it as an Attack, Scenario Short Skill. ITS 17
+  already has a reviewed typed equivalent.
+- **Proposed:** Review and publish an ITS 18 typed Skill without changing its
+  behavior; assess cross-season reuse only after fact-level comparison.
+- **Disposition:** deferred.
 
-## AI-0011 — Preserve scenario-level citations when deduplicating components
-
-- **Date:** 2026-11-18
-- **Area:** ITS shared library composition and component provenance.
-- **Observation:** Before this slice, importing a component with the same
-  typed ID in two scenarios was rejected. Simply merging component
-  definitions and citation arrays would have attributed each scenario's
-  cited source pages to both missions.
-- **Proposed:** Define reusable components once at the library level,
-  pin references by version, and retain the citing scenario's independent
-  source pages in its compiled `componentSources`.
-- **Why:** Content deduplication must not imply source or scope equivalence
-  where independently reviewed mission citations differ.
-- **Disposition:** implemented with a per-scenario citation map and
-  fail-closed duplicate/version/scope checks, covered by synthetic
-  two-scenario SQLite build tests. Real ITS 17/18 parity remains open.
-
-## AI-0012 — Pin official season PDFs before claiming scenario reuse
-
-- **Date:** 2026-11-18
-- **Area:** Cross-season source reconciliation and source evidence lifecycle.
-- **Observation:** ITS 17/18 share 16 mission titles, but Battleground,
-  Superiority, Cutthroat and Outbreak have changed objective semantics.
-  Evacuation's diagrams retain matching geometry even though its source
-  prose and the season-wide CivEvac declaration context differ. Name or
-  text-only matching cannot distinguish these cases reliably.
-- **Proposed:** Preserve original publisher PDF bytes under ignored local
-  source storage with a pinned SHA-256; review both printed missions and
-  map diagrams, then document exactly which *components* can be shared.
-  Do not make CI download the historical source.
-- **Why:** Source revision, scoped gameplay semantics and geometry need
-  independent evidence before a versioned library can safely collapse
-  authoring duplication.
-- **Disposition:** canonical ignored ITS 17 V0.0/V0.1/V0.2 EN/ES
-  originals are now SHA-pinned and checked offline with
-  `tools.research.acquire_its_pdf --verify-set`, retaining backward
-  download-key compatibility. The historical map renderer accepts
-  the same archive layout. Initial five-scenario comparison and
-  targeted curated ITS 18 regressions recorded. V0.1 Casevac's
-  classification change has different literal English and Spanish
-  labels, so bilingual interpretation and real shared publication
-  remain open.
-
-## AI-0013 — Preserve inline scenario rules during staged shared migration
-
-- **Date:** 2026-11-18
-- **Area:** ITS shared authoring and historical publication.
-- **Observation:** The existing component-based mission format v2
-  requires every rule to be a separately registered rule reference,
-  whereas Evacuation's reviewed v1 record contains embedded narrative
-  and typed Scenario Skill facts. A geometry-only extraction therefore
-  cannot be adopted without also migrating rule publication semantics.
-- **Proposed:** Keep verified whole-scenario v1 reuse as the first
-  production authoring slice; promote shared geometry and other
-  typed components only in a separate source-reviewed migration that
-  preserves all original rule text and Skill facts.
-- **Why:** Avoid an unrequested composer or runtime schema change that
-  would silently drop current Scenario Skill coverage.
-- **Disposition:** the ITS 17 V0.2 Evacuation shared definition compiles
-  independently with all source-local citations; granular components
-  and other ITS 17 mission memberships remain open.
-
-## AI-0014 — Consolidate historical ITS scenario inventory expectations
-
-- **Date:** 2026-11-18
-- **Area:** ITS 17 publication tests and source-verified migration.
-- **Observation:** Adding the eleventh historical mission required changing
-  scenario-count assertions and the identical full membership list in ten
-  existing scenario publication test modules; each module still needs its
-  own source and historical-fact assertions.
-- **Proposed:** Derive the shared expected historical membership/count from
-  one reviewed test fixture, while retaining per-scenario origin, citations,
-  facts, geometry and isolation assertions. Do not weaken the checks by
-  merely comparing the source file to itself.
-- **Disposition:** Future test-maintenance improvement; B-Pong is validated
-  with the current explicit expectations, without a fixture refactor.
-
-## AI-0015 — Give ITS 18 Use Panoply the standard scenario Skill form
-
-- **Date:** 2026-11-18
-- **Area:** Scenario Skill presentation and cross-season reuse.
-- **Observation:** ITS 18 Corporate Appropriation describes Use Panoply only
-  inside ordinary Panoplies rule prose, although its source explicitly calls
-  it an Attack, Scenario Short Skill. ITS 17 now has a source-reviewed typed
-  `use-panoply` rule with Requirements, Effects and Restrictions.
-- **Proposed:** In a separate ITS 18 source-review batch, represent Use Panoply
-  as a typed Short Skill without changing its semantics, then assess genuine
-  cross-season reuse of the Skill instead of copying narrative text.
-- **Disposition:** Deferred; the current ITS 17 authoring batch does not
-  modify ITS 18 publication.
-
-## AI-0016 — Refresh runtime semantic baseline after revision-selection policy
+### AI-0016 — Rebaseline the retired-revision runtime snapshot
 
 - **Date:** 2026-11-19
-- **Area:** `tests/fixtures/runtime-semantic-baseline-v1.json`,
-  `tools/verify_checkout_server.py`, offline runtime baseline verification.
-- **Observation:** The pinned fixture requests an ITS 18 Battleground detail
-  with `revision=2026.09.01`, although the current application serves only
-  the latest revision. On a fresh, valid runtime rebuild, the standard
-  checkout-server parity command returns HTTP 404 for this retired route
-  and stops before completing the intended 41-probe comparison. This is
-  unrelated to the unregistered ITS 17 Skills/State authoring.
-- **Proposed:** Rebaseline the maintained runtime fixture against the
-  accepted latest-only ITS 18 API, retaining positive and negative checks
-  for historical-revision selection as appropriate. Keep source history
-  available internally without exposing obsolete selectable URLs.
-- **Why:** Restore a useful non-release runtime regression check without
-  silently weakening the revision-selection contract.
-- **Disposition:** proposed; do not rewrite the baseline as part of ITS 17
-  historical source authoring.
-
-## AI-0017 — Verify season-wide source tables before declaring mission values absent
-
-- **Date:** 2026-11-19
-- **Area:** ITS scenario source review and authoring instructions.
-- **Observation:** Twelve independently reviewed ITS 17 scenarios described
-  matching-diameter Tokens without a numeric value on their mission pages.
-  Previous authorship treated the size as missing, even though the original
-  EN p. 13 / ES p. 14 season-wide chart specifies exact token diameters.
-- **Proposed:** During ITS scenario authoring, cross-check the season-wide
-  Token table and other applicable general sections before marking a fact
-  unspecified. Keep mission-specific representation conflicts separate
-  from quantitative disagreements; explicitly cite the general page when
-  applying a season-wide value.
-- **Why:** Avoid incorrect uncertainty notes and repeated per-scenario review
-  mistakes without building another database or source extraction pipeline.
-- **Disposition:** The twelve source facts and citations are corrected in
-  the current ITS 17 data; a concise authoring-instruction reminder remains
-  an optional follow-up.
-
-## AI-0018 — Compare both languages before declaring source revision changes
-
-- **Date:** 2026-11-19
-- **Area:** ITS source-revision research and historical provenance.
-- **Observation:** ITS 17 V0.1 changelogs are not symmetric. English reports
-  Critical Intervention's Reinforcements correction (YES→NO), while Spanish
-  reports the missing Corporate Appropriation Panoply scoring objective. The
-  omitted language already contained the corrected fact in V0.0. The English
-  Resilience Operations V0.1 timing rewrite creates a bilingual discrepancy
-  retained in V0.2 even though V0.2's changelog mentions only Outbreak,
-  reflow and typo correction.
-- **Proposed:** Treat publisher changelogs as candidates; compare pinned
-  source pages in both languages and both revisions before tagging field
-  applicability. Use the offline revision-delta auditor for triage only,
-  especially when PDF layouts differ.
-- **Why:** Prevent backdating a corrected fact, treating a translation
-  discrepancy as a historical rules change or claiming whole-source
-  equivalence from an incomplete changelog.
-- **Disposition:** Four ITS 17 adjacent-revision audit pairs are supported.
-  Eleven reviewed fact aspects (44 language- and revision-specific
-  observations in the first batch, now 23/104 after further review)
-  live in the original ITS 17 curated file's fail-closed
-  `historicalEvidence` section, deliberately excluded from runtime
-  and full historical projection. Remaining facts still need review.
-
-## AI-0019 — Keep historical tournament-wide facts season-scoped
-
-- **Date:** 2026-11-19
-- **Area:** ITS historical source evidence.
-- **Observation:** The V0.0/V0.1 bye award and 350-point Tournament Tier
-  SWC correction are global ITS tournament facts, not properties of any
-  one mission or the Resilience Operations Extra.
-- **Proposed:** Historical observations must name their actual source owner;
-  support `seasonId` as an alternative to `recordId`, never both.
-  Preserve language-specific differences and refrain from silently
-  applying inconsistent general source tables to scenario configurations.
-- **Disposition:** Implemented and covered by fail-closed tests.
-
-## AI-0020 — Reuse current source pins for historical comparisons
-
-- **Date:** 2026-11-19
-- **Area:** Revision-tagged ITS evidence.
-- **Observation:** Historical comparison facts need citations in both the
-  older revision and the current revision, but the current PDF source
-  descriptors are already owned by the curated publication.
-- **Proposed:** Resolve historical observations against pinned older
-  evidence sources or the original current-publication PDF descriptors.
-  Require edition-matching source IDs and valid pages; do not make a
-  duplicate current-source inventory or accidentally publish review notes.
-- **Disposition:** Implemented in `its_source_family.py` and validated
-  with negative mutation tests; the existing V0.2 projection is unchanged.
-
-## AI-0021 — Inspect mission diagrams independently from written geometry
-
-- **Date:** 2026-11-19
-- **Area:** ITS historical source review and scenario geometry provenance.
-- **Observation:** ITS 17 Uplink Center V0.0/V0.1 describes 4 in / 10 cm
-  antenna offsets in its written rules, but its original 150-point maps
-  already label 6 in / 15 cm in both languages. V0.2 aligns the prose
-  with the unchanged map. The text-only PDF revision auditor cannot detect
-  this conflict.
-- **Proposed:** When reviewing historical geometry, separately inspect the
-  original printed mission maps and prose for each applicable revision and
-  language. Preserve contradictions as distinct observations; do not treat
-  a wording correction as an automatically changed diagram.
-- **Disposition:** Implemented for Uplink Center with six graphical source
-  pins and a focused regression test; Crossing Lines now has twelve more
-  observations proving the persistent English written-table versus map
-  mismatch across V0.0–V0.2. Other historical mission maps remain in the
-  existing ITS 17 review backlog; no new research infrastructure needed.
+- **Area:** `tests/fixtures/runtime-semantic-baseline-v1.json` and
+  `tools/verify_checkout_server.py`.
+- **Remaining issue:** The maintained baseline requests retired
+  `its-18@2026.09.01` Battleground and gets an intentional 404 under
+  latest-only serving, preventing the 41-probe comparison.
+- **Proposed:** Review and refresh the snapshot against the accepted
+  latest-only API while keeping explicit rejection tests for retired revisions.
+- **Disposition:** proposed.

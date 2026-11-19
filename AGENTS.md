@@ -224,9 +224,13 @@ internal-only tests, refactors or process updates.
 **Record actionable improvement opportunities as they arise.** If you identify
 an improvement to code, tests, tooling, workflows, or agent instructions, record
 it in the [agent improvement log](docs/AGENT_IMPROVEMENTS.md), including when it
-falls outside your current task. Check for duplicates and capture the evidence,
-proposed change, and disposition. Continue the assigned work. Link accepted
-follow-up work to the backlog and mention relevant new entries in the handoff.
+falls outside your current task. Check for duplicates and capture the evidence
+and proposed change. Continue the assigned work. The log is an **open-item inbox**,
+not a completion history or second backlog: remove an entry in the same change
+that resolves or declines it, or transfers accepted outstanding work to the
+canonical [backlog](docs/TODO.md). Preserve lasting decisions in their owning
+documents; Git history retains removed entries. Mention only unresolved new
+improvements in the handoff.
 
 Review the actual diff for documentation impact, update public
 `README.md` for user-visible capabilities or setup, and use canonical
