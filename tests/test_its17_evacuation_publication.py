@@ -13,6 +13,7 @@ from infinity_db.its_season_database import (
     inspect_its_database,
     select_its_scenario,
 )
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON = ROOT / "data/curated/its/n5-its-season-17.json"
@@ -27,24 +28,9 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
     assert source["collection"]["id"] == "its-season-17-v0.2"
     assert source["collection"]["status"] == "archived"
     assert source["scenarioCollection"]["revision"] == "0.2"
-    assert [member["scenarioId"] for member in source["scenarioCollection"]["members"]] == [
-        "scenario:evacuation",
-        "scenario:hardlock",
-        "scenario:uplink-center",
-        "scenario:battleground",
-        "scenario:annihilation",
-        "scenario:cutthroat",
-        "scenario:superiority",
-        "scenario:provisioning",
-        "scenario:area-of-interest",
-        "scenario:last-launch",
-        "scenario:b-pong",
-        "scenario:crossing-lines",
-        "scenario:corporate-appropriation",
-        "scenario:critical-intervention",
-        "scenario:outbreak",
-        "scenario:akial-interference",
-    ]
+    assert [member["scenarioId"] for member in source["scenarioCollection"]["members"]] == list(
+        EXPECTED_ITS17_SCENARIO_IDS
+    )
     assert {record["id"] for record in source["records"]} == {
         "skill:civevac", "skill:casevac", "state:casevac",
         "rule:resilience-operations",
@@ -74,24 +60,7 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
         (EN, 13), (ES, 14),
     ]
     library = json.loads(SHARED.read_text(encoding="utf-8"))
-    assert [entry["id"] for entry in library["definitions"]] == [
-        "scenario:evacuation",
-        "scenario:hardlock",
-        "scenario:uplink-center",
-        "scenario:battleground",
-        "scenario:annihilation",
-        "scenario:cutthroat",
-        "scenario:superiority",
-        "scenario:provisioning",
-        "scenario:area-of-interest",
-        "scenario:last-launch",
-        "scenario:b-pong",
-        "scenario:crossing-lines",
-        "scenario:corporate-appropriation",
-        "scenario:critical-intervention",
-        "scenario:outbreak",
-        "scenario:akial-interference",
-    ]
+    assert [entry["id"] for entry in library["definitions"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     entry = library["definitions"][0]
     assert entry["origin"] == {
         "sourceCollectionId": source["collection"]["id"],
@@ -113,22 +82,7 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
 ) -> None:
     historic = load_curated_document(SEASON, shared_scenario_library=SHARED)
     assert historic["scenarioCollection"]["members"] == [
-        {"scenarioId": "scenario:evacuation"},
-        {"scenarioId": "scenario:hardlock"},
-        {"scenarioId": "scenario:uplink-center"},
-        {"scenarioId": "scenario:battleground"},
-        {"scenarioId": "scenario:annihilation"},
-        {"scenarioId": "scenario:cutthroat"},
-        {"scenarioId": "scenario:superiority"},
-        {"scenarioId": "scenario:provisioning"},
-        {"scenarioId": "scenario:area-of-interest"},
-        {"scenarioId": "scenario:last-launch"},
-        {"scenarioId": "scenario:b-pong"},
-        {"scenarioId": "scenario:crossing-lines"},
-        {"scenarioId": "scenario:corporate-appropriation"},
-        {"scenarioId": "scenario:critical-intervention"},
-        {"scenarioId": "scenario:outbreak"},
-        {"scenarioId": "scenario:akial-interference"},
+        {"scenarioId": scenario_id} for scenario_id in EXPECTED_ITS17_SCENARIO_IDS
     ]
     record = next(
         item for item in historic["records"] if item["id"] == "scenario:evacuation"
@@ -166,7 +120,7 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
     )
     assert first["scenarios"][0]["configurationCount"] == 3
     assert first["scenarios"][0]["citations"] == 10
-    assert len(first["scenarios"]) == 16
+    assert [item["id"] for item in first["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     assert first["scenarios"][1]["citations"] == 10
     assert {item["id"] for item in first["skills"]} == {
         "skill:civevac", "skill:casevac",

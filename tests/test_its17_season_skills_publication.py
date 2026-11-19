@@ -9,6 +9,7 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.its_season_database import build_its_database, inspect_its_database
 from infinity_db.its_source_family import project_its_source_family
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON17 = ROOT / "data/curated/its/n5-its-season-17.json"
@@ -28,7 +29,7 @@ def test_all_original_its17_scenarios_are_present_without_resilience_extra() -> 
     assert document["collection"]["status"] == "archived"
     assert document["scenarioCollection"]["revision"] == "0.2"
     members = document["scenarioCollection"]["members"]
-    assert len(members) == len({member["scenarioId"] for member in members}) == 16
+    assert [member["scenarioId"] for member in members] == list(EXPECTED_ITS17_SCENARIO_IDS)
     assert all("resilience" not in member["scenarioId"] for member in members)
     assert {record["id"] for record in document["records"]} == {
         "skill:civevac", "skill:casevac", "state:casevac",
@@ -41,7 +42,7 @@ def test_all_original_its17_scenarios_are_present_without_resilience_extra() -> 
 
 def test_original_casevac_and_civevac_types_have_bilingual_citations() -> None:
     records = historical_records()
-    assert len(records) == 20  # 16 missions, three season-wide records and one Extra
+    assert len(records) == len(EXPECTED_ITS17_SCENARIO_IDS) + 4  # season Skills, State, Extra
     expected = {
         "skill:civevac": [(EN, 17), (EN, 18), (ES, 18), (ES, 19)],
         "skill:casevac": [(EN, 19), (EN, 20), (ES, 20), (ES, 21)],
@@ -92,7 +93,7 @@ def test_historical_skills_and_state_build_in_isolated_database(tmp_path: Path) 
     target = tmp_path / "its_17.db"
     report = build_its_database(SEASON17, target, shared_library=SHARED)
     assert report["inputIdentity"]["seasonId"] == "its-17"
-    assert len(report["scenarios"]) == 16
+    assert [item["id"] for item in report["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     assert {item["id"] for item in report["skills"]} == {
         "skill:civevac", "skill:casevac",
     }

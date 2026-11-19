@@ -14,6 +14,7 @@ from infinity_db.its_season_database import (
     select_its_scenario,
 )
 from infinity_db.its_source_family import project_its_source_family
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 from tools.research.acquire_its_pdf import PINNED_REVISIONS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -178,7 +179,7 @@ def test_history_does_not_create_older_scenario_routes_or_sqlite_rows(
         output, source=SOURCE, shared_library=LIBRARY, require_current_builder=True,
     )
     assert report["inputIdentity"]["seasonRevision"] == "0.2"
-    assert len(report["scenarios"]) == 16
+    assert [item["id"] for item in report["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     assert select_its_scenario(
         output, season_id="its-17", revision="0.1", scenario_id="scenario:hardlock",
     ) is None

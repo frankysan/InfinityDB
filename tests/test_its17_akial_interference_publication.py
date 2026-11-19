@@ -12,6 +12,7 @@ from infinity_db.its_season_database import (
     select_its_scenario,
 )
 from infinity_db.scenario_definition import parse_scenario_definition_record
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON = ROOT / "data/curated/its/n5-its-season-17.json"
@@ -38,7 +39,7 @@ def test_its17_akial_source_pins_and_membership() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert len(library["definitions"]) == 16
+    assert tuple(entry["id"] for entry in library["definitions"]) == EXPECTED_ITS17_SCENARIO_IDS
     definition = library["definitions"][15]
     assert definition["id"] == "scenario:akial-interference"
     assert definition["version"] == "its17-v0.2"
@@ -168,7 +169,7 @@ def test_its17_akial_skill_source_ids_remain_fail_closed() -> None:
 def test_its17_akial_builds_only_in_historical_sqlite(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     report = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(report["scenarios"]) == 16
+    assert tuple(row["id"] for row in report["scenarios"]) == EXPECTED_ITS17_SCENARIO_IDS
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED,

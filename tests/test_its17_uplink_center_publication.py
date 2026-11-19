@@ -7,6 +7,7 @@ from pathlib import Path
 
 from infinity_db.curated import load_curated_document
 from infinity_db.its_season_database import build_its_database, select_its_scenario
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON = ROOT / "data/curated/its/n5-its-season-17.json"
@@ -32,22 +33,7 @@ def test_reviewed_uplink_membership_is_source_and_version_pinned() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert [item["id"] for item in library["definitions"]] == [
-        "scenario:evacuation", "scenario:hardlock", "scenario:uplink-center",
-        "scenario:battleground",
-        "scenario:annihilation",
-        "scenario:cutthroat",
-        "scenario:superiority",
-        "scenario:provisioning",
-        "scenario:area-of-interest",
-        "scenario:last-launch",
-        "scenario:b-pong",
-        "scenario:crossing-lines",
-        "scenario:corporate-appropriation",
-        "scenario:critical-intervention",
-        "scenario:outbreak",
-        "scenario:akial-interference",
-    ]
+    assert [item["id"] for item in library["definitions"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     entry = library["definitions"][2]
     assert entry["version"] == "its17-v0.2"
     assert entry["origin"] == {
@@ -120,7 +106,7 @@ def test_uplink_standalone_sqlite_retains_exact_historical_publication(
 ) -> None:
     out = tmp_path / "its17.db"
     result = build_its_database(SEASON, out, shared_library=SHARED)
-    assert len(result["scenarios"]) == 16
+    assert [item["id"] for item in result["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     assert result["inputIdentity"]["seasonId"] == "its-17"
     selected = select_its_scenario(
         out, season_id="its-17", revision="0.2", scenario_id="scenario:uplink-center",

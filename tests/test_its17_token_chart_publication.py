@@ -7,6 +7,7 @@ from pathlib import Path
 
 from infinity_db.curated import load_curated_document
 from infinity_db.its_season_database import build_its_database, inspect_its_database
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON = ROOT / "data/curated/its/n5-its-season-17.json"
@@ -39,7 +40,10 @@ def test_chart_pins_every_affected_its17_scenario_and_preserves_other_members() 
     assert source["sharedScenarioLibrary"]["sha256"] == hashlib.sha256(
         SHARED.read_bytes()
     ).hexdigest()
-    assert len(source["scenarioCollection"]["members"]) == len(library["definitions"]) == 16
+    assert [m["scenarioId"] for m in source["scenarioCollection"]["members"]] == list(
+        EXPECTED_ITS17_SCENARIO_IDS
+    )
+    assert [item["id"] for item in library["definitions"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     members = {
         m["scenarioId"].removeprefix("scenario:"): m
         for m in source["scenarioCollection"]["members"]
@@ -62,7 +66,7 @@ def test_chart_values_are_explicit_and_disputes_remain_separate() -> None:
     source = load_curated_document(SEASON, shared_scenario_library=SHARED)
     records = {r["id"].removeprefix("scenario:"): r for r in source["records"]
                if r["kind"] == "scenario"}
-    assert len(records) == 16
+    assert {f"scenario:{slug}" for slug in records} == set(EXPECTED_ITS17_SCENARIO_IDS)
     for slug, rule_expectations in AFFECTED.items():
         rules = {
             rule["id"]: rule
@@ -97,7 +101,7 @@ def test_its17_token_chart_builds_standalone_without_touching_its18(
 ) -> None:
     output = tmp_path / "its_17.db"
     report = build_its_database(SEASON, output, shared_library=SHARED)
-    assert len(report["scenarios"]) == 16
+    assert [item["id"] for item in report["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     assert {row["id"] for row in report["skills"]} == {
         "skill:casevac", "skill:civevac",
     }

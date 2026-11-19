@@ -32,17 +32,6 @@ entries.
   narrowing those citations; never infer a precise page.
 - **Disposition:** proposed (structured facts and rendering already completed).
 
-### AI-0014 — Centralize historical ITS scenario inventory test expectations
-
-- **Date:** 2026-11-18
-- **Area:** ITS 17 scenario publication tests.
-- **Remaining issue:** Each new reviewed mission requires editing duplicated
-  scenario counts and membership lists in multiple tests.
-- **Proposed:** Use one independent, reviewed expected-membership fixture while
-  retaining per-scenario identity, source, geometry, and isolation assertions.
-  Do not derive the expected set from the source being tested.
-- **Disposition:** proposed.
-
 ### AI-0015 — Publish ITS 18 Use Panoply as a typed scenario Skill
 
 - **Date:** 2026-11-18

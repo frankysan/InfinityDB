@@ -14,6 +14,7 @@ from infinity_db.its_season_database import (
     inspect_its_database,
     select_its_scenario,
 )
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON = ROOT / "data/curated/its/n5-its-season-17.json"
@@ -37,7 +38,9 @@ def resilience_record() -> dict:
 def test_extra_is_bilingually_cited_and_not_a_seventeenth_scenario() -> None:
     document = source_document()
     extra = resilience_record()
-    assert len(document["scenarioCollection"]["members"]) == 16
+    assert [m["scenarioId"] for m in document["scenarioCollection"]["members"]] == list(
+        EXPECTED_ITS17_SCENARIO_IDS
+    )
     assert all("resilience" not in member["scenarioId"]
                for member in document["scenarioCollection"]["members"])
     assert len(document["records"]) == 4
@@ -122,7 +125,7 @@ def test_optional_extra_is_stored_only_in_its17_sqlite(
 ) -> None:
     output = tmp_path / "its_17.db"
     report = build_its_database(SEASON, output, shared_library=SHARED)
-    assert len(report["scenarios"]) == 16
+    assert [item["id"] for item in report["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     assert [item["id"] for item in report["extras"]] == [ID]
     assert inspect_its_database(
         output, source=SEASON, shared_library=SHARED, require_current_builder=True,

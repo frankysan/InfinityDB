@@ -7,6 +7,7 @@ from pathlib import Path
 
 from infinity_db.curated import load_curated_document
 from infinity_db.its_season_database import build_its_database, select_its_scenario
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON = ROOT / "data/curated/its/n5-its-season-17.json"
@@ -32,22 +33,7 @@ def test_its17_hardlock_uses_pinned_historical_membership_and_citations() -> Non
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert [entry["id"] for entry in shared["definitions"]] == [
-        "scenario:evacuation", "scenario:hardlock", "scenario:uplink-center",
-        "scenario:battleground",
-        "scenario:annihilation",
-        "scenario:cutthroat",
-        "scenario:superiority",
-        "scenario:provisioning",
-        "scenario:area-of-interest",
-        "scenario:last-launch",
-        "scenario:b-pong",
-        "scenario:crossing-lines",
-        "scenario:corporate-appropriation",
-        "scenario:critical-intervention",
-        "scenario:outbreak",
-        "scenario:akial-interference",
-    ]
+    assert [entry["id"] for entry in shared["definitions"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     definition = shared["definitions"][1]
     assert definition["version"] == "its17-v0.2"
     assert definition["origin"] == {
@@ -122,7 +108,7 @@ def test_its17_hardlock_preserves_verified_scoring_geometry_and_source_differenc
 def test_hardlock_standalone_build_stays_season_local(tmp_path: Path) -> None:
     output = tmp_path / "its_17.db"
     result = build_its_database(SEASON, output, shared_library=SHARED)
-    assert len(result["scenarios"]) == 16
+    assert [item["id"] for item in result["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     selected = select_its_scenario(
         output, season_id="its-17", revision="0.2", scenario_id="scenario:hardlock",
     )

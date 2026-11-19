@@ -11,6 +11,7 @@ from infinity_db.its_season_database import (
     inspect_its_database,
     select_its_scenario,
 )
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON = ROOT / "data/curated/its/n5-its-season-17.json"
@@ -37,7 +38,7 @@ def test_its17_b_pong_is_independently_source_pinned() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert len(library["definitions"]) == 16
+    assert [item["id"] for item in library["definitions"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     definition = library["definitions"][10]
     assert definition["id"] == "scenario:b-pong"
     assert definition["version"] == "its17-v0.2"
@@ -138,7 +139,7 @@ def test_its17_b_pong_preserves_only_original_bilingual_differences() -> None:
 def test_its17_b_pong_compiles_independently(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     report = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(report["scenarios"]) == 16
+    assert [item["id"] for item in report["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED, require_current_builder=True,

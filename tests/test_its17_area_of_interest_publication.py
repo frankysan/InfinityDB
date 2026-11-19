@@ -11,6 +11,7 @@ from infinity_db.its_season_database import (
     inspect_its_database,
     select_its_scenario,
 )
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON = ROOT / "data/curated/its/n5-its-season-17.json"
@@ -37,18 +38,7 @@ def test_its17_area_source_identity_and_bilingual_citations() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert [row["id"] for row in library["definitions"]] == [
-        "scenario:evacuation", "scenario:hardlock", "scenario:uplink-center",
-        "scenario:battleground", "scenario:annihilation", "scenario:cutthroat",
-        "scenario:superiority", "scenario:provisioning", "scenario:area-of-interest",
-        "scenario:last-launch",
-        "scenario:b-pong",
-        "scenario:crossing-lines",
-        "scenario:corporate-appropriation",
-        "scenario:critical-intervention",
-        "scenario:outbreak",
-        "scenario:akial-interference",
-    ]
+    assert [row["id"] for row in library["definitions"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     definition = library["definitions"][8]
     assert definition["version"] == "its17-v0.2"
     assert definition["origin"] == {
@@ -143,7 +133,7 @@ def test_its17_area_historical_antenna_rules_and_source_differences() -> None:
 def test_its17_area_sqlite_remains_season_local(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     result = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(result["scenarios"]) == 16
+    assert [item["id"] for item in result["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     assert result["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED, require_current_builder=True,

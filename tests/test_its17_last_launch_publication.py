@@ -11,6 +11,7 @@ from infinity_db.its_season_database import (
     inspect_its_database,
     select_its_scenario,
 )
+from tests.its17_inventory_expectations import EXPECTED_ITS17_SCENARIO_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 SEASON = ROOT / "data/curated/its/n5-its-season-17.json"
@@ -37,7 +38,7 @@ def test_its17_last_launch_has_bilingual_pinned_source_membership() -> None:
         "id": "its17-scenarios",
         "sha256": hashlib.sha256(SHARED.read_bytes()).hexdigest(),
     }
-    assert len(library["definitions"]) == 16
+    assert [item["id"] for item in library["definitions"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     definition = library["definitions"][9]
     assert definition["id"] == "scenario:last-launch"
     assert definition["version"] == "its17-v0.2"
@@ -148,7 +149,7 @@ def test_its17_last_launch_keeps_historical_diameters_and_bilingual_issues() -> 
 def test_its17_last_launch_sqlite_is_isolated(tmp_path: Path) -> None:
     target = tmp_path / "its_17.db"
     report = build_its_database(SEASON, target, shared_library=SHARED)
-    assert len(report["scenarios"]) == 16
+    assert [item["id"] for item in report["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
     assert report["inputIdentity"]["seasonId"] == "its-17"
     assert inspect_its_database(
         target, source=SEASON, shared_library=SHARED, require_current_builder=True,
