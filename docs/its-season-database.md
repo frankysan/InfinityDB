@@ -590,13 +590,35 @@ checked, not simply inferred from the automated text diff:
   16. V0.2 also reflows the PDF from 68→105 EN and 67→112 ES
   pages, so printed-page offsets cannot be reused as citations.
 
-This is a **reviewed subset**, not a full claim of unchanged semantics
-for the other historical mission revisions. V0.0/V0.1 remain
-research-only source editions; the current ITS 17 V0.2 source is not
-retroactively tagged as applicable to all older revisions. Further
-older-version field overrides and geometries require source-specific
-review before a `sourceFamily` history projection can be safely
-authored.
+**Earlier-revision evidence curation (2026-11-19):** The same
+`data/curated/its/n5-its-season-17.json` now keeps an optional
+`historicalEvidence` section with **11 reviewed fact aspects and 44
+source observations**, each pinned to an original V0.0/V0.1 English
+or Spanish PDF source ID, revision, page, SHA-256 and record identity.
+This includes the differences above and the source-reviewed V0.1
+Use Inhibitor Antenna Attacker-only limit (EN p. **33** / ES p.
+**40**), the replacement of Defender-placed Deployable Weapon
+wording for Critical Intervention Armed Turrets with reaction to
+active enemy Models and not Markers (EN p. **32** / ES p. **39**),
+and the rewritten enemy-Hacker ARO / Face-to-Face WIP interaction
+in Area of Interest (EN p. **49** / ES p. **48**). Akial
+Interference's V0.0 texts exclude only Secure HVT explicitly
+(EN p. **23** / ES p. **36**); V0.1 adds Secure Treasure to that
+exclusion in both languages. The absence of a printed prohibition
+is **not** curated as permission to perform the action.
+
+The section has `mode: review-only-not-projected`; validation rejects
+out-of-range citations, unpinned or duplicate edition identifiers,
+unknown target records, duplicate observations, and unreviewed
+facts. `project_its_source_family` validates then **excludes** it
+from the current V0.2 projection, so it does not create older
+scenario records, citations, sources, SQLite rows, API routes,
+or selectable revisions. The historical section is retained in
+the single curated source for later reconciliation. It is a
+**reviewed subset**, not a claim of unchanged semantics for
+unreviewed historical missions. More full-source review and
+older-version field/geometry overrides are needed before a
+complete `sourceFamily` history projection would be valid.
 
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,

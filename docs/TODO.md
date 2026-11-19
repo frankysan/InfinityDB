@@ -618,6 +618,13 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         restriction and Resilience Operations reveal-timing chronology.
         Record the introduced Outbreak mission and V0.2 page reflow,
         without assuming the remaining historical facts are identical.
+      - [x] Preserve reviewed ITS 17 V0.0/V0.1 differences as
+        revision- and language-tagged `historicalEvidence` inside the
+        existing season source file: 11 facts, 44 original-page observations,
+        four pinned older editions. Include Critical Intervention's
+        Attacker-only Inhibitor and Armed Turret clarifications and Area of
+        Interest's Hacker opposition procedure. Validate fail-closed,
+        keep earlier editions unprojected and ITS 18 publication untouched.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
         discrepancies, optional Extras (including Resilience Operations)

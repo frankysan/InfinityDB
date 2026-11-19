@@ -383,6 +383,8 @@ affected area, observation and evidence, proposed change, and disposition.
 - **Why:** Prevent backdating a corrected fact, treating a translation
   discrepancy as a historical rules change or claiming whole-source
   equivalence from an incomplete changelog.
-- **Disposition:** Four ITS 17 adjacent-revision audit pairs are now
-  supported; a source-pinned reviewed subset is documented in
-  `docs/its-season-database.md`. Broader revision tagging remains open.
+- **Disposition:** Four ITS 17 adjacent-revision audit pairs are supported.
+  Eleven reviewed fact aspects (44 language- and revision-specific
+  observations) now live in the original ITS 17 curated file's
+  fail-closed `historicalEvidence` section, deliberately excluded from
+  runtime and full historical projection. Remaining facts still need review.

@@ -1621,6 +1621,386 @@
       }
     }
   ],
+  "historicalEvidence": {
+    "mode": "review-only-not-projected",
+    "sources": [
+      {
+        "id": "its-season-17-v0.0-en-pdf",
+        "revision": "0.0",
+        "language": "en",
+        "sha256": "93de3ce8f9090edf86acf1db00e2d1dac6f2f44a9898e4bd8a98d991d308c812",
+        "pageCount": 68,
+        "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.0-en.pdf"
+      },
+      {
+        "id": "its-season-17-v0.0-es-pdf",
+        "revision": "0.0",
+        "language": "es",
+        "sha256": "5a8ef31491e9e22e4e9b8a8f8c526a3adafac5abf4ab11e999b730d3e5a67d38",
+        "pageCount": 67,
+        "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.0-es.pdf"
+      },
+      {
+        "id": "its-season-17-v0.1-en-pdf",
+        "revision": "0.1",
+        "language": "en",
+        "sha256": "1384eddb24affec3c16243d70d627d94c3bfe1250bec053647b08e30b837dd35",
+        "pageCount": 68,
+        "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.1-en.pdf"
+      },
+      {
+        "id": "its-season-17-v0.1-es-pdf",
+        "revision": "0.1",
+        "language": "es",
+        "sha256": "0edea2f3f1df41e6e341d188e7ab767faf236601c28b01b2469a534117c4ba89",
+        "pageCount": 67,
+        "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.1-es.pdf"
+      }
+    ],
+    "facts": [
+      {
+        "id": "casevac-declaration-type",
+        "recordId": "skill:casevac",
+        "aspect": "skill-declaration",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 14,
+            "value": "short-skill"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 14,
+            "value": "habilidad-corta"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 14,
+            "value": "short-movement-skill"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 14,
+            "value": "habilidad-corta-basica"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "critical-intervention-reinforcements",
+        "recordId": "scenario:critical-intervention",
+        "aspect": "reinforcements-suitability",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 30,
+            "value": "yes"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 37,
+            "value": "no"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 30,
+            "value": "no"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 37,
+            "value": "no"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "corporate-appropriation-panoply-scoring",
+        "recordId": "scenario:corporate-appropriation",
+        "aspect": "panoply-comparison-objective",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 27,
+            "value": "one-objective-point"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 21,
+            "value": "not-stated-in-main-objectives"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 27,
+            "value": "one-objective-point"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 21,
+            "value": "one-objective-point"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "critical-intervention-inhibitor-unlock",
+        "recordId": "scenario:critical-intervention",
+        "aspect": "unlock-console-role-restriction",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 33,
+            "value": "not-explicitly-limited-to-attacker"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 40,
+            "value": "not-explicitly-limited-to-attacker"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 33,
+            "value": "attacker-only"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 40,
+            "value": "attacker-only"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "critical-intervention-turret-reaction",
+        "recordId": "scenario:critical-intervention",
+        "aspect": "defense-system-turret-response",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 32,
+            "value": "defender-deployable-weapons"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 39,
+            "value": "defender-deployable-weapons"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 32,
+            "value": "react-to-active-enemy-model-orders-not-markers"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 39,
+            "value": "react-to-active-enemy-model-orders-not-markers"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "area-of-interest-scenario-name",
+        "recordId": "scenario:area-of-interest",
+        "aspect": "scenario-title",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 48,
+            "value": "zone-of-interest"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 47,
+            "value": "zona-de-interes"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 48,
+            "value": "area-of-interest"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 47,
+            "value": "area-de-interes"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "area-of-interest-hacker-opposition",
+        "recordId": "scenario:area-of-interest",
+        "aspect": "communication-antenna-hacker-response",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 49,
+            "value": "enemy-hacker-face-to-face-wip-roll"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 48,
+            "value": "enemy-hacker-face-to-face-wip-roll"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 49,
+            "value": "enemy-hacker-may-declare-aro-face-to-face-wip-roll"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 48,
+            "value": "select-enemy-hacker-for-aro-face-to-face-wip-roll"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "crossing-lines-secure-objective-exclusions",
+        "recordId": "scenario:crossing-lines",
+        "aspect": "secure-hvt-and-treasure-exclusions",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 36,
+            "value": "not-explicitly-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 28,
+            "value": "not-explicitly-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 36,
+            "value": "secure-hvt-and-secure-treasure-excluded"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 28,
+            "value": "secure-hvt-and-secure-treasure-excluded"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "akial-interference-secure-objective-exclusions",
+        "recordId": "scenario:akial-interference",
+        "aspect": "secure-hvt-and-treasure-exclusions",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 23,
+            "value": "only-secure-hvt-explicitly-excluded"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 36,
+            "value": "only-secure-hvt-explicitly-excluded"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 23,
+            "value": "secure-hvt-and-secure-treasure-excluded"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 36,
+            "value": "secure-hvt-and-secure-treasure-excluded"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "resilience-operations-first-reveal",
+        "recordId": "rule:resilience-operations",
+        "aspect": "first-round-tactical-objective-reveal",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 63,
+            "value": "after-deployment-before-round-one"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 62,
+            "value": "after-deployment-before-round-one"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 63,
+            "value": "beginning-of-round-one"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 62,
+            "value": "after-deployment-before-round-one"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "outbreak-scenario-introduction",
+        "recordId": "scenario:outbreak",
+        "aspect": "scenario-inventory",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 2,
+            "value": "not-listed-as-scenario"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 2,
+            "value": "not-listed-as-scenario"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 2,
+            "value": "not-listed-as-scenario"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 2,
+            "value": "not-listed-as-scenario"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      }
+    ]
+  },
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
     "sha256": "835869999c015f33f4c965b13b90c932397fc679ecdd15a4dddfdf0469f45034"
