@@ -45,7 +45,13 @@ artifact created from reviewed curated ITS facts. The implementation lives in
   season and scenario, so same-named actions are not conflated. Optional
   `skillCitations` now pin the exact English and Spanish action pages for
   all 26 ITS 18 actions, reviewed against the SHA-matched 2026.09.11 source
-  PDFs. Core N5 scenario Skills are resolved
+  PDFs. Source-specific `sourceLabels` are projected through the standard
+  Skill badge row: all reviewed ITS 17/18 scenario actions show **Attack** and
+  **Scenario**, while season-wide Skills retain their own printed qualifiers
+  (such as Optional or Obligatory). Matching N5 Labels link to their canonical
+  definitions; **Scenario** remains readable but unlinked because it is not a
+  current N5 Label entry. No label is derived merely from a Skill category.
+  Core N5 scenario Skills are resolved
   independently from their scoped Rules definitions, not imported into ITS.
 
 **Implemented optional authoring slice (no deployed migration):** The ITS

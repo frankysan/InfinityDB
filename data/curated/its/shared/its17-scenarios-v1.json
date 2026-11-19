@@ -289,6 +289,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only a Specialist Troop in Silhouette contact with an Extraction Console and CivEvacing a Civilian or enemy HVT may declare this Skill."
@@ -1262,6 +1263,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "The player must have an Activated Console.",
@@ -1302,6 +1304,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "A Specialist Troop must be in Silhouette contact with a Console."
@@ -2174,6 +2177,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only a Specialist Troop in Silhouette contact with a Communication Antenna may declare this Skill."
@@ -5796,6 +5800,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "A Specialist Troop must be in Silhouette contact with a Console to declare Hack Consoles."
@@ -6926,6 +6931,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "A Specialist Troop must be in contact with a Tech-Coffin."
@@ -7708,6 +7714,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only a Specialist Troop in Silhouette contact with the Communication Antenna may declare this Skill."
@@ -8525,6 +8532,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only a Specialist Troop in Silhouette contact with an ID Scanner may declare this Skill."
@@ -8547,6 +8555,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "A Trooper must be in Silhouette contact with an allied Trooper carrying an ID Token."
@@ -8595,6 +8604,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "A Trooper carrying an ID Token must be in Silhouette contact with the central ID Checker."
@@ -9523,6 +9533,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only a Specialist Troop in Silhouette contact with the Tracking Beacon may declare this Skill."
@@ -9555,6 +9566,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "A Specialist Troop must be in contact with a Console."
@@ -11040,6 +11052,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only Specialist Troops in Silhouette contact with an Antenna may declare Activate Antenna."
@@ -11572,6 +11585,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "A Trooper must be in Silhouette contact with an unattended enemy Prototype Token or an allied Trooper in Normal State carrying the enemy Prototype."
@@ -11619,6 +11633,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "The Trooper must be in Silhouette contact with a Panoply."
@@ -12861,6 +12876,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only an Attacker Specialist Troop in Silhouette contact with the Data Console may declare Extract Data Pack."
@@ -12900,6 +12916,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only a Specialist Troop in Silhouette contact with the Inhibitor Antenna may declare this Skill."
@@ -13972,6 +13989,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only a Trooper with Doctor, Paramedic, or Specialist Operative may declare this Skill while in Silhouette contact with an Infected or an allied Trooper CivEvacing one."
@@ -13996,6 +14014,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only a Trooper with Doctor, Paramedic, or Specialist Operative may Scan an Infected or Stabilized Infected in its Line of Fire and Zone of Control, whether or not the Infected is being CivEvaced."
@@ -14738,6 +14757,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "Only a Specialist Troop in Silhouette contact with the Akial Antenna may declare this Attack, Scenario Short Skill.",
@@ -14786,6 +14806,7 @@
                 "skillTypeIds": [
                   "short-skill"
                 ],
+                "sourceLabels": ["Attack", "Scenario"],
                 "skillFacts": {
                   "requirements": [
                     "A Specialist Troop must be in Silhouette contact with the Akial Antenna."

@@ -191,7 +191,7 @@ class ScenarioComponents:
         self.used.add(identifier)
         result = self.resolve(entry["payload"], kind, scenario_id, (*stack, identifier))
         if kind == "skill":
-            _object(result, {"skillTypeIds", "skillFacts"}, set(), "Skill component")
+            _object(result, {"skillTypeIds", "skillFacts"}, {"sourceLabels"}, "Skill component")
             types = _array(result["skillTypeIds"], "Skill component types")
             if len(set(types)) != len(types):
                 raise ValueError("Skill component has duplicate declaration types")
@@ -274,7 +274,9 @@ class ScenarioComponents:
         for rule in mission.get("rules", []):
             if "skillDefinition" not in rule:
                 continue
-            if "skillFacts" in rule or "skillTypeIds" in rule or "sharedSkill" in rule:
+            if any(
+                key in rule for key in ("skillFacts", "skillTypeIds", "sourceLabels", "sharedSkill")
+            ):
                 raise ValueError("Skill reuse cannot mix a reference with inline Skill facts")
             overrides = rule.pop("skillOverrides", [])
             if not isinstance(overrides, list):

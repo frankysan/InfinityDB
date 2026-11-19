@@ -247,6 +247,21 @@ class ScenarioCatalog:
         """Project explicitly typed ITS actions as normal, scenario-scoped Skills."""
         if self._scenario_skills_cache is None:
             items: list[dict[str, Any]] = []
+            known_labels = {
+                label["name"]: label for label in (
+                    self.rules_database.current_labels() if self.rules_database else []
+                )
+            }
+
+            def source_labels(names: list[str]) -> list[dict[str, Any]]:
+                # ITS-only qualifiers (such as Scenario) stay visible but unlinked
+                # unless a matching canonical Rules Label exists.
+                return [
+                    {key: known_labels[name][key] for key in ("id", "name", "description")}
+                    if name in known_labels else {"name": name}
+                    for name in names
+                ]
+
             for record, publication in self._records():
                 scenario_slug = _scenario_slug(record)
                 if publication["collection"] == "n5-core":
@@ -388,6 +403,7 @@ class ScenarioCatalog:
                             {"id": category["id"], "name": category["name"]}
                             for category in categories
                         ],
+                        "labels": source_labels(rule.get("sourceLabels", [])),
                         "scope": {
                             "game": "N5",
                             "seasons": [publication["collection"]],
@@ -439,6 +455,7 @@ class ScenarioCatalog:
                         or use["name"] != first["name"]
                         or rule["facts"] != first_rule["facts"]
                         or rule["skill_types"] != first_rule["skill_types"]
+                        or rule["labels"] != first_rule["labels"]
                         or rule["sharedSkill"].get("origin")
                         != first_rule["sharedSkill"].get("origin")
                     ):
@@ -512,6 +529,7 @@ class ScenarioCatalog:
                     rule["skill_types"] = [
                         {"id": kind["id"], "name": kind["name"]} for kind in types
                     ]
+                    rule["labels"] = source_labels(record["facts"].get("sourceLabels", []))
                     category = ("Common Skills" if record["facts"]["category"] == "common-skill"
                                 else "Special Skills")
                     season_use = {
@@ -593,6 +611,7 @@ class ScenarioCatalog:
                         or existing["category"] != category
                         or prior_rule["summary"] != record["summary"]
                         or prior_rule["skill_types"] != rule["skill_types"]
+                        or prior_rule["labels"] != rule["labels"]
                         or prior_facts != new_facts
                         or existing["applicability"]["context"] != season_use["context"]
                         or season_use in existing["seasons"]

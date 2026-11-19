@@ -1915,6 +1915,7 @@
               "id": "activate-antenna",
               "name": "Activate Antenna",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only Specialist Troops in Silhouette contact with an Antenna may declare Activate Antenna."
@@ -2941,6 +2942,7 @@
               "id": "activate-antenna",
               "name": "Activate Antenna",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "A Specialist Troop in Silhouette contact with an Antenna can activate it.",
@@ -3698,6 +3700,7 @@
               "id": "analyze-hyperthermal-tech",
               "name": "Analyze Hyperthermal Tech (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Specialist Troop in Silhouette contact with a Console without that player's Token may declare Analyze Hyperthermal Tech."
@@ -6641,6 +6644,7 @@
               "id": "hack-consoles",
               "name": "Hack Consoles",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "A Specialist Troop must be in Silhouette contact with a Console to declare Hack Consoles."
@@ -7710,6 +7714,7 @@
               "id": "activate-communication-antenna",
               "name": "Activate Communication Antenna",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Specialist Troop in Silhouette contact with a Communication Antenna may declare this Skill."
@@ -8559,6 +8564,7 @@
               "id": "pick-up-beacon",
               "name": "Pick Up Beacon",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "The player must have an Activated Console.",
@@ -8601,6 +8607,7 @@
               "id": "activate-console",
               "name": "Activate Console",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "A Specialist Troop must be in Silhouette contact with a Console."
@@ -9458,6 +9465,7 @@
               "id": "relocate-tracking-beacon",
               "name": "Relocate the Tracking Beacon",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Specialist Troop in Silhouette contact with the Tracking Beacon may declare this Skill."
@@ -9494,6 +9502,7 @@
               "id": "activate-console",
               "name": "Activate Console",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "A Specialist Troop must be in contact with a Console."
@@ -10466,6 +10475,7 @@
               "id": "emit-akial-interference",
               "name": "Emit Akial Interference",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "A Specialist Troop must be in Silhouette contact with the Akial Antenna.",
@@ -10498,6 +10508,7 @@
               "id": "filter-signal",
               "name": "Filter the Signal",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "A Specialist Troop must be in Silhouette contact with the Akial Antenna."
@@ -11200,6 +11211,7 @@
               "id": "activate-extraction-console",
               "name": "Activate Extraction Console",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Specialist Troop in Silhouette contact with an Extraction Console and CivEvacing a Civilian or enemy HVT may declare this Skill."
@@ -12137,6 +12149,7 @@
               "id": "pick-up-hyperthermal-tech",
               "name": "Pick Up Hyperthermal Tech",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "The Trooper must be in Silhouette contact with an uncarried Hyperthermal Tech or an allied Trooper in Normal State carrying one."
@@ -13187,6 +13200,7 @@
               "id": "extract-supply-boxes",
               "name": "Extract Supply Boxes (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "A Specialist Troop must be in contact with a Tech-Coffin."
@@ -13993,6 +14007,7 @@
               "id": "activate-communication-antenna",
               "name": "Activate Communication Antenna (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Specialist Troop in Silhouette contact with the Communication Antenna may declare this Skill."
@@ -14736,6 +14751,7 @@
               "id": "extract-data-harvester",
               "name": "Extract Data-Harvester (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Specialist Troop in contact with a Tech-Coffin may declare this Skill."
@@ -14763,6 +14779,7 @@
               "id": "pickup-data-harvester",
               "name": "Pick Up Data-Harvester (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "The Trooper must be in Silhouette contact with an uncarried Inactive Data-Harvester or an allied Trooper in Normal State carrying one."
@@ -14795,6 +14812,7 @@
               "id": "neutralize-data-harvester",
               "name": "Neutralize Data-Harvester (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Trooper with Engineer, Hacker, or a Deactivator may declare this Skill while in contact with an Active Data-Harvester."
@@ -15616,6 +15634,7 @@
               "id": "download-id",
               "name": "Download ID (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Specialist Troop in Silhouette contact with an ID Scanner may declare this Skill."
@@ -15640,6 +15659,7 @@
               "id": "swap-id",
               "name": "Swap ID (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "A Trooper must be in Silhouette contact with an allied Trooper carrying an ID Token."
@@ -15690,6 +15710,7 @@
               "id": "extract-identified-trooper",
               "name": "Extract Identified Trooper (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "A Trooper carrying an ID Token must be in Silhouette contact with the central ID Checker."
@@ -16635,6 +16656,7 @@
               "id": "pick-up-prototype",
               "name": "Pick Up Enemy Prototype (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "A Trooper must be in Silhouette contact with an unattended enemy Prototype Token or an allied Trooper in Normal State carrying the enemy Prototype."
@@ -17581,6 +17603,7 @@
               "id": "stabilize-infected",
               "name": "Stabilize Infected (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Trooper with Doctor, Paramedic, or Specialist Operative may declare this Skill while in Silhouette contact with an Infected or an allied Trooper CivEvacing one."
@@ -17607,6 +17630,7 @@
               "id": "scan-infected",
               "name": "Scan Infected (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Trooper with Doctor, Paramedic, or Specialist Operative may Scan an Infected or Stabilized Infected in its Line of Fire and Zone of Control, whether or not the Infected is being CivEvaced."
@@ -18652,6 +18676,7 @@
               "id": "extract-data-pack",
               "name": "Extract Data Pack (Attacker Only)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only an Attacker Specialist Troop in Silhouette contact with the Data Console may declare Extract Data Pack."
@@ -18691,6 +18716,7 @@
               "id": "use-inhibitor-antenna",
               "name": "Use Inhibitor Antenna (Short Skill)",
               "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
                   "Only a Specialist Troop in Silhouette contact with the Inhibitor Antenna may declare this Skill."
@@ -19423,6 +19449,7 @@
         "typeIds": [
           "basic-short-skill"
         ],
+        "sourceLabels": ["Optional","Scenario"],
         "requirements": [
           "Only a Model can use CivEvac. A Marker declaring CivEvac is automatically revealed.",
           "The Trooper must be in or reach Silhouette contact with the Civilian. The Civilian cannot have a CivEvac Token or be in Silhouette contact with an enemy Model.",
@@ -19481,6 +19508,7 @@
         "typeIds": [
           "short-skill"
         ],
+        "sourceLabels": ["Optional"],
         "requirements": [
           "Only Models may declare Casevac; declaring it reveals any Marker.",
           "The bearer must be in Silhouette contact with an allied Trooper in Stunned, Immobilized (IMM-A or IMM-B), or Unconscious State, unless a scenario rule modifies this.",
@@ -19534,6 +19562,7 @@
         "typeIds": [
           "automatic"
         ],
+        "sourceLabels": ["Obligatory"],
         "requirements": [
           "The tournament Organizer must have selected the optional Team-Ops Extra.",
           "An Army List using Team-Ops must include all three distinct Team-Ops Units: LI, HI and REM (or equivalents)."
@@ -19588,6 +19617,7 @@
         "typeIds": [
           "short-skill"
         ],
+        "sourceLabels": ["Attack","Optional"],
         "requirements": [
           "The requesting Trooper must have the Infinity Team-Ops Special Skill, available under the optional Team-Ops Extra.",
           "The game must be in its second Game Round."

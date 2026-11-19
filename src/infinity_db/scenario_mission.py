@@ -134,6 +134,7 @@ class ScenarioRule:
     specialist_skill_ids: tuple[str, ...] = ()
     skill_type_ids: tuple[str, ...] = ()
     skill_facts: dict[str, tuple[str, ...]] | None = None
+    source_labels: tuple[str, ...] = ()
     skill_citations: tuple[tuple[str, int], ...] = ()
     shared_skill: tuple[str, str] | None = None
 
@@ -578,7 +579,7 @@ def parse_scenario_mission(
         rule = _object(
             item, {"id", "name", "paragraphs"},
             {"definitionId", "skillIds", "specialists", "skillTypeIds",
-             "skillFacts", "skillCitations", "sharedSkill"}, ctx,
+             "skillFacts", "sourceLabels", "skillCitations", "sharedSkill"}, ctx,
         )
         identifier = _slug(rule["id"], f"{ctx}.id")
         _unique(identifier, rule_ids, ctx)
@@ -605,6 +606,16 @@ def parse_scenario_mission(
         )
         if len(set(skill_types)) != len(skill_types):
             raise ScenarioMissionError(f"{ctx}.skillTypeIds contains duplicate categories")
+        source_labels = tuple(
+            _text(value, f"{ctx}.sourceLabels")
+            for value in _array(
+                rule.get("sourceLabels", []), f"{ctx}.sourceLabels", allow_empty=True
+            )
+        )
+        if source_labels and not skill_types:
+            raise ScenarioMissionError(f"{ctx}.sourceLabels requires skillTypeIds")
+        if len(set(source_labels)) != len(source_labels):
+            raise ScenarioMissionError(f"{ctx}.sourceLabels contains duplicates")
         skill_facts: dict[str, tuple[str, ...]] | None = None
         if "skillFacts" in rule:
             if not skill_types:
@@ -692,6 +703,7 @@ def parse_scenario_mission(
                 qualifiers,
                 skill_types,
                 skill_facts,
+                source_labels,
                 tuple(skill_citations),
                 shared_skill,
             )

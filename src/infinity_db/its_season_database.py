@@ -169,11 +169,17 @@ def _validate_season_skill(
     required = {
         "category", "typeIds", "requirements", "effects", "restrictions", "applicability",
     }
-    if (not isinstance(facts, dict) or set(facts) - (required | {"clarifications"})
+    if (not isinstance(facts, dict) or set(facts) - (required | {"clarifications", "sourceLabels"})
             or required - set(facts)):
         raise ValueError("ITS season Skill requires typed declaration, effects and applicability")
     if facts["category"] not in {"common-skill", "special-skill"}:
         raise ValueError("ITS season Skill must be Common or Special, not scenario-scoped")
+    labels = facts.get("sourceLabels", [])
+    if (not isinstance(labels, list)
+            or any(not isinstance(label, str) or not label.strip()
+                   or label != label.strip() for label in labels)
+            or len(labels) != len(set(labels))):
+        raise ValueError("ITS season Skill has invalid source labels")
     types = facts["typeIds"]
     if (not isinstance(types, list) or len(types) != 1
             or types[0] not in {

@@ -1152,6 +1152,7 @@
         "typeIds": [
           "short-movement-skill"
         ],
+        "sourceLabels": ["Optional","Scenario"],
         "requirements": [
           "Only a Model may use CivEvac; a Marker declaring it is automatically revealed.",
           "The Trooper must be in or reach Silhouette contact with the Civilian. The Civilian must not be in Silhouette contact with an enemy Model or already have a CivEvac Token.",
@@ -1220,6 +1221,7 @@
         "typeIds": [
           "short-movement-skill"
         ],
+        "sourceLabels": ["Optional"],
         "requirements": [
           "Only Models may use Casevac. Declaring Casevac reveals any Marker.",
           "The carrier must be in Silhouette contact with an allied Trooper in Stunned, Immobilized (IMM-A or IMM-B) or Unconscious State, unless a Scenario Special Rule modifies this.",
@@ -2435,6 +2437,6 @@
   },
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "835869999c015f33f4c965b13b90c932397fc679ecdd15a4dddfdf0469f45034"
+    "sha256": "050f841990e6f4561c49514eb338e25018b065be68a8c6eca92efcf31a2bb0a2"
   }
 }

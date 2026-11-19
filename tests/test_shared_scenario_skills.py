@@ -36,6 +36,7 @@ def _source() -> dict:
         "id": SHARED, "kind": "skill", "version": "v1",
         "payload": {
             "skillTypeIds": deepcopy(original["skillTypeIds"]),
+            "sourceLabels": deepcopy(original["sourceLabels"]),
             "skillFacts": deepcopy(original["skillFacts"]),
         },
         "citations": deepcopy(scenario["scenario:hardlock"]["citations"]),
@@ -53,6 +54,7 @@ def _source() -> dict:
         target["name"] = original["name"]
         target.pop("skillFacts")
         target.pop("skillTypeIds")
+        target.pop("sourceLabels")
         target["skillDefinition"] = {"ref": SHARED, "version": "v1"}
         if scenario_slug == "b-pong":
             # Context-specific page evidence is authored by the including mission.
@@ -107,6 +109,9 @@ def test_shared_skill_is_pinned_and_compiled_without_alias_loss(tmp_path: Path) 
     shared = _api(app, f"/api/skills/{canonical['slug']}")
     assert shared["rules"][0]["id"] == SHARED
     assert len(shared["rules"][0]["applicable_scenarios"]) == 2
+    assert [label["name"] for label in shared["rules"][0]["labels"]] == [
+        "Attack", "Scenario",
+    ]
     assert len(shared["rules"][0]["citations"]) >= 2
     search = _api(app, "/api/search?q=activate%20console")["items"]
     assert any(item["href"] == f"/skills/{canonical['slug']}" for item in search)
@@ -192,9 +197,16 @@ def _cross_season_fixture(tmp_path: Path):
                   if r["id"] == "activate-console")
     payload = {
         "skillTypeIds": deepcopy(action.pop("skillTypeIds")),
+        "sourceLabels": deepcopy(action.pop("sourceLabels")),
         "skillFacts": deepcopy(action.pop("skillFacts")),
     }
     action["skillDefinition"] = {"ref": SHARED, "version": "v1"}
+    # The synthetic season binding cites only English; keep its action pins
+    # inside that exact publication scope as required for real shared Skills.
+    action["skillCitations"] = [
+        cite for cite in action["skillCitations"]
+        if cite["sourceId"] == "its-season-18-en-pdf"
+    ]
     origin = {
         "sourceCollectionId": original["collection"]["id"],
         "seasonId": "its-18",

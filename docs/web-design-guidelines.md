@@ -67,6 +67,13 @@ final period). Preserve the maintained source value, meaningful summaries,
 linked summary text, facts, source notes, applicability and citations.
 Apply this in the shared renderer, not by deleting source data.
 
+**Show every source-declared Skill Label.** Standard Skill and Scenario Skill
+cards use the same badge row for declaration types and applicable Labels.
+Preserve source order; link Labels with canonical N5 definitions and display
+source-only qualifiers (such as ITS **Scenario**) as plain badges rather than
+inventing a Label route. Do not infer Labels from a Skill category or hide
+them because a Scenario action already has a Short Skill badge.
+
 **Separate gameplay rules from editorial provenance.** Keep rules players act on
 at normal body size. Source-history, Army/PDF mismatches, and legacy terminology
 belong in `facts.sourceNotes`, rendered in smaller secondary text; retain their

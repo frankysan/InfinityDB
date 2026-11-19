@@ -17,6 +17,8 @@ from tools.browser_wsgi_transport import wsgi_response
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "data/generated"
 SOURCE = ROOT / "data/curated/its/n5-its-season-18.json"
+ITS17 = ROOT / "data/curated/its/n5-its-season-17.json"
+ITS17_SHARED = ROOT / "data/curated/its/shared/its17-scenarios-v1.json"
 
 
 @pytest.fixture(scope="module")
@@ -26,6 +28,16 @@ def app(tmp_path_factory):
     return create_app(
         GENERATED / "army.db", GENERATED / "rules_n5.db",
         season_databases={"its-18": location},
+    )
+
+
+@pytest.fixture(scope="module")
+def its17_app(tmp_path_factory):
+    location = tmp_path_factory.mktemp("scenario-skills-its17") / "its_17.db"
+    build_its_database(ITS17, location, shared_library=ITS17_SHARED)
+    return create_app(
+        GENERATED / "army.db", GENERATED / "rules_n5.db",
+        season_databases={"its-17": location},
     )
 
 
@@ -91,6 +103,97 @@ def test_scenario_actions_use_standard_rule_card_model(app):
     ]
     assert action["skill"]["facts"]["effects"]
     assert action["skill"]["citations"]
+
+
+def test_its17_source_labels_are_visible_on_skill_cards(its17_app):
+    status, catalog = _get(its17_app, "/api/skills")
+    assert status == 200
+    actions = [
+        item for item in catalog["items"]
+        if item["slug"].startswith("its-17-") and item.get("scenario")
+    ]
+    assert len(actions) == 21
+    for item in actions:
+        status, detail = _get(its17_app, f"/api/skills/{item['slug']}")
+        assert status == 200
+        assert [label["name"] for label in detail["rules"][0]["labels"]] == [
+            "Attack", "Scenario",
+        ]
+
+    status, scenario = _get(
+        its17_app, "/api/scenarios/hardlock?collection=its-17&army_points=300",
+    )
+    assert status == 200
+    beacon = next(rule for rule in scenario["special_rules"] if rule["id"] == "pick-up-beacon")
+    assert [label["name"] for label in beacon["skill"]["labels"]] == [
+        "Attack", "Scenario",
+    ]
+    for slug, expected in (("civevac", ["Optional", "Scenario"]),
+                           ("casevac", ["Optional"])):
+        status, skill = _get(its17_app, f"/api/skills/{slug}")
+        assert status == 200
+        assert [label["name"] for label in skill["rules"][0]["labels"]] == expected
+
+
+def test_its18_source_labels_are_visible_on_every_skill_card(app):
+    status, catalog = _get(app, "/api/skills")
+    assert status == 200
+    actions = [
+        item for item in catalog["items"]
+        if item["slug"].startswith("its-18-") and item.get("scenario")
+    ]
+    assert len(actions) == 26
+    for item in actions:
+        status, detail = _get(app, f"/api/skills/{item['slug']}")
+        assert status == 200
+        labels = detail["rules"][0]["labels"]
+        assert [label["name"] for label in labels] == ["Attack", "Scenario"]
+        assert labels[0]["id"] == "attack"
+        assert labels[0]["description"]
+        assert "id" not in labels[1]  # Not a Core N5 Label route.
+
+    status, hardlock = _get(app, "/api/scenarios/hardlock?collection=its-18&army_points=300")
+    assert status == 200
+    beacon = next(rule for rule in hardlock["special_rules"] if rule["id"] == "pick-up-beacon")
+    assert [label["name"] for label in beacon["skill"]["labels"]] == ["Attack", "Scenario"]
+
+    # Core Scenario Skills preserve their own authored N5 Labels.
+    status, core = _get(app, "/api/skills/hack-consoles")
+    assert status == 200
+    assert [label["name"] for label in core["rules"][0]["labels"]] == ["Attack"]
+
+
+@pytest.mark.parametrize(("slug", "expected"), [
+    ("civevac", ["Optional", "Scenario"]),
+    ("casevac", ["Optional"]),
+    ("team-ops", ["Obligatory"]),
+    ("request-tacball", ["Attack", "Optional"]),
+])
+def test_its18_season_skills_display_printed_labels(app, slug, expected):
+    status, detail = _get(app, f"/api/skills/{slug}")
+    assert status == 200
+    labels = detail["rules"][0]["labels"]
+    assert [label["name"] for label in labels] == expected
+    assert all(label.get("id") for label in labels if label["name"] != "Scenario")
+
+
+@pytest.mark.parametrize(("source_labels", "error"), [
+    (["Attack", "Attack"], "sourceLabels"),
+    (["Attack", ""], "sourceLabels"),
+    (["Attack", 42], "sourceLabels"),
+])
+def test_scenario_skill_source_labels_fail_closed(source_labels, error):
+    record = next(
+        row for row in load_curated_document(SOURCE)["records"]
+        if row["id"] == "scenario:hardlock"
+    )
+    action = next(
+        rule for rule in record["facts"]["mission"]["rules"]
+        if rule["id"] == "pick-up-beacon"
+    )
+    action["sourceLabels"] = source_labels
+    with pytest.raises(ValueError, match=error):
+        parse_scenario_definition_record(record)
 
 
 def test_suffix_is_absent_from_skill_detail_scenario_and_search(app):
@@ -201,7 +304,7 @@ def test_scenario_skill_facts_validate_fail_closed(mutation):
         skill["skillFacts"]["unknown"] = ["Invented field"]
     else:
         skill.pop("skillTypeIds")
-    with pytest.raises(ValueError, match="skillFacts"):
+    with pytest.raises(ValueError, match="sourceLabels|skillFacts"):
         parse_scenario_definition_record(record)
 
 
