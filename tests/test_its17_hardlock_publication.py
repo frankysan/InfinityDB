@@ -67,6 +67,7 @@ def test_its17_hardlock_uses_pinned_historical_membership_and_citations() -> Non
     assert [(citation["sourceId"], citation["page"]) for citation in binding["citations"]] == [
         *((EN, page) for page in (59, 60, 61, 62)),
         *((ES, page) for page in (54, 55, 56, 57)),
+        (EN, 13), (ES, 14),
     ]
 
 
@@ -101,12 +102,13 @@ def test_its17_hardlock_preserves_verified_scoring_geometry_and_source_differenc
     assert positions["200-250-points"]["console-left"] == (8, 24)
     assert positions["300-400-points"]["console-left"] == (12, 24)
 
-    # The historical publication identifies a Console A Token, not an
-    # independently specified 40 mm scenery diameter; the modern text does.
+    # Both original ITS 17 source editions establish the token diameters in
+    # the season-wide table, even though the mission uses relative wording.
     historical_text = " ".join(
         paragraph for rule in historical_rules.values() for paragraph in rule["paragraphs"]
     )
-    assert "40 mm" not in historical_text
+    assert "Console Tokens 40 mm and Beacon Tokens 25 mm" in historical_text
+    assert "EN p. 13 / ES p. 14" in historical_text
     assert "40 mm" in " ".join(current_rules["deployment-and-objectives"]["paragraphs"])
     assert "Unlike some other ITS Season 18" not in historical_text
     source_issues = historical["facts"]["mission"]["sourceIssues"]

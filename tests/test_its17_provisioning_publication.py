@@ -69,6 +69,7 @@ def test_its17_provisioning_has_independent_source_and_shared_pin() -> None:
     assert [(row["sourceId"], row["page"]) for row in binding["citations"]] == [
         *((EN, page) for page in (72, 73, 74, 75, 76)),
         *((ES, page) for page in (70, 71, 72, 73, 74)),
+        (EN, 13), (ES, 14),
     ]
 
 
@@ -122,9 +123,10 @@ def test_its17_provisioning_does_not_inherit_its18_source_disputes() -> None:
     old, current = records()
     rules = {row["id"]: row for row in old["facts"]["mission"]["rules"]}
     current_rules = {row["id"]: row for row in current["facts"]["mission"]["rules"]}
-    assert "40 mm" not in " ".join(
+    assert "40 mm Tech-Coffin Token" in " ".join(
         rules["deployment-and-tech-coffins"]["paragraphs"]
-    ).replace("an independent 40 mm size", "")
+    )
+    assert "EN p. 13 / ES p. 14" in rules["deployment-and-tech-coffins"]["paragraphs"][1]
     assert "40 mm" in " ".join(
         current_rules["deployment-and-tech-coffins"]["paragraphs"]
     )

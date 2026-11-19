@@ -58,6 +58,7 @@ def test_its17_crossing_lines_is_independently_source_pinned() -> None:
     assert [(c["sourceId"], c["page"]) for c in binding["citations"]] == [
         *((EN, page) for page in (51, 52, 53, 54)),
         *((ES, page) for page in (42, 43, 44, 45)),
+        (EN, 13), (ES, 14),
     ]
 
 

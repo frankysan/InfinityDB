@@ -59,6 +59,7 @@ def test_its17_akial_source_pins_and_membership() -> None:
     assert [(c["sourceId"], c["page"]) for c in binding["citations"]] == [
         *((EN, p) for p in range(31, 36)),
         *((ES, p) for p in range(58, 63)),
+        (EN, 13), (ES, 14),
     ]
 
 
@@ -109,7 +110,8 @@ def test_its17_akial_local_rule_and_nested_skill_citation_provenance() -> None:
     assert "four HVT" in rules["multiple-hvts"]["paragraphs"][0]
     assert "matching" in rules["akial-antenna"]["paragraphs"][0]
     assert "40 mm" in latest["akial-antenna"]["paragraphs"][0]
-    assert "Neither original fixes a 40 mm size" in rules["akial-antenna"]["paragraphs"][0]
+    assert "EN p. 13 / ES p. 14" in rules["akial-antenna"]["paragraphs"][0]
+    assert "40 mm" in rules["akial-antenna"]["paragraphs"][0]
     emit = rules["emit-akial-interference"]
     filtering = rules["filter-signal"]
     assert emit["skillTypeIds"] == filtering["skillTypeIds"] == ["short-skill"]

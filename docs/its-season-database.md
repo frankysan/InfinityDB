@@ -266,18 +266,18 @@ support its mission, six army sizes / three maps, two Extraction
 Consoles and scoring. Per-language Classified scoring, opening
 activation timing and cross-player Console reactivation ambiguities
 retain historical page references rather than inheriting ITS 18's.
-ITS 17's Console description says to use a Console A Token or
-scenery of the same diameter; it does **not** independently specify
-a 40 mm diameter in this mission's text, so the separate ITS 18
-40 mm assertion is not carried into the historical rule prose.
+ITS 17's mission describes a Console A Token or matching-diameter
+scenery; the separate ITS 17 V0.2 global token table (EN p. 13 /
+ES p. 14) confirms its **40 mm** Console footprint.
 
 Hardlock independently matches ITS 18's six-size scoring, three geometry
 configurations, two scenario Skills, Specialist Troops and end conditions.
 ITS 17 EN pp. **59–62** and ES pp. **54–57** supply eight season-local
 citations. Its original map and text specify 6/8/12-inch offsets for
 side Consoles and owner-specific Beacons at the Deployment Zone inner
-edges. The ITS 17 mission refers to a Console A Token or equal-diameter
-scenery but does not itself assert ITS 18's explicit 40 mm scenery size.
+edges. The mission refers to Console A and Beacon Tokens or
+matching-diameter scenery; the ITS 17 V0.2 global table (EN p. 13 /
+ES p. 14) specifies **40 mm Consoles** and **25 mm Beacons**.
 Both editions preserve EN/ES differences concerning a Connected versus
 Activated Console and the Normal State of a transferring Beacon carrier.
 ITS 17's one Tactical Support Option belongs to historical play context,
@@ -288,9 +288,10 @@ Uplink Center independently matches ITS 18's four scoring conditions,
 Antenna activation, Tech-Coffin Control, Operational Learning, Active
 Lieutenant and end conditions. ITS 17 EN pp. **93–96** and ES pp. **99–102**
 supply eight season-local citations. The 6/8/12-inch Antenna offsets and
-central Tech-Coffin agree across the printed maps; the original ITS 17 text
-requires Tokens or scenery of matching diameter, without separately
-specifying ITS 18's 40 mm. ITS 17 ES p. 100 omits **350** from the
+central Tech-Coffin agree across the printed maps; ITS 17 permits the
+named Tokens or matching-diameter scenery. Its V0.2 token table
+(EN p. 13 / ES p. 14) specifies **40 mm** for both Transmission
+Antenna and Tech-Coffin Tokens. ITS 17 ES p. 100 omits **350** from the
 300/350/400-point Antenna placement grouping; both source maps and EN p. 94
 include 350. The discrepancy remains source-local rather than inventing a
 fourth configuration. ITS 17's zero Tactical Support Options likewise belong
@@ -354,8 +355,9 @@ This preserves the ten-point mission maximum (6 + 3 + 1). The historic
 Key Ops selection, Dodge (+3), Tactical Awareness and English REM/VH
 restriction are retained. Spanish omits VH, and the Shasvastii
 Unconscious/non-Null versus Normal/Embryo formulations differ, so both
-remain historical source issues. ITS 17 refers to Console A Token
-size rather than independently asserting ITS 18's 40 mm dimension.
+remain historical source issues. The mission uses Console A Tokens
+and the ITS 17 V0.2 token table (EN p. 13 / ES p. 14) fixes their
+**40 mm** diameter.
 
 Provisioning has independently reviewed ITS 17 V0.2 EN pp. **72–76**
 and ES pp. **70–74**. Its four-box scoring (4 + 3 + 2 + 1 OP),
@@ -363,8 +365,8 @@ three diagonal Tech-Coffins, corner quarter-circle deployments,
 three game-size maps, Safe Areas, Specialist actions and endings
 match the current definition. The original 8/12/16-inch coffin
 spacing is confirmed by both language editions' diagrams. Its
-Tech-Coffin Token scenery has a relative matching diameter,
-without ITS 18's explicit 40 mm. Both historical languages mark
+Tech-Coffin Token scenery uses a matching diameter, which the
+ITS 17 V0.2 chart (EN p. 13 / ES p. 14) fixes at **40 mm**. Both historical languages mark
 an emptied coffin with a Player Token (ITS 18 English may instead
 remove its Token), limit Specialist/WIP-3 recovery to the **enemy**
 Safe Area (ITS 18 English says *a* Safe Area), and explicitly place
@@ -379,7 +381,9 @@ quarter-circle deployments (12/20/24-inch radii), one central
 Antenna, three player-placed Circular Template Areas, INTELCOM
 choice and three-round/Retreat! endings match ITS 18. Both
 historical languages specify a Transmission Antenna Token or
-same-diameter scenery, **not** ITS 18 English's explicit 40 mm.
+matching-diameter scenery. The ITS 17 V0.2 chart (EN p. 13 /
+ES p. 14) independently fixes **40 mm** for Transmission Antennas
+and **25 mm** for the Player A/B activation Tokens.
 The ITS 17 editions disagree on Reinforcements suitability
 (**EN YES / ES NO**), enemy Hacker ARO optionality, and the
 Shasvastii state wording (EN Unconscious/any non-Null versus
@@ -394,8 +398,9 @@ the three table configurations, 4/8-inch Scanner offsets, three ID actions,
 8-inch central Launching Tower, four open Wide Gates, Baggage, No Quarter
 and the third-round ending. ITS 17 V0.2 EN pp. **63–67** and ES pp.
 **75–80** provide eleven historical citations. Both versions specify scenery
-matching the ID Scanner/Checker Token diameter, without the explicit
-40 mm dimension of ITS 18. ITS 17 EN names an 8-inch Tower versus ES 20 cm;
+matching the ID Scanner/Checker Token diameter, confirmed as
+**40 mm** for Tech-Coffin and Console Tokens by ITS 17's V0.2
+chart (EN p. 13 / ES p. 14). ITS 17 EN names an 8-inch Tower versus ES 20 cm;
 Spanish alone specifies gate access for any Silhouette; EN Shasvastii
 non-Null wording differs from Spanish Normal/Unconscious; and EN says
 removed Troopers' points while ES uses singular for Peripheral extraction.
@@ -409,8 +414,9 @@ Skills and the round limit. Unlike ITS 18, **both** ITS 17 languages
 measure Beacon relocation from its **previous position** and specify
 that Console Activation requires the Beacon not to touch a Trooper and
 limits each successful Specialist Activation to once per round.
-Both historical originals use equal-diameter scenery rather than a
-fixed 40/25 mm. They also agree on end-of-round Beacon Control. The
+Both historical originals permit equal-diameter scenery. The ITS 17
+V0.2 token chart (EN p. 13 / ES p. 14) specifies **25 mm Beacons**
+and **40 mm Consoles**. Both editions agree on end-of-round Beacon Control. The
 remaining bilingual source issues concern EN **up to 6 inches** versus
 ES **15 cm** for Magnetize, and Spanish calling a successful Console
 *Conectada* rather than *Activada*. These remain explicit and are not
@@ -420,9 +426,10 @@ Tactical Support Options in both languages.
 Crossing Lines V0.2 EN pp. **51–54** and ES pp. **42–45** confirms the
 ITS 18 3 + 3 + 2 + 2 OP scoring, split-deployment geometry, central
 75-point deployment cap, 6/8/12-inch Antenna offsets, Activate Antenna
-Short Skill, and third-round/Retreat! endings. Historical Antennas use
-**same-diameter scenery** rather than ITS 18's mandatory 40 mm: EN p. 53
-names Transmission Antenna Tokens while ES p. 44 names Console A Tokens.
+Short Skill, and third-round/Retreat! endings. EN p. 53 specifies
+Transmission Antenna Tokens while ES p. 44 says Console A Tokens.
+Both are **40 mm** under the ITS 17 V0.2 chart (EN p. 13 / ES p. 14).
+The bilingual representation disagreement remains unresolved.
 The EN table gives an inconsistent longer central-strip length for
 150/200/250 points; ES p. 42 supports the reused layout's actual table
 widths. EN p. 53 counts Shasvastii-Embryo or other non-Null States whereas
@@ -435,8 +442,9 @@ Corporate Appropriation V0.2 EN pp. **40–44** and ES pp. **32–37**
 confirms the 2 + 1 + (3 or 1) + 1 + 3 OP scoring, three deployment
 configurations, two Prototypes and Panoplies, their fixed positions,
 ADS defense, first-round protection, and three Classified Objectives.
-Historical Prototypes/Panoplies permit Objective Tokens or
-**matching-diameter scenery**, without ITS 18's fixed 40 mm.
+Historical Panoplies permit Objective Tokens or matching-diameter
+scenery; ITS 17 V0.2 EN p. 13 / ES p. 14 fixes the Objective Token
+at **40 mm**. No unreviewed Prototype diameter is inferred.
 Both ITS 17 languages expressly restrict Prototype-targeting Attacks
 affecting other Troopers and forbid **all** CC Attribute MODs to the
 attacker against ADS; unlike ITS 18, these are not bilingual disputes.
@@ -454,8 +462,8 @@ printed Main Objective awards total 11 OP plus 1 Classified OP;
 they are retained instead of applying an unprinted 10-point cap.
 Both historical languages print STR 1 for the Armed Turrets and say
 the active Defense System reacts to **enemy Models**, not explicitly
-Attacker Models. The Console and Inhibitor Antenna use scenery matching
-the Token diameters without ITS 18's explicit 40 mm. Six independent
+Attacker Models. The Console and Inhibitor Antenna permit scenery
+matching their **40 mm** Tokens under ITS 17 V0.2 EN p. 13 / ES p. 14. Six independent
 source issues preserve the 8-inch/20-cm Server Room dimensions,
 Spanish-only Silhouette access wording for the Gates, Shasvastii
 states, Victory Points versus Army Points for INTELCOM, 4-inch/10-cm
@@ -478,8 +486,9 @@ confirms the 6 + 1 + 1 + 2 OP scoring, 2 public Common Classified
 Objectives per Round, 1 Private Classified Objective, 4 HVTs per
 player and 3 deployment maps. Historical source explicitly disables
 **both Secure HVT and Secure Treasure**, while retaining HVT Models.
-The one central Akial Antenna uses a Transmission Antenna Token or
-**matching-diameter scenery**, without a fixed 40 mm as in ITS 18.
+The central Akial Antenna uses a Transmission Antenna Token or matching-
+diameter scenery. The ITS 17 V0.2 chart (EN p. 13 / ES p. 14) specifies
+**40 mm** for that Token, independently of ITS 18.
 Emit Akial Interference and Filter the Signal remain typed Short Skills
 with **ITS 17-local Skill citations**, not inherited ITS 18 citations.
 Both originals allow repeated failed Emit Rolls but also limit each
@@ -488,6 +497,26 @@ ambiguity is recorded without inventing an interpretation.
 Nested Skill citation `sourceId` validation accepts versioned source IDs with
 revision dots (such as `v0.2`) without weakening identifier validation for
 route slugs; malformed source IDs remain rejected by focused tests.
+
+**ITS 17 V0.2 global token-diameter correction (2026-11-19):**
+The independently pinned English **p. 13** and Spanish **p. 14**
+each print the same season-wide Diameter of ITS Tokens table:
+Transmission Antenna, Tech-Coffin, Console and Objective Tokens are
+**40 mm**; Supply Box, Beacon, Player A/B, Data Pack, Defensive Turret
+and CivEvac Tokens are **25 mm**. The scenario pages often give only
+matching-diameter scenery, but that is not an absence of source-wide
+dimensions. Twelve historically curated missions were reconciled
+against the chart: Evacuation, Hardlock, Uplink Center, Superiority,
+Provisioning, Area of Interest, Last Launch, B-Pong, Crossing Lines,
+Corporate Appropriation, Critical Intervention and Akial Interference.
+Each updated definition and season membership now has the two additional
+source page citations. This does **not** prescribe the physical base
+size of a Civilian Model or unlisted Prototype/Gate, nor resolve
+Crossing Lines' genuine EN Transmission Antenna versus ES Console A
+representation mismatch; both named Token types happen to be 40 mm.
+Neither ITS 18 curation nor scenario scoring/geometry was changed.
+The guarded one-time authoring migration was
+`tools.research.reconcile_its17_token_chart`.
 
 **ITS 17 season-wide Skills and State (2026-11-19):** Independent
 review of pinned V0.2 EN pp. **17–21** and ES pp. **18–22**

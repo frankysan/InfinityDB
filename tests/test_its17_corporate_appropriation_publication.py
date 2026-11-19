@@ -64,6 +64,7 @@ def test_its17_corporate_appropriation_has_independent_source_pins() -> None:
     assert [(c["sourceId"], c["page"]) for c in binding["citations"]] == [
         *((EN, page) for page in range(40, 45)),
         *((ES, page) for page in range(32, 38)),
+        (EN, 13), (ES, 14),
     ]
 
 

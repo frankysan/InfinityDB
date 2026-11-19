@@ -58,6 +58,7 @@ def test_its17_last_launch_has_bilingual_pinned_source_membership() -> None:
     assert [(c["sourceId"], c["page"]) for c in binding["citations"]] == [
         *((EN, page) for page in (63, 64, 65, 66, 67)),
         *((ES, page) for page in (75, 76, 77, 78, 79, 80)),
+        (EN, 13), (ES, 14),
     ]
 
 
@@ -119,7 +120,8 @@ def test_its17_last_launch_keeps_historical_diameters_and_bilingual_issues() -> 
             "matching-diameter" in old[name]["paragraphs"][0]
         )
         assert "40 mm" in now[name]["paragraphs"][0]
-        assert "does not independently specify" in old[name]["paragraphs"][0]
+        assert "EN p. 13 / ES p. 14" in old[name]["paragraphs"][0]
+        assert "40 mm" in old[name]["paragraphs"][0]
     assert "ES p. 77" in old["launching-tower-gates"]["paragraphs"][0]
     assert "ES p. 78" in old["dominate-launching-tower"]["paragraphs"][1]
     extract = old["extract-identified-trooper"]

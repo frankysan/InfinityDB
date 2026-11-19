@@ -58,6 +58,7 @@ def test_its17_b_pong_is_independently_source_pinned() -> None:
     assert [(c["sourceId"], c["page"]) for c in binding["citations"]] == [
         *((EN, page) for page in range(36, 40)),
         *((ES, page) for page in range(38, 42)),
+        (EN, 13), (ES, 14),
     ]
 
 

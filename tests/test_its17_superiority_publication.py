@@ -69,6 +69,7 @@ def test_its17_superiority_source_pins_and_membership() -> None:
     assert [(row["sourceId"], row["page"]) for row in binding["citations"]] == [
         (EN, 89), (EN, 90), (EN, 91), (EN, 92),
         (ES, 94), (ES, 95), (ES, 96), (ES, 97), (ES, 98),
+        (EN, 13), (ES, 14),
     ]
 
 
@@ -115,7 +116,8 @@ def test_superiority_reuses_reviewed_skills_and_notes_source_differences() -> No
         "specialist-troops", "operational-learning", "hvt-and-classified-deck",
     ):
         assert rules[name] == current_rules[name]
-    assert "40 mm" not in " ".join(rules["consoles"]["paragraphs"])
+    assert "40 mm" in " ".join(rules["consoles"]["paragraphs"])
+    assert "EN p. 13 / ES p. 14" in rules["consoles"]["paragraphs"][0]
     assert "40 mm" in " ".join(current_rules["consoles"]["paragraphs"])
     key = " ".join(rules["key-ops"]["paragraphs"])
     assert "REM or VH" in key

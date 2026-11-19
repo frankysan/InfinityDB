@@ -68,6 +68,7 @@ def test_its17_area_source_identity_and_bilingual_citations() -> None:
     assert [(row["sourceId"], row["page"]) for row in binding["citations"]] == [
         (EN, 77), (EN, 78), (EN, 79), (EN, 80),
         (ES, 80), (ES, 81), (ES, 82), (ES, 83), (ES, 84),
+        (EN, 13), (ES, 14),
     ]
 
 
@@ -109,7 +110,8 @@ def test_its17_area_historical_antenna_rules_and_source_differences() -> None:
         assert rules[name] == current_rules[name]
     historic_antenna = " ".join(rules["communication-antenna"]["paragraphs"])
     assert "matching diameter" in historic_antenna
-    assert "independently specifies a 40 mm" in historic_antenna
+    assert "40 mm Transmission Antenna Token" in historic_antenna
+    assert "EN p. 13 / ES p. 14" in historic_antenna
     assert "single 40 mm" in current_rules["communication-antenna"]["paragraphs"][0]
     activation = rules["activate-communication-antenna"]
     assert activation["skillTypeIds"] == ["short-skill"]

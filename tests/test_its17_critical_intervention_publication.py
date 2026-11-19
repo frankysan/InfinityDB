@@ -58,6 +58,7 @@ def test_its17_critical_intervention_has_own_bilingual_publication() -> None:
     assert [(c["sourceId"], c["page"]) for c in binding["citations"]] == [
         *((EN, page) for page in range(45, 51)),
         *((ES, page) for page in range(63, 70)),
+        (EN, 13), (ES, 14),
     ]
 
 

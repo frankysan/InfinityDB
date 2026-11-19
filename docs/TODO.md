@@ -598,6 +598,12 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         Preserve the English Short Movement Skill declarations, the
         distinct Spanish Basic Short Skill labels, the independent State
         cancelation rules, bilingual citations and ITS 18 isolation.
+      - [x] Reconcile the original ITS 17 V0.2 global token diameter chart
+        (EN p. 13 / ES p. 14) against twelve reviewed scenario definitions.
+        Pin the chart pages in each affected season membership and shared
+        definition; resolve the erroneous unspecified-diameter claims while
+        preserving genuine EN/ES token-name differences. Test isolated
+        SQLite and keep ITS 18 unchanged.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
         discrepancies, optional Extras (including Resilience Operations)

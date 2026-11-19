@@ -263,7 +263,7 @@
                 "name": "Civilians",
                 "paragraphs": [
                   "Four Civilians begin at the positions indicated on each game-size map. Each must be on an accessible point of the table, not on top of or inside scenery or buildings; terrain placement must allow this.",
-                  "Use suitable civilian/HVT Models or Player A/B Tokens as the source permits. The source does not assign a fixed physical base diameter to the Civilian figures or Tokens, so map symbols indicate center positions only.",
+                  "Use suitable civilian/HVT Models or Player A/B Tokens as the source permits. ITS 17 V0.2 EN p. 13 / ES p. 14 sets Player A/B Tokens at 25 mm, but does not prescribe Civilian Model base sizes; map symbols indicate center positions only.",
                   "Civilians may be CivEvaced under the applicable CivEvac rules. Extraction is a separate successful Scenario Skill, not automatic from being CivEvaced."
                 ]
               },
@@ -279,7 +279,7 @@
                 "id": "extraction-consoles",
                 "name": "Extraction Consoles",
                 "paragraphs": [
-                  "Two Extraction Consoles begin on the table centerline at the printed positions. Each is a Console A Token or a scenery piece of the same diameter as that Token.",
+                  "Two Extraction Consoles begin on the table centerline at the printed positions. Each is a Console A Token or scenery matching its 40 mm diameter (ITS 17 V0.2 EN p. 13 / ES p. 14).",
                   "The Consoles are shared extraction points; activating a Console does not itself award points or establish exclusive ownership."
                 ]
               },
@@ -914,6 +914,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 53,
             "section": "Evacuación"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -1243,7 +1253,7 @@
                 "name": "Deployment and objective positions",
                 "paragraphs": [
                   "Sides A and B deploy on opposite table edges in game-size-specific Deployment Zones. Troopers may not deploy in Silhouette contact with any Beacon or Console.",
-                  "There are two Beacons, one for each player, positioned in the middle of the front edge of each Deployment Zone. The one beside the opponent's Deployment Zone is the Enemy Beacon. Three Consoles stand along the table centerline: one at the center, with the others [[distance:6:inch]] from the side edges at 150 points, [[distance:8:inch]] at 200/250 points and [[distance:12:inch]] at 300/350/400 points. Each Console uses a Console A Token or scenery of the same diameter as that Token; the ITS 17 mission does not state an independent millimeter diameter."
+                  "There are two Beacons, one for each player, positioned in the middle of the front edge of each Deployment Zone. The one beside the opponent's Deployment Zone is the Enemy Beacon. Three Consoles stand along the table centerline: one at the center, with the others [[distance:6:inch]] from the side edges at 150 points, [[distance:8:inch]] at 200/250 points and [[distance:12:inch]] at 300/350/400 points. Each Console uses a Console A Token or scenery of the same diameter as that Token; the ITS 17 V0.2 EN p. 13 / ES p. 14 chart gives Console Tokens 40 mm and Beacon Tokens 25 mm."
                 ]
               },
               {
@@ -1845,6 +1855,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 57,
             "section": "Hardlock"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -2145,7 +2165,7 @@
                 "name": "Deployment and objectives",
                 "paragraphs": [
                   "Sides A and B deploy on opposite sides of the game table. Neither player may deploy in Silhouette contact with the Tech-Coffin or Communication Antennas.",
-                  "Two Communication Antennas are on the table centerline, [[distance:6:inch]] from the side edges at 150 points, [[distance:8:inch]] at 200/250 points, and [[distance:12:inch]] at 300/350/400 points. The Tech-Coffin is at the table center. Each objective uses its named Token or scenery of the same diameter; the ITS 17 mission does not independently specify a numeric diameter."
+                  "Two Communication Antennas are on the table centerline, [[distance:6:inch]] from the side edges at 150 points, [[distance:8:inch]] at 200/250 points, and [[distance:12:inch]] at 300/350/400 points. The Tech-Coffin is at the table center. Each objective uses its named Token or scenery of the same diameter; the ITS 17 V0.2 EN p. 13 / ES p. 14 chart gives Transmission Antenna and Tech-Coffin Tokens 40 mm."
                 ]
               },
               {
@@ -2687,6 +2707,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 102,
             "section": "Uplink Center"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -5757,7 +5787,7 @@
                 "id": "consoles",
                 "name": "Consoles",
                 "paragraphs": [
-                  "Four Consoles stand in the center of the four Quadrants. Use a Console A Token or a piece of scenery of the same diameter; ITS 17 does not independently specify a numeric diameter."
+                  "Four Consoles stand in the center of the four Quadrants. Use a Console A Token or a piece of scenery of the same diameter; The ITS 17 V0.2 EN p. 13 / ES p. 14 chart specifies 40 mm for Console Tokens."
                 ]
               },
               {
@@ -6573,6 +6603,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 98,
             "section": "Superioridad"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -6877,7 +6917,7 @@
                 "name": "Deployment and Tech-Coffins",
                 "paragraphs": [
                   "Both sides deploy in opposite corner quarter-circle Deployment Zones shown on the three game-size maps. A Trooper may not deploy in Silhouette contact with a Tech-Coffin.",
-                  "Three Tech-Coffins lie along the central diagonal, one at the table center and two [[distance:8:inch]] / [[distance:12:inch]] / [[distance:16:inch]] from it in 150 / 200–250 / 300–400-point games. Each outer Tech-Coffin contains one Supply Box and the central one contains two. Use a Tech-Coffin Marker or a scenery piece of equal diameter; the ITS 17 mission does not specify an independent 40 mm size."
+                  "Three Tech-Coffins lie along the central diagonal, one at the table center and two [[distance:8:inch]] / [[distance:12:inch]] / [[distance:16:inch]] from it in 150 / 200–250 / 300–400-point games. Each outer Tech-Coffin contains one Supply Box and the central one contains two. Use a Tech-Coffin Marker or a scenery piece of equal diameter; the ITS 17 V0.2 EN p. 13 / ES p. 14 chart specifies a 40 mm Tech-Coffin Token."
                 ]
               },
               {
@@ -7352,6 +7392,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 74,
             "section": "Reabastecimiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -7648,7 +7698,7 @@
                 "id": "communication-antenna",
                 "name": "Communication Antenna",
                 "paragraphs": [
-                  "One Communication Antenna stands at the table center, represented by a Transmission Antenna Token (TRANS. ANTENNA) or scenery of matching diameter. Neither ITS 17 language edition independently specifies a 40 mm diameter. Player A/B Tokens can mark its current Activation.",
+                  "One Communication Antenna stands at the table center, represented by a Transmission Antenna Token (TRANS. ANTENNA) or scenery of matching diameter. ITS 17 V0.2 EN p. 13 / ES p. 14 specifies a 40 mm Transmission Antenna Token and 25 mm Player A/B Tokens. Player A/B Tokens can mark its current Activation.",
                   "The Antenna may be Activated repeatedly by either player; activating it for your player replaces the opponent's activation."
                 ]
               },
@@ -8116,6 +8166,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 84,
             "section": "Área de Interés"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -8456,7 +8516,7 @@
                 "id": "id-scanners",
                 "name": "ID Scanners",
                 "paragraphs": [
-                  "Two ID Scanners stand along the table centerline, each [[distance:4:inch]] from the table edge at 150 points and [[distance:8:inch]] otherwise (ES: [[distance:10:cm]] / [[distance:20:cm]]). Represent each with a Tech-Coffin Token or scenery of matching diameter. ITS 17 does not independently specify the 40 mm scenery size of ITS 18."
+                  "Two ID Scanners stand along the table centerline, each [[distance:4:inch]] from the table edge at 150 points and [[distance:8:inch]] otherwise (ES: [[distance:10:cm]] / [[distance:20:cm]]). Represent each with a Tech-Coffin Token or scenery of matching diameter. The ITS 17 V0.2 EN p. 13 / ES p. 14 chart specifies a 40 mm Tech-Coffin Token."
                 ]
               },
               {
@@ -8526,7 +8586,7 @@
                 "id": "id-checker",
                 "name": "ID Checker",
                 "paragraphs": [
-                  "One ID Checker stands at the center of the Launching Tower. Represent it with a Console A Token or a piece of matching-diameter scenery; ITS 17 does not independently specify a 40 mm diameter."
+                  "One ID Checker stands at the center of the Launching Tower. Represent it with a Console A Token or a piece of matching-diameter scenery; The ITS 17 V0.2 EN p. 13 / ES p. 14 chart specifies a 40 mm Console Token."
                 ]
               },
               {
@@ -9137,6 +9197,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 80,
             "section": "Último Lanzamiento"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -9443,7 +9513,7 @@
                 "id": "tracking-beacon-representation",
                 "name": "Tracking Beacon",
                 "paragraphs": [
-                  "One Tracking Beacon begins at the table center and is represented by a Beacon Token or equivalent scenery of matching diameter. Neither ITS 17 edition specifies an independent 40 mm or 25 mm diameter for this mission.",
+                  "One Tracking Beacon begins at the table center and is represented by a Beacon Token or equivalent scenery of matching diameter. ITS 17 V0.2 EN p. 13 / ES p. 14 lists the Beacon Token at 25 mm, not 40 mm.",
                   "At the end of each Game Round, a player Controls the Beacon only if they alone have a non-Null Trooper Model, not a Marker, in Silhouette contact and no enemy Trooper is in contact. Both ITS 17 language editions use end-of-round timing."
                 ]
               },
@@ -10084,6 +10154,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 41,
             "section": "B-Pong"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -10971,11 +11051,11 @@
                   "restrictions": [],
                   "clarifications": [],
                   "sourceNotes": [
-                    "ITS 17 V0.2 EN p. 53 represents Antennas with Transmission Antenna Tokens; ES p. 44 says Console A Tokens. Both say matching-diameter scenery; do not inherit ITS 18's explicit 40 mm requirement."
+                    "ITS 17 V0.2 EN p. 53 represents Antennas with Transmission Antenna Tokens; ES p. 44 says Console A Tokens. Both say matching-diameter scenery; both types are 40 mm under the ITS 17 V0.2 EN p. 13 / ES p. 14 chart; the naming conflict remains."
                   ]
                 },
                 "paragraphs": [
-                  "Two Antennas are positioned on the centerline, [[distance:6:inch]] / [[distance:8:inch]] / [[distance:12:inch]] from the table edges at 150 / 200–250 / 300–400 points respectively. ITS 17 EN p. 53 requires a Transmission Antenna Token or matching-diameter scenery; ES p. 44 instead specifies a Console A Token or equivalent same-diameter scenery. Neither specifies a fixed 40 mm size.",
+                  "Two Antennas are positioned on the centerline, [[distance:6:inch]] / [[distance:8:inch]] / [[distance:12:inch]] from the table edges at 150 / 200–250 / 300–400 points respectively. ITS 17 EN p. 53 requires a Transmission Antenna Token or matching-diameter scenery; ES p. 44 instead specifies a Console A Token or equivalent same-diameter scenery. Both Token types are 40 mm under the ITS 17 V0.2 EN p. 13 / ES p. 14 chart.",
                   "Only Specialist Troops in Silhouette contact with an Antenna may use the Activate Antenna Short Skill: a successful Normal WIP Roll activates it for that player; failed attempts may be retried.",
                   "An Antenna can be activated by the opponent, replacing the previous player's ownership Token."
                 ]
@@ -11058,7 +11138,7 @@
                 ],
                 "objectiveId": "activate-antennas",
                 "status": "needs-verification",
-                "description": "ITS 17 EN p. 53 represents an Antenna with a Transmission Antenna Token; ES p. 44 instead says Console A Token. Both allow scenery matching that Token's diameter without independently fixing a 40 mm size."
+                "description": "ITS 17 EN p. 53 represents an Antenna with a Transmission Antenna Token; ES p. 44 instead says Console A Token. Both allow scenery matching that Token's diameter both Token types are 40 mm under the ITS 17 V0.2 EN p. 13 / ES p. 14 chart, despite the naming conflict."
               },
               {
                 "id": "its17-crossing-lines-hvt-source-gap",
@@ -11117,6 +11197,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 45,
             "section": "Cruce de Líneas"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -11519,7 +11609,7 @@
                 "id": "panoplies",
                 "name": "Panoplies",
                 "paragraphs": [
-                  "Two Panoplies, one in each table half, are at the midpoint of the forward boundary of each Deployment Zone. Use an Objective Token or matching-diameter scenery; ITS 17 gives no fixed 40 mm.",
+                  "Two Panoplies, one in each table half, are at the midpoint of the forward boundary of each Deployment Zone. Use an Objective Token or matching-diameter scenery; The ITS 17 V0.2 EN p. 13 / ES p. 14 chart gives the Objective Token a 40 mm diameter.",
                   "A Trooper in Silhouette contact with a Panoply can spend one Short Skill to cancel Unloaded State. The separate Use Panoply Short Skill governs acquiring D-Charges or other equipment."
                 ]
               },
@@ -12118,6 +12208,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 37,
             "section": "Apropiación Corporativa"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -12752,7 +12852,7 @@
                 "id": "data-console",
                 "name": "Data Console",
                 "paragraphs": [
-                  "One Data Console at the center of the Server Room holds exactly one Data Pack. Represent it with a Console A Token or scenery of matching diameter (ITS 17 EN p. 48 / ES p. 67). Neither edition specifies an independent 40 mm dimension."
+                  "One Data Console at the center of the Server Room holds exactly one Data Pack. Represent it with a Console A Token or scenery of matching diameter (ITS 17 EN p. 48 / ES p. 67). ITS 17 V0.2 EN p. 13 / ES p. 14 specifies 40 mm for the Console Token."
                 ]
               },
               {
@@ -12791,7 +12891,7 @@
                 "id": "inhibitor-antenna",
                 "name": "Inhibitor Antenna",
                 "paragraphs": [
-                  "One Inhibitor Antenna stands next to an exterior Server Room corner in the Defender's table half. It uses a Transmission Antenna Token or matching-diameter scenery (ITS 17 EN p. 49 / ES p. 68), without a specified fixed 40 mm footprint."
+                  "One Inhibitor Antenna stands next to an exterior Server Room corner in the Defender's table half. It uses a Transmission Antenna Token or matching-diameter scenery (ITS 17 EN p. 49 / ES p. 68), at 40 mm under the ITS 17 V0.2 EN p. 13 / ES p. 14 Transmission Antenna chart entry."
                 ]
               },
               {
@@ -13489,6 +13589,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 69,
             "section": "Intervención Crítica"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {
@@ -14618,7 +14728,7 @@
                 "id": "akial-antenna",
                 "name": "Akial Antenna",
                 "paragraphs": [
-                  "One Akial Antenna stands at the center of the table (ITS 17 EN p. 33 and ES p. 60). Represent it with a Transmission Antenna Token (TRANS. ANTENNA) or a scenery piece matching the Token's diameter. Neither original fixes a 40 mm size.",
+                  "One Akial Antenna stands at the center of the table (ITS 17 EN p. 33 and ES p. 60). Represent it with a Transmission Antenna Token (TRANS. ANTENNA) or a scenery piece matching the Token's diameter. The ITS 17 V0.2 EN p. 13 / ES p. 14 chart fixes the Transmission Antenna Token at 40 mm.",
                   "The Akial Antenna is used by Emit Akial Interference and Filter the Signal. No deployment in Silhouette contact with the Antenna or any HVT is permitted."
                 ]
               },
@@ -15107,6 +15217,16 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 62,
             "section": "Interferencia Akial"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 13,
+            "section": "Diameter of ITS Tokens"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 14,
+            "section": "Diámetro de los Tokens ITS"
           }
         ],
         "review": {

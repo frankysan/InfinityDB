@@ -345,3 +345,22 @@ affected area, observation and evidence, proposed change, and disposition.
   silently weakening the revision-selection contract.
 - **Disposition:** proposed; do not rewrite the baseline as part of ITS 17
   historical source authoring.
+
+## AI-0017 — Verify season-wide source tables before declaring mission values absent
+
+- **Date:** 2026-11-19
+- **Area:** ITS scenario source review and authoring instructions.
+- **Observation:** Twelve independently reviewed ITS 17 scenarios described
+  matching-diameter Tokens without a numeric value on their mission pages.
+  Previous authorship treated the size as missing, even though the original
+  EN p. 13 / ES p. 14 season-wide chart specifies exact token diameters.
+- **Proposed:** During ITS scenario authoring, cross-check the season-wide
+  Token table and other applicable general sections before marking a fact
+  unspecified. Keep mission-specific representation conflicts separate
+  from quantitative disagreements; explicitly cite the general page when
+  applying a season-wide value.
+- **Why:** Avoid incorrect uncertainty notes and repeated per-scenario review
+  mistakes without building another database or source extraction pipeline.
+- **Disposition:** The twelve source facts and citations are corrected in
+  the current ITS 17 data; a concise authoring-instruction reminder remains
+  an optional follow-up.

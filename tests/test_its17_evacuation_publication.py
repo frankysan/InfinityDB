@@ -70,6 +70,7 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
     assert [(item["sourceId"], item["page"]) for item in binding["citations"]] == [
         *((EN, page) for page in (55, 56, 57, 58)),
         *((ES, page) for page in (50, 51, 52, 53)),
+        (EN, 13), (ES, 14),
     ]
     library = json.loads(SHARED.read_text(encoding="utf-8"))
     assert [entry["id"] for entry in library["definitions"]] == [
@@ -134,7 +135,8 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
     assert record["scope"]["seasons"] == ["its-17"]
     assert record["sharedDefinition"]["origin"]["seasonId"] == "its-17"
     rules = {item["id"]: item for item in record["facts"]["mission"]["rules"]}
-    assert "40 mm" not in rules["extraction-consoles"]["paragraphs"][0]
+    assert "40 mm" in rules["extraction-consoles"]["paragraphs"][0]
+    assert "EN p. 13 / ES p. 14" in rules["extraction-consoles"]["paragraphs"][0]
     issues = record["facts"]["mission"]["sourceIssues"]
     assert len(issues) == 3
     assert all("ITS 17 V0.2" in issue["description"] for issue in issues)
@@ -162,9 +164,9 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
         hashlib.sha256(SHARED.read_bytes()).hexdigest()
     )
     assert first["scenarios"][0]["configurationCount"] == 3
-    assert first["scenarios"][0]["citations"] == 8
+    assert first["scenarios"][0]["citations"] == 10
     assert len(first["scenarios"]) == 16
-    assert first["scenarios"][1]["citations"] == 8
+    assert first["scenarios"][1]["citations"] == 10
     assert {item["id"] for item in first["skills"]} == {
         "skill:civevac", "skill:casevac",
     }

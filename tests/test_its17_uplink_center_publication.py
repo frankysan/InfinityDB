@@ -67,6 +67,7 @@ def test_reviewed_uplink_membership_is_source_and_version_pinned() -> None:
     assert [(citation["sourceId"], citation["page"]) for citation in binding["citations"]] == [
         *((EN, page) for page in (93, 94, 95, 96)),
         *((ES, page) for page in (99, 100, 101, 102)),
+        (EN, 13), (ES, 14),
     ]
 
 
@@ -89,7 +90,8 @@ def test_uplink_review_matches_six_sizes_and_preserves_historical_ambiguity() ->
     source_text = " ".join(
         paragraph for rule in old_rules.values() for paragraph in rule["paragraphs"]
     )
-    assert "40 mm" not in source_text
+    assert "Transmission Antenna and Tech-Coffin Tokens 40 mm" in source_text
+    assert "EN p. 13 / ES p. 14" in source_text
     assert "40 mm" in current_rules["deployment-and-objectives"]["paragraphs"][1]
     assert "[[distance:6:inch]]" in source_text
     assert "[[distance:8:inch]]" in source_text
