@@ -230,7 +230,9 @@ not a completion history or second backlog: remove an entry in the same change
 that resolves or declines it, or transfers accepted outstanding work to the
 canonical [backlog](docs/TODO.md). Preserve lasting decisions in their owning
 documents; Git history retains removed entries. Mention only unresolved new
-improvements in the handoff.
+improvements in the handoff. When asked to address the inbox, use the
+[agent-improvements skill](.agents/skills/agent-improvements/SKILL.md) to
+review all open entries and implement one actionable item or related batch.
 
 Review the actual diff for documentation impact, update public
 `README.md` for user-visible capabilities or setup, and use canonical
