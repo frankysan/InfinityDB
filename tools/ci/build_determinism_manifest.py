@@ -194,11 +194,18 @@ def build_manifest(
             load_curated_directory(project_root / "data/curated/rules"),
             generated / "rules_n5.db",
         )
-        from infinity_db.database_set import SEASON_DATABASE_SOURCES
+        from infinity_db.database_set import (
+            SEASON_DATABASE_SOURCES,
+            SEASON_SHARED_LIBRARY_SOURCES,
+        )
         from infinity_db.its_season_database import build_its_database
 
-        for filename, source in SEASON_DATABASE_SOURCES.values():
-            build_its_database(project_root / source, generated / filename)
+        for season, (filename, source) in SEASON_DATABASE_SOURCES.items():
+            shared_library = SEASON_SHARED_LIBRARY_SOURCES.get(season)
+            build_its_database(
+                project_root / source, generated / filename,
+                shared_library=(project_root / shared_library if shared_library else None),
+            )
         fixture_files = sorted(path for path in fixture.rglob("*") if path.is_file())
         snapshot = create_timestamped_archive(
             fixture_files,
