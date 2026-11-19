@@ -325,3 +325,23 @@ affected area, observation and evidence, proposed change, and disposition.
   cross-season reuse of the Skill instead of copying narrative text.
 - **Disposition:** Deferred; the current ITS 17 authoring batch does not
   modify ITS 18 publication.
+
+## AI-0016 — Refresh runtime semantic baseline after revision-selection policy
+
+- **Date:** 2026-11-19
+- **Area:** `tests/fixtures/runtime-semantic-baseline-v1.json`,
+  `tools/verify_checkout_server.py`, offline runtime baseline verification.
+- **Observation:** The pinned fixture requests an ITS 18 Battleground detail
+  with `revision=2026.09.01`, although the current application serves only
+  the latest revision. On a fresh, valid runtime rebuild, the standard
+  checkout-server parity command returns HTTP 404 for this retired route
+  and stops before completing the intended 41-probe comparison. This is
+  unrelated to the unregistered ITS 17 Skills/State authoring.
+- **Proposed:** Rebaseline the maintained runtime fixture against the
+  accepted latest-only ITS 18 API, retaining positive and negative checks
+  for historical-revision selection as appropriate. Keep source history
+  available internally without exposing obsolete selectable URLs.
+- **Why:** Restore a useful non-release runtime regression check without
+  silently weakening the revision-selection contract.
+- **Disposition:** proposed; do not rewrite the baseline as part of ITS 17
+  historical source authoring.

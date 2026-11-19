@@ -489,12 +489,36 @@ Nested Skill citation `sourceId` validation accepts versioned source IDs with
 revision dots (such as `v0.2`) without weakening identifier validation for
 route slugs; malformed source IDs remain rejected by focused tests.
 
+**ITS 17 season-wide Skills and State (2026-11-19):** Independent
+review of pinned V0.2 EN pp. **17–21** and ES pp. **18–22**
+adds `skill:civevac`, `skill:casevac` and `state:casevac` to the
+historical season's own `records`, without modifying the 16-member
+scenario library or registering ITS 17 for serving. Both English
+Skills are declared **Short Movement Skills**; both Spanish Skills
+are **Habilidades Cortas Básicas**. The original English classification
+is retained in the historical typed facts, with the different Spanish
+classification recorded rather than silently treated as equivalent
+to ITS 18's distinct Basic Short / Short Skill types. EN p. 20 permits
+Casevac State to continue for the specified Cautious Movement, Climb,
+Dodge, Jump, Reset or **Short Movement Skill** declarations; ES p. 22
+instead uses **Habilidad Corta Básica** for its general permitted class.
+This difference affects possible cancellation and remains unresolved.
+The Spanish CivEvac enemy-contact/Token condition on ES p. 18 is also
+worded conjunctively where EN p. 17 lists two independent exclusions;
+the historical English interpretation is retained, pending clarification.
+The State retains the carrier/carried Order, ARO and movement rules,
+single carried Trooper limit, all automatic cancellation triggers and
+voluntary Short Skill cancellation. Each record has four bilingual page
+pins and independent revision applicability. `its_18.db` and the
+current ITS 18 facts remain unchanged.
+
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
 not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
 development artifact is `local/work/its/its_17.db`; it contains the sixteen
-reviewed ITS 17 scenarios and remains separate from the three-file serving
-set. When ITS 17 is explicitly approved for runtime publication, its tracked
+reviewed ITS 17 scenarios plus the independently reviewed season-wide
+CivEvac, Casevac and Casevac State records, and remains separate from the
+three-file serving set. When ITS 17 is explicitly approved for runtime publication, its tracked
 release artifact will be `data/generated/its_17.db` through the existing
 season-registration/build mechanism, not an embedded projection in another
 database.
@@ -549,9 +573,16 @@ Outbreak and Akial Interference missions.
 The accepted migrations reuse complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 
-The remaining shared-name missions and cross-language parity
-still need targeted review before adding their historical memberships
-or promoting additional shared definitions.
+The ITS 17 V0.2 table of contents lists **exactly sixteen standard
+scenarios**, and all sixteen now have reviewed historical memberships;
+there is no unimplemented seventeenth standard mission. The separate
+**Resilience Operations** section (EN pp. 96–105, ES pp. 103–112)
+explicitly defines an optional tournament Extra using Tactical Objective
+and Battle Condition decks *instead of* the ordinary ITS scenarios and
+Classified deck. It is not a seventeenth scenario membership. Its Tactical
+Elements, glossary and scoring still require independent Extra-level review.
+Cross-season component/Skill equivalence and earlier source revisions
+also remain under review.
 
 Optional `sharedSkillBindings.overrides` entries use exact
 `{scenarioId, ruleId, field, value}` objects. Only complete prose-array

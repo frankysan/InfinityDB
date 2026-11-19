@@ -589,14 +589,20 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         independently cited Short Skills and the unresolved
         one-Emission-versus-failed-retries source issue. Rebuild
         isolated sixteen-scenario `its_17.db`; leave ITS 18 unchanged.
+      - [x] Compare ITS 17 V0.2's scenario inventory against all existing
+        memberships: the TOC contains exactly sixteen standard scenarios
+        and all sixteen are reviewed. Resilience Operations is a separate
+        tournament Extra, not another scenario membership.
+      - [x] Review and curate ITS 17 V0.2 CivEvac, Casevac and Casevac State
+        (EN pp. 17–21, ES pp. 18–22) as season-local standalone records.
+        Preserve the English Short Movement Skill declarations, the
+        distinct Spanish Basic Short Skill labels, the independent State
+        cancelation rules, bilingual citations and ITS 18 isolation.
       - [ ] Pin and review the complete ITS 17 source locally, including
-        the other scenarios, Casevac State, optional Extras
-        and any reusable geometry/components. All six English/Spanish
-        V0.0–V0.2 originals are now pinned; revisions' mission changes
-        and cross-language differences still need review before
-        migrating further ITS 17 memberships.
-        The historical Outbreak objective differences are separately
-        curated; do not collapse ITS 17 and ITS 18 definitions.
+        the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
+        discrepancies, optional Extras (including Resilience Operations)
+        and reusable geometry/components. All six original PDFs are pinned;
+        do not infer cross-revision or cross-season equivalence.
     - [ ] Curate real ITS 17 against this foundation only after evidence review;
       keep each resulting season database independent, with no runtime links.
   - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full

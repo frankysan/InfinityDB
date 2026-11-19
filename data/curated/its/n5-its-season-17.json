@@ -970,6 +970,18 @@
         "singular": "A Short Skill expends one Short Skill.",
         "plural": "Short Skills expend one Short Skill."
       }
+    },
+    {
+      "id": "short-movement-skill",
+      "name": "Short Movement Skills",
+      "labels": [
+        "Short Movement Skill",
+        "Short Movement Skills"
+      ],
+      "descriptions": {
+        "singular": "A Short Movement Skill expends one Short Movement Skill.",
+        "plural": "Short Movement Skills expend one Short Movement Skill each."
+      }
     }
   ],
   "labels": [],
@@ -1000,7 +1012,208 @@
     }
   ],
   "seasonPolicies": [],
-  "records": [],
+  "records": [
+    {
+      "id": "skill:civevac",
+      "kind": "skill",
+      "name": "CivEvac",
+      "summary": "ITS 17 Optional Scenario Common Short Movement Skill: control a Civilian after a WIP Roll and keep them in Silhouette contact.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "common-skill",
+        "typeIds": [
+          "short-movement-skill"
+        ],
+        "requirements": [
+          "Only a Model may use CivEvac; a Marker declaring it is automatically revealed.",
+          "The Trooper must be in or reach Silhouette contact with the Civilian. The Civilian must not be in Silhouette contact with an enemy Model or already have a CivEvac Token.",
+          "The Trooper may not already control two Civilians, have Impetuous (including through Frenzy), possess Peripheral, be a REM or VH, perform a Coordinated Order or belong to a Fireteam."
+        ],
+        "effects": [
+          "On a successful WIP+3 Roll, the Trooper CivEvacs the Civilian and places a CivEvac Token. Failed attempts can be retried by expending another Short Skill for each attempt.",
+          "The Civilian remains in Silhouette contact with the controlling Trooper and must be placeable there at the end of movement; no Trooper can CivEvac more than two Civilians.",
+          "The Civilian remains on the table even when the controlling Trooper enters a Null State.",
+          "CivEvac ends at the end of the Order if the controller becomes Isolated, Immobilized or Null, joins a Fireteam, becomes a Marker or gains Impetuous; remove the CivEvac Token.",
+          "The controller may voluntarily end CivEvac on activation by an Order or ARO without a Roll. Leave the Civilian on a horizontal surface.",
+          "A Hostile Civilian receives no +3 MOD to the CivEvac WIP Roll and is identified with a Hostile Token."
+        ],
+        "restrictions": [
+          "CivEvac is an Optional, Scenario Common Skill, not an automatic extraction action."
+        ],
+        "applicability": {
+          "context": "season",
+          "revision": "0.2"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 17,
+          "section": "CivEvac: Requirements and Effects"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 18,
+          "section": "CivEvac: Effects and Cancelation"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 18,
+          "section": "CivEvac: Requisitos y Efectos"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 19,
+          "section": "CivEvac: Efectos y Cancelación"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-19"
+      }
+    },
+    {
+      "id": "skill:casevac",
+      "kind": "skill",
+      "name": "Casevac",
+      "summary": "ITS 17 Optional Common Short Movement Skill: carry an allied Stunned, Immobilized or Unconscious Trooper.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "common-skill",
+        "typeIds": [
+          "short-movement-skill"
+        ],
+        "requirements": [
+          "Only Models may use Casevac. Declaring Casevac reveals any Marker.",
+          "The carrier must be in Silhouette contact with an allied Trooper in Stunned, Immobilized (IMM-A or IMM-B) or Unconscious State, unless a Scenario Special Rule modifies this.",
+          "The carrier must have PH equal to or greater than the carried Trooper's PH; Baggage removes this requirement."
+        ],
+        "effects": [
+          "Casevac activates [[state:casevac|Casevac State]] for the carrier and the carried allied Trooper. Its movement, ARO and cancellation rules are defined by that State."
+        ],
+        "restrictions": [
+          "A carried Trooper cannot declare or perform its own Orders or AROs while [[state:casevac|Casevac State]] applies."
+        ],
+        "applicability": {
+          "context": "season",
+          "revision": "0.2"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 19,
+          "section": "Casevac Common Skill"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 20,
+          "section": "Casevac State"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 20,
+          "section": "Casevac: Requisitos"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 21,
+          "section": "Casevac: Requisitos y Efectos"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-19"
+      }
+    },
+    {
+      "id": "state:casevac",
+      "kind": "state",
+      "name": "Casevac State",
+      "aliases": [
+        "Casevac"
+      ],
+      "summary": "ITS 17 State entered through [[skill:casevac|Casevac]]: a carrier moves an allied Stunned, Immobilized or Unconscious Trooper in Silhouette contact.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "state",
+        "requirements": [
+          "Activate this State with [[skill:casevac|Casevac]] while in Silhouette contact with an allied Trooper in Stunned, Immobilized (IMM-A or IMM-B) or Unconscious State. The carrier needs PH at least equal to the target's PH, except when Baggage waives it; Scenario Special Rules may modify the target requirement."
+        ],
+        "effects": [
+          "The carrier and carried Trooper activate together with one Order or ARO and move simultaneously in Silhouette contact, using the carrier's MOV values.",
+          "The carried Trooper cannot declare or perform Orders or AROs; only the carrier does so.",
+          "Together, both Troopers provoke only one ARO from each eligible enemy within LoF or ZoC.",
+          "Template Weapon Attacks against either Trooper use the Template Weapons Into Close Combat rule.",
+          "The carried Trooper does not block LoF and does not contribute the +1 B MOD in Close Combat.",
+          "Casevac State automatically ends if the carrier declares any Skill other than Cautious Movement, Climb, Dodge, Jump, Reset or a Short Movement Skill.",
+          "It also ends if the carrier is activated in the Impetuous Phase, enters an Immobilized or Null State or another canceling State, or becomes a Marker (including Camouflaged, Impersonation or Holoecho).",
+          "It ends when the carried Trooper recovers from Immobilized (IMM-A or IMM-B), Stunned or Unconscious State.",
+          "The carrier may end it voluntarily by spending a Short Skill of an Order, without a Roll."
+        ],
+        "restrictions": [
+          "Unless a Scenario Special Rule states otherwise, a carrier may carry at most one Immobilized, Stunned or Unconscious Trooper."
+        ],
+        "applicability": {
+          "context": "season",
+          "revision": "0.2"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 20,
+          "section": "Casevac State: Activation, Effects and Cancelation"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 21,
+          "section": "Casevac State: Cancelation"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 21,
+          "section": "Estado Casevac: Activación y Efectos"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 22,
+          "section": "Estado Casevac: Cancelación"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-19"
+      }
+    }
+  ],
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
     "sha256": "245ccbab339c2197e3a3fb4e2ccad303950e0fe03bfd49f9ac2bf6047a446599"

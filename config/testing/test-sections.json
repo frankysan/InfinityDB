@@ -109,6 +109,7 @@
         "test_its17_critical_intervention_publication",
         "test_its17_outbreak_publication",
         "test_its17_akial_interference_publication",
+        "test_its17_season_skills_publication",
         "test_its_source_family",
         "test_its_hotfix_scenarios",
         "test_its_hotfix_reviewed_missions",

@@ -45,7 +45,9 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
         "scenario:outbreak",
         "scenario:akial-interference",
     ]
-    assert source["records"] == []  # Facts are owned by the shared library.
+    assert {record["id"] for record in source["records"]} == {
+        "skill:civevac", "skill:casevac", "state:casevac",
+    }  # Scenario facts remain owned by the shared library.
     assert source["sharedScenarioLibrary"]["sha256"] == hashlib.sha256(
         SHARED.read_bytes(),
     ).hexdigest()
@@ -126,7 +128,9 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
         {"scenarioId": "scenario:outbreak"},
         {"scenarioId": "scenario:akial-interference"},
     ]
-    record = historic["records"][0]
+    record = next(
+        item for item in historic["records"] if item["id"] == "scenario:evacuation"
+    )
     assert record["scope"]["seasons"] == ["its-17"]
     assert record["sharedDefinition"]["origin"]["seasonId"] == "its-17"
     rules = {item["id"]: item for item in record["facts"]["mission"]["rules"]}
@@ -161,7 +165,10 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
     assert first["scenarios"][0]["citations"] == 8
     assert len(first["scenarios"]) == 16
     assert first["scenarios"][1]["citations"] == 8
-    assert first["skills"] == [] and first["states"] == []
+    assert {item["id"] for item in first["skills"]} == {
+        "skill:civevac", "skill:casevac",
+    }
+    assert {item["id"] for item in first["states"]} == {"state:casevac"}
     assert inspect_its_database(
         output, source=SEASON, shared_library=SHARED, require_current_builder=True,
     ) == first
