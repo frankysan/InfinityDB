@@ -2229,7 +2229,7 @@
       {
         "id": "uplink-center-150-point-antenna-offset",
         "recordId": "scenario:uplink-center",
-        "aspect": "communication-antenna-150-point-distance-from-edge",
+        "aspect": "communication-antenna-150-point-written-rule-distance-from-edge",
         "observations": [
           {
             "sourceId": "its-season-17-v0.0-en-pdf",
@@ -2301,6 +2301,47 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 33,
             "value": "cannot-target-if-attack-affects-allied-or-enemy-troopers"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "uplink-center-150-point-antenna-map-offset",
+        "recordId": "scenario:uplink-center",
+        "aspect": "communication-antenna-150-point-printed-map-distance-from-edge",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 60,
+            "value": "6-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 59,
+            "value": "15-cm-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 60,
+            "value": "6-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 59,
+            "value": "15-cm-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 93,
+            "value": "6-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 99,
+            "value": "15-cm-from-table-edge"
           }
         ],
         "review": {

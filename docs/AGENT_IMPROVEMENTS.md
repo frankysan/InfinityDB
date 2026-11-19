@@ -385,7 +385,7 @@ affected area, observation and evidence, proposed change, and disposition.
   equivalence from an incomplete changelog.
 - **Disposition:** Four ITS 17 adjacent-revision audit pairs are supported.
   Eleven reviewed fact aspects (44 language- and revision-specific
-  observations in the first batch, now 20/86 after further review)
+  observations in the first batch, now 21/92 after further review)
   live in the original ITS 17 curated file's fail-closed
   `historicalEvidence` section, deliberately excluded from runtime
   and full historical projection. Remaining facts still need review.
@@ -416,3 +416,20 @@ affected area, observation and evidence, proposed change, and disposition.
   duplicate current-source inventory or accidentally publish review notes.
 - **Disposition:** Implemented in `its_source_family.py` and validated
   with negative mutation tests; the existing V0.2 projection is unchanged.
+
+## AI-0021 — Inspect mission diagrams independently from written geometry
+
+- **Date:** 2026-11-19
+- **Area:** ITS historical source review and scenario geometry provenance.
+- **Observation:** ITS 17 Uplink Center V0.0/V0.1 describes 4 in / 10 cm
+  antenna offsets in its written rules, but its original 150-point maps
+  already label 6 in / 15 cm in both languages. V0.2 aligns the prose
+  with the unchanged map. The text-only PDF revision auditor cannot detect
+  this conflict.
+- **Proposed:** When reviewing historical geometry, separately inspect the
+  original printed mission maps and prose for each applicable revision and
+  language. Preserve contradictions as distinct observations; do not treat
+  a wording correction as an automatically changed diagram.
+- **Disposition:** Implemented for Uplink Center with six graphical source
+  pins and a focused regression test. Other historical maps remain in the
+  existing ITS 17 review backlog; no new research infrastructure needed.

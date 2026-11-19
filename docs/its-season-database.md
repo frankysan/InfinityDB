@@ -592,7 +592,7 @@ checked, not simply inferred from the automated text diff:
 
 **Earlier-revision evidence curation (2026-11-19):** The same
 `data/curated/its/n5-its-season-17.json` now keeps an optional
-`historicalEvidence` section with **20 reviewed fact aspects and 86
+`historicalEvidence` section with **21 reviewed fact aspects and 92
 source observations**, each pinned to an original English/Spanish PDF
 source ID, revision, page, SHA-256 and record identity. V0.0/V0.1
 descriptors are stored once in the historical source inventory, while
@@ -641,14 +641,22 @@ Additional source-reviewed V0.0→V0.1 facts cover:
   eligibility.
 
 **V0.1→V0.2 bilingual comparison (2026-11-19):** Two
-source-confirmed changes are now part of the same review-only evidence:
+source-confirmed written-rule changes and an independently reviewed
+printed-map chronology are now part of the same review-only evidence:
 
 - **Uplink Center, 150-point Communication Antennas:** The two
   centerline Antennas are placed **4 in** (ES **10 cm**) from their
   respective table edges in both V0.0 and V0.1 (EN p. **61**,
   ES p. **60**). V0.2 moves them to **6 in** (ES **15 cm**)
   from the edges (EN p. **94**, ES p. **100**). This is a
-  scenario geometry change, not simply V0.2's page reflow.
+  written placement-rule revision, not simply V0.2's page reflow.
+  However, visual inspection of the original 150-point maps shows
+  **6 in / 15 cm in every edition**: V0.0/V0.1 EN p. **60**,
+  ES p. **59**, and V0.2 EN p. **93**, ES p. **99**.
+  Thus V0.0/V0.1 **written text contradicts its own map**; V0.2
+  corrects the prose to match existing diagram placement, not the
+  graphical antenna positions. The evidence keeps separate written-rule
+  and printed-map aspects rather than inventing an unambiguous old rule.
   The current V0.2 shared scenario geometry and 150-point
   publication test already use **6 in**.
 - **Corporate Appropriation Prototype targeting:** V0.0/V0.1
@@ -664,9 +672,9 @@ source-confirmed changes are now part of the same review-only evidence:
   on p. **2** explicitly add Outbreak / Estallido, completing
   the previously stored V0.0/V0.1 absence observations.
 
-The review above compares original rule text and source-verified
-numerical geometry. It does **not** establish graphical map parity;
-that remains an independent check for historic page layouts.
+The Uplink Center 150-point maps were inspected visually in all six
+publisher-original PDFs. This establishes only that particular map
+comparison; other historic mission diagrams still need independent review.
 
 The section has `mode: review-only-not-projected`; validation rejects
 out-of-range citations, unpinned or duplicate edition identifiers,

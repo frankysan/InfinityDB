@@ -633,13 +633,18 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         review-only evidence to 18 aspects / 72 source observations and
         support season-scoped facts without inventing scenario ownership.
       - [x] Compare the V0.1→V0.2 Uplink Center 150-point
-        Communication Antenna placement (4→6 in / 10→15 cm) and
+        written Communication Antenna placement (4→6 in / 10→15 cm) and
         Corporate Prototype collateral-Attack restriction against
         all six pinned EN/ES originals. Tag V0.2 observations against
         existing current source descriptors without duplicating pins;
         explicitly verify the Outbreak V0.2 introduction. Historical
-        inventory is now 20 reviewed aspects / 86 observations;
+        inventory is now 21 reviewed aspects / 92 observations;
         preserve the V0.2-only SQLite projection.
+      - [x] Visually inspect the Uplink Center 150-point maps in all six
+        original PDFs. V0.0/V0.1 diagrams already say 6 in / 15 cm,
+        despite their 4 in / 10 cm prose; V0.2 corrects the prose
+        without changing graphical placement. Retain separate,
+        source-pinned written and graphical observations.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
         discrepancies, optional Extras (including Resilience Operations)

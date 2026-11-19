@@ -34,8 +34,8 @@ def test_its17_evidence_is_one_source_family_with_exact_pins() -> None:
     evidence = document["historicalEvidence"]
     assert evidence["mode"] == "review-only-not-projected"
     assert len(evidence["sources"]) == 4
-    assert len(evidence["facts"]) == 20
-    assert sum(len(f["observations"]) for f in evidence["facts"]) == 86
+    assert len(evidence["facts"]) == 21
+    assert sum(len(f["observations"]) for f in evidence["facts"]) == 92
     assert [s["revision"] + "-" + s["language"] for s in evidence["sources"]] == [
         "0.0-en", "0.0-es", "0.1-en", "0.1-es",
     ]
@@ -141,6 +141,13 @@ def test_historical_conflicts_and_new_constraints_remain_separate_by_edition() -
     ] * 4 + [
         "cannot-target-if-attack-affects-allied-or-enemy-troopers",
     ] * 2
+    assert values("uplink-center-150-point-antenna-map-offset") == [
+        "6-inches-from-table-edge", "15-cm-from-table-edge",
+    ] * 3
+    written = values("uplink-center-150-point-antenna-offset")
+    mapped = values("uplink-center-150-point-antenna-map-offset")
+    assert written[:4] != mapped[:4]  # V0.0/V0.1 text contradicts its printed map.
+    assert written[4:] == mapped[4:]  # V0.2 text matches the unchanged map.
 
 
 def test_history_does_not_create_older_scenario_routes_or_sqlite_rows(
