@@ -603,15 +603,43 @@ The accepted migrations reuse complete v1 scenario definitions,
 without claiming fine-grained component or Skill deduplication yet.
 
 The ITS 17 V0.2 table of contents lists **exactly sixteen standard
-scenarios**, and all sixteen now have reviewed historical memberships;
-there is no unimplemented seventeenth standard mission. The separate
-**Resilience Operations** section (EN pp. 96–105, ES pp. 103–112)
-explicitly defines an optional tournament Extra using Tactical Objective
-and Battle Condition decks *instead of* the ordinary ITS scenarios and
-Classified deck. It is not a seventeenth scenario membership. Its Tactical
-Elements, glossary and scoring still require independent Extra-level review.
-Cross-season component/Skill equivalence and earlier source revisions
-also remain under review.
+scenarios**, and all sixteen have reviewed historical memberships;
+there is no seventeenth standard mission. The separate
+**Resilience Operations** section (EN pp. **96–104**, ES pp. **103–111**)
+defines an optional tournament Extra using Tactical Objective
+and Battle Condition decks *instead of* ordinary ITS scenarios and the
+Classified Deck. It is not a scenario membership.
+
+**Resilience Operations source-reviewed (2026-11-19):** The season-local
+`rule:resilience-operations` record contains the original EN/ES source
+pins (plus their shared Token charts EN p. 13 / ES p. 14) and typed
+Extra-only facts. Tactical Objectives: draw four, discard one,
+optional one-Command-Token redraw, reveal one each Round with Priority
+Target first, maximum three OP *per card* awarded once, and one bonus
+OP for completing more objectives than the opponent. Battle Conditions:
+draw two, discard one, reveal in Initiative order after the Initiative
+Roll and before Deployment, redraw duplicate cards for the second-turn
+player, affect both players for the whole game, and apply at most one
+Movement Bonus. Six standard deployment tiers (150–400 points), the
+third-round/Retreat! end conditions, five Tactical Element categories
+(Beacons, HVTs, Beepers, Objectives, conditional F-13 Turrets) and the
+Capture/Control/Dominate/Killing/Subjugate glossary are preserved with
+source-specific details. The two editions differ on the ordinary HVT
+MOV value, exact wording of first-round reveal timing, Beacon failed
+repair wording and Baggage's Skill/Equipment classification; these are
+explicit source notes, not silently resolved claims. The *physical card
+decks' contents* are not present in these rule pages and have not
+been reconstructed.
+
+This Extra is a **Rule**, not a `scenario`, in the existing
+`records` table of the unregistered `local/work/its/its_17.db`.
+The standalone ITS builder now fail-closed validates season-local
+optional Extra records and their source revision, typed deck selection,
+Tactical Elements, glossary, game sizes, and citation integrity. It
+does not create a new SQLite schema or register any ITS 17 web route.
+The ITS 18 database retains the existing report shape when no Extra
+is present. Cross-season component/Skill equivalence, complete physical
+deck card acquisition and earlier source revisions remain under review.
 
 Optional `sharedSkillBindings.overrides` entries use exact
 `{scenarioId, ruleId, field, value}` objects. Only complete prose-array

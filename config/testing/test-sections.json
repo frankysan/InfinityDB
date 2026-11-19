@@ -111,6 +111,7 @@
         "test_its17_akial_interference_publication",
         "test_its17_season_skills_publication",
         "test_its17_token_chart_publication",
+        "test_its17_resilience_operations_publication",
         "test_its_source_family",
         "test_its_hotfix_scenarios",
         "test_its_hotfix_reviewed_missions",

@@ -604,6 +604,13 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         definition; resolve the erroneous unspecified-diameter claims while
         preserving genuine EN/ES token-name differences. Test isolated
         SQLite and keep ITS 18 unchanged.
+      - [x] Source-review Resilience Operations as an optional ITS 17
+        tournament Extra (EN pp. 96–104 / ES pp. 103–111), not a
+        seventeenth scenario. Curate typed deck choices, scoring,
+        deployment, Tactical Elements and glossary in its own
+        season-scoped Rule record and isolated SQLite projection.
+        Retain bilingual source inconsistencies and exclude unsupported
+        physical-card contents; leave ITS 18 unmodified.
       - [ ] Pin and review the complete ITS 17 source locally, including
         the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
         discrepancies, optional Extras (including Resilience Operations)

@@ -236,6 +236,120 @@ def _validate_season_state(
         raise ValueError("ITS season State requires reviewed source citations")
 
 
+def _validate_season_extra(
+    record: dict[str, Any], *, season_id: str, revision: str,
+) -> None:
+    """Keep a tournament Extra separate from scenario memberships and core rules."""
+    from .domain_slugs import require_domain_slug, validate_typed_domain_id
+
+    validate_typed_domain_id(
+        record["id"], expected_domain="rule", context="ITS tournament Extra",
+    )
+    facts = record.get("facts")
+    fields = {
+        "category", "applicability", "tacticalObjectives", "battleConditions",
+        "gameSizes", "tacticalElements", "glossary", "effects", "restrictions",
+        "sourceNotes",
+    }
+    if not isinstance(facts, dict) or set(facts) != fields:
+        raise ValueError("ITS tournament Extra requires complete typed Extra facts")
+    if facts["category"] != "optional-extra":
+        raise ValueError("ITS tournament Extra must be an optional-extra Rule")
+    context = facts["applicability"]
+    if (
+        not isinstance(context, dict)
+        or set(context) != {"context", "revision"}
+        or context["context"] != "resilience-operations-extra"
+        or context["revision"] != revision
+    ):
+        raise ValueError("ITS tournament Extra must pin its season revision and context")
+    for key, required in (
+        ("tacticalObjectives", {
+            "draw", "discard", "maxPointsPerCard", "completionMinimum",
+            "moreCompletedBonus", "commandTokenRedraw", "revealPerRound",
+            "priorityTargetFirst", "privateUntilRevealed",
+        }),
+        ("battleConditions", {
+            "draw", "discard", "appliesToBoth", "wholeGame", "duplicateResolution",
+            "stackMovementBonuses",
+        }),
+    ):
+        item = facts[key]
+        if not isinstance(item, dict) or set(item) != required:
+            raise ValueError(f"ITS tournament Extra requires complete {key}")
+    objectives = facts["tacticalObjectives"]
+    conditions = facts["battleConditions"]
+    if (
+        any(type(objectives[key]) is not int or objectives[key] < 0 for key in (
+            "draw", "discard", "maxPointsPerCard", "completionMinimum",
+            "moreCompletedBonus", "commandTokenRedraw", "revealPerRound",
+        ))
+        or objectives["discard"] >= objectives["draw"]
+        or type(objectives["priorityTargetFirst"]) is not bool
+        or type(objectives["privateUntilRevealed"]) is not bool
+        or any(type(conditions[key]) is not int or conditions[key] < 0
+               for key in ("draw", "discard"))
+        or conditions["discard"] >= conditions["draw"]
+        or any(type(conditions[key]) is not bool
+               for key in ("appliesToBoth", "wholeGame", "stackMovementBonuses"))
+        or conditions["duplicateResolution"] != "second-player-redraws"
+    ):
+        raise ValueError("ITS tournament Extra deck semantics are invalid")
+    sizes = facts["gameSizes"]
+    if not isinstance(sizes, list) or not sizes:
+        raise ValueError("ITS tournament Extra requires published game sizes")
+    point_sizes: set[int] = set()
+    for item in sizes:
+        if (not isinstance(item, dict) or set(item) != {
+            "armyPoints", "swc", "tableWidthIn", "tableHeightIn", "deploymentDepthIn",
+        } or any(type(value) is not int or value <= 0 for value in item.values())
+                or item["armyPoints"] in point_sizes
+                or item["deploymentDepthIn"] * 2 >= item["tableHeightIn"]):
+            raise ValueError("ITS tournament Extra has invalid deployment geometry")
+        point_sizes.add(item["armyPoints"])
+    for key, required in (
+        ("tacticalElements", {"id", "quantity", "placement", "rules"}),
+        ("glossary", {"id", "text"}),
+    ):
+        entries = facts[key]
+        if not isinstance(entries, list) or not entries:
+            raise ValueError(f"ITS tournament Extra requires {key}")
+        seen: set[str] = set()
+        for entry in entries:
+            if (
+                not isinstance(entry, dict) or set(entry) != required
+                or not isinstance(entry.get("id"), str)
+                or require_domain_slug(entry["id"], context=f"ITS {key}") in seen
+            ):
+                raise ValueError(f"ITS tournament Extra has invalid {key} entry")
+            seen.add(entry["id"])
+            if key == "tacticalElements":
+                if (
+                    not isinstance(entry["quantity"], str) or not entry["quantity"].strip()
+                    or not isinstance(entry["placement"], str)
+                    or not entry["placement"].strip()
+                    or not isinstance(entry["rules"], list) or not entry["rules"]
+                    or any(not isinstance(v, str) or not v.strip() for v in entry["rules"])
+                ):
+                    raise ValueError("ITS Extra Tactical Element must describe its source rules")
+            elif not isinstance(entry["text"], str) or not entry["text"].strip():
+                raise ValueError("ITS tournament Extra glossary requires text")
+    for key in ("effects", "restrictions", "sourceNotes"):
+        values = facts[key]
+        if (not isinstance(values, list) or not values or any(
+            not isinstance(v, str) or not v.strip() for v in values
+        )):
+            raise ValueError(f"ITS tournament Extra requires {key}")
+    if (
+        record["scope"] != {"game": "N5", "seasons": [season_id]}
+        or record["composition"] != {"role": "definition"}
+        or record.get("armyLinks")
+        or not record.get("citations")
+        or record.get("review", {}).get("status") != "reviewed"
+    ):
+        raise ValueError("ITS tournament Extra requires season-local reviewed provenance")
+
+
 def _validate_its_document(document: dict[str, Any], core_revision: str) -> None:
     from .domain_slugs import require_domain_slug
 
@@ -289,6 +403,8 @@ def _validate_its_document(document: dict[str, Any], core_revision: str) -> None
             _validate_season_skill(record, season_id=season_id, revision=season["revision"])
         elif record["kind"] == "state":
             _validate_season_state(record, season_id=season_id, revision=season["revision"])
+        elif record["kind"] == "rule":
+            _validate_season_extra(record, season_id=season_id, revision=season["revision"])
         elif record["kind"] != "scenario":
             raise ValueError(f"ITS publication contains unsupported record {record['id']!r}")
 
@@ -538,12 +654,14 @@ def inspect_its_database(
         scenario_rows = [row for row in record_rows if row["kind"] == "scenario"]
         skill_rows = [row for row in record_rows if row["kind"] == "skill"]
         state_rows = [row for row in record_rows if row["kind"] == "state"]
+        extra_rows = [row for row in record_rows if row["kind"] == "rule"]
         if (
             len(scenario_rows) != metadata["scenarioCount"]
-            or len(scenario_rows) + len(skill_rows) + len(state_rows) != len(record_rows)
+            or len(scenario_rows) + len(skill_rows) + len(state_rows) + len(extra_rows)
+            != len(record_rows)
         ):
             raise ValueError("ITS season has unexpected record kinds or scenario count")
-        for row in [*skill_rows, *state_rows]:
+        for row in [*skill_rows, *state_rows, *extra_rows]:
             record = json.loads(row["payload_json"])
             if (
                 row["id"] != record.get("id")
@@ -554,8 +672,12 @@ def inspect_its_database(
                 _validate_season_skill(
                     record, season_id=identity["seasonId"], revision=identity["seasonRevision"],
                 )
-            else:
+            elif row["kind"] == "state":
                 _validate_season_state(
+                    record, season_id=identity["seasonId"], revision=identity["seasonRevision"],
+                )
+            else:
+                _validate_season_extra(
                     record, season_id=identity["seasonId"], revision=identity["seasonRevision"],
                 )
             citation_rows = connection.execute(
@@ -688,7 +810,7 @@ def inspect_its_database(
                 "target": policy["target"]["recordId"],
                 "contentSha256": row["content_sha256"],
             })
-        return {
+        report = {
             "schemaVersion": ITS_SCHEMA_VERSION,
             "inputIdentity": identity,
             "buildId": metadata["buildId"],
@@ -704,6 +826,12 @@ def inspect_its_database(
             ],
             "policies": policies,
         }
+        if extra_rows:
+            report["extras"] = [
+                {"id": row["id"], "contentSha256": row["content_sha256"]}
+                for row in extra_rows
+            ]
+        return report
 
 
 
