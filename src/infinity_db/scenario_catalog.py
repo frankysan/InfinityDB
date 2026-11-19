@@ -141,20 +141,29 @@ class ScenarioCatalog:
         self._scenario_skills_cache: list[dict[str, Any]] | None = None
         self._scenario_skill_aliases: dict[str, dict[str, Any]] = {}
 
-    def _marker_size_source(self, revision: str | None = None) -> dict[str, Any]:
-        """Source attribution for shared marker sizes, not mission ownership."""
+    def _marker_size_source(
+        self, *, season_id: str = "its-18", revision: str | None = None,
+    ) -> dict[str, Any]:
+        """Source attribution for marker sizes in the selected ITS publication."""
         if self.publication_registry is not None:
-            # The September hotfix moved the shared token diameter chart
-            # from p.17 to p.18; keep historical citations version-pinned.
-            chart_page = 17 if revision == "2026.09.01" else 18
+            if season_id == "its-17" and revision != "0.2":
+                # Synthetic/historical fixtures predate this source-verified
+                # publication; do not fabricate a V0.2 source citation.
+                return dict(_MARKER_SIZE_CITATION)
+            if season_id == "its-17":
+                chart_page, source_id = 13, "its-season-17-v0.2-en-pdf"
+            else:
+                # ITS 18 hotfix moved the chart from p.17 to p.18.
+                chart_page = 17 if revision == "2026.09.01" else 18
+                source_id = "its-season-18-en-pdf"
             citation = self.publication_registry.source_citation(
-                season_id="its-18", source_id="its-season-18-en-pdf", page=chart_page,
-                revision=revision,
+                season_id=season_id, source_id=source_id,
+                page=chart_page, revision=revision,
             )
             if citation is not None:
                 return citation
-            if "its-18" in self.publication_registry.season_manifest():
-                raise ValueError("Registered ITS 18 marker size source is unavailable")
+            if season_id in self.publication_registry.season_manifest():
+                raise ValueError(f"Registered {season_id} marker size source is unavailable")
         # Isolated Rules-only research fixtures (or a future set without ITS 18)
         # retain the pinned external measurement provenance.
         return dict(_MARKER_SIZE_CITATION)
@@ -516,9 +525,13 @@ class ScenarioCatalog:
                         raise ValueError(
                             f"Conflicting ITS season Skill registration: {slug!r}"
                         )
+                    # Source-local season Skills have no shared identity. Keep
+                    # distinct editions separate rather than merging two None keys.
+                    shared_identity = rule.get("sharedSkill")
                     existing = next(
                         (group for group in groups
-                         if group["rules"][0].get("sharedSkill") == rule.get("sharedSkill")),
+                         if shared_identity is not None
+                         and group["rules"][0].get("sharedSkill") == shared_identity),
                         None,
                     )
                     if existing is None:
@@ -526,6 +539,12 @@ class ScenarioCatalog:
                             previous = groups[0]["rules"][0].get("sharedSkill")
                             shared = rule.get("sharedSkill")
                             if (
+                                # Independently curated editions do not claim
+                                # shared identity and use season-qualified routes.
+                                previous is None and shared is None
+                            ):
+                                pass
+                            elif (
                                 not previous or not shared
                                 or previous["id"] != shared["id"]
                                 or previous["origin"] != shared["origin"]
@@ -778,8 +797,12 @@ class ScenarioCatalog:
                 "marker_dimensions": _marker_dimensions(
                     configuration["geometry"],
                     self._marker_size_source(
-                        str(publication["revision"])
-                        if publication["collection"] == "its-18" else None
+                        season_id=(publication["collection"]
+                                   if publication["collection"] in {"its-17", "its-18"}
+                                   else "its-18"),
+                        revision=(str(publication["revision"])
+                                  if publication["collection"] in {"its-17", "its-18"}
+                                  else None),
                     ),
                 ),
             },

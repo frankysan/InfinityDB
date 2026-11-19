@@ -1,9 +1,9 @@
-# ITS Season 18 SQLite database
+# ITS Season 17 and 18 SQLite databases
 
 **Project domain:** Data processing
 
-Schema v2 participates in the complete three-file build and serving set:
-Army, Rules and the current ITS Season 18 publication. This page owns the ITS
+Schema v2 participates in the complete four-file build and serving set:
+Army, Rules, ITS Season 18 and ITS Season 17. This page owns the ITS
 database format, selection and build contract; release acceptance belongs in
 [releasing](releasing.md).
 
@@ -31,9 +31,10 @@ artifact created from reviewed curated ITS facts. The implementation lives in
   six Army Points configurations per mission, and three ITS-owned event policies
   for Spec-Ops, TEAM-OPS and optional Reinforcements. These policies are
   **not** new N5 core Rule definitions. There is no ITS-authored FAQ publication.
-- **Public selection:** Choose ITS Season 18; the current 2026.09.11 revision
-  resolves automatically. Older explicit revision links fail closed without
-  silently displaying replacement facts. Historical browsing remains deferred.
+- **Public selection:** Choose ITS Season 18 or 17 by season in Scenarios.
+  Their current authored revisions (2026.09.11 and 0.2, respectively) resolve
+  automatically; explicit older revision links still fail closed without
+  silently displaying replacement facts. Historical revision browsing remains deferred.
 - **Scenario Skills:** Mission rules with `skillTypeIds` and `skillFacts`
   project to standard Skill cards, `/skills` and Search. All 26 reviewed ITS 18
   actions have structured Requirements and Effects, with optional Restrictions,
@@ -248,7 +249,7 @@ Focused reviewed comparisons against the pinned ITS 18 English
   changes above require separate objective/rule versions.
 
 **Real ITS 17 source-reviewed scenario authoring (2026-11-18):**
-`data/curated/its/n5-its-season-17.json` is a standalone, **unregistered**
+`data/curated/its/n5-its-season-17.json` is the registered
 ITS 17 V0.2 curated season source. It has reviewed
 `scenario:evacuation`, `scenario:hardlock`, `scenario:uplink-center`,
 `scenario:battleground`, `scenario:annihilation`, `scenario:cutthroat`,
@@ -314,8 +315,8 @@ Tactical Awareness and Threaten criteria that do not appear in ITS 18.
 The EN/ES **VH exclusion** difference and distinct **Shasvastii
 Unconscious/non-Null versus Normal/Embryo** wording remain explicit
 source issues. Only matching Sector, Domination, Baggage, Killing and
-round-limit rules are carried across. The archived database is still
-unregistered and the current ITS 18 record is unchanged.
+round-limit rules are carried across. The ITS 17 database is separately registered; the current ITS 18 record
+remains unchanged.
 
 Annihilation keeps the source-matched EN V0.2 scoring thresholds
 (ITS 17 **pp. 81–82**, Spanish **pp. 85–87**), 150–400 Army Point
@@ -706,14 +707,13 @@ complete `sourceFamily` history projection would be valid.
 
 **ITS 17 SQLite ownership:** All reviewed ITS 17 mission, geometry, scoring and
 season-specific citation records belong in an independent **`its_17.db`**,
-not in `rules_n5.db` or `its_18.db`. The current, intentionally unregistered
-development artifact is `local/work/its/its_17.db`; it contains the sixteen
-reviewed ITS 17 scenarios plus the independently reviewed season-wide
-CivEvac, Casevac and Casevac State records and the Resilience Operations
-tournament Extra, and remains separate from the three-file serving set. When ITS 17 is explicitly approved for runtime publication, its tracked
-release artifact will be `data/generated/its_17.db` through the existing
-season-registration/build mechanism, not an embedded projection in another
-database.
+not in `rules_n5.db` or `its_18.db`. The tracked runtime publication is
+`data/generated/its_17.db` alongside the existing `its_18.db`, Army and Rules
+files. It contains sixteen reviewed ITS 17 scenarios, CivEvac, Casevac,
+Casevac State and the Resilience Operations tournament Extra; the old
+`local/work/its/its_17.db` remains an optional development output.
+No V0.0/V0.1 selectable revision or shared cross-season record identity is
+inferred from the available historical observations.
 
 Build or check the independent historical SQLite file without registering it:
 `python -m tools.data.build_its_season --source data/curated/its/n5-its-season-17.json --shared-library data/curated/its/shared/its17-scenarios-v1.json --output local/work/its/its_17.db`
@@ -795,11 +795,10 @@ decks' contents* are not present in these rule pages and have not
 been reconstructed.
 
 This Extra is a **Rule**, not a `scenario`, in the existing
-`records` table of the unregistered `local/work/its/its_17.db`.
-The standalone ITS builder now fail-closed validates season-local
-optional Extra records and their source revision, typed deck selection,
-Tactical Elements, glossary, game sizes, and citation integrity. It
-does not create a new SQLite schema or register any ITS 17 web route.
+`records` table of `its_17.db`. The ITS builder fail-closed validates
+season-local optional Extra records and their source revision, typed deck
+selection, Tactical Elements, glossary, game sizes, and citation integrity.
+No new SQLite schema or separate Extra-specific web route is introduced.
 The ITS 18 database retains the existing report shape when no Extra
 is present. Cross-season component/Skill equivalence, complete physical
 deck card acquisition and earlier source revisions remain under review.
@@ -835,11 +834,11 @@ serves independently without an on-disk authoring library. New libraries must
 retain byte-stable LF source text across systems, matching the repository
 `.gitattributes` policy and exact library SHA-256 pins.
 
-The current registration is empty: **ITS 18 remains source-local and the only
-registered production season**. A synthetic ITS 17 fixture verifies the
-complete-set builder's registration path, rejection of missing/modified library
-bytes, and independent SQLite output. No current content migration or runtime
-schema change is implied.
+**Current registration:** ITS 18 remains source-local, while ITS 17 is
+registered with its pinned `its17-scenarios-v1.json` shared authoring library.
+Both compile to separate tracked SQLite files in the four-file runtime bundle;
+source and library hashes, exact season/revision membership and independent
+citations are checked during build, application startup and deployment validation.
 
 This is proven on synthetic single-season, two-season and revision-tagged
 fixtures, **not** reviewed ITS 17 data. Generic component overrides and
@@ -1190,11 +1189,11 @@ only for an exact season, revision and explicit play context. The validated
 manifest exposes publication identity and SHA, not physical paths.
 
 `ScenarioCatalog` uses the registry for ITS-owned publications, while
-N5 core missions continue to use Rules. The complete-set factory registers
-`its-18` from the current `its_18.db`, validates the three-file set,
-and resolves an ITS season selection to its sole published revision.
+N5 core missions continue to use Rules. The complete-set factory registers both
+`its-18` and `its-17` from their independent databases, validates the
+four-file set, and resolves each ITS season to its sole published revision.
 Both local `serve` and production WSGI/Docker use this same factory;
-the runtime cache fingerprint includes all three exact file hashes.
+the runtime cache fingerprint includes all four exact file hashes.
 The HTTP API accepts season-only selection by default and may validate an
 explicit revision in an older link; unregistered revisions never fall back
 to core or silently show current facts. The internal explicit
@@ -1213,21 +1212,21 @@ by their registered season and revision, not by slug alone. An absent or
 mismatched owner, missing N5 target, stale revision, unregistered source
 or altered source/geometry fails closed.
 
-**The production release intentionally uses three files:**
-`army.db`, `rules_n5.db` and `its_18.db`. The selected set does not
-autodiscover additional files. Adding another season requires its own
-reviewed source, explicit registration, recorded build input and packaging;
-a new revision of ITS 18 updates its curated source family and current build.
-The synthetic ITS 17 test database is never published.
+**The release bundle contains four files:**
+`army.db`, `rules_n5.db`, `its_18.db` and `its_17.db`. The selected set
+does not autodiscover additional files. ITS 17's 16 source-reviewed scenarios
+are explicitly registered at V0.2 using the pinned shared authoring library;
+ITS 18 remains at its hotfix revision. The historical V0.0/V0.1 ITS 17
+revisions remain internal evidence and are not selectable.
 
 ## Migration boundary
 
-The Rules exporter excludes ITS-owned curated collections, so current
-Battleground and its scenario membership exist in `its_18.db` only. The
-three-file runtime publishes the hotfix revision. Historical Battleground
-facts, original citations and source identity remain in the curated family
-but are not served. N5 scenario facts, source attribution and shared renderer
-behavior remain unchanged.
+The Rules exporter excludes ITS-owned curated collections. Each ITS season
+owns its own Battleground scenario membership and source citations in
+`its_17.db` or `its_18.db`; the four-file runtime exposes each only under
+its selected season. Earlier source-family revisions remain internal
+historical facts, not independently selectable publications. N5 core
+scenario facts, attribution and the shared renderer remain unchanged.
 
 The N5 Spec-Ops and Request SpecBall cards no longer duplicate ITS 18
 tournament and TEAM-OPS restrictions. The season database remains the sole
@@ -1252,7 +1251,7 @@ reused scenario ID, while rules-wide N5 FAQ applies to a valid selected
 season. Exact season/revision/mission selection fails closed when unregistered.
 No ITS-authored FAQ is inferred. Changing maintained `src/` or curated files
 changes the complete build fingerprint;
-regenerate the three-file release set before source-bound deployment
+regenerate the four-file release set before source-bound deployment
 checks or merge.
 
 For the ownership and scope exceptions (Spec-Ops, TEAM-OPS,

@@ -16,6 +16,10 @@ def _record_slug(record: dict[str, Any]) -> str:
     )
 
 
+def _route_slug(record: dict[str, Any]) -> str:
+    return str(record.get("_routeSlug") or _record_slug(record))
+
+
 class StateCatalog:
     """Expose current curated State definitions independently of Army source tables."""
 
@@ -35,13 +39,28 @@ class StateCatalog:
                 else self.rules_database.composed_records_by_kind("state")
             )
             if self.publication_registry is not None:
-                known = {_record_slug(record) for record in records}
-                for entry in self.publication_registry.season_state_entries():
+                core_slugs = {_record_slug(record) for record in records}
+                known = set(core_slugs)
+
+                def season_sort_key(entry: dict[str, Any]) -> tuple[int, str]:
+                    number = entry["collection"].removeprefix("its-")
+                    return (int(number) if number.isdecimal() else -1, entry["revision"])
+
+                # Newest season owns the unqualified route. A historical
+                # source-local State must keep its own independently cited card.
+                for entry in sorted(
+                    self.publication_registry.season_state_entries(),
+                    key=season_sort_key, reverse=True,
+                ):
                     record = deepcopy(entry["record"])
                     slug = _record_slug(record)
-                    if slug in known:
-                        raise ValueError(f"ITS State identity collides with another State: {slug}")
-                    known.add(slug)
+                    if slug in core_slugs:
+                        raise ValueError(f"ITS State identity collides with a core State: {slug}")
+                    route = slug if slug not in known else f"{entry['collection']}-{slug}"
+                    if route in known:
+                        raise ValueError(f"ITS State route collision: {route}")
+                    known.add(route)
+                    record["_routeSlug"] = route
                     record["citations"] = deepcopy(entry["citations"])
                     record["season"] = {
                         "collection": entry["collection"], "revision": entry["revision"],
@@ -54,8 +73,8 @@ class StateCatalog:
         """Return player-facing State identities available in the current rules DB."""
         items = [
             {
-                "id": _record_slug(record),
-                "slug": _record_slug(record),
+                "id": _route_slug(record),
+                "slug": _route_slug(record),
                 "name": record["name"],
                 "description": record["summary"],
                 **({"season": deepcopy(record["season"])}
@@ -68,15 +87,17 @@ class StateCatalog:
     def get_state(self, state_slug: str) -> dict[str, Any] | None:
         """Return one current curated State with its bidirectional rule relations."""
         for record in self._records():
-            slug = _record_slug(record)
+            slug = _route_slug(record)
             if slug != state_slug:
                 continue
+            published = deepcopy(record)
+            published.pop("_routeSlug", None)
             return {
                 "id": slug,
                 "slug": slug,
                 "name": record["name"],
                 "description": record["summary"],
-                "rules": [deepcopy(record)],
+                "rules": [published],
                 **({"season": deepcopy(record["season"])}
                    if "season" in record else {}),
             }

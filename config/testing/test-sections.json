@@ -119,6 +119,7 @@
         "test_its_revision_publication",
         "test_scenario_skill_catalog",
         "test_its_multiseason",
+        "test_real_its17_publication",
         "test_scenario_reuse",
         "test_shared_scenario_skills",
         "test_publication_registry",

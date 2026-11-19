@@ -46,7 +46,7 @@ def test_selected_set_validates_without_build_sources_or_raw_archive(
                  "weapon-profile-sources.json"):
         (runtime_set / name).write_text("invalid", encoding="utf-8")
     result = validate_database_set(Path("selected"), require_complete=True)
-    assert result["layout"] == "v17-three-file"
+    assert result["layout"] == "v17-four-file"
     assert result["integrityCheck"] == "full"
     assert result["schemaVersion"] == 17
     assert result["deployedObjects"] == 17
@@ -57,6 +57,7 @@ def test_selected_set_validates_without_build_sources_or_raw_archive(
     assert result["sha256"] == before
     assert set(result["sha256"]) == COMPLETE_RUNTIME_FILES
     assert result["seasons"]["its-18"]["revision"] == "2026.09.11"
+    assert result["seasons"]["its-17"]["revision"] == "0.2"
     assert {k: v for k, v in fingerprints(runtime_set).items() if k in before} == before
 
 
@@ -139,7 +140,7 @@ def test_complete_set_rejects_unregistered_or_unbound_shared_library(
         validate_database_set(runtime_set, require_complete=True)
 
     monkeypatch.delitem(database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-18")
-    monkeypatch.setitem(database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-17", relative)
+    monkeypatch.setitem(database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-16", relative)
     with pytest.raises(ValueError, match="unknown season"):
         validate_database_set(runtime_set, require_complete=True)
 

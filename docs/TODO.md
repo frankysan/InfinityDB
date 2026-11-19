@@ -366,7 +366,8 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
 - [x] **Data processing: consolidate source-family curation.** ITS 18 now
   uses one curated `data/curated/its/n5-its-season-18.json` with reviewed
   per-fact revision tags and historical field-level overrides. Its explicit
-  current 2026.09.11 projection produces the only registered `its_18.db`.
+  current 2026.09.11 projection produces the registered `its_18.db` alongside
+  the independently reviewed ITS 17 V0.2 publication.
   Older explicit-revision links fail closed; the player-facing selector
   chooses only a season. The original 2026.09.01 provenance and historical
   Battleground/policy facts remain in the curated file for possible future
@@ -486,7 +487,7 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         Beacon/Activate Console, Specialist Troops and endings against
         ITS 18. Preserve the historical Console diameter wording and
         bilingual ambiguities in a second independently pinned
-        definition. The historical database remains unregistered.
+        definition. The ITS 17 V0.2 database is now independently registered.
       - [x] Source-review ITS 17 V0.2 Uplink Center (EN pp. 93–96,
         ES pp. 99–102) against ITS 18: four scoring objectives,
         all three geometries, Antenna activation, Tech-Coffin control,
@@ -656,11 +657,13 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
         discrepancies, optional Extras (including Resilience Operations)
         and reusable geometry/components. All six original PDFs are pinned;
         do not infer cross-revision or cross-season equivalence.
-    - [ ] Curate real ITS 17 against this foundation only after evidence review;
-      keep each resulting season database independent, with no runtime links.
-  - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
-    season launched under N5) and ITS Season 16 Part II (the N5-compatible
-    revision), at minimum their scenario definitions and maps. Keep original
+    - [x] Publish the sixteen reviewed ITS 17 V0.2 missions in a separate,
+      source- and library-pinned `its_17.db`, registered alongside ITS 18.
+      Preserve season-specific Skill/State identities and current revision selection;
+      continue presentation review independently for both seasons.
+  - [ ] **Later seasons:** Add ITS Season 16 Part II (the N5-compatible
+    revision); ITS Season 17 V0.2 is now registered with 16 missions.
+    Keep original
     Season 16 N4-era content distinct from Part II; preserve exact season,
     revision and source provenance. Consider season-specific rules and FAQ
     coverage after the scenario baseline, without delaying Season 18.

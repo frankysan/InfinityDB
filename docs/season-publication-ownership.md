@@ -2,9 +2,10 @@
 
 **Project domains:** Data processing, Web backend, Web frontend
 
-The selected runtime registers one current ITS 18 publication (2026.09.11).
-Other seasons remain unregistered. The phased P3 implementation
-and its exact-SHA acceptance results remain in Git history and
+The selected runtime registers ITS 18 (2026.09.11) and ITS 17 (V0.2) as
+independent, currently authored season publications. Earlier revisions are not
+selectable. The phased P3 implementation and its exact-SHA acceptance
+results remain in Git history and
 [testing evidence](testing.md), not in this ownership contract.
 
 This document defines the current boundary between N5 core and
@@ -22,8 +23,8 @@ see [the data model](data-model.md#accepted-authoring-direction-one-source-famil
 ## Existing source and runtime inventory
 
 The complete build loads reviewed curated Rules and ITS sources, but the
-Rules exporter accepts only N5-owned collections. ITS-authored Season 18
-facts project the current revision into `its_18.db`. Their current
+Rules exporter accepts only N5-owned collections. ITS-authored Season 17 and 18
+facts project independently into `its_17.db` and `its_18.db`. Their current
 authority is:
 
 - `n5-core-v5.3.json` — `core-rules`, `n5-core-v5.3`, effective
@@ -48,15 +49,18 @@ authority is:
   Appropriation, Outbreak and Critical Intervention. The original
   2026.09.01 Battleground facts, policies, citations, source descriptors
   and original file digest are retained as tagged historical evidence.
+- `data/curated/its/n5-its-season-17.json` — `its`, current authored
+  V0.2 (effective 2026-03-09), sixteen source-reviewed missions, season-wide
+  CivEvac/Casevac Skills, Casevac State and the Resilience Operations Extra.
+  Its pinned shared scenario library is an authoring/build input only; V0.0
+  and V0.1 review facts are preserved internally without user-facing revision
+  selection.
 
-The selected `rules_n5.db` owns N5/FAQ/annex data. `its_18.db` owns
-the current ITS 18 mission publication. ITS 17's reviewed historical
-scenarios, scoring, geometry and citations are compiled into a separate
-`its_17.db` (`local/work/its/its_17.db` while unregistered; eventually
-`data/generated/its_17.db` when explicitly registered for release). They
-must not be embedded in `rules_n5.db` or `its_18.db`. A shared scenario
-slug across seasons does not merge records; historical source citations
-remain distinct.
+The selected `rules_n5.db` owns N5/FAQ/annex data. `its_18.db` and
+`its_17.db` each own their season's missions, scoring, geometry and citations;
+no ITS content is embedded in Rules or another ITS database. Shared scenario
+slugs are disambiguated by explicit season selection; same-named season-wide
+Skills and States retain distinct versioned routes when their facts differ.
 
 ## Ownership decisions
 
@@ -106,7 +110,9 @@ shared library may provide exact-version scenario and Skill definitions to
 multiple season publications. Each retains its own citations, review and
 applicability, and materializes a standalone SQLite record. Canonical shared
 Skills appear once in catalog/Search while existing action URLs remain valid.
-Synthetic fixtures prove this; real ITS 17 curation remains pending. The
+Synthetic fixtures prove the generic reuse contract; ITS 17 now uses the
+pinned authoring library, without claiming unreviewed cross-season semantic
+equivalence. The
 [data-model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse)
 owns the complete contract.
 

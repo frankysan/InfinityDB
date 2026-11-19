@@ -400,7 +400,7 @@ model, so generated databases remain replaceable release artifacts.
 
 Complete embedded-set application composition now has one explicit factory,
 `infinity_db.web.create_app_from_database_set`. It uses the shared database-set
-validator's complete mode before opening the selected three-file set.
+validator's complete mode before opening the selected four-file set.
 Current Army/Rules projections, matched recorded provenance and ITS season/core
 source identity are required; incomplete or stale sets fail before application
 creation. The CLI server and production WSGI use this path. The default

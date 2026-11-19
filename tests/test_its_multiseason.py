@@ -282,19 +282,18 @@ def test_unregistered_extra_season_does_not_extend_release_implicitly(
     selected.mkdir()
     for name in database_set.COMPLETE_RUNTIME_FILES:
         shutil.copyfile(RELEASE / name, selected / name)
-    shutil.copyfile(second, selected / "its_17.db")
-    # An extra file is not a registration. The shipped runtime keeps its
-    # explicit three-file allowlist; adding another season requires a new
-    # build manifest and explicit registration, not an opportunistic scan.
+    shutil.copyfile(second, selected / "its_16.db")
+    # An arbitrary extra SQLite file cannot silently register another season.
+    # The tracked runtime explicitly publishes both ITS 17 and ITS 18.
     report = validate_database_set(selected, require_complete=True)
     assert set(report["sha256"]) == database_set.COMPLETE_RUNTIME_FILES
-    assert set(report["seasons"]) == {"its-18"}
+    assert set(report["seasons"]) == {"its-17", "its-18"}
     monkeypatch = pytest.MonkeyPatch()
     try:
-        monkeypatch.setitem(database_set.SEASON_DATABASE_SOURCES, "its-17", (
-            "its_17.db", "synthetic-fixture-not-in-release-manifest.json",
+        monkeypatch.setitem(database_set.SEASON_DATABASE_SOURCES, "its-16", (
+            "its_16.db", "synthetic-fixture-not-in-release-manifest.json",
         ))
-        with pytest.raises(ValueError, match="lacks input identity"):
+        with pytest.raises(ValueError, match="registration does not match"):
             validate_database_set(selected, require_complete=True)
     finally:
         monkeypatch.undo()

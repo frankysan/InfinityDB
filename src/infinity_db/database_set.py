@@ -57,10 +57,13 @@ EMBEDDED_WEAPON_RUNTIME_FILES = frozenset({ARMY_DATABASE_FILENAME, RULES_DATABAS
 # inferred from the contents of an operator-selected directory.
 SEASON_DATABASE_SOURCES = {
     "its-18": ("its_18.db", "data/curated/its/n5-its-season-18.json"),
+    "its-17": ("its_17.db", "data/curated/its/n5-its-season-17.json"),
 }
 # Only explicitly registered seasons can consume a shared authoring library.
 # The library is a build input, not a runtime database dependency.
-SEASON_SHARED_LIBRARY_SOURCES: dict[str, str] = {}
+SEASON_SHARED_LIBRARY_SOURCES: dict[str, str] = {
+    "its-17": "data/curated/its/shared/its17-scenarios-v1.json",
+}
 
 
 def season_shared_library_source(season: str) -> str | None:
@@ -237,7 +240,8 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
             fingerprints[name] = hashlib.file_digest(stream, "sha256").hexdigest()
     return {
         "layout": (
-            "v17-three-file" if require_complete and registered_seasons
+            "v17-four-file" if require_complete and len(registered_seasons) == 2
+            else "v17-three-file" if require_complete and registered_seasons
             else {
                 12: "v12-two-file", 13: "v13-two-file",
                 14: "v14-two-file", 15: "v15-two-file",

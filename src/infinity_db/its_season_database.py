@@ -67,7 +67,7 @@ def _input_identity(source: Path, document: dict[str, Any], core_revision: str) 
     scenario_set = document["scenarioCollection"]
     return {
         "sourceCollectionId": collection["id"],
-        "sourceSha256": _file_sha(source),
+        "sourceSha256": hashlib.sha256(source.read_bytes().replace(b"\r\n", b"\n")).hexdigest(),
         "seasonId": scenario_set["id"],
         "seasonRevision": scenario_set["revision"],
         "effectiveFrom": collection["effectiveFrom"],
@@ -623,7 +623,9 @@ def inspect_its_database(
             raise ValueError("ITS database requires rebuilding after builder change")
         if core_revision is not None and identity.get("requiredCoreRulesRevision") != core_revision:
             raise ValueError("ITS database requires a different N5 core revision")
-        if source is not None and _file_sha(source) != identity.get("sourceSha256"):
+        if source is not None and hashlib.sha256(
+            source.read_bytes().replace(b"\r\n", b"\n")
+        ).hexdigest() != identity.get("sourceSha256"):
             raise ValueError("ITS source bytes do not match the built database")
         library_identity = identity.get("sharedScenarioLibrary")
         if library_identity is not None and (
