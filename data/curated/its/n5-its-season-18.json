@@ -12409,7 +12409,7 @@
                   "kind": "dimension",
                   "target": "deployment-a",
                   "axis": "y",
-                  "side": "end",
+                  "side": "start",
                   "offset": 0.8
                 },
                 {
@@ -12436,7 +12436,7 @@
                   "y1": 8,
                   "x2": 24,
                   "y2": 8,
-                  "offset": 2.5
+                  "offset": -3.0
                 },
                 {
                   "id": "exclusion-from-center",
@@ -12609,7 +12609,7 @@
                   "kind": "dimension",
                   "target": "deployment-a",
                   "axis": "y",
-                  "side": "end",
+                  "side": "start",
                   "offset": 0.8
                 },
                 {
@@ -12636,7 +12636,7 @@
                   "y1": 12,
                   "x2": 32,
                   "y2": 12,
-                  "offset": 2.5
+                  "offset": -3.0
                 },
                 {
                   "id": "exclusion-from-center",
@@ -12810,7 +12810,7 @@
                   "kind": "dimension",
                   "target": "deployment-a",
                   "axis": "y",
-                  "side": "end",
+                  "side": "start",
                   "offset": 0.8
                 },
                 {
@@ -12837,7 +12837,7 @@
                   "y1": 12,
                   "x2": 48,
                   "y2": 12,
-                  "offset": 2.5
+                  "offset": -3.0
                 },
                 {
                   "id": "exclusion-from-center",

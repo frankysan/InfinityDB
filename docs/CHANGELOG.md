@@ -22,8 +22,9 @@ are not retroactively relabeled.
   cards, and physical marker sizes now include the source-chart 25 mm Defensive
   Turret Token (distinct from its S2 Model option), 25 mm Civilians, and
   Hardlock's Beacon.
-  Scenario-map placement rulers sit below their measured markers rather than
-  inheriting the official diagrams' exterior guide placement.
+  Scenario-map placement rulers use unobstructed interior positions rather than
+  inheriting the official diagrams' exterior guide placement. In Neutralization,
+  the 4-inch Antenna ruler and 8-/12-inch Deployment Zone depth ruler no longer overlap.
 - Circular Template Areas now explicitly show their 12 cm diameter in ITS 17/18
   mission rules, with map notes for fixed template areas.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and

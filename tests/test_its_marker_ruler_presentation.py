@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Literal
 from xml.etree import ElementTree
 
 import pytest
@@ -114,12 +115,69 @@ def test_its_token_chart_has_canonical_size_for_each_fixed_footprint() -> None:
     assert marker_diameter_mm("tracking-beacon") is None
 
 
+@pytest.mark.parametrize("distance_unit", ["in", "cm"])
+def test_neutralization_ruler_labels_clear_antenna_areas(
+    distance_unit: Literal["in", "cm"],
+) -> None:
+    document = json.loads(ITS18.read_text(encoding="utf-8"))
+    record = next(r for r in document["records"] if r["id"] == "scenario:neutralization")
+    for configuration in record["facts"]["configurations"]:
+        geometry = configuration["geometry"]
+        elements = {e["id"]: e for e in geometry["elements"]}
+        annotations = {a["id"]: a for a in geometry["annotations"]}
+        area = elements["neutralization-area-a-right"]
+        left_area = elements["neutralization-area-a-left"]
+        ruler = annotations["antenna-right-from-right"]
+        depth = annotations["deployment-a-depth"]
+        deployment_depth = elements["deployment-a"]["y2"]
+
+        # Measure the actual right-hand Antenna center, but draw entirely above
+        # its circular region; move the vertical depth guide to the opposite edge.
+        assert (ruler["x1"], ruler["x2"], ruler["y1"], ruler["y2"]) == (
+            area["x"], geometry["table"]["width"], area["y"], area["y"],
+        )
+        assert ruler["offset"] == -3.0
+        assert (depth["side"], depth["offset"]) == ("start", 0.8)
+
+        root = ElementTree.fromstring(render_scenario_map_svg(
+            parse_scenario_geometry(geometry), distance_unit=distance_unit,
+        ))
+        by_id = {node.get("id"): node for node in root.iter() if node.get("id")}
+        ruler_group = by_id[ruler["id"]]
+        ruler_line = ruler_group.find(f"{SVG_NS}line")
+        ruler_label = ruler_group.find(f"{SVG_NS}text")
+        depth_group = by_id[depth["id"]]
+        depth_line = depth_group.find(f"{SVG_NS}line")
+        depth_label = depth_group.find(f"{SVG_NS}text")
+        assert all(node is not None for node in (
+            ruler_line, ruler_label, depth_line, depth_label,
+        ))
+        assert ruler_line is not None and ruler_label is not None
+        assert depth_line is not None and depth_label is not None
+
+        # Both the line and its label are above the drawn template area.
+        assert float(ruler_line.get("y1", "nan")) == deployment_depth - 3.0
+        assert float(ruler_line.get("y2", "nan")) < area["y"] - area["radius"]
+        assert float(ruler_label.get("y", "nan")) < area["y"] - area["radius"]
+        # The vertical deployment guide also clears the left template area.
+        assert float(depth_line.get("x1", "nan")) == 0.8
+        assert float(depth_line.get("x1", "nan")) < left_area["x"] - left_area["radius"]
+        assert ruler_group.get("data-distance-inches") == "4"
+        expected_ruler = "4″" if distance_unit == "in" else "10 cm"
+        expected_depth = (
+            f"{deployment_depth}″" if distance_unit == "in"
+            else f"{deployment_depth * 2.5:g} cm"
+        )
+        assert ruler_label.text == expected_ruler
+        assert depth_label.text == expected_depth
+
+
 @pytest.mark.parametrize(
     ("source", "expected_count"),
     [(ITS18, 63), (ITS17_SHARED, 45)],
     ids=["its-18", "its-17"],
 )
-def test_marker_placement_rulers_measure_markers_but_draw_below_them(
+def test_marker_placement_rulers_measure_markers_without_overlaying_them(
     source: Path, expected_count: int,
 ) -> None:
     document = json.loads(source.read_text(encoding="utf-8"))
@@ -154,7 +212,13 @@ def test_marker_placement_rulers_measure_markers_but_draw_below_them(
             by_id = {node.get("id"): node for node in root.iter() if node.get("id")}
             for ruler in placement:
                 assert ruler["y1"] == ruler["y2"], (record["name"], ruler["id"])
-                assert ruler["offset"] == 2.5, (record["name"], ruler["id"])
+                expected_offset = (
+                    -3.0
+                    if record["id"] == "scenario:neutralization"
+                    and ruler["id"] == "antenna-right-from-right"
+                    else 2.5
+                )
+                assert ruler["offset"] == expected_offset, (record["name"], ruler["id"])
                 assert any(
                     marker["x"] in (ruler["x1"], ruler["x2"])
                     and marker["y"] == ruler["y1"]
@@ -165,8 +229,8 @@ def test_marker_placement_rulers_measure_markers_but_draw_below_them(
                 line = group.find(f"{SVG_NS}line")
                 assert line is not None
                 for coordinate, expected in (
-                    ("y1", ruler["y1"] + 2.5),
-                    ("y2", ruler["y2"] + 2.5),
+                    ("y1", ruler["y1"] + expected_offset),
+                    ("y2", ruler["y2"] + expected_offset),
                     ("x1", ruler["x1"]),
                     ("x2", ruler["x2"]),
                 ):

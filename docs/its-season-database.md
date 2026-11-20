@@ -1114,9 +1114,15 @@ marker positions**. Rulers whose purpose is to locate objectives on a
 horizontal centerline are drawn just below those markers inside the map
 using the separate geometry `offset` (currently 2.5 inches); do not
 copy the official diagram's external guide position into the measured
-coordinates. Where rulers cross or collide, position independent
-exclusion/region helpers in clear gaps. Non-placement distances and
-player-placed token positions retain their own geometry and source rules.
+coordinates. Prefer collision-free layouts for rulers, labels, markers
+and shaded regions rather than slavishly following exterior guides. If a
+placement ruler overlaps a nearby region, put it on the opposite side of
+its measured marker, and relocate neighboring dimension annotations
+together as needed. In Neutralization, the right Antenna's 4-inch guide
+sits 3 inches above the marker and the top 8-/12-inch Deployment Zone
+depth indicator moves to the left edge for all game sizes. Non-placement
+distances and player-placed token positions retain their own geometry
+and source rules.
 
 The Annihilation source-issues array explicitly retains the **350-point**
 gap printed in both languages: 3 OP for 176–274 and 4 OP for greater than
