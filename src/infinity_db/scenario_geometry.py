@@ -12,9 +12,9 @@ SCENARIO_GEOMETRY_VERSION = 1
 
 _MM_PER_INCH = 25.4
 
-# Schematic markers without a single corroborated physical diameter are
-# separate from the size registry (B-Pong Tracking Beacon;
-# Evacuation Civilians represented by Models or Tokens without fixed diameter).
+# ITS 17 V0.2 p. 13 and ITS 18 2026.09.11 p. 18 define these
+# token diameters. Schematic models without a fixed footprint (Evacuation
+# Civilians) and conflicting B-Pong Tracking Beacon sources remain unmeasured.
 _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "console": 40.0,
     "beacon": 25.0,
@@ -24,6 +24,11 @@ _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "hyperthermal-tech": 25.0,
     "prototype": 40.0,
     "panoply": 40.0,
+    "objective": 40.0,
+    "player-a-b": 25.0,
+    "data-pack": 25.0,
+    "defensive-turret": 25.0,
+    "civevac": 25.0,
 }
 
 _ELEMENT_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")

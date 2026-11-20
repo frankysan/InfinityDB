@@ -19,7 +19,10 @@ are not retroactively relabeled.
   players can compare them or focus on one while Secondary and Classified
   Objectives stay visible.
 - Scenario lists are alphabetical. ITS tournament and Extra rules have separate
-  cards, and Hardlock shows the official 25 mm Beacon Token diameter.
+  cards, and physical marker sizes now include the source-chart 25 mm Defensive
+  Turret Token (distinct from its S2 Model option) as well as Hardlock's Beacon.
+  Scenario-map placement rulers sit below their measured markers rather than
+  inheriting the official diagrams' exterior guide placement.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and
   HVTs each player uses.
 - Scenario-specific Skills share normal Skill cards, appear under their own

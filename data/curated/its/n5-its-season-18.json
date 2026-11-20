@@ -2183,26 +2183,26 @@
                   "id": "antenna-middle-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 22.5,
+                  "y1": 16,
                   "x2": 12,
-                  "y2": 22.5,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 18,
-                  "y1": 22.5,
+                  "y1": 16,
                   "x2": 24,
-                  "y2": 22.5,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "exclusion-from-center",
                   "kind": "ruler",
-                  "x1": 21,
+                  "x1": 15,
                   "y1": 16,
-                  "x2": 21,
+                  "x2": 15,
                   "y2": 20,
                   "offset": 0
                 }
@@ -2347,26 +2347,26 @@
                   "id": "antenna-middle-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 30.5,
+                  "y1": 24,
                   "x2": 16,
-                  "y2": 30.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 24,
-                  "y1": 30.5,
+                  "y1": 24,
                   "x2": 32,
-                  "y2": 30.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "exclusion-from-center",
                   "kind": "ruler",
-                  "x1": 29,
+                  "x1": 20,
                   "y1": 24,
-                  "x2": 29,
+                  "x2": 20,
                   "y2": 28,
                   "offset": 0
                 }
@@ -2512,26 +2512,26 @@
                   "id": "antenna-middle-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 30.5,
+                  "y1": 24,
                   "x2": 24,
-                  "y2": 30.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 36,
-                  "y1": 30.5,
+                  "y1": 24,
                   "x2": 48,
-                  "y2": 30.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "exclusion-from-center",
                   "kind": "ruler",
-                  "x1": 45,
+                  "x1": 30,
                   "y1": 24,
-                  "x2": 45,
+                  "x2": 30,
                   "y2": 28,
                   "offset": 0
                 }
@@ -7918,19 +7918,19 @@
                   "id": "tech-coffin-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 22.5,
+                  "y1": 16,
                   "x2": 12,
-                  "y2": 22.5,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 18,
-                  "y1": 22.5,
+                  "y1": 16,
                   "x2": 24,
-                  "y2": 22.5,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 }
               ]
             }
@@ -8050,19 +8050,19 @@
                   "id": "tech-coffin-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 34.5,
+                  "y1": 24,
                   "x2": 16,
-                  "y2": 34.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 24,
-                  "y1": 34.5,
+                  "y1": 24,
                   "x2": 32,
-                  "y2": 34.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -8183,19 +8183,19 @@
                   "id": "tech-coffin-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 34.5,
+                  "y1": 24,
                   "x2": 24,
-                  "y2": 34.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 36,
-                  "y1": 34.5,
+                  "y1": 24,
                   "x2": 48,
-                  "y2": 34.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -8821,19 +8821,19 @@
                   "id": "console-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 26.5,
+                  "y1": 16,
                   "x2": 12,
-                  "y2": 26.5,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "console-right-from-right",
                   "kind": "ruler",
                   "x1": 18,
-                  "y1": 26.5,
+                  "y1": 16,
                   "x2": 24,
-                  "y2": 26.5,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 }
               ]
             }
@@ -8963,19 +8963,19 @@
                   "id": "console-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 38.5,
+                  "y1": 24,
                   "x2": 16,
-                  "y2": 38.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "console-right-from-right",
                   "kind": "ruler",
                   "x1": 24,
-                  "y1": 38.5,
+                  "y1": 24,
                   "x2": 32,
-                  "y2": 38.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -9106,19 +9106,19 @@
                   "id": "console-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 38.5,
+                  "y1": 24,
                   "x2": 24,
-                  "y2": 38.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "console-right-from-right",
                   "kind": "ruler",
                   "x1": 36,
-                  "y1": 38.5,
+                  "y1": 24,
                   "x2": 48,
-                  "y2": 38.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -9761,18 +9761,18 @@
                 {
                   "id": "exclusion-a-radius",
                   "kind": "ruler",
-                  "x1": 1.4,
+                  "x1": 14,
                   "y1": 14,
-                  "x2": 1.4,
+                  "x2": 14,
                   "y2": 16,
                   "offset": 0
                 },
                 {
                   "id": "exclusion-b-radius",
                   "kind": "ruler",
-                  "x1": 1.4,
+                  "x1": 14,
                   "y1": 16,
-                  "x2": 1.4,
+                  "x2": 14,
                   "y2": 18,
                   "offset": 0
                 },
@@ -9780,19 +9780,19 @@
                   "id": "beacon-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 23,
+                  "y1": 16,
                   "x2": 12,
-                  "y2": 23,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "right-console-from-right",
                   "kind": "ruler",
                   "x1": 18,
-                  "y1": 23,
+                  "y1": 16,
                   "x2": 24,
-                  "y2": 23,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 }
               ]
             }
@@ -9914,18 +9914,18 @@
                 {
                   "id": "exclusion-a-radius",
                   "kind": "ruler",
-                  "x1": 1.4,
+                  "x1": 18,
                   "y1": 20,
-                  "x2": 1.4,
+                  "x2": 18,
                   "y2": 24,
                   "offset": 0
                 },
                 {
                   "id": "exclusion-b-radius",
                   "kind": "ruler",
-                  "x1": 1.4,
+                  "x1": 18,
                   "y1": 24,
-                  "x2": 1.4,
+                  "x2": 18,
                   "y2": 28,
                   "offset": 0
                 },
@@ -9933,19 +9933,19 @@
                   "id": "beacon-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 35,
+                  "y1": 24,
                   "x2": 16,
-                  "y2": 35,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "right-console-from-right",
                   "kind": "ruler",
                   "x1": 24,
-                  "y1": 35,
+                  "y1": 24,
                   "x2": 32,
-                  "y2": 35,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -10068,18 +10068,18 @@
                 {
                   "id": "exclusion-a-radius",
                   "kind": "ruler",
-                  "x1": 1.4,
+                  "x1": 26,
                   "y1": 20,
-                  "x2": 1.4,
+                  "x2": 26,
                   "y2": 24,
                   "offset": 0
                 },
                 {
                   "id": "exclusion-b-radius",
                   "kind": "ruler",
-                  "x1": 1.4,
+                  "x1": 26,
                   "y1": 24,
-                  "x2": 1.4,
+                  "x2": 26,
                   "y2": 28,
                   "offset": 0
                 },
@@ -10087,19 +10087,19 @@
                   "id": "beacon-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 35,
+                  "y1": 24,
                   "x2": 24,
-                  "y2": 35,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "right-console-from-right",
                   "kind": "ruler",
                   "x1": 36,
-                  "y1": 35,
+                  "y1": 24,
                   "x2": 48,
-                  "y2": 35,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -10669,10 +10669,10 @@
                   "id": "antenna-from-right",
                   "kind": "ruler",
                   "x1": 12,
-                  "y1": 20,
+                  "y1": 16,
                   "x2": 24,
-                  "y2": 20,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 }
               ]
             }
@@ -10770,10 +10770,10 @@
                   "id": "antenna-from-right",
                   "kind": "ruler",
                   "x1": 16,
-                  "y1": 30,
+                  "y1": 24,
                   "x2": 32,
-                  "y2": 30,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -10872,10 +10872,10 @@
                   "id": "antenna-from-right",
                   "kind": "ruler",
                   "x1": 24,
-                  "y1": 30,
+                  "y1": 24,
                   "x2": 48,
-                  "y2": 30,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -11454,19 +11454,19 @@
                   "id": "console-left-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 19,
+                  "y1": 16,
                   "x2": 8,
-                  "y2": 19,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "civilian-right-from-right",
                   "kind": "ruler",
                   "x1": 18,
-                  "y1": 19,
+                  "y1": 12,
                   "x2": 24,
-                  "y2": 19,
-                  "offset": 0
+                  "y2": 12,
+                  "offset": 2.5
                 },
                 {
                   "id": "civilian-upper-from-top",
@@ -11613,19 +11613,19 @@
                   "id": "console-left-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 29,
+                  "y1": 24,
                   "x2": 12,
-                  "y2": 29,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "civilian-right-from-right",
                   "kind": "ruler",
                   "x1": 26,
-                  "y1": 29,
+                  "y1": 16,
                   "x2": 32,
-                  "y2": 29,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "civilian-upper-from-top",
@@ -11773,19 +11773,19 @@
                   "id": "console-left-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 29,
+                  "y1": 24,
                   "x2": 16,
-                  "y2": 29,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "civilian-right-from-right",
                   "kind": "ruler",
                   "x1": 42,
-                  "y1": 29,
+                  "y1": 16,
                   "x2": 48,
-                  "y2": 29,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "civilian-upper-from-top",
@@ -12424,19 +12424,19 @@
                   "id": "tech-box-left-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 20.5,
+                  "y1": 16,
                   "x2": 8,
-                  "y2": 20.5,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 20,
-                  "y1": 20.5,
+                  "y1": 8,
                   "x2": 24,
-                  "y2": 20.5,
-                  "offset": 0
+                  "y2": 8,
+                  "offset": 2.5
                 },
                 {
                   "id": "exclusion-from-center",
@@ -12624,19 +12624,19 @@
                   "id": "tech-box-left-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 32.5,
+                  "y1": 24,
                   "x2": 12,
-                  "y2": 32.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 28,
-                  "y1": 32.5,
+                  "y1": 12,
                   "x2": 32,
-                  "y2": 32.5,
-                  "offset": 0
+                  "y2": 12,
+                  "offset": 2.5
                 },
                 {
                   "id": "exclusion-from-center",
@@ -12825,19 +12825,19 @@
                   "id": "tech-box-left-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 32.5,
+                  "y1": 24,
                   "x2": 20,
-                  "y2": 32.5,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "antenna-right-from-right",
                   "kind": "ruler",
                   "x1": 44,
-                  "y1": 32.5,
+                  "y1": 12,
                   "x2": 48,
-                  "y2": 32.5,
-                  "offset": 0
+                  "y2": 12,
+                  "offset": 2.5
                 },
                 {
                   "id": "exclusion-from-center",
@@ -15001,19 +15001,19 @@
                   "id": "coffin-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 30.9,
+                  "y1": 16,
                   "x2": 12,
-                  "y2": 30.9,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "coffin-right-from-edge",
                   "kind": "ruler",
                   "x1": 20,
-                  "y1": 30.9,
+                  "y1": 16,
                   "x2": 24,
-                  "y2": 30.9,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 }
               ]
             }
@@ -15116,19 +15116,19 @@
                   "id": "coffin-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 46.9,
+                  "y1": 24,
                   "x2": 16,
-                  "y2": 46.9,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "coffin-right-from-edge",
                   "kind": "ruler",
                   "x1": 28,
-                  "y1": 46.9,
+                  "y1": 24,
                   "x2": 32,
-                  "y2": 46.9,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -15232,19 +15232,19 @@
                   "id": "coffin-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 46.9,
+                  "y1": 24,
                   "x2": 24,
-                  "y2": 46.9,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "coffin-right-from-edge",
                   "kind": "ruler",
                   "x1": 44,
-                  "y1": 46.9,
+                  "y1": 24,
                   "x2": 48,
-                  "y2": 46.9,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -15938,19 +15938,19 @@
                   "id": "id-checker-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 30.9,
+                  "y1": 16,
                   "x2": 12,
-                  "y2": 30.9,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "scanner-right-from-edge",
                   "kind": "ruler",
                   "x1": 20,
-                  "y1": 30.9,
+                  "y1": 16,
                   "x2": 24,
-                  "y2": 30.9,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "launching-tower-width",
@@ -16078,19 +16078,19 @@
                   "id": "id-checker-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 46.9,
+                  "y1": 24,
                   "x2": 16,
-                  "y2": 46.9,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "scanner-right-from-edge",
                   "kind": "ruler",
                   "x1": 24,
-                  "y1": 46.9,
+                  "y1": 24,
                   "x2": 32,
-                  "y2": 46.9,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "launching-tower-width",
@@ -16219,19 +16219,19 @@
                   "id": "id-checker-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 46.9,
+                  "y1": 24,
                   "x2": 24,
-                  "y2": 46.9,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "scanner-right-from-edge",
                   "kind": "ruler",
                   "x1": 40,
-                  "y1": 46.9,
+                  "y1": 24,
                   "x2": 48,
-                  "y2": 46.9,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "launching-tower-width",
@@ -16903,19 +16903,19 @@
                   "id": "prototype-left-from-edge",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 31.05,
+                  "y1": 16,
                   "x2": 6,
-                  "y2": 31.05,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "prototype-right-from-edge",
                   "kind": "ruler",
                   "x1": 18,
-                  "y1": 31.05,
+                  "y1": 16,
                   "x2": 24,
-                  "y2": 31.05,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 },
                 {
                   "id": "exclusion-half-width",
@@ -17044,19 +17044,19 @@
                   "id": "prototype-left-from-edge",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 47.05,
+                  "y1": 24,
                   "x2": 8,
-                  "y2": 47.05,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "prototype-right-from-edge",
                   "kind": "ruler",
                   "x1": 24,
-                  "y1": 47.05,
+                  "y1": 24,
                   "x2": 32,
-                  "y2": 47.05,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "exclusion-half-width",
@@ -17186,19 +17186,19 @@
                   "id": "prototype-left-from-edge",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 47.05,
+                  "y1": 24,
                   "x2": 12,
-                  "y2": 47.05,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "prototype-right-from-edge",
                   "kind": "ruler",
                   "x1": 36,
-                  "y1": 47.05,
+                  "y1": 24,
                   "x2": 48,
-                  "y2": 47.05,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 },
                 {
                   "id": "exclusion-half-width",
@@ -17801,7 +17801,7 @@
                   "y1": 16,
                   "x2": 12,
                   "y2": 16,
-                  "offset": 0
+                  "offset": 2.5
                 }
               ]
             }
@@ -17895,7 +17895,7 @@
                   "y1": 24,
                   "x2": 16,
                   "y2": 24,
-                  "offset": 0
+                  "offset": 2.5
                 }
               ]
             }
@@ -17990,7 +17990,7 @@
                   "y1": 24,
                   "x2": 24,
                   "y2": 24,
-                  "offset": 0
+                  "offset": 2.5
                 }
               ]
             }
@@ -19018,10 +19018,10 @@
                   "id": "room-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 31.1,
+                  "y1": 16,
                   "x2": 12,
-                  "y2": 31.1,
-                  "offset": 0
+                  "y2": 16,
+                  "offset": 2.5
                 }
               ]
             }
@@ -19175,10 +19175,10 @@
                   "id": "room-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 47.1,
+                  "y1": 24,
                   "x2": 16,
-                  "y2": 47.1,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }
@@ -19333,10 +19333,10 @@
                   "id": "room-center-from-left",
                   "kind": "ruler",
                   "x1": 0,
-                  "y1": 47.1,
+                  "y1": 24,
                   "x2": 24,
-                  "y2": 47.1,
-                  "offset": 0
+                  "y2": 24,
+                  "offset": 2.5
                 }
               ]
             }

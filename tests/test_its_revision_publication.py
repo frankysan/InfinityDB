@@ -1004,12 +1004,12 @@ def test_critical_intervention_six_sizes_fixed_roles_and_historical_isolation(
         }
         assert {m["marker_type"]: (m["count"], m["diameter_mm"])
                 for m in item["placement"]["marker_dimensions"]} == {
-            "defensive-turret": (2, None),
+            "defensive-turret": (2, 25),
             "console": (1, 40),
             "antenna": (1, 40),
         }
         assert [m["citation"]["page"] for m in item["placement"]["marker_dimensions"]
-                if m["diameter_mm"] is not None] == [18, 18]
+                if m["diameter_mm"] is not None] == [18, 18, 18]
         assert [citation["page"] for citation in item["citations"]] == [
             *range(97, 105), *range(97, 105),
         ]
@@ -1038,7 +1038,7 @@ def test_critical_intervention_six_sizes_fixed_roles_and_historical_isolation(
         assert b'class="no-deploy"' in svg
         assert b'id="attacker-exclusion-zone" class="exclusion"' in svg
         assert svg.count(b'data-marker-type="defensive-turret" '
-                         b'data-physical-size="unspecified"') == 2
+                         b'data-diameter-mm="25"') == 2
         assert svg.count(b'data-marker-type="console" data-diameter-mm="40"') == 1
         assert svg.count(b'data-marker-type="antenna" data-diameter-mm="40"') == 1
         for distance in (depth, 4, 8, width / 2):

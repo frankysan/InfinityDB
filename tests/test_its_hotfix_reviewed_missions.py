@@ -173,11 +173,13 @@ def test_double_bind_selected_main_objective_hotfix_and_antenna_areas() -> None:
         deployment_start = elements["deployment-b"]["y1"]
         for ruler_id in ("antenna-middle-from-left", "antenna-right-from-right"):
             ruler = rulers[ruler_id]
-            assert ruler["y1"] == ruler["y2"] == exclusion_bottom + 2.5
-            assert exclusion_bottom < ruler["y1"] < deployment_start
+            assert ruler["y1"] == ruler["y2"] == geometry["table"]["height"] / 2
+            assert ruler["offset"] == 2.5
+            assert ruler["y1"] < ruler["y1"] + ruler["offset"] < exclusion_bottom
+            assert ruler["y1"] + ruler["offset"] < deployment_start
         center_ruler = rulers["exclusion-from-center"]
         center = geometry["table"]["height"] / 2
-        assert center_ruler["x1"] == center_ruler["x2"] == geometry["table"]["width"] - 3
+        assert center_ruler["x1"] == center_ruler["x2"] == geometry["table"]["width"] * 5 / 8
         assert center_ruler["y1"] == center
         assert center_ruler["y2"] == exclusion_bottom == center + 4
         assert 'id="exclusion-from-center" class="measurement placement-ruler"' in svg
@@ -554,13 +556,13 @@ def test_uplink_center_objectives_activation_control_and_40mm_tokens() -> None:
         assert rulers == {
             "tech-coffin-from-left": {
                 "id": "tech-coffin-from-left", "kind": "ruler",
-                "x1": 0, "y1": height - depth + 2.5,
-                "x2": width / 2, "y2": height - depth + 2.5, "offset": 0,
+                "x1": 0, "y1": height / 2,
+                "x2": width / 2, "y2": height / 2, "offset": 2.5,
             },
             "antenna-right-from-right": {
                 "id": "antenna-right-from-right", "kind": "ruler",
-                "x1": width * 3 / 4, "y1": height - depth + 2.5,
-                "x2": width, "y2": height - depth + 2.5, "offset": 0,
+                "x1": width * 3 / 4, "y1": height / 2,
+                "x2": width, "y2": height / 2, "offset": 2.5,
             },
         }
         svg = render_scenario_map_svg(parse_scenario_geometry(geometry))
@@ -843,8 +845,9 @@ def test_akial_interference_classified_scoring_and_center_antenna() -> None:
         assert rulers["deployment-b-depth"]["target"] == "deployment-b"
         ruler = rulers["antenna-from-right"]
         assert (ruler["x1"], ruler["x2"]) == (width / 2, width)
-        assert ruler["y1"] == ruler["y2"] == height / 2 + (4 if width == 24 else 6)
-        assert ruler["y2"] < height - depth  # no ruler overlaps Deployment Zone B
+        assert ruler["y1"] == ruler["y2"] == height / 2
+        assert ruler["offset"] == 2.5
+        assert ruler["y2"] + ruler["offset"] < height - depth  # inside neutral band
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geo), theme=theme)
             assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 1
@@ -899,10 +902,10 @@ def test_evacuation_civilian_console_positions_and_scoring() -> None:
         "reactivation-english-omission",
     }
     assert all(i["status"] == "needs-verification" for i in mission["sourceIssues"])
-    for key, w, h, d, off, topY, consoleY in (
-        ("150-points", 24, 32, 8, 4, 12, 19),
-        ("200-250-points", 32, 48, 12, 4, 16, 29),
-        ("300-400-points", 48, 48, 12, 8, 16, 29),
+    for key, w, h, d, off, topY in (
+        ("150-points", 24, 32, 8, 4, 12),
+        ("200-250-points", 32, 48, 12, 4, 16),
+        ("300-400-points", 48, 48, 12, 8, 16),
     ):
         geometry = configurations[key]
         assert geometry["table"] == {"width": w, "height": h, "unit": "in"}
@@ -926,8 +929,9 @@ def test_evacuation_civilian_console_positions_and_scoring() -> None:
         assert rulers["civilian-right-from-right"]["x1"] == w - 6
         assert rulers["civilian-right-from-right"]["x2"] == w
         assert rulers["civilian-upper-from-top"]["y2"] == topY
-        assert rulers["console-left-from-left"]["y1"] == consoleY
-        assert rulers["console-left-from-left"]["y2"] == consoleY
+        assert rulers["console-left-from-left"]["y1"] == h / 2
+        assert rulers["console-left-from-left"]["y2"] == h / 2
+        assert rulers["console-left-from-left"]["offset"] == 2.5
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
             assert svg.count('data-marker-type="civilian" data-physical-size="unspecified"') == 4
@@ -1860,7 +1864,7 @@ def test_critical_intervention_fixed_roles_scoring_turrets_and_bilingual_sources
             assert 'class="no-deploy"' in svg
             assert 'id="attacker-exclusion-zone" class="exclusion"' in svg
             assert svg.count('data-marker-type="defensive-turret" '
-                             'data-physical-size="unspecified"') == 2
+                             'data-diameter-mm="25"') == 2
             assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 1
             assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 1
             for distance in (depth, 4, 8, width / 2):

@@ -1056,9 +1056,9 @@ All twenty missions are published for the current 2026.09.11 revision:
   this is not a Double Bind-style selection. Both sides use 8-/12-inch
   deployment depths, a central 4-inch-per-side Attacker Exclusion Zone
   and an 8-inch square Server Room, which is normally a No Deployment
-  Zone. Its schematic two Armed Turrets have no published physical
-  diameter; the central 40 mm Data Console and Defender-side 40 mm
-  Inhibitor Antenna have physical marker dimensions. The Defender may
+  Zone. The two Armed Turrets may use 25 mm Defensive Turret Tokens
+  (ITS 18 EN p. 18) or S2 Models; the central 40 mm Data Console and
+  Defender-side 40 mm Inhibitor Antenna are also source-sized. The Defender may
   spend one additional pre-deployment Command Token to activate the
   Defense System or deploy up to 65 Army Points in the room. Attacker
   scoring covers unlocking and extracting the Data Pack, extractor
@@ -1086,6 +1086,25 @@ Double Bind's Antenna ruler intervals and The Dig's Console interval, centerline
 and deployment-radius measurements follow the printed diagrams. Hyperthermal
 Tech Tokens remain player-placed, so the map does not invent their coordinates;
 their 4-inch/8-inch clearance is retained in mission rules.
+
+**ITS token footprint and ruler presentation:** ITS 17 V0.2 EN p. 13 and
+ITS 18 2026.09.11 EN p. 18 (ES p. 19) provide the source-owned token
+diameter chart. Every fixed-size token type used in scenario maps must
+project that physical diameter in the SVG and player-facing marker list,
+including the **25 mm Defensive Turret Token**. The S2 Model alternative
+for a Defensive Turret remains a model; the 25 mm CivEvac Token similarly
+does not establish a footprint for a generic Civilian Model. B-Pong's
+Tracking Beacon retains its unresolved EN/ES disagreement, rather than
+borrowing the global 25 mm Beacon Token size.
+
+Marker-placement ruler endpoints must describe the **actual measured
+marker positions**. Rulers whose purpose is to locate objectives on a
+horizontal centerline are drawn just below those markers inside the map
+using the separate geometry `offset` (currently 2.5 inches); do not
+copy the official diagram's external guide position into the measured
+coordinates. Where rulers cross or collide, position independent
+exclusion/region helpers in clear gaps. Non-placement distances and
+player-placed token positions retain their own geometry and source rules.
 
 The Annihilation source-issues array explicitly retains the **350-point**
 gap printed in both languages: 3 OP for 176–274 and 4 OP for greater than

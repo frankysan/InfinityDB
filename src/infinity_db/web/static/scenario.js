@@ -228,7 +228,8 @@ function mapCard(item) {
       row.textContent = marker.diameter_mm == null
         ? `${marker.count} × ${marker.name} — ${marker.size_status === "source-conflict"
           ? "conflicting physical sizes in official sources" : "physical size not specified"}`
-        : `${marker.count} × ${marker.name} — ${marker.diameter_mm} mm diameter`;
+        : `${marker.count} × ${marker.name} — ${marker.diameter_mm} mm ${marker.size_status === "token-or-model"
+          ? "token diameter (S2 Model alternative)" : "diameter"}`;
       list.append(row);
     }
     const note = document.createElement("p");
@@ -239,7 +240,7 @@ function mapCard(item) {
       note.append(rulesCitationNode(measured.citation));
     }
     if (schematic) {
-      note.append(" Beacon symbols indicate placement only. See mission rules and source issues for physical-size limitations.");
+      note.append(" Schematic markers indicate placement only where physical size is unknown or disputed; check mission rules and source issues.");
     }
     dimensions.append(title, list, note);
     figure.append(dimensions);

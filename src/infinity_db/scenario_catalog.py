@@ -90,7 +90,11 @@ _MARKER_LABELS = {
     "beacon": "Beacon Token",
     "tracking-beacon": "Tracking Beacon Token",
     "civilian": "Civilian Model or Token",
-    "defensive-turret": "Defensive Turret Model or Token",
+    "defensive-turret": "Defensive Turret Token or S2 Model",
+    "objective": "Objective Token",
+    "player-a-b": "Player A/B Token",
+    "data-pack": "Data Pack Token",
+    "civevac": "CivEvac Token",
 }
 
 
@@ -110,7 +114,7 @@ def _marker_dimensions(
         if label is None or (
             diameter is None
             and marker_type not in {
-                "tracking-beacon", "civilian", "defensive-turret",
+                "tracking-beacon", "civilian",
             }
         ):
             raise ValueError(f"Missing reviewed marker dimensions for {marker_type!r}")
@@ -124,6 +128,9 @@ def _marker_dimensions(
         if marker_type == "tracking-beacon":
             # EN p. 60: 40 mm; ES p. 59: 25 mm. No agreed physical footprint.
             entry["size_status"] = "source-conflict"
+        elif marker_type == "defensive-turret":
+            # The cited 25 mm is the token option; the mission also permits an S2 Model.
+            entry["size_status"] = "token-or-model"
         result.append(entry)
     return result
 

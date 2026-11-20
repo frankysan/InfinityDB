@@ -228,7 +228,7 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
         marker_type = escape(element.marker_type, quote=True)
         diameter_mm = marker_diameter_mm(element.marker_type)
         if diameter_mm is None and element.marker_type not in {
-            "tracking-beacon", "civilian", "defensive-turret",
+            "tracking-beacon", "civilian",
         }:
             raise ScenarioMapRenderError(
                 "scenario SVG renderer v1 has no canonical marker metadata for "
@@ -530,7 +530,7 @@ def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
             isinstance(element, MarkerElement)
             and marker_diameter_mm(element.marker_type) is None
             and element.marker_type not in {
-                "tracking-beacon", "civilian", "defensive-turret",
+                "tracking-beacon", "civilian",
             }
         ):
             raise ScenarioMapRenderError(
