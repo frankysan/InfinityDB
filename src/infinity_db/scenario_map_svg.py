@@ -308,6 +308,10 @@ def _render_ruler(
     tick = .25 * text_scale
     label_x = (x1 + x2) / 2 - .95 * text_scale * nx
     label_y = (y1 + y2) / 2 - .95 * text_scale * ny + .27 * text_scale
+    if abs(y2 - y1) < 0.000001 and x2 > x1 and ruler.offset > 0:
+        # An in-map guide below its measured objects must not put the
+        # distance text back over the marker or its surrounding region.
+        label_y = (y1 + y2) / 2 + 1.05 * text_scale
     ruler_id = escape(ruler.id, quote=True)
     display_distance = round(length, 3)
     return (

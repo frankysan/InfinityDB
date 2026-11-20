@@ -1603,7 +1603,7 @@
                   "target": "deployment-b-forward",
                   "axis": "y",
                   "side": "end",
-                  "offset": 2.2
+                  "offset": 4.7
                 },
                 {
                   "id": "deployment-a-forward-depth",
@@ -2186,7 +2186,7 @@
                   "y1": 16,
                   "x2": 12,
                   "y2": 16,
-                  "offset": 2.5
+                  "offset": 4.5
                 },
                 {
                   "id": "antenna-right-from-right",
@@ -2195,14 +2195,14 @@
                   "y1": 16,
                   "x2": 24,
                   "y2": 16,
-                  "offset": 2.5
+                  "offset": 4.5
                 },
                 {
                   "id": "exclusion-from-center",
                   "kind": "ruler",
-                  "x1": 15,
+                  "x1": 21,
                   "y1": 16,
-                  "x2": 15,
+                  "x2": 21,
                   "y2": 20,
                   "offset": 0
                 }
@@ -2350,7 +2350,7 @@
                   "y1": 24,
                   "x2": 16,
                   "y2": 24,
-                  "offset": 2.5
+                  "offset": 4.5
                 },
                 {
                   "id": "antenna-right-from-right",
@@ -2359,14 +2359,14 @@
                   "y1": 24,
                   "x2": 32,
                   "y2": 24,
-                  "offset": 2.5
+                  "offset": 4.5
                 },
                 {
                   "id": "exclusion-from-center",
                   "kind": "ruler",
-                  "x1": 20,
+                  "x1": 28,
                   "y1": 24,
-                  "x2": 20,
+                  "x2": 28,
                   "y2": 28,
                   "offset": 0
                 }
@@ -2515,7 +2515,7 @@
                   "y1": 24,
                   "x2": 24,
                   "y2": 24,
-                  "offset": 2.5
+                  "offset": 4.5
                 },
                 {
                   "id": "antenna-right-from-right",
@@ -2524,14 +2524,14 @@
                   "y1": 24,
                   "x2": 48,
                   "y2": 24,
-                  "offset": 2.5
+                  "offset": 4.5
                 },
                 {
                   "id": "exclusion-from-center",
                   "kind": "ruler",
-                  "x1": 30,
+                  "x1": 43,
                   "y1": 24,
-                  "x2": 30,
+                  "x2": 43,
                   "y2": 28,
                   "offset": 0
                 }
@@ -9783,7 +9783,7 @@
                   "y1": 16,
                   "x2": 12,
                   "y2": 16,
-                  "offset": 2.5
+                  "offset": 4.5
                 },
                 {
                   "id": "right-console-from-right",
@@ -9792,7 +9792,7 @@
                   "y1": 16,
                   "x2": 24,
                   "y2": 16,
-                  "offset": 2.5
+                  "offset": 4.5
                 }
               ]
             }
@@ -9936,7 +9936,7 @@
                   "y1": 24,
                   "x2": 16,
                   "y2": 24,
-                  "offset": 2.5
+                  "offset": 4.5
                 },
                 {
                   "id": "right-console-from-right",
@@ -9945,7 +9945,7 @@
                   "y1": 24,
                   "x2": 32,
                   "y2": 24,
-                  "offset": 2.5
+                  "offset": 4.5
                 }
               ]
             }
@@ -10090,7 +10090,7 @@
                   "y1": 24,
                   "x2": 24,
                   "y2": 24,
-                  "offset": 2.5
+                  "offset": 4.5
                 },
                 {
                   "id": "right-console-from-right",
@@ -10099,7 +10099,7 @@
                   "y1": 24,
                   "x2": 48,
                   "y2": 24,
-                  "offset": 2.5
+                  "offset": 4.5
                 }
               ]
             }

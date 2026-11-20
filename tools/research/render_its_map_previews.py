@@ -16,7 +16,7 @@ from infinity_db.scenario_geometry import parse_scenario_geometry
 from infinity_db.scenario_map_svg import render_scenario_map_svg
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "data/curated/its/n5-its-season-18-2026.09.11.json"
+SOURCE = ROOT / "data/curated/its/n5-its-season-18.json"
 OUTPUT = ROOT / "local/work/its/map-previews"
 TOKEN_RE = re.compile(r"var\((--color-scenario-map-[a-z-]+),\s*(#[0-9a-fA-F]{6})\)")
 COLOR_RE = re.compile(r"(--color-scenario-map-[a-z-]+):\s*(#[0-9a-fA-F]{6});")
@@ -153,6 +153,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--config", default="300-400-points")
     parser.add_argument("--theme", choices=("light", "dark"), default="light")
+    parser.add_argument("--distance-unit", choices=("in", "cm"), default="in")
     parser.add_argument("--width-px", type=int, default=630)
     args = parser.parse_args(argv)
     if args.width_px < 300 or args.width_px > 1200:
@@ -177,14 +178,17 @@ def main(argv: list[str] | None = None) -> int:
         if selected_config is None:
             parser.error(f"Unknown configuration for {slug}: {args.config}")
         geometry = parse_scenario_geometry(selected_config["geometry"])
-        svg = render_scenario_map_svg(geometry, theme=args.theme)
+        svg = render_scenario_map_svg(
+            geometry, theme=args.theme, distance_unit=args.distance_unit,
+        )
         # MuPDF's SVG importer does not universally implement CSS custom properties.
         # Resolve the already-pinned palette for faithful standalone preview rasterization.
         preview_svg = _raster_friendly_svg(svg, colors, theme=args.theme,
                                            width=geometry.table.width)
         with pymupdf.open(stream=preview_svg, filetype="svg") as document:
             scale = args.width_px / geometry.table.width
-            output = OUTPUT / f"{slug}-{args.config}-{args.theme}.png"
+            suffix = "" if args.distance_unit == "in" else f"-{args.distance_unit}"
+            output = OUTPUT / f"{slug}-{args.config}-{args.theme}{suffix}.png"
             document[0].get_pixmap(
                 matrix=pymupdf.Matrix(scale, scale), alpha=False,
             ).save(output)

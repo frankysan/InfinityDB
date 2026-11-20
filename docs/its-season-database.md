@@ -1110,19 +1110,21 @@ B-Pong's Tracking Beacon retains its unresolved EN/ES disagreement, rather than
 borrowing the global 25 mm Beacon Token size.
 
 Marker-placement ruler endpoints must describe the **actual measured
-marker positions**. Rulers whose purpose is to locate objectives on a
-horizontal centerline are drawn just below those markers inside the map
-using the separate geometry `offset` (currently 2.5 inches); do not
-copy the official diagram's external guide position into the measured
-coordinates. Prefer collision-free layouts for rulers, labels, markers
-and shaded regions rather than slavishly following exterior guides. If a
-placement ruler overlaps a nearby region, put it on the opposite side of
-its measured marker, and relocate neighboring dimension annotations
-together as needed. In Neutralization, the right Antenna's 4-inch guide
-sits 3 inches above the marker and the top 8-/12-inch Deployment Zone
-depth indicator moves to the left edge for all game sizes. Non-placement
-distances and player-placed token positions retain their own geometry
-and source rules.
+marker positions**. In-map rulers for centerline objectives normally
+sit below the markers using a separate geometry `offset` (usually
+2.5 inches); their distance labels also belong **below the visible
+ruler**, not on top of those markers. Do not copy the official diagram's
+external guide placement into the measured coordinates. Prefer
+collision-free ruler, label, marker and region layouts in both inches
+and centimeters. Place related guides together in unobstructed space:
+Double Bind and B-Pong move their horizontal labels below the exclusion
+area and keep vertical exclusion labels clear of Circular Templates;
+Crossing Lines separates the two short central Deployment Zone depth
+guides at 300–400 points. In Neutralization, the right Antenna's 4-inch
+guide stays 3 inches **above** the marker with its caption above the
+line, while the upper Deployment Zone depth guide moves to the left edge.
+Only display offsets and text placement change; measured distances and
+player-placed positions remain source-backed.
 
 The Annihilation source-issues array explicitly retains the **350-point**
 gap printed in both languages: 3 OP for 176–274 and 4 OP for greater than

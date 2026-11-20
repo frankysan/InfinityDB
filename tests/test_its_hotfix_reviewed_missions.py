@@ -104,8 +104,12 @@ def test_crossing_lines_split_deployment_and_hvt_hotfix() -> None:
             "deployment-a-rear", "dead-zone-a", "deployment-b-forward",
             "deployment-a-forward", "dead-zone-b", "deployment-b-rear",
         }
-        assert all(item["axis"] == "y" and item["offset"] == 2.2
-                   for item in depths.values())
+        assert all(
+            item["axis"] == "y" and item["offset"] == (
+                4.7 if w == 48 and target == "deployment-b-forward" else 2.2
+            )
+            for target, item in depths.items()
+        )
         for target, annotation in depths.items():
             height = elements[target]["y2"] - elements[target]["y1"]
             assert f'id="{annotation["id"]}" class="measurement"' in svg
@@ -174,12 +178,12 @@ def test_double_bind_selected_main_objective_hotfix_and_antenna_areas() -> None:
         for ruler_id in ("antenna-middle-from-left", "antenna-right-from-right"):
             ruler = rulers[ruler_id]
             assert ruler["y1"] == ruler["y2"] == geometry["table"]["height"] / 2
-            assert ruler["offset"] == 2.5
-            assert ruler["y1"] < ruler["y1"] + ruler["offset"] < exclusion_bottom
-            assert ruler["y1"] + ruler["offset"] < deployment_start
+            assert ruler["offset"] == 4.5
+            assert exclusion_bottom < ruler["y1"] + ruler["offset"] < deployment_start
         center_ruler = rulers["exclusion-from-center"]
         center = geometry["table"]["height"] / 2
-        assert center_ruler["x1"] == center_ruler["x2"] == geometry["table"]["width"] * 5 / 8
+        expected_x = {24: 21, 32: 28, 48: 43}[geometry["table"]["width"]]
+        assert center_ruler["x1"] == center_ruler["x2"] == expected_x
         assert center_ruler["y1"] == center
         assert center_ruler["y2"] == exclusion_bottom == center + 4
         assert 'id="exclusion-from-center" class="measurement placement-ruler"' in svg

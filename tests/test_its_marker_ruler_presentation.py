@@ -172,6 +172,69 @@ def test_neutralization_ruler_labels_clear_antenna_areas(
         assert depth_label.text == expected_depth
 
 
+@pytest.mark.parametrize("distance_unit", ["in", "cm"])
+def test_double_bind_exclusion_label_stays_visible(
+    distance_unit: Literal["in", "cm"],
+) -> None:
+    document = json.loads(ITS18.read_text(encoding="utf-8"))
+    record = next(r for r in document["records"] if r["id"] == "scenario:double-bind")
+    for configuration in record["facts"]["configurations"]:
+        geometry = configuration["geometry"]
+        width = geometry["table"]["width"]
+        text_scale = 1 + max(0, min(24, width - 24)) / 48
+        svg = ElementTree.fromstring(render_scenario_map_svg(
+            parse_scenario_geometry(geometry), distance_unit=distance_unit,
+        ))
+        guide = next(node for node in svg.iter() if node.get("id") == "exclusion-from-center")
+        caption = guide.find(f"{SVG_NS}text")
+        assert caption is not None and caption.text is not None
+        x = float(caption.get("x", "nan"))
+        y = float(caption.get("y", "nan"))
+        # The longer '10 cm' label must not be clipped at the right table edge.
+        half_width = len(caption.text) * 0.6 * 1.1 * text_scale / 2
+        assert x - half_width > 0
+        assert x + half_width < width - 0.1
+
+        # Nor should the exclusion guide label return to an Antenna template.
+        bbox = (x - half_width, y - 1.1 * text_scale,
+                x + half_width, y + 0.2 * text_scale)
+        for circle in (e for e in geometry["elements"] if e["kind"] == "circle"):
+            nearest_x = max(bbox[0], min(circle["x"], bbox[2]))
+            nearest_y = max(bbox[1], min(circle["y"], bbox[3]))
+            separation = ((nearest_x - circle["x"]) ** 2
+                          + (nearest_y - circle["y"]) ** 2) ** 0.5
+            assert separation > circle["radius"], (configuration["id"], circle["id"])
+
+
+@pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
+def test_exclusion_and_forward_zone_labels_have_separate_tracks(source: Path) -> None:
+    document = json.loads(source.read_text(encoding="utf-8"))
+    records = (
+        document["records"] if source == ITS18
+        else [entry["record"] for entry in document["definitions"]]
+    )
+    for record in records:
+        if record["id"] not in {"scenario:b-pong", "scenario:crossing-lines"}:
+            continue
+        for configuration in record["facts"]["configurations"]:
+            geometry = configuration["geometry"]
+            annotations = {a["id"]: a for a in geometry["annotations"]}
+            width = geometry["table"]["width"]
+            if record["id"] == "scenario:b-pong":
+                center = geometry["table"]["height"] / 2
+                for name in ("beacon-from-left", "right-console-from-right"):
+                    ruler = annotations[name]
+                    assert ruler["y1"] == center
+                    assert ruler["offset"] == 4.5
+                    assert ruler["y1"] + ruler["offset"] > center + 4
+            elif width == 48:
+                near = annotations["deployment-b-forward-depth"]
+                far = annotations["deployment-a-forward-depth"]
+                assert (near["offset"], far["offset"]) == (4.7, 2.2)
+                # The rendered 10 cm captions are on distinct vertical lanes.
+                assert near["offset"] - far["offset"] > 1.1 * 1.5
+
+
 @pytest.mark.parametrize(
     ("source", "expected_count"),
     [(ITS18, 63), (ITS17_SHARED, 45)],
@@ -213,9 +276,9 @@ def test_marker_placement_rulers_measure_markers_without_overlaying_them(
             for ruler in placement:
                 assert ruler["y1"] == ruler["y2"], (record["name"], ruler["id"])
                 expected_offset = (
-                    -3.0
-                    if record["id"] == "scenario:neutralization"
+                    -3.0 if record["id"] == "scenario:neutralization"
                     and ruler["id"] == "antenna-right-from-right"
+                    else 4.5 if record["id"] in {"scenario:double-bind", "scenario:b-pong"}
                     else 2.5
                 )
                 assert ruler["offset"] == expected_offset, (record["name"], ruler["id"])
@@ -237,6 +300,20 @@ def test_marker_placement_rulers_measure_markers_without_overlaying_them(
                     resolved = line.get(coordinate)
                     assert resolved is not None
                     assert float(resolved) == pytest.approx(expected)
+
+                # Ruler text sits beyond its line, away from the measured markers
+                # and (for Double Bind) outside the Circular Template footprints.
+                caption = group.find(f"{SVG_NS}text")
+                assert caption is not None
+                baseline = float(caption.get("y", "nan"))
+                rendered_y = ruler["y1"] + expected_offset
+                text_scale = 1 + max(0, min(24, geometry["table"]["width"] - 24)) / 48
+                if expected_offset > 0:
+                    assert baseline > rendered_y
+                    assert baseline - 1.1 * text_scale > ruler["y1"] + 0.8
+                else:
+                    assert baseline < rendered_y
+                    assert baseline < ruler["y1"] - 2.5
                 examined += 1
 
             if record["name"] in {"Double Bind", "B-Pong"}:
@@ -246,7 +323,8 @@ def test_marker_placement_rulers_measure_markers_without_overlaying_them(
                 }
                 if record["name"] == "Double Bind":
                     guide = verticals["exclusion-from-center"]
-                    assert guide["x1"] == geometry["table"]["width"] * 5 / 8
+                    assert guide["x1"] == {24: 21, 32: 28, 48: 43}[geometry["table"]["width"]]
+                    assert guide["x2"] == guide["x1"]
                 else:
                     for name in ("exclusion-a-radius", "exclusion-b-radius"):
                         assert verticals[name]["x1"] == geometry["table"]["width"] / 2 + 2

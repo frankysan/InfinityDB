@@ -9803,7 +9803,7 @@
                     "y1": 16,
                     "x2": 12,
                     "y2": 16,
-                    "offset": 2.5
+                    "offset": 4.5
                   },
                   {
                     "id": "right-console-from-right",
@@ -9812,7 +9812,7 @@
                     "y1": 16,
                     "x2": 24,
                     "y2": 16,
-                    "offset": 2.5
+                    "offset": 4.5
                   }
                 ]
               }
@@ -9956,7 +9956,7 @@
                     "y1": 24,
                     "x2": 16,
                     "y2": 24,
-                    "offset": 2.5
+                    "offset": 4.5
                   },
                   {
                     "id": "right-console-from-right",
@@ -9965,7 +9965,7 @@
                     "y1": 24,
                     "x2": 32,
                     "y2": 24,
-                    "offset": 2.5
+                    "offset": 4.5
                   }
                 ]
               }
@@ -10110,7 +10110,7 @@
                     "y1": 24,
                     "x2": 24,
                     "y2": 24,
-                    "offset": 2.5
+                    "offset": 4.5
                   },
                   {
                     "id": "right-console-from-right",
@@ -10119,7 +10119,7 @@
                     "y1": 24,
                     "x2": 48,
                     "y2": 24,
-                    "offset": 2.5
+                    "offset": 4.5
                   }
                 ]
               }
@@ -10738,7 +10738,7 @@
                     "target": "deployment-b-forward",
                     "axis": "y",
                     "side": "end",
-                    "offset": 2.2
+                    "offset": 4.7
                   },
                   {
                     "id": "deployment-a-forward-depth",
