@@ -1213,6 +1213,15 @@
               ],
               "annotations": [
                 {
+                  "id": "antenna-left-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 16,
+                  "x2": 6,
+                  "y2": 16,
+                  "offset": 2.5
+                },
+                {
                   "id": "deployment-a-rear-depth",
                   "kind": "dimension",
                   "target": "deployment-a-rear",
@@ -1392,6 +1401,15 @@
                 }
               ],
               "annotations": [
+                {
+                  "id": "antenna-left-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 8,
+                  "y2": 24,
+                  "offset": 2.5
+                },
                 {
                   "id": "deployment-a-rear-depth",
                   "kind": "dimension",
@@ -1573,6 +1591,15 @@
                 }
               ],
               "annotations": [
+                {
+                  "id": "antenna-left-from-left",
+                  "kind": "ruler",
+                  "x1": 0,
+                  "y1": 24,
+                  "x2": 12,
+                  "y2": 24,
+                  "offset": 2.5
+                },
                 {
                   "id": "deployment-a-rear-depth",
                   "kind": "dimension",

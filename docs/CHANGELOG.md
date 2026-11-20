@@ -25,6 +25,8 @@ are not retroactively relabeled.
   Scenario-map rulers now keep labels clear of centerline markers and shaded
   regions in ITS 17/18. Double Bind, B-Pong and Crossing Lines have improved
   guide spacing, alongside the earlier Neutralization ruler separation.
+  Crossing Lines also gains an Antenna placement guide at every game size
+  (6, 8 or 12 inches from either side edge).
 - Circular Template Areas now explicitly show their 12 cm diameter in ITS 17/18
   mission rules, with map notes for fixed template areas.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and

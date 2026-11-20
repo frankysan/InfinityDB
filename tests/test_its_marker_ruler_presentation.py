@@ -72,6 +72,7 @@ def test_all_circular_template_missions_state_12_cm_diameter(source: Path) -> No
 # measured positions; only the offset locates the visible line on the map.
 MARKER_PLACEMENT_RULERS = frozenset({
     "antenna-middle-from-left",
+    "antenna-left-from-left",
     "antenna-right-from-right",
     "tech-coffin-from-left",
     "console-center-from-left",
@@ -113,6 +114,63 @@ def test_its_token_chart_has_canonical_size_for_each_fixed_footprint() -> None:
 
     # B-Pong Tracking Beacon has a documented EN/ES size disagreement.
     assert marker_diameter_mm("tracking-beacon") is None
+
+
+@pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
+@pytest.mark.parametrize("distance_unit", ["in", "cm"])
+def test_crossing_lines_antenna_edge_ruler_is_mirrored_and_clear(
+    source: Path, distance_unit: Literal["in", "cm"],
+) -> None:
+    document = json.loads(source.read_text(encoding="utf-8"))
+    records = (
+        document["records"] if source == ITS18
+        else [entry["record"] for entry in document["definitions"]]
+    )
+    record = next(r for r in records if r["id"] == "scenario:crossing-lines")
+    for configuration, expected_inches in zip(
+        record["facts"]["configurations"], (6, 8, 12), strict=True,
+    ):
+        geometry = configuration["geometry"]
+        width = geometry["table"]["width"]
+        center_y = geometry["table"]["height"] / 2
+        markers = {e["id"]: e for e in geometry["elements"] if e["kind"] == "marker"}
+        assert markers["antenna-left"]["x"] == expected_inches
+        assert markers["antenna-right"]["x"] == width - expected_inches
+        assert markers["antenna-left"]["y"] == markers["antenna-right"]["y"] == center_y
+
+        rulers = {a["id"]: a for a in geometry["annotations"] if a["kind"] == "ruler"}
+        assert set(rulers) == {"antenna-left-from-left"}
+        assert rulers["antenna-left-from-left"] == {
+            "id": "antenna-left-from-left",
+            "kind": "ruler",
+            "x1": 0,
+            "y1": center_y,
+            "x2": expected_inches,
+            "y2": center_y,
+            "offset": 2.5,
+        }
+
+        root = ElementTree.fromstring(render_scenario_map_svg(
+            parse_scenario_geometry(geometry), distance_unit=distance_unit,
+        ))
+        ruler = next(e for e in root.iter() if e.get("id") == "antenna-left-from-left")
+        line = ruler.find(f"{SVG_NS}line")
+        caption = ruler.find(f"{SVG_NS}text")
+        assert line is not None and caption is not None
+        assert ruler.get("data-distance-inches") == str(expected_inches)
+        assert (
+            float(line.get("x1", "nan")), float(line.get("x2", "nan")),
+            float(line.get("y1", "nan")), float(line.get("y2", "nan")),
+        ) == (0, expected_inches, center_y + 2.5, center_y + 2.5)
+        expected_caption = (
+            f"{expected_inches}″" if distance_unit == "in"
+            else f"{expected_inches * 2.5:g} cm"
+        )
+        assert caption.text == expected_caption
+        # Both markers remain above the ruler; the caption is below its line.
+        assert float(caption.get("y", "nan")) > center_y + 2.5
+        # Avoid adding a mirrored right ruler across the dense depth labels.
+        assert not any(e.get("id") == "antenna-right-from-right" for e in root.iter())
 
 
 @pytest.mark.parametrize("distance_unit", ["in", "cm"])
@@ -237,7 +295,7 @@ def test_exclusion_and_forward_zone_labels_have_separate_tracks(source: Path) ->
 
 @pytest.mark.parametrize(
     ("source", "expected_count"),
-    [(ITS18, 63), (ITS17_SHARED, 45)],
+    [(ITS18, 66), (ITS17_SHARED, 48)],
     ids=["its-18", "its-17"],
 )
 def test_marker_placement_rulers_measure_markers_without_overlaying_them(

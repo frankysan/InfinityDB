@@ -1120,7 +1120,11 @@ and centimeters. Place related guides together in unobstructed space:
 Double Bind and B-Pong move their horizontal labels below the exclusion
 area and keep vertical exclusion labels clear of Circular Templates;
 Crossing Lines separates the two short central Deployment Zone depth
-guides at 300–400 points. In Neutralization, the right Antenna's 4-inch
+guides at 300–400 points and adds a 6-/8-/12-inch placement ruler from
+the left table edge to the left Antenna. The right Antenna is its mirrored
+counterpart at the same distance from the right edge; a duplicate right
+ruler would collide with the nearby vertical Deployment Zone dimensions.
+In Neutralization, the right Antenna's 4-inch
 guide stays 3 inches **above** the marker with its caption above the
 line, while the upper Deployment Zone depth guide moves to the left edge.
 Only display offsets and text placement change; measured distances and
