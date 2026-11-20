@@ -2364,6 +2364,15 @@ independently against each target. One Dodge Roll is compared separately against
 each incoming Impact Template Attack. Targetless and Speculative Attack retain
 their expressly scoped placement exceptions.
 
+**Physical template dimensions (distinct from rules text):** The canonical
+Circular Template has an exact **12 cm diameter**, provided as a physical
+template specification rather than a numeric dimension explicitly stated in
+the reviewed rules. This is the basis for InfinityDB's Circular Template
+size labels in scenarios, not a quotation from an ITS or N5 PDF. The Small
+and Large Teardrop Templates have no independently established exact
+outline dimensions here; do not infer their length, width or area from
+their names or schematic depictions.
+
 The [V1S-034 follow-up](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#template-and-base-ammunition-follow-up-v1s-034-2026-11-04)
 records exact source members and pending source/API/browser acceptance.
 

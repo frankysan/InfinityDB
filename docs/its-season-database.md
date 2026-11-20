@@ -1079,8 +1079,10 @@ All twenty missions are published for the current 2026.09.11 revision:
   (EN/ES pp. 97–104).
 
 **Circular Template Areas:** Every Circular Template defines an area
-**12 cm in diameter**. This is now stated explicitly in the relevant
-scenario rules for ITS 18 Double Bind (Antenna Zones of Influence),
+**12 cm in diameter** (the canonical physical template measurement, **not
+an explicit numeric dimension in the reviewed scenario rule text**; see
+[template semantics](rules-semantics.md)). This is now stated explicitly
+in the relevant scenario rules for ITS 18 Double Bind (Antenna Zones of Influence),
 Neutralization (four Antenna-centered Areas), Provisioning (Safe Areas),
 Area of Interest, Data-Harvest (Designated Zones) and Outbreak
 (Stabilization Zones), including the shared ITS 17 versions of
