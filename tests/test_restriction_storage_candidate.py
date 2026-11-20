@@ -69,12 +69,12 @@ def test_all_selected_pdf_sources_have_consistent_pins_and_exports(
             for _, doc in documents for source in doc["sources"] if source["kind"] == "pdf"]
     # The ITS 18 source remains pinned in its authored source document, but
     # the Rules export no longer duplicates ITS-owned source publications.
-    assert len(pdfs) == 13
+    assert len(pdfs) == 12
     assert {
         (collection, source["id"])
         for collection, source in pdfs
         if collection == "its-season-18-2026.09.01"
-    } == {("its-season-18-2026.09.01", "its-season-18-en-pdf")}
+    } == set()
     assert {
         (collection, source["id"])
         for collection, source in pdfs
@@ -93,7 +93,7 @@ def test_all_selected_pdf_sources_have_consistent_pins_and_exports(
         )
         if path is not None:
             assert hashlib.sha256(path.read_bytes()).hexdigest() == source["sha256"]
-    assert len(source_pins) == 8
+    assert len(source_pins) == 7
     output = tmp_path / "rules_n5.db"
     export_rules_database(documents, output)
     with sqlite3.connect(output) as db:

@@ -676,7 +676,11 @@ def test_domination_retains_control_eligibility_and_console_interaction_rules(
             ["quadrant-1"],
             "incompatible scoring element",
         ),
-        (("objectives", 1, "awards", 0, "condition", "status"), "destroyed", "one of"),
+        (
+            ("objectives", 1, "awards", 0, "condition", "status"),
+            "destroyed",
+            "requires an Antenna marker",
+        ),
         (("objectives", 1, "aggregation"), "exclusive", "per-element awards require cumulative"),
         (("endConditions", 1, "finishAt"), "immediate", "Tactical Phase/Player Turn"),
         (("sourceIssues", 0, "gameSizeField"), "unimplemented", "one of"),

@@ -23,6 +23,7 @@ if __package__:
 
     from .report_output import require_new_audit_outputs, write_audit_text_or_exit
     from .source_paths import SourcePathError, pinned_pdf_path
+    from .wiki_archive_members import resolve_page_member
 else:  # Support direct execution as a script in tools/research/.
     import sys
 
@@ -30,6 +31,7 @@ else:  # Support direct execution as a script in tools/research/.
     from data.audit_enrichment_coverage import audit_coverage
     from report_output import require_new_audit_outputs, write_audit_text_or_exit
     from source_paths import SourcePathError, pinned_pdf_path
+    from wiki_archive_members import resolve_page_member
 
 FORMAT = "InfinityDB 1.0 reference source evidence"
 VERSION = 4
@@ -596,8 +598,8 @@ def build_report(
         with zipfile.ZipFile(wiki_history) as archive:
             revisions = verify_wiki_revisions(archive, english_records)
             try:
-                chart = archive.read("Weapon_Chart").decode("utf-8")
-                commlink = archive.read("Commlink").decode("utf-8")
+                chart = archive.read(resolve_page_member(archive, "Weapon_Chart")).decode("utf-8")
+                commlink = archive.read(resolve_page_member(archive, "Commlink")).decode("utf-8")
             except KeyError as exc:
                 raise SourceEvidenceError(f"Wiki archive missing source page: {exc}") from exc
     except (zipfile.BadZipFile, OSError) as exc:

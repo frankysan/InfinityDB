@@ -15,7 +15,7 @@ from typing import Any
 
 from infinity_db.build_provenance import file_sha256
 from infinity_db.cli import _build_army, build_parser
-from infinity_db.database_set import validate_database_set
+from infinity_db.database_set import COMPLETE_RUNTIME_FILES, validate_database_set
 from infinity_db.database_set_builder import build_database_set
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app_from_database_set
@@ -58,9 +58,9 @@ def verify(source: Path, expected_sha256: str) -> dict:
             )
             result = build_database_set(args, _build_army)
             report = validate_database_set(destination, require_complete=True)
-            if report != result or report["layout"] != "v17-three-file":
+            if report != result or report["layout"] != "v17-four-file":
                 raise ValueError("Complete-build database health disagrees with publication")
-            if set(report["sha256"]) != {"army.db", "rules_n5.db", "its_18.db"}:
+            if set(report["sha256"]) != COMPLETE_RUNTIME_FILES:
                 raise ValueError("Complete build produced an unexpected runtime file set")
             inventory = (
                 report["variantGroups"], report["reviewedWeapons"], report["restrictionChartRows"],

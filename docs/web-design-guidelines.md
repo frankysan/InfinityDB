@@ -28,6 +28,22 @@ Recurring UI behavior should be represented by shared primitives with explicit s
 
 Page-specific CSS and markup remain appropriate for genuinely unique content, but they should not redefine common concepts such as surfaces, table geometry, badges, headers, controls, spacing, responsive behavior, or developer-only presentation.
 
+### Card spacing
+
+**Give every content card an explicit inset.** The `.surface` class supplies
+the border and background. A titlebar pads only its own content. For a card
+with a full-width titlebar, put the body, citations, and loading or error
+messages in a padded `.surface-body` or use an existing component that
+provides equivalent insets. For a card with an inset heading, use a shared
+padded card component so the heading and body align. Keep padding for
+grouped policies and other repeated content consistent within the same card.
+
+For new or changed cards, check the rendered layout at desktop and narrow
+mobile widths. Verify a visible inset on both sides and below the last
+content line, alignment between heading and body text, and a clear gap
+between adjacent cards. Include any alternate state that changes the markup
+inside the card.
+
 ### Curated rules text hierarchy
 
 **Author for scanning, not for source-file density.** Separate setup, triggers,
@@ -50,6 +66,13 @@ a summary that only repeats its title as `Rules for Title` (with optional
 final period). Preserve the maintained source value, meaningful summaries,
 linked summary text, facts, source notes, applicability and citations.
 Apply this in the shared renderer, not by deleting source data.
+
+**Show every source-declared Skill Label.** Standard Skill and Scenario Skill
+cards use the same badge row for declaration types and applicable Labels.
+Preserve source order; link Labels with canonical N5 definitions and display
+source-only qualifiers (such as ITS **Scenario**) as plain badges rather than
+inventing a Label route. Do not infer Labels from a Skill category or hide
+them because a Scenario action already has a Short Skill badge.
 
 **Separate gameplay rules from editorial provenance.** Keep rules players act on
 at normal body size. Source-history, Army/PDF mismatches, and legacy terminology
@@ -351,6 +374,19 @@ Maintain separation between detail/usage panels and following FAQ cards.
 Equivalent structures should occupy equivalent visual roles across pages. Normal interaction such as enabling developer mode, changing filters, expanding optional information, or moving between similar catalog pages should not cause unrelated columns or controls to jump unpredictably when that can be avoided.
 
 Stable geometry is especially important for side-by-side comparison and repeated navigation through catalogs.
+
+Scenario-map measurement guides should show **only non-obvious placement or
+region dimensions**. Omit rulers from table edges to objects at the exact
+table center; for fully mirrored object placements or identical opposite
+zone extents, show one representative measurement instead of both. Preserve
+rulers that explain off-center positions, distances between objects,
+quarter-circle radii and relevant Deployment/Exclusion Zone sizes. The
+physical geometry remains source-backed and unchanged when presentation
+rulers are removed. Check label clearance in both inches and centimeters.
+For central square Objective Rooms with four source-defined Wide Gates,
+show one opening at the midpoint of each wall, label the openings and
+place the room-width measurement below the room. Do not label an
+illustrative gate gap as a physical width unless a source supplies it.
 
 ### Use progressive disclosure for secondary information
 

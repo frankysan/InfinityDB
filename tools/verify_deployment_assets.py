@@ -8,7 +8,11 @@ import sqlite3
 from pathlib import Path
 
 from infinity_db.build_provenance import validate_build_input_freshness
-from infinity_db.database_set import SEASON_DATABASE_SOURCES, validate_database_set
+from infinity_db.database_set import (
+    SEASON_DATABASE_SOURCES,
+    season_shared_library_source,
+    validate_database_set,
+)
 from infinity_db.deployment_provenance import (
     DeploymentProvenanceError,
     validate_database_symbol_provenance,
@@ -150,10 +154,12 @@ def main(argv: list[str] | None = None) -> int:
         report = validate_database_set(directory, require_complete=True)
         validate_build_input_freshness(args.database, PROJECT_ROOT)
         for season, (filename, source) in SEASON_DATABASE_SOURCES.items():
+            shared_source = season_shared_library_source(season)
             inspected = inspect_its_database(
                 directory / filename, source=PROJECT_ROOT / source,
                 core_revision=report["seasons"][season]["requiredCoreRulesRevision"],
                 require_current_builder=True,
+                shared_library=(PROJECT_ROOT / shared_source if shared_source else None),
             )
             if inspected["sha256"] != report["sha256"][filename]:
                 raise DeploymentAssetError(f"ITS publication {season} changed after validation")

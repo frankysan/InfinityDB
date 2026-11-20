@@ -491,16 +491,19 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--commit", required=True, help="full 40-character release commit SHA")
     parser.add_argument("--tag", required=True, help="planned release tag, for example v0.10.0")
     parser.add_argument(
+        "--check-only",
+        action="store_true",
+        help="verify candidate CI and metadata without writing release evidence (pre-merge)",
+    )
+    parser.add_argument(
         "--json-output",
         type=Path,
-        required=True,
-        help="write new machine-readable evidence JSON (existing files are rejected)",
+        help="write new machine-readable evidence JSON (required unless --check-only)",
     )
     parser.add_argument(
         "--tag-message-output",
         type=Path,
-        required=True,
-        help="write a new annotated Git tag message (existing files are rejected)",
+        help="write a new annotated Git tag message (required unless --check-only)",
     )
     parser.add_argument(
         "--include-full-assets",
@@ -534,7 +537,12 @@ def _write_text(path: Path, text: str) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        _check_fresh_outputs(args.json_output, args.tag_message_output)
+        if not args.check_only:
+            if args.json_output is None or args.tag_message_output is None:
+                raise ReleaseEvidenceError(
+                    "Both evidence output paths are required unless --check-only is selected"
+                )
+            _check_fresh_outputs(args.json_output, args.tag_message_output)
         tag = validate_tag(args.tag)
         evidence = collect_release_evidence(
             args.repository,
@@ -545,13 +553,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         tag_message = render_tag_message(tag, evidence)
         verify_release_metadata_for_tag(tag, args.commit)
-        # Hosted lookup may be slow; recheck both outputs before any write.
-        _check_fresh_outputs(args.json_output, args.tag_message_output)
-        _write_text(
-            args.json_output,
-            json.dumps(evidence, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        )
-        _write_text(args.tag_message_output, tag_message)
+        if not args.check_only:
+            # Hosted lookup may be slow; recheck both outputs before any write.
+            _check_fresh_outputs(args.json_output, args.tag_message_output)
+            _write_text(
+                args.json_output,
+                json.dumps(evidence, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+            )
+            _write_text(args.tag_message_output, tag_message)
     except (ReleaseEvidenceError, OSError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
@@ -560,8 +569,11 @@ def main(argv: list[str] | None = None) -> int:
         "Hosted CI evidence verified for "
         f"{evidence['commit_sha']}: {len(evidence['workflows'])} required workflows"
     )
-    print(f"Evidence JSON: {args.json_output}")
-    print(f"Annotated-tag message: {args.tag_message_output}")
+    if args.check_only:
+        print("Pre-merge release evidence check passed; no files written.")
+    else:
+        print(f"Evidence JSON: {args.json_output}")
+        print(f"Annotated-tag message: {args.tag_message_output}")
     return 0
 
 

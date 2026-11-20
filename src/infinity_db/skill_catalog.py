@@ -11,6 +11,7 @@ from infinity_db.domain_references import public_slug_for_reference
 from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.hacking_program_catalog import hacking_program_declaration_categories
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
+from infinity_db.scenario_catalog import ScenarioCatalog
 from infinity_db.skill_config import load_skill_source_config
 from infinity_db.structured_chart_outcomes import (
     link_booty_family_outcomes,
@@ -24,12 +25,17 @@ UNCLASSIFIED_CATEGORY = {"id": "unclassified", "name": "Unclassified", "source":
 DECLARATION_KIND = "declaration-category"
 COMMON_SKILL_CATEGORY = "Common Skills"
 SPECIAL_SKILL_CATEGORY = "Special Skills"
+SCENARIO_SKILL_CATEGORY = "Scenario-specific Skills"
 
 
 def _skill_category(record: dict[str, Any] | None) -> str:
     """Return the player-facing source category for a Skill record."""
     category = (record or {}).get("facts", {}).get("category")
-    return COMMON_SKILL_CATEGORY if category == "common-skill" else SPECIAL_SKILL_CATEGORY
+    if category == "common-skill":
+        return COMMON_SKILL_CATEGORY
+    if category == "scenario-skill":
+        return SCENARIO_SKILL_CATEGORY
+    return SPECIAL_SKILL_CATEGORY
 
 
 def _source_label(category: dict[str, Any]) -> str | None:
@@ -47,9 +53,13 @@ def _source_label(category: dict[str, Any]) -> str | None:
 class SkillCatalog:
     """Enrich Army skills with curated declaration categories and rules."""
 
-    def __init__(self, database: Database, rules_database: RulesDatabase | None) -> None:
+    def __init__(
+        self, database: Database, rules_database: RulesDatabase | None,
+        scenario_catalog: ScenarioCatalog | None = None,
+    ) -> None:
         self.database = database
         self.rules_database = rules_database
+        self.scenario_catalog = scenario_catalog
         self._category_index: dict[ArmyLinkRef, list[dict[str, Any]]] | None = None
         self._skill_record_category_index: (
             dict[ArmyLinkRef, list[dict[str, Any]]] | None
@@ -288,6 +298,7 @@ class SkillCatalog:
                 if record.get("facts", {}).get("category") not in {
                     "common-skill",
                     "special-skill",
+                    "scenario-skill",
                 }:
                     continue
                 definition_records.append(record)
@@ -337,6 +348,8 @@ class SkillCatalog:
                     "categories": self._categories_for_record(record),
                 }
             )
+        if self.scenario_catalog is not None:
+            items.extend(self.scenario_catalog.scenario_skill_items())
         return items
 
     def _structured_reference_for_slug(self, slug: str | None) -> dict[str, Any] | None:
@@ -403,6 +416,10 @@ class SkillCatalog:
         if item is None:
             if not isinstance(skill_ref, str) or self.rules_database is None:
                 return None
+            if self.scenario_catalog is not None:
+                scenario_skill = self.scenario_catalog.get_scenario_skill(skill_ref)
+                if scenario_skill is not None:
+                    return scenario_skill
             record_id = f"skill:{skill_ref}"
             item = next(
                 (
@@ -419,7 +436,7 @@ class SkillCatalog:
                     for record in self._skill_records()
                     if record["id"] == record_id
                     and record.get("facts", {}).get("category")
-                    in {"common-skill", "special-skill"}
+                    in {"common-skill", "special-skill", "scenario-skill"}
                     and (record.get("variant_semantics") or {}).get("inheritance")
                     != "source"
                 ),

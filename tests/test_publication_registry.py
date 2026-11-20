@@ -16,8 +16,8 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 RULES_PATH = ROOT / "data/generated/rules_n5.db"
-ITS_SOURCE = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"
-REVISION = "2026.09.01"
+ITS_SOURCE = ROOT / "data/curated/its/n5-its-season-18.json"
+REVISION = "2026.09.11"
 
 
 @pytest.fixture
@@ -38,7 +38,7 @@ def test_registry_resolves_same_scenario_id_by_owner_and_revision(
     assert core is None
     assert season is not None and season["record"]["id"] == "scenario:battleground"
     assert season["publication"]["collectionId"] == "its-18"
-    assert season["publication"]["sourceCollectionId"] == "its-season-18-2026.09.01"
+    assert season["publication"]["sourceCollectionId"] == "its-season-18-2026.09.11"
     manifest = registry.season_manifest()["its-18"]
     assert manifest["revision"] == REVISION
     assert manifest["requiredCoreRulesRevision"] == "5.3"
@@ -96,14 +96,14 @@ def test_core_marker_provenance_is_resolved_from_its_source_metadata(
     registry: PublicationRegistry,
 ) -> None:
     citation = registry.source_citation(
-        season_id="its-18", source_id="its-season-18-en-pdf", page=17,
+        season_id="its-18", source_id="its-season-18-en-pdf", page=18,
     )
     assert citation == {
         "source_id": "its-season-18-en-pdf",
-        "source_title": "ITS Season 18: Overheat (English)",
+        "source_title": "ITS Season 18: Overheat (English, September hotfix)",
         "source_version": REVISION,
         "source_url": "https://experience.corvusbelli.com/en/infinity/its-rules",
-        "page": 17,
+        "page": 18,
     }
     catalog = ScenarioCatalog(registry.rules_database, registry)
     core = catalog.get_scenario("domination", army_points=300)
@@ -212,7 +212,8 @@ def test_registered_http_catalog_preserves_default_and_exact_season_selection(
     its_url = f"http://registry.test/api/scenarios?collection=its-18&revision={REVISION}"
     assert json.loads(wsgi_response(baseline, its_url)[2])["items"] == []
     its_items = json.loads(wsgi_response(registered, its_url)[2])["items"]
-    assert [item["slug"] for item in its_items] == ["battleground"]
+    assert len(its_items) == 20
+    assert any(item["slug"] == "battleground" for item in its_items)
     default = json.loads(wsgi_response(
         registered, "http://registry.test/api/scenarios",
     )[2])
@@ -267,7 +268,7 @@ def test_faq_api_requires_registered_season_and_mission_identity(
         "http://registry.test/api/faq-rulings?"
         "topic_id=equipment%3Ahacking-device&rules_revision=5.3&as_of=2026-09-01"
     )
-    valid_season = "&season_id=its-18&season_revision=2026.09.01"
+    valid_season = "&season_id=its-18&season_revision=2026.09.11"
     invalid_season = "&season_id=its-17&season_revision=2025.09.01"
     assert json.loads(wsgi_response(registered, root)[2])["items"]
     # General N5 FAQ is still applicable to a registered season when not
@@ -276,7 +277,7 @@ def test_faq_api_requires_registered_season_and_mission_identity(
     assert json.loads(wsgi_response(registered, root + invalid_season)[2])["items"] == []
     # A non-member mission cannot impersonate a season's namesake scenario.
     assert json.loads(wsgi_response(
-        registered, root + valid_season + "&scenario_id=scenario%3Aannihilation",
+        registered, root + valid_season + "&scenario_id=scenario%3Asupplies",
     )[2])["items"] == []
     scoped = (
         "http://registry.test/api/faq-rulings?"
@@ -304,10 +305,10 @@ def test_published_season_policies_require_explicit_play_context(
     ]
     assert json.loads(wsgi_response(core, base)[2])["items"] == []
     cases = (
-        ("official-tournament", "its18-spec-ops-tournament", "skill:infinity-spec-ops", 26),
-        ("team-ops-extra", "its18-team-ops-spec-ops", "skill:infinity-spec-ops", 28),
+        ("official-tournament", "its18-spec-ops-tournament", "skill:infinity-spec-ops", 27),
+        ("team-ops-extra", "its18-team-ops-spec-ops", "skill:infinity-spec-ops", 29),
         ("reinforcements-extra", "its18-reinforcements-availability",
-         "rule:reinforcements-extra", 27),
+         "rule:reinforcements-extra", 28),
     )
     for context, expected_id, target, page in cases:
         status, _, body = wsgi_response(registered, base + f"&context={context}")
@@ -317,7 +318,9 @@ def test_published_season_policies_require_explicit_play_context(
         assert policy["target"]["recordId"] == target
         assert policy["target"]["name"]
         assert policy["citations"][0]["page"] == page
-        assert policy["citations"][0]["sourceTitle"] == "ITS Season 18: Overheat (English)"
+        assert policy["citations"][0]["sourceTitle"] == (
+            "ITS Season 18: Overheat (English, September hotfix)"
+        )
         assert policy["citations"][0]["sourceUrl"] == (
             "https://experience.corvusbelli.com/en/infinity/its-rules"
         )
@@ -367,7 +370,7 @@ def test_season_policies_api_rejects_incomplete_or_malformed_selection(
     assert "error" in json.loads(payload)
 
 
-def test_registered_its_matches_pinned_pre_cutover_json_and_svg_bytes(
+def test_registered_its_matches_current_reviewed_json_and_svg_bytes(
     registered_http_apps,
 ) -> None:
     import hashlib
@@ -394,9 +397,10 @@ def test_registered_its_matches_pinned_pre_cutover_json_and_svg_bytes(
                 assert status == 200
                 combined.update(len(body).to_bytes(8, "big"))
                 combined.update(body)
-    # Frozen from the pre-cutover Rules-owned Battleground HTTP responses.
-    # Length-prefixed six canonical JSON payloads and 24 SVG byte streams.
+    # Current reviewed ITS 18 after source hotfix and scenario Skill cards.
+    # Length-prefixed six canonical JSON payloads and 24 SVG byte streams;
+    # compare this digest after any intentional public contract change.
     assert combined.hexdigest() == (
-        "b631c0c677c0c8b1276a606b1367c4c6"
-        "c0e5a9f61479506a7ceee608f33594b2"
+        "240ad88a87ceb23afdee797331e5b2ce"
+        "4515a2dd33fe8b0f233dd9c7b589781e"
     )

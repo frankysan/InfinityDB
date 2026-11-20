@@ -1623,8 +1623,8 @@ def test_label_vocabulary_sources_in_normal_browser(
         assert page.locator("html").get_attribute("data-theme") == theme
         text = citations.inner_text()
         assert "Label vocabulary sources:" in text
-        assert "Infinity Wiki snapshot (English) v20260926-200832, Labels" in text
-        assert "archived member Labels; link opens source site" in text
+        assert "Infinity Wiki snapshot (English) v20261116-075926, Labels" in text
+        assert "archived member Labels.html; link opens source site" in text
         assert "N5 Core Rules v5.3, p. 174" in text
         assert page.get_by_text(
             "These sources describe the Label vocabulary as a whole; "
@@ -3451,7 +3451,7 @@ def test_domination_embedded_map_emphasizes_console_center_placement(
             svg = _rendered_scenario_image(page)
             namespace = "{http://www.w3.org/2000/svg}"
             guides = svg.findall(f".//{namespace}g[@class='center-measurement']")
-            assert len(guides) == 8
+            assert len(guides) == 2
             assert len(svg.findall(f".//{namespace}rect[@class='scoring']")) == 4
             assert not any(
                 node.attrib.get("data-target", "").startswith("quadrant-")
@@ -3490,7 +3490,7 @@ def test_domination_embedded_map_emphasizes_console_center_placement(
         page.close()
 
 
-@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("width", [1440, 770, 390])
 def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:
@@ -3515,7 +3515,7 @@ def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
                 assert conflict.count() == 1
                 assert conflict.locator("dt").inner_text() == "SWC"
                 assert conflict.locator("dd").inner_text().startswith("6")
-                link = conflict.locator("a.scenario-swc-source-conflict")
+                link = setup.locator("a.scenario-swc-source-conflict")
                 assert link.count() == 1
                 assert "Official sources disagree" in link.inner_text()
                 assert link.get_attribute("href") == "#scenario-source-issue-350-point-swc"
@@ -3535,6 +3535,13 @@ def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
             else:
                 assert conflict.count() == 0
                 assert issue.count() == 0
+            assert setup.locator(".scenario-fact dt, .scenario-fact dd").evaluate_all(
+                """cells => cells.every(cell => {
+                  const range = document.createRange();
+                  range.selectNodeContents(cell);
+                  return range.getClientRects().length === 1;
+                })"""
+            ), (width, slug, points)
             assert page.evaluate(
                 "() => document.documentElement.scrollWidth <= innerWidth + 1"
             ), (width, slug, points)

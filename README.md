@@ -5,9 +5,10 @@ Equipment, Skills, Weapons, core Scenarios, and relationships across Armies. It 
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Current release: **1.1.0** (2026-11-15). See the
-[release notes](docs/CHANGELOG.md#110---2026-11-15) for changes and upgrade
-considerations, and the [deployment guide](docs/deployment.md) for updates.
+Latest tagged release: **1.1.0** (2026-11-15); the development branch targets
+**1.2.0**. See the [release notes](docs/CHANGELOG.md#110---2026-11-15)
+for changes and upgrade considerations, and the
+[deployment guide](docs/deployment.md) for updates.
 
 ## Guiding principles
 
@@ -68,6 +69,17 @@ its application metrics.
   catalogs, including reviewed current weapons not yet used by an Army Unit,
   with reverse Unit usage links where that relationship applies. Search and filter state
   uses compact self-contained share links while legacy explicit query parameters remain readable.
+- Provides independently selectable ITS Season 17 V0.2 (16 reviewed scenarios)
+  and Season 18 September-hotfix (20 reviewed scenarios), including
+  Battleground, Annihilation, Crossing Lines,
+  Double Bind, The Dig, Cutthroat, Superiority, Uplink Center, Hardlock,
+  B-Pong, Akial Interference, Evacuation, Neutralization, Provisioning,
+  Area of Interest, Data-Harvest, Last Launch, Corporate Appropriation, Outbreak
+  and Critical Intervention, with game-size deployment maps, scoring,
+  reviewed source citations, and explicit Double Bind Main Objective choices.
+  All twenty Season 18 and sixteen Season 17 missions are represented;
+  earlier revision selection remains unavailable and source discrepancies
+  and browser visual acceptance remain tracked separately.
 - Includes global search and a federated Glossary across player-facing reference domains, with
   canonical Equipment, embedded Attributes, scoped Game terms and searchable Weapon Properties
   (such as Viral, Plasma and combined Ammunition). Weapon Properties link to their underlying
@@ -91,7 +103,7 @@ its application metrics.
   reference presents 17 reviewed objects in individual cards, retaining disputed
   or unknown attributes and verified delivery/Unit-use context.
 - Includes a browsable **Scenarios** reference with four N5.3 Core missions
-  and a separately selectable ITS Season 18 Battleground pilot. Explicit
+  and independently selectable ITS Season 17/18 missions. Explicit
   Army Points selection, structured setup/objectives/scoring, scenario Rules
   and Skills, source-verification notes and deterministic maps all derive
   from maintained scenario definitions. Maps can be saved as standalone SVGs

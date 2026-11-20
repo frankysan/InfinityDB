@@ -4,11 +4,14 @@ import base64
 import fnmatch
 import io
 import json
+import os
+import subprocess
 import tomllib
 from pathlib import Path
 
 import pytest
 
+from infinity_db import __version__
 from infinity_db.web import release_notes
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -167,13 +170,91 @@ def test_deployment_image_pruning_covers_app_and_metrics_history() -> None:
     assert "prune_repository infinity-db-metrics-history metrics-history metrics-history" in script
     assert 'reference=$repository:app-*' in script
 
+def test_tagged_release_build_uses_exact_tag_and_package_version() -> None:
+    deploy = _read("scripts/deploy.sh")
+    verifier = _read("scripts/verify-container-image.sh")
+    assert 'release_version="${IMAGE_TAG#app-v}"' in deploy
+    assert 'git describe --tags --exact-match HEAD' in deploy
+    assert 'git diff --quiet HEAD --' in deploy
+    assert 'display_version="$release_version"' in deploy
+    assert 'display_version="$("$python" -c' in deploy  # development images
+    assert 'release_version="${image#infinity-db:app-v}"' in verifier
+    assert 'baked != expected' in verifier
+    assert 'version.get("version") != __version__' in verifier
+
+
+def test_cleanup_does_not_fail_deployment_or_delete_referenced_images() -> None:
+    deploy = _read("scripts/deploy.sh")
+    cleanup = _read("scripts/prune-app-images.sh")
+    assert 'if ! sh "$(dirname "$0")/prune-app-images.sh"' in deploy
+    assert 'docker ps --all --quiet --filter "ancestor=$image"' in cleanup
+    assert 'if [ -n "$references" ]; then' in cleanup
+    assert 'if ! docker image rm "$image"; then' in cleanup
+    assert 'docker image rm --force' not in cleanup
+
+
+@pytest.mark.skipif(os.name == "nt", reason="requires POSIX shell")
+def test_pruning_preserves_stopped_test_image_and_reports_nonfatal_removal(
+    tmp_path: Path,
+) -> None:
+    docker = tmp_path / "docker"
+    docker.write_text(
+        """#!/bin/sh
+case "$1 $2" in
+  "compose ps")
+    case "$4" in
+      app) echo app-container ;;
+      metrics-history) echo metrics-container ;;
+    esac ;;
+  "inspect --format")
+    case "$4" in
+      app-container) echo sha256:aaa ;;
+      metrics-container) echo sha256:ccc ;;
+    esac ;;
+  "image ls")
+    case "$*" in
+      *reference=infinity-db-metrics-history:app-*)
+        printf 'app-v1.2.0 sha256:ccc\\napp-test-old sha256:ddd\\n' ;;
+      *)
+        printf 'app-v1.2.0 sha256:aaa\\napp-v1.1.0 sha256:bbb\\n' ;;
+    esac ;;
+  "ps --all")
+    case "$5" in
+      ancestor=infinity-db-metrics-history:app-test-old) echo stopped-test ;;
+    esac ;;
+  "image rm")
+    printf '%s\\n' "$3" >> "$DOCKER_REMOVED_LOG"
+    exit 1 ;;
+  *) exit 2 ;;
+esac
+""", encoding="utf-8",
+    )
+    docker.chmod(0o755)
+    removed_log = tmp_path / "removed.txt"
+    env = {
+        **os.environ,
+        "PATH": str(tmp_path) + os.pathsep + os.environ["PATH"],
+        "DOCKER_REMOVED_LOG": str(removed_log),
+    }
+    result = subprocess.run(
+        ["sh", str(ROOT / "scripts/prune-app-images.sh"), "1"],
+        cwd=ROOT, env=env, capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0
+    assert removed_log.read_text(encoding="utf-8").splitlines() == [
+        "infinity-db:app-v1.1.0",
+    ]
+    assert "Retaining metrics-history image tag referenced by a container" in result.stdout
+    assert "Could not remove infinity-db:app-v1.1.0" in result.stderr
+
+
 def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     gitignore = _read(".gitignore")
     attributes = _read(".gitattributes")
 
-    # The three published databases are tracked directly, without ignore negations.
+    # All four published databases are tracked directly, without ignore negations.
     assert "data/generated/*" not in gitignore.splitlines()
-    for name in ("army.db", "rules_n5.db", "its_18.db"):
+    for name in ("army.db", "rules_n5.db", "its_18.db", "its_17.db"):
         assert (ROOT / "data/generated" / name).is_file()
         assert f"data/generated/{name} binary" in attributes
 
@@ -476,11 +557,15 @@ def test_container_smoke_validates_canonical_release_notes(
             "unresolved_deliveries": [{}],
         },
         "/api/weapons/rifle": rifle,
-        "/api/scenarios/battleground?army_points=300&collection=its-18&revision=2026.09.01": {
+        "/api/scenarios/battleground?army_points=300&collection=its-18": {
             "publication": {"collection_id": "its-18"},
             "selected_army_points": 300,
         },
-        "/api/version": {"version": "0.10.0", "snapshot_revision": "fixture"},
+        "/api/version": {
+            "version": __version__,
+            "snapshot_revision": "fixture",
+            "static_revision": "fixture-static",
+        },
     }
 
     def urlopen(url: str, timeout: int) -> io.BytesIO:
@@ -522,10 +607,10 @@ def test_container_symbol_route_smoke_uses_embedded_database_publication() -> No
     assert "maintained_manifest_path" not in route_probe
 
 
-def test_install_and_docker_require_the_complete_three_database_set() -> None:
+def test_install_and_docker_require_the_complete_four_database_set() -> None:
     install = _read("scripts/install-or-update.sh")
     docker = _read("Dockerfile")
-    for name in ("army.db", "rules_n5.db", "its_18.db"):
+    for name in ("army.db", "rules_n5.db", "its_18.db", "its_17.db"):
         assert f"prepare_tracked_release_file data/generated/{name}" in install
         assert f"[ -f data/generated/{name} ] || fail" in install
         assert f"data/generated/{name} /app/data/{name}" in docker

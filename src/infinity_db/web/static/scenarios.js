@@ -71,7 +71,6 @@ function renderScenario(item) {
   const params = new URLSearchParams();
   if (item.publication?.collection_id !== "n5-core") {
     params.set("collection", item.publication.collection_id);
-    params.set("revision", item.publication.revision);
   }
   link.href = `/scenarios/${encodeURIComponent(item.slug)}${params.size ? `?${params}` : ""}`;
   link.textContent = "Open scenario";
@@ -84,12 +83,13 @@ function renderScenario(item) {
 function populateCollections(collections) {
   availableCollections = collections;
   const selected = selection.collection
-    ? collections.findIndex((item) => item.id === selection.collection && item.revision === selection.revision)
+    ? collections.findIndex((item) => item.id === selection.collection
+      && (!selection.revision || item.revision === selection.revision))
     : collections.findIndex((item) => item.id === "n5-core");
   const options = collections.map((item, index) => {
     const option = document.createElement("option");
     option.value = String(index);
-    option.textContent = `${item.title} · ${item.revision} (${item.scenario_count})`;
+    option.textContent = `${item.title} (${item.scenario_count})`;
     return option;
   });
   if (selected < 0) {
@@ -113,7 +113,6 @@ function changeCollection() {
   const params = new URLSearchParams();
   if (item.id !== "n5-core") {
     params.set("collection", item.id);
-    params.set("revision", item.revision);
   }
   window.location.assign(`/scenarios${params.size ? `?${params}` : ""}`);
 }
@@ -123,7 +122,7 @@ async function initialize() {
   try {
     const payload = await getScenarios(controller.signal, selection);
     populateCollections(payload.collections || []);
-    const items = payload.items || [];
+    const items = [...(payload.items || [])].sort((a, b) => a.name.localeCompare(b.name, "en"));
     elements.count.textContent = `${items.length} ${items.length === 1 ? "scenario" : "scenarios"}`;
     if (!items.length) return show(elements.empty);
     elements.grid.replaceChildren(...items.map(renderScenario));

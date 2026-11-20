@@ -11,10 +11,11 @@ import time
 import uuid
 from pathlib import Path
 
-from infinity_db.database_set import validate_database_set
-from tools.runtime_semantic_baseline import DEFAULT_BASELINE, capture, check
+from infinity_db.database_set import COMPLETE_RUNTIME_FILES, validate_database_set
+from tools.runtime_semantic_baseline import capture, check
 
 ROOT = Path(__file__).resolve().parents[1]
+CURRENT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-current.json"
 
 _IMAGE_VERIFY = """
 from pathlib import Path
@@ -58,11 +59,11 @@ def _copy_build_context(context: Path, selected: Path) -> None:
             shutil.copyfile(source, destination)
     output = context / "data/generated"
     output.mkdir(parents=True, exist_ok=True)
-    for name in ("army.db", "rules_n5.db", "its_18.db"):
+    for name in sorted(COMPLETE_RUNTIME_FILES):
         shutil.copyfile(selected / name, output / name)
 
 
-def preview_image(selected: Path, tag: str, baseline: Path = DEFAULT_BASELINE) -> None:
+def preview_image(selected: Path, tag: str, baseline: Path = CURRENT_BASELINE) -> None:
     """Build/start/check/remove a private preview; never modify the serving directory."""
     if not shutil.which("docker"):
         raise ValueError("Docker CLI is unavailable")
@@ -104,7 +105,7 @@ def preview_image(selected: Path, tag: str, baseline: Path = DEFAULT_BASELINE) -
             selected_its = subprocess.run([
                 "docker", "exec", container, "python", "-c", _HTTP_FETCH,
                 "/api/scenarios/battleground?"
-                "army_points=300&collection=its-18&revision=2026.09.01",
+                "army_points=300&collection=its-18",
             ], capture_output=True, text=True, check=True)
             its_status, _its_headers, its_body = json.loads(selected_its.stdout)
             its_payload = json.loads(base64.b64decode(its_body))
@@ -145,7 +146,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-dir", type=Path, default=ROOT / "data/generated")
     parser.add_argument("--tag", default="infinity-db:preview-local")
-    parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
+    parser.add_argument("--baseline", type=Path, default=CURRENT_BASELINE)
     args = parser.parse_args(argv)
     if not args.tag.startswith("infinity-db:preview-"):
         parser.error("Disposable preview tag must start with infinity-db:preview-")

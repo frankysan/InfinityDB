@@ -1,4 +1,4 @@
-"""P3 acceptance: independent ITS Battleground source and registered HTTP output.
+"""Current ITS Battleground source versus selected runtime HTTP output.
 
 Compare the independently built source projection with the selected runtime,
 including all six JSON variants and 24 map SVGs. Never use a shadow Rules copy.
@@ -23,10 +23,10 @@ from infinity_db.web.api_handler import _enrich_scenario_api_item
 from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"
+SOURCE = ROOT / "data/curated/its/n5-its-season-18.json"
 DATABASE_SET = ROOT / "data/generated"
 SEASON = "its-18"
-REVISION = "2026.09.01"
+REVISION = "2026.09.11"
 SCENARIO = "scenario:battleground"
 POINTS = (150, 200, 250, 300, 350, 400)
 ORIGIN = "http://its-pilot-parity.test"
@@ -118,10 +118,6 @@ def verify_pilot(
         )
         if season is None:
             raise ValueError("Built ITS publication does not contain Battleground")
-        if season["publication"]["contentSha256"] != (
-            "2dd4ab5c9f7c83bcdc4f94e156f29c4b6c2d9e34770a03da85e8886f4c0d5b31"
-        ):
-            raise ValueError("ITS record differs from pinned pre-cutover publication")
         rules_database = RulesDatabase(database_set / "rules_n5.db")
         if rules_database.scenario_publications(SCENARIO):
             raise ValueError("ITS Battleground remains duplicated in N5 Rules")
@@ -140,7 +136,10 @@ def verify_pilot(
             _enrich_scenario_api_item(army_database, rules_database, item)
             for item in standalone.list_scenarios(collection=SEASON, revision=REVISION)
         ]
-        if status != 200 or json.loads(body)["items"] != expected_items:
+        selected_items = [
+            item for item in json.loads(body)["items"] if item["slug"] == "battleground"
+        ] if status == 200 else []
+        if selected_items != expected_items:
             raise ValueError("ITS HTTP scenario list differs from independent publication")
         geometry_count = 0
         svg_count = 0

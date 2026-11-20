@@ -478,8 +478,8 @@ def test_repeater_current_citation_and_cube_public_equipment_resolution(
     repeater = records["equipment:repeater"]
     assert _record_gap_codes(repeater) == []
     assert any(
-        cite["source_id"] == "wiki-en-20260926-200832"
-        and cite["member"] == "Hacking_Area"
+        cite["source_id"] == "wiki-en-20261116-075926"
+        and cite["member"] == "Hacking_Area.html"
         for cite in repeater["citations"]
     )
     assert not any(

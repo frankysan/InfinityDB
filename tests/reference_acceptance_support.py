@@ -20,8 +20,8 @@ PDF = ROOT / "local/data/pdf" / Path(PDF_LABEL).relative_to("data/pdf")
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 FAQ_LABEL = "data/pdf/faq/n5-faq-v0.1-en.pdf"
 FAQ_PIN = "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa"
-WIKI = ROOT / "local/data/wiki/WIKI-en 20260926-200832.zip"
-WIKI_PIN = "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"
+WIKI = ROOT / "local/data/wiki/WIKI-en 20261116-075926.zip"
+WIKI_PIN = "6a89e4feb9ce08d1bd9dcf1ecec094b0fcd2aa928a99c253da47561acffed15f"
 RULES = ROOT / "data/generated/rules_n5.db"
 ORIGIN = "http://infinitydb-source-acceptance.test"
 

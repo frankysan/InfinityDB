@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import asdict
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -56,6 +57,63 @@ def test_browser_matrix_is_mandatory_only_for_historical_v1_0_tags(
     tag: str, required: bool,
 ) -> None:
     assert release_ci.requires_cross_browser(tag) is required
+
+
+def test_release_collector_source_contract_matches_workflow() -> None:
+    """Catch CI matrix/step drift before a release is merged."""
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github/workflows/source-checks.yml"
+    ).read_text(encoding="utf-8")
+    job_ids = set(re.findall(
+        r"^  ([a-z][a-z0-9-]+):$",
+        workflow.split("\njobs:\n", 1)[1],
+        flags=re.MULTILINE,
+    ))
+    assert job_ids == {
+        "fast-validation", "source-checks", "determinism-container",
+        "deterministic-outputs",
+    }
+    source = workflow.split("\n  source-checks:\n", 1)[1].split(
+        "\n  determinism-container:\n", 1
+    )[0]
+    pinned = workflow.split("\n  determinism-container:\n", 1)[1].split(
+        "\n  deterministic-outputs:\n", 1
+    )[0]
+    deterministic = workflow.split("\n  deterministic-outputs:\n", 1)[1]
+
+    matrix_rows = re.findall(
+        r'^\s+- os: ([\w.-]+)\n\s+python: "[^"]+"\n\s+label: "([^"]+)"',
+        source, flags=re.MULTILINE,
+    )
+    assert matrix_rows
+    native_jobs = {f"{os} / Python {label}" for os, label in matrix_rows}
+    pinned_match = re.search(r"^\s+os: \[([^]]+)\]", pinned, flags=re.MULTILINE)
+    assert pinned_match is not None
+    pinned_jobs = {
+        f"Pinned determinism / {os.strip()}"
+        for os in pinned_match.group(1).split(",")
+    }
+
+    assert release_ci.SOURCE_FAST_JOB == "Fast validation and scope"
+    assert "name: Fast validation and scope" in workflow
+    assert "name: ${{ matrix.os }} / Python ${{ matrix.label }}" in source
+    assert "name: Pinned determinism / ${{ matrix.os }}" in pinned
+    assert "name: Cross-platform deterministic outputs" in deterministic
+    assert set(release_ci.SOURCE_PINNED_JOBS) == pinned_jobs
+    assert set(release_ci.SOURCE_FULL_JOBS) == (
+        native_jobs | pinned_jobs | {"Cross-platform deterministic outputs"}
+    )
+    required_steps = {
+        source: ("Run source checks", "Reuse validated Source baseline"),
+        pinned: (
+            "Build canonical deterministic-output manifest",
+            "Reuse validated determinism baseline",
+        ),
+        deterministic: ("Compare artifact hashes", "Reuse validated deterministic baseline"),
+    }
+    for section, steps in required_steps.items():
+        for step in steps:
+            assert f"- name: {step}" in section
 
 
 def test_workflow_runs_url_uses_exact_workflow_file_and_commit() -> None:
@@ -472,6 +530,37 @@ def test_main_writes_json_and_annotated_tag_message(
     assert json.loads(json_output.read_text(encoding="utf-8")) == evidence
     assert tag_output.read_text(encoding="utf-8").startswith("InfinityDB v0.10.0\n")
     assert "3 required workflows" in capsys.readouterr().out
+
+
+def test_check_only_verifies_candidate_without_writing_outputs(
+    tmp_path: Path, monkeypatch, capsys,
+) -> None:
+    called = []
+
+    def collect(repository, commit, **kwargs):
+        called.append(("ci", repository, commit))
+        return {"repository": repository, "commit_sha": commit, "workflows": []}
+
+    monkeypatch.setattr(release_ci, "collect_release_evidence", collect)
+    monkeypatch.setattr(
+        release_ci, "render_tag_message", lambda *args: "candidate tag message"
+    )
+    monkeypatch.setattr(
+        release_ci, "verify_release_metadata_for_tag",
+        lambda tag, sha: called.append(("metadata", tag, sha)),
+    )
+    monkeypatch.chdir(tmp_path)
+    result = release_ci.main([
+        "--repository", REPOSITORY, "--commit", COMMIT, "--tag", "v1.2.0",
+        "--check-only",
+    ])
+    assert result == 0
+    assert called == [
+        ("ci", REPOSITORY, COMMIT),
+        ("metadata", "v1.2.0", COMMIT),
+    ]
+    assert not list(tmp_path.iterdir())
+    assert "no files written" in capsys.readouterr().out
 
 
 @pytest.mark.parametrize("occupied", ("evidence.json", "tag.txt"))

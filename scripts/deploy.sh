@@ -132,7 +132,26 @@ start_metrics_history() {
 echo "Validating tracked runtime databases and published SVGs..."
 "$python" tools/verify_deployment_assets.py
 
-display_version="$("$python" -c 'import infinity_db; print(infinity_db.__display_version__)')"
+case "$IMAGE_TAG" in
+  app-v*)
+    # Production identity comes from the exact release tag, not untracked server files.
+    release_version="${IMAGE_TAG#app-v}"
+    package_version="$("$python" -c 'import infinity_db; print(infinity_db.__version__)')"
+    release_tag="$(git describe --tags --exact-match HEAD 2>/dev/null || true)"
+    if [ "$release_version" != "$package_version" ] || [ "$release_tag" != "v$package_version" ]; then
+      echo "Release image $IMAGE_TAG requires HEAD at tag v$package_version with matching package version." >&2
+      exit 2
+    fi
+    if ! git diff --quiet HEAD --; then
+      echo "Release checkout has tracked changes; refusing to build $IMAGE_TAG." >&2
+      exit 2
+    fi
+    display_version="$release_version"
+    ;;
+  *)
+    display_version="$("$python" -c 'import infinity_db; print(infinity_db.__display_version__)')"
+    ;;
+esac
 echo "Building application image infinity-db:$IMAGE_TAG (display $display_version)..."
 docker compose build --build-arg "INFINITY_DB_DISPLAY_VERSION=$display_version" app
 
@@ -165,6 +184,9 @@ collect_metrics_history "opening"
 start_metrics_history
 
 if [ "$PRUNE_APP_IMAGES" = "1" ]; then
-  exec sh "$(dirname "$0")/prune-app-images.sh" "$RETAIN_APP_IMAGES"
+  if ! sh "$(dirname "$0")/prune-app-images.sh" "$RETAIN_APP_IMAGES"; then
+    warn "image pruning did not complete; the deployed application remains active."
+  fi
+else
+  echo "Deployment image pruning skipped for this deployment."
 fi
-echo "Deployment image pruning skipped for this deployment."

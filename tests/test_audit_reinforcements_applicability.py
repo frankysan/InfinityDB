@@ -74,14 +74,20 @@ def synthetic_sources(tmp_path: Path) -> tuple[Path, Path]:
     inventory_path.parent.mkdir(parents=True)
     inventory_path.write_text(json.dumps(inventory), encoding="utf-8")
     for row, catalog_name in zip(manifest["currentReferences"], (
-        "n5-core-v5.3.json", "n5-its-season-18-2026.09.01.json",
+        "data/curated/rules/n5-core-v5.3.json",
+        "data/curated/its/n5-its-season-18.json",
     ), strict=True):
         row["sha256"] = pdf(row["localPath"], row["page"], "\n".join(row["requiredText"]))
-        catalog = root / "data/curated/rules" / catalog_name
+        catalog = root / catalog_name
         catalog.parent.mkdir(parents=True, exist_ok=True)
-        catalog.write_text(json.dumps({"sources": [{
-            "id": row["sourceId"], "sha256": row["sha256"],
-        }]}), encoding="utf-8")
+        source = {"id": row["sourceId"], "sha256": row["sha256"]}
+        if row["sourceId"] == "its-season-18-en-pdf":
+            document = {"sourceFamily": {"historicalRevisions": [
+                {"revision": row["version"], "sources": [source]},
+            ]}}
+        else:
+            document = {"sources": [source]}
+        catalog.write_text(json.dumps(document), encoding="utf-8")
     path = root / "review.json"
     path.write_text(json.dumps(manifest), encoding="utf-8")
     return root, path

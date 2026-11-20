@@ -21,7 +21,7 @@ from infinity_db.rules_database import RulesDatabase, export_rules_database
 from tools.data.build_its_season import DEFAULT_OUTPUT, main
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"
+SOURCE = ROOT / "data/curated/its/n5-its-season-18.json"
 TRACKED_RULES = ROOT / "data/generated/rules_n5.db"
 
 
@@ -49,26 +49,23 @@ def test_isolated_its_database_is_deterministic_and_matches_existing_publication
     assert report == inspect_its_database(first, source=SOURCE, core_revision="5.3")
     assert report["schemaVersion"] == ITS_SCHEMA_VERSION
     assert report["inputIdentity"]["seasonId"] == "its-18"
-    assert report["inputIdentity"]["seasonRevision"] == "2026.09.01"
-    assert report["inputIdentity"]["sourceCollectionId"] == "its-season-18-2026.09.01"
+    assert report["inputIdentity"]["seasonRevision"] == "2026.09.11"
+    assert report["inputIdentity"]["sourceCollectionId"] == "its-season-18-2026.09.11"
     assert len(report["inputIdentity"]["builderRevision"]) == 64
-    assert report["inputIdentity"]["sources"] == [
-        {
-            "id": "its-season-18-en-pdf",
-            "sha256": "9e16874924112e62d51acf78d622f5c0cf6196064cc36f003b515de9dc448baf",
-        }
-    ]
-    assert report["scenarios"][0]["id"] == "scenario:battleground"
-    assert report["scenarios"][0]["configurationCount"] == 3
-    assert report["scenarios"][0]["citations"] == 3
+    assert {row["id"]: row["sha256"] for row in report["inputIdentity"]["sources"]} == {
+        "its-season-18-en-pdf": "d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f",
+        "its-season-18-es-pdf": "df7398f8bc99927dc30c86cf5625cb08f8f38db9f3bbba685223c9c4981fa94d",
+    }
+    assert len(report["scenarios"]) == 20
+    battleground = next(row for row in report["scenarios"] if row["id"] == "scenario:battleground")
+    assert battleground["configurationCount"] == 3
+    assert battleground["citations"] == 3
     assert len(report["policies"]) == 3
     assert {entry["context"] for entry in report["policies"]} == {
         "official-tournament", "team-ops-extra", "reinforcements-extra",
     }
     assert RulesDatabase(TRACKED_RULES).scenario_publications("scenario:battleground") == []
-    assert report["scenarios"][0]["contentSha256"] == (
-        "2dd4ab5c9f7c83bcdc4f94e156f29c4b6c2d9e34770a03da85e8886f4c0d5b31"
-    )
+    assert len(battleground["contentSha256"]) == 64
 
     with sqlite3.connect(first) as connection:
         assert connection.execute("PRAGMA application_id").fetchone()[0] == ITS_APPLICATION_ID
@@ -82,36 +79,47 @@ def test_isolated_its_database_is_deterministic_and_matches_existing_publication
             "collections", "sources", "records", "record_citations", "scenario_sets",
             "scenario_memberships", "scenario_configurations",
         }
-        assert connection.execute("SELECT count(*) FROM sources").fetchone()[0] == 1
-        assert connection.execute("SELECT count(*) FROM scenario_memberships").fetchone()[0] == 1
-        assert connection.execute("SELECT count(*) FROM scenario_configurations").fetchone()[0] == 3
+        assert connection.execute("SELECT count(*) FROM sources").fetchone()[0] == 2
+        assert connection.execute("SELECT count(*) FROM scenario_memberships").fetchone()[0] == 20
+        assert connection.execute(
+            "SELECT count(*) FROM scenario_configurations"
+        ).fetchone()[0] == 60
         assert connection.execute("SELECT count(*) FROM season_policies").fetchone()[0] == 3
         assert connection.execute("SELECT count(*) FROM season_policy_citations").fetchone()[0] == 3
-        assert connection.execute("SELECT count(*) FROM records").fetchone()[0] == 1
+        assert connection.execute("SELECT count(*) FROM records").fetchone()[0] == 25
+        assert connection.execute(
+            "SELECT count(*) FROM records WHERE kind='state'"
+        ).fetchone()[0] == 1
+        assert connection.execute(
+            "SELECT count(*) FROM records WHERE kind='scenario'"
+        ).fetchone()[0] == 20
+        assert connection.execute(
+            "SELECT count(*) FROM records WHERE kind='skill'"
+        ).fetchone()[0] == 4
 
 
 def test_select_its_scenario_requires_exact_season_and_revision(tmp_path: Path) -> None:
     path = tmp_path / "its_18.db"
     build_its_database(SOURCE, path)
     publication = select_its_scenario(
-        path, season_id="its-18", revision="2026.09.01", scenario_id="scenario:battleground",
+        path, season_id="its-18", revision="2026.09.11", scenario_id="scenario:battleground",
     )
     assert publication is not None
     assert publication["record"]["name"] == "Battleground"
-    assert publication["publication"]["sourceCollectionId"] == "its-season-18-2026.09.01"
-    assert publication["publication"]["position"] == 0
+    assert publication["publication"]["sourceCollectionId"] == "its-season-18-2026.09.11"
+    assert publication["publication"]["position"] == 4
     assert {source["id"] for source in publication["publication"]["sources"]} == {
         "its-season-18-en-pdf"
     }
     assert len(publication["record"]["facts"]["configurations"]) == 3
     assert select_its_scenario(
-        path, season_id="its-17", revision="2026.09.01", scenario_id="scenario:battleground",
+        path, season_id="its-17", revision="2026.09.11", scenario_id="scenario:battleground",
     ) is None
     assert select_its_scenario(
-        path, season_id="its-18", revision="2025.09.01", scenario_id="scenario:battleground",
+        path, season_id="its-18", revision="2026.09.01", scenario_id="scenario:battleground",
     ) is None
     assert select_its_scenario(
-        path, season_id="its-18", revision="2026.09.01", scenario_id="scenario:unknown",
+        path, season_id="its-18", revision="2026.09.11", scenario_id="scenario:unknown",
     ) is None
     with pytest.raises(ValueError, match="revision must be provided exactly"):
         select_its_scenario(
@@ -125,30 +133,30 @@ def test_policy_selection_requires_explicit_season_revision_and_play_context(
     path = tmp_path / "its_18.db"
     build_its_database(SOURCE, path)
     policies = select_its_policies(
-        path, season_id="its-18", revision="2026.09.01", context="official-tournament",
+        path, season_id="its-18", revision="2026.09.11", context="official-tournament",
     )
     assert len(policies) == 1
     assert policies[0]["id"] == "its18-spec-ops-tournament"
     assert policies[0]["target"] == {
         "domain": "rules-n5", "recordId": "skill:infinity-spec-ops",
     }
-    assert policies[0]["citations"][0]["page"] == 26
+    assert policies[0]["citations"][0]["page"] == 27
     assert len(select_its_policies(
-        path, season_id="its-18", revision="2026.09.01", context="team-ops-extra",
+        path, season_id="its-18", revision="2026.09.11", context="team-ops-extra",
         target_id="skill:infinity-spec-ops",
     )) == 1
     assert len(select_its_policies(
-        path, season_id="its-18", revision="2026.09.01", context="reinforcements-extra",
+        path, season_id="its-18", revision="2026.09.11", context="reinforcements-extra",
         target_id="rule:reinforcements-extra",
     )) == 1
     assert select_its_policies(
-        path, season_id="its-17", revision="2026.09.01", context="official-tournament",
+        path, season_id="its-17", revision="2026.09.11", context="official-tournament",
     ) == []
     assert select_its_policies(
         path, season_id="its-18", revision="2025.09.01", context="official-tournament",
     ) == []
     assert select_its_policies(
-        path, season_id="its-18", revision="2026.09.01", context="free-play",
+        path, season_id="its-18", revision="2026.09.11", context="free-play",
     ) == []
     with pytest.raises(ValueError, match="revision must be an exact"):
         select_its_policies(path, season_id="its-18", revision="", context="official-tournament")
@@ -203,7 +211,7 @@ def test_its_policies_are_absent_from_core_rules_database(tmp_path: Path) -> Non
     its = tmp_path / "its_18.db"
     build_its_database(SOURCE, its)
     assert len(select_its_policies(
-        its, season_id="its-18", revision="2026.09.01", context="official-tournament",
+        its, season_id="its-18", revision="2026.09.11", context="official-tournament",
     )) == 1
 
 
@@ -218,7 +226,7 @@ def test_builder_replaces_only_validated_output_and_is_repeatable(tmp_path: Path
     ("mutation", "message"),
     (
         (lambda doc: doc["collection"].update(domain="core-rules"), "matching season"),
-        (lambda doc: doc["scenarioCollection"].update(id="its-17"), "matching season"),
+        (lambda doc: doc["scenarioCollection"].update(id="its-17"), "archived revision"),
         (lambda doc: doc["records"][0]["scope"].update(seasons=["its-17"]), "out-of-season"),
         (lambda doc: doc["sources"][0].update(version="2025.09.01"), "revision-matched"),
         (

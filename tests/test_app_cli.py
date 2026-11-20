@@ -806,8 +806,8 @@ def test_render_scenario_map_command_uses_maintained_supplies_definition(
     assert 'viewBox="0 0 32 48"' in svg
     assert 'data-marker-type="supply-box" data-diameter-mm="25"' in svg
     assert 'id="supply-box-left-offset" class="measurement"' in svg
-    assert 'id="supply-box-right-offset" class="measurement"' in svg
-    assert svg.count(">8″</text></g>") >= 2
+    assert 'id="supply-box-right-offset" class="measurement"' not in svg
+    assert svg.count(">8″</text></g>") >= 1
     assert f"Scenario map ready: {output}" in capsys.readouterr().out
 
 

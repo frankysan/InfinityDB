@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Literal
 from xml.etree import ElementTree
 
 import pytest
 
 from infinity_db.curated import load_curated_document
+from infinity_db.its_source_family import project_its_source_family
 from infinity_db.scenario_definition import scenario_definition_from_curated_document
 from infinity_db.scenario_geometry import marker_radius_inches, parse_scenario_geometry
 from infinity_db.scenario_map_svg import ScenarioMapRenderError, render_scenario_map_svg
@@ -204,6 +206,35 @@ def test_scenario_map_saves_standalone_with_canonical_theme_palette(theme: str) 
         assert f"{key}:{color}" in style
 
 
+@pytest.mark.parametrize(
+    ("distance_unit", "label"),
+    [("in", "12″"), ("cm", "30 cm")],
+)
+def test_source_placement_ruler_is_measured_in_its_rendered_unit(
+    distance_unit: Literal["in", "cm"], label: str,
+) -> None:
+    geometry = parse_scenario_geometry({
+        "format": "InfinityDB scenario geometry",
+        "formatVersion": 1,
+        "title": "Placement guides",
+        "table": {"width": 24, "height": 32, "unit": "in"},
+        "elements": [],
+        "annotations": [
+            {"id": "first-antenna", "kind": "ruler",
+             "x1": 0, "y1": 25, "x2": 12, "y2": 25, "offset": 0},
+        ],
+    })
+    svg = render_scenario_map_svg(geometry, distance_unit=distance_unit)
+    root = ElementTree.fromstring(svg)
+    namespace = {"svg": "http://www.w3.org/2000/svg"}
+    ruler = root.find(".//svg:g[@id='first-antenna']", namespace)
+    assert ruler is not None
+    assert ruler.attrib["data-distance-inches"] == "12"
+    text_node = ruler.find("svg:text", namespace)
+    assert text_node is not None
+    assert text_node.text == label
+
+
 _CORE_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
 
 
@@ -257,29 +288,37 @@ def test_domination_console_center_measurements_use_source_geometry(
         node for node in root.iter(f"{namespace}g")
         if node.attrib.get("class") == "center-measurement"
     ]
-    assert len(groups) == 8
+    assert len(groups) == 2
     markers = {
         node.attrib["id"]: node for node in root.iter(f"{namespace}circle")
         if node.attrib.get("data-marker-type") == "console"
     }
     assert set(markers) == {f"console-q{number}" for number in range(1, 5)}
-    for number in range(1, 5):
-        marker_id = f"console-q{number}"
-        marker = markers[marker_id]
-        x, y = float(marker.attrib["cx"]), float(marker.attrib["cy"])
-        horizontal_edge = "left" if number in (1, 3) else "right"
-        vertical_edge = "top" if number in (1, 2) else "bottom"
-        for edge, distance in ((horizontal_edge, horizontal), (vertical_edge, vertical)):
-            ruler = next(row for row in groups if row.attrib["id"] == f"{marker_id}-center-{edge}")
-            assert ruler.attrib["data-target"] == marker_id
-            assert ruler.attrib["data-reference"] == "center"
-            assert ruler.attrib["data-edge"] == edge
-            line = ruler.find(f"{namespace}line")
-            text = ruler.find(f"{namespace}text")
-            assert line is not None and text is not None
-            assert text.attrib["data-distance-inches"] == str(distance)
-            assert text.text == (f"{distance}″" if unit == "in" else f"{distance * 2.5:g} cm")
-            assert (float(line.attrib["x2"]), float(line.attrib["y2"])) == (x, y)
+    positions = {
+        name: (float(marker.attrib["cx"]), float(marker.attrib["cy"]))
+        for name, marker in markers.items()
+    }
+    width, height = geometry.table.width, geometry.table.height
+    assert positions == {
+        "console-q1": (horizontal, vertical),
+        "console-q2": (width - horizontal, vertical),
+        "console-q3": (horizontal, height - vertical),
+        "console-q4": (width - horizontal, height - vertical),
+    }
+    assert {row.attrib["id"] for row in groups} == {
+        "console-q1-center-left", "console-q1-center-top",
+    }
+    for edge, distance in (("left", horizontal), ("top", vertical)):
+        ruler = next(row for row in groups if row.attrib["id"] == f"console-q1-center-{edge}")
+        assert ruler.attrib["data-target"] == "console-q1"
+        assert ruler.attrib["data-reference"] == "center"
+        assert ruler.attrib["data-edge"] == edge
+        line = ruler.find(f"{namespace}line")
+        text = ruler.find(f"{namespace}text")
+        assert line is not None and text is not None
+        assert text.attrib["data-distance-inches"] == str(distance)
+        assert text.text == (f"{distance}″" if unit == "in" else f"{distance * 2.5:g} cm")
+        assert (float(line.attrib["x2"]), float(line.attrib["y2"])) == positions["console-q1"]
     assert not any(
         node.attrib.get("id", "").endswith("-size") for node in root.iter()
         if node.attrib.get("data-target", "").startswith("quadrant-")
@@ -482,10 +521,10 @@ def test_render_maintained_supplies_maps_measure_eight_inches_to_marker_edges() 
     for configuration in definition.configurations:
         root = ElementTree.fromstring(render_scenario_map_svg(configuration.geometry))
         by_id = {element.attrib.get("id"): element for element in root.iter()}
-        for annotation_id in ("supply-box-left-offset", "supply-box-right-offset"):
-            annotation = by_id[annotation_id]
-            labels = list(annotation.iter(f"{namespace}text"))
-            assert labels[-1].text == "8″"
+        annotation = by_id["supply-box-left-offset"]
+        labels = list(annotation.iter(f"{namespace}text"))
+        assert labels[-1].text == "8″"
+        assert "supply-box-right-offset" not in by_id
 
 
 def test_render_scenario_map_svg_fails_closed_for_unknown_style() -> None:
@@ -537,7 +576,7 @@ def test_render_scenario_map_svg_fails_closed_for_unknown_marker_type() -> None:
         render_scenario_map_svg(geometry)
 
 
-_ITS_18_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-its-season-18-2026.09.01.json"
+_ITS_18_RULES = Path(__file__).parents[1] / "data/curated/its/n5-its-season-18.json"
 
 
 @pytest.mark.parametrize(
@@ -552,7 +591,9 @@ _ITS_18_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-its-season-18
 def test_battleground_map_labels_both_sides_and_measures_all_bands(
     configuration_id: str, deployment_depth: int, sector_depth: int, unit: str
 ) -> None:
-    document = load_curated_document(_ITS_18_RULES)
+    document = project_its_source_family(
+        load_curated_document(_ITS_18_RULES), revision="2026.09.01",
+    )
     definition = scenario_definition_from_curated_document(document, "scenario:battleground")
     geometry = next(
         configuration.geometry

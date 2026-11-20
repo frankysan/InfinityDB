@@ -38,7 +38,10 @@ hand those parts to the appropriate workflow after the source semantics are clea
 5. Compare claims without silently resolving conflicts. Classify what is directly stated,
    source-derived, curated interpretation, or still unknown. Keep core rules, FAQ/errata,
    season-specific material, and historical evidence separate; preserve exceptions and exact
-   applicability.
+   applicability. For season revisions, compare the original English and Spanish text
+   **and diagrams** before treating a changelog or extracted-text difference as a rule
+   change. Check applicable season-wide tables before calling mission-specific values
+   unspecified; retain conflicts between prose, maps, and general rules explicitly.
 6. Before editing maintained prose, follow the semantic-token and explanation contracts in
    [curated-data guidance](../../../data/curated/README.md) and
    [rules semantics](../../../docs/rules-semantics.md). Explain conditions, the baseline mechanic,

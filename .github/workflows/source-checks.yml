@@ -31,7 +31,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.11.9"
+          python-version: "3.11"
           cache: pip
           cache-dependency-path: pyproject.toml
 
@@ -85,19 +85,19 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python: "3.11.9"
+            python: "3.11"
             label: "3.11"
             check_args: "--stage test --stage lint --stage docs --stage type --stage build --stage rules"
             primary: true
             timeout_minutes: 30
           - os: windows-latest
-            python: "3.11.9"
+            python: "3.11"
             label: "3.11"
             check_args: "--stage build --stage rules"
             primary: false
             timeout_minutes: 30
           - os: macos-latest
-            python: "3.11.9"
+            python: "3.11"
             label: "3.11"
             check_args: "--stage build --stage rules"
             primary: false
@@ -239,7 +239,7 @@ jobs:
         if: needs.fast-validation.outputs.full == 'true'
         uses: actions/setup-python@v7
         with:
-          python-version: "3.11.9"
+          python-version: "3.11"
 
       - name: Download pinned-container manifests
         if: needs.fast-validation.outputs.full == 'true'

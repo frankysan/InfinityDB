@@ -7,11 +7,17 @@ explicit and reviewed prose is retained where executable predicates would guess.
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from .domain_slugs import require_domain_slug, validate_typed_domain_id
-from .scenario_geometry import MarkerElement, RectangleElement
+from .scenario_geometry import (
+    CircleRegionElement,
+    MarkerElement,
+    QuarterCircleElement,
+    RectangleElement,
+)
 
 if TYPE_CHECKING:
     from .scenario_definition import ScenarioConfiguration
@@ -80,6 +86,14 @@ class ElementStatusComparison:
     comparison: str
 
 
+@dataclass(frozen=True, slots=True)
+class ElementStatusAny:
+    """One award when at least one named objective has the specified state."""
+
+    element_ids: tuple[str, ...]
+    status: str
+
+
 ScenarioScoreCondition = (
     NumericRangeCondition
     | MetricComparison
@@ -87,6 +101,7 @@ ScenarioScoreCondition = (
     | DominatedRegionComparison
     | ElementStatusCount
     | ElementStatusComparison
+    | ElementStatusAny
 )
 
 
@@ -117,6 +132,11 @@ class ScenarioRule:
     definition_id: str | None = None
     skill_ids: tuple[str, ...] = ()
     specialist_skill_ids: tuple[str, ...] = ()
+    skill_type_ids: tuple[str, ...] = ()
+    skill_facts: dict[str, tuple[str, ...]] | None = None
+    source_labels: tuple[str, ...] = ()
+    skill_citations: tuple[tuple[str, int], ...] = ()
+    shared_skill: tuple[str, str] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,6 +161,21 @@ class ScenarioSourceIssue:
 
 
 @dataclass(frozen=True, slots=True)
+class ScenarioObjectiveSet:
+    id: str
+    name: str
+    objective_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioObjectiveSelection:
+    first_chooser: str
+    selection_timing: str
+    distinct_sets_required: bool
+    sets: tuple[ScenarioObjectiveSet, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class ScenarioMission:
     sides: tuple[ScenarioSide, ...]
     game_sizes: tuple[ScenarioGameSize, ...]
@@ -149,6 +184,7 @@ class ScenarioMission:
     end_conditions: tuple[ScenarioEndCondition, ...]
     source_issues: tuple[ScenarioSourceIssue, ...]
     skill_ids: tuple[str, ...] = ()
+    objective_selection: ScenarioObjectiveSelection | None = None
 
 
 def _object(value: Any, required: set[str], optional: set[str], context: str) -> dict[str, Any]:
@@ -181,6 +217,16 @@ def _slug(value: Any, context: str) -> str:
         return require_domain_slug(value, context=context)
     except ValueError as exc:
         raise ScenarioMissionError(str(exc)) from exc
+
+
+def _source_identifier(value: Any, context: str) -> str:
+    """Source IDs may include dotted revisions (e.g. ITS 17 v0.2)."""
+    identifier = _text(value, context)
+    if re.fullmatch(r"[a-z0-9]+(?:[-.][a-z0-9]+)*", identifier) is None:
+        raise ScenarioMissionError(
+            f"{context} must be a lowercase source identifier with valid separators"
+        )
+    return identifier
 
 
 def _integer(value: Any, context: str, *, minimum: int = 1) -> int:
@@ -257,6 +303,7 @@ def _condition(value: Any, context: str) -> ScenarioScoreCondition:
         "dominated-region-comparison",
         "element-status-count",
         "element-status-comparison",
+        "element-status-any",
     }:
         required = {"kind", "elementIds"}
         required.add("comparison" if kind == "dominated-region-comparison" else "status")
@@ -274,10 +321,15 @@ def _condition(value: Any, context: str) -> ScenarioScoreCondition:
         )
         if len(set(elements)) != len(elements):
             raise ScenarioMissionError(f"{context}.elementIds contains duplicate references")
-        if kind in {"element-status-count", "element-status-comparison"}:
-            status = _choice(raw["status"], {"hacked", "controlled"}, f"{context}.status")
+        if kind in {"element-status-count", "element-status-comparison", "element-status-any"}:
+            status = _choice(
+                raw["status"], {"hacked", "controlled", "activated", "destroyed"},
+                f"{context}.status",
+            )
             if kind == "element-status-count":
                 return ElementStatusCount(elements, status)
+            if kind == "element-status-any":
+                return ElementStatusAny(elements, status)
             comparison = _choice(raw["comparison"], {"greater", "all"}, f"{context}.comparison")
             return ElementStatusComparison(elements, status, comparison)
         comparison = _choice(raw["comparison"], {"equal", "greater"}, f"{context}.comparison")
@@ -297,11 +349,13 @@ def _validate_score_geometry(
     context: str,
 ) -> None:
     if not isinstance(
-        condition, (DominatedRegionComparison, ElementStatusCount, ElementStatusComparison)
+        condition,
+        (DominatedRegionComparison, ElementStatusCount, ElementStatusComparison, ElementStatusAny),
     ):
         return
     expected = (
-        RectangleElement if isinstance(condition, DominatedRegionComparison) else MarkerElement
+        (RectangleElement, CircleRegionElement)
+        if isinstance(condition, DominatedRegionComparison) else MarkerElement
     )
     for configuration in configurations:
         if not set(points).intersection(configuration.army_points):
@@ -314,6 +368,23 @@ def _validate_score_geometry(
                     f"{context} references missing or incompatible scoring element {identifier!r} "
                     f"in configuration {configuration.id!r}"
                 )
+            if (
+                isinstance(
+                    condition,
+                    (ElementStatusCount, ElementStatusComparison, ElementStatusAny),
+                )
+                and condition.status in {"activated", "destroyed"}
+                and isinstance(element, MarkerElement)
+                and not (
+                    element.marker_type == "antenna"
+                    or (condition.status == "activated" and element.marker_type == "console")
+                )
+            ):
+                raise ScenarioMissionError(
+                    f"{context} status {condition.status!r} requires an Antenna marker "
+                    "or an Activated Console, "
+                    f"not {element.marker_type!r}"
+                )
 
 
 def parse_scenario_mission(
@@ -325,7 +396,7 @@ def parse_scenario_mission(
     raw = _object(
         value,
         {"sides", "gameSizes", "objectives", "rules", "endConditions", "sourceIssues"},
-        {"skills"},
+        {"skills", "objectiveSelection"},
         context,
     )
     side_ids: set[str] = set()
@@ -365,7 +436,7 @@ def parse_scenario_mission(
         regions = {
             element.id
             for element in config.geometry.elements
-            if isinstance(element, RectangleElement)
+            if isinstance(element, (RectangleElement, QuarterCircleElement))
         }
         deployments: list[ScenarioDeployment] = []
         deployed_sides: set[str] = set()
@@ -449,12 +520,66 @@ def parse_scenario_mission(
             )
         )
 
+    objective_selection = None
+    if "objectiveSelection" in raw:
+        selection = _object(
+            raw["objectiveSelection"],
+            {"firstChooser", "selectionTiming", "distinctSetsRequired", "sets"},
+            set(), f"{context}.objectiveSelection",
+        )
+        chooser = _choice(
+            selection["firstChooser"], {"player-who-chose-deployment"},
+            f"{context}.objectiveSelection.firstChooser",
+        )
+        timing = _choice(
+            selection["selectionTiming"], {"when-deployment-is-chosen"},
+            f"{context}.objectiveSelection.selectionTiming",
+        )
+        if selection["distinctSetsRequired"] is not True:
+            raise ScenarioMissionError(
+                f"{context}.objectiveSelection requires distinct sets for both players"
+            )
+        sets: list[ScenarioObjectiveSet] = []
+        set_ids: set[str] = set()
+        assigned_objectives: set[str] = set()
+        for index, item in enumerate(
+            _array(selection["sets"], f"{context}.objectiveSelection.sets")
+        ):
+            ctx = f"{context}.objectiveSelection.sets[{index}]"
+            objective_set = _object(
+                item, {"id", "name", "objectiveIds"}, set(), ctx,
+            )
+            identifier = _slug(objective_set["id"], f"{ctx}.id")
+            _unique(identifier, set_ids, ctx)
+            references = _references(
+                objective_set["objectiveIds"], objective_ids, f"{ctx}.objectiveIds",
+            )
+            if assigned_objectives.intersection(references):
+                raise ScenarioMissionError(
+                    f"{ctx} reuses an objective across mutually exclusive sets"
+                )
+            assigned_objectives.update(references)
+            sets.append(
+                ScenarioObjectiveSet(
+                    identifier, _text(objective_set["name"], f"{ctx}.name"), references,
+                )
+            )
+        if len(sets) < 2:
+            raise ScenarioMissionError(
+                f"{context}.objectiveSelection requires at least two distinct sets"
+            )
+        objective_selection = ScenarioObjectiveSelection(
+            chooser, timing, True, tuple(sets),
+        )
+
     rules: list[ScenarioRule] = []
     rule_ids: set[str] = set()
     for index, item in enumerate(_array(raw["rules"], f"{context}.rules", allow_empty=True)):
         ctx = f"{context}.rules[{index}]"
         rule = _object(
-            item, {"id", "name", "paragraphs"}, {"definitionId", "skillIds", "specialists"}, ctx
+            item, {"id", "name", "paragraphs"},
+            {"definitionId", "skillIds", "specialists", "skillTypeIds",
+             "skillFacts", "sourceLabels", "skillCitations", "sharedSkill"}, ctx,
         )
         identifier = _slug(rule["id"], f"{ctx}.id")
         _unique(identifier, rule_ids, ctx)
@@ -473,6 +598,96 @@ def parse_scenario_mission(
             validate_typed_domain_id(value, expected_domain="skill", context=ctx)
             for value in _array(specialists.get("anyOfSkills", []), ctx, allow_empty=True)
         )
+        skill_types = tuple(
+            _choice(value, {"short-skill", "long-skill"}, f"{ctx}.skillTypeIds")
+            for value in _array(
+                rule.get("skillTypeIds", []), f"{ctx}.skillTypeIds", allow_empty=True
+            )
+        )
+        if len(set(skill_types)) != len(skill_types):
+            raise ScenarioMissionError(f"{ctx}.skillTypeIds contains duplicate categories")
+        source_labels = tuple(
+            _text(value, f"{ctx}.sourceLabels")
+            for value in _array(
+                rule.get("sourceLabels", []), f"{ctx}.sourceLabels", allow_empty=True
+            )
+        )
+        if source_labels and not skill_types:
+            raise ScenarioMissionError(f"{ctx}.sourceLabels requires skillTypeIds")
+        if len(set(source_labels)) != len(source_labels):
+            raise ScenarioMissionError(f"{ctx}.sourceLabels contains duplicates")
+        skill_facts: dict[str, tuple[str, ...]] | None = None
+        if "skillFacts" in rule:
+            if not skill_types:
+                raise ScenarioMissionError(f"{ctx}.skillFacts requires skillTypeIds")
+            fields = _object(
+                rule["skillFacts"], {"requirements", "effects"},
+                {"restrictions", "clarifications", "sourceNotes"},
+                f"{ctx}.skillFacts",
+            )
+            skill_facts = {
+                field: tuple(
+                    _text(entry, f"{ctx}.skillFacts.{field}")
+                    for entry in _array(
+                        fields.get(field, []), f"{ctx}.skillFacts.{field}",
+                        allow_empty=field not in {"requirements", "effects"},
+                    )
+                )
+                for field in (
+                    "requirements", "effects", "restrictions", "clarifications", "sourceNotes"
+                )
+            }
+        elif skill_types:
+            raise ScenarioMissionError(f"{ctx}.skillTypeIds requires skillFacts")
+
+        shared_skill = None
+        if "sharedSkill" in rule:
+            shared = _object(
+                rule["sharedSkill"], {"id", "version"},
+                {"origin", "review", "overriddenFields"},
+                f"{ctx}.sharedSkill",
+            )
+            shared_id = validate_typed_domain_id(
+                shared["id"], expected_domain="skill", context=f"{ctx}.sharedSkill.id",
+            )
+            shared_skill = (shared_id, _text(shared["version"], f"{ctx}.sharedSkill.version"))
+            if "overriddenFields" in shared:
+                values = _array(
+                    shared["overriddenFields"], f"{ctx}.sharedSkill.overriddenFields",
+                )
+                allowed = {
+                    "skillFacts.requirements", "skillFacts.effects", "skillFacts.restrictions",
+                }
+                if len(set(values)) != len(values) or any(v not in allowed for v in values):
+                    raise ScenarioMissionError(f"{ctx}: invalid shared Skill override fields")
+            if "origin" in shared:
+                _object(
+                    shared["origin"],
+                    {"sourceCollectionId", "seasonId", "revision", "sourceIds"}, set(),
+                    f"{ctx}.sharedSkill.origin",
+                )
+            if "review" in shared:
+                _object(
+                    shared["review"], {"status", "reviewedOn"}, set(),
+                    f"{ctx}.sharedSkill.review",
+                )
+            if not skill_types or skill_facts is None:
+                raise ScenarioMissionError(f"{ctx}.sharedSkill requires structured Skill facts")
+
+        skill_citations: list[tuple[str, int]] = []
+        if "skillCitations" in rule:
+            if not skill_types:
+                raise ScenarioMissionError(f"{ctx}.skillCitations requires skillTypeIds")
+            for citation in _array(rule["skillCitations"], f"{ctx}.skillCitations"):
+                citation = _object(
+                    citation, {"sourceId", "page"}, set(), f"{ctx}.skillCitations"
+                )
+                skill_citations.append((
+                    _source_identifier(citation["sourceId"], f"{ctx}.skillCitations.sourceId"),
+                    _integer(citation["page"], f"{ctx}.skillCitations.page"),
+                ))
+            if len(set(skill_citations)) != len(skill_citations):
+                raise ScenarioMissionError(f"{ctx}.skillCitations has duplicate pins")
         rules.append(
             ScenarioRule(
                 identifier,
@@ -486,6 +701,11 @@ def parse_scenario_mission(
                 definition_id,
                 defined_skills,
                 qualifiers,
+                skill_types,
+                skill_facts,
+                source_labels,
+                tuple(skill_citations),
+                shared_skill,
             )
         )
 
@@ -640,4 +860,5 @@ def parse_scenario_mission(
         tuple(ends),
         tuple(issues),
         skill_ids,
+        objective_selection,
     )

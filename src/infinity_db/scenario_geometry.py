@@ -12,9 +12,30 @@ SCENARIO_GEOMETRY_VERSION = 1
 
 _MM_PER_INCH = 25.4
 
+# Canonical physical template size; not an explicit ITS scenario rule measurement.
+# Scenario table geometry is in physical inches, unlike player-facing game distance
+# labels, which follow the published 2.5 cm-per-inch convention.
+CIRCULAR_TEMPLATE_DIAMETER_CM = 12.0
+CIRCULAR_TEMPLATE_RADIUS_INCHES = CIRCULAR_TEMPLATE_DIAMETER_CM * 10 / (2 * _MM_PER_INCH)
+
+# ITS 17 V0.2 p. 13 and ITS 18 2026.09.11 p. 18 define these
+# token diameters. Civilian markers use the 25 mm Civilian/CivEvac
+# footprint; B-Pong's conflicting Tracking Beacon sources remain unmeasured.
 _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "console": 40.0,
+    "beacon": 25.0,
     "supply-box": 25.0,
+    "antenna": 40.0,
+    "tech-coffin": 40.0,
+    "hyperthermal-tech": 25.0,
+    "prototype": 40.0,
+    "panoply": 40.0,
+    "objective": 40.0,
+    "player-a-b": 25.0,
+    "data-pack": 25.0,
+    "defensive-turret": 25.0,
+    "civevac": 25.0,
+    "civilian": 25.0,
 }
 
 _ELEMENT_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -64,6 +85,23 @@ class LineElement:
 
 
 @dataclass(frozen=True, slots=True)
+class CircleRegionElement:
+    id: str
+    style: str
+    x: Coordinate
+    y: Coordinate
+    radius: float
+
+
+@dataclass(frozen=True, slots=True)
+class QuarterCircleElement:
+    id: str
+    style: str
+    corner: Literal["top-left", "top-right", "bottom-left", "bottom-right"]
+    radius: float
+
+
+@dataclass(frozen=True, slots=True)
 class MarkerElement:
     id: str
     style: str
@@ -82,7 +120,10 @@ class LabelElement:
     align: Literal["start", "middle", "end"]
 
 
-ScenarioElement: TypeAlias = RectangleElement | LineElement | MarkerElement | LabelElement
+ScenarioElement: TypeAlias = (
+    RectangleElement | LineElement | CircleRegionElement | QuarterCircleElement
+    | MarkerElement | LabelElement
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,6 +146,18 @@ class AreaSizeAnnotation:
 
 
 @dataclass(frozen=True, slots=True)
+class RulerAnnotation:
+    """Source-pinned distance between two table positions, with a display offset."""
+
+    id: str
+    x1: Coordinate
+    y1: Coordinate
+    x2: Coordinate
+    y2: Coordinate
+    offset: float
+
+
+@dataclass(frozen=True, slots=True)
 class ElementEdgeDistanceAnnotation:
     """Derived clearance from an element boundary to one table edge."""
 
@@ -116,6 +169,7 @@ class ElementEdgeDistanceAnnotation:
 
 ScenarioAnnotation: TypeAlias = (
     DimensionAnnotation | AreaSizeAnnotation | ElementEdgeDistanceAnnotation
+    | RulerAnnotation
 )
 
 
@@ -251,6 +305,28 @@ def _parse_element(value: Any, index: int) -> ScenarioElement:
             y2=_coordinate(raw.get("y2"), "y", f"{context}.y2"),
         )
 
+    if kind == "circle":
+        _only_keys(raw, common_required | {"x", "y", "radius"}, set(), context)
+        return CircleRegionElement(
+            id=_element_id(raw["id"], f"{context}.id"),
+            style=_style(raw["style"], f"{context}.style"),
+            x=_coordinate(raw["x"], "x", f"{context}.x"),
+            y=_coordinate(raw["y"], "y", f"{context}.y"),
+            radius=_positive_number(raw["radius"], f"{context}.radius"),
+        )
+
+    if kind == "quarter-circle":
+        _only_keys(raw, common_required | {"corner", "radius"}, set(), context)
+        corner = raw["corner"]
+        if corner not in {"top-left", "top-right", "bottom-left", "bottom-right"}:
+            raise ScenarioGeometryError(f"{context}.corner is not a table corner")
+        return QuarterCircleElement(
+            id=_element_id(raw["id"], f"{context}.id"),
+            style=_style(raw["style"], f"{context}.style"),
+            corner=corner,
+            radius=_positive_number(raw["radius"], f"{context}.radius"),
+        )
+
     if kind == "marker":
         required = common_required | {"markerType", "x", "y"}
         _only_keys(raw, required, set(), context)
@@ -280,7 +356,8 @@ def _parse_element(value: Any, index: int) -> ScenarioElement:
         )
 
     raise ScenarioGeometryError(
-        f"{context}.kind must be one of ['label', 'line', 'marker', 'rectangle']"
+        f"{context}.kind must be one of "
+        "['circle', 'label', 'line', 'marker', 'quarter-circle', 'rectangle']"
     )
 
 
@@ -310,6 +387,17 @@ def _parse_annotation(value: Any, index: int) -> ScenarioAnnotation:
             offset=offset,
         )
 
+    if kind == "ruler":
+        _only_keys(raw, {"id", "kind", "x1", "y1", "x2", "y2"}, {"offset"}, context)
+        return RulerAnnotation(
+            id=_element_id(raw["id"], f"{context}.id"),
+            x1=_coordinate(raw["x1"], "x", f"{context}.x1"),
+            y1=_coordinate(raw["y1"], "y", f"{context}.y1"),
+            x2=_coordinate(raw["x2"], "x", f"{context}.x2"),
+            y2=_coordinate(raw["y2"], "y", f"{context}.y2"),
+            offset=_finite_number(raw.get("offset", 0), f"{context}.offset"),
+        )
+
     if kind == "area-size":
         _only_keys(raw, {"id", "kind", "target"}, set(), context)
         return AreaSizeAnnotation(
@@ -333,7 +421,7 @@ def _parse_annotation(value: Any, index: int) -> ScenarioAnnotation:
 
     raise ScenarioGeometryError(
         f"{context}.kind must be one of "
-        "['area-size', 'dimension', 'element-edge-distance']"
+        "['area-size', 'dimension', 'element-edge-distance', 'ruler']"
     )
 
 
@@ -420,6 +508,17 @@ def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
                 raise ScenarioGeometryError(
                     f"{context} rectangle must resolve to positive width and height"
                 )
+        elif isinstance(element, CircleRegionElement):
+            x = resolved(element.x, "x", f"{context}.x")
+            y = resolved(element.y, "y", f"{context}.y")
+            if (
+                x - element.radius < 0 or x + element.radius > table.width
+                or y - element.radius < 0 or y + element.radius > table.height
+            ):
+                raise ScenarioGeometryError(f"{context} circular region extends outside table")
+        elif isinstance(element, QuarterCircleElement):
+            if element.radius > min(table.width, table.height):
+                raise ScenarioGeometryError(f"{context} quarter-circle extends outside table")
         elif isinstance(element, MarkerElement):
             resolved(element.x, "x", f"{context}.x")
             resolved(element.y, "y", f"{context}.y")
@@ -437,6 +536,23 @@ def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
     elements_by_id = {element.id: element for element in geometry.elements}
     for annotation in geometry.annotations:
         context = f"scenario geometry annotation {annotation.id!r}"
+        if isinstance(annotation, RulerAnnotation):
+            x1 = resolved(annotation.x1, "x", f"{context}.x1")
+            y1 = resolved(annotation.y1, "y", f"{context}.y1")
+            x2 = resolved(annotation.x2, "x", f"{context}.x2")
+            y2 = resolved(annotation.y2, "y", f"{context}.y2")
+            dx, dy = x2 - x1, y2 - y1
+            length = math.hypot(dx, dy)
+            if length < 0.000001:
+                raise ScenarioGeometryError(f"{context} ruler requires distinct endpoints")
+            nx, ny = -dy / length, dx / length
+            for x, y in ((x1, y1), (x2, y2)):
+                if not (0 <= x + annotation.offset * nx <= table.width
+                        and 0 <= y + annotation.offset * ny <= table.height):
+                    raise ScenarioGeometryError(
+                        f"{context} ruler offset moves a measured endpoint outside table"
+                    )
+            continue
         target = elements_by_id.get(annotation.target)
         if target is None:
             raise ScenarioGeometryError(

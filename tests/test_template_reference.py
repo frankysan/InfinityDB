@@ -23,6 +23,8 @@ from reference_acceptance_support import (
 )
 from test_verify_ammunition_publication_browser import browser as browser
 
+from tools.research.wiki_archive_members import resolve_page_member
+
 
 def test_template_conditions_match_pinned_pdf_wiki_and_faq(
     require_source_files, reference_pdf_layout: str,
@@ -51,7 +53,7 @@ def test_template_conditions_match_pinned_pdf_wiki_and_faq(
                                  "Direct_Template_Weapons": 3881,
                                  "Impact_Template_Weapons": 3782}.items():
             assert re.search(r'"wgRevisionId"\s*:\s*' + str(revision),
-                             archive.read(member).decode("utf-8"))
+                             archive.read(resolve_page_member(archive, member)).decode("utf-8"))
     assert hashlib.sha256(faq.read_bytes()).hexdigest() == FAQ_PIN
     import pymupdf
     with pymupdf.open(faq) as document:

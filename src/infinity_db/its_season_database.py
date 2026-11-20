@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from .curated import load_curated_document
+from .its_source_family import project_its_source_family
 from .scenario_components import compose_scenario_document
 from .scenario_definition import parse_scenario_definition_record
 from .sqlite_determinism import (
@@ -48,7 +49,8 @@ def _file_sha(path: Path) -> str:
 def _builder_revision() -> str:
     """Bind the output to the relevant parser/exporter code, not host paths."""
     modules = (
-        "its_season_database.py", "curated.py", "scenario_components.py",
+        "its_season_database.py", "its_source_family.py", "curated.py", "scenario_components.py",
+        "scenario_reuse.py",
         "scenario_definition.py", "scenario_mission.py", "scenario_geometry.py",
         "sqlite_determinism.py",
     )
@@ -65,13 +67,15 @@ def _input_identity(source: Path, document: dict[str, Any], core_revision: str) 
     scenario_set = document["scenarioCollection"]
     return {
         "sourceCollectionId": collection["id"],
-        "sourceSha256": _file_sha(source),
+        "sourceSha256": hashlib.sha256(source.read_bytes().replace(b"\r\n", b"\n")).hexdigest(),
         "seasonId": scenario_set["id"],
         "seasonRevision": scenario_set["revision"],
         "effectiveFrom": collection["effectiveFrom"],
         "requiredCoreRulesRevision": core_revision,
         "builderRevision": _builder_revision(),
         "schemaVersion": ITS_SCHEMA_VERSION,
+        **({"sharedScenarioLibrary": document["sharedScenarioLibrary"]}
+           if "sharedScenarioLibrary" in document else {}),
         "sources": [
             {"id": entry["id"], "sha256": entry.get("sha256")}
             for entry in document["sources"]
@@ -152,6 +156,206 @@ def _validate_season_policy(
 
 
 
+def _validate_season_skill(
+    record: dict[str, Any], *, season_id: str, revision: str,
+) -> None:
+    """Validate standalone ITS Skills without inventing scenario applicability."""
+    from .domain_slugs import validate_typed_domain_id
+
+    validate_typed_domain_id(
+        record["id"], expected_domain="skill", context="ITS season Skill",
+    )
+    facts = record.get("facts")
+    required = {
+        "category", "typeIds", "requirements", "effects", "restrictions", "applicability",
+    }
+    if (not isinstance(facts, dict) or set(facts) - (required | {"clarifications", "sourceLabels"})
+            or required - set(facts)):
+        raise ValueError("ITS season Skill requires typed declaration, effects and applicability")
+    if facts["category"] not in {"common-skill", "special-skill"}:
+        raise ValueError("ITS season Skill must be Common or Special, not scenario-scoped")
+    labels = facts.get("sourceLabels", [])
+    if (not isinstance(labels, list)
+            or any(not isinstance(label, str) or not label.strip()
+                   or label != label.strip() for label in labels)
+            or len(labels) != len(set(labels))):
+        raise ValueError("ITS season Skill has invalid source labels")
+    types = facts["typeIds"]
+    if (not isinstance(types, list) or len(types) != 1
+            or types[0] not in {
+                "basic-short-skill", "short-skill", "short-movement-skill", "automatic",
+            }):
+        raise ValueError("ITS season Skill requires one supported declaration category")
+    for field in ("requirements", "effects", "restrictions", "clarifications"):
+        values = facts.get(field, [])
+        if (not isinstance(values, list)
+                or (field == "effects" and not values)
+                or any(not isinstance(value, str) or not value.strip()
+                       or value != value.strip() for value in values)):
+            raise ValueError(f"ITS season Skill has invalid {field}")
+    applicability = facts["applicability"]
+    if (
+        not isinstance(applicability, dict)
+        or set(applicability) != {"context", "revision"}
+        or applicability["revision"] != revision
+        or applicability["context"] not in {"season", "team-ops-extra"}
+    ):
+        raise ValueError("ITS season Skill requires exact current-revision applicability")
+    if record["scope"] != {"game": "N5", "seasons": [season_id]}:
+        raise ValueError("ITS season Skill must not acquire scenario or cross-season scope")
+    if record["composition"] != {"role": "definition"} or record.get("armyLinks"):
+        raise ValueError("ITS season Skill cannot redefine an Army Skill")
+    if not record.get("citations") or record.get("review", {}).get("status") != "reviewed":
+        raise ValueError("ITS season Skill requires reviewed source citations")
+
+
+def _validate_season_state(
+    record: dict[str, Any], *, season_id: str, revision: str,
+) -> None:
+    """A season State is not a core State and never has scenario membership."""
+    from .domain_slugs import validate_typed_domain_id
+
+    validate_typed_domain_id(
+        record["id"], expected_domain="state", context="ITS season State",
+    )
+    facts = record.get("facts")
+    required = {"category", "requirements", "effects", "restrictions", "applicability"}
+    if (not isinstance(facts, dict) or required - set(facts)
+            or set(facts) - (required | {"clarifications"})):
+        raise ValueError("ITS season State requires complete typed State facts")
+    if facts["category"] != "state":
+        raise ValueError("ITS season State must have state category")
+    for field in ("requirements", "effects", "restrictions", "clarifications"):
+        values = facts.get(field, [])
+        if (not isinstance(values, list)
+                or (field == "effects" and not values)
+                or any(not isinstance(value, str) or not value.strip()
+                       or value.strip() != value for value in values)):
+            raise ValueError(f"ITS season State has invalid {field}")
+    if facts["applicability"] != {"context": "season", "revision": revision}:
+        raise ValueError("ITS season State requires exact revision applicability")
+    if record["scope"] != {"game": "N5", "seasons": [season_id]}:
+        raise ValueError("ITS season State must not acquire core or scenario scope")
+    if record["composition"] != {"role": "definition"} or record.get("armyLinks"):
+        raise ValueError("ITS season State cannot redefine an Army record")
+    if not record.get("citations") or record.get("review", {}).get("status") != "reviewed":
+        raise ValueError("ITS season State requires reviewed source citations")
+
+
+def _validate_season_extra(
+    record: dict[str, Any], *, season_id: str, revision: str,
+) -> None:
+    """Keep a tournament Extra separate from scenario memberships and core rules."""
+    from .domain_slugs import require_domain_slug, validate_typed_domain_id
+
+    validate_typed_domain_id(
+        record["id"], expected_domain="rule", context="ITS tournament Extra",
+    )
+    facts = record.get("facts")
+    fields = {
+        "category", "applicability", "tacticalObjectives", "battleConditions",
+        "gameSizes", "tacticalElements", "glossary", "effects", "restrictions",
+        "sourceNotes",
+    }
+    if not isinstance(facts, dict) or set(facts) != fields:
+        raise ValueError("ITS tournament Extra requires complete typed Extra facts")
+    if facts["category"] != "optional-extra":
+        raise ValueError("ITS tournament Extra must be an optional-extra Rule")
+    context = facts["applicability"]
+    if (
+        not isinstance(context, dict)
+        or set(context) != {"context", "revision"}
+        or context["context"] != "resilience-operations-extra"
+        or context["revision"] != revision
+    ):
+        raise ValueError("ITS tournament Extra must pin its season revision and context")
+    for key, required in (
+        ("tacticalObjectives", {
+            "draw", "discard", "maxPointsPerCard", "completionMinimum",
+            "moreCompletedBonus", "commandTokenRedraw", "revealPerRound",
+            "priorityTargetFirst", "privateUntilRevealed",
+        }),
+        ("battleConditions", {
+            "draw", "discard", "appliesToBoth", "wholeGame", "duplicateResolution",
+            "stackMovementBonuses",
+        }),
+    ):
+        item = facts[key]
+        if not isinstance(item, dict) or set(item) != required:
+            raise ValueError(f"ITS tournament Extra requires complete {key}")
+    objectives = facts["tacticalObjectives"]
+    conditions = facts["battleConditions"]
+    if (
+        any(type(objectives[key]) is not int or objectives[key] < 0 for key in (
+            "draw", "discard", "maxPointsPerCard", "completionMinimum",
+            "moreCompletedBonus", "commandTokenRedraw", "revealPerRound",
+        ))
+        or objectives["discard"] >= objectives["draw"]
+        or type(objectives["priorityTargetFirst"]) is not bool
+        or type(objectives["privateUntilRevealed"]) is not bool
+        or any(type(conditions[key]) is not int or conditions[key] < 0
+               for key in ("draw", "discard"))
+        or conditions["discard"] >= conditions["draw"]
+        or any(type(conditions[key]) is not bool
+               for key in ("appliesToBoth", "wholeGame", "stackMovementBonuses"))
+        or conditions["duplicateResolution"] != "second-player-redraws"
+    ):
+        raise ValueError("ITS tournament Extra deck semantics are invalid")
+    sizes = facts["gameSizes"]
+    if not isinstance(sizes, list) or not sizes:
+        raise ValueError("ITS tournament Extra requires published game sizes")
+    point_sizes: set[int] = set()
+    for item in sizes:
+        if (not isinstance(item, dict) or set(item) != {
+            "armyPoints", "swc", "tableWidthIn", "tableHeightIn", "deploymentDepthIn",
+        } or any(type(value) is not int or value <= 0 for value in item.values())
+                or item["armyPoints"] in point_sizes
+                or item["deploymentDepthIn"] * 2 >= item["tableHeightIn"]):
+            raise ValueError("ITS tournament Extra has invalid deployment geometry")
+        point_sizes.add(item["armyPoints"])
+    for key, required in (
+        ("tacticalElements", {"id", "quantity", "placement", "rules"}),
+        ("glossary", {"id", "text"}),
+    ):
+        entries = facts[key]
+        if not isinstance(entries, list) or not entries:
+            raise ValueError(f"ITS tournament Extra requires {key}")
+        seen: set[str] = set()
+        for entry in entries:
+            if (
+                not isinstance(entry, dict) or set(entry) != required
+                or not isinstance(entry.get("id"), str)
+                or require_domain_slug(entry["id"], context=f"ITS {key}") in seen
+            ):
+                raise ValueError(f"ITS tournament Extra has invalid {key} entry")
+            seen.add(entry["id"])
+            if key == "tacticalElements":
+                if (
+                    not isinstance(entry["quantity"], str) or not entry["quantity"].strip()
+                    or not isinstance(entry["placement"], str)
+                    or not entry["placement"].strip()
+                    or not isinstance(entry["rules"], list) or not entry["rules"]
+                    or any(not isinstance(v, str) or not v.strip() for v in entry["rules"])
+                ):
+                    raise ValueError("ITS Extra Tactical Element must describe its source rules")
+            elif not isinstance(entry["text"], str) or not entry["text"].strip():
+                raise ValueError("ITS tournament Extra glossary requires text")
+    for key in ("effects", "restrictions", "sourceNotes"):
+        values = facts[key]
+        if (not isinstance(values, list) or not values or any(
+            not isinstance(v, str) or not v.strip() for v in values
+        )):
+            raise ValueError(f"ITS tournament Extra requires {key}")
+    if (
+        record["scope"] != {"game": "N5", "seasons": [season_id]}
+        or record["composition"] != {"role": "definition"}
+        or record.get("armyLinks")
+        or not record.get("citations")
+        or record.get("review", {}).get("status") != "reviewed"
+    ):
+        raise ValueError("ITS tournament Extra requires season-local reviewed provenance")
+
+
 def _validate_its_document(document: dict[str, Any], core_revision: str) -> None:
     from .domain_slugs import require_domain_slug
 
@@ -201,7 +405,13 @@ def _validate_its_document(document: dict[str, Any], core_revision: str) -> None
         scope = record["scope"]
         if scope.get("game") != "N5" or season_id not in scope.get("seasons", []):
             raise ValueError(f"ITS publication contains out-of-season record {record['id']!r}")
-        if record["kind"] != "scenario":
+        if record["kind"] == "skill":
+            _validate_season_skill(record, season_id=season_id, revision=season["revision"])
+        elif record["kind"] == "state":
+            _validate_season_state(record, season_id=season_id, revision=season["revision"])
+        elif record["kind"] == "rule":
+            _validate_season_extra(record, season_id=season_id, revision=season["revision"])
+        elif record["kind"] != "scenario":
             raise ValueError(f"ITS publication contains unsupported record {record['id']!r}")
 
 
@@ -371,7 +581,7 @@ def _populate(
 
 def inspect_its_database(
     path: Path, *, source: Path | None = None, core_revision: str | None = None,
-    require_current_builder: bool = False,
+    require_current_builder: bool = False, shared_library: Path | None = None,
 ) -> dict[str, Any]:
     """Validate the stored publication; optionally require current builder inputs."""
     if not path.is_file():
@@ -419,8 +629,24 @@ def inspect_its_database(
             raise ValueError("ITS database requires rebuilding after builder change")
         if core_revision is not None and identity.get("requiredCoreRulesRevision") != core_revision:
             raise ValueError("ITS database requires a different N5 core revision")
-        if source is not None and _file_sha(source) != identity.get("sourceSha256"):
+        if source is not None and hashlib.sha256(
+            source.read_bytes().replace(b"\r\n", b"\n")
+        ).hexdigest() != identity.get("sourceSha256"):
             raise ValueError("ITS source bytes do not match the built database")
+        library_identity = identity.get("sharedScenarioLibrary")
+        if library_identity is not None and (
+            not isinstance(library_identity, dict)
+            or set(library_identity) != {"id", "sha256"}
+            or not isinstance(library_identity["id"], str)
+            or not isinstance(library_identity["sha256"], str)
+            or len(library_identity["sha256"]) != 64
+        ):
+            raise ValueError("Invalid ITS shared scenario library provenance")
+        if shared_library is not None and (
+            library_identity is None
+            or _file_sha(shared_library) != library_identity["sha256"]
+        ):
+            raise ValueError("ITS shared scenario library bytes differ from build provenance")
         source_rows = connection.execute(
             "SELECT id, descriptor_json FROM sources ORDER BY id"
         ).fetchall()
@@ -430,10 +656,59 @@ def inspect_its_database(
         ]
         if stored_sources != sorted(identity["sources"], key=lambda item: item["id"]):
             raise ValueError("ITS stored source descriptors differ from build provenance")
-        if connection.execute("SELECT count(*) FROM records").fetchone()[0] != (
-            metadata["scenarioCount"]
+        record_rows = connection.execute(
+            "SELECT id, kind, payload_json, content_sha256 FROM records ORDER BY id"
+        ).fetchall()
+        scenario_rows = [row for row in record_rows if row["kind"] == "scenario"]
+        skill_rows = [row for row in record_rows if row["kind"] == "skill"]
+        state_rows = [row for row in record_rows if row["kind"] == "state"]
+        extra_rows = [row for row in record_rows if row["kind"] == "rule"]
+        if (
+            len(scenario_rows) != metadata["scenarioCount"]
+            or len(scenario_rows) + len(skill_rows) + len(state_rows) + len(extra_rows)
+            != len(record_rows)
         ):
-            raise ValueError("ITS season contains unexpected non-scenario definitions")
+            raise ValueError("ITS season has unexpected record kinds or scenario count")
+        for row in [*skill_rows, *state_rows, *extra_rows]:
+            record = json.loads(row["payload_json"])
+            if (
+                row["id"] != record.get("id")
+                or _digest(record) != row["content_sha256"]
+            ):
+                raise ValueError("ITS season record content does not match stored hash")
+            if row["kind"] == "skill":
+                _validate_season_skill(
+                    record, season_id=identity["seasonId"], revision=identity["seasonRevision"],
+                )
+            elif row["kind"] == "state":
+                _validate_season_state(
+                    record, season_id=identity["seasonId"], revision=identity["seasonRevision"],
+                )
+            else:
+                _validate_season_extra(
+                    record, season_id=identity["seasonId"], revision=identity["seasonRevision"],
+                )
+            citation_rows = connection.execute(
+                "SELECT source_id, page, member, heading, section FROM record_citations "
+                "WHERE collection_id=? AND record_id=? ORDER BY position",
+                (identity["sourceCollectionId"], row["id"]),
+            ).fetchall()
+            authored_citations = [
+                {
+                    "source_id": citation["sourceId"],
+                    "page": citation.get("page"),
+                    "member": citation.get("member"),
+                    "heading": citation.get("heading"),
+                    "section": citation.get("section"),
+                }
+                for citation in record["citations"]
+            ]
+            if [dict(citation) for citation in citation_rows] != authored_citations:
+                raise ValueError("ITS season record citation content differs from source")
+            if any(citation["source_id"] not in {
+                item["id"] for item in identity["sources"]
+            } for citation in citation_rows):
+                raise ValueError("ITS season record references unknown publication source")
         publications = connection.execute(
             "SELECT s.id, s.revision, s.source_collection_id, m.scenario_id, m.position, "
             "r.payload_json, r.content_sha256 FROM scenario_sets AS s "
@@ -543,14 +818,28 @@ def inspect_its_database(
                 "target": policy["target"]["recordId"],
                 "contentSha256": row["content_sha256"],
             })
-        return {
+        report = {
             "schemaVersion": ITS_SCHEMA_VERSION,
             "inputIdentity": identity,
             "buildId": metadata["buildId"],
             "sha256": _file_sha(path),
             "scenarios": scenarios,
+            "skills": [
+                {"id": row["id"], "contentSha256": row["content_sha256"]}
+                for row in skill_rows
+            ],
+            "states": [
+                {"id": row["id"], "contentSha256": row["content_sha256"]}
+                for row in state_rows
+            ],
             "policies": policies,
         }
+        if extra_rows:
+            report["extras"] = [
+                {"id": row["id"], "contentSha256": row["content_sha256"]}
+                for row in extra_rows
+            ]
+        return report
 
 
 
@@ -661,12 +950,15 @@ def select_its_policies(
 
 def build_its_database(
     source: Path, output: Path, *, core_revision: str = DEFAULT_CORE_REVISION,
+    shared_library: Path | None = None,
 ) -> dict[str, Any]:
     """Build/validate in a disposable sibling, then atomically replace the output."""
     source, output = source.resolve(), output.resolve()
     if source == output or output.name in {"army.db", "rules_n5.db"}:
         raise ValueError("ITS output must not replace curated or core runtime artifacts")
-    document = load_curated_document(source)
+    document = project_its_source_family(
+        load_curated_document(source, shared_scenario_library=shared_library)
+    )
     _validate_its_document(document, core_revision)
     identity = _input_identity(source, document, core_revision)
     composed = compose_scenario_document(document)
@@ -685,9 +977,12 @@ def build_its_database(
         normalize_sqlite_header(temporary)
         result = inspect_its_database(
             temporary, source=source, core_revision=core_revision,
-            require_current_builder=True,
+            require_current_builder=True, shared_library=shared_library,
         )
-        if _input_identity(source, load_curated_document(source), core_revision) != identity:
+        current_source = project_its_source_family(
+            load_curated_document(source, shared_scenario_library=shared_library)
+        )
+        if _input_identity(source, current_source, core_revision) != identity:
             raise ValueError("ITS source changed during build; output retained")
         os.replace(temporary, output)
         return result

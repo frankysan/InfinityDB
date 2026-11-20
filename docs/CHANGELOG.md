@@ -8,6 +8,97 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
+## [1.2.0] - Unreleased
+
+### Player summary
+
+- Added all twenty source-cited ITS Season 18 missions from the September hotfix
+  revision, with game-size maps and scoring. The original September 1
+  Battleground publication remains separately selectable.
+- Double Bind now distinguishes its three alternative Main Objective sets;
+  players can compare them or focus on one while Secondary and Classified
+  Objectives stay visible.
+- Scenario lists are alphabetical. ITS tournament and Extra rules have separate
+  cards, and physical marker sizes now include the source-chart 25 mm Defensive
+  Turret Token (distinct from its S2 Model option), 25 mm Civilians, and
+  Hardlock's Beacon.
+  Scenario-map rulers now keep labels clear of centerline markers and shaded
+  regions in ITS 17/18. Double Bind, B-Pong and Crossing Lines have improved
+  guide spacing, alongside the earlier Neutralization ruler separation.
+  Crossing Lines also gains an Antenna placement guide at every game size
+  (6, 8 or 12 inches from either side edge). Removed redundant rulers
+  measuring exact table-center marker positions and duplicate mirrored
+  distances throughout ITS 17 and 18, retaining informative placement
+  and zone dimensions. Core N5 Domination now uses one representative
+  pair of Console-center guides rather than eight repeated guides per map;
+  Supplies shows one of the two mirrored Supply Box offsets.
+- Circular Template Areas now explicitly show their 12 cm diameter in ITS 17/18
+  mission rules. The fixed Double Bind and Neutralization Circular Template
+  zones now render at the exact physical 6 cm radius, rather than the
+  earlier oversized 2.5-inch schematic radius; player-placed zones retain
+  their stated 12 cm diameter without invented locations. Critical Intervention
+  now places the 40 mm Inhibitor Antenna tangent below the Server Room,
+  with both left edges aligned, in both seasons. The central 8-inch rooms
+  in Critical Intervention and Last Launch now have four labeled Wide Gate
+  openings and a width ruler below each room; gate widths remain schematic.
+- Scenario setup lists how many Classified Objectives, Tactical Objectives, and
+  HVTs each player uses.
+- Scenario-specific Skills share normal Skill cards, appear under their own
+  `/skills` category, and are searchable with scenario-specific destinations.
+  All 26 current ITS actions now have structured Requirements and Effects,
+  with source caveats preserved. Core N5 scenario Skills are also listed
+  with their scenario context and exact N5 citations. Redundant Skill-type
+  suffixes are omitted from scenario Skill names; badges identify the type.
+
+### Added
+
+- **Data processing + Web backend + Web frontend:** Published the September
+  2026 ITS Season 18 hotfix as a separately selected season revision, alongside
+  the preserved September 1 Battleground. Added Crossing Lines, Double Bind,
+  The Dig, Annihilation, Cutthroat, Superiority, Uplink Center, Hardlock and
+  B-Pong, Akial Interference, Evacuation, Neutralization, Provisioning and
+  Area of Interest, Data-Harvest, Last Launch, Corporate Appropriation,
+  Outbreak and Critical Intervention, with reviewed source citations, scoring, geometry,
+  special rules and source discrepancies;
+  retained Battleground in both versions.
+  Double Bind exposes mutually exclusive Main Objective sets in the scenario
+  viewer, and the shared map renderer supports circular and corner deployment
+  geometry. Exclusion Zones have diagonal hatching, Antenna Zones of Influence
+  and Battleground Sectors have distinct colors, misplaced Deployment Zone
+  labels are corrected, and antenna/Console/deployment-radius placement
+  rulers are now visible. B-Pong distinguishes the Tracking Beacon from
+  Consoles and records conflicting bilingual marker-size and movement rules.
+  Akial Interference documents the shared/private Classified Objective workflow,
+  Emission and Signal Filtering at its central Antenna, and source ambiguity
+  about failed attempts versus per-round activation limits. Evacuation
+  adds four schematic Civilians and two Extraction Consoles, with source-pinned
+  game sizes and bilingual activation/Classified wording discrepancies.
+  Neutralization adds four Antenna-centered Circular Template Areas and two
+  central Tech Boxes; extraction-capacity and Carrier Marker State wording
+  remain explicitly scoped as source issues. Provisioning adds three diagonal
+  Tech-Coffins holding four Supply Boxes, player-placed Safe Areas, and
+  end-game Control scoring, with bilingual pickup and Token-disposition
+  differences and source-language Reinforcements suitability explicitly recorded.
+  Area of Interest adds three player-placed Zones of Operations, a central
+  Communication Antenna with round-based activation scoring, and INTELCOM
+  Support and Control. English/Spanish ARO and end-round wording differences
+  remain disclosed. Data-Harvest adds three central Tech-Coffins, six
+  extractable Data-Harvesters, four player-placed enemy-side Designated
+  Zones, and per-round/at-game-end activation and neutralization scoring.
+  Last Launch adds ID Scanners and Checker, an 8-inch Launching Tower with
+  highlighted No Deployment area, Trooper extraction, specialist comparisons,
+  and No Quarter. Corporate Appropriation adds paired Prototypes and Panoplies,
+  exclusive own-Prototype scoring, the ADS profile, Panoply Chart, and
+  physical marker dimensions. Outbreak adds the central Alpha Infected,
+  four player-placed Infected, two player-placed Stabilization Zones,
+  and Scan/Stabilization/CivEvac objectives without Classifieds.
+  Critical Intervention completes the twenty-mission hotfix catalog,
+  with Attacker/Defender roles, an 8-inch Server Room, Inhibitor
+  Antenna, schematic defensive Turrets, asymmetric scoring and INTELCOM.
+  Both language editions print a 12-OP Defender total; it is preserved
+  as a source issue rather than silently capped at 10. Unresolved
+  bilingual discrepancies and browser visual acceptance remain open.
+
 ## [1.1.0] - 2026-11-15
 
 ### Player summary

@@ -309,7 +309,7 @@ def test_weapon_chart_name_evidence_is_not_rule_definition_coverage() -> None:
 def _curated_snapshot_fixture(
     tmp_path: Path, *, history_revision: int = 4109
 ) -> tuple[Path, Path, dict[str, object], list[dict[str, str | None]]]:
-    snapshot = tmp_path / "WIKI-en 20260926-200832.zip"
+    snapshot = tmp_path / "WIKI-en 20261116-075926.zip"
     history = tmp_path / "history.zip"
     member = "Transmutation"
     def content(revision: int) -> str:
@@ -325,19 +325,19 @@ def _curated_snapshot_fixture(
     with zipfile.ZipFile(history, "w") as archive:
         archive.writestr(member, content(history_revision))
     declared = {
-        "id": "wiki-en-20260926-200832",
-        "localPath": "data/wiki/WIKI-en 20260926-200832.zip",
+        "id": "wiki-en-20261116-075926",
+        "localPath": "data/wiki/WIKI-en 20261116-075926.zip",
         "sha256": hashlib.sha256(snapshot.read_bytes()).hexdigest(),
         "documentCount": 1,
     }
     references: list[dict[str, str | None]] = [
         {
-            "sourceId": "wiki-en-20260926-200832",
+            "sourceId": "wiki-en-20261116-075926",
             "member": member,
             "heading": "Transmutation (Escape System-X)",
         },
         {
-            "sourceId": "wiki-en-20260926-200832",
+            "sourceId": "wiki-en-20261116-075926",
             "member": member,
             "heading": "Transmutation (Escape System-X)",
         },
@@ -480,7 +480,7 @@ def test_bilingual_snapshots_require_exact_pins_and_matched_histories(
 ) -> None:
     english, history_en, source_en, refs_en = _curated_snapshot_fixture(tmp_path)
     source_en["language"] = "en"
-    spanish = tmp_path / "WIKI-es 20261009-211304.zip"
+    spanish = tmp_path / "WIKI-es 20261116-092640.zip"
     history_es = tmp_path / "history-es.zip"
     payload = (
         '<html><script>RLCONF={"wgRevisionId":4012}</script>'
@@ -491,9 +491,9 @@ def test_bilingual_snapshots_require_exact_pins_and_matched_histories(
     with zipfile.ZipFile(history_es, "w") as archive:
         archive.writestr("es/Esquivar", payload)
     source_es = {
-        "id": "wiki-es-20261009-211304",
+        "id": "wiki-es-20261116-092640",
         "language": "es",
-        "localPath": "data/wiki/WIKI-es 20261009-211304.zip",
+        "localPath": "data/wiki/WIKI-es 20261116-092640.zip",
         "sha256": hashlib.sha256(spanish.read_bytes()).hexdigest(),
         "documentCount": 1,
     }

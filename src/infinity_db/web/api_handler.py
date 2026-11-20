@@ -201,15 +201,15 @@ def _enrich_scenario_api_item(
 
 
 def _scenario_selection(params: dict[str, list[str]]) -> tuple[str | None, str | None]:
-    """Require an exact collection/revision pair; never infer the current ITS season."""
+    """Choose a season by default; reject explicit obsolete revision requests."""
     collection = params.get("collection", [None])[0]
     revision = params.get("revision", [None])[0]
-    if (collection is None) != (revision is None):
-        raise ValueError("Provide collection and revision together")
+    if collection is None and revision is not None:
+        raise ValueError("Scenario revision requires a collection")
     if collection is not None:
         require_domain_slug(collection, context="scenario collection")
-        if not revision or revision.strip() != revision:
-            raise ValueError("scenario revision must be a non-empty trimmed string")
+    if revision is not None and (not revision or revision.strip() != revision):
+        raise ValueError("scenario revision must be a non-empty trimmed string")
     return collection, revision
 
 
@@ -538,14 +538,25 @@ class ApiHandler:
             if deployed_objects is not None else {}
         )
         self.trait_catalog = TraitCatalog(database, rules_database)
-        self.state_catalog = StateCatalog(rules_database)
-        self.skill_catalog = SkillCatalog(database, rules_database)
+        self.state_catalog = StateCatalog(rules_database, publication_registry)
+        self._season_rule_records = (
+            {
+                entry["record"]["id"]: entry["record"]
+                for kind in (
+                    publication_registry.season_skill_entries(),
+                    publication_registry.season_state_entries(),
+                )
+                for entry in kind
+            }
+            if publication_registry is not None else {}
+        )
+        self.scenario_catalog = ScenarioCatalog(rules_database, publication_registry)
+        self.skill_catalog = SkillCatalog(database, rules_database, self.scenario_catalog)
         self.equipment_catalog = EquipmentCatalog(database, rules_database)
         self.hacking_program_catalog = HackingProgramCatalog(database, rules_database)
         self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
         self.label_catalog = LabelCatalog(rules_database)
         self.general_rules_catalog = RulesRecordCatalog(rules_database, "rules")
-        self.scenario_catalog = ScenarioCatalog(rules_database, publication_registry)
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
         self._glossary_items_cache: list[dict[str, Any]] | None = None
         self.army_overview_summaries, self.legacy_armies = database.army_reference_data()
@@ -1050,7 +1061,9 @@ class ApiHandler:
                     payload = self.symbol_catalog.enrich_nested_units(payload)
                     payload = enrich_rule_relation_references(self.database, payload)
                     payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
+                        self.database, self.rules_database, payload,
+                        scenario_id=(payload.get("scenario") or {}).get("id"),
+                        additional_records=self._season_rule_records,
                     )
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
@@ -1146,7 +1159,8 @@ class ApiHandler:
                 else:
                     payload = enrich_rule_relation_references(self.database, payload)
                     payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
+                        self.database, self.rules_database, payload,
+                        additional_records=self._season_rule_records,
                     )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read state")

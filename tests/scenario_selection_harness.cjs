@@ -41,9 +41,10 @@ const context = vm.createContext({
   encodeURIComponent,
   getScenarios: async () => ({ items: [{
     slug: "domination", name: "Domination", supported_army_points: [150, 200, 300, 350],
+    publication: { collection_id: "n5-core", revision: "5.3" },
   }] }),
-  getScenario: (_slug, points, signal) => new Promise((resolve, reject) => {
-    requests.push({ points, signal, resolve, reject });
+  getScenario: (_slug, points, signal, selection) => new Promise((resolve, reject) => {
+    requests.push({ points, signal, selection, resolve, reject });
   }),
   // The FAQ overlay is independent and immediately available in this race
   // harness. Only stale scenario responses may replace the active game size.
@@ -82,6 +83,8 @@ setImmediate(async () => {
 
   assert.equal(requests.length, 1, "default game size must load");
   assert.equal(requests[0].points, 300);
+  assert.equal(requests[0].selection.collection, "");
+  assert.equal(requests[0].selection.revision, "", "core requests must not send revision alone");
   assert.deepEqual(shares, ["300"]);
   const pointsSelect = elements.get("scenario-army-points");
   pointsSelect.value = "200";

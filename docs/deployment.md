@@ -124,6 +124,15 @@ checks embedded provenance, static bytes, package contents, representative API
 citations and production startup. Compose starts with `--no-build` after image
 verification. The immutable container never regenerates databases.
 
+For a production `app-v<version>` image, the deploy script requires HEAD at the
+matching exact Git tag and a matching installed package version. It embeds
+the release version independently of ignored/untracked server artifacts;
+the image verifier rejects a mismatched tag, package or baked footer version.
+Development/test image tags retain the `+dev` display behavior. After the
+application is healthy, old image pruning is best-effort: image tags referenced
+by any container (including stopped test containers) are retained, and
+cleanup errors do not change the successful application deployment result.
+
 For an isolated image build and all pinned semantic-baseline probes, run:
 
 ```sh
@@ -161,11 +170,19 @@ Before every release merge, the
 requires a **running Docker test deployment**, independent of hosted image
 smoke. Use a Docker Linux host with the synchronized candidate SHA and
 tracked runtime files; a separate development/test host is preferable.
-Run the isolated loopback-only deployment:
+Run the isolated loopback-only deployment, then check public-page routing,
+runtime identity, metrics and health through their correct listeners:
 
 ```sh
 sh ./scripts/deploy-local-test.sh
+.venv/bin/python -m tools.ci.verify_running_deployment
 ```
+
+The probe defaults to `http://localhost:8080` for the Caddy public host
+and `http://127.0.0.1:8081` for the metrics listener. Use
+`--public-base` and `--metrics-base` for custom test ports. For production,
+use the public HTTPS URL and loopback metrics port, plus
+`--expected-version <version>` to reject an accidental `+dev` footer.
 
 This creates a separate `infinitydb-test` Compose project, binds Caddy only to
 `127.0.0.1:8080`, deploys the current tracked runtime/symbol artifacts, and disables production

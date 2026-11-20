@@ -1428,26 +1428,27 @@ example:
 
 ```json
 {
-    "sourceId": "wiki-en-20260926-200832",
-    "member": "Camouflaged_State",
+    "sourceId": "wiki-en-20261116-075926",
+    "member": "Camouflaged_State.html",
     "heading": "Camouflaged State"
 }
 ```
 
-The checked-in N5 v5.3 collections are bound to
-`data/wiki/WIKI-en 20260926-200832.zip` with SHA-256
-`c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987`,
-acquired 2026-09-26 at 20:08:32 +02:00 with 812 members. This replaces the
-unavailable 2026-09-18 capture: all 74 archived citations and two vocabulary
-references were checked against the newer archive; three citation members needed
-path corrections. The original September 18 bytes are unavailable, so exact
-content equivalence cannot be established. Individually pinned `oldid=`
-revisions remain separate URL-backed source identities, even when archived
-revision payloads can be verified against the history-enabled Wiki capture.
+The checked-in N5 v5.3 collections now select the verified English
+`WIKI-en 20261116-075926.zip` (932 members, SHA-256
+`6a89e4feb9ce08d1bd9dcf1ecec094b0fcd2aa928a99c253da47561acffed15f`)
+and Spanish `WIKI-es 20261116-092640.zip` (1,146 members, SHA-256
+`f51337a595ba3ee282daa6faeddceb1a3e443351fb84889eca73d22434a2e83f`).
+All 109 cited current-page occurrences were mapped by title and source URL,
+with corresponding headings and MediaWiki revision IDs verified. Another 116
+URL-backed `oldid` references resolve to the exact historical payloads in
+the new archives. These captures do not establish a single publication date.
 
-Generated acquisition provenance remains under `data/manifests/snapshots/`;
-curated rules copy only the exact source identity required to reproduce what was
-reviewed.
+Older archives are still available for migration validation; the remaining
+database publication and dependent-test updates must pass before retirement.
+Acquisition manifests and detailed inventories are ignored under
+`local/data/manifests/snapshots/`; curated rules retain the exact selected
+source identities.
 
 Curated-rule files older than format v23 are no longer accepted by the loader and must
 be migrated to the current source/citation, composition, variant, declaration, and

@@ -14,6 +14,7 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
+from tools.research.wiki_archive_members import resolve_page_member
 
 ROOT = Path(__file__).resolve().parents[1]
 RULES = ROOT / "data/generated/rules_n5.db"
@@ -68,13 +69,13 @@ def test_movement_source_pages_and_archived_move_requirements(
             text = " ".join(pdf[page - 1].get_text().split()).casefold()
             for phrase in phrases:
                 assert phrase.casefold() in text, (page, phrase)
-    archive = ROOT / "local/data/wiki/WIKI-en 20260926-200832.zip"
+    archive = ROOT / "local/data/wiki/WIKI-en 20261116-075926.zip"
     if archive.is_file():
         assert hashlib.sha256(archive.read_bytes()).hexdigest() == (
-            "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"
+            "6a89e4feb9ce08d1bd9dcf1ecec094b0fcd2aa928a99c253da47561acffed15f"
         )
         with ZipFile(archive) as wiki:
-            move = wiki.read("Move").decode()
+            move = wiki.read(resolve_page_member(wiki, "Move")).decode()
             assert 'wgRevisionId":3530' in move
             assert "at least half as wide" in move
             assert "equal to or larger than their base" in move

@@ -68,7 +68,7 @@ def test_flamethrower_family_rules_and_profile_remain_source_exact(
         for citation in rule["citations"]
     )
     assert any(
-        citation["source_id"] == "wiki-en-20260926-200832"
+        citation["source_id"] == "wiki-en-20261116-075926"
         and citation["heading"] == "FLAMETHROWERS"
         for citation in rule["citations"]
     )

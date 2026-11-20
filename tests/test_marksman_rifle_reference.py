@@ -128,7 +128,7 @@ def test_single_mode_source_profiles_and_scoped_links(
     )
     if slug != "breaker-marksman-rifle":
         assert any(
-            citation["source_id"] == "wiki-en-20260926-200832"
+            citation["source_id"] == "wiki-en-20261116-075926"
             and citation["heading"] == "MARKSMAN RIFLES"
             for citation in rule["citations"]
         )

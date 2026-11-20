@@ -18,12 +18,14 @@ from pathlib import Path
 from typing import cast
 
 if __package__:
+    from .acquire_its_pdf import PINNED_REVISIONS
     from .report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
     )
     from .source_paths import SourcePathError, pinned_pdf_path
 else:  # Support direct execution as a script in tools/research/.
+    from acquire_its_pdf import PINNED_REVISIONS
     from report_output import (
         require_new_audit_outputs,
         write_audit_text_or_exit,
@@ -50,6 +52,23 @@ PAIRS = {
     "n5-v5.2-v5.3-es": ("rules/n5-rules-v5.2-es.pdf", "rules/n5-rules-v5.3-es.pdf", 1),
     "faq-en": ("faq/n5-faq-v0.0-en.pdf", "faq/n5-faq-v0.1-en.pdf", 1),
     "faq-es": ("faq/n5-faq-v0.0-es.pdf", "faq/n5-faq-v0.1-es.pdf", 1),
+    # Reflowed/mobile V0.2 requires content-based matching rather than equal-page comparison.
+    "its17-v0.0-v0.1-en": (
+        "legacy/its_17/its-rules-season-17-v0.0-en.pdf",
+        "legacy/its_17/its-rules-season-17-v0.1-en.pdf", 2,
+    ),
+    "its17-v0.0-v0.1-es": (
+        "legacy/its_17/its-rules-season-17-v0.0-es.pdf",
+        "legacy/its_17/its-rules-season-17-v0.1-es.pdf", 2,
+    ),
+    "its17-v0.1-v0.2-en": (
+        "legacy/its_17/its-rules-season-17-v0.1-en.pdf",
+        "legacy/its_17/its-rules-season-17-v0.2-en.pdf", 2,
+    ),
+    "its17-v0.1-v0.2-es": (
+        "legacy/its_17/its-rules-season-17-v0.1-es.pdf",
+        "legacy/its_17/its-rules-season-17-v0.2-es.pdf", 2,
+    ),
 }
 WORD = re.compile(r"[^\W_]+(?:[.’'/-][^\W_]+)*|[+\-]+|[*]+", re.UNICODE)
 FOOTER = re.compile(
@@ -260,6 +279,12 @@ def main() -> int:
         artifact["path"].removeprefix("data/pdf/"): artifact["sha256"]
         for artifact in pins["artifacts"]
     }
+    # ITS 17's six publisher originals are separately pinned, not part of
+    # the N5/ITS 18 revision inventory used by the existing audit.
+    expected.update({
+        f"legacy/its_17/its-rules-season-17-{edition}.pdf": digest
+        for edition, (digest, _size, _pages) in PINNED_REVISIONS.items()
+    })
     documents = {}
     results = []
     for name in args.pairs:

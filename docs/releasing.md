@@ -348,6 +348,12 @@ risk-based selection and from hosted CI. Run it against a clean, pinned
 candidate checkout with the required graphical assets available. The final
 release cannot be approved on focused tests alone.
 
+**Freeze release-facing content before expensive acceptance:** finish the dated
+changelog, README, version metadata, deployment instructions and release-tooling
+changes; pass the cheap metadata, documentation and affected tooling checks first.
+Then run the mandatory full suite and isolated Docker acceptance once against
+the stable candidate. Re-run affected gates if the candidate changes.
+
 - [ ] Verify the complete tracked Army/Rules/ITS set, inputs, source identity,
   citations, SQLite schema and published SVGs. Rebuild from the supported
   pipeline if inputs changed; never hand-edit a release database. Run
@@ -394,9 +400,7 @@ release cannot be approved on focused tests alone.
 
   ```sh
   sh ./scripts/deploy-local-test.sh
-  curl -fsS http://127.0.0.1:8081/health
-  curl -fsS http://localhost:8080/api/version
-  curl -fsS http://127.0.0.1:8081/metrics
+  .venv/bin/python -m tools.ci.verify_running_deployment
   docker compose -p infinitydb-test ps
   ```
 
@@ -447,6 +451,16 @@ Do not create a routine second PR to finish release prose or TODO cleanup.
   The historical v1.0.x contract requires all four. Run optional
   `Full-asset checks` only when the external checksum-pinned bundle is
   relevant.
+- [ ] Before merging, **rehearse the release-evidence collector on the exact
+  development candidate SHA** once its selected hosted checks are complete,
+  after finalizing the version metadata. This validates the current CI matrix
+  contract without creating tag evidence yet:
+
+  ```text
+  python -m tools.ci.prepare_release_ci_evidence --repository OWNER/REPO --commit <candidate-sha> --tag v<version> --check-only
+  ```
+
+  The final post-merge collector run is still required for the exact `main` SHA.
 - [ ] Check that the recorded local **full suite**, isolated **Docker
   deployment**, player-copy review, documentation, metadata and required
   accessibility acceptance are all complete. Obtain merge approval, then
@@ -502,9 +516,16 @@ the production host must not substitute newly built data.
 - [ ] Deploy the selected immutable release through
   [deployment instructions](deployment.md), without a fresh application/data
   rebuild on the server.
-- [ ] Confirm `/health`, `/api/version`, the release tag/version and
-  expected runtime snapshot and static revision. Use the available paired
-  database/source verifier when the release changes data publications.
+- [ ] Verify production's public and metrics listeners, exact browser footer
+  version (no `+dev`), `/api/version`, snapshot/static revisions and
+  representative page routes with the shared deployment probe:
+
+  ```sh
+  .venv/bin/python -m tools.ci.verify_running_deployment --public-base https://YOUR-HOST --metrics-base http://127.0.0.1:9090 --expected-version <version>
+  ```
+
+  Use the available paired database/source verifier when the release changes
+  data publications.
 - [ ] Smoke-test the main application route and the release's changed
   player-facing paths. Browser coverage should reflect affected UI,
   navigation and accessibility—not a compulsory 21/81-page acceptance

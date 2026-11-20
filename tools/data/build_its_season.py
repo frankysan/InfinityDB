@@ -15,7 +15,7 @@ from infinity_db.its_season_database import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_SOURCE = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"
+DEFAULT_SOURCE = ROOT / "data/curated/its/n5-its-season-18.json"
 DEFAULT_OUTPUT = ROOT / "local/work/its/its_18.db"
 
 
@@ -24,6 +24,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--core-revision", default=DEFAULT_CORE_REVISION)
+    parser.add_argument("--shared-library", type=Path, help="Pinned shared scenario definitions")
     parser.add_argument(
         "--check", action="store_true",
         help="Inspect an existing ITS artifact without building or changing files",
@@ -36,11 +37,12 @@ def main(argv: list[str] | None = None) -> int:
         if args.check:
             result = inspect_its_database(
                 args.output, source=args.source, core_revision=args.core_revision,
-                require_current_builder=True,
+                require_current_builder=True, shared_library=args.shared_library,
             )
         else:
             result = build_its_database(
                 args.source, args.output, core_revision=args.core_revision,
+                shared_library=args.shared_library,
             )
     except (OSError, ValueError) as exc:
         parser.exit(1, f"ITS season database blocked: {exc}\n")

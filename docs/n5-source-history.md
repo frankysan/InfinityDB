@@ -579,6 +579,31 @@ unverified publisher rules are separately owned by
 V1S-016–022; final frozen-release browser, accessibility,
 full-suite and CI gates are still outstanding.
 
+### Current Wiki archive selection (2026-11-16)
+
+Active curated N5.3 references now use the independently acquired English
+`local/data/wiki/WIKI-en 20261116-075926.zip` (932 members, SHA-256
+`6a89e4feb9ce08d1bd9dcf1ecec094b0fcd2aa928a99c253da47561acffed15f`)
+and Spanish `local/data/wiki/WIKI-es 20261116-092640.zip`
+(1,146 members, SHA-256
+`f51337a595ba3ee282daa6faeddceb1a3e443351fb84889eca73d22434a2e83f`).
+The matching history archives are `WIKI-en-history 20261116-090844.zip`
+(SHA-256 `7207ecd564d9e9cfc672e46fc1524209f6b7a45a67a0631e50af438597299c6f`)
+and `WIKI-es-history 20261116-101038.zip`
+(SHA-256 `9c907f9b21cbb12c63843727075b27f5f212820f80a0f330eac98bdac6317ff2`).
+
+Migration review matched 109 active current-page citation occurrences by archived
+page title and URL, verified their headings and unchanged MediaWiki revision IDs,
+and resolved 116 `oldid` URLs against exact revision payloads in the new histories.
+Current curated data and generated Rules publication select the new source IDs.
+Capture timestamps do **not** establish the rules' publication or effective dates.
+
+Earlier dated ZIP paths and hashes recorded below document the **historical 1.0
+review process**, not files needed by current curated rules or source audits.
+These earlier captures may be retired once remaining tooling and validation
+dependencies are cleared; their historic identities must not be interpreted as
+a second current source selection.
+
 ### Selected rules, FAQ, Wiki and annex evidence (V1S-002; 2026-11-03)
 
 The 1.0 current-reference review selects these **existing local inputs**;

@@ -63,12 +63,55 @@ the retired source roots.
 - `local/data/raw/army/` — immutable Corvus Belli Army snapshot ZIPs.
   Older raw-symbol ZIPs reside under `local/data/raw/symbols/`.
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
-  Human Sphere snapshot ZIPs, including history variants. The two unique
-  expanded mirrors live under `local/data/wiki-extracted/`, which is not
+  Human Sphere snapshot ZIPs, including history variants. The three expanded
+  research mirrors live under `local/data/wiki-extracted/`, which is not
   synchronized.
+
+  The independently acquired Wiki snapshots dated 2026-11-16 retain their
+  exact ZIPs, v3 manifests and detailed inventories in
+  `local/data/manifests/snapshots/inventories/`. English current/history contain
+  711 pages and 2,801 oldid revisions; Spanish contain 930 pages and 2,655
+  revisions. Current pages use portable `.html` members (including nested and
+  Unicode-suffixed paths); Spanish pages are under `es/`. The inventories
+  identify source URLs and archive members, while `_history/index.json` owns
+  oldid resolution. Do not derive paths from titles or mix snapshots across
+  naming schemes.
+  New verified Wiki captures are intended to supersede older active captures
+  of the same language. Re-pin curated source declarations, exact member
+  citations and supported tools/tests against the latest acquired ZIP and
+  inventory before retiring older files. A new member path or matching heading
+  alone does not prove unchanged rules semantics: require exact source mapping
+  and review changed content or missing locators. Preserve historical `oldid`
+  URL identities, confirming they resolve in the replacement history archive.
+  Older captures remain available until the migrated publication and source
+  consumers pass acceptance; dated historical reports can retain their
+  original source identities as historical evidence, not active dependencies.
+
+  For each replacement, run `tools.research.audit_wiki_snapshot_migration`
+  with `--en-current`, `--en-history`, `--es-current` and `--es-history`
+  set to the acquired ZIP stems (without `.zip`). Review its JSON mapping and
+  generated Git patch; a changed/missing revision or heading prevents a patch.
+  Apply the checked patch, rebuild and validate the affected publication.
+  Before retiring old files, compare their current/history pairs against the
+  replacements using `tools.research.audit_wiki_archive_retirement`. Require
+  zero missing older revision IDs and no historical page-identity conflicts;
+  the comparison does not prove identical archived HTML bytes or static assets.
+  The Human Sphere capture `HUMAN-SPHERE 20261117-002753.zip` has 74,193
+  documents and a detailed inventory; its extracted research mirror is under
+  `local/data/wiki-extracted/`. Human Sphere captures do not have the separate
+  history archives required by the Infinity Wiki retirement comparator.
+  `tools.research.audit_human_sphere_retirement` instead verifies both archive
+  manifests/content hashes, matches captured pages by MediaWiki identity and
+  revision, and reports missing non-page paths. Changed revisions and absent
+  assets require review before retiring older Human Sphere ZIPs; matching
+  revisions alone do not prove identical HTML or historical completeness.
 - `local/data/pdf/` — physical research PDFs and the preserved
   `rules/sources.txt` revision index. Canonical `data/pdf/` source labels
-  remain unchanged in curated provenance.
+  remain unchanged in curated provenance. ITS 17's six original EN/ES
+  V0.0–V0.2 editions are under `legacy/its_17/` with pinned hashes in
+  `tools/research/acquire_its_pdf.py`; current ITS 18 PDFs remain under
+  `its/`. Do not infer a document revision from the historical ITS 17
+  download URL suffix `v1.0.2` (it contains the document labelled V0.2).
 - The independent Wiki acquisition checkout keeps incomplete crawl work
   under its own `local/work/wiki/`.
 - `local/archive/symbols/` retains historical in-tree symbol work, reports,
@@ -124,14 +167,15 @@ the retired source roots.
 - `curated/snapshot-notes/` — source-controlled, human-authored descriptions,
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
-- `generated/` — the three tracked runtime databases: `army.db`
+- `generated/` — three tracked runtime databases: `army.db`
   (Army v31/compatibility 40), `rules_n5.db` (Rules v17), and
-  `its_18.db` (ITS v2). Exact variants, reviewed Weapon citations,
-  deployed objects, Restrictions, and symbol mappings remain embedded in
-  Army/Rules. The ITS database owns Season 18 Battleground and scoped
-  tournament/Extra policies; it is selected by exact season and revision.
+  `its_18.db` (ITS v2, current 2026.09.11). Exact variants, reviewed
+  Weapon citations, deployed objects, Restrictions, and symbol mappings
+  remain embedded in Army/Rules. The ITS database publishes twenty reviewed
+  current missions and the source-cited tournament/Extra policies. Historical
+  Battleground facts and source identity remain in
+  `curated/its/n5-its-season-18.json` rather than a second runtime database.
   See [ITS season database](../docs/its-season-database.md).
-  The old filenames and required JSON publications are retired.
 
 **Complete runtime build:** `infinity-db build --compact` selects the latest
 timestamped Army ZIP from `local/data/raw/army/` (not by copy mtime), with
@@ -140,6 +184,13 @@ mismatched provenance blocks this implicit build; it never falls back to
 `data/raw/` or downloads data. An explicit source ZIP remains supported;
 `--snapshot-manifest` pins its provenance. Explicit `--metadata` retains
 the legacy unpinned metadata override behavior.
+When rebuilding the existing published runtime set solely to update maintained
+build inputs (such as a version bump), run
+`python -m tools.data.rebuild_runtime_set --use-recorded-source`.
+This selects the exact Army ZIP/manifest pair recorded by the current
+`data/generated/army.db`, verifies the archive hash, and refuses missing
+sources instead of silently selecting a newer snapshot.
+
 For an R1 source-pinned build, supply **both** the exact ZIP and its
 version-3 provenance manifest, optionally choosing a separate complete
 database-set output directory:
@@ -166,7 +217,7 @@ repositories now create new ZIPs and provenance in their **own** ignored
 can use `tools.data.import_acquisition_snapshot` for verified ZIP/manifest
 pairs. Four Syncthing sender source paths use `local/data/` while Linux
 staging roots and the optional image-overrides sender remain unchanged.
-The deployed three-file runtime set is unaffected. Current
+The published runtime set is unaffected by those historical acquisition migrations. Current
 symbol-publication pins and other maintained inputs must still match.
 
 Default output is `data/generated/`; `--db-dir PATH` selects a
@@ -183,7 +234,7 @@ Army v27–v31 overlays use the same verified normalized source without opening
 or updating the temporary raw SQLite sibling. The standalone export and
 raw-pair inspection interfaces remain supported.
 The builder validates all
-three runtime databases, cross-domain references and source/build provenance,
+four runtime databases, cross-domain references and source/build provenance,
 checks that its inputs remain unchanged, then replaces the selected set and
 discards intermediates.
 Generation/validation failure before replacement preserves destination bytes.
@@ -195,7 +246,7 @@ Normal serving opens only that completed directory. Precedence is explicit
 to the working directory. WSGI requires the environment setting. The retired
 individual-database variables are rejected. There is no automatic checkout
 bundle selection or older-file fallback. Docker copies the same tracked
-three-file set into its image. The cache revision hashes sorted active filenames and
+four-file set into its image. The cache revision hashes sorted active filenames and
 their exact file hashes.
 
 `infinity-army build --output-dir PATH` retains the source JSON pipeline;
@@ -213,8 +264,9 @@ exist for independent development commands; they are not serving dependencies.
 
 **Selected runtime health:** `infinity-db database-health --db-dir PATH`
 validates exactly the selected directory through the shared
-`infinity_db.database_set` validator. Startup and directory health require `army.db`, `rules_n5.db`
-and `its_18.db`, Army v31 / Rules v17 / ITS v2, with matched provenance
+`infinity_db.database_set` validator. Startup and directory health require
+`army.db`, `rules_n5.db` and `its_18.db`,
+Army v31 / Rules v17 / ITS v2, with matched provenance
 and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;
 they do not establish an operator-facing alternate selection contract.
@@ -253,7 +305,7 @@ transitional fixtures when explicitly requested by development code.
 the selected three-database set, without selecting environment paths or discovering
 another directory. The semantic-baseline tool's `--db-dir` exercises this factory.
 
-The current three-file runtime layout embeds Army v31 Equipment presentation
+The current four-file runtime layout embeds Army v31 Equipment presentation
 encodings, reviewed Skill source classifications, Unit filter semantics,
 Army overview text, legacy identities and symbol mappings/hashes,
 plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
@@ -906,7 +958,7 @@ request.
   --expected-current-sha256 CURRENT_SHA256 --expected-candidate-sha256 CANDIDATE_SHA256
 ```
 
-Promotion replaces graphical publication only. Rebuild the **complete three-file**
+Promotion replaces graphical publication only. Rebuild the **complete four-file**
 Army/Rules/ITS set using the accepted manifest, validate embedded hashes/mappings
 and deployment assets, then resume serving. Do not patch only the Army SQLite
 rows or serve a mixed database/publication set. The

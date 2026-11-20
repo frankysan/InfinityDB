@@ -2693,7 +2693,8 @@ def test_skill_modifiers_remains_internal_to_the_player_skills_page(app: Callabl
     assert status == 200
     assert b'href="/skill-extras"' not in skills
     assert (
-        b"Browse Common and Special Skills, with rules text and Army usage where available."
+        b"Browse Common, Special, and Scenario-specific Skills, including scenario context, "
+        b"rules text, and Army usage where available."
         in skills
     )
 
@@ -4963,7 +4964,7 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     shock = json.loads(body)
     assert shock["slug"] == "shock"
     assert shock["rules"][0]["id"] == "ammunition:shock"
-    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20260926-200832"
+    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20261116-075926"
 
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
@@ -5373,8 +5374,16 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
 
     status, _, body = request(rules_app, "/api/states")
     assert status == 200
-    states = {item["id"]: item for item in json.loads(body)["items"]}
-    assert len(states) == 24
+    items = json.loads(body)["items"]
+    states = {item["id"]: item for item in items}
+    assert len(states) == len(items) == 25
+    assert len([item for item in items if "season" not in item]) == 24
+    its_states = {item["id"]: item for item in items if "season" in item}
+    assert set(its_states) == {"casevac"}
+    assert its_states["casevac"]["season"] == {
+        "collection": "its-18", "revision": "2026.09.11",
+    }
+    assert its_states["casevac"]["name"] == "Casevac State"
     assert states["unconscious"]["name"] == "Unconscious State"
     assert states["targeted"]["name"] == "Targeted State"
 
