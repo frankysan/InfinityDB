@@ -33,7 +33,10 @@ are not retroactively relabeled.
   pair of Console-center guides rather than eight repeated guides per map;
   Supplies shows one of the two mirrored Supply Box offsets.
 - Circular Template Areas now explicitly show their 12 cm diameter in ITS 17/18
-  mission rules, with map notes for fixed template areas. Critical Intervention
+  mission rules. The fixed Double Bind and Neutralization Circular Template
+  zones now render at the exact physical 6 cm radius, rather than the
+  earlier oversized 2.5-inch schematic radius; player-placed zones retain
+  their stated 12 cm diameter without invented locations. Critical Intervention
   now places the 40 mm Inhibitor Antenna tangent below the Server Room,
   with both left edges aligned, in both seasons. The central 8-inch rooms
   in Critical Intervention and Last Launch now have four labeled Wide Gate

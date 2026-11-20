@@ -152,7 +152,9 @@ def test_double_bind_selected_main_objective_hotfix_and_antenna_areas() -> None:
             if isinstance(element, CircleRegionElement)
         ]
         assert len(regions) == 3
-        assert {region.radius for region in regions} == {2.5}
+        assert all(
+            region.radius == pytest.approx(60 / 25.4) for region in regions
+        )
         assert {region.style for region in regions} == {"influence"}
         assert {
             el.marker_type for el in parsed.elements if isinstance(el, MarkerElement)
@@ -1004,7 +1006,10 @@ def test_neutralization_score_caps_regions_and_exact_source_geometry() -> None:
         }
         assert {id: (e["x"], e["y"]) for id, e in elements.items()
                 if e["kind"] == "circle"} == expected_areas
-        assert all(elements[id]["radius"] == 2.5 for id in expected_areas)
+        assert all(
+            elements[id]["radius"] == pytest.approx(60 / 25.4)
+            for id in expected_areas
+        )
         assert {id: (e["markerType"], e["x"], e["y"])
                 for id, e in elements.items() if e["kind"] == "marker"} == {
             "antenna-a-left": ("antenna", 4, dep),

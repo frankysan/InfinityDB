@@ -210,7 +210,7 @@ function mapCard(item) {
   )) {
     const note = document.createElement("p");
     note.className = "scenario-map-placement-note";
-    note.textContent = "Circular Template areas: 12 cm diameter each (map footprints are schematic).";
+    note.textContent = "Circular Template areas: 12 cm diameter each (footprints drawn to scale).";
     figure.append(note);
   }
   if (item.slug === "domination" && item.publication?.collection_id === "n5-core") {

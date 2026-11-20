@@ -10,6 +10,8 @@ from xml.etree import ElementTree
 import pytest
 
 from infinity_db.scenario_geometry import (
+    CIRCULAR_TEMPLATE_DIAMETER_CM,
+    CIRCULAR_TEMPLATE_RADIUS_INCHES,
     marker_diameter_mm,
     marker_radius_inches,
     parse_scenario_geometry,
@@ -35,13 +37,19 @@ CIRCULAR_TEMPLATE_MISSIONS = {
 
 
 @pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
-def test_all_circular_template_missions_state_12_cm_diameter(source: Path) -> None:
+@pytest.mark.parametrize("distance_unit", ["in", "cm"])
+def test_all_circular_template_missions_state_12_cm_diameter(
+    source: Path, distance_unit: Literal["in", "cm"],
+) -> None:
     document = json.loads(source.read_text(encoding="utf-8"))
     records = (
         document["records"] if source == ITS18
         else [entry["record"] for entry in document["definitions"]]
     )
+    assert CIRCULAR_TEMPLATE_DIAMETER_CM == 12
+    assert CIRCULAR_TEMPLATE_RADIUS_INCHES * 25.4 == pytest.approx(60)
     found: set[str] = set()
+    fixed_circles = 0
     for record in records:
         if record["kind"] != "scenario":
             continue
@@ -63,12 +71,32 @@ def test_all_circular_template_missions_state_12_cm_diameter(source: Path) -> No
             ]
             if circles:
                 assert record["id"] in CIRCULAR_TEMPLATE_MISSIONS[source]
+                assert all(element["style"] == "influence" for element in circles)
                 assert all(
-                    element["style"] == "influence" and element["radius"] == 2.5
+                    element["radius"] == pytest.approx(CIRCULAR_TEMPLATE_RADIUS_INCHES)
                     for element in circles
                 ), record["id"]
+                fixed_circles += len(circles)
+
+                svg = ElementTree.fromstring(render_scenario_map_svg(
+                    parse_scenario_geometry(configuration["geometry"]),
+                    distance_unit=distance_unit,
+                ))
+                rendered = [
+                    node for node in svg.iter()
+                    if node.get("data-region-shape") == "circle"
+                ]
+                assert len(rendered) == len(circles)
+                for element in circles:
+                    node = next(e for e in rendered if e.get("id") == element["id"])
+                    assert float(node.get("r", "nan")) == pytest.approx(
+                        CIRCULAR_TEMPLATE_RADIUS_INCHES, abs=1e-6
+                    )
+                    assert float(node.get("cx", "nan")) == element["x"]
+                    assert float(node.get("cy", "nan")) == element["y"]
 
     assert found == CIRCULAR_TEMPLATE_MISSIONS[source]
+    assert fixed_circles == (21 if source == ITS18 else 0)
 
 
 # These are marker-placement guides, not Deployment Zone, region-radius or

@@ -2103,7 +2103,7 @@
                   "style": "influence",
                   "x": 6,
                   "y": 16,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "zone-of-influence-2",
@@ -2111,7 +2111,7 @@
                   "style": "influence",
                   "x": 12,
                   "y": 16,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "zone-of-influence-3",
@@ -2119,7 +2119,7 @@
                   "style": "influence",
                   "x": 18,
                   "y": 16,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "deployment-a",
@@ -2258,7 +2258,7 @@
                   "style": "influence",
                   "x": 8,
                   "y": 24,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "zone-of-influence-2",
@@ -2266,7 +2266,7 @@
                   "style": "influence",
                   "x": 16,
                   "y": 24,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "zone-of-influence-3",
@@ -2274,7 +2274,7 @@
                   "style": "influence",
                   "x": 24,
                   "y": 24,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "deployment-a",
@@ -2414,7 +2414,7 @@
                   "style": "influence",
                   "x": 12,
                   "y": 24,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "zone-of-influence-2",
@@ -2422,7 +2422,7 @@
                   "style": "influence",
                   "x": 24,
                   "y": 24,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "zone-of-influence-3",
@@ -2430,7 +2430,7 @@
                   "style": "influence",
                   "x": 36,
                   "y": 24,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "deployment-a",
@@ -12137,7 +12137,7 @@
                   "style": "influence",
                   "x": 4,
                   "y": 8,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "neutralization-area-a-right",
@@ -12145,7 +12145,7 @@
                   "style": "influence",
                   "x": 20,
                   "y": 8,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "neutralization-area-b-left",
@@ -12153,7 +12153,7 @@
                   "style": "influence",
                   "x": 4,
                   "y": 24,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "neutralization-area-b-right",
@@ -12161,7 +12161,7 @@
                   "style": "influence",
                   "x": 20,
                   "y": 24,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "table-center-line",
@@ -12337,7 +12337,7 @@
                   "style": "influence",
                   "x": 4,
                   "y": 12,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "neutralization-area-a-right",
@@ -12345,7 +12345,7 @@
                   "style": "influence",
                   "x": 28,
                   "y": 12,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "neutralization-area-b-left",
@@ -12353,7 +12353,7 @@
                   "style": "influence",
                   "x": 4,
                   "y": 36,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "neutralization-area-b-right",
@@ -12361,7 +12361,7 @@
                   "style": "influence",
                   "x": 28,
                   "y": 36,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "table-center-line",
@@ -12538,7 +12538,7 @@
                   "style": "influence",
                   "x": 4,
                   "y": 12,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "neutralization-area-a-right",
@@ -12546,7 +12546,7 @@
                   "style": "influence",
                   "x": 44,
                   "y": 12,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "neutralization-area-b-left",
@@ -12554,7 +12554,7 @@
                   "style": "influence",
                   "x": 4,
                   "y": 36,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "neutralization-area-b-right",
@@ -12562,7 +12562,7 @@
                   "style": "influence",
                   "x": 44,
                   "y": 36,
-                  "radius": 2.5
+                  "radius": 2.362204724409449
                 },
                 {
                   "id": "table-center-line",

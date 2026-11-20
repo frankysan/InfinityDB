@@ -524,7 +524,10 @@ def test_neutralization_six_sizes_controlled_antennas_and_revision_isolation(
             "neutralization-area-a-left", "neutralization-area-a-right",
             "neutralization-area-b-left", "neutralization-area-b-right",
         }
-        assert all(e["radius"] == 2.5 for e in elements.values() if e["kind"] == "circle")
+        assert all(
+            e["radius"] == pytest.approx(60 / 25.4)
+            for e in elements.values() if e["kind"] == "circle"
+        )
         markers = {m["marker_type"]: m for m in item["placement"]["marker_dimensions"]}
         assert {key: (m["count"], m["diameter_mm"]) for key, m in markers.items()} == {
             "antenna": (4, 40), "tech-coffin": (2, 40),

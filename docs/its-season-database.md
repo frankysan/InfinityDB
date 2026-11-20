@@ -1087,10 +1087,13 @@ Neutralization (four Antenna-centered Areas), Provisioning (Safe Areas),
 Area of Interest, Data-Harvest (Designated Zones) and Outbreak
 (Stabilization Zones), including the shared ITS 17 versions of
 Provisioning, Area of Interest and Outbreak. Maps with fixed Circular
-Template Areas repeat the size in their visible placement note. The
-previous 2.5-inch schematic circle radius is preserved for map layout;
-it is not an alternative physical template specification. Player-placed
-Areas remain without invented map positions.
+Template Areas repeat the size in their visible placement note. Their
+fixed SVG footprints now use the exact physical **6 cm radius**
+(60 / 25.4 inches in the canonical table coordinates), replacing the
+former schematic 2.5-inch radius. Physical sizes use 25.4 mm per inch
+as for tokens; distance labels continue to use Infinity's published
+2.5 cm-per-inch game convention. Player-placed Areas retain the same
+12 cm diameter but remain without invented map positions.
 
 All twenty missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible

@@ -12,6 +12,12 @@ SCENARIO_GEOMETRY_VERSION = 1
 
 _MM_PER_INCH = 25.4
 
+# Canonical physical template size; not an explicit ITS scenario rule measurement.
+# Scenario table geometry is in physical inches, unlike player-facing game distance
+# labels, which follow the published 2.5 cm-per-inch convention.
+CIRCULAR_TEMPLATE_DIAMETER_CM = 12.0
+CIRCULAR_TEMPLATE_RADIUS_INCHES = CIRCULAR_TEMPLATE_DIAMETER_CM * 10 / (2 * _MM_PER_INCH)
+
 # ITS 17 V0.2 p. 13 and ITS 18 2026.09.11 p. 18 define these
 # token diameters. Civilian markers use the 25 mm Civilian/CivEvac
 # footprint; B-Pong's conflicting Tracking Beacon sources remain unmeasured.

@@ -2368,7 +2368,8 @@ their expressly scoped placement exceptions.
 Circular Template has an exact **12 cm diameter**, provided as a physical
 template specification rather than a numeric dimension explicitly stated in
 the reviewed rules. This is the basis for InfinityDB's Circular Template
-size labels in scenarios, not a quotation from an ITS or N5 PDF. The Small
+size labels and fixed map footprints (6 cm radius, converted using
+25.4 mm per physical inch), not a quotation from an ITS or N5 PDF. The Small
 and Large Teardrop Templates have no independently established exact
 outline dimensions here; do not infer their length, width or area from
 their names or schematic depictions.
