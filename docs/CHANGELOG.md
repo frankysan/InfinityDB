@@ -26,7 +26,12 @@ are not retroactively relabeled.
   regions in ITS 17/18. Double Bind, B-Pong and Crossing Lines have improved
   guide spacing, alongside the earlier Neutralization ruler separation.
   Crossing Lines also gains an Antenna placement guide at every game size
-  (6, 8 or 12 inches from either side edge).
+  (6, 8 or 12 inches from either side edge). Removed redundant rulers
+  measuring exact table-center marker positions and duplicate mirrored
+  distances throughout ITS 17 and 18, retaining informative placement
+  and zone dimensions. Core N5 Domination now uses one representative
+  pair of Console-center guides rather than eight repeated guides per map;
+  Supplies shows one of the two mirrored Supply Box offsets.
 - Circular Template Areas now explicitly show their 12 cm diameter in ITS 17/18
   mission rules, with map notes for fixed template areas.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and

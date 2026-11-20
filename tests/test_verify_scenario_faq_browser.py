@@ -3451,7 +3451,7 @@ def test_domination_embedded_map_emphasizes_console_center_placement(
             svg = _rendered_scenario_image(page)
             namespace = "{http://www.w3.org/2000/svg}"
             guides = svg.findall(f".//{namespace}g[@class='center-measurement']")
-            assert len(guides) == 8
+            assert len(guides) == 2
             assert len(svg.findall(f".//{namespace}rect[@class='scoring']")) == 4
             assert not any(
                 node.attrib.get("data-target", "").startswith("quadrant-")

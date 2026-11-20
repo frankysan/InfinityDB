@@ -26906,13 +26906,6 @@
                                     "target": "supply-box-left",
                                     "edge": "left",
                                     "offset": -1.5
-                                },
-                                {
-                                    "id": "supply-box-right-offset",
-                                    "kind": "element-edge-distance",
-                                    "target": "supply-box-right",
-                                    "edge": "right",
-                                    "offset": -1.5
                                 }
                             ]
                         }
@@ -27057,13 +27050,6 @@
                                     "kind": "element-edge-distance",
                                     "target": "supply-box-left",
                                     "edge": "left",
-                                    "offset": -1.5
-                                },
-                                {
-                                    "id": "supply-box-right-offset",
-                                    "kind": "element-edge-distance",
-                                    "target": "supply-box-right",
-                                    "edge": "right",
                                     "offset": -1.5
                                 }
                             ]
@@ -27210,13 +27196,6 @@
                                     "kind": "element-edge-distance",
                                     "target": "supply-box-left",
                                     "edge": "left",
-                                    "offset": -1.5
-                                },
-                                {
-                                    "id": "supply-box-right-offset",
-                                    "kind": "element-edge-distance",
-                                    "target": "supply-box-right",
-                                    "edge": "right",
                                     "offset": -1.5
                                 }
                             ]

@@ -375,6 +375,15 @@ Equivalent structures should occupy equivalent visual roles across pages. Normal
 
 Stable geometry is especially important for side-by-side comparison and repeated navigation through catalogs.
 
+Scenario-map measurement guides should show **only non-obvious placement or
+region dimensions**. Omit rulers from table edges to objects at the exact
+table center; for fully mirrored object placements or identical opposite
+zone extents, show one representative measurement instead of both. Preserve
+rulers that explain off-center positions, distances between objects,
+quarter-circle radii and relevant Deployment/Exclusion Zone sizes. The
+physical geometry remains source-backed and unchanged when presentation
+rulers are removed. Check label clearance in both inches and centimeters.
+
 ### Use progressive disclosure for secondary information
 
 Player-facing information should dominate the normal view. Provenance, internal identifiers, source diagnostics, and developer metadata should remain available without distorting the ordinary layout.

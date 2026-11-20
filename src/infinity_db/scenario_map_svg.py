@@ -566,13 +566,15 @@ def render_scenario_map_svg(
     # Increase viewBox-space text on wider tables; at the same on-screen map width,
     # 48-inch maps should no longer render labels at half the size of 24-inch maps.
     text_scale = 1.0 + max(0.0, min(24.0, geometry.table.width - 24.0)) / 48.0
+    # Validate all four symmetric quadrants, but display placement distances
+    # for only their upper-left representative Console.
     center_consoles = _domination_console_centers(geometry)
     elements = "\n".join(
         (
             _render_console_center_guides(
                 geometry, center_consoles[element.id], text_scale, distance_unit
             ) + "\n"
-            if element.id in center_consoles else ""
+            if element.id == "console-q1" and element.id in center_consoles else ""
         ) + _render_element(geometry, element)
         for element in geometry.elements
     )

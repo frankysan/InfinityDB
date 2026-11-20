@@ -161,25 +161,21 @@ def test_double_bind_selected_main_objective_hotfix_and_antenna_areas() -> None:
         assert svg.count('data-region-shape="circle"') == 3
         assert 'class="exclusion"' in svg
         assert 'class="influence"' in svg
-        assert svg.count('class="measurement placement-ruler"') == 3
+        assert svg.count('class="measurement placement-ruler"') == 2
         rulers = {
             annotation["id"]: annotation for annotation in geometry["annotations"]
             if annotation["kind"] == "ruler"
         }
-        assert set(rulers) == {
-            "antenna-middle-from-left", "antenna-right-from-right",
-            "exclusion-from-center",
-        }
-        assert rulers["antenna-middle-from-left"]["x2"] == geometry["table"]["width"] / 2
+        assert set(rulers) == {"antenna-right-from-right", "exclusion-from-center"}
+        assert "antenna-middle-from-left" not in svg
         assert rulers["antenna-right-from-right"]["x1"] == geometry["table"]["width"] * 3 / 4
         elements = {item["id"]: item for item in geometry["elements"]}
         exclusion_bottom = elements["exclusion-zone"]["y2"]
         deployment_start = elements["deployment-b"]["y1"]
-        for ruler_id in ("antenna-middle-from-left", "antenna-right-from-right"):
-            ruler = rulers[ruler_id]
-            assert ruler["y1"] == ruler["y2"] == geometry["table"]["height"] / 2
-            assert ruler["offset"] == 4.5
-            assert exclusion_bottom < ruler["y1"] + ruler["offset"] < deployment_start
+        ruler = rulers["antenna-right-from-right"]
+        assert ruler["y1"] == ruler["y2"] == geometry["table"]["height"] / 2
+        assert ruler["offset"] == 4.5
+        assert exclusion_bottom < ruler["y1"] + ruler["offset"] < deployment_start
         center_ruler = rulers["exclusion-from-center"]
         center = geometry["table"]["height"] / 2
         expected_x = {24: 21, 32: 28, 48: 43}[geometry["table"]["width"]]
@@ -189,7 +185,7 @@ def test_double_bind_selected_main_objective_hotfix_and_antenna_areas() -> None:
         assert 'id="exclusion-from-center" class="measurement placement-ruler"' in svg
         assert 'data-distance-inches="4"' in svg
         assert (
-            f'data-distance-inches="{geometry["table"]["width"] / 2:g}"' in svg
+            f'data-distance-inches="{geometry["table"]["width"] / 4:g}"' in svg
         )
     assert objectives["sabotage"]["awards"][0]["condition"]["status"] == "destroyed"
 
@@ -261,18 +257,13 @@ def test_the_dig_150_point_spacing_analysis_token_ownership_and_corner_geometry(
         svg = render_scenario_map_svg(parsed)
         assert svg.count('data-region-shape="quarter-circle"') == 2
         assert svg.count('data-marker-type="console"') == 3
-        assert svg.count('class="measurement placement-ruler"') == 3
+        assert svg.count('class="measurement placement-ruler"') == 2
         rulers = {
             a["id"]: a for a in configs[config_id]["annotations"] if a["kind"] == "ruler"
         }
-        assert set(rulers) == {
-            "console-to-console", "deployment-corner-radius", "console-center-from-top",
-        }
+        assert set(rulers) == {"console-to-console", "deployment-corner-radius"}
         assert rulers["deployment-corner-radius"]["x2"] == expected_radius
-        vertical_ruler = rulers["console-center-from-top"]
-        assert vertical_ruler["y1"] == 0
-        assert vertical_ruler["y2"] == y1
-        assert vertical_ruler["x1"] == vertical_ruler["x2"] == x1 - 2
+        assert "console-center-from-top" not in svg
         assert math.isclose(
             math.hypot(
                 rulers["console-to-console"]["x2"] - rulers["console-to-console"]["x1"],
@@ -558,11 +549,6 @@ def test_uplink_center_objectives_activation_control_and_40mm_tokens() -> None:
             if annotation["kind"] == "ruler"
         }
         assert rulers == {
-            "tech-coffin-from-left": {
-                "id": "tech-coffin-from-left", "kind": "ruler",
-                "x1": 0, "y1": height / 2,
-                "x2": width / 2, "y2": height / 2, "offset": 2.5,
-            },
             "antenna-right-from-right": {
                 "id": "antenna-right-from-right", "kind": "ruler",
                 "x1": width * 3 / 4, "y1": height / 2,
@@ -572,8 +558,8 @@ def test_uplink_center_objectives_activation_control_and_40mm_tokens() -> None:
         svg = render_scenario_map_svg(parse_scenario_geometry(geometry))
         assert 'data-marker-type="tech-coffin" data-diameter-mm="40"' in svg
         assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 2
-        assert 'id="tech-coffin-from-left" class="measurement placement-ruler"' in svg
-        assert f'data-distance-inches="{width / 2:g}"' in svg
+        assert 'id="tech-coffin-from-left"' not in svg
+        assert 'id="antenna-right-from-right" class="measurement placement-ruler"' in svg
         assert f'data-distance-inches="{width / 4:g}"' in svg
         assert '.objective[data-marker-type="tech-coffin"]' in svg
         assert 'svg[data-theme="dark"] .objective[data-marker-type="tech-coffin"]' in (
@@ -667,7 +653,7 @@ def test_hardlock_beacon_control_console_activation_and_map_geometry() -> None:
         annotations = {a["id"]: a for a in geo["annotations"]}
         assert annotations["deployment-a-depth"]["target"] == "deployment-a"
         assert annotations["deployment-b-depth"]["target"] == "deployment-b"
-        assert annotations["console-center-from-left"]["x2"] == w / 2
+        assert "console-center-from-left" not in annotations
         assert annotations["console-right-from-right"]["x1"] == 3 * w / 4
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geo), theme=theme)
@@ -675,7 +661,8 @@ def test_hardlock_beacon_control_console_activation_and_map_geometry() -> None:
             assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 3
             assert '.objective#beacon-a' in svg
             assert '.objective#beacon-b' in svg
-            assert 'data-distance-inches="' + str(w / 2).removesuffix(".0") + '"' in svg
+            assert 'id="console-center-from-left"' not in svg
+            assert 'id="console-right-from-right"' in svg
 
 
 @pytest.mark.parametrize("mutation", ["missing-console", "beacon-as-activated-console"])
@@ -761,9 +748,11 @@ def test_b_pong_scoring_geometry_and_source_disagreements() -> None:
             "console-right": ("console", 3 * width / 4, height / 2),
         }
         rulers = {r["id"]: r for r in geometry["annotations"]}
+        assert set(rulers) >= {"exclusion-a-radius", "right-console-from-right"}
+        assert "exclusion-b-radius" not in rulers
+        assert "beacon-from-left" not in rulers
         assert rulers["exclusion-a-radius"]["y1"] == height / 2 - exclusion
-        assert rulers["exclusion-b-radius"]["y2"] == height / 2 + exclusion
-        assert rulers["beacon-from-left"]["x2"] == width / 2
+        assert rulers["exclusion-a-radius"]["y2"] == height / 2
         assert rulers["right-console-from-right"]["x1"] == width * 3 / 4
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
@@ -847,16 +836,11 @@ def test_akial_interference_classified_scoring_and_center_antenna() -> None:
         rulers = {a["id"]: a for a in geo["annotations"]}
         assert rulers["deployment-a-depth"]["target"] == "deployment-a"
         assert rulers["deployment-b-depth"]["target"] == "deployment-b"
-        ruler = rulers["antenna-from-right"]
-        assert (ruler["x1"], ruler["x2"]) == (width / 2, width)
-        assert ruler["y1"] == ruler["y2"] == height / 2
-        assert ruler["offset"] == 2.5
-        assert ruler["y2"] + ruler["offset"] < height - depth  # inside neutral band
+        assert "antenna-from-right" not in rulers
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geo), theme=theme)
             assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 1
-            assert 'id="antenna-from-right"' in svg
-            assert f'data-distance-inches="{width / 2:g}"' in svg
+            assert 'id="antenna-from-right"' not in svg
             assert "antenna" in svg
 
 
@@ -1247,15 +1231,14 @@ def test_area_of_interest_round_scoring_placement_and_bilingual_intelcom() -> No
             "communication-antenna",
         ]
         rulers = {a["id"]: a for a in geometry["annotations"]}
-        assert set(rulers) == {"deployment-corner-radius", "antenna-center-from-top"}
-        assert rulers["antenna-center-from-top"]["y2"] == height / 2
+        assert set(rulers) == {"deployment-corner-radius"}
         assert rulers["deployment-corner-radius"]["x1"] == width - radius
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
             assert svg.count('data-region-shape="quarter-circle"') == 2
             assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 1
             assert f'data-distance-inches="{radius}"' in svg
-            assert f'data-distance-inches="{height / 2:g}"' in svg
+            assert 'id="antenna-center-from-top"' not in svg
 
 
 @pytest.mark.parametrize(
@@ -1361,17 +1344,15 @@ def test_data_harvest_six_tokens_scoring_placement_and_source_provenance() -> No
         assert not any(el["kind"] == "circle" for el in elements.values())
         annotations = {annotation["id"]: annotation
                        for annotation in geometry["annotations"]}
-        assert set(annotations) == {
-            "deployment-b-depth", "coffin-center-from-left", "coffin-right-from-edge",
-        }
+        assert set(annotations) == {"deployment-b-depth", "coffin-right-from-edge"}
         assert annotations["deployment-b-depth"]["y1"] == height - depth
-        assert annotations["coffin-center-from-left"]["x2"] == width / 2
         assert annotations["coffin-right-from-edge"]["x1"] == width - 4
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
             assert svg.count('data-marker-type="tech-coffin" data-diameter-mm="40"') == 3
-            for length in (depth, width / 2, 4):
+            for length in (depth, 4):
                 assert f'data-distance-inches="{length:g}"' in svg
+            assert 'id="coffin-center-from-left"' not in svg
 
 
 @pytest.mark.parametrize(
@@ -1495,7 +1476,7 @@ def test_last_launch_extraction_tower_and_bilingual_source_geometry() -> None:
             assert 'class="no-deploy"' in svg
             assert svg.count('data-marker-type="tech-coffin" data-diameter-mm="40"') == 2
             assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 1
-            for length in (8, depth, width / 2, scanner_offset):
+            for length in (8, depth, scanner_offset):
                 assert f'data-distance-inches="{length:g}"' in svg
 
 
@@ -1607,7 +1588,7 @@ def test_corporate_appropriation_prototype_outcomes_panoplies_and_geometry() -> 
         annotations = {a["id"]: a for a in geometry["annotations"]}
         assert annotations["exclusion-half-width"]["y1"] == height / 2 - 4
         assert annotations["prototype-left-from-edge"]["x2"] == width / 4
-        assert annotations["prototype-right-from-edge"]["x1"] == width * 3 / 4
+        assert "prototype-right-from-edge" not in annotations
         assert annotations["deployment-b-depth"]["y1"] == height - depth
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
@@ -1711,14 +1692,14 @@ def test_outbreak_corner_deployment_alpha_and_player_placed_infected() -> None:
         )
         assert not any(el["kind"] == "circle" for el in elements.values())
         rulers = {a["id"]: a for a in geometry["annotations"]}
+        assert set(rulers) == {"deployment-b-radius"}
         assert rulers["deployment-b-radius"]["x2"] == radius
-        assert rulers["alpha-center-from-left"]["x2"] == width / 2
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
             assert svg.count('data-region-shape="quarter-circle"') == 2
             assert svg.count('data-marker-type="civilian" data-diameter-mm="25"') == 1
             assert f'data-distance-inches="{radius:g}"' in svg
-            assert f'data-distance-inches="{width / 2:g}"' in svg
+            assert 'id="alpha-center-from-left"' not in svg
 
 
 @pytest.mark.parametrize(
@@ -1871,7 +1852,7 @@ def test_critical_intervention_fixed_roles_scoring_turrets_and_bilingual_sources
                              'data-diameter-mm="25"') == 2
             assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 1
             assert svg.count('data-marker-type="antenna" data-diameter-mm="40"') == 1
-            for distance in (depth, 4, 8, width / 2):
+            for distance in (depth, 4, 8):
                 assert f'data-distance-inches="{distance:g}"' in svg
 
 

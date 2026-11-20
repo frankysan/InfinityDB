@@ -421,7 +421,7 @@ def test_akial_interference_api_six_sizes_sources_and_historical_isolation(
         svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
         assert svg_status == 200
         assert svg.count(b'data-marker-type="antenna" data-diameter-mm="40"') == 1
-        assert b'id="antenna-from-right"' in svg
+        assert b'id="antenna-from-right"' not in svg
 
     assert _json(
         app, "/api/scenarios/akial-interference?army_points=300"
@@ -671,7 +671,7 @@ def test_area_of_interest_six_sizes_center_antenna_and_revision_isolation(
         assert svg_status == 200
         assert svg.count(b'data-marker-type="antenna" data-diameter-mm="40"') == 1
         assert f'data-distance-inches="{radius}"'.encode() in svg
-        assert f'data-distance-inches="{height / 2:g}"'.encode() in svg
+        assert b'id="antenna-center-from-top"' not in svg
 
     assert _json(
         app, "/api/scenarios/area-of-interest?army_points=300"
@@ -737,7 +737,7 @@ def test_data_harvest_six_sizes_designated_zones_and_revision_isolation(
         svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
         assert svg_status == 200
         assert svg.count(b'data-marker-type="tech-coffin" data-diameter-mm="40"') == 3
-        for length in (depth, width / 2, 4):
+        for length in (depth, 4):
             assert f'data-distance-inches="{length:g}"'.encode() in svg
 
     assert _json(
@@ -809,7 +809,7 @@ def test_last_launch_six_sizes_tower_scanners_and_historical_isolation(
         assert b'class="no-deploy"' in svg
         assert svg.count(b'data-marker-type="tech-coffin" data-diameter-mm="40"') == 2
         assert svg.count(b'data-marker-type="console" data-diameter-mm="40"') == 1
-        for length in (depth, 8, offset, width / 2):
+        for length in (depth, 8, offset):
             assert f'data-distance-inches="{length:g}"'.encode() in svg
 
     assert _json(
@@ -948,7 +948,7 @@ def test_outbreak_alpha_stabilization_six_sizes_and_revision_isolation(
         assert svg.count(b'data-region-shape="quarter-circle"') == 2
         assert svg.count(b'data-marker-type="civilian" data-diameter-mm="25"') == 1
         assert f'data-distance-inches="{radius:g}"'.encode() in svg
-        assert f'data-distance-inches="{width / 2:g}"'.encode() in svg
+        assert b'id="alpha-center-from-left"' not in svg
 
     assert _json(
         app, "/api/scenarios/outbreak?army_points=300"
@@ -1041,7 +1041,7 @@ def test_critical_intervention_six_sizes_fixed_roles_and_historical_isolation(
                          b'data-diameter-mm="25"') == 2
         assert svg.count(b'data-marker-type="console" data-diameter-mm="40"') == 1
         assert svg.count(b'data-marker-type="antenna" data-diameter-mm="40"') == 1
-        for distance in (depth, 4, 8, width / 2):
+        for distance in (depth, 4, 8):
             assert f'data-distance-inches="{distance:g}"'.encode() in svg
 
     assert _json(

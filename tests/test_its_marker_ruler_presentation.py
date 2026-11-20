@@ -71,27 +71,68 @@ def test_all_circular_template_missions_state_12_cm_diameter(source: Path) -> No
 # scenario-rule distance measurements. Their endpoints describe the actual
 # measured positions; only the offset locates the visible line on the map.
 MARKER_PLACEMENT_RULERS = frozenset({
-    "antenna-middle-from-left",
     "antenna-left-from-left",
     "antenna-right-from-right",
-    "tech-coffin-from-left",
-    "console-center-from-left",
     "console-right-from-right",
-    "beacon-from-left",
     "right-console-from-right",
-    "antenna-from-right",
     "tech-box-left-from-left",
-    "coffin-center-from-left",
     "coffin-right-from-edge",
-    "id-checker-center-from-left",
     "scanner-right-from-edge",
     "prototype-left-from-edge",
-    "prototype-right-from-edge",
-    "alpha-center-from-left",
-    "room-center-from-left",
     "console-left-from-left",
     "civilian-right-from-right",
 })
+
+
+@pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
+def test_placement_helpers_skip_obvious_centers_and_mirrored_duplicates(
+    source: Path,
+) -> None:
+    document = json.loads(source.read_text(encoding="utf-8"))
+    records = (
+        document["records"] if source == ITS18
+        else [entry["record"] for entry in document["definitions"]]
+    )
+    for record in records:
+        if record["kind"] != "scenario":
+            continue
+        for configuration in record["facts"]["configurations"]:
+            geometry = configuration["geometry"]
+            width, height = geometry["table"]["width"], geometry["table"]["height"]
+            markers = [e for e in geometry["elements"] if e["kind"] == "marker"]
+            rulers = {
+                a["id"]: a for a in geometry["annotations"] if a["kind"] == "ruler"
+            }
+            for ruler in rulers.values():
+                endpoints = ((ruler["x1"], ruler["y1"]), (ruler["x2"], ruler["y2"]))
+                # A line from any table edge to an exactly central marker
+                # only restates its visually obvious position.
+                for marker in markers:
+                    if (marker["x"], marker["y"]) != (width / 2, height / 2):
+                        continue
+                    if (width / 2, height / 2) not in endpoints:
+                        continue
+                    other = (
+                        endpoints[0] if endpoints[1] == (width / 2, height / 2)
+                        else endpoints[1]
+                    )
+                    assert not (
+                        other[0] in (0, width) or other[1] in (0, height)
+                    ), (record["name"], configuration["id"], ruler["id"])
+
+            if record["id"] == "scenario:corporate-appropriation":
+                by_id = {m["id"]: m for m in markers}
+                assert by_id["prototype-left"]["x"] + by_id["prototype-right"]["x"] == width
+                assert by_id["prototype-left"]["y"] == by_id["prototype-right"]["y"]
+                assert "prototype-left-from-edge" in rulers
+                assert "prototype-right-from-edge" not in rulers
+            if record["id"] == "scenario:b-pong":
+                by_id = {e["id"]: e for e in geometry["elements"]}
+                assert (
+                    by_id["exclusion-zone"]["y1"] + by_id["exclusion-zone"]["y2"]
+                ) == height
+                assert "exclusion-a-radius" in rulers
+                assert "exclusion-b-radius" not in rulers
 
 
 def test_its_token_chart_has_canonical_size_for_each_fixed_footprint() -> None:
@@ -280,11 +321,12 @@ def test_exclusion_and_forward_zone_labels_have_separate_tracks(source: Path) ->
             width = geometry["table"]["width"]
             if record["id"] == "scenario:b-pong":
                 center = geometry["table"]["height"] / 2
-                for name in ("beacon-from-left", "right-console-from-right"):
-                    ruler = annotations[name]
-                    assert ruler["y1"] == center
-                    assert ruler["offset"] == 4.5
-                    assert ruler["y1"] + ruler["offset"] > center + 4
+                assert "beacon-from-left" not in annotations
+                assert "exclusion-b-radius" not in annotations
+                ruler = annotations["right-console-from-right"]
+                assert ruler["y1"] == center
+                assert ruler["offset"] == 4.5
+                assert ruler["y1"] + ruler["offset"] > center + 4
             elif width == 48:
                 near = annotations["deployment-b-forward-depth"]
                 far = annotations["deployment-a-forward-depth"]
@@ -295,7 +337,7 @@ def test_exclusion_and_forward_zone_labels_have_separate_tracks(source: Path) ->
 
 @pytest.mark.parametrize(
     ("source", "expected_count"),
-    [(ITS18, 66), (ITS17_SHARED, 48)],
+    [(ITS18, 36), (ITS17_SHARED, 24)],
     ids=["its-18", "its-17"],
 )
 def test_marker_placement_rulers_measure_markers_without_overlaying_them(
@@ -384,7 +426,9 @@ def test_marker_placement_rulers_measure_markers_without_overlaying_them(
                     assert guide["x1"] == {24: 21, 32: 28, 48: 43}[geometry["table"]["width"]]
                     assert guide["x2"] == guide["x1"]
                 else:
-                    for name in ("exclusion-a-radius", "exclusion-b-radius"):
-                        assert verticals[name]["x1"] == geometry["table"]["width"] / 2 + 2
+                    assert set(verticals) == {"exclusion-a-radius"}
+                    assert verticals["exclusion-a-radius"]["x1"] == (
+                        geometry["table"]["width"] / 2 + 2
+                    )
 
     assert examined == expected_count

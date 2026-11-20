@@ -1127,8 +1127,16 @@ ruler would collide with the nearby vertical Deployment Zone dimensions.
 In Neutralization, the right Antenna's 4-inch
 guide stays 3 inches **above** the marker with its caption above the
 line, while the upper Deployment Zone depth guide moves to the left edge.
-Only display offsets and text placement change; measured distances and
-player-placed positions remain source-backed.
+The player-facing maps now omit **edge-to-center placement rulers** for
+objects fixed at the exact table center; their centered positions remain in
+the geometry and source-backed setup rules. For **fully mirrored placement**
+or equal upper/lower zone dimensions, show just one representative ruler
+(e.g., Corporate Appropriation's left Prototype and B-Pong's upper half of
+the Exclusion Zone). Keep off-center placement distances, measured
+object-to-object spacing, quarter-circle deployment radii, and relevant
+Deployment/Exclusion Zone dimensions. This affects both ITS 17 and 18
+without changing any physical position, zone boundary, or source claim.
+Ruler offsets remain presentation-only.
 
 The Annihilation source-issues array explicitly retains the **350-point**
 gap printed in both languages: 3 OP for 176–274 and 4 OP for greater than
