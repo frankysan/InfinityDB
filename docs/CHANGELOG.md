@@ -20,7 +20,8 @@ are not retroactively relabeled.
   Objectives stay visible.
 - Scenario lists are alphabetical. ITS tournament and Extra rules have separate
   cards, and physical marker sizes now include the source-chart 25 mm Defensive
-  Turret Token (distinct from its S2 Model option) as well as Hardlock's Beacon.
+  Turret Token (distinct from its S2 Model option), 25 mm Civilians, and
+  Hardlock's Beacon.
   Scenario-map placement rulers sit below their measured markers rather than
   inheriting the official diagrams' exterior guide placement.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and

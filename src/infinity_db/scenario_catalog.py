@@ -113,9 +113,7 @@ def _marker_dimensions(
         label = _MARKER_LABELS.get(marker_type)
         if label is None or (
             diameter is None
-            and marker_type not in {
-                "tracking-beacon", "civilian",
-            }
+            and marker_type != "tracking-beacon"
         ):
             raise ValueError(f"Missing reviewed marker dimensions for {marker_type!r}")
         entry = {

@@ -55,13 +55,12 @@ def test_its_token_chart_has_canonical_size_for_each_fixed_footprint() -> None:
         "data-pack": 25,
         "defensive-turret": 25,
         "civevac": 25,
+        "civilian": 25,
         "hyperthermal-tech": 25,
     }.items():
         assert marker_diameter_mm(marker) == size_mm
 
-    # Civilians represented by Models have no single specified footprint.
     # B-Pong Tracking Beacon has a documented EN/ES size disagreement.
-    assert marker_diameter_mm("civilian") is None
     assert marker_diameter_mm("tracking-beacon") is None
 
 
@@ -87,7 +86,7 @@ def test_marker_placement_rulers_measure_markers_but_draw_below_them(
             markers = [e for e in geometry["elements"] if e["kind"] == "marker"]
             for marker in markers:
                 diameter = marker_diameter_mm(marker["markerType"])
-                if marker["markerType"] in {"civilian", "tracking-beacon"}:
+                if marker["markerType"] == "tracking-beacon":
                     assert diameter is None
                 else:
                     assert diameter is not None, (

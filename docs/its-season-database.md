@@ -1092,9 +1092,9 @@ ITS 18 2026.09.11 EN p. 18 (ES p. 19) provide the source-owned token
 diameter chart. Every fixed-size token type used in scenario maps must
 project that physical diameter in the SVG and player-facing marker list,
 including the **25 mm Defensive Turret Token**. The S2 Model alternative
-for a Defensive Turret remains a model; the 25 mm CivEvac Token similarly
-does not establish a footprint for a generic Civilian Model. B-Pong's
-Tracking Beacon retains its unresolved EN/ES disagreement, rather than
+for a Defensive Turret remains a model. Civilian markers use the
+**25 mm** Civilian/CivEvac footprint in Evacuation and Outbreak maps.
+B-Pong's Tracking Beacon retains its unresolved EN/ES disagreement, rather than
 borrowing the global 25 mm Beacon Token size.
 
 Marker-placement ruler endpoints must describe the **actual measured

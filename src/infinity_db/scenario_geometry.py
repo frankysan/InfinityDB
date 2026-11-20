@@ -13,8 +13,8 @@ SCENARIO_GEOMETRY_VERSION = 1
 _MM_PER_INCH = 25.4
 
 # ITS 17 V0.2 p. 13 and ITS 18 2026.09.11 p. 18 define these
-# token diameters. Schematic models without a fixed footprint (Evacuation
-# Civilians) and conflicting B-Pong Tracking Beacon sources remain unmeasured.
+# token diameters. Civilian markers use the 25 mm Civilian/CivEvac
+# footprint; B-Pong's conflicting Tracking Beacon sources remain unmeasured.
 _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "console": 40.0,
     "beacon": 25.0,
@@ -29,6 +29,7 @@ _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "data-pack": 25.0,
     "defensive-turret": 25.0,
     "civevac": 25.0,
+    "civilian": 25.0,
 }
 
 _ELEMENT_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")

@@ -934,8 +934,8 @@ def test_evacuation_civilian_console_positions_and_scoring() -> None:
         assert rulers["console-left-from-left"]["offset"] == 2.5
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
-            assert svg.count('data-marker-type="civilian" data-physical-size="unspecified"') == 4
-            assert svg.count('data-physical-size="unspecified"') == 4
+            assert svg.count('data-marker-type="civilian" data-diameter-mm="25"') == 4
+            assert 'data-physical-size="unspecified"' not in svg
             assert svg.count('data-marker-type="console" data-diameter-mm="40"') == 2
             assert 'id="civilian-upper-from-top"' in svg
             assert 'id="console-left-from-left"' in svg
@@ -1712,7 +1712,7 @@ def test_outbreak_corner_deployment_alpha_and_player_placed_infected() -> None:
         for theme in ("light", "dark"):
             svg = render_scenario_map_svg(parse_scenario_geometry(geometry), theme=theme)
             assert svg.count('data-region-shape="quarter-circle"') == 2
-            assert svg.count('data-marker-type="civilian" data-physical-size="unspecified"') == 1
+            assert svg.count('data-marker-type="civilian" data-diameter-mm="25"') == 1
             assert f'data-distance-inches="{radius:g}"' in svg
             assert f'data-distance-inches="{width / 2:g}"' in svg
 

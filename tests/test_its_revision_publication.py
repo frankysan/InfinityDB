@@ -464,8 +464,8 @@ def test_evacuation_six_game_sizes_schematic_civilians_and_revision_isolation(
         assert elements["civilian-right-bottom"]["y"] == height - depth - 4
         markers = {m["marker_type"]: m for m in item["placement"]["marker_dimensions"]}
         assert markers["civilian"]["count"] == 4
-        assert markers["civilian"]["diameter_mm"] is None
-        assert markers["civilian"]["citation"] is None
+        assert markers["civilian"]["diameter_mm"] == 25
+        assert markers["civilian"]["citation"]["page"] == 18
         assert markers["console"]["count"] == 2
         assert markers["console"]["diameter_mm"] == 40
         assert [c["page"] for c in item["citations"]] == [88, 89, 90, 91] * 2
@@ -479,8 +479,8 @@ def test_evacuation_six_game_sizes_schematic_civilians_and_revision_isolation(
                               "/api/scenarios/evacuation/map.svg?")
         svg_status, _, svg = wsgi_response(app, ORIGIN + svg_url)
         assert svg_status == 200
-        assert svg.count(b'data-marker-type="civilian" data-physical-size="unspecified"') == 4
-        assert svg.count(b'data-physical-size="unspecified"') == 4
+        assert svg.count(b'data-marker-type="civilian" data-diameter-mm="25"') == 4
+        assert b'data-physical-size="unspecified"' not in svg
         assert svg.count(b'data-marker-type="console" data-diameter-mm="40"') == 2
 
     assert _json(
@@ -929,7 +929,7 @@ def test_outbreak_alpha_stabilization_six_sizes_and_revision_isolation(
         )
         assert {m["marker_type"]: (m["count"], m["diameter_mm"])
                 for m in item["placement"]["marker_dimensions"]} == {
-            "civilian": (1, None),
+            "civilian": (1, 25),
         }
         assert [c["page"] for c in item["citations"]] == [
             *range(83, 88), *range(83, 88),
@@ -946,7 +946,7 @@ def test_outbreak_alpha_stabilization_six_sizes_and_revision_isolation(
         svg_status, _, svg = wsgi_response(app, ORIGIN + svg_uri)
         assert svg_status == 200
         assert svg.count(b'data-region-shape="quarter-circle"') == 2
-        assert svg.count(b'data-marker-type="civilian" data-physical-size="unspecified"') == 1
+        assert svg.count(b'data-marker-type="civilian" data-diameter-mm="25"') == 1
         assert f'data-distance-inches="{radius:g}"'.encode() in svg
         assert f'data-distance-inches="{width / 2:g}"'.encode() in svg
 
