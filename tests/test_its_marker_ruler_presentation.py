@@ -9,7 +9,11 @@ from xml.etree import ElementTree
 
 import pytest
 
-from infinity_db.scenario_geometry import marker_diameter_mm, parse_scenario_geometry
+from infinity_db.scenario_geometry import (
+    marker_diameter_mm,
+    marker_radius_inches,
+    parse_scenario_geometry,
+)
 from infinity_db.scenario_map_svg import render_scenario_map_svg
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -155,6 +159,48 @@ def test_its_token_chart_has_canonical_size_for_each_fixed_footprint() -> None:
 
     # B-Pong Tracking Beacon has a documented EN/ES size disagreement.
     assert marker_diameter_mm("tracking-beacon") is None
+
+
+@pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
+@pytest.mark.parametrize("distance_unit", ["in", "cm"])
+def test_critical_intervention_antenna_is_tangent_to_server_room_lower_left(
+    source: Path, distance_unit: Literal["in", "cm"],
+) -> None:
+    document = json.loads(source.read_text(encoding="utf-8"))
+    records = (
+        document["records"] if source == ITS18
+        else [entry["record"] for entry in document["definitions"]]
+    )
+    record = next(r for r in records if r["id"] == "scenario:critical-intervention")
+    radius = marker_radius_inches("antenna")
+    assert marker_diameter_mm("antenna") == 40
+    assert radius is not None
+    assert len(record["facts"]["configurations"]) == 3
+
+    for configuration in record["facts"]["configurations"]:
+        geometry = configuration["geometry"]
+        elements = {element["id"]: element for element in geometry["elements"]}
+        room = elements["server-room"]
+        antenna = elements["inhibitor-antenna"]
+        assert antenna["markerType"] == "antenna"
+
+        # The Antenna center is inset by one physical token radius from
+        # the room's left edge and offset one radius below its bottom edge.
+        assert antenna["x"] - radius == pytest.approx(room["x1"], abs=1e-6)
+        assert antenna["y"] - radius == pytest.approx(room["y2"], abs=1e-6)
+        assert antenna["x"] + radius < room["x2"]
+        assert antenna["y"] + radius < geometry["table"]["height"]
+
+        svg = ElementTree.fromstring(render_scenario_map_svg(
+            parse_scenario_geometry(geometry), distance_unit=distance_unit,
+        ))
+        circle = next(node for node in svg.iter() if node.get("id") == "inhibitor-antenna")
+        assert circle.get("data-diameter-mm") == "40"
+        cx = float(circle.get("cx", "nan"))
+        cy = float(circle.get("cy", "nan"))
+        r = float(circle.get("r", "nan"))
+        assert cx - r == pytest.approx(room["x1"], abs=1e-6)
+        assert cy - r == pytest.approx(room["y2"], abs=1e-6)
 
 
 @pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])

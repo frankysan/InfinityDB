@@ -33,7 +33,9 @@ are not retroactively relabeled.
   pair of Console-center guides rather than eight repeated guides per map;
   Supplies shows one of the two mirrored Supply Box offsets.
 - Circular Template Areas now explicitly show their 12 cm diameter in ITS 17/18
-  mission rules, with map notes for fixed template areas.
+  mission rules, with map notes for fixed template areas. Critical Intervention
+  now places the 40 mm Inhibitor Antenna tangent below the Server Room,
+  with both left edges aligned, in both seasons.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and
   HVTs each player uses.
 - Scenario-specific Skills share normal Skill cards, appear under their own

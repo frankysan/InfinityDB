@@ -18412,7 +18412,7 @@
               "id": "inhibitor-antenna",
               "name": "Inhibitor Antenna",
               "paragraphs": [
-                "One 40 mm Inhibitor Antenna is fixed next to an exterior corner of the Server Room in the Defender's table half, shown below the room's left corner in the source map. It may use a Transmission Antenna Token or equivalent scenery."
+                "One 40 mm Inhibitor Antenna is fixed tangent to the bottom edge of the Server Room in the Defender's table half, with the left edge of the Antenna aligned with the left edge of the room. It may use a Transmission Antenna Token or equivalent scenery."
               ]
             },
             {
@@ -18662,8 +18662,8 @@
                   "kind": "marker",
                   "style": "objective",
                   "markerType": "antenna",
-                  "x": 8,
-                  "y": 20.65
+                  "x": 8.787402,
+                  "y": 20.787402
                 },
                 {
                   "id": "deployment-a-label",
@@ -18810,8 +18810,8 @@
                   "kind": "marker",
                   "style": "objective",
                   "markerType": "antenna",
-                  "x": 12,
-                  "y": 28.65
+                  "x": 12.787402,
+                  "y": 28.787402
                 },
                 {
                   "id": "deployment-a-label",
@@ -18959,8 +18959,8 @@
                   "kind": "marker",
                   "style": "objective",
                   "markerType": "antenna",
-                  "x": 20,
-                  "y": 28.65
+                  "x": 20.787402,
+                  "y": 28.787402
                 },
                 {
                   "id": "deployment-a-label",

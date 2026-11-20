@@ -1058,7 +1058,9 @@ All twenty missions are published for the current 2026.09.11 revision:
   and an 8-inch square Server Room, which is normally a No Deployment
   Zone. The two Armed Turrets may use 25 mm Defensive Turret Tokens
   (ITS 18 EN p. 18) or S2 Models; the central 40 mm Data Console and
-  Defender-side 40 mm Inhibitor Antenna are also source-sized. The Defender may
+  Defender-side 40 mm Inhibitor Antenna are also source-sized. Its token sits
+  tangent to the Server Room's bottom edge with its left edge aligned to
+  the room's left edge in all three map sizes (ITS 17 and 18). The Defender may
   spend one additional pre-deployment Command Token to activate the
   Defense System or deploy up to 65 Army Points in the room. Attacker
   scoring covers unlocking and extracting the Data Pack, extractor

@@ -12745,7 +12745,7 @@
                 "id": "inhibitor-antenna",
                 "name": "Inhibitor Antenna",
                 "paragraphs": [
-                  "One Inhibitor Antenna stands next to an exterior Server Room corner in the Defender's table half. It uses a Transmission Antenna Token or matching-diameter scenery (ITS 17 EN p. 49 / ES p. 68), at 40 mm under the ITS 17 V0.2 EN p. 13 / ES p. 14 Transmission Antenna chart entry."
+                  "One Inhibitor Antenna stands tangent to the bottom edge of the Server Room in the Defender's table half, with the Antenna's left edge aligned to the room's left edge. It uses a Transmission Antenna Token or matching-diameter scenery (ITS 17 EN p. 49 / ES p. 68), at 40 mm under the ITS 17 V0.2 EN p. 13 / ES p. 14 Transmission Antenna chart entry."
                 ]
               },
               {
@@ -12995,8 +12995,8 @@
                     "kind": "marker",
                     "style": "objective",
                     "markerType": "antenna",
-                    "x": 8,
-                    "y": 20.65
+                    "x": 8.787402,
+                    "y": 20.787402
                   },
                   {
                     "id": "deployment-a-label",
@@ -13143,8 +13143,8 @@
                     "kind": "marker",
                     "style": "objective",
                     "markerType": "antenna",
-                    "x": 12,
-                    "y": 28.65
+                    "x": 12.787402,
+                    "y": 28.787402
                   },
                   {
                     "id": "deployment-a-label",
@@ -13292,8 +13292,8 @@
                     "kind": "marker",
                     "style": "objective",
                     "markerType": "antenna",
-                    "x": 20,
-                    "y": 28.65
+                    "x": 20.787402,
+                    "y": 28.787402
                   },
                   {
                     "id": "deployment-a-label",

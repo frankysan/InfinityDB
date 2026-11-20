@@ -460,7 +460,7 @@ def test_superiority_four_quadrants_four_consoles_and_bilingual_special_rules() 
             "deployment-a-depth", "deployment-b-depth",
         }
         svg = render_scenario_map_svg(parse_scenario_geometry(geometry))
-        assert svg.count('data-reference="center"') == 8
+        assert svg.count('data-reference="center"') == 2
         assert f'data-distance-inches="{depth}"' in svg
 
 
@@ -1832,13 +1832,15 @@ def test_critical_intervention_fixed_roles_scoring_turrets_and_bilingual_sources
                 if element["kind"] == "marker"} == {
             "turret-a", "turret-b", "data-console", "inhibitor-antenna",
         }
+        antenna_radius_inches = round(40 / 25.4 / 2, 6)
         assert [(elements[key]["x"], elements[key]["y"]) for key in (
             "turret-a", "turret-b", "data-console", "inhibitor-antenna",
         )] == [
             (width / 2 - 3.25, height / 2 - 3.25),
             (width / 2 + 3.25, height / 2 + 3.25),
             (width / 2, height / 2),
-            (width / 2 - 4, height / 2 + 4.65),
+            (width / 2 - 4 + antenna_radius_inches,
+             height / 2 + 4 + antenna_radius_inches),
         ]
         assert elements["turret-a"]["markerType"] == "defensive-turret"
         assert elements["turret-b"]["markerType"] == "defensive-turret"
