@@ -2969,7 +2969,7 @@
               "id": "zone-of-influence",
               "name": "Zones of Influence",
               "paragraphs": [
-                "Each Antenna is the center of a Circular Template defining its Zone of Influence, also a Zone of Operations.",
+                "Each Antenna is the center of a Circular Template ([[distance:12:cm]] diameter) defining its Zone of Influence, also a Zone of Operations.",
                 "A player Dominates a Zone of Operations if they have more Victory Points of eligible Troopers inside than their opponent.",
                 "Count Models, Trooper Markers, Proxies and Peripheral Troops in non-Null States. Equipment Tokens and fake Holoechoes do not count; more than half of a Trooper's base must lie within the Zone.",
                 "Troopers with [[skill:shasvastii]] count in Unconscious or other non-Null States; eligible [[equipment:baggage]] Troopers contribute an additional 20 Victory Points."
@@ -12177,7 +12177,7 @@
               "id": "neutralization-areas",
               "name": "Neutralization Areas",
               "paragraphs": [
-                "Four Neutralization Areas are represented by Circular Templates, each centered on a Neutralizing Antenna at the front edge of a Deployment Zone. The map displays their full Circular Template footprints.",
+                "Four Neutralization Areas are represented by Circular Templates ([[distance:12:cm]] diameter each), each centered on a Neutralizing Antenna at the front edge of a Deployment Zone. The map displays their full Circular Template footprints.",
                 "At the end of an Order or ARO, a Hyperthermal Tech is Neutralized if the Trooper carrying it is entirely inside a Neutralization Area and is not in a Null State. Remove the Token from the table and keep it aside as the player's count of Neutralized Techs."
               ]
             },
@@ -13252,7 +13252,7 @@
               "id": "safe-areas",
               "name": "Player-Placed Safe Areas",
               "paragraphs": [
-                "Before Deployment each player places one Circular Template on a surface at least the size of that Template, wholly outside all Deployment Zones and not overlapping the other Safe Area. The player who kept Deployment places first.",
+                "Before Deployment each player places one Circular Template ([[distance:12:cm]] diameter) on a surface at least the size of that Template, wholly outside all Deployment Zones and not overlapping the other Safe Area. The player who kept Deployment places first.",
                 "These are player-placed Circular Templates, not fixed map objects. Any Trooper can deposit a Box in their Safe Area using a Short Skill without a Roll. Spanish explicitly requires the Box to be placed completely inside the Safe Area.",
                 "Only a Specialist Troop may take a Box from the opposing Safe Area, using the pickup Short Skill and a WIP-3 Roll. The source-language discrepancy concerning other Safe Areas is listed separately."
               ]
@@ -14037,7 +14037,7 @@
               "id": "player-placed-areas",
               "name": "Player-Placed Areas of Interest",
               "paragraphs": [
-                "There are three Circular Template Areas of Interest (Zones of Operations); one is the Special Area of Interest. They are not pre-positioned map elements.",
+                "There are three Circular Template Areas of Interest ([[distance:12:cm]] diameter each; Zones of Operations); one is the Special Area of Interest. They are not pre-positioned map elements.",
                 "Before Deployment and in Initiative order, the first-turn player places one ordinary Area and the Special Area, designating the Special Area at placement. The second-turn player places the remaining ordinary Area.",
                 "Each Area must fit on a surface at least as large as its Circular Template, completely outside every Deployment Zone, without overlapping any other Area of Interest."
               ]
@@ -14839,7 +14839,7 @@
               "id": "player-placed-designated-zones",
               "name": "Player-Placed Designated Zones",
               "paragraphs": [
-                "Each player places two Circular Templates representing that player's Designated Zones on surfaces large enough for the Templates before the Deployment Phase. One must be completely within the enemy Deployment Zone, and the other must be outside that Deployment Zone but completely within the enemy half of the table.",
+                "Each player places two Circular Templates ([[distance:12:cm]] diameter each) representing that player's Designated Zones on surfaces large enough for the Templates before the Deployment Phase. One must be completely within the enemy Deployment Zone, and the other must be outside that Deployment Zone but completely within the enemy half of the table.",
                 "The player who kept Deployment places their two Templates first. The four Zones belong to their respective players, and none has a fixed, source-defined map position. The sources do not add a non-overlap rule between player-placed Designated Zones."
               ]
             },
@@ -17593,7 +17593,7 @@
               "id": "stabilization-zones",
               "name": "Player-Placed Stabilization Zones",
               "paragraphs": [
-                "There are two Circular Template Stabilization Zones, one placed by each player. After placing the Infected and before deployment, each player places one Template totally inside their own Deployment Zone on a surface large enough for the full Template.",
+                "There are two Circular Template Stabilization Zones ([[distance:12:cm]] diameter each), one placed by each player. After placing the Infected and before deployment, each player places one Template totally inside their own Deployment Zone on a surface large enough for the full Template.",
                 "The player who kept Deployment places the first Stabilization Zone. Its precise position is not specified by the published map and is not invented here.",
                 "At the end of each Player Turn, an Infected being CivEvaced is Stabilized if both the Infected and their CivEvacing Trooper are totally inside a Stabilization Zone. Mark which player Stabilized the Infected with a Player A or B Token.",
                 "An Infected already Stabilized by one player cannot be Stabilized by the other, including by a Stabilization Zone."

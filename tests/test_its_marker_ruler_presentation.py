@@ -16,6 +16,56 @@ ITS18 = ROOT / "data/curated/its/n5-its-season-18.json"
 ITS17_SHARED = ROOT / "data/curated/its/shared/its17-scenarios-v1.json"
 SVG_NS = "{http://www.w3.org/2000/svg}"
 
+# One canonical diameter for every mission rule that defines an area using
+# a Circular Template, including areas placed by players rather than on maps.
+CIRCULAR_TEMPLATE_MISSIONS = {
+    ITS18: {
+        "scenario:double-bind", "scenario:neutralization", "scenario:provisioning",
+        "scenario:area-of-interest", "scenario:data-harvest", "scenario:outbreak",
+    },
+    ITS17_SHARED: {
+        "scenario:provisioning", "scenario:area-of-interest", "scenario:outbreak",
+    },
+}
+
+
+@pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
+def test_all_circular_template_missions_state_12_cm_diameter(source: Path) -> None:
+    document = json.loads(source.read_text(encoding="utf-8"))
+    records = (
+        document["records"] if source == ITS18
+        else [entry["record"] for entry in document["definitions"]]
+    )
+    found: set[str] = set()
+    for record in records:
+        if record["kind"] != "scenario":
+            continue
+        paragraphs = [
+            paragraph
+            for rule in record["facts"]["mission"]["rules"]
+            for paragraph in rule["paragraphs"]
+        ]
+        if any("Circular Template" in paragraph for paragraph in paragraphs):
+            found.add(record["id"])
+            assert any(
+                "[[distance:12:cm]] diameter" in paragraph for paragraph in paragraphs
+            ), record["id"]
+
+        for configuration in record["facts"]["configurations"]:
+            circles = [
+                element for element in configuration["geometry"]["elements"]
+                if element["kind"] == "circle"
+            ]
+            if circles:
+                assert record["id"] in CIRCULAR_TEMPLATE_MISSIONS[source]
+                assert all(
+                    element["style"] == "influence" and element["radius"] == 2.5
+                    for element in circles
+                ), record["id"]
+
+    assert found == CIRCULAR_TEMPLATE_MISSIONS[source]
+
+
 # These are marker-placement guides, not Deployment Zone, region-radius or
 # scenario-rule distance measurements. Their endpoints describe the actual
 # measured positions; only the offset locates the visible line on the map.

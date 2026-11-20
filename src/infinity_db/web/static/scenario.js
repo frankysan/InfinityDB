@@ -203,6 +203,16 @@ function mapCard(item) {
   if (selectedPublication.revision) params.set("revision", selectedPublication.revision);
   image.src = `/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?${params}`;
   figure.append(heading, image);
+  // The current ITS influence circles represent fixed Circular Template areas.
+  // Player-placed templates have no map footprint and state their size in the rules.
+  if ((item.placement?.geometry?.elements || []).some(
+    (element) => element.kind === "circle" && element.style === "influence"
+  )) {
+    const note = document.createElement("p");
+    note.className = "scenario-map-placement-note";
+    note.textContent = "Circular Template areas: 12 cm diameter each (map footprints are schematic).";
+    figure.append(note);
+  }
   if (item.slug === "domination" && item.publication?.collection_id === "n5-core") {
     const note = document.createElement("p");
     note.className = "scenario-map-placement-note";

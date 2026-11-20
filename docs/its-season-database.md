@@ -1076,6 +1076,18 @@ All twenty missions are published for the current 2026.09.11 revision:
   STR, INTELCOM point terminology and the 12-OP anomaly
   (EN/ES pp. 97–104).
 
+**Circular Template Areas:** Every Circular Template defines an area
+**12 cm in diameter**. This is now stated explicitly in the relevant
+scenario rules for ITS 18 Double Bind (Antenna Zones of Influence),
+Neutralization (four Antenna-centered Areas), Provisioning (Safe Areas),
+Area of Interest, Data-Harvest (Designated Zones) and Outbreak
+(Stabilization Zones), including the shared ITS 17 versions of
+Provisioning, Area of Interest and Outbreak. Maps with fixed Circular
+Template Areas repeat the size in their visible placement note. The
+previous 2.5-inch schematic circle radius is preserved for map layout;
+it is not an alternative physical template specification. Player-placed
+Areas remain without invented map positions.
+
 All twenty missions share the existing geometry parser, model and SVG
 renderer. Source-backed circles, corner-quarter-circles and unit-convertible
 placement rulers are reusable geometry primitives, not mission-specific markup.

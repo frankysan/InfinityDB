@@ -6980,7 +6980,7 @@
                 "id": "safe-areas",
                 "name": "Player-Placed Safe Areas",
                 "paragraphs": [
-                  "Before Deployment each player places one Circular Template on a surface at least the size of that Template, wholly outside all Deployment Zones and not overlapping the other Safe Area. The player who kept Deployment places first.",
+                  "Before Deployment each player places one Circular Template ([[distance:12:cm]] diameter) on a surface at least the size of that Template, wholly outside all Deployment Zones and not overlapping the other Safe Area. The player who kept Deployment places first.",
                   "These are player-placed Circular Templates, not fixed map objects. A Trooper can deposit a Supply Box in their Safe Area with a Short Skill and no Roll, placing the Box completely inside the Safe Area. Both ITS 17 languages require the Box to be wholly inside.",
                   "Only Specialist Troops may recover a Supply Box from the enemy's Safe Area using Pick Up Supply Boxes and a WIP-3 Roll."
                 ]
@@ -7741,7 +7741,7 @@
                 "id": "player-placed-areas",
                 "name": "Player-Placed Areas of Interest",
                 "paragraphs": [
-                  "There are three Circular Template Areas of Interest (Zones of Operations); one is the Special Area of Interest. They are not pre-positioned map elements.",
+                  "There are three Circular Template Areas of Interest ([[distance:12:cm]] diameter each; Zones of Operations); one is the Special Area of Interest. They are not pre-positioned map elements.",
                   "Before Deployment and in Initiative order, the first-turn player places one ordinary Area and the Special Area, designating the Special Area at placement. The second-turn player places the remaining ordinary Area.",
                   "Each Area must fit on a surface at least as large as its Circular Template, completely outside every Deployment Zone, without overlapping any other Area of Interest."
                 ]
@@ -13977,7 +13977,7 @@
                 "id": "stabilization-zones",
                 "name": "Player-Placed Stabilization Zones",
                 "paragraphs": [
-                  "There are two Circular Template Stabilization Zones, one placed by each player. After placing the Infected and before deployment, each player places one Template totally inside their own Deployment Zone on a surface large enough for the full Template.",
+                  "There are two Circular Template Stabilization Zones ([[distance:12:cm]] diameter each), one placed by each player. After placing the Infected and before deployment, each player places one Template totally inside their own Deployment Zone on a surface large enough for the full Template.",
                   "The player who kept Deployment places the first Stabilization Zone. Its precise position is not specified by the published map and is not invented here.",
                   "At the end of each Player Turn, an Infected being CivEvaced is Stabilized if both the Infected and their CivEvacing Trooper are totally inside a Stabilization Zone. Mark which player Stabilized the Infected with a Player A or B Token.",
                   "An Infected already Stabilized by one player cannot be Stabilized by the other, including by a Stabilization Zone."

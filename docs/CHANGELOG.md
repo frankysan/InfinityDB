@@ -24,6 +24,8 @@ are not retroactively relabeled.
   Hardlock's Beacon.
   Scenario-map placement rulers sit below their measured markers rather than
   inheriting the official diagrams' exterior guide placement.
+- Circular Template Areas now explicitly show their 12 cm diameter in ITS 17/18
+  mission rules, with map notes for fixed template areas.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and
   HVTs each player uses.
 - Scenario-specific Skills share normal Skill cards, appear under their own

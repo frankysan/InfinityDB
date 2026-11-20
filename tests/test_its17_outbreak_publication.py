@@ -113,7 +113,14 @@ def test_its17_outbreak_geometry_skills_and_source_differences() -> None:
     h_rules = {r["id"]: r for r in old["mission"]["rules"]}
     m_rules = {r["id"]: r for r in latest["mission"]["rules"]}
     for skill in ("stabilize-infected", "scan-infected"):
-        assert h_rules[skill] == m_rules[skill]
+        # Skill mechanics are reusable; publication-specific citation pins are not.
+        assert {
+            key: value for key, value in h_rules[skill].items()
+            if key != "skillCitations"
+        } == {
+            key: value for key, value in m_rules[skill].items()
+            if key != "skillCitations"
+        }
         assert h_rules[skill]["skillTypeIds"] == ["short-skill"]
     assert "each player places two" in h_rules["infected-placement"]["paragraphs"][0]
     assert "Circular Template" in h_rules["stabilization-zones"]["paragraphs"][0]
