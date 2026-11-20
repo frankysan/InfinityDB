@@ -35,7 +35,9 @@ are not retroactively relabeled.
 - Circular Template Areas now explicitly show their 12 cm diameter in ITS 17/18
   mission rules, with map notes for fixed template areas. Critical Intervention
   now places the 40 mm Inhibitor Antenna tangent below the Server Room,
-  with both left edges aligned, in both seasons.
+  with both left edges aligned, in both seasons. The central 8-inch rooms
+  in Critical Intervention and Last Launch now have four labeled Wide Gate
+  openings and a width ruler below each room; gate widths remain schematic.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and
   HVTs each player uses.
 - Scenario-specific Skills share normal Skill cards, appear under their own

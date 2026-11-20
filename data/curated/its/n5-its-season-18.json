@@ -15471,7 +15471,7 @@
               "name": "Wide Gates",
               "paragraphs": [
                 "The Launching Tower has four open Wide Gates, each at the midpoint of a wall. Spanish p. 118 explicitly specifies Wide Gate Tokens and that the Gates allow access irrespective of a Trooper's Silhouette Attribute, while English p. 117 only states that the Gates start open.",
-                "The map shows the Tower's exterior square and the central ID Checker. Gate locations are described here because the source does not provide a numerical gate width for geometric placement."
+                "The map shows all four Wide Gates as centered openings in the Tower walls. Their gap widths are schematic, because the source does not specify a numerical gate width."
               ]
             },
             {
@@ -15729,11 +15729,12 @@
                 },
                 {
                   "id": "launching-tower-width",
-                  "kind": "dimension",
-                  "target": "launching-tower",
-                  "axis": "x",
-                  "side": "end",
-                  "offset": 0.4
+                  "kind": "ruler",
+                  "x1": 8,
+                  "y1": 20,
+                  "x2": 16,
+                  "y2": 20,
+                  "offset": 1.8
                 }
               ]
             }
@@ -15860,11 +15861,12 @@
                 },
                 {
                   "id": "launching-tower-width",
-                  "kind": "dimension",
-                  "target": "launching-tower",
-                  "axis": "x",
-                  "side": "end",
-                  "offset": 0.4
+                  "kind": "ruler",
+                  "x1": 12,
+                  "y1": 28,
+                  "x2": 20,
+                  "y2": 28,
+                  "offset": 1.8
                 }
               ]
             }
@@ -15992,11 +15994,12 @@
                 },
                 {
                   "id": "launching-tower-width",
-                  "kind": "dimension",
-                  "target": "launching-tower",
-                  "axis": "x",
-                  "side": "end",
-                  "offset": 0.4
+                  "kind": "ruler",
+                  "x1": 20,
+                  "y1": 28,
+                  "x2": 28,
+                  "y2": 28,
+                  "offset": 1.8
                 }
               ]
             }
@@ -18345,7 +18348,7 @@
               "name": "Server Room and Gates",
               "paragraphs": [
                 "The Server Room is a central [[distance:8:inch]] × [[distance:8:inch]] Zone of Operations (ZO). It is treated as having infinitely high walls completely blocking Line of Fire, with four Wide Gates, one in the center of each wall, open at game start.",
-                "Wide Gate Tokens or comparable scenery represent the Gates. Spanish p.100 explicitly confirms the Gates allow access irrespective of Silhouette Attribute. Neither publication defines a numeric Gate width to plot here; Gates are stated in these rules rather than invented on the SVG.",
+                "Wide Gate Tokens or comparable scenery represent the Gates. Spanish p.100 explicitly confirms the Gates allow access irrespective of Silhouette Attribute. The four openings are shown schematically on the SVG; neither publication defines a numeric Gate width.",
                 "The Spanish publication describes the room as [[distance:20:cm]] × [[distance:20:cm]], slightly smaller than the English inches; geometry follows the English source."
               ]
             },
@@ -18711,11 +18714,12 @@
                 },
                 {
                   "id": "server-room-width",
-                  "kind": "dimension",
-                  "target": "server-room",
-                  "axis": "x",
-                  "side": "end",
-                  "offset": 0.35
+                  "kind": "ruler",
+                  "x1": 8,
+                  "y1": 20,
+                  "x2": 16,
+                  "y2": 20,
+                  "offset": 1.8
                 }
               ]
             }
@@ -18859,11 +18863,12 @@
                 },
                 {
                   "id": "server-room-width",
-                  "kind": "dimension",
-                  "target": "server-room",
-                  "axis": "x",
-                  "side": "end",
-                  "offset": 0.35
+                  "kind": "ruler",
+                  "x1": 12,
+                  "y1": 28,
+                  "x2": 20,
+                  "y2": 28,
+                  "offset": 1.8
                 }
               ]
             }
@@ -19008,11 +19013,12 @@
                 },
                 {
                   "id": "server-room-width",
-                  "kind": "dimension",
-                  "target": "server-room",
-                  "axis": "x",
-                  "side": "end",
-                  "offset": 0.35
+                  "kind": "ruler",
+                  "x1": 20,
+                  "y1": 28,
+                  "x2": 28,
+                  "y2": 28,
+                  "offset": 1.8
                 }
               ]
             }

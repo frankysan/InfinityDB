@@ -1140,6 +1140,19 @@ Deployment/Exclusion Zone dimensions. This affects both ITS 17 and 18
 without changing any physical position, zone boundary, or source claim.
 Ruler offsets remain presentation-only.
 
+For central **8-inch square rooms** (Last Launch's Launching Tower and
+Critical Intervention's Server Room), the 8-inch room-width helper is a
+horizontal ruler **below** the room, with endpoints derived from the
+room's left and right edges. Its placement leaves clearance for Critical
+Intervention's physically sized Inhibitor Antenna. Both rooms have four
+**Wide Gates** centered on their walls and open at game start; maps
+depict them as four labeled breaks in the wall outline. The displayed
+gate gaps are **schematic, not physical measurements**: neither source
+gives a gate width. Their purpose is to admit Troopers regardless of
+Silhouette (explicit in the Spanish text), so estimates such as
+35 mm minimum clearance are not treated as official values. The
+existing 8-inch EN / 20-cm ES room-size discrepancies remain preserved.
+
 The Annihilation source-issues array explicitly retains the **350-point**
 gap printed in both languages: 3 OP for 176–274 and 4 OP for greater than
 275 leaves 275 unassigned. The English 400-point surviving-VP threshold

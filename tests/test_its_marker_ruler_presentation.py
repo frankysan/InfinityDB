@@ -162,6 +162,77 @@ def test_its_token_chart_has_canonical_size_for_each_fixed_footprint() -> None:
 
 
 @pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
+@pytest.mark.parametrize(
+    ("scenario_id", "room_id"),
+    [
+        ("scenario:last-launch", "launching-tower"),
+        ("scenario:critical-intervention", "server-room"),
+    ],
+)
+@pytest.mark.parametrize("distance_unit", ["in", "cm"])
+def test_central_room_has_four_schematic_wide_gates_and_width_below(
+    source: Path, scenario_id: str, room_id: str,
+    distance_unit: Literal["in", "cm"],
+) -> None:
+    document = json.loads(source.read_text(encoding="utf-8"))
+    records = (
+        document["records"] if source == ITS18
+        else [entry["record"] for entry in document["definitions"]]
+    )
+    record = next(r for r in records if r["id"] == scenario_id)
+    for configuration in record["facts"]["configurations"]:
+        geometry = configuration["geometry"]
+        elements = {e["id"]: e for e in geometry["elements"]}
+        room = elements[room_id]
+        assert room["x2"] - room["x1"] == room["y2"] - room["y1"] == 8
+
+        width_guide = next(
+            a for a in geometry["annotations"] if a["id"] == room_id + "-width"
+        )
+        assert width_guide == {
+            "id": room_id + "-width", "kind": "ruler",
+            "x1": room["x1"], "y1": room["y2"],
+            "x2": room["x2"], "y2": room["y2"], "offset": 1.8,
+        }
+
+        svg = ElementTree.fromstring(render_scenario_map_svg(
+            parse_scenario_geometry(geometry), distance_unit=distance_unit,
+        ))
+        walls = next(e for e in svg.iter() if e.get("id") == room_id + "-walls")
+        assert walls.get("fill") == "none"
+        assert walls.get("d", "").count("M") == 5  # Four gaps in the closed perimeter.
+        assert walls.get("stroke-width") == ".12"
+
+        for side in ("top", "right", "bottom", "left"):
+            gate = next(
+                e for e in svg.iter() if e.get("id") == room_id + "-gate-" + side
+            )
+            assert gate.get("data-gate") == "wide"
+            assert gate.get("data-side") == side
+            assert gate.get("data-open") == "true"
+            assert gate.get("data-width-status") == "unspecified"
+            gate_label = gate.find(f"{SVG_NS}text")
+            assert gate_label is not None
+            assert gate_label.text == "Wide Gate"
+            # The visible gap is illustrative, never a measured game dimension.
+            assert gate.get("data-diameter-mm") is None
+
+        measure = next(e for e in svg.iter() if e.get("id") == room_id + "-width")
+        line = measure.find(f"{SVG_NS}line")
+        text_node = measure.find(f"{SVG_NS}text")
+        assert line is not None and text_node is not None
+        assert float(line.get("y1", "nan")) == pytest.approx(room["y2"] + 1.8)
+        assert float(line.get("y2", "nan")) == pytest.approx(room["y2"] + 1.8)
+        assert float(text_node.get("y", "nan")) > float(line.get("y1", "nan"))
+        assert text_node.text == ("8″" if distance_unit == "in" else "20 cm")
+        if room_id == "server-room":
+            antenna = elements["inhibitor-antenna"]
+            radius = marker_radius_inches("antenna")
+            assert radius is not None
+            assert antenna["y"] + radius < room["y2"] + 1.8
+
+
+@pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
 @pytest.mark.parametrize("distance_unit", ["in", "cm"])
 def test_critical_intervention_antenna_is_tangent_to_server_room_lower_left(
     source: Path, distance_unit: Literal["in", "cm"],

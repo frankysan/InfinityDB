@@ -1465,8 +1465,10 @@ def test_last_launch_extraction_tower_and_bilingual_source_geometry() -> None:
         annotations = {annotation["id"]: annotation
                        for annotation in geometry["annotations"]}
         assert annotations["launching-tower-width"] == {
-            "id": "launching-tower-width", "kind": "dimension",
-            "target": "launching-tower", "axis": "x", "side": "end", "offset": .4,
+            "id": "launching-tower-width", "kind": "ruler",
+            "x1": width / 2 - 4, "y1": height / 2 + 4,
+            "x2": width / 2 + 4, "y2": height / 2 + 4,
+            "offset": 1.8,
         }
         assert annotations["scanner-right-from-edge"]["x1"] == width - scanner_offset
         assert not any(e["kind"] == "circle" for e in elements.values())

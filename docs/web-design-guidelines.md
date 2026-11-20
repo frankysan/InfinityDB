@@ -383,6 +383,10 @@ rulers that explain off-center positions, distances between objects,
 quarter-circle radii and relevant Deployment/Exclusion Zone sizes. The
 physical geometry remains source-backed and unchanged when presentation
 rulers are removed. Check label clearance in both inches and centimeters.
+For central square Objective Rooms with four source-defined Wide Gates,
+show one opening at the midpoint of each wall, label the openings and
+place the room-width measurement below the room. Do not label an
+illustrative gate gap as a physical width unless a source supplies it.
 
 ### Use progressive disclosure for secondary information
 

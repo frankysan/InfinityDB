@@ -81,6 +81,13 @@ font-family:sans-serif;font-size:var(--scenario-map-label-size,1.4px);font-weigh
 _NO_DEPLOY_CSS = """.no-deploy{fill:#f0c6c6;fill-opacity:.72;stroke:#aa7777;stroke-width:.09}
 svg[data-theme="dark"] .no-deploy{fill:#744647;stroke:#d5a7a7}
 """
+_WIDE_GATE_CSS = """.wide-gate-wall{fill:none;stroke:#aa7777;stroke-width:.12}
+svg[data-theme="dark"] .wide-gate-wall{stroke:#d5a7a7}
+.wide-gate-label{fill:var(--color-scenario-map-text,#203b35);
+font-family:sans-serif;font-size:.72px;font-weight:600;
+paint-order:stroke;stroke:var(--color-scenario-map-text-halo,#fffefa);
+stroke-width:.065;stroke-linejoin:round}
+"""
 _EXCLUSION_CSS = """.exclusion{fill:url(#scenario-exclusion-hatch);
 stroke:var(--color-scenario-map-deployment-b-edge,#dc2626);stroke-width:.09}
 """
@@ -165,6 +172,47 @@ def _resolved(
     return resolve_coordinate(value, axis=axis, table=geometry.table)
 
 
+def _render_wide_gate_room(
+    room_id: str, style: str, x1: float, y1: float, x2: float, y2: float,
+) -> str:
+    """Render four centered, OPEN gates without claiming a source-defined width."""
+    mid_x, mid_y = (x1 + x2) / 2, (y1 + y2) / 2
+    half_gap = 1.0  # Schematic 2-inch gap only; neither ITS source specifies gate width.
+    left, right = mid_x - half_gap, mid_x + half_gap
+    top, bottom = mid_y - half_gap, mid_y + half_gap
+    segments = (
+        f"M{_number(x1)} {_number(y1)} H{_number(left)} "
+        f"M{_number(right)} {_number(y1)} H{_number(x2)} "
+        f"V{_number(top)} M{_number(x2)} {_number(bottom)} V{_number(y2)} "
+        f"H{_number(right)} M{_number(left)} {_number(y2)} H{_number(x1)} "
+        f"V{_number(bottom)} M{_number(x1)} {_number(top)} V{_number(y1)}"
+    )
+    labels = (
+        ("top", mid_x, y1 - .45, ""),
+        ("right", x2 + .55, mid_y,
+         f' transform="rotate(-90 {_number(x2 + .55)} {_number(mid_y)})"'),
+        ("bottom", mid_x, y2 + .72, ""),
+        ("left", x1 - .55, mid_y,
+         f' transform="rotate(-90 {_number(x1 - .55)} {_number(mid_y)})"'),
+    )
+    gates = "\n".join(
+        f'<g id="{room_id}-gate-{side}" class="wide-gate" data-gate="wide" '
+        f'data-side="{side}" data-open="true" data-width-status="unspecified">'
+        f'<title>Wide Gate (open; width unspecified)</title>'
+        f'<text class="wide-gate-label" x="{_number(x)}" y="{_number(y)}" '
+        f'font-family="sans-serif" font-size=".72" font-weight="600" '
+        f'fill="#203b35" text-anchor="middle"{rotation}>Wide Gate</text></g>'
+        for side, x, y, rotation in labels
+    )
+    return (
+        f'<rect id="{room_id}" class="{style}" x="{_number(x1)}" '
+        f'y="{_number(y1)}" width="{_number(x2 - x1)}" '
+        f'height="{_number(y2 - y1)}" style="stroke:none"/>\n'
+        f'<path id="{room_id}-walls" class="wide-gate-wall" fill="none" '
+        f'stroke="#aa7777" stroke-width=".12" d="{segments}"/>\n{gates}'
+    )
+
+
 def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str:
     element_id = escape(element.id, quote=True)
     style = escape(element.style, quote=True)
@@ -174,6 +222,15 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
         y1 = _resolved(geometry, element.y1, "y")
         x2 = _resolved(geometry, element.x2, "x")
         y2 = _resolved(geometry, element.y2, "y")
+        if (
+            element.id in {"server-room", "launching-tower"}
+            and element.style == "no-deploy"
+            and abs(x2 - x1 - 8) < 0.000001
+            and abs(y2 - y1 - 8) < 0.000001
+            and abs((x1 + x2) / 2 - geometry.table.width / 2) < 0.000001
+            and abs((y1 + y2) / 2 - geometry.table.height / 2) < 0.000001
+        ):
+            return _render_wide_gate_room(element_id, style, x1, y1, x2, y2)
         return (
             f'<rect id="{element_id}" class="{style}" x="{_number(x1)}" y="{_number(y1)}" '
             f'width="{_number(x2 - x1)}" height="{_number(y2 - y1)}"/>'
@@ -593,6 +650,12 @@ def render_scenario_map_svg(
         annotations += "\n"
     styles = {element.style for element in geometry.elements}
     has_exclusion = "exclusion" in styles
+    has_wide_gate_room = any(
+        isinstance(element, RectangleElement)
+        and element.id in {"server-room", "launching-tower"}
+        and element.style == "no-deploy"
+        for element in geometry.elements
+    )
     has_special_zones = bool(styles & {"influence", "sector", "sector-center"})
     has_rulers = any(isinstance(a, RulerAnnotation) for a in geometry.annotations)
     has_tracking_beacon = any(
@@ -627,6 +690,7 @@ def render_scenario_map_svg(
     )
     extra_style = (
         (_NO_DEPLOY_CSS if "no-deploy" in styles else "")
+        + (_WIDE_GATE_CSS if has_wide_gate_room else "")
         + (_EXCLUSION_CSS if has_exclusion else "")
         + (_SPECIAL_ZONE_CSS if has_special_zones else "")
         + (_ANTENNA_TECH_MARKER_CSS if has_tech_coffin or has_akial_antenna else "")
