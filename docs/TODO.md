@@ -268,6 +268,16 @@ Use these links to jump directly to a workstream:
     Keep detailed acceptance procedures in `docs/releasing.md` and
     `docs/deployment.md`, not duplicated in this backlog.
 
+- [ ] **Support direct production deployment probes with an explicit Host header.**
+  The v1.2.0 public smoke probe received HTTP 403 while browser access worked;
+  direct requests to the loopback listener succeeded with the configured
+  Caddy Host header. Extend `tools/ci/verify_running_deployment.py` with an
+  optional public Host override, leaving the metrics listener and existing
+  default behavior unchanged. Add focused regression tests and document the
+  direct-production invocation in `deployment.md` and `releasing.md`. Verify
+  exact release identity, snapshot/static revisions, representative routes,
+  health and metrics without relying on the external proxy.
+
 ### Performance, storage, and build tooling
 
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
